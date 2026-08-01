@@ -10,11 +10,14 @@ export default async function TraineeCelta5Page() {
   const profile = await requireRole("trainee");
   const supabase = await createClient();
 
-  const [{ data: record }, { data: matrix }, { data: observations }] = await Promise.all([
+  const [{ data: recordRows }, { data: matrix }, { data: observations }] = await Promise.all([
     supabase.rpc("get_my_celta5_record"),
     supabase.rpc("get_my_celta5_matrix"),
     supabase.from("observations").select("*").eq("trainee_id", profile.id).order("observation_date"),
   ]);
+  // get_my_celta5_record() is a RETURNS TABLE function, so PostgREST
+  // returns it as an array (at most one row per trainee).
+  const record = recordRows?.[0];
 
   if (!record) {
     return (

@@ -338,7 +338,14 @@ export interface Database {
     Functions: {
       get_my_celta5_record: {
         Args: Record<string, never>;
-        Returns: Database["public"]["Tables"]["celta5_records"]["Row"];
+        // Narrower than the full table Row: omits admin_access_granted_by,
+        // which the trainee has no need to see. Returns a single row (or
+        // none) via RETURNS TABLE, so supabase-js resolves it as an array;
+        // callers should treat it as the first element or null.
+        Returns: Omit<
+          Database["public"]["Tables"]["celta5_records"]["Row"],
+          "admin_access_granted_by"
+        >[];
       };
       get_my_celta5_matrix: {
         Args: Record<string, never>;
