@@ -1,4 +1,4 @@
-// Hand-authored to match supabase/migrations/0001_init_schema.sql.
+// Hand-authored to match the supabase/migrations/*.sql files.
 // Once the Supabase CLI is linked, regenerate with:
 //   supabase gen types typescript --linked > src/lib/supabase/types.ts
 
@@ -9,8 +9,10 @@ export type SubmissionStatus =
   | "submitted"
   | "resubmission_required"
   | "approved";
-export type CriteriaStatus = "not_yet_assessed" | "developing" | "met" | "not_met";
-export type AttendanceStatus = "present" | "absent";
+export type CriteriaRating = "S+" | "S" | "N" | "X";
+export type StandardRating = "above_standard" | "to_standard" | "not_to_standard";
+export type PassFail = "pass" | "fail";
+export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn";
 
 export interface Database {
   public: {
@@ -39,6 +41,7 @@ export interface Database {
           name: string;
           start_date: string;
           end_date: string;
+          total_hours: number;
           duplicated_from_course_id: string | null;
           created_at: string;
         };
@@ -72,28 +75,68 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
         Relationships: [];
       };
-      tps: {
+      tp_lessons: {
         Row: {
           id: string;
           course_id: string;
           trainee_id: string;
           trainer_id: string | null;
-          tp_number: number;
-          lesson_type: string | null;
-          main_aim: string | null;
-          sub_aim: string | null;
-          stage_grades: Record<string, unknown>;
-          observation_notes: string | null;
-          scheduled_at: string | null;
+          lesson_date: string | null;
+          length_minutes: number | null;
+          level: string | null;
+          learner_count: number | null;
+          lesson_focus: string | null;
+          tutor_assessment: StandardRating | null;
+          tutor_comments: string | null;
           created_at: string;
           updated_at: string;
         };
-        Insert: Partial<Database["public"]["Tables"]["tps"]["Row"]> & {
+        Insert: Partial<Database["public"]["Tables"]["tp_lessons"]["Row"]> & {
           course_id: string;
           trainee_id: string;
-          tp_number: number;
         };
-        Update: Partial<Database["public"]["Tables"]["tps"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["tp_lessons"]["Row"]>;
+        Relationships: [];
+      };
+      observations: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          observation_date: string | null;
+          length_minutes: number | null;
+          level: string | null;
+          learners_present: number | null;
+          lesson_focus: string | null;
+          filmed: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["observations"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["observations"]["Row"]>;
+        Relationships: [];
+      };
+      attendance_absences: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          session_date: string | null;
+          category: "unavoidable" | "other";
+          reason: string | null;
+          work_made_up: string | null;
+          tutor_comment: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["attendance_absences"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          category: "unavoidable" | "other";
+        };
+        Update: Partial<Database["public"]["Tables"]["attendance_absences"]["Row"]>;
         Relationships: [];
       };
       assignments: {
@@ -105,9 +148,13 @@ export interface Database {
           first_submission_url: string | null;
           first_status: SubmissionStatus;
           first_submitted_at: string | null;
+          first_content_grade: PassFail | null;
+          first_english_grade: PassFail | null;
           resubmission_url: string | null;
           resubmission_status: SubmissionStatus;
           resubmission_submitted_at: string | null;
+          resubmission_content_grade: PassFail | null;
+          resubmission_english_grade: PassFail | null;
           final_grade: string | null;
           created_at: string;
           updated_at: string;
@@ -126,9 +173,11 @@ export interface Database {
           course_id: string;
           trainee_id: string;
           criteria_code: string;
-          status: CriteriaStatus;
-          tutor_comments: string | null;
-          tutorial_transcript_summary: string | null;
+          candidate_status: CriteriaRating | null;
+          tutor_status_stage2: CriteriaRating | null;
+          tutor_comments_stage2: string | null;
+          tutor_status_stage3: CriteriaRating | null;
+          tutor_comments_stage3: string | null;
           updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["celta5_matrix"]["Row"]> & {
@@ -139,40 +188,46 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["celta5_matrix"]["Row"]>;
         Relationships: [];
       };
-      attendance: {
+      celta5_records: {
         Row: {
           id: string;
           course_id: string;
           trainee_id: string;
-          session_id: string;
-          join_timestamp: string | null;
-          status: AttendanceStatus;
-          created_at: string;
-        };
-        Insert: Partial<Database["public"]["Tables"]["attendance"]["Row"]> & {
-          course_id: string;
-          trainee_id: string;
-          session_id: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["attendance"]["Row"]>;
-        Relationships: [];
-      };
-      finances: {
-        Row: {
-          id: string;
-          profile_id: string;
-          course_id: string;
-          total_fee: number;
-          amount_paid: number;
-          balance_due: number;
-          payment_notes: string | null;
+          hours_attended: number | null;
+          stage1_tutorial_given: boolean;
+          stage1_hours_taught: number | null;
+          stage1_strengths: string | null;
+          stage1_action_plan: string | null;
+          stage1_completed_at: string | null;
+          stage2_tutorial_given: boolean;
+          stage2_hours_taught: number | null;
+          stage2_candidate_submitted_at: string | null;
+          stage2_candidate_overall: StandardRating | null;
+          stage2_candidate_notes: string | null;
+          stage2_candidate_written_assignments_notes: string | null;
+          stage2_candidate_other_notes: string | null;
+          stage2_tutor_overall: StandardRating | null;
+          stage2_tutor_notes: string | null;
+          stage2_tutor_written_assignments_notes: string | null;
+          stage2_tutor_other_notes: string | null;
+          stage2_completed_at: string | null;
+          stage3_required: boolean;
+          stage3_tutorial_given: boolean;
+          stage3_hours_taught: number | null;
+          stage3_tutor_overall: StandardRating | null;
+          stage3_tutor_notes: string | null;
+          stage3_tutor_written_assignments_notes: string | null;
+          stage3_tutor_other_notes: string | null;
+          stage3_finalized_at: string | null;
+          final_recommended_grade: FinalGrade | null;
+          overall_notes: string | null;
           updated_at: string;
         };
-        Insert: Partial<Database["public"]["Tables"]["finances"]["Row"]> & {
-          profile_id: string;
+        Insert: Partial<Database["public"]["Tables"]["celta5_records"]["Row"]> & {
           course_id: string;
+          trainee_id: string;
         };
-        Update: Partial<Database["public"]["Tables"]["finances"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["celta5_records"]["Row"]>;
         Relationships: [];
       };
       resources: {
@@ -193,8 +248,45 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["resources"]["Row"]>;
         Relationships: [];
       };
+      finances: {
+        Row: {
+          id: string;
+          profile_id: string;
+          course_id: string;
+          total_fee: number;
+          amount_paid: number;
+          balance_due: number;
+          payment_notes: string | null;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["finances"]["Row"]> & {
+          profile_id: string;
+          course_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["finances"]["Row"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      get_my_celta5_record: {
+        Args: Record<string, never>;
+        Returns: Database["public"]["Tables"]["celta5_records"]["Row"];
+      };
+      get_my_celta5_matrix: {
+        Args: Record<string, never>;
+        Returns: Database["public"]["Tables"]["celta5_matrix"]["Row"][];
+      };
+      submit_stage2_self_assessment: {
+        Args: {
+          ratings: Record<string, CriteriaRating>;
+          overall: StandardRating;
+          notes: string | null;
+          written_assignments_notes: string | null;
+          other_notes: string | null;
+        };
+        Returns: void;
+      };
+    };
   };
 }

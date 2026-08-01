@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
-import type { SubmissionStatus } from "@/lib/supabase/types";
+import type { PassFail, StandardRating, SubmissionStatus } from "@/lib/supabase/types";
 
 export interface FormState {
   error: string | null;
@@ -17,40 +17,87 @@ const SUBMISSION_STATUSES: SubmissionStatus[] = [
   "approved",
 ];
 
-export async function updateTp(
+const STANDARD_RATINGS: StandardRating[] = ["above_standard", "to_standard", "not_to_standard"];
+const PASS_FAILS: PassFail[] = ["pass", "fail"];
+
+function optionalString(value: FormDataEntryValue | null): string | null {
+  return typeof value === "string" && value ? value : null;
+}
+
+function optionalNumber(value: FormDataEntryValue | null): number | null {
+  if (typeof value !== "string" || !value) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function optionalRating<T extends string>(
+  value: FormDataEntryValue | null,
+  allowed: readonly T[]
+): T | null {
+  return typeof value === "string" && (allowed as readonly string[]).includes(value)
+    ? (value as T)
+    : null;
+}
+
+export async function createTpLesson(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
   const trainer = await requireRole("trainer");
 
-  const tpId = formData.get("tp_id");
   const traineeId = formData.get("trainee_id");
-  const mainAim = formData.get("main_aim");
-  const subAim = formData.get("sub_aim");
-  const scheduledAt = formData.get("scheduled_at");
-  const observationNotes = formData.get("observation_notes");
+  if (typeof traineeId !== "string" || !traineeId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
 
-  if (typeof tpId !== "string" || typeof traineeId !== "string") {
+  const supabase = await createClient();
+  const { error } = await supabase.from("tp_lessons").insert({
+    course_id: trainer.course_id!,
+    trainee_id: traineeId,
+    trainer_id: trainer.id,
+    lesson_date: optionalString(formData.get("lesson_date")),
+    length_minutes: optionalNumber(formData.get("length_minutes")),
+    level: optionalString(formData.get("level")),
+    learner_count: optionalNumber(formData.get("learner_count")),
+    lesson_focus: optionalString(formData.get("lesson_focus")),
+    tutor_assessment: optionalRating(formData.get("tutor_assessment"), STANDARD_RATINGS),
+    tutor_comments: optionalString(formData.get("tutor_comments")),
+  });
+
+  if (error) {
+    return { error: "Could not save the lesson. Try again." };
+  }
+
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
+  revalidatePath("/dashboard/trainer");
+  return { error: null };
+}
+
+export async function updateTpLesson(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("trainer");
+
+  const lessonId = formData.get("lesson_id");
+  const traineeId = formData.get("trainee_id");
+  if (typeof lessonId !== "string" || typeof traineeId !== "string") {
     return { error: "Something went wrong. Refresh and try again." };
   }
 
   const supabase = await createClient();
   const { error } = await supabase
-    .from("tps")
+    .from("tp_lessons")
     .update({
-      trainer_id: trainer.id,
-      main_aim: typeof mainAim === "string" && mainAim ? mainAim : null,
-      sub_aim: typeof subAim === "string" && subAim ? subAim : null,
-      scheduled_at:
-        typeof scheduledAt === "string" && scheduledAt
-          ? new Date(scheduledAt).toISOString()
-          : null,
-      observation_notes:
-        typeof observationNotes === "string" && observationNotes
-          ? observationNotes
-          : null,
+      lesson_date: optionalString(formData.get("lesson_date")),
+      length_minutes: optionalNumber(formData.get("length_minutes")),
+      level: optionalString(formData.get("level")),
+      learner_count: optionalNumber(formData.get("learner_count")),
+      lesson_focus: optionalString(formData.get("lesson_focus")),
+      tutor_assessment: optionalRating(formData.get("tutor_assessment"), STANDARD_RATINGS),
+      tutor_comments: optionalString(formData.get("tutor_comments")),
     })
-    .eq("id", tpId);
+    .eq("id", lessonId);
 
   if (error) {
     return { error: "Could not save. Try again." };
@@ -89,8 +136,18 @@ export async function updateAssignment(
     .from("assignments")
     .update({
       first_status: firstStatus as SubmissionStatus,
+      first_content_grade: optionalRating(formData.get("first_content_grade"), PASS_FAILS),
+      first_english_grade: optionalRating(formData.get("first_english_grade"), PASS_FAILS),
       resubmission_status: resubmissionStatus as SubmissionStatus,
-      final_grade: typeof finalGrade === "string" && finalGrade ? finalGrade : null,
+      resubmission_content_grade: optionalRating(
+        formData.get("resubmission_content_grade"),
+        PASS_FAILS
+      ),
+      resubmission_english_grade: optionalRating(
+        formData.get("resubmission_english_grade"),
+        PASS_FAILS
+      ),
+      final_grade: optionalString(formData.get("final_grade")) ?? (finalGrade ? String(finalGrade) : null),
     })
     .eq("id", assignmentId);
 

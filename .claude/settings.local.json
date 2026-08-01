@@ -8,7 +8,12 @@
       "Read(//usr/local/bin/**)",
       "Bash(find '/Users/work/CELTA connect-code prompt/node_modules/@supabase' -iname *.d.ts)",
       "Bash(find '/Users/work/CELTA connect-code prompt/node_modules/@supabase/supabase-js' -iname *.d.ts)",
-      "Bash(find '/Users/work/CELTA connect-code prompt/node_modules/@supabase/supabase-js/src' -path *rest/types/common*)"
+      "Bash(find '/Users/work/CELTA connect-code prompt/node_modules/@supabase/supabase-js/src' -path *rest/types/common*)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3)",
+      "Bash(rm \"/Users/work/CELTA connect-code prompt/src/app/dashboard/trainer/trainees/[id]/tp-form.tsx\")",
+      "Bash(rm -f \"/Users/work/CELTA connect-code prompt/src/app/dashboard/trainer/trainees/[id]/celta5/criteria-matrix-form.tsx\")",
+      "Bash(rm -f \"/Users/work/CELTA connect-code prompt/src/app/dashboard/trainer/trainees/[id]/celta5/final-grade-form.tsx\")"
     ]
   }
 }

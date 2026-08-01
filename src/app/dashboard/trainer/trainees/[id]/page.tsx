@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { TpForm } from "@/app/dashboard/trainer/trainees/[id]/tp-form";
+import { TpLessonForm } from "@/app/dashboard/trainer/trainees/[id]/tp-lesson-form";
 import { AssignmentForm } from "@/app/dashboard/trainer/trainees/[id]/assignment-form";
 
 export default async function TraineeDetailPage({
@@ -23,16 +24,31 @@ export default async function TraineeDetailPage({
     notFound();
   }
 
-  const [{ data: tps }, { data: assignments }] = await Promise.all([
-    supabase.from("tps").select("*").eq("trainee_id", id).order("tp_number"),
+  const [{ data: lessons }, { data: assignments }] = await Promise.all([
+    supabase
+      .from("tp_lessons")
+      .select("*")
+      .eq("trainee_id", id)
+      .order("lesson_date", { ascending: false, nullsFirst: false }),
     supabase.from("assignments").select("*").eq("trainee_id", id).order("assignment_type"),
   ]);
 
+  const totalMinutes = (lessons ?? []).reduce((sum, l) => sum + (l.length_minutes ?? 0), 0);
+  const levels = new Set((lessons ?? []).map((l) => l.level).filter(Boolean));
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">{trainee.full_name}</h1>
-        <p className="mt-1 text-muted">{trainee.email}</p>
+      <div className="card flex items-center justify-between p-6">
+        <div>
+          <h1 className="font-serif text-xl text-ink">{trainee.full_name}</h1>
+          <p className="mt-1 text-muted">{trainee.email}</p>
+        </div>
+        <Link
+          href={`/dashboard/trainer/trainees/${id}/celta5`}
+          className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+        >
+          CELTA 5 record
+        </Link>
       </div>
 
       <div>
@@ -49,10 +65,19 @@ export default async function TraineeDetailPage({
 
       <div>
         <h2 className="font-serif text-lg text-ink">Teaching Practice</h2>
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {tps?.map((tp) => (
-            <TpForm key={`${tp.id}-${tp.updated_at}`} tp={tp} />
+        <p className="mt-1 text-sm text-muted">
+          {(totalMinutes / 60).toFixed(1)} hours taught across {levels.size} level
+          {levels.size === 1 ? "" : "s"} (6 hours across 2+ levels required).
+        </p>
+        <div className="mt-3 flex flex-col gap-3">
+          {lessons?.map((lesson) => (
+            <TpLessonForm
+              key={`${lesson.id}-${lesson.updated_at}`}
+              traineeId={id}
+              lesson={lesson}
+            />
           ))}
+          <TpLessonForm traineeId={id} />
         </div>
       </div>
     </div>

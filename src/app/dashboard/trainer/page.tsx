@@ -8,14 +8,14 @@ export default async function TrainerDashboardPage() {
 
   const courseId = profile.course_id;
 
-  const [{ data: trainees }, { data: tps }, { data: assignments }] = await Promise.all([
+  const [{ data: trainees }, { data: lessons }, { data: assignments }] = await Promise.all([
     supabase
       .from("profiles")
       .select("*")
       .eq("course_id", courseId ?? "")
       .eq("role", "trainee")
       .order("full_name"),
-    supabase.from("tps").select("*").eq("course_id", courseId ?? ""),
+    supabase.from("tp_lessons").select("*").eq("course_id", courseId ?? ""),
     supabase.from("assignments").select("*").eq("course_id", courseId ?? ""),
   ]);
 
@@ -33,17 +33,19 @@ export default async function TrainerDashboardPage() {
             <thead>
               <tr>
                 <th className="text-sm text-muted">Name</th>
-                <th className="text-sm text-muted">TPs scheduled</th>
+                <th className="text-sm text-muted">TP hours taught</th>
                 <th className="text-sm text-muted">Assignments approved</th>
               </tr>
             </thead>
             <tbody>
               {trainees && trainees.length > 0 ? (
                 trainees.map((trainee) => {
-                  const traineeTps = tps?.filter((tp) => tp.trainee_id === trainee.id) ?? [];
+                  const traineeLessons =
+                    lessons?.filter((l) => l.trainee_id === trainee.id) ?? [];
                   const traineeAssignments =
                     assignments?.filter((a) => a.trainee_id === trainee.id) ?? [];
-                  const scheduledCount = traineeTps.filter((tp) => tp.main_aim).length;
+                  const hoursTaught =
+                    traineeLessons.reduce((sum, l) => sum + (l.length_minutes ?? 0), 0) / 60;
                   const approvedCount = traineeAssignments.filter(
                     (a) => a.first_status === "approved"
                   ).length;
@@ -58,7 +60,7 @@ export default async function TrainerDashboardPage() {
                           {trainee.full_name}
                         </Link>
                       </td>
-                      <td className="text-muted">{scheduledCount} / {traineeTps.length}</td>
+                      <td className="text-muted">{hoursTaught.toFixed(1)} / 6.0</td>
                       <td className="text-muted">
                         {approvedCount} / {traineeAssignments.length}
                       </td>

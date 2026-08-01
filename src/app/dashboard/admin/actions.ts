@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import type { UserRole } from "@/lib/supabase/types";
+import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 
 export interface FormState {
   error: string | null;
@@ -133,13 +134,18 @@ export async function inviteMember(
       }))
     );
 
-    await supabase.from("tps").insert(
-      Array.from({ length: 8 }, (_, i) => ({
+    await supabase.from("celta5_matrix").insert(
+      CELTA_CRITERIA_CODES.map((criteria_code) => ({
         course_id: courseId,
         trainee_id: invited.user!.id,
-        tp_number: i + 1,
+        criteria_code,
       }))
     );
+
+    await supabase.from("celta5_records").insert({
+      course_id: courseId,
+      trainee_id: invited.user!.id,
+    });
   }
 
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
