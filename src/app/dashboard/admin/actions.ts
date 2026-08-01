@@ -123,6 +123,25 @@ export async function inviteMember(
     return { error: "Invite sent, but the profile could not be created." };
   }
 
+  if (role === "trainee") {
+    const assignmentTypes = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
+    await supabase.from("assignments").insert(
+      assignmentTypes.map((assignment_type) => ({
+        course_id: courseId,
+        trainee_id: invited.user!.id,
+        assignment_type,
+      }))
+    );
+
+    await supabase.from("tps").insert(
+      Array.from({ length: 8 }, (_, i) => ({
+        course_id: courseId,
+        trainee_id: invited.user!.id,
+        tp_number: i + 1,
+      }))
+    );
+  }
+
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
   return { error: null };
 }
