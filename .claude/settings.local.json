@@ -5,7 +5,10 @@
       "Bash(command -v brew)",
       "Read(//Users/work/**)",
       "Read(//opt/homebrew/bin/**)",
-      "Read(//usr/local/bin/**)"
+      "Read(//usr/local/bin/**)",
+      "Bash(find '/Users/work/CELTA connect-code prompt/node_modules/@supabase' -iname *.d.ts)",
+      "Bash(find '/Users/work/CELTA connect-code prompt/node_modules/@supabase/supabase-js' -iname *.d.ts)",
+      "Bash(find '/Users/work/CELTA connect-code prompt/node_modules/@supabase/supabase-js/src' -path *rest/types/common*)"
     ]
   }
 }

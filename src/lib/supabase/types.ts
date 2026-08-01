@@ -19,7 +19,7 @@ export interface Database {
         Row: {
           id: string;
           name: string;
-          center_number: string | null;
+          center_number: string;
           logo_url: string | null;
           primary_color: string | null;
           accent_color: string | null;
@@ -27,8 +27,10 @@ export interface Database {
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {
           name: string;
+          center_number: string;
         };
         Update: Partial<Database["public"]["Tables"]["centers"]["Row"]>;
+        Relationships: [];
       };
       courses: {
         Row: {
@@ -47,6 +49,7 @@ export interface Database {
           end_date: string;
         };
         Update: Partial<Database["public"]["Tables"]["courses"]["Row"]>;
+        Relationships: [];
       };
       profiles: {
         Row: {
@@ -67,6 +70,7 @@ export interface Database {
           center_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
+        Relationships: [];
       };
       tps: {
         Row: {
@@ -90,6 +94,7 @@ export interface Database {
           tp_number: number;
         };
         Update: Partial<Database["public"]["Tables"]["tps"]["Row"]>;
+        Relationships: [];
       };
       assignments: {
         Row: {
@@ -113,6 +118,7 @@ export interface Database {
           assignment_type: "Focus on Learner" | "LRT" | "Skills" | "LfC";
         };
         Update: Partial<Database["public"]["Tables"]["assignments"]["Row"]>;
+        Relationships: [];
       };
       celta5_matrix: {
         Row: {
@@ -131,6 +137,7 @@ export interface Database {
           criteria_code: string;
         };
         Update: Partial<Database["public"]["Tables"]["celta5_matrix"]["Row"]>;
+        Relationships: [];
       };
       attendance: {
         Row: {
@@ -148,6 +155,7 @@ export interface Database {
           session_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["attendance"]["Row"]>;
+        Relationships: [];
       };
       finances: {
         Row: {
@@ -165,6 +173,7 @@ export interface Database {
           course_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["finances"]["Row"]>;
+        Relationships: [];
       };
       resources: {
         Row: {
@@ -182,7 +191,10 @@ export interface Database {
           file_url: string;
         };
         Update: Partial<Database["public"]["Tables"]["resources"]["Row"]>;
+        Relationships: [];
       };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
   };
 }
