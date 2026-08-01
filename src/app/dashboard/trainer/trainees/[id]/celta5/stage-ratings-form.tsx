@@ -41,8 +41,6 @@ export function StageRatingsForm({
           {codes.map((code) => {
             const row = byCode.get(code);
             const tutorStatus = stage === 2 ? row?.tutor_status_stage2 : row?.tutor_status_stage3;
-            const tutorComments =
-              stage === 2 ? row?.tutor_comments_stage2 : row?.tutor_comments_stage3;
             const suggestion = suggestions[code];
             const isSuggested = !tutorStatus && !!suggestion;
 
@@ -78,13 +76,6 @@ export function StageRatingsForm({
                     </span>
                   ) : null}
                 </div>
-                <textarea
-                  name={`comments__${code}`}
-                  defaultValue={tutorComments ?? ""}
-                  placeholder="Tutor comments"
-                  rows={2}
-                  className="mt-2 w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
-                />
               </div>
             );
           })}

@@ -15,9 +15,19 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">Welcome, {profile.full_name}</h1>
-        <p className="mt-2 text-muted">Manage your center&apos;s courses and roster.</p>
+      <div className="card flex items-center justify-between p-6">
+        <div>
+          <h1 className="font-serif text-xl text-ink">Welcome, {profile.full_name}</h1>
+          <p className="mt-2 text-muted">Manage your center&apos;s courses and roster.</p>
+        </div>
+        <div className="flex gap-4">
+          <Link href="/dashboard/admin/coursebooks" className="text-sm text-muted hover:text-ink">
+            TP Points Library
+          </Link>
+          <Link href="/dashboard/admin/settings" className="text-sm text-muted hover:text-ink">
+            Settings
+          </Link>
+        </div>
       </div>
 
       <div>

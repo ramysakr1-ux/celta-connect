@@ -2,6 +2,8 @@
 // Once the Supabase CLI is linked, regenerate with:
 //   supabase gen types typescript --linked > src/lib/supabase/types.ts
 
+import type { TpProcedure } from "@/lib/tp-density";
+
 export type UserRole = "trainee" | "trainer" | "admin";
 export type SubmissionStatus =
   | "not_submitted"
@@ -14,6 +16,10 @@ export type StandardRating = "above_standard" | "to_standard" | "not_to_standard
 export type PassFail = "pass" | "fail";
 export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn";
 export type StaffChannelType = "center_trainers" | "all_staff" | "dm";
+export type TpGenerationStatus = "pending" | "processing" | "completed" | "failed";
+export type TpDensityTier = "scripted" | "framework" | "coaching_prose" | "minimal";
+export type TpPointStatus = "pending_review" | "published" | "archived";
+export type TpGenerationSource = "ai_generated" | "manual";
 
 export interface Database {
   public: {
@@ -176,9 +182,7 @@ export interface Database {
           criteria_code: string;
           candidate_status: CriteriaRating | null;
           tutor_status_stage2: CriteriaRating | null;
-          tutor_comments_stage2: string | null;
           tutor_status_stage3: CriteriaRating | null;
-          tutor_comments_stage3: string | null;
           updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["celta5_matrix"]["Row"]> & {
@@ -253,6 +257,158 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["tp_lesson_criteria_tags"]["Row"]>;
         Relationships: [];
       };
+      tp_coursebooks: {
+        Row: {
+          id: string;
+          center_id: string;
+          title: string;
+          level: string;
+          storage_path: string;
+          original_filename: string | null;
+          uploaded_by: string | null;
+          generation_status: TpGenerationStatus;
+          generation_error: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_coursebooks"]["Row"]> & {
+          center_id: string;
+          title: string;
+          level: string;
+          storage_path: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_coursebooks"]["Row"]>;
+        Relationships: [];
+      };
+      tp_points: {
+        Row: {
+          id: string;
+          tp_coursebook_id: string;
+          center_id: string;
+          tp_number: number;
+          sequence_index: number;
+          density_tier: TpDensityTier;
+          main_lesson_aim: string;
+          sub_aim: string | null;
+          materials_description: string | null;
+          procedure: TpProcedure | null;
+          page_references: string | null;
+          generation_source: TpGenerationSource;
+          status: TpPointStatus;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_points"]["Row"]> & {
+          tp_coursebook_id: string;
+          center_id: string;
+          tp_number: number;
+          sequence_index: number;
+          density_tier: TpDensityTier;
+          main_lesson_aim: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_points"]["Row"]>;
+        Relationships: [];
+      };
+      course_subgroups: {
+        Row: {
+          id: string;
+          course_id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_subgroups"]["Row"]> & {
+          course_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_subgroups"]["Row"]>;
+        Relationships: [];
+      };
+      course_subgroup_members: {
+        Row: {
+          id: string;
+          subgroup_id: string;
+          trainee_id: string;
+          base_slot: number;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_subgroup_members"]["Row"]> & {
+          subgroup_id: string;
+          trainee_id: string;
+          base_slot: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_subgroup_members"]["Row"]>;
+        Relationships: [];
+      };
+      course_tp_schedule: {
+        Row: {
+          id: string;
+          course_id: string;
+          tp_number: number;
+          tp_coursebook_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_tp_schedule"]["Row"]> & {
+          course_id: string;
+          tp_number: number;
+          tp_coursebook_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_tp_schedule"]["Row"]>;
+        Relationships: [];
+      };
+      plan_assignments: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          tp_number: number;
+          tp_point_id: string | null;
+          rotation_position_used: number;
+          main_lesson_aim: string;
+          sub_aim: string | null;
+          materials_description: string | null;
+          procedure: TpProcedure | null;
+          page_references: string | null;
+          density_tier: TpDensityTier;
+          assigned_at: string;
+          assigned_by: string | null;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["plan_assignments"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          tp_number: number;
+          rotation_position_used: number;
+          main_lesson_aim: string;
+          density_tier: TpDensityTier;
+        };
+        Update: Partial<Database["public"]["Tables"]["plan_assignments"]["Row"]>;
+        Relationships: [];
+      };
+      syllabus_planning_entries: {
+        Row: {
+          id: string;
+          course_id: string;
+          tp_number: number;
+          trainee_id: string;
+          main_aim: string;
+          sub_aim: string | null;
+          material: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["syllabus_planning_entries"]["Row"]> & {
+          course_id: string;
+          tp_number: number;
+          trainee_id: string;
+          main_aim: string;
+          material: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["syllabus_planning_entries"]["Row"]>;
+        Relationships: [];
+      };
       resources: {
         Row: {
           id: string;
@@ -315,6 +471,23 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["staff_messages"]["Row"]>;
         Relationships: [];
       };
+      center_google_connections: {
+        Row: {
+          center_id: string;
+          connected_by: string | null;
+          refresh_token: string;
+          template_doc_id: string | null;
+          output_folder_id: string | null;
+          connected_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["center_google_connections"]["Row"]> & {
+          center_id: string;
+          refresh_token: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["center_google_connections"]["Row"]>;
+        Relationships: [];
+      };
       finances: {
         Row: {
           id: string;
@@ -371,6 +544,14 @@ export interface Database {
       };
       trainee_sign_off_final: {
         Args: Record<string, never>;
+        Returns: void;
+      };
+      assign_tp_round: {
+        Args: { p_subgroup_id: string; p_tp_number: number };
+        Returns: void;
+      };
+      reorder_subgroup_members: {
+        Args: { p_subgroup_id: string; p_ordered_trainee_ids: string[] };
         Returns: void;
       };
     };

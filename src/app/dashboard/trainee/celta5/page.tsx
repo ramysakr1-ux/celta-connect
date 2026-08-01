@@ -123,9 +123,6 @@ export default async function TraineeCelta5Page() {
                               <CriteriaRatingPill rating={row?.tutor_status_stage2 ?? null} />
                             </div>
                           </div>
-                          {row?.tutor_comments_stage2 ? (
-                            <p className="mt-1 text-sm text-muted">{row.tutor_comments_stage2}</p>
-                          ) : null}
                         </div>
                       );
                     })}

@@ -1,4 +1,9 @@
-import type { CriteriaRating, StandardRating, SubmissionStatus } from "@/lib/supabase/types";
+import type {
+  CriteriaRating,
+  StandardRating,
+  SubmissionStatus,
+  TpPointStatus,
+} from "@/lib/supabase/types";
 
 const SUBMISSION_STATUS_LABEL: Record<SubmissionStatus, string> = {
   not_submitted: "Not submitted",
@@ -57,6 +62,26 @@ export function StandardRatingPill({ rating }: { rating: StandardRating | null }
   return (
     <span className={`status-pill ${STANDARD_RATING_CLASS[rating]}`}>
       {STANDARD_RATING_LABEL[rating]}
+    </span>
+  );
+}
+
+const TP_POINT_STATUS_LABEL: Record<TpPointStatus, string> = {
+  pending_review: "Pending review",
+  published: "Published",
+  archived: "Archived",
+};
+
+const TP_POINT_STATUS_CLASS: Record<TpPointStatus, string> = {
+  pending_review: "status-pill-pending",
+  published: "status-pill-on-track",
+  archived: "status-pill-at-risk",
+};
+
+export function TpPointStatusPill({ status }: { status: TpPointStatus }) {
+  return (
+    <span className={`status-pill ${TP_POINT_STATUS_CLASS[status]}`}>
+      {TP_POINT_STATUS_LABEL[status]}
     </span>
   );
 }

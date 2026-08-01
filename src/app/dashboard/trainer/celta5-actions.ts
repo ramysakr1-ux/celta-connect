@@ -139,10 +139,9 @@ export async function updateStage2Ratings(
 
   const updates = CELTA_CRITERIA_CODES.map(async (code) => {
     const status = optionalRating(formData.get(`status__${code}`), CRITERIA_RATINGS);
-    const comments = optionalString(formData.get(`comments__${code}`));
     return supabase
       .from("celta5_matrix")
-      .update({ tutor_status_stage2: status, tutor_comments_stage2: comments })
+      .update({ tutor_status_stage2: status })
       .eq("trainee_id", traineeId)
       .eq("criteria_code", code);
   });
@@ -207,10 +206,9 @@ export async function updateStage3Ratings(
 
   const updates = CELTA_CRITERIA_CODES.map(async (code) => {
     const status = optionalRating(formData.get(`status__${code}`), CRITERIA_RATINGS);
-    const comments = optionalString(formData.get(`comments__${code}`));
     return supabase
       .from("celta5_matrix")
-      .update({ tutor_status_stage3: status, tutor_comments_stage3: comments })
+      .update({ tutor_status_stage3: status })
       .eq("trainee_id", traineeId)
       .eq("criteria_code", code);
   });

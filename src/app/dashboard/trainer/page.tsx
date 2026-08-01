@@ -21,9 +21,19 @@ export default async function TrainerDashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">Welcome, {profile.full_name}</h1>
-        <p className="mt-2 text-muted">Your cohort&apos;s TP and assignment progress.</p>
+      <div className="card flex items-center justify-between p-6">
+        <div>
+          <h1 className="font-serif text-xl text-ink">Welcome, {profile.full_name}</h1>
+          <p className="mt-2 text-muted">Your cohort&apos;s TP and assignment progress.</p>
+        </div>
+        <div className="flex gap-4">
+          <Link href="/dashboard/trainer/coursebooks" className="text-sm text-muted hover:text-ink">
+            TP Points Library
+          </Link>
+          <Link href="/dashboard/trainer/rotation" className="text-sm text-muted hover:text-ink">
+            TP Rotation
+          </Link>
+        </div>
       </div>
 
       <div>
