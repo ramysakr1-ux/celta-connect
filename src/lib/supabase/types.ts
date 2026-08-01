@@ -13,6 +13,7 @@ export type CriteriaRating = "S+" | "S" | "N" | "X";
 export type StandardRating = "above_standard" | "to_standard" | "not_to_standard";
 export type PassFail = "pass" | "fail";
 export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn";
+export type StaffChannelType = "center_trainers" | "all_staff" | "dm";
 
 export interface Database {
   public: {
@@ -248,6 +249,50 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["resources"]["Row"]>;
         Relationships: [];
       };
+      staff_channels: {
+        Row: {
+          id: string;
+          center_id: string;
+          type: StaffChannelType;
+          name: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["staff_channels"]["Row"]> & {
+          center_id: string;
+          type: StaffChannelType;
+        };
+        Update: Partial<Database["public"]["Tables"]["staff_channels"]["Row"]>;
+        Relationships: [];
+      };
+      staff_channel_members: {
+        Row: {
+          channel_id: string;
+          profile_id: string;
+          joined_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["staff_channel_members"]["Row"]> & {
+          channel_id: string;
+          profile_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["staff_channel_members"]["Row"]>;
+        Relationships: [];
+      };
+      staff_messages: {
+        Row: {
+          id: string;
+          channel_id: string;
+          sender_id: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["staff_messages"]["Row"]> & {
+          channel_id: string;
+          sender_id: string;
+          body: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["staff_messages"]["Row"]>;
+        Relationships: [];
+      };
       finances: {
         Row: {
           id: string;
@@ -286,6 +331,10 @@ export interface Database {
           other_notes: string | null;
         };
         Returns: void;
+      };
+      get_or_create_dm_channel: {
+        Args: { other_profile_id: string };
+        Returns: string;
       };
     };
   };

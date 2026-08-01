@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { signOut } from "@/app/login/actions";
+import { getInitialStaffChatData } from "@/lib/staff-chat";
+import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
 
 export default async function DashboardLayout({
   children,
@@ -11,6 +13,9 @@ export default async function DashboardLayout({
   if (!session) redirect("/login");
 
   const { profile, email } = session;
+
+  const staffChat =
+    profile && profile.role !== "trainee" ? await getInitialStaffChatData(profile.id) : null;
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
@@ -33,6 +38,14 @@ export default async function DashboardLayout({
       <footer className="px-6 py-4 text-right text-xs text-muted">
         Designed by Ramy
       </footer>
+
+      {profile && staffChat ? (
+        <StaffChatDrawer
+          profileId={profile.id}
+          initialChannels={staffChat.channels}
+          coworkers={staffChat.coworkers}
+        />
+      ) : null}
     </div>
   );
 }
