@@ -158,7 +158,14 @@ with check (
 -- trainer_signoff_final_at.
 -- ============================================================
 
-create or replace function public.get_my_celta5_record()
+-- The table's row type changed shape (new columns above), so
+-- CREATE OR REPLACE can't be used here -- Postgres treats that as an
+-- illegal return-type change (42P13) even though the type name is the
+-- same. Drop and recreate instead.
+drop function if exists public.get_my_celta5_record();
+drop function if exists public.get_my_celta5_matrix();
+
+create function public.get_my_celta5_record()
 returns public.celta5_records
 language sql
 stable
@@ -205,7 +212,7 @@ as $$
   where trainee_id = auth.uid();
 $$;
 
-create or replace function public.get_my_celta5_matrix()
+create function public.get_my_celta5_matrix()
 returns setof public.celta5_matrix
 language sql
 stable
