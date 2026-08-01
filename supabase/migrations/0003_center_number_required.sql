@@ -10,5 +10,12 @@ where center_number is null;
 alter table public.centers
   alter column center_number set not null;
 
-alter table public.centers
-  add constraint centers_center_number_key unique (center_number);
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'centers_center_number_key'
+  ) then
+    alter table public.centers
+      add constraint centers_center_number_key unique (center_number);
+  end if;
+end $$;
