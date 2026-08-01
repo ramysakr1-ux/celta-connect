@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+:root {
+  --color-background: #f8f6f1; /* cream */
+  --color-card: #fdfcfb; /* paper / near-white */
+  --color-border: #e2ded5; /* hairline neutral */
+  --color-ink: #2a2723; /* body text */
+  --color-primary: #1c4e52; /* deep teal */
+  --color-muted: #7c7368; /* muted text */
+  --color-gold: #c99a4a; /* accent, used sparingly */
+  --color-destructive: #c0392b;
+
+  --color-status-on-track-bg: #d9eeda;
+  --color-status-on-track-text: #1f5e33;
+  --color-status-at-risk-bg: #fadfd8;
+  --color-status-at-risk-text: #c0392b;
+  --color-status-pending-bg: #edebe5;
+  --color-status-pending-text: #6e6960;
+
+  --radius-card: 6px;
+}
+
+@theme inline {
+  --color-background: var(--color-background);
+  --color-card: var(--color-card);
+  --color-border: var(--color-border);
+  --color-ink: var(--color-ink);
+  --color-primary: var(--color-primary);
+  --color-muted: var(--color-muted);
+  --color-gold: var(--color-gold);
+  --color-destructive: var(--color-destructive);
+  --color-status-on-track-bg: var(--color-status-on-track-bg);
+  --color-status-on-track-text: var(--color-status-on-track-text);
+  --color-status-at-risk-bg: var(--color-status-at-risk-bg);
+  --color-status-at-risk-text: var(--color-status-at-risk-text);
+  --color-status-pending-bg: var(--color-status-pending-bg);
+  --color-status-pending-text: var(--color-status-pending-text);
+
+  --font-sans: var(--font-karla);
+  --font-serif: var(--font-newsreader);
+
+  --radius-card: var(--radius-card);
+}
+
+body {
+  font-family: var(--font-karla), sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-newsreader), serif;
+  font-weight: 600;
+}
+
+/*
+  Structural discipline (see build plan "VISUAL SYSTEM" section):
+  no box-shadows anywhere, cards are a single hairline border + 6px radius,
+  no colored accent bars. Reach for `.card` instead of ad-hoc shadow/border
+  utilities so this doesn't drift page by page.
+*/
+@layer components {
+  .card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .card-interactive {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease;
+  }
+
+  .card-interactive:hover {
+    background-color: color-mix(in srgb, var(--color-card) 92%, var(--color-primary) 8%);
+    border-color: color-mix(in srgb, var(--color-border) 60%, var(--color-primary) 40%);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .status-pill-on-track {
+    background-color: var(--color-status-on-track-bg);
+    color: var(--color-status-on-track-text);
+  }
+
+  .status-pill-at-risk {
+    background-color: var(--color-status-at-risk-bg);
+    color: var(--color-status-at-risk-text);
+  }
+
+  .status-pill-pending {
+    background-color: var(--color-status-pending-bg);
+    color: var(--color-status-pending-text);
+  }
+
+  .badge-pass-a {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: var(--color-gold);
+    color: var(--color-card);
+  }
+
+  /* Rows separated by a single bottom hairline; no cell/column borders,
+     no header background fill. */
+  .table-plain th,
+  .table-plain td {
+    border: none;
+    text-align: left;
+    padding: 0.625rem 0.75rem;
+  }
+
+  .table-plain thead {
+    background: transparent;
+  }
+
+  .table-plain tbody tr {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .table-plain tbody tr:last-child {
+    border-bottom: none;
+  }
+}

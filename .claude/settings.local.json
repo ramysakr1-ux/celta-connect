@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm -v)",
+      "Bash(command -v brew)",
+      "Read(//Users/work/**)",
+      "Read(//opt/homebrew/bin/**)",
+      "Read(//usr/local/bin/**)"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "celta-connect-dev",
+      "runtimeExecutable": "/Users/work/CELTA connect-code prompt/.claude/run-npm.sh",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    }
+  ]
+}
