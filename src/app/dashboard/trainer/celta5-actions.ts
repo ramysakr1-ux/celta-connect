@@ -261,6 +261,76 @@ export async function updateStage3Overall(
   return { error: null };
 }
 
+export async function updateAdminGrant(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const trainer = await requireRole("trainer");
+
+  const traineeId = formData.get("trainee_id");
+  const granted = formData.get("granted") === "on";
+  const accessLevel = formData.get("access_level");
+  if (
+    typeof traineeId !== "string" ||
+    !traineeId ||
+    (accessLevel !== "read" && accessLevel !== "edit")
+  ) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("celta5_records")
+    .update(
+      granted
+        ? {
+            admin_access_granted_at: new Date().toISOString(),
+            admin_access_granted_by: trainer.id,
+            admin_access_level: accessLevel,
+          }
+        : {
+            admin_access_granted_at: null,
+            admin_access_granted_by: null,
+            admin_access_level: null,
+          }
+    )
+    .eq("trainee_id", traineeId);
+
+  if (error) {
+    return { error: "Could not save. Try again." };
+  }
+
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+  return { error: null };
+}
+
+export async function finalizeRecord(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("trainer");
+
+  const traineeId = formData.get("trainee_id");
+  if (typeof traineeId !== "string" || !traineeId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const finalized = formData.get("finalized") === "on";
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("celta5_records")
+    .update({ trainer_signoff_final_at: finalized ? new Date().toISOString() : null })
+    .eq("trainee_id", traineeId);
+
+  if (error) {
+    return { error: "Could not save. Try again." };
+  }
+
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+  return { error: null };
+}
+
 export async function updateFinalGrade(
   _prevState: FormState,
   formData: FormData

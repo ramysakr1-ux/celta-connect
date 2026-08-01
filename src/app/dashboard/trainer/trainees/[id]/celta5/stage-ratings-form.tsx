@@ -18,10 +18,12 @@ export function StageRatingsForm({
   stage,
   traineeId,
   rows,
+  suggestions = {},
 }: {
   stage: 2 | 3;
   traineeId: string;
   rows: MatrixRow[];
+  suggestions?: Record<string, "S+" | "S" | "N">;
 }) {
   const action = stage === 2 ? updateStage2Ratings : updateStage3Ratings;
   const [state, formAction, pending] = useActionState(action, initialState);
@@ -41,6 +43,8 @@ export function StageRatingsForm({
             const tutorStatus = stage === 2 ? row?.tutor_status_stage2 : row?.tutor_status_stage3;
             const tutorComments =
               stage === 2 ? row?.tutor_comments_stage2 : row?.tutor_comments_stage3;
+            const suggestion = suggestions[code];
+            const isSuggested = !tutorStatus && !!suggestion;
 
             return (
               <div key={code} className="border-b border-border pb-4 last:border-none">
@@ -58,7 +62,7 @@ export function StageRatingsForm({
                   <span className="text-xs text-muted">Tutor:</span>
                   <select
                     name={`status__${code}`}
-                    defaultValue={tutorStatus ?? ""}
+                    defaultValue={tutorStatus ?? suggestion ?? ""}
                     className="rounded-[6px] border border-border bg-card px-2 py-1 text-sm text-ink outline-none focus:border-primary"
                   >
                     <option value="">Not rated</option>
@@ -68,6 +72,11 @@ export function StageRatingsForm({
                       </option>
                     ))}
                   </select>
+                  {isSuggested ? (
+                    <span className="text-xs text-muted">
+                      (suggested from TP notes -- review before saving)
+                    </span>
+                  ) : null}
                 </div>
                 <textarea
                   name={`comments__${code}`}

@@ -147,3 +147,67 @@ export const GRADE_DESCRIPTORS = {
     "No portfolio submitted for Grade Review: outcome is Withdrawn, not Fail.",
   ],
 } as const;
+
+// ============================================================
+// Per-criterion suggestion, derived from TP lesson tags (strength /
+// action point). A starting point for the trainer's Stage 2 rating,
+// never a final answer -- always shown as editable.
+// ============================================================
+
+export type CriteriaTagType = "strength" | "action_point";
+
+export interface CriteriaTag {
+  tag_type: CriteriaTagType;
+  created_at: string;
+}
+
+export function computeCriteriaSuggestion(
+  tags: CriteriaTag[]
+): "S+" | "S" | "N" | null {
+  if (tags.length === 0) return null; // no evidence yet -- leave as X
+
+  const sorted = [...tags].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+  const last = sorted[sorted.length - 1];
+  const earlier = sorted.slice(0, -1);
+
+  if (last.tag_type === "action_point") {
+    // Still an open concern, whether this is the first mention or a repeat.
+    return "N";
+  }
+
+  // last.tag_type === "strength"
+  const hadEarlierActionPoint = earlier.some((t) => t.tag_type === "action_point");
+  if (hadEarlierActionPoint) return "S"; // improved from a weakness -- solid, not yet "consistent"
+
+  const strengthCount = sorted.filter((t) => t.tag_type === "strength").length;
+  return strengthCount >= 2 ? "S+" : "S"; // S+ needs a consistent pattern, not one good lesson
+}
+
+// ============================================================
+// Trainer-only trajectory indicator: "currently tracking toward X".
+// Purely advisory -- never shown to the trainee, never sets the real
+// final grade. Needs a minimum spread of rated criteria before it says
+// anything, to avoid a misleadingly confident read from TP1-2 alone.
+// ============================================================
+
+export type Trajectory = "Pass A" | "Pass B" | "Pass" | "Fail" | "not_enough_data";
+
+const TRAJECTORY_MIN_RATED = 10; // out of 41 criteria
+
+export function computeTrajectory(
+  ratings: (("S+" | "S" | "N" | "X") | null)[]
+): Trajectory {
+  const rated = ratings.filter((r): r is "S+" | "S" | "N" => r != null && r !== "X");
+
+  if (rated.length < TRAJECTORY_MIN_RATED) return "not_enough_data";
+  if (rated.some((r) => r === "N")) return "Fail";
+
+  const plusCount = rated.filter((r) => r === "S+").length;
+  const ratio = plusCount / rated.length;
+
+  if (ratio >= 0.75) return "Pass A";
+  if (ratio >= 0.4) return "Pass B";
+  return "Pass";
+}

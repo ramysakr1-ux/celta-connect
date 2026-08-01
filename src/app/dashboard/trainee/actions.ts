@@ -53,6 +53,20 @@ export async function submitStage2SelfAssessment(
   return { error: null };
 }
 
+export async function signOffStage2(): Promise<void> {
+  await requireRole("trainee");
+  const supabase = await createClient();
+  await supabase.rpc("trainee_sign_off_stage2");
+  revalidatePath("/dashboard/trainee/celta5");
+}
+
+export async function signOffFinal(): Promise<void> {
+  await requireRole("trainee");
+  const supabase = await createClient();
+  await supabase.rpc("trainee_sign_off_final");
+  revalidatePath("/dashboard/trainee/celta5");
+}
+
 export interface ObservationFormState {
   error: string | null;
 }

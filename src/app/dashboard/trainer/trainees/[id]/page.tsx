@@ -33,6 +33,18 @@ export default async function TraineeDetailPage({
     supabase.from("assignments").select("*").eq("trainee_id", id).order("assignment_type"),
   ]);
 
+  const lessonIds = (lessons ?? []).map((l) => l.id);
+  const { data: tags } =
+    lessonIds.length > 0
+      ? await supabase.from("tp_lesson_criteria_tags").select("*").in("tp_lesson_id", lessonIds)
+      : { data: [] };
+  const tagsByLesson = new Map<string, typeof tags>();
+  for (const tag of tags ?? []) {
+    const list = tagsByLesson.get(tag.tp_lesson_id) ?? [];
+    list.push(tag);
+    tagsByLesson.set(tag.tp_lesson_id, list);
+  }
+
   const totalMinutes = (lessons ?? []).reduce((sum, l) => sum + (l.length_minutes ?? 0), 0);
   const levels = new Set((lessons ?? []).map((l) => l.level).filter(Boolean));
 
@@ -75,6 +87,7 @@ export default async function TraineeDetailPage({
               key={`${lesson.id}-${lesson.updated_at}`}
               traineeId={id}
               lesson={lesson}
+              tags={tagsByLesson.get(lesson.id) ?? []}
             />
           ))}
           <TpLessonForm traineeId={id} />

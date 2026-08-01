@@ -222,6 +222,12 @@ export interface Database {
           stage3_finalized_at: string | null;
           final_recommended_grade: FinalGrade | null;
           overall_notes: string | null;
+          admin_access_granted_at: string | null;
+          admin_access_granted_by: string | null;
+          admin_access_level: "read" | "edit" | null;
+          trainee_signoff_stage2_at: string | null;
+          trainer_signoff_final_at: string | null;
+          trainee_signoff_final_at: string | null;
           updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["celta5_records"]["Row"]> & {
@@ -229,6 +235,22 @@ export interface Database {
           trainee_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["celta5_records"]["Row"]>;
+        Relationships: [];
+      };
+      tp_lesson_criteria_tags: {
+        Row: {
+          id: string;
+          tp_lesson_id: string;
+          criteria_code: string;
+          tag_type: "strength" | "action_point";
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_lesson_criteria_tags"]["Row"]> & {
+          tp_lesson_id: string;
+          criteria_code: string;
+          tag_type: "strength" | "action_point";
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_lesson_criteria_tags"]["Row"]>;
         Relationships: [];
       };
       resources: {
@@ -335,6 +357,14 @@ export interface Database {
       get_or_create_dm_channel: {
         Args: { other_profile_id: string };
         Returns: string;
+      };
+      trainee_sign_off_stage2: {
+        Args: Record<string, never>;
+        Returns: void;
+      };
+      trainee_sign_off_final: {
+        Args: Record<string, never>;
+        Returns: void;
       };
     };
   };

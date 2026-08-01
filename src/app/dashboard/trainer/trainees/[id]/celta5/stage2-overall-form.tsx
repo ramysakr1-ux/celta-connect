@@ -111,8 +111,13 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
           name="stage2_completed"
           defaultChecked={!!record.stage2_completed_at}
         />
-        Stage Two complete
+        Stage One and Two complete -- reveal to trainee
       </label>
+      <p className="text-xs text-muted">
+        Checking this is what makes Stage One and Two (including your ratings above) visible
+        to the trainee for the first time, so they can review and sign off. Nothing is shown
+        to them before this, however far along you&apos;ve gotten.
+      </p>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 

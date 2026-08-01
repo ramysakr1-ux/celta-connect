@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import type { PassFail, StandardRating, SubmissionStatus } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -105,6 +106,67 @@ export async function updateTpLesson(
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
   revalidatePath("/dashboard/trainer");
+  return { error: null };
+}
+
+export async function addCriteriaTag(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("trainer");
+
+  const lessonId = formData.get("lesson_id");
+  const traineeId = formData.get("trainee_id");
+  const criteriaCode = formData.get("criteria_code");
+  const tagType = formData.get("tag_type");
+
+  if (
+    typeof lessonId !== "string" ||
+    typeof traineeId !== "string" ||
+    typeof criteriaCode !== "string" ||
+    !CELTA_CRITERIA_CODES.includes(criteriaCode) ||
+    (tagType !== "strength" && tagType !== "action_point")
+  ) {
+    return { error: "Pick a criterion and a type." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("tp_lesson_criteria_tags").insert({
+    tp_lesson_id: lessonId,
+    criteria_code: criteriaCode,
+    tag_type: tagType,
+  });
+
+  if (error) {
+    return { error: "Could not save the tag. Try again." };
+  }
+
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+  return { error: null };
+}
+
+export async function removeCriteriaTag(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("trainer");
+
+  const tagId = formData.get("tag_id");
+  const traineeId = formData.get("trainee_id");
+  if (typeof tagId !== "string" || typeof traineeId !== "string") {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("tp_lesson_criteria_tags").delete().eq("id", tagId);
+
+  if (error) {
+    return { error: "Could not remove the tag. Try again." };
+  }
+
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   return { error: null };
 }
 
