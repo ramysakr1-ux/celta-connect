@@ -11,6 +11,7 @@ import {
   showsAbbreviationsGlossary,
   showsTips,
 } from "@/lib/tp-density";
+import { getTpCardStatus } from "@/lib/tp-plan-content";
 
 const TP_NUMBERS = [1, 2, 3, 4, 5, 6] as const;
 
@@ -26,19 +27,26 @@ export default async function TraineePlanPage() {
   const profile = await requireRole("trainee");
   const supabase = await createClient();
 
-  const [{ data: plans }, { data: lessons }] = await Promise.all([
-    supabase.from("plan_assignments").select("*").eq("trainee_id", profile.id),
-    supabase
-      .from("tp_lessons")
-      .select("*")
-      .eq("trainee_id", profile.id)
-      .not("tp_number", "is", null),
-  ]);
+  const [{ data: plans }, { data: lessons }, { data: tpPlans }, { data: selfEvaluations }, { data: feedbackRows }] =
+    await Promise.all([
+      supabase.from("plan_assignments").select("*").eq("trainee_id", profile.id),
+      supabase
+        .from("tp_lessons")
+        .select("*")
+        .eq("trainee_id", profile.id)
+        .not("tp_number", "is", null),
+      supabase.from("tp_plans").select("tp_number, submitted_at").eq("trainee_id", profile.id),
+      supabase.from("tp_self_evaluations").select("tp_number, submitted_at").eq("trainee_id", profile.id),
+      supabase.from("tp_feedback").select("tp_number, grade, submitted_at").eq("trainee_id", profile.id),
+    ]);
 
   const planByTpNumber = new Map((plans ?? []).map((p) => [p.tp_number, p]));
   const lessonByTpNumber = new Map(
     (lessons ?? []).map((l) => [l.tp_number as number, l])
   );
+  const tpPlanByTpNumber = new Map((tpPlans ?? []).map((p) => [p.tp_number, p]));
+  const selfEvalByTpNumber = new Map((selfEvaluations ?? []).map((s) => [s.tp_number, s]));
+  const feedbackByTpNumber = new Map((feedbackRows ?? []).map((f) => [f.tp_number, f]));
 
   const trainerIds = [...new Set((lessons ?? []).map((l) => l.trainer_id).filter(Boolean))];
   const { data: trainers } =
@@ -88,13 +96,27 @@ export default async function TraineePlanPage() {
         const tier = plan.density_tier;
         const label = DENSITY_TIER_LABELS[tier];
         const lesson = lessonByTpNumber.get(tpNumber);
+        const tpPlan = tpPlanByTpNumber.get(tpNumber);
+        const selfEvaluation = selfEvalByTpNumber.get(tpNumber);
+        const feedback = feedbackByTpNumber.get(tpNumber);
+        const cardStatus = getTpCardStatus({
+          planSubmitted: Boolean(tpPlan?.submitted_at),
+          taught: Boolean(plan.taught_at),
+          selfEvalSubmitted: Boolean(selfEvaluation?.submitted_at),
+          feedbackSubmitted: Boolean(feedback?.submitted_at),
+          grade: feedback?.grade,
+        });
 
         return (
-          <div key={tpNumber} className="card p-6">
+          <Link key={tpNumber} href={`/dashboard/trainee/plan/${tpNumber}`} className="card-interactive block p-6">
             <div className="flex items-start justify-between gap-4">
               <h2 className="font-serif text-lg text-ink">TP{tpNumber}</h2>
               <div className="shrink-0 text-right">
-                <span className="badge-solid">{label.name}</span>
+                {feedback?.submitted_at && feedback.grade ? (
+                  <StandardRatingPill rating={feedback.grade} />
+                ) : (
+                  <span className="badge-solid">{label.name}</span>
+                )}
                 <p className="mt-1 text-xs text-muted">{label.blurb}</p>
               </div>
             </div>
@@ -191,7 +213,19 @@ export default async function TraineePlanPage() {
                 ) : null}
               </div>
             ) : null}
-          </div>
+
+            <p
+              className={`mt-4 border-t border-border-faint pt-3 text-sm ${
+                cardStatus.tone === "on-track"
+                  ? "text-primary"
+                  : cardStatus.tone === "at-risk"
+                    ? "text-destructive"
+                    : "text-muted"
+              }`}
+            >
+              {cardStatus.label}
+            </p>
+          </Link>
         );
       })}
     </div>

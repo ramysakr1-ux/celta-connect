@@ -24,7 +24,9 @@
       "Bash(mkdir -p \"/Users/work/CELTA connect-code prompt/src/app/auth/confirm\" \"/Users/work/CELTA connect-code prompt/src/app/auth/set-password\")",
       "Bash(rm \"/Users/work/CELTA connect-code prompt/src/app/dashboard/admin/courses/[id]/invite-form.tsx\")",
       "mcp__claude-in-chrome__get_page_text",
-      "Bash(git status *)"
+      "Bash(git status *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git add *)"
     ]
   }
 }

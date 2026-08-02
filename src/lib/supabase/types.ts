@@ -3,6 +3,15 @@
 //   supabase gen types typescript --linked > src/lib/supabase/types.ts
 
 import type { TpProcedure } from "@/lib/tp-density";
+import type {
+  AnalysisBlock,
+  FeedbackPoint,
+  LanguageAnalysisType,
+  PlanProcedureRow,
+  ProblemSolutionPair,
+  SelfEvalActionPoint,
+  VocabRow,
+} from "@/lib/tp-plan-content";
 
 export type UserRole = "trainee" | "trainer" | "admin";
 export type SubmissionStatus =
@@ -21,6 +30,7 @@ export type TpDensityTier = "scripted" | "framework" | "coaching_prose" | "minim
 export type TpPointStatus = "pending_review" | "published" | "archived";
 export type TpGenerationSource = "ai_generated" | "manual";
 export type FeedbackTone = "direct" | "supportive";
+export type TpMaterialFileType = "pdf" | "image";
 
 export interface Database {
   public: {
@@ -409,6 +419,122 @@ export interface Database {
           density_tier: TpDensityTier;
         };
         Update: Partial<Database["public"]["Tables"]["plan_assignments"]["Row"]>;
+        Relationships: [];
+      };
+      tp_plans: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          tp_number: number;
+          plan_assignment_id: string | null;
+          main_aims: string | null;
+          subsidiary_aims: string | null;
+          personal_aims: string | null;
+          class_profile: string | null;
+          materials_description: string | null;
+          anticipated_problems: ProblemSolutionPair[];
+          framework_used: string | null;
+          procedure: PlanProcedureRow[];
+          submitted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_plans"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          tp_number: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_plans"]["Row"]>;
+        Relationships: [];
+      };
+      tp_language_analyses: {
+        Row: {
+          id: string;
+          tp_plan_id: string;
+          trainee_id: string;
+          type: LanguageAnalysisType;
+          is_main_aim: boolean;
+          context: string | null;
+          blocks: AnalysisBlock[];
+          vocab_rows: VocabRow[];
+          vocab_reference: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_language_analyses"]["Row"]> & {
+          tp_plan_id: string;
+          trainee_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_language_analyses"]["Row"]>;
+        Relationships: [];
+      };
+      tp_materials: {
+        Row: {
+          id: string;
+          tp_plan_id: string;
+          trainee_id: string;
+          storage_path: string | null;
+          file_name: string | null;
+          file_type: TpMaterialFileType | null;
+          slides_url: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_materials"]["Row"]> & {
+          tp_plan_id: string;
+          trainee_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_materials"]["Row"]>;
+        Relationships: [];
+      };
+      tp_self_evaluations: {
+        Row: {
+          id: string;
+          tp_plan_id: string;
+          trainee_id: string;
+          tp_number: number;
+          what_went_well: string | null;
+          what_not_as_planned: string | null;
+          evidence_of_learning: string | null;
+          what_differently: string | null;
+          next_tp_focus: string | null;
+          action_points: SelfEvalActionPoint[];
+          submitted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_self_evaluations"]["Row"]> & {
+          tp_plan_id: string;
+          trainee_id: string;
+          tp_number: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_self_evaluations"]["Row"]>;
+        Relationships: [];
+      };
+      tp_feedback: {
+        Row: {
+          id: string;
+          tp_plan_id: string;
+          trainee_id: string;
+          tp_number: number;
+          trainer_id: string | null;
+          grade: StandardRating | null;
+          strengths_planning: FeedbackPoint[];
+          action_points_planning: FeedbackPoint[];
+          strengths_teaching: FeedbackPoint[];
+          action_points_teaching: FeedbackPoint[];
+          overall_comment: string | null;
+          self_eval_comment: string | null;
+          submitted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_feedback"]["Row"]> & {
+          tp_plan_id: string;
+          trainee_id: string;
+          tp_number: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_feedback"]["Row"]>;
         Relationships: [];
       };
       syllabus_planning_entries: {

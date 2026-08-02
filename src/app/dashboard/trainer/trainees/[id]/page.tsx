@@ -4,6 +4,8 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { TpLessonForm } from "@/app/dashboard/trainer/trainees/[id]/tp-lesson-form";
 import { AssignmentForm } from "@/app/dashboard/trainer/trainees/[id]/assignment-form";
+import { StandardRatingPill } from "@/lib/status-pill";
+import { getTpCardStatus } from "@/lib/tp-plan-content";
 
 export default async function TraineeDetailPage({
   params,
@@ -24,15 +26,25 @@ export default async function TraineeDetailPage({
     notFound();
   }
 
-  const [{ data: lessons }, { data: assignments }, { data: plans }] = await Promise.all([
-    supabase
-      .from("tp_lessons")
-      .select("*")
-      .eq("trainee_id", id)
-      .order("lesson_date", { ascending: false, nullsFirst: false }),
-    supabase.from("assignments").select("*").eq("trainee_id", id).order("assignment_type"),
-    supabase.from("plan_assignments").select("tp_number").eq("trainee_id", id),
-  ]);
+  const [{ data: lessons }, { data: assignments }, { data: plans }, { data: tpPlans }, { data: selfEvaluations }, { data: feedbackRows }] =
+    await Promise.all([
+      supabase
+        .from("tp_lessons")
+        .select("*")
+        .eq("trainee_id", id)
+        .order("lesson_date", { ascending: false, nullsFirst: false }),
+      supabase.from("assignments").select("*").eq("trainee_id", id).order("assignment_type"),
+      supabase.from("plan_assignments").select("tp_number, taught_at").eq("trainee_id", id),
+      supabase.from("tp_plans").select("tp_number, submitted_at").eq("trainee_id", id),
+      supabase.from("tp_self_evaluations").select("tp_number, submitted_at").eq("trainee_id", id),
+      supabase.from("tp_feedback").select("tp_number, grade, submitted_at").eq("trainee_id", id),
+    ]);
+
+  const assignedTpNumbers = new Set((plans ?? []).map((p) => p.tp_number));
+  const taughtByTpNumber = new Map((plans ?? []).map((p) => [p.tp_number, Boolean(p.taught_at)]));
+  const tpPlanByNumber = new Map((tpPlans ?? []).map((p) => [p.tp_number, p]));
+  const selfEvalByTpNumber = new Map((selfEvaluations ?? []).map((s) => [s.tp_number, s]));
+  const feedbackByTpNumber = new Map((feedbackRows ?? []).map((f) => [f.tp_number, f]));
 
   const loggedTpNumbers = new Set(
     (lessons ?? []).map((l) => l.tp_number).filter((n): n is number => n !== null)
@@ -82,6 +94,49 @@ export default async function TraineeDetailPage({
               assignment={assignment}
             />
           ))}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="font-serif text-lg text-ink">TP cards</h2>
+        <p className="mt-1 text-sm text-muted">Lesson plan, language analysis, materials, self-evaluation and feedback for each TP.</p>
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((n) => {
+            if (!assignedTpNumbers.has(n)) {
+              return (
+                <div key={n} className="card p-4 text-sm text-muted">
+                  TP{n} -- not assigned
+                </div>
+              );
+            }
+            const feedback = feedbackByTpNumber.get(n);
+            const status = getTpCardStatus({
+              planSubmitted: Boolean(tpPlanByNumber.get(n)?.submitted_at),
+              taught: Boolean(taughtByTpNumber.get(n)),
+              selfEvalSubmitted: Boolean(selfEvalByTpNumber.get(n)?.submitted_at),
+              feedbackSubmitted: Boolean(feedback?.submitted_at),
+              grade: feedback?.grade,
+            });
+            return (
+              <Link key={n} href={`/dashboard/trainer/trainees/${id}/tp/${n}`} className="card-interactive p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-serif text-ink">TP{n}</p>
+                  {feedback?.submitted_at && feedback.grade ? <StandardRatingPill rating={feedback.grade} /> : null}
+                </div>
+                <p
+                  className={`text-sm ${
+                    status.tone === "on-track"
+                      ? "text-primary"
+                      : status.tone === "at-risk"
+                        ? "text-destructive"
+                        : "text-muted"
+                  }`}
+                >
+                  {status.label}
+                </p>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
