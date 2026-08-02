@@ -10,14 +10,20 @@
   --color-gold: #c99a4a; /* accent, used sparingly */
   --color-destructive: #c0392b;
 
-  --color-status-on-track-bg: #d9eeda;
+  --color-status-on-track-bg: #cfe9d2;
   --color-status-on-track-text: #1f5e33;
   --color-status-at-risk-bg: #fadfd8;
-  --color-status-at-risk-text: #c0392b;
-  --color-status-pending-bg: #edebe5;
-  --color-status-pending-text: #6e6960;
+  --color-status-at-risk-text: #b8341f;
+  --color-status-pending-bg: #f4eadb;
+  --color-status-pending-text: #6b4e1c;
 
   --radius-card: 6px;
+
+  /* Near-invisible structural hairline -- used for card edges and row
+     dividers so the app doesn't read as "box box box" at rest. Interactive
+     elements darken toward --color-primary on hover instead of relying on a
+     visible resting border. */
+  --color-border-faint: color-mix(in srgb, var(--color-border) 40%, var(--color-card) 60%);
 }
 
 @theme inline {
@@ -35,6 +41,7 @@
   --color-status-at-risk-text: var(--color-status-at-risk-text);
   --color-status-pending-bg: var(--color-status-pending-bg);
   --color-status-pending-text: var(--color-status-pending-text);
+  --color-border-faint: var(--color-border-faint);
 
   --font-sans: var(--font-karla);
   --font-serif: var(--font-newsreader);
@@ -65,13 +72,13 @@ h6 {
 @layer components {
   .card {
     background-color: var(--color-card);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-faint);
     border-radius: var(--radius-card);
   }
 
   .card-interactive {
     background-color: var(--color-card);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-faint);
     border-radius: var(--radius-card);
     transition:
       background-color 150ms ease,
@@ -79,8 +86,43 @@ h6 {
   }
 
   .card-interactive:hover {
-    background-color: color-mix(in srgb, var(--color-card) 92%, var(--color-primary) 8%);
-    border-color: color-mix(in srgb, var(--color-border) 60%, var(--color-primary) 40%);
+    background-color: color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%);
+    border-color: color-mix(in srgb, var(--color-border) 50%, var(--color-primary) 50%);
+  }
+
+  /* Hairline-divided rows living inside ONE .card wrapper, for document-like
+     continuous content (e.g. CELTA5's numbered sections) -- not for lists of
+     discrete items like TPs or assignments, which want their own full cards. */
+  .list-row {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .list-row:not(:last-child) {
+    border-bottom: 1px solid var(--color-border-faint);
+  }
+
+  .list-row-interactive {
+    padding: 1.25rem 1.5rem;
+    transition: background-color 150ms ease;
+  }
+
+  .list-row-interactive:not(:last-child) {
+    border-bottom: 1px solid var(--color-border-faint);
+  }
+
+  .list-row-interactive:hover {
+    background-color: color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%);
+  }
+
+  .badge-solid {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: var(--color-primary);
+    color: var(--color-card);
   }
 
   .status-pill {
@@ -132,7 +174,7 @@ h6 {
   }
 
   .table-plain tbody tr {
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border-faint);
   }
 
   .table-plain tbody tr:last-child {

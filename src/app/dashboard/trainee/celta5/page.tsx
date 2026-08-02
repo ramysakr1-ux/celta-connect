@@ -79,8 +79,8 @@ export default async function TraineeCelta5Page() {
 
           <div>
             <h2 className="font-serif text-lg text-ink">Stage Two</h2>
-            <div className="mt-3 flex flex-col gap-4">
-              <div className="card p-6">
+            <div className="card mt-3 overflow-hidden">
+              <div className="list-row">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <p className="text-sm text-muted">Your overall assessment</p>
@@ -100,7 +100,7 @@ export default async function TraineeCelta5Page() {
               </div>
 
               {CELTA_CRITERIA_SECTIONS.map(({ section, title, codes }) => (
-                <div key={section} className="card p-6">
+                <div key={section} className="list-row">
                   <h3 className="font-serif text-ink">
                     Topic {section} -- {title}
                   </h3>
@@ -108,7 +108,7 @@ export default async function TraineeCelta5Page() {
                     {codes.map((code) => {
                       const row = byCode.get(code);
                       return (
-                        <div key={code} className="border-b border-border pb-3 last:border-none">
+                        <div key={code} className="border-b border-border-faint pb-3 last:border-none">
                           <p className="text-sm text-ink">
                             {code}
                             {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
@@ -130,7 +130,7 @@ export default async function TraineeCelta5Page() {
                 </div>
               ))}
 
-              <div className="card p-6">
+              <div className="list-row">
                 {record.trainee_signoff_stage2_at ? (
                   <p className="text-sm text-muted">
                     You signed off on this on{" "}
@@ -173,9 +173,9 @@ export default async function TraineeCelta5Page() {
           {record.final_recommended_grade ? (
             <div className="card p-6">
               <h2 className="font-serif text-lg text-ink">Final recommended grade</h2>
-              <p className="mt-1 font-serif text-2xl text-ink">
+              <span className="mt-1 inline-flex rounded-[6px] bg-primary px-3 py-1 font-serif text-2xl text-card">
                 {record.final_recommended_grade}
-              </p>
+              </span>
               <p className="mt-2 text-sm text-muted">
                 Subject to confirmation by Cambridge Assessment English.
               </p>

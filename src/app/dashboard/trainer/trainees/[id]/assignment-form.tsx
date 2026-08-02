@@ -81,7 +81,7 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
         </div>
       </div>
 
-      <div className="border-t border-border pt-4">
+      <div className="border-t border-border-faint pt-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-sm text-muted">Resubmission status</label>
           <select

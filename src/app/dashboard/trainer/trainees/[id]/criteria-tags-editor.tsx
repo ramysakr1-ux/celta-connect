@@ -38,7 +38,7 @@ export function CriteriaTagsEditor({
   const [state, action, pending] = useActionState(addCriteriaTag, initialState);
 
   return (
-    <div className="border-t border-border pt-3">
+    <div className="border-t border-border-faint pt-3">
       <p className="text-xs text-muted">Criteria tags</p>
       {tags.length > 0 ? (
         <div className="mt-1.5 flex flex-wrap gap-1.5">

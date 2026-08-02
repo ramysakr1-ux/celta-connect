@@ -45,7 +45,7 @@ export function StageRatingsForm({
             const isSuggested = !tutorStatus && !!suggestion;
 
             return (
-              <div key={code} className="border-b border-border pb-4 last:border-none">
+              <div key={code} className="border-b border-border-faint pb-4 last:border-none">
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-ink">
                     {code}
