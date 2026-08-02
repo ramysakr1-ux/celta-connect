@@ -13,7 +13,18 @@
       "Bash(python3)",
       "Bash(rm \"/Users/work/CELTA connect-code prompt/src/app/dashboard/trainer/trainees/[id]/tp-form.tsx\")",
       "Bash(rm -f \"/Users/work/CELTA connect-code prompt/src/app/dashboard/trainer/trainees/[id]/celta5/criteria-matrix-form.tsx\")",
-      "Bash(rm -f \"/Users/work/CELTA connect-code prompt/src/app/dashboard/trainer/trainees/[id]/celta5/final-grade-form.tsx\")"
+      "Bash(rm -f \"/Users/work/CELTA connect-code prompt/src/app/dashboard/trainer/trainees/[id]/celta5/final-grade-form.tsx\")",
+      "Bash(node qa-chat-flow.mjs)",
+      "mcp__claude-in-chrome__computer",
+      "mcp__claude-in-chrome__navigate",
+      "mcp__claude-in-chrome__find",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "mcp__claude-in-chrome__browser_batch",
+      "mcp__claude-in-chrome__javascript_tool",
+      "Bash(mkdir -p \"/Users/work/CELTA connect-code prompt/src/app/auth/confirm\" \"/Users/work/CELTA connect-code prompt/src/app/auth/set-password\")",
+      "Bash(rm \"/Users/work/CELTA connect-code prompt/src/app/dashboard/admin/courses/[id]/invite-form.tsx\")",
+      "mcp__claude-in-chrome__get_page_text",
+      "Bash(git status *)"
     ]
   }
 }

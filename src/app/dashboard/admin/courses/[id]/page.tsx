@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { InviteForm } from "@/app/dashboard/admin/courses/[id]/invite-form";
+import { JoinLinksCard } from "@/components/join-links-card";
 import {
   CreateSubgroupForm,
   AddMemberForm,
 } from "@/app/dashboard/admin/courses/[id]/subgroups-form";
 import { removeSubgroupMember } from "@/app/dashboard/admin/courses/[id]/subgroup-actions";
+import { removeRosterMember } from "@/app/dashboard/admin/courses/[id]/roster-actions";
 
 export default async function CourseRosterPage({
   params,
@@ -70,6 +71,7 @@ export default async function CourseRosterPage({
                 <th className="text-sm text-muted">Name</th>
                 <th className="text-sm text-muted">Email</th>
                 <th className="text-sm text-muted">Role</th>
+                <th className="text-sm text-muted"></th>
               </tr>
             </thead>
             <tbody>
@@ -83,11 +85,20 @@ export default async function CourseRosterPage({
                         {member.role}
                       </span>
                     </td>
+                    <td>
+                      <form action={removeRosterMember}>
+                        <input type="hidden" name="member_id" value={member.id} />
+                        <input type="hidden" name="course_id" value={course.id} />
+                        <button type="submit" className="text-sm text-destructive underline">
+                          Remove
+                        </button>
+                      </form>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={3} className="text-muted">
+                  <td colSpan={4} className="text-muted">
                     No one on this course yet.
                   </td>
                 </tr>
@@ -146,7 +157,11 @@ export default async function CourseRosterPage({
         </div>
       </div>
 
-      <InviteForm courseId={course.id} />
+      <JoinLinksCard
+        courseId={course.id}
+        traineeLink={`${process.env.SITE_URL ?? ""}/join/${course.trainee_join_token}`}
+        trainerLink={`${process.env.SITE_URL ?? ""}/join/${course.trainer_join_token}`}
+      />
     </div>
   );
 }

@@ -35,11 +35,20 @@ export async function proxy(request: NextRequest) {
   const isPublicRoute =
     request.nextUrl.pathname === "/" ||
     isAuthRoute ||
-    // /auth/set-password's session is established client-side from a URL
-    // fragment (never sent to the server), so the very first server-side
-    // request for this page has no session yet -- must be reachable
-    // unauthenticated so its client-side hash-detection can even run.
-    request.nextUrl.pathname.startsWith("/auth/set-password");
+    // /auth/confirm verifies a token_hash server-side and has no session
+    // yet when the request arrives -- inherently unauthenticated.
+    request.nextUrl.pathname.startsWith("/auth/confirm") ||
+    // /auth/set-password: by the time this is reached, /auth/confirm has
+    // already set the session cookie on the redirect response, but keep it
+    // in the public allowlist defensively -- the page itself still gates on
+    // having a real session and redirects to /login if not.
+    request.nextUrl.pathname.startsWith("/auth/set-password") ||
+    // /join/[token] is the self-serve course join link -- inherently
+    // unauthenticated, that's the whole point.
+    request.nextUrl.pathname.startsWith("/join/") ||
+    // /forgot-password is how a logged-out user requests a reset link --
+    // inherently unauthenticated, same as /login.
+    request.nextUrl.pathname.startsWith("/forgot-password");
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
