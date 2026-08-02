@@ -1,11 +1,28 @@
 import { LoginForm } from "@/app/login/login-form";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+
   return (
     <div className="flex flex-1 items-center justify-center p-8">
       <div className="card w-full max-w-sm p-8">
         <h1 className="font-serif text-2xl text-ink">Celta Connect</h1>
         <p className="mt-1 text-muted">Sign in to your center.</p>
+        {error === "invite_invalid" ? (
+          <p className="mt-4 text-sm text-destructive">
+            That invite link is invalid or has expired. Ask your admin to resend it.
+          </p>
+        ) : null}
+        {error === "session_expired" ? (
+          <p className="mt-4 text-sm text-destructive">
+            Your session expired before you could set a password. Ask your admin to resend the
+            invite.
+          </p>
+        ) : null}
         <LoginForm />
       </div>
     </div>

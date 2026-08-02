@@ -98,8 +98,30 @@ export async function inviteMember(
     };
   }
 
+  // Pass the center + invitee details as user metadata so the Supabase invite
+  // email template can personalize -- e.g. "You've been invited to
+  // {{ .Data.center_name }} on Celta Connect" -- instead of the generic
+  // default. Available in templates as {{ .Data.<key> }}.
+  const { data: center } = await supabase
+    .from("centers")
+    .select("name")
+    .eq("id", admin.center_id)
+    .maybeSingle();
+
+  const siteUrl = process.env.SITE_URL;
+  if (!siteUrl) {
+    return { error: "Invites aren't set up yet -- SITE_URL is missing from .env.local." };
+  }
+
   const { data: invited, error: inviteError } =
-    await adminClient.auth.admin.inviteUserByEmail(email);
+    await adminClient.auth.admin.inviteUserByEmail(email, {
+      data: {
+        full_name: fullName,
+        center_name: center?.name ?? null,
+        invited_role: role,
+      },
+      redirectTo: `${siteUrl}/auth/set-password`,
+    });
 
   if (inviteError || !invited.user) {
     if (inviteError?.code === "email_exists") {

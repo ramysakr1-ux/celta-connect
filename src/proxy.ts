@@ -33,7 +33,13 @@ export async function proxy(request: NextRequest) {
 
   const isAuthRoute = request.nextUrl.pathname.startsWith("/login");
   const isPublicRoute =
-    request.nextUrl.pathname === "/" || isAuthRoute;
+    request.nextUrl.pathname === "/" ||
+    isAuthRoute ||
+    // /auth/set-password's session is established client-side from a URL
+    // fragment (never sent to the server), so the very first server-side
+    // request for this page has no session yet -- must be reachable
+    // unauthenticated so its client-side hash-detection can even run.
+    request.nextUrl.pathname.startsWith("/auth/set-password");
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
