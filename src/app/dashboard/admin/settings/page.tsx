@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { disconnectGoogleDrive } from "@/app/dashboard/admin/settings/actions";
 import { GoogleDriveTargetsForm } from "@/app/dashboard/admin/settings/targets-form";
+import { FeedbackStyleExamplesManager } from "@/components/feedback-style-examples/manager";
 
 const GOOGLE_ERROR_MESSAGES: Record<string, string> = {
   invalid_state: "That connection attempt looked invalid, so it was rejected. Try again.",
@@ -23,6 +24,12 @@ export default async function AdminSettingsPage({
     .select("center_id, template_doc_id, output_folder_id, connected_at")
     .eq("center_id", profile.center_id)
     .maybeSingle();
+
+  const { data: styleExamples } = await admin
+    .from("feedback_style_examples")
+    .select("*")
+    .eq("center_id", profile.center_id)
+    .order("created_at", { ascending: false });
 
   return (
     <div className="flex flex-col gap-6">
@@ -73,6 +80,17 @@ export default async function AdminSettingsPage({
             Connect Google Drive
           </a>
         )}
+      </div>
+
+      <div className="card p-6">
+        <h2 className="font-serif text-lg text-ink">Feedback Style Examples</h2>
+        <p className="mt-2 text-muted">
+          Real feedback snippets used to guide the AI tone-cleanup feature on trainer feedback
+          fields. Added once, reused automatically on every rewrite.
+        </p>
+        <div className="mt-4">
+          <FeedbackStyleExamplesManager examples={styleExamples ?? []} />
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { TpPointStatusPill } from "@/lib/status-pill";
 import { ProcedureDisplay } from "@/components/tp-library/procedure-display";
+import { VoiceTextarea } from "@/components/voice-textarea";
 import type { Database } from "@/lib/supabase/types";
 
 type TpPoint = Database["public"]["Tables"]["tp_points"]["Row"];
@@ -39,7 +40,7 @@ export function TpPointReviewForm({
 
         <div className="flex flex-col gap-1.5">
           <label className="text-sm text-muted">Main aim</label>
-          <textarea
+          <VoiceTextarea
             name="main_lesson_aim"
             defaultValue={point.main_lesson_aim}
             rows={2}
@@ -56,7 +57,7 @@ export function TpPointReviewForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-sm text-muted">Materials</label>
-          <textarea
+          <VoiceTextarea
             name="materials_description"
             defaultValue={point.materials_description ?? ""}
             rows={2}

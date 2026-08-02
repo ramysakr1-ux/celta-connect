@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updateStage1, type FormState } from "@/app/dashboard/trainer/celta5-actions";
+import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
 import type { Database } from "@/lib/supabase/types";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
@@ -40,7 +41,7 @@ export function Stage1Form({ record }: { record: Celta5Record }) {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Strengths</label>
-        <textarea
+        <TrainerFeedbackTextarea
           name="stage1_strengths"
           rows={3}
           defaultValue={record.stage1_strengths ?? ""}
@@ -50,7 +51,7 @@ export function Stage1Form({ record }: { record: Celta5Record }) {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Action plan for the next stage</label>
-        <textarea
+        <TrainerFeedbackTextarea
           name="stage1_action_plan"
           rows={3}
           defaultValue={record.stage1_action_plan ?? ""}

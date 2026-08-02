@@ -6,6 +6,7 @@ import {
   type FormState,
 } from "@/app/dashboard/trainee/actions";
 import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS, CRITERIA_RATING_OPTIONS, STANDARD_RATING_OPTIONS } from "@/lib/celta-criteria";
+import { VoiceTextarea } from "@/components/voice-textarea";
 
 const initialState: FormState = { error: null };
 
@@ -28,7 +29,7 @@ export function SelfAssessmentForm() {
             Topic {section} -- {title}
           </h3>
           {codes.map((code) => (
-            <div key={code} className="flex items-center justify-between gap-4 border-b border-border pb-3 last:border-none">
+            <div key={code} className="flex items-center justify-between gap-4 border-b border-border-faint pb-3 last:border-none">
               <span className="text-sm text-ink">
                 {code}
                 {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
@@ -74,7 +75,7 @@ export function SelfAssessmentForm() {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Areas you think you need to work on</label>
-        <textarea
+        <VoiceTextarea
           name="notes"
           rows={3}
           className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
@@ -83,7 +84,7 @@ export function SelfAssessmentForm() {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Written assignments -- anything to raise?</label>
-        <textarea
+        <VoiceTextarea
           name="written_assignments_notes"
           rows={2}
           className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
@@ -92,7 +93,7 @@ export function SelfAssessmentForm() {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Other -- attendance, workload, support needs</label>
-        <textarea
+        <VoiceTextarea
           name="other_notes"
           rows={2}
           className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"

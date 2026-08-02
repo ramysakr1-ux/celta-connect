@@ -37,3 +37,75 @@ export async function disconnectGoogleDrive(): Promise<void> {
   await admin.from("center_google_connections").delete().eq("center_id", profile.center_id);
   revalidatePath("/dashboard/admin/settings");
 }
+
+export async function addStyleExample(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const profile = await requireRole("admin");
+
+  const tone = formData.get("tone");
+  const exampleText = (formData.get("example_text") as string | null)?.trim();
+  if (tone !== "direct" && tone !== "supportive") {
+    return { error: "Invalid tone." };
+  }
+  if (!exampleText) {
+    return { error: "Enter an example." };
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin.from("feedback_style_examples").insert({
+    center_id: profile.center_id,
+    tone,
+    example_text: exampleText,
+    created_by: profile.id,
+  });
+
+  if (error) {
+    return { error: "Could not save. Try again." };
+  }
+
+  revalidatePath("/dashboard/admin/settings");
+  return { error: null };
+}
+
+export async function updateStyleExample(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const profile = await requireRole("admin");
+
+  const id = formData.get("id") as string | null;
+  const exampleText = (formData.get("example_text") as string | null)?.trim();
+  if (!id || !exampleText) {
+    return { error: "Enter an example." };
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("feedback_style_examples")
+    .update({ example_text: exampleText })
+    .eq("id", id)
+    .eq("center_id", profile.center_id);
+
+  if (error) {
+    return { error: "Could not save. Try again." };
+  }
+
+  revalidatePath("/dashboard/admin/settings");
+  return { error: null };
+}
+
+export async function deleteStyleExample(formData: FormData): Promise<void> {
+  const profile = await requireRole("admin");
+  const id = formData.get("id") as string | null;
+  if (!id) return;
+
+  const admin = createAdminClient();
+  await admin
+    .from("feedback_style_examples")
+    .delete()
+    .eq("id", id)
+    .eq("center_id", profile.center_id);
+  revalidatePath("/dashboard/admin/settings");
+}

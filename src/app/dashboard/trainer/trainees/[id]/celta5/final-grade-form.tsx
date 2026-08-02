@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { updateFinalGrade, type FormState } from "@/app/dashboard/trainer/celta5-actions";
 import { GRADE_DESCRIPTORS } from "@/lib/celta-criteria";
+import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
 import type { Database } from "@/lib/supabase/types";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
@@ -65,7 +66,7 @@ export function FinalGradeForm({ record }: { record: Celta5Record }) {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Overall notes</label>
-        <textarea
+        <TrainerFeedbackTextarea
           name="overall_notes"
           rows={4}
           defaultValue={record.overall_notes ?? ""}

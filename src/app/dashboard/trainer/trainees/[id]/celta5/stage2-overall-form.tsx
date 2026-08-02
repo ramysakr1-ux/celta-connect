@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { updateStage2Overall, type FormState } from "@/app/dashboard/trainer/celta5-actions";
 import { STANDARD_RATING_OPTIONS } from "@/lib/celta-criteria";
 import { StandardRatingPill } from "@/lib/status-pill";
+import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
 import type { Database } from "@/lib/supabase/types";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
@@ -77,7 +78,7 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Summary of tutorial and action points</label>
-        <textarea
+        <TrainerFeedbackTextarea
           name="stage2_tutor_notes"
           rows={3}
           defaultValue={record.stage2_tutor_notes ?? ""}
@@ -87,7 +88,7 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Written assignments notes</label>
-        <textarea
+        <TrainerFeedbackTextarea
           name="stage2_tutor_written_assignments_notes"
           rows={2}
           defaultValue={record.stage2_tutor_written_assignments_notes ?? ""}
@@ -97,7 +98,7 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Other notes</label>
-        <textarea
+        <TrainerFeedbackTextarea
           name="stage2_tutor_other_notes"
           rows={2}
           defaultValue={record.stage2_tutor_other_notes ?? ""}
