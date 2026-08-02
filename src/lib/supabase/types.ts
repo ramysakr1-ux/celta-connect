@@ -12,6 +12,7 @@ import type {
   SelfEvalActionPoint,
   VocabRow,
 } from "@/lib/tp-plan-content";
+import type { AssignmentTypeValue, TemplateSection } from "@/lib/assignment-templates/content";
 
 export type UserRole = "trainee" | "trainer" | "admin";
 export type SubmissionStatus =
@@ -188,6 +189,50 @@ export interface Database {
           assignment_type: "Focus on Learner" | "LRT" | "Skills" | "LfC";
         };
         Update: Partial<Database["public"]["Tables"]["assignments"]["Row"]>;
+        Relationships: [];
+      };
+      assignment_templates: {
+        Row: {
+          id: string;
+          center_id: string;
+          assignment_type: AssignmentTypeValue;
+          storage_path: string;
+          original_filename: string | null;
+          sections: TemplateSection[];
+          generation_status: TpGenerationStatus;
+          generation_error: string | null;
+          published_at: string | null;
+          uploaded_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["assignment_templates"]["Row"]> & {
+          center_id: string;
+          assignment_type: AssignmentTypeValue;
+          storage_path: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["assignment_templates"]["Row"]>;
+        Relationships: [];
+      };
+      assignment_section_responses: {
+        Row: {
+          id: string;
+          assignment_id: string;
+          section_key: string;
+          section_title: string;
+          first_response: string | null;
+          first_comments: string | null;
+          resubmission_response: string | null;
+          resubmission_comments: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["assignment_section_responses"]["Row"]> & {
+          assignment_id: string;
+          section_key: string;
+          section_title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["assignment_section_responses"]["Row"]>;
         Relationships: [];
       };
       celta5_matrix: {
@@ -702,6 +747,10 @@ export interface Database {
       };
       reorder_subgroup_members: {
         Args: { p_subgroup_id: string; p_ordered_trainee_ids: string[] };
+        Returns: void;
+      };
+      submit_assignment_round: {
+        Args: { p_assignment_id: string };
         Returns: void;
       };
     };

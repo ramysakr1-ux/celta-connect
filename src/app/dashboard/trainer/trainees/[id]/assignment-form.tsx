@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { updateAssignment, type FormState } from "@/app/dashboard/trainer/actions";
 import type { Database } from "@/lib/supabase/types";
@@ -30,7 +31,15 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
       <input type="hidden" name="assignment_id" value={assignment.id} />
       <input type="hidden" name="trainee_id" value={assignment.trainee_id} />
 
-      <h3 className="font-serif text-ink">{assignment.assignment_type}</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="font-serif text-ink">{assignment.assignment_type}</h3>
+        <Link
+          href={`/dashboard/trainer/trainees/${assignment.trainee_id}/assignments/${assignment.id}`}
+          className="text-sm text-primary hover:underline"
+        >
+          Review responses
+        </Link>
+      </div>
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">First submission status</label>

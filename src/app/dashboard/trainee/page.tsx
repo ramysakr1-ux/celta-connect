@@ -54,7 +54,7 @@ export default async function TraineeDashboardPage() {
             assignments.map((a, i) => {
               const info = ASSIGNMENT_INFO[a.assignment_type];
               return (
-                <div key={a.id} className="card p-6">
+                <Link key={a.id} href={`/dashboard/trainee/assignments/${a.id}`} className="card-interactive block p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-xs font-medium uppercase tracking-wide text-muted">
@@ -96,7 +96,7 @@ export default async function TraineeDashboardPage() {
                   {a.final_grade ? (
                     <p className="mt-3 text-sm text-muted">Final grade: {a.final_grade}</p>
                   ) : null}
-                </div>
+                </Link>
               );
             })
           ) : (
