@@ -24,14 +24,24 @@ export default async function TraineeDetailPage({
     notFound();
   }
 
-  const [{ data: lessons }, { data: assignments }] = await Promise.all([
+  const [{ data: lessons }, { data: assignments }, { data: plans }] = await Promise.all([
     supabase
       .from("tp_lessons")
       .select("*")
       .eq("trainee_id", id)
       .order("lesson_date", { ascending: false, nullsFirst: false }),
     supabase.from("assignments").select("*").eq("trainee_id", id).order("assignment_type"),
+    supabase.from("plan_assignments").select("tp_number").eq("trainee_id", id),
   ]);
+
+  const loggedTpNumbers = new Set(
+    (lessons ?? []).map((l) => l.tp_number).filter((n): n is number => n !== null)
+  );
+  const suggestedTpNumber =
+    (plans ?? [])
+      .map((p) => p.tp_number)
+      .filter((n) => !loggedTpNumbers.has(n))
+      .sort((a, b) => a - b)[0] ?? null;
 
   const lessonIds = (lessons ?? []).map((l) => l.id);
   const { data: tags } =
@@ -90,7 +100,7 @@ export default async function TraineeDetailPage({
               tags={tagsByLesson.get(lesson.id) ?? []}
             />
           ))}
-          <TpLessonForm traineeId={id} />
+          <TpLessonForm traineeId={id} suggestedTpNumber={suggestedTpNumber} />
         </div>
       </div>
     </div>

@@ -44,6 +44,15 @@ export default async function TrainerRotationPage() {
 
   const coursebookByTpNumber = new Map((schedule ?? []).map((s) => [s.tp_number, s.tp_coursebook_id]));
 
+  const { data: plans } = await supabase
+    .from("plan_assignments")
+    .select("id, trainee_id, tp_number, taught_at")
+    .eq("course_id", trainer.course_id!);
+
+  const planByTraineeAndTp = new Map(
+    (plans ?? []).map((p) => [`${p.trainee_id}-${p.tp_number}`, p])
+  );
+
   return (
     <div className="flex flex-col gap-6">
       <div className="card p-6">
@@ -114,6 +123,59 @@ export default async function TrainerRotationPage() {
                           </tr>
                         );
                       })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
+
+            {size > 0 ? (
+              <div>
+                <h3 className="text-sm text-muted">Progress</h3>
+                <p className="mt-1 text-xs text-muted">
+                  Logging a trainee&apos;s TP lesson (on their trainee page) unlocks assigning
+                  their next one -- keeps the Plan page to one upcoming lesson at a time.
+                </p>
+                <div className="mt-2 overflow-x-auto">
+                  <table className="table-plain w-full">
+                    <thead>
+                      <tr>
+                        <th className="text-sm text-muted">Trainee</th>
+                        {TP_NUMBERS.map((tpNumber) => (
+                          <th key={tpNumber} className="text-sm text-muted">
+                            TP{tpNumber}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {subgroupMembers.map((member) => (
+                        <tr key={member.traineeId}>
+                          <td className="text-ink">{member.fullName}</td>
+                          {TP_NUMBERS.map((tpNumber) => {
+                            const plan = planByTraineeAndTp.get(`${member.traineeId}-${tpNumber}`);
+                            if (!plan) {
+                              return (
+                                <td key={tpNumber} className="text-sm text-muted">
+                                  &mdash;
+                                </td>
+                              );
+                            }
+                            if (plan.taught_at) {
+                              return (
+                                <td key={tpNumber}>
+                                  <span className="status-pill status-pill-on-track">Taught</span>
+                                </td>
+                              );
+                            }
+                            return (
+                              <td key={tpNumber} className="text-sm text-muted">
+                                Awaiting lesson log
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>

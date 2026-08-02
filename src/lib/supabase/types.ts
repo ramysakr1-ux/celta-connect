@@ -20,6 +20,7 @@ export type TpGenerationStatus = "pending" | "processing" | "completed" | "faile
 export type TpDensityTier = "scripted" | "framework" | "coaching_prose" | "minimal";
 export type TpPointStatus = "pending_review" | "published" | "archived";
 export type TpGenerationSource = "ai_generated" | "manual";
+export type FeedbackTone = "direct" | "supportive";
 
 export interface Database {
   public: {
@@ -50,6 +51,8 @@ export interface Database {
           end_date: string;
           total_hours: number;
           duplicated_from_course_id: string | null;
+          trainee_join_token: string;
+          trainer_join_token: string;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["courses"]["Row"]> & {
@@ -95,6 +98,7 @@ export interface Database {
           lesson_focus: string | null;
           tutor_assessment: StandardRating | null;
           tutor_comments: string | null;
+          tp_number: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -163,6 +167,8 @@ export interface Database {
           resubmission_content_grade: PassFail | null;
           resubmission_english_grade: PassFail | null;
           final_grade: string | null;
+          due_date: string | null;
+          tutor_feedback: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -279,6 +285,23 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["tp_coursebooks"]["Row"]>;
         Relationships: [];
       };
+      feedback_style_examples: {
+        Row: {
+          id: string;
+          center_id: string;
+          tone: FeedbackTone;
+          example_text: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["feedback_style_examples"]["Row"]> & {
+          center_id: string;
+          tone: FeedbackTone;
+          example_text: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["feedback_style_examples"]["Row"]>;
+        Relationships: [];
+      };
       tp_points: {
         Row: {
           id: string;
@@ -374,6 +397,7 @@ export interface Database {
           density_tier: TpDensityTier;
           assigned_at: string;
           assigned_by: string | null;
+          taught_at: string | null;
           updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["plan_assignments"]["Row"]> & {

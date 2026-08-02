@@ -51,6 +51,8 @@ export async function createTpLesson(
     return { error: "Something went wrong. Refresh and try again." };
   }
 
+  const tpNumber = optionalNumber(formData.get("tp_number"));
+
   const supabase = await createClient();
   const { error } = await supabase.from("tp_lessons").insert({
     course_id: trainer.course_id!,
@@ -63,14 +65,33 @@ export async function createTpLesson(
     lesson_focus: optionalString(formData.get("lesson_focus")),
     tutor_assessment: optionalRating(formData.get("tutor_assessment"), STANDARD_RATINGS),
     tutor_comments: optionalString(formData.get("tutor_comments")),
+    tp_number: tpNumber,
   });
 
   if (error) {
+    if (error.code === "23505") {
+      return { error: `This trainee already has a lesson logged for TP${tpNumber} -- edit that entry instead.` };
+    }
     return { error: "Could not save the lesson. Try again." };
+  }
+
+  // Logging the outcome for a TP round is also what unlocks the next one --
+  // one action for the trainer, not a separate "Mark taught" click. `.is`
+  // guard keeps this idempotent if the trainee's TP was somehow already
+  // marked taught.
+  if (tpNumber !== null) {
+    await supabase
+      .from("plan_assignments")
+      .update({ taught_at: new Date().toISOString() })
+      .eq("trainee_id", traineeId)
+      .eq("tp_number", tpNumber)
+      .is("taught_at", null);
   }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
   revalidatePath("/dashboard/trainer");
+  revalidatePath("/dashboard/trainer/rotation");
+  revalidatePath("/dashboard/trainee/plan");
   return { error: null };
 }
 
@@ -86,6 +107,8 @@ export async function updateTpLesson(
     return { error: "Something went wrong. Refresh and try again." };
   }
 
+  const tpNumber = optionalNumber(formData.get("tp_number"));
+
   const supabase = await createClient();
   const { error } = await supabase
     .from("tp_lessons")
@@ -97,15 +120,32 @@ export async function updateTpLesson(
       lesson_focus: optionalString(formData.get("lesson_focus")),
       tutor_assessment: optionalRating(formData.get("tutor_assessment"), STANDARD_RATINGS),
       tutor_comments: optionalString(formData.get("tutor_comments")),
+      tp_number: tpNumber,
     })
     .eq("id", lessonId);
 
   if (error) {
+    if (error.code === "23505") {
+      return { error: `This trainee already has a lesson logged for TP${tpNumber} -- edit that entry instead.` };
+    }
     return { error: "Could not save. Try again." };
+  }
+
+  // A trainer might add the TP number on a later edit rather than at
+  // creation -- still unlocks the next TP when that happens.
+  if (tpNumber !== null) {
+    await supabase
+      .from("plan_assignments")
+      .update({ taught_at: new Date().toISOString() })
+      .eq("trainee_id", traineeId)
+      .eq("tp_number", tpNumber)
+      .is("taught_at", null);
   }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
   revalidatePath("/dashboard/trainer");
+  revalidatePath("/dashboard/trainer/rotation");
+  revalidatePath("/dashboard/trainee/plan");
   return { error: null };
 }
 

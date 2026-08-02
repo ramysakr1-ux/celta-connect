@@ -23,6 +23,29 @@ export function getDensityTier(tpNumber: number): DensityTier {
   return DENSITY_TIER_OVERRIDES[tpNumber] ?? DEFAULT_DENSITY_BY_TP_NUMBER[tpNumber] ?? "minimal";
 }
 
+// Trainee-facing labels for the tiers -- the raw union values are internal
+// jargon ("coaching_prose") that shouldn't surface on the Plan page. The
+// second line frames how much scaffolding the trainee is getting, since the
+// whole point of the tiers is a deliberate, progressive step-down.
+export const DENSITY_TIER_LABELS: Record<DensityTier, { name: string; blurb: string }> = {
+  scripted: {
+    name: "Fully scripted",
+    blurb: "A minute-by-minute procedure to follow closely.",
+  },
+  framework: {
+    name: "Framework-based",
+    blurb: "A named framework and stages -- write your own aims and procedure into it.",
+  },
+  coaching_prose: {
+    name: "Coaching notes",
+    blurb: "Guidance to shape your own procedure -- more support as the level changes.",
+  },
+  minimal: {
+    name: "Aims & materials only",
+    blurb: "Build the full lesson yourself from the aims and materials below.",
+  },
+};
+
 // Matches the real per-subgroup slot count (~3 trainees per subgroup).
 export const POINTS_PER_TP = 3;
 

@@ -8,6 +8,7 @@ import {
 } from "@/app/dashboard/trainer/actions";
 import { STANDARD_RATING_OPTIONS } from "@/lib/celta-criteria";
 import { CriteriaTagsEditor } from "@/app/dashboard/trainer/trainees/[id]/criteria-tags-editor";
+import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
 import type { Database } from "@/lib/supabase/types";
 
 type TpLesson = Database["public"]["Tables"]["tp_lessons"]["Row"];
@@ -19,10 +20,12 @@ export function TpLessonForm({
   traineeId,
   lesson,
   tags = [],
+  suggestedTpNumber,
 }: {
   traineeId: string;
   lesson?: TpLesson;
   tags?: Tag[];
+  suggestedTpNumber?: number | null;
 }) {
   const action = lesson ? updateTpLesson : createTpLesson;
   const [state, formAction, pending] = useActionState(action, initialState);
@@ -32,6 +35,22 @@ export function TpLessonForm({
       <form action={formAction} className="flex flex-col gap-3">
         <input type="hidden" name="trainee_id" value={traineeId} />
         {lesson ? <input type="hidden" name="lesson_id" value={lesson.id} /> : null}
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm text-muted">TP number</label>
+          <select
+            name="tp_number"
+            defaultValue={lesson?.tp_number ?? suggestedTpNumber ?? ""}
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          >
+            <option value="">Not part of rotation</option>
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <option key={n} value={n}>
+                TP{n}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
@@ -102,7 +121,7 @@ export function TpLessonForm({
 
         <div className="flex flex-col gap-1.5">
           <label className="text-sm text-muted">Tutor comments</label>
-          <textarea
+          <TrainerFeedbackTextarea
             name="tutor_comments"
             rows={2}
             defaultValue={lesson?.tutor_comments ?? ""}
