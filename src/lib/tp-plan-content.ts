@@ -13,17 +13,16 @@ export interface ProblemSolutionPair {
   solution: string;
 }
 
-export const INTERACTION_PATTERN_OPTIONS = [
-  "T–S",
-  "S–T",
-  "S–S",
-  "PW",
-  "GW",
-  "Ind.",
-  "OC",
-  "Ming.",
-] as const;
-export type InteractionPattern = (typeof INTERACTION_PATTERN_OPTIONS)[number];
+export const INTERACTION_PATTERNS: { code: string; label: string }[] = [
+  { code: "T–S", label: "T–S — teacher to student(s)" },
+  { code: "S–T", label: "S–T — student to teacher" },
+  { code: "S–S", label: "S–S — student to student" },
+  { code: "PW", label: "PW — pair work" },
+  { code: "GW", label: "GW — group work" },
+  { code: "Ind.", label: "Ind. — individual work" },
+  { code: "OC", label: "OC — open/whole class" },
+  { code: "Ming.", label: "Ming. — mingling" },
+];
 
 // The trainee's own authored procedure table -- always this shape regardless
 // of density tier, unlike tp_points/plan_assignments' tier-specific brief

@@ -10,8 +10,8 @@
   --color-gold: #c99a4a; /* accent, used sparingly */
   --color-destructive: #c0392b;
 
-  --color-status-on-track-bg: #cfe9d2;
-  --color-status-on-track-text: #1f5e33;
+  --color-status-on-track-bg: #e3e4c4; /* pale olive */
+  --color-status-on-track-text: #55631f; /* olive green */
   --color-status-at-risk-bg: #fadfd8;
   --color-status-at-risk-text: #b8341f;
   --color-status-pending-bg: #f4eadb;

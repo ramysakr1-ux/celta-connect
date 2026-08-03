@@ -61,7 +61,7 @@ export function StageRatingsForm({
                   <select
                     name={`status__${code}`}
                     defaultValue={tutorStatus ?? suggestion ?? ""}
-                    className="rounded-[6px] border border-border bg-card px-2 py-1 text-sm text-ink outline-none focus:border-primary"
+                    className="appearance-none rounded-[6px] border border-border bg-card px-2 py-1 text-center text-sm text-ink outline-none focus:border-primary"
                   >
                     <option value="">Not rated</option>
                     {CRITERIA_RATING_OPTIONS.map((opt) => (

@@ -54,6 +54,9 @@ export async function joinCourse(
   if (password !== confirmPassword) {
     return { error: "Passwords do not match." };
   }
+  if (!formData.get("agree_ip") || !formData.get("agree_data")) {
+    return { error: "You need to agree to both checkboxes to join." };
+  }
 
   const resolved = await resolveCourseAndRole(token);
   if (!resolved) {
@@ -86,6 +89,7 @@ export async function joinCourse(
     role,
     center_id: course.center_id,
     course_id: course.id,
+    terms_accepted_at: new Date().toISOString(),
   });
 
   if (profileError) {

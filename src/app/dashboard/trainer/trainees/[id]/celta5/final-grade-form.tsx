@@ -53,7 +53,7 @@ export function FinalGradeForm({ record }: { record: Celta5Record }) {
         <select
           name="final_recommended_grade"
           defaultValue={record.final_recommended_grade ?? ""}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-ink outline-none focus:border-primary"
         >
           <option value="">Not yet decided</option>
           <option value="Pass">Pass</option>

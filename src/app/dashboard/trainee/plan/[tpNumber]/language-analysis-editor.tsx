@@ -2,7 +2,6 @@
 
 import {
   ANALYSIS_SHEETS,
-  IPA_SYMBOL_GROUPS,
   emptyAnalysisBlock,
   emptyVocabRow,
   type AnalysisBlock,
@@ -10,6 +9,9 @@ import {
   type VocabRow,
 } from "@/lib/tp-plan-content";
 import { VoiceTextarea } from "@/components/voice-textarea";
+import { bulletListProps } from "@/lib/bullet-list";
+import { PhonemicPopup } from "@/components/phonemic-popup";
+import { CustomSelect } from "@/components/custom-select";
 
 const inputClass =
   "w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary";
@@ -68,18 +70,18 @@ export function LanguageAnalysisEditor({
       {open ? (
         <div className="mt-4 flex flex-col gap-4">
           <div className="flex flex-wrap items-end gap-4">
-            <div className="flex flex-col gap-1.5">
+            <div className="flex w-48 flex-col gap-1.5">
               <label className="text-sm text-muted">What are you analysing?</label>
-              <select
+              <CustomSelect
                 value={type}
                 disabled={locked}
-                onChange={(e) => onTypeChange(e.target.value as LanguageAnalysisType)}
-                className={inputClass}
-              >
-                <option value="grammar">Grammar</option>
-                <option value="vocab">Vocabulary</option>
-                <option value="function">Functional language</option>
-              </select>
+                onChange={(v) => onTypeChange(v as LanguageAnalysisType)}
+                options={[
+                  { value: "grammar", label: "Grammar" },
+                  { value: "vocab", label: "Vocabulary" },
+                  { value: "function", label: "Functional language" },
+                ]}
+              />
             </div>
             <div className="flex items-center gap-3 text-sm text-ink">
               <span>
@@ -176,6 +178,7 @@ export function LanguageAnalysisEditor({
                                   }
                                   placeholder="Problem"
                                   className={inputClass}
+                                  {...bulletListProps}
                                 />
                                 <textarea
                                   rows={2}
@@ -188,6 +191,7 @@ export function LanguageAnalysisEditor({
                                   }
                                   placeholder="Solution"
                                   className={inputClass}
+                                  {...bulletListProps}
                                 />
                               </div>
                             ))}
@@ -215,18 +219,15 @@ export function LanguageAnalysisEditor({
                         <label className="text-sm text-muted">{field.label}</label>
                         {field.hint ? <p className="text-xs italic text-muted">{field.hint}</p> : null}
                         {field.type === "select" ? (
-                          <select
+                          <CustomSelect
                             value={value}
                             disabled={locked}
-                            onChange={(e) => updateBlock(i, { [key]: e.target.value } as Partial<AnalysisBlock>)}
-                            className={inputClass}
-                          >
-                            {(field.options ?? []).map((opt) => (
-                              <option key={opt} value={opt}>
-                                {opt || "— choose —"}
-                              </option>
-                            ))}
-                          </select>
+                            onChange={(v) => updateBlock(i, { [key]: v } as Partial<AnalysisBlock>)}
+                            options={(field.options ?? []).map((opt) => ({
+                              value: opt,
+                              label: opt || "— choose —",
+                            }))}
+                          />
                         ) : field.type === "input" ? (
                           <input
                             type="text"
@@ -236,33 +237,12 @@ export function LanguageAnalysisEditor({
                             className={inputClass}
                           />
                         ) : field.type === "phon" ? (
-                          <div className="flex flex-col gap-2">
-                            <textarea
-                              rows={2}
-                              value={value}
-                              disabled={locked}
-                              onChange={(e) => updateBlock(i, { [key]: e.target.value } as Partial<AnalysisBlock>)}
-                              className={`${inputClass} font-serif`}
-                            />
-                            {!locked ? (
-                              <div className="flex flex-wrap gap-2">
-                                {IPA_SYMBOL_GROUPS.map((group) => (
-                                  <div key={group.label} className="flex flex-wrap items-center gap-1">
-                                    {group.symbols.map((sym) => (
-                                      <button
-                                        key={sym}
-                                        type="button"
-                                        onClick={() => updateBlock(i, { [key]: value + sym } as Partial<AnalysisBlock>)}
-                                        className="rounded border border-border-faint px-1.5 py-0.5 font-serif text-sm hover:border-primary"
-                                      >
-                                        {sym}
-                                      </button>
-                                    ))}
-                                  </div>
-                                ))}
-                              </div>
-                            ) : null}
-                          </div>
+                          <PhonemicPopup
+                            value={value}
+                            disabled={locked}
+                            onChange={(v) => updateBlock(i, { [key]: v } as Partial<AnalysisBlock>)}
+                            className={inputClass}
+                          />
                         ) : (
                           <VoiceTextarea
                             rows={3}
@@ -270,6 +250,7 @@ export function LanguageAnalysisEditor({
                             disabled={locked}
                             onChange={(e) => updateBlock(i, { [key]: e.target.value } as Partial<AnalysisBlock>)}
                             className={inputClass}
+                            {...bulletListProps}
                           />
                         )}
                       </div>
@@ -330,19 +311,31 @@ function VocabTable({
           <tbody>
             {rows.map((row, i) => (
               <tr key={i}>
-                {columns.map((col) => (
-                  <td key={col.key} className="border-b border-border-faint p-1.5 align-top">
-                    <textarea
-                      rows={3}
-                      value={row[col.key]}
-                      disabled={locked}
-                      onChange={(e) =>
-                        onChange(rows.map((r, x) => (x === i ? { ...r, [col.key]: e.target.value } : r)))
-                      }
-                      className={inputClass}
-                    />
-                  </td>
-                ))}
+                {columns.map((col) =>
+                  col.key === "item" ? (
+                    <td key={col.key} className="border-b border-border-faint p-1.5 align-top">
+                      <PhonemicPopup
+                        rows={3}
+                        value={row[col.key]}
+                        disabled={locked}
+                        onChange={(v) => onChange(rows.map((r, x) => (x === i ? { ...r, [col.key]: v } : r)))}
+                        className={inputClass}
+                      />
+                    </td>
+                  ) : (
+                    <td key={col.key} className="border-b border-border-faint p-1.5 align-top">
+                      <textarea
+                        rows={3}
+                        value={row[col.key]}
+                        disabled={locked}
+                        onChange={(e) =>
+                          onChange(rows.map((r, x) => (x === i ? { ...r, [col.key]: e.target.value } : r)))
+                        }
+                        className={inputClass}
+                      />
+                    </td>
+                  )
+                )}
                 <td className="border-b border-border-faint p-1.5 align-top">
                   {!locked ? (
                     <button

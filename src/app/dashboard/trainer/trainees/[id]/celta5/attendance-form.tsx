@@ -91,7 +91,7 @@ export function AttendanceForm({
             <select
               name="category"
               defaultValue="unavoidable"
-              className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
             >
               <option value="unavoidable">Unavoidable</option>
               <option value="other">Other / unexplained</option>

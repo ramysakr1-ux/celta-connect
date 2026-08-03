@@ -41,7 +41,7 @@ export function TpLessonForm({
           <select
             name="tp_number"
             defaultValue={lesson?.tp_number ?? suggestedTpNumber ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Not part of rotation</option>
             {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -108,7 +108,7 @@ export function TpLessonForm({
           <select
             name="tutor_assessment"
             defaultValue={lesson?.tutor_assessment ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Not yet assessed</option>
             {STANDARD_RATING_OPTIONS.map((opt) => (

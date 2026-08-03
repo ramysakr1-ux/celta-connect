@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useState } from "react";
 import {
   saveLessonPlanDraft,
   submitLessonPlan,
@@ -8,8 +8,10 @@ import {
 } from "@/app/dashboard/trainee/plan/[tpNumber]/actions";
 import { LanguageAnalysisEditor } from "@/app/dashboard/trainee/plan/[tpNumber]/language-analysis-editor";
 import { VoiceTextarea } from "@/components/voice-textarea";
+import { bulletListProps } from "@/lib/bullet-list";
+import { InteractionPatternPopup } from "@/components/interaction-pattern-popup";
+import { FrameworkPicker } from "@/components/framework-picker";
 import {
-  INTERACTION_PATTERN_OPTIONS,
   LESSON_FRAMEWORKS,
   emptyAnalysisBlock,
   type AnalysisBlock,
@@ -54,7 +56,7 @@ export function LessonPlanForm({
       ? plan.procedure
       : [{ ...emptyProcedureRow(), stage: "LEAD-IN" }, ...Array.from({ length: 4 }, emptyProcedureRow)]
   );
-  const frameworkRef = useRef<HTMLSelectElement>(null);
+  const [frameworkName, setFrameworkName] = useState(plan?.framework_used ?? "");
 
   const [laOpen, setLaOpen] = useState(
     Boolean(
@@ -76,8 +78,7 @@ export function LessonPlanForm({
   const totalMinutes = procedure.reduce((sum, row) => sum + timeValue(row.time), 0);
 
   function applyFramework() {
-    const key = frameworkRef.current?.value;
-    const framework = LESSON_FRAMEWORKS.find((f) => f.key === key);
+    const framework = LESSON_FRAMEWORKS.find((f) => f.name === frameworkName);
     if (!framework) return;
     const hasTyped = procedure.some((row) => row.procedure.trim());
     if (
@@ -133,21 +134,26 @@ export function LessonPlanForm({
               <table className="w-full min-w-[700px] border-collapse text-sm">
                 <thead>
                   <tr>
-                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage</th>
-                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
+                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
                     <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
                     <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
+                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
                   </tr>
                 </thead>
                 <tbody>
                   {procedure.map((row, i) => (
-                    <tr key={i}>
-                      <td className="border-b border-border-faint p-2 align-top text-ink">{row.stage}</td>
+                    <tr key={i} className="even:bg-background">
                       <td className="whitespace-pre-line border-b border-border-faint p-2 align-top text-ink">
-                        {row.procedure}
+                        {row.stage}
+                        {row.aim ? (
+                          <p className="mt-1 text-xs italic text-status-on-track-text">{row.aim}</p>
+                        ) : null}
                       </td>
                       <td className="border-b border-border-faint p-2 align-top text-ink">{row.interaction}</td>
                       <td className="border-b border-border-faint p-2 align-top text-ink">{row.time}</td>
+                      <td className="whitespace-pre-line border-b border-border-faint p-2 align-top text-ink">
+                        {row.procedure}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -191,7 +197,13 @@ export function LessonPlanForm({
         <h2 className="font-serif text-lg text-ink">Your lesson plan</h2>
         <div className="mt-4 flex flex-col gap-4">
           <Field label="Main Aims" hint="What the learners will be able to do by the end.">
-            <VoiceTextarea name="main_aims" rows={3} defaultValue={plan?.main_aims ?? ""} className={inputClass} />
+            <VoiceTextarea
+              name="main_aims"
+              rows={3}
+              defaultValue={plan?.main_aims ?? ""}
+              className={inputClass}
+              {...bulletListProps}
+            />
           </Field>
           <Field label="Subsidiary Aims" hint="What else the lesson develops along the way.">
             <VoiceTextarea
@@ -199,6 +211,7 @@ export function LessonPlanForm({
               rows={3}
               defaultValue={plan?.subsidiary_aims ?? ""}
               className={inputClass}
+              {...bulletListProps}
             />
           </Field>
           <Field label="Personal Aims" hint="Take these from the action points in your last feedback.">
@@ -207,6 +220,7 @@ export function LessonPlanForm({
               rows={3}
               defaultValue={plan?.personal_aims ?? ""}
               className={inputClass}
+              {...bulletListProps}
             />
           </Field>
 
@@ -227,12 +241,14 @@ export function LessonPlanForm({
                       defaultValue={existing?.problem ?? ""}
                       placeholder={`Problem #${n}`}
                       className={inputClass}
+                      {...bulletListProps}
                     />
                     <textarea
                       name={`solution_${n}`}
                       rows={2}
                       defaultValue={existing?.solution ?? ""}
                       placeholder="Solution"
+                      {...bulletListProps}
                       className={inputClass}
                     />
                   </div>
@@ -263,22 +279,25 @@ export function LessonPlanForm({
       <div className="card p-6">
         <h2 className="font-serif text-lg text-ink">Lesson shape</h2>
         <p className="text-sm text-muted">Choosing a framework fills the Stage column with that shape&apos;s usual stages.</p>
-        <div className="mt-3 flex flex-wrap items-end gap-3">
-          <select ref={frameworkRef} name="framework_used" defaultValue={plan?.framework_used ?? ""} className={`${inputClass} max-w-sm`}>
-            <option value="">— choose a framework —</option>
-            {LESSON_FRAMEWORKS.map((f) => (
-              <option key={f.key} value={f.name}>
-                {f.name}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={applyFramework}
-            className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
-          >
-            Fill in the stages
-          </button>
+        <div className="mt-3 flex w-80 flex-col gap-3">
+          <input type="hidden" name="framework_used" value={frameworkName} />
+          <FrameworkPicker value={frameworkName} onChange={setFrameworkName} />
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={applyFramework}
+              className="flex-1 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+            >
+              Fill in the stages
+            </button>
+            <button
+              type="button"
+              onClick={() => setProcedure(procedure.map((row) => ({ ...row, stage: "", aim: "" })))}
+              className="flex-1 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+            >
+              Clear stages
+            </button>
+          </div>
         </div>
       </div>
 
@@ -288,26 +307,55 @@ export function LessonPlanForm({
         <input type="hidden" name="procedure" value={JSON.stringify(procedure)} />
         <div className="mt-3 overflow-x-auto">
           <table className="w-full min-w-[900px] border-collapse text-sm">
+            <colgroup>
+              <col className="w-44" />
+              <col className="w-24" />
+              <col className="w-24" />
+              <col />
+              <col className="w-8" />
+            </colgroup>
             <thead>
               <tr>
-                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage</th>
-                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
+                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
                 <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
                 <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
+                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
                 <th className="border-b border-border-faint p-2" />
               </tr>
             </thead>
             <tbody>
               {procedure.map((row, i) => (
-                <tr key={i}>
+                <tr key={i} className="even:bg-background">
+                  <td className="border-b border-border-faint p-1.5 align-top">
+                    <textarea
+                      rows={2}
+                      value={row.stage}
+                      onChange={(e) => updateProcedureRow(i, { stage: e.target.value })}
+                      className={`${inputClass} resize-none`}
+                    />
+                    <textarea
+                      rows={2}
+                      value={row.aim}
+                      onChange={(e) => updateProcedureRow(i, { aim: e.target.value })}
+                      placeholder="Stage aim"
+                      className="mt-1 w-full resize-none bg-transparent text-xs italic text-status-on-track-text outline-none placeholder:text-muted"
+                    />
+                  </td>
+                  <td className="border-b border-border-faint p-1.5 align-top">
+                    <InteractionPatternPopup
+                      placeholder="e.g. GW + PW"
+                      value={row.interaction}
+                      onChange={(v) => updateProcedureRow(i, { interaction: v })}
+                      className={`${inputClass} min-h-[60px]`}
+                    />
+                  </td>
                   <td className="border-b border-border-faint p-1.5 align-top">
                     <input
                       type="text"
-                      value={row.stage}
-                      onChange={(e) => updateProcedureRow(i, { stage: e.target.value })}
-                      className={inputClass}
+                      value={row.time}
+                      onChange={(e) => updateProcedureRow(i, { time: e.target.value })}
+                      className={`${inputClass} min-h-[60px]`}
                     />
-                    {row.aim ? <p className="mt-1 text-xs italic text-primary">{row.aim}</p> : null}
                   </td>
                   <td className="border-b border-border-faint p-1.5 align-top">
                     <textarea
@@ -315,40 +363,7 @@ export function LessonPlanForm({
                       value={row.procedure}
                       onChange={(e) => updateProcedureRow(i, { procedure: e.target.value })}
                       className={inputClass}
-                    />
-                  </td>
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <div className="flex flex-col gap-1">
-                      {[0, 1].map((slot) => {
-                        const picks = row.interaction.split("+").map((s) => s.trim());
-                        return (
-                          <select
-                            key={slot}
-                            value={picks[slot] ?? ""}
-                            onChange={(e) => {
-                              const next = [...picks];
-                              next[slot] = e.target.value;
-                              updateProcedureRow(i, { interaction: next.filter(Boolean).join(" + ") });
-                            }}
-                            className={inputClass}
-                          >
-                            <option value="">–</option>
-                            {INTERACTION_PATTERN_OPTIONS.map((opt) => (
-                              <option key={opt} value={opt}>
-                                {opt}
-                              </option>
-                            ))}
-                          </select>
-                        );
-                      })}
-                    </div>
-                  </td>
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <input
-                      type="text"
-                      value={row.time}
-                      onChange={(e) => updateProcedureRow(i, { time: e.target.value })}
-                      className={`${inputClass} w-20`}
+                      {...bulletListProps}
                     />
                   </td>
                   <td className="border-b border-border-faint p-1.5 align-top">

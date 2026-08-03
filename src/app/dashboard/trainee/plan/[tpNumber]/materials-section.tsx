@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import {
-  addSlidesLink,
-  createMaterialRecord,
-  deleteMaterial,
-} from "@/app/dashboard/trainee/plan/[tpNumber]/materials-actions";
+import { createMaterialRecord, deleteMaterial } from "@/app/dashboard/trainee/plan/[tpNumber]/materials-actions";
+import { DriveAttachButtons } from "@/app/dashboard/trainee/plan/[tpNumber]/drive-attach-buttons";
 import type { Database } from "@/lib/supabase/types";
 
 type TpMaterial = Database["public"]["Tables"]["tp_materials"]["Row"];
@@ -17,16 +14,46 @@ export function MaterialsSection({
   traineeId,
   materials,
   locked,
+  hasGoogleConnection,
 }: {
   tpPlanId: string;
   centerId: string;
   traineeId: string;
   materials: TpMaterial[];
   locked: boolean;
+  hasGoogleConnection: boolean;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [slidesUrl, setSlidesUrl] = useState("");
+  const [opening, setOpening] = useState<string | null>(null);
+
+  async function handleOpenMaterial(m: TpMaterial) {
+    if (m.slides_url) {
+      window.open(m.slides_url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (!m.storage_path) return;
+
+    // Open the tab synchronously on the click, then point it at the signed
+    // URL once it resolves -- opening a new tab only after an awaited call
+    // gets blocked as a popup by most browsers.
+    const tab = window.open("", "_blank");
+    setOpening(m.id);
+    try {
+      const supabase = createClient();
+      const { data, error: signError } = await supabase.storage
+        .from("tp-materials")
+        .createSignedUrl(m.storage_path, 60);
+      if (signError || !data) {
+        tab?.close();
+        setError("Could not open the file. Try again.");
+        return;
+      }
+      if (tab) tab.location.href = data.signedUrl;
+    } finally {
+      setOpening(null);
+    }
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -67,30 +94,26 @@ export function MaterialsSection({
     }
   }
 
-  async function handleAddSlidesLink() {
-    if (!slidesUrl.trim()) return;
-    setError(null);
-    const result = await addSlidesLink({ tpPlanId, slidesUrl: slidesUrl.trim() });
-    if (result.error) setError(result.error);
-    else setSlidesUrl("");
-  }
-
   return (
     <div className="card p-6">
       <h2 className="font-serif text-lg text-ink">Materials</h2>
       <p className="mt-1 text-sm text-muted">
-        Handouts, worksheets, or slides exported as a PDF or image. Encourage Google Slides, then attach the
-        exported PDF here for the bound record.
+        Handouts, worksheets, or slides. Upload a PDF/image{hasGoogleConnection ? ", or attach a file directly from your center's Drive" : ""}.
       </p>
 
       {materials.length > 0 ? (
         <ul className="mt-4 flex flex-col gap-2">
           {materials.map((m) => (
             <li key={m.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border-faint px-3 py-2 text-sm">
-              <span className="text-ink">
-                {m.file_name ?? m.slides_url}
+              <button
+                type="button"
+                onClick={() => handleOpenMaterial(m)}
+                disabled={opening === m.id}
+                className="text-left text-ink hover:underline disabled:opacity-60"
+              >
+                {opening === m.id ? "Opening…" : (m.file_name ?? m.slides_url)}
                 {m.file_type ? <span className="ml-2 text-xs text-muted">({m.file_type})</span> : null}
-              </span>
+              </button>
               {!locked ? (
                 <form action={deleteMaterial}>
                   <input type="hidden" name="material_id" value={m.id} />
@@ -119,22 +142,12 @@ export function MaterialsSection({
             />
             {uploading ? <p className="text-sm text-muted">Uploading…</p> : null}
           </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="url"
-              value={slidesUrl}
-              onChange={(e) => setSlidesUrl(e.target.value)}
-              placeholder="Optional: live Google Slides link"
-              className="flex-1 rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
-            />
-            <button
-              type="button"
-              onClick={handleAddSlidesLink}
-              className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
-            >
-              Add link
-            </button>
-          </div>
+          {hasGoogleConnection ? (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm text-muted">Or attach a Google Doc, Slides, or Sheet</label>
+              <DriveAttachButtons tpPlanId={tpPlanId} onError={setError} />
+            </div>
+          ) : null}
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
         </div>
       ) : null}

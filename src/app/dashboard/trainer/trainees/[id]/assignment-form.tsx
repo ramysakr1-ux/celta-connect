@@ -46,7 +46,7 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
         <select
           name="first_status"
           defaultValue={assignment.first_status}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
         >
           {STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -65,7 +65,7 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
           <select
             name="first_content_grade"
             defaultValue={assignment.first_content_grade ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
           >
             {GRADE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -79,7 +79,7 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
           <select
             name="first_english_grade"
             defaultValue={assignment.first_english_grade ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
           >
             {GRADE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -96,7 +96,7 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
           <select
             name="resubmission_status"
             defaultValue={assignment.resubmission_status}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -112,7 +112,7 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
             <select
               name="resubmission_content_grade"
               defaultValue={assignment.resubmission_content_grade ?? ""}
-              className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
             >
               {GRADE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -126,7 +126,7 @@ export function AssignmentForm({ assignment }: { assignment: Assignment }) {
             <select
               name="resubmission_english_grade"
               defaultValue={assignment.resubmission_english_grade ?? ""}
-              className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
             >
               {GRADE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>

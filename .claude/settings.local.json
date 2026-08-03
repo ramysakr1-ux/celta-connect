@@ -26,7 +26,8 @@
       "mcp__claude-in-chrome__get_page_text",
       "Bash(git status *)",
       "Bash(git commit -m ' *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(pbpaste)"
     ]
   }
 }

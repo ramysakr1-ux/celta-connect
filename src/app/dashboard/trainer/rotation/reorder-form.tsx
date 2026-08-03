@@ -28,7 +28,7 @@ export function ReorderForm({
             id={`position__${m.traineeId}`}
             name={`position__${m.traineeId}`}
             defaultValue={m.baseSlot + 1}
-            className="rounded-[6px] border border-border bg-card px-2 py-1 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card px-2 py-1 text-center text-sm text-ink outline-none focus:border-primary"
           >
             {ordered.map((_, i) => (
               <option key={i} value={i + 1}>

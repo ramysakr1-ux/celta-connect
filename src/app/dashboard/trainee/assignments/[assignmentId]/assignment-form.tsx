@@ -144,7 +144,7 @@ export function AssignmentAuthoringForm({
                     <p className="mt-1 whitespace-pre-line text-ink">{existing.first_comments}</p>
                   </div>
                 ) : null}
-                {round === "resubmission" && existing?.resubmission_comments ? (
+                {round === "resubmission" && existing?.resubmission_comments && locked ? (
                   <div className="mt-3 border-t border-border-faint pt-3">
                     <p className="text-xs font-medium uppercase tracking-wide text-primary">Resubmission comment</p>
                     <p className="mt-1 whitespace-pre-line text-ink">{existing.resubmission_comments}</p>

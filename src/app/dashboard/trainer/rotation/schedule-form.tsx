@@ -23,7 +23,7 @@ export function ScheduleForm({
       <select
         name="tp_coursebook_id"
         defaultValue={currentCoursebookId ?? ""}
-        className="flex-1 rounded-[6px] border border-border bg-card px-2 py-1 text-sm text-ink outline-none focus:border-primary"
+        className="flex-1 appearance-none rounded-[6px] border border-border bg-card px-2 py-1 text-center text-sm text-ink outline-none focus:border-primary"
       >
         <option value="">No coursebook scheduled</option>
         {coursebooks.map((cb) => (

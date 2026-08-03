@@ -38,7 +38,7 @@ export function SelfAssessmentForm() {
                 name={`status__${code}`}
                 required
                 defaultValue=""
-                className="shrink-0 rounded-[6px] border border-border bg-card px-2 py-1 text-sm text-ink outline-none focus:border-primary"
+                className="shrink-0 appearance-none rounded-[6px] border border-border bg-card px-2 py-1 text-center text-sm text-ink outline-none focus:border-primary"
               >
                 <option value="" disabled>
                   Rate
@@ -60,7 +60,7 @@ export function SelfAssessmentForm() {
           name="overall"
           required
           defaultValue=""
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-ink outline-none focus:border-primary"
         >
           <option value="" disabled>
             Choose one

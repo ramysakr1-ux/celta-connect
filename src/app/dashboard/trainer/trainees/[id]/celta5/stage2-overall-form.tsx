@@ -65,7 +65,7 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
         <select
           name="stage2_tutor_overall"
           defaultValue={record.stage2_tutor_overall ?? ""}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-ink outline-none focus:border-primary"
         >
           <option value="">Not yet assessed</option>
           {STANDARD_RATING_OPTIONS.map((opt) => (

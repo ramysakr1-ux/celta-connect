@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { LessonPlanForm } from "@/app/dashboard/trainee/plan/[tpNumber]/lesson-plan-form";
 import { MaterialsSection } from "@/app/dashboard/trainee/plan/[tpNumber]/materials-section";
@@ -21,7 +22,8 @@ export default async function TpPlanDetailPage({
   const trainee = await requireRole("trainee");
   const supabase = await createClient();
 
-  const [{ data: assignment }, { data: plan }] = await Promise.all([
+  const admin = createAdminClient();
+  const [{ data: assignment }, { data: plan }, { data: googleConnection }] = await Promise.all([
     supabase
       .from("plan_assignments")
       .select("*")
@@ -29,7 +31,9 @@ export default async function TpPlanDetailPage({
       .eq("tp_number", tpNumber)
       .maybeSingle(),
     supabase.from("tp_plans").select("*").eq("trainee_id", trainee.id).eq("tp_number", tpNumber).maybeSingle(),
+    admin.from("center_google_connections").select("center_id").eq("center_id", trainee.center_id).maybeSingle(),
   ]);
+  const hasGoogleConnection = Boolean(googleConnection);
 
   if (!assignment) {
     return (
@@ -144,6 +148,7 @@ export default async function TpPlanDetailPage({
           traineeId={trainee.id}
           materials={materials ?? []}
           locked={Boolean(plan.submitted_at)}
+          hasGoogleConnection={hasGoogleConnection}
         />
       ) : (
         <div className="card p-6">

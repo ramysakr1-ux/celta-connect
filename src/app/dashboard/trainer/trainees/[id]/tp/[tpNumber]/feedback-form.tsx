@@ -67,7 +67,12 @@ export function FeedbackForm({
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Lesson grade at this stage of the course</label>
-        <select name="grade" value={grade} onChange={(e) => setGrade(e.target.value)} className={`${inputClass} max-w-xs`}>
+        <select
+          name="grade"
+          value={grade}
+          onChange={(e) => setGrade(e.target.value)}
+          className={`${inputClass} max-w-xs appearance-none text-center`}
+        >
           <option value="">— choose —</option>
           {STANDARD_RATING_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
