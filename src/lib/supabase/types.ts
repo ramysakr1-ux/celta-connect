@@ -432,6 +432,7 @@ export interface Database {
           zoom_time: string | null;
           attachment_name: string | null;
           attachment_url: string | null;
+          linked_timetable_event_id: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["course_broadcasts"]["Row"]> & {
@@ -453,6 +454,7 @@ export interface Database {
           tag: string | null;
           linked_assignment_type: string | null;
           linked_tp_number: number | null;
+          zoom_url: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;

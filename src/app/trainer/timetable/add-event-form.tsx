@@ -68,6 +68,15 @@ export function AddEventForm() {
         />
       </div>
       <div className="flex flex-col gap-1.5">
+        <label className="text-sm text-muted">Zoom link (optional)</label>
+        <input
+          name="zoom_url"
+          type="url"
+          placeholder="https://zoom.us/j/…"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        />
+      </div>
+      <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Linked assignment (optional)</label>
         <select
           name="linked_assignment_type"

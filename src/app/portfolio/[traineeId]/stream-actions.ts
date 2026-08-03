@@ -23,6 +23,7 @@ export async function postBroadcast(
   const zoomTime = (formData.get("zoom_time") as string | null) || null;
   const attachmentName = (formData.get("attachment_name") as string | null)?.trim() || null;
   const attachmentUrl = (formData.get("attachment_url") as string | null)?.trim() || null;
+  const linkedTimetableEventId = (formData.get("linked_timetable_event_id") as string | null) || null;
   const pinned = formData.get("pinned") === "on";
 
   if (!title) return { error: "Title is required." };
@@ -34,8 +35,12 @@ export async function postBroadcast(
     title,
     body,
     pinned,
+    // A linked timetable event is the preferred source for the Zoom time
+    // (read live at display time, see page.tsx) -- these manual fields are
+    // only the fallback for an ad-hoc call not tied to any scheduled event.
     zoom_url: zoomUrl,
     zoom_time: zoomTime ? new Date(zoomTime).toISOString() : null,
+    linked_timetable_event_id: linkedTimetableEventId,
     attachment_name: attachmentUrl ? attachmentName : null,
     attachment_url: attachmentUrl,
   });

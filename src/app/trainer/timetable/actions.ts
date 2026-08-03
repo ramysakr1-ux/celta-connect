@@ -20,6 +20,7 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
   const eventDate = formData.get("event_date");
   const eventTime = (formData.get("event_time") as string | null) || null;
   const tag = (formData.get("tag") as string | null)?.trim() || null;
+  const zoomUrl = (formData.get("zoom_url") as string | null)?.trim() || null;
   const linkedAssignmentType = (formData.get("linked_assignment_type") as string | null) || null;
   const linkedTpNumberRaw = formData.get("linked_tp_number");
   const linkedTpNumber = linkedTpNumberRaw ? Number(linkedTpNumberRaw) : null;
@@ -38,6 +39,7 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
     event_date: eventDate,
     event_time: eventTime,
     tag,
+    zoom_url: zoomUrl,
     linked_assignment_type: linkedAssignmentType,
     linked_tp_number: linkedTpNumber && linkedTpNumber >= 1 && linkedTpNumber <= 8 ? linkedTpNumber : null,
     created_by: trainer.id,

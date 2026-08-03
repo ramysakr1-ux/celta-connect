@@ -34,23 +34,36 @@ export default async function CourseStreamPage({
   const isStaff = viewer.role === "trainer" || viewer.role === "admin";
   const today = new Date().toISOString().slice(0, 10);
 
-  const [{ data: broadcasts }, { data: timetableEvents }, { data: tutors }] = await Promise.all([
-    supabase
-      .from("course_broadcasts")
-      .select("*, profiles(full_name, role)")
-      .eq("course_id", trainee.course_id)
-      .order("pinned", { ascending: false })
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("course_timetable_events")
-      .select("*")
-      .eq("course_id", trainee.course_id)
-      .gte("event_date", today)
-      .order("event_date")
-      .order("event_time")
-      .limit(4),
-    supabase.from("profiles").select("full_name, role").eq("course_id", trainee.course_id).eq("role", "trainer"),
-  ]);
+  const [{ data: broadcasts }, { data: timetableEvents }, { data: upcomingEvents }, { data: tutors }] =
+    await Promise.all([
+      supabase
+        .from("course_broadcasts")
+        .select("*, profiles(full_name, role), course_timetable_events(event_date, event_time, zoom_url, title)")
+        .eq("course_id", trainee.course_id)
+        .order("pinned", { ascending: false })
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("course_timetable_events")
+        .select("*")
+        .eq("course_id", trainee.course_id)
+        .gte("event_date", today)
+        .order("event_date")
+        .order("event_time")
+        .limit(4),
+      // Broader list for the composer's "link a timetable event" dropdown --
+      // not limited to 4 like the This Week panel above.
+      isStaff
+        ? supabase
+            .from("course_timetable_events")
+            .select("id, title, event_date, event_time")
+            .eq("course_id", trainee.course_id)
+            .gte("event_date", today)
+            .order("event_date")
+            .order("event_time")
+            .limit(30)
+        : Promise.resolve({ data: [] }),
+      supabase.from("profiles").select("full_name, role").eq("course_id", trainee.course_id).eq("role", "trainer"),
+    ]);
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_300px]">
@@ -60,13 +73,29 @@ export default async function CourseStreamPage({
           <p className="text-xs text-muted">{(broadcasts ?? []).length} broadcasts</p>
         </div>
 
-        {isStaff ? <BroadcastComposer traineeId={traineeId} /> : null}
+        {isStaff ? <BroadcastComposer traineeId={traineeId} timetableEvents={upcomingEvents ?? []} /> : null}
 
         {(broadcasts ?? []).length === 0 ? (
           <p className="sheet text-sm text-muted">No broadcasts yet.</p>
         ) : (
           (broadcasts ?? []).map((b) => {
             const author = b.profiles as unknown as { full_name: string; role: string } | null;
+            const linkedEvent = b.course_timetable_events as unknown as {
+              event_date: string;
+              event_time: string | null;
+              zoom_url: string | null;
+              title: string;
+            } | null;
+            // A linked timetable event is the live source of truth for the
+            // Zoom time -- if the trainer reschedules that event later, this
+            // broadcast's displayed time updates with it. Falls back to the
+            // broadcast's own ad-hoc fields when there's no link.
+            const zoomUrl = linkedEvent?.zoom_url || b.zoom_url;
+            const zoomWhen = linkedEvent
+              ? [linkedEvent.event_date, linkedEvent.event_time].filter(Boolean).join(" ")
+              : b.zoom_time
+                ? new Date(b.zoom_time).toLocaleString()
+                : null;
             const initials = (author?.full_name ?? "?")
               .split(" ")
               .map((p) => p[0])
@@ -98,19 +127,17 @@ export default async function CourseStreamPage({
                 <p className="mt-2 font-serif text-xl font-medium text-ink">{b.title}</p>
                 {b.body ? <p className="mt-1 text-base whitespace-pre-wrap text-muted">{b.body}</p> : null}
 
-                {b.zoom_url ? (
+                {zoomUrl ? (
                   <a
-                    href={b.zoom_url}
+                    href={zoomUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 flex items-center gap-3 rounded-[6px] border border-primary/25 bg-accent/50 px-3 py-2.5 transition-colors hover:bg-accent"
+                    className="mt-4 flex w-full items-center gap-3 rounded-[6px] border border-primary/25 bg-accent/50 px-3 py-2.5 transition-colors hover:bg-accent"
                   >
                     <span aria-hidden="true">🎥</span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-semibold text-ink">Join Zoom session</span>
-                      {b.zoom_time ? (
-                        <span className="block text-xs text-muted">{new Date(b.zoom_time).toLocaleString()}</span>
-                      ) : null}
+                      {zoomWhen ? <span className="block text-xs text-muted">{zoomWhen}</span> : null}
                     </span>
                     <span className="text-sm font-medium text-primary">Open</span>
                   </a>
