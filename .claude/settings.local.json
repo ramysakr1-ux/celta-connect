@@ -27,7 +27,12 @@
       "Bash(git status *)",
       "Bash(git commit -m ' *)",
       "Bash(git add *)",
-      "Bash(pbpaste)"
+      "Bash(pbpaste)",
+      "Bash(textutil -convert txt -stdout \"/Users/work/Library/Mobile Documents/com~apple~CloudDocs/Online-Celta November-IH Milan /Syllabus planning grid.docx\")",
+      "Bash(grep -iE \"^pg$|^postgres$\")",
+      "Bash(npx supabase *)",
+      "Bash(env)",
+      "mcp__claude-in-chrome__tabs_create_mcp"
     ]
   }
 }

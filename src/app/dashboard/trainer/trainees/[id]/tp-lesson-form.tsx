@@ -44,7 +44,7 @@ export function TpLessonForm({
             className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Not part of rotation</option>
-            {[1, 2, 3, 4, 5, 6].map((n) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
               <option key={n} value={n}>
                 TP{n}
               </option>

@@ -31,7 +31,7 @@ function parseJsonField<T>(formData: FormData, key: string, fallback: T): T {
 
 function parseTpNumber(formData: FormData): number | null {
   const n = Number(formData.get("tp_number"));
-  return Number.isInteger(n) && n >= 1 && n <= 6 ? n : null;
+  return Number.isInteger(n) && n >= 1 && n <= 8 ? n : null;
 }
 
 async function getOrCreatePlanId(

@@ -753,6 +753,15 @@ export interface Database {
         Args: { p_assignment_id: string };
         Returns: void;
       };
+      save_syllabus_planning_entry: {
+        Args: {
+          p_tp_number: number;
+          p_main_aim: string;
+          p_sub_aim: string | null;
+          p_material: string;
+        };
+        Returns: void;
+      };
     };
   };
 }

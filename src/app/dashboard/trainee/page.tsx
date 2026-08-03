@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { SubmissionStatusPill } from "@/lib/status-pill";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_WORD_COUNT } from "@/lib/assignment-info";
+import { DEADLINE_URGENCY_CLASS, getDeadlineUrgency } from "@/lib/deadline";
 
 export default async function TraineeDashboardPage() {
   const profile = await requireRole("trainee");
@@ -49,13 +50,13 @@ export default async function TraineeDashboardPage() {
 
       <div>
         <h2 className="font-serif text-lg text-ink">Assignments</h2>
-        <div className="mt-3 flex flex-col gap-3">
+        <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {assignments.length > 0 ? (
             assignments.map((a, i) => {
               const info = ASSIGNMENT_INFO[a.assignment_type];
               return (
-                <Link key={a.id} href={`/dashboard/trainee/assignments/${a.id}`} className="card-interactive block p-6">
-                  <div className="flex items-start justify-between gap-4">
+                <Link key={a.id} href={`/dashboard/trainee/assignments/${a.id}`} className="card-interactive flex flex-col p-4">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-medium uppercase tracking-wide text-muted">
                         Assignment {i + 1}
@@ -65,36 +66,43 @@ export default async function TraineeDashboardPage() {
                     <SubmissionStatusPill status={a.first_status} />
                   </div>
 
-                  <p className="mt-2 text-muted">{info.description}</p>
+                  <p className="mt-2 line-clamp-2 text-sm text-muted">{info.description}</p>
 
-                  <p className="mt-3 text-sm text-muted">
+                  <p className="mt-3 text-xs text-muted">
                     {[
-                      a.due_date ? `Due ${a.due_date}` : null,
-                      ASSIGNMENT_WORD_COUNT,
-                      a.first_submitted_at ? `Submitted ${a.first_submitted_at.slice(0, 10)}` : null,
+                      a.due_date ? (
+                        <span
+                          key="due"
+                          className={DEADLINE_URGENCY_CLASS[getDeadlineUrgency(a.due_date, a.first_submitted_at)]}
+                        >
+                          Due {a.due_date}
+                        </span>
+                      ) : null,
+                      <span key="words">{ASSIGNMENT_WORD_COUNT}</span>,
+                      a.first_submitted_at ? (
+                        <span key="submitted">Submitted {a.first_submitted_at.slice(0, 10)}</span>
+                      ) : null,
                     ]
                       .filter(Boolean)
-                      .join(" · ")}
+                      .flatMap((node, idx) => (idx > 0 ? [" · ", node] : [node]))}
                   </p>
 
                   {a.first_status === "resubmission_required" ? (
-                    <div className="mt-3 border-t border-border-faint pt-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted">Resubmission</span>
-                        <SubmissionStatusPill status={a.resubmission_status} />
-                      </div>
+                    <div className="mt-3 flex items-center justify-between border-t border-border-faint pt-3">
+                      <span className="text-xs text-muted">Resubmission</span>
+                      <SubmissionStatusPill status={a.resubmission_status} />
                     </div>
                   ) : null}
 
-                  <div className="mt-4 border-t border-border-faint pt-4">
+                  <div className="mt-3 border-t border-border-faint pt-3">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted">
                       Tutor feedback
                     </p>
-                    <p className="mt-2 text-ink">{a.tutor_feedback || "No feedback yet."}</p>
+                    <p className="mt-1 line-clamp-2 text-sm text-ink">{a.tutor_feedback || "No feedback yet."}</p>
                   </div>
 
                   {a.final_grade ? (
-                    <p className="mt-3 text-sm text-muted">Final grade: {a.final_grade}</p>
+                    <p className="mt-2 text-xs text-muted">Final grade: {a.final_grade}</p>
                   ) : null}
                 </Link>
               );

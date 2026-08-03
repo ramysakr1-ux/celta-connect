@@ -15,7 +15,7 @@ export default async function TpPlanDetailPage({
 }) {
   const { tpNumber: tpNumberParam } = await params;
   const tpNumber = Number(tpNumberParam);
-  if (!Number.isInteger(tpNumber) || tpNumber < 1 || tpNumber > 6) {
+  if (!Number.isInteger(tpNumber) || tpNumber < 1 || tpNumber > 8) {
     notFound();
   }
 

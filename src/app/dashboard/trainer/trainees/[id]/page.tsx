@@ -101,7 +101,7 @@ export default async function TraineeDetailPage({
         <h2 className="font-serif text-lg text-ink">TP cards</h2>
         <p className="mt-1 text-sm text-muted">Lesson plan, language analysis, materials, self-evaluation and feedback for each TP.</p>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((n) => {
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => {
             if (!assignedTpNumbers.has(n)) {
               return (
                 <div key={n} className="card p-4 text-sm text-muted">
