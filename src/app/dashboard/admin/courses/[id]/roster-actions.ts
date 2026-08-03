@@ -101,7 +101,7 @@ export async function sendJoinLinkEmail(
     const { error } = await resend.emails.send({
       from: JOIN_LINK_SENDER,
       to: toEmail,
-      subject: "You've been invited to Celta Connect",
+      subject: "You've been invited to Connect CELTA",
       html: buildJoinEmailHtml({
         courseName: course.name,
         startDate: course.start_date,
@@ -134,7 +134,7 @@ function buildJoinEmailHtml({
   joinUrl: string;
 }): string {
   return `
-    <h2>You're invited to Celta Connect</h2>
+    <h2>You're invited to Connect CELTA</h2>
     <p>
       You've been invited to join <strong>${courseName}</strong>
       (${startDate} &rarr; ${endDate}) as a <strong>${role}</strong>.

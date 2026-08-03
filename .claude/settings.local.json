@@ -32,7 +32,14 @@
       "Bash(grep -iE \"^pg$|^postgres$\")",
       "Bash(npx supabase *)",
       "Bash(env)",
-      "mcp__claude-in-chrome__tabs_create_mcp"
+      "mcp__claude-in-chrome__tabs_create_mcp",
+      "Bash(textutil -convert txt -stdout \"/Users/work/Desktop/CELTA-Connect-architecture-plan.md.docx\")",
+      "Bash(textutil -convert txt -stdout \"/Users/work/Downloads/CELTA5_Anna.docx\")",
+      "Bash(textutil -convert txt -stdout \"/Users/work/Desktop/CELTA-Connect-architecture-plan.md \\(1\\).docx\")",
+      "Bash(textutil -convert txt -stdout \"/Users/work/Desktop/CELTA-Connect-architecture-plan.md \\(2\\).docx\")",
+      "Bash(textutil -convert txt -stdout \"/Users/work/Desktop/CELTA-Connect-architecture-plan.md \\(3\\).docx\")",
+      "Bash(grep -rln \"onAuthStateChange\\\\|detectSessionInUrl\\\\|/dashboard/trainee\\\\|/dashboard/\\\\${\" src --include=\"*.tsx\" --include=\"*.ts\")",
+      "Bash(grep -rn '\"/dashboard/trainee\"\\\\|`/dashboard/trainee`\\\\|redirect\\(.*dashboard' src --include=\"*.ts\" --include=\"*.tsx\")"
     ]
   }
 }

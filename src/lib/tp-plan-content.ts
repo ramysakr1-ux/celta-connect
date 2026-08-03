@@ -3,7 +3,7 @@
 // (~/Desktop/CELTA-Hub/1_trainee_plan_and_analysis.html), which is the real
 // design for this content. Only the content/UX is ported; the prototype's
 // file-download + Google Classroom hand-off mechanism is replaced by
-// CELTA Connect's own database-backed submit-to-lock pattern (see
+// Connect CELTA's own database-backed submit-to-lock pattern (see
 // project_content_architecture_spec memory).
 
 // ---------------- shared shapes (also used by src/lib/supabase/types.ts) ----------------

@@ -64,6 +64,7 @@ export interface Database {
           duplicated_from_course_id: string | null;
           trainee_join_token: string;
           trainer_join_token: string;
+          timetable_locked_at: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["courses"]["Row"]> & {
@@ -417,6 +418,52 @@ export interface Database {
           base_slot: number;
         };
         Update: Partial<Database["public"]["Tables"]["course_subgroup_members"]["Row"]>;
+        Relationships: [];
+      };
+      course_broadcasts: {
+        Row: {
+          id: string;
+          course_id: string;
+          author_id: string;
+          title: string;
+          body: string | null;
+          pinned: boolean;
+          zoom_url: string | null;
+          zoom_time: string | null;
+          attachment_name: string | null;
+          attachment_url: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_broadcasts"]["Row"]> & {
+          course_id: string;
+          author_id: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_broadcasts"]["Row"]>;
+        Relationships: [];
+      };
+      course_timetable_events: {
+        Row: {
+          id: string;
+          course_id: string;
+          type: "input_session" | "tp" | "assignment_due" | "resubmission_due" | "milestone";
+          title: string;
+          event_date: string;
+          event_time: string | null;
+          tag: string | null;
+          linked_assignment_type: string | null;
+          linked_tp_number: number | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_timetable_events"]["Row"]> & {
+          course_id: string;
+          type: "input_session" | "tp" | "assignment_due" | "resubmission_due" | "milestone";
+          title: string;
+          event_date: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_timetable_events"]["Row"]>;
         Relationships: [];
       };
       course_tp_schedule: {

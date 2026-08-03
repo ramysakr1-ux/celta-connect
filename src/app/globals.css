@@ -1,23 +1,59 @@
 @import "tailwindcss";
 
+/*
+  Tokens below are the architecture-plan.md source of truth (SS1.3), given
+  there as raw oklch --background/--foreground/etc. custom properties. They
+  are mapped onto this codebase's existing --color-X / Tailwind v4 "@theme
+  inline" convention rather than adopted verbatim, for two reasons: (1) every
+  existing page already consumes utilities like `text-ink`, `bg-primary`,
+  `status-pill-on-track` -- renaming the underlying property names would
+  require touching dozens of already-shipped files for zero visual gain; (2)
+  the plan's own --muted is a background TINT, but this codebase's existing
+  --color-muted has always been consumed as *text* (`text-muted` used
+  pervasively) -- so --color-muted refreshes to the plan's --muted-foreground
+  value, and the plan's --muted (an actual bg tint) lands under the new name
+  --color-surface-muted instead, to avoid silently turning muted text
+  near-invisible. Same background bg/border/primary/foreground role, same
+  6px radius -- just the exact colours modernised to match the plan, plus
+  new tokens added for concepts this app didn't have yet (accent, ring,
+  input, warning/info/neutral status tints, brass-foreground).
+*/
 :root {
-  --color-background: #f8f6f1; /* cream */
-  --color-card: #fdfcfb; /* paper / near-white */
-  --color-border: #e2ded5; /* hairline neutral */
-  --color-ink: #2a2723; /* body text */
-  --color-primary: #1c4e52; /* deep teal */
-  --color-muted: #7c7368; /* muted text */
-  --color-gold: #c99a4a; /* accent, used sparingly */
-  --color-destructive: #c0392b;
+  --color-background: oklch(97.8% 0.008 85); /* warm cream page bg */
+  --color-card: oklch(99.5% 0.004 90); /* card / paper */
+  --color-border: oklch(89.5% 0.012 82); /* hairline neutral */
+  --color-ink: oklch(23.5% 0.017 65); /* near-black warm ink (body text) */
+  --color-primary: oklch(37.5% 0.058 195); /* teal */
+  --color-primary-foreground: oklch(98.5% 0.006 90);
+  --color-muted: oklch(51% 0.017 70); /* muted TEXT -- see note above */
+  --color-surface-muted: oklch(94.8% 0.01 85); /* muted BACKGROUND tint */
+  --color-gold: oklch(63% 0.096 72); /* brass/gold accent, used sparingly */
+  --color-gold-foreground: oklch(99% 0.005 90);
+  --color-destructive: oklch(45% 0.15 27);
+  --color-input: oklch(88.8% 0.013 82);
+  --color-accent: oklch(93% 0.019 190); /* pale teal-green, the "green hover" wash */
+  --color-accent-foreground: oklch(32% 0.05 195);
+  --color-ring: oklch(37.5% 0.058 195);
 
-  --color-status-on-track-bg: #e3e4c4; /* pale olive */
-  --color-status-on-track-text: #55631f; /* olive green */
-  --color-status-at-risk-bg: #fadfd8;
-  --color-status-at-risk-text: #b8341f;
-  --color-status-pending-bg: #f4eadb;
-  --color-status-pending-text: #6b4e1c;
+  /* status (tint bg + matching text) -- on-track/at-risk/pending are the
+     three variants every existing status-pill usage already consumes;
+     warning/info/neutral are new variants for screens built from the plan
+     (Under Review, Draft, Not Yet Assessed, etc.) that don't map onto the
+     old three 1:1. */
+  --color-status-on-track-bg: oklch(93% 0.045 155);
+  --color-status-on-track-text: oklch(38% 0.085 155);
+  --color-status-at-risk-bg: oklch(94% 0.043 25);
+  --color-status-at-risk-text: oklch(45% 0.15 27);
+  --color-status-pending-bg: oklch(94.5% 0.065 85);
+  --color-status-pending-text: oklch(44% 0.095 68);
+  --color-status-warning-bg: oklch(94.5% 0.065 85);
+  --color-status-warning-text: oklch(44% 0.095 68);
+  --color-status-info-bg: oklch(93.5% 0.033 235);
+  --color-status-info-text: oklch(42% 0.09 250);
+  --color-status-neutral-bg: oklch(93.5% 0.008 85);
+  --color-status-neutral-text: oklch(44% 0.014 70);
 
-  --radius-card: 6px;
+  --radius-card: 0.375rem; /* 6px, matches the plan's --radius exactly */
 
   /* Near-invisible structural hairline -- used for card edges and row
      dividers so the app doesn't read as "box box box" at rest. Interactive
@@ -32,15 +68,28 @@
   --color-border: var(--color-border);
   --color-ink: var(--color-ink);
   --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
   --color-muted: var(--color-muted);
+  --color-surface-muted: var(--color-surface-muted);
   --color-gold: var(--color-gold);
+  --color-gold-foreground: var(--color-gold-foreground);
   --color-destructive: var(--color-destructive);
+  --color-input: var(--color-input);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-ring: var(--color-ring);
   --color-status-on-track-bg: var(--color-status-on-track-bg);
   --color-status-on-track-text: var(--color-status-on-track-text);
   --color-status-at-risk-bg: var(--color-status-at-risk-bg);
   --color-status-at-risk-text: var(--color-status-at-risk-text);
   --color-status-pending-bg: var(--color-status-pending-bg);
   --color-status-pending-text: var(--color-status-pending-text);
+  --color-status-warning-bg: var(--color-status-warning-bg);
+  --color-status-warning-text: var(--color-status-warning-text);
+  --color-status-info-bg: var(--color-status-info-bg);
+  --color-status-info-text: var(--color-status-info-text);
+  --color-status-neutral-bg: var(--color-status-neutral-bg);
+  --color-status-neutral-text: var(--color-status-neutral-text);
   --color-border-faint: var(--color-border-faint);
 
   --font-sans: var(--font-karla);
@@ -179,5 +228,99 @@ h6 {
 
   .table-plain tbody tr:last-child {
     border-bottom: none;
+  }
+
+  /* ============================================================
+     architecture-plan.md SS1.4-1.6 primitives, for screens rebuilt from
+     that doc. New names (.container/.sheet/.pill) rather than reusing
+     .card/.status-pill, since those are still live across every
+     not-yet-rebuilt page -- avoids a flag-day rename across the whole app.
+     .sheet is functionally identical to .card today (same border/radius/no
+     shadow) but carries its own "green hover" per the plan, deliberately
+     stronger/more specific than .card-interactive's existing hover.
+     ============================================================ */
+  /* 1280px (Tailwind's max-w-7xl), not the plan doc's stated 1152px --
+     confirmed via computed styles against the actual reference build,
+     which reads wider than the written spec describes. */
+  .container {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .sheet {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    box-shadow: none;
+    transition:
+      border-color 150ms ease,
+      background-color 150ms ease;
+  }
+
+  .sheet-interactive {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    box-shadow: none;
+    transition:
+      border-color 150ms ease,
+      background-color 150ms ease;
+  }
+
+  .sheet-interactive:hover {
+    border-color: color-mix(in oklch, var(--color-primary) 40%, transparent);
+    background-color: color-mix(in oklch, var(--color-accent) 40%, transparent);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+
+  .pill::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: currentColor;
+    flex-shrink: 0;
+  }
+
+  .pill-success {
+    background-color: var(--color-status-on-track-bg);
+    color: var(--color-status-on-track-text);
+  }
+
+  .pill-warning {
+    background-color: var(--color-status-warning-bg);
+    color: var(--color-status-warning-text);
+  }
+
+  .pill-danger {
+    background-color: var(--color-status-at-risk-bg);
+    color: var(--color-status-at-risk-text);
+  }
+
+  .pill-info {
+    background-color: var(--color-status-info-bg);
+    color: var(--color-status-info-text);
+  }
+
+  .pill-neutral {
+    background-color: var(--color-status-neutral-bg);
+    color: var(--color-status-neutral-text);
   }
 }

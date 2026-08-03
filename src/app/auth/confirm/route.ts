@@ -13,9 +13,9 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type");
   const next = searchParams.get("next") ?? "/dashboard";
 
-  if (tokenHash && type === "recovery") {
+  if (tokenHash && (type === "recovery" || type === "magiclink" || type === "email")) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.verifyOtp({ type: "recovery", token_hash: tokenHash });
+    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
       redirect(next);
     }

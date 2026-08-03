@@ -15,4 +15,4 @@ export function createResendClient() {
   return new Resend(apiKey);
 }
 
-export const JOIN_LINK_SENDER = "Celta Connect <invites@celtaconnect.com>";
+export const JOIN_LINK_SENDER = "Connect CELTA <invites@celtaconnect.com>";

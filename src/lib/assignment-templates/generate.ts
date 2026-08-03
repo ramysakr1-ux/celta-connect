@@ -41,7 +41,7 @@ const SUBMIT_SECTIONS_TOOL = {
 
 function buildPrompt(assignmentType: AssignmentTypeValue): string {
   const skeleton = DEFAULT_SECTION_SKELETONS[assignmentType];
-  return `You are converting a CELTA "${assignmentType}" written assignment brief (attached, from a training centre) into the chunked "instruction on top of a response box" structure CELTA Connect uses.
+  return `You are converting a CELTA "${assignmentType}" written assignment brief (attached, from a training centre) into the chunked "instruction on top of a response box" structure Connect CELTA uses.
 
 Break the brief into an ordered list of sections a trainee will complete one at a time. Each section needs a short unique key, a title, and the instruction text for that section, preserving the centre's own wording as closely as possible (light cleanup for clarity is fine; do not invent requirements the brief doesn't contain).
 

@@ -66,7 +66,7 @@ export function JoinForm({ token }: { token: string }) {
             className="mt-0.5 accent-[#c99a4a]"
           />
           <span>
-            I agree not to copy, reverse-engineer, or share access to the CELTA Connect platform,
+            I agree not to copy, reverse-engineer, or share access to the Connect CELTA platform,
             and to use it only for the purposes of my course.
           </span>
         </label>

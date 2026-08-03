@@ -14,7 +14,7 @@ const karla = Karla({
 });
 
 export const metadata: Metadata = {
-  title: "Celta Connect",
+  title: "Connect CELTA",
   description: "CELTA course administration, built for centers.",
 };
 

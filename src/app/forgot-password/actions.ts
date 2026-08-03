@@ -47,10 +47,10 @@ export async function requestPasswordReset(
     await resend.emails.send({
       from: JOIN_LINK_SENDER,
       to: email,
-      subject: "Reset your Celta Connect password",
+      subject: "Reset your Connect CELTA password",
       html: `
         <h2>Reset your password</h2>
-        <p>Someone requested a password reset for your Celta Connect account.</p>
+        <p>Someone requested a password reset for your Connect CELTA account.</p>
         <p><a href="${confirmUrl}">Reset your password &rarr;</a></p>
         <p style="color:#888;font-size:13px">If you didn't request this, you can safely ignore this email.</p>
       `,
