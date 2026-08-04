@@ -154,7 +154,7 @@ export default async function CourseStreamPage({
                   ) : null}
                 </div>
 
-                <p className="mt-2 font-serif text-xl font-medium text-ink">{b.title}</p>
+                <p className="mt-2 font-serif text-2xl font-bold text-ink">{b.title}</p>
                 {b.body ? <p className="mt-1 text-base whitespace-pre-wrap text-muted">{b.body}</p> : null}
 
                 {zoomUrl ? (
@@ -206,39 +206,48 @@ export default async function CourseStreamPage({
         )}
       </div>
 
-      <div className="sheet h-fit lg:sticky lg:top-6">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">This week</p>
-        {(timetableEvents ?? []).length > 0 ? (
-          <ul className="mt-3 flex flex-col">
-            {(timetableEvents ?? []).map((event, i) => (
-              <li
-                key={event.id}
-                className={`py-3 ${i > 0 ? "border-t border-border" : "pt-0"}`}
-              >
-                <p className="text-sm font-semibold text-ink">{event.title}</p>
-                <p className="mt-0.5 text-xs text-muted">
-                  {[EVENT_TYPE_LABELS[event.type], event.event_date, event.event_time].filter(Boolean).join(" · ")}
-                </p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-3 text-sm text-muted">Nothing scheduled yet.</p>
-        )}
+      <div className="flex flex-col gap-4">
+        {/* Invisible spacer matching the left column's "Course Stream" heading
+            row height, so the sidebar box's top edge lines up with the first
+            broadcast card's top edge instead of the page's top edge. */}
+        <div className="flex items-center justify-between" aria-hidden="true">
+          <h2 className="invisible font-serif text-xl">Spacer</h2>
+        </div>
 
-        <p className="mt-6 text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Course tutors</p>
-        {(tutors ?? []).length > 0 ? (
-          <ul className="mt-3 flex flex-col gap-2">
-            {(tutors ?? []).map((tutor, i) => (
-              <li key={i} className="text-sm text-ink">
-                {tutor.full_name}
-                <span className="ml-1 text-xs text-muted">Trainer</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-3 text-sm text-muted">No tutors assigned yet.</p>
-        )}
+        <div className="sheet-accent h-fit lg:sticky lg:top-6">
+          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">This week</p>
+          {(timetableEvents ?? []).length > 0 ? (
+            <ul className="mt-3 flex flex-col">
+              {(timetableEvents ?? []).map((event, i) => (
+                <li
+                  key={event.id}
+                  className={`py-3 ${i > 0 ? "border-t border-border" : "pt-0"}`}
+                >
+                  <p className="text-sm font-semibold text-ink">{event.title}</p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    {[EVENT_TYPE_LABELS[event.type], event.event_date, event.event_time].filter(Boolean).join(" · ")}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm text-muted">Nothing scheduled yet.</p>
+          )}
+
+          <p className="mt-6 text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Course tutors</p>
+          {(tutors ?? []).length > 0 ? (
+            <ul className="mt-3 flex flex-col gap-2">
+              {(tutors ?? []).map((tutor, i) => (
+                <li key={i} className="text-sm text-ink">
+                  {tutor.full_name}
+                  <span className="ml-1 text-xs text-muted">Trainer</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm text-muted">No tutors assigned yet.</p>
+          )}
+        </div>
       </div>
     </div>
   );

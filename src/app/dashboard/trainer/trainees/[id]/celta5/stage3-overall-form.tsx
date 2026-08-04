@@ -14,7 +14,7 @@ export function Stage3OverallForm({ record }: { record: Celta5Record }) {
   const [state, action, pending] = useActionState(updateStage3Overall, initialState);
 
   return (
-    <form action={action} className="card flex flex-col gap-4 p-6">
+    <form action={action} className="sheet flex flex-col gap-4 p-6">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
       <h2 className="font-serif text-lg text-ink">Stage Three -- final third (conditional)</h2>
       <p className="text-xs text-muted">

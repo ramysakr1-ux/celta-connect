@@ -26,7 +26,7 @@ export function AttendanceForm({
   const [absenceState, absenceAction, absencePending] = useActionState(addAbsence, initialState);
 
   return (
-    <div className="card flex flex-col gap-4 p-6">
+    <div className="sheet flex flex-col gap-4 p-6">
       <h2 className="font-serif text-lg text-ink">Attendance</h2>
 
       <form action={hoursAction} className="flex items-end gap-3">

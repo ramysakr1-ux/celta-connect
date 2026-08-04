@@ -87,6 +87,10 @@ export default async function TrainerTimetablePage() {
       {!locked ? (
         <div className="sheet">
           <h2 className="font-serif text-lg text-ink">Add event</h2>
+          <p className="mt-1 text-sm text-muted">
+            Add a single dated item to the timetable below -- an input session, a TP, an
+            assignment or resubmission due date, or a milestone.
+          </p>
           <AddEventForm />
         </div>
       ) : null}

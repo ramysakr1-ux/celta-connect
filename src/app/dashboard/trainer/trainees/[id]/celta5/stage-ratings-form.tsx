@@ -30,7 +30,7 @@ export function StageRatingsForm({
   const byCode = new Map(rows.map((r) => [r.criteria_code, r]));
 
   return (
-    <form action={formAction} className="card flex flex-col gap-6 p-6">
+    <form action={formAction} className="sheet flex flex-col gap-6 p-6">
       <input type="hidden" name="trainee_id" value={traineeId} />
 
       {CELTA_CRITERIA_SECTIONS.map(({ section, title, codes }) => (

@@ -58,7 +58,7 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:auto-rows-fr">
         {assignments.length > 0 ? (
           assignments.map((a, i) => {
             const info = ASSIGNMENT_INFO[a.assignment_type];
@@ -66,7 +66,7 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
               <Link
                 key={a.id}
                 href={`/portfolio/${traineeId}/assignments/${a.id}`}
-                className="sheet group flex flex-col p-5 transition-colors hover:border-primary/40 hover:bg-accent/30"
+                className="sheet group flex h-full flex-col p-5 transition-colors hover:border-primary/40 hover:bg-accent/30"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>

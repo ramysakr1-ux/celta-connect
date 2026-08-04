@@ -66,7 +66,7 @@ export default async function TpHubPage({ params }: { params: Promise<{ traineeI
         <p className="text-xs text-muted">TP1 – TP8</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {TP_NUMBERS.map((tpNumber) => {
           const plan = planByTpNumber.get(tpNumber);
 
@@ -116,8 +116,14 @@ export default async function TpHubPage({ params }: { params: Promise<{ traineeI
                 <span className={`pill ${TONE_PILL_CLASS[status.tone]}`}>{status.label}</span>
               </div>
 
-              <p className="mt-2 line-clamp-2 text-sm font-medium text-ink">{plan.main_lesson_aim}</p>
-              {plan.sub_aim ? <p className="mt-0.5 line-clamp-1 text-xs text-muted">{plan.sub_aim}</p> : null}
+              <p className="mt-3 truncate text-base text-ink">
+                <span className="text-muted">Main aim:</span> <span className="font-medium">{plan.main_lesson_aim}</span>
+              </p>
+              {plan.sub_aim ? (
+                <p className="mt-1 truncate text-sm text-ink">
+                  <span className="text-muted">Sub aim:</span> <span className="font-medium">{plan.sub_aim}</span>
+                </p>
+              ) : null}
 
               <div className="mt-3 flex flex-col gap-1 text-xs text-muted">
                 {lesson ? (

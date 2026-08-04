@@ -15,7 +15,7 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
   const [state, action, pending] = useActionState(updateStage2Overall, initialState);
 
   return (
-    <form action={action} className="card flex flex-col gap-4 p-6">
+    <form action={action} className="sheet flex flex-col gap-4 p-6">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
       <h2 className="font-serif text-lg text-ink">Stage Two -- mid-course tutorial</h2>
 

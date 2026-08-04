@@ -12,7 +12,7 @@ export function FinalizeRecordForm({ record }: { record: Celta5Record }) {
   const [state, action, pending] = useActionState(finalizeRecord, initialState);
 
   return (
-    <form action={action} className="card flex flex-col gap-3 p-6">
+    <form action={action} className="sheet flex flex-col gap-3 p-6">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
       <h2 className="font-serif text-lg text-ink">Final sign-off</h2>
       <p className="text-sm text-muted">
