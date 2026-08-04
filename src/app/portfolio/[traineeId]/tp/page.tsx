@@ -136,36 +136,22 @@ export default async function TpHubPage({ params }: { params: Promise<{ traineeI
               </p>
 
               <div className="mt-3 flex flex-col gap-[22px] text-sm text-muted">
-                {lesson ? (
-                  <>
-                    {lesson.lesson_date ? (
-                      <p className="flex items-center gap-2">
-                        <Calendar className="size-4 shrink-0" aria-hidden="true" />
-                        {lesson.lesson_date}
-                      </p>
-                    ) : null}
-                    {lesson.level ? (
-                      <p className="flex items-center gap-2">
-                        <Users className="size-4 shrink-0" aria-hidden="true" />
-                        {lesson.level}
-                      </p>
-                    ) : null}
-                    {lesson.length_minutes ? (
-                      <p className="flex items-center gap-2">
-                        <Clock className="size-4 shrink-0" aria-hidden="true" />
-                        {lesson.length_minutes} mins
-                      </p>
-                    ) : null}
-                    {lesson.trainer_id && trainerNameById.get(lesson.trainer_id) ? (
-                      <p className="flex items-center gap-2">
-                        <GraduationCap className="size-4 shrink-0" aria-hidden="true" />
-                        {trainerNameById.get(lesson.trainer_id)}
-                      </p>
-                    ) : null}
-                  </>
-                ) : (
-                  <p>{label.name}</p>
-                )}
+                <p className="flex items-center gap-2">
+                  <Calendar className="size-4 shrink-0" aria-hidden="true" />
+                  {lesson?.lesson_date ?? "Not yet scheduled"}
+                </p>
+                <p className="flex items-center gap-2">
+                  <Users className="size-4 shrink-0" aria-hidden="true" />
+                  {lesson?.level ?? "Level TBC"}
+                </p>
+                <p className="flex items-center gap-2">
+                  <Clock className="size-4 shrink-0" aria-hidden="true" />
+                  {lesson?.length_minutes ? `${lesson.length_minutes} mins` : label.name}
+                </p>
+                <p className="flex items-center gap-2">
+                  <GraduationCap className="size-4 shrink-0" aria-hidden="true" />
+                  {(lesson?.trainer_id && trainerNameById.get(lesson.trainer_id)) || "Trainer TBC"}
+                </p>
               </div>
 
               <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs">
