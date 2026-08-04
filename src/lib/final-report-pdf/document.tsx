@@ -68,11 +68,15 @@ const styles = StyleSheet.create({
   grade: { fontFamily: "Newsreader", fontSize: 32, textAlign: "center", marginBottom: 18 },
   disclaimer: { fontSize: 9, textAlign: "center", color: COLOR.muted, marginBottom: 22, lineHeight: 1.5 },
   paragraph: { fontSize: 10, lineHeight: 1.6, textAlign: "center", color: COLOR.ink, marginBottom: 8 },
-  signRow: { flexDirection: "row", justifyContent: "center", gap: 60, marginTop: 56 },
-  signBlock: { alignItems: "center", width: 180 },
-  signature: { fontFamily: "DancingScript", fontSize: 24, color: COLOR.teal, borderBottomWidth: 1, borderBottomColor: COLOR.border, paddingBottom: 4, marginBottom: 4, width: "100%", textAlign: "center" },
-  signName: { fontSize: 9, color: COLOR.ink },
-  signRole: { fontSize: 8, color: COLOR.muted },
+  // flexWrap so a big course's full trainer team (not just a lead + one
+  // co-tutor) still fits -- 3 blocks/row at this width comfortably clears
+  // an A4 page's ~499pt content width (150*3 + 24*2 = 498), wrapping to a
+  // second row rather than overflowing or shrinking to illegibility.
+  signRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 24, rowGap: 28, marginTop: 48 },
+  signBlock: { alignItems: "center", width: 150 },
+  signature: { fontFamily: "DancingScript", fontSize: 20, color: COLOR.teal, borderBottomWidth: 1, borderBottomColor: COLOR.border, paddingBottom: 4, marginBottom: 4, width: "100%", textAlign: "center" },
+  signName: { fontSize: 8.5, color: COLOR.ink },
+  signRole: { fontSize: 7.5, color: COLOR.muted },
   footer: { position: "absolute", bottom: 28, left: 0, right: 0, textAlign: "center", fontSize: 7, color: COLOR.border },
 
   section: { border: `1px solid ${COLOR.border}`, borderRadius: 4, padding: 16, marginBottom: 14 },
@@ -169,7 +173,7 @@ export async function renderFinalReportBuffer(input: FinalReportInput): Promise<
         <Text style={styles.paragraph}>A full report is set out on the reverse of this document.</Text>
 
         <View style={styles.signRow}>
-          {signatories.slice(0, 2).map((s) => (
+          {signatories.map((s) => (
             <View key={s.name} style={styles.signBlock}>
               <Text style={styles.signature}>{s.name}</Text>
               <Text style={styles.signName}>{s.name}</Text>
