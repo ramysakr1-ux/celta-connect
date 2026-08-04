@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { saveObservation, type ObservationFormState } from "@/app/dashboard/trainee/actions";
+import { CEFR_LEVELS } from "@/lib/levels";
 import type { Database } from "@/lib/supabase/types";
 
 type Observation = Database["public"]["Tables"]["observations"]["Row"];
@@ -38,12 +39,18 @@ export function ObservationForm({ observation }: { observation?: Observation }) 
         </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-sm text-muted">Level</label>
-          <input
+          <select
             name="level"
-            type="text"
             defaultValue={observation?.level ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
-          />
+            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          >
+            <option value="">Select a level</option>
+            {CEFR_LEVELS.map((l) => (
+              <option key={l.code} value={`${l.name} (${l.code})`}>
+                {l.name} ({l.code})
+              </option>
+            ))}
+          </select>
         </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-sm text-muted">Learners present</label>
