@@ -323,4 +323,18 @@ h6 {
     background-color: var(--color-status-neutral-bg);
     color: var(--color-status-neutral-text);
   }
+
+  @keyframes pill-live-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  .pill-live::before {
+    animation: pill-live-pulse 1.6s ease-in-out infinite;
+  }
 }

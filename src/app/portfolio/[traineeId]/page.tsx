@@ -14,6 +14,21 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
   milestone: "Milestone",
 };
 
+// No duration/end-time field exists on either the timetable event or the
+// ad-hoc broadcast -- 3 hours is a reasonable upper bound for a single
+// CELTA session (TP block, input session) rather than adding a schema
+// field for this cosmetic badge.
+const LIVE_WINDOW_MS = 3 * 60 * 60 * 1000;
+
+function getZoomStatus(startDate: Date | null): "live" | "upcoming" | null {
+  if (!startDate || Number.isNaN(startDate.getTime())) return null;
+  const now = Date.now();
+  const start = startDate.getTime();
+  if (now >= start && now <= start + LIVE_WINDOW_MS) return "live";
+  if (now < start) return "upcoming";
+  return null;
+}
+
 // §4 Course Stream -- the default tab behind the portfolio link.
 export default async function CourseStreamPage({
   params,
@@ -100,6 +115,17 @@ export default async function CourseStreamPage({
               : b.zoom_time
                 ? new Date(b.zoom_time).toLocaleString()
                 : null;
+            // Only a linked event WITH a time, or an ad-hoc zoom_time, gives
+            // an actual instant to compare against -- a date-only linked
+            // event (no event_time) has no real start to badge against.
+            const zoomStartDate = linkedEvent
+              ? linkedEvent.event_time
+                ? new Date(`${linkedEvent.event_date}T${linkedEvent.event_time}`)
+                : null
+              : b.zoom_time
+                ? new Date(b.zoom_time)
+                : null;
+            const zoomStatus = getZoomStatus(zoomStartDate);
             const initials = (author?.full_name ?? "?")
               .split(" ")
               .map((p) => p[0])
@@ -140,7 +166,14 @@ export default async function CourseStreamPage({
                   >
                     <span aria-hidden="true">🎥</span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-ink">Join Zoom session</span>
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-semibold text-ink">Join Zoom session</span>
+                        {zoomStatus === "live" ? (
+                          <span className="pill pill-danger pill-live">Live now</span>
+                        ) : zoomStatus === "upcoming" ? (
+                          <span className="pill pill-info">Upcoming</span>
+                        ) : null}
+                      </span>
                       {zoomWhen ? <span className="block text-xs text-muted">{zoomWhen}</span> : null}
                     </span>
                     <span className="text-sm font-medium text-primary">Open</span>
