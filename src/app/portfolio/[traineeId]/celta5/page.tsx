@@ -12,6 +12,7 @@ import {
   computeTrajectory,
 } from "@/lib/celta-criteria";
 import { CriteriaRatingPill, StandardRatingPill } from "@/lib/status-pill";
+import { computeProgressIssues } from "@/lib/course-progress";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
 import { signOffStage2, signOffFinal } from "@/app/dashboard/trainee/actions";
@@ -64,11 +65,21 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
 
   if (!isStaff && !assessorCourseId) {
-    const [{ data: recordRows }, { data: matrix }, { data: observations }] = await Promise.all([
-      supabase.rpc("get_my_celta5_record"),
-      supabase.rpc("get_my_celta5_matrix"),
-      supabase.from("observations").select("*").eq("trainee_id", traineeId).order("observation_date"),
-    ]);
+    const [{ data: recordRows }, { data: matrix }, { data: observations }, { data: timetableEvents }, { data: plans }, { data: assignments }] =
+      await Promise.all([
+        supabase.rpc("get_my_celta5_record"),
+        supabase.rpc("get_my_celta5_matrix"),
+        supabase.from("observations").select("*").eq("trainee_id", traineeId).order("observation_date"),
+        viewer?.course_id
+          ? supabase
+              .from("course_timetable_events")
+              .select("type, event_date, linked_tp_number, linked_assignment_type, title")
+              .eq("course_id", viewer.course_id)
+              .in("type", ["tp", "assignment_due", "resubmission_due"])
+          : Promise.resolve({ data: [] }),
+        supabase.from("plan_assignments").select("tp_number, taught_at").eq("trainee_id", traineeId),
+        supabase.from("assignments").select("assignment_type, first_status, resubmission_status").eq("trainee_id", traineeId),
+      ]);
     const record = recordRows?.[0];
 
     if (!record) {
@@ -80,9 +91,36 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
     const stage1And2Released = !!record.stage2_completed_at;
     const finalReleased = !!record.trainer_signoff_final_at;
 
+    const taughtTpNumbers = new Set((plans ?? []).filter((p) => p.taught_at).map((p) => p.tp_number));
+    const assignmentStatusByType = new Map((assignments ?? []).map((a) => [a.assignment_type, a]));
+    const progressIssues = computeProgressIssues({
+      today: new Date().toISOString().slice(0, 10),
+      timetableEvents: timetableEvents ?? [],
+      taughtTpNumbers,
+      assignmentStatusByType,
+    });
+
     return (
       <div className="flex flex-col gap-4">
         <h2 className="font-serif text-xl text-ink">CELTA 5 record</h2>
+
+        <div className="sheet">
+          <p className="text-sm text-muted">Course progress</p>
+          {progressIssues.length === 0 ? (
+            <p className="mt-2">
+              <span className="pill pill-success">On track</span>
+            </p>
+          ) : (
+            <ul className="mt-3 flex flex-col gap-2">
+              {progressIssues.map((issue, i) => (
+                <li key={i} className="flex items-center gap-2">
+                  <span className="pill pill-danger">{issue.label}</span>
+                  <span className="text-sm text-muted">{issue.detail}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {!stage2Submitted ? (
           <div>
