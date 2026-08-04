@@ -24,9 +24,7 @@ export default async function TrainerTimetablePage() {
 
   if (!trainer.course_id) {
     return (
-      <div className="card p-6">
-        <p className="text-muted">No course assigned.</p>
-      </div>
+      <div className="sheet text-sm text-muted">No course assigned.</div>
     );
   }
 
@@ -44,7 +42,7 @@ export default async function TrainerTimetablePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card flex items-center justify-between p-6">
+      <div className="sheet flex items-center justify-between">
         <div>
           <h1 className="font-serif text-xl text-ink">Course timetable</h1>
           <p className="mt-2 text-muted">
@@ -59,7 +57,7 @@ export default async function TrainerTimetablePage() {
             className={`rounded-[6px] border px-4 py-2 text-sm font-medium ${
               locked
                 ? "border-border text-ink hover:border-primary"
-                : "border-primary bg-primary text-card"
+                : "border-primary bg-primary text-primary-foreground"
             }`}
           >
             {locked ? "Unlock timetable" : "Lock timetable"}
@@ -68,19 +66,19 @@ export default async function TrainerTimetablePage() {
       </div>
 
       {locked ? (
-        <div className="rounded-[6px] border border-border-faint bg-status-info-bg px-4 py-3 text-sm text-status-info-text">
+        <div className="sheet border-primary/20 bg-accent/30 text-sm text-ink">
           Locked -- the course clock now calculates off these dates. Unlock to make changes.
         </div>
       ) : null}
 
       {!locked ? (
-        <div className="card p-6">
+        <div className="sheet">
           <h2 className="font-serif text-lg text-ink">Add event</h2>
           <AddEventForm />
         </div>
       ) : null}
 
-      <div className="card overflow-hidden p-0">
+      <div className="sheet overflow-hidden !p-0">
         {events && events.length > 0 ? (
           <ul>
             {events.map((event) => (
