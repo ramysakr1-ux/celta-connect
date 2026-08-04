@@ -6,7 +6,7 @@ import {
   updateStage3Ratings,
   type FormState,
 } from "@/app/dashboard/trainer/celta5-actions";
-import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS, CRITERIA_RATING_OPTIONS } from "@/lib/celta-criteria";
+import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS, CRITERIA_GUIDANCE, CRITERIA_RATING_OPTIONS } from "@/lib/celta-criteria";
 import { CriteriaRatingPill } from "@/lib/status-pill";
 import type { Database } from "@/lib/supabase/types";
 
@@ -76,6 +76,18 @@ export function StageRatingsForm({
                     </span>
                   ) : null}
                 </div>
+                {CRITERIA_GUIDANCE[code] ? (
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-xs text-muted hover:text-primary">Guidance</summary>
+                    <ul className="mt-1 flex flex-col gap-0.5 pl-4 text-xs text-muted">
+                      {CRITERIA_GUIDANCE[code].map((bullet, i) => (
+                        <li key={i} className="list-disc">
+                          {bullet}
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
               </div>
             );
           })}

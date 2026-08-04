@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   CELTA_CRITERIA_SECTIONS,
   CRITERIA_LABELS,
+  CRITERIA_GUIDANCE,
   CELTA_CRITERIA_CODES,
   computeCriteriaSuggestion,
   computeTrajectory,
@@ -151,6 +152,18 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
                                 <CriteriaRatingPill rating={row?.tutor_status_stage2 ?? null} />
                               </div>
                             </div>
+                            {CRITERIA_GUIDANCE[code] ? (
+                              <details className="mt-2">
+                                <summary className="cursor-pointer text-xs text-muted hover:text-primary">Guidance</summary>
+                                <ul className="mt-1 flex flex-col gap-0.5 pl-4 text-xs text-muted">
+                                  {CRITERIA_GUIDANCE[code].map((bullet, i) => (
+                                    <li key={i} className="list-disc">
+                                      {bullet}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </details>
+                            ) : null}
                           </div>
                         );
                       })}
