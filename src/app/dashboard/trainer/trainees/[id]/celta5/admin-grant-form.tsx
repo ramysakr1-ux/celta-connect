@@ -13,7 +13,7 @@ export function AdminGrantForm({ record }: { record: Celta5Record }) {
   const granted = !!record.admin_access_granted_at;
 
   return (
-    <form action={action} className="card flex flex-col gap-3 p-6">
+    <form action={action} className="sheet flex flex-col gap-3 p-6">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
       <h2 className="font-serif text-lg text-ink">Admin access</h2>
       <p className="text-sm text-muted">
