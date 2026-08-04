@@ -681,6 +681,68 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["resources"]["Row"]>;
         Relationships: [];
       };
+      volunteer_students: {
+        Row: {
+          id: string;
+          course_id: string;
+          name: string;
+          created_at: string;
+          removed_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["volunteer_students"]["Row"]> & {
+          course_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["volunteer_students"]["Row"]>;
+        Relationships: [];
+      };
+      course_access_tokens: {
+        Row: {
+          token: string;
+          course_id: string;
+          role: "volunteer_student" | "assessor" | "register_viewer";
+          volunteer_student_id: string | null;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_access_tokens"]["Row"]> & {
+          course_id: string;
+          role: "volunteer_student" | "assessor" | "register_viewer";
+          expires_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_access_tokens"]["Row"]>;
+        Relationships: [];
+      };
+      volunteer_attendance: {
+        Row: {
+          id: string;
+          volunteer_student_id: string;
+          timetable_event_id: string;
+          marked_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["volunteer_attendance"]["Row"]> & {
+          volunteer_student_id: string;
+          timetable_event_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["volunteer_attendance"]["Row"]>;
+        Relationships: [];
+      };
+      volunteer_shared_materials: {
+        Row: {
+          id: string;
+          course_id: string;
+          tp_material_id: string;
+          shared_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["volunteer_shared_materials"]["Row"]> & {
+          course_id: string;
+          tp_material_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["volunteer_shared_materials"]["Row"]>;
+        Relationships: [];
+      };
       staff_channels: {
         Row: {
           id: string;

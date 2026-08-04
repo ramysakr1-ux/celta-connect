@@ -53,6 +53,32 @@ export default async function CourseRosterPage({
     (m) => m.role === "trainee" && !assignedTraineeIds.has(m.id)
   );
 
+  // Read-only for admin -- the invite-link/add/remove management stays
+  // trainer-owned (see /trainer/volunteers); admin just needs visibility
+  // into attendance across any course at their center, not only "their
+  // own" the way a trainer is scoped.
+  const { data: volunteers } = await supabase
+    .from("volunteer_students")
+    .select("id, name")
+    .eq("course_id", id)
+    .is("removed_at", null)
+    .order("name");
+  const { data: tpEvents } = await supabase
+    .from("course_timetable_events")
+    .select("id")
+    .eq("course_id", id)
+    .eq("type", "tp");
+  const volunteerIds = (volunteers ?? []).map((v) => v.id);
+  const { data: attendanceRows } =
+    volunteerIds.length > 0
+      ? await supabase.from("volunteer_attendance").select("volunteer_student_id").in("volunteer_student_id", volunteerIds)
+      : { data: [] };
+  const attendanceCountByVolunteer = new Map<string, number>();
+  for (const row of attendanceRows ?? []) {
+    attendanceCountByVolunteer.set(row.volunteer_student_id, (attendanceCountByVolunteer.get(row.volunteer_student_id) ?? 0) + 1);
+  }
+  const totalTpSessions = tpEvents?.length ?? 0;
+
   return (
     <div className="flex flex-col gap-6">
       <div className="card p-6">
@@ -154,6 +180,41 @@ export default async function CourseRosterPage({
         </div>
         <div className="card mt-4 p-6">
           <CreateSubgroupForm courseId={course.id} />
+        </div>
+      </div>
+
+      <div>
+        <h2 className="font-serif text-lg text-ink">Volunteer students (TP students)</h2>
+        <p className="mt-1 text-sm text-muted">
+          {(volunteers ?? []).length} registered · managed by the trainer from their Volunteers page.
+        </p>
+        <div className="card mt-3 overflow-hidden">
+          <table className="table-plain w-full">
+            <thead>
+              <tr>
+                <th className="text-sm text-muted">Name</th>
+                <th className="text-sm text-muted">Sessions attended</th>
+              </tr>
+            </thead>
+            <tbody>
+              {volunteers && volunteers.length > 0 ? (
+                volunteers.map((v) => (
+                  <tr key={v.id}>
+                    <td className="text-ink">{v.name}</td>
+                    <td className="text-muted">
+                      {attendanceCountByVolunteer.get(v.id) ?? 0} / {totalTpSessions}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={2} className="text-muted">
+                    No volunteer students registered yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 

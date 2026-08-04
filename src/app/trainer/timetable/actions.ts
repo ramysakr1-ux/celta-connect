@@ -66,6 +66,39 @@ export async function deleteTimetableEvent(formData: FormData): Promise<void> {
   revalidatePath("/trainer/timetable");
 }
 
+// Attendance is tracked per TP-type timetable event (migration 0030) --
+// this syncs the full set of "attended" volunteer_students for one event to
+// whichever checkboxes were checked, rather than toggling one at a time.
+export async function setAttendance(formData: FormData): Promise<void> {
+  const trainer = await requireRole("trainer");
+  const eventId = formData.get("event_id");
+  if (typeof eventId !== "string") return;
+
+  const supabase = await createClient();
+  const { data: event } = await supabase
+    .from("course_timetable_events")
+    .select("id")
+    .eq("id", eventId)
+    .eq("course_id", trainer.course_id ?? "")
+    .maybeSingle();
+  if (!event) return;
+
+  const attendedIds = formData.getAll("attended_volunteer_id").filter((v): v is string => typeof v === "string");
+
+  await supabase.from("volunteer_attendance").delete().eq("timetable_event_id", eventId);
+  if (attendedIds.length > 0) {
+    await supabase.from("volunteer_attendance").insert(
+      attendedIds.map((volunteerStudentId) => ({
+        volunteer_student_id: volunteerStudentId,
+        timetable_event_id: eventId,
+        marked_by: trainer.id,
+      }))
+    );
+  }
+
+  revalidatePath("/trainer/timetable");
+}
+
 export async function setTimetableLock(formData: FormData): Promise<void> {
   const trainer = await requireRole("trainer");
   if (!trainer.course_id) return;

@@ -1,7 +1,7 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
-import { deleteTimetableEvent, setTimetableLock } from "@/app/trainer/timetable/actions";
+import { deleteTimetableEvent, setAttendance, setTimetableLock } from "@/app/trainer/timetable/actions";
 import { AddEventForm } from "@/app/trainer/timetable/add-event-form";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -28,7 +28,7 @@ export default async function TrainerTimetablePage() {
     );
   }
 
-  const [{ data: course }, { data: events }] = await Promise.all([
+  const [{ data: course }, { data: events }, { data: volunteers }] = await Promise.all([
     supabase.from("courses").select("timetable_locked_at").eq("id", trainer.course_id).maybeSingle(),
     supabase
       .from("course_timetable_events")
@@ -36,9 +36,22 @@ export default async function TrainerTimetablePage() {
       .eq("course_id", trainer.course_id)
       .order("event_date")
       .order("event_time"),
+    supabase.from("volunteer_students").select("id, name").eq("course_id", trainer.course_id).is("removed_at", null).order("name"),
   ]);
 
   const locked = Boolean(course?.timetable_locked_at);
+
+  const tpEventIds = (events ?? []).filter((e) => e.type === "tp").map((e) => e.id);
+  const { data: attendanceRows } =
+    tpEventIds.length > 0
+      ? await supabase.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("timetable_event_id", tpEventIds)
+      : { data: [] };
+  const attendedByEvent = new Map<string, Set<string>>();
+  for (const row of attendanceRows ?? []) {
+    const set = attendedByEvent.get(row.timetable_event_id) ?? new Set<string>();
+    set.add(row.volunteer_student_id);
+    attendedByEvent.set(row.timetable_event_id, set);
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -102,14 +115,43 @@ export default async function TrainerTimetablePage() {
                       .join(" · ")}
                   </p>
                 </div>
-                {!locked ? (
-                  <form action={deleteTimetableEvent}>
-                    <input type="hidden" name="event_id" value={event.id} />
-                    <button type="submit" className="text-sm text-destructive hover:underline">
-                      Remove
-                    </button>
-                  </form>
-                ) : null}
+                <div className="flex shrink-0 items-center gap-4">
+                  {event.type === "tp" && volunteers && volunteers.length > 0 ? (
+                    <details>
+                      <summary className="cursor-pointer text-sm text-muted hover:text-primary">
+                        Attendance ({attendedByEvent.get(event.id)?.size ?? 0}/{volunteers.length})
+                      </summary>
+                      <form action={setAttendance} className="mt-2 flex flex-col gap-1.5 rounded-[6px] border border-border-faint p-3">
+                        <input type="hidden" name="event_id" value={event.id} />
+                        {volunteers.map((v) => (
+                          <label key={v.id} className="flex items-center gap-2 text-sm text-ink">
+                            <input
+                              type="checkbox"
+                              name="attended_volunteer_id"
+                              value={v.id}
+                              defaultChecked={attendedByEvent.get(event.id)?.has(v.id) ?? false}
+                            />
+                            {v.name}
+                          </label>
+                        ))}
+                        <button
+                          type="submit"
+                          className="mt-1 self-start rounded-[6px] border border-border px-3 py-1 text-xs text-ink hover:border-primary"
+                        >
+                          Save attendance
+                        </button>
+                      </form>
+                    </details>
+                  ) : null}
+                  {!locked ? (
+                    <form action={deleteTimetableEvent}>
+                      <input type="hidden" name="event_id" value={event.id} />
+                      <button type="submit" className="text-sm text-destructive hover:underline">
+                        Remove
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
               </li>
             ))}
           </ul>

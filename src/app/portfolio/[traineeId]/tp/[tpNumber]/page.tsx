@@ -10,6 +10,7 @@ import { LessonPlanForm } from "@/app/dashboard/trainee/plan/[tpNumber]/lesson-p
 import { MaterialsSection } from "@/app/dashboard/trainee/plan/[tpNumber]/materials-section";
 import { SelfEvaluationSection } from "@/app/dashboard/trainee/plan/[tpNumber]/self-evaluation-section";
 import { FeedbackForm } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/feedback-form";
+import { shareMaterialWithStudents, unshareMaterialWithStudents } from "@/app/portfolio/[traineeId]/tp/[tpNumber]/share-actions";
 import type { Database } from "@/lib/supabase/types";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
@@ -68,7 +69,7 @@ export default async function TpDetailPage({
   const supabase = await createClient();
   const { data: trainee } = await supabase
     .from("profiles")
-    .select("id, full_name, center_id")
+    .select("id, full_name, center_id, course_id")
     .eq("id", traineeId)
     .maybeSingle();
   if (!trainee) notFound();
@@ -128,6 +129,13 @@ export default async function TpDetailPage({
         .map((p) => p.text);
     }
   }
+
+  const materialIds = (materials ?? []).map((m) => m.id);
+  const { data: sharedRows } =
+    isStaff && materialIds.length > 0
+      ? await supabase.from("volunteer_shared_materials").select("tp_material_id").in("tp_material_id", materialIds)
+      : { data: [] };
+  const sharedMaterialIds = new Set((sharedRows ?? []).map((r) => r.tp_material_id));
 
   const tier = assignment.density_tier;
   const densityLabel = DENSITY_TIER_LABELS[tier];
@@ -304,10 +312,30 @@ export default async function TpDetailPage({
             {materials && materials.length > 0 ? (
               <div className="sheet p-6">
                 <h2 className="font-serif text-lg text-ink">Materials</h2>
-                <ul className="mt-2 flex flex-col gap-1 text-sm text-ink">
-                  {materials.map((m) => (
-                    <li key={m.id}>{m.file_name ?? m.slides_url}</li>
-                  ))}
+                <ul className="mt-2 flex flex-col gap-2 text-sm text-ink">
+                  {materials.map((m) => {
+                    const shared = sharedMaterialIds.has(m.id);
+                    return (
+                      <li key={m.id} className="flex items-center justify-between gap-3">
+                        <span>{m.file_name ?? m.slides_url}</span>
+                        <form action={shared ? unshareMaterialWithStudents : shareMaterialWithStudents}>
+                          <input type="hidden" name="tp_material_id" value={m.id} />
+                          <input type="hidden" name="trainee_id" value={traineeId} />
+                          <input type="hidden" name="tp_number" value={tpNumber} />
+                          <button
+                            type="submit"
+                            className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                              shared
+                                ? "border-status-on-track-text/30 bg-status-on-track-bg text-status-on-track-text"
+                                : "border-border text-muted hover:border-primary hover:text-primary"
+                            }`}
+                          >
+                            {shared ? "Shared with students ✓" : "Share with students"}
+                          </button>
+                        </form>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ) : null}

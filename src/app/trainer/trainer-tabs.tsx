@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const TABS = [
   { href: "", label: "Roster", external: false },
   { href: "/timetable", label: "Timetable", external: false },
+  { href: "/volunteers", label: "Volunteers", external: false },
   { href: "/dashboard/trainer/rotation", label: "TP Rotation", external: true },
   { href: "/dashboard/trainer/coursebooks", label: "TP Points Library", external: true },
 ] as const;
