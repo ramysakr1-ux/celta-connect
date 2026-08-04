@@ -20,7 +20,7 @@ export function LoginForm() {
           type="email"
           required
           autoComplete="email"
-          className="card rounded-[6px] px-3 py-2 text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
@@ -33,7 +33,7 @@ export function LoginForm() {
           type="password"
           required
           autoComplete="current-password"
-          className="card rounded-[6px] px-3 py-2 text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -44,7 +44,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 rounded-[6px] bg-primary px-4 py-2 font-medium text-card disabled:opacity-60"
+        className="mt-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
         {pending ? "Signing in..." : "Sign in"}
       </button>
