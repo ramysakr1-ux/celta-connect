@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MaterialsCard } from "@/app/student/[token]/materials-card";
+import { Wordmark } from "@/components/wordmark";
 
 // §14 -- the volunteer-student (TP student) view. No login, no password --
 // resolved entirely from a tokenized, course-scoped, auto-expiring link
@@ -23,9 +24,12 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
   if (!accessToken || !accessToken.volunteer_student_id || new Date(accessToken.expires_at) < new Date()) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#fdf6ec] p-8">
-        <div className="w-full max-w-sm rounded-lg border border-[#eddfc4] bg-white p-8 text-center">
-          <p className="text-[#8a6a2f]">This link has expired or isn&apos;t valid. Ask your teacher for a new one.</p>
+      <div className="flex min-h-screen flex-1 items-center justify-center p-8">
+        <div className="sheet-accent w-full max-w-sm p-8 text-center">
+          <Wordmark size="lg" />
+          <p className="mt-4 text-sm text-destructive">
+            This link has expired or isn&apos;t valid. Ask your teacher for a new one.
+          </p>
         </div>
       </div>
     );

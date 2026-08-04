@@ -277,6 +277,31 @@ h6 {
     background-color: color-mix(in oklch, var(--color-accent) 40%, transparent);
   }
 
+  /* Shared "entry moment" card -- pale tinted teal-green background + soft
+     primary border, the same combination the Course Stream Zoom card uses
+     (bg-accent/50 over a card backdrop, border-primary/25). Baked into a
+     named class with color-mix rather than those same Tailwind opacity
+     utilities, since standalone entry pages (login/join/invalid-link
+     gates) sit directly on --color-background, not nested inside another
+     .sheet -- an opacity utility here would blend against the wrong
+     backdrop and read differently page to page. Used to unify every
+     invite/sign-in entry point (login, join-as-trainer-or-trainee, and the
+     expired/invalid-link gates on the tokenized routes) under one visual
+     language instead of each screen inventing its own.  */
+  .sheet-accent {
+    /* oklab, not oklch -- both --color-accent and --color-card are very
+       pale/low-chroma, and mixing two near-achromatic colors in oklch's
+       polar space hits an undefined-hue edge case (rendered as a stray
+       pink tint in testing). oklab is rectangular (no hue component), so
+       it has no such edge case -- also matches how Tailwind's own opacity
+       utilities (e.g. bg-accent/50 on the Zoom card) mix under the hood. */
+    background-color: color-mix(in oklab, var(--color-accent) 45%, var(--color-card));
+    border: 1px solid color-mix(in oklab, var(--color-primary) 25%, transparent);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    box-shadow: none;
+  }
+
   .pill {
     display: inline-flex;
     align-items: center;

@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CopyLinkButton } from "@/app/trainer/volunteers/copy-link-button";
 import { AddVolunteerForm } from "@/app/register/[token]/add-volunteer-form";
+import { Wordmark } from "@/components/wordmark";
 
 // A separate no-login link for center business/admissions staff -- distinct
 // from the app's own `admin` UserRole. They have no account at all and
@@ -20,9 +21,12 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
 
   if (!accessToken || new Date(accessToken.expires_at) < new Date()) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-8">
-        <div className="sheet w-full max-w-sm text-center text-sm text-muted">
-          This link has expired or isn&apos;t valid. Ask the trainer for a new one.
+      <div className="flex min-h-screen flex-1 items-center justify-center p-8">
+        <div className="sheet-accent w-full max-w-sm p-8 text-center">
+          <Wordmark size="lg" />
+          <p className="mt-4 text-sm text-destructive">
+            This link has expired or isn&apos;t valid. Ask the trainer for a new one.
+          </p>
         </div>
       </div>
     );
