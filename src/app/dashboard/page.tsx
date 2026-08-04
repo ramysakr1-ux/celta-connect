@@ -19,5 +19,15 @@ export default async function DashboardIndexPage() {
     );
   }
 
+  // Per the architecture-plan's SS1.1c landing routing: trainer -> /trainer
+  // (Command Centre, not a portfolio), trainee -> their own /portfolio/:id
+  // (Course Stream tab). Admin isn't covered by that doc at all and keeps
+  // its existing /dashboard/admin home. The old /dashboard/trainer and
+  // /dashboard/trainee pages still exist (not deleted) but are superseded
+  // -- every trainer/trainee session was landing on them instead of the
+  // rebuilt pages until this fix, since this was the only entry point and
+  // it predated the SS13 rebuild.
+  if (profile.role === "trainer") redirect("/trainer");
+  if (profile.role === "trainee") redirect(`/portfolio/${profile.id}`);
   redirect(`/dashboard/${profile.role}`);
 }
