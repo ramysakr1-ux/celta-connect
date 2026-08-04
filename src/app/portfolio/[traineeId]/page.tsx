@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { BroadcastComposer } from "@/app/portfolio/[traineeId]/broadcast-composer";
 import { deleteBroadcast } from "@/app/portfolio/[traineeId]/stream-actions";
 
@@ -20,18 +22,20 @@ export default async function CourseStreamPage({
 }) {
   const { traineeId } = await params;
   const session = await getCurrentProfile();
-  if (!session?.profile) notFound();
-  const viewer = session.profile;
+  const viewer = session?.profile ?? null;
+  const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
+  if (!viewer && !assessorCourseId) notFound();
 
-  const supabase = await createClient();
+  const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const { data: trainee } = await supabase
     .from("profiles")
     .select("course_id")
     .eq("id", traineeId)
     .maybeSingle();
   if (!trainee?.course_id) notFound();
+  if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
-  const isStaff = viewer.role === "trainer" || viewer.role === "admin";
+  const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
   const today = new Date().toISOString().slice(0, 10);
 
   const [{ data: broadcasts }, { data: timetableEvents }, { data: upcomingEvents }, { data: tutors }] =

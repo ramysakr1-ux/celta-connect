@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { Wordmark } from "@/components/wordmark";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
 import { StatBar } from "@/app/portfolio/[traineeId]/stat-bar";
@@ -13,6 +15,10 @@ import { StatBar } from "@/app/portfolio/[traineeId]/stat-bar";
 // that a trainer/admin can only reach trainees in their own course/center --
 // if RLS denies the row, `trainee` comes back null and we 404, so there's
 // no separate authorization check to duplicate here.
+// §11 -- an assessor (no real session, token cookie only) reaches this same
+// shell read-only, scoped to their token's course_id -- RLS has no
+// auth.uid() to key off for them at all, so their branch uses the admin
+// client with that course_id as the explicit authorization check instead.
 export default async function PortfolioLayout({
   children,
   params,
@@ -22,14 +28,16 @@ export default async function PortfolioLayout({
 }) {
   const { traineeId } = await params;
   const session = await getCurrentProfile();
-  if (!session?.profile) redirect("/login");
-  const viewer = session.profile;
+  const viewer = session?.profile ?? null;
 
-  if (viewer.role === "trainee" && viewer.id !== traineeId) {
+  if (viewer?.role === "trainee" && viewer.id !== traineeId) {
     redirect(`/portfolio/${viewer.id}`);
   }
 
-  const supabase = await createClient();
+  const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
+  if (!viewer && !assessorCourseId) redirect("/login");
+
+  const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const { data: trainee } = await supabase
     .from("profiles")
     .select("*")
@@ -37,6 +45,7 @@ export default async function PortfolioLayout({
     .eq("role", "trainee")
     .maybeSingle();
   if (!trainee) notFound();
+  if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
   const [{ data: course }, { data: center }, { data: lessons }, { data: celta5Record }, { data: assignments }] =
     await Promise.all([
@@ -55,7 +64,8 @@ export default async function PortfolioLayout({
     (a) => a.first_status === "approved" || a.resubmission_status === "approved"
   ).length;
 
-  const isStaff = viewer.role === "trainer" || viewer.role === "admin";
+  const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
+  const isStaffView = isStaff || Boolean(assessorCourseId);
   const initials = trainee.full_name
     .split(" ")
     .map((p) => p[0])
@@ -67,11 +77,13 @@ export default async function PortfolioLayout({
     <div className="flex min-h-full flex-col bg-background">
       <div className="border-b border-border bg-card">
         <div className="container flex h-14 items-center justify-between">
-          <Link href={isStaff ? "/trainer" : `/portfolio/${trainee.id}`} className="block">
+          <Link href={isStaffView ? "/trainer" : `/portfolio/${trainee.id}`} className="block">
             <Wordmark size="sm" />
-            <p className="text-[10px] tracking-[0.1em] text-muted uppercase">Trainee Workspace</p>
+            <p className="text-[10px] tracking-[0.1em] text-muted uppercase">
+              Trainee Workspace{assessorCourseId ? " · read-only" : ""}
+            </p>
           </Link>
-          {isStaff ? (
+          {isStaffView ? (
             <Link href="/trainer" className="text-sm font-semibold text-primary">
               Command Centre
             </Link>

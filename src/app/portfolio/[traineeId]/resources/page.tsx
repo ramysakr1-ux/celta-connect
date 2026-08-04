@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { RESOURCE_CATEGORY_LABELS, RESOURCE_CATEGORY_ORDER, RESOURCE_TYPE_ICON, RESOURCE_TYPE_LABELS } from "@/lib/resource-info";
 import { ResourceComposer } from "@/app/portfolio/[traineeId]/resources/resource-composer";
 import { deleteResource } from "@/app/portfolio/[traineeId]/resources/actions";
@@ -13,13 +15,15 @@ import { deleteResource } from "@/app/portfolio/[traineeId]/resources/actions";
 export default async function ResourceHubPage({ params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
   const session = await getCurrentProfile();
-  if (!session?.profile) notFound();
-  const viewer = session.profile;
-  const isStaff = viewer.role === "trainer" || viewer.role === "admin";
+  const viewer = session?.profile ?? null;
+  const isEditableStaff = viewer?.role === "trainer" || viewer?.role === "admin";
+  const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
+  if (!viewer && !assessorCourseId) notFound();
 
-  const supabase = await createClient();
+  const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const { data: trainee } = await supabase.from("profiles").select("center_id, course_id").eq("id", traineeId).maybeSingle();
   if (!trainee) notFound();
+  if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
   const query = supabase
     .from("resources")
@@ -45,7 +49,7 @@ export default async function ResourceHubPage({ params }: { params: Promise<{ tr
         <p className="text-xs text-muted">{resources.length} items</p>
       </div>
 
-      {isStaff ? <ResourceComposer traineeId={traineeId} /> : null}
+      {isEditableStaff ? <ResourceComposer traineeId={traineeId} /> : null}
 
       {resources.length === 0 ? (
         <p className="sheet text-sm text-muted">No resources yet.</p>
@@ -82,7 +86,7 @@ export default async function ResourceHubPage({ params }: { params: Promise<{ tr
                       </span>
                     </span>
                   </a>
-                  {isStaff ? (
+                  {isEditableStaff ? (
                     <form action={deleteResource} className="mt-1">
                       <input type="hidden" name="resource_id" value={resource.id} />
                       <input type="hidden" name="trainee_id" value={traineeId} />

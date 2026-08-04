@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { getTpCardStatus, type FeedbackPoint, type TpCardStatus } from "@/lib/tp-plan-content";
@@ -61,18 +62,21 @@ export default async function TpDetailPage({
   if (!Number.isInteger(tpNumber) || tpNumber < 1 || tpNumber > 8) notFound();
 
   const session = await getCurrentProfile();
-  if (!session?.profile) notFound();
-  const viewer = session.profile;
-  const isStaff = viewer.role === "trainer" || viewer.role === "admin";
-  if (!isStaff && viewer.id !== traineeId) notFound();
+  const viewer = session?.profile ?? null;
+  const isEditableStaff = viewer?.role === "trainer" || viewer?.role === "admin";
+  const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
+  if (!viewer && !assessorCourseId) notFound();
+  if (viewer && !isEditableStaff && viewer.id !== traineeId) notFound();
+  const isStaff = isEditableStaff || Boolean(assessorCourseId);
 
-  const supabase = await createClient();
+  const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const { data: trainee } = await supabase
     .from("profiles")
     .select("id, full_name, center_id, course_id")
     .eq("id", traineeId)
     .maybeSingle();
   if (!trainee) notFound();
+  if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
   const admin = createAdminClient();
   const [{ data: assignment }, { data: plan }, { data: googleConnection }] = await Promise.all([
@@ -318,21 +322,27 @@ export default async function TpDetailPage({
                     return (
                       <li key={m.id} className="flex items-center justify-between gap-3">
                         <span>{m.file_name ?? m.slides_url}</span>
-                        <form action={shared ? unshareMaterialWithStudents : shareMaterialWithStudents}>
-                          <input type="hidden" name="tp_material_id" value={m.id} />
-                          <input type="hidden" name="trainee_id" value={traineeId} />
-                          <input type="hidden" name="tp_number" value={tpNumber} />
-                          <button
-                            type="submit"
-                            className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-                              shared
-                                ? "border-status-on-track-text/30 bg-status-on-track-bg text-status-on-track-text"
-                                : "border-border text-muted hover:border-primary hover:text-primary"
-                            }`}
-                          >
-                            {shared ? "Shared with students ✓" : "Share with students"}
-                          </button>
-                        </form>
+                        {isEditableStaff ? (
+                          <form action={shared ? unshareMaterialWithStudents : shareMaterialWithStudents}>
+                            <input type="hidden" name="tp_material_id" value={m.id} />
+                            <input type="hidden" name="trainee_id" value={traineeId} />
+                            <input type="hidden" name="tp_number" value={tpNumber} />
+                            <button
+                              type="submit"
+                              className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                shared
+                                  ? "border-status-on-track-text/30 bg-status-on-track-bg text-status-on-track-text"
+                                  : "border-border text-muted hover:border-primary hover:text-primary"
+                              }`}
+                            >
+                              {shared ? "Shared with students ✓" : "Share with students"}
+                            </button>
+                          </form>
+                        ) : shared ? (
+                          <span className="rounded-full border border-status-on-track-text/30 bg-status-on-track-bg px-2.5 py-1 text-xs font-medium text-status-on-track-text">
+                            Shared with students ✓
+                          </span>
+                        ) : null}
                       </li>
                     );
                   })}
@@ -355,8 +365,13 @@ export default async function TpDetailPage({
               )}
             </div>
 
-            {plan ? (
+            {plan && (isEditableStaff || feedback?.submitted_at) ? (
               <FeedbackForm planId={plan.id} traineeId={traineeId} tpNumber={tpNumber} feedback={feedback ?? null} />
+            ) : plan ? (
+              <div className="sheet p-6">
+                <h2 className="font-serif text-lg text-ink">Tutor feedback</h2>
+                <p className="mt-2 text-sm text-muted">Not yet submitted.</p>
+              </div>
             ) : null}
           </>
         ) : (

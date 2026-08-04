@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import {
   CELTA_CRITERIA_SECTIONS,
   CRITERIA_LABELS,
@@ -30,6 +32,16 @@ const TRAJECTORY_LABEL: Record<string, string> = {
   not_enough_data: "Not enough data yet",
 };
 
+function ReadOnlyField({ label, value }: { label: string; value: string | null }) {
+  if (!value) return null;
+  return (
+    <div className="mt-2">
+      <p className="text-sm text-muted">{label}</p>
+      <p className="text-ink">{value}</p>
+    </div>
+  );
+}
+
 // §9 -- CELTA5 record. Trainee viewers get the exact self-assessment ->
 // gated-release -> sign-off flow from /dashboard/trainee/celta5 (same RPCs,
 // which are already scoped to the calling user's own record so they work
@@ -43,14 +55,15 @@ const TRAJECTORY_LABEL: Record<string, string> = {
 export default async function PortfolioCelta5Page({ params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
   const session = await getCurrentProfile();
-  if (!session?.profile) notFound();
-  const viewer = session.profile;
-  const isStaff = viewer.role === "trainer" || viewer.role === "admin";
-  if (!isStaff && viewer.id !== traineeId) notFound();
+  const viewer = session?.profile ?? null;
+  const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
+  const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
+  if (!viewer && !assessorCourseId) notFound();
+  if (viewer && !isStaff && viewer.id !== traineeId) notFound();
 
-  const supabase = await createClient();
+  const supabase = assessorCourseId ? createAdminClient() : await createClient();
 
-  if (!isStaff) {
+  if (!isStaff && !assessorCourseId) {
     const [{ data: recordRows }, { data: matrix }, { data: observations }] = await Promise.all([
       supabase.rpc("get_my_celta5_record"),
       supabase.rpc("get_my_celta5_matrix"),
@@ -248,11 +261,12 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
     );
   }
 
-  // -- Staff view --
+  // -- Staff / assessor view --
+  const isEditableStaff = isStaff; // real trainer/admin session; assessor is view-only
   const { data: trainee } = await supabase.from("profiles").select("*").eq("id", traineeId).maybeSingle();
-  if (!trainee || trainee.role !== "trainee" || (viewer.role === "trainer" && trainee.course_id !== viewer.course_id)) {
-    notFound();
-  }
+  if (!trainee || trainee.role !== "trainee") notFound();
+  if (viewer?.role === "trainer" && trainee.course_id !== viewer.course_id) notFound();
+  if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
   const [
     { data: course },
@@ -307,25 +321,172 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
   const trajectoryInputs = CELTA_CRITERIA_CODES.map((code) => matrixByCode.get(code)?.tutor_status_stage2 ?? suggestions[code] ?? null);
   const trajectory = computeTrajectory(trajectoryInputs);
 
-  return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <h2 className="font-serif text-xl text-ink">CELTA 5 record</h2>
-        <div className="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-          <div>
-            <p className="text-muted">Center</p>
-            <p className="text-ink">{center?.name ?? "--"}</p>
-          </div>
-          <div>
-            <p className="text-muted">Course</p>
-            <p className="text-ink">{course?.name ?? "--"}</p>
-          </div>
-          <div>
-            <p className="text-muted">Dates</p>
-            <p className="text-ink">{course ? `${course.start_date} → ${course.end_date}` : "--"}</p>
-          </div>
+  const headerBlock = (
+    <div>
+      <h2 className="font-serif text-xl text-ink">CELTA 5 record</h2>
+      <div className="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
+        <div>
+          <p className="text-muted">Center</p>
+          <p className="text-ink">{center?.name ?? "--"}</p>
+        </div>
+        <div>
+          <p className="text-muted">Course</p>
+          <p className="text-ink">{course?.name ?? "--"}</p>
+        </div>
+        <div>
+          <p className="text-muted">Dates</p>
+          <p className="text-ink">{course ? `${course.start_date} → ${course.end_date}` : "--"}</p>
         </div>
       </div>
+    </div>
+  );
+
+  const observationsBlock = (
+    <div>
+      <h3 className="font-serif text-lg text-ink">Observations of experienced teachers (self-reported)</h3>
+      <div className="sheet mt-3 overflow-hidden !p-0">
+        {observations && observations.length > 0 ? (
+          <table className="table-plain w-full">
+            <thead>
+              <tr>
+                <th className="text-sm text-muted">Date</th>
+                <th className="text-sm text-muted">Length</th>
+                <th className="text-sm text-muted">Level</th>
+                <th className="text-sm text-muted">Focus</th>
+                <th className="text-sm text-muted">Filmed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {observations.map((o) => (
+                <tr key={o.id}>
+                  <td className="text-ink">{o.observation_date ?? "--"}</td>
+                  <td className="text-muted">{o.length_minutes ? `${o.length_minutes} min` : "--"}</td>
+                  <td className="text-muted">{o.level ?? "--"}</td>
+                  <td className="text-muted">{o.lesson_focus ?? "--"}</td>
+                  <td className="text-muted">{o.filmed ? "Yes" : "No"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="p-4 text-muted">No observations logged yet.</p>
+        )}
+      </div>
+    </div>
+  );
+
+  if (!isEditableStaff) {
+    // Assessor: read-only summary, not the trainer's editable stage forms --
+    // same fetched data (record/matrix/attendance/observations), rendered
+    // as plain text/pills instead of Stage1Form/StageRatingsForm/etc.
+    // FinalizeRecordForm and AdminGrantForm are trainer/admin operational
+    // controls with no read equivalent for an assessor to see at all.
+    return (
+      <div className="flex flex-col gap-4">
+        {headerBlock}
+
+        <div className="sheet">
+          <p className="text-sm text-muted">Trajectory (estimated, informal)</p>
+          <p className="mt-1 font-serif text-xl text-ink">{TRAJECTORY_LABEL[trajectory]}</p>
+        </div>
+
+        <div className="sheet">
+          <p className="text-sm text-muted">Attendance</p>
+          <p className="mt-1 text-ink">
+            {record.hours_attended ?? 0} / {course?.total_hours ?? 120} hrs
+          </p>
+        </div>
+
+        {observationsBlock}
+
+        {record.stage1_strengths || record.stage1_action_plan ? (
+          <div className="sheet">
+            <h3 className="font-serif text-lg text-ink">Stage One</h3>
+            <ReadOnlyField label="Strengths" value={record.stage1_strengths} />
+            <ReadOnlyField label="Action plan" value={record.stage1_action_plan} />
+          </div>
+        ) : null}
+
+        <div>
+          <h3 className="font-serif text-lg text-ink">Stage Two -- criteria ratings</h3>
+          <div className="sheet mt-3 overflow-hidden !p-0">
+            <div className="list-row">
+              <p className="text-sm text-muted">Tutor&apos;s overall assessment</p>
+              <StandardRatingPill rating={record.stage2_tutor_overall} />
+              {record.stage2_tutor_notes ? <p className="mt-2 text-ink">{record.stage2_tutor_notes}</p> : null}
+            </div>
+            {CELTA_CRITERIA_SECTIONS.map(({ section, title, codes }) => (
+              <div key={section} className="list-row">
+                <h4 className="font-serif text-ink">
+                  Topic {section} -- {title}
+                </h4>
+                <div className="mt-3 flex flex-col gap-2">
+                  {codes.map((code) => (
+                    <div key={code} className="flex items-center justify-between gap-3 border-b border-border-faint pb-2 last:border-none">
+                      <p className="text-sm text-ink">
+                        {code}
+                        {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
+                      </p>
+                      <CriteriaRatingPill rating={matrixByCode.get(code)?.tutor_status_stage2 ?? null} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {record.stage3_required ? (
+          <div>
+            <h3 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h3>
+            <div className="sheet mt-3 overflow-hidden !p-0">
+              <div className="list-row">
+                <p className="text-sm text-muted">Tutor&apos;s overall assessment</p>
+                <StandardRatingPill rating={record.stage3_tutor_overall} />
+                {record.stage3_tutor_notes ? <p className="mt-2 text-ink">{record.stage3_tutor_notes}</p> : null}
+              </div>
+              {CELTA_CRITERIA_SECTIONS.map(({ section, title, codes }) => (
+                <div key={section} className="list-row">
+                  <h4 className="font-serif text-ink">
+                    Topic {section} -- {title}
+                  </h4>
+                  <div className="mt-3 flex flex-col gap-2">
+                    {codes.map((code) => (
+                      <div key={code} className="flex items-center justify-between gap-3 border-b border-border-faint pb-2 last:border-none">
+                        <p className="text-sm text-ink">
+                          {code}
+                          {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
+                        </p>
+                        <CriteriaRatingPill rating={matrixByCode.get(code)?.tutor_status_stage3 ?? null} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="sheet">
+          <h3 className="font-serif text-lg text-ink">Final recommended grade</h3>
+          {record.final_recommended_grade ? (
+            <>
+              <span className="mt-1 inline-flex rounded-[6px] bg-primary px-3 py-1 font-serif text-2xl text-primary-foreground">
+                {record.final_recommended_grade}
+              </span>
+              {record.overall_notes ? <p className="mt-3 text-ink">{record.overall_notes}</p> : null}
+            </>
+          ) : (
+            <p className="mt-2 text-sm text-muted">Not yet decided.</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {headerBlock}
 
       <div className="sheet">
         <p className="text-sm text-muted">Trajectory (trainer-only, estimated -- never shown to the trainee, never sets the real final grade)</p>
@@ -334,37 +495,7 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
 
       <AttendanceForm key={`attendance-${record.updated_at}`} record={record} totalHours={course?.total_hours ?? 120} absences={absences ?? []} />
 
-      <div>
-        <h3 className="font-serif text-lg text-ink">Observations of experienced teachers (self-reported)</h3>
-        <div className="sheet mt-3 overflow-hidden !p-0">
-          {observations && observations.length > 0 ? (
-            <table className="table-plain w-full">
-              <thead>
-                <tr>
-                  <th className="text-sm text-muted">Date</th>
-                  <th className="text-sm text-muted">Length</th>
-                  <th className="text-sm text-muted">Level</th>
-                  <th className="text-sm text-muted">Focus</th>
-                  <th className="text-sm text-muted">Filmed</th>
-                </tr>
-              </thead>
-              <tbody>
-                {observations.map((o) => (
-                  <tr key={o.id}>
-                    <td className="text-ink">{o.observation_date ?? "--"}</td>
-                    <td className="text-muted">{o.length_minutes ? `${o.length_minutes} min` : "--"}</td>
-                    <td className="text-muted">{o.level ?? "--"}</td>
-                    <td className="text-muted">{o.lesson_focus ?? "--"}</td>
-                    <td className="text-muted">{o.filmed ? "Yes" : "No"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="p-4 text-muted">No observations logged yet.</p>
-          )}
-        </div>
-      </div>
+      {observationsBlock}
 
       <Stage1Form key={`stage1-${record.updated_at}`} record={record} />
 

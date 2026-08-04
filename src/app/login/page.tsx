@@ -24,6 +24,11 @@ export default async function LoginPage({
             invite.
           </p>
         ) : null}
+        {error === "assessor_link_invalid" ? (
+          <p className="mt-4 text-sm text-destructive">
+            That assessor link is invalid or has expired. Ask the center for a new one.
+          </p>
+        ) : null}
         <LoginForm />
       </div>
     </div>

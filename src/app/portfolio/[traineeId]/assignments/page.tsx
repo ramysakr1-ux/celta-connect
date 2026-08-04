@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_WORD_COUNT } from "@/lib/assignment-info";
 import { DEADLINE_URGENCY_CLASS, getDeadlineUrgency } from "@/lib/deadline";
 import type { SubmissionStatus } from "@/lib/supabase/types";
@@ -29,9 +31,16 @@ const STATUS_LABEL: Record<SubmissionStatus, string> = {
 export default async function AssignmentsPage({ params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
   const session = await getCurrentProfile();
-  if (!session?.profile) notFound();
+  const assessorCourseId = !session?.profile ? await getAssessorCourseId() : null;
+  if (!session?.profile && !assessorCourseId) notFound();
 
-  const supabase = await createClient();
+  const supabase = assessorCourseId ? createAdminClient() : await createClient();
+
+  if (assessorCourseId) {
+    const { data: trainee } = await supabase.from("profiles").select("course_id").eq("id", traineeId).maybeSingle();
+    if (!trainee || trainee.course_id !== assessorCourseId) notFound();
+  }
+
   const { data: assignmentsRaw } = await supabase.from("assignments").select("*").eq("trainee_id", traineeId);
   const assignments = (assignmentsRaw ?? []).sort(
     (a, b) => ASSIGNMENT_ORDER.indexOf(a.assignment_type) - ASSIGNMENT_ORDER.indexOf(b.assignment_type)

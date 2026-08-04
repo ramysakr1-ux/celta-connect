@@ -1,7 +1,11 @@
 import Link from "next/link";
-import { requireRole } from "@/lib/auth/require-role";
+import { redirect } from "next/navigation";
+import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { CELTA_CRITERIA_CODES, computeTrajectory, type Trajectory } from "@/lib/celta-criteria";
+import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 
 const TRAJECTORY_LABEL: Record<Trajectory, string> = {
   "Pass A": "Pass A",
@@ -26,14 +30,17 @@ const TRAJECTORY_PILL_CLASS: Record<Trajectory, string> = {
 // trainer page already does (same function, same "trainer-only, estimated"
 // caveat) rather than inventing a second grading signal.
 export default async function TrainerHomePage() {
-  const trainer = await requireRole("trainer");
-  const supabase = await createClient();
+  const session = await getCurrentProfile();
+  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
+  const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
+  if (!trainer && !assessorCourseId) redirect("/login");
 
-  if (!trainer.course_id) {
+  const supabase = assessorCourseId ? createAdminClient() : await createClient();
+
+  const courseId = trainer?.course_id ?? assessorCourseId;
+  if (!courseId) {
     return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
   }
-
-  const courseId = trainer.course_id;
 
   const [{ data: course }, { data: trainees }] = await Promise.all([
     supabase.from("courses").select("name, start_date, end_date, total_hours").eq("id", courseId).maybeSingle(),
@@ -56,11 +63,19 @@ export default async function TrainerHomePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="font-serif text-2xl text-ink">Trainer Command Center</h1>
-        <p className="mt-1 text-sm text-muted">
-          {[course?.name, course ? `${course.start_date} – ${course.end_date}` : null].filter(Boolean).join(" · ")}
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-2xl text-ink">Trainer Command Center</h1>
+          <p className="mt-1 text-sm text-muted">
+            {[course?.name, course ? `${course.start_date} – ${course.end_date}` : null].filter(Boolean).join(" · ")}
+            {assessorCourseId ? " · viewing as assessor (read-only)" : ""}
+          </p>
+        </div>
+        {trainer ? (
+          <div className="shrink-0">
+            <AssessorLinkButton />
+          </div>
+        ) : null}
       </div>
 
       <div>

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { getTpCardStatus, type TpCardStatus } from "@/lib/tp-plan-content";
 
@@ -23,11 +25,18 @@ const TONE_PILL_CLASS: Record<TpCardStatus["tone"], string> = {
 export default async function TpHubPage({ params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
   const session = await getCurrentProfile();
-  if (!session?.profile) notFound();
-  const viewer = session.profile;
-  const isStaff = viewer.role === "trainer" || viewer.role === "admin";
+  const viewer = session?.profile ?? null;
+  const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
+  if (!viewer && !assessorCourseId) notFound();
+  const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
 
-  const supabase = await createClient();
+  const supabase = assessorCourseId ? createAdminClient() : await createClient();
+
+  if (assessorCourseId) {
+    const { data: trainee } = await supabase.from("profiles").select("course_id").eq("id", traineeId).maybeSingle();
+    if (!trainee || trainee.course_id !== assessorCourseId) notFound();
+  }
+
   const [{ data: plans }, { data: lessons }, { data: tpPlans }, { data: selfEvaluations }, { data: feedbackRows }] =
     await Promise.all([
       supabase.from("plan_assignments").select("*").eq("trainee_id", traineeId),

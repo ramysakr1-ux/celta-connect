@@ -48,9 +48,27 @@ export async function proxy(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/join/") ||
     // /forgot-password is how a logged-out user requests a reset link --
     // inherently unauthenticated, same as /login.
-    request.nextUrl.pathname.startsWith("/forgot-password");
+    request.nextUrl.pathname.startsWith("/forgot-password") ||
+    // Tokenized no-login links (course_access_tokens, migration 0030) --
+    // volunteer students, the admissions register link, and assessors never
+    // get a real Supabase session at all, so these must stay reachable
+    // without one. Each route validates its own token server-side.
+    request.nextUrl.pathname.startsWith("/student/") ||
+    request.nextUrl.pathname.startsWith("/register/") ||
+    request.nextUrl.pathname.startsWith("/assessor/");
 
-  if (!user && !isPublicRoute) {
+  // An assessor carries no real Supabase user at all -- just the
+  // assessor_token cookie set by /assessor/[token] (migration 0030). This
+  // only checks the cookie is present, not that it's still valid/unexpired
+  // -- full validation (getAssessorCourseId) happens at the page level via
+  // the admin client, same division of labor as every other auth check in
+  // this proxy, which also doesn't validate row-level authorization itself.
+  const hasAssessorCookie = Boolean(request.cookies.get("assessor_token")?.value);
+  const isAssessorReachableRoute =
+    hasAssessorCookie &&
+    (request.nextUrl.pathname === "/trainer" || request.nextUrl.pathname.startsWith("/portfolio/"));
+
+  if (!user && !isPublicRoute && !isAssessorReachableRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

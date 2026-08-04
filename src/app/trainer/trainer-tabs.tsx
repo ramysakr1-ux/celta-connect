@@ -11,13 +11,14 @@ const TABS = [
   { href: "/dashboard/trainer/coursebooks", label: "TP Points Library", external: true },
 ] as const;
 
-export function TrainerTabs() {
+export function TrainerTabs({ rosterOnly = false }: { rosterOnly?: boolean }) {
   const pathname = usePathname();
+  const tabs = rosterOnly ? TABS.filter((t) => t.href === "") : TABS;
 
   return (
     <div className="border-b border-border bg-card">
       <div className="container flex gap-8">
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const href = tab.external ? tab.href : `/trainer${tab.href}`;
           const active = tab.external ? false : tab.href === "" ? pathname === "/trainer" : pathname.startsWith(href);
           return (
