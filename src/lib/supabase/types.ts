@@ -32,6 +32,13 @@ export type TpPointStatus = "pending_review" | "published" | "archived";
 export type TpGenerationSource = "ai_generated" | "manual";
 export type FeedbackTone = "direct" | "supportive";
 export type TpMaterialFileType = "pdf" | "image";
+export type ResourceCategory =
+  | "lesson_planning"
+  | "teaching_practice"
+  | "written_assignments"
+  | "cambridge_documentation"
+  | "reading_input";
+export type ResourceType = "template" | "form" | "brief" | "cambridge_doc" | "reading" | "video";
 
 export interface Database {
   public: {
@@ -659,7 +666,10 @@ export interface Database {
           center_id: string;
           course_id: string | null;
           title: string;
+          description: string | null;
           file_url: string;
+          category: ResourceCategory;
+          resource_type: ResourceType;
           uploaded_by: string | null;
           created_at: string;
         };
