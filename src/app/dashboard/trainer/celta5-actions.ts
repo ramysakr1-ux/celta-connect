@@ -347,11 +347,23 @@ export async function updateFinalGrade(
       ? (finalGrade as (typeof validGrades)[number])
       : null;
 
+  const teachingGradeRaw = formData.get("final_teaching_grade");
+  const validTeachingGrades = ["Pass", "Pass B", "Pass A", "Fail"] as const;
+  const teachingGrade =
+    typeof teachingGradeRaw === "string" && (validTeachingGrades as readonly string[]).includes(teachingGradeRaw)
+      ? (teachingGradeRaw as (typeof validTeachingGrades)[number])
+      : null;
+
+  const assignmentsGradeRaw = formData.get("final_assignments_grade");
+  const assignmentsGrade = assignmentsGradeRaw === "Pass" || assignmentsGradeRaw === "Fail" ? assignmentsGradeRaw : null;
+
   const supabase = await createClient();
   const { error } = await supabase
     .from("celta5_records")
     .update({
       final_recommended_grade: grade,
+      final_teaching_grade: teachingGrade,
+      final_assignments_grade: assignmentsGrade,
       overall_notes: optionalString(formData.get("overall_notes")),
     })
     .eq("trainee_id", traineeId);

@@ -48,8 +48,37 @@ export function FinalGradeForm({ record }: { record: Celta5Record }) {
         </div>
       </details>
 
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm text-muted">Preparing, planning and practising teaching</label>
+          <select
+            name="final_teaching_grade"
+            defaultValue={record.final_teaching_grade ?? ""}
+            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-ink outline-none focus:border-primary"
+          >
+            <option value="">Not yet decided</option>
+            <option value="Pass">Pass</option>
+            <option value="Pass B">Pass B</option>
+            <option value="Pass A">Pass A</option>
+            <option value="Fail">Fail</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm text-muted">Written assignments</label>
+          <select
+            name="final_assignments_grade"
+            defaultValue={record.final_assignments_grade ?? ""}
+            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-ink outline-none focus:border-primary"
+          >
+            <option value="">Not yet decided</option>
+            <option value="Pass">Pass</option>
+            <option value="Fail">Fail</option>
+          </select>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Final recommended grade</label>
+        <label className="text-sm text-muted">Overall recommended grade</label>
         <select
           name="final_recommended_grade"
           defaultValue={record.final_recommended_grade ?? ""}

@@ -294,6 +294,8 @@ export interface Database {
           stage3_tutor_other_notes: string | null;
           stage3_finalized_at: string | null;
           final_recommended_grade: FinalGrade | null;
+          final_teaching_grade: "Pass" | "Pass B" | "Pass A" | "Fail" | null;
+          final_assignments_grade: "Pass" | "Fail" | null;
           overall_notes: string | null;
           admin_access_granted_at: string | null;
           admin_access_granted_by: string | null;
