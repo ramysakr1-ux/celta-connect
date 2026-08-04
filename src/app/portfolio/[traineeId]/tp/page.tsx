@@ -66,7 +66,7 @@ export default async function TpHubPage({ params }: { params: Promise<{ traineeI
         <p className="text-xs text-muted">TP1 – TP8</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:auto-rows-fr">
         {TP_NUMBERS.map((tpNumber) => {
           const plan = planByTpNumber.get(tpNumber);
 
