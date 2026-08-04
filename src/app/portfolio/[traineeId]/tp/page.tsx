@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Calendar, Users, Clock, GraduationCap } from "lucide-react";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -116,33 +117,46 @@ export default async function TpHubPage({ params }: { params: Promise<{ traineeI
                 <span className={`pill ${TONE_PILL_CLASS[status.tone]}`}>{status.label}</span>
               </div>
 
-              <p className="mt-3 truncate text-base text-ink">
-                <span className="text-muted">Main aim:</span> <span className="font-medium">{plan.main_lesson_aim}</span>
-              </p>
-              {plan.sub_aim ? (
-                <p className="mt-1 truncate text-sm text-ink">
-                  <span className="text-muted">Sub aim:</span> <span className="font-medium">{plan.sub_aim}</span>
-                </p>
-              ) : null}
+              <p className="mt-3 truncate text-base font-semibold text-ink">{plan.main_lesson_aim}</p>
 
-              <div className="mt-3 flex flex-col gap-1 text-xs text-muted">
+              <div className="mt-3 flex flex-col gap-1.5 text-sm text-muted">
                 {lesson ? (
-                  <p>
-                    {[
-                      lesson.lesson_date,
-                      lesson.level,
-                      lesson.length_minutes ? `${lesson.length_minutes} mins` : null,
-                      lesson.trainer_id ? trainerNameById.get(lesson.trainer_id) : null,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
+                  <>
+                    {lesson.lesson_date ? (
+                      <p className="flex items-center gap-2">
+                        <Calendar className="size-4 shrink-0" aria-hidden="true" />
+                        {lesson.lesson_date}
+                      </p>
+                    ) : null}
+                    {lesson.level ? (
+                      <p className="flex items-center gap-2">
+                        <Users className="size-4 shrink-0" aria-hidden="true" />
+                        {lesson.level}
+                      </p>
+                    ) : null}
+                    {lesson.length_minutes ? (
+                      <p className="flex items-center gap-2">
+                        <Clock className="size-4 shrink-0" aria-hidden="true" />
+                        {lesson.length_minutes} mins
+                      </p>
+                    ) : null}
+                    {lesson.trainer_id && trainerNameById.get(lesson.trainer_id) ? (
+                      <p className="flex items-center gap-2">
+                        <GraduationCap className="size-4 shrink-0" aria-hidden="true" />
+                        {trainerNameById.get(lesson.trainer_id)}
+                      </p>
+                    ) : null}
+                  </>
                 ) : (
                   <p>{label.name}</p>
                 )}
               </div>
 
-              <p className="mt-auto border-t border-border-faint pt-3 text-xs text-muted">
+              <p
+                className={`mt-auto border-t border-border-faint pt-3 text-xs ${
+                  tpPlan?.submitted_at ? "text-status-on-track-text" : "text-muted"
+                }`}
+              >
                 {tpPlan?.submitted_at ? "Lesson plan submitted" : "Plan not yet submitted"}
               </p>
             </Link>
