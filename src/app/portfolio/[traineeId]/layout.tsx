@@ -10,11 +10,19 @@ import { StatBar } from "@/app/portfolio/[traineeId]/stat-bar";
 import { CELTA_CRITERIA_CODES, computeCriteriaSuggestion, computeTrajectory } from "@/lib/celta-criteria";
 
 const TRAJECTORY_LABEL: Record<string, string> = {
-  "Pass A": "Pass A",
-  "Pass B": "Pass B",
-  Pass: "Pass",
-  Fail: "Fail",
+  "Pass A": "On track for Pass A",
+  "Pass B": "On track for Pass B",
+  Pass: "On track for Pass",
+  Fail: "Flagged -- currently below Pass",
   not_enough_data: "Not enough data yet",
+};
+
+const TRAJECTORY_PILL_CLASS: Record<string, string> = {
+  "Pass A": "pill-success",
+  "Pass B": "pill-success",
+  Pass: "pill-success",
+  Fail: "pill-danger",
+  not_enough_data: "pill-neutral",
 };
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
@@ -160,7 +168,9 @@ export default async function PortfolioLayout({
 
           {isStaffView && trajectory ? (
             <div className="lg:ml-2">
-              <span className="pill pill-success">{TRAJECTORY_LABEL[trajectory] ?? trajectory}</span>
+              <span className={`pill ${TRAJECTORY_PILL_CLASS[trajectory] ?? "pill-neutral"}`}>
+                {TRAJECTORY_LABEL[trajectory] ?? trajectory}
+              </span>
             </div>
           ) : null}
         </div>

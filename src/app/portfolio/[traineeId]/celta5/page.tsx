@@ -220,26 +220,21 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
               </div>
             ) : null}
 
-            {record.final_recommended_grade ? (
-              <div className="sheet">
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-serif text-lg text-ink">Final recommended grade</h3>
-                  {record.final_recommended_grade !== "Withdrawn" ? (
-                    <a
-                      href={`/api/celta5/${traineeId}/final-report`}
-                      className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
-                    >
-                      Download final report
-                    </a>
-                  ) : null}
-                </div>
-                <span className="mt-1 inline-flex rounded-[6px] bg-primary px-3 py-1 font-serif text-2xl text-primary-foreground">
-                  {record.final_recommended_grade}
-                </span>
-                <p className="mt-2 text-sm text-muted">Subject to confirmation by Cambridge Assessment English.</p>
-                {record.overall_notes ? <p className="mt-3 text-ink">{record.overall_notes}</p> : null}
-              </div>
-            ) : null}
+            {/* Deliberately no grade reveal here -- Ramy: trainees must never
+                see the real grade in-app, at any point, even at course end.
+                It needs assessor approval first; what a trainee eventually
+                gets is a separate provisional grade report (not yet
+                designed/built), not this record. get_my_celta5_record()
+                already nulls final_recommended_grade/overall_notes for a
+                trainee at the data layer (migration 0034) -- this is just
+                the matching UI, not the only enforcement. */}
+            <div className="sheet">
+              <h3 className="font-serif text-lg text-ink">Final grade</h3>
+              <p className="mt-2 text-sm text-muted">
+                Your final grade is confirmed after your tutor&apos;s recommendation is reviewed. You&apos;ll
+                receive it separately once that&apos;s complete.
+              </p>
+            </div>
 
             <div className="sheet">
               {record.trainee_signoff_final_at ? (
