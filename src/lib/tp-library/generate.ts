@@ -25,6 +25,11 @@ const SUBMIT_TP_POINTS_TOOL = {
             sequence_index: { type: "integer", minimum: 1, maximum: POINTS_PER_TP },
             main_lesson_aim: { type: "string" },
             sub_aim: { type: "string" },
+            short_title: {
+              type: "string",
+              description:
+                "REQUIRED for TP1/TP2 only (main_lesson_aim there is a full sentence, unsuitable as a card headline) -- a short 'Skill/Language focus: Topic' string, e.g. 'Reading for gist and detail: a city life article' or 'Present perfect for life experience' (omit the colon+topic half if there isn't a distinct topic beyond the focus itself). Omit this field entirely for TP3-6, whose main_lesson_aim is already this same short shape.",
+            },
             materials_description: { type: "string" },
             page_references: { type: "string" },
             procedure: {
@@ -53,7 +58,7 @@ Generate exactly ${POINTS_PER_TP} distinct lesson points for EACH TP number 1 th
 
 Each TP number has a different density tier, and the shape of the "procedure" field must match:
 
-- TP1 and TP2 ("scripted" tier): main_lesson_aim and sub_aim must be a full CELTA-style sentence (e.g. "By the end of the lesson, Ss will be better able to use... in the context of..."). procedure must be { "stages": [{ "name": string, "timing": string, "instructions": string }] } with real, detailed prose instructions per stage (e.g. stage names like "LEAD IN", "TEST 1 (DIAGNOSTIC)", "TEACH", "CONTROLLED PRACTICE", "FREER PRACTICE", "FEEDBACK ON CONTENT"). IMPORTANT: since trainees this early in the course aren't yet familiar with CELTA jargon, expand any abbreviation on its first use in the instructions text, e.g. "concept checking questions (CCQs)" not just "CCQs", "target language (TL)" not just "TL".
+- TP1 and TP2 ("scripted" tier): main_lesson_aim and sub_aim must be a full CELTA-style sentence (e.g. "By the end of the lesson, Ss will be better able to use... in the context of..."). ALSO include short_title for these two TP numbers only -- a short "Skill/Language focus: Topic" headline distilled from that same lesson (e.g. "Present perfect for life experience", "Reading for gist and detail: a city life article"), the same short shape TP3-6 already use as their main_lesson_aim, since a full sentence doesn't work as a card headline. procedure must be { "stages": [{ "name": string, "timing": string, "instructions": string }] } with real, detailed prose instructions per stage (e.g. stage names like "LEAD IN", "TEST 1 (DIAGNOSTIC)", "TEACH", "CONTROLLED PRACTICE", "FREER PRACTICE", "FEEDBACK ON CONTENT"). IMPORTANT: since trainees this early in the course aren't yet familiar with CELTA jargon, expand any abbreviation on its first use in the instructions text, e.g. "concept checking questions (CCQs)" not just "CCQs", "target language (TL)" not just "TL".
 - TP3 and TP4 ("framework" tier): main_lesson_aim and sub_aim are just a bare category + topic (e.g. main_lesson_aim: "Vocabulary: Air Travel", sub_aim: "Speaking"). procedure must be { "framework_name": string, "stages": [{ "name": string, "reference": string }], "analysis_label": string, "analysis_prompt": string }. framework_name must be exactly one of these real named frameworks, and stage names must use that framework's real stage vocabulary:
 ${frameworkList}
   analysis_label should be one of "Language Analysis", "Grammar Analysis", "Vocabulary Analysis", or "Functional Language Analysis" depending on the main aim's category, with analysis_prompt describing what the trainee should analyze (e.g. "The 6 items of vocabulary you expect to be the most problematic"). Bare abbreviations (CCQ, TTT, etc.) are fine at this tier.
@@ -70,6 +75,7 @@ interface GeneratedPoint {
   sequence_index: number;
   main_lesson_aim: string;
   sub_aim?: string;
+  short_title?: string;
   materials_description?: string;
   page_references?: string;
   procedure?: unknown;
@@ -188,6 +194,7 @@ export async function generateTpPointsForCoursebook(coursebookId: string): Promi
       density_tier: getDensityTier(p.tp_number),
       main_lesson_aim: p.main_lesson_aim,
       sub_aim: p.sub_aim ?? null,
+      short_title: p.short_title ?? null,
       materials_description: p.materials_description ?? null,
       page_references: p.page_references ?? null,
       procedure: (p.procedure ?? null) as never,

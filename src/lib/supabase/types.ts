@@ -377,6 +377,7 @@ export interface Database {
           density_tier: TpDensityTier;
           main_lesson_aim: string;
           sub_aim: string | null;
+          short_title: string | null;
           materials_description: string | null;
           procedure: TpProcedure | null;
           page_references: string | null;
@@ -504,6 +505,7 @@ export interface Database {
           rotation_position_used: number;
           main_lesson_aim: string;
           sub_aim: string | null;
+          short_title: string | null;
           materials_description: string | null;
           procedure: TpProcedure | null;
           page_references: string | null;

@@ -16,6 +16,20 @@ const TONE_PILL_CLASS: Record<TpCardStatus["tone"], string> = {
   pending: "pill-neutral",
 };
 
+// TP3-6 aims are already generated as a short "Category: Topic" string
+// (e.g. "Vocabulary: Air Travel") and need no help. TP1/2 ("scripted"
+// tier) are deliberately generated as a full CELTA-style sentence
+// instead ("By the end of the lesson, Ss will be better able to use...")
+// -- there's no separate short field for those yet, so this strips the
+// near-universal boilerplate opener as a stopgap to make the truncated
+// card title read better, without touching the underlying data (the full
+// sentence is still what's stored and shown on the TP detail page).
+const AIM_BOILERPLATE = /^by the end of (the lesson|this lesson),?\s*(ss|students)\s+will be better able to\s*/i;
+function shortenAim(aim: string): string {
+  const stripped = aim.replace(AIM_BOILERPLATE, "");
+  return stripped.length > 0 ? stripped.charAt(0).toUpperCase() + stripped.slice(1) : aim;
+}
+
 // §6 -- TP1-8 grid. Every slot is always visible so a trainee can see the
 // shape of the course from day one; a slot with no plan_assignments row yet
 // renders as a locked box, except TP7/8 which link out to the self-select
@@ -117,9 +131,11 @@ export default async function TpHubPage({ params }: { params: Promise<{ traineeI
                 <span className={`pill ${TONE_PILL_CLASS[status.tone]}`}>{status.label}</span>
               </div>
 
-              <p className="mt-3 truncate text-base font-semibold text-ink">{plan.main_lesson_aim}</p>
+              <p className="mt-3 truncate text-base font-semibold text-ink">
+                {plan.short_title ?? shortenAim(plan.main_lesson_aim)}
+              </p>
 
-              <div className="mt-3 flex flex-col gap-1.5 text-sm text-muted">
+              <div className="mt-3 flex flex-col gap-[22px] text-sm text-muted">
                 {lesson ? (
                   <>
                     {lesson.lesson_date ? (
@@ -152,13 +168,18 @@ export default async function TpHubPage({ params }: { params: Promise<{ traineeI
                 )}
               </div>
 
-              <p
-                className={`mt-auto border-t border-border-faint pt-3 text-xs ${
-                  tpPlan?.submitted_at ? "text-status-on-track-text" : "text-muted"
-                }`}
-              >
-                {tpPlan?.submitted_at ? "Lesson plan submitted" : "Plan not yet submitted"}
-              </p>
+              <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs">
+                <span
+                  className={
+                    tpPlan?.submitted_at ? "font-medium text-[oklch(45%_0.13_150)]" : "text-muted"
+                  }
+                >
+                  {tpPlan?.submitted_at ? "Lesson plan submitted" : "Plan not yet submitted"}
+                </span>
+                <span className="flex items-center gap-1 font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                  Open <span aria-hidden="true">→</span>
+                </span>
+              </div>
             </Link>
           );
         })}
