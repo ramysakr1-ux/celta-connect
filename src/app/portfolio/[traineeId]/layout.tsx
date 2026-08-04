@@ -7,6 +7,15 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { Wordmark } from "@/components/wordmark";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
 import { StatBar } from "@/app/portfolio/[traineeId]/stat-bar";
+import { CELTA_CRITERIA_CODES, computeCriteriaSuggestion, computeTrajectory } from "@/lib/celta-criteria";
+
+const TRAJECTORY_LABEL: Record<string, string> = {
+  "Pass A": "Pass A",
+  "Pass B": "Pass B",
+  Pass: "Pass",
+  Fail: "Fail",
+  not_enough_data: "Not enough data yet",
+};
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
 // only ever land on their own :traineeId (redirected home otherwise);
@@ -47,13 +56,16 @@ export default async function PortfolioLayout({
   if (!trainee) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
+  const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
+  const isStaffView = isStaff || Boolean(assessorCourseId);
+
   const [{ data: course }, { data: center }, { data: lessons }, { data: celta5Record }, { data: assignments }] =
     await Promise.all([
       trainee.course_id
         ? supabase.from("courses").select("*").eq("id", trainee.course_id).maybeSingle()
         : Promise.resolve({ data: null }),
       supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
-      supabase.from("tp_lessons").select("length_minutes").eq("trainee_id", trainee.id),
+      supabase.from("tp_lessons").select("id, length_minutes").eq("trainee_id", trainee.id),
       supabase.from("celta5_records").select("hours_attended").eq("trainee_id", trainee.id).maybeSingle(),
       supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
     ]);
@@ -64,8 +76,34 @@ export default async function PortfolioLayout({
     (a) => a.first_status === "approved" || a.resubmission_status === "approved"
   ).length;
 
-  const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
-  const isStaffView = isStaff || Boolean(assessorCourseId);
+  // Trajectory: trainer/assessor-only informal estimate, computed the exact
+  // same way the CELTA5 page does (tutor's Stage Two ratings, falling back
+  // to the same TP-feedback-tag suggestion when a criterion isn't rated
+  // yet) -- gated behind isStaffView so a trainee view never pays for or
+  // sees this query at all.
+  let trajectory: string | null = null;
+  if (isStaffView) {
+    const lessonIds = (lessons ?? []).map((l) => l.id);
+    const [{ data: matrix }, { data: criteriaTags }] = await Promise.all([
+      supabase.from("celta5_matrix").select("criteria_code, tutor_status_stage2").eq("trainee_id", trainee.id),
+      lessonIds.length > 0
+        ? supabase.from("tp_lesson_criteria_tags").select("*").in("tp_lesson_id", lessonIds).order("created_at")
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    const matrixByCode = new Map((matrix ?? []).map((m) => [m.criteria_code, m.tutor_status_stage2]));
+    const tagsByCriteria = new Map<string, { tag_type: "strength" | "action_point"; created_at: string }[]>();
+    for (const tag of criteriaTags ?? []) {
+      const list = tagsByCriteria.get(tag.criteria_code) ?? [];
+      list.push({ tag_type: tag.tag_type, created_at: tag.created_at });
+      tagsByCriteria.set(tag.criteria_code, list);
+    }
+    const trajectoryInputs = CELTA_CRITERIA_CODES.map(
+      (code) => matrixByCode.get(code) ?? computeCriteriaSuggestion(tagsByCriteria.get(code) ?? []) ?? null
+    );
+    trajectory = computeTrajectory(trajectoryInputs);
+  }
+
   const initials = trainee.full_name
     .split(" ")
     .map((p) => p[0])
@@ -94,29 +132,37 @@ export default async function PortfolioLayout({
       <PortfolioTabs traineeId={trainee.id} />
 
       <div className="container flex-1 py-8">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-surface-muted">
-              <span className="font-serif text-xl text-muted">{initials}</span>
+        <div className="sheet flex flex-col gap-5 p-5 lg:flex-row lg:items-center">
+          <div className="flex min-w-0 items-center gap-3.5">
+            <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-surface-muted">
+              <span className="font-serif text-lg text-muted">{initials}</span>
             </div>
-            <h1 className="font-serif text-3xl leading-none text-ink">{trainee.full_name}</h1>
+            <div className="min-w-0">
+              <h1 className="truncate font-serif text-2xl leading-tight text-ink">{trainee.full_name}</h1>
+              <p className="truncate text-sm text-muted">
+                {[course?.name, course ? `${course.start_date} – ${course.end_date}` : null]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </div>
           </div>
-          <p className="mt-0.5 ml-[68px] text-xs text-muted">
-            {[course?.name, course ? `${course.start_date} – ${course.end_date}` : null]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-        </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-12">
-          <StatBar label="Assessed teaching" value={Number(assessedHours.toFixed(2))} max={6} unit="hrs" />
-          <StatBar
-            label="Attendance"
-            value={Number(attendanceHours.toFixed(1))}
-            max={course?.total_hours ?? 120}
-            unit="hrs"
-          />
-          <StatBar label="Assignments passed" value={assignmentsPassed} max={4} />
+          <div className="grid flex-1 grid-cols-2 gap-5 lg:max-w-2xl lg:grid-cols-3">
+            <StatBar label="Assessed teaching" value={Number(assessedHours.toFixed(2))} max={6} unit="hrs" />
+            <StatBar
+              label="Attendance"
+              value={Number(attendanceHours.toFixed(1))}
+              max={course?.total_hours ?? 120}
+              unit="hrs"
+            />
+            <StatBar label="Assignments passed" value={assignmentsPassed} max={4} />
+          </div>
+
+          {isStaffView && trajectory ? (
+            <div className="lg:ml-2">
+              <span className="pill pill-success">{TRAJECTORY_LABEL[trajectory] ?? trajectory}</span>
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-8">{children}</div>

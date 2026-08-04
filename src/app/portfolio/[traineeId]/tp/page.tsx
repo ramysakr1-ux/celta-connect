@@ -67,10 +67,15 @@ export default async function TpHubPage({ params }: { params: Promise<{ traineeI
   const selfEvalByTpNumber = new Map((selfEvaluations ?? []).map((s) => [s.tp_number, s]));
   const feedbackByTpNumber = new Map((feedbackRows ?? []).map((f) => [f.tp_number, f]));
 
+  // Admin client regardless of viewer: a trainee has no RLS SELECT on a
+  // trainer's profile row at all (only their own + subgroup-mates), so
+  // the session-scoped client silently returned zero trainers here for a
+  // trainee viewing their own assigned lessons -- same bug shape as the
+  // final report's signatory lookup earlier this session.
   const trainerIds = [...new Set((lessons ?? []).map((l) => l.trainer_id).filter(Boolean))];
   const { data: trainers } =
     trainerIds.length > 0
-      ? await supabase.from("profiles").select("id, full_name").in("id", trainerIds as string[])
+      ? await createAdminClient().from("profiles").select("id, full_name").in("id", trainerIds as string[])
       : { data: [] };
   const trainerNameById = new Map((trainers ?? []).map((t) => [t.id, t.full_name]));
 
@@ -99,9 +104,34 @@ export default async function TpHubPage({ params }: { params: Promise<{ traineeI
               );
             }
             return (
-              <div key={tpNumber} className="sheet flex h-full flex-col justify-center gap-1 p-5">
-                <span className="font-serif text-2xl text-muted">TP{tpNumber}</span>
-                <p className="text-sm text-muted">Not yet assigned.</p>
+              <div key={tpNumber} className="sheet flex h-full flex-col p-5">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="font-serif text-2xl text-muted">TP{tpNumber}</span>
+                  <span className="pill pill-neutral">Not yet assigned</span>
+                </div>
+
+                <p className="mt-3 truncate text-base font-semibold text-muted">Not yet assigned</p>
+
+                <div className="mt-3 flex flex-col gap-[22px] text-sm text-muted">
+                  <p className="flex items-center gap-2">
+                    <Calendar className="size-4 shrink-0" aria-hidden="true" />
+                    Not yet scheduled
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <Users className="size-4 shrink-0" aria-hidden="true" />
+                    Level TBC
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <Clock className="size-4 shrink-0" aria-hidden="true" />
+                    Duration TBC
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <GraduationCap className="size-4 shrink-0" aria-hidden="true" />
+                    Trainer TBC
+                  </p>
+                </div>
+
+                <p className="mt-4 border-t border-border pt-3 text-xs text-muted">Awaiting rotation assignment</p>
               </div>
             );
           }
