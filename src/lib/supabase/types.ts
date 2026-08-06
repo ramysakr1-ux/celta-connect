@@ -25,7 +25,7 @@ export type CriteriaRating = "S+" | "S" | "N" | "X";
 export type StandardRating = "above_standard" | "to_standard" | "not_to_standard";
 export type PassFail = "pass" | "fail";
 export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn";
-export type StaffChannelType = "center_trainers" | "all_staff" | "dm";
+export type StaffChannelType = "center_trainers" | "all_staff" | "dm" | "tp_group";
 export type TpGenerationStatus = "pending" | "processing" | "completed" | "failed";
 export type TpDensityTier = "scripted" | "framework" | "coaching_prose" | "minimal";
 export type TpPointStatus = "pending_review" | "published" | "archived";
@@ -37,8 +37,21 @@ export type ResourceCategory =
   | "teaching_practice"
   | "written_assignments"
   | "cambridge_documentation"
-  | "reading_input";
+  | "reading"
+  | "input_sessions"
+  | "filmed_observations"
+  | "admissions";
 export type ResourceType = "template" | "form" | "brief" | "cambridge_doc" | "reading" | "video";
+
+// A course's timetable daily structure -- see courses.time_bands. Defined
+// here (not in timetable-grid.ts) since timetable-grid.ts already imports
+// Database from this file; timetable-grid.ts re-exports/imports this type
+// instead of the reverse, to avoid a circular import.
+export interface TimeBand {
+  start: string;
+  end: string;
+  label: string;
+}
 
 export interface Database {
   public: {
@@ -72,6 +85,7 @@ export interface Database {
           trainee_join_token: string;
           trainer_join_token: string;
           timetable_locked_at: string | null;
+          time_bands: TimeBand[] | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["courses"]["Row"]> & {
@@ -91,6 +105,7 @@ export interface Database {
           role: UserRole;
           center_id: string;
           course_id: string | null;
+          tutor_role: string | null;
           terms_accepted_at: string | null;
           created_at: string;
         };
@@ -293,6 +308,9 @@ export interface Database {
           stage3_tutor_written_assignments_notes: string | null;
           stage3_tutor_other_notes: string | null;
           stage3_finalized_at: string | null;
+          provisional_grade: FinalGrade | null;
+          provisional_grade_upper: FinalGrade | null;
+          provisional_set_at: string | null;
           final_recommended_grade: FinalGrade | null;
           final_teaching_grade: "Pass" | "Pass B" | "Pass A" | "Fail" | null;
           final_assignments_grade: "Pass" | "Fail" | null;
@@ -303,6 +321,13 @@ export interface Database {
           trainee_signoff_stage2_at: string | null;
           trainer_signoff_final_at: string | null;
           trainee_signoff_final_at: string | null;
+          final_checklist_tp: boolean;
+          final_checklist_observations: boolean;
+          final_checklist_assignments: boolean;
+          final_checklist_own_work: boolean;
+          final_checklist_all_records: boolean;
+          grade_review_tutor_comments: string | null;
+          final_report_released_at: string | null;
           updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["celta5_records"]["Row"]> & {
@@ -348,6 +373,29 @@ export interface Database {
           storage_path: string;
         };
         Update: Partial<Database["public"]["Tables"]["tp_coursebooks"]["Row"]>;
+        Relationships: [];
+      };
+      tp_audio_library: {
+        Row: {
+          id: string;
+          center_id: string;
+          level: string;
+          coursebook_title: string;
+          unit_label: string | null;
+          file_name: string;
+          storage_path: string;
+          original_filename: string | null;
+          uploaded_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_audio_library"]["Row"]> & {
+          center_id: string;
+          level: string;
+          coursebook_title: string;
+          file_name: string;
+          storage_path: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_audio_library"]["Row"]>;
         Relationships: [];
       };
       feedback_style_examples: {
@@ -674,6 +722,7 @@ export interface Database {
           file_url: string;
           category: ResourceCategory;
           resource_type: ResourceType;
+          visible_to_trainee: boolean;
           uploaded_by: string | null;
           created_at: string;
         };
@@ -751,6 +800,8 @@ export interface Database {
         Row: {
           id: string;
           center_id: string;
+          course_id: string | null;
+          subgroup_id: string | null;
           type: StaffChannelType;
           name: string | null;
           created_at: string;

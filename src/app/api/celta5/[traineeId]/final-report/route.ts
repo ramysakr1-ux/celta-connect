@@ -7,10 +7,15 @@ import { renderFinalReportBuffer } from "@/lib/final-report-pdf/document";
 
 // Same three-way viewer resolution as every /portfolio/[traineeId]/* page
 // this session (trainee-self / real staff / assessor-via-cookie), reused
-// here rather than invented fresh for this one route. Only downloadable
-// once the trainer has actually finalized + released the record
-// (trainer_signoff_final_at) -- matches the existing "finalReleased" gate
-// the CELTA5 page already uses for showing Stage Three/final grade at all.
+// here rather than invented fresh for this one route.
+//
+// Two distinct gates, not one (Ramy, 2026-08-05): trainer_signoff_final_at
+// is the trainer's internal finalize step at course end -- staff/assessor
+// can download from that moment. A trainee's OWN copy is a separate, later
+// event (final_report_released_at, migration 0038) -- "maybe a week after
+// the course... never during the course," once Cambridge has actually
+// confirmed things. This is unrelated to the Grades Report (provisional/
+// final grade), which stays trainer+assessor-only forever regardless.
 export async function GET(_request: Request, { params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
   const session = await getCurrentProfile();
@@ -26,6 +31,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
   }
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
+  // celta5_records has no trainee-self RLS SELECT (same restriction as the
+  // portfolio celta5 page -- a trainee only ever reads it through
+  // get_my_celta5_record(), which masks the grade fields entirely). This
+  // route already independently re-authorizes the viewer above, so once
+  // that's done it's safe to read the real row directly via the admin
+  // client rather than going through that masking RPC.
+  const admin = createAdminClient();
 
   const { data: trainee } = await supabase
     .from("profiles")
@@ -39,32 +51,28 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
     return NextResponse.json({ error: "Not authorized." }, { status: 403 });
   }
 
-  // A trainee viewing their own record has no direct RLS SELECT on
-  // celta5_records (same restriction as the portfolio celta5 page) --
-  // they only ever read it through get_my_celta5_record(), which also
-  // happens to already mask everything until trainer_signoff_final_at
-  // is set, so it's a good fit for this gate too.
   const isTraineeSelf = !isStaff && !assessorCourseId;
 
   const [{ data: course }, { data: center }, { data: record }, { data: trainers }] = await Promise.all([
     supabase.from("courses").select("name, start_date, end_date, total_hours").eq("id", trainee.course_id).maybeSingle(),
     supabase.from("centers").select("name, logo_url").eq("id", trainee.center_id).maybeSingle(),
-    isTraineeSelf
-      ? supabase.rpc("get_my_celta5_record").then((r) => ({ data: r.data?.[0] ?? null }))
-      : supabase.from("celta5_records").select("*").eq("trainee_id", traineeId).maybeSingle(),
+    admin.from("celta5_records").select("*").eq("trainee_id", traineeId).maybeSingle(),
     // Admin client regardless of viewer: profiles RLS only lets a trainee
     // read their own row (plus subgroup-mates), so the session-scoped
     // client silently returns zero trainers here for a trainee viewer.
     // Trainer name + role on the trainee's own finalized report isn't
     // sensitive -- this mirrors how course/center are already visible.
-    createAdminClient().from("profiles").select("full_name").eq("course_id", trainee.course_id).eq("role", "trainer").order("full_name"),
+    admin.from("profiles").select("full_name").eq("course_id", trainee.course_id).eq("role", "trainer").order("full_name"),
   ]);
 
   if (!record || !record.final_recommended_grade || record.final_recommended_grade === "Withdrawn") {
     return NextResponse.json({ error: "No final grade has been recommended yet." }, { status: 409 });
   }
   if (!record.trainer_signoff_final_at) {
-    return NextResponse.json({ error: "This record hasn't been finalized and released yet." }, { status: 409 });
+    return NextResponse.json({ error: "This record hasn't been finalized yet." }, { status: 409 });
+  }
+  if (isTraineeSelf && !record.final_report_released_at) {
+    return NextResponse.json({ error: "Your final report hasn't been released yet." }, { status: 409 });
   }
   if (!course) {
     return NextResponse.json({ error: "Course not found." }, { status: 404 });

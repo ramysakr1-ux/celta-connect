@@ -8,7 +8,7 @@ import { requireRole } from "@/lib/auth/require-role";
 // rather than minting a new one every time, same as the register-viewer
 // link (getOrCreateRegisterViewToken).
 export async function getOrCreateAssessorToken(): Promise<{ token: string | null; error: string | null }> {
-  const trainer = await requireRole("trainer");
+  const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) return { token: null, error: "No course assigned." };
 
   const supabase = await createClient();

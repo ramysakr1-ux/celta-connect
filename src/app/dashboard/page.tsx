@@ -13,7 +13,7 @@ export default async function DashboardIndexPage() {
         <h1 className="font-serif text-xl text-ink">Account not set up yet</h1>
         <p className="mt-2 text-muted">
           {email} is signed in, but no profile exists for this account yet.
-          Ask your center admin to add you to a course.
+          Ask your centre admin to add you to a course.
         </p>
       </div>
     );

@@ -52,7 +52,7 @@ export function DriveAttachButtons({
       disabled={busy}
       className="self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary disabled:opacity-50"
     >
-      {busy ? "Opening…" : "Attach from center's Drive"}
+      {busy ? "Opening…" : "Attach from centre's Drive"}
     </button>
   );
 }

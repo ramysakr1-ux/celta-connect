@@ -98,7 +98,7 @@ export function MaterialsSection({
     <div className="card p-6">
       <h2 className="font-serif text-lg text-ink">Materials</h2>
       <p className="mt-1 text-sm text-muted">
-        Handouts, worksheets, or slides. Upload a PDF/image{hasGoogleConnection ? ", or attach a file directly from your center's Drive" : ""}.
+        Handouts, worksheets, or slides. Upload a PDF/image{hasGoogleConnection ? ", or attach a file directly from your centre's Drive" : ""}.
       </p>
 
       {materials.length > 0 ? (

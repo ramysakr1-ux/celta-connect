@@ -60,11 +60,24 @@ export async function signOffStage2(): Promise<void> {
   revalidatePath("/dashboard/trainee/celta5");
 }
 
-export async function signOffFinal(): Promise<void> {
+export async function signOffFinal(_prevState: FormState, formData: FormData): Promise<FormState> {
   await requireRole("trainee");
   const supabase = await createClient();
-  await supabase.rpc("trainee_sign_off_final");
+  const { error } = await supabase.rpc("trainee_sign_off_final", {
+    p_checklist_tp: formData.get("checklist_tp") === "on",
+    p_checklist_observations: formData.get("checklist_observations") === "on",
+    p_checklist_assignments: formData.get("checklist_assignments") === "on",
+    p_checklist_own_work: formData.get("checklist_own_work") === "on",
+    p_checklist_all_records: formData.get("checklist_all_records") === "on",
+  });
+
+  if (error) {
+    return { error: "Could not sign off -- make sure all five confirmations are checked." };
+  }
+
   revalidatePath("/dashboard/trainee/celta5");
+  revalidatePath("/portfolio", "layout");
+  return { error: null };
 }
 
 export interface ObservationFormState {

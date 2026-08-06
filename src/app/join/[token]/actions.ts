@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
+import { TUTOR_ROLES } from "@/lib/tutor-roles";
 import type { UserRole } from "@/lib/supabase/types";
 
 export interface JoinCourseState {
@@ -64,6 +65,12 @@ export async function joinCourse(
   }
   const { course, role } = resolved;
 
+  const tutorRoleInput = formData.get("tutor_role");
+  const tutorRole =
+    role === "trainer" && typeof tutorRoleInput === "string" && TUTOR_ROLES.includes(tutorRoleInput as (typeof TUTOR_ROLES)[number])
+      ? tutorRoleInput
+      : null;
+
   const adminClient = createAdminClient();
   const { data: created, error: createError } = await adminClient.auth.admin.createUser({
     email,
@@ -89,6 +96,7 @@ export async function joinCourse(
     role,
     center_id: course.center_id,
     course_id: course.id,
+    tutor_role: tutorRole,
     terms_accepted_at: new Date().toISOString(),
   });
 

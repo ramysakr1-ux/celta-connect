@@ -2,13 +2,15 @@
 
 import { useActionState } from "react";
 import { joinCourse, type JoinCourseState } from "@/app/join/[token]/actions";
+import { TUTOR_ROLES, TUTOR_ROLE_LABELS } from "@/lib/tutor-roles";
+import type { UserRole } from "@/lib/supabase/types";
 
 const initialState: JoinCourseState = { error: null };
 
 const inputClass =
   "h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary";
 
-export function JoinForm({ token }: { token: string }) {
+export function JoinForm({ token, role }: { token: string; role: UserRole }) {
   const [state, action, pending] = useActionState(joinCourse, initialState);
 
   return (
@@ -21,6 +23,22 @@ export function JoinForm({ token }: { token: string }) {
         </label>
         <input id="full_name" name="full_name" type="text" required className={inputClass} />
       </div>
+
+      {role === "trainer" ? (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="tutor_role" className="text-sm text-muted">
+            Your role on this course (optional)
+          </label>
+          <select id="tutor_role" name="tutor_role" defaultValue="" className={inputClass}>
+            <option value="">Not specified</option>
+            {TUTOR_ROLES.map((r) => (
+              <option key={r} value={r}>
+                {TUTOR_ROLE_LABELS[r]}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-sm text-muted">

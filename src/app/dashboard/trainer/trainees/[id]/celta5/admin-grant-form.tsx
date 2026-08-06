@@ -17,7 +17,7 @@ export function AdminGrantForm({ record }: { record: Celta5Record }) {
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
       <h2 className="font-serif text-lg text-ink">Admin access</h2>
       <p className="text-sm text-muted">
-        Admin (center business/admissions staff) has no access to this record by default.
+        Admin (centre business/admissions staff) has no access to this record by default.
         Grant it here only if there&apos;s a specific business reason to.
       </p>
 

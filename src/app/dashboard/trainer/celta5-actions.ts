@@ -373,5 +373,116 @@ export async function updateFinalGrade(
   }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+  revalidatePath("/trainer/grades-report");
+  return { error: null };
+}
+
+const PROVISIONAL_GRADES = ["Pass", "Pass B", "Pass A", "Fail", "Withdrawn"] as const;
+
+// The real provisional grade, set by the trainer around Stage 2 (~TP6) --
+// distinct from final_recommended_grade, which stays hidden from trainees
+// (see 0034_hide_final_grade_from_trainee.sql). computeTrajectory() can
+// suggest a starting point, but this is always the trainer's own call, same
+// as every other rating in this app -- including whether to mark the
+// candidate as "slashed" between two adjacent grades by also setting the
+// upper bound.
+export async function updateProvisionalGrade(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("trainer");
+
+  const traineeId = formData.get("trainee_id");
+  if (typeof traineeId !== "string" || !traineeId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const grade = optionalRating(formData.get("provisional_grade"), PROVISIONAL_GRADES);
+  const upper = optionalRating(formData.get("provisional_grade_upper"), PROVISIONAL_GRADES);
+
+  const supabase = await createClient();
+  const { error: provisionalError } = await supabase
+    .from("celta5_records")
+    .update({
+      provisional_grade: grade,
+      // A "slashed" upper bound only makes sense once there's a primary
+      // grade to be uncertain relative to, and only when it's genuinely a
+      // different (higher) grade -- not a duplicate of the primary.
+      provisional_grade_upper: grade && upper && upper !== grade ? upper : null,
+      provisional_set_at: grade ? new Date().toISOString() : null,
+    })
+    .eq("trainee_id", traineeId);
+
+  if (provisionalError) {
+    return { error: "Could not save. Try again." };
+  }
+
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+  revalidatePath("/trainer/grades-report");
+  return { error: null };
+}
+
+// The "INFORMATION FOR THE CELTA GRADE REVIEW" box -- required when
+// stage3_required is true, Cambridge/assessor-facing commentary, never
+// shown to the trainee (same treatment as final_recommended_grade/
+// overall_notes per migration 0034).
+export async function updateGradeReviewComments(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("trainer");
+
+  const traineeId = formData.get("trainee_id");
+  if (typeof traineeId !== "string" || !traineeId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("celta5_records")
+    .update({ grade_review_tutor_comments: optionalString(formData.get("grade_review_tutor_comments")) })
+    .eq("trainee_id", traineeId);
+
+  if (error) {
+    return { error: "Could not save. Try again." };
+  }
+
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+  revalidatePath(`/portfolio/${traineeId}/celta5`);
+  return { error: null };
+}
+
+// Releases the trainee's own copy of the Final Report (the certificate-
+// style PDF) -- a deliberately separate, later action from finalizing the
+// record. Ramy: trainees only ever see this "maybe a week after the
+// course... never during the course," once Cambridge has actually
+// confirmed things -- not the moment the trainer finalizes internally. No
+// automated timer; a trainer/admin clicks this when it's genuinely time.
+// Unrelated to the Grades Report (provisional/final grade), which stays
+// trainer+assessor-only forever regardless of this.
+export async function releaseFinalReport(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("trainer");
+
+  const traineeId = formData.get("trainee_id");
+  if (typeof traineeId !== "string" || !traineeId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("celta5_records")
+    .update({ final_report_released_at: new Date().toISOString() })
+    .eq("trainee_id", traineeId)
+    .not("trainer_signoff_final_at", "is", null);
+
+  if (error) {
+    return { error: "Could not save. Try again." };
+  }
+
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+  revalidatePath(`/portfolio/${traineeId}/celta5`);
   return { error: null };
 }

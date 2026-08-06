@@ -17,16 +17,22 @@ import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/a
 // /dashboard/trainer/trainees/[id]/assignments/[assignmentId].
 export default async function AssignmentDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ traineeId: string; assignmentId: string }>;
+  searchParams: Promise<{ preview?: string }>;
 }) {
   const { traineeId, assignmentId } = await params;
+  const { preview } = await searchParams;
   const session = await getCurrentProfile();
   const viewer = session?.profile ?? null;
-  const isEditableStaff = viewer?.role === "trainer" || viewer?.role === "admin";
+  // Raw role check for the access gate -- see the TP detail page's
+  // identical comment for why this can't fold in previewAsTrainee.
+  const isRealStaff = viewer?.role === "trainer" || viewer?.role === "admin";
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
   if (!viewer && !assessorCourseId) notFound();
-  if (viewer && !isEditableStaff && viewer.id !== traineeId) notFound();
+  if (viewer && !isRealStaff && viewer.id !== traineeId) notFound();
+  const isEditableStaff = isRealStaff && preview !== "trainee";
   const isStaff = isEditableStaff || Boolean(assessorCourseId);
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();

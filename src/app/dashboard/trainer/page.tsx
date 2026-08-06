@@ -27,10 +27,10 @@ export default async function TrainerDashboardPage() {
           <p className="mt-2 text-muted">Your cohort&apos;s TP and assignment progress.</p>
         </div>
         <div className="flex gap-4">
-          <Link href="/dashboard/trainer/coursebooks" className="text-sm text-muted hover:text-ink">
+          <Link href="/trainer/coursebooks" className="text-sm text-muted hover:text-ink">
             TP Points Library
           </Link>
-          <Link href="/dashboard/trainer/rotation" className="text-sm text-muted hover:text-ink">
+          <Link href="/trainer/rotation" className="text-sm text-muted hover:text-ink">
             TP Rotation
           </Link>
         </div>

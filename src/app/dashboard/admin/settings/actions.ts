@@ -8,6 +8,42 @@ export interface FormState {
   error: string | null;
 }
 
+// Centre-level identity -- name + the real Cambridge-assigned centre
+// number. Every course under this centre shares the same number (it's
+// not a per-course value), so it lives here rather than on the
+// create-course form -- that form just shows it read-only for
+// confirmation. Previously had no edit UI at all: centers.center_number
+// only ever held an auto-generated "PENDING-xxxxxxxx" placeholder
+// (migration 0003) until an admin actually sets the real one here.
+export async function updateCenterProfile(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const profile = await requireRole("admin");
+
+  const name = (formData.get("name") as string | null)?.trim();
+  const centerNumber = (formData.get("center_number") as string | null)?.trim();
+  if (!name || !centerNumber) {
+    return { error: "Enter both the centre name and centre number." };
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("centers")
+    .update({ name, center_number: centerNumber })
+    .eq("id", profile.center_id);
+
+  if (error) {
+    return {
+      error: error.code === "23505" ? "That centre number is already in use." : "Could not save. Try again.",
+    };
+  }
+
+  revalidatePath("/dashboard/admin/settings");
+  revalidatePath("/dashboard/admin");
+  return { error: null };
+}
+
 export async function updateGoogleDriveTargets(
   _prevState: FormState,
   formData: FormData

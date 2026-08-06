@@ -57,11 +57,17 @@ export function ResourceComposer({ traineeId }: { traineeId: string }) {
         rows={2}
         className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
       />
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2">
         <label className="flex items-center gap-2 text-sm text-muted">
           <input type="checkbox" name="center_wide" />
           Share across the whole center, not just this course
         </label>
+        <label className="flex items-center gap-2 text-sm text-muted">
+          <input type="checkbox" name="visible_to_trainee" defaultChecked />
+          Visible to the trainee (uncheck for trainer/assessor-only material, e.g. an internal template)
+        </label>
+      </div>
+      <div className="flex items-center justify-between">
         {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
         <button
           type="submit"

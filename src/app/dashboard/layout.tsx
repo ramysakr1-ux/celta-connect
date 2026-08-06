@@ -22,7 +22,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-border">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+        <div className="container flex items-center justify-between py-4">
           <Link href="/dashboard" className="hover:opacity-80">
             <Wordmark size="sm" />
           </Link>
@@ -37,7 +37,7 @@ export default async function DashboardLayout({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</main>
+      <main className="container w-full flex-1 py-8">{children}</main>
 
       <footer className="px-6 py-4 text-right text-xs text-muted">
         Designed by Ramy

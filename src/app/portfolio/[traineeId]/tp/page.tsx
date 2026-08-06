@@ -37,13 +37,21 @@ function shortenAim(aim: string): string {
 // here, just linked to). Reuses the exact same status state machine
 // (getTpCardStatus) as the pre-existing /dashboard/trainee/plan grid so the
 // two views can never disagree about where a trainee stands.
-export default async function TpHubPage({ params }: { params: Promise<{ traineeId: string }> }) {
+export default async function TpHubPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ traineeId: string }>;
+  searchParams: Promise<{ preview?: string }>;
+}) {
   const { traineeId } = await params;
+  const { preview } = await searchParams;
   const session = await getCurrentProfile();
   const viewer = session?.profile ?? null;
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
   if (!viewer && !assessorCourseId) notFound();
-  const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
+  // See portfolio/[traineeId]/layout.tsx's previewAsTrainee comment.
+  const isStaff = (viewer?.role === "trainer" || viewer?.role === "admin") && preview !== "trainee";
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
 

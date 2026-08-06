@@ -7,18 +7,17 @@ export default async function AdminDashboardPage() {
   const profile = await requireRole("admin");
   const supabase = await createClient();
 
-  const { data: courses } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("center_id", profile.center_id)
-    .order("start_date", { ascending: false });
+  const [{ data: courses }, { data: center }] = await Promise.all([
+    supabase.from("courses").select("*").eq("center_id", profile.center_id).order("start_date", { ascending: false }),
+    supabase.from("centers").select("name, center_number").eq("id", profile.center_id).maybeSingle(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
       <div className="card flex items-center justify-between p-6">
         <div>
           <h1 className="font-serif text-xl text-ink">Welcome, {profile.full_name}</h1>
-          <p className="mt-2 text-muted">Manage your center&apos;s courses and roster.</p>
+          <p className="mt-2 text-muted">Manage your centre&apos;s courses and roster.</p>
         </div>
         <div className="flex gap-4">
           <Link href="/dashboard/admin/coursebooks" className="text-sm text-muted hover:text-ink">
@@ -52,7 +51,28 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      <CreateCourseForm />
+      <div>
+        {center ? (
+          <p className="mb-2 text-xs text-muted">
+            New courses are created under <span className="text-ink">{center.name}</span> ·
+            Centre{" "}
+            <span className="text-ink">
+              {center.center_number.startsWith("PENDING-") ? (
+                <>
+                  {center.center_number} --{" "}
+                  <Link href="/dashboard/admin/settings" className="text-primary hover:underline">
+                    set the real centre number
+                  </Link>
+                </>
+              ) : (
+                center.center_number
+              )}
+            </span>
+            .
+          </p>
+        ) : null}
+        <CreateCourseForm />
+      </div>
     </div>
   );
 }

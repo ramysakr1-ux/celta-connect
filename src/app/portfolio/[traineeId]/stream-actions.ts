@@ -14,7 +14,7 @@ export async function postBroadcast(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const trainer = await requireRole("trainer");
+  const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) return { error: "No course assigned." };
 
   const title = (formData.get("title") as string | null)?.trim();
@@ -52,7 +52,7 @@ export async function postBroadcast(
 }
 
 export async function deleteBroadcast(formData: FormData): Promise<void> {
-  const trainer = await requireRole("trainer");
+  const trainer = await requireRole(["trainer", "admin"]);
   const broadcastId = formData.get("broadcast_id");
   const traineeId = formData.get("trainee_id");
   if (typeof broadcastId !== "string" || typeof traineeId !== "string") return;

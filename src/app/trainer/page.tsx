@@ -1,27 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Link2, ShieldCheck } from "lucide-react";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { CELTA_CRITERIA_CODES, computeTrajectory, type Trajectory } from "@/lib/celta-criteria";
-import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
-
-const TRAJECTORY_LABEL: Record<Trajectory, string> = {
-  "Pass A": "Pass A",
-  "Pass B": "Pass B",
-  Pass: "Pass",
-  Fail: "At Risk",
-  not_enough_data: "Not Yet Assessed",
-};
-
-const TRAJECTORY_PILL_CLASS: Record<Trajectory, string> = {
-  "Pass A": "pill-success",
-  "Pass B": "pill-success",
-  Pass: "pill-success",
-  Fail: "pill-danger",
-  not_enough_data: "pill-neutral",
-};
+import { CELTA_CRITERIA_CODES, computeTrajectory } from "@/lib/celta-criteria";
+import { TrajectoryBarCompact } from "@/components/trajectory-gradient-bar";
 
 // §10 -- the trainer/admin home. Was previously a dead link (every portfolio
 // page's "Command Centre" header link pointed at /trainer with no page.tsx
@@ -48,114 +33,119 @@ export default async function TrainerHomePage() {
   ]);
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
-  const [{ data: lessons }, { data: feedbackRows }, { data: assignments }, { data: celta5Records }, { data: matrixRows }] =
+  const [{ data: lessons }, { data: matrixRows }] =
     traineeIds.length > 0
       ? await Promise.all([
           supabase.from("tp_lessons").select("trainee_id, length_minutes").eq("course_id", courseId),
-          supabase.from("tp_feedback").select("trainee_id, grade, submitted_at").in("trainee_id", traineeIds),
-          supabase.from("assignments").select("trainee_id, first_status, resubmission_status").eq("course_id", courseId),
-          supabase.from("celta5_records").select("trainee_id, hours_attended").eq("course_id", courseId),
           supabase.from("celta5_matrix").select("trainee_id, criteria_code, tutor_status_stage2").eq("course_id", courseId),
         ])
-      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }];
+      : [{ data: [] }, { data: [] }];
 
-  const totalHours = course?.total_hours ?? 120;
+  const cohortLine = [course?.name, course ? `${course.start_date} – ${course.end_date}` : null]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-2xl text-ink">Trainer Command Center</h1>
-          <p className="mt-1 text-sm text-muted">
-            {[course?.name, course ? `${course.start_date} – ${course.end_date}` : null].filter(Boolean).join(" · ")}
-            {assessorCourseId ? " · viewing as assessor (read-only)" : ""}
-          </p>
-        </div>
-        {trainer ? (
-          <div className="shrink-0">
-            <AssessorLinkButton />
-          </div>
-        ) : null}
+    <div className="container flex flex-col gap-10 py-8">
+      {/* §10 hero -- same shape as the public landing hero (§2); logo/wordmark
+          already live in trainer/layout.tsx's top bar, so this is just the
+          overline/H1/lede portion. Placeholder copy per the plan's explicit
+          "don't let wording block the build" instruction. trainer/layout.tsx
+          renders {children} with no wrapper of its own (only the (hub) route
+          group's layout adds .container, for the roster/timetable/etc pages)
+          -- this landing page needs its own .container, which had gone
+          missing since the layout simplification, leaving the hero/cards
+          rendering truly edge-to-edge with zero gutter (the "sides sticking
+          out of the screen" bug). */}
+      <div className="pt-4">
+        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+          {cohortLine || "Cambridge CELTA"}
+          {assessorCourseId ? " · viewing as assessor (read-only)" : ""}
+        </p>
+        <h1 className="mt-2 max-w-2xl font-serif text-5xl font-medium leading-[1.1] text-ink">
+          Every candidate gets one link. Everything they need lives behind it.
+        </h1>
+        <p className="mt-4 max-w-[700px] text-base leading-6 text-muted">
+          Each trainee holds a unique workspace URL. It opens their course stream,
+          resource hub, teaching practice record, written assignments and their personal CELTA 5
+          -- and nobody else&apos;s.
+        </p>
       </div>
 
       <div>
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-lg text-ink">Candidate roster</h2>
-          <p className="text-xs text-muted">{(trainees ?? []).length} candidates · click a row to open a portfolio</p>
+          <h3 className="font-serif text-lg text-ink">Candidate roster</h3>
+          <p className="text-xs text-muted">{(trainees ?? []).length} candidates · click a card to open a portfolio</p>
         </div>
 
-        <div className="sheet mt-3 overflow-hidden !p-0">
-          <table className="table-plain w-full">
-            <thead>
-              <tr>
-                <th className="text-sm text-muted">Candidate</th>
-                <th className="text-right text-sm text-muted">Assessed hrs</th>
-                <th className="text-right text-sm text-muted">TPs passed</th>
-                <th className="text-right text-sm text-muted">Assignments left</th>
-                <th className="text-right text-sm text-muted">Criteria</th>
-                <th className="text-right text-sm text-muted">Attendance</th>
-                <th className="text-right text-sm text-muted">Standing</th>
-              </tr>
-            </thead>
-            <tbody>
-              {trainees && trainees.length > 0 ? (
-                trainees.map((trainee) => {
-                  const traineeLessons = (lessons ?? []).filter((l) => l.trainee_id === trainee.id);
-                  const assessedHrs = traineeLessons.reduce((sum, l) => sum + (l.length_minutes ?? 0), 0) / 60;
+        <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {trainees && trainees.length > 0 ? (
+            trainees.map((trainee) => {
+              const traineeLessons = (lessons ?? []).filter((l) => l.trainee_id === trainee.id);
+              const assessedHrs = traineeLessons.reduce((sum, l) => sum + (l.length_minutes ?? 0), 0) / 60;
 
-                  const tpsPassed = (feedbackRows ?? []).filter(
-                    (f) => f.trainee_id === trainee.id && f.submitted_at && f.grade !== "not_to_standard"
-                  ).length;
+              const traineeMatrix = (matrixRows ?? []).filter((m) => m.trainee_id === trainee.id);
+              const matrixByCode = new Map(traineeMatrix.map((m) => [m.criteria_code, m.tutor_status_stage2]));
+              const achievedCount = traineeMatrix.filter((m) => m.tutor_status_stage2 === "S+" || m.tutor_status_stage2 === "S").length;
+              const criteriaPct = Math.round((achievedCount / CELTA_CRITERIA_CODES.length) * 100);
 
-                  const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id);
-                  const assignmentsPassed = traineeAssignments.filter(
-                    (a) => a.first_status === "approved" || a.resubmission_status === "approved"
-                  ).length;
-                  const assignmentsLeft = Math.max(traineeAssignments.length - assignmentsPassed, 0);
+              const trajectory = computeTrajectory(CELTA_CRITERIA_CODES.map((code) => matrixByCode.get(code) ?? null));
 
-                  const traineeMatrix = (matrixRows ?? []).filter((m) => m.trainee_id === trainee.id);
-                  const matrixByCode = new Map(traineeMatrix.map((m) => [m.criteria_code, m.tutor_status_stage2]));
-                  const achievedCount = traineeMatrix.filter((m) => m.tutor_status_stage2 === "S+" || m.tutor_status_stage2 === "S").length;
-                  const criteriaPct = Math.round((achievedCount / CELTA_CRITERIA_CODES.length) * 100);
-
-                  const hoursAttended = celta5Records?.find((r) => r.trainee_id === trainee.id)?.hours_attended ?? 0;
-                  const attendancePct = Math.round((hoursAttended / totalHours) * 100);
-
-                  const trajectory = computeTrajectory(CELTA_CRITERIA_CODES.map((code) => matrixByCode.get(code) ?? null));
-
-                  return (
-                    <tr key={trainee.id} className="cursor-pointer">
-                      <td>
-                        <Link href={`/portfolio/${trainee.id}`} className="text-ink hover:text-primary">
-                          {trainee.full_name}
-                        </Link>
-                      </td>
-                      <td className={`text-right tabular-nums ${assessedHrs < 6 ? "text-status-warning-text" : "text-ink"}`}>
-                        {assessedHrs.toFixed(2)}
-                      </td>
-                      <td className="text-right tabular-nums text-ink">{tpsPassed} / 8</td>
-                      <td className="text-right tabular-nums text-ink">{assignmentsLeft}</td>
-                      <td className="text-right tabular-nums text-ink">{criteriaPct}%</td>
-                      <td className={`text-right tabular-nums ${attendancePct < 80 ? "font-semibold text-destructive" : "text-ink"}`}>
-                        {attendancePct}%
-                      </td>
-                      <td className="text-right">
-                        <span className={`pill ${TRAJECTORY_PILL_CLASS[trajectory]}`}>{TRAJECTORY_LABEL[trajectory]}</span>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={7} className="text-muted">
-                    No trainees on this course yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              return (
+                <Link
+                  key={trainee.id}
+                  href={`/portfolio/${trainee.id}`}
+                  className="sheet group flex items-start justify-between gap-4 p-5 transition-colors hover:border-primary/40"
+                >
+                  <div>
+                    <h4 className="font-serif text-lg text-ink">{trainee.full_name}</h4>
+                    <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
+                      <Link2 className="size-3.5" aria-hidden="true" />
+                      Portfolio
+                    </p>
+                    <p className={`mt-1.5 text-sm ${assessedHrs < 6 ? "text-status-warning-text" : "text-muted"}`}>
+                      {assessedHrs.toFixed(2)} hrs assessed teaching · {criteriaPct}% criteria
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-3">
+                    <TrajectoryBarCompact value={trajectory} />
+                    <span className="text-muted transition-transform group-hover:translate-x-0.5">&rarr;</span>
+                  </div>
+                </Link>
+              );
+            })
+          ) : (
+            <p className="sheet text-sm text-muted">No trainees on this course yet.</p>
+          )}
         </div>
       </div>
+
+      {/* Landing stays a clean first look -- the operational tools
+          (roster table, timetable, volunteers, TP rotation, TP points
+          library, grades report) all live one click in, at the Command
+          Centre, not on this page. sheet-accent, not a full saturated
+          primary bar -- same pale teal wash used elsewhere, the heading
+          text + ShieldCheck icon (same icon ViewSwitcherPill uses for this
+          exact "Command Centre" destination) carry the identity instead of
+          a solid block of colour. Whole row is one Link, arrow-only
+          affordance, same as each candidate card above -- no second button
+          repeating the heading text. */}
+      <Link
+        href="/trainer/roster"
+        className="sheet-accent group flex items-center justify-between gap-4 p-5 transition-colors hover:border-primary/40"
+      >
+        <div className="flex items-center gap-3">
+          <ShieldCheck className="size-5 shrink-0 text-primary" aria-hidden="true" />
+          <div>
+            <h3 className="font-serif text-lg text-ink">Trainer Command Centre</h3>
+            <p className="mt-1 text-sm text-muted">
+              Full roster, TP assessment, assignment grading and CELTA 5 editing for all{" "}
+              {(trainees ?? []).length} candidate{(trainees ?? []).length === 1 ? "" : "s"}.
+            </p>
+          </div>
+        </div>
+        <span className="shrink-0 text-muted transition-transform group-hover:translate-x-0.5">&rarr;</span>
+      </Link>
     </div>
   );
 }

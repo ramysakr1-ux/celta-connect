@@ -1,0 +1,128 @@
+import { requireRole } from "@/lib/auth/require-role";
+import { createClient } from "@/lib/supabase/server";
+import { setTimetableLock } from "@/app/trainer/(hub)/timetable/actions";
+import { AddEventForm } from "@/app/trainer/(hub)/timetable/add-event-form";
+import { GenerateSkeletonForm } from "@/app/trainer/(hub)/timetable/generate-skeleton-form";
+import { TimetableGrid } from "@/app/trainer/(hub)/timetable/timetable-grid";
+import { TimeBandsForm } from "@/app/trainer/(hub)/timetable/time-bands-form";
+import { resolveTimeBands } from "@/lib/timetable-grid";
+
+// §1.1a v2 -- the course timetable is the single source of truth for the
+// whole course clock (This Week panel, due/overdue states, TP dates).
+// Transposed grid orientation, settled 5 Aug 2026: days as rows, time bands
+// as columns, admin & deadlines as the leading column, sticky floating time
+// band. See CELTA-Connect-timetable-handoff-for-code.md and the sanctioned
+// reference C14-timetable-A-floating.html.
+export default async function TrainerTimetablePage() {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const supabase = await createClient();
+
+  if (!trainer.course_id) {
+    return (
+      <div className="sheet text-sm text-muted">No course assigned.</div>
+    );
+  }
+
+  const [{ data: course }, { data: events }, { data: volunteers }] = await Promise.all([
+    supabase.from("courses").select("timetable_locked_at, time_bands").eq("id", trainer.course_id).maybeSingle(),
+    supabase
+      .from("course_timetable_events")
+      .select("*")
+      .eq("course_id", trainer.course_id)
+      .order("event_date")
+      .order("event_time"),
+    supabase.from("volunteer_students").select("id, name").eq("course_id", trainer.course_id).is("removed_at", null).order("name"),
+  ]);
+
+  const locked = Boolean(course?.timetable_locked_at);
+  const timeBands = resolveTimeBands(course?.time_bands ?? null);
+  const isCustomTimeBands = Boolean(course?.time_bands && course.time_bands.length > 0);
+
+  const tpEventIds = (events ?? []).filter((e) => e.type === "tp").map((e) => e.id);
+  const { data: attendanceRows } =
+    tpEventIds.length > 0
+      ? await supabase.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("timetable_event_id", tpEventIds)
+      : { data: [] };
+  const attendedByEvent = new Map<string, Set<string>>();
+  for (const row of attendanceRows ?? []) {
+    const set = attendedByEvent.get(row.timetable_event_id) ?? new Set<string>();
+    set.add(row.volunteer_student_id);
+    attendedByEvent.set(row.timetable_event_id, set);
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="sheet flex items-center justify-between">
+        <div>
+          <h1 className="font-serif text-xl text-ink">Course timetable</h1>
+          <p className="mt-2 text-muted">
+            The single source of truth for the course clock -- This Week, due dates, and TP
+            dates all read from this.
+          </p>
+        </div>
+        <form action={setTimetableLock}>
+          <input type="hidden" name="lock" value={(!locked).toString()} />
+          <button
+            type="submit"
+            className={`rounded-[6px] border px-4 py-2 text-sm font-medium ${
+              locked
+                ? "border-border text-ink hover:border-primary"
+                : "border-primary bg-primary text-primary-foreground"
+            }`}
+          >
+            {locked ? "Unlock timetable" : "Lock timetable"}
+          </button>
+        </form>
+      </div>
+
+      {locked ? (
+        <div className="sheet border-primary/20 bg-accent/30 text-sm text-ink">
+          Locked -- the course clock now calculates off these dates. Unlock to make changes.
+        </div>
+      ) : null}
+
+      {!locked && events && events.length === 0 ? (
+        <div className="sheet border-primary/20 bg-accent/20">
+          <h2 className="font-serif text-lg text-ink">Start from the standard skeleton</h2>
+          <p className="mt-1 text-sm text-muted">
+            Generates the usual 4-week CELTA shape -- 8 teaching practices, all 4 written
+            assignments, VO1-3, Stage 1 &amp; 2 tutorials -- anchored to a real start date. Nobody
+            builds a course from a blank grid: tweak or remove anything below afterwards.
+          </p>
+          <GenerateSkeletonForm />
+        </div>
+      ) : null}
+
+      {!locked ? (
+        <div className="sheet">
+          <TimeBandsForm timeBands={timeBands} isCustom={isCustomTimeBands} />
+        </div>
+      ) : null}
+
+      {!locked ? (
+        <div className="sheet">
+          <h2 className="font-serif text-lg text-ink">Add event</h2>
+          <p className="mt-1 text-sm text-muted">
+            Add a single dated item to the timetable below -- an input session, a TP, an
+            assignment or resubmission due date, or a milestone.
+          </p>
+          <AddEventForm />
+        </div>
+      ) : null}
+
+      {events && events.length > 0 ? (
+        <div className="sheet">
+          <TimetableGrid
+            events={events}
+            locked={locked}
+            timeBands={timeBands}
+            volunteers={volunteers ?? []}
+            attendedByEvent={attendedByEvent}
+          />
+        </div>
+      ) : (
+        <div className="sheet text-sm text-muted">No events yet.</div>
+      )}
+    </div>
+  );
+}

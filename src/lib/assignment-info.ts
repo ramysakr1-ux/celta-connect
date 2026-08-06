@@ -1,6 +1,23 @@
 import type { Database } from "@/lib/supabase/types";
 
 type AssignmentType = Database["public"]["Tables"]["assignments"]["Row"]["assignment_type"];
+type SubmissionStatus = Database["public"]["Tables"]["assignments"]["Row"]["first_status"];
+
+export const ASSIGNMENT_STATUS_PILL_CLASS: Record<SubmissionStatus, string> = {
+  not_submitted: "pill-neutral",
+  pending: "pill-neutral",
+  submitted: "pill-info",
+  resubmission_required: "pill-danger",
+  approved: "pill-success",
+};
+
+export const ASSIGNMENT_STATUS_LABEL: Record<SubmissionStatus, string> = {
+  not_submitted: "Draft",
+  pending: "Pending review",
+  submitted: "Under Review",
+  resubmission_required: "Resubmission required",
+  approved: "Pass",
+};
 
 // Fixed CELTA assignment briefs -- identical for every trainee at every
 // centre, so this is static reference content (like ABBREVIATIONS_GLOSSARY

@@ -1,6 +1,7 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { disconnectGoogleDrive } from "@/app/dashboard/admin/settings/actions";
+import { CenterProfileForm } from "@/app/dashboard/admin/settings/center-profile-form";
 import { GoogleDriveTargetsForm } from "@/app/dashboard/admin/settings/targets-form";
 import { FeedbackStyleExamplesManager } from "@/components/feedback-style-examples/manager";
 
@@ -19,6 +20,11 @@ export default async function AdminSettingsPage({
   const { google_connected, google_error } = await searchParams;
 
   const admin = createAdminClient();
+  const { data: center } = await admin
+    .from("centers")
+    .select("name, center_number")
+    .eq("id", profile.center_id)
+    .maybeSingle();
   const { data: connection } = await admin
     .from("center_google_connections")
     .select("center_id, template_doc_id, output_folder_id, connected_at")
@@ -35,13 +41,24 @@ export default async function AdminSettingsPage({
     <div className="flex flex-col gap-6">
       <div className="card p-6">
         <h1 className="font-serif text-xl text-ink">Settings</h1>
-        <p className="mt-2 text-muted">Center-level integrations and configuration.</p>
+        <p className="mt-2 text-muted">Centre-level integrations and configuration.</p>
+      </div>
+
+      <div className="card p-6">
+        <h2 className="font-serif text-lg text-ink">Centre profile</h2>
+        <p className="mt-2 text-muted">
+          Your centre&apos;s name and Cambridge-assigned centre number -- shown on every course,
+          the final report, and your own record pages.
+        </p>
+        <div className="mt-4">
+          <CenterProfileForm name={center?.name ?? ""} centerNumber={center?.center_number ?? ""} />
+        </div>
       </div>
 
       <div className="card p-6">
         <h2 className="font-serif text-lg text-ink">Google Drive</h2>
         <p className="mt-2 text-muted">
-          Connect your center&apos;s Google Drive so CELTA5 records can be kept in sync with your
+          Connect your centre&apos;s Google Drive so CELTA5 records can be kept in sync with your
           official template document.
         </p>
 

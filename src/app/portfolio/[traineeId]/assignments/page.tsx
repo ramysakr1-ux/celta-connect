@@ -4,25 +4,14 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_WORD_COUNT } from "@/lib/assignment-info";
+import {
+  ASSIGNMENT_INFO,
+  ASSIGNMENT_ORDER,
+  ASSIGNMENT_WORD_COUNT,
+  ASSIGNMENT_STATUS_PILL_CLASS as STATUS_PILL_CLASS,
+  ASSIGNMENT_STATUS_LABEL as STATUS_LABEL,
+} from "@/lib/assignment-info";
 import { DEADLINE_URGENCY_CLASS, getDeadlineUrgency } from "@/lib/deadline";
-import type { SubmissionStatus } from "@/lib/supabase/types";
-
-const STATUS_PILL_CLASS: Record<SubmissionStatus, string> = {
-  not_submitted: "pill-neutral",
-  pending: "pill-neutral",
-  submitted: "pill-info",
-  resubmission_required: "pill-danger",
-  approved: "pill-success",
-};
-
-const STATUS_LABEL: Record<SubmissionStatus, string> = {
-  not_submitted: "Draft",
-  pending: "Pending review",
-  submitted: "Under Review",
-  resubmission_required: "Resubmission required",
-  approved: "Pass",
-};
 
 // §8 -- restyle of the existing assignments grid (dashboard/trainee), same
 // `assignments` rows/statuses, just re-linked into the portfolio shell and

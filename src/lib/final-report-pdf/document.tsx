@@ -13,6 +13,16 @@ import type { FinalGrade } from "@/lib/supabase/types";
 // and that a typed name is the real center's own signature convention --
 // rendered here in a script font for a bit more polish, not a drawn
 // signature pad (see project memory for why that's deliberately deferred).
+//
+// Front-page treatment (2026-08-05) borrows the ornamental double-border
+// frame + centered-logo + corner-mark technique from the volunteer
+// certificate (src/lib/certificate-pdf/document.tsx), but keeps this
+// document's own established teal/gold identity rather than that
+// certificate's cream/gold palette -- Ramy's own principle from that build:
+// same technique, different person type, so a different (but still this
+// app's own) visual identity. Both pages stay portrait A4 -- these are
+// real double-sided printed reports, and a landscape front page would break
+// that pairing.
 
 // Read from public/ via process.cwd() rather than __dirname -- Next.js's
 // bundler doesn't reliably preserve __dirname pointing at the real source
@@ -56,29 +66,64 @@ const CLOSING_LINE: Partial<Record<FinalGrade, string>> = {
     "They will continue to need minimal guidance to help them develop and broaden their range of skills as teachers in post.",
 };
 
+const CORNER_SIZE = 22;
+
 const styles = StyleSheet.create({
-  page: { padding: 48, fontFamily: "Karla", fontSize: 10.5, color: COLOR.ink },
-  logo: { position: "absolute", top: 40, right: 48, width: 90, objectFit: "contain" },
-  centered: { textAlign: "center" },
-  eyebrow: { fontSize: 9, letterSpacing: 1.5, color: COLOR.gold, textTransform: "uppercase", marginBottom: 24, textAlign: "center" },
-  name: { fontFamily: "Newsreader", fontSize: 26, textAlign: "center", marginBottom: 16, color: COLOR.ink },
-  body: { fontSize: 11, lineHeight: 1.6, textAlign: "center", marginBottom: 10, color: COLOR.ink },
-  strong: { fontFamily: "Newsreader", fontSize: 11 },
-  gradeLabel: { fontSize: 10, textAlign: "center", marginTop: 18, marginBottom: 6, color: COLOR.muted },
-  grade: { fontFamily: "Newsreader", fontSize: 32, textAlign: "center", marginBottom: 18 },
-  disclaimer: { fontSize: 9, textAlign: "center", color: COLOR.muted, marginBottom: 22, lineHeight: 1.5 },
-  paragraph: { fontSize: 10, lineHeight: 1.6, textAlign: "center", color: COLOR.ink, marginBottom: 8 },
-  // flexWrap so a big course's full trainer team (not just a lead + one
-  // co-tutor) still fits -- 3 blocks/row at this width comfortably clears
-  // an A4 page's ~499pt content width (150*3 + 24*2 = 498), wrapping to a
-  // second row rather than overflowing or shrinking to illegibility.
-  signRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 24, rowGap: 28, marginTop: 48 },
+  // -- Front page (certificate) --
+  coverPage: { padding: 26, fontFamily: "Karla", fontSize: 10.5, color: COLOR.ink, backgroundColor: COLOR.cream },
+  frame: { flex: 1, borderWidth: 1.25, borderColor: COLOR.gold, borderRadius: 3, padding: 5 },
+  innerFrame: {
+    flex: 1,
+    borderWidth: 0.75,
+    borderColor: COLOR.gold,
+    borderRadius: 2,
+    paddingVertical: 40,
+    paddingHorizontal: 56,
+    alignItems: "center",
+  },
+  cornerMark: { position: "absolute", width: CORNER_SIZE, height: CORNER_SIZE, borderColor: COLOR.gold },
+  cornerTL: { top: -1, left: -1, borderTopWidth: 1.5, borderLeftWidth: 1.5 },
+  cornerTR: { top: -1, right: -1, borderTopWidth: 1.5, borderRightWidth: 1.5 },
+  cornerBL: { bottom: -1, left: -1, borderBottomWidth: 1.5, borderLeftWidth: 1.5 },
+  cornerBR: { bottom: -1, right: -1, borderBottomWidth: 1.5, borderRightWidth: 1.5 },
+  logo: { width: 64, objectFit: "contain", marginBottom: 18 },
+  eyebrow: { fontSize: 10.5, letterSpacing: 3, color: COLOR.gold, textTransform: "uppercase", textAlign: "center" },
+  courseLine: { fontSize: 9, color: COLOR.muted, textAlign: "center", marginTop: 4 },
+  divider: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 18, marginBottom: 18 },
+  dividerRule: { width: 64, height: 0.75, backgroundColor: COLOR.gold },
+  dividerMark: { fontSize: 9, color: COLOR.gold },
+  body: { fontSize: 11, lineHeight: 1.6, textAlign: "center", marginBottom: 8, color: COLOR.ink },
+  name: { fontFamily: "Newsreader", fontSize: 30, textAlign: "center", marginBottom: 14, color: COLOR.ink },
+  gradeLabel: { fontSize: 9.5, letterSpacing: 1, textTransform: "uppercase", textAlign: "center", marginTop: 22, marginBottom: 10, color: COLOR.muted },
+  gradeBadge: { borderWidth: 1.25, borderRadius: 40, paddingVertical: 8, paddingHorizontal: 30, marginBottom: 16 },
+  grade: { fontFamily: "Newsreader", fontSize: 26, textAlign: "center" },
+  disclaimer: { fontSize: 8.5, textAlign: "center", color: COLOR.muted, marginBottom: 20, lineHeight: 1.5, maxWidth: 380 },
+  paragraph: { fontSize: 9.5, lineHeight: 1.6, textAlign: "center", color: COLOR.ink, marginBottom: 6, maxWidth: 400 },
+  signRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 24, rowGap: 28, marginTop: 40 },
   signBlock: { alignItems: "center", width: 150 },
-  signature: { fontFamily: "DancingScript", fontSize: 20, color: COLOR.teal, borderBottomWidth: 1, borderBottomColor: COLOR.border, paddingBottom: 4, marginBottom: 4, width: "100%", textAlign: "center" },
+  signature: {
+    fontFamily: "DancingScript",
+    fontSize: 20,
+    color: COLOR.teal,
+    borderBottomWidth: 1,
+    borderBottomColor: COLOR.border,
+    paddingBottom: 4,
+    marginBottom: 4,
+    width: "100%",
+    textAlign: "center",
+  },
   signName: { fontSize: 8.5, color: COLOR.ink },
   signRole: { fontSize: 7.5, color: COLOR.muted },
-  footer: { position: "absolute", bottom: 28, left: 0, right: 0, textAlign: "center", fontSize: 7, color: COLOR.border },
+  credit: { position: "absolute", bottom: 16, left: 0, right: 0, textAlign: "center", fontSize: 7.5 },
+  creditConnect: { color: COLOR.gold },
+  creditCelta: { color: COLOR.ink },
 
+  // -- Back page (report) --
+  page: { padding: 48, fontFamily: "Karla", fontSize: 10.5, color: COLOR.ink },
+  logoTopRight: { position: "absolute", top: 40, right: 48, width: 60, objectFit: "contain" },
+  reportHeader: { borderBottomWidth: 0.75, borderBottomColor: COLOR.gold, paddingBottom: 10, marginBottom: 22 },
+  reportHeaderName: { fontFamily: "Newsreader", fontSize: 15, color: COLOR.ink },
+  reportHeaderMeta: { fontSize: 8, color: COLOR.muted, marginTop: 2, letterSpacing: 0.5, textTransform: "uppercase" },
   section: { border: `1px solid ${COLOR.border}`, borderRadius: 4, padding: 16, marginBottom: 14 },
   sectionTitle: { fontFamily: "Newsreader", fontSize: 13, color: COLOR.teal, marginBottom: 8 },
   sectionIntro: { fontSize: 9, color: COLOR.muted, lineHeight: 1.5, marginBottom: 10 },
@@ -92,6 +137,7 @@ const styles = StyleSheet.create({
   bulletText: { fontSize: 9.5, lineHeight: 1.5, flex: 1 },
   closingLine: { fontSize: 9.5, lineHeight: 1.5, marginTop: 4, fontFamily: "Newsreader" },
   commentText: { fontSize: 10, lineHeight: 1.7 },
+  footer: { position: "absolute", bottom: 28, left: 0, right: 0, textAlign: "center", fontSize: 7, color: COLOR.border },
 });
 
 interface Signatory {
@@ -118,6 +164,17 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 }
 
+function CornerMarks() {
+  return (
+    <>
+      <View style={[styles.cornerMark, styles.cornerTL]} />
+      <View style={[styles.cornerMark, styles.cornerTR]} />
+      <View style={[styles.cornerMark, styles.cornerBL]} />
+      <View style={[styles.cornerMark, styles.cornerBR]} />
+    </>
+  );
+}
+
 export async function renderFinalReportBuffer(input: FinalReportInput): Promise<Buffer> {
   const {
     traineeName,
@@ -141,53 +198,74 @@ export async function renderFinalReportBuffer(input: FinalReportInput): Promise<
 
   return renderToBuffer(
     <Document>
-      <Page size="A4" style={styles.page}>
-        {centerLogoUrl ? <Image src={centerLogoUrl} style={styles.logo} /> : null}
+      <Page size="A4" style={styles.coverPage}>
+        <View style={styles.frame}>
+          <CornerMarks />
+          <View style={styles.innerFrame}>
+            {centerLogoUrl ? <Image src={centerLogoUrl} style={styles.logo} /> : null}
+            <Text style={styles.eyebrow}>Final Course Report</Text>
+            <Text style={styles.courseLine}>{courseName}</Text>
 
-        <Text style={{ marginTop: 60 }} />
-        <Text style={styles.eyebrow}>{courseName}</Text>
-        <Text style={styles.body}>This is to certify that</Text>
-        <Text style={styles.name}>{traineeName}</Text>
-        <Text style={styles.body}>
-          attended a {totalHours}-hour initial teacher training course leading to the Cambridge Certificate in
-          Teaching English to Speakers of Other Languages (CELTA)
-        </Text>
-        <Text style={styles.body}>at {centerName}</Text>
-        <Text style={styles.body}>
-          from {formatDate(courseStartDate)} to {formatDate(courseEndDate)}
-        </Text>
-
-        <Text style={styles.gradeLabel}>The following provisional grade was awarded</Text>
-        <Text style={[styles.grade, { color: gradeColor }]}>{finalGrade.toUpperCase()}</Text>
-
-        <Text style={styles.disclaimer}>
-          This is an internal course report. The final grade is subject to confirmation by Cambridge Assessment
-          English.
-        </Text>
-
-        <Text style={styles.paragraph}>
-          The course included collaborative planning, peer observation and shared evaluation and feedback. Within
-          this framework each candidate completed 6 hours of individually assessed teaching, and 6 hours of
-          observation of experienced teachers.
-        </Text>
-        <Text style={styles.paragraph}>A full report is set out on the reverse of this document.</Text>
-
-        <View style={styles.signRow}>
-          {signatories.map((s) => (
-            <View key={s.name} style={styles.signBlock}>
-              <Text style={styles.signature}>{s.name}</Text>
-              <Text style={styles.signName}>{s.name}</Text>
-              <Text style={styles.signRole}>{s.role}</Text>
+            <View style={styles.divider}>
+              <View style={styles.dividerRule} />
+              <Text style={styles.dividerMark}>❖</Text>
+              <View style={styles.dividerRule} />
             </View>
-          ))}
+
+            <Text style={styles.body}>This is to certify that</Text>
+            <Text style={styles.name}>{traineeName}</Text>
+            <Text style={styles.body}>
+              attended a {totalHours}-hour initial teacher training course leading to the Cambridge Certificate in
+              Teaching English to Speakers of Other Languages (CELTA)
+            </Text>
+            <Text style={styles.body}>at {centerName}</Text>
+            <Text style={styles.body}>
+              from {formatDate(courseStartDate)} to {formatDate(courseEndDate)}
+            </Text>
+
+            <Text style={styles.gradeLabel}>The following provisional grade was awarded</Text>
+            <View style={[styles.gradeBadge, { borderColor: gradeColor }]}>
+              <Text style={[styles.grade, { color: gradeColor }]}>{finalGrade.toUpperCase()}</Text>
+            </View>
+
+            <Text style={styles.disclaimer}>
+              This is an internal course report. The final grade is subject to confirmation by Cambridge Assessment
+              English.
+            </Text>
+
+            <Text style={styles.paragraph}>
+              The course included collaborative planning, peer observation and shared evaluation and feedback.
+              Within this framework each candidate completed 6 hours of individually assessed teaching, and 6 hours
+              of observation of experienced teachers.
+            </Text>
+            <Text style={styles.paragraph}>A full report is set out on the reverse of this document.</Text>
+
+            <View style={styles.signRow}>
+              {signatories.map((s) => (
+                <View key={s.name} style={styles.signBlock}>
+                  <Text style={styles.signature}>{s.name}</Text>
+                  <Text style={styles.signName}>{s.name}</Text>
+                  <Text style={styles.signRole}>{s.role}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
         </View>
 
-        <Text style={styles.footer}>Generated via Connect CELTA</Text>
+        <Text style={styles.credit}>
+          <Text style={styles.creditConnect}>Connect</Text> <Text style={styles.creditCelta}>CELTA</Text>
+        </Text>
       </Page>
 
       <Page size="A4" style={styles.page}>
-        {centerLogoUrl ? <Image src={centerLogoUrl} style={[styles.logo, { width: 60 }]} /> : null}
-        <Text style={{ marginTop: 40 }} />
+        {centerLogoUrl ? <Image src={centerLogoUrl} style={styles.logoTopRight} /> : null}
+
+        <View style={styles.reportHeader}>
+          <Text style={styles.reportHeaderName}>{traineeName}</Text>
+          <Text style={styles.reportHeaderMeta}>
+            {courseName} · Final Report
+          </Text>
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Achievements in Individual Assessment Areas</Text>

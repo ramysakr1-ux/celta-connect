@@ -74,13 +74,13 @@ export async function getCenterDriveAccessToken(): Promise<{ accessToken: string
     .eq("center_id", trainee.center_id)
     .maybeSingle();
 
-  if (!connection) return { error: "Your center hasn't connected Google Drive yet." };
+  if (!connection) return { error: "Your centre hasn't connected Google Drive yet." };
 
   try {
     const accessToken = await getAccessTokenFromRefreshToken(connection.refresh_token);
     return { accessToken };
   } catch {
-    return { error: "Could not connect to the center's Google Drive. Ask your admin to reconnect it in Settings." };
+    return { error: "Could not connect to the centre's Google Drive. Ask your admin to reconnect it in Settings." };
   }
 }
 

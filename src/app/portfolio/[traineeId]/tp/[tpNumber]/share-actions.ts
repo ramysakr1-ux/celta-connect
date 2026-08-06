@@ -9,7 +9,7 @@ import { requireRole } from "@/lib/auth/require-role";
 // course register at once (not per-individual targeting), the only way
 // material reaches the /student/[token] view (migration 0030).
 export async function shareMaterialWithStudents(formData: FormData): Promise<void> {
-  const trainer = await requireRole("trainer");
+  const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) return;
   const tpMaterialId = formData.get("tp_material_id");
   const traineeId = formData.get("trainee_id");
@@ -28,7 +28,7 @@ export async function shareMaterialWithStudents(formData: FormData): Promise<voi
 }
 
 export async function unshareMaterialWithStudents(formData: FormData): Promise<void> {
-  const trainer = await requireRole("trainer");
+  const trainer = await requireRole(["trainer", "admin"]);
   const tpMaterialId = formData.get("tp_material_id");
   const traineeId = formData.get("trainee_id");
   const tpNumber = formData.get("tp_number");

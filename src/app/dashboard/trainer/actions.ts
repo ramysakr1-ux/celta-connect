@@ -91,7 +91,8 @@ export async function createTpLesson(
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
   revalidatePath("/dashboard/trainer");
   revalidatePath("/dashboard/trainer/rotation");
-  revalidatePath("/dashboard/trainee/plan");
+  revalidatePath("/trainer/rotation");
+  revalidatePath(`/portfolio/${traineeId}/tp`);
   return { error: null };
 }
 
@@ -145,7 +146,8 @@ export async function updateTpLesson(
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
   revalidatePath("/dashboard/trainer");
   revalidatePath("/dashboard/trainer/rotation");
-  revalidatePath("/dashboard/trainee/plan");
+  revalidatePath("/trainer/rotation");
+  revalidatePath(`/portfolio/${traineeId}/tp`);
   return { error: null };
 }
 

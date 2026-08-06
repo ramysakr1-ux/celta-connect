@@ -8,6 +8,7 @@ import {
 } from "@/app/dashboard/admin/courses/[id]/subgroups-form";
 import { removeSubgroupMember } from "@/app/dashboard/admin/courses/[id]/subgroup-actions";
 import { removeRosterMember } from "@/app/dashboard/admin/courses/[id]/roster-actions";
+import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 
 export default async function CourseRosterPage({
   params,
@@ -81,11 +82,14 @@ export default async function CourseRosterPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">{course.name}</h1>
-        <p className="mt-1 text-muted">
-          {course.start_date} &rarr; {course.end_date}
-        </p>
+      <div className="card flex items-start justify-between gap-4 p-6">
+        <div>
+          <h1 className="font-serif text-xl text-ink">{course.name}</h1>
+          <p className="mt-1 text-muted">
+            {course.start_date} &rarr; {course.end_date}
+          </p>
+        </div>
+        <DuplicateCourseForm courseId={course.id} suggestedName={`${course.name} (copy)`} />
       </div>
 
       <div>

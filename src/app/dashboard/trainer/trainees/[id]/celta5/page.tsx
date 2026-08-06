@@ -1,11 +1,19 @@
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { computeCriteriaSuggestion, computeTrajectory, CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
+import {
+  computeCriteriaSuggestion,
+  computeTrajectory,
+  addTpFeedbackCriteriaTags,
+  CELTA_CRITERIA_CODES,
+} from "@/lib/celta-criteria";
+import { AssignmentsSummary, TpFeedbackSummary } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
 import { Stage1Form } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-form";
 import { StageRatingsForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage-ratings-form";
 import { Stage2OverallForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage2-overall-form";
 import { Stage3OverallForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage3-overall-form";
+import { GradeReviewCommentsForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/grade-review-comments-form";
+import { ReleaseFinalReportForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/release-final-report-form";
 import { FinalGradeForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/final-grade-form";
 import { AttendanceForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/attendance-form";
 import { AdminGrantForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/admin-grant-form";
@@ -46,6 +54,8 @@ export default async function Celta5RecordPage({
     { data: absences },
     { data: observations },
     { data: lessons },
+    { data: assignments },
+    { data: tpFeedbackRows },
   ] = await Promise.all([
     supabase.from("courses").select("*").eq("id", trainer.course_id ?? "").maybeSingle(),
     supabase.from("centers").select("*").eq("id", trainer.center_id).maybeSingle(),
@@ -54,6 +64,8 @@ export default async function Celta5RecordPage({
     supabase.from("attendance_absences").select("*").eq("trainee_id", id).order("session_date"),
     supabase.from("observations").select("*").eq("trainee_id", id).order("observation_date"),
     supabase.from("tp_lessons").select("id").eq("trainee_id", id),
+    supabase.from("assignments").select("*").eq("trainee_id", id),
+    supabase.from("tp_feedback").select("*").eq("trainee_id", id),
   ]);
 
   const lessonIds = (lessons ?? []).map((l) => l.id);
@@ -72,6 +84,7 @@ export default async function Celta5RecordPage({
     list.push({ tag_type: tag.tag_type, created_at: tag.created_at });
     tagsByCriteria.set(tag.criteria_code, list);
   }
+  addTpFeedbackCriteriaTags(tagsByCriteria, tpFeedbackRows ?? []);
 
   const suggestions: Record<string, "S+" | "S" | "N"> = {};
   for (const code of CELTA_CRITERIA_CODES) {
@@ -107,7 +120,7 @@ export default async function Celta5RecordPage({
         <p className="mt-1 text-muted">{trainee.email}</p>
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
           <div>
-            <p className="text-muted">Center</p>
+            <p className="text-muted">Centre</p>
             <p className="text-ink">{center?.name ?? "--"}</p>
           </div>
           <div>
@@ -174,6 +187,9 @@ export default async function Celta5RecordPage({
         </div>
       </div>
 
+      <AssignmentsSummary traineeId={id} assignments={assignments ?? []} />
+      <TpFeedbackSummary traineeId={id} feedbackRows={tpFeedbackRows ?? []} />
+
       <Stage1Form key={`stage1-${record.updated_at}`} record={record} />
 
       <div>
@@ -200,9 +216,17 @@ export default async function Celta5RecordPage({
 
       <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} />
 
+      {record.stage3_required ? (
+        <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
+      ) : null}
+
       <FinalGradeForm key={`final-${record.updated_at}`} record={record} />
 
       <FinalizeRecordForm key={`finalize-${record.updated_at}`} record={record} />
+
+      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.trainer_signoff_final_at ? (
+        <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} />
+      ) : null}
 
       <AdminGrantForm key={`admin-grant-${record.updated_at}`} record={record} />
     </div>

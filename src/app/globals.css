@@ -302,6 +302,7 @@ h6 {
     box-shadow: none;
   }
 
+
   .pill {
     display: inline-flex;
     align-items: center;
@@ -349,6 +350,14 @@ h6 {
     color: var(--color-status-neutral-text);
   }
 
+  /* Reserved for Pass A specifically -- gold is the signature colour, used
+     sparingly (wordmark, Pass A, final-report watermark), never a generic
+     "success" state alongside plain Pass/Pass B. */
+  .pill-gold {
+    background-color: color-mix(in oklab, var(--color-gold) 16%, var(--color-card));
+    color: var(--color-gold);
+  }
+
   @keyframes pill-live-pulse {
     0%,
     100% {
@@ -361,5 +370,38 @@ h6 {
 
   .pill-live::before {
     animation: pill-live-pulse 1.6s ease-in-out infinite;
+  }
+
+  /* Horizontal (Y-axis) turntable spin, not a flat clock-hand rotation --
+     needs `perspective` on the parent (.wordmark-mark-stage) for the
+     foreshortening that actually reads as 3D rather than a a flip.
+     Pauses on the readable, correctly-ordered "CC" face (0%-11.11%, both
+     held at 0deg -- two identical keyframe values is a static hold, not
+     motion) before rotating through the remaining 48s at the same speed
+     as before (88.89% of a 54s total cycle = 48s, unchanged). */
+  @keyframes wordmark-spin {
+    0%,
+    11.11% {
+      transform: rotateY(0deg);
+    }
+    100% {
+      transform: rotateY(360deg);
+    }
+  }
+
+  .wordmark-mark-stage {
+    perspective: 400px;
+  }
+
+  .wordmark-spin {
+    animation: wordmark-spin 54s linear infinite;
+    transform-origin: 50% 50%;
+    transform-style: preserve-3d;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wordmark-spin {
+      animation: none;
+    }
   }
 }

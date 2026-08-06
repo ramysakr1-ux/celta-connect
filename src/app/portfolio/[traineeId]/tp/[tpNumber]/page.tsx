@@ -54,19 +54,28 @@ function ReadOnlyField({ label, value }: { label: string; value?: string | null 
 // feedback-point-editor.tsx), not a separate/invented criteria set.
 export default async function TpDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ traineeId: string; tpNumber: string }>;
+  searchParams: Promise<{ preview?: string }>;
 }) {
   const { traineeId, tpNumber: tpNumberParam } = await params;
+  const { preview } = await searchParams;
   const tpNumber = Number(tpNumberParam);
   if (!Number.isInteger(tpNumber) || tpNumber < 1 || tpNumber > 8) notFound();
 
   const session = await getCurrentProfile();
   const viewer = session?.profile ?? null;
-  const isEditableStaff = viewer?.role === "trainer" || viewer?.role === "admin";
+  // Raw role check -- used ONLY for the access gate below. Must NOT fold in
+  // previewAsTrainee, or a staff member previewing this exact page would
+  // 404 themselves (see portfolio/[traineeId]/layout.tsx's comment).
+  const isRealStaff = viewer?.role === "trainer" || viewer?.role === "admin";
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
   if (!viewer && !assessorCourseId) notFound();
-  if (viewer && !isEditableStaff && viewer.id !== traineeId) notFound();
+  if (viewer && !isRealStaff && viewer.id !== traineeId) notFound();
+  // Rendering-only from here down: hides staff-only UI while previewing,
+  // same rule as everywhere else in the portfolio tree.
+  const isEditableStaff = isRealStaff && preview !== "trainee";
   const isStaff = isEditableStaff || Boolean(assessorCourseId);
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();

@@ -370,6 +370,46 @@ export interface CriteriaTag {
   created_at: string;
 }
 
+// Merges criteria tags from the TP card feedback system (`tp_feedback`,
+// where a criterion is tagged via `FeedbackPoint.criteria_codes` on the
+// strengths/action-points arrays) into a tagsByCriteria map already built
+// from `tp_lesson_criteria_tags`. Both are real tagging surfaces trainers
+// use -- the older per-lesson quick tags and the newer TP card feedback --
+// and the criteria suggestion engine needs evidence from both, not just
+// whichever one the trainer happened to use for a given TP. Draft (not yet
+// submitted) feedback is excluded: it isn't locked-in evidence yet.
+export interface TpFeedbackForCriteriaTags {
+  submitted_at: string | null;
+  strengths_planning: { criteria_codes: string[] }[] | null;
+  action_points_planning: { criteria_codes: string[] }[] | null;
+  strengths_teaching: { criteria_codes: string[] }[] | null;
+  action_points_teaching: { criteria_codes: string[] }[] | null;
+}
+
+export function addTpFeedbackCriteriaTags(
+  tagsByCriteria: Map<string, CriteriaTag[]>,
+  feedbackRows: TpFeedbackForCriteriaTags[]
+): void {
+  for (const fb of feedbackRows) {
+    if (!fb.submitted_at) continue;
+    const groups: [CriteriaTagType, { criteria_codes: string[] }[] | null][] = [
+      ["action_point", fb.action_points_planning],
+      ["action_point", fb.action_points_teaching],
+      ["strength", fb.strengths_planning],
+      ["strength", fb.strengths_teaching],
+    ];
+    for (const [tag_type, points] of groups) {
+      for (const point of points ?? []) {
+        for (const code of point.criteria_codes) {
+          const list = tagsByCriteria.get(code) ?? [];
+          list.push({ tag_type, created_at: fb.submitted_at });
+          tagsByCriteria.set(code, list);
+        }
+      }
+    }
+  }
+}
+
 export function computeCriteriaSuggestion(
   tags: CriteriaTag[]
 ): "S+" | "S" | "N" | null {
@@ -405,12 +445,8 @@ export type Trajectory = "Pass A" | "Pass B" | "Pass" | "Fail" | "not_enough_dat
 
 const TRAJECTORY_MIN_RATED = 10; // out of 41 criteria
 
-export function computeTrajectory(
-  ratings: (("S+" | "S" | "N" | "X") | null)[]
-): Trajectory {
-  const rated = ratings.filter((r): r is "S+" | "S" | "N" => r != null && r !== "X");
-
-  if (rated.length < TRAJECTORY_MIN_RATED) return "not_enough_data";
+function trajectoryFromRated(rated: ("S+" | "S" | "N")[], minRated: number): Trajectory {
+  if (rated.length < minRated) return "not_enough_data";
   if (rated.some((r) => r === "N")) return "Fail";
 
   const plusCount = rated.filter((r) => r === "S+").length;
@@ -419,4 +455,170 @@ export function computeTrajectory(
   if (ratio >= 0.75) return "Pass A";
   if (ratio >= 0.4) return "Pass B";
   return "Pass";
+}
+
+export function computeTrajectory(
+  ratings: (("S+" | "S" | "N" | "X") | null)[]
+): Trajectory {
+  const rated = ratings.filter((r): r is "S+" | "S" | "N" => r != null && r !== "X");
+  return trajectoryFromRated(rated, TRAJECTORY_MIN_RATED);
+}
+
+// ============================================================
+// Per-dimension trajectory -- the gradient bar in the grading spec
+// (project_grading_feedback_trainer_awareness.md) shows Planning / Teaching
+// / Awareness of learners / Reflection / Overall as five INDEPENDENT bars,
+// matching GRADE_DESCRIPTORS' five dimensions above. computeTrajectory()
+// only ever produces one number from all 41 codes, so it can't drive that
+// alone. The full spec ties each bar's movement to a per-TP step function
+// driven by an auto-tagging engine that doesn't exist yet -- but a real,
+// non-fabricated interim version IS possible today: score each dimension
+// off just ITS OWN criteria codes, using the exact same statistical method
+// Overall already uses. The code->dimension split below is grounded
+// directly in the booklet section titles (not invented): section 1 IS
+// "Learners and Teachers..." awareness, section 4 IS "Planning...", section
+// 5 IS "Developing Teaching Skills...". Reflection has no dedicated
+// section, so it's assembled from the specific codes whose own wording is
+// literally about reflecting/responding to feedback (4n, 5m, 5n) -- pulled
+// out of Planning/Teaching so no code double-counts into two bars.
+// Sections 2 and 3 (language analysis, language skills) don't map onto any
+// of the five GRADE_DESCRIPTORS dimensions and are intentionally left out
+// of every per-dimension bar; they still count toward Overall.
+export type GradeDimension = "Planning" | "Teaching" | "Awareness of learners" | "Reflection" | "Overall";
+
+export const GRADE_DIMENSION_ORDER: GradeDimension[] = [
+  "Planning",
+  "Teaching",
+  "Awareness of learners",
+  "Reflection",
+  "Overall",
+];
+
+const DIMENSION_CRITERIA_CODES: Record<GradeDimension, readonly string[]> = {
+  Planning: ["4a", "4b", "4c", "4d", "4e", "4f", "4g", "4h", "4i", "4j", "4k", "4l", "4m"],
+  Teaching: ["5a", "5b", "5c", "5d", "5e", "5f", "5g", "5h", "5i", "5j", "5k", "5l"],
+  "Awareness of learners": ["1a", "1b", "1c", "1d"],
+  Reflection: ["4n", "5m", "5n"],
+  Overall: CELTA_CRITERIA_CODES,
+};
+
+export function computeTrajectoryByDimension(
+  ratingsByCode: Record<string, ("S+" | "S" | "N" | "X") | null | undefined>
+): Record<GradeDimension, Trajectory> {
+  const result = {} as Record<GradeDimension, Trajectory>;
+  for (const dimension of GRADE_DIMENSION_ORDER) {
+    const codes = DIMENSION_CRITERIA_CODES[dimension];
+    const rated = codes
+      .map((code) => ratingsByCode[code])
+      .filter((r): r is "S+" | "S" | "N" => r != null && r !== "X");
+    // Overall keeps its original, larger fixed threshold (out of 41); the
+    // much smaller per-dimension groups (as few as 3 codes for Reflection)
+    // need a threshold scaled to their own size instead, or they'd never
+    // leave "not_enough_data" in practice.
+    const minRated = dimension === "Overall" ? TRAJECTORY_MIN_RATED : Math.max(2, Math.ceil(codes.length / 2));
+    result[dimension] = trajectoryFromRated(rated, minRated);
+  }
+  return result;
+}
+
+// ============================================================
+// Grades Report -- Planning/Teaching Strengths & Action Points, matching
+// the real center's actual output (traced verbatim from a real filled
+// "Grades Report" document, 5 Aug 2026): short criterion labels, not the
+// full booklet wording, grouped by section 4 ("Planning") vs everything
+// else ("Teaching"), listing only criteria that stand out either way --
+// "*all criteria not listed below is assumed to be 'To standard'".
+// ============================================================
+
+export const SHORT_CRITERIA_LABELS: Record<string, string> = {
+  "1a": "needs awareness",
+  "1b": "cultural awareness",
+  "1c": "background awareness",
+  "1d": "rapport/learner involvement",
+
+  "2a": "TTT/language grading",
+  "2b": "error-correction",
+  "2c": "context",
+  "2d": "language models",
+  "2e": "clarifying language",
+  "2f": "register",
+  "2g": "language practice",
+
+  "3a": "reading/listening",
+  "3b": "productive skills",
+
+  "4a": "stating aims",
+  "4b": "staging",
+  "4c": "materials design",
+  "4d": "materials prep",
+  "4e": "procedure",
+  "4f": "interaction patterns",
+  "4g": "variety and balance",
+  "4h": "timing",
+  "4i": "language analysis",
+  "4j": "anticipated problems",
+  "4k": "anticipated solutions",
+  "4l": "terminology",
+  "4m": "teamwork",
+  "4n": "reflection on plans",
+
+  "5a": "classroom arrangement",
+  "5b": "grouping",
+  "5c": "teaching techniques",
+  "5d": "achieving aims",
+  "5e": "material use",
+  "5f": "instructions",
+  "5g": "eliciting/concept-checking",
+  "5h": "feedback",
+  "5i": "pace",
+  "5j": "monitoring",
+  "5k": "timing",
+  "5l": "portfolio",
+  "5m": "self-reflection",
+  "5n": "participation",
+};
+
+export interface StrengthsAndActionPoints {
+  planningStrengths: string[];
+  planningActionPoints: string[];
+  teachingStrengths: string[];
+  teachingActionPoints: string[];
+}
+
+function formatCriterion(code: string): string {
+  return `${SHORT_CRITERIA_LABELS[code] ?? code} (${code})`;
+}
+
+/**
+ * Given a trainee's rating per criterion code (from celta5_matrix, typically
+ * tutor_status_stage2 or tutor_status_stage3), buckets the notable ones into
+ * the four lists the real Grades Report shows. Section 4 codes are
+ * "Planning"; every other section is "Teaching" -- matches the real
+ * document's split exactly. Unrated ("X"/null) or plain "S" criteria that
+ * aren't otherwise notable are omitted, same as the real report.
+ */
+export function computeStrengthsAndActionPoints(
+  ratingsByCode: Record<string, "S+" | "S" | "N" | "X" | null | undefined>
+): StrengthsAndActionPoints {
+  const result: StrengthsAndActionPoints = {
+    planningStrengths: [],
+    planningActionPoints: [],
+    teachingStrengths: [],
+    teachingActionPoints: [],
+  };
+
+  for (const code of CELTA_CRITERIA_CODES) {
+    const rating = ratingsByCode[code];
+    const isPlanning = code.startsWith("4");
+    const label = formatCriterion(code);
+
+    if (rating === "S+" || rating === "S") {
+      (isPlanning ? result.planningStrengths : result.teachingStrengths).push(label);
+    } else if (rating === "N") {
+      (isPlanning ? result.planningActionPoints : result.teachingActionPoints).push(label);
+    }
+    // "X"/null/plain-to-standard: omitted, per the real report's own footnote.
+  }
+
+  return result;
 }

@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { CopyLinkButton } from "@/app/trainer/volunteers/copy-link-button";
+import { CopyLinkButton } from "@/app/trainer/(hub)/volunteers/copy-link-button";
 import { AddVolunteerForm } from "@/app/register/[token]/add-volunteer-form";
 import { Wordmark } from "@/components/wordmark";
 

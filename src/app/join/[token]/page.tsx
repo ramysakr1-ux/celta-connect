@@ -27,7 +27,7 @@ export default async function JoinPage({
         <div className="sheet-accent w-full max-w-sm p-8">
           <Wordmark size="lg" />
           <p className="mt-4 text-sm text-destructive">
-            This join link is invalid or has expired. Ask your center admin for a new one.
+            This join link is invalid or has expired. Ask your centre admin for a new one.
           </p>
         </div>
       </div>
@@ -43,7 +43,7 @@ export default async function JoinPage({
         <p className="mt-1 text-sm text-muted">
           You&apos;re joining {course.name} as a <span className="capitalize">{role}</span>.
         </p>
-        <JoinForm token={token} />
+        <JoinForm token={token} role={role} />
       </div>
     </div>
   );

@@ -5,25 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { Wordmark } from "@/components/wordmark";
+import { ViewSwitcherPill } from "@/components/view-switcher-pill";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
 import { StatBar } from "@/app/portfolio/[traineeId]/stat-bar";
-import { CELTA_CRITERIA_CODES, computeCriteriaSuggestion, computeTrajectory } from "@/lib/celta-criteria";
-
-const TRAJECTORY_LABEL: Record<string, string> = {
-  "Pass A": "On track for Pass A",
-  "Pass B": "On track for Pass B",
-  Pass: "On track for Pass",
-  Fail: "Flagged -- currently below Pass",
-  not_enough_data: "Not enough data yet",
-};
-
-const TRAJECTORY_PILL_CLASS: Record<string, string> = {
-  "Pass A": "pill-success",
-  "Pass B": "pill-success",
-  Pass: "pill-success",
-  Fail: "pill-danger",
-  not_enough_data: "pill-neutral",
-};
+import { getInitialStaffChatData } from "@/lib/staff-chat";
+import { CELTA_CRITERIA_CODES, computeCriteriaSuggestion, computeTrajectory, type Trajectory } from "@/lib/celta-criteria";
+import { HideDuringPreview, TraineeEyebrowLabel, PreviewBanner, ChatDrawerSwitcher } from "@/app/portfolio/[traineeId]/preview-chrome";
+import { TrajectoryBarCompact } from "@/components/trajectory-gradient-bar";
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
 // only ever land on their own :traineeId (redirected home otherwise);
@@ -67,6 +55,52 @@ export default async function PortfolioLayout({
   const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
   const isStaffView = isStaff || Boolean(assessorCourseId);
 
+  // §1.1d: the ViewSwitcherPill's "Trainee" segment promises a real preview
+  // of what the candidate sees -- confirmed live it wasn't actually doing
+  // that (the broadcast composer, trajectory pill etc. all still rendered,
+  // since every page independently re-derives isStaff from the real
+  // session role, and this layout can't read ?preview=trainee server-side
+  // at all -- Next.js never passes searchParams to a layout). The pages
+  // under this layout DO receive searchParams and fold `preview=trainee`
+  // straight into their own isStaff-equivalent for real UI gating; this
+  // layout's own staff-only chrome (trajectory pill, chat drawer, eyebrow
+  // label) is still fetched/computed normally below but conditionally
+  // RENDERED via the small client components in preview-chrome.tsx, which
+  // read the param client-side instead. Every server action still calls
+  // requireRole("trainer") itself regardless of any of this, so none of it
+  // can be used to bypass a real authorization check either way.
+  const staffChat =
+    viewer?.role === "trainee" || viewer?.role === "trainer" ? await getInitialStaffChatData(viewer.id) : null;
+  // A staff member's OWN chat (above) isn't part of what a trainee actually
+  // sees, so previewing showed nothing at all -- confirmed live, "messages
+  // do not appear anywhere on the trainee view." Real trainees do have
+  // their own chat (TP-group channel + DM-their-tutor, 0041), so fetch the
+  // TARGET trainee's channels too whenever staff might preview this page,
+  // and let the client-side preview toggle (chat-preview.tsx) pick which
+  // one to render. getInitialStaffChatData is keyed purely by profileId, no
+  // role branching inside it, so calling it with the trainee's id is safe
+  // and returns exactly what that trainee's own session would see.
+  const traineePreviewChat = isStaff ? await getInitialStaffChatData(trainee.id, createAdminClient()) : null;
+  // Same RLS boundary, different code path: MessageThread's own client-side
+  // fetch (for the latest-message preview above the compose row) runs
+  // under the REAL browser session -- staff's, not the trainee's -- so it
+  // silently came back empty too, even though this channel genuinely has
+  // messages (confirmed live: "the one you created for the trainee...
+  // that extra bit on top is not there" -- not because no one wrote
+  // anything). Fetch the trainee's primary channel's latest message here,
+  // admin-side, and hand it to MessageThread as a static value instead of
+  // letting it try (and fail) to fetch this itself.
+  const traineePreviewLatestMessage = traineePreviewChat?.channels[0]
+    ? (
+        await createAdminClient()
+          .from("staff_messages")
+          .select("*")
+          .eq("channel_id", traineePreviewChat.channels[0].id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+      ).data?.[0]
+    : null;
+
   const [{ data: course }, { data: center }, { data: lessons }, { data: celta5Record }, { data: assignments }] =
     await Promise.all([
       trainee.course_id
@@ -78,7 +112,7 @@ export default async function PortfolioLayout({
       supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
     ]);
 
-  const assessedHours = (lessons ?? []).reduce((sum, l) => sum + (l.length_minutes ?? 0), 0) / 60;
+  const tpsTaught = (lessons ?? []).length;
   const attendanceHours = celta5Record?.hours_attended ?? 0;
   const assignmentsPassed = (assignments ?? []).filter(
     (a) => a.first_status === "approved" || a.resubmission_status === "approved"
@@ -89,7 +123,7 @@ export default async function PortfolioLayout({
   // to the same TP-feedback-tag suggestion when a criterion isn't rated
   // yet) -- gated behind isStaffView so a trainee view never pays for or
   // sees this query at all.
-  let trajectory: string | null = null;
+  let trajectory: Trajectory | null = null;
   if (isStaffView) {
     const lessonIds = (lessons ?? []).map((l) => l.id);
     const [{ data: matrix }, { data: criteriaTags }] = await Promise.all([
@@ -125,17 +159,22 @@ export default async function PortfolioLayout({
         <div className="container flex h-14 items-center justify-between">
           <Link href={isStaffView ? "/trainer" : `/portfolio/${trainee.id}`} className="block">
             <Wordmark size="sm" />
-            <p className="text-[10px] tracking-[0.1em] text-muted uppercase">
-              Trainee Workspace{assessorCourseId ? " · read-only" : ""}
-            </p>
+            {/* §1.1d: for real staff, the pill's active segment ("Trainee view") already
+                names this place, so the standalone label only shows for the trainee's own
+                view, a staff preview, and assessors (who don't get the pill -- see below). */}
+            <TraineeEyebrowLabel isStaff={isStaff} readOnly={Boolean(assessorCourseId)} />
           </Link>
-          {isStaffView ? (
+          {isStaff ? (
+            <ViewSwitcherPill current="trainee" traineeHref={`/portfolio/${trainee.id}?preview=trainee`} />
+          ) : assessorCourseId ? (
             <Link href="/trainer" className="text-sm font-semibold text-primary">
               Command Centre
             </Link>
           ) : null}
         </div>
       </div>
+
+      <PreviewBanner traineeId={trainee.id} traineeName={trainee.full_name} />
 
       <PortfolioTabs traineeId={trainee.id} />
 
@@ -156,7 +195,7 @@ export default async function PortfolioLayout({
           </div>
 
           <div className="grid flex-1 grid-cols-2 gap-5 lg:max-w-2xl lg:grid-cols-3">
-            <StatBar label="Assessed teaching" value={Number(assessedHours.toFixed(2))} max={6} unit="hrs" />
+            <StatBar label="Assessed teaching" value={tpsTaught} max={8} unit="TPs" />
             <StatBar
               label="Attendance"
               value={Number(attendanceHours.toFixed(1))}
@@ -167,11 +206,11 @@ export default async function PortfolioLayout({
           </div>
 
           {isStaffView && trajectory ? (
-            <div className="lg:ml-2">
-              <span className={`pill ${TRAJECTORY_PILL_CLASS[trajectory] ?? "pill-neutral"}`}>
-                {TRAJECTORY_LABEL[trajectory] ?? trajectory}
-              </span>
-            </div>
+            <HideDuringPreview>
+              <div className="lg:ml-2">
+                <TrajectoryBarCompact value={trajectory} />
+              </div>
+            </HideDuringPreview>
           ) : null}
         </div>
 
@@ -183,6 +222,14 @@ export default async function PortfolioLayout({
           .filter(Boolean)
           .join(" · ")}
       </footer>
+
+      <ChatDrawerSwitcher
+        staffProfileId={viewer?.id ?? null}
+        staffChat={staffChat}
+        traineeId={trainee.id}
+        traineePreviewChat={traineePreviewChat}
+        traineePreviewLatestMessage={traineePreviewLatestMessage}
+      />
     </div>
   );
 }

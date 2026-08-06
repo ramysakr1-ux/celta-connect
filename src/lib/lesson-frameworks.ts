@@ -1,8 +1,17 @@
 // The center's real named lesson-shape frameworks, used as context for the
 // TP Points Library's AI generation prompt (framework-tier / TP3-4 content)
 // so generated stage lists use real framework names and real stage
-// vocabulary rather than invented ones. Verbatim from the center's own
-// "Lesson Framework" reference document.
+// vocabulary rather than invented ones. Verbatim from Ramy's own "Lesson
+// Systems and Framework" reference document (6 Aug 2026 -- supersedes an
+// earlier, less accurate transcription sourced from a shared Drive copy of
+// a similarly-named but different doc; Receptive Skills was missing two
+// real stages, Prediction and Reading/listening for specific info).
+// Framework CHOICE itself follows a real decision tree from the same doc,
+// not free judgement: language vs skills -> (for language) clarification/
+// practice/both -> (for clarification-or-both) does the target language
+// arise from a reading/listening text? yes=Text-based, no=Test-Teach-Test
+// or PPP (practice-only=Language Practice) -> (for skills) receptive
+// (reading/listening) vs productive (speaking/writing).
 export const LESSON_FRAMEWORKS = [
   {
     name: "Text-based Presentation of Language",
@@ -37,9 +46,11 @@ export const LESSON_FRAMEWORKS = [
     name: "Receptive Skills",
     stages: [
       "Lead in",
+      "Prediction task",
       "Pre-teach vocabulary",
       "Reading/listening for gist",
       "Reading/listening for detail",
+      "Reading/listening for specific information",
       "Post reading/listening task",
     ],
   },

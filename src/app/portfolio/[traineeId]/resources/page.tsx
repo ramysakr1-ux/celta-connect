@@ -3,7 +3,13 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { RESOURCE_CATEGORY_LABELS, RESOURCE_CATEGORY_ORDER, RESOURCE_TYPE_ICON, RESOURCE_TYPE_LABELS } from "@/lib/resource-info";
+import {
+  RESOURCE_CATEGORY_LABELS,
+  RESOURCE_CATEGORY_ORDER,
+  RESOURCE_TYPE_ICON,
+  RESOURCE_TYPE_LABELS,
+  TRAINER_ONLY_CATEGORIES,
+} from "@/lib/resource-info";
 import { ResourceComposer } from "@/app/portfolio/[traineeId]/resources/resource-composer";
 import { deleteResource } from "@/app/portfolio/[traineeId]/resources/actions";
 
@@ -12,13 +18,25 @@ import { deleteResource } from "@/app/portfolio/[traineeId]/resources/actions";
 // admins/trainers add real center material over time via the composer
 // below. A resource is either course-specific or center-wide
 // (course_id null, "share across the whole center").
-export default async function ResourceHubPage({ params }: { params: Promise<{ traineeId: string }> }) {
+export default async function ResourceHubPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ traineeId: string }>;
+  searchParams: Promise<{ preview?: string }>;
+}) {
   const { traineeId } = await params;
+  const { preview } = await searchParams;
   const session = await getCurrentProfile();
   const viewer = session?.profile ?? null;
-  const isEditableStaff = viewer?.role === "trainer" || viewer?.role === "admin";
+  // See portfolio/[traineeId]/layout.tsx's previewAsTrainee comment.
+  const isEditableStaff = (viewer?.role === "trainer" || viewer?.role === "admin") && preview !== "trainee";
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
   if (!viewer && !assessorCourseId) notFound();
+  // Assessor sees the same trainer-only material a trainer does (reviewing
+  // for Cambridge); a real trainee, and a staff member previewing as one,
+  // sees only what's actually marked visible_to_trainee.
+  const canSeeTrainerOnly = isEditableStaff || Boolean(assessorCourseId);
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const { data: trainee } = await supabase.from("profiles").select("center_id, course_id").eq("id", traineeId).maybeSingle();
@@ -34,7 +52,10 @@ export default async function ResourceHubPage({ params }: { params: Promise<{ tr
     ? await query.or(`course_id.eq.${trainee.course_id},course_id.is.null`)
     : await query.is("course_id", null);
 
-  const resources = resourcesRaw ?? [];
+  const resources = (resourcesRaw ?? []).filter((r) => {
+    if (!canSeeTrainerOnly && TRAINER_ONLY_CATEGORIES.includes(r.category)) return false;
+    return r.visible_to_trainee || canSeeTrainerOnly;
+  });
   const byCategory = new Map<string, typeof resources>();
   for (const r of resources) {
     const list = byCategory.get(r.category) ?? [];
@@ -51,14 +72,28 @@ export default async function ResourceHubPage({ params }: { params: Promise<{ tr
 
       {isEditableStaff ? <ResourceComposer traineeId={traineeId} /> : null}
 
-      {resources.length === 0 ? (
+      {resources.length === 0 && !isEditableStaff ? (
         <p className="sheet text-sm text-muted">No resources yet.</p>
       ) : (
-        RESOURCE_CATEGORY_ORDER.filter((category) => byCategory.has(category)).map((category) => (
+        // Staff sees every category's heading even at zero items -- "the
+        // hub with all the same dimensions and headings" was the explicit
+        // ask (so the whole shape is visible before any real file is
+        // attached); a trainee only ever sees categories that actually
+        // have something in them, an empty heading would just read as
+        // broken/missing content to them, not "not filled in yet".
+        (isEditableStaff ? RESOURCE_CATEGORY_ORDER : RESOURCE_CATEGORY_ORDER.filter((category) => byCategory.has(category))).map(
+          (category) => (
           <div key={category}>
-            <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+            {/* Traced live off the Lovable reference 5 Aug 2026: group
+                headings are Newsreader (serif), not the app's default
+                Karla -- easy to miss since every other overline label in
+                the app IS plain Karla; this one specifically isn't. */}
+            <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">
               {RESOURCE_CATEGORY_LABELS[category]}
             </h3>
+            {!byCategory.has(category) ? (
+              <p className="mt-3 sheet border-dashed text-sm text-muted">No items in this category yet.</p>
+            ) : (
             <ul className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
               {byCategory.get(category)!.map((resource) => (
                 <li key={resource.id}>
@@ -68,8 +103,11 @@ export default async function ResourceHubPage({ params }: { params: Promise<{ tr
                     rel="noopener noreferrer"
                     className="sheet group flex h-full gap-3 p-4 transition-colors hover:border-primary/40 hover:bg-accent/40"
                   >
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-surface-muted text-base">
-                      {RESOURCE_TYPE_ICON[resource.resource_type]}
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
+                      {(() => {
+                        const Icon = RESOURCE_TYPE_ICON[resource.resource_type];
+                        return <Icon className="size-4" aria-hidden="true" />;
+                      })()}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-start justify-between gap-2">
@@ -81,8 +119,15 @@ export default async function ResourceHubPage({ params }: { params: Promise<{ tr
                       {resource.description ? (
                         <span className="mt-1 block text-xs leading-relaxed text-muted">{resource.description}</span>
                       ) : null}
-                      <span className="mt-2 inline-block rounded-full border border-border px-2 py-0.5 text-[0.6875rem] font-semibold text-muted">
-                        {RESOURCE_TYPE_LABELS[resource.resource_type]}
+                      <span className="mt-2 flex flex-wrap gap-1.5">
+                        <span className="inline-block rounded-full border border-border px-2 py-0.5 text-[0.6875rem] font-semibold text-muted">
+                          {RESOURCE_TYPE_LABELS[resource.resource_type]}
+                        </span>
+                        {!resource.visible_to_trainee && canSeeTrainerOnly ? (
+                          <span className="inline-block rounded-full border border-border bg-surface-muted px-2 py-0.5 text-[0.6875rem] font-semibold text-muted">
+                            Trainer only
+                          </span>
+                        ) : null}
                       </span>
                     </span>
                   </a>
@@ -98,8 +143,10 @@ export default async function ResourceHubPage({ params }: { params: Promise<{ tr
                 </li>
               ))}
             </ul>
+            )}
           </div>
-        ))
+          )
+        )
       )}
     </div>
   );

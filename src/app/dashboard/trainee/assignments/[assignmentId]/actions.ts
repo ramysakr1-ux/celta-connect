@@ -51,7 +51,7 @@ async function saveResponses(
 }
 
 export async function saveAssignmentDraft(_prevState: FormState, formData: FormData): Promise<FormState> {
-  await requireRole("trainee");
+  const trainee = await requireRole("trainee");
   const assignmentId = formData.get("assignment_id");
   const round = formData.get("round");
   if (typeof assignmentId !== "string" || typeof round !== "string") {
@@ -62,12 +62,12 @@ export async function saveAssignmentDraft(_prevState: FormState, formData: FormD
   const error = await saveResponses(supabase, assignmentId, round, parseSections(formData));
   if (error) return { error };
 
-  revalidatePath(`/dashboard/trainee/assignments/${assignmentId}`);
+  revalidatePath(`/portfolio/${trainee.id}/assignments/${assignmentId}`);
   return { error: null };
 }
 
 export async function submitAssignment(_prevState: FormState, formData: FormData): Promise<FormState> {
-  await requireRole("trainee");
+  const trainee = await requireRole("trainee");
   const assignmentId = formData.get("assignment_id");
   const round = formData.get("round");
   if (typeof assignmentId !== "string" || typeof round !== "string") {
@@ -81,7 +81,7 @@ export async function submitAssignment(_prevState: FormState, formData: FormData
   const { error } = await supabase.rpc("submit_assignment_round", { p_assignment_id: assignmentId });
   if (error) return { error: error.message };
 
-  revalidatePath(`/dashboard/trainee/assignments/${assignmentId}`);
-  revalidatePath("/dashboard/trainee");
+  revalidatePath(`/portfolio/${trainee.id}/assignments/${assignmentId}`);
+  revalidatePath(`/portfolio/${trainee.id}/assignments`);
   return { error: null };
 }

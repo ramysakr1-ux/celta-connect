@@ -129,6 +129,7 @@ export const LESSON_FRAMEWORKS: LessonFramework[] = [
       { name: "Pre-teach vocabulary", aim: "To unblock the key vocabulary needed to complete the… task" },
       { name: "Reading / listening for gist", aim: "To encourage learners to skim/listen for gist" },
       { name: "Reading / listening for detail", aim: "To practise reading/listening for detailed comprehension" },
+      { name: "Reading / listening for specific information", aim: "To practise scanning for specific information" },
       {
         name: "Post-reading / listening task",
         aim: "To develop fluency by reacting to the text; to personalise the topic",

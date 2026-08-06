@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -5,6 +6,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { BroadcastComposer } from "@/app/portfolio/[traineeId]/broadcast-composer";
 import { deleteBroadcast } from "@/app/portfolio/[traineeId]/stream-actions";
+import { TUTOR_ROLE_LABELS, type TutorRole } from "@/lib/tutor-roles";
+import { toLocalIso } from "@/lib/timetable-grid";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   input_session: "Input session",
@@ -32,10 +35,13 @@ function getZoomStatus(startDate: Date | null): "live" | "upcoming" | null {
 // §4 Course Stream -- the default tab behind the portfolio link.
 export default async function CourseStreamPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ traineeId: string }>;
+  searchParams: Promise<{ preview?: string }>;
 }) {
   const { traineeId } = await params;
+  const { preview } = await searchParams;
   const session = await getCurrentProfile();
   const viewer = session?.profile ?? null;
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
@@ -50,10 +56,15 @@ export default async function CourseStreamPage({
   if (!trainee?.course_id) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
-  const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
-  const today = new Date().toISOString().slice(0, 10);
+  // See portfolio/[traineeId]/layout.tsx's previewAsTrainee comment -- same
+  // "hide staff-only rendering, never touch real authorization" rule here.
+  // No notFound() gate keys off this in this file, so folding preview
+  // straight into `isStaff` is safe (unlike TP detail/assignment/CELTA5,
+  // which need a separate raw staff check for their access gate).
+  const isStaff = (viewer?.role === "trainer" || viewer?.role === "admin") && preview !== "trainee";
+  const today = toLocalIso(new Date());
 
-  const [{ data: broadcasts }, { data: timetableEvents }, { data: upcomingEvents }, { data: tutors }] =
+  const [{ data: broadcasts }, { data: timetableEvents }, { data: upcomingEvents }, { data: tutors }, { data: assignments }] =
     await Promise.all([
       supabase
         .from("course_broadcasts")
@@ -81,8 +92,19 @@ export default async function CourseStreamPage({
             .order("event_time")
             .limit(30)
         : Promise.resolve({ data: [] }),
-      supabase.from("profiles").select("full_name, role").eq("course_id", trainee.course_id).eq("role", "trainer"),
+      supabase
+        .from("profiles")
+        .select("full_name, tutor_role")
+        .eq("course_id", trainee.course_id)
+        .eq("role", "trainer"),
+      supabase.from("assignments").select("id, assignment_type").eq("trainee_id", traineeId),
     ]);
+
+  // §1.1a v2 rule 9 -- deadline chips are live links to the assignment card
+  // they govern. A timetable event only carries the assignment TYPE
+  // (course-wide -- "Focus on the Learner is due", not any one trainee's
+  // row), so it's resolved here against this trainee's own assignments.
+  const assignmentIdByType = new Map((assignments ?? []).map((a) => [a.assignment_type, a.id]));
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_300px]">
@@ -214,39 +236,59 @@ export default async function CourseStreamPage({
           <h2 className="invisible font-serif text-xl">Spacer</h2>
         </div>
 
-        <div className="sheet-accent h-fit lg:sticky lg:top-6">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">This week</p>
-          {(timetableEvents ?? []).length > 0 ? (
-            <ul className="mt-3 flex flex-col">
-              {(timetableEvents ?? []).map((event, i) => (
-                <li
-                  key={event.id}
-                  className={`py-3 ${i > 0 ? "border-t border-border" : "pt-0"}`}
-                >
-                  <p className="text-sm font-semibold text-ink">{event.title}</p>
-                  <p className="mt-0.5 text-xs text-muted">
-                    {[EVENT_TYPE_LABELS[event.type], event.event_date, event.event_time].filter(Boolean).join(" · ")}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-3 text-sm text-muted">Nothing scheduled yet.</p>
-          )}
+        <div className="flex flex-col gap-4 lg:sticky lg:top-6">
+          <div className="sheet-accent h-fit">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">This week</p>
+            {(timetableEvents ?? []).length > 0 ? (
+              <ul className="mt-3 flex flex-col">
+                {(timetableEvents ?? []).map((event, i) => {
+                  const assignmentId = event.linked_assignment_type
+                    ? assignmentIdByType.get(event.linked_assignment_type)
+                    : undefined;
+                  return (
+                    <li
+                      key={event.id}
+                      className={`py-3 ${i > 0 ? "border-t border-border" : "pt-0"}`}
+                    >
+                      {assignmentId ? (
+                        <Link
+                          href={`/portfolio/${traineeId}/assignments/${assignmentId}`}
+                          className="text-sm font-semibold text-ink hover:text-primary hover:underline"
+                        >
+                          {event.title}
+                        </Link>
+                      ) : (
+                        <p className="text-sm font-semibold text-ink">{event.title}</p>
+                      )}
+                      <p className="mt-0.5 text-xs text-muted">
+                        {[EVENT_TYPE_LABELS[event.type], event.event_date, event.event_time].filter(Boolean).join(" · ")}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="mt-3 text-sm text-muted">Nothing scheduled yet.</p>
+            )}
+          </div>
 
-          <p className="mt-6 text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Course tutors</p>
-          {(tutors ?? []).length > 0 ? (
-            <ul className="mt-3 flex flex-col gap-2">
-              {(tutors ?? []).map((tutor, i) => (
-                <li key={i} className="text-sm text-ink">
-                  {tutor.full_name}
-                  <span className="ml-1 text-xs text-muted">Trainer</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-3 text-sm text-muted">No tutors assigned yet.</p>
-          )}
+          <div className="sheet-accent h-fit">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Course tutors</p>
+            {(tutors ?? []).length > 0 ? (
+              <ul className="mt-3 flex flex-col gap-2">
+                {(tutors ?? []).map((tutor, i) => (
+                  <li key={i} className="text-sm text-ink">
+                    {tutor.full_name}
+                    <span className="ml-1 text-xs text-muted">
+                      {(tutor.tutor_role && TUTOR_ROLE_LABELS[tutor.tutor_role as TutorRole]) || "Trainer"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-sm text-muted">No tutors assigned yet.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

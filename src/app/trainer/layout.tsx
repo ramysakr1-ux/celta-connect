@@ -1,35 +1,41 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/wordmark";
-import { TrainerTabs } from "@/app/trainer/trainer-tabs";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 
-// Shared shell for every /trainer/* page -- was previously missing
-// entirely, so /trainer and /trainer/timetable rendered with no header/nav
-// at all (bare root layout, full-bleed width). Mirrors the portfolio
-// shell's header + tab bar pattern (§3) rather than inventing a new one.
-// §11 -- an assessor (no real session, token cookie only) only ever gets
-// the roster tab; Timetable/Volunteers/Rotation/Points Library stay
-// trainer-only operational tools, hidden rather than shown-then-redirected.
+// Shared shell for every /trainer/* page -- just the wordmark now. The
+// tab bar + view-switcher pill moved into (hub)/layout.tsx, since they
+// only belong on the operational Command Centre pages (roster/timetable/
+// volunteers/etc.), not the /trainer landing itself -- landing has its
+// own "Command Centre" button leading into the hub instead.
 export default async function TrainerLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentProfile();
-  const isRealStaff = session?.profile?.role === "trainer" || session?.profile?.role === "admin";
-  const isAssessor = !isRealStaff && Boolean(await getAssessorCourseId());
+  const profile = session?.profile ?? null;
 
   return (
-    <div className="flex min-h-full flex-col bg-background">
+    // min-h-screen, not min-h-full: a percentage min-height here silently
+    // breaks position:sticky for any descendant (confirmed live -- the
+    // timetable's floating time band would not stick until this changed).
+    // min-h-screen achieves the same "fill at least the viewport" look via
+    // a viewport unit instead of a parent-percentage chain, which sticky's
+    // containing-block calculation doesn't choke on. Kept here since this
+    // layout still wraps the timetable page underneath (hub).
+    <div className="flex min-h-screen flex-col bg-background">
       <div className="border-b border-border bg-card">
         <div className="container flex h-14 items-center justify-between">
           <Link href="/trainer" className="block">
             <Wordmark size="sm" />
-            <p className="text-[10px] tracking-[0.1em] text-muted uppercase">Command Centre</p>
           </Link>
+          {/* Same gap this whole /trainer subtree had -- (hub)/layout.tsx
+              just got the same fix. Landing page itself never showed a
+              staff greeting either, so this was the only place a name
+              could have shown on the way in. */}
+          {profile ? (
+            <span className="text-sm text-muted">{profile.full_name ?? session?.email}</span>
+          ) : null}
         </div>
       </div>
 
-      <TrainerTabs rosterOnly={isAssessor} />
-
-      <div className="container flex-1 py-8">{children}</div>
+      {children}
     </div>
   );
 }

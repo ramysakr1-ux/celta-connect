@@ -9,29 +9,27 @@ import {
   CRITERIA_GUIDANCE,
   CELTA_CRITERIA_CODES,
   computeCriteriaSuggestion,
-  computeTrajectory,
+  computeTrajectoryByDimension,
+  addTpFeedbackCriteriaTags,
 } from "@/lib/celta-criteria";
+import { TrajectoryGradientBars } from "@/components/trajectory-gradient-bar";
+import { AssignmentsSummary, TpFeedbackSummary } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
 import { CriteriaRatingPill, StandardRatingPill } from "@/lib/status-pill";
 import { computeProgressIssues } from "@/lib/course-progress";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
-import { signOffStage2, signOffFinal } from "@/app/dashboard/trainee/actions";
+import { FinalChecklistForm } from "@/app/dashboard/trainee/celta5/final-checklist-form";
+import { signOffStage2 } from "@/app/dashboard/trainee/actions";
 import { Stage1Form } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-form";
 import { StageRatingsForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage-ratings-form";
 import { Stage2OverallForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage2-overall-form";
 import { Stage3OverallForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage3-overall-form";
+import { GradeReviewCommentsForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/grade-review-comments-form";
 import { FinalGradeForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/final-grade-form";
 import { AttendanceForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/attendance-form";
 import { AdminGrantForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/admin-grant-form";
 import { FinalizeRecordForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/finalize-record-form";
-
-const TRAJECTORY_LABEL: Record<string, string> = {
-  "Pass A": "Pass A",
-  "Pass B": "Pass B",
-  Pass: "Pass",
-  Fail: "Fail",
-  not_enough_data: "Not enough data yet",
-};
+import { ReleaseFinalReportForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/release-final-report-form";
 
 function ReadOnlyField({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
@@ -53,14 +51,46 @@ function ReadOnlyField({ label, value }: { label: string; value: string | null }
 // booklet-verified CELTA_CRITERIA_SECTIONS (41 codes) -- not the shorter
 // invented set shown in the design reference, per standing instruction that
 // the real CELTA5 booklet always overrides the visual reference on this.
-export default async function PortfolioCelta5Page({ params }: { params: Promise<{ traineeId: string }> }) {
+export default async function PortfolioCelta5Page({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ traineeId: string }>;
+  searchParams: Promise<{ preview?: string }>;
+}) {
   const { traineeId } = await params;
+  const { preview } = await searchParams;
   const session = await getCurrentProfile();
   const viewer = session?.profile ?? null;
+  // Raw role check for the access gate -- see the TP detail page's
+  // identical comment for why this can't fold in previewAsTrainee.
   const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
   if (!viewer && !assessorCourseId) notFound();
   if (viewer && !isStaff && viewer.id !== traineeId) notFound();
+
+  // CELTA5 doesn't get the same previewAsTrainee treatment as the rest of
+  // the portfolio tree: the trainee's real view is masked SERVER-SIDE by
+  // get_my_celta5_record()'s auth.uid()-scoped RPC (migration 0034 --
+  // final_recommended_grade/final_teaching_grade/final_assignments_grade/
+  // overall_notes always null for a trainee, no exceptions). That RPC can't
+  // be called "as" another user, and the staff/assessor branch below
+  // genuinely does show the real grade (assessors are allowed to). Faking
+  // a preview by reusing that branch would risk showing the real grade
+  // inside something labelled "what the trainee sees" -- given "trainees
+  // must NEVER see the real grade" is the single most repeated hard rule
+  // in this project, an honest placeholder here is safer than a wrong
+  // simulation.
+  if (isStaff && preview === "trainee") {
+    return (
+      <div className="sheet p-6 text-sm text-muted">
+        CELTA 5 preview isn&apos;t available here -- the trainee&apos;s grade fields are masked at the database
+        level for their own session specifically, not just hidden in this page&apos;s markup, so staff can&apos;t
+        safely simulate that exact view. To verify what a trainee sees on this record, check with their real
+        account.
+      </div>
+    );
+  }
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
 
@@ -267,11 +297,26 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
                 trainee at the data layer (migration 0034) -- this is just
                 the matching UI, not the only enforcement. */}
             <div className="sheet">
-              <h3 className="font-serif text-lg text-ink">Final grade</h3>
-              <p className="mt-2 text-sm text-muted">
-                Your final grade is confirmed after your tutor&apos;s recommendation is reviewed. You&apos;ll
-                receive it separately once that&apos;s complete.
-              </p>
+              <h3 className="font-serif text-lg text-ink">Final report</h3>
+              {record.final_report_released_at ? (
+                <>
+                  <p className="mt-2 text-sm text-muted">
+                    Your final report is ready.
+                  </p>
+                  <a
+                    href={`/api/celta5/${traineeId}/final-report`}
+                    className="mt-3 inline-flex rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+                  >
+                    Download final report
+                  </a>
+                </>
+              ) : (
+                <p className="mt-2 text-sm text-muted">
+                  Your final grade is confirmed after your tutor&apos;s recommendation is reviewed by Cambridge
+                  Assessment English. Your final report will be released here once that&apos;s complete --
+                  typically some time after the course ends.
+                </p>
+              )}
             </div>
 
             <div className="sheet">
@@ -280,11 +325,7 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
                   You signed off on this on {new Date(record.trainee_signoff_final_at).toLocaleString()}.
                 </p>
               ) : (
-                <form action={signOffFinal}>
-                  <button type="submit" className="rounded-[6px] bg-primary px-4 py-2 font-medium text-primary-foreground">
-                    I&apos;ve reviewed my final record and sign off
-                  </button>
-                </form>
+                <FinalChecklistForm />
               )}
             </div>
           </>
@@ -319,6 +360,8 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
     { data: absences },
     { data: observations },
     { data: lessons },
+    { data: assignments },
+    { data: tpFeedbackRows },
   ] = await Promise.all([
     supabase.from("courses").select("*").eq("id", trainee.course_id ?? "").maybeSingle(),
     supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
@@ -327,6 +370,8 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
     supabase.from("attendance_absences").select("*").eq("trainee_id", traineeId).order("session_date"),
     supabase.from("observations").select("*").eq("trainee_id", traineeId).order("observation_date"),
     supabase.from("tp_lessons").select("id").eq("trainee_id", traineeId),
+    supabase.from("assignments").select("*").eq("trainee_id", traineeId),
+    supabase.from("tp_feedback").select("*").eq("trainee_id", traineeId),
   ]);
 
   const lessonIds = (lessons ?? []).map((l) => l.id);
@@ -341,6 +386,7 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
     list.push({ tag_type: tag.tag_type, created_at: tag.created_at });
     tagsByCriteria.set(tag.criteria_code, list);
   }
+  addTpFeedbackCriteriaTags(tagsByCriteria, tpFeedbackRows ?? []);
 
   const suggestions: Record<string, "S+" | "S" | "N"> = {};
   for (const code of CELTA_CRITERIA_CODES) {
@@ -361,15 +407,18 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
   const matrixKey = matrixRows.map((m) => m.updated_at).join(",");
   const matrixByCode = new Map(matrixRows.map((m) => [m.criteria_code, m]));
 
-  const trajectoryInputs = CELTA_CRITERIA_CODES.map((code) => matrixByCode.get(code)?.tutor_status_stage2 ?? suggestions[code] ?? null);
-  const trajectory = computeTrajectory(trajectoryInputs);
+  const ratingsByCode: Record<string, "S+" | "S" | "N" | "X" | null> = {};
+  for (const code of CELTA_CRITERIA_CODES) {
+    ratingsByCode[code] = matrixByCode.get(code)?.tutor_status_stage2 ?? suggestions[code] ?? null;
+  }
+  const trajectoryByDimension = computeTrajectoryByDimension(ratingsByCode);
 
   const headerBlock = (
     <div>
       <h2 className="font-serif text-xl text-ink">CELTA 5 record</h2>
       <div className="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
         <div>
-          <p className="text-muted">Center</p>
+          <p className="text-muted">Centre</p>
           <p className="text-ink">{center?.name ?? "--"}</p>
         </div>
         <div>
@@ -430,7 +479,9 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
 
         <div className="sheet">
           <p className="text-sm text-muted">Trajectory (estimated, informal)</p>
-          <p className="mt-1 font-serif text-xl text-ink">{TRAJECTORY_LABEL[trajectory]}</p>
+          <div className="mt-3">
+            <TrajectoryGradientBars byDimension={trajectoryByDimension} />
+          </div>
         </div>
 
         <div className="sheet">
@@ -441,6 +492,9 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
         </div>
 
         {observationsBlock}
+
+        <AssignmentsSummary traineeId={traineeId} assignments={assignments ?? []} />
+        <TpFeedbackSummary traineeId={traineeId} feedbackRows={tpFeedbackRows ?? []} />
 
         {record.stage1_strengths || record.stage1_action_plan ? (
           <div className="sheet">
@@ -533,6 +587,25 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
             <p className="mt-2 text-sm text-muted">Not yet decided.</p>
           )}
         </div>
+
+        {record.stage3_required && record.grade_review_tutor_comments ? (
+          <div className="sheet">
+            <h3 className="font-serif text-lg text-ink">Information for the CELTA grade review</h3>
+            <p className="mt-2 whitespace-pre-wrap text-ink">{record.grade_review_tutor_comments}</p>
+          </div>
+        ) : null}
+
+        <div className="sheet">
+          <h3 className="font-serif text-lg text-ink">Final-day sign-off</h3>
+          {record.trainee_signoff_final_at ? (
+            <p className="mt-2 text-sm text-ink">
+              Candidate signed {new Date(record.trainee_signoff_final_at).toLocaleString()}, confirming teaching
+              practice, observations, written assignments, own work, and complete records.
+            </p>
+          ) : (
+            <p className="mt-2 text-sm text-muted">Not yet signed off by the candidate.</p>
+          )}
+        </div>
       </div>
     );
   }
@@ -543,12 +616,17 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
 
       <div className="sheet">
         <p className="text-sm text-muted">Trajectory (trainer-only, estimated -- never shown to the trainee, never sets the real final grade)</p>
-        <p className="mt-1 font-serif text-xl text-ink">{TRAJECTORY_LABEL[trajectory]}</p>
+        <div className="mt-3">
+          <TrajectoryGradientBars byDimension={trajectoryByDimension} />
+        </div>
       </div>
 
       <AttendanceForm key={`attendance-${record.updated_at}`} record={record} totalHours={course?.total_hours ?? 120} absences={absences ?? []} />
 
       {observationsBlock}
+
+      <AssignmentsSummary traineeId={traineeId} assignments={assignments ?? []} />
+      <TpFeedbackSummary traineeId={traineeId} feedbackRows={tpFeedbackRows ?? []} />
 
       <Stage1Form key={`stage1-${record.updated_at}`} record={record} />
 
@@ -570,6 +648,10 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
 
       <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} />
 
+      {record.stage3_required ? (
+        <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
+      ) : null}
+
       {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.trainer_signoff_final_at ? (
         <div className="sheet flex items-center justify-between gap-3">
           <p className="text-ink">Final report ready to download.</p>
@@ -585,6 +667,10 @@ export default async function PortfolioCelta5Page({ params }: { params: Promise<
       <FinalGradeForm key={`final-${record.updated_at}`} record={record} />
 
       <FinalizeRecordForm key={`finalize-${record.updated_at}`} record={record} />
+
+      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.trainer_signoff_final_at ? (
+        <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} />
+      ) : null}
 
       <AdminGrantForm key={`admin-grant-${record.updated_at}`} record={record} />
     </div>
