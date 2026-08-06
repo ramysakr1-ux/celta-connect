@@ -8,6 +8,7 @@ import { BroadcastComposer } from "@/app/portfolio/[traineeId]/broadcast-compose
 import { deleteBroadcast } from "@/app/portfolio/[traineeId]/stream-actions";
 import { TUTOR_ROLE_LABELS, type TutorRole } from "@/lib/tutor-roles";
 import { toLocalIso } from "@/lib/timetable-grid";
+import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   input_session: "Input session",
@@ -243,7 +244,7 @@ export default async function CourseStreamPage({
               <ul className="mt-3 flex flex-col">
                 {(timetableEvents ?? []).map((event, i) => {
                   const assignmentId = event.linked_assignment_type
-                    ? assignmentIdByType.get(event.linked_assignment_type)
+                    ? assignmentIdByType.get(event.linked_assignment_type as AssignmentTypeValue)
                     : undefined;
                   return (
                     <li

@@ -914,7 +914,13 @@ export interface Database {
         Returns: void;
       };
       trainee_sign_off_final: {
-        Args: Record<string, never>;
+        Args: {
+          p_checklist_tp: boolean;
+          p_checklist_observations: boolean;
+          p_checklist_assignments: boolean;
+          p_checklist_own_work: boolean;
+          p_checklist_all_records: boolean;
+        };
         Returns: void;
       };
       assign_tp_round: {
