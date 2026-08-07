@@ -23,10 +23,6 @@ export const MessageThread = forwardRef<
     // own now (see staff-chat-drawer.tsx) -- when this thread is only being
     // shown as a history panel above that bar, skip rendering a second input.
     hideComposer?: boolean;
-    // Compact preview mode for the drawer: show just the most recent message,
-    // sized to its own content, sitting right above the compose row -- not a
-    // scrolling multi-message history panel.
-    latestOnly?: boolean;
     // Server-fetched messages for a channel the CURRENT browser session
     // can't itself read under RLS (a staff member previewing a trainee's
     // channel, which they're not a member of -- confirmed live, the
@@ -38,13 +34,13 @@ export const MessageThread = forwardRef<
     staticMessages?: Message[];
   }
 >(function MessageThread(
-  { channelId, myProfileId, nameById, isGroup, hideComposer = false, latestOnly = false, staticMessages },
+  { channelId, myProfileId, nameById, isGroup, hideComposer = false, staticMessages },
   ref
 ) {
   const [messages, setMessages] = useState<Message[]>(staticMessages ?? []);
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(!staticMessages);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Dedupes against whatever a later realtime delivery (or another insert)
   // brings in -- an id already present is never appended twice.
@@ -99,8 +95,13 @@ export const MessageThread = forwardRef<
     };
   }, [channelId, staticMessages]);
 
+  // build-spec.md §8 bug 1 -- scrollIntoView on a sentinel div can scroll
+  // the whole PAGE, not just this panel, if the panel isn't the nearest
+  // scrolling ancestor. Setting scrollTop directly on the panel's own
+  // scroll container never touches anything outside it.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: "end" });
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [messages]);
 
   // Send-and-append locally instead of waiting on the realtime round trip
@@ -137,38 +138,9 @@ export const MessageThread = forwardRef<
     return null;
   }
 
-  const visibleMessages = latestOnly ? messages.slice(-1) : messages;
-
-  if (latestOnly) {
-    // Compact preview: just the latest message, sized to its own content,
-    // no scroll container -- sits right above the compose row rather than
-    // a tall scrolling history panel.
-    return (
-      <div className="px-4 pt-3">
-        {visibleMessages.map((m) => {
-          const mine = m.sender_id === myProfileId;
-          return (
-            <div key={m.id} className={mine ? "text-right" : ""}>
-              {!mine && isGroup ? (
-                <p className="mb-0.5 text-xs font-medium text-muted">{nameById.get(m.sender_id) ?? "Unknown"}</p>
-              ) : null}
-              <div
-                className={`inline-block max-w-[70%] truncate rounded-[6px] px-3 py-1.5 text-sm ${
-                  mine ? "bg-primary text-card" : "bg-accent/40 text-ink"
-                }`}
-              >
-                {m.body}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+    <div className="flex flex-1 flex-col overflow-hidden" role="log" aria-live="polite">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3">
         {loading ? (
           hideComposer ? null : <p className="text-sm text-muted">Loading...</p>
         ) : messages.length === 0 ? (
@@ -178,29 +150,26 @@ export const MessageThread = forwardRef<
             {messages.map((m) => {
               const mine = m.sender_id === myProfileId;
               return (
-                <div key={m.id} className={mine ? "text-right" : ""}>
-                  {!mine && isGroup ? (
-                    <p className="mb-0.5 text-xs font-medium text-muted">
-                      {nameById.get(m.sender_id) ?? "Unknown"}
-                    </p>
-                  ) : null}
+                <div key={m.id} className="flex items-start gap-2.5">
                   <div
-                    className={`inline-block max-w-[85%] rounded-[6px] px-3 py-2 text-sm ${
-                      mine ? "bg-primary text-card" : "bg-accent/40 text-ink"
+                    className={`flex size-6 shrink-0 items-center justify-center rounded-[8px] text-[9px] font-semibold ${
+                      mine ? "bg-gold text-gold-foreground" : "bg-accent text-accent-foreground"
                     }`}
                   >
-                    {m.body}
+                    {(mine ? "Me" : (nameById.get(m.sender_id) ?? "?")).slice(0, 2).toUpperCase()}
                   </div>
-                  <p className="mt-0.5 text-xs text-muted">
-                    {new Date(m.created_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-baseline gap-1.5 text-xs font-semibold text-ink">
+                      {!mine && isGroup ? (nameById.get(m.sender_id) ?? "Unknown") : mine ? "You" : null}
+                      <span className="text-[10px] font-normal text-muted">
+                        {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </p>
+                    <p className="text-[13px] leading-[1.45] text-ink/85 text-pretty">{m.body}</p>
+                  </div>
                 </div>
               );
             })}
-            <div ref={bottomRef} />
           </div>
         )}
       </div>

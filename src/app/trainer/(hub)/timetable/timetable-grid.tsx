@@ -46,14 +46,25 @@ export function TimetableGrid({
   const bandWidthPx = () => COLUMN_WIDTH_PX;
   const totalBandAreaPx = TIME_BANDS.length * COLUMN_WIDTH_PX;
 
+  // Hairline chrome (apply-to-app.md §2.1): border-collapse instead of
+  // border-spacing, so the grid reads as one continuous surface with
+  // dividers rather than rounded boxes floating inside a sheet. Every cell
+  // still needs its own border-b/border-r since border-collapse dedupes
+  // adjacent borders automatically -- we only suppress the outer edge
+  // (last column's right border, last row's bottom border) so the grid
+  // doesn't double up against the .sheet wrapper's own border.
+  const isLastRow = (rowIndex: number) => rowIndex === rows.length - 1;
+  const cellBorder = (isLastCol: boolean, isLastRowHere: boolean) =>
+    `${isLastCol ? "" : "border-r"} ${isLastRowHere ? "" : "border-b"} border-border-faint`;
+
   return (
     <>
       {/* §1.1a v2 rule 10 -- desktop keeps the full transposed grid; mobile
           collapses to one day at a time rather than shrinking the table. */}
-      <div className="hidden md:block max-[1240px]:overflow-x-auto">
+      <div className="hidden md:block max-[1240px]:overflow-x-auto pb-24">
         <ScrollToToday />
         <table
-          className="w-full table-fixed border-separate border-spacing-1"
+          className="w-full table-fixed border-collapse"
           style={{ minWidth: `${64 + adminWidthPx + totalBandAreaPx}px` }}
         >
           {/* table-layout:fixed sizes every column off THIS colgroup, never
@@ -75,16 +86,23 @@ export function TimetableGrid({
           </colgroup>
           <thead>
             <tr>
-              <th className="sticky top-0 left-0 z-20 w-16 bg-card p-0" />
-              <th className="sticky top-0 z-10 rounded-[6px] bg-accent p-2 text-left text-xs font-bold text-accent-foreground">
-                Admin &amp; deadlines
+              <th className="sticky top-0 left-0 z-20 w-16 bg-background p-0 border-b border-border" />
+              <th className="sticky top-0 z-10 bg-background px-2.5 pb-2.5 text-left align-bottom border-b border-border">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gold">
+                  Admin &amp; deadlines
+                </span>
               </th>
               {TIME_BANDS.map((band) => (
                 <th
                   key={band.label}
-                  className="sticky top-0 z-10 rounded-[6px] bg-accent p-2 text-left text-xs font-bold text-accent-foreground"
+                  className="sticky top-0 z-10 bg-background px-2.5 pb-2.5 text-left align-bottom border-b border-border"
                 >
-                  {band.label}
+                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+                    {band.start}
+                  </span>
+                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+                    {band.end}
+                  </span>
                 </th>
               ))}
             </tr>
@@ -92,33 +110,33 @@ export function TimetableGrid({
           <tbody>
             {rows.map((row, rowIndex) => {
               const isToday = row.isoDate === today;
-              // Every other day gets a shaded band across the whole row --
-              // with border-spacing (not border-collapse) between cells,
-              // day rows had no visual break from one another, so scanning
-              // down a single time column read as one undifferentiated
-              // vertical stack instead of distinct horizontal day-bands
-              // (confirmed live: "I think you went vertical as well").
-              const rowBg = rowIndex % 2 === 1 ? "bg-surface-muted/50" : "";
+              const lastRowHere = isLastRow(rowIndex);
+              const [weekday, dayOfMonth] = row.date.split(" ");
               return (
                 <Fragment key={row.isoDate}>
                   {row.weekLabel ? (
                     <tr key={`${row.isoDate}-week`}>
-                      <td colSpan={TIME_BANDS.length + 2} className="pt-4 pb-1 font-serif text-base text-ink">
+                      <td colSpan={TIME_BANDS.length + 2} className="pt-6 pb-2 font-serif text-base text-muted">
                         {row.weekLabel}
                       </td>
                     </tr>
                   ) : null}
                   <tr key={row.isoDate} data-today={isToday ? "" : undefined} style={{ height: ROW_HEIGHT_PX }}>
                     <td
-                      className={`sticky left-0 z-10 w-16 rounded-[6px] bg-card p-2 align-top text-xs font-bold text-ink ${
+                      className={`sticky left-0 z-10 w-16 bg-card p-2 align-top ${cellBorder(false, lastRowHere)} ${
                         isToday ? "border-l-[3px] border-primary" : ""
                       }`}
                       style={{ height: ROW_HEIGHT_PX }}
                     >
-                      {row.date}
+                      <span className={`block font-serif text-[20px] leading-none ${isToday ? "text-primary" : "text-ink"}`}>
+                        {dayOfMonth}
+                      </span>
+                      <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+                        {weekday}
+                      </span>
                     </td>
-                    <td className={`rounded-[6px] align-top p-0 ${rowBg}`} style={{ height: ROW_HEIGHT_PX }}>
-                      <div className="h-full overflow-y-auto p-1" style={{ height: ROW_HEIGHT_PX }}>
+                    <td className={`align-top p-0 ${cellBorder(false, lastRowHere)}`} style={{ height: ROW_HEIGHT_PX }}>
+                      <div className="h-full overflow-y-auto p-2.5" style={{ height: ROW_HEIGHT_PX }}>
                         <EventCell
                           events={row.admin}
                           locked={locked}
@@ -132,10 +150,10 @@ export function TimetableGrid({
                     {row.bands.map((bandEvents, i) => (
                       <td
                         key={TIME_BANDS[i].label}
-                        className={`rounded-[6px] align-top p-0 ${rowBg}`}
+                        className={`align-top p-0 ${cellBorder(i === TIME_BANDS.length - 1, lastRowHere)}`}
                         style={{ height: ROW_HEIGHT_PX }}
                       >
-                        <div className="h-full overflow-y-auto p-1" style={{ height: ROW_HEIGHT_PX }}>
+                        <div className="h-full overflow-y-auto p-2.5" style={{ height: ROW_HEIGHT_PX }}>
                           <EventCell
                             events={bandEvents}
                             locked={locked}

@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { Wordmark } from "@/components/wordmark";
 import { ViewSwitcherPill } from "@/components/view-switcher-pill";
 import { TrainerTabs } from "@/app/trainer/trainer-tabs";
 import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
@@ -25,21 +27,26 @@ export default async function TrainerHubLayout({ children }: { children: React.R
 
   return (
     <>
-      <div className="border-b border-border bg-card">
-        <div className="container flex h-14 items-center justify-between gap-3">
-          {/* Was missing here -- dashboard/layout.tsx shows the signed-in
-              user's name in its header, this Command Centre header never
-              did, no name visible anywhere in the whole hub. Same
-              full_name-falls-back-to-email pattern as that header. */}
-          <span className="text-sm text-muted">{profile?.full_name ?? session?.email}</span>
-          <div className="flex items-center gap-3">
+      {/* Checkpoint 1 shell consolidation (specs/build-spec.md phase 1) --
+          this used to be 3 stacked bars (this one, a duplicate name-only
+          bar in trainer/layout.tsx, and TrainerTabs' own wrapper). Now one
+          56px (h-14) header: wordmark + nav on the left, assessor
+          link/view-switcher/name on the right. */}
+      <header className="border-b border-border bg-card">
+        <div className="container flex h-14 items-stretch justify-between gap-6">
+          <div className="flex items-center gap-6">
+            <Link href="/trainer" className="block shrink-0">
+              <Wordmark size="sm" />
+            </Link>
+            <TrainerTabs rosterOnly={isAssessor} />
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
             {isRealStaff ? <AssessorLinkButton /> : null}
             {isRealStaff ? <ViewSwitcherPill current="trainer" /> : null}
+            <span className="text-sm text-muted">{profile?.full_name ?? session?.email}</span>
           </div>
         </div>
-      </div>
-
-      <TrainerTabs rosterOnly={isAssessor} />
+      </header>
 
       <div className="container flex-1 py-8">{children}</div>
 

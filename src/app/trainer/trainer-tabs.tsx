@@ -23,26 +23,28 @@ export function TrainerTabs({ rosterOnly = false }: { rosterOnly?: boolean }) {
   const pathname = usePathname();
   const tabs = rosterOnly ? [TABS[0], GRADES_REPORT_TAB] : [...TABS, GRADES_REPORT_TAB];
 
+  // No wrapper bar of its own any more -- this is now inlined directly into
+  // the (hub) shell's single header (see (hub)/layout.tsx), which supplies
+  // the h-full/items-stretch row this relies on to make the active tab's
+  // 2px underline land flush with the header's own bottom hairline.
   return (
-    <div className="border-b border-border bg-card">
-      <div className="container flex gap-8">
-        {tabs.map((tab) => {
-          const href = `/trainer${tab.href}`;
-          const alsoMatch = "alsoMatch" in tab ? tab.alsoMatch : [];
-          const active = pathname.startsWith(href) || alsoMatch.some((extra) => pathname.startsWith(`/trainer${extra}`));
-          return (
-            <Link
-              key={tab.href}
-              href={href}
-              className={`border-b-2 py-3 text-sm font-medium ${
-                active ? "border-primary text-primary" : "border-transparent text-muted hover:text-ink"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          );
-        })}
-      </div>
+    <div className="flex h-full items-center gap-6">
+      {tabs.map((tab) => {
+        const href = `/trainer${tab.href}`;
+        const alsoMatch = "alsoMatch" in tab ? tab.alsoMatch : [];
+        const active = pathname.startsWith(href) || alsoMatch.some((extra) => pathname.startsWith(`/trainer${extra}`));
+        return (
+          <Link
+            key={tab.href}
+            href={href}
+            className={`flex h-full items-center border-b-2 text-sm font-medium ${
+              active ? "border-primary text-primary" : "border-transparent text-muted hover:text-ink"
+            }`}
+          >
+            {tab.label}
+          </Link>
+        );
+      })}
     </div>
   );
 }

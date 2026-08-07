@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Link2, ShieldCheck } from "lucide-react";
+import { Wordmark } from "@/components/wordmark";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -22,9 +23,33 @@ export default async function TrainerHomePage() {
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
 
+  // §Area 2 of checkpoint 1 -- the shell consolidation moved this page's
+  // header out of trainer/layout.tsx (which now wraps the (hub) shell's own
+  // single header instead) and in here, since the bare /trainer landing is
+  // the one place under this route that still needs its own wordmark bar.
+  const header = (
+    <div className="border-b border-border bg-card">
+      <div className="container flex h-14 items-center justify-between">
+        <Link href="/trainer" className="block">
+          <Wordmark size="sm" />
+        </Link>
+        {session?.profile ? (
+          <span className="text-sm text-muted">{session.profile.full_name ?? session.email}</span>
+        ) : null}
+      </div>
+    </div>
+  );
+
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
-    return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
+    return (
+      <>
+        {header}
+        <div className="container py-8">
+          <div className="sheet text-sm text-muted">No course assigned.</div>
+        </div>
+      </>
+    );
   }
 
   const [{ data: course }, { data: trainees }] = await Promise.all([
@@ -46,17 +71,14 @@ export default async function TrainerHomePage() {
     .join(" · ");
 
   return (
-    <div className="container flex flex-col gap-10 py-8">
-      {/* §10 hero -- same shape as the public landing hero (§2); logo/wordmark
-          already live in trainer/layout.tsx's top bar, so this is just the
-          overline/H1/lede portion. Placeholder copy per the plan's explicit
-          "don't let wording block the build" instruction. trainer/layout.tsx
-          renders {children} with no wrapper of its own (only the (hub) route
-          group's layout adds .container, for the roster/timetable/etc pages)
-          -- this landing page needs its own .container, which had gone
-          missing since the layout simplification, leaving the hero/cards
-          rendering truly edge-to-edge with zero gutter (the "sides sticking
-          out of the screen" bug). */}
+    <>
+      {header}
+      <div className="container flex flex-col gap-10 py-8">
+      {/* §10 hero -- same shape as the public landing hero (§2), now with
+          its own wordmark bar above (see `header` const) since the shell
+          consolidation removed trainer/layout.tsx's shared one. Placeholder
+          copy per the plan's explicit "don't let wording block the build"
+          instruction. */}
       <div className="pt-4">
         <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
           {cohortLine || "Cambridge CELTA"}
@@ -146,6 +168,7 @@ export default async function TrainerHomePage() {
         </div>
         <span className="shrink-0 text-muted transition-transform group-hover:translate-x-0.5">&rarr;</span>
       </Link>
-    </div>
+      </div>
+    </>
   );
 }

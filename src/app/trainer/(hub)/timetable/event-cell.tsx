@@ -5,12 +5,14 @@ import type { Database } from "@/lib/supabase/types";
 type TimetableEvent = Database["public"]["Tables"]["course_timetable_events"]["Row"];
 export type Volunteer = { id: string; name: string };
 
-export const CATEGORY_CLASS: Record<string, string> = {
-  admin: "bg-gold/12 text-ink",
-  wg: "bg-accent text-accent-foreground",
-  rm: "bg-card text-ink border border-border",
-  iw: "bg-surface-muted text-muted",
-  lu: "bg-background text-muted",
+// apply-to-app.md §2.4 -- category is now a 3px left rule + dot, not a
+// background fill. `lu` (lunch) gets no rule at all, it should recede.
+export const CATEGORY_ACCENT: Record<string, string> = {
+  admin: "var(--color-gold)",
+  wg: "var(--color-primary)",
+  rm: "var(--color-ink)",
+  iw: "var(--color-muted)",
+  lu: "transparent",
 };
 
 // Join opens ~10 min before the band's start and stays open through a
@@ -42,18 +44,29 @@ function CameraIcon() {
 function JoinChip({ event, now }: { event: TimetableEvent; now: Date }) {
   if (!event.zoom_url) return null;
   const live = isLive(event, now);
+  // apply-to-app.md §2.5 -- live gets a real pill (with a leading gold dot
+  // so it catches the eye across a busy grid); not-live is icon-only, no
+  // pill/border/label, so a whole column of un-joinable Zoom links doesn't
+  // read as the loudest thing on the page.
+  if (!live) {
+    return (
+      <span
+        className="mt-1 inline-flex items-center text-muted/70"
+        title="Zoom link -- opens 10 minutes before the session"
+        aria-disabled="true"
+      >
+        <CameraIcon />
+      </span>
+    );
+  }
   return (
     <a
-      href={live ? event.zoom_url : undefined}
-      target={live ? "_blank" : undefined}
-      rel={live ? "noreferrer" : undefined}
-      aria-disabled={!live}
-      className={`mt-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-        live
-          ? "border-primary bg-primary text-card"
-          : "cursor-default border-border text-muted"
-      }`}
+      href={event.zoom_url}
+      target="_blank"
+      rel="noreferrer"
+      className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-primary-foreground"
     >
+      <span className="size-[5px] shrink-0 rounded-full bg-gold" />
       <CameraIcon />
       Join
     </a>
@@ -79,32 +92,34 @@ function EventRow({
 }) {
   const category = categorize(event);
   return (
-    <div className={divider ? "mt-1.5 border-t border-current/15 pt-1.5" : ""}>
+    <div className={divider ? "mt-1.5 border-t border-border-faint pt-1.5" : ""}>
       <div className="flex items-start justify-between gap-1">
-        <span className="font-medium">{event.title}</span>
+        <span className="text-[12px] font-medium text-ink">{event.title}</span>
         {!locked ? (
           <form action={deleteTimetableEvent}>
             <input type="hidden" name="event_id" value={event.id} />
-            <button type="submit" className="shrink-0 text-[10px] text-destructive hover:underline">
+            <button
+              type="submit"
+              className="shrink-0 text-[10px] text-muted opacity-0 group-hover:opacity-100 hover:text-destructive focus-visible:opacity-100"
+            >
               ×
             </button>
           </form>
         ) : null}
       </div>
       {showTime(event) && event.event_time ? (
-        <span className="mt-0.5 block opacity-80">{event.event_time.slice(0, 5)}</span>
+        <span className="mt-0.5 block text-[10px] text-muted">{event.event_time.slice(0, 5)}</span>
       ) : null}
-      {event.tag && category === "rm" ? <span className="mt-0.5 block opacity-70">{event.tag}</span> : null}
+      {event.tag && category === "rm" ? (
+        <span className="mt-0.5 block text-[10px] text-muted">{event.tag}</span>
+      ) : null}
       <JoinChip event={event} now={now} />
       {event.type === "tp" && volunteers.length > 0 ? (
         <details className="mt-1">
-          <summary className="cursor-pointer text-[10px] opacity-70 hover:opacity-100">
-            Attendance ({attendedIds.size}/{volunteers.length})
+          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
+            Attendance {attendedIds.size}/{volunteers.length}
           </summary>
-          <form
-            action={setAttendance}
-            className="mt-1 flex flex-col gap-1 rounded-[6px] border border-border-faint bg-card p-2 text-ink"
-          >
+          <form action={setAttendance} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">
             <input type="hidden" name="event_id" value={event.id} />
             {volunteers.map((v) => (
               <label key={v.id} className="flex items-center gap-1.5">
@@ -157,8 +172,14 @@ export function EventCell({
   if (events.length === 0) return null;
   const category = categorize(events[0]);
   const emptySet = new Set<string>();
+  const accent = CATEGORY_ACCENT[category];
   return (
-    <div className={`rounded-[6px] p-2 text-xs leading-snug ${CATEGORY_CLASS[category]}`}>
+    <div
+      className={`group bg-transparent text-xs leading-snug ${
+        category === "lu" ? "pl-0 text-muted" : "border-l-[3px] pl-2.5"
+      }`}
+      style={category === "lu" ? undefined : { borderLeftColor: accent }}
+    >
       {events.map((event, i) => (
         <EventRow
           key={event.id}

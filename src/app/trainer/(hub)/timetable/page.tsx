@@ -38,6 +38,18 @@ export default async function TrainerTimetablePage() {
   const timeBands = resolveTimeBands(course?.time_bands ?? null);
   const isCustomTimeBands = Boolean(course?.time_bands && course.time_bands.length > 0);
 
+  // The grid no longer prints a strong week header of its own (apply-to-app.md
+  // §2.7), so the page header carries the overall date range instead.
+  const weekRange = (() => {
+    if (!events || events.length === 0) return null;
+    const dates = [...events].map((e) => e.event_date).sort();
+    const fmt = (iso: string) =>
+      new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+    const first = dates[0];
+    const last = dates[dates.length - 1];
+    return first === last ? fmt(first) : `${fmt(first)} – ${fmt(last)}`;
+  })();
+
   const tpEventIds = (events ?? []).filter((e) => e.type === "tp").map((e) => e.id);
   const { data: attendanceRows } =
     tpEventIds.length > 0
@@ -55,6 +67,7 @@ export default async function TrainerTimetablePage() {
       <div className="sheet flex items-center justify-between">
         <div>
           <h1 className="font-serif text-xl text-ink">Course timetable</h1>
+          {weekRange ? <p className="mt-1 font-serif text-2xl text-ink">{weekRange}</p> : null}
           <p className="mt-2 text-muted">
             The single source of truth for the course clock -- This Week, due dates, and TP
             dates all read from this.
@@ -64,12 +77,13 @@ export default async function TrainerTimetablePage() {
           <input type="hidden" name="lock" value={(!locked).toString()} />
           <button
             type="submit"
-            className={`rounded-[6px] border px-4 py-2 text-sm font-medium ${
+            className={`flex items-center gap-2 rounded-[6px] border px-4 py-2 text-sm font-medium ${
               locked
                 ? "border-border text-ink hover:border-primary"
                 : "border-primary bg-primary text-primary-foreground"
             }`}
           >
+            {locked ? <span className="size-[5px] shrink-0 rounded-full bg-gold" /> : null}
             {locked ? "Unlock timetable" : "Lock timetable"}
           </button>
         </form>
