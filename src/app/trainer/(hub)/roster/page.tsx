@@ -1,16 +1,14 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { CELTA_CRITERIA_CODES, computeTrajectory } from "@/lib/celta-criteria";
-import { TrajectoryBarCompact } from "@/components/trajectory-gradient-bar";
+import { fetchRosterRows } from "@/lib/roster";
+import { RosterRowView } from "@/app/trainer/(hub)/roster/roster-row";
 
-// The detailed operational roster -- moved here from the /trainer landing
-// (which now just shows summary candidate cards + a link into this page)
-// so the full column set (TPs passed, assignments left, attendance) still
-// lives somewhere, just one level in rather than on the first thing you see.
+// The detailed operational roster. Row computation lives in lib/roster.ts,
+// shared with the CSV export route below so the two can't drift on what a
+// column means.
 export default async function TrainerRosterPage() {
   const session = await getCurrentProfile();
   const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
@@ -24,33 +22,24 @@ export default async function TrainerRosterPage() {
     return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
   }
 
-  const { data: trainees } = await supabase
-    .from("profiles")
-    .select("id, full_name")
-    .eq("course_id", courseId)
-    .eq("role", "trainee")
-    .order("full_name");
-
-  const traineeIds = (trainees ?? []).map((t) => t.id);
-  const [{ data: lessons }, { data: feedbackRows }, { data: assignments }, { data: celta5Records }, { data: matrixRows }, { data: course }] =
-    traineeIds.length > 0
-      ? await Promise.all([
-          supabase.from("tp_lessons").select("trainee_id, length_minutes").eq("course_id", courseId),
-          supabase.from("tp_feedback").select("trainee_id, grade, submitted_at").in("trainee_id", traineeIds),
-          supabase.from("assignments").select("trainee_id, first_status, resubmission_status").eq("course_id", courseId),
-          supabase.from("celta5_records").select("trainee_id, hours_attended").eq("course_id", courseId),
-          supabase.from("celta5_matrix").select("trainee_id, criteria_code, tutor_status_stage2").eq("course_id", courseId),
-          supabase.from("courses").select("total_hours").eq("id", courseId).maybeSingle(),
-        ])
-      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: null }];
-
-  const totalHours = course?.total_hours ?? 120;
+  const rows = await fetchRosterRows(supabase, courseId);
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="font-serif text-xl text-ink">Candidate roster</h1>
-        <p className="text-xs text-muted">{(trainees ?? []).length} candidates · click a row to open a portfolio</p>
+      <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-col gap-1.5">
+          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Roster</p>
+          <h1 className="font-serif text-2xl text-ink">{rows.length} candidates</h1>
+        </div>
+        <div className="flex items-center gap-5">
+          <p className="text-xs text-muted">Click a row to open a portfolio</p>
+          <a
+            href="/trainer/roster/export"
+            className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary"
+          >
+            Export CSV
+          </a>
+        </div>
       </div>
 
       <div className="sheet overflow-hidden !p-0">
@@ -67,55 +56,8 @@ export default async function TrainerRosterPage() {
             </tr>
           </thead>
           <tbody>
-            {trainees && trainees.length > 0 ? (
-              trainees.map((trainee) => {
-                const traineeLessons = (lessons ?? []).filter((l) => l.trainee_id === trainee.id);
-                const assessedHrs = traineeLessons.reduce((sum, l) => sum + (l.length_minutes ?? 0), 0) / 60;
-
-                const tpsPassed = (feedbackRows ?? []).filter(
-                  (f) => f.trainee_id === trainee.id && f.submitted_at && f.grade !== "not_to_standard"
-                ).length;
-
-                const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id);
-                const assignmentsPassed = traineeAssignments.filter(
-                  (a) => a.first_status === "approved" || a.resubmission_status === "approved"
-                ).length;
-                const assignmentsLeft = Math.max(traineeAssignments.length - assignmentsPassed, 0);
-
-                const traineeMatrix = (matrixRows ?? []).filter((m) => m.trainee_id === trainee.id);
-                const matrixByCode = new Map(traineeMatrix.map((m) => [m.criteria_code, m.tutor_status_stage2]));
-                const achievedCount = traineeMatrix.filter((m) => m.tutor_status_stage2 === "S+" || m.tutor_status_stage2 === "S").length;
-                const criteriaPct = Math.round((achievedCount / CELTA_CRITERIA_CODES.length) * 100);
-
-                const hoursAttended = celta5Records?.find((r) => r.trainee_id === trainee.id)?.hours_attended ?? 0;
-                const attendancePct = Math.round((hoursAttended / totalHours) * 100);
-
-                const trajectory = computeTrajectory(CELTA_CRITERIA_CODES.map((code) => matrixByCode.get(code) ?? null));
-
-                return (
-                  <tr key={trainee.id} className="cursor-pointer">
-                    <td>
-                      <Link href={`/portfolio/${trainee.id}`} className="text-ink hover:text-primary">
-                        {trainee.full_name}
-                      </Link>
-                    </td>
-                    <td className={`text-right tabular-nums ${assessedHrs < 6 ? "text-status-warning-text" : "text-ink"}`}>
-                      {assessedHrs.toFixed(2)}
-                    </td>
-                    <td className="text-right tabular-nums text-ink">{tpsPassed} / 8</td>
-                    <td className="text-right tabular-nums text-ink">{assignmentsLeft}</td>
-                    <td className="text-right tabular-nums text-ink">{criteriaPct}%</td>
-                    <td className={`text-right tabular-nums ${attendancePct < 80 ? "font-semibold text-destructive" : "text-ink"}`}>
-                      {attendancePct}%
-                    </td>
-                    <td className="text-right">
-                      <div className="ml-auto">
-                        <TrajectoryBarCompact value={trajectory} />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
+            {rows.length > 0 ? (
+              rows.map((row) => <RosterRowView key={row.id} row={row} />)
             ) : (
               <tr>
                 <td colSpan={7} className="text-muted">

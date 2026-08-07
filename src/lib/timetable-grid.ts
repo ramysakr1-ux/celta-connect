@@ -1,6 +1,6 @@
 import type { Database, TimeBand } from "@/lib/supabase/types";
 
-type TimetableEvent = Database["public"]["Tables"]["course_timetable_events"]["Row"];
+export type TimetableEvent = Database["public"]["Tables"]["course_timetable_events"]["Row"];
 
 export type { TimeBand };
 
@@ -29,6 +29,24 @@ export function resolveTimeBands(courseTimeBands: TimeBand[] | null | undefined)
 }
 
 export type CellCategory = "admin" | "wg" | "rm" | "iw" | "lu";
+
+// Moved from event-cell.tsx (checkpoint 2) -- the Today dashboard needs the
+// exact same "is this Zoom event live right now" calc for its own schedule
+// card, so both places read from one definition instead of two that could
+// drift. Join opens ~10 min before the band's start and stays open through
+// a generous window after -- exact lead time/duration rules are reserved to
+// the content spec, this is a reasonable default. Computed from local date
+// components, not a UTC round-trip (see the addWeekdays bug note in
+// timetable-skeleton.ts -- same trap applies to any date math here).
+export function isEventLive(event: TimetableEvent, now: Date): boolean {
+  if (!event.zoom_url || !event.event_time) return false;
+  const [h, m] = event.event_time.split(":").map(Number);
+  const start = new Date(`${event.event_date}T00:00:00`);
+  start.setHours(h, m - 10, 0, 0);
+  const end = new Date(`${event.event_date}T00:00:00`);
+  end.setHours(h + 3, m, 0, 0);
+  return now >= start && now <= end;
+}
 
 // §1.1a v2 colour legend, category derived from the event's own type/tag,
 // never hand-painted: assignment/resubmission due dates always live in the

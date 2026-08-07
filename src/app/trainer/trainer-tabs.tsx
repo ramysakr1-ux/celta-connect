@@ -3,6 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// Today is the (hub) group's own index page (bare /trainer) -- not part of
+// TABS/rosterOnly's slice-based logic below since it never shows for
+// assessor sessions (checkpoint 2: Today is trainer-only operational
+// material -- write actions, cohort-wide alerts -- same boundary already
+// drawn for the rest of TABS vs. Grades Report).
+const TODAY_TAB = { href: "", label: "Today" } as const;
+
 const TABS = [
   { href: "/roster", label: "Roster" },
   { href: "/timetable", label: "Timetable" },
@@ -21,7 +28,7 @@ const GRADES_REPORT_TAB = { href: "/grades-report", label: "Grades Report" } as 
 
 export function TrainerTabs({ rosterOnly = false }: { rosterOnly?: boolean }) {
   const pathname = usePathname();
-  const tabs = rosterOnly ? [TABS[0], GRADES_REPORT_TAB] : [...TABS, GRADES_REPORT_TAB];
+  const tabs = rosterOnly ? [TABS[0], GRADES_REPORT_TAB] : [TODAY_TAB, ...TABS, GRADES_REPORT_TAB];
 
   // No wrapper bar of its own any more -- this is now inlined directly into
   // the (hub) shell's single header (see (hub)/layout.tsx), which supplies
@@ -32,7 +39,14 @@ export function TrainerTabs({ rosterOnly = false }: { rosterOnly?: boolean }) {
       {tabs.map((tab) => {
         const href = `/trainer${tab.href}`;
         const alsoMatch = "alsoMatch" in tab ? tab.alsoMatch : [];
-        const active = pathname.startsWith(href) || alsoMatch.some((extra) => pathname.startsWith(`/trainer${extra}`));
+        // Today's href is "" -> /trainer, which every other tab's pathname
+        // ALSO starts with -- needs an exact match or it shows active
+        // everywhere, same footgun portfolio-tabs.tsx already special-cases
+        // for its own href:"" tab.
+        const active =
+          tab.href === ""
+            ? pathname === href
+            : pathname.startsWith(href) || alsoMatch.some((extra) => pathname.startsWith(`/trainer${extra}`));
         return (
           <Link
             key={tab.href}

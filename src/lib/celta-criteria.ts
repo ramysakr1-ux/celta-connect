@@ -464,6 +464,18 @@ export function computeTrajectory(
   return trajectoryFromRated(rated, TRAJECTORY_MIN_RATED);
 }
 
+// Shared by the roster table, the Today dashboard's cohort card, and the
+// portfolio sidebar/TP Hub -- extracted so all four call sites can't
+// silently drift on what "criteria %" means (same achieved-count-over-41
+// calc every one of them used to compute independently).
+export function computeCriteriaPct(matrixByCode: Map<string, string | null | undefined>): number {
+  const achievedCount = CELTA_CRITERIA_CODES.filter((code) => {
+    const status = matrixByCode.get(code);
+    return status === "S+" || status === "S";
+  }).length;
+  return Math.round((achievedCount / CELTA_CRITERIA_CODES.length) * 100);
+}
+
 // ============================================================
 // Per-dimension trajectory -- the gradient bar in the grading spec
 // (project_grading_feedback_trainer_awareness.md) shows Planning / Teaching

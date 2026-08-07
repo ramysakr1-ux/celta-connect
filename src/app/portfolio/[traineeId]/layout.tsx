@@ -7,11 +7,16 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { Wordmark } from "@/components/wordmark";
 import { ViewSwitcherPill } from "@/components/view-switcher-pill";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
-import { StatBar } from "@/app/portfolio/[traineeId]/stat-bar";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
-import { CELTA_CRITERIA_CODES, computeCriteriaSuggestion, computeTrajectory, type Trajectory } from "@/lib/celta-criteria";
+import {
+  CELTA_CRITERIA_CODES,
+  computeCriteriaPct,
+  computeCriteriaSuggestion,
+  computeTrajectory,
+  type Trajectory,
+} from "@/lib/celta-criteria";
 import { HideDuringPreview, TraineeEyebrowLabel, PreviewBanner, ChatDrawerSwitcher } from "@/app/portfolio/[traineeId]/preview-chrome";
-import { TrajectoryBarCompact } from "@/components/trajectory-gradient-bar";
+import { STANDING_LABEL } from "@/components/trajectory-gradient-bar";
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
 // only ever land on their own :traineeId (redirected home otherwise);
@@ -101,19 +106,13 @@ export default async function PortfolioLayout({
       ).data?.[0]
     : null;
 
-  const [{ data: course }, { data: center }, { data: lessons }, { data: celta5Record }, { data: assignments }] =
-    await Promise.all([
-      trainee.course_id
-        ? supabase.from("courses").select("*").eq("id", trainee.course_id).maybeSingle()
-        : Promise.resolve({ data: null }),
-      supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
-      supabase.from("tp_lessons").select("id, length_minutes").eq("trainee_id", trainee.id),
-      supabase.from("celta5_records").select("hours_attended").eq("trainee_id", trainee.id).maybeSingle(),
-      supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
-    ]);
+  const [{ data: center }, { data: lessons }, { data: assignments }] = await Promise.all([
+    supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
+    supabase.from("tp_lessons").select("id").eq("trainee_id", trainee.id),
+    supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
+  ]);
 
   const tpsTaught = (lessons ?? []).length;
-  const attendanceHours = celta5Record?.hours_attended ?? 0;
   const assignmentsPassed = (assignments ?? []).filter(
     (a) => a.first_status === "approved" || a.resubmission_status === "approved"
   ).length;
@@ -124,6 +123,11 @@ export default async function PortfolioLayout({
   // yet) -- gated behind isStaffView so a trainee view never pays for or
   // sees this query at all.
   let trajectory: Trajectory | null = null;
+  // Sidebar's "CELTA 5 / N%" meta -- reuses this same isStaffView-gated
+  // matrix fetch (kept blank for a trainee's own view rather than adding a
+  // second, RPC-based fetch path just for this one meta count; the
+  // trainee's real celta5 tab already has its own correct, RLS-safe query).
+  let criteriaPctMeta = "";
   if (isStaffView) {
     const lessonIds = (lessons ?? []).map((l) => l.id);
     const [{ data: matrix }, { data: criteriaTags }] = await Promise.all([
@@ -144,77 +148,70 @@ export default async function PortfolioLayout({
       (code) => matrixByCode.get(code) ?? computeCriteriaSuggestion(tagsByCriteria.get(code) ?? []) ?? null
     );
     trajectory = computeTrajectory(trajectoryInputs);
+    criteriaPctMeta = `${computeCriteriaPct(matrixByCode)}%`;
   }
 
-  const initials = trainee.full_name
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  const assignmentsLeft = Math.max((assignments ?? []).length - assignmentsPassed, 0);
+  const sidebarMeta = {
+    courseStream: "",
+    resourceHub: "",
+    tp: `${tpsTaught}/8`,
+    assignments: assignmentsLeft > 0 ? `${assignmentsLeft} due` : "",
+    celta5: criteriaPctMeta,
+  };
 
   return (
     <div className="flex min-h-full flex-col bg-background">
+      {/* Checkpoint 2 (App Redesign.dc.html 1d) -- collapses the old 2-block
+          header (14px wordmark bar + a separate .sheet identity block with
+          avatar/3 StatBars/trajectory pill) into one 56px bar: back-link +
+          name + trajectory-status pill on the left, ViewSwitcherPill on the
+          right. Attendance hours (previously a StatBar) has no slot in this
+          layout and isn't shown here any more -- still visible on the
+          roster table and Today's "Needs you" alerts. */}
       <div className="border-b border-border bg-card">
-        <div className="container flex h-14 items-center justify-between">
-          <Link href={isStaffView ? "/trainer" : `/portfolio/${trainee.id}`} className="block">
-            <Wordmark size="sm" />
-            {/* §1.1d: for real staff, the pill's active segment ("Trainee view") already
-                names this place, so the standalone label only shows for the trainee's own
-                view, a staff preview, and assessors (who don't get the pill -- see below). */}
+        <div className="container flex h-14 items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            {isStaffView ? (
+              <>
+                <Link href="/trainer/roster" className="shrink-0 text-sm text-primary">
+                  ← Roster
+                </Link>
+                <span className="h-5 w-px shrink-0 bg-border" />
+              </>
+            ) : (
+              <Link href={`/portfolio/${trainee.id}`} className="shrink-0 block">
+                <Wordmark size="sm" />
+              </Link>
+            )}
+            <h1 className="truncate font-serif text-[17px] text-ink">{trainee.full_name}</h1>
+            {isStaffView && trajectory ? (
+              <HideDuringPreview>
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gold/16 px-2.5 py-0.5 text-[11px] font-semibold text-gold">
+                  <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                  Tracking {STANDING_LABEL[trajectory]}
+                </span>
+              </HideDuringPreview>
+            ) : null}
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
             <TraineeEyebrowLabel isStaff={isStaff} readOnly={Boolean(assessorCourseId)} />
-          </Link>
-          {isStaff ? (
-            <ViewSwitcherPill current="trainee" traineeHref={`/portfolio/${trainee.id}?preview=trainee`} />
-          ) : assessorCourseId ? (
-            <Link href="/trainer" className="text-sm font-semibold text-primary">
-              Command Centre
-            </Link>
-          ) : null}
+            {isStaff ? (
+              <ViewSwitcherPill current="trainee" traineeHref={`/portfolio/${trainee.id}?preview=trainee`} />
+            ) : assessorCourseId ? (
+              <Link href="/trainer/roster" className="text-sm font-semibold text-primary">
+                Roster
+              </Link>
+            ) : null}
+          </div>
         </div>
       </div>
 
       <PreviewBanner traineeId={trainee.id} traineeName={trainee.full_name} />
 
-      <PortfolioTabs traineeId={trainee.id} />
-
-      <div className="container flex-1 py-8">
-        <div className="sheet flex flex-col gap-5 p-5 lg:flex-row lg:items-center">
-          <div className="flex min-w-0 items-center gap-3.5">
-            <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-surface-muted">
-              <span className="font-serif text-lg text-muted">{initials}</span>
-            </div>
-            <div className="min-w-0">
-              <h1 className="truncate font-serif text-2xl leading-tight text-ink">{trainee.full_name}</h1>
-              <p className="truncate text-sm text-muted">
-                {[course?.name, course ? `${course.start_date} – ${course.end_date}` : null]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid flex-1 grid-cols-2 gap-5 lg:max-w-2xl lg:grid-cols-3">
-            <StatBar label="Assessed teaching" value={tpsTaught} max={8} unit="TPs" />
-            <StatBar
-              label="Attendance"
-              value={Number(attendanceHours.toFixed(1))}
-              max={course?.total_hours ?? 120}
-              unit="hrs"
-            />
-            <StatBar label="Assignments passed" value={assignmentsPassed} max={4} />
-          </div>
-
-          {isStaffView && trajectory ? (
-            <HideDuringPreview>
-              <div className="lg:ml-2">
-                <TrajectoryBarCompact value={trajectory} />
-              </div>
-            </HideDuringPreview>
-          ) : null}
-        </div>
-
-        <div className="mt-8">{children}</div>
+      <div className="container flex flex-1 gap-8 py-8">
+        <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />
+        <div className="min-w-0 flex-1">{children}</div>
       </div>
 
       <footer className="mt-auto py-8 text-center text-xs text-muted">

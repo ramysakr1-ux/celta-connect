@@ -1,8 +1,6 @@
-import { categorize } from "@/lib/timetable-grid";
+import { categorize, isEventLive, type TimetableEvent } from "@/lib/timetable-grid";
 import { deleteTimetableEvent, setAttendance } from "@/app/trainer/(hub)/timetable/actions";
-import type { Database } from "@/lib/supabase/types";
 
-type TimetableEvent = Database["public"]["Tables"]["course_timetable_events"]["Row"];
 export type Volunteer = { id: string; name: string };
 
 // apply-to-app.md §2.4 -- category is now a 3px left rule + dot, not a
@@ -14,21 +12,6 @@ export const CATEGORY_ACCENT: Record<string, string> = {
   iw: "var(--color-muted)",
   lu: "transparent",
 };
-
-// Join opens ~10 min before the band's start and stays open through a
-// generous window after -- exact lead time/duration rules are reserved to
-// the content spec, this is a reasonable default. Computed from local date
-// components, not a UTC round-trip (see the addWeekdays bug note in
-// timetable-skeleton.ts -- same trap applies to any date math here).
-function isLive(event: TimetableEvent, now: Date): boolean {
-  if (!event.zoom_url || !event.event_time) return false;
-  const [h, m] = event.event_time.split(":").map(Number);
-  const start = new Date(`${event.event_date}T00:00:00`);
-  start.setHours(h, m - 10, 0, 0);
-  const end = new Date(`${event.event_date}T00:00:00`);
-  end.setHours(h + 3, m, 0, 0);
-  return now >= start && now <= end;
-}
 
 // Camera icon, traced from the sanctioned C14-timetable-A-floating.html
 // reference's .join svg (a camera/video-call glyph, not a generic link icon).
@@ -43,7 +26,7 @@ function CameraIcon() {
 
 function JoinChip({ event, now }: { event: TimetableEvent; now: Date }) {
   if (!event.zoom_url) return null;
-  const live = isLive(event, now);
+  const live = isEventLive(event, now);
   // apply-to-app.md §2.5 -- live gets a real pill (with a leading gold dot
   // so it catches the eye across a busy grid); not-live is icon-only, no
   // pill/border/label, so a whole column of un-joinable Zoom links doesn't

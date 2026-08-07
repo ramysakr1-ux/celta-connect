@@ -1,7 +1,7 @@
 import type { GradeDimension, Trajectory } from "@/lib/celta-criteria";
 import { GRADE_DIMENSION_ORDER } from "@/lib/celta-criteria";
 
-const STANDING_LABEL: Record<Trajectory, string> = {
+export const STANDING_LABEL: Record<Trajectory, string> = {
   "Pass A": "Pass A",
   "Pass B": "Pass B",
   Pass: "Pass",

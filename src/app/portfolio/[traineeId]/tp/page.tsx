@@ -1,12 +1,29 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, Users, Clock, GraduationCap } from "lucide-react";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { getTpCardStatus, type TpCardStatus } from "@/lib/tp-plan-content";
+import { computeCriteriaPct } from "@/lib/celta-criteria";
+import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_STATUS_LABEL } from "@/lib/assignment-info";
+import { TpRow } from "@/app/portfolio/[traineeId]/tp/tp-row";
+import type { Database } from "@/lib/supabase/types";
+
+type SubmissionStatus = Database["public"]["Tables"]["assignments"]["Row"]["first_status"];
+
+// The single "further along of the two" status for one assignment row --
+// approved on the first submission wins outright; otherwise a resubmission
+// in progress takes priority over the (now moot) first-round status.
+function overallAssignmentStatus(
+  a: { first_status: SubmissionStatus; resubmission_status: SubmissionStatus } | undefined
+): SubmissionStatus | null {
+  if (!a) return null;
+  if (a.first_status === "approved") return "approved";
+  if (a.resubmission_status !== "not_submitted") return a.resubmission_status;
+  return a.first_status;
+}
 
 const TP_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
@@ -30,11 +47,11 @@ function shortenAim(aim: string): string {
   return stripped.length > 0 ? stripped.charAt(0).toUpperCase() + stripped.slice(1) : aim;
 }
 
-// §6 -- TP1-8 grid. Every slot is always visible so a trainee can see the
+// §6 -- TP1-8 table (checkpoint 2 restyle: was a card grid, App Redesign.dc.html
+// 1d shows a table). Every slot is always visible so a trainee can see the
 // shape of the course from day one; a slot with no plan_assignments row yet
-// renders as a locked box, except TP7/8 which link out to the self-select
-// syllabus planning grid (see project memory -- that pipeline is untouched
-// here, just linked to). Reuses the exact same status state machine
+// renders as a locked row, except TP7/8 which link out to the self-select
+// syllabus planning grid. Reuses the exact same status state machine
 // (getTpCardStatus) as the pre-existing /dashboard/trainee/plan grid so the
 // two views can never disagree about where a trainee stands.
 export default async function TpHubPage({
@@ -52,6 +69,11 @@ export default async function TpHubPage({
   if (!viewer && !assessorCourseId) notFound();
   // See portfolio/[traineeId]/layout.tsx's previewAsTrainee comment.
   const isStaff = (viewer?.role === "trainer" || viewer?.role === "admin") && preview !== "trainee";
+  // Criteria % card stays staff/assessor-only, matching the same boundary
+  // the portfolio sidebar's "CELTA 5 / N%" meta already draws (a trainee's
+  // own real celta5 tab reads this via a different RPC-based, RLS-safe
+  // path -- not duplicated here for one summary card).
+  const canSeeCriteria = isStaff || Boolean(assessorCourseId);
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
 
@@ -60,13 +82,17 @@ export default async function TpHubPage({
     if (!trainee || trainee.course_id !== assessorCourseId) notFound();
   }
 
-  const [{ data: plans }, { data: lessons }, { data: tpPlans }, { data: selfEvaluations }, { data: feedbackRows }] =
+  const [{ data: plans }, { data: lessons }, { data: tpPlans }, { data: selfEvaluations }, { data: feedbackRows }, { data: assignments }] =
     await Promise.all([
       supabase.from("plan_assignments").select("*").eq("trainee_id", traineeId),
       supabase.from("tp_lessons").select("*").eq("trainee_id", traineeId).not("tp_number", "is", null),
       supabase.from("tp_plans").select("tp_number, submitted_at").eq("trainee_id", traineeId),
       supabase.from("tp_self_evaluations").select("tp_number, submitted_at").eq("trainee_id", traineeId),
       supabase.from("tp_feedback").select("tp_number, grade, submitted_at").eq("trainee_id", traineeId),
+      supabase
+        .from("assignments")
+        .select("assignment_type, first_status, resubmission_status, due_date")
+        .eq("trainee_id", traineeId),
     ]);
 
   const planByTpNumber = new Map((plans ?? []).map((p) => [p.tp_number, p]));
@@ -88,146 +114,152 @@ export default async function TpHubPage({
   const trainerNameById = new Map((trainers ?? []).map((t) => [t.id, t.full_name]));
 
   const assessedHours = (lessons ?? []).reduce((sum, l) => sum + (l.length_minutes ?? 0), 0) / 60;
-  const hoursStillRequired = Math.max(0, 6 - assessedHours);
+  const tpsTaught = (lessons ?? []).length;
+
+  let criteriaPct: number | null = null;
+  if (canSeeCriteria) {
+    const admin = createAdminClient();
+    const { data: matrix } = await admin.from("celta5_matrix").select("criteria_code, tutor_status_stage2").eq("trainee_id", traineeId);
+    const matrixByCode = new Map((matrix ?? []).map((m) => [m.criteria_code, m.tutor_status_stage2]));
+    criteriaPct = computeCriteriaPct(matrixByCode);
+  }
+  const achievedCount = criteriaPct !== null ? Math.round((criteriaPct / 100) * 41) : 0;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-serif text-xl text-ink">Teaching Practice Hub</h2>
-        <p className="text-xs text-muted">TP1 – TP8</p>
+    <div className="flex flex-col gap-5">
+      <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Teaching practice record</p>
+          <h2 className="font-serif text-2xl text-ink">
+            {tpsTaught} of 8 taught · {assessedHours.toFixed(1)} hrs assessed
+          </h2>
+        </div>
+        {isStaff ? (
+          <Link
+            href={`/dashboard/trainer/trainees/${traineeId}/tp`}
+            className="shrink-0 rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
+          >
+            Write TP feedback
+          </Link>
+        ) : null}
       </div>
 
-      <div className="sheet flex flex-col gap-3 p-5 sm:flex-row sm:items-center">
-        <div className="flex-1">
-          <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted">
-            Assessed teaching towards the mandatory 6 hours
-          </p>
-          <p className="mt-1 font-serif text-2xl leading-none text-ink">
-            {assessedHours.toFixed(2)} <span className="text-base text-muted">of 6.00 hrs</span>
-          </p>
-          <div className="mt-3 h-2 w-full rounded-full bg-primary/20">
-            <div
-              className="h-2 rounded-full bg-primary"
-              style={{ width: `${Math.min(1, assessedHours / 6) * 100}%` }}
-            />
+      <div className="sheet overflow-hidden !p-0">
+        <table className="table-plain w-full">
+          <thead>
+            <tr>
+              <th className="text-sm text-muted">TP</th>
+              <th className="text-sm text-muted">Focus</th>
+              <th className="text-sm text-muted">Date</th>
+              <th className="text-sm text-muted">Status</th>
+              <th className="text-right text-sm text-muted">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {TP_NUMBERS.map((tpNumber) => {
+              const plan = planByTpNumber.get(tpNumber);
+
+              if (!plan) {
+                const selfSelect = (tpNumber === 7 || tpNumber === 8) && !isStaff;
+                const href = selfSelect ? "/dashboard/trainee/plan/syllabus-grid" : null;
+                return (
+                  <TpRow key={tpNumber} href={href}>
+                    <td className="font-serif text-lg text-muted">TP{tpNumber}</td>
+                    <td className="text-sm text-muted">
+                      {selfSelect ? "Choose your own topic in the syllabus planning grid" : "Not yet assigned"}
+                    </td>
+                    <td className="text-sm text-muted">Not yet scheduled</td>
+                    <td>
+                      <span className="pill pill-neutral">{selfSelect ? "Self-select" : "Not yet assigned"}</span>
+                    </td>
+                    <td className="text-right text-sm text-muted">{selfSelect ? "Choose topic →" : "—"}</td>
+                  </TpRow>
+                );
+              }
+
+              const tier = plan.density_tier;
+              const label = DENSITY_TIER_LABELS[tier];
+              const lesson = lessonByTpNumber.get(tpNumber);
+              const tpPlan = tpPlanByTpNumber.get(tpNumber);
+              const selfEvaluation = selfEvalByTpNumber.get(tpNumber);
+              const feedback = feedbackByTpNumber.get(tpNumber);
+              const status = getTpCardStatus({
+                planSubmitted: Boolean(tpPlan?.submitted_at),
+                taught: Boolean(plan.taught_at),
+                selfEvalSubmitted: Boolean(selfEvaluation?.submitted_at),
+                feedbackSubmitted: Boolean(feedback?.submitted_at),
+                grade: feedback?.grade,
+              });
+              const trainerName = (lesson?.trainer_id && trainerNameById.get(lesson.trainer_id)) || null;
+
+              return (
+                <TpRow key={tpNumber} href={`/portfolio/${traineeId}/tp/${tpNumber}`}>
+                  <td className="font-serif text-lg text-ink">TP{tpNumber}</td>
+                  <td className="text-sm text-ink">
+                    {plan.short_title ?? shortenAim(plan.main_lesson_aim)}
+                    {lesson?.level || trainerName ? (
+                      <span className="block text-xs text-muted">
+                        {[lesson?.level, trainerName, lesson?.length_minutes ? `${lesson.length_minutes} mins` : label.name]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="text-sm text-muted">{lesson?.lesson_date ?? "Not yet scheduled"}</td>
+                  <td>
+                    <span className={`pill ${TONE_PILL_CLASS[status.tone]}`}>{status.label}</span>
+                  </td>
+                  <td className="text-right text-sm text-primary">
+                    {tpPlan?.submitted_at ? "View feedback" : "Lesson plan"}
+                  </td>
+                </TpRow>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        {canSeeCriteria ? (
+          <div className="sheet flex flex-col gap-3.5">
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Criteria — stage 2</p>
+            <div className="flex items-baseline gap-2.5">
+              <span className="font-serif text-[32px] leading-none text-ink">{criteriaPct}%</span>
+              <span className="text-xs text-muted">{achievedCount} of 41 met</span>
+            </div>
+            <div className="h-1 w-full overflow-hidden rounded-full bg-surface-muted">
+              <div className="h-1 rounded-full bg-primary" style={{ width: `${criteriaPct}%` }} />
+            </div>
+          </div>
+        ) : null}
+
+        <div className="sheet flex flex-col gap-3">
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Written assignments</p>
+          <div className="flex flex-col">
+            {ASSIGNMENT_ORDER.map((type, i) => {
+              const a = (assignments ?? []).find((row) => row.assignment_type === type);
+              const overall = overallAssignmentStatus(a);
+              const statusText = overall ? ASSIGNMENT_STATUS_LABEL[overall] : "Not started";
+              const statusClass =
+                overall === "approved"
+                  ? "text-status-on-track-text"
+                  : overall === "resubmission_required"
+                    ? "text-status-warning-text"
+                    : "text-muted";
+              return (
+                <div
+                  key={type}
+                  className={`flex items-center justify-between py-1.75 text-sm ${i > 0 ? "border-t border-border-faint" : ""}`}
+                >
+                  <span className="text-ink">
+                    {ASSIGNMENT_ORDER.indexOf(type) + 1} · {ASSIGNMENT_INFO[type].title}
+                  </span>
+                  <span className={`font-semibold ${statusClass}`}>{statusText}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
-        <div className="text-sm text-muted sm:w-56 sm:text-right">
-          {hoursStillRequired > 0
-            ? `${hoursStillRequired.toFixed(2)} hrs of assessed teaching still required.`
-            : "Mandatory assessed teaching hours complete."}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:auto-rows-fr">
-        {TP_NUMBERS.map((tpNumber) => {
-          const plan = planByTpNumber.get(tpNumber);
-
-          if (!plan) {
-            if ((tpNumber === 7 || tpNumber === 8) && !isStaff) {
-              return (
-                <Link
-                  key={tpNumber}
-                  href="/dashboard/trainee/plan/syllabus-grid"
-                  className="sheet group flex h-full flex-col justify-center gap-1 p-5 transition-colors hover:border-primary/40 hover:bg-accent/30"
-                >
-                  <span className="font-serif text-2xl text-ink">TP{tpNumber}</span>
-                  <p className="text-sm text-muted">Choose your own topic in the syllabus planning grid.</p>
-                </Link>
-              );
-            }
-            return (
-              <div key={tpNumber} className="sheet flex h-full flex-col p-5">
-                <div className="flex items-start justify-between gap-2">
-                  <span className="font-serif text-2xl leading-none text-muted">TP{tpNumber}</span>
-                  <span className="pill pill-neutral">Not yet assigned</span>
-                </div>
-
-                <p className="mt-3 font-semibold leading-snug text-muted">Not yet assigned</p>
-
-                <div className="mt-4 flex flex-col gap-1.5 text-xs text-muted">
-                  <p className="flex items-center gap-2">
-                    <Calendar className="size-3.5 shrink-0" aria-hidden="true" />
-                    Not yet scheduled
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <Users className="size-3.5 shrink-0" aria-hidden="true" />
-                    Level TBC
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <Clock className="size-3.5 shrink-0" aria-hidden="true" />
-                    Duration TBC
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <GraduationCap className="size-3.5 shrink-0" aria-hidden="true" />
-                    Trainer TBC
-                  </p>
-                </div>
-
-                <p className="mt-4 border-t border-border pt-3 text-xs text-muted">Awaiting rotation assignment</p>
-              </div>
-            );
-          }
-
-          const tier = plan.density_tier;
-          const label = DENSITY_TIER_LABELS[tier];
-          const lesson = lessonByTpNumber.get(tpNumber);
-          const tpPlan = tpPlanByTpNumber.get(tpNumber);
-          const selfEvaluation = selfEvalByTpNumber.get(tpNumber);
-          const feedback = feedbackByTpNumber.get(tpNumber);
-          const status = getTpCardStatus({
-            planSubmitted: Boolean(tpPlan?.submitted_at),
-            taught: Boolean(plan.taught_at),
-            selfEvalSubmitted: Boolean(selfEvaluation?.submitted_at),
-            feedbackSubmitted: Boolean(feedback?.submitted_at),
-            grade: feedback?.grade,
-          });
-
-          return (
-            <Link
-              key={tpNumber}
-              href={`/portfolio/${traineeId}/tp/${tpNumber}`}
-              className="sheet group flex h-full flex-col p-5 transition-colors hover:border-primary/40 hover:bg-accent/30"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <span className="font-serif text-2xl leading-none text-ink">TP{tpNumber}</span>
-                <span className={`pill ${TONE_PILL_CLASS[status.tone]}`}>{status.label}</span>
-              </div>
-
-              <p className="mt-3 text-base font-semibold leading-snug text-ink">
-                {plan.short_title ?? shortenAim(plan.main_lesson_aim)}
-              </p>
-
-              <div className="mt-4 flex flex-col gap-1.5 text-xs text-muted">
-                <p className="flex items-center gap-2">
-                  <Calendar className="size-3.5 shrink-0" aria-hidden="true" />
-                  {lesson?.lesson_date ?? "Not yet scheduled"}
-                </p>
-                <p className="flex items-center gap-2">
-                  <Users className="size-3.5 shrink-0" aria-hidden="true" />
-                  {lesson?.level ?? "Level TBC"}
-                </p>
-                <p className="flex items-center gap-2">
-                  <Clock className="size-3.5 shrink-0" aria-hidden="true" />
-                  {lesson?.length_minutes ? `${lesson.length_minutes} mins` : label.name}
-                </p>
-                <p className="flex items-center gap-2">
-                  <GraduationCap className="size-3.5 shrink-0" aria-hidden="true" />
-                  {(lesson?.trainer_id && trainerNameById.get(lesson.trainer_id)) || "Trainer TBC"}
-                </p>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs">
-                <span className={tpPlan?.submitted_at ? "text-[oklch(45%_0.13_150)]" : "text-muted"}>
-                  {tpPlan?.submitted_at ? "Lesson plan submitted" : "Plan not yet submitted"}
-                </span>
-                <span className="flex items-center gap-1 font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
-                  Open <span aria-hidden="true">→</span>
-                </span>
-              </div>
-            </Link>
-          );
-        })}
       </div>
     </div>
   );

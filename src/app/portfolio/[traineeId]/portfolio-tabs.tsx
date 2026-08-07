@@ -4,14 +4,29 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
 const TABS = [
-  { href: "", label: "Course Stream" },
-  { href: "/resources", label: "Resource Hub" },
-  { href: "/tp", label: "TP Hub" },
-  { href: "/assignments", label: "Written Assignments" },
-  { href: "/celta5", label: "CELTA 5" },
+  { href: "", label: "Course Stream", metaKey: "courseStream" },
+  { href: "/resources", label: "Resource Hub", metaKey: "resourceHub" },
+  { href: "/tp", label: "Teaching Practice", metaKey: "tp" },
+  { href: "/assignments", label: "Written Assignments", metaKey: "assignments" },
+  { href: "/celta5", label: "CELTA 5", metaKey: "celta5" },
 ] as const;
 
-export function PortfolioTabs({ traineeId }: { traineeId: string }) {
+export interface PortfolioSidebarMeta {
+  // "" (blank) is a deliberate choice for anything with no real data model
+  // yet -- checkpoint 2 explicitly avoids fabricating a "N new" style count
+  // where there's no read-tracking to back it (see courseStream/resourceHub).
+  courseStream: string;
+  resourceHub: string;
+  tp: string;
+  assignments: string;
+  celta5: string;
+}
+
+// Was a horizontal top tab bar; checkpoint 2 (App Redesign.dc.html 1d)
+// moves this into a 232px left sidebar with a meta count per item. Kept the
+// filename/TABS shape as the source of truth to avoid an import-path churn
+// across the layout.
+export function PortfolioTabs({ traineeId, meta }: { traineeId: string; meta: PortfolioSidebarMeta }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const base = `/portfolio/${traineeId}`;
@@ -20,29 +35,35 @@ export function PortfolioTabs({ traineeId }: { traineeId: string }) {
   // staff view, so they had to re-click "Trainee view" in the pill after
   // every single tab. Only this one param is meaningful here, so a plain
   // string append is enough rather than cloning the whole search string.
-  const previewSuffix = searchParams.get("preview") === "trainee" ? "?preview=trainee" : "";
+  const isPreviewingAsTrainee = searchParams.get("preview") === "trainee";
+  const previewSuffix = isPreviewingAsTrainee ? "?preview=trainee" : "";
 
   return (
-    <div className="border-b border-border bg-card">
-      <div className="container flex gap-8">
-        {TABS.map((tab) => {
-          const href = `${base}${tab.href}`;
-          const active = tab.href === "" ? pathname === base : pathname.startsWith(href);
-          return (
-            <Link
-              key={tab.href}
-              href={`${href}${previewSuffix}`}
-              className={`border-b-2 py-3 text-sm font-medium ${
-                active
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted hover:text-ink"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          );
-        })}
-      </div>
-    </div>
+    <nav className="flex w-[232px] shrink-0 flex-col gap-0.5 py-1">
+      <p className="px-3 pb-2.5 text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Workspace</p>
+      {TABS.map((tab) => {
+        const href = `${base}${tab.href}`;
+        const active = tab.href === "" ? pathname === base : pathname.startsWith(href);
+        // celta5's meta is a staff-only figure (see layout.tsx's comment on
+        // criteriaPctMeta) -- computed server-side off the real session, so
+        // it has to be hidden client-side here during preview, same
+        // treatment as the header's trajectory pill (HideDuringPreview).
+        const metaValue = tab.metaKey === "celta5" && isPreviewingAsTrainee ? "" : meta[tab.metaKey];
+        return (
+          <Link
+            key={tab.href}
+            href={`${href}${previewSuffix}`}
+            className={`flex items-center justify-between gap-2.5 rounded-[6px] border-l-[3px] px-3 py-2.5 text-sm ${
+              active
+                ? "border-primary bg-accent/40 font-semibold text-ink"
+                : "border-transparent text-muted hover:bg-accent/20"
+            }`}
+          >
+            <span>{tab.label}</span>
+            {metaValue ? <span className="text-xs tabular-nums text-muted">{metaValue}</span> : null}
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
