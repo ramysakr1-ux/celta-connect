@@ -19,7 +19,7 @@ export default async function Home() {
             <GraduationCap className="size-5 text-primary-foreground" aria-hidden="true" />
           </div>
           <div>
-            <Wordmark size="sm" />
+            <Wordmark size="header" />
             {center ? (
               <p className="text-[11px] tracking-[0.08em] text-muted uppercase">
                 {center.name} · Centre {center.center_number}
@@ -43,7 +43,7 @@ export default async function Home() {
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-4 py-8 text-center">
-          <p className="text-base text-muted">Sign in to your CELTA Connect workspace.</p>
+          <p className="text-base text-muted">Sign in to your Connect workspace.</p>
           <Link
             href="/login"
             className="rounded-[6px] bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"

@@ -181,7 +181,7 @@ export default async function PortfolioLayout({
               </>
             ) : (
               <Link href={`/portfolio/${trainee.id}`} className="shrink-0 block">
-                <Wordmark size="sm" />
+                <Wordmark size="header" />
               </Link>
             )}
             <h1 className="truncate font-serif text-[17px] text-ink">{trainee.full_name}</h1>

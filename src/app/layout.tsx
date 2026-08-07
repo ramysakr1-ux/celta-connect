@@ -31,7 +31,7 @@ const instrumentSans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Connect CELTA",
+  title: "Connect",
   description: "CELTA course administration, built for centers.",
 };
 

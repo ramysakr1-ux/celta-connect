@@ -1,6 +1,6 @@
 import "server-only";
 import path from "node:path";
-import { Document, Page, Text, View, Image, Font, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, Svg, Path, Font, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 
 // Certificate of attendance for a volunteer TP student who's completed a
 // full level (all "sets" of a coursebook) -- a DESIGN-ONLY piece for now,
@@ -10,8 +10,9 @@ import { Document, Page, Text, View, Image, Font, StyleSheet, renderToBuffer } f
 // cream/gold palette already established for the volunteer-student portal
 // (/student/[token], materials-card.tsx) rather than the teal palette used
 // for the trainee final report -- same person type, same visual identity.
-// No Cambridge logo (Ramy: explicit), only the center's own logo. Connect
-// CELTA appears only as a small colour-matched credit line, not a logo.
+// No Cambridge logo (Ramy: explicit), only the center's own logo. Per
+// specs/rename-to-connect.md the credit line is now the actual mark plus
+// plain "Connect" text -- no descriptor, no strapline, no "CELTA".
 const fontsDir = path.join(process.cwd(), "public", "fonts");
 Font.register({ family: "Newsreader", src: path.join(fontsDir, "Newsreader.ttf") });
 Font.register({ family: "Karla", src: path.join(fontsDir, "Karla.ttf") });
@@ -25,6 +26,11 @@ const COLOR = {
   frame: "#c9a04a",
   gold: "#b3892f",
 };
+
+// Wordmark tile hex equivalents of the app's --color-ink-warm / lifted-gold
+// / --color-card tokens (react-pdf has no CSSOM, so these are computed once
+// via the standard OKLCH->sRGB conversion -- same values as src/app/icon.tsx).
+const MARK_COLOR = { tile: "#3e2818", gold: "#cc9140", card: "#fefdfa" };
 
 const styles = StyleSheet.create({
   page: {
@@ -97,11 +103,20 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 0,
     right: 0,
-    textAlign: "center",
-    fontSize: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
   },
-  creditConnect: { color: COLOR.gold },
-  creditCelta: { color: COLOR.ink },
+  creditTile: {
+    width: 13,
+    height: 13,
+    borderRadius: 3,
+    backgroundColor: MARK_COLOR.tile,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  creditText: { fontSize: 8, color: COLOR.ink },
 });
 
 interface Signatory {
@@ -154,9 +169,27 @@ export async function renderCertificateBuffer(input: CertificateInput): Promise<
           </View>
         </View>
 
-        <Text style={styles.credit}>
-          <Text style={styles.creditConnect}>Connect</Text> <Text style={styles.creditCelta}>CELTA</Text>
-        </Text>
+        <View style={styles.credit}>
+          <View style={styles.creditTile}>
+            <Svg width={8.2} height={4.7} viewBox="8 30 104 60">
+              <Path
+                d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8"
+                stroke={MARK_COLOR.gold}
+                strokeWidth={13}
+                strokeLinecap="round"
+                fill="none"
+              />
+              <Path
+                d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8"
+                stroke={MARK_COLOR.card}
+                strokeWidth={13}
+                strokeLinecap="round"
+                fill="none"
+              />
+            </Svg>
+          </View>
+          <Text style={styles.creditText}>Connect</Text>
+        </View>
       </Page>
     </Document>
   );

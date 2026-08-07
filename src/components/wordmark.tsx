@@ -1,192 +1,176 @@
-import { useId } from "react";
+// Real brand mark, redesigned per specs/rename-to-connect.md (locked 7 Aug
+// 2026): a single "Connect" word inside a filled ink tile is the mark now
+// -- the tile is what makes the gold read at every size (gold-on-ink, not
+// gold-on-cream), and the tile alone doubles as the app icon (see
+// src/app/icon.tsx). Arc geometry is byte-for-byte unchanged from the
+// original handoff (same viewBox, same path data) -- only the surrounding
+// tile, sizing, and stroke-width compensation are new. Colors are real CSS
+// custom properties now (--color-gold / --color-ink-warm / --color-card),
+// not the standalone hex palette this component used to carry -- that
+// disconnect from the app's own design tokens is exactly what the rename
+// spec called out to fix.
 
-// Real brand mark, from Ramy's design handoff (design_handoff_connect_celta_logo,
-// v2 "warm" palette -- confirmed as the approved one: the palette sample he
-// sent renders at #FCF5E9, an exact match for v2's Panel token, not v1's).
-// The monogram is inline SVG (exact path data from the handoff spec, not a
-// raster crop) so it stays crisp at every size and can be recolored for the
-// reversed/on-dark variant. "Connect" uses Instrument Serif italic and
-// "CELTA" uses Instrument Sans -- both loaded in layout.tsx as CSS
-// variables scoped to this component only; the rest of the app keeps
-// Newsreader/Karla untouched.
-const WARM = {
-  gold: "#B3762B",
-  ink: "#1C1710",
-  goldOnDark: "#E0AC55",
-  inkOnDarkGround: "#FCF5E9",
-  muted: "rgba(28,23,16,0.6)",
-};
+// Bespoke "lifted gold" used only for the arcs sitting directly on the dark
+// ink tile, and for the word when the whole lockup is reversed onto ink --
+// needs more lift than the normal --color-gold to read at that contrast.
+// Not a general design token, per spec -- kept local to this component.
+const LIFTED_GOLD = "oklch(70% 0.12 72)";
 
-// mark viewBox is `8 30 104 60` per spec -- aspect ratio 104:60 (1.7333).
+// mark viewBox is `8 30 104 60` per the original handoff spec, unchanged --
+// aspect ratio 104:60 (1.7333).
 const MARK_ASPECT = 104 / 60;
 
-// Gentle dimensional treatment (6 Aug 2026, on request: "smaller and 3D") --
-// a diagonal light-to-dark gradient per ring simulates a rounded/glossy
-// tube catching light, plus a soft drop shadow for lift off the page.
-// Kept subtle deliberately: this is a wordmark seen constantly in a header,
-// not a hero graphic -- heavy bevel/highlight effects would get old fast.
-function Mark({ heightPx, onDark }: { heightPx: number; onDark: boolean }) {
-  const gradId = useId();
-  const shadowId = useId();
-  const widthPx = Math.round(heightPx * MARK_ASPECT);
-  // Thinner than the original spec (was 14/11) -- on request, testing
-  // whether a lighter ring weight (closer to the italic "Connect" script's
-  // own stroke weight) reads as smoother, since a thick stroke on a small
-  // circle radius has less room to anti-alias cleanly and exaggerates any
-  // softness at the edge.
-  const strokeWidth = heightPx < 40 ? 9 : 7.5;
-  const goldBase = onDark ? WARM.goldOnDark : WARM.gold;
-  const inkBase = onDark ? WARM.inkOnDarkGround : WARM.ink;
+// Stroke-width compensation as the tile shrinks, per spec's three anchor
+// points (11 at 78px, 13 at 34px, 15 at 22px) -- linear interpolation
+// between them, clamped flat beyond either end (spec gives no data point
+// past 78px, and 22px is already the smallest named context).
+function strokeWidthForTile(tilePx: number): number {
+  const points: [number, number][] = [
+    [22, 15],
+    [34, 13],
+    [78, 11],
+  ];
+  if (tilePx <= points[0][0]) return points[0][1];
+  if (tilePx >= points[points.length - 1][0]) return points[points.length - 1][1];
+  for (let i = 0; i < points.length - 1; i++) {
+    const [x0, y0] = points[i];
+    const [x1, y1] = points[i + 1];
+    if (tilePx >= x0 && tilePx <= x1) {
+      const t = (tilePx - x0) / (x1 - x0);
+      return y0 + (y1 - y0) * t;
+    }
+  }
+  return 12;
+}
+
+// Arcs always invert inside the tile -- first arc lifted gold, second arc
+// --color-card -- regardless of onDark (per spec: "Reversed... arcs
+// unchanged"). The tile background is what changes for onDark, not the
+// arcs.
+function Mark({ tilePx }: { tilePx: number }) {
+  const markWidth = tilePx * 0.63;
+  const markHeight = markWidth / MARK_ASPECT;
+  const strokeWidth = strokeWidthForTile(tilePx);
 
   return (
     <svg
       viewBox="8 30 104 60"
-      width={widthPx}
-      height={heightPx}
+      width={markWidth}
+      height={markHeight}
       fill="none"
       shapeRendering="geometricPrecision"
       role="img"
-      aria-label="Connect CELTA"
+      aria-label="Connect"
       className="wordmark-spin"
     >
-      <defs>
-        <linearGradient id={`${gradId}-gold`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={mix(goldBase, "#ffffff", 0.35)} />
-          <stop offset="55%" stopColor={goldBase} />
-          <stop offset="100%" stopColor={mix(goldBase, "#000000", 0.32)} />
-        </linearGradient>
-        <linearGradient id={`${gradId}-ink`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={mix(inkBase, "#ffffff", onDark ? 0.15 : 0.28)} />
-          <stop offset="55%" stopColor={inkBase} />
-          <stop offset="100%" stopColor={mix(inkBase, "#000000", onDark ? 0.2 : 0.32)} />
-        </linearGradient>
-        <filter id={shadowId} x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow
-            dx="0"
-            dy="1.4"
-            stdDeviation="1.6"
-            floodColor={WARM.ink}
-            floodOpacity="0.28"
-          />
-        </filter>
-      </defs>
-      <g filter={`url(#${shadowId})`}>
-        <path
-          d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8"
-          stroke={`url(#${gradId}-gold)`}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-        />
-        <path
-          d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8"
-          stroke={`url(#${gradId}-ink)`}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-        />
-      </g>
+      <path
+        d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8"
+        stroke={LIFTED_GOLD}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+      />
+      <path
+        d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8"
+        stroke="var(--color-card)"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
-// Tiny local hex mixer -- avoids pulling in a color library for two blends.
-function mix(hex: string, withHex: string, amount: number): string {
-  const a = hexToRgb(hex);
-  const b = hexToRgb(withHex);
-  const r = Math.round(a.r + (b.r - a.r) * amount);
-  const g = Math.round(a.g + (b.g - a.g) * amount);
-  const bl = Math.round(a.b + (b.b - a.b) * amount);
-  return `rgb(${r}, ${g}, ${bl})`;
-}
-function hexToRgb(hex: string) {
-  const h = hex.replace("#", "");
-  return {
-    r: parseInt(h.slice(0, 2), 16),
-    g: parseInt(h.slice(2, 4), 16),
-    b: parseInt(h.slice(4, 6), 16),
-  };
-}
+export type WordmarkSize = "header" | "hero" | "stacked" | "email" | "icon";
 
-const SIZE_CONFIG = {
-  // Below-minimum header lockup -- sized down ~20% from spec minimum on
-  // request ("a bit smaller"). markHeight 19, not 21: the spec's own two
-  // lockup configs hold a mark-height:Connect-fontsize ratio of ~1.19-1.21
-  // (58/48, 38/32); 21 gave this size a 1.31 ratio, a real outlier vs md/lg
-  // below which already track the spec ratio closely -- not just "feels
-  // big", it measurably was, relative to the rest of the system.
-  // descriptorPx 4, not the spec ratio's ~3.2 (0.2 x connectPx): a hair
-  // above strict ratio for legibility at this scale.
-  sm: { markHeight: 19, connectPx: 16, celtaPx: 8, descriptorPx: 4 },
-  // Config B, compact horizontal.
-  md: { markHeight: 31, connectPx: 26, celtaPx: 11, descriptorPx: 6 },
-  // Config A, full horizontal.
-  lg: { markHeight: 47, connectPx: 39, celtaPx: 16, descriptorPx: 8 },
+// Literal per-context Tile/Word pixel pairs, straight from the spec's own
+// "Sizes" table -- not re-derived from the "≈0.56 x tile" ratio it also
+// gives, since that ratio doesn't quite reproduce the table's own numbers
+// (it's a rule of thumb the designer used while drafting, not a formula to
+// recompute live) and the table is explicitly "locked... every decision
+// below is settled." Hero uses the midpoint of its 78-92/44-54 ranges,
+// since (unlike the other rows) it's given as a range, not one number.
+const SIZE_CONFIG: Record<WordmarkSize, { tile: number; word: number | null; descriptor: boolean; stacked: boolean }> = {
+  header: { tile: 34, word: 22, descriptor: false, stacked: false },
+  hero: { tile: 84, word: 49, descriptor: true, stacked: false },
+  stacked: { tile: 54, word: 27, descriptor: true, stacked: true },
+  email: { tile: 44, word: 26, descriptor: true, stacked: false },
+  icon: { tile: 32, word: null, descriptor: false, stacked: false },
 };
 
 export function Wordmark({
-  size = "md",
+  size = "hero",
   onDark = false,
   className = "",
+  iconSizePx,
 }: {
-  size?: "sm" | "md" | "lg";
+  size?: WordmarkSize;
   onDark?: boolean;
   className?: string;
+  /** Only used with size="icon" -- overrides the tile's default 32px (spec's icon range is 22-48px, context-dependent, e.g. the 20px designer-credit mark). */
+  iconSizePx?: number;
 }) {
   const cfg = SIZE_CONFIG[size];
-  const showDescriptor = cfg.descriptorPx > 0;
-  const inkColor = onDark ? WARM.inkOnDarkGround : WARM.ink;
-  const goldColor = onDark ? WARM.goldOnDark : WARM.gold;
+  const tilePx = size === "icon" && iconSizePx ? iconSizePx : cfg.tile;
+  const tileRadius = Math.round(tilePx * 0.22);
+  const tileBg = onDark ? "oklch(30% 0.02 65)" : "var(--color-ink-warm)";
+  const wordColor = onDark ? LIFTED_GOLD : "var(--color-gold)";
+
+  const tile = (
+    <span
+      className="wordmark-mark-stage inline-flex shrink-0 items-center justify-center"
+      style={{ width: tilePx, height: tilePx, borderRadius: tileRadius, background: tileBg }}
+    >
+      <Mark tilePx={tilePx} />
+    </span>
+  );
+
+  if (cfg.word === null) {
+    return <span className={`inline-flex ${className}`}>{tile}</span>;
+  }
+
+  const wordPx = cfg.word;
+  // Descriptor font-size ~0.2x the word size, with a hard 9px floor -- this
+  // formula, applied to the table's own literal word sizes, reproduces the
+  // spec's explicit "Email header ... yes, 9px" cell exactly (26 * 0.2 =
+  // 5.2, floored to 9), confirming the two parts of the spec agree.
+  const descriptorPx = Math.max(9, Math.round(wordPx * 0.2));
+  const descriptorTracking = wordPx < 40 ? "0.24em" : "0.26em";
+  // "padding-left: 9px at the reference size (44px word) -- scale that
+  // offset with the word."
+  const paddingLeftPx = Math.round((9 * wordPx) / 44);
+  // "Tile-to-text gap 15px at the 78px tile" -- scales with the tile.
+  const gapPx = Math.round((15 * tilePx) / 78);
 
   return (
-    <span className={`inline-flex items-center ${className}`} style={{ gap: 2 }}>
-      <span className="wordmark-mark-stage inline-flex">
-        <Mark heightPx={cfg.markHeight} onDark={onDark} />
-      </span>
-      {/* Column scoped to the wordmark text only (not the mark) -- the
-          descriptor below anchors to THIS column's own left edge, i.e. the
-          "C" of Connect, rather than the mark's, which is what "aligns to
-          the C stem" in the handoff actually meant. Was a sibling of the
-          whole mark+text row before, so its padding-left was offset from
-          the mark's edge, not Connect's -- a real misalignment, not a
-          styling nicety. */}
+    <span className={`inline-flex items-center ${className}`} style={{ gap: gapPx }}>
+      {tile}
       <span className="inline-flex flex-col">
-        <span className="inline-flex items-baseline" style={{ gap: Math.round(cfg.celtaPx * 0.5) }}>
-          <span
-            style={{
-              fontFamily: "var(--font-instrument-serif)",
-              fontStyle: "italic",
-              fontSize: cfg.connectPx,
-              lineHeight: 0.9,
-              letterSpacing: "-0.01em",
-              color: goldColor,
-            }}
-          >
-            Connect
-          </span>
+        <span
+          style={{
+            fontFamily: "var(--font-instrument-serif)",
+            fontStyle: "italic",
+            fontSize: wordPx,
+            lineHeight: 0.85,
+            letterSpacing: "-0.012em",
+            color: wordColor,
+          }}
+        >
+          Connect
+        </span>
+        {cfg.descriptor ? (
           <span
             style={{
               fontFamily: "var(--font-instrument-sans)",
               fontWeight: 600,
-              fontSize: cfg.celtaPx,
-              letterSpacing: "0.1em",
-              color: inkColor,
-            }}
-          >
-            CELTA
-          </span>
-        </span>
-        {showDescriptor ? (
-          <span
-            style={{
-              fontFamily: "var(--font-instrument-sans)",
-              fontWeight: 500,
-              fontSize: cfg.descriptorPx,
-              letterSpacing: "0.26em",
-              color: onDark ? "rgba(252,245,233,0.7)" : WARM.muted,
+              fontSize: descriptorPx,
+              letterSpacing: descriptorTracking,
+              color: onDark ? "rgba(252,245,233,0.7)" : "var(--color-muted)",
               textTransform: "uppercase",
-              paddingLeft: 2,
+              paddingLeft: paddingLeftPx,
+              marginTop: 7,
+              whiteSpace: cfg.stacked ? "normal" : "nowrap",
             }}
           >
-            Teacher Training Ecosystem
+            Teacher training platform
           </span>
         ) : null}
       </span>

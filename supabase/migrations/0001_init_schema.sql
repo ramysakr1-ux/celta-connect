@@ -1,4 +1,4 @@
--- Celta Connect: core schema, roles, and Row-Level Security
+-- Connect: core schema, roles, and Row-Level Security
 -- Step 1 of the phased build: centers -> courses -> profiles (3 roles),
 -- plus the operational tables needed by the trainee/trainer dashboards,
 -- TP Hub, and CELTA 5 record page (steps 2-4). Admissions/ATS tables are

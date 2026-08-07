@@ -95,14 +95,20 @@ export async function sendJoinLinkEmail(
 
   const token = role === "trainee" ? course.trainee_join_token : course.trainer_join_token;
   const joinUrl = `${siteUrl}/join/${token}`;
+  // Subject leads with the centre, not the platform -- the recipient
+  // recognises their centre; Connect is the tool underneath
+  // (specs/rename-to-connect.md, "Copy that changes meaning" #2).
+  const { data: center } = await supabase.from("centers").select("name").eq("id", admin.center_id).maybeSingle();
+  const centerName = center?.name ?? "Your centre";
 
   try {
     const resend = createResendClient();
     const { error } = await resend.emails.send({
       from: JOIN_LINK_SENDER,
       to: toEmail,
-      subject: "You've been invited to Connect CELTA",
+      subject: `${centerName} · your CELTA workspace is ready`,
       html: buildJoinEmailHtml({
+        centerName,
         courseName: course.name,
         startDate: course.start_date,
         endDate: course.end_date,
@@ -121,20 +127,24 @@ export async function sendJoinLinkEmail(
 }
 
 function buildJoinEmailHtml({
+  centerName,
   courseName,
   startDate,
   endDate,
   role,
   joinUrl,
 }: {
+  centerName: string;
   courseName: string;
   startDate: string;
   endDate: string;
   role: "trainee" | "trainer";
   joinUrl: string;
 }): string {
+  // Opens with the centre and course, not the platform -- Connect only
+  // appears via the sender name, not in the body copy (rename-to-connect.md).
   return `
-    <h2>You're invited to Connect CELTA</h2>
+    <h2>${centerName} has invited you to join ${courseName}</h2>
     <p>
       You've been invited to join <strong>${courseName}</strong>
       (${startDate} &rarr; ${endDate}) as a <strong>${role}</strong>.

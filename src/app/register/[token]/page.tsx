@@ -23,7 +23,7 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
     return (
       <div className="flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="sheet-accent w-full max-w-sm p-8 text-center">
-          <Wordmark size="lg" />
+          <Wordmark size="hero" />
           <p className="mt-4 text-sm text-destructive">
             This link has expired or isn&apos;t valid. Ask the trainer for a new one.
           </p>

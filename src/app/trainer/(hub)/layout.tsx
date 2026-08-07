@@ -36,7 +36,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
         <div className="container flex h-14 items-stretch justify-between gap-6">
           <div className="flex items-center gap-6">
             <Link href="/trainer" className="block shrink-0">
-              <Wordmark size="sm" />
+              <Wordmark size="header" />
             </Link>
             <TrainerTabs rosterOnly={isAssessor} />
           </div>

@@ -1,6 +1,6 @@
 import "server-only";
 import path from "node:path";
-import { Document, Page, Text, View, Image, Font, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, Svg, Path, Font, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import { GRADE_DESCRIPTORS } from "@/lib/celta-criteria";
 import type { FinalGrade } from "@/lib/supabase/types";
 
@@ -44,6 +44,11 @@ const COLOR = {
   cream: "#f8f3e8",
   fail: "#9a3324",
 };
+
+// Wordmark tile hex equivalents of --color-ink-warm / lifted-gold /
+// --color-card (react-pdf has no CSSOM) -- same values as src/app/icon.tsx
+// and src/lib/certificate-pdf/document.tsx.
+const MARK_COLOR = { tile: "#3e2818", gold: "#cc9140", card: "#fefdfa" };
 
 const GRADE_COLOR: Record<string, string> = {
   "Pass A": COLOR.gold,
@@ -114,9 +119,25 @@ const styles = StyleSheet.create({
   },
   signName: { fontSize: 8.5, color: COLOR.ink },
   signRole: { fontSize: 7.5, color: COLOR.muted },
-  credit: { position: "absolute", bottom: 16, left: 0, right: 0, textAlign: "center", fontSize: 7.5 },
-  creditConnect: { color: COLOR.gold },
-  creditCelta: { color: COLOR.ink },
+  credit: {
+    position: "absolute",
+    bottom: 16,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+  },
+  creditTile: {
+    width: 12,
+    height: 12,
+    borderRadius: 3,
+    backgroundColor: MARK_COLOR.tile,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  creditText: { fontSize: 7.5, color: COLOR.ink },
 
   // -- Back page (report) --
   page: { padding: 48, fontFamily: "Karla", fontSize: 10.5, color: COLOR.ink },
@@ -252,9 +273,27 @@ export async function renderFinalReportBuffer(input: FinalReportInput): Promise<
           </View>
         </View>
 
-        <Text style={styles.credit}>
-          <Text style={styles.creditConnect}>Connect</Text> <Text style={styles.creditCelta}>CELTA</Text>
-        </Text>
+        <View style={styles.credit}>
+          <View style={styles.creditTile}>
+            <Svg width={7.6} height={4.4} viewBox="8 30 104 60">
+              <Path
+                d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8"
+                stroke={MARK_COLOR.gold}
+                strokeWidth={13}
+                strokeLinecap="round"
+                fill="none"
+              />
+              <Path
+                d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8"
+                stroke={MARK_COLOR.card}
+                strokeWidth={13}
+                strokeLinecap="round"
+                fill="none"
+              />
+            </Svg>
+          </View>
+          <Text style={styles.creditText}>Connect</Text>
+        </View>
       </Page>
 
       <Page size="A4" style={styles.page}>
@@ -315,7 +354,7 @@ export async function renderFinalReportBuffer(input: FinalReportInput): Promise<
           </View>
         ) : null}
 
-        <Text style={styles.footer}>Generated via Connect CELTA</Text>
+        <Text style={styles.footer}>Generated via Connect</Text>
       </Page>
     </Document>
   );

@@ -5,6 +5,7 @@ import { signOut } from "@/app/login/actions";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
 import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
 import { Wordmark } from "@/components/wordmark";
+import { DesignerCredit } from "@/components/designer-credit";
 
 export default async function DashboardLayout({
   children,
@@ -24,7 +25,7 @@ export default async function DashboardLayout({
       <header className="border-b border-border">
         <div className="container flex items-center justify-between py-4">
           <Link href="/dashboard" className="hover:opacity-80">
-            <Wordmark size="sm" />
+            <Wordmark size="header" />
           </Link>
           <div className="flex items-center gap-4 text-sm text-muted">
             <span>{profile?.full_name ?? email}</span>
@@ -39,8 +40,8 @@ export default async function DashboardLayout({
 
       <main className="container w-full flex-1 py-8">{children}</main>
 
-      <footer className="px-6 py-4 text-right text-xs text-muted">
-        Designed by Ramy
+      <footer className="flex justify-end px-6 py-4">
+        <DesignerCredit />
       </footer>
 
       {profile && staffChat ? (

@@ -29,6 +29,7 @@
   --color-surface-muted: oklch(94.8% 0.01 85); /* muted BACKGROUND tint */
   --color-gold: oklch(63% 0.096 72); /* brass/gold accent, used sparingly */
   --color-gold-foreground: oklch(99% 0.005 90);
+  --color-ink-warm: oklch(30% 0.042 58); /* warm dark brown, one step lighter/warmer than --color-ink -- the wordmark tile, and headings/primary buttons/checkboxes on entry surfaces (rename-to-connect.md) */
   --color-destructive: oklch(45% 0.15 27);
   --color-input: oklch(88.8% 0.013 82);
   --color-accent: oklch(93% 0.019 190); /* pale teal-green, the "green hover" wash */
@@ -73,6 +74,7 @@
   --color-surface-muted: var(--color-surface-muted);
   --color-gold: var(--color-gold);
   --color-gold-foreground: var(--color-gold-foreground);
+  --color-ink-warm: var(--color-ink-warm);
   --color-destructive: var(--color-destructive);
   --color-input: var(--color-input);
   --color-accent: var(--color-accent);
@@ -377,8 +379,10 @@ h6 {
      foreshortening that actually reads as 3D rather than a a flip.
      Pauses on the readable, correctly-ordered "CC" face (0%-11.11%, both
      held at 0deg -- two identical keyframe values is a static hold, not
-     motion) before rotating through the remaining 48s at the same speed
-     as before (88.89% of a 54s total cycle = 48s, unchanged). */
+     motion) before rotating through the remaining 80s at the same speed
+     as before (88.89% of a 90s total cycle -- rename-to-connect.md slows
+     this from 54s to 90s so the hold reads as 10s and the turn as drift,
+     not animation). */
   @keyframes wordmark-spin {
     0%,
     11.11% {
@@ -394,7 +398,7 @@ h6 {
   }
 
   .wordmark-spin {
-    animation: wordmark-spin 54s linear infinite;
+    animation: wordmark-spin 90s linear infinite;
     transform-origin: 50% 50%;
     transform-style: preserve-3d;
   }

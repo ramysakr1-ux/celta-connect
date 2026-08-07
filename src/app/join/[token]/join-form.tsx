@@ -79,14 +79,14 @@ export function JoinForm({ token, role }: { token: string; role: UserRole }) {
         <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
           <input type="checkbox" name="agree_ip" required className="mt-0.5 accent-primary" />
           <span>
-            I agree not to copy, reverse-engineer, or share access to the Connect CELTA platform,
+            I agree not to copy, reverse-engineer, or share access to the Connect platform,
             and to use it only for the purposes of my course.
           </span>
         </label>
         <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
           <input type="checkbox" name="agree_data" required className="mt-0.5 accent-primary" />
           <span>
-            I understand that my coursework, tutor feedback, and records are held in CELTA
+            I understand that my coursework, tutor feedback, and records are held in
             Connect during the course and archived to the centre&apos;s secure Google Drive
             afterwards.
           </span>

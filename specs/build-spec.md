@@ -24,17 +24,100 @@ These came from Cambridge's syllabus, the CELTA 5 booklet, the centre's own assi
 - A withdrawn candidate **leaves an empty slot**. Positions of the others do not change. Do not re-derive.
 - Observation is **not transferable**. A tutor may not mark a lesson they did not watch. If a tutor leaves, the replacement observes the next lesson themselves.
 
+**Observation of experienced teachers — Admin Handbook 9.1**
+- Six hours' directed observation of experienced ELT professionals. All six may be live; **a maximum of three hours may be filmed**. Filmed observation counts toward the six.
+- **Peer observation cannot be included** in the six hours. It is required as a course activity (candidates attend TP in groups so peer observation can take place) but is never counted here.
+- **Demonstration classes** taught by a tutor or other experienced teacher and observed by trainees **do count** — a demo class led by a tutor with the TP students is recommended.
+- Mixed-mode courses: candidates should observe **both online and face-to-face** lessons. Moodle courses: three hours come from the online materials, three must be live from the centre.
+- The record of attendance at observed classes goes in the **CELTA 5**; the observed teacher signs it **where the centre requires** — so the signature column is centre-optional, not always shown.
+
+**Teaching practice — Admin Handbook 10.2**
+- All assessed TP must be observed by a **verified** CELTA tutor, and each candidate must be observed/assessed by **a minimum of two tutors** during the course.
+- **Five of the six assessed hours must be whole-class teaching.** One assessed lesson may be one-to-one or paired, where the course programme includes one-to-one teaching.
+- Maximum TP length is **3 hours per day** for tutors and candidates.
+
+**Assessor visit — Admin Handbook 13.1 / 13.2**
+
+The pack must contain, in addition to portfolios:
+- individual **descriptions of the candidates with photographs** where possible
+- the **course timetable**
+- the **TP schedule** with arrangements for the day of assessment
+- **written assignment titles**
+- the **application file** — application forms and completed selection tasks for **both rejected and accepted applicants**. *Nothing in the app currently holds rejected applicants; this needs a data model.*
+- **lesson plans** for candidates teaching that day (at the latest, at the start of the lesson)
+- **attendance registers for the language students** attending TP classes (the volunteer register)
+- a **sample candidate end-of-course report**
+- a copy of the **last assessor's report**, shared by secure means
+- the **double-marking record** (8.2.3)
+- face-to-face only: map and accommodation details
+
+Portfolio selection — a minimum of four, made up of:
+- **mandatory:** every candidate the assessor observes teaching; every candidate provisionally graded **Fail or potential Fail**; every **withdrawn** candidate (the assessor must check the file and comment in their report)
+- **recommended:** candidates graded **Pass A or potential Pass A**
+- the course admin picks the remainder. The app should propose the mandatory set automatically and let the admin complete it.
+
+The assessor co-observes 1.5+ hours of TP including feedback, across **at least two different candidates**, and reads the portfolio of at least one candidate they observed. There must be an opportunity for the assessor to talk to candidates **without tutors present**.
+
+New centres: the assessor for a centre's **first course is nominated by Cambridge**, not selected by the centre.
+
+**CELTA 5 — the document of record**
+- The app's **digital replica is the original**. No printing, no scanning back in. It carries **digital signatures from tutors and candidates**.
+- It is stored on the **centre's own storage**, not in Connect CELTA and not on the centre's Drive folder used for the course export — a separate, retained location accessible to Cambridge.
+- **Every tutorial record** follows the same pattern: tutor's signature + date; the candidate ticks *"I have read and agree with the summarising comments"* and signs + dates. Neither is complete without both.
+- **Final-day declaration**, headed *"TO BE COMPLETED ON THE FINAL DAY OF THE COURSE"* — five checkboxes the candidate ticks, verbatim: *I have completed six hours of assessed teaching practice at at least two levels; I have completed six hours of observation of experienced teachers; I have completed four written assignments; The written assignments are my own work; I have completed all records.* Then candidate's signature + date, and **"Accepted by tutor"** + date. The app can pre-verify every one of the five from its own records and show the candidate what it knows — but the tick is theirs.
+- This declaration is what decides **Withdrawn vs Fail** (see §3): an unsuccessful candidate who does not attend the final day and has not signed it is Withdrawn, not Fail.
+- A further box, **"Information for the CELTA Grade Review — tutor comments on action points detailed in Stage Three progress record"**, must be completed for every candidate whose portfolio is submitted to Cambridge. It asks whether the candidate did or did not demonstrate effectiveness in the areas identified, referencing feedback in final lessons and/or written assignments.
+- Note the rule embedded in the first checkbox: **six hours of assessed TP at at least two levels**. Track levels taught, not only hours.
+
+**Two kinds of centre upload — treat them differently**
+
+1. **Parsed into templates.** Assignment briefs and cover sheets, converted at centre setup into criteria rows, comment slots and section prompts. The source file is finished after import; never served, never round-tripped.
+2. **Stored as documents.** The application file (application forms and completed selection tasks for **accepted and rejected** applicants), the centre's own timetable, and anything else the centre attaches. Uploaded at the start of the course, never parsed, held for the assessor pack and the close-out export.
+
+Category 2 carries the most sensitive data in the system — **rejected applicants never became candidates and never signed anything**, yet their files are here. They must be covered by the same retention and deletion rules as candidate data, and named explicitly in the centre's privacy terms.
+
+**Volunteer students**
+- A volunteer belongs to a **class at a specific level** (Elementary, Upper-Intermediate, etc.), not merely to the course. Candidates must teach at a range of levels, so the class is what a TP is scheduled against.
+- No account. A tokenised link, a consent gate, and their own class list, attendance, and handouts.
+
+**Volunteer attendance and certificates — the hours model**
+- **Certificates are earned by hours, never by levels or by courses.** Volunteers move between levels depending on what is running (A2 this course, B1 the next), which is not their doing. Cambridge puts one CEFR level at roughly **200 guided learning hours**, while one CELTA course gives a volunteer about **30**. A level is therefore the wrong unit and a course is too small; hours carry across both.
+- Hours are **cumulative across courses and across levels**, held against the person, not the enrolment.
+- **How a tick is earned.** A TP session is three 45-minute lessons (135 minutes). Presence is measured from **Zoom's join and leave timestamps, summed across rejoins** — dropping out and rejoining is not penalised, since connection loss is common and not the volunteer's fault. **Presence is enough: there is no camera rule for volunteers.** The camera-off-counts-as-absent rule applies to candidates only.
+  - Under 90 minutes → **no tick**. Five minutes is nothing; one lesson is not enough.
+  - **90 minutes or more → one tick**, and the tick credits the session **in full at 135 minutes (2¼ hours)**, whether they stayed 90 or 135. Deliberately generous: it removes any reason for a volunteer to watch the clock, and the 45-minute difference is not worth the complexity of pro-rating.
+- **The certificate sits at 160 hours** — 80% of the 200 guided learning hours Cambridge suggests for one CEFR level. The volunteer never sees that calculation; they see a number and how far off it is. 160 hours is roughly 71 classes, or four to five courses, so **staging posts at 40, 80 and 120** keep the next milestone close enough to matter.
+- The **90-minute threshold, the session length, the milestone values and the 160-hour target are all centre settings.** Do not hardcode.
+- **Face-to-face sessions** have no Zoom timestamps; the tutor ticks the register directly and the same hours follow.
+- Per-course attendance is shown to the volunteer as a plain count of classes, with **no percentage and no threshold** — the hours bank is the incentive, and making a volunteer do arithmetic about their own certificate is pressure with no purpose.
+
 **Written assignments**
+
 - Four assignments; **a candidate must pass 3 of 4 to be eligible for a PASS**.
 - **One resubmission per assignment.** Fail on resubmission is a distinct outcome from Fail.
 - Passing on first or second submission **does not affect the certificate grade**.
 - Each assignment has **its own criteria list**, in its own order, imported from the centre's own cover sheet. Criteria are data. Never hardcode them.
 - Assignments may be **conflated** — two briefs delivered as one document, counting as two, both parts must pass independently. The data model must allow one submission to satisfy two assignment records.
+- **Double-marking — Admin Handbook 8.2.3.** A minimum of two tutors must be involved in marking. **A proportion of each assignment must be double-marked**, by candidate count: up to 9 candidates → **3 of each assignment**; up to 16 → **4**; up to 24 → **5**. The sample **must include any fail assignments**. Double-marking means checking the first marker's grading and comments; both tutors **initial** the assignment. **Blind double-marking** (each tutor marks independently, then they discuss and agree) is recommended but not required — support both modes, blind as an option, not the default.
+- **Who double-marks whom is the centre's choice** — commonly tutors who swap TP groups mark each other's candidates. Do not encode a pairing rule. The app assigns and tracks; the centre decides.
+- The centre **must keep a record of which assignments were double-marked**, and assessors may ask to see it. Generate that record automatically and include it in the assessor pack.
+- **Resubmission deadlines live on the timetable**, like every other date — not computed from the return date. A **48-hour minimum** between returning marked work and the resubmission deadline is the guideline; it is centre-configurable, not fixed. Warn when a deadline gives a candidate less than the centre's minimum.
+- **Cover sheet prints only the comments belonging to its own round.** The exported PDF is **one file per assignment**, containing both rounds clearly separated: outcome at the top (e.g. *Pass on Resubmission*), then the first submission with its comments, then the resubmission with its comments. The distinction between rounds must be unmistakable; one file per assignment is enough.
 - Marked as **Met / Not met per criterion, per round** — not content/English pass marks. (An earlier design had this wrong.)
 - Cover sheet carries: date, 1st marker, 2nd marker; four outcome boxes (Pass, Resubmission Needed, Pass on Resubmission, Fail on Resubmission); overall comment per round; the seven-point declaration including the AI conversation link.
 
 **Grades**
 - Provisional grades are trainer-only and never visible to a candidate before release.
+- Provisional values are either **definite** (Fail, Pass, Pass B, Pass A) or **undecided**, written with a slash (Fail/Pass, Pass/Pass B, Pass B/Pass A). A slash means the tutors have not yet decided between two adjacent grades.
+- **Withdrawal is a selectable value in both the provisional and final grade lists**, not only a status arrived at by event.
+- **Warning letters are generated by state, and are safeguards** — nobody may reach a final grade without having been warned in writing. Two triggers:
+  - A provisional grade of **Fail/Pass** → the candidate is given a **Stage 3 tutorial** and a **warning fail letter** stating what they must do to pass the course.
+  - **Failing one written assignment** → a warning letter stating that they cannot fail another.
+  - Both are drafted by the app with the specifics filled in (as the withdrawal letter is), signed, filed in the portfolio, and visible in the assessor pack as evidence the warning was given.
+- **Stage 3 tutorials — Admin Handbook 9.2, verbatim triggers.** Stage 3 progress checks must be completed **in the final third of the course** for all candidates who: were **not to standard at Stage 2**; were **at standard at Stage 2 but are not making the expected progress** in the second half; were **above standard at Stage 2 but are not making the expected progress** in the second half; or **have received indications of Pass B or Pass A but have not maintained their progress**. All four are derivable by the app from the Stage 2 record plus subsequent TP outcomes — flag them rather than relying on a tutor to notice. In every case a tutorial must be given **and the whole tutorial record completed**. A centre may additionally give Stage 3 tutorials to everyone (centre setting).
+- **Stage 1** is carried out on all candidates; a tutorial at Stage 1 is optional. **Stage 2** is carried out on all candidates and **requires a one-to-one tutorial**, ordinarily at the halfway point — after 3 hours' TP, when candidates swap tutors/TP groups — but the trigger is **hours of assessed TP, not calendar position** (a nine-lesson course puts it at 2h40 or 3h20). Derive it from assessed hours. The **final progress record must be completed for all candidates**. Minimum one tutorial per candidate overall, recorded in the CELTA 5.
+- **Fail letter — Admin Handbook 9.2.** Potential Fail candidates are issued a Fail letter making the possible Fail outcome clear and **drawing attention to the action points detailed by the tutors in the CELTA 5**. It must be issued **with at least two lessons left to teach**, so the candidate can respond. The app should therefore warn when a Fail-risk candidate has fewer than two TPs remaining and no letter issued. It is filed in **CELTA 5 Section A** and appears in the assessor pack.
+- **Mixed-mode rule:** if a candidate receives a Stage 3 tutorial and is borderline Pass/Fail, their **final two assessed TP lessons must be in the same mode** (all online or all face-to-face). Enforce this when scheduling.
 - Final grades are **subject to confirmation by Cambridge**. The app is never the authority.
 - Withdrawn and Extension are real outcome values alongside Pass A / Pass B / Pass / Fail.
 
@@ -102,7 +185,18 @@ This is the area most likely to be built wrong. Three distinct things:
 - Their portfolio is **paused, not erased** — read-only, and it stays in the assessor pack marked Withdrawn, because assessors do ask to see withdrawn files.
 - TP: the slot empties; nobody else moves.
 
-**Deferral** — allowed **only if the candidate has completed more than half the course**. Otherwise it is a withdrawal.
+**Deferral** — Admin Handbook 6.9: allowed **only if the candidate has completed more than half the course**, in exceptional circumstances, at the centre's discretion. Otherwise it is a withdrawal.
+- Cambridge process: centre submits a deferral form via Appian → Cambridge confirms → the **original** course records the final grade as **Deferred** → the candidate's name is added to the **new** course's entry form marked deferred → the assessor is told in advance and given the previous assessor's comments → both centre and assessor confirm the final result at the end.
+- Re-integration normally **no later than six months** after the original course ends (12 months part-time). Surface that deadline in the app.
+
+**First-half withdrawal with a restart** — Admin Handbook 6.9, a separate case: a candidate forced to withdraw in the first half may, at the centre's discretion, **start a new course from the beginning without paying a new fee**, and *"can transfer any successful assessment to the new course."* Teaching starts again from TP1; passed assignments carry. This is not a deferral and must not reuse the deferral flow.
+
+**Withdrawn vs Fail is decided by attendance and the CELTA 5 declaration, not by choice** (Admin Handbook 10.4):
+- Attends to the end and submits a portfolio, even incomplete → **Fail**.
+- Does not attend the final day and has not signed the CELTA 5 declaration → **Withdrawn**.
+- Attends the whole course but declines assessment, in writing → **Withdrawn**.
+- No portfolio available for grade review → **Withdrawn**.
+- Withdrawn portfolios are not submitted to Cambridge, but **the assessor must check the file and record the reason** in their report — so it stays in the assessor pack.
 - Freeze at the point they stop: portfolio locked, out of rotation and marking queue, link opens read-only.
 - They are absent from the grades report and present in the roster as Deferred.
 - At close-out the record **transfers** to the destination course rather than being erased, and also exports to Drive.
@@ -179,14 +273,10 @@ Website, not an app — a link is the product. Offer "Add to Home Screen" for tr
 ## 9. Still open — needs Ramy before building
 
 1. Do carried TPs count toward the six assessed hours on a deferral's new course?
-2. Which provisional grade **pairs** does the centre use ("PASS/PASS B")?
-3. Does filmed observation count toward the six hours of observed experienced teaching, and does peer observation count at all?
-4. What exactly does a **second marker** do — mark independently, or countersign?
-5. How are **resubmission deadlines** set — fixed days after return, or from the timetable?
-6. Do volunteers belong to a **class/level** or only to a course? (Designs assume class.)
-7. Which centre documents does an assessor ask for, and how many portfolios do they scrutinise?
-8. Does the CELTA 5 "original" mean the app's PDF or a scan of a signed document?
-9. Cover sheet: print every section comment, or only the round it covers? One PDF per assignment or per round?
+2. Where do **applicants** live in the data model? The assessor requires the application file including **rejected** applicants, and the app currently has no concept of an applicant. Decided: uploaded as documents at course start (§ centre uploads) — but the retention and consent position for rejected applicants needs Ramy's sign-off.
+3. Does the centre's Drive hold the CELTA 5, or is "the centre's own storage" a separate location? (Ramy: separate. Confirm which.)
+
+**Answered during design — recorded above, listed here for traceability:** provisional grade pairs and the slash rule; warning letters and Stage 3 triggers; second/double marking (numbers, blind vs check, who chooses); resubmission deadlines on the timetable; filmed and peer observation; volunteer class levels; assessor documents and portfolio selection; the CELTA 5 as digital original; cover sheet round scope and one PDF per assignment.
 
 ---
 

@@ -25,7 +25,7 @@ export default async function JoinPage({
     return (
       <div className="flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="sheet-accent w-full max-w-sm p-8">
-          <Wordmark size="lg" />
+          <Wordmark size="hero" />
           <p className="mt-4 text-sm text-destructive">
             This join link is invalid or has expired. Ask your centre admin for a new one.
           </p>
@@ -39,7 +39,7 @@ export default async function JoinPage({
   return (
     <div className="flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="sheet-accent w-full max-w-sm p-8">
-        <Wordmark size="lg" />
+        <Wordmark size="hero" />
         <p className="mt-1 text-sm text-muted">
           You&apos;re joining {course.name} as a <span className="capitalize">{role}</span>.
         </p>
