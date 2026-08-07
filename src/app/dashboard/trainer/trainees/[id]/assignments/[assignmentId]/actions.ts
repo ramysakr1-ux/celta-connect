@@ -37,6 +37,16 @@ function parseComments(formData: FormData): SectionCommentPayload[] {
   }));
 }
 
+function parseCriteriaMarks(formData: FormData): Record<string, boolean> {
+  const raw = formData.get("criteria_marks");
+  if (typeof raw !== "string" || !raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+}
+
 async function saveComments(
   supabase: Awaited<ReturnType<typeof createClient>>,
   assignmentId: string,
@@ -60,25 +70,45 @@ async function saveComments(
   return null;
 }
 
-async function returnAssignment(formData: FormData, decision: "pass" | "resubmission_required"): Promise<FormState> {
-  await requireRole("trainer");
+async function returnAssignment(
+  formData: FormData,
+  decision: "pass" | "resubmission_required" | "fail"
+): Promise<FormState> {
+  const marker = await requireRole("trainer");
   const assignmentId = formData.get("assignment_id");
   const round = formData.get("round");
   const finalGrade = formData.get("final_grade");
+  const secondMarkerId = formData.get("second_marker_id");
   if (typeof assignmentId !== "string" || typeof round !== "string") {
     return { error: "Invalid request." };
+  }
+
+  const isResubmission = round === "resubmission";
+
+  if (decision === "fail" && !isResubmission) {
+    return { error: "A fail can only be recorded on the resubmission round." };
+  }
+  if (isResubmission && (typeof secondMarkerId !== "string" || !secondMarkerId)) {
+    return { error: "Pick a second marker before returning a resubmission decision." };
   }
 
   const supabase = await createClient();
   const commentError = await saveComments(supabase, assignmentId, round, parseComments(formData));
   if (commentError) return { error: commentError };
 
-  const status = decision === "pass" ? "approved" : "resubmission_required";
-  const isResubmission = round === "resubmission";
+  const criteriaMarks = parseCriteriaMarks(formData);
+  const status = decision === "resubmission_required" ? "resubmission_required" : "approved";
   const grade = decision === "pass" && typeof finalGrade === "string" && finalGrade ? finalGrade : undefined;
+
   const update: Database["public"]["Tables"]["assignments"]["Update"] = {
+    marker_id: marker.id,
     first_status: isResubmission ? undefined : status,
+    first_criteria_marks: isResubmission ? undefined : criteriaMarks,
     resubmission_status: isResubmission ? status : undefined,
+    resubmission_criteria_marks: isResubmission ? criteriaMarks : undefined,
+    resubmission_outcome: isResubmission ? (decision === "fail" ? "fail" : "pass") : undefined,
+    second_marker_id: isResubmission ? (secondMarkerId as string) : undefined,
+    second_marker_recorded_at: isResubmission ? new Date().toISOString() : undefined,
     final_grade: grade,
   };
 
@@ -95,6 +125,10 @@ export async function returnWithPass(_prevState: FormState, formData: FormData):
 
 export async function returnForResubmission(_prevState: FormState, formData: FormData): Promise<FormState> {
   return returnAssignment(formData, "resubmission_required");
+}
+
+export async function returnAsFail(_prevState: FormState, formData: FormData): Promise<FormState> {
+  return returnAssignment(formData, "fail");
 }
 
 export async function updateAssignmentDueDate(formData: FormData): Promise<void> {

@@ -141,6 +141,93 @@ The hub has six sections; the candidate's Resources tab shows fewer. Set visibil
 
 The TP points library is the important exclusion: a candidate seeing the scripted-through-to-aim-only progression, and next round's points before release, changes what teaching practice is for. Individual items can also be marked staff-only within an otherwise visible section.
 
+**Retention rules that constrain close-out — Admin Handbook**
+
+Close-out as designed erases at the end of the course. Cambridge requires several things to survive it:
+
+- **Application forms and selection tasks must be kept for six months after the end of the course**, and be available on assessment day. This includes **rejected applicants**. **The centre holds this, not Connect.** The close-out export delivers everything as PDFs to the centre's Drive, and the six-month obligation runs against the centre's own copy. Connect erases on schedule; what the centre does with its files after six months is the centre's decision. This is the same position as every other document: the centre owns the course, Connect is where it was run.
+- **Cambridge reserves the right to request portfolios for moderation and awards meetings**, after the course. **Cambridge does not accept hard copies** — portfolios must be electronic and securely stored, which the Drive export satisfies.
+- Centres keep **electronic summary records of candidate progress and back-up records** (feedback sheets, progress and tutorial records).
+- **Tutors retain a record of the provisional grades agreed at the grading meeting**, to refer to when completing the centre grade approval form in Appian.
+- **The assessor's report is the property of Cambridge**, confidential, and **must not be quoted from or used for advertising**. Nothing in the design breaches this — it is a constraint on marketing, not on the app. Two build rules follow: the demo course must never contain real assessor report text, and a freelance tutor sees the report at the centre rather than receiving an exportable copy (2.4.6).
+
+So the close-out sequence is not one erasure but a staged one: export everything at close, erase candidate workspaces and accounts, **hold applicant records six months**, and keep the centre's exported copies indefinitely on its own Drive.
+
+**AI-assisted marking is a per-tutor, per-course permission**
+
+Not on for everyone, and not a platform-wide switch. Three levels, all off by default:
+
+1. **Centre setting** — whether the centre permits it at all.
+2. **Course setting** — whether it is on for a given course.
+3. **Per-tutor** — which named tutors may use it on that course.
+
+So one tutor can use it while the others on the same course do not, which is the requested behaviour and also the right compliance posture: it makes usage a deliberate, recorded, named decision rather than a default.
+
+**No AI attribution on a tutor's work.** A candidate is being assessed; a tutor is not. A tutor consulting a reference book, a coursebook or a colleague does not stamp their feedback with the source, and a reading tool is the same kind of thing. The declaration rules attach to **being assessed**, not to being a person — the same tutor writing a master's dissertation is a student again and declares.
+
+So: **once a tutor has reviewed a suggested comment or rating, it is simply their comment or rating.** No badge, no "suggested by AI", no attribution anywhere — not on the marked assignment, not on the cover sheet, not in the portfolio, not in the assessor pack.
+
+**Keep the pre-review state, but stop calling it AI.** The dashed, tinted, unmistakable state stays — its purpose is not attribution but **preventing a tutor sending text they have not read**, the same reason an editor highlights unsaved changes. Label it *"not yet reviewed"*, not *"suggested by AI"*. It disappears the moment the tutor touches it.
+
+**Audit at the course level, not per comment.** Do not stamp individual comments. Keep a simple course-level record — which tutors had the permission, and that suggestions were generated — so a centre can answer a direct question without every document carrying a mark. That is enough for an assessor and invisible to everyone else.
+
+**Still non-negotiable regardless of permission:** it never pre-fills a decision without review, the overall comment is always the tutor's own writing, nothing generated reaches a candidate unreviewed, and it is never a second marker.
+
+**Chat retention is a centre setting**
+
+Midnight clearing is the default and the promise made on the bar, but it can be turned off or extended per centre. Three positions, and the centre picks:
+
+- **Clear at midnight** (default) — nothing survives, the bar says so, and the promise is kept.
+- **Retain for a set period** — 7 or 30 days, chosen by the centre. The bar's wording changes to match; never state a promise the setting does not keep.
+- **Retain for the course** — cleared at close-out with everything else.
+
+There is no technical difficulty. The trade is real though: retention makes chat discoverable in a complaint or an appeal, which cuts both ways — it protects a tutor accused of something they did not say, and it exposes an off-hand remark made at 11pm. A centre choosing retention should be told that plainly at the point of choosing.
+
+Whatever the setting, the countdown and the wording on the bar must reflect it exactly. The one unacceptable outcome is a bar promising a midnight clear on a centre that retains.
+
+**Appian is outside the app, and grades go in twice by two different people**
+
+The centre receives a **course number** from Cambridge. Then:
+
+1. The **MCT enters the provisional grades in Appian**, then sends the course number to the assessor.
+2. The assessor now has the provisionals, and comes to the **grade meeting** with them.
+3. The provisionals are discussed at the meeting.
+4. The centre sends the **final report to the assessor**.
+5. The **assessor enters the final grades in Appian** — not the centre.
+
+So Connect never writes to Appian. It holds the course number, records that each step happened and when, and links out. Two consequences:
+
+- The **provisional grades must be exportable in the order Appian wants them**, so the MCT is copying from a list rather than hunting through portfolios. This is the one place a small formatting decision saves real time.
+- **The final report is the handover artefact.** After the grade meeting it goes to the assessor, and the assessor does the rest. The app's job ends with producing it.
+
+Record `courses.appian_course_number`, and timestamps for provisionals-entered, number-sent-to-assessor, grade-meeting-held, final-report-sent. Those five facts are what a centre needs to answer "where are we".
+
+**Trainers-in-training — Admin Handbook 2.4.4 and 2.4.5**
+
+A person learning to become a CELTA tutor, working on a live course under supervision. Not a fifth candidate role and not a tutor role — a distinct status with its own rules.
+
+- **Verification comes first, always.** A trainer-in-training **must be formally verified by Cambridge before training takes place**; training undertaken without prior verification **will not be acknowledged**. The app must therefore hold a verification date and **refuse to assign the role without one**, with the reason stated. This is the single most expensive thing to get wrong — a course's worth of training discarded.
+- Their **name goes on the course entry form**, alongside the verified tutors. Add them to the entry-form record, marked as trainer-in-training.
+- **They do not count toward the two-verified-tutor minimum.** A course still needs two verified tutors normally involved in all aspects — input, TP, feedback, tutorials and marking. A trainer-in-training is additional to that, never a substitute, and the app should say so if a course is staffed with one verified tutor plus a TinT.
+- **Mode-shadowing rules.** They may train on any course type, but:
+  - trained **online only** → must shadow **at least one TP group** (two weeks of TP and associated activities at one level) on a **face-to-face** course before tutoring face-to-face;
+  - trained **face-to-face only** → must shadow at least one TP group of an **online** course before tutoring online or mixed-mode;
+  - trained on a **mixed-mode course covering both modes in equal measure** (TP, input and feedback in both) → eligible for both.
+  So the app tracks **which modes they have trained in**, and warns when a course would put them outside what they are eligible for.
+- **The assessor visit needs an extra day booked** to assess the trainer-in-training, where the centre is on the **external** scheme. Surface this when scheduling the visit — it is a real cost and easily forgotten.
+- Two schemes exist: **internal** (centres approved to manage training themselves) and **external**. The requirements differ; the **CELTA Trainer-in-Training Handbook** on the Cambridge Support Site is the source, and the centre uploads it like its other policy documents.
+
+**Open questions for the centre**
+1. **Whose name goes on a trainer-in-training's work?** Answered in practice: a **supervisor countersigns**, and that is **usually but not always the MCT**. So the supervisor is a named person on the TinT's record, defaulting to the MCT and changeable per course — not derived from the MCT role. Every piece of work a TinT produces carries both names, theirs and their supervisor's, on the same pattern as double-marked assignments.
+2. Does their marking count toward the **double-marking sample**, or is a verified tutor's countersignature the first mark?
+3. Do candidates know they are being observed by a trainer-in-training, and does anything need saying to them?
+
+**Related, from the same section:**
+- Tutors must work on a course **at least every two years** to keep verified status; lapsed status requires retraining and standardisation. Worth a quiet flag on a tutor record approaching two years since their last course.
+- Roles logged in Appian: **Main Course Tutor** and **Assistant Course Tutor** — which matches the four-role list already in the spec.
+- **Freelance tutors**: check verification before employing, request references from two previous centres, include liaison time in the terms. They must respond quickly after the course, **particularly on candidate appeals** — so a freelance tutor's access cannot be cut at close-out while an appeal window is open.
+- Centres **send freelance tutors the assessor's recommendations**, but **must not copy them the report** — they may see it at the centre. That is a real permission rule: report visible on site, not exportable to a freelancer.
+
 **Application and selection — Admin Handbook 6.2 and 6.3**
 
 Applicants are **first-class records, not uploaded documents.** The file exists from first contact; an accepted applicant becomes a candidate with nothing retyped. See `Applications.dc.html`.
@@ -174,6 +261,40 @@ Reconsider a payment integration only when a second centre asks. It brings refun
 - **The application page is public and centre-branded.** The centre links to it from their own website. It carries the **centre's logo and name prominently, with the Connect mark small in the footer** — the one public surface where both appear, because an applicant benefits from knowing what system they are entering. Serve it from a **per-centre subdomain** (`iti.celtaconnect.com/apply`) so the address reads as the centre's page; build the routing for this early rather than retrofitting it.
 - **The intake dropdown shows real availability, and only when it is low.** Each open course lists as "places available", or "3 places left" when the remaining count is at or below the centre's threshold (default 4), or "full — waiting list". The number is always the true one and disappears once it rises again. **No manufactured scarcity**: no "filling fast", no countdown, no invented figure. Scarcity that is not a fact stops being information and becomes a technique, and a centre director spots it. Full courses stay selectable as a waiting-list application, since a withdrawal or deferral can free a place two weeks out.
 - **Links are unlimited and filtered.** One permanent link per centre is the default, and the form asks which intake. A centre may generate as many as it wants — per course, per campus, per advertising source — each carrying its own filter. Per-source links also tell a centre where its applicants actually come from.
+- **The centre's real briefs are already structured, and the structure should be kept.** Reading FOL and SRT closely (10–11 tables each) shows they are not prose documents at all:
+  - **Per-section submission boxes.** Every part carries its own "First submission" box and "Resubmission (yes/no)" box, so a resubmission is already section-scoped in the paper version. The app's round model matches this exactly — build fields per section, not per assignment.
+  - **"Preparing" and "Writing" are separated** in every section: what to do before writing, then what to actually write. Keep that split — it is why candidates arrive with the right material.
+  - **Instructions are already bulleted.** The prose-only instruction in the boilerplate contradicts the briefs' own layout. Bullets are correct for SRT's and FOL's instruction sections and for LRT's analysis fields.
+  - **FOL and SRT are effectively tables.** FOL wants two mistakes per problem with student name, spoken or written, lesson stage, and the correct version — that is a table, not a paragraph. Its pronunciation section wants **IPA transcription of both the wrong and correct forms**. Build these as small structured tables with named columns.
+  - **SRT supplies a fixed group profile** (B1, 10 mixed-nationality students, mid-20s, career and IELTS motivations, keen to communicate, find grammar tedious, spoken accuracy needs work) and three texts in an appendix. The profile is centre content and should be a template field, editable per course.
+  - **"DO NOT attach multiple tasks"** — one task only, because tutors cannot pick the preferred one for the candidate. Enforce it: one attachment per task slot.
+
+- **The briefs carry hidden required words as a malpractice tripwire — keep this.** Each section quietly instructs the candidate to use a specific unrelated word in their answer ("use the word 'Easter' in your answer", then 'Christmas', then 'wedding', varying by section and by assignment). A candidate who generates or copies a section will not include the word, because the instruction is in the brief rather than in the text being copied. It costs nothing, it is invisible to anyone who has not read the brief, and it catches exactly the case the scanner cannot: text generated fresh, matching nothing.
+  For the app: store the required word **per section, per course**, rotate it each course alongside the item sets, and check for it automatically on submission. A missing word is **not** an accusation — it surfaces as a finding for the tutor in the same list as a scanner match ("section 2 does not contain the required word"), because a candidate can simply have missed the instruction. Never show the requirement or the check to the candidate beyond the brief itself, and never auto-fail on it.
+
+- **Language analysis is written under sub-headings, in bullets — not continuous prose.** Each LRT item gets three labelled fields: **Meaning**, **Form**, **Pronunciation** (**Register** in place of pronunciation for the functional exponent), each taking short bullets rather than a paragraph. Three reasons: it is how language analysis is conventionally set out, so it is what a candidate will do in a real lesson plan; a candidate cannot quietly skip pronunciation by burying it mid-paragraph, because the field sits there empty; and the key's per-part thresholds line up field by field, which makes both the tutor's marking and the reading's observations specific to a sub-part rather than to the whole item.
+  **Drop "the assignment should be written in continuous prose" for LRT only.** It is right for the other three and wrong here.
+  Empty sub-fields are shown as empty rather than hidden — an unwritten Pronunciation heading is itself the finding.
+- **AI may read an assignment against the key, the same way it reads the selection task.** Same shape, same limits, same rules — this is not a second mechanism.
+  - It reads the submission **against the centre's own key and criteria**, never against a general notion of quality. The key already states what is enough for Met, so the reading has a real reference rather than an opinion.
+  - **The marking sequence.** Submitted → the reading runs → the tutor opens the assignment and reads it themselves, with the reading's marks already in the margins → they accept, edit or delete each one → they write the overall comment. The reading precedes the tutor and never replaces them.
+  - **Ticks where something is simply right**, with no comment attached. A criterion met with nothing to say gets a tick and the tutor moves on; most of a good assignment should be silent.
+  - **Comments on strengths, not only faults.** "This is the level of detail the criterion asks for" on the paragraph that got it right is worth more to a candidate than three corrections — and marking energy usually runs out before the praise gets written, so this is where it genuinely helps.
+  - **Margin notes look unfinished until touched** — a tint or marker that clears the moment a tutor edits — so nobody sends generated text believing they wrote it.
+  - **The overall comment is always the tutor's.** The reading never drafts it. It is the part the candidate reads first and remembers, and the one place a person has to say something to another person.
+  - It produces **per-criterion observations that cite the text** — "criterion 1: the Vocabulary 2 field analyses the present perfect, not the item set"; "stress is marked on three of four items". Never a mark, never Met/Not met, never a percentage.
+  - **It may suggest a rating, and a tutor may accept it in one click** — the same pattern `computeCriteriaSuggestion` already uses for Stage 2 ratings ("a starting point for the trainer's Stage 2 rating, never a final answer — always shown as editable"). Three conditions make that safe:
+    - **Accepting is recorded as accepting.** Every rating stores whether it was the tutor's own or a suggestion taken unedited, and the second marker and the assessor can see which. Not to police anyone — it makes rubber-stamping a visible fact rather than an invisible suspicion, and a tutor who accepts twelve suggestions in four minutes should be legible.
+    - **The overall comment must still be written.** A criterion can be accepted with a click; an assignment cannot be returned with no words in it.
+    - **A Not met outcome always requires a written reason**, whoever proposed it, because the candidate reads it and may appeal on it.
+  - It is **visible to tutors only**, labelled as a suggestion, visually distinct from anything a person wrote, and **never shown to the candidate** or included in the assessor pack.
+  - It is **most useful on the mechanical criteria** and should be scoped there: word count against the range, whether a named reference appears in the body, whether stress is marked, whether all four items were actually analysed, whether the AI declaration matches citations present in the text. Those are checkable. Whether an analysis is *correct* is a tutor's judgement and the reading should say less, not more, about it.
+  - **Double-marking is unaffected.** Cambridge requires a minimum of two tutors involved in assessing written work; a machine reading is not a marker and cannot count as either.
+  - Record that a suggestion was generated and what it said, for the same reason as at selection: an unexamined model quietly shaping assessment outcomes is the risk, and an audit trail is what makes it examinable.
+
+- **Answer keys state how much is enough, not only what is correct.** A key that lists every correct point silently becomes a checklist, and a tutor starts marking against completeness rather than against the criterion. Every key entry carries an explicit **"Enough for Met"** line — "meaning and form, plus either stress or the weak form, not both" — because a Pass does not require perfection. A candidate can omit things, and can be wrong about things, and still meet the criterion.
+  The test to encode in the guidance: **would the analysis mislead a learner?** A wrong transcription of one vowel is a comment on the work. Analysing the wrong item, or stating a rule that is not true, is Not met.
+  Keys are **staff-only**, in the hub's staff section beside the TP points library, and **rewritten each course with the item set** — an old key invites a tutor to mark this year's item against last year's answer.
 - **Marking scheme for the selection task.** Five rows, each **Above / At standard / Below**, with a required note on any Below: **language awareness** (the analysis and correction items), then four on the writing — **accuracy**, **organisation**, **range**, **substance**. Deliberately the same shape as the Standard of English criterion on the assignment cover sheets, so a weak writer is visible at selection rather than in week two. The criteria do not change with the chosen prompt. The scheme is a centre setting imported at setup.
 
 **Selection lives outside the course, and outside course roles.**
@@ -209,6 +330,151 @@ Notifications carry the applicant's name and stage, never a suggested verdict �
 - **Build a centre supplement, not a replacement.** Six to eight short tasks in the same shape as Cambridge's, sitting after theirs as a clearly-marked section: **teaching online, and the use of L1**. Nothing on young learners — CELTA is teaching English to adults. Centre-authored, so it duplicates with the course shell and a centre can edit it. Other centres already do this — the British Council's pre-interview task carries its own pronunciation section alongside the Cambridge material.
 - Cambridge's task and the centre supplement are **visually distinct** in the candidate's workspace, and the supplement never claims to be Cambridge's.
 
+**Grade query — the reply before an appeal**
+
+A candidate unhappy with their grade emails asking why. Handbook 15 covers the formal Internal Complaints Procedure and then Cambridge appeal stages, but almost every case starts as an informal email, and answering it well ends most of them there.
+
+Build a **grade explanation** the tutor generates and edits, drawn entirely from the record:
+
+- The grade awarded, and what the descriptors for that grade and the one above actually say (Appendix 2 wording, already in `GRADE_DESCRIPTORS`).
+- **Teaching practice**: lessons taught, hours assessed, and the outcome of each — the pattern is usually the answer, since Pass B and Pass A require sustained performance rather than good lessons.
+- **Criteria met**, out of the total, and specifically which of the higher-grade criteria were not met.
+- **Assignments**: outcomes and how many needed a resubmission.
+- **Tutorials and any letters issued**, with dates — evidence they were told at the time rather than surprised at the end.
+- The written justification, if the provisional carried a slash.
+
+Then the honest sentences a tutor writes themselves: what would have made the difference, and what happens next if they are still unsatisfied — the centre's Internal Complaints Procedure, then Cambridge Appeal Stage One.
+
+Rules: it is **generated but never sent automatically**; the tutor edits and signs it. It quotes the record rather than re-arguing the grade — a candidate is entitled to see the evidence, not to a second assessment. It is **filed with the course** and appears in the assessor pack. And it is never a defence: if reading it back shows the grade was wrong, the centre says so and corrects it.
+
+**AI and plagiarism — the actual rules**
+
+Cambridge's own guidance (*Advice on the use of generative AI in assessed work*, May 2024) is specific, and its disclaimer is already written. Use its wording, not a paraphrase. Note it is explicitly "subject to constant review and may be amended, re-written or revoked" — so hold it as an uploaded centre document rather than hardcoded text.
+
+**Permitted, per the disclaimer candidates sign:**
+- generating ideas for teaching practice, including texts and activities
+- initial research for written assignments, including generating a bibliography
+- proofreading work
+
+**Treated as malpractice, and results in failing the work:**
+- generating a lesson plan, a language analysis, or a written assignment using AI
+- using AI for any purpose beyond those permitted
+- **failing to acknowledge AI use, regardless of scope or purpose** — this one stands alone: unattributed use is malpractice even where the use itself would have been allowed
+
+**Referencing.** All AI use must be referenced in a recognised style used consistently; **APA is recommended**. Both an in-text citation and a reference-list entry are required. The in-text citation must state the prompt or prompts, put the AI-aided text in quotes so it is identifiable, and name the tool with the date. The reference entry is author, date, title (model name, italicised, with "[Large language model]"), and a URL linking as directly as possible to the conversation.
+
+**Plagiarism — Admin Handbook 8.2.3 and 8.2.4.** Candidates must **confirm in writing** that assignments are their own work; this does not exclude joint preparation and discussion, but they must not collaborate to the extent of submitting substantially similar assignments. Centres must provide guidance on what plagiarism is and how to avoid it, hold an internal policy stating the penalties, deal with detected plagiarism under their malpractice policy, and **must not knowingly submit plagiarised work to Cambridge for moderation**. Candidates must be told that awarding bodies apply severe penalties for plagiarism in externally moderated work — **from loss of marks to disqualification and a ban on re-entry for up to three years**.
+
+**What this means for the submission form.** Two things are required before an assignment will send, and the app blocks on both: the **own-work declaration**, and the **AI declaration** — either "not used" or a conversation link plus the citations. **Word the question to name proofreaders explicitly**: "Did you use any AI tool, including a proofreader such as Grammarly?" Cambridge permits proofreading and requires only that it be referenced; naming the tool is the centre's own addition to its brief and worth keeping, because many candidates do not think of a spellchecker as AI, and the offence Cambridge penalises is unacknowledged use rather than use. Grammarly is a browser extension and works in any text field, so it cannot be blocked and should not be — the declaration is the control. The permitted and prohibited lists are shown at the point of declaring, not only at enrolment, because that is when a candidate is deciding.
+
+**The unproofread-original requirement is dropped.** The current brief asks for it when AI-assisted proofreading was used, but nobody can prove a draft is the original, so it collects a file that means nothing while adding a step to every submission. The declaration and the conversation link carry the weight instead — and Cambridge's own guidance requires referencing, not evidence of drafting.
+
+**Do not block paste, and do not try to disable proofreaders.**
+
+Both are possible and both are wrong here.
+
+- Grammarly honours `data-gramm="false"`, but it is an extension the candidate controls — they can re-enable it, use another tool, or draft elsewhere. It is a request, not a control.
+- Blocking paste is easy to implement and trivial to defeat: drag-and-drop, another browser, a phone beside the screen. It punishes the honest candidate writing 1,000 words in a second language who drafted in Word when the connection dropped, or who wants to paste a quotation typed carefully with the phonemic symbols correct.
+- Most fundamentally it treats coursework as an exam. Assignments are prepared over days, with research and proofreading both permitted. The barrier stops nobody determined and irritates everyone else.
+
+**Record that a large paste happened, but never treat it as evidence.** The distinction matters. Drafting in Google Docs over three evenings is legitimate and is what a careful person does, and it pastes identically to pasting a classmate's paragraph — so the fact proves nothing on its own.
+
+What it is useful for is **context beside a finding that already exists**. If the scanner matches 94 words in section 3, knowing that section 3 arrived as a single paste is worth something to the tutor reading both. On its own, with no match, it means nothing and must not be surfaced at all.
+
+So: log it, show it **only alongside a scanner finding on the same section**, phrase it as a fact rather than a flag ("section 3 was pasted in one insertion, 22 Nov 23:58"), never count it toward anything, never open a case from it, and never let it appear on a submission that has no other finding. If a tutor asks why a clean assignment shows nothing, the answer is that there is nothing to show.
+
+What actually works is text compared against text — the scanner — and a tutor asking the candidate about their own writing.
+
+**Assignment 5 — the plagiarism assignment (a centre sanction, not a Cambridge assignment)**
+
+Set when an upheld plagiarism case results in a failed assignment. The candidate resubmits the original with one chance, and additionally writes this. Due by the end of the course.
+
+**The design problem to avoid.** A research essay on "what plagiarism is" can itself be plagiarised — it is generic, widely written about, and the candidate writing it has already demonstrated a willingness. It also teaches nothing: a week later they can define plagiarism and still not see what they did wrong.
+
+**Make it about their own case, not about plagiarism in general.** Four short sections, 750–1,000 words:
+1. **What happened** — in their own words, what they submitted and how it came about. Not an apology; an account.
+2. **Which rule it breached** — quoting the centre's policy and the Cambridge guidance they accepted at account setup, and saying which clause and why. This is where the reading happens, and it is reading of documents they already signed.
+3. **Why it matters here** — what it would mean for a learner, a colleague, or a centre if a teacher's materials or claims were not their own. Ties it to the profession rather than to school rules.
+4. **What they will do differently** — specific: how they will note sources while reading, how they will use AI and declare it, what they will do at 1am with a deadline in seven hours.
+
+Sections 1 and 4 cannot be copied from anywhere, and section 2 requires quoting documents specific to this centre. The scanner still runs on it.
+
+**Rules:**
+- It is **not numbered as a Cambridge assignment** in the candidate's workspace or on any Cambridge-facing document. Label it plainly — "Plagiarism reflection" — and keep it visually distinct from the four.
+- It **does not count toward the 3-of-4 rule** and cannot raise or lower the certificate grade. It is a condition of the centre, not of the qualification.
+- **One chance, pass or fail**, as with the resubmission it accompanies.
+- It **belongs to the malpractice case**, appearing on the case timeline and in the case record, not in the assignment run.
+- Marked by the tutor who handled the case, not necessarily the assignment marker.
+- **Close-out cannot complete while it is outstanding** — same rule as an open appeal.
+- It goes in the portfolio and the assessor pack **with the case**, because an assessor asking how the centre handled plagiarism should see both the decision and what followed.
+
+**Plagiarism scanner — built in, with room for a third party**
+
+Runs automatically on submission, visible to tutors only, never to the candidate. See `Malpractice.dc.html` frame 1a.
+
+- **Compares against what the centre already holds**: other submissions on the same course, the centre's archive of previous cohorts, the assignment brief, and any model answers. **Not the open web** — a general web check is a different product with a licence attached.
+- **Never produces a similarity percentage.** A number invites a threshold, a threshold becomes a rule, and a percentage has decided cases it should not have. Show the matched passage, what it matched, and its length; a person reads both.
+- A flag is **not a case** and creates no record against the candidate until a tutor opens one.
+
+**It must exclude the brief itself, or every submission matches every other.** A candidate's document contains the assignment's own headings, its prompts, the criteria, quoted source sentences the brief supplied, and any tables it asked them to fill in. Every candidate has that text, so a naive scan flags all eight submissions against each other and is instantly useless.
+
+Handle it structurally rather than by tuning a threshold:
+
+- **The brief is a known document.** It was imported at setup, so the app already holds its exact text and can subtract every passage that came from it — headings, prompts, criteria wording, supplied examples.
+- **Sections are already separate fields.** Candidates write into the structured sections defined by the template, so the app compares **only the text they typed**, never the scaffolding around it. This is the strongest reason to keep assignments app-native rather than uploaded documents.
+- **Quotations they attributed are excluded** where the referencing convention makes them identifiable, and shown as attributed rather than flagged.
+- **Two candidates analysing the same coursebook item will share phrasing** — the target sentence, the grammatical terminology, the phonemic transcription. Short matches inside a language-analysis field are expected; the scanner should weight **continuous prose** far more heavily than analysis fields, and say which kind of field a match sits in.
+
+The Emre/Sara example in the design is exactly this test: 94 continuous words in a prose section, differing in register from the writing around them, and both citing the same page. Length, field type and register are what make it worth a look — not similarity in the abstract.
+
+**Notifications on findings — a nudge, never an alarm.**
+
+No email, no badge on a roster row, no red dot on a candidate. Two nudges only:
+
+1. **A line on the marking tutor's Today screen** — "2 assignments have scanner findings" — visible to that tutor only, with **no candidate names**. It is a reason to open the marking queue, not a judgement. Clicking it goes to the queue, where the findings sit on the assignments themselves.
+2. **At close-out**, any finding never opened surfaces as a blocker-level note: "3 findings on this course were never reviewed." An unread finding is the real failure mode — not a missed case, but nobody having looked.
+
+What must never happen: a push or email naming a candidate ("Possible plagiarism — Emre Doğan"). That arrives on a phone at 11pm and creates a verdict before anyone has read the passage, and most findings turn out to be a shared textbook definition. Badges on rosters are also out — a marker on a row is visible to anyone walking past a screen, including candidates.
+
+**Where a finding surfaces.** Not on a scanner page — nobody visits one. It appears **on the assignment, when a tutor opens it to mark**: a quiet band above the first section naming the match, its length and its source, with the passage highlighted inline and a side-by-side view one click away. The scanner screen remains as a per-assignment overview for the main course tutor, not as the place findings are discovered. **Nothing appears on the roster, the pipeline, or anywhere the candidate can see.**
+
+**Cross-course matches** are the reason the centre archive is worth having: a candidate copying from a cohort two years ago is invisible to a tutor who was not there. The finding names **the course and the date, not the previous candidate**, unless the tutor opens it — old cohorts are other people's data, and most of these turn out to be a shared textbook definition. Cross-course scanning must survive close-out deletion, which means the archive keeps a **text fingerprint of past submissions, not the submissions themselves**; state that in the candidate agreement.
+
+**Designed to accept an external checker later.** Build the scan as a **provider interface**, not as one hard-coded routine: a submission goes in, and a list of findings comes back — each with a matched passage, a source, a length, and a confidence the app does not display as a number. The built-in centre-archive check is simply the first provider.
+
+That way a centre wanting Turnitin, Copyleaks, or an AI-text checker can have it added as a second provider whose findings appear in the same table alongside the internal ones, labelled with which provider found them. Nothing downstream changes: the case flow, the timeline and the assessor pack are already provider-agnostic.
+
+Three things to hold to when a third party is added: the **licence and cost belong to the centre**, not to Connect; a candidate's work being **sent to an external service must be disclosed** in the candidate agreement before it happens, since they accepted terms that did not mention it; and an external tool's **score is never shown or stored as a verdict** — the same rule that applies to the built-in scanner.
+
+**Appeals — Admin Handbook 15**
+
+Three steps, and the app's job differs at each.
+
+**15.1 · At the centre, before anything formal.** The handbook is specific about what a tutor should do when a candidate is unhappy with the recommended grade: *"A tutor should go through the coursework with the candidate, showing the evidence on which the grading decision was based… refer to overall grade descriptors, to specific assessment criteria and to evidence from teaching practice feedback and lesson plans in the candidate's portfolio."* That is exactly the grade explanation specified above — it is not a nicety, it is the procedure. Candidates must also be told that **all recommended grades remain provisional until confirmed by Cambridge** after Grade Review by a Joint Chief Assessor.
+
+**15.2 · Appeal Stage One.** Available only after the candidate has been through **all stages of the centre's Internal Complaints Procedure** and remains dissatisfied, **and once the result is confirmed by Cambridge**. There is an administrative fee. **Cambridge must receive the appeal via the centre within two weeks of the candidate receiving their final result**, and the appeal must be made by the candidate, not a third party.
+
+The process: the centre gives the candidate the **Cambridge Teaching Qualifications Stage One Appeal Form** (downloaded from the Cambridge Support Site — the app does not reproduce it). The candidate completes it and returns it to the centre. The centre **writes a response** to the issues raised, then sends the form and its response to `TeachingAwardAppeals@CambridgeEnglish.org` **within two weeks of receiving the completed form**, along with the candidate's **portfolio and application and selection notes**, sent electronically and securely by the same route as portfolios for moderation.
+
+What Cambridge scrutinises, and therefore what the app must be able to produce as a bundle:
+- the Stage One form, completed by the candidate
+- the **candidate portfolio**
+- the **application and selection notes** — which is why applicant records matter beyond selection
+- the **assessor report**
+- the **centre's response** to the appeal
+- the centre's **terms and conditions for refunds, including a copy of the Candidate Agreement**
+
+So the app should offer an **appeal bundle** action that assembles all of it — the same machinery as the assessor pack, different recipient. The two-week clocks are the thing to surface: both are short and both are the centre's responsibility to meet.
+
+**15.3 · Appeal Stage Two** — independent review, on the candidate's own request, using Cambridge's Stage Two form. Nothing for the app to do beyond keeping the Stage One bundle retrievable.
+
+Two consequences worth stating. **A candidate's file cannot be deleted at close-out while an appeal window is open or an appeal is running** — the two-week window runs from their receiving the final result, which is after close-out. And **application and selection notes are appeal evidence**, which settles why they are retained rather than discarded once a course begins.
+
+**Two cases the design deliberately does not handle**
+
+- **Cambridge confirming a grade different from the centre's recommendation.** Rare to the point of never in practice. Handle it as a **manual override on the certificate and the final record**, with the confirmed grade recorded alongside the recommended one and a note. Do not build a workflow for it.
+- **A course changing mode mid-flight.** Mode is set per lesson on the timetable and normally decided in advance in course settings, so a planned change is an ordinary edit. An emergency change works the same way: change the lessons, and the mode-aware prompts follow. The consequences that need watching are already specified elsewhere — a Stage 3 borderline candidate's final two assessed lessons must be in the same mode, and observation hours still cap filmed at three of six. Nothing further is needed.
+
 **Volunteer students**
 - A volunteer belongs to a **class at a specific level** (Elementary, Upper-Intermediate, etc.), not merely to the course. Candidates must teach at a range of levels, so the class is what a TP is scheduled against.
 - No account. A tokenised link, a consent gate, and their own class list, attendance, and handouts.
@@ -234,6 +500,8 @@ Notifications carry the applicant's name and stage, never a suggested verdict �
 - **Double-marking — Admin Handbook 8.2.3.** A minimum of two tutors must be involved in marking. **A proportion of each assignment must be double-marked**, by candidate count: up to 9 candidates → **3 of each assignment**; up to 16 → **4**; up to 24 → **5**. The sample **must include any fail assignments**. Double-marking means checking the first marker's grading and comments; both tutors **initial** the assignment. **Blind double-marking** (each tutor marks independently, then they discuss and agree) is recommended but not required — support both modes, blind as an option, not the default.
 - **Who double-marks whom is the centre's choice** — commonly tutors who swap TP groups mark each other's candidates. Do not encode a pairing rule. The app assigns and tracks; the centre decides.
 - The centre **must keep a record of which assignments were double-marked**, and assessors may ask to see it. Generate that record automatically and include it in the assessor pack.
+- **Assignment deadlines anchor to TP rounds where the task depends on teaching, not to fixed days.** Focus on the Learner cannot be written before the candidate has taught the group four times — the brief asks for difficulties noticed across TP1–4 — so it **opens after TP4 completes** and is due a set number of days after that. Lessons from the Classroom must fall after the last observed lesson. Language Related Tasks and the Skills Related Task do not depend on having taught, so they can sit on fixed dates.
+  The failure this prevents: a fixed "day 9" deadline on FOL becomes impossible if the rotation or the timetable shifts TP4 later, and the app would be asking for work the candidate cannot yet do. Same mechanism as scheduled announcements — anchor to the event, let the timetable supply the date.
 - **Resubmission deadlines live on the timetable**, like every other date — not computed from the return date. A **48-hour minimum** between returning marked work and the resubmission deadline is the guideline; it is centre-configurable, not fixed. Warn when a deadline gives a candidate less than the centre's minimum.
 - **Cover sheet prints only the comments belonging to its own round.** The exported PDF is **one file per assignment**, containing both rounds clearly separated: outcome at the top (e.g. *Pass on Resubmission*), then the first submission with its comments, then the resubmission with its comments. The distinction between rounds must be unmistakable; one file per assignment is enough.
 - Marked as **Met / Not met per criterion, per round** — not content/English pass marks. (An earlier design had this wrong.)

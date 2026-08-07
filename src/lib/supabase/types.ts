@@ -201,6 +201,16 @@ export interface Database {
           resubmission_submitted_at: string | null;
           resubmission_content_grade: PassFail | null;
           resubmission_english_grade: PassFail | null;
+          resubmission_outcome: "pass" | "fail" | null;
+          first_criteria_marks: Record<string, boolean>;
+          resubmission_criteria_marks: Record<string, boolean>;
+          marker_id: string | null;
+          second_marker_id: string | null;
+          second_marker_recorded_at: string | null;
+          first_ai_declared: boolean;
+          first_ai_conversation_url: string | null;
+          resubmission_ai_declared: boolean;
+          resubmission_ai_conversation_url: string | null;
           final_grade: string | null;
           due_date: string | null;
           tutor_feedback: string | null;
@@ -955,7 +965,12 @@ export interface Database {
         Returns: string;
       };
       submit_assignment_round: {
-        Args: { p_assignment_id: string };
+        Args: {
+          p_assignment_id: string;
+          p_word_count: number;
+          p_ai_declared: boolean;
+          p_ai_conversation_url: string | null;
+        };
         Returns: void;
       };
       save_syllabus_planning_entry: {

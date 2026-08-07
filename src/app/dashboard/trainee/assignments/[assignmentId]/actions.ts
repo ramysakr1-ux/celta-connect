@@ -66,6 +66,10 @@ export async function saveAssignmentDraft(_prevState: FormState, formData: FormD
   return { error: null };
 }
 
+function wordCount(text: string): number {
+  return text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length;
+}
+
 export async function submitAssignment(_prevState: FormState, formData: FormData): Promise<FormState> {
   const trainee = await requireRole("trainee");
   const assignmentId = formData.get("assignment_id");
@@ -74,11 +78,21 @@ export async function submitAssignment(_prevState: FormState, formData: FormData
     return { error: "Invalid request." };
   }
 
+  const sections = parseSections(formData);
+  const totalWords = sections.reduce((sum, s) => sum + wordCount(s.text), 0);
+  const aiDeclared = formData.get("ai_declared") === "true";
+  const aiConversationUrl = formData.get("ai_conversation_url");
+
   const supabase = await createClient();
-  const saveError = await saveResponses(supabase, assignmentId, round, parseSections(formData));
+  const saveError = await saveResponses(supabase, assignmentId, round, sections);
   if (saveError) return { error: saveError };
 
-  const { error } = await supabase.rpc("submit_assignment_round", { p_assignment_id: assignmentId });
+  const { error } = await supabase.rpc("submit_assignment_round", {
+    p_assignment_id: assignmentId,
+    p_word_count: totalWords,
+    p_ai_declared: aiDeclared,
+    p_ai_conversation_url: typeof aiConversationUrl === "string" ? aiConversationUrl : null,
+  });
   if (error) return { error: error.message };
 
   revalidatePath(`/portfolio/${trainee.id}/assignments/${assignmentId}`);

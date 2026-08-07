@@ -2,8 +2,6 @@
 
 Source file: `Chat Pill.dc.html` (design reference, HTML prototype). Implement in your existing stack; do not copy the HTML.
 
-**Note:** this is the raw spec written directly against the HTML prototype's own hardcoded colors/fonts. `apply-to-app.md` supersedes the literal token values here (see its Global translation rules) — use this file for the extra structural/spacing/state detail, not for colors or fonts.
-
 ---
 
 ## 0. Tokens used by both

@@ -59,6 +59,12 @@ So each centre uploads its logo at setup, alongside its name and address, and ev
 
 The one exception is the designer credit line (`Connect · designed and built by Ramy`), which appears in the Centre Admin and sign-in footers only — never on a document.
 
+## Which design files to build from
+
+**Read `design-files.md` first.** Twenty-odd designs were built across several sessions, and some are superseded explorations. That file lists which is current and which to ignore — building from a stale one is the failure mode that already happened once.
+
+All design files are now on the current branding ("Connect", never "Connect CELTA") and the current palette (no green as a success colour).
+
 ## The specs
 
 **0. `green.md`** — exactly which greens go and which stay, token by token. Short; read it before touching any status pill.
@@ -111,5 +117,6 @@ Specified in `build-spec.md` but never drawn. Build from the prose.
 - **Conflated assignments** — two briefs as one document, both parts passing independently.
 - **Plagiarism and malpractice** — an allegation, an investigation, an outcome. No home in the app today, and an assessor will ask.
 - **Appeals and complaints** — the candidate's form and the centre's written response. Handbook 15; currently an uploaded PDF with nowhere for the response to live.
+- **Grade query reply** — the explanation a tutor sends when a candidate asks why they got a Pass and not a Pass B. Generated from the record (TP outcomes, criteria met, assignments, tutorials, letters, the slash justification), edited and signed by a person, never sent automatically. Specified in `build-spec.md`; answering these well ends most of them before they become appeals.
 - **Special consideration mid-course** — distinct from the declaration at application.
 - **The centre's pre-course supplement** — six to eight tasks on teaching online and the use of L1.

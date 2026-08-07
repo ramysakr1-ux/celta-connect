@@ -40,6 +40,7 @@ export function AssignmentAuthoringForm({
   deadlinePassed: boolean;
 }) {
   const responseByKey = new Map(responses.map((r) => [r.section_key, r]));
+  const isResubmission = round === "resubmission";
   const [mode, setMode] = useState<"focus" | "review">("focus");
   const [activeKey, setActiveKey] = useState<string>(sections[0]?.key ?? "");
 
@@ -47,7 +48,7 @@ export function AssignmentAuthoringForm({
     const initial: Record<string, string> = {};
     for (const s of sections) {
       const existing = responseByKey.get(s.key);
-      initial[s.key] = (round === "resubmission" ? existing?.resubmission_response : existing?.first_response) ?? "";
+      initial[s.key] = (isResubmission ? existing?.resubmission_response : existing?.first_response) ?? "";
     }
     return initial;
   });
@@ -56,39 +57,174 @@ export function AssignmentAuthoringForm({
   const [submitState, submitActionFn, submitPending] = useActionState(submitAssignment, initialState);
   const state = submitPending ? submitState : draftState;
 
+  const [aiDeclared, setAiDeclared] = useState(false);
+  const [aiConversationUrl, setAiConversationUrl] = useState("");
+
   const totalWords = useMemo(
     () => sections.reduce((sum, s) => sum + wordCount(texts[s.key] ?? ""), 0),
     [sections, texts]
   );
   const wordTone = totalWords < 750 ? "pending" : totalWords <= 1000 ? "on-track" : "at-risk";
+  const wordCountOutOfRange = totalWords < 750 || totalWords > 1000;
+  const aiDeclarationIncomplete = aiDeclared && !aiConversationUrl.trim();
+
+  const blockReasons: string[] = [];
+  if (deadlinePassed) blockReasons.push("the deadline has passed");
+  if (wordCountOutOfRange) blockReasons.push(`word count must be 750-1,000 (currently ${totalWords})`);
+  if (aiDeclarationIncomplete) blockReasons.push("add the AI conversation link below before submitting");
+  const submitDisabled = blockReasons.length > 0;
+  const submitWarning = submitDisabled
+    ? `Can't submit yet -- ${blockReasons.join("; ")}.`
+    : "Submitting locks your responses until your tutor returns them.";
 
   const sectionsPayload = sections.map((s) => ({ key: s.key, title: s.title, text: texts[s.key] ?? "" }));
+
+  const hiddenFields = (
+    <>
+      <input type="hidden" name="assignment_id" value={assignmentId} />
+      <input type="hidden" name="round" value={round} />
+      <input type="hidden" name="sections_payload" value={JSON.stringify(sectionsPayload)} />
+      <input type="hidden" name="ai_declared" value={aiDeclared ? "true" : "false"} />
+      <input type="hidden" name="ai_conversation_url" value={aiConversationUrl} />
+    </>
+  );
+
+  const aiDeclarationBlock = (
+    <div className="card flex flex-col gap-2 p-4">
+      <label className="flex items-center gap-2 text-sm text-ink">
+        <input type="checkbox" checked={aiDeclared} onChange={(e) => setAiDeclared(e.target.checked)} />
+        Did you use any AI tool, including a proofreader such as Grammarly?
+      </label>
+      {aiDeclared ? (
+        <div className="mt-1 flex flex-col gap-1">
+          <label className="text-xs text-muted">AI conversation link</label>
+          <input
+            type="url"
+            value={aiConversationUrl}
+            onChange={(e) => setAiConversationUrl(e.target.value)}
+            placeholder="https://..."
+            className={inputClass}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-6">
       <div className="card flex items-center justify-between p-4">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setMode("focus")}
-            className={`rounded-[6px] px-3 py-1.5 text-sm ${mode === "focus" ? "bg-primary text-card" : "text-muted hover:text-ink"}`}
-          >
-            Focus mode
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("review")}
-            className={`rounded-[6px] px-3 py-1.5 text-sm ${mode === "review" ? "bg-primary text-card" : "text-muted hover:text-ink"}`}
-          >
-            Full review
-          </button>
-        </div>
+        {isResubmission ? (
+          <p className="text-sm font-medium text-ink">Resubmission -- one opportunity only</p>
+        ) : (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMode("focus")}
+              className={`rounded-[6px] px-3 py-1.5 text-sm ${mode === "focus" ? "bg-primary text-card" : "text-muted hover:text-ink"}`}
+            >
+              Focus mode
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("review")}
+              className={`rounded-[6px] px-3 py-1.5 text-sm ${mode === "review" ? "bg-primary text-card" : "text-muted hover:text-ink"}`}
+            >
+              Full review
+            </button>
+          </div>
+        )}
         <span className={`status-pill status-pill-${wordTone}`}>
           {totalWords} words ({ASSIGNMENT_WORD_COUNT})
         </span>
       </div>
 
-      {mode === "review" ? (
+      {isResubmission ? (
+        <>
+          {!locked ? (
+            <div className="flex items-start gap-3 rounded-[6px] border border-gold/40 bg-gold/10 p-3">
+              <span className="mt-1 size-1.5 shrink-0 rounded-full bg-gold" />
+              <p className="text-sm text-ink">
+                Use the boxes on the right for your second submission -- the boxes on the left and your tutor&apos;s comments stay
+                exactly as they were. Whether you pass on first or second submission does not affect your certificate grade, but you
+                must pass 3 out of 4 assignments to be eligible for a PASS.
+              </p>
+            </div>
+          ) : null}
+
+          <form action={draftAction} className="flex flex-col gap-4">
+            {hiddenFields}
+            {sections.map((s) => {
+              const existing = responseByKey.get(s.key);
+              const carriedOver = !existing?.first_comments;
+              return (
+                <div key={s.key} className="card flex flex-col gap-3 p-6">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="font-serif text-lg text-ink">{s.title}</h3>
+                    {carriedOver ? (
+                      <span className="status-pill status-pill-on-track">Carried over</span>
+                    ) : (
+                      <span className="status-pill status-pill-at-risk">Needs rewriting</span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="flex flex-col gap-1.5">
+                      <p className="text-[10px] font-semibold tracking-[0.1em] text-muted uppercase">1st submission</p>
+                      <p className="min-h-[84px] rounded-[6px] border border-border-faint bg-background p-3 text-sm whitespace-pre-line text-muted">
+                        {existing?.first_response || "(no response)"}
+                      </p>
+                      {existing?.first_comments ? (
+                        <div className="rounded-[6px] border border-primary/20 bg-accent/20 p-2.5">
+                          <p className="text-[10px] font-semibold tracking-[0.08em] text-primary uppercase">Tutor comment · read-only</p>
+                          <p className="mt-1 text-sm text-ink">{existing.first_comments}</p>
+                        </div>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-baseline justify-between">
+                        <p className="text-[10px] font-semibold tracking-[0.1em] text-primary uppercase">Your resubmission</p>
+                        <span className="text-xs text-muted">{wordCount(texts[s.key] ?? "")} words</span>
+                      </div>
+                      {locked ? (
+                        <p className="whitespace-pre-line text-ink">{texts[s.key] || "(empty)"}</p>
+                      ) : (
+                        <VoiceTextarea
+                          rows={6}
+                          value={texts[s.key] ?? ""}
+                          onChange={(e) => setTexts({ ...texts, [s.key]: e.target.value })}
+                          className={inputClass}
+                        />
+                      )}
+                      {locked && existing?.resubmission_comments ? (
+                        <div className="mt-1 border-t border-border-faint pt-2">
+                          <p className="text-[10px] font-semibold tracking-[0.08em] text-primary uppercase">Resubmission comment</p>
+                          <p className="mt-1 text-sm text-ink">{existing.resubmission_comments}</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {!locked ? (
+              <>
+                {aiDeclarationBlock}
+                <FormSubmitBar
+                  warning={submitWarning}
+                  draftPending={draftPending}
+                  submitPending={submitPending}
+                  submitDisabled={submitDisabled}
+                  onSubmitAction={submitActionFn}
+                  submitLabel={deadlinePassed ? "Deadline passed" : "Submit resubmission"}
+                  error={state.error}
+                />
+              </>
+            ) : (
+              <p className="text-sm text-muted">Submitted -- awaiting your tutor.</p>
+            )}
+          </form>
+        </>
+      ) : mode === "review" ? (
         <div className="card p-6">
           <h2 className="font-serif text-lg text-ink">Full review</h2>
           <p className="text-sm text-muted">Read-only -- switch to Focus mode to edit.</p>
@@ -103,9 +239,7 @@ export function AssignmentAuthoringForm({
         </div>
       ) : (
         <form action={draftAction} className="grid grid-cols-1 gap-4 lg:grid-cols-[248px_1fr] lg:items-start">
-          <input type="hidden" name="assignment_id" value={assignmentId} />
-          <input type="hidden" name="round" value={round} />
-          <input type="hidden" name="sections_payload" value={JSON.stringify(sectionsPayload)} />
+          {hiddenFields}
 
           <nav className="card flex flex-col gap-1 p-2 lg:sticky lg:top-6">
             {sections.map((s) => {
@@ -136,19 +270,6 @@ export function AssignmentAuthoringForm({
                     <h3 className="font-serif text-lg text-ink">{s.title}</h3>
                     <p className="mt-1 whitespace-pre-line text-sm text-muted">{s.instruction}</p>
 
-                    {round === "resubmission" && existing?.first_response ? (
-                      <div className="mt-3 rounded-[6px] border border-border-faint bg-background p-3">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted">1st submission</p>
-                        <p className="mt-1 whitespace-pre-line text-sm text-muted">{existing.first_response}</p>
-                        {existing.first_comments ? (
-                          <div className="mt-2 border-t border-border-faint pt-2">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted">Tutor comment</p>
-                            <p className="mt-1 whitespace-pre-line text-sm text-ink">{existing.first_comments}</p>
-                          </div>
-                        ) : null}
-                      </div>
-                    ) : null}
-
                     <div className="mt-3">
                       {locked ? (
                         <p className="whitespace-pre-line text-ink">{texts[s.key] || "(empty)"}</p>
@@ -163,16 +284,10 @@ export function AssignmentAuthoringForm({
                     </div>
                     <p className="mt-1.5 text-right text-xs text-muted">{wordCount(texts[s.key] ?? "")} words</p>
 
-                    {round === "first" && existing?.first_comments && locked ? (
+                    {existing?.first_comments && locked ? (
                       <div className="mt-3 border-t border-border-faint pt-3">
                         <p className="text-xs font-medium uppercase tracking-wide text-primary">Tutor comment</p>
                         <p className="mt-1 whitespace-pre-line text-ink">{existing.first_comments}</p>
-                      </div>
-                    ) : null}
-                    {round === "resubmission" && existing?.resubmission_comments && locked ? (
-                      <div className="mt-3 border-t border-border-faint pt-3">
-                        <p className="text-xs font-medium uppercase tracking-wide text-primary">Resubmission comment</p>
-                        <p className="mt-1 whitespace-pre-line text-ink">{existing.resubmission_comments}</p>
                       </div>
                     ) : null}
                   </div>
@@ -180,15 +295,18 @@ export function AssignmentAuthoringForm({
               })}
 
             {!locked ? (
-              <FormSubmitBar
-                warning="Submitting locks your responses until your tutor returns them."
-                draftPending={draftPending}
-                submitPending={submitPending}
-                submitDisabled={deadlinePassed}
-                onSubmitAction={submitActionFn}
-                submitLabel={deadlinePassed ? "Deadline passed" : "Submit"}
-                error={state.error}
-              />
+              <>
+                {aiDeclarationBlock}
+                <FormSubmitBar
+                  warning={submitWarning}
+                  draftPending={draftPending}
+                  submitPending={submitPending}
+                  submitDisabled={submitDisabled}
+                  onSubmitAction={submitActionFn}
+                  submitLabel={deadlinePassed ? "Deadline passed" : "Submit"}
+                  error={state.error}
+                />
+              </>
             ) : (
               <p className="text-sm text-muted">Submitted -- awaiting your tutor.</p>
             )}

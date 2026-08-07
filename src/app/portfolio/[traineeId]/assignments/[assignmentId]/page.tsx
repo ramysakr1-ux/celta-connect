@@ -56,6 +56,16 @@ export default async function AssignmentDetailPage({
     .select("*")
     .eq("assignment_id", assignmentId);
 
+  const { data: secondMarkerRows } = isEditableStaff && trainee.course_id
+    ? await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .eq("course_id", trainee.course_id)
+        .eq("role", "trainer")
+        .neq("id", viewer!.id)
+        .order("full_name")
+    : { data: [] };
+
   let round: "first" | "resubmission";
   let locked: boolean;
   if (assignment.first_status === "not_submitted") {
@@ -73,6 +83,7 @@ export default async function AssignmentDetailPage({
     assignment.due_date && round === "first" && !locked && new Date(assignment.due_date) < new Date()
   );
   const roundStatus = round === "resubmission" ? assignment.resubmission_status : assignment.first_status;
+  const canExportCoverSheet = assignment.first_status === "approved" || assignment.first_status === "resubmission_required";
 
   return (
     <div className="flex flex-col gap-4">
@@ -91,6 +102,21 @@ export default async function AssignmentDetailPage({
                 : "No deadline set"}
           </p>
         </div>
+        {canExportCoverSheet ? (
+          <a
+            href={`/api/portfolio/${traineeId}/assignments/${assignmentId}/cover-sheet`}
+            className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+          >
+            Export cover sheet + assignment PDF
+          </a>
+        ) : (
+          <span
+            className="shrink-0 cursor-not-allowed rounded-[6px] border border-border px-4 py-2 text-sm text-muted"
+            title="Available once the first round has been submitted and returned"
+          >
+            Export cover sheet + assignment PDF
+          </span>
+        )}
       </div>
 
       {isEditableStaff ? (
@@ -129,7 +155,15 @@ export default async function AssignmentDetailPage({
             <p className="text-muted">Not yet submitted for this round -- nothing to review until the trainee submits.</p>
           </div>
         ) : (
-          <AssignmentReviewForm assignmentId={assignmentId} sections={template.sections} responses={responses ?? []} round={round} />
+          <AssignmentReviewForm
+            assignmentId={assignmentId}
+            assignmentType={assignment.assignment_type}
+            sections={template.sections}
+            responses={responses ?? []}
+            round={round}
+            criteriaMarks={(round === "resubmission" ? assignment.resubmission_criteria_marks : assignment.first_criteria_marks) ?? {}}
+            secondMarkerOptions={secondMarkerRows ?? []}
+          />
         )
       ) : assessorCourseId ? (
         assignment.first_status === "not_submitted" ? (

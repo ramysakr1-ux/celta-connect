@@ -38,6 +38,16 @@ export default async function TrainerAssignmentReviewPage({
     .select("*")
     .eq("assignment_id", assignmentId);
 
+  const { data: secondMarkerRows } = trainee.course_id
+    ? await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .eq("course_id", trainee.course_id)
+        .eq("role", "trainer")
+        .neq("id", trainer.id)
+        .order("full_name")
+    : { data: [] };
+
   const round: "first" | "resubmission" = assignment.first_status === "resubmission_required" ? "resubmission" : "first";
   const roundStatus = round === "resubmission" ? assignment.resubmission_status : assignment.first_status;
 
@@ -84,7 +94,15 @@ export default async function TrainerAssignmentReviewPage({
           </p>
         </div>
       ) : (
-        <AssignmentReviewForm assignmentId={assignmentId} sections={template.sections} responses={responses ?? []} round={round} />
+        <AssignmentReviewForm
+          assignmentId={assignmentId}
+          assignmentType={assignment.assignment_type}
+          sections={template.sections}
+          responses={responses ?? []}
+          round={round}
+          criteriaMarks={(round === "resubmission" ? assignment.resubmission_criteria_marks : assignment.first_criteria_marks) ?? {}}
+          secondMarkerOptions={secondMarkerRows ?? []}
+        />
       )}
     </div>
   );
