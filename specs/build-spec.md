@@ -125,6 +125,22 @@ Each level down is less specific but never empty; there is no state in which the
 
 This is the same criteria thread as everywhere else: input session → criterion → TP point → lesson plan → self-evaluation → peer task → tutor feedback. One vocabulary the whole course speaks.
 
+**Resource hub visibility — trainers see everything, trainees see part**
+
+The hub has six sections; the candidate's Resources tab shows fewer. Set visibility **per section**, with sensible defaults a centre can change:
+
+| Section | Trainer | Trainee |
+| --- | --- | --- |
+| Input sessions and their materials | yes | yes |
+| Coursebooks | yes | yes |
+| Multimedia | yes | yes |
+| Assignment briefs | yes | yes |
+| Forms and documents (blank PDFs, syllabus, appeals procedure) | yes | yes |
+| **TP points library** | yes | **no** |
+| **Centre documents** (policies, application files, assessor reports) | yes | **no** |
+
+The TP points library is the important exclusion: a candidate seeing the scripted-through-to-aim-only progression, and next round's points before release, changes what teaching practice is for. Individual items can also be marked staff-only within an otherwise visible section.
+
 **Application and selection — Admin Handbook 6.2 and 6.3**
 
 Applicants are **first-class records, not uploaded documents.** The file exists from first contact; an accepted applicant becomes a candidate with nothing retyped. See `Applications.dc.html`.
@@ -308,6 +324,9 @@ This is the area most likely to be built wrong. Three distinct things:
 **Deferral** — Admin Handbook 6.9: allowed **only if the candidate has completed more than half the course**, in exceptional circumstances, at the centre's discretion. Otherwise it is a withdrawal.
 - Cambridge process: centre submits a deferral form via Appian → Cambridge confirms → the **original** course records the final grade as **Deferred** → the candidate's name is added to the **new** course's entry form marked deferred → the assessor is told in advance and given the previous assessor's comments → both centre and assessor confirm the final result at the end.
 - Re-integration normally **no later than six months** after the original course ends (12 months part-time). Surface that deadline in the app.
+- **The new course should be the same mode of delivery as the original** (face-to-face, online, mixed) unless the candidate agrees otherwise **in writing**. If the mode changes, the centre must provide **familiarisation activities**. The app should warn when a destination course is a different mode, capture the written agreement, and prompt for the familiarisation plan.
+- **Everything freezes as it stands, complete or not.** Whatever the candidate had on the day they stopped is preserved exactly: TPs taught, assignments passed, an assignment mid-marking, a resubmission not yet returned, criteria met, self-evaluations, tutorial records. Nothing is discarded for being incomplete and nothing is re-judged. It travels to the destination course as their **portfolio** — the same place it lived on the original course — and it also exports to the centre's Drive at close-out of the original course, so there is a record either way.
+- **How many hours carry is the centre's judgement, not a calculation.** 6.9 asks the centre to weigh how much was completed, how the candidate performed, and what the break will do to the outcome. Default the carried figure to the hours already assessed, let a tutor change it, and require a note when they do. The level of support offered should scale with the length of the gap.
 
 **First-half withdrawal with a restart** — Admin Handbook 6.9, a separate case: a candidate forced to withdraw in the first half may, at the centre's discretion, **start a new course from the beginning without paying a new fee**, and *"can transfer any successful assessment to the new course."* Teaching starts again from TP1; passed assignments carry. This is not a deferral and must not reuse the deferral flow.
 
@@ -393,9 +412,9 @@ Website, not an app — a link is the product. Offer "Add to Home Screen" for tr
 
 ## 9. Still open — needs Ramy before building
 
-1. Do carried TPs count toward the six assessed hours on a deferral's new course?
+1. ~~Do carried TPs count toward the six assessed hours on a deferral's new course?~~ **Answered by Handbook 6.9: there is no fixed rule.** The centre "should consider how much of the course has been completed, the candidate's performance on the original course and the impact the break may have on the final outcome". So the app must let the centre decide per candidate how many hours carry and how many lessons the new course gives them — never compute it. Default the field to the hours completed and let a tutor change it, with a required note when they do.
 2. What is the retention and consent position for **rejected applicants**? Their files are required for the assessor and are held as first-class records (§ Application and selection), but they never became candidates and never accepted any terms. The application form itself needs to state how long their data is kept and on what basis.
-3. Does the centre's Drive hold the CELTA 5, or is "the centre's own storage" a separate location? (Ramy: separate. Confirm which.)
+3. ~~Which storage holds the CELTA 5?~~ **Answered.** The blank original lives in the **Resource hub**, under Forms and documents, as the centre's reference copy — not visible to candidates as something they fill in. At the start of the course candidates sign the disclaimers; everything after that is done in the **built-in CELTA 5 record**; on the final day they sign the declaration; and at close-out the completed record is exported as a digital original alongside the rest of the course.
 
 **Answered during design — recorded above, listed here for traceability:** provisional grade pairs and the slash rule; warning letters and Stage 3 triggers; second/double marking (numbers, blind vs check, who chooses); resubmission deadlines on the timetable; filmed and peer observation; volunteer class levels; assessor documents and portfolio selection; the CELTA 5 as digital original; cover sheet round scope and one PDF per assignment.
 

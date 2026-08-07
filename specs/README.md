@@ -97,9 +97,9 @@ These came out of long conversations with Ramy and are not recoverable from the 
 
 ## Still open — ask Ramy
 
-1. Do carried TPs count toward the six assessed hours on a deferral's new course?
-2. Retention and consent position for **rejected applicants**, whose files the assessor requires but who never signed anything.
-3. Which storage holds the CELTA 5 — it is explicitly *not* the course Drive folder.
+1. ~~Carried TPs and the six hours?~~ **Answered:** Handbook 6.9 sets no rule — it is the centre's judgement per candidate. The app defaults to hours already assessed and lets a tutor change it with a note.
+2. Rejected applicants stay in the applications area and the assessor sees all of them. Narrowly still open: **how long is the file kept, and what does the application form tell them when they apply?**
+3. ~~Which storage holds the CELTA 5?~~ **Answered:** blank original in the Resource hub as the centre's reference copy; the working record is the built-in CELTA 5; the completed, signed version exports at close-out.
 
 ## Not yet designed
 
