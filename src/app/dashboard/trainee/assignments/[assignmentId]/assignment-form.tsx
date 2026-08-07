@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { saveAssignmentDraft, submitAssignment, type FormState } from "@/app/dashboard/trainee/assignments/[assignmentId]/actions";
+import { FormSubmitBar } from "@/components/form-submit-bar";
 import { VoiceTextarea } from "@/components/voice-textarea";
 import { ASSIGNMENT_WORD_COUNT } from "@/lib/assignment-info";
 import type { TemplateSection } from "@/lib/assignment-templates/content";
@@ -40,6 +41,7 @@ export function AssignmentAuthoringForm({
 }) {
   const responseByKey = new Map(responses.map((r) => [r.section_key, r]));
   const [mode, setMode] = useState<"focus" | "review">("focus");
+  const [activeKey, setActiveKey] = useState<string>(sections[0]?.key ?? "");
 
   const [texts, setTexts] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
@@ -100,88 +102,97 @@ export function AssignmentAuthoringForm({
           </div>
         </div>
       ) : (
-        <form action={draftAction} className="flex flex-col gap-4">
+        <form action={draftAction} className="grid grid-cols-1 gap-4 lg:grid-cols-[248px_1fr] lg:items-start">
           <input type="hidden" name="assignment_id" value={assignmentId} />
           <input type="hidden" name="round" value={round} />
           <input type="hidden" name="sections_payload" value={JSON.stringify(sectionsPayload)} />
 
-          {sections.map((s) => {
-            const existing = responseByKey.get(s.key);
-            return (
-              <div key={s.key} className="card p-6">
-                <h3 className="font-serif text-lg text-ink">{s.title}</h3>
-                <p className="mt-1 whitespace-pre-line text-sm text-muted">{s.instruction}</p>
+          <nav className="card flex flex-col gap-1 p-2 lg:sticky lg:top-6">
+            {sections.map((s) => {
+              const words = wordCount(texts[s.key] ?? "");
+              return (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => setActiveKey(s.key)}
+                  className={`flex items-center justify-between gap-2 rounded-[6px] px-3 py-2 text-left text-sm transition-colors ${
+                    activeKey === s.key ? "bg-accent font-medium text-ink" : "text-muted hover:bg-accent/50 hover:text-ink"
+                  }`}
+                >
+                  <span>{s.title}</span>
+                  <span className="shrink-0 text-xs text-muted">{words}w</span>
+                </button>
+              );
+            })}
+          </nav>
 
-                {round === "resubmission" && existing?.first_response ? (
-                  <div className="mt-3 rounded-[6px] border border-border-faint bg-background p-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted">1st submission</p>
-                    <p className="mt-1 whitespace-pre-line text-sm text-muted">{existing.first_response}</p>
-                    {existing.first_comments ? (
-                      <div className="mt-2 border-t border-border-faint pt-2">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted">Tutor comment</p>
-                        <p className="mt-1 whitespace-pre-line text-sm text-ink">{existing.first_comments}</p>
+          <div className="flex flex-col gap-4">
+            {sections
+              .filter((s) => s.key === activeKey)
+              .map((s) => {
+                const existing = responseByKey.get(s.key);
+                return (
+                  <div key={s.key} className="card p-6">
+                    <h3 className="font-serif text-lg text-ink">{s.title}</h3>
+                    <p className="mt-1 whitespace-pre-line text-sm text-muted">{s.instruction}</p>
+
+                    {round === "resubmission" && existing?.first_response ? (
+                      <div className="mt-3 rounded-[6px] border border-border-faint bg-background p-3">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted">1st submission</p>
+                        <p className="mt-1 whitespace-pre-line text-sm text-muted">{existing.first_response}</p>
+                        {existing.first_comments ? (
+                          <div className="mt-2 border-t border-border-faint pt-2">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted">Tutor comment</p>
+                            <p className="mt-1 whitespace-pre-line text-sm text-ink">{existing.first_comments}</p>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    <div className="mt-3">
+                      {locked ? (
+                        <p className="whitespace-pre-line text-ink">{texts[s.key] || "(empty)"}</p>
+                      ) : (
+                        <VoiceTextarea
+                          rows={12}
+                          value={texts[s.key] ?? ""}
+                          onChange={(e) => setTexts({ ...texts, [s.key]: e.target.value })}
+                          className={inputClass}
+                        />
+                      )}
+                    </div>
+                    <p className="mt-1.5 text-right text-xs text-muted">{wordCount(texts[s.key] ?? "")} words</p>
+
+                    {round === "first" && existing?.first_comments && locked ? (
+                      <div className="mt-3 border-t border-border-faint pt-3">
+                        <p className="text-xs font-medium uppercase tracking-wide text-primary">Tutor comment</p>
+                        <p className="mt-1 whitespace-pre-line text-ink">{existing.first_comments}</p>
+                      </div>
+                    ) : null}
+                    {round === "resubmission" && existing?.resubmission_comments && locked ? (
+                      <div className="mt-3 border-t border-border-faint pt-3">
+                        <p className="text-xs font-medium uppercase tracking-wide text-primary">Resubmission comment</p>
+                        <p className="mt-1 whitespace-pre-line text-ink">{existing.resubmission_comments}</p>
                       </div>
                     ) : null}
                   </div>
-                ) : null}
+                );
+              })}
 
-                <div className="mt-3">
-                  {locked ? (
-                    <p className="whitespace-pre-line text-ink">{texts[s.key] || "(empty)"}</p>
-                  ) : (
-                    <VoiceTextarea
-                      rows={6}
-                      value={texts[s.key] ?? ""}
-                      onChange={(e) => setTexts({ ...texts, [s.key]: e.target.value })}
-                      className={inputClass}
-                    />
-                  )}
-                </div>
-
-                {round === "first" && existing?.first_comments && locked ? (
-                  <div className="mt-3 border-t border-border-faint pt-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-primary">Tutor comment</p>
-                    <p className="mt-1 whitespace-pre-line text-ink">{existing.first_comments}</p>
-                  </div>
-                ) : null}
-                {round === "resubmission" && existing?.resubmission_comments && locked ? (
-                  <div className="mt-3 border-t border-border-faint pt-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-primary">Resubmission comment</p>
-                    <p className="mt-1 whitespace-pre-line text-ink">{existing.resubmission_comments}</p>
-                  </div>
-                ) : null}
-              </div>
-            );
-          })}
-
-          {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-
-          {!locked ? (
-            <div className="flex items-center gap-3">
-              <button
-                type="submit"
-                disabled={draftPending || submitPending}
-                className="rounded-[6px] border border-border px-4 py-2 text-sm font-medium text-ink hover:border-primary disabled:opacity-60"
-              >
-                {draftPending ? "Saving…" : "Save draft"}
-              </button>
-              <button
-                type="submit"
-                formAction={submitActionFn}
-                disabled={draftPending || submitPending || deadlinePassed}
-                onClick={(e) => {
-                  if (!window.confirm("Submitting locks your responses until your tutor returns them. Continue?")) {
-                    e.preventDefault();
-                  }
-                }}
-                className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
-              >
-                {deadlinePassed ? "Deadline passed" : submitPending ? "Submitting…" : "Submit"}
-              </button>
-            </div>
-          ) : (
-            <p className="text-sm text-muted">Submitted -- awaiting your tutor.</p>
-          )}
+            {!locked ? (
+              <FormSubmitBar
+                warning="Submitting locks your responses until your tutor returns them."
+                draftPending={draftPending}
+                submitPending={submitPending}
+                submitDisabled={deadlinePassed}
+                onSubmitAction={submitActionFn}
+                submitLabel={deadlinePassed ? "Deadline passed" : "Submit"}
+                error={state.error}
+              />
+            ) : (
+              <p className="text-sm text-muted">Submitted -- awaiting your tutor.</p>
+            )}
+          </div>
         </form>
       )}
     </div>

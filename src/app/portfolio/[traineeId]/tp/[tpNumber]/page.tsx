@@ -6,7 +6,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
-import { getTpCardStatus, type FeedbackPoint, type TpCardStatus } from "@/lib/tp-plan-content";
+import {
+  TP_LESSON_LENGTH_MINUTES,
+  getTpCardStatus,
+  sumProcedureMinutes,
+  type FeedbackPoint,
+  type TpCardStatus,
+} from "@/lib/tp-plan-content";
 import { LessonPlanForm } from "@/app/dashboard/trainee/plan/[tpNumber]/lesson-plan-form";
 import { MaterialsSection } from "@/app/dashboard/trainee/plan/[tpNumber]/materials-section";
 import { SelfEvaluationSection } from "@/app/dashboard/trainee/plan/[tpNumber]/self-evaluation-section";
@@ -121,6 +127,12 @@ export default async function TpDetailPage({
     : [{ data: null }, { data: [] }, { data: null }, { data: null }];
 
   let previousActionPoints: string[] = [];
+  // Personal Aims' own carried suggestion is planning-scoped only (a
+  // "what to work on" for how the trainee designs the lesson, not the
+  // teaching-scope points self-evaluation already carries) -- just the
+  // first starred one, since the field shows one tap-to-use suggestion,
+  // not a list.
+  let previousPlanningActionPoint: string | null = null;
   if (!isStaff && tpNumber > 1) {
     const { data: previousPlan } = await supabase
       .from("tp_plans")
@@ -134,12 +146,12 @@ export default async function TpDetailPage({
         .select("action_points_planning, action_points_teaching")
         .eq("tp_plan_id", previousPlan.id)
         .maybeSingle();
+      const planningPoints = (previousFeedback?.action_points_planning ?? []).filter((p) => p.starred);
       previousActionPoints = [
-        ...(previousFeedback?.action_points_planning ?? []),
-        ...(previousFeedback?.action_points_teaching ?? []),
-      ]
-        .filter((p) => p.starred)
-        .map((p) => p.text);
+        ...planningPoints,
+        ...(previousFeedback?.action_points_teaching ?? []).filter((p) => p.starred),
+      ].map((p) => p.text);
+      previousPlanningActionPoint = planningPoints[0]?.text ?? null;
     }
   }
 
@@ -183,14 +195,24 @@ export default async function TpDetailPage({
             <p className="mt-1 text-sm text-muted">{densityLabel.name}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {plan?.submitted_at && selfEvaluation?.submitted_at && feedback?.submitted_at ? (
-              <a
-                href={`/api/tp-plans/${plan.id}/pdf`}
-                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
-              >
-                Export TP PDF
-              </a>
-            ) : null}
+            {(() => {
+              const exportReady = Boolean(plan?.submitted_at && selfEvaluation?.submitted_at && feedback?.submitted_at);
+              return exportReady ? (
+                <a
+                  href={`/api/tp-plans/${plan!.id}/pdf`}
+                  className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+                >
+                  Export TP PDF
+                </a>
+              ) : (
+                <span
+                  className="cursor-not-allowed rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted"
+                  title="Available once the plan, self-evaluation and feedback are all submitted"
+                >
+                  Export TP PDF
+                </span>
+              );
+            })()}
             <span className={`pill ${TONE_PILL_CLASS[status.tone]}`}>{status.label}</span>
           </div>
         </div>
@@ -202,7 +224,30 @@ export default async function TpDetailPage({
           </div>
         ) : null}
 
-        <div className="sheet p-6">
+        <nav className="sheet flex items-center gap-1 !p-1.5">
+          {[
+            { key: "brief", label: "Brief" },
+            { key: "plan", label: "Plan" },
+            { key: "analysis", label: "Language analysis" },
+            { key: "materials", label: "Materials", badge: materials && materials.length > 0 ? String(materials.length) : null },
+            { key: "self", label: "Self-evaluation", badge: selfEvaluation?.submitted_at ? "✓" : null },
+          ].map((item) => (
+            <a
+              key={item.key}
+              href={`#${item.key}`}
+              className="flex items-center gap-1.5 rounded-[5px] px-2.5 py-1.5 text-xs font-semibold text-muted hover:bg-accent/40 hover:text-ink"
+            >
+              {item.label}
+              {item.badge ? (
+                <span className="flex min-w-[16px] items-center justify-center rounded-full bg-surface-muted px-1 py-0.5 text-[10px] font-bold text-muted">
+                  {item.badge}
+                </span>
+              ) : null}
+            </a>
+          ))}
+        </nav>
+
+        <div id="brief" className="sheet scroll-mt-20 p-6">
           <div className="flex items-start justify-between gap-4">
             <h2 className="font-serif text-lg text-ink">Assigned brief</h2>
             <span className="badge-solid">{densityLabel.name}</span>
@@ -236,7 +281,7 @@ export default async function TpDetailPage({
 
         {isStaff ? (
           <>
-            <div className="sheet p-6">
+            <div id="plan" className="sheet scroll-mt-20 p-6">
               <h2 className="font-serif text-lg text-ink">What they planned</h2>
               {!plan ? (
                 <p className="mt-2 text-sm text-muted">The trainee hasn&apos;t started a lesson plan for this TP yet.</p>
@@ -268,28 +313,50 @@ export default async function TpDetailPage({
                     {plan.procedure.length > 0 ? (
                       <div>
                         <p className="text-sm text-muted">Procedure</p>
-                        <table className="mt-2 w-full min-w-[700px] border-collapse text-sm">
-                          <thead>
-                            <tr>
-                              <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage</th>
-                              <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
-                              <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
-                              <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {plan.procedure.map((row, i) => (
-                              <tr key={i}>
-                                <td className="border-b border-border-faint p-2 align-top text-ink">{row.stage}</td>
-                                <td className="border-b border-border-faint p-2 align-top whitespace-pre-line text-ink">
-                                  {row.procedure}
-                                </td>
-                                <td className="border-b border-border-faint p-2 align-top text-ink">{row.interaction}</td>
-                                <td className="border-b border-border-faint p-2 align-top text-ink">{row.time}</td>
+                        <div className="mt-2 overflow-x-auto">
+                          <table className="w-full border-collapse text-sm">
+                            <colgroup>
+                              <col className="w-[116px]" />
+                              <col />
+                              <col className="w-[74px]" />
+                              <col className="w-[52px]" />
+                            </colgroup>
+                            <thead>
+                              <tr>
+                                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage</th>
+                                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
+                                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
+                                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {plan.procedure.map((row, i) => (
+                                <tr key={i}>
+                                  <td className="border-b border-border-faint p-2 align-top text-ink">{row.stage}</td>
+                                  <td className="border-b border-border-faint p-2 align-top whitespace-pre-line text-ink">
+                                    {row.procedure}
+                                  </td>
+                                  <td className="border-b border-border-faint p-2 align-top text-ink">{row.interaction}</td>
+                                  <td className="border-b border-border-faint p-2 align-top text-ink">{row.time}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        {(() => {
+                          const total = sumProcedureMinutes(plan.procedure);
+                          const overBy = total - TP_LESSON_LENGTH_MINUTES;
+                          return (
+                            <div className="mt-1.5 flex items-center justify-between gap-3">
+                              <span className="text-xs text-muted">
+                                {plan.procedure.length} stages · {total} minutes planned for a {TP_LESSON_LENGTH_MINUTES} minute lesson
+                              </span>
+                              {overBy > 0 ? (
+                                <span className="text-xs font-semibold text-status-warning-text">Over by {overBy} min</span>
+                              ) : null}
+                            </div>
+                          );
+                        })()}
                       </div>
                     ) : null}
                   </div>
@@ -298,7 +365,7 @@ export default async function TpDetailPage({
             </div>
 
             {languageAnalysis ? (
-              <div className="sheet p-6">
+              <div id="analysis" className="sheet scroll-mt-20 p-6">
                 <h2 className="font-serif text-lg text-ink">Language Analysis ({languageAnalysis.type})</h2>
                 {languageAnalysis.context ? <p className="mt-1 text-sm text-ink">{languageAnalysis.context}</p> : null}
                 {languageAnalysis.type === "vocab" ? (
@@ -323,7 +390,7 @@ export default async function TpDetailPage({
             ) : null}
 
             {materials && materials.length > 0 ? (
-              <div className="sheet p-6">
+              <div id="materials" className="sheet scroll-mt-20 p-6">
                 <h2 className="font-serif text-lg text-ink">Materials</h2>
                 <ul className="mt-2 flex flex-col gap-2 text-sm text-ink">
                   {materials.map((m) => {
@@ -359,7 +426,7 @@ export default async function TpDetailPage({
               </div>
             ) : null}
 
-            <div className="sheet p-6">
+            <div id="self" className="sheet scroll-mt-20 p-6">
               <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
               {selfEvaluation?.submitted_at ? (
                 <div className="mt-3 flex flex-col gap-3">
@@ -375,7 +442,13 @@ export default async function TpDetailPage({
             </div>
 
             {plan && (isEditableStaff || feedback?.submitted_at) ? (
-              <FeedbackForm planId={plan.id} traineeId={traineeId} tpNumber={tpNumber} feedback={feedback ?? null} />
+              <FeedbackForm
+                planId={plan.id}
+                traineeId={traineeId}
+                tpNumber={tpNumber}
+                feedback={feedback ?? null}
+                selfEvaluation={selfEvaluation ?? null}
+              />
             ) : plan ? (
               <div className="sheet p-6">
                 <h2 className="font-serif text-lg text-ink">Tutor feedback</h2>
@@ -385,39 +458,50 @@ export default async function TpDetailPage({
           </>
         ) : (
           <>
-            <LessonPlanForm tpNumber={tpNumber} plan={plan} languageAnalysis={languageAnalysis ?? null} />
-
-            {plan ? (
-              <MaterialsSection
-                tpPlanId={plan.id}
-                centerId={trainee.center_id}
-                traineeId={traineeId}
-                materials={materials ?? []}
-                locked={Boolean(plan.submitted_at)}
-                hasGoogleConnection={hasGoogleConnection}
-              />
-            ) : (
-              <div className="sheet p-6">
-                <h2 className="font-serif text-lg text-ink">Materials</h2>
-                <p className="mt-2 text-sm text-muted">Save your lesson plan first -- materials attach to it once it exists.</p>
-              </div>
-            )}
-
-            <SelfEvaluationSection
+            <LessonPlanForm
               tpNumber={tpNumber}
-              plan={plan ?? null}
-              taught={Boolean(assignment.taught_at)}
-              selfEvaluation={selfEvaluation ?? null}
-              previousActionPoints={previousActionPoints}
-              feedback={feedback ?? null}
+              plan={plan}
+              languageAnalysis={languageAnalysis ?? null}
+              previousPlanningActionPoint={previousPlanningActionPoint}
             />
+
+            <div id="materials" className="scroll-mt-20">
+              {plan ? (
+                <MaterialsSection
+                  tpPlanId={plan.id}
+                  centerId={trainee.center_id}
+                  traineeId={traineeId}
+                  materials={materials ?? []}
+                  locked={Boolean(plan.submitted_at)}
+                  hasGoogleConnection={hasGoogleConnection}
+                />
+              ) : (
+                <div className="sheet p-6">
+                  <h2 className="font-serif text-lg text-ink">Materials</h2>
+                  <p className="mt-2 text-sm text-muted">Save your lesson plan first -- materials attach to it once it exists.</p>
+                </div>
+              )}
+            </div>
+
+            <div id="self" className="scroll-mt-20">
+              <SelfEvaluationSection
+                tpNumber={tpNumber}
+                plan={plan ?? null}
+                taught={Boolean(assignment.taught_at)}
+                selfEvaluation={selfEvaluation ?? null}
+                previousActionPoints={previousActionPoints}
+                feedback={feedback ?? null}
+              />
+            </div>
           </>
         )}
       </div>
 
-      <div className="sheet h-fit lg:sticky lg:top-6">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Criteria evidenced</p>
-        <p className="mt-1 text-xs text-muted">Criteria your tutor confirmed in this lesson&apos;s feedback.</p>
+      <div className="sheet h-fit p-6 lg:sticky lg:top-6">
+        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+          Criteria evidenced{criteriaCodes.length > 0 ? ` · ${criteriaCodes.length}` : ""}
+        </p>
+        <p className="mt-1 text-xs text-muted">Fills as your tutor tags criteria in this lesson&apos;s feedback.</p>
         {criteriaCodes.length > 0 ? (
           <ul className="mt-3 flex flex-col gap-3">
             {criteriaCodes.map((code) => (

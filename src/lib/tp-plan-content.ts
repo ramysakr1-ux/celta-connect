@@ -37,6 +37,28 @@ export interface PlanProcedureRow {
   time: string;
 }
 
+// CELTA TP lessons run 40-45 minutes by convention, and the design
+// reference's own timing check uses 45 -- there's no schema field for a
+// per-course/per-TP lesson length today, so this is a shared default
+// rather than a lookup. Promote to a centre/course setting if that turns
+// out to vary in practice.
+export const TP_LESSON_LENGTH_MINUTES = 45;
+
+// Shared "sum the procedure table's Time column" logic -- was duplicated
+// ad hoc in the trainee's lesson-plan-form; now also used by the read-only
+// TP record view so the two never disagree on the same math. A cell like
+// "5" or "5-10" or "5 mins" all parse; the largest number in the cell wins
+// (a range's upper bound is the one that matters for an over-time check).
+export function timeValue(s: string): number {
+  const match = s.match(/\d+(?:\.\d+)?/g);
+  if (!match) return 0;
+  return Math.max(...match.map(Number));
+}
+
+export function sumProcedureMinutes(procedure: { time: string }[]): number {
+  return procedure.reduce((sum, row) => sum + timeValue(row.time), 0);
+}
+
 export interface LessonFrameworkStage {
   name: string;
   aim: string;
@@ -289,6 +311,7 @@ export const IPA_SYMBOL_GROUPS: { label: string; symbols: string[] }[] = [
 export interface SelfEvalActionPoint {
   previous_point: string;
   what_i_did: string;
+  carried?: boolean;
 }
 
 // ---------------- tutor feedback ----------------

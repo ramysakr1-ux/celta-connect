@@ -70,18 +70,27 @@ export function LanguageAnalysisEditor({
       {open ? (
         <div className="mt-4 flex flex-col gap-4">
           <div className="flex flex-wrap items-end gap-4">
-            <div className="flex w-48 flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5">
               <label className="text-sm text-muted">What are you analysing?</label>
-              <CustomSelect
-                value={type}
-                disabled={locked}
-                onChange={(v) => onTypeChange(v as LanguageAnalysisType)}
-                options={[
+              <div className="inline-flex w-fit rounded-[6px] border border-border p-0.5">
+                {([
                   { value: "grammar", label: "Grammar" },
                   { value: "vocab", label: "Vocabulary" },
                   { value: "function", label: "Functional language" },
-                ]}
-              />
+                ] as { value: LanguageAnalysisType; label: string }[]).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    disabled={locked}
+                    onClick={() => onTypeChange(opt.value)}
+                    className={`rounded-[4px] px-3 py-1.5 text-sm font-medium transition-colors ${
+                      type === opt.value ? "bg-primary text-card" : "text-muted hover:text-ink"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="flex items-center gap-3 text-sm text-ink">
               <span>
@@ -162,8 +171,11 @@ export function LanguageAnalysisEditor({
                     if (field.type === "pairs") {
                       const pairs = (block[key] as { problem: string; solution: string }[] | undefined) ?? [];
                       return (
-                        <div key={key} className="mb-4">
-                          <label className="mb-1 block text-sm text-muted">{field.label}</label>
+                        <div
+                          key={key}
+                          className="grid grid-cols-1 gap-1.5 border-t border-border-faint py-3 first:border-t-0 first:pt-0 sm:grid-cols-[200px_1fr] sm:items-start sm:gap-4"
+                        >
+                          <label className="text-sm text-muted">{field.label}</label>
                           <div className="flex flex-col gap-2">
                             {pairs.map((pair, pi) => (
                               <div key={pi} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -215,9 +227,14 @@ export function LanguageAnalysisEditor({
 
                     const value = (block[key] as string | undefined) ?? "";
                     return (
-                      <div key={key} className="mb-4 flex flex-col gap-1">
-                        <label className="text-sm text-muted">{field.label}</label>
-                        {field.hint ? <p className="text-xs italic text-muted">{field.hint}</p> : null}
+                      <div
+                        key={key}
+                        className="grid grid-cols-1 gap-1 border-t border-border-faint py-3 first:border-t-0 first:pt-0 sm:grid-cols-[200px_1fr] sm:items-start sm:gap-4"
+                      >
+                        <div>
+                          <label className="text-sm text-muted">{field.label}</label>
+                          {field.hint ? <p className="text-xs italic text-muted">{field.hint}</p> : null}
+                        </div>
                         {field.type === "select" ? (
                           <CustomSelect
                             value={value}

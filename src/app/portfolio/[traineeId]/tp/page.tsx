@@ -125,6 +125,26 @@ export default async function TpHubPage({
   }
   const achievedCount = criteriaPct !== null ? Math.round((criteriaPct / 100) * 41) : 0;
 
+  // "Write TP feedback" needs a real destination -- the earliest TP whose
+  // self-evaluation is in but feedback isn't yet, matching the exact same
+  // "Awaiting tutor feedback" state the row's own status pill already shows
+  // (getTpCardStatus), rather than a second, possibly-disagreeing check.
+  const nextTpNeedingFeedback = TP_NUMBERS.find((tpNumber) => {
+    const plan = planByTpNumber.get(tpNumber);
+    if (!plan) return false;
+    const tpPlan = tpPlanByTpNumber.get(tpNumber);
+    const selfEvaluation = selfEvalByTpNumber.get(tpNumber);
+    const feedback = feedbackByTpNumber.get(tpNumber);
+    const status = getTpCardStatus({
+      planSubmitted: Boolean(tpPlan?.submitted_at),
+      taught: Boolean(plan.taught_at),
+      selfEvalSubmitted: Boolean(selfEvaluation?.submitted_at),
+      feedbackSubmitted: Boolean(feedback?.submitted_at),
+      grade: feedback?.grade,
+    });
+    return status.label === "Awaiting tutor feedback";
+  });
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-end justify-between gap-4">
@@ -134,9 +154,9 @@ export default async function TpHubPage({
             {tpsTaught} of 8 taught · {assessedHours.toFixed(1)} hrs assessed
           </h2>
         </div>
-        {isStaff ? (
+        {isStaff && nextTpNeedingFeedback ? (
           <Link
-            href={`/dashboard/trainer/trainees/${traineeId}/tp`}
+            href={`/portfolio/${traineeId}/tp/${nextTpNeedingFeedback}`}
             className="shrink-0 rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
           >
             Write TP feedback

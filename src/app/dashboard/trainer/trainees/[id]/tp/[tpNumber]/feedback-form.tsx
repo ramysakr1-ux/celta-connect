@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { saveFeedbackDraft, submitFeedback, type FormState } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/actions";
 import { FeedbackPointEditor } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/feedback-point-editor";
+import { FormSubmitBar } from "@/components/form-submit-bar";
 import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
 import { STANDARD_RATING_OPTIONS } from "@/lib/celta-criteria";
 import { StandardRatingPill } from "@/lib/status-pill";
@@ -10,21 +11,30 @@ import type { FeedbackPoint } from "@/lib/tp-plan-content";
 import type { Database } from "@/lib/supabase/types";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
+type SelfEvaluation = Database["public"]["Tables"]["tp_self_evaluations"]["Row"];
 
 const initialState: FormState = { error: null };
 const inputClass =
   "w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+
+const SELF_EVAL_QUOTE_FIELDS: { key: keyof SelfEvaluation; label: string }[] = [
+  { key: "what_went_well", label: "What went to plan?" },
+  { key: "what_not_as_planned", label: "What didn't go as planned" },
+  { key: "next_tp_focus", label: "Focus for next TP" },
+];
 
 export function FeedbackForm({
   planId,
   traineeId,
   tpNumber,
   feedback,
+  selfEvaluation,
 }: {
   planId: string;
   traineeId: string;
   tpNumber: number;
   feedback: TpFeedback | null;
+  selfEvaluation?: SelfEvaluation | null;
 }) {
   const locked = Boolean(feedback?.submitted_at);
   const [draftState, draftAction, draftPending] = useActionState(saveFeedbackDraft, initialState);
@@ -67,53 +77,65 @@ export function FeedbackForm({
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Lesson grade at this stage of the course</label>
-        <select
-          name="grade"
-          value={grade}
-          onChange={(e) => setGrade(e.target.value)}
-          className={`${inputClass} max-w-xs appearance-none text-center`}
-        >
-          <option value="">— choose —</option>
+        <input type="hidden" name="grade" value={grade} />
+        <div className="flex flex-wrap gap-2">
           {STANDARD_RATING_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setGrade(opt.value)}
+              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+                grade === opt.value
+                  ? "border-primary bg-primary text-card"
+                  : "border-border text-ink hover:border-primary"
+              }`}
+            >
               {opt.label}
-            </option>
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
-      <FeedbackPointEditor
-        label="Strengths in planning"
-        guide="One point per line. Tag each with the planning criteria it shows."
-        points={strengthsPlanning}
-        onChange={setStrengthsPlanning}
-        scope="planning"
-        starable={false}
-      />
-      <FeedbackPointEditor
-        label="Action points in planning"
-        guide="Star the ones you want them to prioritise in the next TP -- starred points carry into the Personal Aims of their next plan."
-        points={actionPointsPlanning}
-        onChange={setActionPointsPlanning}
-        scope="planning"
-        starable
-      />
-      <FeedbackPointEditor
-        label="Strengths in teaching"
-        guide="What happened in the room -- rapport, clarity, management, language work."
-        points={strengthsTeaching}
-        onChange={setStrengthsTeaching}
-        scope="teaching"
-        starable={false}
-      />
-      <FeedbackPointEditor
-        label="Action points in teaching"
-        guide="Star the ones to prioritise next time."
-        points={actionPointsTeaching}
-        onChange={setActionPointsTeaching}
-        scope="teaching"
-        starable
-      />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="flex flex-col gap-4">
+          <p className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">Planning</p>
+          <FeedbackPointEditor
+            label="Strengths in planning"
+            guide="One point per line. Tag each with the planning criteria it shows."
+            points={strengthsPlanning}
+            onChange={setStrengthsPlanning}
+            scope="planning"
+            starable={false}
+          />
+          <FeedbackPointEditor
+            label="Action points in planning"
+            guide="Star the ones you want them to prioritise in the next TP -- starred points carry into the Personal Aims of their next plan."
+            points={actionPointsPlanning}
+            onChange={setActionPointsPlanning}
+            scope="planning"
+            starable
+          />
+        </div>
+        <div className="flex flex-col gap-4">
+          <p className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">Teaching</p>
+          <FeedbackPointEditor
+            label="Strengths in teaching"
+            guide="What happened in the room -- rapport, clarity, management, language work."
+            points={strengthsTeaching}
+            onChange={setStrengthsTeaching}
+            scope="teaching"
+            starable={false}
+          />
+          <FeedbackPointEditor
+            label="Action points in teaching"
+            guide="Star the ones to prioritise next time."
+            points={actionPointsTeaching}
+            onChange={setActionPointsTeaching}
+            scope="teaching"
+            starable
+          />
+        </div>
+      </div>
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Overall comment</label>
@@ -122,33 +144,31 @@ export function FeedbackForm({
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Your comment on their self-evaluation</label>
         <p className="text-xs italic text-muted">Appears at the end of the assembled document. Leave empty if you have nothing to add.</p>
+        {selfEvaluation ? (
+          <div className="flex flex-col gap-2 rounded-[6px] border border-border-faint bg-background p-3">
+            {SELF_EVAL_QUOTE_FIELDS.map((field) => {
+              const value = selfEvaluation[field.key] as string | null;
+              if (!value) return null;
+              return (
+                <div key={field.key}>
+                  <p className="text-[11px] font-semibold tracking-[0.06em] text-muted uppercase">{field.label}</p>
+                  <p className="text-sm text-ink italic">&ldquo;{value}&rdquo;</p>
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
         <TrainerFeedbackTextarea name="self_eval_comment" rows={3} defaultValue={feedback?.self_eval_comment ?? ""} className={inputClass} />
       </div>
 
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-
-      <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={draftPending || submitPending}
-          className="rounded-[6px] border border-border px-4 py-2 text-sm font-medium text-ink hover:border-primary disabled:opacity-60"
-        >
-          {draftPending ? "Saving…" : "Save draft"}
-        </button>
-        <button
-          type="submit"
-          formAction={submitActionFn}
-          disabled={draftPending || submitPending}
-          onClick={(e) => {
-            if (!window.confirm("Submitting releases this feedback to the trainee. Continue?")) {
-              e.preventDefault();
-            }
-          }}
-          className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
-        >
-          {submitPending ? "Submitting…" : "Submit feedback"}
-        </button>
-      </div>
+      <FormSubmitBar
+        warning="Submitting releases this feedback to the trainee -- you won't be able to edit it afterwards."
+        draftPending={draftPending}
+        submitPending={submitPending}
+        onSubmitAction={submitActionFn}
+        submitLabel="Submit feedback"
+        error={state.error}
+      />
     </form>
   );
 }

@@ -31,8 +31,7 @@ export function TrainerFeedbackTextarea(props: VoiceTextareaProps) {
 
   return (
     <div className="flex flex-col gap-1">
-      <VoiceTextarea ref={textareaRef} {...props} />
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-end gap-3">
         <button
           type="button"
           disabled={isPending}
@@ -50,6 +49,7 @@ export function TrainerFeedbackTextarea(props: VoiceTextareaProps) {
           {isPending && activeTone === "supportive" ? "Rewriting…" : "Supportive tone"}
         </button>
       </div>
+      <VoiceTextarea ref={textareaRef} {...props} />
       {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>
   );

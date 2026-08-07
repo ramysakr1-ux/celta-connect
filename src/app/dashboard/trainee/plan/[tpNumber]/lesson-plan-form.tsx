@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import {
   saveLessonPlanDraft,
   submitLessonPlan,
@@ -8,12 +8,15 @@ import {
 } from "@/app/dashboard/trainee/plan/[tpNumber]/actions";
 import { LanguageAnalysisEditor } from "@/app/dashboard/trainee/plan/[tpNumber]/language-analysis-editor";
 import { VoiceTextarea } from "@/components/voice-textarea";
+import { FormSubmitBar } from "@/components/form-submit-bar";
 import { bulletListProps } from "@/lib/bullet-list";
 import { InteractionPatternPopup } from "@/components/interaction-pattern-popup";
 import { FrameworkPicker } from "@/components/framework-picker";
 import {
   LESSON_FRAMEWORKS,
+  TP_LESSON_LENGTH_MINUTES,
   emptyAnalysisBlock,
+  sumProcedureMinutes,
   type AnalysisBlock,
   type LanguageAnalysisType,
   type PlanProcedureRow,
@@ -32,20 +35,17 @@ function emptyProcedureRow(): PlanProcedureRow {
   return { stage: "", aim: "", procedure: "", interaction: "", time: "" };
 }
 
-function timeValue(s: string): number {
-  const match = s.match(/\d+(?:\.\d+)?/g);
-  if (!match) return 0;
-  return Math.max(...match.map(Number));
-}
-
 export function LessonPlanForm({
   tpNumber,
   plan,
   languageAnalysis,
+  previousPlanningActionPoint,
 }: {
   tpNumber: number;
   plan: TpPlan | null;
   languageAnalysis: TpLanguageAnalysis | null;
+  /** Starred planning action point from the previous TP's feedback, if any -- tap-to-use suggestion under Personal Aims. */
+  previousPlanningActionPoint?: string | null;
 }) {
   const locked = Boolean(plan?.submitted_at);
   const [draftState, draftAction, draftPending] = useActionState(saveLessonPlanDraft, initialState);
@@ -57,6 +57,7 @@ export function LessonPlanForm({
       : [{ ...emptyProcedureRow(), stage: "LEAD-IN" }, ...Array.from({ length: 4 }, emptyProcedureRow)]
   );
   const [frameworkName, setFrameworkName] = useState(plan?.framework_used ?? "");
+  const personalAimsRef = useRef<HTMLTextAreaElement>(null);
 
   const [laOpen, setLaOpen] = useState(
     Boolean(
@@ -75,7 +76,8 @@ export function LessonPlanForm({
   const [laVocabRows, setLaVocabRows] = useState<VocabRow[]>(languageAnalysis?.vocab_rows ?? []);
   const [laVocabReference, setLaVocabReference] = useState(languageAnalysis?.vocab_reference ?? "");
 
-  const totalMinutes = procedure.reduce((sum, row) => sum + timeValue(row.time), 0);
+  const totalMinutes = sumProcedureMinutes(procedure);
+  const overBy = totalMinutes - TP_LESSON_LENGTH_MINUTES;
 
   function applyFramework() {
     const framework = LESSON_FRAMEWORKS.find((f) => f.name === frameworkName);
@@ -99,6 +101,14 @@ export function LessonPlanForm({
 
   function updateProcedureRow(index: number, patch: Partial<PlanProcedureRow>) {
     setProcedure(procedure.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  }
+
+  function useCarriedPersonalAim() {
+    const textarea = personalAimsRef.current;
+    if (!textarea || !previousPlanningActionPoint) return;
+    const joined = textarea.value.trim() ? `${textarea.value.trim()}\n${previousPlanningActionPoint}` : previousPlanningActionPoint;
+    textarea.value = joined;
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
   const laHasContent =
@@ -131,7 +141,13 @@ export function LessonPlanForm({
           <div>
             <p className="text-sm text-muted">Procedure</p>
             <div className="mt-2 overflow-x-auto">
-              <table className="w-full min-w-[700px] border-collapse text-sm">
+              <table className="w-full border-collapse text-sm">
+                <colgroup>
+                  <col className="w-[168px]" />
+                  <col className="w-[92px]" />
+                  <col className="w-[62px]" />
+                  <col />
+                </colgroup>
                 <thead>
                   <tr>
                     <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
@@ -159,6 +175,9 @@ export function LessonPlanForm({
                 </tbody>
               </table>
             </div>
+            <p className="mt-1.5 text-xs text-muted">
+              {totalMinutes} of {TP_LESSON_LENGTH_MINUTES} min{overBy > 0 ? ` · Over by ${overBy} min` : ""}
+            </p>
           </div>
           {languageAnalysis ? (
             <div className="border-t border-border-faint pt-4">
@@ -190,41 +209,61 @@ export function LessonPlanForm({
   }
 
   return (
-    <form action={draftAction} className="flex flex-col gap-6">
+    <form id="plan" action={draftAction} className="scroll-mt-20 flex flex-col gap-4">
       <input type="hidden" name="tp_number" value={tpNumber} />
 
-      <div className="card p-6">
+      <div className="flex items-center justify-between">
         <h2 className="font-serif text-lg text-ink">Your lesson plan</h2>
-        <div className="mt-4 flex flex-col gap-4">
-          <Field label="Main Aims" hint="What the learners will be able to do by the end.">
-            <VoiceTextarea
-              name="main_aims"
-              rows={3}
-              defaultValue={plan?.main_aims ?? ""}
-              className={inputClass}
-              {...bulletListProps}
-            />
-          </Field>
-          <Field label="Subsidiary Aims" hint="What else the lesson develops along the way.">
-            <VoiceTextarea
-              name="subsidiary_aims"
-              rows={3}
-              defaultValue={plan?.subsidiary_aims ?? ""}
-              className={inputClass}
-              {...bulletListProps}
-            />
-          </Field>
-          <Field label="Personal Aims" hint="Take these from the action points in your last feedback.">
-            <VoiceTextarea
-              name="personal_aims"
-              rows={3}
-              defaultValue={plan?.personal_aims ?? ""}
-              className={inputClass}
-              {...bulletListProps}
-            />
-          </Field>
+      </div>
 
-          <div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[360px_1fr] lg:items-start">
+        {/* Left: written once */}
+        <div className="flex flex-col gap-4">
+          <div className="card flex flex-col gap-4 p-5">
+            <Field label="Main Aims" hint="What the learners will be able to do by the end.">
+              <VoiceTextarea
+                name="main_aims"
+                rows={3}
+                defaultValue={plan?.main_aims ?? ""}
+                className={inputClass}
+                {...bulletListProps}
+              />
+            </Field>
+            <Field label="Subsidiary Aims" hint="What else the lesson develops along the way.">
+              <VoiceTextarea
+                name="subsidiary_aims"
+                rows={3}
+                defaultValue={plan?.subsidiary_aims ?? ""}
+                className={inputClass}
+                {...bulletListProps}
+              />
+            </Field>
+            <Field label="Personal Aims" hint="Take these from the action points in your last feedback.">
+              <VoiceTextarea
+                ref={personalAimsRef}
+                name="personal_aims"
+                rows={3}
+                defaultValue={plan?.personal_aims ?? ""}
+                className={inputClass}
+                {...bulletListProps}
+              />
+            </Field>
+            {previousPlanningActionPoint ? (
+              <button
+                type="button"
+                onClick={useCarriedPersonalAim}
+                className="flex items-start gap-2 rounded-[6px] border border-gold/40 bg-gold/10 p-2.5 text-left"
+              >
+                <span className="mt-0.5 shrink-0 text-xs text-gold">★</span>
+                <span className="text-xs leading-relaxed text-ink">
+                  From TP{tpNumber - 1}: {previousPlanningActionPoint}
+                  <span className="ml-1.5 font-semibold text-primary">Tap to use it.</span>
+                </span>
+              </button>
+            ) : null}
+          </div>
+
+          <div className="card p-5">
             <label className="text-sm text-muted">Anticipated Problems &amp; Solutions</label>
             <p className="text-xs italic text-muted">
               Problems with tasks and materials, technology, classroom management, interaction patterns (NOT
@@ -234,7 +273,7 @@ export function LessonPlanForm({
               {[1, 2, 3].map((n) => {
                 const existing = plan?.anticipated_problems?.[n - 1];
                 return (
-                  <div key={n} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div key={n} className="flex flex-col gap-1.5 border-b border-dashed border-border-faint pb-2.5 last:border-b-0 last:pb-0">
                     <textarea
                       name={`problem_${n}`}
                       rows={2}
@@ -249,7 +288,7 @@ export function LessonPlanForm({
                       defaultValue={existing?.solution ?? ""}
                       placeholder="Solution"
                       {...bulletListProps}
-                      className={inputClass}
+                      className={`${inputClass} ml-3.5`}
                     />
                   </div>
                 );
@@ -257,192 +296,201 @@ export function LessonPlanForm({
             </div>
           </div>
 
-          <Field label="Class Profile" hint="Who you are teaching -- two or three lines is enough.">
-            <VoiceTextarea
-              name="class_profile"
-              rows={3}
-              defaultValue={plan?.class_profile ?? ""}
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Materials" hint="Everything you and the learners will need, including where it came from.">
-            <VoiceTextarea
-              name="materials_description"
-              rows={3}
-              defaultValue={plan?.materials_description ?? ""}
-              className={inputClass}
-            />
-          </Field>
+          <div className="card flex flex-col gap-4 p-5">
+            <Field label="Class Profile" hint="Who you are teaching -- two or three lines is enough.">
+              <VoiceTextarea
+                name="class_profile"
+                rows={3}
+                defaultValue={plan?.class_profile ?? ""}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Materials" hint="Everything you and the learners will need, including where it came from.">
+              <VoiceTextarea
+                name="materials_description"
+                rows={3}
+                defaultValue={plan?.materials_description ?? ""}
+                className={inputClass}
+              />
+            </Field>
+          </div>
         </div>
-      </div>
 
-      <div className="card p-6">
-        <h2 className="font-serif text-lg text-ink">Lesson shape</h2>
-        <p className="text-sm text-muted">Choosing a framework fills the Stage column with that shape&apos;s usual stages.</p>
-        <div className="mt-3 flex w-80 flex-col gap-3">
-          <input type="hidden" name="framework_used" value={frameworkName} />
-          <FrameworkPicker value={frameworkName} onChange={setFrameworkName} />
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={applyFramework}
-              className="flex-1 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
-            >
-              Fill in the stages
-            </button>
-            <button
-              type="button"
-              onClick={() => setProcedure(procedure.map((row) => ({ ...row, stage: "", aim: "" })))}
-              className="flex-1 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
-            >
-              Clear stages
-            </button>
+        {/* Right: worked on for hours */}
+        <div className="flex min-w-0 flex-col gap-4">
+          <div className="card flex flex-wrap items-center justify-between gap-3 p-4">
+            <div>
+              <h3 className="font-serif text-base text-ink">Lesson shape</h3>
+              <p className="text-xs text-muted">Choosing a framework fills the Stage column with that shape&apos;s usual stages.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="hidden" name="framework_used" value={frameworkName} />
+              <div className="w-48">
+                <FrameworkPicker value={frameworkName} onChange={setFrameworkName} />
+              </div>
+              <button
+                type="button"
+                onClick={applyFramework}
+                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+              >
+                Fill in the stages
+              </button>
+              <button
+                type="button"
+                onClick={() => setProcedure(procedure.map((row) => ({ ...row, stage: "", aim: "" })))}
+                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted hover:border-primary"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div className="card p-5">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="font-serif text-lg text-ink">Lesson Procedure</h2>
+                <p className="text-xs italic text-muted">Write the procedure in short bullet points -- one action per line.</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2.5">
+                <span className="font-serif text-xl leading-none text-ink">{totalMinutes}</span>
+                <span className="text-xs text-muted">of {TP_LESSON_LENGTH_MINUTES} min</span>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                    overBy > 0 ? "bg-status-warning-bg text-status-warning-text" : "bg-status-neutral-bg text-ink"
+                  }`}
+                >
+                  <span className="size-1 rounded-full bg-current" />
+                  {overBy > 0 ? `Over by ${overBy} min` : "Fits"}
+                </span>
+              </div>
+            </div>
+            <input type="hidden" name="procedure" value={JSON.stringify(procedure)} />
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full min-w-[700px] border-collapse text-sm">
+                <colgroup>
+                  <col className="w-[168px]" />
+                  <col className="w-[92px]" />
+                  <col className="w-[62px]" />
+                  <col />
+                  <col className="w-[30px]" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
+                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
+                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
+                    <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
+                    <th className="border-b border-border-faint p-2" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {procedure.map((row, i) => (
+                    <tr key={i} className="group even:bg-background">
+                      <td className="border-b border-border-faint p-1.5 align-top">
+                        <textarea
+                          rows={2}
+                          value={row.stage}
+                          onChange={(e) => updateProcedureRow(i, { stage: e.target.value })}
+                          className={`${inputClass} resize-none`}
+                        />
+                        <textarea
+                          rows={2}
+                          value={row.aim}
+                          onChange={(e) => updateProcedureRow(i, { aim: e.target.value })}
+                          placeholder="Stage aim"
+                          className="mt-1 w-full resize-none bg-transparent text-xs italic text-muted outline-none placeholder:text-muted"
+                        />
+                      </td>
+                      <td className="border-b border-border-faint p-1.5 align-top">
+                        <InteractionPatternPopup
+                          placeholder="e.g. GW + PW"
+                          value={row.interaction}
+                          onChange={(v) => updateProcedureRow(i, { interaction: v })}
+                          className={`${inputClass} min-h-[60px]`}
+                        />
+                      </td>
+                      <td className="border-b border-border-faint p-1.5 align-top">
+                        <input
+                          type="text"
+                          value={row.time}
+                          onChange={(e) => updateProcedureRow(i, { time: e.target.value })}
+                          className={`${inputClass} min-h-[60px]`}
+                        />
+                      </td>
+                      <td className="border-b border-border-faint p-1.5 align-top">
+                        <textarea
+                          rows={3}
+                          value={row.procedure}
+                          onChange={(e) => updateProcedureRow(i, { procedure: e.target.value })}
+                          className={inputClass}
+                          {...bulletListProps}
+                        />
+                      </td>
+                      <td className="border-b border-border-faint p-1.5 align-top">
+                        <button
+                          type="button"
+                          onClick={() => setProcedure(procedure.filter((_, x) => x !== i))}
+                          className="text-destructive opacity-0 focus-visible:opacity-100 group-hover:opacity-100"
+                          title="Delete this stage"
+                        >
+                          ✕
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setProcedure([...procedure, emptyProcedureRow()])}
+                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+              >
+                + Add stage
+              </button>
+              <span className="text-xs text-muted">Interaction patterns and the phonemic keyboard open from the cell.</span>
+            </div>
+          </div>
+
+          <input type="hidden" name="la_type" value={laType} />
+          <input type="hidden" name="la_main_aim" value={laMainAim ? "Yes" : "No"} />
+          <input type="hidden" name="la_context" value={laContext} />
+          <input type="hidden" name="la_blocks" value={JSON.stringify(laBlocks)} />
+          <input type="hidden" name="la_vocab_rows" value={JSON.stringify(laVocabRows)} />
+          <input type="hidden" name="la_vocab_reference" value={laVocabReference} />
+          <input type="hidden" name="la_has_content" value={laHasContent ? "1" : "0"} />
+
+          <div id="analysis" className="scroll-mt-20">
+          <LanguageAnalysisEditor
+            open={laOpen}
+            onToggle={() => setLaOpen(!laOpen)}
+            type={laType}
+            onTypeChange={setLaType}
+            isMainAim={laMainAim}
+            onMainAimChange={setLaMainAim}
+            context={laContext}
+            onContextChange={setLaContext}
+            blocks={laBlocks}
+            onBlocksChange={setLaBlocks}
+            vocabRows={laVocabRows}
+            onVocabRowsChange={setLaVocabRows}
+            vocabReference={laVocabReference}
+            onVocabReferenceChange={setLaVocabReference}
+            locked={false}
+          />
           </div>
         </div>
       </div>
 
-      <div className="card p-6">
-        <h2 className="font-serif text-lg text-ink">Lesson Procedure</h2>
-        <p className="text-xs italic text-muted">Write the procedure in short bullet points -- one action per line.</p>
-        <input type="hidden" name="procedure" value={JSON.stringify(procedure)} />
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[900px] border-collapse text-sm">
-            <colgroup>
-              <col className="w-44" />
-              <col className="w-24" />
-              <col className="w-24" />
-              <col />
-              <col className="w-8" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Stage / Aim</th>
-                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Interaction</th>
-                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Time</th>
-                <th className="border-b border-border-faint p-2 text-left text-xs text-muted">Procedure</th>
-                <th className="border-b border-border-faint p-2" />
-              </tr>
-            </thead>
-            <tbody>
-              {procedure.map((row, i) => (
-                <tr key={i} className="even:bg-background">
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <textarea
-                      rows={2}
-                      value={row.stage}
-                      onChange={(e) => updateProcedureRow(i, { stage: e.target.value })}
-                      className={`${inputClass} resize-none`}
-                    />
-                    <textarea
-                      rows={2}
-                      value={row.aim}
-                      onChange={(e) => updateProcedureRow(i, { aim: e.target.value })}
-                      placeholder="Stage aim"
-                      className="mt-1 w-full resize-none bg-transparent text-xs italic text-muted outline-none placeholder:text-muted"
-                    />
-                  </td>
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <InteractionPatternPopup
-                      placeholder="e.g. GW + PW"
-                      value={row.interaction}
-                      onChange={(v) => updateProcedureRow(i, { interaction: v })}
-                      className={`${inputClass} min-h-[60px]`}
-                    />
-                  </td>
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <input
-                      type="text"
-                      value={row.time}
-                      onChange={(e) => updateProcedureRow(i, { time: e.target.value })}
-                      className={`${inputClass} min-h-[60px]`}
-                    />
-                  </td>
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <textarea
-                      rows={3}
-                      value={row.procedure}
-                      onChange={(e) => updateProcedureRow(i, { procedure: e.target.value })}
-                      className={inputClass}
-                      {...bulletListProps}
-                    />
-                  </td>
-                  <td className="border-b border-border-faint p-1.5 align-top">
-                    <button
-                      type="button"
-                      onClick={() => setProcedure(procedure.filter((_, x) => x !== i))}
-                      className="text-destructive"
-                      title="Delete this stage"
-                    >
-                      ✕
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-3 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setProcedure([...procedure, emptyProcedureRow()])}
-            className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
-          >
-            + Add stage
-          </button>
-          <span className="text-sm font-medium text-primary">Total: {totalMinutes} min</span>
-        </div>
-      </div>
-
-      <input type="hidden" name="la_type" value={laType} />
-      <input type="hidden" name="la_main_aim" value={laMainAim ? "Yes" : "No"} />
-      <input type="hidden" name="la_context" value={laContext} />
-      <input type="hidden" name="la_blocks" value={JSON.stringify(laBlocks)} />
-      <input type="hidden" name="la_vocab_rows" value={JSON.stringify(laVocabRows)} />
-      <input type="hidden" name="la_vocab_reference" value={laVocabReference} />
-      <input type="hidden" name="la_has_content" value={laHasContent ? "1" : "0"} />
-
-      <LanguageAnalysisEditor
-        open={laOpen}
-        onToggle={() => setLaOpen(!laOpen)}
-        type={laType}
-        onTypeChange={setLaType}
-        isMainAim={laMainAim}
-        onMainAimChange={setLaMainAim}
-        context={laContext}
-        onContextChange={setLaContext}
-        blocks={laBlocks}
-        onBlocksChange={setLaBlocks}
-        vocabRows={laVocabRows}
-        onVocabRowsChange={setLaVocabRows}
-        vocabReference={laVocabReference}
-        onVocabReferenceChange={setLaVocabReference}
-        locked={false}
+      <FormSubmitBar
+        warning="Submitting locks this lesson plan -- you won't be able to edit it afterwards."
+        draftPending={draftPending}
+        submitPending={submitPending}
+        onSubmitAction={submitActionFn}
+        submitLabel="Submit lesson plan"
+        error={state.error}
       />
-
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-
-      <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={draftPending || submitPending}
-          className="rounded-[6px] border border-border px-4 py-2 text-sm font-medium text-ink hover:border-primary disabled:opacity-60"
-        >
-          {draftPending ? "Saving…" : "Save draft"}
-        </button>
-        <button
-          type="submit"
-          formAction={submitActionFn}
-          disabled={draftPending || submitPending}
-          onClick={(e) => {
-            if (!window.confirm("Submitting locks this lesson plan -- you won't be able to edit it afterwards. Continue?")) {
-              e.preventDefault();
-            }
-          }}
-          className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
-        >
-          {submitPending ? "Submitting…" : "Submit lesson plan"}
-        </button>
-      </div>
     </form>
   );
 }

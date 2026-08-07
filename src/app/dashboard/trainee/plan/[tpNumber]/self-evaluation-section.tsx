@@ -1,6 +1,6 @@
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { SelfEvaluationForm } from "@/app/dashboard/trainee/plan/[tpNumber]/self-evaluation-form";
-import type { FeedbackPoint } from "@/lib/tp-plan-content";
+import type { FeedbackPoint, SelfEvalActionPoint } from "@/lib/tp-plan-content";
 import type { Database } from "@/lib/supabase/types";
 import { StandardRatingPill } from "@/lib/status-pill";
 
@@ -61,6 +61,7 @@ export function SelfEvaluationSection({
           <ReadOnlyField label="What didn't go as planned, and why?" value={selfEvaluation.what_not_as_planned} />
           <ReadOnlyField label="Evidence of learning" value={selfEvaluation.evidence_of_learning} />
           <ReadOnlyField label="What I'd do differently" value={selfEvaluation.what_differently} />
+          <ActionPointsReadOnly points={selfEvaluation.action_points} />
           <ReadOnlyField label="Focus for next TP" value={selfEvaluation.next_tp_focus} />
         </div>
       </div>
@@ -96,6 +97,41 @@ function ReadOnlyField({ label, value }: { label: string; value?: string | null 
     <div>
       <p className="text-sm text-muted">{label}</p>
       <p className="whitespace-pre-line text-ink">{value}</p>
+    </div>
+  );
+}
+
+function ActionPointsReadOnly({ points }: { points: SelfEvalActionPoint[] }) {
+  const withContent = points.filter((p) => p.previous_point || p.what_i_did);
+  if (withContent.length === 0) return null;
+  return (
+    <div>
+      <p className="text-sm text-muted">Action points from the last TP</p>
+      <div className="mt-1 overflow-x-auto rounded-[6px] border border-border-faint">
+        <table className="w-full min-w-[480px] border-collapse text-sm">
+          <thead>
+            <tr>
+              <th className="border-b border-border-faint bg-background p-2 text-left text-xs text-muted">
+                Action point set last time
+              </th>
+              <th className="border-b border-border-faint bg-background p-2 text-left text-xs text-muted">
+                What I did about it
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {withContent.map((point, i) => (
+              <tr key={i}>
+                <td className="border-b border-border-faint p-2 align-top text-ink">
+                  {point.carried ? <span className="mr-1 text-xs text-gold">★</span> : null}
+                  {point.previous_point}
+                </td>
+                <td className="border-b border-border-faint p-2 align-top text-ink">{point.what_i_did}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
