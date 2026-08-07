@@ -96,7 +96,7 @@ export default async function AssignmentDetailPage({
           <h1 className="font-serif text-2xl text-ink">{ASSIGNMENT_INFO[assignment.assignment_type].title}</h1>
           <p className="mt-1 text-sm text-muted">
             {isStaff
-              ? `Status: ${roundStatus.replace(/_/g, " ")}`
+              ? `Status: ${roundStatus.replace(/_/g, " ")}${assignment.first_submitted_late ? " · submitted late" : ""}`
               : assignment.due_date
                 ? `Due ${assignment.due_date}`
                 : "No deadline set"}

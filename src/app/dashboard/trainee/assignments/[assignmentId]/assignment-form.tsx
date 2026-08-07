@@ -69,13 +69,18 @@ export function AssignmentAuthoringForm({
   const aiDeclarationIncomplete = aiDeclared && !aiConversationUrl.trim();
 
   const blockReasons: string[] = [];
-  if (deadlinePassed) blockReasons.push("the deadline has passed");
   if (wordCountOutOfRange) blockReasons.push(`word count must be 750-1,000 (currently ${totalWords})`);
   if (aiDeclarationIncomplete) blockReasons.push("add the AI conversation link below before submitting");
   const submitDisabled = blockReasons.length > 0;
+  // A late submission is allowed, not blocked -- it's recorded as late and
+  // the tutor decides what to do about it, rather than the candidate being
+  // unable to submit at all and the conversation happening offline with no
+  // record (specs/for-claude-code.md).
   const submitWarning = submitDisabled
     ? `Can't submit yet -- ${blockReasons.join("; ")}.`
-    : "Submitting locks your responses until your tutor returns them.";
+    : deadlinePassed
+      ? "This assignment is past its deadline -- submitting now will be recorded as late."
+      : "Submitting locks your responses until your tutor returns them.";
 
   const sectionsPayload = sections.map((s) => ({ key: s.key, title: s.title, text: texts[s.key] ?? "" }));
 
@@ -215,7 +220,7 @@ export function AssignmentAuthoringForm({
                   submitPending={submitPending}
                   submitDisabled={submitDisabled}
                   onSubmitAction={submitActionFn}
-                  submitLabel={deadlinePassed ? "Deadline passed" : "Submit resubmission"}
+                  submitLabel={deadlinePassed ? "Submit (late)" : "Submit resubmission"}
                   error={state.error}
                 />
               </>
@@ -303,7 +308,7 @@ export function AssignmentAuthoringForm({
                   submitPending={submitPending}
                   submitDisabled={submitDisabled}
                   onSubmitAction={submitActionFn}
-                  submitLabel={deadlinePassed ? "Deadline passed" : "Submit"}
+                  submitLabel={deadlinePassed ? "Submit (late)" : "Submit"}
                   error={state.error}
                 />
               </>

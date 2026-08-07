@@ -207,6 +207,7 @@ export interface Database {
           marker_id: string | null;
           second_marker_id: string | null;
           second_marker_recorded_at: string | null;
+          first_submitted_late: boolean;
           first_ai_declared: boolean;
           first_ai_conversation_url: string | null;
           resubmission_ai_declared: boolean;
@@ -246,6 +247,22 @@ export interface Database {
           storage_path: string;
         };
         Update: Partial<Database["public"]["Tables"]["assignment_templates"]["Row"]>;
+        Relationships: [];
+      };
+      assignment_type_definitions: {
+        Row: {
+          id: string;
+          center_id: string | null;
+          code: string;
+          title: string;
+          counts_toward_pass: boolean;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["assignment_type_definitions"]["Row"]> & {
+          code: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["assignment_type_definitions"]["Row"]>;
         Relationships: [];
       };
       assignment_section_responses: {
@@ -488,6 +505,32 @@ export interface Database {
           name: string;
         };
         Update: Partial<Database["public"]["Tables"]["course_tp_groups"]["Row"]>;
+        Relationships: [];
+      };
+      course_tutors: {
+        Row: {
+          id: string;
+          course_id: string;
+          profile_id: string;
+          tutor_role:
+            | "main_course_tutor"
+            | "assistant_course_tutor"
+            | "teaching_practice_tutor"
+            | "input_session_tutor"
+            | "external_assessor"
+            | null;
+          is_trainer_in_training: boolean;
+          verified_at: string | null;
+          supervisor_profile_id: string | null;
+          joined_at: string;
+          left_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_tutors"]["Row"]> & {
+          course_id: string;
+          profile_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_tutors"]["Row"]>;
         Relationships: [];
       };
       course_subgroup_members: {
