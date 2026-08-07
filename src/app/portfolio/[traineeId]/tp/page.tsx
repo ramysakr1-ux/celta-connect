@@ -242,7 +242,7 @@ export default async function TpHubPage({
               const statusText = overall ? ASSIGNMENT_STATUS_LABEL[overall] : "Not started";
               const statusClass =
                 overall === "approved"
-                  ? "text-status-on-track-text"
+                  ? "text-ink font-semibold"
                   : overall === "resubmission_required"
                     ? "text-status-warning-text"
                     : "text-muted";

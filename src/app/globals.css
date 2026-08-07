@@ -185,9 +185,13 @@ h6 {
     font-weight: 500;
   }
 
+  /* Green is gone as a success signal (specs/green.md) -- "on-track" now
+     reads as ink on the neutral tint, not green. The --color-status-on-
+     track-* tokens stay defined in :root/unused, deliberately, so this is
+     reversible without a second design pass. */
   .status-pill-on-track {
-    background-color: var(--color-status-on-track-bg);
-    color: var(--color-status-on-track-text);
+    background-color: var(--color-status-neutral-bg);
+    color: var(--color-ink);
   }
 
   .status-pill-at-risk {
@@ -327,9 +331,11 @@ h6 {
     flex-shrink: 0;
   }
 
+  /* Green is gone as a success signal (specs/green.md) -- the ::before dot
+     above inherits currentColor, so this alone also turns the dot ink. */
   .pill-success {
-    background-color: var(--color-status-on-track-bg);
-    color: var(--color-status-on-track-text);
+    background-color: var(--color-status-neutral-bg);
+    color: var(--color-ink);
   }
 
   .pill-warning {

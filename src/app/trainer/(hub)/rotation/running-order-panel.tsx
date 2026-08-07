@@ -74,8 +74,8 @@ export function RunningOrderPanel({
                 : !plan
                   ? { label: "Plan due", cls: "text-status-pending-text" }
                   : plan.taughtAt
-                    ? { label: "Taught", cls: "text-status-on-track-text" }
-                    : { label: "Plan in", cls: "text-status-on-track-text" };
+                    ? { label: "Taught", cls: "text-ink font-semibold" }
+                    : { label: "Plan in", cls: "text-ink font-semibold" };
               return (
                 <div
                   key={m.traineeId}

@@ -340,7 +340,7 @@ export default async function TpDetailPage({
                               type="submit"
                               className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
                                 shared
-                                  ? "border-status-on-track-text/30 bg-status-on-track-bg text-status-on-track-text"
+                                  ? "border-border bg-status-neutral-bg text-ink"
                                   : "border-border text-muted hover:border-primary hover:text-primary"
                               }`}
                             >
@@ -348,7 +348,7 @@ export default async function TpDetailPage({
                             </button>
                           </form>
                         ) : shared ? (
-                          <span className="rounded-full border border-status-on-track-text/30 bg-status-on-track-bg px-2.5 py-1 text-xs font-medium text-status-on-track-text">
+                          <span className="rounded-full border border-border bg-status-neutral-bg px-2.5 py-1 text-xs font-medium text-ink">
                             Shared with students ✓
                           </span>
                         ) : null}

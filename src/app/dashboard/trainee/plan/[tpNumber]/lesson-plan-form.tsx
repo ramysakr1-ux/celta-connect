@@ -146,7 +146,7 @@ export function LessonPlanForm({
                       <td className="whitespace-pre-line border-b border-border-faint p-2 align-top text-ink">
                         {row.stage}
                         {row.aim ? (
-                          <p className="mt-1 text-xs italic text-status-on-track-text">{row.aim}</p>
+                          <p className="mt-1 text-xs italic text-muted">{row.aim}</p>
                         ) : null}
                       </td>
                       <td className="border-b border-border-faint p-2 align-top text-ink">{row.interaction}</td>
@@ -338,7 +338,7 @@ export function LessonPlanForm({
                       value={row.aim}
                       onChange={(e) => updateProcedureRow(i, { aim: e.target.value })}
                       placeholder="Stage aim"
-                      className="mt-1 w-full resize-none bg-transparent text-xs italic text-status-on-track-text outline-none placeholder:text-muted"
+                      className="mt-1 w-full resize-none bg-transparent text-xs italic text-muted outline-none placeholder:text-muted"
                     />
                   </td>
                   <td className="border-b border-border-faint p-1.5 align-top">

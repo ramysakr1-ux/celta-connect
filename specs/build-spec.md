@@ -43,7 +43,7 @@ The pack must contain, in addition to portfolios:
 - the **course timetable**
 - the **TP schedule** with arrangements for the day of assessment
 - **written assignment titles**
-- the **application file** — application forms and completed selection tasks for **both rejected and accepted applicants**. *Nothing in the app currently holds rejected applicants; this needs a data model.*
+- the **application file** — application forms and completed selection tasks for **both rejected and accepted applicants**. Applicants are first-class records (see "Application and selection" below), so the pack generates rather than being uploaded.
 - **lesson plans** for candidates teaching that day (at the latest, at the start of the lesson)
 - **attendance registers for the language students** attending TP classes (the volunteer register)
 - a **sample candidate end-of-course report**
@@ -72,9 +72,82 @@ New centres: the assessor for a centre's **first course is nominated by Cambridg
 **Two kinds of centre upload — treat them differently**
 
 1. **Parsed into templates.** Assignment briefs and cover sheets, converted at centre setup into criteria rows, comment slots and section prompts. The source file is finished after import; never served, never round-tripped.
-2. **Stored as documents.** The application file (application forms and completed selection tasks for **accepted and rejected** applicants), the centre's own timetable, and anything else the centre attaches. Uploaded at the start of the course, never parsed, held for the assessor pack and the close-out export.
+2. **Stored as documents.** The centre's own timetable, policies, and anything else it attaches. Uploaded at the start of the course, never parsed, held for the assessor pack and the close-out export. *(The application file used to live here. It does not any more — see "Application and selection".)*
 
-Category 2 carries the most sensitive data in the system — **rejected applicants never became candidates and never signed anything**, yet their files are here. They must be covered by the same retention and deletion rules as candidate data, and named explicitly in the centre's privacy terms.
+Retention note: the most sensitive data in the system is not in either category — it is the **rejected applicants** held as records under § Application and selection. They never became candidates and never accepted terms, yet their files are retained for the assessor. They fall under the same retention and deletion rules as candidate data, and must be named explicitly in the centre's privacy terms and on the application form itself.
+
+**Announcements are schedulable, and they duplicate.**
+- An announcement may be posted now or **anchored to a timetable event** — "the day before Assignment 3 is due", "when round 4 is released", "two days before the assessment visit". Never to an absolute date.
+- The anchor is what makes duplication work: a whole course's announcements can be written once at setup and carried into every later course as part of the centre's shell (alongside the resource hub, TP points, timetable skeleton and assignment templates). The new course's timetable supplies the dates; nothing is edited.
+- Each announcement carries a **keep-on-duplicate flag**, default on for anchored ones and off for ad-hoc ones ("Room 2 projector is fixed"), which are specific to a single course.
+- **Scheduling is a default, not a lock.** Every scheduled announcement carries **Post now**, and can be edited or skipped at any point before it fires. Posting early cancels the schedule rather than duplicating the message. A trainer must never have to wait for their own announcement.
+- Anchored announcements that never fire — because their event was removed from the timetable — should surface as a warning at close-out rather than disappearing silently.
+
+**Navigation — one change from the code.** The canonical trainer tabs today are Today, Roster, Timetable, Volunteers, Teaching Practice (also matching `/rotation` and `/coursebooks`), Audio Library, Grades Report. **Replace the Audio Library tab with a Resource hub tab.** Audio is material, and it never justified a place in the header while coursebooks and TP points — which are larger — did not have one. The hub holds six sections: TP points, coursebooks, multimedia, assignment briefs, input sessions, centre documents. `/audio` and `/coursebooks` become sections within it; keep the routes and redirect. Rotation stays under Teaching Practice. The candidate portfolio stays reachable from a roster row, not the nav.
+
+**Peer observation — the shared sheet**
+- Peer observation is a required course activity but **never counts toward the six hours** (Admin Handbook 9.1). Log it separately; keep it out of the six-hour tally.
+- **Five take notes during each lesson** — everyone in the group of six except the candidate teaching. Notes are private while being written; one sheet per lesson.
+- **Two prompts per note, never more, and both are single-line boxes.** An observer is there to watch a lesson, not to type through one — the note should take under a minute and read as a jotting. Cap each at roughly 140 characters and let it be obvious from the box height. Anything longer gets filled in carelessly, and short notes make for sharper feedback.
+- **The task is generated from the criterion the cohort is working on**, which comes from that week's input session. Week one asks about instructions (4c), week four about staging and pace. The same criterion is what tutors mark on each candidate's own next lesson — so watching for it and being assessed on it are the same act. This is the thread: input session → criterion → TP point → peer task → TP feedback.
+- **The feedback slot on the timetable reveals every note at once.** Not the lesson end, not all-notes-submitted — the slot. The tutor may open it early. Never gate on every note being finished; one person forgetting would block the group.
+- **From that moment the group splits, and everyone writes.** The three who **taught** write their **self-evaluations**. The three who **did not teach today** read all the notes and agree the **group feedback**. Nobody sits waiting while others talk about them.
+- **Then one-to-one oral feedback**, using the notes. The tutor marks the self-evaluations while it happens.
+- **Afterwards the candidates who taught receive the written peer notes and keep them — but NOT in the portfolio.** Peer feedback is not a Cambridge document. Keeping it out of the assessed record is also what lets it stay candid.
+- **Where it sits:** on the candidate's own **TP record** for that lesson, below the assessed material, in a block headed "From your peers". Same page as their plan, self-evaluation and tutor feedback, because that is where they will look for it — but visually and structurally outside the assessment.
+- **The boundary, stated once:** observation of experienced teachers (live, filmed, or a tutor's demo) is recorded in **CELTA 5 and the portfolio** — it is the Cambridge record of the six hours. Peer observation is **excluded** from CELTA 5, the portfolio, the grade review, the assessor pack, and the close-out export. Two different things that happen to share a form.
+- Needs a `peer_observations` table; nothing in the current build has one.
+
+**Prompts adapt to the delivery mode**
+
+Every generated prompt — peer observation tasks, self-evaluation questions, TP point wording — is written twice, once per mode, and the course's mode decides which is served. Criterion 4c is the same criterion either way; only the language changes.
+
+| | Face-to-face | Online |
+|---|---|---|
+| 4c instructions | "Where did instructions land? Watch the room after you stop talking." | "Where did instructions land? Watch the tiles after you stop talking." |
+| Grouping | pairs, monitoring, moving between tables | breakout rooms, dropping in, timing the return |
+| Materials | handouts, board work, realia | shared screen, annotation, chat, links |
+| Attention | eye contact, seating, board position | cameras, spotlighting, chat as a channel |
+
+On a **mixed-mode course** the mode is a property of the individual lesson, not the course — the timetable already knows which lessons are online, so read it from there rather than a course-level setting. A candidate teaching online on Tuesday and in a room on Thursday gets the right vocabulary each day.
+
+Where a criterion genuinely has no online analogue (or vice versa), the alternate reads as guidance rather than a forced translation. Do not invent a breakout-room equivalent of walking between tables where none exists.
+
+**Self-evaluation — prompts resolve through a fallback chain**
+
+The form is never generic. Its prompts are drawn from the most specific thing available for that lesson, falling back in this order:
+
+1. **The lesson plan**, if one was submitted — its stated aims, anticipated problems and personal aims. The candidate evaluates against what they said they would do, which is the sharpest version.
+2. **The TP point**, if there is no plan — the aim and focus the tutor assigned for that round.
+3. **The stage of the course and its criteria**, if there is neither — the criteria the cohort is being assessed on at that point, which is also what the peer observation task is drawn from.
+
+Each level down is less specific but never empty; there is no state in which the candidate sees a blank form. The form should say which source it used ("From your lesson plan" / "From TP3 points" / "Stage 2 criteria"), so a candidate who skipped their plan can see the consequence.
+
+This is the same criteria thread as everywhere else: input session → criterion → TP point → lesson plan → self-evaluation → peer task → tutor feedback. One vocabulary the whole course speaks.
+
+**Application and selection — Admin Handbook 6.2 and 6.3**
+
+Applicants are **first-class records, not uploaded documents.** The file exists from first contact; an accepted applicant becomes a candidate with nothing retyped. See `Applications.dc.html`.
+
+- **Entry requirements (6.3), all four required.** At least 18 — Cambridge recommends 20 or over, 18–20 at the centre's discretion. An awareness of language and competence in written and spoken English sufficient to undertake the course and prepare to teach a range of levels — recommended level C2 or C1+. A standard of education equivalent to that required for entry into higher education; where formal qualifications are absent, the centre may accept at its discretion if screening is convincing, and the evidence must be recorded. CELTA is for applicants with little or no ELT experience; some experience with little formal training may be considered.
+- **Selection process (6.2).** Selection is conducted by **verified course tutors** or a nominated person at the centre. **All applicants must be interviewed** — online or face to face, in surroundings where privacy can be assured. **All applicants must submit written tasks before being accepted**, and those tasks must include **language awareness tasks and an extended writing task**. For courses with an online TP element, the interview should be conducted online on the centre's teaching platform, and the process must assess **digital literacy**.
+- **The extended writing task offers a choice of prompt.** The centre defines three or four — one narrative, one descriptive, one argumentative — and the applicant picks one. Three or four, not ten: enough that nobody is stuck with a prompt they have nothing to say about, few enough that a tutor knows them by heart. **The marking criteria do not change with the prompt** (organisation, accuracy, range, holding a position for 400 words), which is what keeps the writing comparable and a rejection defensible under 6.2. Record which prompt they chose — the choice is itself a small piece of evidence.
+- Prompts, like interview questions and assignment criteria, are **centre settings imported at setup**, with defaults supplied. Different centres select for different things.
+- **Equality of opportunity** is the centre's responsibility, and questions about physical and mental health must follow local legislation. The app must not force a health question; it offers a single optional "anything we should know" field and leaves the wording to the centre.
+- **Candidates must be told**, and it should be recorded that they were: completing the course does not guarantee success; there are **no exemptions or recognition of prior learning**; and on mixed-mode courses, the additional demand of changing TP mode.
+- **Applicants who cannot attend significant parts of the course must not be accepted** (6.5). Ask at application, not at enrolment.
+- **Special requirements (6.4)** are declared at application, so arrangements exist on day one rather than being improvised in week two.
+- **Rejections require a written reason.** The applicant may ask, and the assessor may look. The reason goes into the letter the applicant receives.
+- **The application page is public and centre-branded.** The centre links to it from their own website. It carries the **centre's logo and name prominently, with the Connect mark small in the footer** — the one public surface where both appear, because an applicant benefits from knowing what system they are entering. Serve it from a **per-centre subdomain** (`iti.celtaconnect.com/apply`) so the address reads as the centre's page; build the routing for this early rather than retrofitting it.
+- **Links are unlimited and filtered.** One permanent link per centre is the default, and the form asks which intake. A centre may generate as many as it wants — per course, per campus, per advertising source — each carrying its own filter. Per-source links also tell a centre where its applicants actually come from.
+- **AI reads the written task; a person decides.** The app may generate a reading of the extended writing task and the language awareness answers **against the centre's own marking scheme** — never against a general notion of quality. Rules, non-negotiable:
+  - It produces **observations and a where-to-look**, never a score, a ranking, or an accept/reject. The strongest wording it may use is "worth interviewing" or "worth a careful interview".
+  - Each observation cites what it is reading — "both phonology items blank", "one comma splice in 400 words" — so a tutor can check it in seconds rather than trusting it.
+  - It is **always labelled as a suggestion**, visually distinct from anything a person wrote, and it is **never shown to the applicant** or included in the assessor pack.
+  - A tutor's decision is recorded independently. If the app ever lets a tutor accept a suggestion with one click, it has become the decision-maker — so it must not.
+  - **Rejections still require a human-written reason.** A generated sentence is not a reason, and an applicant challenging a rejection is entitled to a person's judgement.
+  - Because the process must demonstrate equality of opportunity (6.2), record that a suggestion was generated and what it said. An unexamined model quietly filtering applicants is precisely the risk here.
+- **Rejected applicants' files are retained** for the course they applied to, appear in the assessor pack, and are deleted with everything else at close-out.
 
 **Volunteer students**
 - A volunteer belongs to a **class at a specific level** (Elementary, Upper-Intermediate, etc.), not merely to the course. Candidates must teach at a range of levels, so the class is what a TP is scheduled against.
@@ -114,6 +187,9 @@ Category 2 carries the most sensitive data in the system — **rejected applican
   - A provisional grade of **Fail/Pass** → the candidate is given a **Stage 3 tutorial** and a **warning fail letter** stating what they must do to pass the course.
   - **Failing one written assignment** → a warning letter stating that they cannot fail another.
   - Both are drafted by the app with the specifics filled in (as the withdrawal letter is), signed, filed in the portfolio, and visible in the assessor pack as evidence the warning was given.
+  - **Signatories are derived, not fixed.** If a course tutor gave the tutorial or marked the assignment, there are three: that tutor, **the main course tutor countersigning**, and the candidate acknowledging receipt. If the MCT did it themselves, the first two collapse into one and the letter has two. The app knows who conducted the tutorial and who marked the assignment, so it decides — and a tutor can still add or remove a signatory before issuing. The MCT's name must appear either way: it is what makes the notice the centre speaking rather than an individual.
+  - The candidate acknowledges receipt, not agreement — refusing to sign does not invalidate the notice, and it is recorded as unacknowledged for the assessor.
+  - Withdrawal and deferral keep **two** signatures. Those are agreements between the candidate and the centre, not notices issued to a candidate.
 - **Stage 3 tutorials — Admin Handbook 9.2, verbatim triggers.** Stage 3 progress checks must be completed **in the final third of the course** for all candidates who: were **not to standard at Stage 2**; were **at standard at Stage 2 but are not making the expected progress** in the second half; were **above standard at Stage 2 but are not making the expected progress** in the second half; or **have received indications of Pass B or Pass A but have not maintained their progress**. All four are derivable by the app from the Stage 2 record plus subsequent TP outcomes — flag them rather than relying on a tutor to notice. In every case a tutorial must be given **and the whole tutorial record completed**. A centre may additionally give Stage 3 tutorials to everyone (centre setting).
 - **Stage 1** is carried out on all candidates; a tutorial at Stage 1 is optional. **Stage 2** is carried out on all candidates and **requires a one-to-one tutorial**, ordinarily at the halfway point — after 3 hours' TP, when candidates swap tutors/TP groups — but the trigger is **hours of assessed TP, not calendar position** (a nine-lesson course puts it at 2h40 or 3h20). Derive it from assessed hours. The **final progress record must be completed for all candidates**. Minimum one tutorial per candidate overall, recorded in the CELTA 5.
 - **Fail letter — Admin Handbook 9.2.** Potential Fail candidates are issued a Fail letter making the possible Fail outcome clear and **drawing attention to the action points detailed by the tutors in the CELTA 5**. It must be issued **with at least two lessons left to teach**, so the candidate can respond. The app should therefore warn when a Fail-risk candidate has fewer than two TPs remaining and no letter issued. It is filed in **CELTA 5 Section A** and appears in the assessor pack.
@@ -267,13 +343,14 @@ Website, not an app — a link is the product. Offer "Add to Home Screen" for tr
 6. Broadcast titles are larger than the section heading above them. 20px/600.
 7. Course Stream aligns its sidebar with an invisible spacer `<h2>Spacer</h2>`. Use a shared grid header row.
 8. `TraineeEyebrowLabel` renders inside the wordmark `<Link>`, making the label part of the click target.
+9. **The broadcast composer is inside a candidate's portfolio.** `src/app/portfolio/[traineeId]/broadcast-composer.tsx` posts to the whole cohort but is only reachable by opening one trainee's page. Move it to `/trainer` (Today) or its own route; `postBroadcast` and the `course_broadcasts` table stay unchanged.
 
 ---
 
 ## 9. Still open — needs Ramy before building
 
 1. Do carried TPs count toward the six assessed hours on a deferral's new course?
-2. Where do **applicants** live in the data model? The assessor requires the application file including **rejected** applicants, and the app currently has no concept of an applicant. Decided: uploaded as documents at course start (§ centre uploads) — but the retention and consent position for rejected applicants needs Ramy's sign-off.
+2. What is the retention and consent position for **rejected applicants**? Their files are required for the assessor and are held as first-class records (§ Application and selection), but they never became candidates and never accepted any terms. The application form itself needs to state how long their data is kept and on what basis.
 3. Does the centre's Drive hold the CELTA 5, or is "the centre's own storage" a separate location? (Ramy: separate. Confirm which.)
 
 **Answered during design — recorded above, listed here for traceability:** provisional grade pairs and the slash rule; warning letters and Stage 3 triggers; second/double marking (numbers, blind vs check, who chooses); resubmission deadlines on the timetable; filmed and peer observation; volunteer class levels; assessor documents and portfolio selection; the CELTA 5 as digital original; cover sheet round scope and one PDF per assignment.

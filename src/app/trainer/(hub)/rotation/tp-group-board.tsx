@@ -126,7 +126,7 @@ export function TpGroupBoard({
                             const taught = Boolean(plan?.taughtAt);
                             const isNextCol = date === nextDate;
                             const chipClass = taught
-                              ? "bg-status-on-track-bg text-status-on-track-text"
+                              ? "bg-ink text-card"
                               : isNextCol
                                 ? "bg-gold text-gold-foreground"
                                 : "bg-surface-muted text-muted";
@@ -154,7 +154,7 @@ export function TpGroupBoard({
 
       <div className="flex flex-wrap items-center gap-5">
         <div className="flex items-center gap-2">
-          <span className="size-3.5 rounded-[4px] bg-status-on-track-bg" />
+          <span className="size-3.5 rounded-[4px] bg-ink" />
           <span className="text-[11px] text-muted">Taught</span>
         </div>
         <div className="flex items-center gap-2">

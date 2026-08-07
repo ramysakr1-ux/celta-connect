@@ -1,6 +1,6 @@
 import "server-only";
 import path from "node:path";
-import { Document, Page, Text, View, Image, Svg, Path, Font, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, Font, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 
 // Certificate of attendance for a volunteer TP student who's completed a
 // full level (all "sets" of a coursebook) -- a DESIGN-ONLY piece for now,
@@ -11,8 +11,10 @@ import { Document, Page, Text, View, Image, Svg, Path, Font, StyleSheet, renderT
 // (/student/[token], materials-card.tsx) rather than the teal palette used
 // for the trainee final report -- same person type, same visual identity.
 // No Cambridge logo (Ramy: explicit), only the center's own logo. Per
-// specs/rename-to-connect.md the credit line is now the actual mark plus
-// plain "Connect" text -- no descriptor, no strapline, no "CELTA".
+// specs/README.md's "Whose brand appears where" -- this is a document that
+// leaves the system, so it carries the centre's own branding only, never
+// the Connect mark. Falls back to the centre's name in text where no logo
+// has been uploaded, rather than falling back to a Connect mark.
 const fontsDir = path.join(process.cwd(), "public", "fonts");
 Font.register({ family: "Newsreader", src: path.join(fontsDir, "Newsreader.ttf") });
 Font.register({ family: "Karla", src: path.join(fontsDir, "Karla.ttf") });
@@ -26,11 +28,6 @@ const COLOR = {
   frame: "#c9a04a",
   gold: "#b3892f",
 };
-
-// Wordmark tile hex equivalents of the app's --color-ink-warm / lifted-gold
-// / --color-card tokens (react-pdf has no CSSOM, so these are computed once
-// via the standard OKLCH->sRGB conversion -- same values as src/app/icon.tsx).
-const MARK_COLOR = { tile: "#3e2818", gold: "#cc9140", card: "#fefdfa" };
 
 const styles = StyleSheet.create({
   page: {
@@ -57,6 +54,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: { width: 84, objectFit: "contain", marginBottom: 20 },
+  logoFallbackText: {
+    fontFamily: "Newsreader",
+    fontSize: 18,
+    color: COLOR.ink,
+    textAlign: "center",
+    marginBottom: 20,
+  },
   eyebrow: {
     fontSize: 12,
     letterSpacing: 3,
@@ -98,25 +102,6 @@ const styles = StyleSheet.create({
   },
   signName: { fontSize: 9, color: COLOR.ink },
   signRole: { fontSize: 8, color: COLOR.muted },
-  credit: {
-    position: "absolute",
-    bottom: 20,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 5,
-  },
-  creditTile: {
-    width: 13,
-    height: 13,
-    borderRadius: 3,
-    backgroundColor: MARK_COLOR.tile,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  creditText: { fontSize: 8, color: COLOR.ink },
 });
 
 interface Signatory {
@@ -145,7 +130,11 @@ export async function renderCertificateBuffer(input: CertificateInput): Promise<
       <Page size="A4" orientation="landscape" style={styles.page}>
         <View style={styles.frame}>
           <View style={styles.innerFrame}>
-            {centerLogoUrl ? <Image src={centerLogoUrl} style={styles.logo} /> : null}
+            {centerLogoUrl ? (
+              <Image src={centerLogoUrl} style={styles.logo} />
+            ) : (
+              <Text style={styles.logoFallbackText}>{centerName}</Text>
+            )}
             <Text style={styles.eyebrow}>Certificate of Attendance</Text>
 
             <Text style={styles.body}>This certifies that</Text>
@@ -167,28 +156,6 @@ export async function renderCertificateBuffer(input: CertificateInput): Promise<
               ))}
             </View>
           </View>
-        </View>
-
-        <View style={styles.credit}>
-          <View style={styles.creditTile}>
-            <Svg width={8.2} height={4.7} viewBox="8 30 104 60">
-              <Path
-                d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8"
-                stroke={MARK_COLOR.gold}
-                strokeWidth={13}
-                strokeLinecap="round"
-                fill="none"
-              />
-              <Path
-                d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8"
-                stroke={MARK_COLOR.card}
-                strokeWidth={13}
-                strokeLinecap="round"
-                fill="none"
-              />
-            </Svg>
-          </View>
-          <Text style={styles.creditText}>Connect</Text>
         </View>
       </Page>
     </Document>

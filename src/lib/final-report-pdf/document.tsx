@@ -1,6 +1,6 @@
 import "server-only";
 import path from "node:path";
-import { Document, Page, Text, View, Image, Svg, Path, Font, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, Font, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import { GRADE_DESCRIPTORS } from "@/lib/celta-criteria";
 import type { FinalGrade } from "@/lib/supabase/types";
 
@@ -13,6 +13,10 @@ import type { FinalGrade } from "@/lib/supabase/types";
 // and that a typed name is the real center's own signature convention --
 // rendered here in a script font for a bit more polish, not a drawn
 // signature pad (see project memory for why that's deliberately deferred).
+// Per specs/README.md's "Whose brand appears where" -- this document leaves
+// the system, so it carries the centre's own branding only, never the
+// Connect mark. Falls back to the centre's name in text where no logo has
+// been uploaded, rather than falling back to a Connect mark.
 //
 // Front-page treatment (2026-08-05) borrows the ornamental double-border
 // frame + centered-logo + corner-mark technique from the volunteer
@@ -44,11 +48,6 @@ const COLOR = {
   cream: "#f8f3e8",
   fail: "#9a3324",
 };
-
-// Wordmark tile hex equivalents of --color-ink-warm / lifted-gold /
-// --color-card (react-pdf has no CSSOM) -- same values as src/app/icon.tsx
-// and src/lib/certificate-pdf/document.tsx.
-const MARK_COLOR = { tile: "#3e2818", gold: "#cc9140", card: "#fefdfa" };
 
 const GRADE_COLOR: Record<string, string> = {
   "Pass A": COLOR.gold,
@@ -92,6 +91,7 @@ const styles = StyleSheet.create({
   cornerBL: { bottom: -1, left: -1, borderBottomWidth: 1.5, borderLeftWidth: 1.5 },
   cornerBR: { bottom: -1, right: -1, borderBottomWidth: 1.5, borderRightWidth: 1.5 },
   logo: { width: 64, objectFit: "contain", marginBottom: 18 },
+  logoFallbackText: { fontFamily: "Newsreader", fontSize: 16, color: COLOR.ink, textAlign: "center", marginBottom: 18 },
   eyebrow: { fontSize: 10.5, letterSpacing: 3, color: COLOR.gold, textTransform: "uppercase", textAlign: "center" },
   courseLine: { fontSize: 9, color: COLOR.muted, textAlign: "center", marginTop: 4 },
   divider: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 18, marginBottom: 18 },
@@ -119,25 +119,6 @@ const styles = StyleSheet.create({
   },
   signName: { fontSize: 8.5, color: COLOR.ink },
   signRole: { fontSize: 7.5, color: COLOR.muted },
-  credit: {
-    position: "absolute",
-    bottom: 16,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 5,
-  },
-  creditTile: {
-    width: 12,
-    height: 12,
-    borderRadius: 3,
-    backgroundColor: MARK_COLOR.tile,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  creditText: { fontSize: 7.5, color: COLOR.ink },
 
   // -- Back page (report) --
   page: { padding: 48, fontFamily: "Karla", fontSize: 10.5, color: COLOR.ink },
@@ -158,7 +139,6 @@ const styles = StyleSheet.create({
   bulletText: { fontSize: 9.5, lineHeight: 1.5, flex: 1 },
   closingLine: { fontSize: 9.5, lineHeight: 1.5, marginTop: 4, fontFamily: "Newsreader" },
   commentText: { fontSize: 10, lineHeight: 1.7 },
-  footer: { position: "absolute", bottom: 28, left: 0, right: 0, textAlign: "center", fontSize: 7, color: COLOR.border },
 });
 
 interface Signatory {
@@ -223,7 +203,11 @@ export async function renderFinalReportBuffer(input: FinalReportInput): Promise<
         <View style={styles.frame}>
           <CornerMarks />
           <View style={styles.innerFrame}>
-            {centerLogoUrl ? <Image src={centerLogoUrl} style={styles.logo} /> : null}
+            {centerLogoUrl ? (
+              <Image src={centerLogoUrl} style={styles.logo} />
+            ) : (
+              <Text style={styles.logoFallbackText}>{centerName}</Text>
+            )}
             <Text style={styles.eyebrow}>Final Course Report</Text>
             <Text style={styles.courseLine}>{courseName}</Text>
 
@@ -271,28 +255,6 @@ export async function renderFinalReportBuffer(input: FinalReportInput): Promise<
               ))}
             </View>
           </View>
-        </View>
-
-        <View style={styles.credit}>
-          <View style={styles.creditTile}>
-            <Svg width={7.6} height={4.4} viewBox="8 30 104 60">
-              <Path
-                d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8"
-                stroke={MARK_COLOR.gold}
-                strokeWidth={13}
-                strokeLinecap="round"
-                fill="none"
-              />
-              <Path
-                d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8"
-                stroke={MARK_COLOR.card}
-                strokeWidth={13}
-                strokeLinecap="round"
-                fill="none"
-              />
-            </Svg>
-          </View>
-          <Text style={styles.creditText}>Connect</Text>
         </View>
       </Page>
 
@@ -353,8 +315,6 @@ export async function renderFinalReportBuffer(input: FinalReportInput): Promise<
             <Text style={styles.commentText}>{overallComment}</Text>
           </View>
         ) : null}
-
-        <Text style={styles.footer}>Generated via Connect</Text>
       </Page>
     </Document>
   );
