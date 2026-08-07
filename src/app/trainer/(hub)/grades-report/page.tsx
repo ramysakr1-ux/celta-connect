@@ -4,18 +4,26 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { computeStrengthsAndActionPoints } from "@/lib/celta-criteria";
+import { computeAssessedTpStats } from "@/lib/course-progress";
+import { computeSignatureLedger, isBookletExportReady } from "@/lib/celta5-signatures";
+import { mapTpFeedbackToGlyphRow } from "@/lib/tp-grades";
+import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { ProvisionalGradeForm } from "@/app/trainer/(hub)/grades-report/provisional-grade-form";
-import type { CriteriaRating } from "@/lib/supabase/types";
+import { UpgradeConditionsForm } from "@/app/trainer/(hub)/grades-report/upgrade-conditions-form";
+import { CohortSheet, type CohortSheetRow } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
+import { FinalGradeForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/final-grade-form";
+import { StandardRatingGlyph } from "@/lib/status-pill";
+import type { CriteriaRating, Database } from "@/lib/supabase/types";
+
+type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 
 // Assessor-facing compiled Grades Report -- the whole cohort in one
 // continuous document, matching the shape of a real center's actual
-// "Grades Report" (traced from a filled example, 5 Aug 2026): provisional
-// grade (set by the trainer ~Stage 2, "slashed" between two grades when
-// genuinely unsure), Planning/Teaching Strengths & Action Points derived
-// from the same criteria matrix the rest of the app already tracks, and a
-// recommended final grade + justification -- required only for candidates
-// who were slashed; a candidate who simply maintained their provisional
-// trajectory needs no extra comment.
+// "Grades Report" (traced from a filled example, 5 Aug 2026), plus the
+// design reference's own "grade review meeting view" (Grades Report.dc.html
+// 1a): a compact cohort sheet up top -- TP1-8 trajectory, provisional,
+// recommended, what's still outstanding -- with the existing per-candidate
+// detail below it for the actual editing.
 export default async function GradesReportPage() {
   const session = await getCurrentProfile();
   const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
@@ -28,6 +36,8 @@ export default async function GradesReportPage() {
     return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
   }
 
+  const { data: course } = await supabase.from("courses").select("name").eq("id", courseId).maybeSingle();
+
   const { data: trainees } = await supabase
     .from("profiles")
     .select("id, full_name")
@@ -36,7 +46,7 @@ export default async function GradesReportPage() {
     .order("full_name");
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
-  const [{ data: records }, { data: matrixRows }] =
+  const [{ data: records }, { data: matrixRows }, { data: tpFeedbackRows }, { data: assignments }, { data: planAssignments }] =
     traineeIds.length > 0
       ? await Promise.all([
           supabase.from("celta5_records").select("*").eq("course_id", courseId),
@@ -44,8 +54,21 @@ export default async function GradesReportPage() {
             .from("celta5_matrix")
             .select("trainee_id, criteria_code, tutor_status_stage2, tutor_status_stage3")
             .eq("course_id", courseId),
+          supabase.from("tp_feedback").select("trainee_id, tp_number, grade, submitted_at").in("trainee_id", traineeIds),
+          supabase.from("assignments").select("*").in("trainee_id", traineeIds),
+          supabase.from("plan_assignments").select("trainee_id, tp_point_id, taught_at").eq("course_id", courseId),
         ])
-      : [{ data: [] }, { data: [] }];
+      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }];
+
+  const tpPointIds = [
+    ...new Set((planAssignments ?? []).filter((p) => p.taught_at).map((p) => p.tp_point_id).filter((id): id is string => !!id)),
+  ];
+  const { data: tpPoints } = tpPointIds.length > 0 ? await supabase.from("tp_points").select("id, tp_coursebook_id").in("id", tpPointIds) : { data: [] };
+  const coursebookIds = [...new Set((tpPoints ?? []).map((p) => p.tp_coursebook_id))];
+  const { data: coursebooks } =
+    coursebookIds.length > 0 ? await supabase.from("tp_coursebooks").select("id, level").in("id", coursebookIds) : { data: [] };
+  const tpPointCoursebookById = new Map((tpPoints ?? []).map((p) => [p.id, p.tp_coursebook_id]));
+  const coursebookLevelById = new Map((coursebooks ?? []).map((c) => [c.id, c.level]));
 
   const recordByTrainee = new Map((records ?? []).map((r) => [r.trainee_id, r]));
   const matrixByTrainee = new Map<string, Record<string, CriteriaRating | null>>();
@@ -57,12 +80,54 @@ export default async function GradesReportPage() {
     matrixByTrainee.set(row.trainee_id, ratings);
   }
 
+  function provisionalLabel(record: Celta5Record | null | undefined): string {
+    if (!record?.provisional_grade) return "Not set";
+    return record.provisional_grade_upper ? `${record.provisional_grade} / ${record.provisional_grade_upper}` : record.provisional_grade;
+  }
+
+  const cohortRows: CohortSheetRow[] = (trainees ?? []).map((trainee) => {
+    const record = recordByTrainee.get(trainee.id) ?? null;
+    const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id);
+    const traineeFeedback = (tpFeedbackRows ?? []).filter((f) => f.trainee_id === trainee.id);
+
+    let outstanding = "";
+    if (!record) {
+      outstanding = "No CELTA 5 record";
+    } else if (record.stage3_required && !record.stage3_finalized_at) {
+      outstanding = "Stage 3 record open";
+    } else {
+      const unresolved = traineeAssignments.find((a) => {
+        const isResubmissionRound = a.first_status === "resubmission_required" || a.resubmission_status !== "not_submitted";
+        const status = isResubmissionRound ? a.resubmission_status : a.first_status;
+        return status !== "approved";
+      });
+      if (unresolved) {
+        outstanding = `${ASSIGNMENT_INFO[unresolved.assignment_type]?.title ?? unresolved.assignment_type} unresolved`;
+      } else {
+        const ledger = computeSignatureLedger(record, traineeAssignments);
+        if (!isBookletExportReady(ledger)) {
+          const outstandingCount = ledger.filter((r) => r.state !== "signed").length;
+          outstanding = `${outstandingCount} signature${outstandingCount === 1 ? "" : "s"} outstanding`;
+        }
+      }
+    }
+
+    return {
+      traineeId: trainee.id,
+      name: trainee.full_name,
+      tpGlyphs: mapTpFeedbackToGlyphRow(traineeFeedback),
+      provisionalLabel: provisionalLabel(record),
+      recommendedGrade: record?.final_recommended_grade ?? null,
+      outstanding,
+    };
+  });
+
   return (
     <div className="flex flex-col gap-6">
+      <CohortSheet courseId={courseId} courseName={course?.name ?? "Course"} rows={cohortRows} />
+
       <div className="sheet">
-        <h1 className="font-serif text-xl text-ink">Grades Report</h1>
         <p className="mt-2 text-sm text-muted">
-          The whole cohort's provisional and final grades, for review with the external assessor.
           Provisional grades are set by the trainer around Stage 2 -- if a candidate is genuinely in
           doubt between two grades, mark them as such below. A final justification is only needed
           for candidates who were marked in doubt; anyone who simply maintained their provisional
@@ -80,23 +145,31 @@ export default async function GradesReportPage() {
             const { planningStrengths, planningActionPoints, teachingStrengths, teachingActionPoints } =
               computeStrengthsAndActionPoints(ratings);
             const wasSlashed = Boolean(record?.provisional_grade_upper);
+            const traineeFeedback = (tpFeedbackRows ?? []).filter((f) => f.trainee_id === trainee.id);
+            const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at);
+            const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
 
             return (
-              <div key={trainee.id} className="sheet flex flex-col gap-4">
+              <div key={trainee.id} id={`candidate-${trainee.id}`} className="sheet flex flex-col gap-4 scroll-mt-6">
                 <div className="flex items-start justify-between gap-4">
-                  <h2 className="font-serif text-lg text-ink">{trainee.full_name}</h2>
-                  {record?.provisional_grade ? (
-                    <span className="pill pill-info shrink-0">
-                      Provisional: {record.provisional_grade}
-                      {record.provisional_grade_upper ? ` / ${record.provisional_grade_upper}` : ""}
-                    </span>
-                  ) : (
-                    <span className="pill pill-neutral shrink-0">Provisional: not set</span>
-                  )}
+                  <div>
+                    <p className="text-xs text-muted">
+                      {assessedTp.tpsTaught} of 8 TPs taught · {assessedTp.hoursAssessed.toFixed(1)} hrs assessed
+                    </p>
+                    <h2 className="font-serif text-lg text-ink">{trainee.full_name}</h2>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {mapTpFeedbackToGlyphRow(traineeFeedback).map((slot) => (
+                      <StandardRatingGlyph key={slot.tpNumber} rating={slot.grade} title={`TP${slot.tpNumber}`} />
+                    ))}
+                  </div>
                 </div>
 
                 {trainer ? (
-                  <ProvisionalGradeForm traineeId={trainee.id} record={record} />
+                  <>
+                    <ProvisionalGradeForm traineeId={trainee.id} record={record} />
+                    <UpgradeConditionsForm traineeId={trainee.id} record={record} />
+                  </>
                 ) : null}
 
                 <p className="text-xs text-muted">
@@ -123,6 +196,8 @@ export default async function GradesReportPage() {
                     justification is expected before this record is complete.
                   </p>
                 ) : null}
+
+                {trainer && record ? <FinalGradeForm record={record} /> : null}
 
                 {record?.final_recommended_grade ? (
                   <p className="text-sm font-semibold text-ink">

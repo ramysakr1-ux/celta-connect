@@ -341,6 +341,7 @@ export interface Database {
           provisional_grade: FinalGrade | null;
           provisional_grade_upper: FinalGrade | null;
           provisional_set_at: string | null;
+          provisional_upgrade_conditions: string | null;
           final_recommended_grade: FinalGrade | null;
           final_teaching_grade: "Pass" | "Pass B" | "Pass A" | "Fail" | null;
           final_assignments_grade: "Pass" | "Fail" | null;

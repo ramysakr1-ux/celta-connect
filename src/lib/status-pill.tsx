@@ -66,6 +66,37 @@ export function StandardRatingPill({ rating }: { rating: StandardRating | null }
   );
 }
 
+const STANDARD_RATING_GLYPH: Record<StandardRating, string> = {
+  above_standard: "S+",
+  to_standard: "S",
+  not_to_standard: "N",
+};
+
+// Compact 1-2 character variant for dense tables (Grades Report's cohort
+// sheet and per-candidate TP row) -- same 3-color mapping as
+// StandardRatingPill, just without the full label. No rating = a dim empty
+// slot (TP not yet taught/graded), not an error state.
+export function StandardRatingGlyph({ rating, title }: { rating: StandardRating | null; title?: string }) {
+  if (!rating) {
+    return (
+      <span
+        title={title}
+        className="inline-flex h-[22px] w-[30px] items-center justify-center rounded-[5px] border border-dashed border-border-faint text-xs text-muted"
+      >
+        --
+      </span>
+    );
+  }
+  return (
+    <span
+      title={title}
+      className={`status-pill inline-flex h-[22px] w-[30px] items-center justify-center rounded-[5px] px-0 ${STANDARD_RATING_CLASS[rating]}`}
+    >
+      {STANDARD_RATING_GLYPH[rating]}
+    </span>
+  );
+}
+
 const TP_POINT_STATUS_LABEL: Record<TpPointStatus, string> = {
   pending_review: "Pending review",
   published: "Published",

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
+import { PROVISIONAL_SLOTS } from "@/lib/provisional-grade";
 import type { CriteriaRating, StandardRating } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -379,14 +380,80 @@ export async function updateFinalGrade(
 
 const PROVISIONAL_GRADES = ["Pass", "Pass B", "Pass A", "Fail", "Withdrawn"] as const;
 
+// Only these 3 adjacent pairs are real "slashed, undecided" states --
+// specs/README.md's own rule: "Provisional grades with a slash (Fail/Pass,
+// Pass/Pass B, Pass B/Pass A) mean undecided." The old two-independent-
+// selects form let a trainer save any of the 25 combinations (including
+// nonsense like Fail/Pass A) -- this is a real correctness tightening, not
+// just a restyle. `provisional_grade`/`provisional_grade_upper` stay the
+// same two columns underneath; only the picker and its validation change.
+const VALID_SLASH_PAIRS: [string, string][] = [
+  ["Fail", "Pass"],
+  ["Pass", "Pass B"],
+  ["Pass B", "Pass A"],
+];
+
 // The real provisional grade, set by the trainer around Stage 2 (~TP6) --
 // distinct from final_recommended_grade, which stays hidden from trainees
 // (see 0034_hide_final_grade_from_trainee.sql). computeTrajectory() can
 // suggest a starting point, but this is always the trainer's own call, same
 // as every other rating in this app -- including whether to mark the
-// candidate as "slashed" between two adjacent grades by also setting the
-// upper bound.
+// candidate as "slashed" between two adjacent grades.
 export async function updateProvisionalGrade(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("trainer");
+
+  const traineeId = formData.get("trainee_id");
+  const slot = formData.get("provisional_slot");
+  if (typeof traineeId !== "string" || !traineeId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+  if (typeof slot !== "string" || !(PROVISIONAL_SLOTS as readonly string[]).includes(slot)) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  let grade: (typeof PROVISIONAL_GRADES)[number] | null = null;
+  let upper: (typeof PROVISIONAL_GRADES)[number] | null = null;
+
+  if (slot.includes("/")) {
+    const [lower, higher] = slot.split("/");
+    const isValidPair = VALID_SLASH_PAIRS.some(([l, h]) => l === lower && h === higher);
+    if (!isValidPair) {
+      return { error: "Not a real slashed pair -- only Fail/Pass, Pass/Pass B, and Pass B/Pass A mean undecided." };
+    }
+    grade = optionalRating(lower, PROVISIONAL_GRADES);
+    upper = optionalRating(higher, PROVISIONAL_GRADES);
+  } else {
+    grade = optionalRating(slot, PROVISIONAL_GRADES);
+  }
+
+  const supabase = await createClient();
+  const { error: provisionalError } = await supabase
+    .from("celta5_records")
+    .update({
+      provisional_grade: grade,
+      provisional_grade_upper: upper,
+      provisional_set_at: grade ? new Date().toISOString() : null,
+    })
+    .eq("trainee_id", traineeId);
+
+  if (provisionalError) {
+    return { error: "Could not save. Try again." };
+  }
+
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+  revalidatePath("/trainer/grades-report");
+  return { error: null };
+}
+
+// The tutor's free-text "in order to deserve a higher grade, they need
+// to..." working note (migration 0053) -- one condition per line, gated to
+// release to the candidate only alongside the final report (same UI-layer
+// gate as final_recommended_grade/overall_notes; celta5_records has no
+// trainee-self SELECT policy at all).
+export async function updateUpgradeConditions(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
@@ -397,23 +464,13 @@ export async function updateProvisionalGrade(
     return { error: "Something went wrong. Refresh and try again." };
   }
 
-  const grade = optionalRating(formData.get("provisional_grade"), PROVISIONAL_GRADES);
-  const upper = optionalRating(formData.get("provisional_grade_upper"), PROVISIONAL_GRADES);
-
   const supabase = await createClient();
-  const { error: provisionalError } = await supabase
+  const { error } = await supabase
     .from("celta5_records")
-    .update({
-      provisional_grade: grade,
-      // A "slashed" upper bound only makes sense once there's a primary
-      // grade to be uncertain relative to, and only when it's genuinely a
-      // different (higher) grade -- not a duplicate of the primary.
-      provisional_grade_upper: grade && upper && upper !== grade ? upper : null,
-      provisional_set_at: grade ? new Date().toISOString() : null,
-    })
+    .update({ provisional_upgrade_conditions: optionalString(formData.get("provisional_upgrade_conditions")) })
     .eq("trainee_id", traineeId);
 
-  if (provisionalError) {
+  if (error) {
     return { error: "Could not save. Try again." };
   }
 
@@ -449,6 +506,37 @@ export async function updateGradeReviewComments(
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   revalidatePath(`/portfolio/${traineeId}/celta5`);
+  return { error: null };
+}
+
+// Cohort sheet's "Release final reports" -- the same release as
+// releaseFinalReport above, just batched for everyone on the course who is
+// actually ready (recommended grade set, not Withdrawn, trainer already
+// signed off, not already released). Silently skips anyone not ready
+// instead of erroring -- the point of a bulk action is releasing everyone
+// who's genuinely done, not blocking the whole batch on stragglers.
+export async function releaseAllFinalReports(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const trainer = await requireRole("trainer");
+  const courseId = formData.get("course_id");
+  if (typeof courseId !== "string" || !courseId || courseId !== trainer.course_id) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("celta5_records")
+    .update({ final_report_released_at: new Date().toISOString() })
+    .eq("course_id", courseId)
+    .not("final_recommended_grade", "is", null)
+    .neq("final_recommended_grade", "Withdrawn")
+    .not("trainer_signoff_final_at", "is", null)
+    .is("final_report_released_at", null);
+
+  if (error) {
+    return { error: "Could not save. Try again." };
+  }
+
+  revalidatePath("/trainer/grades-report");
   return { error: null };
 }
 
