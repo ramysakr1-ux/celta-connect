@@ -6,10 +6,34 @@ import {
   ASSIGNMENT_STATUS_PILL_CLASS,
 } from "@/lib/assignment-info";
 import { StandardRatingPill } from "@/lib/status-pill";
+import { MIN_LEVELS_REQUIRED, type AssessedTpStats } from "@/lib/course-progress";
 import type { Database } from "@/lib/supabase/types";
 
 type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
 type TpFeedbackRow = Database["public"]["Tables"]["tp_feedback"]["Row"];
+
+// Section 6 stats badge -- "X hrs assessed" plus the distinct-levels count
+// build-spec.md calls out specifically ("at least two levels", not just
+// hours). Sits above TpFeedbackSummary in both the trainee-own and staff
+// views since both already render that list from the same taught-TP data.
+export function AssessedTpStatsBadge({ stats }: { stats: AssessedTpStats }) {
+  const levelsOk = stats.levels.length >= MIN_LEVELS_REQUIRED;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
+        {stats.tpsTaught} TP{stats.tpsTaught === 1 ? "" : "s"} taught · {stats.hoursAssessed.toFixed(1)} hrs assessed
+      </span>
+      <span
+        className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${
+          levelsOk ? "bg-accent text-ink" : "border border-dashed border-gold text-gold"
+        }`}
+      >
+        Levels taught: {stats.levels.length > 0 ? stats.levels.join(", ") : "none yet"} ({stats.levels.length} of{" "}
+        {MIN_LEVELS_REQUIRED} required)
+      </span>
+    </div>
+  );
+}
 
 // Auto-pulled from the assignments/TP-feedback trainers already fill in
 // elsewhere in the app, so the Stage Two/Three "written assignments notes"
@@ -37,12 +61,15 @@ export function AssignmentsSummary({
             <tr>
               <th className="text-sm text-muted">Assignment</th>
               <th className="text-sm text-muted">Status</th>
+              <th className="text-sm text-muted">Own work</th>
               <th className="text-sm text-muted">Final grade</th>
             </tr>
           </thead>
           <tbody>
             {sorted.map((a) => {
-              const status = a.first_status === "resubmission_required" ? a.resubmission_status : a.first_status;
+              const isResubmissionRound = a.first_status === "resubmission_required";
+              const status = isResubmissionRound ? a.resubmission_status : a.first_status;
+              const ownWorkConfirmed = isResubmissionRound ? a.resubmission_own_work_confirmed : a.first_own_work_confirmed;
               return (
                 <tr key={a.id}>
                   <td className="text-ink">
@@ -55,6 +82,7 @@ export function AssignmentsSummary({
                       {ASSIGNMENT_STATUS_LABEL[status]}
                     </span>
                   </td>
+                  <td className="text-muted">{status === "not_submitted" ? "--" : ownWorkConfirmed ? "Confirmed" : "Not confirmed"}</td>
                   <td className="text-muted">{a.final_grade ?? "--"}</td>
                 </tr>
               );

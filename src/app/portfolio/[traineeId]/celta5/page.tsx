@@ -13,9 +13,9 @@ import {
   addTpFeedbackCriteriaTags,
 } from "@/lib/celta-criteria";
 import { TrajectoryGradientBars } from "@/components/trajectory-gradient-bar";
-import { AssignmentsSummary, TpFeedbackSummary } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
+import { AssignmentsSummary, TpFeedbackSummary, AssessedTpStatsBadge } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
 import { CriteriaRatingPill, StandardRatingPill } from "@/lib/status-pill";
-import { computeProgressIssues } from "@/lib/course-progress";
+import { computeProgressIssues, computeAssessedTpStats } from "@/lib/course-progress";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
 import { FinalChecklistForm } from "@/app/dashboard/trainee/celta5/final-checklist-form";
@@ -30,6 +30,8 @@ import { AttendanceForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/att
 import { AdminGrantForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/admin-grant-form";
 import { FinalizeRecordForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/finalize-record-form";
 import { ReleaseFinalReportForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/release-final-report-form";
+import { SignatureLedger } from "@/app/dashboard/trainer/trainees/[id]/celta5/signature-ledger";
+import { computeSignatureLedger } from "@/lib/celta5-signatures";
 
 function ReadOnlyField({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
@@ -107,7 +109,7 @@ export default async function PortfolioCelta5Page({
               .eq("course_id", viewer.course_id)
               .in("type", ["tp", "assignment_due", "resubmission_due"])
           : Promise.resolve({ data: [] }),
-        supabase.from("plan_assignments").select("tp_number, taught_at").eq("trainee_id", traineeId),
+        supabase.from("plan_assignments").select("tp_number, tp_point_id, taught_at").eq("trainee_id", traineeId),
         supabase.from("assignments").select("assignment_type, first_status, resubmission_status").eq("trainee_id", traineeId),
       ]);
     const record = recordRows?.[0];
@@ -116,7 +118,26 @@ export default async function PortfolioCelta5Page({
       return <div className="sheet p-6 text-sm text-muted">No CELTA 5 record found yet. Check with your trainer.</div>;
     }
 
+    const taughtAssignments = (plans ?? []).filter((p) => p.taught_at);
+    const tpPointIds = [...new Set(taughtAssignments.map((p) => p.tp_point_id).filter((id): id is string => !!id))];
+    const { data: tpPointsForLevels } =
+      tpPointIds.length > 0
+        ? await supabase.from("tp_points").select("id, tp_coursebook_id").in("id", tpPointIds)
+        : { data: [] };
+    const coursebookIds = [...new Set((tpPointsForLevels ?? []).map((p) => p.tp_coursebook_id))];
+    const { data: coursebooksForLevels } =
+      coursebookIds.length > 0
+        ? await supabase.from("tp_coursebooks").select("id, level").in("id", coursebookIds)
+        : { data: [] };
+    const assessedTpStats = computeAssessedTpStats({
+      taughtAssignments,
+      tpPointCoursebookById: new Map((tpPointsForLevels ?? []).map((p) => [p.id, p.tp_coursebook_id])),
+      coursebookLevelById: new Map((coursebooksForLevels ?? []).map((c) => [c.id, c.level])),
+    });
+
     const byCode = new Map((matrix ?? []).map((m) => [m.criteria_code, m]));
+    const candidateRatedCount = CELTA_CRITERIA_CODES.filter((c) => byCode.get(c)?.candidate_status).length;
+    const tutorRatedCount = CELTA_CRITERIA_CODES.filter((c) => byCode.get(c)?.tutor_status_stage2).length;
     const stage2Submitted = !!record.stage2_candidate_submitted_at;
     const stage1And2Released = !!record.stage2_completed_at;
     const finalReleased = !!record.trainer_signoff_final_at;
@@ -188,7 +209,13 @@ export default async function PortfolioCelta5Page({
             ) : null}
 
             <div>
-              <h3 className="font-serif text-lg text-ink">Stage Two</h3>
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-serif text-lg text-ink">Stage Two</h3>
+                <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
+                  You: {candidateRatedCount} of {CELTA_CRITERIA_CODES.length} · Tutor: {tutorRatedCount} of{" "}
+                  {CELTA_CRITERIA_CODES.length}
+                </span>
+              </div>
               <div className="sheet mt-3 overflow-hidden !p-0">
                 <div className="list-row">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -217,11 +244,18 @@ export default async function PortfolioCelta5Page({
                     <div className="mt-3 flex flex-col gap-3">
                       {codes.map((code) => {
                         const row = byCode.get(code);
+                        const disagrees =
+                          !!row?.candidate_status && !!row?.tutor_status_stage2 && row.candidate_status !== row.tutor_status_stage2;
                         return (
                           <div key={code} className="border-b border-border-faint pb-3 last:border-none">
                             <p className="text-sm text-ink">
                               {code}
                               {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
+                              {disagrees ? (
+                                <span className="ml-2 text-sm font-semibold text-gold" title="You and your tutor rated this differently">
+                                  &ne;
+                                </span>
+                              ) : null}
                             </p>
                             <div className="mt-1 flex items-center gap-4">
                               <div className="flex items-center gap-1.5">
@@ -331,6 +365,13 @@ export default async function PortfolioCelta5Page({
           </>
         ) : null}
 
+        <div className="sheet">
+          <p className="text-sm text-muted">Teaching practice</p>
+          <div className="mt-2">
+            <AssessedTpStatsBadge stats={assessedTpStats} />
+          </div>
+        </div>
+
         <div>
           <h3 className="font-serif text-lg text-ink">Observations of experienced teachers</h3>
           <p className="mt-1 text-sm text-muted">Log the 6 hours you spend observing experienced teachers (up to 3 filmed).</p>
@@ -362,6 +403,7 @@ export default async function PortfolioCelta5Page({
     { data: lessons },
     { data: assignments },
     { data: tpFeedbackRows },
+    { data: planAssignments },
   ] = await Promise.all([
     supabase.from("courses").select("*").eq("id", trainee.course_id ?? "").maybeSingle(),
     supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
@@ -372,6 +414,7 @@ export default async function PortfolioCelta5Page({
     supabase.from("tp_lessons").select("id").eq("trainee_id", traineeId),
     supabase.from("assignments").select("*").eq("trainee_id", traineeId),
     supabase.from("tp_feedback").select("*").eq("trainee_id", traineeId),
+    supabase.from("plan_assignments").select("tp_point_id, taught_at").eq("trainee_id", traineeId),
   ]);
 
   const lessonIds = (lessons ?? []).map((l) => l.id);
@@ -379,6 +422,23 @@ export default async function PortfolioCelta5Page({
     lessonIds.length > 0
       ? await supabase.from("tp_lesson_criteria_tags").select("*").in("tp_lesson_id", lessonIds).order("created_at")
       : { data: [] };
+
+  const taughtAssignments = (planAssignments ?? []).filter((p) => p.taught_at);
+  const tpPointIdsForLevels = [...new Set(taughtAssignments.map((p) => p.tp_point_id).filter((id): id is string => !!id))];
+  const { data: tpPointsForLevels } =
+    tpPointIdsForLevels.length > 0
+      ? await supabase.from("tp_points").select("id, tp_coursebook_id").in("id", tpPointIdsForLevels)
+      : { data: [] };
+  const coursebookIdsForLevels = [...new Set((tpPointsForLevels ?? []).map((p) => p.tp_coursebook_id))];
+  const { data: coursebooksForLevels } =
+    coursebookIdsForLevels.length > 0
+      ? await supabase.from("tp_coursebooks").select("id, level").in("id", coursebookIdsForLevels)
+      : { data: [] };
+  const assessedTpStats = computeAssessedTpStats({
+    taughtAssignments,
+    tpPointCoursebookById: new Map((tpPointsForLevels ?? []).map((p) => [p.id, p.tp_coursebook_id])),
+    coursebookLevelById: new Map((coursebooksForLevels ?? []).map((c) => [c.id, c.level])),
+  });
 
   const tagsByCriteria = new Map<string, { tag_type: "strength" | "action_point"; created_at: string }[]>();
   for (const tag of criteriaTags ?? []) {
@@ -403,9 +463,14 @@ export default async function PortfolioCelta5Page({
     );
   }
 
+  const signatureLedger = computeSignatureLedger(record, assignments ?? []);
+
   const matrixRows = matrix ?? [];
   const matrixKey = matrixRows.map((m) => m.updated_at).join(",");
   const matrixByCode = new Map(matrixRows.map((m) => [m.criteria_code, m]));
+  const stage2CandidateRatedCount = CELTA_CRITERIA_CODES.filter((c) => matrixByCode.get(c)?.candidate_status).length;
+  const stage2TutorRatedCount = CELTA_CRITERIA_CODES.filter((c) => matrixByCode.get(c)?.tutor_status_stage2).length;
+  const stage3TutorRatedCount = CELTA_CRITERIA_CODES.filter((c) => matrixByCode.get(c)?.tutor_status_stage3).length;
 
   const ratingsByCode: Record<string, "S+" | "S" | "N" | "X" | null> = {};
   for (const code of CELTA_CRITERIA_CODES) {
@@ -433,9 +498,30 @@ export default async function PortfolioCelta5Page({
     </div>
   );
 
+  // Section 5 requirement: 6 hours total, but filmed observations only ever
+  // count for up to 3 of those 6 -- the remaining hours must be live.
+  const OBSERVATION_HOURS_REQUIRED = 6;
+  const OBSERVATION_FILMED_CAP_MINUTES = 3 * 60;
+  const liveMinutes = (observations ?? []).filter((o) => !o.filmed).reduce((sum, o) => sum + (o.length_minutes ?? 0), 0);
+  const filmedMinutes = (observations ?? []).filter((o) => o.filmed).reduce((sum, o) => sum + (o.length_minutes ?? 0), 0);
+  const filmedCountedMinutes = Math.min(filmedMinutes, OBSERVATION_FILMED_CAP_MINUTES);
+  const observationHoursCounted = (liveMinutes + filmedCountedMinutes) / 60;
+  const observationLivePct = Math.min(100, (liveMinutes / 60 / OBSERVATION_HOURS_REQUIRED) * 100);
+  const observationFilmedPct = Math.min(100 - observationLivePct, (filmedCountedMinutes / 60 / OBSERVATION_HOURS_REQUIRED) * 100);
+
   const observationsBlock = (
     <div>
       <h3 className="font-serif text-lg text-ink">Observations of experienced teachers (self-reported)</h3>
+      <div className="mt-2">
+        <p className="text-sm text-ink">
+          {observationHoursCounted.toFixed(1)} of {OBSERVATION_HOURS_REQUIRED} hrs counted · {(liveMinutes / 60).toFixed(1)} hrs live
+          {filmedMinutes > 0 ? ` · ${(filmedMinutes / 60).toFixed(1)} hrs filmed (capped at 3)` : ""}
+        </p>
+        <div className="mt-1.5 flex h-1.5 w-full overflow-hidden rounded-full bg-accent">
+          <div className="h-full bg-primary" style={{ width: `${observationLivePct}%` }} />
+          <div className="h-full bg-gold" style={{ width: `${observationFilmedPct}%` }} />
+        </div>
+      </div>
       <div className="sheet mt-3 overflow-hidden !p-0">
         {observations && observations.length > 0 ? (
           <table className="table-plain w-full">
@@ -493,6 +579,8 @@ export default async function PortfolioCelta5Page({
 
         {observationsBlock}
 
+        <AssessedTpStatsBadge stats={assessedTpStats} />
+
         <AssignmentsSummary traineeId={traineeId} assignments={assignments ?? []} />
         <TpFeedbackSummary traineeId={traineeId} feedbackRows={tpFeedbackRows ?? []} />
 
@@ -505,7 +593,13 @@ export default async function PortfolioCelta5Page({
         ) : null}
 
         <div>
-          <h3 className="font-serif text-lg text-ink">Stage Two -- criteria ratings</h3>
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-serif text-lg text-ink">Stage Two -- criteria ratings</h3>
+            <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
+              Candidate: {stage2CandidateRatedCount} of {CELTA_CRITERIA_CODES.length} · Tutor: {stage2TutorRatedCount} of{" "}
+              {CELTA_CRITERIA_CODES.length}
+            </span>
+          </div>
           <div className="sheet mt-3 overflow-hidden !p-0">
             <div className="list-row">
               <p className="text-sm text-muted">Tutor&apos;s overall assessment</p>
@@ -518,15 +612,34 @@ export default async function PortfolioCelta5Page({
                   Topic {section} -- {title}
                 </h4>
                 <div className="mt-3 flex flex-col gap-2">
-                  {codes.map((code) => (
-                    <div key={code} className="flex items-center justify-between gap-3 border-b border-border-faint pb-2 last:border-none">
-                      <p className="text-sm text-ink">
-                        {code}
-                        {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
-                      </p>
-                      <CriteriaRatingPill rating={matrixByCode.get(code)?.tutor_status_stage2 ?? null} />
-                    </div>
-                  ))}
+                  {codes.map((code) => {
+                    const mRow = matrixByCode.get(code);
+                    const disagrees =
+                      !!mRow?.candidate_status && !!mRow?.tutor_status_stage2 && mRow.candidate_status !== mRow.tutor_status_stage2;
+                    return (
+                      <div key={code} className="flex items-center justify-between gap-3 border-b border-border-faint pb-2 last:border-none">
+                        <p className="text-sm text-ink">
+                          {code}
+                          {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
+                          {disagrees ? (
+                            <span className="ml-2 text-sm font-semibold text-gold" title="Candidate and tutor ratings differ">
+                              &ne;
+                            </span>
+                          ) : null}
+                        </p>
+                        <div className="flex shrink-0 items-center gap-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-muted">Candidate:</span>
+                            <CriteriaRatingPill rating={mRow?.candidate_status ?? null} />
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-muted">Tutor:</span>
+                            <CriteriaRatingPill rating={mRow?.tutor_status_stage2 ?? null} />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -535,7 +648,12 @@ export default async function PortfolioCelta5Page({
 
         {record.stage3_required ? (
           <div>
-            <h3 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h3>
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h3>
+              <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
+                Tutor: {stage3TutorRatedCount} of {CELTA_CRITERIA_CODES.length}
+              </span>
+            </div>
             <div className="sheet mt-3 overflow-hidden !p-0">
               <div className="list-row">
                 <p className="text-sm text-muted">Tutor&apos;s overall assessment</p>
@@ -606,6 +724,8 @@ export default async function PortfolioCelta5Page({
             <p className="mt-2 text-sm text-muted">Not yet signed off by the candidate.</p>
           )}
         </div>
+
+        <SignatureLedger rows={signatureLedger} traineeId={traineeId} />
       </div>
     );
   }
@@ -624,6 +744,8 @@ export default async function PortfolioCelta5Page({
       <AttendanceForm key={`attendance-${record.updated_at}`} record={record} totalHours={course?.total_hours ?? 120} absences={absences ?? []} />
 
       {observationsBlock}
+
+      <AssessedTpStatsBadge stats={assessedTpStats} />
 
       <AssignmentsSummary traineeId={traineeId} assignments={assignments ?? []} />
       <TpFeedbackSummary traineeId={traineeId} feedbackRows={tpFeedbackRows ?? []} />
@@ -673,6 +795,8 @@ export default async function PortfolioCelta5Page({
       ) : null}
 
       <AdminGrantForm key={`admin-grant-${record.updated_at}`} record={record} />
+
+      <SignatureLedger rows={signatureLedger} traineeId={traineeId} />
     </div>
   );
 }

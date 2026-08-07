@@ -25,9 +25,21 @@ export function AttendanceForm({
   const [hoursState, hoursAction, hoursPending] = useActionState(updateAttendance, initialState);
   const [absenceState, absenceAction, absencePending] = useActionState(addAbsence, initialState);
 
+  const hoursAttended = record.hours_attended ?? 0;
+  const attendancePct = totalHours > 0 ? Math.min(100, (hoursAttended / totalHours) * 100) : 0;
+
   return (
     <div className="sheet flex flex-col gap-4 p-6">
       <h2 className="font-serif text-lg text-ink">Attendance</h2>
+
+      <div>
+        <p className="text-sm text-ink">
+          {hoursAttended} of {totalHours} hrs
+        </p>
+        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-accent">
+          <div className="h-full rounded-full bg-primary" style={{ width: `${attendancePct}%` }} />
+        </div>
+      </div>
 
       <form action={hoursAction} className="flex items-end gap-3">
         <input type="hidden" name="trainee_id" value={record.trainee_id} />
@@ -59,6 +71,7 @@ export function AttendanceForm({
                 <th className="text-sm text-muted">Date</th>
                 <th className="text-sm text-muted">Category</th>
                 <th className="text-sm text-muted">Reason</th>
+                <th className="text-sm text-muted">Made up</th>
               </tr>
             </thead>
             <tbody>
@@ -67,6 +80,7 @@ export function AttendanceForm({
                   <td className="text-ink">{a.session_date ?? "--"}</td>
                   <td className="text-muted capitalize">{a.category}</td>
                   <td className="text-muted">{a.reason ?? "--"}</td>
+                  <td className="text-muted">{a.work_made_up ?? "--"}</td>
                 </tr>
               ))}
             </tbody>

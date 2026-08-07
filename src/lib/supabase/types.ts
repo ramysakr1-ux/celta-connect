@@ -212,6 +212,8 @@ export interface Database {
           first_ai_conversation_url: string | null;
           resubmission_ai_declared: boolean;
           resubmission_ai_conversation_url: string | null;
+          first_own_work_confirmed: boolean;
+          resubmission_own_work_confirmed: boolean;
           final_grade: string | null;
           due_date: string | null;
           tutor_feedback: string | null;
@@ -1013,6 +1015,7 @@ export interface Database {
           p_word_count: number;
           p_ai_declared: boolean;
           p_ai_conversation_url: string | null;
+          p_own_work_confirmed: boolean;
         };
         Returns: void;
       };

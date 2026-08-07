@@ -59,6 +59,7 @@ export function AssignmentAuthoringForm({
 
   const [aiDeclared, setAiDeclared] = useState(false);
   const [aiConversationUrl, setAiConversationUrl] = useState("");
+  const [ownWorkConfirmed, setOwnWorkConfirmed] = useState(false);
 
   const totalWords = useMemo(
     () => sections.reduce((sum, s) => sum + wordCount(texts[s.key] ?? ""), 0),
@@ -71,6 +72,7 @@ export function AssignmentAuthoringForm({
   const blockReasons: string[] = [];
   if (wordCountOutOfRange) blockReasons.push(`word count must be 750-1,000 (currently ${totalWords})`);
   if (aiDeclarationIncomplete) blockReasons.push("add the AI conversation link below before submitting");
+  if (!ownWorkConfirmed) blockReasons.push("confirm this is your own work below");
   const submitDisabled = blockReasons.length > 0;
   // A late submission is allowed, not blocked -- it's recorded as late and
   // the tutor decides what to do about it, rather than the candidate being
@@ -91,11 +93,20 @@ export function AssignmentAuthoringForm({
       <input type="hidden" name="sections_payload" value={JSON.stringify(sectionsPayload)} />
       <input type="hidden" name="ai_declared" value={aiDeclared ? "true" : "false"} />
       <input type="hidden" name="ai_conversation_url" value={aiConversationUrl} />
+      <input type="hidden" name="own_work_confirmed" value={ownWorkConfirmed ? "true" : "false"} />
     </>
   );
 
   const aiDeclarationBlock = (
-    <div className="card flex flex-col gap-2 p-4">
+    <div className="card flex flex-col gap-3 p-4">
+      <label className="flex items-center gap-2 text-sm text-ink">
+        <input
+          type="checkbox"
+          checked={ownWorkConfirmed}
+          onChange={(e) => setOwnWorkConfirmed(e.target.checked)}
+        />
+        I confirm this is my own work.
+      </label>
       <label className="flex items-center gap-2 text-sm text-ink">
         <input type="checkbox" checked={aiDeclared} onChange={(e) => setAiDeclared(e.target.checked)} />
         Did you use any AI tool, including a proofreader such as Grammarly?

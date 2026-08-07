@@ -1,4 +1,5 @@
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
+import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import type { Database, SubmissionStatus } from "@/lib/supabase/types";
 
 type AssignmentType = Database["public"]["Tables"]["assignments"]["Row"]["assignment_type"];
@@ -67,4 +68,44 @@ export function computeProgressIssues(input: {
   }
 
   return issues;
+}
+
+// CELTA5's Section 6 record ("assessed teaching practice") needs both hours
+// AND a distinct-levels count -- build-spec.md's own note: "Track levels
+// taught, not only hours." At least 2 distinct levels is the real Cambridge
+// requirement (build-spec.md's transcription of the final-day checklist:
+// "six hours of assessed teaching practice at at least two levels").
+//
+// tp_lessons.level exists in the schema but that table is only ever written
+// by the old, pre-rebuild trainer page (dashboard/trainer/actions.ts) -- the
+// live TP pipeline (plan_assignments.taught_at) never populates it, so it
+// reads as permanently empty for any course run through the current app.
+// The real, live source is the tp_point a taught TP was assigned from, via
+// its coursebook's level -- confirmed against migrations 0013/0014/0017.
+export const MIN_LEVELS_REQUIRED = 2;
+
+export interface AssessedTpStats {
+  hoursAssessed: number;
+  tpsTaught: number;
+  levels: string[]; // distinct, in first-taught order
+}
+
+export function computeAssessedTpStats(input: {
+  taughtAssignments: { tp_point_id: string | null }[]; // plan_assignments rows already filtered to taught_at is not null
+  tpPointCoursebookById: Map<string, string>; // tp_points.id -> tp_coursebook_id
+  coursebookLevelById: Map<string, string>; // tp_coursebooks.id -> level
+}): AssessedTpStats {
+  const { taughtAssignments, tpPointCoursebookById, coursebookLevelById } = input;
+  const levels: string[] = [];
+  for (const a of taughtAssignments) {
+    if (!a.tp_point_id) continue; // TP7/8 self-select, no library point to trace a level from
+    const coursebookId = tpPointCoursebookById.get(a.tp_point_id);
+    const level = coursebookId ? coursebookLevelById.get(coursebookId) : null;
+    if (level && !levels.includes(level)) levels.push(level);
+  }
+  return {
+    hoursAssessed: (taughtAssignments.length * TP_LESSON_LENGTH_MINUTES) / 60,
+    tpsTaught: taughtAssignments.length,
+    levels,
+  };
 }

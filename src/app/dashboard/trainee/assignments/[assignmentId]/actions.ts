@@ -82,6 +82,7 @@ export async function submitAssignment(_prevState: FormState, formData: FormData
   const totalWords = sections.reduce((sum, s) => sum + wordCount(s.text), 0);
   const aiDeclared = formData.get("ai_declared") === "true";
   const aiConversationUrl = formData.get("ai_conversation_url");
+  const ownWorkConfirmed = formData.get("own_work_confirmed") === "true";
 
   const supabase = await createClient();
   const saveError = await saveResponses(supabase, assignmentId, round, sections);
@@ -92,6 +93,7 @@ export async function submitAssignment(_prevState: FormState, formData: FormData
     p_word_count: totalWords,
     p_ai_declared: aiDeclared,
     p_ai_conversation_url: typeof aiConversationUrl === "string" ? aiConversationUrl : null,
+    p_own_work_confirmed: ownWorkConfirmed,
   });
   if (error) return { error: error.message };
 

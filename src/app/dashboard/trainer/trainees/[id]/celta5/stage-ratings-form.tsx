@@ -1,18 +1,20 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   updateStage2Ratings,
   updateStage3Ratings,
   type FormState,
 } from "@/app/dashboard/trainer/celta5-actions";
-import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS, CRITERIA_GUIDANCE, CRITERIA_RATING_OPTIONS } from "@/lib/celta-criteria";
+import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS, CRITERIA_GUIDANCE } from "@/lib/celta-criteria";
 import { CriteriaRatingPill } from "@/lib/status-pill";
+import { CriteriaRatingPills } from "@/components/criteria-rating-pills";
 import type { Database } from "@/lib/supabase/types";
 
 type MatrixRow = Database["public"]["Tables"]["celta5_matrix"]["Row"];
 
 const initialState: FormState = { error: null };
+const TOTAL_CODES = CELTA_CRITERIA_SECTIONS.reduce((n, s) => n + s.codes.length, 0);
 
 export function StageRatingsForm({
   stage,
@@ -29,9 +31,49 @@ export function StageRatingsForm({
   const [state, formAction, pending] = useActionState(action, initialState);
   const byCode = new Map(rows.map((r) => [r.criteria_code, r]));
 
+  // Ratings start from what's already saved -- NOT the suggestion. A
+  // suggestion is offered separately and only becomes "your rating" once
+  // explicitly accepted (one click, or via "Accept all"), per the design
+  // reference's own rule: "the suggestion itself never counts as an
+  // assessment."
+  const [ratings, setRatings] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    for (const [code, row] of byCode) {
+      const tutorStatus = stage === 2 ? row.tutor_status_stage2 : row.tutor_status_stage3;
+      if (tutorStatus) initial[code] = tutorStatus;
+    }
+    return initial;
+  });
+
+  const ratedCount = Object.values(ratings).filter(Boolean).length;
+  const unacceptedSuggestions = Object.keys(suggestions).filter((code) => !ratings[code]);
+
+  function acceptAllSuggestions() {
+    setRatings((prev) => {
+      const next = { ...prev };
+      for (const code of unacceptedSuggestions) next[code] = suggestions[code];
+      return next;
+    });
+  }
+
   return (
     <form action={formAction} className="sheet flex flex-col gap-6 p-6">
       <input type="hidden" name="trainee_id" value={traineeId} />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
+          Tutor: {ratedCount} of {TOTAL_CODES}
+        </span>
+        {unacceptedSuggestions.length > 0 ? (
+          <button
+            type="button"
+            onClick={acceptAllSuggestions}
+            className="rounded-[6px] border border-dashed border-gold px-3 py-1.5 text-xs font-medium text-gold hover:bg-gold/10"
+          >
+            Accept all suggestions ({unacceptedSuggestions.length})
+          </button>
+        ) : null}
+      </div>
 
       {CELTA_CRITERIA_SECTIONS.map(({ section, title, codes }) => (
         <div key={section} className="flex flex-col gap-4">
@@ -40,9 +82,11 @@ export function StageRatingsForm({
           </h3>
           {codes.map((code) => {
             const row = byCode.get(code);
-            const tutorStatus = stage === 2 ? row?.tutor_status_stage2 : row?.tutor_status_stage3;
+            const candidateStatus = row?.candidate_status ?? null;
+            const value = ratings[code] ?? "";
             const suggestion = suggestions[code];
-            const isSuggested = !tutorStatus && !!suggestion;
+            const showSuggestion = !!suggestion && !value;
+            const disagrees = !!candidateStatus && !!value && candidateStatus !== value;
 
             return (
               <div key={code} className="border-b border-border-faint pb-4 last:border-none">
@@ -50,30 +94,30 @@ export function StageRatingsForm({
                   <span className="text-ink">
                     {code}
                     {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
+                    {disagrees ? (
+                      <span className="ml-2 text-sm font-semibold text-gold" title="Candidate and tutor ratings differ">
+                        &ne;
+                      </span>
+                    ) : null}
                   </span>
                   <div className="flex shrink-0 items-center gap-2">
                     <span className="text-xs text-muted">Candidate:</span>
-                    <CriteriaRatingPill rating={row?.candidate_status ?? null} />
+                    <CriteriaRatingPill rating={candidateStatus} />
                   </div>
                 </div>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-xs text-muted">Tutor:</span>
-                  <select
-                    name={`status__${code}`}
-                    defaultValue={tutorStatus ?? suggestion ?? ""}
-                    className="appearance-none rounded-[6px] border border-border bg-card px-2 py-1 text-center text-sm text-ink outline-none focus:border-primary"
-                  >
-                    <option value="">Not rated</option>
-                    {CRITERIA_RATING_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  {isSuggested ? (
-                    <span className="text-xs text-muted">
-                      (suggested from TP notes -- review before saving)
-                    </span>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <input type="hidden" name={`status__${code}`} value={value} />
+                  <span className="text-xs text-muted">Your rating:</span>
+                  <CriteriaRatingPills value={value} onChange={(v) => setRatings((prev) => ({ ...prev, [code]: v }))} />
+                  {showSuggestion ? (
+                    <button
+                      type="button"
+                      onClick={() => setRatings((prev) => ({ ...prev, [code]: suggestion }))}
+                      className="rounded-[6px] border border-dashed border-gold px-2 py-1 text-xs font-medium text-gold hover:bg-gold/10"
+                      title="Suggested from TP notes -- click to accept as your rating"
+                    >
+                      Suggested: {suggestion}
+                    </button>
                   ) : null}
                 </div>
                 {CRITERIA_GUIDANCE[code] ? (

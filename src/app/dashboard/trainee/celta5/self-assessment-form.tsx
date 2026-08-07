@@ -1,26 +1,35 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   submitStage2SelfAssessment,
   type FormState,
 } from "@/app/dashboard/trainee/actions";
-import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS, CRITERIA_RATING_OPTIONS, STANDARD_RATING_OPTIONS } from "@/lib/celta-criteria";
+import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS, STANDARD_RATING_OPTIONS } from "@/lib/celta-criteria";
+import { CriteriaRatingPills } from "@/components/criteria-rating-pills";
 import { VoiceTextarea } from "@/components/voice-textarea";
 
 const initialState: FormState = { error: null };
+const TOTAL_CODES = CELTA_CRITERIA_SECTIONS.reduce((n, s) => n + s.codes.length, 0);
 
 export function SelfAssessmentForm() {
   const [state, action, pending] = useActionState(submitStage2SelfAssessment, initialState);
+  const [ratings, setRatings] = useState<Record<string, string>>({});
+  const ratedCount = Object.values(ratings).filter(Boolean).length;
 
   return (
     <form action={action} className="card flex flex-col gap-6 p-6">
-      <div>
-        <h2 className="font-serif text-lg text-ink">Stage Two self-assessment</h2>
-        <p className="mt-1 text-sm text-muted">
-          Rate yourself on each criterion before your tutorial. Your tutor&apos;s ratings
-          stay hidden until you submit this.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="font-serif text-lg text-ink">Stage Two self-assessment</h2>
+          <p className="mt-1 text-sm text-muted">
+            Rate yourself on each criterion before your tutorial. Your tutor&apos;s ratings
+            stay hidden until you submit this.
+          </p>
+        </div>
+        <span className="shrink-0 rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
+          You: {ratedCount} of {TOTAL_CODES}
+        </span>
       </div>
 
       {CELTA_CRITERIA_SECTIONS.map(({ section, title, codes }) => (
@@ -34,21 +43,13 @@ export function SelfAssessmentForm() {
                 {code}
                 {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
               </span>
-              <select
-                name={`status__${code}`}
-                required
-                defaultValue=""
-                className="shrink-0 appearance-none rounded-[6px] border border-border bg-card px-2 py-1 text-center text-sm text-ink outline-none focus:border-primary"
-              >
-                <option value="" disabled>
-                  Rate
-                </option>
-                {CRITERIA_RATING_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.value}
-                  </option>
-                ))}
-              </select>
+              <div className="shrink-0">
+                <input type="hidden" name={`status__${code}`} value={ratings[code] ?? ""} required />
+                <CriteriaRatingPills
+                  value={ratings[code] ?? ""}
+                  onChange={(v) => setRatings((prev) => ({ ...prev, [code]: v }))}
+                />
+              </div>
             </div>
           ))}
         </div>
