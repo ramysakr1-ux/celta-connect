@@ -454,12 +454,28 @@ export interface Database {
           course_id: string;
           name: string;
           created_at: string;
+          tp_group_id: string | null;
+          half_order: 1 | 2 | null;
         };
         Insert: Partial<Database["public"]["Tables"]["course_subgroups"]["Row"]> & {
           course_id: string;
           name: string;
         };
         Update: Partial<Database["public"]["Tables"]["course_subgroups"]["Row"]>;
+        Relationships: [];
+      };
+      course_tp_groups: {
+        Row: {
+          id: string;
+          course_id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_tp_groups"]["Row"]> & {
+          course_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_tp_groups"]["Row"]>;
         Relationships: [];
       };
       course_subgroup_members: {
@@ -930,6 +946,10 @@ export interface Database {
       reorder_subgroup_members: {
         Args: { p_subgroup_id: string; p_ordered_trainee_ids: string[] };
         Returns: void;
+      };
+      pair_subgroups: {
+        Args: { p_course_id: string; p_name: string; p_first_subgroup_id: string; p_second_subgroup_id: string };
+        Returns: string;
       };
       submit_assignment_round: {
         Args: { p_assignment_id: string };

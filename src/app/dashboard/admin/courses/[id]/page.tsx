@@ -5,6 +5,8 @@ import { JoinLinksCard } from "@/components/join-links-card";
 import {
   CreateSubgroupForm,
   AddMemberForm,
+  PairSubgroupsForm,
+  UnpairButton,
 } from "@/app/dashboard/admin/courses/[id]/subgroups-form";
 import { removeSubgroupMember } from "@/app/dashboard/admin/courses/[id]/subgroup-actions";
 import { removeRosterMember } from "@/app/dashboard/admin/courses/[id]/roster-actions";
@@ -41,6 +43,13 @@ export default async function CourseRosterPage({
     .select("*")
     .eq("course_id", id)
     .order("created_at");
+
+  // checkpoint 3 -- TP groups pair two subgroups as "halves" that alternate
+  // real TP days (see src/lib/rotation.ts). Kept as a separate query rather
+  // than a join since course_tp_groups can exist with zero/one linked
+  // subgroup mid-pairing-flow-edge-cases; simpler to read both flat and
+  // join in JS.
+  const { data: tpGroups } = await supabase.from("course_tp_groups").select("id, name").eq("course_id", id);
 
   const { data: members } = await supabase
     .from("course_subgroup_members")
@@ -145,45 +154,85 @@ export default async function CourseRosterPage({
           course. Trainers manage rotation order from their own Rotation page.
         </p>
         <div className="mt-3 flex flex-col gap-4">
-          {(subgroups ?? []).map((subgroup) => {
-            const subgroupMembers = (members ?? []).filter((m) => m.subgroup_id === subgroup.id);
+          {(() => {
+            const availableTraineeOptions = unassignedTrainees.map((t) => ({ id: t.id, full_name: t.full_name }));
+            const renderSubgroup = (subgroup: NonNullable<typeof subgroups>[number]) => {
+              const subgroupMembers = (members ?? []).filter((m) => m.subgroup_id === subgroup.id);
+              return (
+                <div key={subgroup.id}>
+                  <h4 className="text-sm font-semibold text-ink">{subgroup.name}</h4>
+                  <div className="mt-2 flex flex-col gap-2">
+                    {subgroupMembers.length > 0 ? (
+                      subgroupMembers.map((m) => (
+                        <div key={m.id} className="flex items-center justify-between">
+                          <span className="text-ink">{nameByTraineeId.get(m.trainee_id)}</span>
+                          <form action={removeSubgroupMember}>
+                            <input type="hidden" name="member_id" value={m.id} />
+                            <input type="hidden" name="course_id" value={course.id} />
+                            <button type="submit" className="text-sm text-destructive underline">
+                              Remove
+                            </button>
+                          </form>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted">No trainees in this subgroup yet.</p>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <AddMemberForm courseId={course.id} subgroupId={subgroup.id} availableTrainees={availableTraineeOptions} />
+                  </div>
+                </div>
+              );
+            };
+
+            const paired = (subgroups ?? []).filter((g) => g.tp_group_id);
+            const unpaired = (subgroups ?? []).filter((g) => !g.tp_group_id);
+
             return (
-              <div key={subgroup.id} className="card p-6">
-                <h3 className="font-serif text-ink">{subgroup.name}</h3>
-                <div className="mt-3 flex flex-col gap-2">
-                  {subgroupMembers.length > 0 ? (
-                    subgroupMembers.map((m) => (
-                      <div key={m.id} className="flex items-center justify-between">
-                        <span className="text-ink">{nameByTraineeId.get(m.trainee_id)}</span>
-                        <form action={removeSubgroupMember}>
-                          <input type="hidden" name="member_id" value={m.id} />
-                          <input type="hidden" name="course_id" value={course.id} />
-                          <button type="submit" className="text-sm text-destructive underline">
-                            Remove
-                          </button>
-                        </form>
+              <>
+                {(tpGroups ?? []).map((tpGroup) => {
+                  const halves = paired
+                    .filter((g) => g.tp_group_id === tpGroup.id)
+                    .sort((a, b) => (a.half_order ?? 0) - (b.half_order ?? 0));
+                  return (
+                    <div key={tpGroup.id} className="card p-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-serif text-ink">{tpGroup.name}</h3>
+                        <UnpairButton courseId={course.id} tpGroupId={tpGroup.id} />
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted">No trainees in this subgroup yet.</p>
-                  )}
-                </div>
-                <div className="mt-4">
-                  <AddMemberForm
-                    courseId={course.id}
-                    subgroupId={subgroup.id}
-                    availableTrainees={unassignedTrainees.map((t) => ({
-                      id: t.id,
-                      full_name: t.full_name,
-                    }))}
-                  />
-                </div>
-              </div>
+                      <p className="mt-1 text-xs text-muted">
+                        The two halves alternate which real TP day (from the timetable) they teach on.
+                      </p>
+                      <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        {halves.map((half, i) => (
+                          <div key={half.id}>
+                            <p className="mb-2 text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
+                              Half {i === 0 ? "A" : "B"}
+                            </p>
+                            {renderSubgroup(half)}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {unpaired.map((subgroup) => (
+                  <div key={subgroup.id} className="card p-6">
+                    {renderSubgroup(subgroup)}
+                  </div>
+                ))}
+              </>
             );
-          })}
+          })()}
         </div>
-        <div className="card mt-4 p-6">
+        <div className="card mt-4 flex flex-col gap-4 p-6">
           <CreateSubgroupForm courseId={course.id} />
+          <PairSubgroupsForm
+            courseId={course.id}
+            unpairedSubgroups={(subgroups ?? []).filter((g) => !g.tp_group_id).map((g) => ({ id: g.id, name: g.name }))}
+          />
         </div>
       </div>
 
