@@ -1,6 +1,8 @@
 import { rotationPosition } from "@/lib/rotation";
+import { AIM_TYPE_LABELS, AIM_TYPE_STYLE, type AimType } from "@/lib/aim-type";
 import { ReorderForm } from "@/app/trainer/(hub)/rotation/reorder-form";
 import { AssignButton } from "@/app/trainer/(hub)/rotation/assign-button";
+import { AimCoverageMatrix } from "@/app/trainer/(hub)/rotation/aim-coverage";
 
 export interface RunningOrderMember {
   traineeId: string;
@@ -14,6 +16,7 @@ export interface RunningOrderPlan {
   taughtAt: string | null;
   rotationPositionUsed: number;
   mainLessonAim: string | null;
+  aimType: AimType | null;
 }
 
 // checkpoint 3 (Rotation.dc.html 1b) -- the half owning the next real TP
@@ -44,6 +47,7 @@ export function RunningOrderPanel({
   );
 
   return (
+    <div className="flex flex-col gap-5">
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px] lg:items-start">
       <div className="flex flex-col gap-4">
         <div className="sheet flex flex-col gap-3.5 p-5">
@@ -84,6 +88,14 @@ export function RunningOrderPanel({
                     <p className="truncate text-sm text-ink">{m.fullName}</p>
                     {plan?.mainLessonAim ? <p className="truncate text-xs text-muted">{plan.mainLessonAim}</p> : null}
                   </div>
+                  {plan?.aimType ? (
+                    <span
+                      className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                      style={{ background: AIM_TYPE_STYLE[plan.aimType].bg, color: AIM_TYPE_STYLE[plan.aimType].ink }}
+                    >
+                      {AIM_TYPE_LABELS[plan.aimType]}
+                    </span>
+                  ) : null}
                   <span className={`shrink-0 text-xs font-semibold ${status.cls}`}>{status.label}</span>
                   {!plan && hasSchedule ? <AssignButton subgroupId={subgroupId} tpNumber={tpNumber} /> : null}
                 </div>
@@ -106,6 +118,12 @@ export function RunningOrderPanel({
       </div>
 
       <FairnessCheck members={members} allPlans={allPlans} />
+    </div>
+
+    <AimCoverageMatrix
+      members={members.map((m) => ({ traineeId: m.traineeId, fullName: m.fullName }))}
+      plans={allPlans.map((p) => ({ traineeId: p.traineeId, tpNumber: p.tpNumber, aimType: p.aimType }))}
+    />
     </div>
   );
 }

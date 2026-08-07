@@ -2,10 +2,8 @@ import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { GenerateButton } from "@/components/tp-library/generate-button";
-import { TpPointReviewForm } from "@/components/tp-library/tp-point-review-form";
+import { TpNumberTabs } from "@/components/tp-library/tp-number-tabs";
 import { updateTpPoint, setTpPointStatus } from "@/app/trainer/(hub)/coursebooks/actions";
-
-const TP_NUMBERS = [1, 2, 3, 4, 5, 6];
 
 export default async function TrainerCoursebookDetailPage({
   params,
@@ -50,26 +48,12 @@ export default async function TrainerCoursebookDetailPage({
         ) : null}
       </div>
 
-      {TP_NUMBERS.map((tpNumber) => {
-        const tpPoints = (points ?? []).filter((p) => p.tp_number === tpNumber);
-        if (tpPoints.length === 0) return null;
-        return (
-          <div key={tpNumber}>
-            <h2 className="font-serif text-lg text-ink">TP{tpNumber}</h2>
-            <div className="mt-3 flex flex-col gap-4">
-              {tpPoints.map((point) => (
-                <TpPointReviewForm
-                  key={point.id}
-                  point={point}
-                  coursebookId={coursebook.id}
-                  updateAction={updateTpPoint}
-                  setStatusAction={setTpPointStatus}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      })}
+      <TpNumberTabs
+        points={points ?? []}
+        coursebookId={coursebook.id}
+        updateAction={updateTpPoint}
+        setStatusAction={setTpPointStatus}
+      />
     </div>
   );
 }

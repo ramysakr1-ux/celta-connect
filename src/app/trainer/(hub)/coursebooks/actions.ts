@@ -5,6 +5,11 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { createCoursebookRecord } from "@/lib/tp-library/upload";
+import { AIM_TYPES, type AimType } from "@/lib/aim-type";
+
+function parseAimType(value: FormDataEntryValue | null): AimType | null {
+  return typeof value === "string" && (AIM_TYPES as string[]).includes(value) ? (value as AimType) : null;
+}
 
 export interface FormState {
   error: string | null;
@@ -47,6 +52,7 @@ export async function updateTpPoint(
   const { error } = await supabase
     .from("tp_points")
     .update({
+      aim_type: parseAimType(formData.get("aim_type")),
       main_lesson_aim: (formData.get("main_lesson_aim") as string) || "",
       sub_aim: (formData.get("sub_aim") as string) || null,
       materials_description: (formData.get("materials_description") as string) || null,
@@ -80,10 +86,17 @@ export async function setTpPointStatus(formData: FormData): Promise<void> {
   }
 
   const supabase = await createClient();
-  await supabase
+  let query = supabase
     .from("tp_points")
     .update({ status, reviewed_by: trainer.id, reviewed_at: new Date().toISOString() })
     .eq("id", pointId);
+  // "Checked before publishing, not after" -- an aim type must be set
+  // before a point can go live (the review form's Publish button is
+  // already disabled for this case; this is the server-side backstop).
+  if (status === "published") {
+    query = query.not("aim_type", "is", null);
+  }
+  await query;
 
   if (typeof coursebookId === "string") {
     revalidatePath(`/trainer/coursebooks/${coursebookId}`);

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { TpPointStatusPill } from "@/lib/status-pill";
 import { ProcedureDisplay } from "@/components/tp-library/procedure-display";
 import { VoiceTextarea } from "@/components/voice-textarea";
+import { AIM_TYPE_OPTIONS, AIM_TYPE_LABELS, AIM_TYPE_STYLE } from "@/lib/aim-type";
 import type { Database } from "@/lib/supabase/types";
 
 type TpPoint = Database["public"]["Tables"]["tp_points"]["Row"];
@@ -31,13 +32,42 @@ export function TpPointReviewForm({
         <span className="text-sm text-muted">
           TP{point.tp_number} &middot; slot {point.sequence_index} &middot; {point.density_tier}
         </span>
-        <TpPointStatusPill status={point.status} />
+        <div className="flex items-center gap-2">
+          {point.aim_type ? (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+              style={{ background: AIM_TYPE_STYLE[point.aim_type].bg, color: AIM_TYPE_STYLE[point.aim_type].ink }}
+            >
+              {AIM_TYPE_LABELS[point.aim_type]}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-destructive/40 px-2.5 py-0.5 text-[11px] font-semibold text-destructive">
+              Aim type not set
+            </span>
+          )}
+          <TpPointStatusPill status={point.status} />
+        </div>
       </div>
 
       <form action={formAction} className="flex flex-col gap-3">
         <input type="hidden" name="point_id" value={point.id} />
         <input type="hidden" name="coursebook_id" value={coursebookId} />
 
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm text-muted">Aim type</label>
+          <select
+            name="aim_type"
+            defaultValue={point.aim_type ?? ""}
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          >
+            <option value="">Not set</option>
+            {AIM_TYPE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-sm text-muted">Main aim</label>
           <VoiceTextarea
@@ -101,7 +131,9 @@ export function TpPointReviewForm({
             <input type="hidden" name="status" value="published" />
             <button
               type="submit"
-              className="rounded-[6px] bg-primary px-3 py-1.5 text-sm font-medium text-card"
+              disabled={!point.aim_type}
+              title={point.aim_type ? undefined : "Set an aim type and save before publishing"}
+              className="rounded-[6px] bg-primary px-3 py-1.5 text-sm font-medium text-card disabled:cursor-not-allowed disabled:opacity-50"
             >
               Publish
             </button>

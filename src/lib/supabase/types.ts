@@ -3,6 +3,7 @@
 //   supabase gen types typescript --linked > src/lib/supabase/types.ts
 
 import type { TpProcedure } from "@/lib/tp-density";
+import type { AimType } from "@/lib/aim-type";
 import type {
   AnalysisBlock,
   FeedbackPoint,
@@ -423,6 +424,7 @@ export interface Database {
           tp_number: number;
           sequence_index: number;
           density_tier: TpDensityTier;
+          aim_type: AimType | null;
           main_lesson_aim: string;
           sub_aim: string | null;
           short_title: string | null;
@@ -574,6 +576,7 @@ export interface Database {
           procedure: TpProcedure | null;
           page_references: string | null;
           density_tier: TpDensityTier;
+          aim_type: AimType | null;
           assigned_at: string;
           assigned_by: string | null;
           taught_at: string | null;

@@ -52,7 +52,7 @@ export default async function TrainerRotationPage() {
 
   const { data: plans } = await supabase
     .from("plan_assignments")
-    .select("id, trainee_id, tp_number, taught_at, rotation_position_used, main_lesson_aim")
+    .select("id, trainee_id, tp_number, taught_at, rotation_position_used, main_lesson_aim, aim_type")
     .eq("course_id", courseId);
 
   const planByTraineeAndTp = new Map((plans ?? []).map((p) => [`${p.trainee_id}-${p.tp_number}`, p]));
@@ -161,6 +161,7 @@ export default async function TrainerRotationPage() {
                     taughtAt: p.taught_at,
                     rotationPositionUsed: p.rotation_position_used,
                     mainLessonAim: p.main_lesson_aim,
+                    aimType: p.aim_type,
                   }))}
               />
             ) : (

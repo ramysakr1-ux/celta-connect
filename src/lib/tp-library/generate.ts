@@ -3,6 +3,7 @@ import { createAnthropicClient, getAnthropicModel } from "@/lib/anthropic/client
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getDensityTier, POINTS_PER_TP } from "@/lib/tp-density";
 import { LESSON_FRAMEWORKS } from "@/lib/lesson-frameworks";
+import { AIM_TYPES, type AimType } from "@/lib/aim-type";
 import type { Database } from "@/lib/supabase/types";
 
 const TP_NUMBERS = [1, 2, 3, 4, 5, 6] as const;
@@ -23,6 +24,12 @@ const SUBMIT_TP_POINTS_TOOL = {
           properties: {
             tp_number: { type: "integer", minimum: 1, maximum: 6 },
             sequence_index: { type: "integer", minimum: 1, maximum: POINTS_PER_TP },
+            aim_type: {
+              type: "string",
+              enum: AIM_TYPES,
+              description:
+                "The one kind of lesson this point is. grammar/lexis/function are language-system aims; reading/listening are the two receptive skills, speaking/writing the two productive skills -- pick the single most accurate one, not a generic 'receptive'/'productive' bucket.",
+            },
             main_lesson_aim: { type: "string" },
             sub_aim: { type: "string" },
             short_title: {
@@ -39,7 +46,7 @@ const SUBMIT_TP_POINTS_TOOL = {
               additionalProperties: true,
             },
           },
-          required: ["tp_number", "sequence_index", "main_lesson_aim"],
+          required: ["tp_number", "sequence_index", "aim_type", "main_lesson_aim"],
         },
       },
     },
@@ -55,6 +62,8 @@ function buildPrompt(title: string, level: string): string {
   return `You are generating a reusable bank of CELTA Teaching Practice (TP) lesson points from the attached coursebook "${title}" (level ${level}).
 
 Generate exactly ${POINTS_PER_TP} distinct lesson points for EACH TP number 1 through 6 (${POINTS_PER_TP * 6} points total), drawing on different units/pages of the book so the ${POINTS_PER_TP} points for a given TP number are genuinely different lessons. Number each point's sequence_index 1-${POINTS_PER_TP} within its tp_number.
+
+Every point needs an aim_type: grammar, lexis, function, reading, listening, speaking, or writing -- the one kind of lesson it is. IMPORTANT: within a single tp_number, all ${POINTS_PER_TP} points must have 3 DIFFERENT aim_types (never repeat one within the same TP number) -- this is the whole point of generating 3 points per round: whoever teaches first, second or third gets a genuinely different kind of lesson, not two grammar lessons and a vocabulary one.
 
 Each TP number has a different density tier, and the shape of the "procedure" field must match:
 
@@ -73,6 +82,7 @@ IMPORTANT: the "points" field in your tool call must be a genuine native JSON ar
 interface GeneratedPoint {
   tp_number: number;
   sequence_index: number;
+  aim_type: AimType;
   main_lesson_aim: string;
   sub_aim?: string;
   short_title?: string;
@@ -192,6 +202,7 @@ export async function generateTpPointsForCoursebook(coursebookId: string): Promi
       tp_number: p.tp_number,
       sequence_index: p.sequence_index,
       density_tier: getDensityTier(p.tp_number),
+      aim_type: p.aim_type,
       main_lesson_aim: p.main_lesson_aim,
       sub_aim: p.sub_aim ?? null,
       short_title: p.short_title ?? null,
