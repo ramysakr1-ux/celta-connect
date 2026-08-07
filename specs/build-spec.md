@@ -137,9 +137,45 @@ Applicants are **first-class records, not uploaded documents.** The file exists 
 - **Candidates must be told**, and it should be recorded that they were: completing the course does not guarantee success; there are **no exemptions or recognition of prior learning**; and on mixed-mode courses, the additional demand of changing TP mode.
 - **Applicants who cannot attend significant parts of the course must not be accepted** (6.5). Ask at application, not at enrolment.
 - **Special requirements (6.4)** are declared at application, so arrangements exist on day one rather than being improvised in week two.
+- **Six replies, and nobody is left without one.** All are centre-branded, sent from the centre, with the Connect mark absent.
+  - **Offer** — names what was strong and what will need work, states the fee, and carries one link that confirms the place, takes the candidate agreement, sets up the workspace and delivers the pre-course task. Accepting is what creates the account. Include an accept-by date and say what happens after it.
+
+  - **Rejection before interview** — the applicant is not taken to interview on the strength of the task alone. The harder of the two to write, because nobody has met them: it must name the specific gap, since a bare "not suitable" from someone who never spoke to them is the version people repeat to others. Says it is not final and what would change it.
+  - **Rejection after interview** — written by the tutor who interviewed them, and names what happened in the room. They gave up an afternoon and met a person; the letter should read as though it was written by that person.
+  - Both require a **human-written reason** before they can be sent, and neither is ever generated.
+  - **Not this time, no place available** — sends **automatically** when the waiting-list deadline passes with no place freed. Nothing about the applicant is being judged, so no human sentence is required; it apologises, explains that the course filled, and carries them to the next intake unless they opt out. Silence at this point is the worst outcome and it is exactly what happens when it is left to a person to remember.
+  - **A place has come free** — triggered by a withdrawal, deferral, unaccepted or expired offer. The app names who is next and drafts it. **A named day and hour, not a number of days**, because the course is close and there is usually more than one person waiting; the email says so plainly and the button carries the countdown. **On expiry the app moves to the next person on the list and drafts the same email**, so the list keeps working without anyone remembering to work it. Declining costs them nothing — they carry to the next intake with task and interview still on file.
+  - **The distinction that matters:** an apology for a full course is automatic; a rejection on the merits never is. The app must refuse to send a merit rejection without a human-written reason.
+  - **Waiting list** — position, the course, and **a date by which they will hear either way**. Without that date it is just an unanswered application. Their task and interview stay on file so they never repeat them, and the application rolls into the next intake automatically unless they opt out. When a place frees, the app notifies the centre and shows who is next; the list is worked in order.
 - **Rejections require a written reason.** The applicant may ask, and the assessor may look. The reason goes into the letter the applicant receives.
+
+**Payment is outside the app, deliberately.** Nothing in Connect takes money. The offer email **states the fee and directs the applicant to the centre** — phone number and a reply-to — for payment options, instalments and deposits. A tutor or administrator ticks **fee paid** on the applicant record when it lands, with a free-text note for reference numbers or instalment arrangements.
+
+Everything else in these emails is fed from records that already exist: course name, dates, number and mode from the **course record**; places remaining from the **cap minus accepted offers**; the fee amount and currency from a **field on the course**; the applicant's name, spelled their way, from their **own application form** (never retyped between there and the certificate); what was strong and what needs work from the **five marking rows and the tutor's notes**; the pre-course task and reading list from the **Resource hub**.
+
+Reconsider a payment integration only when a second centre asks. It brings refunds, partial payments, deposits, currency handling and reconciliation with it — a large piece of work for a problem most small centres solve with a bank transfer.
+
 - **The application page is public and centre-branded.** The centre links to it from their own website. It carries the **centre's logo and name prominently, with the Connect mark small in the footer** — the one public surface where both appear, because an applicant benefits from knowing what system they are entering. Serve it from a **per-centre subdomain** (`iti.celtaconnect.com/apply`) so the address reads as the centre's page; build the routing for this early rather than retrofitting it.
+- **The intake dropdown shows real availability, and only when it is low.** Each open course lists as "places available", or "3 places left" when the remaining count is at or below the centre's threshold (default 4), or "full — waiting list". The number is always the true one and disappears once it rises again. **No manufactured scarcity**: no "filling fast", no countdown, no invented figure. Scarcity that is not a fact stops being information and becomes a technique, and a centre director spots it. Full courses stay selectable as a waiting-list application, since a withdrawal or deferral can free a place two weeks out.
 - **Links are unlimited and filtered.** One permanent link per centre is the default, and the form asks which intake. A centre may generate as many as it wants — per course, per campus, per advertising source — each carrying its own filter. Per-source links also tell a centre where its applicants actually come from.
+- **Marking scheme for the selection task.** Five rows, each **Above / At standard / Below**, with a required note on any Below: **language awareness** (the analysis and correction items), then four on the writing — **accuracy**, **organisation**, **range**, **substance**. Deliberately the same shape as the Standard of English criterion on the assignment cover sheets, so a weak writer is visible at selection rather than in week two. The criteria do not change with the chosen prompt. The scheme is a centre setting imported at setup.
+
+**Selection lives outside the course, and outside course roles.**
+
+Applications exist before a course starts and are handled by people who may never be on it — a registrar, an office manager, a director. Two consequences for the permission model:
+
+- **A staff role that is centre-level, not course-level.** Not "course admin". Someone who can see and act on the pipeline for every course at the centre, without being a tutor on any of them, and without access to candidate assessment. Selection itself must still be *conducted* by a verified course tutor or a nominated person (6.2), so the role distinguishes **handling** an application (booking, chasing, correspondence) from **deciding** on one (interview, marking, accept/reject), and only verified tutors or nominees can do the second.
+- **Late applications after the course has started** must still work. The pipeline is attached to the centre and filtered by intake, never gated on the course being in a pre-start state.
+- Such a person may be given a **tokenised link** to the pipeline rather than a full account, on the same pattern as the assessor: read plus the specific actions they need, expiring, revocable.
+
+**Notifications on the pipeline.** Selection is the one place in the app where a delay costs a place. Notify the centre when:
+- an application is **submitted** — with the applicant's name, which intake they chose, and a one-line read of the writing task if one has been generated;
+- a **task is returned**, since that is the moment an interview can be booked;
+- an **interview record is completed**, prompting a decision;
+- an application has been **sitting without a decision** for the centre's own threshold — default five working days. This is the one that matters: applicants who wait go elsewhere.
+
+Notifications carry the applicant's name and stage, never a suggested verdict — a nudge must not become a recommendation. Delivered in-app and by email, per person, with per-type opt-out.
+
 - **AI reads the written task; a person decides.** The app may generate a reading of the extended writing task and the language awareness answers **against the centre's own marking scheme** — never against a general notion of quality. Rules, non-negotiable:
   - It produces **observations and a where-to-look**, never a score, a ranking, or an accept/reject. The strongest wording it may use is "worth interviewing" or "worth a careful interview".
   - Each observation cites what it is reading — "both phonology items blank", "one comma splice in 400 words" — so a tutor can check it in seconds rather than trusting it.
@@ -148,6 +184,14 @@ Applicants are **first-class records, not uploaded documents.** The file exists 
   - **Rejections still require a human-written reason.** A generated sentence is not a reason, and an applicant challenging a rejection is entitled to a person's judgement.
   - Because the process must demonstrate equality of opportunity (6.2), record that a suggestion was generated and what it said. An unexamined model quietly filtering applicants is precisely the risk here.
 - **Rejected applicants' files are retained** for the course they applied to, appear in the assessor pack, and are deleted with everything else at close-out.
+
+**Pre-course task — Cambridge's, plus a centre supplement**
+
+- The centre's uploaded task is Cambridge's **Pre-Course Task, © UCLES 2018** — five sections mapped to the five CELTA units, ungraded, handed in on day one. It is the most recent official version in circulation (the other is © UCLES 2004). Serve it as-is; never rewrite it.
+- **It predates the current syllabus.** The syllabus is the **July 2021 edition**, and the 2018 task says nothing about **teaching in virtual classrooms** or **the use of L1** — both of which candidates now meet on the course.
+- So the gap is **online teaching** — a centre running mixed-mode courses sends candidates a pre-course task that says nothing about the mode half their teaching practice will be in.
+- **Build a centre supplement, not a replacement.** Six to eight short tasks in the same shape as Cambridge's, sitting after theirs as a clearly-marked section: **teaching online, and the use of L1**. Nothing on young learners — CELTA is teaching English to adults. Centre-authored, so it duplicates with the course shell and a centre can edit it. Other centres already do this — the British Council's pre-interview task carries its own pronunciation section alongside the Cambridge material.
+- Cambridge's task and the centre supplement are **visually distinct** in the candidate's workspace, and the supplement never claims to be Cambridge's.
 
 **Volunteer students**
 - A volunteer belongs to a **class at a specific level** (Elementary, Upper-Intermediate, etc.), not merely to the course. Candidates must teach at a range of levels, so the class is what a TP is scheduled against.

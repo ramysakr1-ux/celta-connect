@@ -20,6 +20,13 @@ If you have an earlier copy of these specs, these are the decisions made since:
 - **Bug 9 added**: the broadcast composer lives inside a candidate's portfolio and needs moving.
 - The canonical trainer tabs are seven: **Today, Roster, Timetable, Volunteers, Teaching Practice, Resource hub, Grades Report**. Rotation and Coursebooks are routes under Teaching Practice, not tabs. The portfolio is reached from a roster row.
 
+## Also decided on 7 August, after the first handoff
+
+- **Application and selection is a full area now**, not uploaded documents: pipeline, applicant file, marking scheme, an AI reading, a public centre-branded form on a per-centre subdomain, and six reply emails.
+- **Payment stays outside the app.** The offer email names the fee and points at the centre office; a tutor ticks "fee paid".
+- **The pre-course task** is Cambridge's 2018 edition, served as-is, with a centre supplement for online teaching and the use of L1.
+- **`green.md` is new** and supersedes the one-line "green is gone" note.
+
 ## Designs to build against
 
 In the design project, all current:
@@ -35,6 +42,7 @@ In the design project, all current:
 | `CELTA 5 Record.dc.html`, `Grades Report.dc.html`, `Assessor Visit.dc.html` | Assessment and the visit |
 | `Assignment Review.dc.html`, `Lesson Plan.dc.html`, `TP Record.dc.html`, `Forms.dc.html` | Marking and the TP loop |
 | `Resource Hub.dc.html`, `Course Close-out.dc.html`, `Centre Admin.dc.html`, `Demo Links.dc.html` | Material, lifecycle, admin |
+| `Applications.dc.html` | Application pipeline, applicant file, public form, six reply emails |
 | `Connect Wordmark.dc.html` | The locked identity |
 
 Older files still on the pre-rename palette: `Resource Hub.dc.html`, `App Redesign.dc.html`, `Timetable Refresh.dc.html`. Take their structure, not their colours.
@@ -65,7 +73,7 @@ The domain stays `celtaconnect.com`. The brand is Connect; the domain is a legac
 The chat pill replaces the current `StaffChatDrawer` chrome: always visible, dimmed at rest, keyboard-reachable. The timetable keeps its transposed orientation and equal cell dimensions; only the finish changes — hairlines instead of coloured boxes.
 
 **3. `build-spec.md`** — everything else.
-Constraining rules from Cambridge's syllabus and handbook, build order for 22 screens, the Drive import/export model, the three leaving statuses, the guidance system, mobile scope, eight bugs found in the current build, and three genuinely open questions.
+Constraining rules from Cambridge's syllabus and handbook, build order for 22 screens, the Drive import/export model, the three leaving statuses, the guidance system, mobile scope, nine bugs found in the current build, and three genuinely open questions.
 
 ## What the designs are
 
@@ -95,6 +103,13 @@ These came out of long conversations with Ramy and are not recoverable from the 
 
 ## Not yet designed
 
-- The leaving flow as a single screen (withdrawal / deferral / extension with the entry-form gate)
-- The attendance register in the assessor pack
-- Conflated assignments — two briefs as one document, both parts passing independently
+Specified in `build-spec.md` but never drawn. Build from the prose.
+
+- **Extension** — a candidate with special consideration finishing after the end date. Reuses the deferral shell in `Letters.dc.html` with three fields changed.
+- **Tutorial records as working forms** — Stage 1, 2 and 3. Parked deliberately: they are CELTA 5 sections, and blank PDFs cover them for now. Stage 3 is the one to build first, since the Fail letter quotes it.
+- **The attendance register** in the assessor pack.
+- **Conflated assignments** — two briefs as one document, both parts passing independently.
+- **Plagiarism and malpractice** — an allegation, an investigation, an outcome. No home in the app today, and an assessor will ask.
+- **Appeals and complaints** — the candidate's form and the centre's written response. Handbook 15; currently an uploaded PDF with nowhere for the response to live.
+- **Special consideration mid-course** — distinct from the declaration at application.
+- **The centre's pre-course supplement** — six to eight tasks on teaching online and the use of L1.
