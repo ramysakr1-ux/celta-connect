@@ -26,9 +26,17 @@ const TABS = [
 // (rosterOnly) too.
 const GRADES_REPORT_TAB = { href: "/grades-report", label: "Grades Report" } as const;
 
+// Same route as the trainer's own "Volunteers" tab (TABS[2]) -- checkpoint
+// 9 (Assessor pack) gave /volunteers a read-only branch for assessor
+// sessions, but "Volunteers" reads like a management tool a trainer would
+// use; the assessor's own vocabulary (build-spec.md item 14) is "the
+// attendance register," so this tab gets its own label pointing at the
+// identical URL rather than reusing TABS[2]'s.
+const ATTENDANCE_REGISTER_TAB = { href: "/volunteers", label: "Attendance register" } as const;
+
 export function TrainerTabs({ rosterOnly = false }: { rosterOnly?: boolean }) {
   const pathname = usePathname();
-  const tabs = rosterOnly ? [TABS[0], GRADES_REPORT_TAB] : [TODAY_TAB, ...TABS, GRADES_REPORT_TAB];
+  const tabs = rosterOnly ? [TABS[0], ATTENDANCE_REGISTER_TAB, GRADES_REPORT_TAB] : [TODAY_TAB, ...TABS, GRADES_REPORT_TAB];
 
   // No wrapper bar of its own any more -- this is now inlined directly into
   // the (hub) shell's single header (see (hub)/layout.tsx), which supplies

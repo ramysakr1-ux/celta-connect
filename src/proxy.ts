@@ -64,9 +64,18 @@ export async function proxy(request: NextRequest) {
   // the admin client, same division of labor as every other auth check in
   // this proxy, which also doesn't validate row-level authorization itself.
   const hasAssessorCookie = Boolean(request.cookies.get("assessor_token")?.value);
+  // Real bug found and fixed while building checkpoint 9 (Assessor pack):
+  // this used to require an EXACT match on "/trainer" -- which only ever
+  // let an assessor through the landing bounce from /assessor/[token]
+  // itself, then bounced them straight back to /login the moment they
+  // navigated anywhere under it (/trainer/roster, /trainer/grades-report,
+  // /trainer/volunteers, all real assessor-facing pages per rosterOnly).
+  // Needs the whole /trainer/* subtree, same as /portfolio/ already gets.
   const isAssessorReachableRoute =
     hasAssessorCookie &&
-    (request.nextUrl.pathname === "/trainer" || request.nextUrl.pathname.startsWith("/portfolio/"));
+    (request.nextUrl.pathname === "/trainer" ||
+      request.nextUrl.pathname.startsWith("/trainer/") ||
+      request.nextUrl.pathname.startsWith("/portfolio/"));
 
   if (!user && !isPublicRoute && !isAssessorReachableRoute) {
     const url = request.nextUrl.clone();

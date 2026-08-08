@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { CopyLinkButton } from "@/app/trainer/(hub)/volunteers/copy-link-button";
 import { AddVolunteerForm } from "@/app/register/[token]/add-volunteer-form";
 import { Wordmark } from "@/components/wordmark";
+import { AttendanceRegisterGrid } from "@/components/attendance-register-grid";
 
 // A separate no-login link for center business/admissions staff -- distinct
 // from the app's own `admin` UserRole. They have no account at all and
@@ -35,7 +36,7 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
   const [{ data: course }, { data: volunteers }, { data: tpEvents }] = await Promise.all([
     admin.from("courses").select("name, start_date, end_date").eq("id", accessToken.course_id).maybeSingle(),
     admin.from("volunteer_students").select("id, name").eq("course_id", accessToken.course_id).is("removed_at", null).order("name"),
-    admin.from("course_timetable_events").select("id").eq("course_id", accessToken.course_id).eq("type", "tp"),
+    admin.from("course_timetable_events").select("id, event_date").eq("course_id", accessToken.course_id).eq("type", "tp").order("event_date"),
   ]);
 
   const volunteerIds = (volunteers ?? []).map((v) => v.id);
@@ -44,15 +45,10 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
       ? admin.from("course_access_tokens").select("token, volunteer_student_id").in("volunteer_student_id", volunteerIds)
       : Promise.resolve({ data: [] }),
     volunteerIds.length > 0
-      ? admin.from("volunteer_attendance").select("volunteer_student_id").in("volunteer_student_id", volunteerIds)
+      ? admin.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
       : Promise.resolve({ data: [] }),
   ]);
   const tokenByVolunteer = new Map((tokens ?? []).map((t) => [t.volunteer_student_id, t.token]));
-  const attendanceCountByVolunteer = new Map<string, number>();
-  for (const row of attendanceRows ?? []) {
-    attendanceCountByVolunteer.set(row.volunteer_student_id, (attendanceCountByVolunteer.get(row.volunteer_student_id) ?? 0) + 1);
-  }
-  const totalTpSessions = tpEvents?.length ?? 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -75,12 +71,7 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
                 const vToken = tokenByVolunteer.get(v.id);
                 return (
                   <li key={v.id} className="list-row flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm text-ink">{v.name}</p>
-                      <p className="text-xs text-muted">
-                        {attendanceCountByVolunteer.get(v.id) ?? 0} / {totalTpSessions} sessions attended
-                      </p>
-                    </div>
+                    <p className="text-sm text-ink">{v.name}</p>
                     {vToken ? <CopyLinkButton token={vToken} /> : null}
                   </li>
                 );
@@ -89,6 +80,13 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
           ) : (
             <p className="p-6 text-sm text-muted">No volunteer students registered yet.</p>
           )}
+        </div>
+
+        <div>
+          <h2 className="font-serif text-lg text-ink">Attendance register</h2>
+          <div className="mt-3">
+            <AttendanceRegisterGrid events={tpEvents ?? []} volunteers={volunteers ?? []} attendance={attendanceRows ?? []} />
+          </div>
         </div>
       </div>
     </div>
