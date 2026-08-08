@@ -35,7 +35,7 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
 
   const [{ data: course }, { data: volunteers }, { data: tpEvents }] = await Promise.all([
     admin.from("courses").select("name, start_date, end_date").eq("id", accessToken.course_id).maybeSingle(),
-    admin.from("volunteer_students").select("id, name").eq("course_id", accessToken.course_id).is("removed_at", null).order("name"),
+    admin.from("volunteer_students").select("id, name, level").eq("course_id", accessToken.course_id).is("removed_at", null).order("name"),
     admin.from("course_timetable_events").select("id, event_date").eq("course_id", accessToken.course_id).eq("type", "tp").order("event_date"),
   ]);
 
@@ -71,7 +71,10 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
                 const vToken = tokenByVolunteer.get(v.id);
                 return (
                   <li key={v.id} className="list-row flex items-center justify-between gap-4">
-                    <p className="text-sm text-ink">{v.name}</p>
+                    <p className="text-sm text-ink">
+                      {v.name}
+                      {v.level ? <span className="ml-2 text-xs text-muted">{v.level}</span> : null}
+                    </p>
                     {vToken ? <CopyLinkButton token={vToken} /> : null}
                   </li>
                 );

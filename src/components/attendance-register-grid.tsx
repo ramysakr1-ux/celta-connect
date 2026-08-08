@@ -14,7 +14,7 @@ export function AttendanceRegisterGrid({
   attendance,
 }: {
   events: { id: string; event_date: string }[];
-  volunteers: { id: string; name: string }[];
+  volunteers: { id: string; name: string; level?: string | null }[];
   attendance: { volunteer_student_id: string; timetable_event_id: string }[];
 }) {
   const attendedSet = new Set(attendance.map((a) => `${a.volunteer_student_id}:${a.timetable_event_id}`));
@@ -45,7 +45,10 @@ export function AttendanceRegisterGrid({
             const attendedCount = events.filter((e) => attendedSet.has(`${v.id}:${e.id}`)).length;
             return (
               <tr key={v.id} className="border-b border-border-faint last:border-none">
-                <td className="px-4 py-2.5 text-ink">{v.name}</td>
+                <td className="px-4 py-2.5 text-ink">
+                  {v.name}
+                  {v.level ? <span className="ml-2 text-xs text-muted">{v.level}</span> : null}
+                </td>
                 {events.map((e) => {
                   const present = attendedSet.has(`${v.id}:${e.id}`);
                   return (

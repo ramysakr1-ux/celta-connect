@@ -814,6 +814,7 @@ export interface Database {
           id: string;
           course_id: string;
           name: string;
+          level: string | null;
           created_at: string;
           removed_at: string | null;
         };

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { addVolunteerStudentViaRegister, type FormState } from "@/app/register/[token]/actions";
+import { LEVEL_OPTIONS } from "@/lib/levels";
 
 const initialState: FormState = { error: null };
 
@@ -19,6 +20,21 @@ export function AddVolunteerForm({ token }: { token: string }) {
           required
           className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
         />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm text-muted">Class level</label>
+        <select
+          name="level"
+          defaultValue=""
+          className="h-10 appearance-none rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+        >
+          <option value="">Not set</option>
+          {LEVEL_OPTIONS.map((l) => (
+            <option key={l} value={l}>
+              {l}
+            </option>
+          ))}
+        </select>
       </div>
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       <button

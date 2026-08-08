@@ -16,6 +16,7 @@ export interface FormState {
 export async function addVolunteerStudentViaRegister(_prevState: FormState, formData: FormData): Promise<FormState> {
   const token = formData.get("token");
   const name = (formData.get("name") as string | null)?.trim();
+  const level = (formData.get("level") as string | null)?.trim() || null;
   if (typeof token !== "string" || !token) return { error: "Invalid link." };
   if (!name) return { error: "Name is required." };
 
@@ -33,7 +34,7 @@ export async function addVolunteerStudentViaRegister(_prevState: FormState, form
 
   const { data: volunteer, error } = await admin
     .from("volunteer_students")
-    .insert({ course_id: accessToken.course_id, name })
+    .insert({ course_id: accessToken.course_id, name, level })
     .select("id")
     .single();
   if (error || !volunteer) return { error: "Could not add the student. Try again." };

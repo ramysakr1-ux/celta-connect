@@ -19,6 +19,7 @@ export async function addVolunteerStudent(_prevState: FormState, formData: FormD
 
   const name = (formData.get("name") as string | null)?.trim();
   if (!name) return { error: "Name is required." };
+  const level = (formData.get("level") as string | null)?.trim() || null;
 
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("end_date").eq("id", trainer.course_id).maybeSingle();
@@ -26,7 +27,7 @@ export async function addVolunteerStudent(_prevState: FormState, formData: FormD
 
   const { data: volunteer, error } = await supabase
     .from("volunteer_students")
-    .insert({ course_id: trainer.course_id, name })
+    .insert({ course_id: trainer.course_id, name, level })
     .select("id")
     .single();
 

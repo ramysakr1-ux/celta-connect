@@ -85,7 +85,10 @@ export default async function VolunteersPage() {
               const token = tokenByVolunteer.get(volunteer.id);
               return (
                 <li key={volunteer.id} className="list-row flex items-center justify-between gap-4">
-                  <p className="text-sm text-ink">{volunteer.name}</p>
+                  <p className="text-sm text-ink">
+                    {volunteer.name}
+                    {volunteer.level ? <span className="ml-2 text-xs text-muted">{volunteer.level}</span> : null}
+                  </p>
                   <div className="flex items-center gap-3">
                     {token ? <CopyLinkButton token={token} /> : null}
                     <form action={removeVolunteerStudent}>

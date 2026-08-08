@@ -35,11 +35,10 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     );
   }
 
-  const [{ data: volunteer }, { data: course }, { data: tpEvents }, { data: attendance }, { data: sharedMaterials }] =
+  const [{ data: volunteer }, { data: course }, { data: attendance }, { data: sharedMaterials }] =
     await Promise.all([
       admin.from("volunteer_students").select("name").eq("id", accessToken.volunteer_student_id).maybeSingle(),
       admin.from("courses").select("name").eq("id", accessToken.course_id).maybeSingle(),
-      admin.from("course_timetable_events").select("id").eq("course_id", accessToken.course_id).eq("type", "tp"),
       admin.from("volunteer_attendance").select("timetable_event_id").eq("volunteer_student_id", accessToken.volunteer_student_id),
       admin
         .from("volunteer_shared_materials")
@@ -50,9 +49,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
   if (!volunteer) notFound();
 
-  const totalSessions = tpEvents?.length ?? 0;
   const attendedSessions = attendance?.length ?? 0;
-  const progressPct = totalSessions > 0 ? Math.round((attendedSessions / totalSessions) * 100) : 0;
 
   // Resolved server-side with the admin client -- a volunteer has no
   // Supabase session at all, so a browser client could never sign a
@@ -94,13 +91,10 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         </div>
 
         <div className="rounded-xl border border-[#eddfc4] bg-white p-6">
-          <p className="text-sm text-[#8a6a2f]">Your progress</p>
+          <p className="text-sm text-[#8a6a2f]">Your attendance</p>
           <p className="mt-1 text-2xl font-semibold text-[#3a2e18]">
-            {attendedSessions} of {totalSessions || "?"} sessions attended
+            {attendedSessions} class{attendedSessions === 1 ? "" : "es"} attended
           </p>
-          <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-[#f0e6d0]">
-            <div className="h-full rounded-full bg-[#4f9464] transition-all" style={{ width: `${Math.max(progressPct, 4)}%` }} />
-          </div>
         </div>
 
         <MaterialsCard materials={materials} />
