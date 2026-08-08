@@ -7,6 +7,7 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { fetchRosterRows } from "@/lib/roster";
 import { categorize, isEventLive, toLocalIso } from "@/lib/timetable-grid";
 import { CATEGORY_ACCENT } from "@/app/trainer/(hub)/timetable/event-cell";
+import { computeWeekOf } from "@/lib/course-progress";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -106,15 +107,8 @@ export default async function TodayPage() {
         ? "var(--color-destructive)"
         : "var(--color-primary)";
 
-  const weekOf = (() => {
-    if (!course?.start_date || !course?.end_date) return null;
-    const start = new Date(`${course.start_date}T00:00:00`);
-    const end = new Date(`${course.end_date}T00:00:00`);
-    const now = new Date(`${today}T00:00:00`);
-    const totalWeeks = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (7 * 86400000)));
-    const currentWeek = Math.min(totalWeeks, Math.max(1, Math.ceil((now.getTime() - start.getTime()) / (7 * 86400000)) + 1));
-    return `week ${currentWeek} of ${totalWeeks}`;
-  })();
+  const weekOf =
+    course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
 
   const overline = [course?.name, course ? `${course.start_date} – ${course.end_date}` : null, weekOf].filter(Boolean).join(" · ");
   const todayHeading = new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", {

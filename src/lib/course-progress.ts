@@ -84,6 +84,29 @@ export function computeProgressIssues(input: {
 // its coursebook's level -- confirmed against migrations 0013/0014/0017.
 export const MIN_LEVELS_REQUIRED = 2;
 
+// Shared with the trainer Today page's own overline calc -- extracted here
+// so Centre Admin's course-state grouping doesn't reimplement it.
+export function computeWeekOf(startDate: string, endDate: string, today: string): string {
+  const start = new Date(`${startDate}T00:00:00`);
+  const end = new Date(`${endDate}T00:00:00`);
+  const now = new Date(`${today}T00:00:00`);
+  const totalWeeks = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (7 * 86400000)));
+  const currentWeek = Math.min(totalWeeks, Math.max(1, Math.ceil((now.getTime() - start.getTime()) / (7 * 86400000)) + 1));
+  return `week ${currentWeek} of ${totalWeeks}`;
+}
+
+export type CourseState = "running" | "upcoming" | "closed";
+
+// Purely date-derived -- Close-out (build-spec item 20, not built yet) will
+// eventually be the real "this course is done" signal (export + erase).
+// Until then "closed" just means the end date has passed; the UI must not
+// imply an export happened that never did.
+export function computeCourseState(startDate: string, endDate: string, today: string): CourseState {
+  if (today < startDate) return "upcoming";
+  if (today > endDate) return "closed";
+  return "running";
+}
+
 export interface AssessedTpStats {
   hoursAssessed: number;
   tpsTaught: number;

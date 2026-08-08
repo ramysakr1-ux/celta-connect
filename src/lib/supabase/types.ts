@@ -87,6 +87,7 @@ export interface Database {
           trainer_join_token: string;
           timetable_locked_at: string | null;
           time_bands: TimeBand[] | null;
+          delivery_mode: "f2f" | "online" | "mixed";
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["courses"]["Row"]> & {

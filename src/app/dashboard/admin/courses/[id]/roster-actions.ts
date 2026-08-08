@@ -5,6 +5,30 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import { createResendClient, JOIN_LINK_SENDER } from "@/lib/resend/client";
+import type { DeliveryMode } from "@/lib/delivery-mode";
+
+const VALID_DELIVERY_MODES: DeliveryMode[] = ["f2f", "online", "mixed"];
+
+export async function updateDeliveryMode(formData: FormData): Promise<void> {
+  const admin = await requireRole("admin");
+
+  const courseId = formData.get("course_id");
+  const deliveryMode = formData.get("delivery_mode");
+  if (
+    typeof courseId !== "string" ||
+    typeof deliveryMode !== "string" ||
+    !VALID_DELIVERY_MODES.includes(deliveryMode as DeliveryMode)
+  ) {
+    return;
+  }
+
+  const supabase = await createClient();
+  const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
+  if (!course || course.center_id !== admin.center_id) return;
+
+  await supabase.from("courses").update({ delivery_mode: deliveryMode as DeliveryMode }).eq("id", courseId);
+  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+}
 
 export async function regenerateJoinLink(formData: FormData): Promise<void> {
   const admin = await requireRole("admin");

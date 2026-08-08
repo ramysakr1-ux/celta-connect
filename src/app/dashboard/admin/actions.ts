@@ -4,10 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import type { DeliveryMode } from "@/lib/delivery-mode";
 
 export interface FormState {
   error: string | null;
 }
+
+const VALID_DELIVERY_MODES: DeliveryMode[] = ["f2f", "online", "mixed"];
 
 export async function createCourse(
   _prevState: FormState,
@@ -18,6 +21,7 @@ export async function createCourse(
   const name = formData.get("name");
   const startDate = formData.get("start_date");
   const endDate = formData.get("end_date");
+  const deliveryMode = formData.get("delivery_mode");
 
   if (
     typeof name !== "string" ||
@@ -34,12 +38,17 @@ export async function createCourse(
     return { error: "End date must be on or after the start date." };
   }
 
+  if (typeof deliveryMode !== "string" || !VALID_DELIVERY_MODES.includes(deliveryMode as DeliveryMode)) {
+    return { error: "Choose how teaching practice is delivered." };
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.from("courses").insert({
     center_id: admin.center_id,
     name,
     start_date: startDate,
     end_date: endDate,
+    delivery_mode: deliveryMode as DeliveryMode,
   });
 
   if (error) {
@@ -106,7 +115,7 @@ export async function duplicateCourse(
 
   const { data: source } = await supabase
     .from("courses")
-    .select("id, center_id, start_date")
+    .select("id, center_id, start_date, delivery_mode")
     .eq("id", sourceCourseId)
     .maybeSingle();
   if (!source || source.center_id !== admin.center_id) {
@@ -121,6 +130,7 @@ export async function duplicateCourse(
       start_date: startDate,
       end_date: endDate,
       duplicated_from_course_id: source.id,
+      delivery_mode: source.delivery_mode,
     })
     .select("id")
     .single();
