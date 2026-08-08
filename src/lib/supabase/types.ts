@@ -858,6 +858,45 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["volunteer_attendance"]["Row"]>;
         Relationships: [];
       };
+      pre_course_task_sections: {
+        Row: {
+          id: string;
+          center_id: string;
+          source: "cambridge" | "centre_supplement";
+          sequence_index: number;
+          title: string;
+          prompt: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["pre_course_task_sections"]["Row"]> & {
+          center_id: string;
+          source: "cambridge" | "centre_supplement";
+          sequence_index: number;
+          title: string;
+          prompt: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["pre_course_task_sections"]["Row"]>;
+        Relationships: [];
+      };
+      pre_course_task_responses: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          section_id: string;
+          response: string | null;
+          submitted_at: string | null;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["pre_course_task_responses"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          section_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["pre_course_task_responses"]["Row"]>;
+        Relationships: [];
+      };
       volunteer_shared_materials: {
         Row: {
           id: string;

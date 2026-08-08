@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 const TABS = [
   { href: "", label: "Course Stream", metaKey: "courseStream" },
+  { href: "/pre-course-task", label: "Pre-course task", metaKey: "preCourseTask" },
   { href: "/resources", label: "Resource Hub", metaKey: "resourceHub" },
   { href: "/tp", label: "Teaching Practice", metaKey: "tp" },
   { href: "/assignments", label: "Written Assignments", metaKey: "assignments" },
@@ -16,6 +17,7 @@ export interface PortfolioSidebarMeta {
   // yet -- checkpoint 2 explicitly avoids fabricating a "N new" style count
   // where there's no read-tracking to back it (see courseStream/resourceHub).
   courseStream: string;
+  preCourseTask: string;
   resourceHub: string;
   tp: string;
   assignments: string;

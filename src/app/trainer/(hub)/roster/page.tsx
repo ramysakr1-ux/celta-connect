@@ -34,6 +34,12 @@ export default async function TrainerRosterPage() {
         <div className="flex items-center gap-5">
           <p className="text-xs text-muted">Click a row to open a portfolio</p>
           <a
+            href="/trainer/pre-course-task"
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Pre-course tasks →
+          </a>
+          <a
             href="/trainer/roster/export"
             className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary"
           >

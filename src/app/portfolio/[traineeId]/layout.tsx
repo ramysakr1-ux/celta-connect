@@ -106,16 +106,21 @@ export default async function PortfolioLayout({
       ).data?.[0]
     : null;
 
-  const [{ data: center }, { data: lessons }, { data: assignments }] = await Promise.all([
-    supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
-    supabase.from("tp_lessons").select("id").eq("trainee_id", trainee.id),
-    supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
-  ]);
+  const [{ data: center }, { data: lessons }, { data: assignments }, { data: preCourseSections }, { data: preCourseResponses }] =
+    await Promise.all([
+      supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
+      supabase.from("tp_lessons").select("id").eq("trainee_id", trainee.id),
+      supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
+      supabase.from("pre_course_task_sections").select("id").eq("center_id", trainee.center_id),
+      supabase.from("pre_course_task_responses").select("section_id, response").eq("trainee_id", trainee.id),
+    ]);
 
   const tpsTaught = (lessons ?? []).length;
   const assignmentsPassed = (assignments ?? []).filter(
     (a) => a.first_status === "approved" || a.resubmission_status === "approved"
   ).length;
+  const preCourseTotal = preCourseSections?.length ?? 0;
+  const preCourseAnswered = (preCourseResponses ?? []).filter((r) => r.response && r.response.trim() !== "").length;
 
   // Trajectory: trainer/assessor-only informal estimate, computed the exact
   // same way the CELTA5 page does (tutor's Stage Two ratings, falling back
@@ -154,6 +159,7 @@ export default async function PortfolioLayout({
   const assignmentsLeft = Math.max((assignments ?? []).length - assignmentsPassed, 0);
   const sidebarMeta = {
     courseStream: "",
+    preCourseTask: preCourseTotal > 0 ? `${preCourseAnswered}/${preCourseTotal}` : "",
     resourceHub: "",
     tp: `${tpsTaught}/8`,
     assignments: assignmentsLeft > 0 ? `${assignmentsLeft} due` : "",
