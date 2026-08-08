@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { CELTA_CRITERIA_CODES, computeCriteriaPct, computeTrajectory, type Trajectory } from "@/lib/celta-criteria";
+import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 
 export interface RosterRow {
   id: string;
@@ -29,10 +30,15 @@ export async function fetchRosterRows(
     .order("full_name");
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
-  const [{ data: lessons }, { data: feedbackRows }, { data: assignments }, { data: celta5Records }, { data: matrixRows }, { data: course }] =
+  const [{ data: taughtPlans }, { data: feedbackRows }, { data: assignments }, { data: celta5Records }, { data: matrixRows }, { data: course }] =
     traineeIds.length > 0
       ? await Promise.all([
-          supabase.from("tp_lessons").select("trainee_id, length_minutes").eq("course_id", courseId),
+          // Real "taught" signal is plan_assignments.taught_at (migration
+          // 0017) -- tp_lessons is only ever written by the old,
+          // pre-rebuild trainer page and reads as permanently empty for any
+          // course run through the live app (same dead-table bug already
+          // fixed for the CELTA5 record's own "hrs assessed" stat).
+          supabase.from("plan_assignments").select("trainee_id").eq("course_id", courseId).not("taught_at", "is", null),
           supabase.from("tp_feedback").select("trainee_id, grade, submitted_at").in("trainee_id", traineeIds),
           supabase.from("assignments").select("trainee_id, first_status, resubmission_status").eq("course_id", courseId),
           supabase.from("celta5_records").select("trainee_id, hours_attended").eq("course_id", courseId),
@@ -44,8 +50,8 @@ export async function fetchRosterRows(
   const totalHours = course?.total_hours ?? 120;
 
   return (trainees ?? []).map((trainee) => {
-    const traineeLessons = (lessons ?? []).filter((l) => l.trainee_id === trainee.id);
-    const assessedHrs = traineeLessons.reduce((sum, l) => sum + (l.length_minutes ?? 0), 0) / 60;
+    const tpsTaught = (taughtPlans ?? []).filter((p) => p.trainee_id === trainee.id).length;
+    const assessedHrs = (tpsTaught * TP_LESSON_LENGTH_MINUTES) / 60;
 
     const tpsPassed = (feedbackRows ?? []).filter(
       (f) => f.trainee_id === trainee.id && f.submitted_at && f.grade !== "not_to_standard"

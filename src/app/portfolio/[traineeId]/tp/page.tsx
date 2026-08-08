@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
-import { getTpCardStatus, type TpCardStatus } from "@/lib/tp-plan-content";
+import { getTpCardStatus, TP_LESSON_LENGTH_MINUTES, type TpCardStatus } from "@/lib/tp-plan-content";
 import { computeCriteriaPct } from "@/lib/celta-criteria";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_STATUS_LABEL } from "@/lib/assignment-info";
 import { TpRow } from "@/app/portfolio/[traineeId]/tp/tp-row";
@@ -113,8 +113,12 @@ export default async function TpHubPage({
       : { data: [] };
   const trainerNameById = new Map((trainers ?? []).map((t) => [t.id, t.full_name]));
 
-  const assessedHours = (lessons ?? []).reduce((sum, l) => sum + (l.length_minutes ?? 0), 0) / 60;
-  const tpsTaught = (lessons ?? []).length;
+  // Real "taught" signal is plan_assignments.taught_at (migration 0017) --
+  // tp_lessons is only ever written by the old, pre-rebuild trainer page
+  // and reads as permanently empty for any course run through the live
+  // app (same dead-table bug fixed in src/lib/roster.ts).
+  const tpsTaught = (plans ?? []).filter((p) => p.taught_at).length;
+  const assessedHours = (tpsTaught * TP_LESSON_LENGTH_MINUTES) / 60;
 
   let criteriaPct: number | null = null;
   if (canSeeCriteria) {
