@@ -343,6 +343,11 @@ export default async function PortfolioCelta5Page({
                   >
                     Download final report
                   </a>
+                  <p className="mt-3 text-xs text-muted">
+                    Questions about your grade? Start by emailing your tutor -- most questions are resolved there.
+                    If you&apos;re still unsatisfied, your centre&apos;s Internal Complaints Procedure is the next
+                    step.
+                  </p>
                 </>
               ) : (
                 <p className="mt-2 text-sm text-muted">

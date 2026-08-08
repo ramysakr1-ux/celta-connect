@@ -65,6 +65,19 @@ export async function joinCourse(
   }
   const { course, role } = resolved;
 
+  // Two more real disclosures build-spec.md names as required candidate-
+  // agreement content -- cross-course text fingerprinting and the AI/
+  // plagiarism policy -- trainee-only, same boundary as tutor_role being
+  // trainer-only below. The exact official Cambridge AI disclaimer wording
+  // is explicitly meant to live as an uploaded, versioned centre document
+  // (it's "subject to constant review"), not hardcoded here -- this
+  // checkbox is the plain-English acknowledgment, not a substitute for it.
+  if (role === "trainee" && (!formData.get("agree_ai_policy") || !formData.get("agree_fingerprint"))) {
+    return { error: "You need to agree to all the checkboxes to join." };
+  }
+  const specialConsideration =
+    role === "trainee" ? (formData.get("special_consideration") as string | null)?.trim() || null : null;
+
   const tutorRoleInput = formData.get("tutor_role");
   const tutorRole =
     role === "trainer" && typeof tutorRoleInput === "string" && TUTOR_ROLES.includes(tutorRoleInput as (typeof TUTOR_ROLES)[number])
@@ -97,6 +110,7 @@ export async function joinCourse(
     center_id: course.center_id,
     course_id: course.id,
     tutor_role: tutorRole,
+    special_consideration: specialConsideration,
     terms_accepted_at: new Date().toISOString(),
   });
 

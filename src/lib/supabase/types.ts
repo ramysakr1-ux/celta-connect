@@ -108,6 +108,7 @@ export interface Database {
           course_id: string | null;
           tutor_role: string | null;
           terms_accepted_at: string | null;
+          special_consideration: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {

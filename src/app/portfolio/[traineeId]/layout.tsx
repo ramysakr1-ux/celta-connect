@@ -193,6 +193,17 @@ export default async function PortfolioLayout({
                 </span>
               </HideDuringPreview>
             ) : null}
+            {isStaffView && trainee.special_consideration ? (
+              <HideDuringPreview>
+                <span
+                  title={trainee.special_consideration}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-semibold text-ink"
+                >
+                  <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                  Special consideration declared
+                </span>
+              </HideDuringPreview>
+            ) : null}
           </div>
           <div className="flex shrink-0 items-center gap-3">
             <TraineeEyebrowLabel isStaff={isStaff} readOnly={Boolean(assessorCourseId)} />

@@ -75,6 +75,24 @@ export function JoinForm({ token, role }: { token: string; role: UserRole }) {
         />
       </div>
 
+      {role === "trainee" ? (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="special_consideration" className="text-sm text-muted">
+            Special consideration to declare (optional)
+          </label>
+          <p className="text-xs text-muted">
+            A disability, learning difference, or health condition that may affect your course. Declaring it now
+            means your centre can plan for it from the start, rather than partway through.
+          </p>
+          <textarea
+            id="special_consideration"
+            name="special_consideration"
+            rows={2}
+            className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          />
+        </div>
+      ) : null}
+
       <div className="mt-2 flex flex-col gap-3 border-t border-border pt-4">
         <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
           <input type="checkbox" name="agree_ip" required className="mt-0.5 accent-primary" />
@@ -91,6 +109,49 @@ export function JoinForm({ token, role }: { token: string; role: UserRole }) {
             afterwards.
           </span>
         </label>
+        {role === "trainee" ? (
+          <>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_fingerprint" required className="mt-0.5 accent-primary" />
+              <span>
+                I understand that Connect keeps a text fingerprint of my written assignments -- not the
+                assignments themselves -- even after my course records are archived, so future candidates&apos;
+                work can be checked against it.
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_ai_policy" required className="mt-0.5 accent-primary" />
+              <span>
+                I have read and understood the centre&apos;s policy on using AI in coursework.
+                <details className="mt-1">
+                  <summary className="cursor-pointer text-ink hover:text-primary">What&apos;s permitted / not permitted</summary>
+                  <div className="mt-2 flex flex-col gap-2 text-ink">
+                    <div>
+                      <p className="font-medium">Permitted</p>
+                      <ul className="list-disc pl-4">
+                        <li>generating ideas for teaching practice, including texts and activities</li>
+                        <li>initial research for written assignments, including generating a bibliography</li>
+                        <li>proofreading work</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-medium">Treated as malpractice</p>
+                      <ul className="list-disc pl-4">
+                        <li>generating a lesson plan, a language analysis, or a written assignment using AI</li>
+                        <li>using AI for any purpose beyond those permitted</li>
+                        <li>failing to acknowledge AI use, regardless of scope or purpose</li>
+                      </ul>
+                    </div>
+                    <p className="text-xs">
+                      Summarised from Cambridge&apos;s own guidance -- see your centre&apos;s uploaded disclaimer document
+                      for the full, current wording.
+                    </p>
+                  </div>
+                </details>
+              </span>
+            </label>
+          </>
+        ) : null}
       </div>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
