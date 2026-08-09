@@ -39,7 +39,12 @@ export async function updateAssignmentTemplateSections(
 
   const templateId = formData.get("template_id");
   const sectionsRaw = formData.get("sections");
-  if (typeof templateId !== "string" || typeof sectionsRaw !== "string") {
+  const format = formData.get("format");
+  if (
+    typeof templateId !== "string" ||
+    typeof sectionsRaw !== "string" ||
+    (format !== "prose" && format !== "structured")
+  ) {
     return { error: "Something went wrong. Refresh and try again." };
   }
 
@@ -51,7 +56,7 @@ export async function updateAssignmentTemplateSections(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("assignment_templates").update({ sections }).eq("id", templateId);
+  const { error } = await supabase.from("assignment_templates").update({ sections, format }).eq("id", templateId);
 
   if (error) {
     return { error: "Could not save. Try again." };
@@ -61,12 +66,35 @@ export async function updateAssignmentTemplateSections(
   return { error: null };
 }
 
+// remaining-compliance.md item 1: exactly two of the centre's four briefs
+// must be academic prose (Syllabus, assessment requirements). Warned
+// non-blockingly on the edit page at any point, but refused here -- only
+// at the moment publishing this one would complete a full set of 4
+// published briefs with the wrong prose count. Can't judge "wrong count"
+// before all 4 exist and are published, so earlier publishes never trip
+// this even if the running count looks off mid-setup.
 export async function publishAssignmentTemplate(formData: FormData): Promise<void> {
-  await requireRole("admin");
+  const admin = await requireRole("admin");
   const templateId = formData.get("template_id");
   if (typeof templateId !== "string") return;
 
   const supabase = await createClient();
+  const { data: allTemplates } = await supabase
+    .from("assignment_templates")
+    .select("id, format, published_at")
+    .eq("center_id", admin.center_id);
+
+  const afterPublish = (allTemplates ?? []).map((t) =>
+    t.id === templateId ? { ...t, published_at: new Date().toISOString() } : t
+  );
+  const completingFullPublishedSet = afterPublish.length === 4 && afterPublish.every((t) => t.published_at);
+  if (completingFullPublishedSet) {
+    const proseCount = afterPublish.filter((t) => t.format === "prose").length;
+    if (proseCount !== 2) {
+      redirect(`/dashboard/admin/assignment-briefs/${templateId}?publish_error=format_count`);
+    }
+  }
+
   await supabase
     .from("assignment_templates")
     .update({ published_at: new Date().toISOString() })

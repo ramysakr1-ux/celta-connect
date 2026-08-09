@@ -17,7 +17,7 @@ export default async function JoinPage({
   const admin = createAdminClient();
   const { data: course } = await admin
     .from("courses")
-    .select("id, name, trainee_join_token, trainer_join_token")
+    .select("id, name, center_id, trainee_join_token, trainer_join_token")
     .or(`trainee_join_token.eq.${token},trainer_join_token.eq.${token}`)
     .maybeSingle();
 
@@ -35,6 +35,7 @@ export default async function JoinPage({
   }
 
   const role: UserRole = course.trainee_join_token === token ? "trainee" : "trainer";
+  const { data: center } = await admin.from("centers").select("is_uk_centre").eq("id", course.center_id).maybeSingle();
 
   return (
     <div className="flex min-h-screen flex-1 items-center justify-center p-8">
@@ -43,7 +44,7 @@ export default async function JoinPage({
         <p className="mt-1 text-sm text-muted">
           You&apos;re joining {course.name} as a <span className="capitalize">{role}</span>.
         </p>
-        <JoinForm token={token} role={role} />
+        <JoinForm token={token} role={role} isUkCentre={center?.is_uk_centre ?? false} />
       </div>
     </div>
   );

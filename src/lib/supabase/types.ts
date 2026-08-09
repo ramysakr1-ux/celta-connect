@@ -65,6 +65,7 @@ export interface Database {
           logo_url: string | null;
           primary_color: string | null;
           accent_color: string | null;
+          is_uk_centre: boolean;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {
@@ -88,6 +89,7 @@ export interface Database {
           timetable_locked_at: string | null;
           time_bands: TimeBand[] | null;
           delivery_mode: "f2f" | "online" | "mixed";
+          assessor_visit_date: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["courses"]["Row"]> & {
@@ -110,6 +112,7 @@ export interface Database {
           tutor_role: string | null;
           terms_accepted_at: string | null;
           special_consideration: string | null;
+          uln: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {
@@ -238,6 +241,7 @@ export interface Database {
           storage_path: string;
           original_filename: string | null;
           sections: TemplateSection[];
+          format: "prose" | "structured";
           generation_status: TpGenerationStatus;
           generation_error: string | null;
           published_at: string | null;
@@ -591,6 +595,8 @@ export interface Database {
           linked_assignment_type: string | null;
           linked_tp_number: number | null;
           zoom_url: string | null;
+          is_asynchronous: boolean;
+          linked_live_session_event_id: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;

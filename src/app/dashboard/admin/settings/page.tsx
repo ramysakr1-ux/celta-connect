@@ -33,7 +33,7 @@ export default async function AdminSettingsPage({
   const admin = createAdminClient();
   const { data: center } = await admin
     .from("centers")
-    .select("name, center_number")
+    .select("name, center_number, is_uk_centre")
     .eq("id", profile.center_id)
     .maybeSingle();
   const { data: connection } = await admin
@@ -124,7 +124,11 @@ export default async function AdminSettingsPage({
               the final report, and your own record pages.
             </p>
             <div className="mt-4">
-              <CenterProfileForm name={center?.name ?? ""} centerNumber={center?.center_number ?? ""} />
+              <CenterProfileForm
+                name={center?.name ?? ""}
+                centerNumber={center?.center_number ?? ""}
+                isUkCentre={center?.is_uk_centre ?? false}
+              />
             </div>
           </div>
 

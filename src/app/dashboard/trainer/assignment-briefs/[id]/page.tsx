@@ -49,6 +49,8 @@ export default async function TrainerAssignmentBriefDetailPage({
             <SectionEditor
               templateId={template.id}
               sections={template.sections}
+              format={template.format}
+              formatWarning={null}
               publishedAt={template.published_at}
               saveAction={updateAssignmentTemplateSections}
               publishAction={publishAssignmentTemplate}

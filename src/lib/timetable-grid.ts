@@ -28,7 +28,7 @@ export function resolveTimeBands(courseTimeBands: TimeBand[] | null | undefined)
   return courseTimeBands && courseTimeBands.length > 0 ? courseTimeBands : DEFAULT_TIME_BANDS;
 }
 
-export type CellCategory = "admin" | "wg" | "rm" | "iw" | "lu";
+export type CellCategory = "admin" | "wg" | "rm" | "iw" | "lu" | "cs";
 
 // Moved from event-cell.tsx (checkpoint 2) -- the Today dashboard needs the
 // exact same "is this Zoom event live right now" calc for its own schedule
@@ -63,6 +63,13 @@ export function categorize(event: TimetableEvent): CellCategory {
   if (event.tag === "lunch") return "lu";
   if (event.tag === "whole_group") return "wg";
   if (event.tag === "individual") return "iw";
+  // remaining-compliance.md item 2: consultation time is one of the
+  // syllabus's own named 120-hour categories (alongside input, planning,
+  // TP, feedback, peer observation, observation of experienced teachers) --
+  // renamed into a real tag here, not a new kind of slot. Tutorials,
+  // resubmission clinics and planning support were already being run as
+  // ordinary tagged events; this just gives them the syllabus's own word.
+  if (event.tag === "consultation") return "cs";
   if (event.tag) return "rm";
   return event.type === "tp" ? "rm" : "iw";
 }
@@ -82,6 +89,29 @@ export function bandIndexFor(eventTime: string | null, timeBands: TimeBand[] = D
     if (minutes < toMinutes(timeBands[i].end)) return i;
   }
   return timeBands.length - 1;
+}
+
+// remaining-compliance.md "Changed by decision": quiet hours derive from
+// the real timetable rather than a fixed clock -- a part-time course
+// teaching until 21:30 shouldn't go quiet at the same hour a full-time
+// course does. "An hour after the last timetabled session that day" is the
+// rule; events only carry a start time, so "last session" is the latest
+// event_time on the day, not a computed end. Informational only -- no
+// message queueing/blocking infrastructure exists to actually hold
+// anything until morning, this just tells a trainee messaging late that a
+// reply won't come until then.
+export function computeQuietHoursNote(
+  todaysEventTimes: (string | null)[],
+  now: Date
+): string | null {
+  const times = todaysEventTimes.filter((t): t is string => !!t).sort();
+  if (times.length === 0) return null;
+  const lastEventTime = times[times.length - 1];
+  const [h, m] = lastEventTime.split(":").map(Number);
+  const quietFrom = new Date(now);
+  quietFrom.setHours(h + 1, m, 0, 0);
+  if (now < quietFrom) return null;
+  return `Quiet hours -- today's last session ended a while ago, so your tutor likely won't reply until morning.`;
 }
 
 /** True when an event's own time doesn't match its band's default start --

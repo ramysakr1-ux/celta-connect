@@ -77,6 +77,7 @@ export async function joinCourse(
   }
   const specialConsideration =
     role === "trainee" ? (formData.get("special_consideration") as string | null)?.trim() || null : null;
+  const uln = role === "trainee" ? (formData.get("uln") as string | null)?.trim() || null : null;
 
   const tutorRoleInput = formData.get("tutor_role");
   const tutorRole =
@@ -111,6 +112,7 @@ export async function joinCourse(
     course_id: course.id,
     tutor_role: tutorRole,
     special_consideration: specialConsideration,
+    uln,
     terms_accepted_at: new Date().toISOString(),
   });
 

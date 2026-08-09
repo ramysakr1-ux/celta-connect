@@ -53,12 +53,14 @@ export function ChatDrawerSwitcher({
   traineeId,
   traineePreviewChat,
   traineePreviewLatestMessage,
+  quietHoursNote,
 }: {
   staffProfileId: string | null;
   staffChat: ChatPayload | null;
   traineeId: string;
   traineePreviewChat: ChatPayload | null;
   traineePreviewLatestMessage?: Message | null;
+  quietHoursNote?: string | null;
 }) {
   const searchParams = useSearchParams();
   if (isPreviewingAsTrainee(searchParams)) {
@@ -74,7 +76,14 @@ export function ChatDrawerSwitcher({
     );
   }
   if (!staffProfileId || !staffChat) return null;
-  return <StaffChatDrawer profileId={staffProfileId} initialChannels={staffChat.channels} coworkers={staffChat.coworkers} />;
+  return (
+    <StaffChatDrawer
+      profileId={staffProfileId}
+      initialChannels={staffChat.channels}
+      coworkers={staffChat.coworkers}
+      quietHoursNote={quietHoursNote}
+    />
+  );
 }
 
 export function PreviewBanner({ traineeId, traineeName }: { traineeId: string; traineeName: string }) {

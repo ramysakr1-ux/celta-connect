@@ -12,31 +12,69 @@ interface TimetableEventOption {
   event_time: string | null;
 }
 
+// remaining-compliance.md "Changed by decision": candidates raise concerns
+// with the assessor in the meeting, not through a written channel -- the
+// assessor already has no chat access. What candidates get instead is this
+// calming announcement, human-reviewed before it sends (the button only
+// prefills the fields, it never posts on its own).
+const ASSESSOR_VISIT_TEMPLATE = {
+  title: "Your assessor visit is coming up",
+  body: "An external Cambridge assessor will be visiting the course soon, sitting in on some teaching practice and reviewing portfolios. This is a normal, routine part of every CELTA course -- there's nothing to prepare beyond what you're already doing. If anything is on your mind, the assessor meeting itself is the place to raise it.",
+};
+
 export function BroadcastComposer({
   traineeId,
   timetableEvents,
+  assessorVisitDate,
 }: {
   traineeId: string;
   timetableEvents: TimetableEventOption[];
+  assessorVisitDate: string | null;
 }) {
   const action = postBroadcast.bind(null, traineeId);
   const [state, formAction, pending] = useActionState(action, initialState);
   const [linkedEventId, setLinkedEventId] = useState("");
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+
+  const showAssessorTemplate = (() => {
+    if (!assessorVisitDate) return false;
+    const daysUntil = Math.ceil((new Date(`${assessorVisitDate}T00:00:00`).getTime() - Date.now()) / 86400000);
+    return daysUntil >= 0 && daysUntil <= 2;
+  })();
 
   return (
     <form action={formAction} className="sheet flex flex-col gap-3 border-primary/25 bg-accent/30">
       <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
         Broadcast to cohort
       </p>
+
+      {showAssessorTemplate ? (
+        <button
+          type="button"
+          onClick={() => {
+            setTitle(ASSESSOR_VISIT_TEMPLATE.title);
+            setBody(ASSESSOR_VISIT_TEMPLATE.body);
+          }}
+          className="self-start rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold hover:bg-gold/20"
+        >
+          Use assessor-visit template
+        </button>
+      ) : null}
+
       <input
         name="title"
         type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
         placeholder="Title"
         required
         className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
       />
       <textarea
         name="body"
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
         placeholder="Write your announcement…"
         rows={3}
         className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"

@@ -8,9 +8,11 @@ const initialState: FormState = { error: null };
 export function CenterProfileForm({
   name,
   centerNumber,
+  isUkCentre,
 }: {
   name: string;
   centerNumber: string;
+  isUkCentre: boolean;
 }) {
   const [state, action, pending] = useActionState(updateCenterProfile, initialState);
   const isPlaceholder = centerNumber.startsWith("PENDING-");
@@ -56,6 +58,15 @@ export function CenterProfileForm({
           course.
         </p>
       </div>
+
+      <label className="flex items-center gap-2 text-sm text-ink">
+        <input type="checkbox" name="is_uk_centre" defaultChecked={isUkCentre} />
+        This centre is based in the UK
+      </label>
+      <p className="-mt-2 text-xs text-muted">
+        Shows a Unique Learner Number field on the trainee join form -- required for UK education
+        and training records, not used elsewhere.
+      </p>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 

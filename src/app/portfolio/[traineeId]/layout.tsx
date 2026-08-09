@@ -17,6 +17,7 @@ import {
 } from "@/lib/celta-criteria";
 import { HideDuringPreview, TraineeEyebrowLabel, PreviewBanner, ChatDrawerSwitcher } from "@/app/portfolio/[traineeId]/preview-chrome";
 import { STANDING_LABEL } from "@/components/trajectory-gradient-bar";
+import { computeQuietHoursNote } from "@/lib/timetable-grid";
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
 // only ever land on their own :traineeId (redirected home otherwise);
@@ -106,14 +107,29 @@ export default async function PortfolioLayout({
       ).data?.[0]
     : null;
 
-  const [{ data: center }, { data: lessons }, { data: assignments }, { data: preCourseSections }, { data: preCourseResponses }] =
-    await Promise.all([
-      supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
-      supabase.from("tp_lessons").select("id").eq("trainee_id", trainee.id),
-      supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
-      supabase.from("pre_course_task_sections").select("id").eq("center_id", trainee.center_id),
-      supabase.from("pre_course_task_responses").select("section_id, response").eq("trainee_id", trainee.id),
-    ]);
+  const today = new Date().toISOString().slice(0, 10);
+  const [
+    { data: center },
+    { data: lessons },
+    { data: assignments },
+    { data: preCourseSections },
+    { data: preCourseResponses },
+    { data: todaysEvents },
+  ] = await Promise.all([
+    supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
+    supabase.from("tp_lessons").select("id").eq("trainee_id", trainee.id),
+    supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
+    supabase.from("pre_course_task_sections").select("id").eq("center_id", trainee.center_id),
+    supabase.from("pre_course_task_responses").select("section_id, response").eq("trainee_id", trainee.id),
+    trainee.course_id
+      ? supabase
+          .from("course_timetable_events")
+          .select("event_time")
+          .eq("course_id", trainee.course_id)
+          .eq("event_date", today)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const quietHoursNote = computeQuietHoursNote((todaysEvents ?? []).map((e) => e.event_time), new Date());
 
   const tpsTaught = (lessons ?? []).length;
   const assignmentsPassed = (assignments ?? []).filter(
@@ -243,6 +259,7 @@ export default async function PortfolioLayout({
         traineeId={trainee.id}
         traineePreviewChat={traineePreviewChat}
         traineePreviewLatestMessage={traineePreviewLatestMessage}
+        quietHoursNote={viewer?.role === "trainee" ? quietHoursNote : null}
       />
     </div>
   );

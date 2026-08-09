@@ -11,6 +11,7 @@ export const CATEGORY_ACCENT: Record<string, string> = {
   rm: "var(--color-ink)",
   iw: "var(--color-muted)",
   lu: "transparent",
+  cs: "var(--color-bronze)",
 };
 
 // Camera icon, traced from the sanctioned C14-timetable-A-floating.html

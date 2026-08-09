@@ -9,7 +9,7 @@ import {
   UnpairButton,
 } from "@/app/dashboard/admin/courses/[id]/subgroups-form";
 import { removeSubgroupMember } from "@/app/dashboard/admin/courses/[id]/subgroup-actions";
-import { removeRosterMember } from "@/app/dashboard/admin/courses/[id]/roster-actions";
+import { removeRosterMember, updateAssessorVisitDate } from "@/app/dashboard/admin/courses/[id]/roster-actions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { DeliveryModeCard } from "@/app/dashboard/admin/courses/[id]/delivery-mode-card";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
@@ -112,6 +112,28 @@ export default async function CourseRosterPage({
       </div>
 
       <DeliveryModeCard courseId={course.id} savedMode={course.delivery_mode} />
+
+      <div className="card flex items-center justify-between gap-4 p-6">
+        <div>
+          <h2 className="font-serif text-lg text-ink">Assessor visit date</h2>
+          <p className="mt-1 text-sm text-muted">
+            Candidates get a calming reminder from Course Stream ahead of this date -- concerns are
+            raised with the assessor in the meeting itself, not through a written channel.
+          </p>
+        </div>
+        <form action={updateAssessorVisitDate} className="flex items-center gap-2">
+          <input type="hidden" name="course_id" value={course.id} />
+          <input
+            type="date"
+            name="assessor_visit_date"
+            defaultValue={course.assessor_visit_date ?? ""}
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          />
+          <button type="submit" className="rounded-[6px] border border-border px-3 py-2 text-sm text-ink hover:border-primary">
+            Save
+          </button>
+        </form>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
         <div className="flex flex-col gap-6">

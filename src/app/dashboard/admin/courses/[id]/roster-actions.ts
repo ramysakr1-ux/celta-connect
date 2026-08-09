@@ -30,6 +30,20 @@ export async function updateDeliveryMode(formData: FormData): Promise<void> {
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
 }
 
+export async function updateAssessorVisitDate(formData: FormData): Promise<void> {
+  const admin = await requireRole("admin");
+  const courseId = formData.get("course_id");
+  const assessorVisitDate = (formData.get("assessor_visit_date") as string | null) || null;
+  if (typeof courseId !== "string") return;
+
+  const supabase = await createClient();
+  const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
+  if (!course || course.center_id !== admin.center_id) return;
+
+  await supabase.from("courses").update({ assessor_visit_date: assessorVisitDate }).eq("id", courseId);
+  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+}
+
 export async function regenerateJoinLink(formData: FormData): Promise<void> {
   const admin = await requireRole("admin");
 

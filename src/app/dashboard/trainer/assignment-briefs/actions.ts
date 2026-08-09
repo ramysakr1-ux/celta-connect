@@ -39,7 +39,12 @@ export async function updateAssignmentTemplateSections(
 
   const templateId = formData.get("template_id");
   const sectionsRaw = formData.get("sections");
-  if (typeof templateId !== "string" || typeof sectionsRaw !== "string") {
+  const format = formData.get("format");
+  if (
+    typeof templateId !== "string" ||
+    typeof sectionsRaw !== "string" ||
+    (format !== "prose" && format !== "structured")
+  ) {
     return { error: "Something went wrong. Refresh and try again." };
   }
 
@@ -51,7 +56,7 @@ export async function updateAssignmentTemplateSections(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("assignment_templates").update({ sections }).eq("id", templateId);
+  const { error } = await supabase.from("assignment_templates").update({ sections, format }).eq("id", templateId);
 
   if (error) {
     return { error: "Could not save. Try again." };

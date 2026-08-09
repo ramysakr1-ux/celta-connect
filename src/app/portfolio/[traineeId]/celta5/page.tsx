@@ -97,21 +97,39 @@ export default async function PortfolioCelta5Page({
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
 
   if (!isStaff && !assessorCourseId) {
-    const [{ data: recordRows }, { data: matrix }, { data: observations }, { data: timetableEvents }, { data: plans }, { data: assignments }] =
-      await Promise.all([
-        supabase.rpc("get_my_celta5_record"),
-        supabase.rpc("get_my_celta5_matrix"),
-        supabase.from("observations").select("*").eq("trainee_id", traineeId).order("observation_date"),
-        viewer?.course_id
-          ? supabase
-              .from("course_timetable_events")
-              .select("type, event_date, linked_tp_number, linked_assignment_type, title")
-              .eq("course_id", viewer.course_id)
-              .in("type", ["tp", "assignment_due", "resubmission_due"])
-          : Promise.resolve({ data: [] }),
-        supabase.from("plan_assignments").select("tp_number, tp_point_id, taught_at").eq("trainee_id", traineeId),
-        supabase.from("assignments").select("assignment_type, first_status, resubmission_status").eq("trainee_id", traineeId),
-      ]);
+    const [
+      { data: recordRows },
+      { data: matrix },
+      { data: observations },
+      { data: timetableEvents },
+      { data: plans },
+      { data: assignments },
+      { data: course },
+      { data: center },
+      { data: courseTutorRows },
+    ] = await Promise.all([
+      supabase.rpc("get_my_celta5_record"),
+      supabase.rpc("get_my_celta5_matrix"),
+      supabase.from("observations").select("*").eq("trainee_id", traineeId).order("observation_date"),
+      viewer?.course_id
+        ? supabase
+            .from("course_timetable_events")
+            .select("type, event_date, linked_tp_number, linked_assignment_type, title")
+            .eq("course_id", viewer.course_id)
+            .in("type", ["tp", "assignment_due", "resubmission_due"])
+        : Promise.resolve({ data: [] }),
+      supabase.from("plan_assignments").select("tp_number, tp_point_id, taught_at").eq("trainee_id", traineeId),
+      supabase.from("assignments").select("assignment_type, first_status, resubmission_status").eq("trainee_id", traineeId),
+      viewer?.course_id
+        ? supabase.from("courses").select("name, start_date, end_date").eq("id", viewer.course_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      viewer?.center_id
+        ? supabase.from("centers").select("name, center_number, is_uk_centre").eq("id", viewer.center_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      viewer?.course_id
+        ? supabase.from("course_tutors").select("profile_id").eq("course_id", viewer.course_id).is("left_at", null)
+        : Promise.resolve({ data: [] }),
+    ]);
     const record = recordRows?.[0];
 
     if (!record) {
@@ -151,9 +169,49 @@ export default async function PortfolioCelta5Page({
       assignmentStatusByType,
     });
 
+    const tutorIds = (courseTutorRows ?? []).map((t) => t.profile_id);
+    const { data: tutorProfiles } =
+      tutorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", tutorIds) : { data: [] };
+    const tutorNames = (tutorProfiles ?? []).map((t) => t.full_name);
+
     return (
       <div className="flex flex-col gap-4">
-        <h2 className="font-serif text-xl text-ink">CELTA 5 record</h2>
+        <div>
+          <h2 className="font-serif text-xl text-ink">CELTA 5 record</h2>
+          {/* remaining-compliance.md item 4: front matter populated from
+              real data (name/centre/course/tutors), never typed by hand. */}
+          <div className="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
+            <div>
+              <p className="text-muted">Candidate</p>
+              <p className="text-ink">{viewer?.full_name}</p>
+            </div>
+            <div>
+              <p className="text-muted">Centre</p>
+              <p className="text-ink">
+                {center?.name ?? "--"}
+                {center?.center_number ? ` (Centre ${center.center_number})` : ""}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted">Course</p>
+              <p className="text-ink">{course?.name ?? "--"}</p>
+            </div>
+            <div>
+              <p className="text-muted">Dates</p>
+              <p className="text-ink">{course ? `${course.start_date} → ${course.end_date}` : "--"}</p>
+            </div>
+            <div>
+              <p className="text-muted">Tutors</p>
+              <p className="text-ink">{tutorNames.length > 0 ? tutorNames.join(", ") : "--"}</p>
+            </div>
+            {center?.is_uk_centre ? (
+              <div>
+                <p className="text-muted">ULN</p>
+                <p className="text-ink">{viewer?.uln || "Not provided"}</p>
+              </div>
+            ) : null}
+          </div>
+        </div>
 
         <div className="sheet">
           <p className="text-sm text-muted">Course progress</p>
@@ -422,6 +480,16 @@ export default async function PortfolioCelta5Page({
     supabase.from("plan_assignments").select("tp_point_id, taught_at").eq("trainee_id", traineeId),
   ]);
 
+  // remaining-compliance.md item 4: CELTA 5 front matter (candidate name,
+  // centre number, tutors) populated from real data, never typed by hand.
+  const { data: courseTutorRows } = trainee.course_id
+    ? await supabase.from("course_tutors").select("profile_id").eq("course_id", trainee.course_id).is("left_at", null)
+    : { data: [] };
+  const tutorIds = (courseTutorRows ?? []).map((t) => t.profile_id);
+  const { data: tutorProfiles } =
+    tutorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", tutorIds) : { data: [] };
+  const tutorNames = (tutorProfiles ?? []).map((t) => t.full_name);
+
   const lessonIds = (lessons ?? []).map((l) => l.id);
   const { data: criteriaTags } =
     lessonIds.length > 0
@@ -488,8 +556,15 @@ export default async function PortfolioCelta5Page({
       <h2 className="font-serif text-xl text-ink">CELTA 5 record</h2>
       <div className="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
         <div>
+          <p className="text-muted">Candidate</p>
+          <p className="text-ink">{trainee.full_name}</p>
+        </div>
+        <div>
           <p className="text-muted">Centre</p>
-          <p className="text-ink">{center?.name ?? "--"}</p>
+          <p className="text-ink">
+            {center?.name ?? "--"}
+            {center?.center_number ? ` (Centre ${center.center_number})` : ""}
+          </p>
         </div>
         <div>
           <p className="text-muted">Course</p>
@@ -499,6 +574,16 @@ export default async function PortfolioCelta5Page({
           <p className="text-muted">Dates</p>
           <p className="text-ink">{course ? `${course.start_date} → ${course.end_date}` : "--"}</p>
         </div>
+        <div>
+          <p className="text-muted">Tutors</p>
+          <p className="text-ink">{tutorNames.length > 0 ? tutorNames.join(", ") : "--"}</p>
+        </div>
+        {center?.is_uk_centre ? (
+          <div>
+            <p className="text-muted">ULN</p>
+            <p className="text-ink">{trainee.uln || "Not provided"}</p>
+          </div>
+        ) : null}
       </div>
     </div>
   );

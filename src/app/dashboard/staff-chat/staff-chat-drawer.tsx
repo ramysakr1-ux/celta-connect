@@ -49,6 +49,7 @@ export function StaffChatDrawer({
   coworkers,
   readOnly = false,
   staticMessages,
+  quietHoursNote,
 }: {
   profileId: string;
   initialChannels: ChannelSummary[];
@@ -64,6 +65,11 @@ export function StaffChatDrawer({
   // can't be trusted to see them itself under RLS. Passed straight through
   // to the one MessageThread instance this drawer ever shows at a time.
   staticMessages?: Message[];
+  // remaining-compliance.md "Changed by decision": derived server-side from
+  // the real timetable (see computeQuietHoursNote), trainee-only, purely
+  // informational -- there's no message-holding infrastructure to actually
+  // delay delivery until morning, this just sets the right expectation.
+  quietHoursNote?: string | null;
 }) {
   const [channels, setChannels] = useState(initialChannels);
   const [selectedId, setSelectedId] = useState<string | null>(initialChannels[0]?.id ?? null);
@@ -267,6 +273,10 @@ export function StaffChatDrawer({
               />
             ) : null}
           </div>
+        ) : null}
+
+        {quietHoursNote && !readOnly ? (
+          <p className="rounded-full bg-gold/10 px-3 py-1 text-center text-[11px] text-gold">{quietHoursNote}</p>
         ) : null}
 
         <div className="flex h-14 items-center gap-3 rounded-[28px] border border-border bg-card pl-2 pr-2.5 shadow-lg">

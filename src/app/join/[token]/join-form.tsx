@@ -10,7 +10,7 @@ const initialState: JoinCourseState = { error: null };
 const inputClass =
   "h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary";
 
-export function JoinForm({ token, role }: { token: string; role: UserRole }) {
+export function JoinForm({ token, role, isUkCentre }: { token: string; role: UserRole; isUkCentre: boolean }) {
   const [state, action, pending] = useActionState(joinCourse, initialState);
 
   return (
@@ -74,6 +74,19 @@ export function JoinForm({ token, role }: { token: string; role: UserRole }) {
           className={inputClass}
         />
       </div>
+
+      {role === "trainee" && isUkCentre ? (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="uln" className="text-sm text-muted">
+            Unique Learner Number (ULN)
+          </label>
+          <p className="text-xs text-muted">
+            The 10-digit identifier applied to your Personal Learning Record for UK education and
+            training, if you have one.
+          </p>
+          <input id="uln" name="uln" type="text" inputMode="numeric" maxLength={10} className={inputClass} />
+        </div>
+      ) : null}
 
       {role === "trainee" ? (
         <div className="flex flex-col gap-1.5">

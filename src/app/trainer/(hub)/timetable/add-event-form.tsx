@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { addTimetableEvent, type FormState } from "@/app/trainer/(hub)/timetable/actions";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER } from "@/lib/assignment-info";
 
@@ -14,8 +14,14 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
 
 const initialState: FormState = { error: null };
 
-export function AddEventForm() {
+export function AddEventForm({
+  existingEvents,
+}: {
+  existingEvents: { id: string; title: string; event_date: string }[];
+}) {
   const [state, formAction, pending] = useActionState(addTimetableEvent, initialState);
+  const [type, setType] = useState("input_session");
+  const [isAsync, setIsAsync] = useState(false);
 
   return (
     <form action={formAction} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -24,6 +30,8 @@ export function AddEventForm() {
         <select
           name="type"
           required
+          value={type}
+          onChange={(e) => setType(e.target.value)}
           className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         >
           {Object.entries(EVENT_TYPE_LABELS).map(([value, label]) => (
@@ -60,7 +68,10 @@ export function AddEventForm() {
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Tag (optional -- e.g. tutor name, "whole_group", "individual", or "lunch")</label>
+        <label className="text-sm text-muted">
+          Tag (optional -- e.g. tutor name, &quot;whole_group&quot;, &quot;individual&quot;, &quot;lunch&quot;, or
+          &quot;consultation&quot;)
+        </label>
         <input
           name="tag"
           type="text"
@@ -91,6 +102,38 @@ export function AddEventForm() {
           ))}
         </select>
       </div>
+      {type === "input_session" ? (
+        <div className="flex flex-col gap-1.5 sm:col-span-2">
+          <label className="flex items-center gap-2 text-sm text-ink">
+            <input type="checkbox" name="is_asynchronous" checked={isAsync} onChange={(e) => setIsAsync(e.target.checked)} />
+            Delivered asynchronously (recorded or Moodle, not live)
+          </label>
+          {isAsync ? (
+            <>
+              <label className="text-sm text-muted">Linked live follow-up slot</label>
+              <select
+                name="linked_live_session_event_id"
+                required
+                defaultValue=""
+                className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              >
+                <option value="" disabled>
+                  Choose a timetable slot
+                </option>
+                {existingEvents.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.title} -- {e.event_date}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-muted">
+                Handbook 2.2: recorded or Moodle input must always be combined with a live follow-up
+                discussion. Required before the timetable can be locked.
+              </p>
+            </>
+          ) : null}
+        </div>
+      ) : null}
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Linked TP (optional)</label>
         <select

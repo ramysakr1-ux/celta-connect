@@ -65,7 +65,7 @@ export default async function CourseStreamPage({
   const isStaff = (viewer?.role === "trainer" || viewer?.role === "admin") && preview !== "trainee";
   const today = toLocalIso(new Date());
 
-  const [{ data: broadcasts }, { data: timetableEvents }, { data: upcomingEvents }, { data: tutors }, { data: assignments }] =
+  const [{ data: broadcasts }, { data: timetableEvents }, { data: upcomingEvents }, { data: tutors }, { data: assignments }, { data: course }] =
     await Promise.all([
       supabase
         .from("course_broadcasts")
@@ -99,6 +99,7 @@ export default async function CourseStreamPage({
         .eq("course_id", trainee.course_id)
         .eq("role", "trainer"),
       supabase.from("assignments").select("id, assignment_type").eq("trainee_id", traineeId),
+      supabase.from("courses").select("assessor_visit_date").eq("id", trainee.course_id).maybeSingle(),
     ]);
 
   // §1.1a v2 rule 9 -- deadline chips are live links to the assignment card
@@ -115,7 +116,13 @@ export default async function CourseStreamPage({
           <p className="text-xs text-muted">{(broadcasts ?? []).length} broadcasts</p>
         </div>
 
-        {isStaff ? <BroadcastComposer traineeId={traineeId} timetableEvents={upcomingEvents ?? []} /> : null}
+        {isStaff ? (
+          <BroadcastComposer
+            traineeId={traineeId}
+            timetableEvents={upcomingEvents ?? []}
+            assessorVisitDate={course?.assessor_visit_date ?? null}
+          />
+        ) : null}
 
         {(broadcasts ?? []).length === 0 ? (
           <p className="sheet text-sm text-muted">No broadcasts yet.</p>

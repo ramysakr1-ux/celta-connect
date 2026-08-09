@@ -17,6 +17,8 @@ function emptySection(): TemplateSection {
 export function SectionEditor({
   templateId,
   sections: initialSections,
+  format: initialFormat,
+  formatWarning,
   publishedAt,
   saveAction,
   publishAction,
@@ -24,6 +26,8 @@ export function SectionEditor({
 }: {
   templateId: string;
   sections: TemplateSection[];
+  format: "prose" | "structured";
+  formatWarning: string | null;
   publishedAt: string | null;
   saveAction: (prevState: SectionEditorFormState, formData: FormData) => Promise<SectionEditorFormState>;
   publishAction: (formData: FormData) => Promise<void>;
@@ -32,6 +36,7 @@ export function SectionEditor({
   const [sections, setSections] = useState<TemplateSection[]>(
     initialSections.length > 0 ? initialSections : [emptySection()]
   );
+  const [format, setFormat] = useState(initialFormat);
   const [state, formAction, pending] = useActionState(saveAction, { error: null });
 
   function updateSection(index: number, patch: Partial<TemplateSection>) {
@@ -43,6 +48,23 @@ export function SectionEditor({
       <form action={formAction} className="flex flex-col gap-4">
         <input type="hidden" name="template_id" value={templateId} />
         <input type="hidden" name="sections" value={JSON.stringify(sections)} />
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-medium uppercase tracking-wide text-muted">Format</label>
+          <select
+            name="format"
+            value={format}
+            onChange={(e) => setFormat(e.target.value as "prose" | "structured")}
+            className={inputClass}
+          >
+            <option value="prose">Academic prose</option>
+            <option value="structured">Structured (sections/tables)</option>
+          </select>
+          <p className="text-xs text-muted">
+            The syllabus requires exactly two of the four assignments to be continuous prose.
+          </p>
+          {formatWarning ? <p className="text-xs text-gold">{formatWarning}</p> : null}
+        </div>
 
         {sections.map((section, i) => (
           <div key={section.key || i} className="rounded-[6px] border border-border-faint p-4">

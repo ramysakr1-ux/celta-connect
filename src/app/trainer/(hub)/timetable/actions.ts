@@ -2,6 +2,7 @@
 
 import "server-only";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { buildSkeletonEvents, DEFAULT_TEACHING_DAYS } from "@/lib/timetable-skeleton";
@@ -26,6 +27,8 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
   const linkedAssignmentType = (formData.get("linked_assignment_type") as string | null) || null;
   const linkedTpNumberRaw = formData.get("linked_tp_number");
   const linkedTpNumber = linkedTpNumberRaw ? Number(linkedTpNumberRaw) : null;
+  const isAsynchronous = formData.get("is_asynchronous") === "on";
+  const linkedLiveSessionEventId = (formData.get("linked_live_session_event_id") as string | null) || null;
 
   if (typeof type !== "string" || !EVENT_TYPES.includes(type as (typeof EVENT_TYPES)[number])) {
     return { error: "Invalid event type." };
@@ -44,6 +47,10 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
     zoom_url: zoomUrl,
     linked_assignment_type: linkedAssignmentType,
     linked_tp_number: linkedTpNumber && linkedTpNumber >= 1 && linkedTpNumber <= 8 ? linkedTpNumber : null,
+    // Only meaningful on input_session rows -- Handbook 2.2: async input
+    // needs a real linked live follow-up slot, not free text.
+    is_asynchronous: type === "input_session" ? isAsynchronous : false,
+    linked_live_session_event_id: type === "input_session" ? linkedLiveSessionEventId : null,
     created_by: trainer.id,
   });
 
@@ -201,6 +208,25 @@ export async function setTimetableLock(formData: FormData): Promise<void> {
   const lock = formData.get("lock") === "true";
 
   const supabase = await createClient();
+
+  // remaining-compliance.md item 3: refuse (not warn) locking the
+  // timetable while an asynchronous input session has no linked live
+  // follow-up slot -- this is one of the rules an assessor checks directly
+  // on any course with an online element.
+  if (lock) {
+    const { data: unlinkedAsync } = await supabase
+      .from("course_timetable_events")
+      .select("id")
+      .eq("course_id", trainer.course_id)
+      .eq("type", "input_session")
+      .eq("is_asynchronous", true)
+      .is("linked_live_session_event_id", null)
+      .limit(1);
+    if (unlinkedAsync && unlinkedAsync.length > 0) {
+      redirect("/trainer/timetable?lock_error=async_missing_link");
+    }
+  }
+
   await supabase
     .from("courses")
     .update({ timetable_locked_at: lock ? new Date().toISOString() : null })

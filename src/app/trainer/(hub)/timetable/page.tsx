@@ -13,8 +13,13 @@ import { resolveTimeBands } from "@/lib/timetable-grid";
 // as columns, admin & deadlines as the leading column, sticky floating time
 // band. See CELTA-Connect-timetable-handoff-for-code.md and the sanctioned
 // reference C14-timetable-A-floating.html.
-export default async function TrainerTimetablePage() {
+export default async function TrainerTimetablePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ lock_error?: string }>;
+}) {
   const trainer = await requireRole(["trainer", "admin"]);
+  const { lock_error } = await searchParams;
   const supabase = await createClient();
 
   if (!trainer.course_id) {
@@ -95,6 +100,13 @@ export default async function TrainerTimetablePage() {
         </div>
       ) : null}
 
+      {lock_error === "async_missing_link" ? (
+        <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+          Can&apos;t lock -- an asynchronous input session has no linked live follow-up slot (Handbook
+          2.2). Add the link on that session, or add the live slot first.
+        </div>
+      ) : null}
+
       {!locked && events && events.length === 0 ? (
         <div className="sheet border-primary/20 bg-accent/20">
           <h2 className="font-serif text-lg text-ink">Start from the standard skeleton</h2>
@@ -120,7 +132,7 @@ export default async function TrainerTimetablePage() {
             Add a single dated item to the timetable below -- an input session, a TP, an
             assignment or resubmission due date, or a milestone.
           </p>
-          <AddEventForm />
+          <AddEventForm existingEvents={(events ?? []).map((e) => ({ id: e.id, title: e.title, event_date: e.event_date }))} />
         </div>
       ) : null}
 

@@ -30,6 +30,7 @@
   --color-gold: oklch(63% 0.096 72); /* brass/gold accent, used sparingly */
   --color-gold-foreground: oklch(99% 0.005 90);
   --color-ink-warm: oklch(30% 0.042 58); /* warm dark brown, one step lighter/warmer than --color-ink -- the wordmark tile, and headings/primary buttons/checkboxes on entry surfaces (rename-to-connect.md) */
+  --color-bronze: oklch(50% 0.09 62); /* third accent, from the Centre Admin design system -- consultation-time timetable category, distinct from primary/gold/ink at a glance */
   --color-destructive: oklch(45% 0.15 27);
   --color-input: oklch(88.8% 0.013 82);
   --color-accent: oklch(93% 0.019 190); /* pale teal-green, the "green hover" wash */
@@ -75,6 +76,7 @@
   --color-gold: var(--color-gold);
   --color-gold-foreground: var(--color-gold-foreground);
   --color-ink-warm: var(--color-ink-warm);
+  --color-bronze: var(--color-bronze);
   --color-destructive: var(--color-destructive);
   --color-input: var(--color-input);
   --color-accent: var(--color-accent);

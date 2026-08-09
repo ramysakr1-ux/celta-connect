@@ -15,6 +15,11 @@ export default async function AdminAssignmentBriefsPage() {
     .eq("center_id", admin.center_id);
 
   const templateByType = new Map((templates ?? []).map((t) => [t.assignment_type, t]));
+  const proseCount = (templates ?? []).filter((t) => t.format === "prose").length;
+  const formatWarning =
+    (templates ?? []).length === 4 && proseCount !== 2
+      ? `The syllabus needs exactly two of the four briefs in academic prose -- currently ${proseCount}.`
+      : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -24,6 +29,11 @@ export default async function AdminAssignmentBriefsPage() {
           Upload your centre&apos;s own brief for each written assignment as a PDF -- Claude splits it
           into sections you can review and edit before publishing it to trainees.
         </p>
+        {formatWarning ? (
+          <p className="mt-3 rounded-[6px] border border-gold/40 bg-gold/10 px-3 py-2 text-sm text-gold">
+            {formatWarning}
+          </p>
+        ) : null}
       </div>
 
       {ASSIGNMENT_ORDER.map((type) => {
