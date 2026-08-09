@@ -527,6 +527,8 @@ export interface Database {
           is_trainer_in_training: boolean;
           verified_at: string | null;
           supervisor_profile_id: string | null;
+          online_experience_evidenced: boolean;
+          online_experience_note: string | null;
           joined_at: string;
           left_at: string | null;
           created_at: string;

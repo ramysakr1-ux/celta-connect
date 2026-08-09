@@ -132,6 +132,74 @@ export async function updateStyleExample(
   return { error: null };
 }
 
+const TUTOR_ROLES = [
+  "main_course_tutor",
+  "assistant_course_tutor",
+  "teaching_practice_tutor",
+  "input_session_tutor",
+  "external_assessor",
+] as const;
+
+// Edits an existing course_tutors row -- role, trainer-in-training status
+// (0051's own check constraint enforces verified_at is set before this can
+// be true), and per-course online-experience evidence (Handbook: every
+// tutor on an online/mixed course must be able to evidence online
+// teaching/training experience). Does NOT add a tutor to an ADDITIONAL
+// course -- 0051's own comment flags that as needing a real decision about
+// what happens to their access to their old course (profiles.course_id is
+// still the single source RLS reads for "which course is this login
+// scoped to" today), not something to guess at here.
+export async function updateCourseTutor(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const profile = await requireRole("admin");
+
+  const id = formData.get("id") as string | null;
+  const tutorRole = formData.get("tutor_role") as string | null;
+  const isTraineeInTraining = formData.get("is_trainer_in_training") === "on";
+  const verifiedAt = (formData.get("verified_at") as string | null) || null;
+  const supervisorProfileId = (formData.get("supervisor_profile_id") as string | null) || null;
+  const onlineExperienceEvidenced = formData.get("online_experience_evidenced") === "on";
+  const onlineExperienceNote = (formData.get("online_experience_note") as string | null)?.trim() || null;
+
+  if (!id) return { error: "Missing tutor record." };
+  if (tutorRole && !TUTOR_ROLES.includes(tutorRole as (typeof TUTOR_ROLES)[number])) {
+    return { error: "Invalid tutor role." };
+  }
+  if (isTraineeInTraining && !verifiedAt) {
+    return { error: "A trainer-in-training needs a Cambridge verification date on file first." };
+  }
+
+  const admin = createAdminClient();
+
+  const { data: row } = await admin.from("course_tutors").select("id, course_id").eq("id", id).maybeSingle();
+  if (!row) return { error: "Tutor record not found." };
+  const { data: course } = await admin.from("courses").select("center_id").eq("id", row.course_id).maybeSingle();
+  if (!course || course.center_id !== profile.center_id) {
+    return { error: "Tutor record not found." };
+  }
+
+  const { error } = await admin
+    .from("course_tutors")
+    .update({
+      tutor_role: (tutorRole || null) as (typeof TUTOR_ROLES)[number] | null,
+      is_trainer_in_training: isTraineeInTraining,
+      verified_at: verifiedAt,
+      supervisor_profile_id: supervisorProfileId,
+      online_experience_evidenced: onlineExperienceEvidenced,
+      online_experience_note: onlineExperienceNote,
+    })
+    .eq("id", id);
+
+  if (error) {
+    return { error: "Could not save. Try again." };
+  }
+
+  revalidatePath("/dashboard/admin/settings");
+  return { error: null };
+}
+
 export async function deleteStyleExample(formData: FormData): Promise<void> {
   const profile = await requireRole("admin");
   const id = formData.get("id") as string | null;
