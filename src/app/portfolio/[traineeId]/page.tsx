@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Video, Paperclip } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -109,13 +110,13 @@ export default async function CourseStreamPage({
   const assignmentIdByType = new Map((assignments ?? []).map((a) => [a.assignment_type, a.id]));
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_300px]">
-      <div className="flex min-w-0 flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-serif text-xl text-ink">Course Stream</h2>
-          <p className="text-xs text-muted">{(broadcasts ?? []).length} broadcasts</p>
-        </div>
+    <div className="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-[1fr_300px] lg:grid-rows-[auto_1fr]">
+      <div className="flex items-center justify-between lg:col-start-1 lg:row-start-1">
+        <h2 className="font-serif text-xl text-ink">Course Stream</h2>
+        <p className="text-xs text-muted">{(broadcasts ?? []).length} broadcasts</p>
+      </div>
 
+      <div className="flex min-w-0 flex-col gap-4 lg:col-start-1 lg:row-start-2">
         {isStaff ? (
           <BroadcastComposer
             traineeId={traineeId}
@@ -178,13 +179,11 @@ export default async function CourseStreamPage({
                     </div>
                   </div>
                   {b.pinned ? (
-                    <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-gold px-2 py-0.5 text-[11px] font-semibold text-gold-foreground">
-                      Pinned
-                    </span>
+                    <span className="pill pill-gold ml-auto">Pinned</span>
                   ) : null}
                 </div>
 
-                <p className="mt-2 font-serif text-2xl font-bold text-ink">{b.title}</p>
+                <p className="mt-2 font-serif text-xl font-semibold text-ink">{b.title}</p>
                 {b.body ? <p className="mt-1 text-base whitespace-pre-wrap text-muted">{b.body}</p> : null}
 
                 {zoomUrl ? (
@@ -194,7 +193,7 @@ export default async function CourseStreamPage({
                     rel="noopener noreferrer"
                     className="mt-4 flex w-full items-center gap-3 rounded-[6px] border border-primary/25 bg-accent/50 px-3 py-2.5 transition-colors hover:bg-accent"
                   >
-                    <span aria-hidden="true">🎥</span>
+                    <Video className="size-4 shrink-0" aria-hidden="true" />
                     <span className="min-w-0 flex-1">
                       <span className="flex flex-wrap items-center gap-2">
                         <span className="text-sm font-semibold text-ink">Join Zoom session</span>
@@ -217,7 +216,8 @@ export default async function CourseStreamPage({
                     rel="noopener noreferrer"
                     className="sheet-interactive mt-3 inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-2.5 py-1 text-xs font-medium text-ink"
                   >
-                    📎 {b.attachment_name ?? "Attachment"}
+                    <Paperclip className="size-3.5 shrink-0" aria-hidden="true" />
+                    {b.attachment_name ?? "Attachment"}
                   </a>
                 ) : null}
 
@@ -236,14 +236,7 @@ export default async function CourseStreamPage({
         )}
       </div>
 
-      <div className="flex flex-col gap-4">
-        {/* Invisible spacer matching the left column's "Course Stream" heading
-            row height, so the sidebar box's top edge lines up with the first
-            broadcast card's top edge instead of the page's top edge. */}
-        <div className="flex items-center justify-between" aria-hidden="true">
-          <h2 className="invisible font-serif text-xl">Spacer</h2>
-        </div>
-
+      <div className="flex flex-col gap-4 lg:col-start-2 lg:row-start-2">
         <div className="flex flex-col gap-4 lg:sticky lg:top-6">
           <div className="sheet-accent h-fit">
             <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">This week</p>
