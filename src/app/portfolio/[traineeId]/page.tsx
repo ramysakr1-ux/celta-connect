@@ -5,7 +5,6 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { BroadcastComposer } from "@/app/portfolio/[traineeId]/broadcast-composer";
 import { deleteBroadcast } from "@/app/portfolio/[traineeId]/stream-actions";
 import { TUTOR_ROLE_LABELS, type TutorRole } from "@/lib/tutor-roles";
 import { toLocalIso } from "@/lib/timetable-grid";
@@ -66,7 +65,7 @@ export default async function CourseStreamPage({
   const isStaff = (viewer?.role === "trainer" || viewer?.role === "admin") && preview !== "trainee";
   const today = toLocalIso(new Date());
 
-  const [{ data: broadcasts }, { data: timetableEvents }, { data: upcomingEvents }, { data: tutors }, { data: assignments }, { data: course }] =
+  const [{ data: broadcasts }, { data: timetableEvents }, { data: tutors }, { data: assignments }] =
     await Promise.all([
       supabase
         .from("course_broadcasts")
@@ -82,25 +81,12 @@ export default async function CourseStreamPage({
         .order("event_date")
         .order("event_time")
         .limit(4),
-      // Broader list for the composer's "link a timetable event" dropdown --
-      // not limited to 4 like the This Week panel above.
-      isStaff
-        ? supabase
-            .from("course_timetable_events")
-            .select("id, title, event_date, event_time")
-            .eq("course_id", trainee.course_id)
-            .gte("event_date", today)
-            .order("event_date")
-            .order("event_time")
-            .limit(30)
-        : Promise.resolve({ data: [] }),
       supabase
         .from("profiles")
         .select("full_name, tutor_role")
         .eq("course_id", trainee.course_id)
         .eq("role", "trainer"),
       supabase.from("assignments").select("id, assignment_type").eq("trainee_id", traineeId),
-      supabase.from("courses").select("assessor_visit_date").eq("id", trainee.course_id).maybeSingle(),
     ]);
 
   // §1.1a v2 rule 9 -- deadline chips are live links to the assignment card
@@ -117,14 +103,6 @@ export default async function CourseStreamPage({
       </div>
 
       <div className="flex min-w-0 flex-col gap-4 lg:col-start-1 lg:row-start-2">
-        {isStaff ? (
-          <BroadcastComposer
-            traineeId={traineeId}
-            timetableEvents={upcomingEvents ?? []}
-            assessorVisitDate={course?.assessor_visit_date ?? null}
-          />
-        ) : null}
-
         {(broadcasts ?? []).length === 0 ? (
           <p className="sheet text-sm text-muted">No broadcasts yet.</p>
         ) : (
@@ -224,7 +202,6 @@ export default async function CourseStreamPage({
                 {isStaff ? (
                   <form action={deleteBroadcast} className="mt-3">
                     <input type="hidden" name="broadcast_id" value={b.id} />
-                    <input type="hidden" name="trainee_id" value={traineeId} />
                     <button type="submit" className="text-xs text-destructive hover:underline">
                       Remove
                     </button>

@@ -8,6 +8,7 @@ import { fetchRosterRows } from "@/lib/roster";
 import { categorize, isEventLive, toLocalIso } from "@/lib/timetable-grid";
 import { CATEGORY_ACCENT } from "@/app/trainer/(hub)/timetable/event-cell";
 import { computeWeekOf } from "@/lib/course-progress";
+import { BroadcastComposer } from "@/app/trainer/(hub)/broadcast-composer";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -35,22 +36,38 @@ export default async function TodayPage() {
   const nameById = new Map(rows.map((r) => [r.id, r.name]));
   const traineeIds = rows.map((r) => r.id);
 
-  const [{ data: course }, { data: todayEvents }, { data: lessons }, { data: feedbackRows }, { data: dueAssignments }] =
-    await Promise.all([
-      supabase.from("courses").select("name, start_date, end_date").eq("id", courseId).maybeSingle(),
-      supabase
-        .from("course_timetable_events")
-        .select("*")
-        .eq("course_id", courseId)
-        .eq("event_date", today)
-        .order("event_time"),
-      supabase.from("tp_lessons").select("trainee_id, lesson_date, tp_number").eq("course_id", courseId).not("lesson_date", "is", null),
-      // tp_feedback has no course_id column -- scope by this course's trainee ids instead.
-      traineeIds.length > 0
-        ? supabase.from("tp_feedback").select("trainee_id, tp_number, submitted_at").in("trainee_id", traineeIds)
-        : Promise.resolve({ data: [] }),
-      supabase.from("assignments").select("assignment_type, first_submitted_at").eq("course_id", courseId).eq("due_date", today),
-    ]);
+  const [
+    { data: course },
+    { data: todayEvents },
+    { data: lessons },
+    { data: feedbackRows },
+    { data: dueAssignments },
+    { data: upcomingEvents },
+  ] = await Promise.all([
+    supabase.from("courses").select("name, start_date, end_date, assessor_visit_date").eq("id", courseId).maybeSingle(),
+    supabase
+      .from("course_timetable_events")
+      .select("*")
+      .eq("course_id", courseId)
+      .eq("event_date", today)
+      .order("event_time"),
+    supabase.from("tp_lessons").select("trainee_id, lesson_date, tp_number").eq("course_id", courseId).not("lesson_date", "is", null),
+    // tp_feedback has no course_id column -- scope by this course's trainee ids instead.
+    traineeIds.length > 0
+      ? supabase.from("tp_feedback").select("trainee_id, tp_number, submitted_at").in("trainee_id", traineeIds)
+      : Promise.resolve({ data: [] }),
+    supabase.from("assignments").select("assignment_type, first_submitted_at").eq("course_id", courseId).eq("due_date", today),
+    // Broadcast composer's "link a timetable event" dropdown -- broader than
+    // today's schedule above, not limited to today.
+    supabase
+      .from("course_timetable_events")
+      .select("id, title, event_date, event_time")
+      .eq("course_id", courseId)
+      .gte("event_date", today)
+      .order("event_date")
+      .order("event_time")
+      .limit(30),
+  ]);
 
   // "Needs you" -- capped at 3 total, this priority order.
   type Alert = { title: string; meta: string; href: string; destructive?: boolean };
@@ -109,6 +126,18 @@ export default async function TodayPage() {
 
   const weekOf =
     course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
+
+  // Composer's assessor-visit template surfaces in the 3-day window before
+  // the visit -- computed here (server, "today" already known) rather than
+  // in the client composer, which would need an impure Date.now() call.
+  const showAssessorTemplate = (() => {
+    if (!course?.assessor_visit_date) return false;
+    const daysUntil = Math.ceil(
+      (new Date(`${course.assessor_visit_date}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) /
+        86400000
+    );
+    return daysUntil >= 0 && daysUntil <= 2;
+  })();
 
   const overline = [course?.name, course ? `${course.start_date} – ${course.end_date}` : null, weekOf].filter(Boolean).join(" · ");
   const todayHeading = new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", {
@@ -235,6 +264,11 @@ export default async function TodayPage() {
           </div>
         </div>
       </div>
+
+      <BroadcastComposer
+        timetableEvents={upcomingEvents ?? []}
+        showAssessorTemplate={showAssessorTemplate}
+      />
     </div>
   );
 }

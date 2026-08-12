@@ -23,25 +23,16 @@ const ASSESSOR_VISIT_TEMPLATE = {
 };
 
 export function BroadcastComposer({
-  traineeId,
   timetableEvents,
-  assessorVisitDate,
+  showAssessorTemplate,
 }: {
-  traineeId: string;
   timetableEvents: TimetableEventOption[];
-  assessorVisitDate: string | null;
+  showAssessorTemplate: boolean;
 }) {
-  const action = postBroadcast.bind(null, traineeId);
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState(postBroadcast, initialState);
   const [linkedEventId, setLinkedEventId] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-
-  const showAssessorTemplate = (() => {
-    if (!assessorVisitDate) return false;
-    const daysUntil = Math.ceil((new Date(`${assessorVisitDate}T00:00:00`).getTime() - Date.now()) / 86400000);
-    return daysUntil >= 0 && daysUntil <= 2;
-  })();
 
   return (
     <form action={formAction} className="sheet flex flex-col gap-3 border-primary/25 bg-accent/30">

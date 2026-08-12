@@ -9,11 +9,7 @@ export interface FormState {
   error: string | null;
 }
 
-export async function postBroadcast(
-  traineeId: string,
-  _prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
+export async function postBroadcast(_prevState: FormState, formData: FormData): Promise<FormState> {
   const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) return { error: "No course assigned." };
 
@@ -47,15 +43,17 @@ export async function postBroadcast(
 
   if (error) return { error: "Could not post the announcement." };
 
-  revalidatePath(`/portfolio/${traineeId}`);
+  // Cohort-wide, not one trainee's page -- revalidate the composer's own
+  // home (Today) and every portfolio Course Stream that reads it.
+  revalidatePath("/trainer");
+  revalidatePath("/portfolio/[traineeId]", "layout");
   return { error: null };
 }
 
 export async function deleteBroadcast(formData: FormData): Promise<void> {
   const trainer = await requireRole(["trainer", "admin"]);
   const broadcastId = formData.get("broadcast_id");
-  const traineeId = formData.get("trainee_id");
-  if (typeof broadcastId !== "string" || typeof traineeId !== "string") return;
+  if (typeof broadcastId !== "string") return;
 
   const supabase = await createClient();
   await supabase
@@ -64,5 +62,6 @@ export async function deleteBroadcast(formData: FormData): Promise<void> {
     .eq("id", broadcastId)
     .eq("course_id", trainer.course_id ?? "");
 
-  revalidatePath(`/portfolio/${traineeId}`);
+  revalidatePath("/trainer");
+  revalidatePath("/portfolio/[traineeId]", "layout");
 }
