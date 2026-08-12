@@ -4,6 +4,7 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchRosterRows } from "@/lib/roster";
+import { AT_RISK_LABELS } from "@/lib/at-risk";
 
 function csvCell(value: string | number): string {
   const s = String(value);
@@ -28,7 +29,16 @@ export async function GET() {
 
   const rows = await fetchRosterRows(supabase, courseId);
 
-  const header = ["Candidate", "Assessed hrs", "TPs passed", "Assignments left", "Criteria", "Attendance", "Standing"];
+  const header = [
+    "Candidate",
+    "Assessed hrs",
+    "TPs passed",
+    "Assignments left",
+    "Criteria",
+    "Attendance",
+    "Standing",
+    "At risk",
+  ];
   const lines = [
     header.join(","),
     ...rows.map((r) =>
@@ -40,6 +50,7 @@ export async function GET() {
         csvCell(`${r.criteriaPct}%`),
         csvCell(`${r.attendancePct}%`),
         csvCell(r.trajectory),
+        csvCell(r.atRiskReasons.map((reason) => AT_RISK_LABELS[reason]).join("; ")),
       ].join(",")
     ),
   ];

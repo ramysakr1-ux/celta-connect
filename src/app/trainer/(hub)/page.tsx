@@ -9,6 +9,7 @@ import { categorize, isEventLive, toLocalIso } from "@/lib/timetable-grid";
 import { CATEGORY_ACCENT } from "@/app/trainer/(hub)/timetable/event-cell";
 import { computeWeekOf } from "@/lib/course-progress";
 import { BroadcastComposer } from "@/app/trainer/(hub)/broadcast-composer";
+import { AT_RISK_LABELS } from "@/lib/at-risk";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -102,6 +103,19 @@ export default async function TodayPage() {
   }
   for (const [type, { total, submitted }] of dueByType) {
     alerts.push({ title: `${type} due today`, meta: `${submitted} of ${total} submitted`, href: "/trainer/roster" });
+  }
+
+  // master-backlog #1 -- 3 streams (back-to-back fails, missing must-submit
+  // docs, repeating action points) plus the same-TP contradiction flag,
+  // computed once in fetchRosterRows so roster/CSV/Today can't disagree.
+  const flaggedRows = rows.filter((r) => r.atRiskReasons.length > 0);
+  for (const r of flaggedRows) {
+    alerts.push({
+      title: `At risk — ${r.name}`,
+      meta: r.atRiskReasons.map((reason) => AT_RISK_LABELS[reason]).join(" · "),
+      href: `/portfolio/${r.id}`,
+      destructive: true,
+    });
   }
 
   const atRisk = rows.filter((r) => r.attendancePct < 80);

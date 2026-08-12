@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TrajectoryBarCompact } from "@/components/trajectory-gradient-bar";
 import type { RosterRow } from "@/lib/roster";
+import { AT_RISK_LABELS } from "@/lib/at-risk";
 
 // build-spec.md §8 bug 3 -- rows carried cursor-pointer but only the name
 // cell actually navigated. Whole row now pushes to the portfolio; the
@@ -30,6 +31,13 @@ export function RosterRowView({ row }: { row: RosterRow }) {
         <div className="ml-auto">
           <TrajectoryBarCompact value={row.trajectory} />
         </div>
+      </td>
+      <td className="text-right">
+        {row.atRiskReasons.length > 0 ? (
+          <span title={row.atRiskReasons.map((r) => AT_RISK_LABELS[r]).join(" · ")} className="pill pill-danger">
+            At risk
+          </span>
+        ) : null}
       </td>
     </tr>
   );

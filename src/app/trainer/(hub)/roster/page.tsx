@@ -59,6 +59,7 @@ export default async function TrainerRosterPage() {
               <th className="text-right text-sm text-muted">Criteria</th>
               <th className="text-right text-sm text-muted">Attendance</th>
               <th className="text-right text-sm text-muted">Standing</th>
+              <th className="text-right text-sm text-muted">At risk</th>
             </tr>
           </thead>
           <tbody>
@@ -66,7 +67,7 @@ export default async function TrainerRosterPage() {
               rows.map((row) => <RosterRowView key={row.id} row={row} />)
             ) : (
               <tr>
-                <td colSpan={7} className="text-muted">
+                <td colSpan={8} className="text-muted">
                   No trainees on this course yet.
                 </td>
               </tr>
