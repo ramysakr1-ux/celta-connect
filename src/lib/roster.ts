@@ -50,7 +50,7 @@ export async function fetchRosterRows(
             .in("trainee_id", traineeIds),
           supabase
             .from("assignments")
-            .select("trainee_id, first_status, resubmission_status, due_date, first_submitted_at")
+            .select("trainee_id, assignment_type, first_status, resubmission_status, due_date, first_submitted_at")
             .eq("course_id", courseId),
           supabase.from("celta5_records").select("trainee_id, hours_attended").eq("course_id", courseId),
           supabase.from("celta5_matrix").select("trainee_id, criteria_code, tutor_status_stage2").eq("course_id", courseId),
@@ -70,10 +70,16 @@ export async function fetchRosterRows(
     ).length;
 
     const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id);
-    const assignmentsPassed = traineeAssignments.filter(
+    // build-spec.md "Assignment 5": a Plagiarism Reflection "does not
+    // count toward the 3-of-4 rule and cannot raise or lower the
+    // certificate grade" -- excluded here, but still fed into
+    // computeAtRiskReasons below (an overdue one is still a real
+    // must-submit document, just not part of this specific tally).
+    const standardAssignments = traineeAssignments.filter((a) => a.assignment_type !== "Plagiarism Reflection");
+    const assignmentsPassed = standardAssignments.filter(
       (a) => a.first_status === "approved" || a.resubmission_status === "approved"
     ).length;
-    const assignmentsLeft = Math.max(traineeAssignments.length - assignmentsPassed, 0);
+    const assignmentsLeft = Math.max(standardAssignments.length - assignmentsPassed, 0);
 
     const traineeMatrix = (matrixRows ?? []).filter((m) => m.trainee_id === trainee.id);
     const matrixByCode = new Map(traineeMatrix.map((m) => [m.criteria_code, m.tutor_status_stage2]));

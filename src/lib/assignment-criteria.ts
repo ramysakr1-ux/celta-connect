@@ -85,6 +85,29 @@ export const ASSIGNMENT_CRITERIA: Record<AssignmentTypeValue, AssignmentCriterio
       text: "The assignment meets the 750-1,000-word count requirement and there is clear reference to the sources used.",
     },
   ],
+  // Not a Cambridge criteria set -- this is a centre sanction
+  // (build-spec.md "Assignment 5"), so there's no official rubric to lift
+  // verbatim. Derived directly from the spec's own 4-section description,
+  // one criterion per section plus the standard word-count check.
+  "Plagiarism Reflection": [
+    {
+      key: "own_account",
+      text: "Gives their own honest account of what happened and how it came about -- not an apology, an account.",
+    },
+    {
+      key: "rule_identified",
+      text: "Quotes the specific centre policy and Cambridge guidance clause breached, and explains why it applies here.",
+    },
+    {
+      key: "professional_impact",
+      text: "Explains what it would mean for a learner, a colleague, or the centre if a teacher's materials or claims were not their own.",
+    },
+    {
+      key: "future_practice",
+      text: "Describes specific, concrete changes to how they will work -- source-noting, AI use and declaration -- going forward.",
+    },
+    { key: "word_count", text: "The assignment meets the 750-1,000-word count requirement." },
+  ],
 };
 
 export type CriteriaMarks = Record<string, boolean>;

@@ -70,6 +70,23 @@ export default async function TodayPage() {
       .limit(30),
   ]);
 
+  // build-spec.md: "A line on the marking tutor's Today screen -- '2
+  // assignments have scanner findings' -- visible to that tutor only,
+  // with no candidate names." A bare count only, never a list here.
+  const { data: courseAssignmentIds } = await supabase.from("assignments").select("id").eq("course_id", courseId);
+  const { data: unreviewedFindings } =
+    (courseAssignmentIds ?? []).length > 0
+      ? await supabase
+          .from("plagiarism_scanner_findings")
+          .select("assignment_id")
+          .in(
+            "assignment_id",
+            (courseAssignmentIds ?? []).map((a) => a.id)
+          )
+          .is("reviewed_at", null)
+      : { data: [] };
+  const assignmentsWithFindings = new Set((unreviewedFindings ?? []).map((f) => f.assignment_id)).size;
+
   // "Needs you" -- capped at 3 total, this priority order.
   type Alert = { title: string; meta: string; href: string; destructive?: boolean };
   const alerts: Alert[] = [];
@@ -248,6 +265,14 @@ export default async function TodayPage() {
               ))
             )}
           </div>
+          {assignmentsWithFindings > 0 ? (
+            <Link
+              href="/trainer/roster"
+              className="border-t border-border-faint pt-2.5 text-xs text-muted hover:text-primary"
+            >
+              {assignmentsWithFindings} assignment{assignmentsWithFindings === 1 ? "" : "s"} have scanner findings
+            </Link>
+          ) : null}
         </div>
 
         {/* Cohort */}

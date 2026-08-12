@@ -50,4 +50,13 @@ export const ASSIGNMENT_INFO: Record<AssignmentType, { title: string; descriptio
     description:
       "Reflect on your teaching across the course: strengths, areas for development, and an action plan for future professional growth.",
   },
+  // build-spec.md: "not numbered as a Cambridge assignment... label it
+  // plainly". Deliberately absent from ASSIGNMENT_ORDER above -- this
+  // entry exists only so pages that read ASSIGNMENT_INFO[assignment_type]
+  // generically (e.g. the assignment detail page header) don't crash when
+  // they happen to be showing one.
+  "Plagiarism Reflection": {
+    title: "Plagiarism reflection",
+    description: "A centre sanction, not a Cambridge assignment -- set when a plagiarism case is upheld.",
+  },
 };

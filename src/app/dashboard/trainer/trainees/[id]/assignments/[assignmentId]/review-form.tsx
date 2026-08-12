@@ -46,6 +46,11 @@ export function AssignmentReviewForm({
   const responseByKey = new Map(responses.map((r) => [r.section_key, r]));
   const criteria = ASSIGNMENT_CRITERIA[assignmentType];
   const isResubmission = round === "resubmission";
+  // build-spec.md "Assignment 5": one chance, pass or fail -- no
+  // resubmission round for this type, so a fail is available immediately
+  // instead of gated behind a resubmission round that will never happen.
+  const isOneChanceReflection = assignmentType === "Plagiarism Reflection";
+  const canFail = isResubmission || isOneChanceReflection;
 
   const [marks, setMarks] = useState<CriteriaMarks>(criteriaMarks);
   const [outcome, setOutcome] = useState<Outcome>("pass");
@@ -142,22 +147,26 @@ export function AssignmentReviewForm({
               selected={outcome === "pass"}
               onSelect={() => setOutcome("pass")}
             />
-            <OutcomeOption
-              label="Return for resubmission"
-              note="Opens one resubmission -- the only one allowed. Your comments carry across beside the original."
-              selected={outcome === "resub"}
-              onSelect={() => setOutcome("resub")}
-            />
+            {isOneChanceReflection ? null : (
+              <OutcomeOption
+                label="Return for resubmission"
+                note="Opens one resubmission -- the only one allowed. Your comments carry across beside the original."
+                selected={outcome === "resub"}
+                onSelect={() => setOutcome("resub")}
+              />
+            )}
             <OutcomeOption
               label="Record a fail"
               note={
-                isResubmission
-                  ? "Only after a resubmission. Still unsatisfactory at this point -- the assignment is graded Fail and cannot be reopened."
-                  : "Only available once this assignment is on its resubmission round."
+                isOneChanceReflection
+                  ? "One chance only -- a fail here is final."
+                  : isResubmission
+                    ? "Only after a resubmission. Still unsatisfactory at this point -- the assignment is graded Fail and cannot be reopened."
+                    : "Only available once this assignment is on its resubmission round."
               }
               selected={outcome === "fail"}
-              onSelect={() => isResubmission && setOutcome("fail")}
-              disabled={!isResubmission}
+              onSelect={() => canFail && setOutcome("fail")}
+              disabled={!canFail}
             />
           </div>
 

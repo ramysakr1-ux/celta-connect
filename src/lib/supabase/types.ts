@@ -195,7 +195,7 @@ export interface Database {
           id: string;
           course_id: string;
           trainee_id: string;
-          assignment_type: "Focus on Learner" | "LRT" | "Skills" | "LfC";
+          assignment_type: AssignmentTypeValue;
           first_submission_url: string | null;
           first_status: SubmissionStatus;
           first_submitted_at: string | null;
@@ -222,13 +222,18 @@ export interface Database {
           final_grade: string | null;
           due_date: string | null;
           tutor_feedback: string | null;
+          // Which open malpractice case (if any) is pausing this
+          // assignment's marking, and which case (if any) this row IS the
+          // Plagiarism Reflection for. See migration 0063.
+          open_case_id: string | null;
+          reflection_for_case_id: string | null;
           created_at: string;
           updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["assignments"]["Row"]> & {
           course_id: string;
           trainee_id: string;
-          assignment_type: "Focus on Learner" | "LRT" | "Skills" | "LfC";
+          assignment_type: AssignmentTypeValue;
         };
         Update: Partial<Database["public"]["Tables"]["assignments"]["Row"]>;
         Relationships: [];
@@ -271,6 +276,91 @@ export interface Database {
           title: string;
         };
         Update: Partial<Database["public"]["Tables"]["assignment_type_definitions"]["Row"]>;
+        Relationships: [];
+      };
+      malpractice_cases: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          assignment_id: string;
+          assignment_round: "first" | "resubmission";
+          opened_by: string;
+          opened_at: string;
+          candidate_account: string | null;
+          candidate_account_recorded_at: string | null;
+          status: "open" | "decided";
+          outcome: "upheld" | "not_upheld" | null;
+          decision_notes: string | null;
+          decided_by: string | null;
+          decided_at: string | null;
+          reflection_assignment_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["malpractice_cases"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          assignment_id: string;
+          assignment_round: "first" | "resubmission";
+          opened_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["malpractice_cases"]["Row"]>;
+        Relationships: [];
+      };
+      plagiarism_scanner_findings: {
+        Row: {
+          id: string;
+          assignment_id: string;
+          round: "first" | "resubmission";
+          section_key: string;
+          field_type: "prose" | "analysis";
+          matched_text: string;
+          match_length: number;
+          source_type: "same_course" | "cross_course_archive" | "brief" | "model_answer";
+          source_assignment_id: string | null;
+          source_course_label: string | null;
+          provider: string;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          case_id: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["plagiarism_scanner_findings"]["Row"]> & {
+          assignment_id: string;
+          round: "first" | "resubmission";
+          section_key: string;
+          field_type: "prose" | "analysis";
+          matched_text: string;
+          match_length: number;
+          source_type: "same_course" | "cross_course_archive" | "brief" | "model_answer";
+        };
+        Update: Partial<Database["public"]["Tables"]["plagiarism_scanner_findings"]["Row"]>;
+        Relationships: [];
+      };
+      submission_text_fingerprints: {
+        Row: {
+          id: string;
+          center_id: string;
+          course_id: string;
+          course_label: string;
+          assignment_type: string;
+          section_key: string;
+          field_type: "prose" | "analysis";
+          shingles: string[];
+          source_assignment_id: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["submission_text_fingerprints"]["Row"]> & {
+          center_id: string;
+          course_id: string;
+          course_label: string;
+          assignment_type: string;
+          section_key: string;
+          field_type: "prose" | "analysis";
+          shingles: string[];
+        };
+        Update: Partial<Database["public"]["Tables"]["submission_text_fingerprints"]["Row"]>;
         Relationships: [];
       };
       assignment_section_responses: {

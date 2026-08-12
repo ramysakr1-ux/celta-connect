@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import type { Database } from "@/lib/supabase/types";
+import { runPlagiarismScan } from "@/lib/plagiarism/scan";
 
 type SectionResponseInsert = Database["public"]["Tables"]["assignment_section_responses"]["Insert"];
 
@@ -96,6 +97,15 @@ export async function submitAssignment(_prevState: FormState, formData: FormData
     p_own_work_confirmed: ownWorkConfirmed,
   });
   if (error) return { error: error.message };
+
+  // build-spec.md: the scanner "runs automatically on submission, visible
+  // to tutors only". A scan failure must never block the trainee's
+  // submission, which already succeeded above -- log and move on.
+  try {
+    await runPlagiarismScan(assignmentId, round === "resubmission" ? "resubmission" : "first");
+  } catch (scanError) {
+    console.error("Plagiarism scan failed for assignment", assignmentId, scanError);
+  }
 
   revalidatePath(`/portfolio/${trainee.id}/assignments/${assignmentId}`);
   revalidatePath(`/portfolio/${trainee.id}/assignments`);

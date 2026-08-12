@@ -8,6 +8,8 @@ import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { AssignmentAuthoringForm } from "@/app/dashboard/trainee/assignments/[assignmentId]/assignment-form";
 import { AssignmentReviewForm } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/review-form";
 import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
+import { OpenCaseButton } from "@/app/trainer/(hub)/malpractice/open-case-button";
+import { FindingsBand } from "@/app/trainer/(hub)/malpractice/findings-band";
 
 // §8 detail -- trainee viewers get the real editable pipeline
 // (AssignmentAuthoringForm, exactly as built for
@@ -79,6 +81,23 @@ export default async function AssignmentDetailPage({
     locked = true;
   }
 
+  const { data: findingRows } = isEditableStaff
+    ? await supabase
+        .from("plagiarism_scanner_findings")
+        .select("id, section_key, matched_text, match_length, source_type, source_course_label, reviewed_at")
+        .eq("assignment_id", assignmentId)
+        .eq("round", round)
+    : { data: [] };
+  const findings = (findingRows ?? []).map((f) => ({
+    id: f.id,
+    sectionKey: f.section_key,
+    matchedText: f.matched_text,
+    matchLength: f.match_length,
+    sourceType: f.source_type,
+    sourceCourseLabel: f.source_course_label,
+    reviewedAt: f.reviewed_at,
+  }));
+
   const deadlinePassed = Boolean(
     assignment.due_date && round === "first" && !locked && new Date(assignment.due_date) < new Date()
   );
@@ -149,21 +168,40 @@ export default async function AssignmentDetailPage({
               : "This assignment's brief hasn't been published yet -- check back soon."}
           </p>
         </div>
+      ) : isEditableStaff && assignment.open_case_id ? (
+        <div className="sheet flex flex-col gap-2 p-6">
+          <p className="pill pill-warning w-fit">Marking paused</p>
+          <p className="text-muted">
+            A malpractice case is open on this submission. No outcome can be recorded until it&apos;s decided.
+          </p>
+          <Link
+            href={`/trainer/malpractice/${assignment.open_case_id}`}
+            className="mt-1 self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+          >
+            Open the case →
+          </Link>
+        </div>
       ) : isEditableStaff ? (
         roundStatus !== "submitted" ? (
           <div className="sheet p-6">
             <p className="text-muted">Not yet submitted for this round -- nothing to review until the trainee submits.</p>
           </div>
         ) : (
-          <AssignmentReviewForm
-            assignmentId={assignmentId}
-            assignmentType={assignment.assignment_type}
-            sections={template.sections}
-            responses={responses ?? []}
-            round={round}
-            criteriaMarks={(round === "resubmission" ? assignment.resubmission_criteria_marks : assignment.first_criteria_marks) ?? {}}
-            secondMarkerOptions={secondMarkerRows ?? []}
-          />
+          <div className="flex flex-col gap-3">
+            <FindingsBand findings={findings} assignmentId={assignmentId} round={round} traineeId={traineeId} />
+            <AssignmentReviewForm
+              assignmentId={assignmentId}
+              assignmentType={assignment.assignment_type}
+              sections={template.sections}
+              responses={responses ?? []}
+              round={round}
+              criteriaMarks={(round === "resubmission" ? assignment.resubmission_criteria_marks : assignment.first_criteria_marks) ?? {}}
+              secondMarkerOptions={secondMarkerRows ?? []}
+            />
+            {assignment.assignment_type !== "Plagiarism Reflection" ? (
+              <OpenCaseButton assignmentId={assignmentId} round={round} />
+            ) : null}
+          </div>
         )
       ) : assessorCourseId ? (
         assignment.first_status === "not_submitted" ? (

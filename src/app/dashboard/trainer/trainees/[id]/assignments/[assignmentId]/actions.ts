@@ -84,15 +84,29 @@ async function returnAssignment(
   }
 
   const isResubmission = round === "resubmission";
+  const supabase = await createClient();
 
-  if (decision === "fail" && !isResubmission) {
+  // build-spec.md "Assignment 5": "One chance, pass or fail, as with the
+  // resubmission it accompanies" -- a Plagiarism Reflection never gets a
+  // resubmission round of its own, so a fail is final on the first round
+  // for this type only.
+  const { data: assignmentType } = await supabase
+    .from("assignments")
+    .select("assignment_type")
+    .eq("id", assignmentId)
+    .maybeSingle();
+  const isOneChanceReflection = assignmentType?.assignment_type === "Plagiarism Reflection";
+
+  if (decision === "resubmission_required" && isOneChanceReflection) {
+    return { error: "A Plagiarism Reflection has one chance only -- pass or fail, no resubmission." };
+  }
+  if (decision === "fail" && !isResubmission && !isOneChanceReflection) {
     return { error: "A fail can only be recorded on the resubmission round." };
   }
   if (isResubmission && (typeof secondMarkerId !== "string" || !secondMarkerId)) {
     return { error: "Pick a second marker before returning a resubmission decision." };
   }
 
-  const supabase = await createClient();
   const commentError = await saveComments(supabase, assignmentId, round, parseComments(formData));
   if (commentError) return { error: commentError };
 
@@ -100,13 +114,21 @@ async function returnAssignment(
   const status = decision === "resubmission_required" ? "resubmission_required" : "approved";
   const grade = decision === "pass" && typeof finalGrade === "string" && finalGrade ? finalGrade : undefined;
 
+  // A Plagiarism Reflection's fail is final on the first round -- the
+  // schema only has a distinct pass/fail outcome field on the
+  // resubmission side (resubmission_outcome), so a first-round fail for
+  // this type reuses it rather than a first_status value that doesn't
+  // exist ('approved' alone would read as a pass everywhere else in the
+  // app that shows ASSIGNMENT_STATUS_LABEL.approved = "Pass").
+  const reflectionFirstRoundFail = isOneChanceReflection && !isResubmission && decision === "fail";
+
   const update: Database["public"]["Tables"]["assignments"]["Update"] = {
     marker_id: marker.id,
     first_status: isResubmission ? undefined : status,
     first_criteria_marks: isResubmission ? undefined : criteriaMarks,
     resubmission_status: isResubmission ? status : undefined,
     resubmission_criteria_marks: isResubmission ? criteriaMarks : undefined,
-    resubmission_outcome: isResubmission ? (decision === "fail" ? "fail" : "pass") : undefined,
+    resubmission_outcome: isResubmission ? (decision === "fail" ? "fail" : "pass") : reflectionFirstRoundFail ? "fail" : undefined,
     second_marker_id: isResubmission ? (secondMarkerId as string) : undefined,
     second_marker_recorded_at: isResubmission ? new Date().toISOString() : undefined,
     final_grade: grade,
