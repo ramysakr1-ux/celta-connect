@@ -14,7 +14,7 @@ export interface RunningOrderPlan {
   traineeId: string;
   tpNumber: number;
   taughtAt: string | null;
-  rotationPositionUsed: number;
+  rotationPositionUsed: number | null;
   mainLessonAim: string | null;
   aimType: AimType | null;
 }

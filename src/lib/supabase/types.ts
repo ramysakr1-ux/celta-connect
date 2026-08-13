@@ -749,7 +749,10 @@ export interface Database {
           trainee_id: string;
           tp_number: number;
           tp_point_id: string | null;
-          rotation_position_used: number;
+          // Nullable since migration 0025 -- a manually assigned round
+          // (the syllabus planning grid, or the trainer override under
+          // rotation/override/) has no rotation position to record.
+          rotation_position_used: number | null;
           main_lesson_aim: string;
           sub_aim: string | null;
           short_title: string | null;
@@ -767,7 +770,6 @@ export interface Database {
           course_id: string;
           trainee_id: string;
           tp_number: number;
-          rotation_position_used: number;
           main_lesson_aim: string;
           density_tier: TpDensityTier;
         };
