@@ -29,6 +29,33 @@ export type PassFail = "pass" | "fail";
 export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn" | "Extension" | "Deferred";
 export type CourseStatus = "active" | "withdrawn" | "deferred" | "restarting" | "extension";
 
+// specs/build-spec.md §2 "Export is the mirror" -- the three-layer close-out
+// protection (course_lifecycle_signup_handoff spec): technical verify ->
+// signed receipt -> 7-day grace-hold wipe. States move forward only, except
+// verify_failed/export_failed which loop back to a retry of the same step.
+export type CourseCloseOutStatus =
+  | "not_started"
+  | "verifying"
+  | "verify_failed"
+  | "ready_to_export"
+  | "exporting"
+  | "export_failed"
+  | "awaiting_receipt"
+  | "grace_period"
+  | "wiped";
+
+export interface CloseOutVerificationIssue {
+  traineeId: string;
+  traineeName: string;
+  artifact: string;
+  problem: string;
+}
+export interface CloseOutVerificationReport {
+  checkedAt: string;
+  candidateCount: number;
+  issues: CloseOutVerificationIssue[];
+}
+
 // specs/build-spec.md §3 "first-half restart" -- a frozen snapshot of one
 // passed assignment, taken at the moment a candidate is marked eligible to
 // restart, not a live reference (see migration 0070).
@@ -191,6 +218,8 @@ export interface Database {
           delivery_mode: "f2f" | "online" | "mixed";
           assessor_visit_date: string | null;
           entry_form_sent_at: string | null;
+          cambridge_grades_confirmed_at: string | null;
+          cambridge_grades_confirmed_by: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["courses"]["Row"]> & {
@@ -436,6 +465,7 @@ export interface Database {
           familiarisation_plan: string | null;
           linked_at: string | null;
           linked_by: string | null;
+          hold_at_centre: boolean;
         };
         Insert: Partial<Database["public"]["Tables"]["deferral_transfers"]["Row"]> & {
           center_id: string;
@@ -446,6 +476,38 @@ export interface Database {
           created_by: string;
         };
         Update: Partial<Database["public"]["Tables"]["deferral_transfers"]["Row"]>;
+        Relationships: [];
+      };
+      course_close_outs: {
+        Row: {
+          id: string;
+          course_id: string;
+          center_id: string;
+          status: CourseCloseOutStatus;
+          verification_report: CloseOutVerificationReport | null;
+          verified_at: string | null;
+          verified_by: string | null;
+          drive_folder_id: string | null;
+          drive_folder_url: string | null;
+          exported_at: string | null;
+          exported_by: string | null;
+          export_error: string | null;
+          receipt_requested_at: string | null;
+          receipt_signed_name: string | null;
+          receipt_signed_at: string | null;
+          receipt_signed_by: string | null;
+          grace_period_ends_at: string | null;
+          wiped_at: string | null;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_close_outs"]["Row"]> & {
+          course_id: string;
+          center_id: string;
+          created_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_close_outs"]["Row"]>;
         Relationships: [];
       };
       peer_observation_sheets: {

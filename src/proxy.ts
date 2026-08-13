@@ -55,7 +55,13 @@ export async function proxy(request: NextRequest) {
     // without one. Each route validates its own token server-side.
     request.nextUrl.pathname.startsWith("/student/") ||
     request.nextUrl.pathname.startsWith("/register/") ||
-    request.nextUrl.pathname.startsWith("/assessor/");
+    request.nextUrl.pathname.startsWith("/assessor/") ||
+    // Vercel Cron invokes this with no session cookie at all, just its own
+    // Authorization: Bearer $CRON_SECRET header -- the route checks that
+    // itself. Found live: without this, the redirect below fired before the
+    // route's own auth check ever ran, so the grace-period wipe would have
+    // silently never executed in production.
+    request.nextUrl.pathname.startsWith("/api/cron/");
 
   // An assessor carries no real Supabase user at all -- just the
   // assessor_token cookie set by /assessor/[token] (migration 0030). This

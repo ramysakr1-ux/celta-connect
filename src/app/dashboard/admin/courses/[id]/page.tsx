@@ -14,6 +14,8 @@ import { linkRestartTransfer } from "@/app/dashboard/admin/courses/[id]/restart-
 import { linkDeferralTransfer } from "@/app/dashboard/admin/courses/[id]/deferral-actions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { DeliveryModeCard } from "@/app/dashboard/admin/courses/[id]/delivery-mode-card";
+import { CloseOutCard } from "@/app/dashboard/admin/courses/[id]/close-out-card";
+import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rules";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
@@ -140,6 +142,11 @@ export default async function CourseRosterPage({
   ]);
   const deferralTraineeNameById = new Map((deferralSourceTrainees ?? []).map((t) => [t.id, t.full_name]));
   const deferralCourseById = new Map((deferralSourceCourses ?? []).map((c) => [c.id, c]));
+
+  const [{ data: closeOut }, blockingReasons] = await Promise.all([
+    supabase.from("course_close_outs").select("*").eq("course_id", id).maybeSingle(),
+    getCloseOutBlockingReasons(id),
+  ]);
 
   const today = toLocalIso(new Date());
   const courseState = computeCourseState(course.start_date, course.end_date, today);
@@ -539,6 +546,13 @@ export default async function CourseRosterPage({
           </table>
         </div>
       </div>
+
+      <CloseOutCard
+        courseId={course.id}
+        cambridgeGradesConfirmedAt={course.cambridge_grades_confirmed_at}
+        blockingReasons={blockingReasons}
+        closeOut={closeOut ?? null}
+      />
     </div>
   );
 }
