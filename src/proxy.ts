@@ -46,6 +46,9 @@ export async function proxy(request: NextRequest) {
     // /join/[token] is the self-serve course join link -- inherently
     // unauthenticated, that's the whole point.
     request.nextUrl.pathname.startsWith("/join/") ||
+    // /demo mints a fresh session for the seeded demo trainer and redirects
+    // through /auth/confirm -- inherently unauthenticated, same reasoning.
+    request.nextUrl.pathname === "/demo" ||
     // /forgot-password is how a logged-out user requests a reset link --
     // inherently unauthenticated, same as /login.
     request.nextUrl.pathname.startsWith("/forgot-password") ||

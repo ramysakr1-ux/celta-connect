@@ -193,6 +193,7 @@ export interface Database {
           accent_color: string | null;
           is_uk_centre: boolean;
           auto_tag_criteria_enabled: boolean;
+          is_demo: boolean;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {

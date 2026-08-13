@@ -4,9 +4,11 @@ import { ViewSwitcherPill } from "@/components/view-switcher-pill";
 import { TrainerTabs } from "@/app/trainer/trainer-tabs";
 import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
+import { DemoModeBanner } from "@/components/demo-mode-banner";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
+import { createClient } from "@/lib/supabase/server";
 
 // The operational "Command Centre" -- roster/timetable/volunteers/TP
 // rotation/TP points library/grades report. Deliberately separate from
@@ -25,8 +27,16 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // "you cannot be on the course unless registered as a trainer" rule.
   const staffChat = profile?.role === "trainer" ? await getInitialStaffChatData(profile.id) : null;
 
+  let isDemo = false;
+  if (profile) {
+    const supabase = await createClient();
+    const { data: center } = await supabase.from("centers").select("is_demo").eq("id", profile.center_id).maybeSingle();
+    isDemo = center?.is_demo ?? false;
+  }
+
   return (
     <>
+      {isDemo ? <DemoModeBanner /> : null}
       {/* Checkpoint 1 shell consolidation (specs/build-spec.md phase 1) --
           this used to be 3 stacked bars (this one, a duplicate name-only
           bar in trainer/layout.tsx, and TrainerTabs' own wrapper). Now one

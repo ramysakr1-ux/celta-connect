@@ -7,9 +7,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // centre name/code is read via the admin client (same pre-auth pattern as
 // /join/[token]) rather than gated by RLS. Hero copy is a placeholder per
 // the plan's explicit instruction not to let final wording block the build.
+//
+// Excludes is_demo centres -- this query assumes single-tenant (whichever
+// centre comes back first), which silently broke the moment the seeded
+// demo centre (build order #21) became a second row in this table.
 export default async function Home() {
   const admin = createAdminClient();
-  const { data: center } = await admin.from("centers").select("name, center_number").limit(1).maybeSingle();
+  const { data: center } = await admin.from("centers").select("name, center_number").eq("is_demo", false).limit(1).maybeSingle();
 
   return (
     <div className="flex min-h-full flex-col bg-background">
@@ -51,6 +55,9 @@ export default async function Home() {
             Log in
           </Link>
           <p className="text-sm text-muted">Assessors and TP students: use the link emailed to you.</p>
+          <a href="/demo" className="text-sm text-primary hover:underline">
+            Or explore a live demo, no sign-up needed →
+          </a>
         </div>
       </div>
 
