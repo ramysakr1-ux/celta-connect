@@ -4,13 +4,14 @@ import type { ResourceCategory, ResourceType } from "@/lib/supabase/types";
 // §5.2 order -- roughly the order they're used across a course, Admissions
 // last since it's trainer/assessor-only and least frequently opened.
 export const RESOURCE_CATEGORY_ORDER: ResourceCategory[] = [
+  "input_sessions",
   "lesson_planning",
   "teaching_practice",
   "written_assignments",
   "cambridge_documentation",
   "reading",
-  "input_sessions",
   "filmed_observations",
+  "centre_documents",
   "admissions",
 ];
 
@@ -23,6 +24,7 @@ export const RESOURCE_CATEGORY_LABELS: Record<ResourceCategory, string> = {
   input_sessions: "Input Sessions",
   filmed_observations: "Filmed Observations",
   admissions: "Admissions",
+  centre_documents: "Centre Documents",
 };
 
 // Admissions is a hard, category-level restriction -- never trainee-visible

@@ -138,8 +138,10 @@ export type ResourceCategory =
   | "reading"
   | "input_sessions"
   | "filmed_observations"
-  | "admissions";
+  | "admissions"
+  | "centre_documents";
 export type ResourceType = "template" | "form" | "brief" | "cambridge_doc" | "reading" | "video";
+export type ResourceContentType = "link" | "file" | "html";
 
 // A course's timetable daily structure -- see courses.time_bands. Defined
 // here (not in timetable-grid.ts) since timetable-grid.ts already imports
@@ -726,6 +728,7 @@ export interface Database {
           uploaded_by: string | null;
           generation_status: TpGenerationStatus;
           generation_error: string | null;
+          access_notes: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["tp_coursebooks"]["Row"]> & {
@@ -1132,17 +1135,18 @@ export interface Database {
           course_id: string | null;
           title: string;
           description: string | null;
-          file_url: string;
+          file_url: string | null;
           category: ResourceCategory;
           resource_type: ResourceType;
           visible_to_trainee: boolean;
+          storage_path: string | null;
+          content_type: ResourceContentType;
           uploaded_by: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["resources"]["Row"]> & {
           center_id: string;
           title: string;
-          file_url: string;
         };
         Update: Partial<Database["public"]["Tables"]["resources"]["Row"]>;
         Relationships: [];

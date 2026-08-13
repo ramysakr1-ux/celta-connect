@@ -12,6 +12,10 @@ import {
 } from "@/lib/resource-info";
 import { ResourceComposer } from "@/app/portfolio/[traineeId]/resources/resource-composer";
 import { deleteResource } from "@/app/portfolio/[traineeId]/resources/actions";
+import { ResourceContentLink } from "@/components/resource-content-link";
+import { CoursebooksSection } from "@/app/portfolio/[traineeId]/resources/coursebooks-section";
+import { MultimediaSection } from "@/app/portfolio/[traineeId]/resources/multimedia-section";
+import { AssignmentBriefsSection } from "@/app/portfolio/[traineeId]/resources/assignment-briefs-section";
 
 // §5 -- Resource Hub, a genuinely new feature (the pre-existing `resources`
 // table had zero UI anywhere). Starts empty by design -- no seeded content,
@@ -63,6 +67,31 @@ export default async function ResourceHubPage({
     byCategory.set(r.category, list);
   }
 
+  // The other three hub sections have their own dedicated tables/pages
+  // already (TP Points Library, Audio Library, Assignment Briefs) rather
+  // than living in `resources` -- TP points stays trainer-only and isn't
+  // shown here at all; these two read-only trainee views are new.
+  //
+  // Coursebooks: deliberately just the ones THIS course's schedule actually
+  // uses (course_tp_schedule), not every coursebook in the centre's library
+  // -- a centre can have several courses running different books.
+  const { data: scheduledCoursebookIds } = trainee.course_id
+    ? await supabase.from("course_tp_schedule").select("tp_coursebook_id").eq("course_id", trainee.course_id)
+    : { data: [] };
+  const coursebookIds = [...new Set((scheduledCoursebookIds ?? []).map((s) => s.tp_coursebook_id))];
+
+  const [{ data: coursebooks }, { data: audioTracks }, { data: briefs }] = await Promise.all([
+    coursebookIds.length > 0
+      ? supabase.from("tp_coursebooks").select("id, title, level, access_notes").in("id", coursebookIds).order("title")
+      : Promise.resolve({ data: [] }),
+    supabase.from("tp_audio_library").select("*").eq("center_id", trainee.center_id).order("coursebook_title"),
+    supabase
+      .from("assignment_templates")
+      .select("id, assignment_type, sections, published_at")
+      .eq("center_id", trainee.center_id)
+      .not("published_at", "is", null),
+  ]);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -70,7 +99,11 @@ export default async function ResourceHubPage({
         <p className="text-xs text-muted">{resources.length} items</p>
       </div>
 
-      {isEditableStaff ? <ResourceComposer traineeId={traineeId} /> : null}
+      {isEditableStaff ? <ResourceComposer traineeId={traineeId} centerId={trainee.center_id} /> : null}
+
+      <CoursebooksSection coursebooks={coursebooks ?? []} isEditableStaff={isEditableStaff} />
+      <MultimediaSection tracks={audioTracks ?? []} />
+      <AssignmentBriefsSection briefs={briefs ?? []} />
 
       {resources.length === 0 && !isEditableStaff ? (
         <p className="sheet text-sm text-muted">No resources yet.</p>
@@ -96,30 +129,25 @@ export default async function ResourceHubPage({
             ) : (
             <ul className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
               {byCategory.get(category)!.map((resource) => (
-                <li key={resource.id}>
-                  <a
-                    href={resource.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="sheet group flex h-full gap-3 p-4 transition-colors hover:border-primary/40 hover:bg-accent/40"
-                  >
+                <li key={resource.id} className="sheet flex h-full flex-col gap-3 p-4">
+                  <div className="flex items-start gap-3">
                     <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
                       {(() => {
                         const Icon = RESOURCE_TYPE_ICON[resource.resource_type];
                         return <Icon className="size-4" aria-hidden="true" />;
                       })()}
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-start justify-between gap-2">
-                        <span className="font-semibold text-sm leading-snug text-ink">{resource.title}</span>
-                        <span aria-hidden="true" className="mt-0.5 shrink-0 text-xs text-muted opacity-0 transition-opacity group-hover:opacity-100">
-                          Open →
-                        </span>
-                      </span>
+                    <div className="min-w-0 flex-1">
+                      <ResourceContentLink
+                        title={resource.title}
+                        fileUrl={resource.file_url}
+                        storagePath={resource.storage_path}
+                        contentType={resource.content_type}
+                      />
                       {resource.description ? (
-                        <span className="mt-1 block text-xs leading-relaxed text-muted">{resource.description}</span>
+                        <p className="mt-1 text-xs leading-relaxed text-muted">{resource.description}</p>
                       ) : null}
-                      <span className="mt-2 flex flex-wrap gap-1.5">
+                      <div className="mt-2 flex flex-wrap gap-1.5">
                         <span className="inline-block rounded-full border border-border px-2 py-0.5 text-[0.6875rem] font-semibold text-muted">
                           {RESOURCE_TYPE_LABELS[resource.resource_type]}
                         </span>
@@ -128,11 +156,11 @@ export default async function ResourceHubPage({
                             Trainer only
                           </span>
                         ) : null}
-                      </span>
-                    </span>
-                  </a>
+                      </div>
+                    </div>
+                  </div>
                   {isEditableStaff ? (
-                    <form action={deleteResource} className="mt-1">
+                    <form action={deleteResource}>
                       <input type="hidden" name="resource_id" value={resource.id} />
                       <input type="hidden" name="trainee_id" value={traineeId} />
                       <button type="submit" className="text-xs text-destructive hover:underline">

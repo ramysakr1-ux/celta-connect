@@ -18,7 +18,10 @@ const TABS = [
   // this tab link into them) -- matched here too so the tab still reads
   // as active once you've clicked through into either one.
   { href: "/tp", label: "Teaching Practice", alsoMatch: ["/rotation", "/coursebooks"] },
-  { href: "/audio", label: "Audio Library" },
+  // build-spec.md: "Replace the Audio Library tab with a Resource hub tab."
+  // /audio and /coursebooks keep working as direct routes (linked from the
+  // hub's own cards) -- only the top-nav tab itself moved.
+  { href: "/resource-hub", label: "Resource hub", alsoMatch: ["/audio"] },
 ] as const;
 
 // Grades Report is assessor-facing material, not an operational trainer
