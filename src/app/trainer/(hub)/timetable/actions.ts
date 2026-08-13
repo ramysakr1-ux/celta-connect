@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { buildSkeletonEvents, DEFAULT_TEACHING_DAYS } from "@/lib/timetable-skeleton";
+import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import type { TimeBand } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -13,6 +14,18 @@ export interface FormState {
 }
 
 const EVENT_TYPES = ["input_session", "tp", "assignment_due", "resubmission_due", "milestone"] as const;
+
+// Free-typed, comma/space separated ("4c, 5f") rather than a 41-item picker
+// -- this is a one-time data-entry pass against material the trainer
+// already knows cold, not a menu they need to browse.
+function parseCriteriaCodes(raw: string | null): string[] {
+  if (!raw) return [];
+  const codes = raw
+    .split(/[,\s]+/)
+    .map((c) => c.trim().toLowerCase())
+    .filter(Boolean);
+  return [...new Set(codes.filter((c) => (CELTA_CRITERIA_CODES as readonly string[]).includes(c)))];
+}
 
 export async function addTimetableEvent(_prevState: FormState, formData: FormData): Promise<FormState> {
   const trainer = await requireRole(["trainer", "admin"]);
@@ -51,6 +64,7 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
     // needs a real linked live follow-up slot, not free text.
     is_asynchronous: type === "input_session" ? isAsynchronous : false,
     linked_live_session_event_id: type === "input_session" ? linkedLiveSessionEventId : null,
+    input_session_criteria: type === "input_session" ? parseCriteriaCodes(formData.get("input_session_criteria") as string | null) : [],
     created_by: trainer.id,
   });
 
@@ -58,6 +72,32 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
 
   revalidatePath("/trainer/timetable");
   return { error: null };
+}
+
+// specs/build-spec.md "Peer observation" -- lets a trainer annotate an
+// input session ALREADY on the timetable with the criteria it covers,
+// since most input sessions predate this feature and won't get recreated
+// just to add it. No general event-editor exists (or is needed) -- this
+// is narrowly scoped to the one field.
+export async function setInputSessionCriteria(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return;
+
+  const eventId = formData.get("event_id");
+  if (typeof eventId !== "string") return;
+
+  const supabase = await createClient();
+  const { data: event } = await supabase
+    .from("course_timetable_events")
+    .select("id, course_id, type")
+    .eq("id", eventId)
+    .maybeSingle();
+  if (!event || event.course_id !== trainer.course_id || event.type !== "input_session") return;
+
+  const codes = parseCriteriaCodes(formData.get("input_session_criteria") as string | null);
+  await supabase.from("course_timetable_events").update({ input_session_criteria: codes }).eq("id", eventId);
+
+  revalidatePath("/trainer/timetable");
 }
 
 // §1.1a-skel -- "nobody builds a course from a blank grid." Only offered

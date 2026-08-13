@@ -19,6 +19,7 @@ import { HideDuringPreview, TraineeEyebrowLabel, PreviewBanner, ChatDrawerSwitch
 import { STANDING_LABEL } from "@/components/trajectory-gradient-bar";
 import { computeQuietHoursNote } from "@/lib/timetable-grid";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
+import { getPeerGroupMembers } from "@/lib/peer-observation";
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
 // only ever land on their own :traineeId (redirected home otherwise);
@@ -42,8 +43,21 @@ export default async function PortfolioLayout({
   const session = await getCurrentProfile();
   const viewer = session?.profile ?? null;
 
+  // specs/build-spec.md "Peer observation" -- the one legitimate reason a
+  // trainee reaches a URL that isn't their own: they're one of the other
+  // five in that candidate's TP group, viewing a /tp/[tpNumber] page to
+  // read prompts or write notes. Every OTHER subpage under this layout
+  // (assignments, celta5, pre-course-task) independently guards with its
+  // own viewer.id !== traineeId check, so relaxing the redirect here can't
+  // leak anything those pages don't already protect on their own -- only
+  // Course Stream has no such check, and it shows course-wide broadcasts,
+  // not this trainee's private data, so that's fine either way.
   if (viewer?.role === "trainee" && viewer.id !== traineeId) {
-    redirect(`/portfolio/${viewer.id}`);
+    const admin = createAdminClient();
+    const group = await getPeerGroupMembers(admin, traineeId);
+    if (!group.some((m) => m.traineeId === viewer.id)) {
+      redirect(`/portfolio/${viewer.id}`);
+    }
   }
 
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;

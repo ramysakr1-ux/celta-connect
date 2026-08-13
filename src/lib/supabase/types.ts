@@ -446,6 +446,50 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["deferral_transfers"]["Row"]>;
         Relationships: [];
       };
+      peer_observation_sheets: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          tp_number: number;
+          plan_assignment_id: string | null;
+          criteria_codes: string[];
+          prompt_1: string;
+          prompt_2: string;
+          revealed_at: string | null;
+          revealed_by: string | null;
+          group_feedback: string | null;
+          group_feedback_submitted_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["peer_observation_sheets"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          tp_number: number;
+          prompt_1: string;
+          prompt_2: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["peer_observation_sheets"]["Row"]>;
+        Relationships: [];
+      };
+      peer_observation_notes: {
+        Row: {
+          id: string;
+          sheet_id: string;
+          observer_id: string;
+          note_1: string | null;
+          note_2: string | null;
+          submitted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["peer_observation_notes"]["Row"]> & {
+          sheet_id: string;
+          observer_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["peer_observation_notes"]["Row"]>;
+        Relationships: [];
+      };
       malpractice_cases: {
         Row: {
           id: string;
@@ -878,6 +922,7 @@ export interface Database {
           zoom_url: string | null;
           is_asynchronous: boolean;
           linked_live_session_event_id: string | null;
+          input_session_criteria: string[];
           created_by: string | null;
           created_at: string;
           updated_at: string;

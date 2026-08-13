@@ -18,6 +18,9 @@ import { MaterialsSection } from "@/app/dashboard/trainee/plan/[tpNumber]/materi
 import { SelfEvaluationSection } from "@/app/dashboard/trainee/plan/[tpNumber]/self-evaluation-section";
 import { FeedbackForm } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/feedback-form";
 import { shareMaterialWithStudents, unshareMaterialWithStudents } from "@/app/portfolio/[traineeId]/tp/[tpNumber]/share-actions";
+import { getPeerGroupMembers } from "@/lib/peer-observation";
+import { PeerNoteForm } from "@/app/portfolio/[traineeId]/tp/[tpNumber]/peer-note-form";
+import { GroupFeedbackForm } from "@/app/portfolio/[traineeId]/tp/[tpNumber]/group-feedback-form";
 import type { Database } from "@/lib/supabase/types";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
@@ -78,7 +81,19 @@ export default async function TpDetailPage({
   const isRealStaff = viewer?.role === "trainer" || viewer?.role === "admin";
   const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
   if (!viewer && !assessorCourseId) notFound();
-  if (viewer && !isRealStaff && viewer.id !== traineeId) notFound();
+  const admin = createAdminClient();
+  // A trainee who isn't the page owner is only ever allowed in as a peer
+  // observer (one of the other five in that candidate's TP group) -- never
+  // as a general viewer of someone else's plan/feedback/self-eval.
+  let isPeerObserver = false;
+  if (viewer && !isRealStaff && viewer.id !== traineeId) {
+    const group = await getPeerGroupMembers(admin, traineeId);
+    if (group.some((m) => m.traineeId === viewer.id)) {
+      isPeerObserver = true;
+    } else {
+      notFound();
+    }
+  }
   // Rendering-only from here down: hides staff-only UI while previewing,
   // same rule as everywhere else in the portfolio tree.
   const isEditableStaff = isRealStaff && preview !== "trainee";
@@ -93,7 +108,55 @@ export default async function TpDetailPage({
   if (!trainee) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
-  const admin = createAdminClient();
+  // specs/build-spec.md "Peer observation" -- a peer only ever sees this
+  // one panel for someone else's lesson, never their plan, self-eval, or
+  // tutor feedback. Returns early, before any of those get fetched.
+  if (isPeerObserver) {
+    const { data: sheet } = await admin
+      .from("peer_observation_sheets")
+      .select("id, prompt_1, prompt_2, revealed_at")
+      .eq("trainee_id", traineeId)
+      .eq("tp_number", tpNumber)
+      .maybeSingle();
+    const { data: myNote } = sheet
+      ? await admin
+          .from("peer_observation_notes")
+          .select("note_1, note_2")
+          .eq("sheet_id", sheet.id)
+          .eq("observer_id", viewer!.id)
+          .maybeSingle()
+      : { data: null };
+
+    return (
+      <div className="flex flex-col gap-4">
+        <Link href={`/portfolio/${traineeId}/tp`} className="text-sm text-muted hover:text-primary">
+          ← All teaching practices
+        </Link>
+        <div className="sheet p-6">
+          <h1 className="font-serif text-xl text-ink">{trainee.full_name} — TP{tpNumber}</h1>
+          <p className="mt-1 text-sm text-muted">Peer observation</p>
+        </div>
+        <div className="sheet p-6">
+          {!sheet || !sheet.revealed_at ? (
+            <PeerNoteForm
+              traineeId={traineeId}
+              tpNumber={tpNumber}
+              prompt1={sheet?.prompt_1 ?? "What's one strength you noticed?"}
+              prompt2={sheet?.prompt_2 ?? "Anything else worth flagging?"}
+              initialNote1={myNote?.note_1 ?? ""}
+              initialNote2={myNote?.note_2 ?? ""}
+            />
+          ) : (
+            <div>
+              <p className="text-sm text-muted">Notes have been revealed -- read them together, then agree the group feedback.</p>
+              <GroupFeedbackForm traineeId={traineeId} tpNumber={tpNumber} initialFeedback="" />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   const [{ data: assignment }, { data: plan }, { data: googleConnection }, { data: center }] = await Promise.all([
     supabase.from("plan_assignments").select("*").eq("trainee_id", traineeId).eq("tp_number", tpNumber).maybeSingle(),
     supabase.from("tp_plans").select("*").eq("trainee_id", traineeId).eq("tp_number", tpNumber).maybeSingle(),
@@ -117,6 +180,20 @@ export default async function TpDetailPage({
       </div>
     );
   }
+
+  // "From your peers" -- read only once revealed, and only through the
+  // admin client (this viewer is the observed candidate or staff, never
+  // one of the individual observers, so the notes: observer-owns-row RLS
+  // policy would otherwise show nothing here even post-reveal).
+  const { data: peerSheet } = await admin
+    .from("peer_observation_sheets")
+    .select("id, revealed_at, group_feedback")
+    .eq("trainee_id", traineeId)
+    .eq("tp_number", tpNumber)
+    .maybeSingle();
+  const { data: peerNotes } = peerSheet?.revealed_at
+    ? await admin.from("peer_observation_notes").select("note_1, note_2").eq("sheet_id", peerSheet.id)
+    : { data: [] };
 
   const [{ data: languageAnalysis }, { data: materials }, { data: selfEvaluation }, { data: feedback }] = plan
     ? await Promise.all([
@@ -497,6 +574,29 @@ export default async function TpDetailPage({
             </div>
           </>
         )}
+
+        {peerSheet?.revealed_at && (peerNotes ?? []).length > 0 ? (
+          <div className="sheet p-6">
+            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">From your peers</p>
+            <p className="mt-1 text-xs text-muted">
+              Not a Cambridge document -- kept out of the portfolio, CELTA5, and the assessor pack.
+            </p>
+            <ul className="mt-3 flex flex-col gap-2">
+              {(peerNotes ?? []).map((n, i) => (
+                <li key={i} className="rounded-[6px] border border-border-faint p-2.5 text-sm text-ink">
+                  {n.note_1 ? <p>{n.note_1}</p> : null}
+                  {n.note_2 ? <p>{n.note_2}</p> : null}
+                </li>
+              ))}
+            </ul>
+            {peerSheet.group_feedback ? (
+              <div className="mt-3 border-t border-border-faint pt-3">
+                <p className="text-xs font-semibold text-muted uppercase">Group feedback</p>
+                <p className="mt-1 whitespace-pre-line text-sm text-ink">{peerSheet.group_feedback}</p>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="sheet h-fit p-6 lg:sticky lg:top-6">

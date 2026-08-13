@@ -104,7 +104,17 @@ export function AddEventForm({
       </div>
       {type === "input_session" ? (
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label className="flex items-center gap-2 text-sm text-ink">
+          <label className="text-sm text-muted">Criteria covered (optional -- e.g. &quot;4c, 5f&quot;)</label>
+          <input
+            name="input_session_criteria"
+            type="text"
+            placeholder="4c, 5f"
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          />
+          <p className="text-xs text-muted">
+            Seeds that week&apos;s peer observation task -- input session → criterion → TP point → peer task.
+          </p>
+          <label className="mt-2 flex items-center gap-2 text-sm text-ink">
             <input type="checkbox" name="is_asynchronous" checked={isAsync} onChange={(e) => setIsAsync(e.target.checked)} />
             Delivered asynchronously (recorded or Moodle, not live)
           </label>

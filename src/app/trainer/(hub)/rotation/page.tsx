@@ -8,6 +8,7 @@ import { ScheduleForm } from "@/app/trainer/(hub)/rotation/schedule-form";
 import { AssignButton } from "@/app/trainer/(hub)/rotation/assign-button";
 import { TpGroupBoard } from "@/app/trainer/(hub)/rotation/tp-group-board";
 import { RunningOrderPanel } from "@/app/trainer/(hub)/rotation/running-order-panel";
+import { RevealPeerNotesForm } from "@/app/trainer/(hub)/rotation/reveal-peer-notes-form";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import type { CourseStatus } from "@/lib/supabase/types";
 
@@ -196,6 +197,17 @@ export default async function TrainerRotationPage() {
           planByTraineeAndTp={planByTraineeAndTp}
         />
       ))}
+
+      <div className="sheet p-6">
+        <h2 className="font-serif text-lg text-ink">Peer observation notes</h2>
+        <p className="mt-1 text-sm text-muted">
+          Reveal a TP day&apos;s peer notes for everyone at once -- notes stay private until you do.
+          Nothing to reveal for a lesson nobody has noted yet.
+        </p>
+        <div className="mt-3">
+          <RevealPeerNotesForm subgroups={(subgroups ?? []).map((g) => ({ id: g.id, name: g.name }))} />
+        </div>
+      </div>
 
       <div className="sheet p-6">
         <h2 className="font-serif text-lg text-ink">Coursebook schedule</h2>
