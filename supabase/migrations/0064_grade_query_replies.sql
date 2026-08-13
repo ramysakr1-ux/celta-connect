@@ -6,14 +6,6 @@
 -- justification -- then writes two sentences themselves (what would have
 -- made the difference, what happens next) and files it.
 --
--- NOTE on numbering: at the time this migration was written, this worktree's
--- own git history tops out at 0062_assessor_visit_date.sql. A
--- 0063_malpractice_and_scanner.sql exists in the shared checkout's working
--- directory but is uncommitted there (not part of this branch/worktree's
--- history) -- this file is numbered 0064 to leave room for it. Whoever
--- merges these branches should confirm there isn't a numbering collision
--- and renumber whichever lands second.
---
 -- "Generated but never sent automatically... filed with the course" means
 -- this is a snapshot, not a live-recomputed view: evidence_snapshot is
 -- captured once, at generation time, and never updated afterwards even if
@@ -37,8 +29,8 @@
 -- No trainee access at all (staff-facing evidence assembly, not a
 -- candidate-facing feature -- the spec never has the candidate opening
 -- this in-app, only receiving the resulting email). Matches the
--- malpractice_cases policy shape (0063 in the shared checkout, see note
--- above): trainer/admin, scoped to their current course. No assessor-read
+-- malpractice_cases policy shape (0063): trainer/admin, scoped to their
+-- current course. No assessor-read
 -- policy yet -- there is no distinct "assessor pack" feature in this
 -- codebase today (grades-report's own assessor access goes through a
 -- tokenized course_access_tokens link + admin client, see
