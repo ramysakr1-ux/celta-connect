@@ -114,6 +114,7 @@ export interface Database {
           terms_accepted_at: string | null;
           special_consideration: string | null;
           uln: string | null;
+          connect_hub_link: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {

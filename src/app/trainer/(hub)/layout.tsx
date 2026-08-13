@@ -41,6 +41,25 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             <TrainerTabs rosterOnly={isAssessor} />
           </div>
           <div className="flex shrink-0 items-center gap-3">
+            {isRealStaff ? (
+              profile?.connect_hub_link ? (
+                <a
+                  href={profile.connect_hub_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
+                >
+                  Connect Hub
+                </a>
+              ) : (
+                <Link
+                  href="/trainer/connect-hub"
+                  className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
+                >
+                  Connect Hub
+                </Link>
+              )
+            ) : null}
             {isRealStaff ? <AssessorLinkButton /> : null}
             {isRealStaff ? <ViewSwitcherPill current="trainer" /> : null}
             <span className="text-sm text-muted">{profile?.full_name ?? session?.email}</span>

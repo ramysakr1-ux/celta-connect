@@ -1,0 +1,20 @@
+-- A personal (per-user, not per-centre) link out to that trainer/admin's own
+-- Connect Hub tutor dashboard -- Connect Hub (a separate Google Apps Script
+-- project, see the design-handoff memory) has no login of its own at all,
+-- access is purely a token baked into a URL, so there is no session to
+-- bridge. This just lets each person paste their own Connect Hub tutor link
+-- once and reach it from inside Connect afterwards, rather than needing to
+-- keep it bookmarked separately. See src/app/trainer/(hub)/connect-hub/.
+--
+-- Stored as the full link (not just the token) so a trainer can paste
+-- exactly what they already have saved from Connect Hub's own "Tutors" tab,
+-- with no manual extraction step -- and so this table has zero coupling to
+-- Connect Hub's actual deployment URL, which lives entirely outside this
+-- codebase and could change without needing a migration here.
+--
+-- No RLS policy change needed: "profiles: users can update their own
+-- onboarding fields" (0001) already lets any authenticated user update any
+-- column on their own row via id = auth.uid() -- real gating (trainer/admin
+-- only) happens in the app's action layer, same pattern as everywhere else
+-- in this codebase.
+alter table public.profiles add column connect_hub_link text;
