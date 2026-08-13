@@ -26,7 +26,7 @@ export type SubmissionStatus =
 export type CriteriaRating = "S+" | "S" | "N" | "X";
 export type StandardRating = "above_standard" | "to_standard" | "not_to_standard";
 export type PassFail = "pass" | "fail";
-export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn" | "Extension";
+export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn" | "Extension" | "Deferred";
 export type CourseStatus = "active" | "withdrawn" | "deferred" | "restarting" | "extension";
 
 // specs/build-spec.md §3 "first-half restart" -- a frozen snapshot of one
@@ -40,6 +40,88 @@ export interface CarriedAssignmentSnapshot {
   tutor_feedback: string | null;
   submitted_at: string | null;
   source_assignment_id: string;
+}
+
+// specs/build-spec.md §3 "Deferral" -- unlike a restart's single-outcome
+// snapshot, a deferral carries the FULL administrative state of every
+// assignment (an assignment mid-marking or a resubmission not yet returned
+// must be able to continue, not just a final pass/fail).
+export interface DeferredAssignmentSnapshot {
+  assignment_type: AssignmentTypeValue;
+  first_submission_url: string | null;
+  first_status: SubmissionStatus;
+  first_submitted_at: string | null;
+  first_content_grade: PassFail | null;
+  first_english_grade: PassFail | null;
+  resubmission_url: string | null;
+  resubmission_status: SubmissionStatus;
+  resubmission_submitted_at: string | null;
+  resubmission_content_grade: PassFail | null;
+  resubmission_english_grade: PassFail | null;
+  resubmission_outcome: "pass" | "fail" | null;
+  marker_id: string | null;
+  second_marker_id: string | null;
+  first_ai_declared: boolean;
+  first_ai_conversation_url: string | null;
+  resubmission_ai_declared: boolean;
+  resubmission_ai_conversation_url: string | null;
+  first_own_work_confirmed: boolean;
+  resubmission_own_work_confirmed: boolean;
+  tutor_feedback: string | null;
+  source_assignment_id: string;
+}
+
+// A taught TP, credited read-only on the destination course -- "completed
+// TPs read-only and credited, with numbering continuing (TP4 next)".
+export interface CarriedTpSnapshot {
+  tp_number: number;
+  tp_point_id: string | null;
+  main_lesson_aim: string;
+  sub_aim: string | null;
+  materials_description: string | null;
+  procedure: TpProcedure | null;
+  page_references: string | null;
+  density_tier: TpDensityTier;
+  aim_type: AimType | null;
+  taught_at: string | null;
+}
+
+export interface CarriedCelta5MatrixEntry {
+  criteria_code: string;
+  tutor_status_stage2: CriteriaRating | null;
+  tutor_status_stage3: CriteriaRating | null;
+}
+
+// Content fields only -- deliberately excludes the *_completed_at /
+// *_finalized_at reveal-gate timestamps (those control when Stage 1/2/3 is
+// exposed to the trainee) and every grade/signoff/checklist field. The
+// destination course's tutors reach their own conclusions and their own
+// reveal decisions using this as input; carrying an old conclusion or
+// silently auto-revealing history to the trainee on day one of a new
+// course would both be wrong.
+export interface CarriedCelta5Record {
+  hours_attended: number | null;
+  stage1_tutorial_given: boolean;
+  stage1_hours_taught: number | null;
+  stage1_strengths: string | null;
+  stage1_action_plan: string | null;
+  stage2_tutorial_given: boolean;
+  stage2_hours_taught: number | null;
+  stage2_candidate_overall: StandardRating | null;
+  stage2_candidate_notes: string | null;
+  stage2_candidate_written_assignments_notes: string | null;
+  stage2_candidate_other_notes: string | null;
+  stage2_tutor_overall: StandardRating | null;
+  stage2_tutor_notes: string | null;
+  stage2_tutor_written_assignments_notes: string | null;
+  stage2_tutor_other_notes: string | null;
+  stage3_required: boolean;
+  stage3_tutorial_given: boolean;
+  stage3_hours_taught: number | null;
+  stage3_tutor_overall: StandardRating | null;
+  stage3_tutor_notes: string | null;
+  stage3_tutor_written_assignments_notes: string | null;
+  stage3_tutor_other_notes: string | null;
 }
 export type StaffChannelType = "center_trainers" | "all_staff" | "dm" | "tp_group";
 export type TpGenerationStatus = "pending" | "processing" | "completed" | "failed";
@@ -324,6 +406,43 @@ export interface Database {
           created_by: string;
         };
         Update: Partial<Database["public"]["Tables"]["restart_transfers"]["Row"]>;
+        Relationships: [];
+      };
+      deferral_transfers: {
+        Row: {
+          id: string;
+          center_id: string;
+          source_trainee_id: string;
+          source_course_id: string;
+          reasons: string;
+          reintegration_arrangements: string | null;
+          reintegration_deadline: string | null;
+          hours_carried: number;
+          hours_carried_overridden: boolean;
+          hours_carried_note: string | null;
+          carried_assignments: DeferredAssignmentSnapshot[];
+          carried_tps: CarriedTpSnapshot[];
+          carried_celta5_matrix: CarriedCelta5MatrixEntry[];
+          carried_celta5_record: CarriedCelta5Record | null;
+          note: string | null;
+          created_by: string;
+          created_at: string;
+          destination_trainee_id: string | null;
+          destination_course_id: string | null;
+          mode_change_agreed_at: string | null;
+          familiarisation_plan: string | null;
+          linked_at: string | null;
+          linked_by: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["deferral_transfers"]["Row"]> & {
+          center_id: string;
+          source_trainee_id: string;
+          source_course_id: string;
+          reasons: string;
+          hours_carried: number;
+          created_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["deferral_transfers"]["Row"]>;
         Relationships: [];
       };
       malpractice_cases: {

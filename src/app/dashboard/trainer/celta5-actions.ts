@@ -342,7 +342,7 @@ export async function updateFinalGrade(
     return { error: "Something went wrong. Refresh and try again." };
   }
 
-  const validGrades = ["Pass", "Pass B", "Pass A", "Fail", "Withdrawn", "Extension"] as const;
+  const validGrades = ["Pass", "Pass B", "Pass A", "Fail", "Withdrawn", "Extension", "Deferred"] as const;
   const grade =
     typeof finalGrade === "string" && (validGrades as readonly string[]).includes(finalGrade)
       ? (finalGrade as (typeof validGrades)[number])
@@ -530,6 +530,7 @@ export async function releaseAllFinalReports(_prevState: FormState, formData: Fo
     .not("final_recommended_grade", "is", null)
     .neq("final_recommended_grade", "Withdrawn")
     .neq("final_recommended_grade", "Extension")
+    .neq("final_recommended_grade", "Deferred")
     .not("trainer_signoff_final_at", "is", null)
     .is("final_report_released_at", null);
 

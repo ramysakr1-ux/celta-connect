@@ -69,7 +69,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
     !record ||
     !record.final_recommended_grade ||
     record.final_recommended_grade === "Withdrawn" ||
-    record.final_recommended_grade === "Extension"
+    record.final_recommended_grade === "Extension" ||
+    record.final_recommended_grade === "Deferred"
   ) {
     return NextResponse.json({ error: "No final grade has been recommended yet." }, { status: 409 });
   }

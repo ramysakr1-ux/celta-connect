@@ -99,6 +99,36 @@ export default async function CourseStreamPage({
   // row), so it's resolved here against this trainee's own assignments.
   const assignmentIdByType = new Map((assignments ?? []).map((a) => [a.assignment_type, a.id]));
 
+  // §3 "Deferral" eligibility -- ">50% of the course completed", surfaced
+  // as a warning on the status card, not a hard block (the handbook leaves
+  // it to the centre's discretion either way).
+  let hoursAttended = 0;
+  let totalHours = 120;
+  if (isStaff && trainee.course_status === "active") {
+    const [{ data: celta5Record }, { data: course }] = await Promise.all([
+      supabase.from("celta5_records").select("hours_attended").eq("trainee_id", traineeId).maybeSingle(),
+      supabase.from("courses").select("total_hours").eq("id", trainee.course_id).maybeSingle(),
+    ]);
+    hoursAttended = celta5Record?.hours_attended ?? 0;
+    totalHours = course?.total_hours ?? 120;
+  }
+
+  // §3 -- once deferred, the frozen transfer record itself is the fuller
+  // status detail worth showing (reasons, hours carried, whether it's been
+  // linked to a destination course yet), not just the generic status note.
+  let deferralTransfer: { reasons: string; hours_carried: number; reintegration_deadline: string | null; linked_at: string | null } | null =
+    null;
+  if (isStaff && trainee.course_status === "deferred") {
+    const { data } = await supabase
+      .from("deferral_transfers")
+      .select("reasons, hours_carried, reintegration_deadline, linked_at")
+      .eq("source_trainee_id", traineeId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    deferralTransfer = data;
+  }
+
   return (
     <div className="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-[1fr_300px] lg:grid-rows-[auto_1fr]">
       <div className="flex items-center justify-between lg:col-start-1 lg:row-start-1">
@@ -273,7 +303,12 @@ export default async function CourseStreamPage({
           </div>
 
           {isStaff && trainee.course_status === "active" ? (
-            <CandidateStatusCard traineeId={traineeId} specialConsideration={trainee.special_consideration} />
+            <CandidateStatusCard
+              traineeId={traineeId}
+              specialConsideration={trainee.special_consideration}
+              hoursAttended={hoursAttended}
+              totalHours={totalHours}
+            />
           ) : isStaff && trainee.course_status !== "active" ? (
             <div className="sheet-accent h-fit">
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
@@ -294,6 +329,19 @@ export default async function CourseStreamPage({
                 <p className="mt-1 text-xs text-muted">
                   Portfolio stays active. {trainee.extension_completes_by ? `Expected completion: ${trainee.extension_completes_by}.` : ""} Close-out should wait for them.
                 </p>
+              ) : null}
+              {trainee.course_status === "deferred" && deferralTransfer ? (
+                <div className="mt-1 flex flex-col gap-1 text-xs text-muted">
+                  <p>&ldquo;{deferralTransfer.reasons}&rdquo;</p>
+                  <p>{deferralTransfer.hours_carried.toFixed(1)} hours carried.</p>
+                  {deferralTransfer.reintegration_deadline ? <p>Re-integrate by {deferralTransfer.reintegration_deadline}.</p> : null}
+                  <p className="font-semibold text-ink">
+                    {deferralTransfer.linked_at ? "Linked to a destination course." : "Not yet linked to a destination course."}
+                  </p>
+                </div>
+              ) : null}
+              {trainee.course_status === "restarting" ? (
+                <p className="mt-1 text-xs text-muted">Not yet linked to a destination course &mdash; link it from that course&apos;s admin page once they join.</p>
               ) : null}
               {trainee.course_status_note ? (
                 <p className="mt-2 text-xs text-muted italic">&ldquo;{trainee.course_status_note}&rdquo;</p>

@@ -231,7 +231,7 @@ export default async function Celta5RecordPage({
 
       <FinalizeRecordForm key={`finalize-${record.updated_at}`} record={record} />
 
-      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.trainer_signoff_final_at ? (
+      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
         <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} />
       ) : null}
 

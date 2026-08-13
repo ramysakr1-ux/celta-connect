@@ -5,22 +5,39 @@ import {
   withdrawTrainee,
   grantExtension,
   markForRestart,
+  markForDeferral,
   type WithdrawFormState,
   type ExtensionFormState,
   type RestartFormState,
+  type DeferralFormState,
 } from "@/app/portfolio/[traineeId]/status-actions";
 
 const initialWithdrawState: WithdrawFormState = { error: null };
 const initialExtensionState: ExtensionFormState = { error: null };
 const initialRestartState: RestartFormState = { error: null };
+const initialDeferralState: DeferralFormState = { error: null };
 
-type Mode = "none" | "withdraw" | "extension" | "restart";
+type Mode = "none" | "withdraw" | "extension" | "restart" | "deferral";
 
-export function CandidateStatusCard({ traineeId, specialConsideration }: { traineeId: string; specialConsideration: string | null }) {
+export function CandidateStatusCard({
+  traineeId,
+  specialConsideration,
+  hoursAttended,
+  totalHours,
+}: {
+  traineeId: string;
+  specialConsideration: string | null;
+  hoursAttended: number;
+  totalHours: number;
+}) {
   const [mode, setMode] = useState<Mode>("none");
   const [withdrawState, withdrawAction, withdrawPending] = useActionState(withdrawTrainee, initialWithdrawState);
   const [extensionState, extensionAction, extensionPending] = useActionState(grantExtension, initialExtensionState);
   const [restartState, restartAction, restartPending] = useActionState(markForRestart, initialRestartState);
+  const [deferralState, deferralAction, deferralPending] = useActionState(markForDeferral, initialDeferralState);
+  const [hoursCarried, setHoursCarried] = useState(hoursAttended);
+  const hoursCarriedOverridden = hoursCarried !== hoursAttended;
+  const belowHalfway = hoursAttended < totalHours / 2;
 
   return (
     <div className="sheet-accent h-fit">
@@ -36,6 +53,9 @@ export function CandidateStatusCard({ traineeId, specialConsideration }: { train
           </button>
           <button type="button" onClick={() => setMode("restart")} className="text-left text-sm font-medium text-primary hover:underline">
             Approve a fee-free restart…
+          </button>
+          <button type="button" onClick={() => setMode("deferral")} className="text-left text-sm font-medium text-primary hover:underline">
+            Defer to a later course…
           </button>
         </div>
       ) : null}
@@ -136,6 +156,96 @@ export function CandidateStatusCard({ traineeId, specialConsideration }: { train
               className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card disabled:opacity-60"
             >
               {restartPending ? "Saving…" : "Approve restart"}
+            </button>
+            <button type="button" onClick={() => setMode("none")} className="text-xs text-muted hover:underline">
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : null}
+
+      {mode === "deferral" ? (
+        <form action={deferralAction} className="mt-3 flex flex-col gap-2.5">
+          <input type="hidden" name="trainee_id" value={traineeId} />
+          <p className="text-xs text-muted">
+            Only if more than half the course is completed, in exceptional circumstances. Everything
+            freezes as it stands &mdash; TPs taught, assignments (even mid-marking), CELTA5 criteria and
+            tutorial records &mdash; and carries to whichever course they&apos;re later linked to from
+            that course&apos;s admin page.
+          </p>
+          {belowHalfway ? (
+            <p className="text-xs text-status-warning-text">
+              {hoursAttended.toFixed(1)} of {totalHours} hours attended &mdash; under half the course.
+              Deferral is still the centre&apos;s call, but the Handbook frames it as a &gt;50% case.
+            </p>
+          ) : null}
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted">Reason for the deferral (required)</label>
+            <textarea
+              name="reasons"
+              rows={2}
+              required
+              placeholder="Full details, for the Appian deferral form"
+              className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted">Re-integration arrangements (optional)</label>
+            <textarea
+              name="reintegration_arrangements"
+              rows={2}
+              className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted">Hours carried (defaults to hours attended)</label>
+            <input
+              type="number"
+              step="0.1"
+              name="hours_carried"
+              value={hoursCarried}
+              onChange={(e) => setHoursCarried(e.target.value === "" ? 0 : Number(e.target.value))}
+              className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            />
+          </div>
+          {hoursCarriedOverridden ? (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-muted">Note on the changed hours (required)</label>
+              <textarea
+                name="hours_carried_note"
+                rows={2}
+                required
+                className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              />
+            </div>
+          ) : null}
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted">Re-integration deadline (6 months full-time / 12 part-time is normal)</label>
+            <input
+              type="date"
+              name="reintegration_deadline"
+              className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            />
+          </div>
+
+          <textarea
+            name="note"
+            rows={2}
+            placeholder="Any other note (optional)"
+            className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          />
+          {deferralState.error ? <p className="text-xs text-destructive">{deferralState.error}</p> : null}
+          <div className="flex items-center gap-2">
+            <button
+              type="submit"
+              disabled={deferralPending}
+              className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card disabled:opacity-60"
+            >
+              {deferralPending ? "Saving…" : "Confirm deferral"}
             </button>
             <button type="button" onClick={() => setMode("none")} className="text-xs text-muted hover:underline">
               Cancel

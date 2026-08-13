@@ -11,6 +11,7 @@ import {
 import { removeSubgroupMember } from "@/app/dashboard/admin/courses/[id]/subgroup-actions";
 import { removeRosterMember, updateAssessorVisitDate, updateEntryFormSentAt } from "@/app/dashboard/admin/courses/[id]/roster-actions";
 import { linkRestartTransfer } from "@/app/dashboard/admin/courses/[id]/restart-actions";
+import { linkDeferralTransfer } from "@/app/dashboard/admin/courses/[id]/deferral-actions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { DeliveryModeCard } from "@/app/dashboard/admin/courses/[id]/delivery-mode-card";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
@@ -116,6 +117,29 @@ export default async function CourseRosterPage({
   const restartTraineeNameById = new Map((restartSourceTrainees ?? []).map((t) => [t.id, t.full_name]));
   const restartCourseNameById = new Map((restartSourceCourses ?? []).map((c) => [c.id, c.name]));
   const activeTraineesOnThisCourse = (roster ?? []).filter((m) => m.role === "trainee" && m.course_status === "active");
+
+  // §3 "Deferral" -- same shape as pending restarts above, plus the source
+  // course's delivery_mode so a mode change (vs. this course's own mode)
+  // can be flagged before linking, per Handbook 6.9.
+  const { data: pendingDeferrals } = await supabase
+    .from("deferral_transfers")
+    .select(
+      "id, source_trainee_id, source_course_id, reasons, hours_carried, reintegration_deadline, carried_assignments, carried_tps, carried_celta5_matrix, note, created_at"
+    )
+    .eq("center_id", admin.center_id)
+    .is("destination_trainee_id", null)
+    .order("created_at");
+  const deferralSourceCourseIds = [...new Set((pendingDeferrals ?? []).map((t) => t.source_course_id))];
+  const [{ data: deferralSourceTrainees }, { data: deferralSourceCourses }] = await Promise.all([
+    (pendingDeferrals ?? []).length > 0
+      ? supabase.from("profiles").select("id, full_name").in("id", (pendingDeferrals ?? []).map((t) => t.source_trainee_id))
+      : Promise.resolve({ data: [] }),
+    deferralSourceCourseIds.length > 0
+      ? supabase.from("courses").select("id, name, delivery_mode").in("id", deferralSourceCourseIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const deferralTraineeNameById = new Map((deferralSourceTrainees ?? []).map((t) => [t.id, t.full_name]));
+  const deferralCourseById = new Map((deferralSourceCourses ?? []).map((c) => [c.id, c]));
 
   const today = toLocalIso(new Date());
   const courseState = computeCourseState(course.start_date, course.end_date, today);
@@ -230,6 +254,85 @@ export default async function CourseRosterPage({
                 </button>
               </form>
             ))}
+          </div>
+        </div>
+      ) : null}
+
+      {(pendingDeferrals ?? []).length > 0 ? (
+        <div className="card flex flex-col gap-4 p-6">
+          <div>
+            <h2 className="font-serif text-lg text-ink">Pending deferrals</h2>
+            <p className="mt-1 text-sm text-muted">
+              Candidates deferred from another course at this centre, frozen and waiting for a
+              destination. Link one once they&apos;ve joined this course.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
+            {(pendingDeferrals ?? []).map((t) => {
+              const sourceCourse = deferralCourseById.get(t.source_course_id);
+              const modeChanged = Boolean(sourceCourse && sourceCourse.delivery_mode !== course.delivery_mode);
+              const tpCount = (t.carried_tps as unknown[]).length;
+              const assignmentCount = (t.carried_assignments as unknown[]).length;
+              return (
+                <form
+                  key={t.id}
+                  action={linkDeferralTransfer}
+                  className="flex flex-col gap-3 rounded-[6px] border border-border p-3"
+                >
+                  <input type="hidden" name="transfer_id" value={t.id} />
+                  <input type="hidden" name="course_id" value={course.id} />
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-ink">{deferralTraineeNameById.get(t.source_trainee_id) ?? "Unknown"}</p>
+                      <p className="text-xs text-muted">
+                        From {sourceCourse?.name ?? "a previous course"} &middot; {t.hours_carried.toFixed(1)} hrs carried &middot;{" "}
+                        {tpCount} TP{tpCount === 1 ? "" : "s"} &middot; {assignmentCount} assignment{assignmentCount === 1 ? "" : "s"}
+                        {t.reintegration_deadline ? ` · re-integrate by ${t.reintegration_deadline}` : ""}
+                      </p>
+                      <p className="mt-1 text-xs text-ink italic">&ldquo;{t.reasons}&rdquo;</p>
+                    </div>
+                    <select
+                      name="destination_trainee_id"
+                      defaultValue=""
+                      required
+                      className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+                    >
+                      <option value="" disabled>
+                        — link to —
+                      </option>
+                      {activeTraineesOnThisCourse.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.full_name}
+                        </option>
+                      ))}
+                    </select>
+                    <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+                      Link
+                    </button>
+                  </div>
+                  {modeChanged ? (
+                    <div className="flex flex-col gap-2 rounded-[6px] border border-gold/30 bg-gold/10 p-3">
+                      <p className="text-xs text-ink">
+                        This course&apos;s delivery mode ({course.delivery_mode}) differs from{" "}
+                        {sourceCourse?.name ?? "the original course"}&apos;s ({sourceCourse?.delivery_mode}). Handbook 6.9
+                        requires the candidate&apos;s written agreement, and a familiarisation plan.
+                      </p>
+                      <label className="flex items-center gap-2 text-xs text-ink">
+                        <input type="checkbox" name="mode_change_agreed" required />
+                        The candidate agreed in writing to the different delivery mode
+                      </label>
+                      <textarea
+                        name="familiarisation_plan"
+                        rows={2}
+                        required
+                        placeholder="Familiarisation plan for the new mode"
+                        className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+                      />
+                    </div>
+                  ) : null}
+                </form>
+              );
+            })}
           </div>
         </div>
       ) : null}

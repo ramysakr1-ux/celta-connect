@@ -91,6 +91,7 @@ export function FinalGradeForm({ record }: { record: Celta5Record }) {
           <option value="Fail">Fail</option>
           <option value="Withdrawn">Withdrawn</option>
           <option value="Extension">Extension</option>
+          <option value="Deferred">Deferred</option>
         </select>
       </div>
 
