@@ -1,17 +1,26 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { withdrawTrainee, grantExtension, type WithdrawFormState, type ExtensionFormState } from "@/app/portfolio/[traineeId]/status-actions";
+import {
+  withdrawTrainee,
+  grantExtension,
+  markForRestart,
+  type WithdrawFormState,
+  type ExtensionFormState,
+  type RestartFormState,
+} from "@/app/portfolio/[traineeId]/status-actions";
 
 const initialWithdrawState: WithdrawFormState = { error: null };
 const initialExtensionState: ExtensionFormState = { error: null };
+const initialRestartState: RestartFormState = { error: null };
 
-type Mode = "none" | "withdraw" | "extension";
+type Mode = "none" | "withdraw" | "extension" | "restart";
 
 export function CandidateStatusCard({ traineeId, specialConsideration }: { traineeId: string; specialConsideration: string | null }) {
   const [mode, setMode] = useState<Mode>("none");
   const [withdrawState, withdrawAction, withdrawPending] = useActionState(withdrawTrainee, initialWithdrawState);
   const [extensionState, extensionAction, extensionPending] = useActionState(grantExtension, initialExtensionState);
+  const [restartState, restartAction, restartPending] = useActionState(markForRestart, initialRestartState);
 
   return (
     <div className="sheet-accent h-fit">
@@ -24,6 +33,9 @@ export function CandidateStatusCard({ traineeId, specialConsideration }: { train
           </button>
           <button type="button" onClick={() => setMode("extension")} className="text-left text-sm font-medium text-primary hover:underline">
             Grant an extension…
+          </button>
+          <button type="button" onClick={() => setMode("restart")} className="text-left text-sm font-medium text-primary hover:underline">
+            Approve a fee-free restart…
           </button>
         </div>
       ) : null}
@@ -93,6 +105,37 @@ export function CandidateStatusCard({ traineeId, specialConsideration }: { train
               className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card disabled:opacity-60"
             >
               {extensionPending ? "Saving…" : "Grant extension"}
+            </button>
+            <button type="button" onClick={() => setMode("none")} className="text-xs text-muted hover:underline">
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : null}
+
+      {mode === "restart" ? (
+        <form action={restartAction} className="mt-3 flex flex-col gap-2.5">
+          <input type="hidden" name="trainee_id" value={traineeId} />
+          <p className="text-xs text-muted">
+            First-half withdrawal, at the centre&apos;s discretion &mdash; they start a new course from
+            the beginning with no new fee. Teaching restarts from TP1; their currently-passed
+            assignments are frozen here and carry to whichever course they join next. This is not a
+            deferral.
+          </p>
+          <textarea
+            name="note"
+            rows={2}
+            placeholder="Reason (optional, kept on the record)"
+            className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          />
+          {restartState.error ? <p className="text-xs text-destructive">{restartState.error}</p> : null}
+          <div className="flex items-center gap-2">
+            <button
+              type="submit"
+              disabled={restartPending}
+              className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card disabled:opacity-60"
+            >
+              {restartPending ? "Saving…" : "Approve restart"}
             </button>
             <button type="button" onClick={() => setMode("none")} className="text-xs text-muted hover:underline">
               Cancel

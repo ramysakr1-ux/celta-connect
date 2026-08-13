@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
+import type { CarriedAssignmentSnapshot } from "@/lib/supabase/types";
 
 export interface WithdrawFormState {
   error: string | null;
@@ -65,6 +66,95 @@ export async function withdrawTrainee(
     .eq("id", traineeId);
   if (error) {
     return { error: "Could not withdraw this candidate. Try again." };
+  }
+
+  revalidatePath(`/portfolio/${traineeId}`);
+  revalidatePath("/trainer/roster");
+  return { error: null };
+}
+
+export interface RestartFormState {
+  error: string | null;
+}
+
+// specs/build-spec.md §3 "First-half withdrawal with a restart... can
+// transfer any successful assessment to the new course. Teaching starts
+// again from TP1; passed assignments carry. This is not a deferral and
+// must not reuse the deferral flow." Snapshots currently-passed assignments
+// into restart_transfers now (see migration 0070) -- the destination course
+// usually doesn't exist yet, so there's nothing to link to at this point,
+// only something to freeze and wait with. "Plagiarism Reflection" is
+// deliberately excluded: it's tied to a specific malpractice case on the
+// old course and has no standalone meaning on a new one.
+export async function markForRestart(
+  _prevState: RestartFormState,
+  formData: FormData
+): Promise<RestartFormState> {
+  const staff = await requireRole(["trainer", "admin"]);
+  const traineeId = formData.get("trainee_id");
+  const note = ((formData.get("note") as string | null) ?? "").trim() || null;
+  if (typeof traineeId !== "string") {
+    return { error: "Missing candidate." };
+  }
+
+  const supabase = await createClient();
+  const { data: trainee } = await supabase
+    .from("profiles")
+    .select("id, course_id, center_id, role, course_status")
+    .eq("id", traineeId)
+    .maybeSingle();
+  if (!trainee || trainee.role !== "trainee" || trainee.course_id !== staff.course_id) {
+    return { error: "Candidate not found on your course." };
+  }
+  if (trainee.course_status !== "active") {
+    return { error: "This candidate already has a course status set." };
+  }
+
+  const { data: assignments } = await supabase
+    .from("assignments")
+    .select(
+      "id, assignment_type, first_status, first_content_grade, first_english_grade, first_submitted_at, resubmission_status, resubmission_content_grade, resubmission_english_grade, resubmission_submitted_at, marker_id, tutor_feedback"
+    )
+    .eq("trainee_id", traineeId);
+
+  const carried: CarriedAssignmentSnapshot[] = (assignments ?? [])
+    .filter((a) => a.assignment_type !== "Plagiarism Reflection")
+    .filter((a) => a.first_status === "approved" || a.resubmission_status === "approved")
+    .map((a) => {
+      const passedOnResubmission = a.resubmission_status === "approved";
+      return {
+        assignment_type: a.assignment_type,
+        content_grade: passedOnResubmission ? a.resubmission_content_grade : a.first_content_grade,
+        english_grade: passedOnResubmission ? a.resubmission_english_grade : a.first_english_grade,
+        marker_id: a.marker_id,
+        tutor_feedback: a.tutor_feedback,
+        submitted_at: passedOnResubmission ? a.resubmission_submitted_at : a.first_submitted_at,
+        source_assignment_id: a.id,
+      };
+    });
+
+  const admin = createAdminClient();
+  const [{ error: transferError }, { error: statusError }] = await Promise.all([
+    admin.from("restart_transfers").insert({
+      center_id: trainee.center_id,
+      source_trainee_id: traineeId,
+      source_course_id: trainee.course_id as string,
+      carried_assignments: carried,
+      note,
+      created_by: staff.id,
+    }),
+    admin
+      .from("profiles")
+      .update({
+        course_status: "restarting",
+        course_status_set_at: new Date().toISOString(),
+        course_status_set_by: staff.id,
+        course_status_note: note,
+      })
+      .eq("id", traineeId),
+  ]);
+  if (transferError || statusError) {
+    return { error: "Could not record the restart. Try again." };
   }
 
   revalidatePath(`/portfolio/${traineeId}`);

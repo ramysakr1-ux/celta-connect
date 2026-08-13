@@ -10,6 +10,7 @@ import {
 } from "@/app/dashboard/admin/courses/[id]/subgroups-form";
 import { removeSubgroupMember } from "@/app/dashboard/admin/courses/[id]/subgroup-actions";
 import { removeRosterMember, updateAssessorVisitDate, updateEntryFormSentAt } from "@/app/dashboard/admin/courses/[id]/roster-actions";
+import { linkRestartTransfer } from "@/app/dashboard/admin/courses/[id]/restart-actions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { DeliveryModeCard } from "@/app/dashboard/admin/courses/[id]/delivery-mode-card";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
@@ -93,6 +94,29 @@ export default async function CourseRosterPage({
   }
   const totalTpSessions = tpEvents?.length ?? 0;
 
+  // §3 "First-half withdrawal with a restart" -- transfers created on ANY
+  // course at this centre, still waiting for the candidate to actually join
+  // one. Shown here so an admin can link one the moment that trainee shows
+  // up on this course's roster.
+  const { data: pendingRestarts } = await supabase
+    .from("restart_transfers")
+    .select("id, source_trainee_id, source_course_id, carried_assignments, note, created_at")
+    .eq("center_id", admin.center_id)
+    .is("destination_trainee_id", null)
+    .order("created_at");
+  const restartSourceIds = [...new Set((pendingRestarts ?? []).flatMap((t) => [t.source_trainee_id, t.source_course_id]))];
+  const [{ data: restartSourceTrainees }, { data: restartSourceCourses }] = await Promise.all([
+    restartSourceIds.length > 0
+      ? supabase.from("profiles").select("id, full_name").in("id", (pendingRestarts ?? []).map((t) => t.source_trainee_id))
+      : Promise.resolve({ data: [] }),
+    restartSourceIds.length > 0
+      ? supabase.from("courses").select("id, name").in("id", (pendingRestarts ?? []).map((t) => t.source_course_id))
+      : Promise.resolve({ data: [] }),
+  ]);
+  const restartTraineeNameById = new Map((restartSourceTrainees ?? []).map((t) => [t.id, t.full_name]));
+  const restartCourseNameById = new Map((restartSourceCourses ?? []).map((c) => [c.id, c.name]));
+  const activeTraineesOnThisCourse = (roster ?? []).filter((m) => m.role === "trainee" && m.course_status === "active");
+
   const today = toLocalIso(new Date());
   const courseState = computeCourseState(course.start_date, course.end_date, today);
   const weekOf = courseState === "running" ? computeWeekOf(course.start_date, course.end_date, today) : null;
@@ -158,6 +182,57 @@ export default async function CourseRosterPage({
           </button>
         </form>
       </div>
+
+      {(pendingRestarts ?? []).length > 0 ? (
+        <div className="card flex flex-col gap-4 p-6">
+          <div>
+            <h2 className="font-serif text-lg text-ink">Pending fee-free restarts</h2>
+            <p className="mt-1 text-sm text-muted">
+              Candidates approved for a first-half restart on another course at this centre, frozen and
+              waiting for a destination. Link one once they&apos;ve joined this course.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
+            {(pendingRestarts ?? []).map((t) => (
+              <form
+                key={t.id}
+                action={linkRestartTransfer}
+                className="flex flex-wrap items-center gap-3 rounded-[6px] border border-border p-3"
+              >
+                <input type="hidden" name="transfer_id" value={t.id} />
+                <input type="hidden" name="course_id" value={course.id} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-ink">{restartTraineeNameById.get(t.source_trainee_id) ?? "Unknown"}</p>
+                  <p className="text-xs text-muted">
+                    From {restartCourseNameById.get(t.source_course_id) ?? "a previous course"} &middot;{" "}
+                    {(t.carried_assignments as unknown[]).length} carried assignment
+                    {(t.carried_assignments as unknown[]).length === 1 ? "" : "s"}
+                    {t.note ? ` · "${t.note}"` : ""}
+                  </p>
+                </div>
+                <select
+                  name="destination_trainee_id"
+                  defaultValue=""
+                  required
+                  className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+                >
+                  <option value="" disabled>
+                    — link to —
+                  </option>
+                  {activeTraineesOnThisCourse.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.full_name}
+                    </option>
+                  ))}
+                </select>
+                <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+                  Link
+                </button>
+              </form>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
         <div className="flex flex-col gap-6">

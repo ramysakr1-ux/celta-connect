@@ -28,6 +28,19 @@ export type StandardRating = "above_standard" | "to_standard" | "not_to_standard
 export type PassFail = "pass" | "fail";
 export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn" | "Extension";
 export type CourseStatus = "active" | "withdrawn" | "deferred" | "restarting" | "extension";
+
+// specs/build-spec.md §3 "first-half restart" -- a frozen snapshot of one
+// passed assignment, taken at the moment a candidate is marked eligible to
+// restart, not a live reference (see migration 0070).
+export interface CarriedAssignmentSnapshot {
+  assignment_type: AssignmentTypeValue;
+  content_grade: PassFail | null;
+  english_grade: PassFail | null;
+  marker_id: string | null;
+  tutor_feedback: string | null;
+  submitted_at: string | null;
+  source_assignment_id: string;
+}
 export type StaffChannelType = "center_trainers" | "all_staff" | "dm" | "tp_group";
 export type TpGenerationStatus = "pending" | "processing" | "completed" | "failed";
 export type TpDensityTier = "scripted" | "framework" | "coaching_prose" | "minimal";
@@ -287,6 +300,30 @@ export interface Database {
           title: string;
         };
         Update: Partial<Database["public"]["Tables"]["assignment_type_definitions"]["Row"]>;
+        Relationships: [];
+      };
+      restart_transfers: {
+        Row: {
+          id: string;
+          center_id: string;
+          source_trainee_id: string;
+          source_course_id: string;
+          carried_assignments: CarriedAssignmentSnapshot[];
+          note: string | null;
+          created_by: string;
+          created_at: string;
+          destination_trainee_id: string | null;
+          destination_course_id: string | null;
+          linked_at: string | null;
+          linked_by: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["restart_transfers"]["Row"]> & {
+          center_id: string;
+          source_trainee_id: string;
+          source_course_id: string;
+          created_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["restart_transfers"]["Row"]>;
         Relationships: [];
       };
       malpractice_cases: {
