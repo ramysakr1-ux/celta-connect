@@ -6,8 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { deleteBroadcast } from "@/app/portfolio/[traineeId]/stream-actions";
+import { WithdrawCard } from "@/app/portfolio/[traineeId]/withdraw-card";
 import { TUTOR_ROLE_LABELS, type TutorRole } from "@/lib/tutor-roles";
 import { toLocalIso } from "@/lib/timetable-grid";
+import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -51,7 +53,7 @@ export default async function CourseStreamPage({
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const { data: trainee } = await supabase
     .from("profiles")
-    .select("course_id")
+    .select("course_id, course_status, course_status_set_at, course_status_note, withdrawal_reportable")
     .eq("id", traineeId)
     .maybeSingle();
   if (!trainee?.course_id) notFound();
@@ -267,6 +269,40 @@ export default async function CourseStreamPage({
               <p className="mt-3 text-sm text-muted">No tutors assigned yet.</p>
             )}
           </div>
+
+          {isStaff && trainee.course_status === "active" ? (
+            <WithdrawCard traineeId={traineeId} />
+          ) : isStaff && trainee.course_status !== "active" ? (
+            <div className="sheet-accent h-fit">
+              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
+              <p className="mt-2 text-sm font-semibold text-ink">{COURSE_STATUS_LABEL[trainee.course_status]}</p>
+              {trainee.course_status_set_at ? (
+                <p className="mt-0.5 text-xs text-muted">
+                  Set {new Date(trainee.course_status_set_at).toLocaleDateString()}
+                </p>
+              ) : null}
+              {trainee.course_status === "withdrawn" ? (
+                <p className="mt-1 text-xs text-muted">
+                  {trainee.withdrawal_reportable
+                    ? "Reportable -- entry form was already sent."
+                    : "Internal only -- withdrawn before the entry form was sent."}
+                </p>
+              ) : null}
+              {trainee.course_status_note ? (
+                <p className="mt-2 text-xs text-muted italic">&ldquo;{trainee.course_status_note}&rdquo;</p>
+              ) : null}
+              {trainee.course_status === "withdrawn" ? (
+                <a
+                  href={`/api/withdrawal-letter/${traineeId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-block text-xs font-semibold text-primary hover:underline"
+                >
+                  Download withdrawal letter →
+                </a>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

@@ -18,6 +18,7 @@ import {
 import { HideDuringPreview, TraineeEyebrowLabel, PreviewBanner, ChatDrawerSwitcher } from "@/app/portfolio/[traineeId]/preview-chrome";
 import { STANDING_LABEL } from "@/components/trajectory-gradient-bar";
 import { computeQuietHoursNote } from "@/lib/timetable-grid";
+import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
 // only ever land on their own :traineeId (redirected home otherwise);
@@ -207,6 +208,12 @@ export default async function PortfolioLayout({
               </Link>
             )}
             <h1 className="truncate font-serif text-[17px] text-ink">{trainee.full_name}</h1>
+            {isCourseStatusReadOnly(trainee.course_status) ? (
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-destructive/12 px-2.5 py-0.5 text-[11px] font-semibold text-destructive">
+                <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                {COURSE_STATUS_LABEL[trainee.course_status]}
+              </span>
+            ) : null}
             {isStaffView && trajectory ? (
               <HideDuringPreview>
                 <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gold/16 px-2.5 py-0.5 text-[11px] font-semibold text-gold">
@@ -239,6 +246,15 @@ export default async function PortfolioLayout({
           </div>
         </div>
       </div>
+
+      {isCourseStatusReadOnly(trainee.course_status) ? (
+        <div className="bg-destructive/8 border-b border-destructive/20">
+          <div className="container flex h-9 items-center text-xs text-destructive">
+            {COURSE_STATUS_LABEL[trainee.course_status]} -- this portfolio is kept as a record but is
+            read-only going forward.
+          </div>
+        </div>
+      ) : null}
 
       <PreviewBanner traineeId={trainee.id} traineeName={trainee.full_name} />
 

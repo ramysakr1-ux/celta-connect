@@ -9,9 +9,10 @@ import {
   UnpairButton,
 } from "@/app/dashboard/admin/courses/[id]/subgroups-form";
 import { removeSubgroupMember } from "@/app/dashboard/admin/courses/[id]/subgroup-actions";
-import { removeRosterMember, updateAssessorVisitDate } from "@/app/dashboard/admin/courses/[id]/roster-actions";
+import { removeRosterMember, updateAssessorVisitDate, updateEntryFormSentAt } from "@/app/dashboard/admin/courses/[id]/roster-actions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { DeliveryModeCard } from "@/app/dashboard/admin/courses/[id]/delivery-mode-card";
+import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
 
@@ -115,6 +116,29 @@ export default async function CourseRosterPage({
 
       <div className="card flex items-center justify-between gap-4 p-6">
         <div>
+          <h2 className="font-serif text-lg text-ink">Entry form sent to Cambridge</h2>
+          <p className="mt-1 text-sm text-muted">
+            Fixes the cohort and the candidates&apos; names as Cambridge holds them, and decides
+            whether a later withdrawal is internal only or reportable. Comes from Cambridge&apos;s
+            own calendar, not the timetable.
+          </p>
+        </div>
+        <form action={updateEntryFormSentAt} className="flex items-center gap-2">
+          <input type="hidden" name="course_id" value={course.id} />
+          <input
+            type="date"
+            name="entry_form_sent_at"
+            defaultValue={course.entry_form_sent_at ? course.entry_form_sent_at.slice(0, 10) : ""}
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          />
+          <button type="submit" className="rounded-[6px] border border-border px-3 py-2 text-sm text-ink hover:border-primary">
+            Save
+          </button>
+        </form>
+      </div>
+
+      <div className="card flex items-center justify-between gap-4 p-6">
+        <div>
           <h2 className="font-serif text-lg text-ink">Assessor visit date</h2>
           <p className="mt-1 text-sm text-muted">
             Candidates get a calming reminder from Course Stream ahead of this date -- concerns are
@@ -152,6 +176,7 @@ export default async function CourseRosterPage({
                     <th className="text-sm text-muted">Name</th>
                     <th className="text-sm text-muted">Email</th>
                     <th className="text-sm text-muted">Role</th>
+                    <th className="text-sm text-muted">Status</th>
                     <th className="text-sm text-muted"></th>
                   </tr>
                 </thead>
@@ -167,6 +192,11 @@ export default async function CourseRosterPage({
                           </span>
                         </td>
                         <td>
+                          {member.role === "trainee" && isCourseStatusReadOnly(member.course_status) ? (
+                            <span className="pill pill-neutral">{COURSE_STATUS_LABEL[member.course_status]}</span>
+                          ) : null}
+                        </td>
+                        <td>
                           <form action={removeRosterMember}>
                             <input type="hidden" name="member_id" value={member.id} />
                             <input type="hidden" name="course_id" value={course.id} />
@@ -179,7 +209,7 @@ export default async function CourseRosterPage({
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={4} className="text-muted">
+                      <td colSpan={5} className="text-muted">
                         No one on this course yet.
                       </td>
                     </tr>

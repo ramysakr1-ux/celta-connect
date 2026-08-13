@@ -3,11 +3,14 @@ import { AIM_TYPE_LABELS, AIM_TYPE_STYLE, type AimType } from "@/lib/aim-type";
 import { ReorderForm } from "@/app/trainer/(hub)/rotation/reorder-form";
 import { AssignButton } from "@/app/trainer/(hub)/rotation/assign-button";
 import { AimCoverageMatrix } from "@/app/trainer/(hub)/rotation/aim-coverage";
+import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
+import type { CourseStatus } from "@/lib/supabase/types";
 
 export interface RunningOrderMember {
   traineeId: string;
   fullName: string;
   baseSlot: number;
+  courseStatus: CourseStatus;
 }
 
 export interface RunningOrderPlan {
@@ -69,13 +72,20 @@ export function RunningOrderPanel({
             {order.map((m, i) => {
               const position = rotationPosition(m.baseSlot, members.length, tpNumber) + 1;
               const plan = planByTrainee.get(m.traineeId);
-              const status = !hasSchedule
-                ? { label: "No points", cls: "text-muted" }
-                : !plan
-                  ? { label: "Plan due", cls: "text-status-pending-text" }
-                  : plan.taughtAt
-                    ? { label: "Taught", cls: "text-ink font-semibold" }
-                    : { label: "Plan in", cls: "text-ink font-semibold" };
+              // §3 "the slot empties; nobody else moves" -- a withdrawn (etc.)
+              // trainee stays IN `members` so everyone else's rotationPosition
+              // modulo base is unchanged; their own turn is just shown empty
+              // and never assignable.
+              const withdrawn = isCourseStatusReadOnly(m.courseStatus);
+              const status = withdrawn
+                ? { label: COURSE_STATUS_LABEL[m.courseStatus], cls: "text-muted" }
+                : !hasSchedule
+                  ? { label: "No points", cls: "text-muted" }
+                  : !plan
+                    ? { label: "Plan due", cls: "text-status-pending-text" }
+                    : plan.taughtAt
+                      ? { label: "Taught", cls: "text-ink font-semibold" }
+                      : { label: "Plan in", cls: "text-ink font-semibold" };
               return (
                 <div
                   key={m.traineeId}
@@ -97,7 +107,7 @@ export function RunningOrderPanel({
                     </span>
                   ) : null}
                   <span className={`shrink-0 text-xs font-semibold ${status.cls}`}>{status.label}</span>
-                  {!plan && hasSchedule ? <AssignButton subgroupId={subgroupId} tpNumber={tpNumber} /> : null}
+                  {!plan && hasSchedule && !withdrawn ? <AssignButton subgroupId={subgroupId} tpNumber={tpNumber} /> : null}
                 </div>
               );
             })}

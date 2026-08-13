@@ -8,6 +8,8 @@ import { ScheduleForm } from "@/app/trainer/(hub)/rotation/schedule-form";
 import { AssignButton } from "@/app/trainer/(hub)/rotation/assign-button";
 import { TpGroupBoard } from "@/app/trainer/(hub)/rotation/tp-group-board";
 import { RunningOrderPanel } from "@/app/trainer/(hub)/rotation/running-order-panel";
+import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
+import type { CourseStatus } from "@/lib/supabase/types";
 
 const TP_NUMBERS = [1, 2, 3, 4, 5, 6];
 
@@ -32,11 +34,12 @@ export default async function TrainerRotationPage() {
 
   const { data: roster } = await supabase
     .from("profiles")
-    .select("id, full_name")
+    .select("id, full_name, course_status")
     .eq("course_id", courseId)
     .eq("role", "trainee");
 
   const nameByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.full_name]));
+  const courseStatusByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.course_status]));
 
   const { data: coursebooks } = await supabase
     .from("tp_coursebooks")
@@ -76,6 +79,7 @@ export default async function TrainerRotationPage() {
         traineeId: m.trainee_id,
         fullName: nameByTraineeId.get(m.trainee_id) ?? "Unknown",
         baseSlot: m.base_slot,
+        courseStatus: courseStatusByTraineeId.get(m.trainee_id) ?? "active",
       }));
 
   const paired = (subgroups ?? []).filter((g) => g.tp_group_id);
@@ -224,7 +228,7 @@ function UnpairedSubgroupBoard({
 }: {
   subgroupId: string;
   name: string;
-  members: { traineeId: string; fullName: string; baseSlot: number }[];
+  members: { traineeId: string; fullName: string; baseSlot: number; courseStatus: CourseStatus }[];
   planByTraineeAndTp: Map<string, { taught_at: string | null }>;
 }) {
   const size = members.length;
@@ -300,6 +304,17 @@ function UnpairedSubgroupBoard({
                     <td className="text-ink">{member.fullName}</td>
                     {TP_NUMBERS.map((tpNumber) => {
                       const plan = planByTraineeAndTp.get(`${member.traineeId}-${tpNumber}`);
+                      if (isCourseStatusReadOnly(member.courseStatus)) {
+                        return (
+                          <td key={tpNumber}>
+                            {plan?.taught_at ? (
+                              <span className="status-pill status-pill-on-track">Taught</span>
+                            ) : (
+                              <span className="pill pill-neutral">{COURSE_STATUS_LABEL[member.courseStatus]}</span>
+                            )}
+                          </td>
+                        );
+                      }
                       if (!plan) {
                         return (
                           <td key={tpNumber} className="text-sm text-muted">

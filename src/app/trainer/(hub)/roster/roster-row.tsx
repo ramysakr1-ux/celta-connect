@@ -5,12 +5,33 @@ import { useRouter } from "next/navigation";
 import { TrajectoryBarCompact } from "@/components/trajectory-gradient-bar";
 import type { RosterRow } from "@/lib/roster";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
+import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 
 // build-spec.md §8 bug 3 -- rows carried cursor-pointer but only the name
 // cell actually navigated. Whole row now pushes to the portfolio; the
 // name keeps its own <Link> too, for keyboard nav and hover color.
 export function RosterRowView({ row }: { row: RosterRow }) {
   const router = useRouter();
+
+  // §3 -- a withdrawn/deferred/etc. candidate is "present in the roster"
+  // but their working columns (hrs, TPs, etc.) stop meaning anything once
+  // frozen, so this row collapses to name + status rather than showing
+  // stale numbers next to the others' live ones.
+  if (isCourseStatusReadOnly(row.courseStatus)) {
+    return (
+      <tr className="cursor-pointer opacity-70" onClick={() => router.push(`/portfolio/${row.id}`)}>
+        <td>
+          <Link href={`/portfolio/${row.id}`} className="text-ink hover:text-primary">
+            {row.name}
+          </Link>
+        </td>
+        <td colSpan={7} className="text-right">
+          <span className="pill pill-neutral">{COURSE_STATUS_LABEL[row.courseStatus]}</span>
+        </td>
+      </tr>
+    );
+  }
+
   return (
     <tr className="cursor-pointer" onClick={() => router.push(`/portfolio/${row.id}`)}>
       <td>

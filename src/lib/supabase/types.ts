@@ -27,6 +27,7 @@ export type CriteriaRating = "S+" | "S" | "N" | "X";
 export type StandardRating = "above_standard" | "to_standard" | "not_to_standard";
 export type PassFail = "pass" | "fail";
 export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn";
+export type CourseStatus = "active" | "withdrawn" | "deferred" | "restarting" | "extension";
 export type StaffChannelType = "center_trainers" | "all_staff" | "dm" | "tp_group";
 export type TpGenerationStatus = "pending" | "processing" | "completed" | "failed";
 export type TpDensityTier = "scripted" | "framework" | "coaching_prose" | "minimal";
@@ -91,6 +92,7 @@ export interface Database {
           time_bands: TimeBand[] | null;
           delivery_mode: "f2f" | "online" | "mixed";
           assessor_visit_date: string | null;
+          entry_form_sent_at: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["courses"]["Row"]> & {
@@ -115,6 +117,12 @@ export interface Database {
           special_consideration: string | null;
           uln: string | null;
           connect_hub_link: string | null;
+          course_status: CourseStatus;
+          course_status_set_at: string | null;
+          course_status_set_by: string | null;
+          course_status_note: string | null;
+          withdrawal_reportable: boolean | null;
+          withdrawal_letter_generated_at: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {

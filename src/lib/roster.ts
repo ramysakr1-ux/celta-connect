@@ -1,6 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/supabase/types";
+import type { CourseStatus, Database } from "@/lib/supabase/types";
 import { CELTA_CRITERIA_CODES, computeCriteriaPct, computeTrajectory, type Trajectory } from "@/lib/celta-criteria";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { computeAtRiskReasons, type AtRiskReason } from "@/lib/at-risk";
@@ -9,6 +9,7 @@ import { toLocalIso } from "@/lib/timetable-grid";
 export interface RosterRow {
   id: string;
   name: string;
+  courseStatus: CourseStatus;
   assessedHrs: number;
   tpsPassed: number;
   assignmentsLeft: number;
@@ -27,7 +28,7 @@ export async function fetchRosterRows(
 ): Promise<RosterRow[]> {
   const { data: trainees } = await supabase
     .from("profiles")
-    .select("id, full_name")
+    .select("id, full_name, course_status")
     .eq("course_id", courseId)
     .eq("role", "trainee")
     .order("full_name");
@@ -99,6 +100,7 @@ export async function fetchRosterRows(
     return {
       id: trainee.id,
       name: trainee.full_name,
+      courseStatus: trainee.course_status,
       assessedHrs,
       tpsPassed,
       assignmentsLeft,

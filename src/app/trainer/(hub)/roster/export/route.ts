@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchRosterRows } from "@/lib/roster";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
+import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 
 function csvCell(value: string | number): string {
   const s = String(value);
@@ -31,6 +32,7 @@ export async function GET() {
 
   const header = [
     "Candidate",
+    "Status",
     "Assessed hrs",
     "TPs passed",
     "Assignments left",
@@ -44,6 +46,7 @@ export async function GET() {
     ...rows.map((r) =>
       [
         csvCell(r.name),
+        csvCell(COURSE_STATUS_LABEL[r.courseStatus]),
         csvCell(r.assessedHrs.toFixed(2)),
         csvCell(`${r.tpsPassed} / 8`),
         csvCell(r.assignmentsLeft),
