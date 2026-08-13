@@ -29,12 +29,14 @@ export function FeedbackForm({
   tpNumber,
   feedback,
   selfEvaluation,
+  autoTagEnabled = true,
 }: {
   planId: string;
   traineeId: string;
   tpNumber: number;
   feedback: TpFeedback | null;
   selfEvaluation?: SelfEvaluation | null;
+  autoTagEnabled?: boolean;
 }) {
   const locked = Boolean(feedback?.submitted_at);
   const [draftState, draftAction, draftPending] = useActionState(saveFeedbackDraft, initialState);
@@ -106,6 +108,7 @@ export function FeedbackForm({
             onChange={setStrengthsPlanning}
             scope="planning"
             starable={false}
+            autoTagEnabled={autoTagEnabled}
           />
           <FeedbackPointEditor
             label="Action points in planning"
@@ -114,6 +117,7 @@ export function FeedbackForm({
             onChange={setActionPointsPlanning}
             scope="planning"
             starable
+            autoTagEnabled={autoTagEnabled}
           />
         </div>
         <div className="flex flex-col gap-4">
@@ -125,6 +129,7 @@ export function FeedbackForm({
             onChange={setStrengthsTeaching}
             scope="teaching"
             starable={false}
+            autoTagEnabled={autoTagEnabled}
           />
           <FeedbackPointEditor
             label="Action points in teaching"
@@ -133,6 +138,7 @@ export function FeedbackForm({
             onChange={setActionPointsTeaching}
             scope="teaching"
             starable
+            autoTagEnabled={autoTagEnabled}
           />
         </div>
       </div>

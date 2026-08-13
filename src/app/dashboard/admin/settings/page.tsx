@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { disconnectGoogleDrive } from "@/app/dashboard/admin/settings/actions";
+import { disconnectGoogleDrive, updateAutoTagCriteria } from "@/app/dashboard/admin/settings/actions";
 import { CenterProfileForm } from "@/app/dashboard/admin/settings/center-profile-form";
 import { GoogleDriveTargetsForm } from "@/app/dashboard/admin/settings/targets-form";
 import { FeedbackStyleExamplesManager } from "@/components/feedback-style-examples/manager";
@@ -10,6 +10,7 @@ import type { DeliveryMode } from "@/lib/delivery-mode";
 
 const SETTINGS_NAV = [
   { href: "#centre-profile", label: "Centre profile" },
+  { href: "#auto-tagging", label: "TP feedback tagging" },
   { href: "#google-drive", label: "Google Drive" },
   { href: "/dashboard/admin/assignment-briefs", label: "Assignment briefs", external: true },
   { href: "#feedback-style", label: "Feedback style" },
@@ -33,7 +34,7 @@ export default async function AdminSettingsPage({
   const admin = createAdminClient();
   const { data: center } = await admin
     .from("centers")
-    .select("name, center_number, is_uk_centre")
+    .select("name, center_number, is_uk_centre, auto_tag_criteria_enabled")
     .eq("id", profile.center_id)
     .maybeSingle();
   const { data: connection } = await admin
@@ -130,6 +131,24 @@ export default async function AdminSettingsPage({
                 isUkCentre={center?.is_uk_centre ?? false}
               />
             </div>
+          </div>
+
+          <div id="auto-tagging" className="card scroll-mt-6 p-6">
+            <h2 className="font-serif text-lg text-ink">TP feedback tagging</h2>
+            <p className="mt-2 text-muted">
+              As a trainer types a feedback bullet, matching CELTA criteria codes land on it
+              automatically -- no clicking through the criteria panel. On by default; the manual
+              &quot;+ criteria&quot; panel always stays available either way.
+            </p>
+            <form action={updateAutoTagCriteria} className="mt-4 flex items-center gap-3">
+              <label className="flex items-center gap-2 text-sm text-ink">
+                <input type="checkbox" name="auto_tag_criteria_enabled" defaultChecked={center?.auto_tag_criteria_enabled ?? true} />
+                Auto-tag criteria while typing TP feedback
+              </label>
+              <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary">
+                Save
+              </button>
+            </form>
           </div>
 
           <div id="google-drive" className="card scroll-mt-6 p-6">

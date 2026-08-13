@@ -23,6 +23,12 @@ export default async function TrainerTpCardPage({
     notFound();
   }
 
+  const { data: center } = await supabase
+    .from("centers")
+    .select("auto_tag_criteria_enabled")
+    .eq("id", trainee.center_id)
+    .maybeSingle();
+
   const { data: plan } = await supabase
     .from("tp_plans")
     .select("*")
@@ -174,7 +180,13 @@ export default async function TrainerTpCardPage({
         )}
       </div>
 
-      <FeedbackForm planId={plan.id} traineeId={id} tpNumber={tpNumber} feedback={feedback ?? null} />
+      <FeedbackForm
+        planId={plan.id}
+        traineeId={id}
+        tpNumber={tpNumber}
+        feedback={feedback ?? null}
+        autoTagEnabled={center?.auto_tag_criteria_enabled ?? true}
+      />
 
       {plan.submitted_at && selfEvaluation?.submitted_at && feedback?.submitted_at ? (
         <a

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS } from "@/lib/celta-criteria";
+import { matchCriteriaCodes } from "@/lib/criteria-glossary";
 import { emptyFeedbackPoint, type FeedbackPoint } from "@/lib/tp-plan-content";
 
 const PLANNING_SECTIONS = ["4"];
@@ -14,6 +15,7 @@ export function FeedbackPointEditor({
   onChange,
   scope,
   starable,
+  autoTagEnabled,
 }: {
   label: string;
   guide: string;
@@ -21,6 +23,7 @@ export function FeedbackPointEditor({
   onChange: (points: FeedbackPoint[]) => void;
   scope: "planning" | "teaching";
   starable: boolean;
+  autoTagEnabled: boolean;
 }) {
   const sections = CELTA_CRITERIA_SECTIONS.filter((s) =>
     (scope === "planning" ? PLANNING_SECTIONS : TEACHING_SECTIONS).includes(s.section)
@@ -37,6 +40,7 @@ export function FeedbackPointEditor({
             point={point}
             sections={sections}
             starable={starable}
+            autoTagEnabled={autoTagEnabled}
             onChange={(patch) => onChange(points.map((p, x) => (x === i ? { ...p, ...patch } : p)))}
             onRemove={() => onChange(points.filter((_, x) => x !== i))}
           />
@@ -57,16 +61,36 @@ function PointRow({
   point,
   sections,
   starable,
+  autoTagEnabled,
   onChange,
   onRemove,
 }: {
   point: FeedbackPoint;
   sections: typeof CELTA_CRITERIA_SECTIONS extends readonly (infer T)[] ? T[] : never;
   starable: boolean;
+  autoTagEnabled: boolean;
   onChange: (patch: Partial<FeedbackPoint>) => void;
   onRemove: () => void;
 }) {
   const [panelOpen, setPanelOpen] = useState(false);
+
+  // project_grading_feedback_trainer_awareness.md §2 -- "as the trainer
+  // types a bullet, the matching criterion code silently appends... no
+  // popup/click/confirm, behaves like autocorrect". Debounced so it fires
+  // on a pause rather than every keystroke; self-limiting (only adds codes
+  // not already present), so re-running on every keystroke after that is
+  // harmless -- it just finds nothing new to add.
+  useEffect(() => {
+    if (!autoTagEnabled) return;
+    const timeout = setTimeout(() => {
+      const matched = matchCriteriaCodes(point.text);
+      const newCodes = matched.filter((c) => !point.criteria_codes.includes(c));
+      if (newCodes.length > 0) {
+        onChange({ criteria_codes: [...point.criteria_codes, ...newCodes] });
+      }
+    }, 600);
+    return () => clearTimeout(timeout);
+  }, [point.text, point.criteria_codes, autoTagEnabled, onChange]);
 
   function toggleCriteria(code: string) {
     const has = point.criteria_codes.includes(code);

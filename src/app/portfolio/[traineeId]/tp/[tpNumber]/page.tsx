@@ -94,10 +94,11 @@ export default async function TpDetailPage({
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
   const admin = createAdminClient();
-  const [{ data: assignment }, { data: plan }, { data: googleConnection }] = await Promise.all([
+  const [{ data: assignment }, { data: plan }, { data: googleConnection }, { data: center }] = await Promise.all([
     supabase.from("plan_assignments").select("*").eq("trainee_id", traineeId).eq("tp_number", tpNumber).maybeSingle(),
     supabase.from("tp_plans").select("*").eq("trainee_id", traineeId).eq("tp_number", tpNumber).maybeSingle(),
     admin.from("center_google_connections").select("center_id").eq("center_id", trainee.center_id).maybeSingle(),
+    admin.from("centers").select("auto_tag_criteria_enabled").eq("id", trainee.center_id).maybeSingle(),
   ]);
   const hasGoogleConnection = Boolean(googleConnection);
 
@@ -448,6 +449,7 @@ export default async function TpDetailPage({
                 tpNumber={tpNumber}
                 feedback={feedback ?? null}
                 selfEvaluation={selfEvaluation ?? null}
+                autoTagEnabled={center?.auto_tag_criteria_enabled ?? true}
               />
             ) : plan ? (
               <div className="sheet p-6">

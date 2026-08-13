@@ -45,6 +45,19 @@ export async function updateCenterProfile(
   return { error: null };
 }
 
+// project_grading_feedback_trainer_awareness.md §2 -- "on by default,
+// disable-able in settings". Plain checkbox toggle, no confirm state
+// needed (unlike name/number, there's nothing to validate).
+export async function updateAutoTagCriteria(formData: FormData): Promise<void> {
+  const profile = await requireRole("admin");
+  const enabled = formData.get("auto_tag_criteria_enabled") === "on";
+
+  const admin = createAdminClient();
+  await admin.from("centers").update({ auto_tag_criteria_enabled: enabled }).eq("id", profile.center_id);
+
+  revalidatePath("/dashboard/admin/settings");
+}
+
 export async function updateGoogleDriveTargets(
   _prevState: FormState,
   formData: FormData
