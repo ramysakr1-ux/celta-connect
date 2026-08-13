@@ -729,6 +729,7 @@ export interface Database {
           generation_status: TpGenerationStatus;
           generation_error: string | null;
           access_notes: string | null;
+          avoid_repeat_of: string[];
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["tp_coursebooks"]["Row"]> & {
@@ -738,6 +739,23 @@ export interface Database {
           storage_path: string;
         };
         Update: Partial<Database["public"]["Tables"]["tp_coursebooks"]["Row"]>;
+        Relationships: [];
+      };
+      tp_coursebook_sources: {
+        Row: {
+          id: string;
+          tp_coursebook_id: string;
+          label: string | null;
+          storage_path: string;
+          original_filename: string | null;
+          uploaded_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_coursebook_sources"]["Row"]> & {
+          tp_coursebook_id: string;
+          storage_path: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_coursebook_sources"]["Row"]>;
         Relationships: [];
       };
       tp_audio_library: {

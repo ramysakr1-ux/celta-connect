@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { createCoursebookRecord } from "@/lib/tp-library/upload";
+import { createCoursebookRecord, addCoursebookSourceRecord } from "@/lib/tp-library/upload";
 import { AIM_TYPES, type AimType } from "@/lib/aim-type";
 
 function parseAimType(value: FormDataEntryValue | null): AimType | null {
@@ -101,4 +101,49 @@ export async function setTpPointStatus(formData: FormData): Promise<void> {
   if (typeof coursebookId === "string") {
     revalidatePath(`/trainer/coursebooks/${coursebookId}`);
   }
+}
+
+export async function trainerAddCoursebookSource(input: {
+  tpCoursebookId: string;
+  label: string;
+  storagePath: string;
+  originalFilename: string;
+}): Promise<{ error: string | null }> {
+  const trainer = await requireRole(["trainer", "admin"]);
+
+  const result = await addCoursebookSourceRecord({
+    uploadedBy: trainer.id,
+    ...input,
+  });
+
+  if ("error" in result) {
+    return { error: result.error };
+  }
+
+  revalidatePath(`/trainer/coursebooks/${input.tpCoursebookId}`);
+  return { error: null };
+}
+
+export async function removeCoursebookSource(formData: FormData): Promise<void> {
+  await requireRole(["trainer", "admin"]);
+
+  const sourceId = formData.get("source_id");
+  const coursebookId = formData.get("coursebook_id");
+  if (typeof sourceId !== "string" || typeof coursebookId !== "string") {
+    return;
+  }
+
+  const supabase = await createClient();
+  const { data: source } = await supabase
+    .from("tp_coursebook_sources")
+    .select("storage_path")
+    .eq("id", sourceId)
+    .maybeSingle();
+
+  await supabase.from("tp_coursebook_sources").delete().eq("id", sourceId);
+  if (source?.storage_path) {
+    await supabase.storage.from("coursebook-pdfs").remove([source.storage_path]);
+  }
+
+  revalidatePath(`/trainer/coursebooks/${coursebookId}`);
 }

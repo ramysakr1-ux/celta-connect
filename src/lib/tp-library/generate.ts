@@ -54,12 +54,26 @@ const SUBMIT_TP_POINTS_TOOL = {
   },
 };
 
-function buildPrompt(title: string, level: string): string {
+function buildPrompt(
+  title: string,
+  level: string,
+  sourceLabels: string[],
+  avoidRepeatText: string | null
+): string {
   const frameworkList = LESSON_FRAMEWORKS.map(
     (f) => `- "${f.name}": ${f.stages.join(" -> ")}`
   ).join("\n");
 
-  return `You are generating a reusable bank of CELTA Teaching Practice (TP) lesson points from the attached coursebook "${title}" (level ${level}).
+  const sourceIntro =
+    sourceLabels.length > 1
+      ? `You have been given ${sourceLabels.length} attached documents for this coursebook, in this order: ${sourceLabels.join(", ")}. Draw on all of them together (e.g. a grammar/lexis point's practice material may live in the workbook, its answer key or teaching notes in the teacher's book) rather than treating them as separate, unrelated books.`
+      : "";
+
+  const avoidBlock = avoidRepeatText
+    ? `\n\nIMPORTANT -- avoid repeating prior sets: this coursebook already has other generated sets covering the material below. Generate points on DIFFERENT units, pages, and main aims than these -- do not just rephrase the same lesson:\n${avoidRepeatText}\n`
+    : "";
+
+  return `You are generating a reusable bank of CELTA Teaching Practice (TP) lesson points from the attached coursebook "${title}" (level ${level}). ${sourceIntro}${avoidBlock}
 
 Generate exactly ${POINTS_PER_TP} distinct lesson points for EACH TP number 1 through 6 (${POINTS_PER_TP * 6} points total), drawing on different units/pages of the book so the ${POINTS_PER_TP} points for a given TP number are genuinely different lessons. Number each point's sequence_index 1-${POINTS_PER_TP} within its tp_number.
 
@@ -91,7 +105,10 @@ interface GeneratedPoint {
   procedure?: unknown;
 }
 
-export async function generateTpPointsForCoursebook(coursebookId: string): Promise<void> {
+export async function generateTpPointsForCoursebook(
+  coursebookId: string,
+  avoidRepeatOfIds: string[] = []
+): Promise<void> {
   const admin = createAdminClient();
 
   const { data: coursebook, error: fetchError } = await admin
@@ -106,18 +123,53 @@ export async function generateTpPointsForCoursebook(coursebookId: string): Promi
 
   await admin
     .from("tp_coursebooks")
-    .update({ generation_status: "processing" })
+    .update({ generation_status: "processing", avoid_repeat_of: avoidRepeatOfIds })
     .eq("id", coursebookId);
 
   try {
-    const { data: pdfBlob, error: downloadError } = await admin.storage
-      .from("coursebook-pdfs")
-      .download(coursebook.storage_path);
-    if (downloadError || !pdfBlob) {
-      throw new Error(`Could not download PDF: ${downloadError?.message}`);
+    const { data: additionalSources } = await admin
+      .from("tp_coursebook_sources")
+      .select("*")
+      .eq("tp_coursebook_id", coursebookId)
+      .order("created_at", { ascending: true });
+
+    // Primary source first, then any additional ones (Workbook, Teacher's
+    // Book, ...), each labeled so the model knows which is which.
+    const sources = [
+      { label: coursebook.original_filename ?? "Student's Book", storage_path: coursebook.storage_path },
+      ...(additionalSources ?? []).map((s) => ({
+        label: s.label || s.original_filename || "Additional source",
+        storage_path: s.storage_path,
+      })),
+    ];
+
+    const documentBlocks: { label: string; base64: string }[] = [];
+    for (const source of sources) {
+      const { data: pdfBlob, error: downloadError } = await admin.storage
+        .from("coursebook-pdfs")
+        .download(source.storage_path);
+      if (downloadError || !pdfBlob) {
+        throw new Error(`Could not download PDF (${source.label}): ${downloadError?.message}`);
+      }
+      documentBlocks.push({
+        label: source.label,
+        base64: Buffer.from(await pdfBlob.arrayBuffer()).toString("base64"),
+      });
     }
 
-    const pdfBase64 = Buffer.from(await pdfBlob.arrayBuffer()).toString("base64");
+    let avoidRepeatText: string | null = null;
+    if (avoidRepeatOfIds.length > 0) {
+      const { data: priorPoints } = await admin
+        .from("tp_points")
+        .select("tp_number, main_lesson_aim, page_references")
+        .in("tp_coursebook_id", avoidRepeatOfIds)
+        .order("tp_number", { ascending: true });
+      if (priorPoints && priorPoints.length > 0) {
+        avoidRepeatText = priorPoints
+          .map((p) => `- TP${p.tp_number}: ${p.main_lesson_aim}${p.page_references ? ` (${p.page_references})` : ""}`)
+          .join("\n");
+      }
+    }
 
     const anthropic = createAnthropicClient();
     // Streamed rather than a plain create() call: the SDK requires
@@ -144,11 +196,25 @@ export async function generateTpPointsForCoursebook(coursebookId: string): Promi
         {
           role: "user",
           content: [
+            ...documentBlocks.flatMap(
+              (d) =>
+                [
+                  { type: "text" as const, text: `Document: ${d.label}` },
+                  {
+                    type: "document" as const,
+                    source: { type: "base64" as const, media_type: "application/pdf" as const, data: d.base64 },
+                  },
+                ]
+            ),
             {
-              type: "document",
-              source: { type: "base64", media_type: "application/pdf", data: pdfBase64 },
+              type: "text",
+              text: buildPrompt(
+                coursebook.title,
+                coursebook.level,
+                documentBlocks.map((d) => d.label),
+                avoidRepeatText
+              ),
             },
-            { type: "text", text: buildPrompt(coursebook.title, coursebook.level) },
           ],
         },
       ],

@@ -42,3 +42,39 @@ export async function createCoursebookRecord(
 
   return { id: data.id };
 }
+
+// Same direct-to-storage-then-metadata-row pattern as createCoursebookRecord
+// above -- these are the additional PDFs (Workbook, Teacher's Book, ...)
+// a generation run can now draw on alongside the primary storage_path.
+export interface AddCoursebookSourceInput {
+  tpCoursebookId: string;
+  uploadedBy: string;
+  label: string;
+  storagePath: string;
+  originalFilename: string;
+}
+
+export async function addCoursebookSourceRecord(
+  input: AddCoursebookSourceInput
+): Promise<{ id: string } | { error: string }> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("tp_coursebook_sources")
+    .insert({
+      tp_coursebook_id: input.tpCoursebookId,
+      label: input.label,
+      storage_path: input.storagePath,
+      original_filename: input.originalFilename,
+      uploaded_by: input.uploadedBy,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    await supabase.storage.from("coursebook-pdfs").remove([input.storagePath]);
+    return { error: "Could not save the source. Try again." };
+  }
+
+  return { id: data.id };
+}
