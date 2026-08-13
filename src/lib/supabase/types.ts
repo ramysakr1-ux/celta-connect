@@ -14,6 +14,7 @@ import type {
   VocabRow,
 } from "@/lib/tp-plan-content";
 import type { AssignmentTypeValue, TemplateSection } from "@/lib/assignment-templates/content";
+import type { GradeQueryEvidenceSnapshot } from "@/lib/grade-query-reply";
 
 export type UserRole = "trainee" | "trainer" | "admin";
 export type SubmissionStatus =
@@ -462,6 +463,29 @@ export interface Database {
           trainee_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["celta5_records"]["Row"]>;
+        Relationships: [];
+      };
+      grade_query_replies: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          generated_by: string;
+          generated_at: string;
+          evidence_snapshot: GradeQueryEvidenceSnapshot;
+          what_would_have_made_the_difference: string | null;
+          what_happens_next: string | null;
+          filed_at: string | null;
+          filed_by: string | null;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["grade_query_replies"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          generated_by: string;
+          evidence_snapshot: GradeQueryEvidenceSnapshot;
+        };
+        Update: Partial<Database["public"]["Tables"]["grade_query_replies"]["Row"]>;
         Relationships: [];
       };
       tp_lesson_criteria_tags: {

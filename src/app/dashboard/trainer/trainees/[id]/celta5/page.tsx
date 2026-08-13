@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
@@ -134,6 +135,12 @@ export default async function Celta5RecordPage({
             </p>
           </div>
         </div>
+        <Link
+          href={`/trainer/grade-query-reply/${id}`}
+          className="mt-4 inline-flex self-start rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary"
+        >
+          Grade query reply →
+        </Link>
       </div>
 
       <div className="card p-6">
