@@ -213,6 +213,11 @@ export default async function PortfolioLayout({
                 <span className="size-1.5 shrink-0 rounded-full bg-current" />
                 {COURSE_STATUS_LABEL[trainee.course_status]}
               </span>
+            ) : trainee.course_status === "extension" ? (
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                Extension
+              </span>
             ) : null}
             {isStaffView && trajectory ? (
               <HideDuringPreview>

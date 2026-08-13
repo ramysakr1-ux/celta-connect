@@ -12,7 +12,7 @@ import { removeSubgroupMember } from "@/app/dashboard/admin/courses/[id]/subgrou
 import { removeRosterMember, updateAssessorVisitDate, updateEntryFormSentAt } from "@/app/dashboard/admin/courses/[id]/roster-actions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { DeliveryModeCard } from "@/app/dashboard/admin/courses/[id]/delivery-mode-card";
-import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
+import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
 
@@ -192,8 +192,10 @@ export default async function CourseRosterPage({
                           </span>
                         </td>
                         <td>
-                          {member.role === "trainee" && isCourseStatusReadOnly(member.course_status) ? (
-                            <span className="pill pill-neutral">{COURSE_STATUS_LABEL[member.course_status]}</span>
+                          {member.role === "trainee" && member.course_status !== "active" ? (
+                            <span className={`pill ${member.course_status === "extension" ? "pill-info" : "pill-neutral"}`}>
+                              {COURSE_STATUS_LABEL[member.course_status]}
+                            </span>
                           ) : null}
                         </td>
                         <td>

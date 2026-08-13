@@ -13,6 +13,17 @@ export const COURSE_STATUS_LABEL: Record<CourseStatus, string> = {
   extension: "Extension",
 };
 
+// Withdrawn/deferred/restarting are genuine "left" states -- the portfolio
+// freezes. Extension is different: the candidate is still actively
+// working, just past the normal end date, so it must stay editable.
+const READ_ONLY_STATUSES: readonly CourseStatus[] = ["withdrawn", "deferred", "restarting"];
+
 export function isCourseStatusReadOnly(status: CourseStatus): boolean {
+  return READ_ONLY_STATUSES.includes(status);
+}
+
+// Anything worth a badge somewhere, whether or not it freezes the
+// portfolio -- i.e. every non-'active' status, extension included.
+export function isCourseStatusNotable(status: CourseStatus): boolean {
   return status !== "active";
 }

@@ -65,7 +65,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
     admin.from("profiles").select("full_name").eq("course_id", trainee.course_id).eq("role", "trainer").order("full_name"),
   ]);
 
-  if (!record || !record.final_recommended_grade || record.final_recommended_grade === "Withdrawn") {
+  if (
+    !record ||
+    !record.final_recommended_grade ||
+    record.final_recommended_grade === "Withdrawn" ||
+    record.final_recommended_grade === "Extension"
+  ) {
     return NextResponse.json({ error: "No final grade has been recommended yet." }, { status: 409 });
   }
   if (!record.trainer_signoff_final_at) {

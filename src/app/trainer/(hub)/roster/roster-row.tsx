@@ -38,6 +38,7 @@ export function RosterRowView({ row }: { row: RosterRow }) {
         <Link href={`/portfolio/${row.id}`} className="text-ink hover:text-primary">
           {row.name}
         </Link>
+        {row.courseStatus === "extension" ? <span className="pill pill-info ml-2">Extension</span> : null}
       </td>
       <td className={`text-right tabular-nums ${row.assessedHrs < 6 ? "text-status-warning-text" : "text-ink"}`}>
         {row.assessedHrs.toFixed(2)}

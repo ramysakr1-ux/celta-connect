@@ -1,0 +1,13 @@
+-- specs/build-spec.md §3 "Extension -- for special consideration (illness,
+-- dyslexia, declared at enrolment). The candidate completes after the
+-- official end date and the final grade is recorded as extension. Close-out
+-- waits." Phase 2 of §3, after Withdrawal.
+--
+-- Unlike Withdrawal, an extension does NOT freeze the portfolio -- the
+-- candidate is still actively working, just past the normal end date. The
+-- "why" reuses the existing profiles.special_consideration field (already
+-- captured at enrolment, see join-form.tsx) rather than duplicating it.
+-- This migration only adds the one genuinely new, structured field: the
+-- expected/actual completion date, so it can be shown to the trainer and
+-- (once course lifecycle/close-out is eventually built) gate that flow.
+alter table public.profiles add column extension_completes_by date;

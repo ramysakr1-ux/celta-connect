@@ -55,6 +55,7 @@ const GRADE_COLOR: Record<string, string> = {
   Pass: COLOR.teal,
   Fail: COLOR.fail,
   Withdrawn: COLOR.muted,
+  Extension: COLOR.muted,
 };
 
 // Real closing lines confirmed from actual center reports for Pass/Pass B

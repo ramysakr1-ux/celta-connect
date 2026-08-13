@@ -15,6 +15,7 @@ const GRADE_PILL_CLASS: Record<FinalGrade, string> = {
   Pass: "pill-success",
   Fail: "pill-danger",
   Withdrawn: "pill-neutral",
+  Extension: "pill-info",
 };
 
 export interface CohortSheetRow {

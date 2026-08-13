@@ -775,7 +775,7 @@ export default async function PortfolioCelta5Page({
         <div className="sheet">
           <div className="flex items-start justify-between gap-3">
             <h3 className="font-serif text-lg text-ink">Final recommended grade</h3>
-            {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.trainer_signoff_final_at ? (
+            {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.trainer_signoff_final_at ? (
               <a
                 href={`/api/celta5/${traineeId}/final-report`}
                 className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
@@ -864,7 +864,7 @@ export default async function PortfolioCelta5Page({
         <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
       ) : null}
 
-      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.trainer_signoff_final_at ? (
+      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.trainer_signoff_final_at ? (
         <div className="sheet flex items-center justify-between gap-3">
           <p className="text-ink">Final report ready to download.</p>
           <a
@@ -880,7 +880,7 @@ export default async function PortfolioCelta5Page({
 
       <FinalizeRecordForm key={`finalize-${record.updated_at}`} record={record} />
 
-      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.trainer_signoff_final_at ? (
+      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.trainer_signoff_final_at ? (
         <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} />
       ) : null}
 

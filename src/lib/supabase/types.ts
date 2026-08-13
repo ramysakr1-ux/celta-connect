@@ -26,7 +26,7 @@ export type SubmissionStatus =
 export type CriteriaRating = "S+" | "S" | "N" | "X";
 export type StandardRating = "above_standard" | "to_standard" | "not_to_standard";
 export type PassFail = "pass" | "fail";
-export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn";
+export type FinalGrade = "Pass" | "Pass B" | "Pass A" | "Fail" | "Withdrawn" | "Extension";
 export type CourseStatus = "active" | "withdrawn" | "deferred" | "restarting" | "extension";
 export type StaffChannelType = "center_trainers" | "all_staff" | "dm" | "tp_group";
 export type TpGenerationStatus = "pending" | "processing" | "completed" | "failed";
@@ -123,6 +123,7 @@ export interface Database {
           course_status_note: string | null;
           withdrawal_reportable: boolean | null;
           withdrawal_letter_generated_at: string | null;
+          extension_completes_by: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {

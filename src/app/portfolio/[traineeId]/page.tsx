@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { deleteBroadcast } from "@/app/portfolio/[traineeId]/stream-actions";
-import { WithdrawCard } from "@/app/portfolio/[traineeId]/withdraw-card";
+import { CandidateStatusCard } from "@/app/portfolio/[traineeId]/withdraw-card";
 import { TUTOR_ROLE_LABELS, type TutorRole } from "@/lib/tutor-roles";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
@@ -53,7 +53,9 @@ export default async function CourseStreamPage({
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const { data: trainee } = await supabase
     .from("profiles")
-    .select("course_id, course_status, course_status_set_at, course_status_note, withdrawal_reportable")
+    .select(
+      "course_id, course_status, course_status_set_at, course_status_note, withdrawal_reportable, extension_completes_by, special_consideration"
+    )
     .eq("id", traineeId)
     .maybeSingle();
   if (!trainee?.course_id) notFound();
@@ -271,7 +273,7 @@ export default async function CourseStreamPage({
           </div>
 
           {isStaff && trainee.course_status === "active" ? (
-            <WithdrawCard traineeId={traineeId} />
+            <CandidateStatusCard traineeId={traineeId} specialConsideration={trainee.special_consideration} />
           ) : isStaff && trainee.course_status !== "active" ? (
             <div className="sheet-accent h-fit">
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
@@ -286,6 +288,11 @@ export default async function CourseStreamPage({
                   {trainee.withdrawal_reportable
                     ? "Reportable -- entry form was already sent."
                     : "Internal only -- withdrawn before the entry form was sent."}
+                </p>
+              ) : null}
+              {trainee.course_status === "extension" ? (
+                <p className="mt-1 text-xs text-muted">
+                  Portfolio stays active. {trainee.extension_completes_by ? `Expected completion: ${trainee.extension_completes_by}.` : ""} Close-out should wait for them.
                 </p>
               ) : null}
               {trainee.course_status_note ? (

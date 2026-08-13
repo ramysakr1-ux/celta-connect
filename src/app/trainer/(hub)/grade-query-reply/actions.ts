@@ -84,9 +84,23 @@ export async function generateGradeQueryReply(
       .eq("trainee_id", traineeId),
   ]);
 
+  // assembleGradeQueryEvidence's grade ladder only knows the four gradeable
+  // rungs (Fail/Pass/Pass B/Pass A) -- Withdrawn was already outside that,
+  // and Extension (added later) is too, so both narrow to null here rather
+  // than the ladder needing to understand "not actually a grade" states.
+  const asLadderGrade = (g: string | null): "Fail" | "Pass" | "Pass B" | "Pass A" | null =>
+    g === "Fail" || g === "Pass" || g === "Pass B" || g === "Pass A" ? g : null;
+
   const evidence = assembleGradeQueryEvidence({
     courseTotalHours: course?.total_hours ?? 120,
-    celta5Record: record,
+    celta5Record: record
+      ? {
+          ...record,
+          provisional_grade: asLadderGrade(record.provisional_grade),
+          provisional_grade_upper: asLadderGrade(record.provisional_grade_upper),
+          final_recommended_grade: asLadderGrade(record.final_recommended_grade),
+        }
+      : null,
     matrixRows: matrixRows ?? [],
     taughtPlanAssignments: taughtPlans ?? [],
     tpFeedbackRows: tpFeedbackRows ?? [],

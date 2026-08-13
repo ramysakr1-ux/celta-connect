@@ -71,3 +71,56 @@ export async function withdrawTrainee(
   revalidatePath("/trainer/roster");
   return { error: null };
 }
+
+export interface ExtensionFormState {
+  error: string | null;
+}
+
+// specs/build-spec.md §3 "Extension -- for special consideration... The
+// candidate completes after the official end date... Close-out waits."
+// Unlike withdrawTrainee, this does NOT freeze the portfolio -- course_status
+// changes but isCourseStatusReadOnly deliberately excludes 'extension'.
+export async function grantExtension(
+  _prevState: ExtensionFormState,
+  formData: FormData
+): Promise<ExtensionFormState> {
+  const staff = await requireRole(["trainer", "admin"]);
+  const traineeId = formData.get("trainee_id");
+  const note = ((formData.get("note") as string | null) ?? "").trim() || null;
+  const completesBy = (formData.get("completes_by") as string | null) || null;
+  if (typeof traineeId !== "string") {
+    return { error: "Missing candidate." };
+  }
+
+  const supabase = await createClient();
+  const { data: trainee } = await supabase
+    .from("profiles")
+    .select("id, course_id, role, course_status")
+    .eq("id", traineeId)
+    .maybeSingle();
+  if (!trainee || trainee.role !== "trainee" || trainee.course_id !== staff.course_id) {
+    return { error: "Candidate not found on your course." };
+  }
+  if (trainee.course_status !== "active") {
+    return { error: "This candidate already has a course status set." };
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("profiles")
+    .update({
+      course_status: "extension",
+      course_status_set_at: new Date().toISOString(),
+      course_status_set_by: staff.id,
+      course_status_note: note,
+      extension_completes_by: completesBy,
+    })
+    .eq("id", traineeId);
+  if (error) {
+    return { error: "Could not record the extension. Try again." };
+  }
+
+  revalidatePath(`/portfolio/${traineeId}`);
+  revalidatePath("/trainer/roster");
+  return { error: null };
+}
