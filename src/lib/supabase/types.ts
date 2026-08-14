@@ -195,6 +195,7 @@ export interface Database {
           auto_tag_criteria_enabled: boolean;
           is_demo: boolean;
           admissions_stale_threshold_days: number;
+          application_low_availability_threshold: number;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {
@@ -222,6 +223,8 @@ export interface Database {
           entry_form_sent_at: string | null;
           cambridge_grades_confirmed_at: string | null;
           cambridge_grades_confirmed_by: string | null;
+          application_cap: number | null;
+          accepting_applications: boolean;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["courses"]["Row"]> & {
