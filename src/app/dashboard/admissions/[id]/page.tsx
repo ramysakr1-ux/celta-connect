@@ -179,7 +179,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             <h2 className="font-serif text-lg text-ink">Offer</h2>
             <p className="mt-1 text-sm text-ink">
               Sent {applicant.offer_sent_at?.slice(0, 10)}, accept by {applicant.offer_accept_by}.
-              {applicant.fee_amount ? ` Fee: ${applicant.fee_amount} ${applicant.fee_currency}.` : ""}
+              {applicant.fee_amount ? ` Fee: ${applicant.fee_amount}${applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}.` : ""}
             </p>
           </div>
           <FeeTrackingForm applicant={applicant} />

@@ -9,10 +9,12 @@ export function CenterProfileForm({
   name,
   centerNumber,
   isUkCentre,
+  admissionsEmail,
 }: {
   name: string;
   centerNumber: string;
   isUkCentre: boolean;
+  admissionsEmail: string | null;
 }) {
   const [state, action, pending] = useActionState(updateCenterProfile, initialState);
   const isPlaceholder = centerNumber.startsWith("PENDING-");
@@ -67,6 +69,24 @@ export function CenterProfileForm({
         Shows a Unique Learner Number field on the trainee join form -- required for UK education
         and training records, not used elsewhere.
       </p>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="admissions_email" className="text-sm text-muted">
+          Admissions reply-to address
+        </label>
+        <input
+          id="admissions_email"
+          name="admissions_email"
+          type="email"
+          defaultValue={admissionsEmail ?? ""}
+          placeholder="admissions@yourcentre.example"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+        />
+        <p className="text-xs text-muted">
+          Where replies to applicant emails (offers, rejections) land. Every email is sent from your
+          centre&apos;s name, never Connect&apos;s.
+        </p>
+      </div>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 

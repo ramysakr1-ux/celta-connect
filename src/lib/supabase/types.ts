@@ -196,6 +196,7 @@ export interface Database {
           is_demo: boolean;
           admissions_stale_threshold_days: number;
           application_low_availability_threshold: number;
+          admissions_email: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {

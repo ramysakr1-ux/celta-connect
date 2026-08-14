@@ -52,6 +52,9 @@ export async function proxy(request: NextRequest) {
     // /apply is the public, centre-branded admissions application page --
     // inherently unauthenticated, same reasoning as /join/[token].
     request.nextUrl.pathname === "/apply" ||
+    // /offer/[token] is the offer-acceptance link -- inherently
+    // unauthenticated, same reasoning as /join/[token].
+    request.nextUrl.pathname.startsWith("/offer/") ||
     // /forgot-password is how a logged-out user requests a reset link --
     // inherently unauthenticated, same as /login.
     request.nextUrl.pathname.startsWith("/forgot-password") ||

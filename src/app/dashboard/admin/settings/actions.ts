@@ -24,6 +24,7 @@ export async function updateCenterProfile(
   const name = (formData.get("name") as string | null)?.trim();
   const centerNumber = (formData.get("center_number") as string | null)?.trim();
   const isUkCentre = formData.get("is_uk_centre") === "on";
+  const admissionsEmail = (formData.get("admissions_email") as string | null)?.trim() || null;
   if (!name || !centerNumber) {
     return { error: "Enter both the centre name and centre number." };
   }
@@ -31,7 +32,7 @@ export async function updateCenterProfile(
   const admin = createAdminClient();
   const { error } = await admin
     .from("centers")
-    .update({ name, center_number: centerNumber, is_uk_centre: isUkCentre })
+    .update({ name, center_number: centerNumber, is_uk_centre: isUkCentre, admissions_email: admissionsEmail })
     .eq("id", profile.center_id);
 
   if (error) {

@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-access";
+import { sendApplicantEmail, offerEmailHtml, rejectionEmailHtml } from "@/lib/admissions-email";
 import type { Database } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -256,6 +257,14 @@ export async function rejectApplicant(_prevState: FormState, formData: FormData)
   }
 
   const supabase = await createClient();
+  const { data: applicant } = await supabase
+    .from("applicants")
+    .select("full_name, email, intake_course_id")
+    .eq("id", applicantId)
+    .eq("center_id", staff.center_id)
+    .maybeSingle();
+  if (!applicant) return { error: "Applicant not found." };
+
   const { error } = await supabase
     .from("applicants")
     .update({
@@ -268,9 +277,27 @@ export async function rejectApplicant(_prevState: FormState, formData: FormData)
     .eq("center_id", staff.center_id);
   if (error) return { error: "Could not save the decision. Try again." };
 
+  let emailError: string | null = null;
+  const [{ data: course }, { data: center }] = await Promise.all([
+    supabase.from("courses").select("name").eq("id", applicant.intake_course_id).maybeSingle(),
+    supabase.from("centers").select("name, admissions_email").eq("id", staff.center_id).maybeSingle(),
+  ]);
+  const { error: sendError } = await sendApplicantEmail({
+    centerName: center?.name ?? "Your centre",
+    centerAdmissionsEmail: center?.admissions_email ?? null,
+    to: applicant.email,
+    subject: `${course?.name ?? "Your application"} -- update on your application`,
+    html: rejectionEmailHtml({
+      applicantName: applicant.full_name,
+      courseName: course?.name ?? "the course",
+      reason: reason.trim(),
+    }),
+  });
+  emailError = sendError;
+
   revalidatePath(`/dashboard/admissions/${applicantId}`);
   revalidatePath("/dashboard/admissions");
-  return { error: null };
+  return { error: emailError ? `Decision recorded, but the email failed to send: ${emailError}` : null };
 }
 
 // ---- Offer, payment tracking, waivers, waiting list ----
@@ -297,13 +324,22 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
   }
 
   const supabase = await createClient();
+  const { data: applicant } = await supabase
+    .from("applicants")
+    .select("full_name, email, intake_course_id")
+    .eq("id", applicantId)
+    .eq("center_id", staff.center_id)
+    .maybeSingle();
+  if (!applicant) return { error: "Applicant not found." };
+
+  const offerToken = crypto.randomUUID();
   const { error } = await supabase
     .from("applicants")
     .update({
       stage: "offer_sent",
       offer_sent_at: new Date().toISOString(),
       offer_accept_by: acceptBy,
-      offer_token: crypto.randomUUID(),
+      offer_token: offerToken,
       fee_amount: typeof feeAmount === "string" && feeAmount ? Number(feeAmount) : null,
       fee_currency: typeof feeCurrency === "string" && feeCurrency ? feeCurrency.trim().toUpperCase() : null,
     })
@@ -311,9 +347,38 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
     .eq("center_id", staff.center_id);
   if (error) return { error: "Could not record the offer. Try again." };
 
+  // "If the copies fail, the booking still happened" -- same principle
+  // applied here: the offer is recorded regardless of whether the email
+  // send succeeds, and a failure surfaces without undoing the record.
+  const siteUrl = process.env.SITE_URL;
+  let emailError: string | null = null;
+  if (siteUrl) {
+    const [{ data: course }, { data: center }] = await Promise.all([
+      supabase.from("courses").select("name").eq("id", applicant.intake_course_id).maybeSingle(),
+      supabase.from("centers").select("name, admissions_email").eq("id", staff.center_id).maybeSingle(),
+    ]);
+    const { error: sendError } = await sendApplicantEmail({
+      centerName: center?.name ?? "Your centre",
+      centerAdmissionsEmail: center?.admissions_email ?? null,
+      to: applicant.email,
+      subject: `${course?.name ?? "Your course"} -- offer of a place`,
+      html: offerEmailHtml({
+        applicantName: applicant.full_name,
+        courseName: course?.name ?? "the course",
+        feeAmount: typeof feeAmount === "string" && feeAmount ? Number(feeAmount) : null,
+        feeCurrency: typeof feeCurrency === "string" && feeCurrency ? feeCurrency.trim().toUpperCase() : null,
+        acceptBy,
+        offerUrl: `${siteUrl}/offer/${offerToken}`,
+      }),
+    });
+    emailError = sendError;
+  } else {
+    emailError = "SITE_URL is missing -- the offer was recorded but no email was sent.";
+  }
+
   revalidatePath(`/dashboard/admissions/${applicantId}`);
   revalidatePath("/dashboard/admissions");
-  return { error: null };
+  return { error: emailError ? `Offer recorded, but the email failed to send: ${emailError}` : null };
 }
 
 export async function setFeePaid(formData: FormData): Promise<void> {
