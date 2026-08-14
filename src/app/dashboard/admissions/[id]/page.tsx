@@ -6,6 +6,9 @@ import { bookInterviewSlot } from "@/app/dashboard/admissions/actions";
 import { MarkingForm } from "@/app/dashboard/admissions/[id]/marking-form";
 import { InterviewRecordForm } from "@/app/dashboard/admissions/[id]/interview-record-form";
 import { RejectForm } from "@/app/dashboard/admissions/[id]/reject-form";
+import { OfferForm } from "@/app/dashboard/admissions/[id]/offer-form";
+import { FeeTrackingForm } from "@/app/dashboard/admissions/[id]/fee-tracking-form";
+import { WaitingListForm } from "@/app/dashboard/admissions/[id]/waiting-list-form";
 
 export default async function ApplicantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const staff = await requireAdmissionsHandler();
@@ -35,6 +38,9 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
   const canDecide = canDecideAdmissions(staff);
   const isRejected = applicant.stage === "rejected_before_interview" || applicant.stage === "rejected_after_interview";
+  const hasOffer = applicant.stage === "offer_sent" || applicant.stage === "accepted";
+  const isWaitingList = applicant.stage === "waiting_list";
+  const isSettled = isRejected || hasOffer || isWaitingList || applicant.stage === "not_this_time" || applicant.stage === "withdrawn_application";
 
   return (
     <div className="flex flex-col gap-6">
@@ -167,7 +173,35 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         ) : null}
       </div>
 
-      {canDecide && !isRejected && applicant.stage !== "accepted" ? <RejectForm applicantId={applicant.id} /> : null}
+      {hasOffer ? (
+        <>
+          <div className="card p-6">
+            <h2 className="font-serif text-lg text-ink">Offer</h2>
+            <p className="mt-1 text-sm text-ink">
+              Sent {applicant.offer_sent_at?.slice(0, 10)}, accept by {applicant.offer_accept_by}.
+              {applicant.fee_amount ? ` Fee: ${applicant.fee_amount} ${applicant.fee_currency}.` : ""}
+            </p>
+          </div>
+          <FeeTrackingForm applicant={applicant} />
+        </>
+      ) : null}
+
+      {isWaitingList ? (
+        <div className="card p-6">
+          <h2 className="font-serif text-lg text-ink">Waiting list</h2>
+          <p className="mt-1 text-sm text-ink">
+            Position {applicant.waiting_list_position}. Will hear by {applicant.waiting_list_hear_by}.
+          </p>
+        </div>
+      ) : null}
+
+      {canDecide && !isSettled ? (
+        <>
+          <OfferForm applicantId={applicant.id} />
+          <WaitingListForm applicantId={applicant.id} />
+          <RejectForm applicantId={applicant.id} />
+        </>
+      ) : null}
     </div>
   );
 }

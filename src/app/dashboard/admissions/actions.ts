@@ -272,3 +272,115 @@ export async function rejectApplicant(_prevState: FormState, formData: FormData)
   revalidatePath("/dashboard/admissions");
   return { error: null };
 }
+
+// ---- Offer, payment tracking, waivers, waiting list ----
+// "Payment is outside the app, deliberately... nothing in Connect takes
+// money" (confirmed over Ramy's own handover, 2026-08-14) -- fee_paid is a
+// tick a person makes after money arrives by whatever route the centre
+// uses, never a real transaction. "Confirmed vs Marked by [name]" from the
+// handover survives as the recording shape even though the provider-
+// integration half of it doesn't: every figure here is "marked by" a
+// named person, never "confirmed" by anything automated.
+
+export async function sendOffer(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const staff = await requireAdmissionsHandler();
+  const applicantId = formData.get("applicant_id");
+  const feeAmount = formData.get("fee_amount");
+  const feeCurrency = formData.get("fee_currency");
+  const acceptBy = formData.get("offer_accept_by");
+
+  if (typeof applicantId !== "string" || typeof acceptBy !== "string" || !acceptBy) {
+    return { error: "Set an accept-by date to send an offer." };
+  }
+  if (!canDecideAdmissions(staff)) {
+    return { error: "Only a verified course tutor or a nominated admissions decider can send an offer." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("applicants")
+    .update({
+      stage: "offer_sent",
+      offer_sent_at: new Date().toISOString(),
+      offer_accept_by: acceptBy,
+      offer_token: crypto.randomUUID(),
+      fee_amount: typeof feeAmount === "string" && feeAmount ? Number(feeAmount) : null,
+      fee_currency: typeof feeCurrency === "string" && feeCurrency ? feeCurrency.trim().toUpperCase() : null,
+    })
+    .eq("id", applicantId)
+    .eq("center_id", staff.center_id);
+  if (error) return { error: "Could not record the offer. Try again." };
+
+  revalidatePath(`/dashboard/admissions/${applicantId}`);
+  revalidatePath("/dashboard/admissions");
+  return { error: null };
+}
+
+export async function setFeePaid(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  const applicantId = formData.get("applicant_id");
+  const paid = formData.get("paid") === "true";
+  const note = (formData.get("fee_paid_note") as string | null)?.trim() || null;
+  if (typeof applicantId !== "string") return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("applicants")
+    .update(
+      paid
+        ? { fee_paid: true, fee_paid_marked_by: staff.id, fee_paid_note: note, fee_paid_at: new Date().toISOString() }
+        : { fee_paid: false, fee_paid_marked_by: null, fee_paid_note: null, fee_paid_at: null }
+    )
+    .eq("id", applicantId)
+    .eq("center_id", staff.center_id);
+
+  revalidatePath(`/dashboard/admissions/${applicantId}`);
+}
+
+export async function recordWaiver(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  const applicantId = formData.get("applicant_id");
+  const note = formData.get("waiver_note");
+  const role = formData.get("waiver_agreed_role");
+  if (typeof applicantId !== "string" || typeof note !== "string" || !note.trim() || typeof role !== "string" || !role.trim()) return;
+  if (!canDecideAdmissions(staff)) return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("applicants")
+    .update({ waiver_note: note.trim(), waiver_agreed_by: staff.id, waiver_agreed_role: role.trim() })
+    .eq("id", applicantId)
+    .eq("center_id", staff.center_id);
+
+  revalidatePath(`/dashboard/admissions/${applicantId}`);
+}
+
+// "Position, the course, and a date by which they will hear either way."
+// Position is the next free slot in this intake's existing waiting list,
+// not user-entered -- the list is worked in order.
+export async function addToWaitingList(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  const applicantId = formData.get("applicant_id");
+  const hearBy = formData.get("waiting_list_hear_by");
+  if (typeof applicantId !== "string" || typeof hearBy !== "string" || !hearBy) return;
+  if (!canDecideAdmissions(staff)) return;
+
+  const supabase = await createClient();
+  const { data: applicant } = await supabase.from("applicants").select("intake_course_id").eq("id", applicantId).maybeSingle();
+  if (!applicant) return;
+
+  const { count } = await supabase
+    .from("applicants")
+    .select("id", { count: "exact", head: true })
+    .eq("intake_course_id", applicant.intake_course_id)
+    .eq("stage", "waiting_list");
+
+  await supabase
+    .from("applicants")
+    .update({ stage: "waiting_list", waiting_list_position: (count ?? 0) + 1, waiting_list_hear_by: hearBy })
+    .eq("id", applicantId)
+    .eq("center_id", staff.center_id);
+
+  revalidatePath(`/dashboard/admissions/${applicantId}`);
+  revalidatePath("/dashboard/admissions");
+}
