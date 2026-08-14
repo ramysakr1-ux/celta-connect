@@ -30,6 +30,26 @@ export async function updateDeliveryMode(formData: FormData): Promise<void> {
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
 }
 
+// "The intake dropdown shows real availability" -- a course must be
+// explicitly opened for applications with a real cap before /apply will
+// list it. Off/null by default (migration 0082) so nothing is exposed
+// accidentally.
+export async function updateApplicationSettings(formData: FormData): Promise<void> {
+  const admin = await requireRole("admin");
+  const courseId = formData.get("course_id");
+  const accepting = formData.get("accepting_applications") === "on";
+  const capRaw = formData.get("application_cap");
+  const cap = typeof capRaw === "string" && capRaw.trim() ? Number(capRaw) : null;
+  if (typeof courseId !== "string") return;
+
+  const supabase = await createClient();
+  const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
+  if (!course || course.center_id !== admin.center_id) return;
+
+  await supabase.from("courses").update({ accepting_applications: accepting, application_cap: cap }).eq("id", courseId);
+  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+}
+
 export async function updateAssessorVisitDate(formData: FormData): Promise<void> {
   const admin = await requireRole("admin");
   const courseId = formData.get("course_id");

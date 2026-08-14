@@ -91,6 +91,9 @@ export default async function AdminDashboardPage() {
           <p className="mt-2 text-muted">Manage your centre&apos;s courses and roster.</p>
         </div>
         <div className="flex gap-4">
+          <Link href="/dashboard/admissions" className="text-sm text-muted hover:text-ink">
+            Admissions
+          </Link>
           <Link href="/dashboard/admin/coursebooks" className="text-sm text-muted hover:text-ink">
             TP Points Library
           </Link>

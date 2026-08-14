@@ -9,7 +9,12 @@ import {
   UnpairButton,
 } from "@/app/dashboard/admin/courses/[id]/subgroups-form";
 import { removeSubgroupMember } from "@/app/dashboard/admin/courses/[id]/subgroup-actions";
-import { removeRosterMember, updateAssessorVisitDate, updateEntryFormSentAt } from "@/app/dashboard/admin/courses/[id]/roster-actions";
+import {
+  removeRosterMember,
+  updateAssessorVisitDate,
+  updateEntryFormSentAt,
+  updateApplicationSettings,
+} from "@/app/dashboard/admin/courses/[id]/roster-actions";
 import { linkRestartTransfer } from "@/app/dashboard/admin/courses/[id]/restart-actions";
 import { linkDeferralTransfer } from "@/app/dashboard/admin/courses/[id]/deferral-actions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
@@ -168,6 +173,34 @@ export default async function CourseRosterPage({
       </div>
 
       <DeliveryModeCard courseId={course.id} savedMode={course.delivery_mode} />
+
+      <form action={updateApplicationSettings} className="card flex items-center justify-between gap-4 p-6">
+        <div>
+          <h2 className="font-serif text-lg text-ink">Open for applications</h2>
+          <p className="mt-1 text-sm text-muted">
+            Makes this intake selectable on the public application page, with a real place count. A full course stays
+            selectable as a waiting-list application.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <input type="hidden" name="course_id" value={course.id} />
+          <label className="flex items-center gap-2 text-sm text-ink">
+            <input type="checkbox" name="accepting_applications" defaultChecked={course.accepting_applications} />
+            Accepting
+          </label>
+          <input
+            type="number"
+            name="application_cap"
+            min={0}
+            placeholder="Cap"
+            defaultValue={course.application_cap ?? ""}
+            className="w-20 rounded-[6px] border border-border bg-card px-2 py-2 text-sm text-ink outline-none focus:border-primary"
+          />
+          <button type="submit" className="rounded-[6px] border border-border px-3 py-2 text-sm text-ink hover:border-primary">
+            Save
+          </button>
+        </div>
+      </form>
 
       <div className="card flex items-center justify-between gap-4 p-6">
         <div>

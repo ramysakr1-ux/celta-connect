@@ -1,0 +1,151 @@
+import Link from "next/link";
+import { requireAdmissionsHandler } from "@/lib/admissions-access";
+import { createClient } from "@/lib/supabase/server";
+import { addWritingPrompt, togglePromptActive, addInterviewQuestion, toggleQuestionActive } from "@/app/dashboard/admissions/actions";
+
+const COVERAGE_AREAS = [
+  "motivation_suitability",
+  "language_awareness",
+  "classroom_presence",
+  "flexibility_openness",
+  "digital_literacy",
+  "time_commitment",
+  "other",
+] as const;
+const COVERAGE_LABEL: Record<string, string> = {
+  motivation_suitability: "Motivation & suitability",
+  language_awareness: "Language awareness",
+  classroom_presence: "Classroom presence",
+  flexibility_openness: "Flexibility & openness",
+  digital_literacy: "Digital literacy",
+  time_commitment: "Time commitment",
+  other: "Other",
+};
+
+export default async function AdmissionsSettingsPage() {
+  const staff = await requireAdmissionsHandler();
+  const supabase = await createClient();
+
+  const [{ data: prompts }, { data: questions }] = await Promise.all([
+    supabase.from("application_writing_prompts").select("*").eq("center_id", staff.center_id).order("prompt_type"),
+    supabase.from("interview_questions").select("*").eq("center_id", staff.center_id).order("coverage_area"),
+  ]);
+
+  const activeQuestions = (questions ?? []).filter((q) => q.active);
+  const coveredAreas = new Set(activeQuestions.map((q) => q.coverage_area));
+  const missingAreas = COVERAGE_AREAS.filter((a) => !coveredAreas.has(a));
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="card p-6">
+        <Link href="/dashboard/admissions" className="text-sm text-muted hover:text-ink">
+          &larr; Admissions
+        </Link>
+        <h1 className="mt-2 font-serif text-xl text-ink">Admissions settings</h1>
+        <p className="mt-1 text-muted">
+          Extended writing task prompts and the fixed interview question bank. Imported once, edited any time, carried
+          into every future course.
+        </p>
+      </div>
+
+      <div className="card flex flex-col gap-4 p-6">
+        <h2 className="font-serif text-lg text-ink">Extended writing task prompts</h2>
+        <p className="text-sm text-muted">
+          The centre defines three or four -- one narrative, one descriptive, one argumentative. The applicant picks
+          one; marking criteria don&apos;t change with the prompt.
+        </p>
+        <ul className="flex flex-col gap-2">
+          {(prompts ?? []).map((p) => (
+            <li key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{p.prompt_type}</span>
+                <p className="text-sm text-ink">{p.prompt_text}</p>
+              </div>
+              <form action={togglePromptActive}>
+                <input type="hidden" name="prompt_id" value={p.id} />
+                <input type="hidden" name="active" value={String(p.active)} />
+                <button type="submit" className="text-xs text-muted hover:text-ink">
+                  {p.active ? "Deactivate" : "Activate"}
+                </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+        <form action={addWritingPrompt} className="flex flex-wrap items-end gap-3 border-t border-border pt-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="prompt_type" className="text-xs text-muted">
+              Type
+            </label>
+            <select id="prompt_type" name="prompt_type" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+              <option value="narrative">Narrative</option>
+              <option value="descriptive">Descriptive</option>
+              <option value="argumentative">Argumentative</option>
+            </select>
+          </div>
+          <div className="flex flex-1 flex-col gap-1.5">
+            <label htmlFor="prompt_text" className="text-xs text-muted">
+              Prompt
+            </label>
+            <input id="prompt_text" name="prompt_text" type="text" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink" />
+          </div>
+          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+            Add prompt
+          </button>
+        </form>
+      </div>
+
+      <div className="card flex flex-col gap-4 p-6">
+        <h2 className="font-serif text-lg text-ink">Interview question bank</h2>
+        <p className="text-sm text-muted">
+          Seven fixed questions is the usual shape. Two more are drawn per applicant from the weak areas their task
+          reading flagged.
+        </p>
+        {missingAreas.length > 0 ? (
+          <div className="rounded-[6px] border border-gold/30 bg-gold/10 p-3 text-sm text-ink">
+            No active question covers: {missingAreas.map((a) => COVERAGE_LABEL[a]).join(", ")}.
+          </div>
+        ) : null}
+        <ul className="flex flex-col gap-2">
+          {(questions ?? []).map((q) => (
+            <li key={q.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{COVERAGE_LABEL[q.coverage_area]}</span>
+                <p className="text-sm text-ink">{q.question_text}</p>
+              </div>
+              <form action={toggleQuestionActive}>
+                <input type="hidden" name="question_id" value={q.id} />
+                <input type="hidden" name="active" value={String(q.active)} />
+                <button type="submit" className="text-xs text-muted hover:text-ink">
+                  {q.active ? "Deactivate" : "Activate"}
+                </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+        <form action={addInterviewQuestion} className="flex flex-wrap items-end gap-3 border-t border-border pt-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="coverage_area" className="text-xs text-muted">
+              Assesses
+            </label>
+            <select id="coverage_area" name="coverage_area" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+              {COVERAGE_AREAS.map((a) => (
+                <option key={a} value={a}>
+                  {COVERAGE_LABEL[a]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-1 flex-col gap-1.5">
+            <label htmlFor="question_text" className="text-xs text-muted">
+              Question
+            </label>
+            <input id="question_text" name="question_text" type="text" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink" />
+          </div>
+          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+            Add question
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
