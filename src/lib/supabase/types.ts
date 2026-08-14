@@ -16,7 +16,7 @@ import type {
 import type { AssignmentTypeValue, TemplateSection } from "@/lib/assignment-templates/content";
 import type { GradeQueryEvidenceSnapshot } from "@/lib/grade-query-reply";
 
-export type UserRole = "trainee" | "trainer" | "admin";
+export type UserRole = "trainee" | "trainer" | "admin" | "admissions";
 export type SubmissionStatus =
   | "not_submitted"
   | "pending"
@@ -194,6 +194,7 @@ export interface Database {
           is_uk_centre: boolean;
           auto_tag_criteria_enabled: boolean;
           is_demo: boolean;
+          admissions_stale_threshold_days: number;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {
@@ -252,6 +253,7 @@ export interface Database {
           withdrawal_reportable: boolean | null;
           withdrawal_letter_generated_at: string | null;
           extension_completes_by: string | null;
+          can_decide_admissions: boolean;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {
@@ -262,6 +264,215 @@ export interface Database {
           center_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
+        Relationships: [];
+      };
+      application_writing_prompts: {
+        Row: {
+          id: string;
+          center_id: string;
+          prompt_type: "narrative" | "descriptive" | "argumentative";
+          prompt_text: string;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["application_writing_prompts"]["Row"]> & {
+          center_id: string;
+          prompt_type: "narrative" | "descriptive" | "argumentative";
+          prompt_text: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["application_writing_prompts"]["Row"]>;
+        Relationships: [];
+      };
+      interview_questions: {
+        Row: {
+          id: string;
+          center_id: string;
+          question_text: string;
+          coverage_area:
+            | "motivation_suitability"
+            | "language_awareness"
+            | "classroom_presence"
+            | "flexibility_openness"
+            | "digital_literacy"
+            | "time_commitment"
+            | "other";
+          active: boolean;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["interview_questions"]["Row"]> & {
+          center_id: string;
+          question_text: string;
+          coverage_area: Database["public"]["Tables"]["interview_questions"]["Row"]["coverage_area"];
+        };
+        Update: Partial<Database["public"]["Tables"]["interview_questions"]["Row"]>;
+        Relationships: [];
+      };
+      application_links: {
+        Row: {
+          id: string;
+          center_id: string;
+          label: string;
+          intake_course_id: string | null;
+          token: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["application_links"]["Row"]> & {
+          center_id: string;
+          label: string;
+          token: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["application_links"]["Row"]>;
+        Relationships: [];
+      };
+      applicants: {
+        Row: {
+          id: string;
+          center_id: string;
+          intake_course_id: string;
+          source_link_id: string | null;
+          full_name: string;
+          email: string;
+          phone: string | null;
+          date_of_birth: string | null;
+          education_summary: string | null;
+          elt_experience_summary: string | null;
+          special_requirements: string | null;
+          cannot_attend_note: string | null;
+          anything_else: string | null;
+          acknowledged_no_guarantee_at: string | null;
+          acknowledged_no_exemptions_at: string | null;
+          acknowledged_mixed_mode_demand_at: string | null;
+          writing_task_prompt_id: string | null;
+          writing_task_submission: string | null;
+          language_awareness_submission: { question: string; answer: string }[];
+          ai_reading_summary: unknown | null;
+          ai_reading_generated_at: string | null;
+          marking_language_awareness: "above" | "at" | "below" | null;
+          marking_language_awareness_note: string | null;
+          marking_accuracy: "above" | "at" | "below" | null;
+          marking_accuracy_note: string | null;
+          marking_organisation: "above" | "at" | "below" | null;
+          marking_organisation_note: string | null;
+          marking_range: "above" | "at" | "below" | null;
+          marking_range_note: string | null;
+          marking_substance: "above" | "at" | "below" | null;
+          marking_substance_note: string | null;
+          marked_by: string | null;
+          marked_at: string | null;
+          stage:
+            | "submitted"
+            | "task_returned"
+            | "interview_booked"
+            | "interview_completed"
+            | "offer_sent"
+            | "accepted"
+            | "rejected_before_interview"
+            | "rejected_after_interview"
+            | "waiting_list"
+            | "not_this_time"
+            | "withdrawn_application";
+          rejection_reason: string | null;
+          rejected_at: string | null;
+          rejected_by: string | null;
+          offer_sent_at: string | null;
+          offer_accept_by: string | null;
+          offer_token: string | null;
+          accepted_at: string | null;
+          fee_amount: number | null;
+          fee_currency: string | null;
+          fee_paid: boolean;
+          fee_paid_marked_by: string | null;
+          fee_paid_note: string | null;
+          fee_paid_at: string | null;
+          waiver_note: string | null;
+          waiver_agreed_by: string | null;
+          waiver_agreed_role: string | null;
+          waiting_list_position: number | null;
+          waiting_list_hear_by: string | null;
+          waiting_list_opt_out: boolean;
+          place_offered_at: string | null;
+          place_offer_expires_at: string | null;
+          resulting_trainee_id: string | null;
+          notification_opt_outs: string[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["applicants"]["Row"]> & {
+          center_id: string;
+          intake_course_id: string;
+          full_name: string;
+          email: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["applicants"]["Row"]>;
+        Relationships: [];
+      };
+      interview_slots: {
+        Row: {
+          id: string;
+          center_id: string;
+          intake_course_id: string;
+          interviewer_id: string;
+          panel: boolean;
+          second_interviewer_id: string | null;
+          slot_date: string;
+          slot_time: string;
+          duration_minutes: number;
+          mode: "online" | "face_to_face";
+          booked_applicant_id: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["interview_slots"]["Row"]> & {
+          center_id: string;
+          intake_course_id: string;
+          interviewer_id: string;
+          slot_date: string;
+          slot_time: string;
+          mode: "online" | "face_to_face";
+        };
+        Update: Partial<Database["public"]["Tables"]["interview_slots"]["Row"]>;
+        Relationships: [];
+      };
+      interview_records: {
+        Row: {
+          id: string;
+          applicant_id: string;
+          slot_id: string | null;
+          fixed_questions: { question_id: string; question_text: string; answer_text: string }[];
+          drawn_questions: { question_text: string; answer_text: string; drawn_reason: string | null }[];
+          interviewer_signature_name: string | null;
+          interviewer_signed_at: string | null;
+          applicant_signature_name: string | null;
+          applicant_signed_at: string | null;
+          overall_notes: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["interview_records"]["Row"]> & {
+          applicant_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["interview_records"]["Row"]>;
+        Relationships: [];
+      };
+      admissions_notifications: {
+        Row: {
+          id: string;
+          center_id: string;
+          applicant_id: string;
+          type: "submitted" | "task_returned" | "interview_completed" | "stale_no_decision";
+          message: string;
+          read_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["admissions_notifications"]["Row"]> & {
+          center_id: string;
+          applicant_id: string;
+          type: Database["public"]["Tables"]["admissions_notifications"]["Row"]["type"];
+          message: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["admissions_notifications"]["Row"]>;
         Relationships: [];
       };
       tp_lessons: {
