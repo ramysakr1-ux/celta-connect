@@ -1,9 +1,11 @@
 import { Wordmark } from "@/components/wordmark";
 
 // specs/rename-to-connect.md: "[mark, 20px] Connect · designed and built by
-// Ramy" -- exactly two places only (Centre Admin footer, sign-in page
-// footer), never on an exported or Cambridge-facing document. Not gold --
-// gold would make the credit the brightest thing on the page.
+// Ramy" -- the public landing page footer only (src/app/page.tsx), never on
+// an internal working screen or an exported/Cambridge-facing document. It's
+// a brand mark, not a functional element, so it doesn't belong on every
+// dashboard/entry-gate footer -- moved off Centre Admin + sign-in 2026-08-15.
+// Not gold -- gold would make the credit the brightest thing on the page.
 export function DesignerCredit() {
   return (
     <span className="inline-flex items-center gap-1.5 text-[11px] text-muted">

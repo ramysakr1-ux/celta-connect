@@ -7,7 +7,6 @@ import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
 import { getAdminChatCourses } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
-import { DesignerCredit } from "@/components/designer-credit";
 import { AdminTabs } from "@/app/dashboard/admin/admin-tabs";
 
 export default async function DashboardLayout({
@@ -44,10 +43,6 @@ export default async function DashboardLayout({
       </header>
 
       <main className="container w-full flex-1 py-8">{children}</main>
-
-      <footer className="flex justify-end px-6 py-4">
-        <DesignerCredit />
-      </footer>
 
       {profile && staffChat ? (
         <StaffChatDrawer

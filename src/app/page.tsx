@@ -1,12 +1,17 @@
 import Link from "next/link";
-import { GraduationCap } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
+import { DesignerCredit } from "@/components/designer-credit";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // §2 -- centre-facing public front door. No session exists yet here, so the
 // centre name/code is read via the admin client (same pre-auth pattern as
-// /join/[token]) rather than gated by RLS. Hero copy is a placeholder per
-// the plan's explicit instruction not to let final wording block the build.
+// /join/[token]) rather than gated by RLS.
+//
+// Header previously paired a generic lucide GraduationCap icon next to the
+// Wordmark -- predates specs/rename-to-connect.md's locked tile lockup,
+// where the Wordmark's own ink tile already IS the app icon (see
+// wordmark.tsx's header comment). Dropped the stray icon so this page
+// matches the real mark everywhere else in the app (login, join, dashboard).
 //
 // Excludes is_demo centres -- this query assumes single-tenant (whichever
 // centre comes back first), which silently broke the moment the seeded
@@ -19,25 +24,18 @@ export default async function Home() {
     <div className="flex min-h-full flex-col bg-background">
       <div className="border-b border-border bg-card">
         <div className="container flex h-16 items-center gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-primary">
-            <GraduationCap className="size-5 text-primary-foreground" aria-hidden="true" />
-          </div>
-          <div>
-            <Wordmark size="header" />
-            {center ? (
-              <p className="text-[11px] tracking-[0.08em] text-muted uppercase">
-                {center.name} · Centre {center.center_number}
-              </p>
-            ) : null}
-          </div>
+          <Wordmark size="header" />
+          {center ? (
+            <p className="text-[11px] tracking-[0.08em] text-muted uppercase">
+              {center.name} · Centre {center.center_number}
+            </p>
+          ) : null}
         </div>
       </div>
 
       <div className="container flex-1 pt-16">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
-          {center ? `${center.name} · Cambridge CELTA` : "Cambridge CELTA"}
-        </p>
-        <h1 className="mt-2 max-w-2xl font-serif text-5xl font-medium leading-[1.1] text-ink">
+        <Wordmark size="hero" />
+        <h1 className="mt-6 max-w-2xl font-serif text-5xl font-medium leading-[1.1] text-ink">
           Every candidate gets one link. Everything they need lives behind it.
         </h1>
         <p className="mt-4 max-w-[700px] text-base leading-6 text-muted">
@@ -61,8 +59,9 @@ export default async function Home() {
         </div>
       </div>
 
-      <footer className="mt-auto py-8 text-center text-xs text-muted">
-        {center ? `${center.name} · Cambridge CELTA` : "Cambridge CELTA"}
+      <footer className="mt-auto flex flex-col items-center gap-2 py-8 text-center text-xs text-muted">
+        <p>{center ? `${center.name} · Cambridge CELTA` : "Cambridge CELTA"}</p>
+        <DesignerCredit />
       </footer>
     </div>
   );

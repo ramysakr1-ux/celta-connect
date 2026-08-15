@@ -1,6 +1,5 @@
 import { LoginForm } from "@/app/login/login-form";
 import { Wordmark } from "@/components/wordmark";
-import { DesignerCredit } from "@/components/designer-credit";
 
 export default async function LoginPage({
   searchParams,
@@ -38,9 +37,6 @@ export default async function LoginPage({
           <LoginForm />
         </div>
       </div>
-      <footer className="flex justify-center pb-6">
-        <DesignerCredit />
-      </footer>
     </div>
   );
 }

@@ -112,7 +112,10 @@ Three strings currently lean on the old name and need rewriting rather than subs
 
 ## Designer credit
 
-A single line, in the **Centre Admin footer** and the **sign-in page footer** only — nowhere else, and never on an exported or Cambridge-facing document:
+A single line, in the **public landing page footer** (`/`) only — nowhere else, and never on an
+exported or Cambridge-facing document. **Revised 2026-08-15**: originally placed on the Centre
+Admin footer and sign-in page footer too, but as a brand mark rather than a functional element it
+was adding visual noise to working/entry screens — moved to the landing page only.
 
 > [mark, 20px] Connect · designed and built by **Ramy**
 

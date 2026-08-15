@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { joinCourse, type JoinCourseState } from "@/app/join/[token]/actions";
 import { TUTOR_ROLES, TUTOR_ROLE_LABELS } from "@/lib/tutor-roles";
 import type { UserRole } from "@/lib/supabase/types";
@@ -107,6 +108,13 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
       ) : null}
 
       <div className="mt-2 flex flex-col gap-3 border-t border-border pt-4">
+        <p className="text-xs text-muted">
+          By checking the boxes below you agree to our{" "}
+          <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            full terms
+          </Link>
+          .
+        </p>
         <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
           <input type="checkbox" name="agree_ip" required className="mt-0.5 accent-primary" />
           <span>
