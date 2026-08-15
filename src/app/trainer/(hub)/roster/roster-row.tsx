@@ -6,11 +6,18 @@ import { TrajectoryBarCompact } from "@/components/trajectory-gradient-bar";
 import type { RosterRow } from "@/lib/roster";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
+import { ordinal } from "@/lib/stage2-tutorials";
 
 function formatSupervisedTime(totalSeconds: number): string {
   const m = Math.round(totalSeconds / 60);
   return m > 0 ? `${m} min` : "under a minute";
 }
+
+const CELTA5_SIGNOFF_LABEL: Record<RosterRow["celta5SignoffStatus"], string> = {
+  not_started: "Not started",
+  candidate_signed: "Candidate signed",
+  both_signed: "Both signed",
+};
 
 // build-spec.md §8 bug 3 -- rows carried cursor-pointer but only the name
 // cell actually navigated. Whole row now pushes to the portfolio; the
@@ -30,7 +37,7 @@ export function RosterRowView({ row }: { row: RosterRow }) {
             {row.name}
           </Link>
         </td>
-        <td colSpan={9} className="text-right">
+        <td colSpan={15} className="text-right">
           <span className="pill pill-neutral">{COURSE_STATUS_LABEL[row.courseStatus]}</span>
         </td>
       </tr>
@@ -49,10 +56,38 @@ export function RosterRowView({ row }: { row: RosterRow }) {
         {row.assessedHrs.toFixed(2)}
       </td>
       <td className="text-right tabular-nums text-ink">{row.tpsPassed} / 8</td>
-      <td className="text-right tabular-nums text-ink">{row.assignmentsLeft}</td>
+      <td className="text-right tabular-nums text-ink">
+        {row.assignmentsTotal > 0 ? (
+          <Link
+            href={`/portfolio/${row.id}/assignments`}
+            onClick={(e) => e.stopPropagation()}
+            title={row.assignmentsResubmitted ? "Includes a resubmission" : "No resubmissions used"}
+            className="hover:underline"
+          >
+            {row.assignmentsPassed} / {row.assignmentsTotal}
+            {row.assignmentsResubmitted ? <sup className="ml-0.5 text-status-warning-text">R</sup> : null}
+          </Link>
+        ) : (
+          <span className="text-muted">--</span>
+        )}
+      </td>
       <td className="text-right tabular-nums text-ink">{row.criteriaPct}%</td>
       <td className={`text-right tabular-nums ${row.attendancePct < 80 ? "font-semibold text-destructive" : "text-ink"}`}>
         {row.attendancePct}%
+      </td>
+      <td className="text-right tabular-nums">
+        {row.tpStagesTaught > 0 ? (
+          <Link
+            href={`/portfolio/${row.id}/tp`}
+            onClick={(e) => e.stopPropagation()}
+            title="Taught TPs with plan + self-evaluation + feedback all submitted"
+            className={`hover:underline ${row.tpStagesBehind > 0 ? "text-status-warning-text" : "text-ink"}`}
+          >
+            {row.tpStagesTaught - row.tpStagesBehind} / {row.tpStagesTaught}
+          </Link>
+        ) : (
+          <span className="text-muted">--</span>
+        )}
       </td>
       <td className="text-right tabular-nums">
         {row.supervisedTotal > 0 ? (
@@ -67,6 +102,46 @@ export function RosterRowView({ row }: { row: RosterRow }) {
         ) : (
           <span className="text-muted">--</span>
         )}
+      </td>
+      <td className="text-right tabular-nums">
+        <Link
+          href={`/portfolio/${row.id}/celta5`}
+          onClick={(e) => e.stopPropagation()}
+          className={`hover:underline ${row.observationHoursShort ? "text-status-warning-text" : "text-ink"}`}
+        >
+          {row.observationHoursCounted.toFixed(1)} / 6
+        </Link>
+      </td>
+      <td className="text-right">
+        <Link
+          href={`/portfolio/${row.id}/celta5`}
+          onClick={(e) => e.stopPropagation()}
+          className={`hover:underline ${row.stage1Filed ? "text-ink" : "text-status-warning-text"}`}
+        >
+          {row.stage1Filed ? "Filed" : "Not filed"}
+        </Link>
+      </td>
+      <td className="text-right">
+        <Link href={`/portfolio/${row.id}/celta5`} onClick={(e) => e.stopPropagation()} className="hover:underline text-ink">
+          {row.stage2BookedPosition ? ordinal(row.stage2BookedPosition) : <span className="text-status-warning-text">Not booked</span>}
+          {" · "}
+          {row.stage3Required ? (row.stage3Done ? "Stage 3 done" : "Stage 3 pending") : "Stage 3 N/A"}
+        </Link>
+      </td>
+      <td className="text-right">
+        <Link
+          href={`/portfolio/${row.id}/celta5`}
+          onClick={(e) => e.stopPropagation()}
+          className={`hover:underline ${row.celta5SignoffStatus === "both_signed" ? "text-ink" : "text-status-warning-text"}`}
+        >
+          {CELTA5_SIGNOFF_LABEL[row.celta5SignoffStatus]}
+        </Link>
+      </td>
+      <td
+        className={`text-right tabular-nums ${row.folEntriesLow ? "text-status-warning-text" : "text-ink"}`}
+        title={row.folEntriesLow ? "Below half the cohort's average -- may be under-logging" : "FOL entries logged this course"}
+      >
+        {row.folEntriesLogged}
       </td>
       <td className="text-right">
         <div className="ml-auto">

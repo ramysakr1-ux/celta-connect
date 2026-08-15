@@ -60,17 +60,23 @@ export default async function TrainerRosterPage() {
         </div>
       </div>
 
-      <div className="sheet overflow-hidden !p-0">
+      <div className="sheet overflow-x-auto !p-0">
         <table className="table-plain w-full">
           <thead>
             <tr>
               <th className="text-sm text-muted">Candidate</th>
               <th className="text-right text-sm text-muted">Assessed hrs</th>
               <th className="text-right text-sm text-muted">TPs passed</th>
-              <th className="text-right text-sm text-muted">Assignments left</th>
+              <th className="text-right text-sm text-muted">Assignments</th>
               <th className="text-right text-sm text-muted">Criteria</th>
               <th className="text-right text-sm text-muted">Attendance</th>
+              <th className="text-right text-sm text-muted">TP stages</th>
               <th className="text-right text-sm text-muted">Supervised review</th>
+              <th className="text-right text-sm text-muted">Observation hrs</th>
+              <th className="text-right text-sm text-muted">Stage 1 report</th>
+              <th className="text-right text-sm text-muted">Stage 2 / 3</th>
+              <th className="text-right text-sm text-muted">CELTA 5 sign-off</th>
+              <th className="text-right text-sm text-muted">FOL logged</th>
               <th className="text-right text-sm text-muted">Standing</th>
               <th className="text-right text-sm text-muted">Provisional</th>
               <th className="text-right text-sm text-muted">At risk</th>
@@ -81,7 +87,7 @@ export default async function TrainerRosterPage() {
               rows.map((row) => <RosterRowView key={row.id} row={row} />)
             ) : (
               <tr>
-                <td colSpan={9} className="text-muted">
+                <td colSpan={16} className="text-muted">
                   No trainees on this course yet.
                 </td>
               </tr>

@@ -16,6 +16,7 @@ import { TrajectoryGradientBars } from "@/components/trajectory-gradient-bar";
 import { AssignmentsSummary, TpFeedbackSummary, AssessedTpStatsBadge } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
 import { CriteriaRatingPill, StandardRatingPill } from "@/lib/status-pill";
 import { computeProgressIssues, computeAssessedTpStats } from "@/lib/course-progress";
+import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
 import { FinalChecklistForm } from "@/app/dashboard/trainee/celta5/final-checklist-form";
@@ -588,24 +589,18 @@ export default async function PortfolioCelta5Page({
     </div>
   );
 
-  // Section 5 requirement: 6 hours total, but filmed observations only ever
-  // count for up to 3 of those 6 -- the remaining hours must be live.
-  const OBSERVATION_HOURS_REQUIRED = 6;
-  const OBSERVATION_FILMED_CAP_MINUTES = 3 * 60;
-  const liveMinutes = (observations ?? []).filter((o) => !o.filmed).reduce((sum, o) => sum + (o.length_minutes ?? 0), 0);
-  const filmedMinutes = (observations ?? []).filter((o) => o.filmed).reduce((sum, o) => sum + (o.length_minutes ?? 0), 0);
-  const filmedCountedMinutes = Math.min(filmedMinutes, OBSERVATION_FILMED_CAP_MINUTES);
-  const observationHoursCounted = (liveMinutes + filmedCountedMinutes) / 60;
-  const observationLivePct = Math.min(100, (liveMinutes / 60 / OBSERVATION_HOURS_REQUIRED) * 100);
-  const observationFilmedPct = Math.min(100 - observationLivePct, (filmedCountedMinutes / 60 / OBSERVATION_HOURS_REQUIRED) * 100);
+  const { hoursCounted: observationHoursCounted, liveHours, filmedHours } = computeObservationHours(observations ?? []);
+  const observationLivePct = Math.min(100, (liveHours / OBSERVATION_HOURS_REQUIRED) * 100);
+  const filmedCountedHours = observationHoursCounted - liveHours;
+  const observationFilmedPct = Math.min(100 - observationLivePct, (filmedCountedHours / OBSERVATION_HOURS_REQUIRED) * 100);
 
   const observationsBlock = (
     <div>
       <h3 className="font-serif text-lg text-ink">Observations of experienced teachers (self-reported)</h3>
       <div className="mt-2">
         <p className="text-sm text-ink">
-          {observationHoursCounted.toFixed(1)} of {OBSERVATION_HOURS_REQUIRED} hrs counted · {(liveMinutes / 60).toFixed(1)} hrs live
-          {filmedMinutes > 0 ? ` · ${(filmedMinutes / 60).toFixed(1)} hrs filmed (capped at 3)` : ""}
+          {observationHoursCounted.toFixed(1)} of {OBSERVATION_HOURS_REQUIRED} hrs counted · {liveHours.toFixed(1)} hrs live
+          {filmedHours > 0 ? ` · ${filmedHours.toFixed(1)} hrs filmed (capped at 3)` : ""}
         </p>
         <div className="mt-1.5 flex h-1.5 w-full overflow-hidden rounded-full bg-accent">
           <div className="h-full bg-primary" style={{ width: `${observationLivePct}%` }} />
