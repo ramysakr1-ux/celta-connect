@@ -1,4 +1,5 @@
 import "server-only";
+import { createHash, randomBytes } from "node:crypto";
 
 const SCOPE = "https://www.googleapis.com/auth/drive.file";
 
@@ -8,7 +9,19 @@ function requiredEnv(name: string): string {
   return value;
 }
 
-export function buildGoogleAuthUrl(state: string): string {
+// PKCE (RFC 7636) -- Google Cloud Console flags confidential clients that skip
+// this as vulnerable to authorization-code interception/impersonation. The
+// verifier is a per-attempt secret held server-side (cookie); only its SHA-256
+// hash goes out in the authorization request, and the verifier itself is sent
+// once, at token exchange, so Google can confirm the same party that started
+// the flow is the one completing it.
+export function generatePkcePair(): { codeVerifier: string; codeChallenge: string } {
+  const codeVerifier = randomBytes(32).toString("base64url");
+  const codeChallenge = createHash("sha256").update(codeVerifier).digest("base64url");
+  return { codeVerifier, codeChallenge };
+}
+
+export function buildGoogleAuthUrl(state: string, codeChallenge: string): string {
   const params = new URLSearchParams({
     client_id: requiredEnv("GOOGLE_CLIENT_ID"),
     redirect_uri: requiredEnv("GOOGLE_REDIRECT_URI"),
@@ -18,11 +31,13 @@ export function buildGoogleAuthUrl(state: string): string {
     include_granted_scopes: "true",
     scope: SCOPE,
     state,
+    code_challenge: codeChallenge,
+    code_challenge_method: "S256",
   });
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
 
-export async function exchangeCodeForRefreshToken(code: string): Promise<string> {
+export async function exchangeCodeForRefreshToken(code: string, codeVerifier: string): Promise<string> {
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -32,6 +47,7 @@ export async function exchangeCodeForRefreshToken(code: string): Promise<string>
       client_secret: requiredEnv("GOOGLE_CLIENT_SECRET"),
       redirect_uri: requiredEnv("GOOGLE_REDIRECT_URI"),
       grant_type: "authorization_code",
+      code_verifier: codeVerifier,
     }),
   });
 
