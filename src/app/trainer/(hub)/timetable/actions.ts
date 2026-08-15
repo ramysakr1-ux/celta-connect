@@ -159,6 +159,29 @@ export async function generateTimetableSkeleton(_prevState: FormState, formData:
   return { error: null };
 }
 
+// for-claude-code-timetable-drag.md -- dropping a tile on a clean target day
+// applies immediately (no confirm), same trust level as any other edit here.
+// Only the date moves; time/tag/everything else about the event is
+// untouched. RLS already refuses this the same way it refuses insert/delete
+// once timetable_locked_at is set (see addTimetableEvent's own comment) --
+// no separate app-level lock check needed here.
+export async function moveTimetableEvent(eventId: string, newDate: string): Promise<{ error: string | null }> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return { error: "No course assigned." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("course_timetable_events")
+    .update({ event_date: newDate })
+    .eq("id", eventId)
+    .eq("course_id", trainer.course_id);
+
+  if (error) return { error: "Could not move the event -- the timetable may be locked." };
+
+  revalidatePath("/trainer/timetable");
+  return { error: null };
+}
+
 export async function deleteTimetableEvent(formData: FormData): Promise<void> {
   const trainer = await requireRole(["trainer", "admin"]);
   const eventId = formData.get("event_id");
