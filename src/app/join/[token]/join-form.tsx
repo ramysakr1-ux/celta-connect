@@ -115,23 +115,23 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
           </Link>
           .
         </p>
-        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
-          <input type="checkbox" name="agree_ip" required className="mt-0.5 accent-primary" />
-          <span>
-            I agree not to copy, reverse-engineer, or share access to the Connect platform,
-            and to use it only for the purposes of my course.
-          </span>
-        </label>
-        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
-          <input type="checkbox" name="agree_data" required className="mt-0.5 accent-primary" />
-          <span>
-            I understand that my coursework, tutor feedback, and records are held in
-            Connect during the course and archived to the centre&apos;s secure Google Drive
-            afterwards.
-          </span>
-        </label>
         {role === "trainee" ? (
           <>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_ip" required className="mt-0.5 accent-primary" />
+              <span>
+                I agree not to copy, reverse-engineer, or share access to the Connect platform,
+                and to use it only for the purposes of my course.
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_data" required className="mt-0.5 accent-primary" />
+              <span>
+                I understand that my coursework, tutor feedback, and records are held in
+                Connect during the course and archived to the centre&apos;s secure Google Drive
+                afterwards.
+              </span>
+            </label>
             <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
               <input type="checkbox" name="agree_fingerprint" required className="mt-0.5 accent-primary" />
               <span>
@@ -171,8 +171,37 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
                 </details>
               </span>
             </label>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_policies" required className="mt-0.5 accent-primary" />
+              <span>
+                I have read and agree to follow the centre&apos;s policies on attendance, plagiarism,
+                complaints, and resubmission.
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_own_work" required className="mt-0.5 accent-primary" />
+              <span>Each assignment I submit is my own work, produced for this course.</span>
+            </label>
           </>
-        ) : null}
+        ) : (
+          <>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_confidentiality" required className="mt-0.5 accent-primary" />
+              <span>I will keep candidate work, grades, and records confidential.</span>
+            </label>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_procedures" required className="mt-0.5 accent-primary" />
+              <span>I will follow the centre&apos;s malpractice and safeguarding procedures.</span>
+            </label>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_ip" required className="mt-0.5 accent-primary" />
+              <span>
+                I agree not to copy, reverse-engineer, or share access to the Connect platform,
+                and to use it only for the purposes of my course.
+              </span>
+            </label>
+          </>
+        )}
       </div>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

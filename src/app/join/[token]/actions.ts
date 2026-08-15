@@ -55,8 +55,8 @@ export async function joinCourse(
   if (password !== confirmPassword) {
     return { error: "Passwords do not match." };
   }
-  if (!formData.get("agree_ip") || !formData.get("agree_data")) {
-    return { error: "You need to agree to both checkboxes to join." };
+  if (!formData.get("agree_ip")) {
+    return { error: "You need to agree to all the checkboxes to join." };
   }
 
   const resolved = await resolveCourseAndRole(token);
@@ -72,7 +72,17 @@ export async function joinCourse(
   // is explicitly meant to live as an uploaded, versioned centre document
   // (it's "subject to constant review"), not hardcoded here -- this
   // checkbox is the plain-English acknowledgment, not a substitute for it.
-  if (role === "trainee" && (!formData.get("agree_ai_policy") || !formData.get("agree_fingerprint"))) {
+  if (
+    role === "trainee" &&
+    (!formData.get("agree_data") ||
+      !formData.get("agree_ai_policy") ||
+      !formData.get("agree_fingerprint") ||
+      !formData.get("agree_policies") ||
+      !formData.get("agree_own_work"))
+  ) {
+    return { error: "You need to agree to all the checkboxes to join." };
+  }
+  if (role === "trainer" && (!formData.get("agree_confidentiality") || !formData.get("agree_procedures"))) {
     return { error: "You need to agree to all the checkboxes to join." };
   }
   const specialConsideration =
