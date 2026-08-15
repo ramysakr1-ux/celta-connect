@@ -89,22 +89,13 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card flex items-center justify-between p-6">
-        <div>
-          <h1 className="font-serif text-xl text-ink">Welcome, {profile.full_name}</h1>
-          <p className="mt-2 text-muted">Manage your centre&apos;s courses and roster.</p>
-        </div>
-        <div className="flex gap-4">
-          <Link href="/dashboard/admissions" className="text-sm text-muted hover:text-ink">
-            Admissions
-          </Link>
-          <Link href="/dashboard/admin/coursebooks" className="text-sm text-muted hover:text-ink">
-            TP Points Library
-          </Link>
-          <Link href="/dashboard/admin/settings" className="text-sm text-muted hover:text-ink">
-            Settings
-          </Link>
-        </div>
+      {/* Admissions/TP Points Library/Settings used to live only here --
+          moved to a persistent AdminTabs nav in dashboard/layout.tsx so they
+          don't disappear the moment you click into one (Ramy, live-testing
+          2026-08-15: no way back except the browser's own back button). */}
+      <div className="card p-6">
+        <h1 className="font-serif text-xl text-ink">Welcome, {profile.full_name}</h1>
+        <p className="mt-2 text-muted">Manage your centre&apos;s courses and roster.</p>
       </div>
 
       {center?.center_number.startsWith("PENDING-") ? (

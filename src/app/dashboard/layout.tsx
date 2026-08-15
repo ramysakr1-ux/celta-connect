@@ -8,6 +8,7 @@ import { getAdminChatCourses } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { DesignerCredit } from "@/components/designer-credit";
+import { AdminTabs } from "@/app/dashboard/admin/admin-tabs";
 
 export default async function DashboardLayout({
   children,
@@ -26,11 +27,12 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-border">
-        <div className="container flex items-center justify-between py-4">
-          <Link href="/dashboard" className="hover:opacity-80">
+        <div className="container flex h-14 items-center justify-between gap-6">
+          <Link href="/dashboard" className="shrink-0 hover:opacity-80">
             <Wordmark size="header" />
           </Link>
-          <div className="flex items-center gap-4 text-sm text-muted">
+          {profile?.role === "admin" ? <AdminTabs /> : null}
+          <div className="flex shrink-0 items-center gap-4 text-sm text-muted">
             <span>{profile?.full_name ?? email}</span>
             <form action={signOut}>
               <button type="submit" className="hover:text-ink">
