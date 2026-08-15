@@ -1367,7 +1367,7 @@ export interface Database {
         Row: {
           id: string;
           course_id: string;
-          type: "input_session" | "tp" | "assignment_due" | "resubmission_due" | "milestone";
+          type: "input_session" | "tp" | "assignment_due" | "resubmission_due" | "milestone" | "supervised_session";
           title: string;
           event_date: string;
           event_time: string | null;
@@ -1384,11 +1384,30 @@ export interface Database {
         };
         Insert: Partial<Database["public"]["Tables"]["course_timetable_events"]["Row"]> & {
           course_id: string;
-          type: "input_session" | "tp" | "assignment_due" | "resubmission_due" | "milestone";
+          type: "input_session" | "tp" | "assignment_due" | "resubmission_due" | "milestone" | "supervised_session";
           title: string;
           event_date: string;
         };
         Update: Partial<Database["public"]["Tables"]["course_timetable_events"]["Row"]>;
+        Relationships: [];
+      };
+      supervised_session_completions: {
+        Row: {
+          id: string;
+          timetable_event_id: string;
+          trainee_id: string;
+          started_at: string;
+          time_spent_seconds: number;
+          response: string | null;
+          submitted_at: string | null;
+          checked_at: string | null;
+          checked_by: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["supervised_session_completions"]["Row"]> & {
+          timetable_event_id: string;
+          trainee_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["supervised_session_completions"]["Row"]>;
         Relationships: [];
       };
       course_tp_schedule: {

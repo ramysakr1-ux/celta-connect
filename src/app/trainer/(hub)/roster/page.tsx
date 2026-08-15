@@ -70,6 +70,7 @@ export default async function TrainerRosterPage() {
               <th className="text-right text-sm text-muted">Assignments left</th>
               <th className="text-right text-sm text-muted">Criteria</th>
               <th className="text-right text-sm text-muted">Attendance</th>
+              <th className="text-right text-sm text-muted">Supervised review</th>
               <th className="text-right text-sm text-muted">Standing</th>
               <th className="text-right text-sm text-muted">Provisional</th>
               <th className="text-right text-sm text-muted">At risk</th>

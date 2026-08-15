@@ -7,6 +7,11 @@ import type { RosterRow } from "@/lib/roster";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 
+function formatSupervisedTime(totalSeconds: number): string {
+  const m = Math.round(totalSeconds / 60);
+  return m > 0 ? `${m} min` : "under a minute";
+}
+
 // build-spec.md §8 bug 3 -- rows carried cursor-pointer but only the name
 // cell actually navigated. Whole row now pushes to the portfolio; the
 // name keeps its own <Link> too, for keyboard nav and hover color.
@@ -25,7 +30,7 @@ export function RosterRowView({ row }: { row: RosterRow }) {
             {row.name}
           </Link>
         </td>
-        <td colSpan={8} className="text-right">
+        <td colSpan={9} className="text-right">
           <span className="pill pill-neutral">{COURSE_STATUS_LABEL[row.courseStatus]}</span>
         </td>
       </tr>
@@ -48,6 +53,20 @@ export function RosterRowView({ row }: { row: RosterRow }) {
       <td className="text-right tabular-nums text-ink">{row.criteriaPct}%</td>
       <td className={`text-right tabular-nums ${row.attendancePct < 80 ? "font-semibold text-destructive" : "text-ink"}`}>
         {row.attendancePct}%
+      </td>
+      <td className="text-right tabular-nums">
+        {row.supervisedTotal > 0 ? (
+          <Link
+            href={`/portfolio/${row.id}/timetable`}
+            onClick={(e) => e.stopPropagation()}
+            title={`${formatSupervisedTime(row.supervisedSecondsSpent)} spent -- click to see per-session status on their timetable`}
+            className={`hover:underline ${row.supervisedDone < row.supervisedTotal ? "text-status-warning-text" : "text-ink"}`}
+          >
+            {row.supervisedDone} / {row.supervisedTotal}
+          </Link>
+        ) : (
+          <span className="text-muted">--</span>
+        )}
       </td>
       <td className="text-right">
         <div className="ml-auto">

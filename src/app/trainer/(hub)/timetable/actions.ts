@@ -14,7 +14,7 @@ export interface FormState {
   error: string | null;
 }
 
-const EVENT_TYPES = ["input_session", "tp", "assignment_due", "resubmission_due", "milestone"] as const;
+const EVENT_TYPES = ["input_session", "tp", "assignment_due", "resubmission_due", "milestone", "supervised_session"] as const;
 
 // Free-typed, comma/space separated ("4c, 5f") rather than a 41-item picker
 // -- this is a one-time data-entry pass against material the trainer
@@ -48,6 +48,18 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
     return { error: "Invalid event type." };
   }
   if (!title) return { error: "Title is required." };
+  // for-claude-code-supervised-review.md: "Never leave a bare 'Self-study'
+  // label anywhere on the timetable going forward." A real submit-and-check
+  // structure is what earns the "Supervised review"/"[X] writing" naming --
+  // this is a naming guardrail, not a promise that the event itself has
+  // that structure (a trainer could still create a genuine unsupervised
+  // self-study slot, they just can't call it "self-study" and expect it to
+  // read as contact time).
+  if (/self.?study/i.test(title)) {
+    return {
+      error: 'Use "Supervised review" or "[assignment] writing" instead of "Self-study" -- only sessions with a real submit-and-check count as contact time.',
+    };
+  }
   if (typeof eventDate !== "string" || !eventDate) return { error: "Date is required." };
 
   const supabase = await createClient();

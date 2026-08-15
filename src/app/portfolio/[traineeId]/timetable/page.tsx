@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -34,7 +35,7 @@ export default async function TraineeTimetablePage({
 
   const today = toLocalIso(new Date());
 
-  const [{ data: events }, { data: plans }, { data: subgroupMember }] = await Promise.all([
+  const [{ data: events }, { data: plans }, { data: subgroupMember }, { data: supervisedCompletions }] = await Promise.all([
     supabase
       .from("course_timetable_events")
       .select("*")
@@ -43,7 +44,12 @@ export default async function TraineeTimetablePage({
       .order("event_time"),
     supabase.from("plan_assignments").select("tp_number, taught_at").eq("trainee_id", traineeId),
     supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle(),
+    // for-claude-code-supervised-review.md -- lets the trainee's own
+    // Timetable show whether they've already submitted a given supervised
+    // session, without a separate query per row.
+    supabase.from("supervised_session_completions").select("timetable_event_id, submitted_at").eq("trainee_id", traineeId),
   ]);
+  const supervisedSubmittedByEventId = new Map((supervisedCompletions ?? []).map((c) => [c.timetable_event_id, Boolean(c.submitted_at)]));
 
   // "Their own TP lessons get a teal left rule" -- only resolvable for a
   // paired subgroup, where a real date maps to a real TP number (same
@@ -116,16 +122,30 @@ export default async function TraineeTimetablePage({
                     const isOwnTp = event.type === "tp" && ownTpDates.has(event.event_date);
                     const category = categorize(event);
                     const planDue = event.linked_assignment_type && event.event_date >= today;
-                    return (
-                      <div
-                        key={event.id}
-                        className="flex items-center gap-3 border-l-[3px] pl-3"
-                        style={{ borderLeftColor: isOwnTp ? "var(--color-primary)" : CATEGORY_ACCENT[category] }}
-                      >
+                    const isSupervised = event.type === "supervised_session";
+                    const supervisedSubmitted = isSupervised && (supervisedSubmittedByEventId.get(event.id) ?? false);
+                    const rowContent = (
+                      <>
                         <span className="w-14 shrink-0 text-xs tabular-nums text-muted">{event.event_time?.slice(0, 5) ?? ""}</span>
                         <span className={`flex-1 text-sm ${isOwnTp ? "font-semibold text-ink" : "text-ink"}`}>{event.title}</span>
                         {isOwnTp ? <span className="pill pill-success">Your TP</span> : null}
                         {planDue ? <span className="pill pill-neutral">Plan due</span> : null}
+                        {isSupervised ? (
+                          <span className={supervisedSubmitted ? "pill pill-success" : "pill pill-info"}>
+                            {supervisedSubmitted ? "Done" : "Open task →"}
+                          </span>
+                        ) : null}
+                      </>
+                    );
+                    const rowClass = "flex items-center gap-3 border-l-[3px] pl-3";
+                    const rowStyle = { borderLeftColor: isOwnTp ? "var(--color-primary)" : CATEGORY_ACCENT[category] };
+                    return isSupervised && !isStaff ? (
+                      <Link key={event.id} href={`/portfolio/${traineeId}/supervised/${event.id}`} className={`${rowClass} hover:bg-accent/20`} style={rowStyle}>
+                        {rowContent}
+                      </Link>
+                    ) : (
+                      <div key={event.id} className={rowClass} style={rowStyle}>
+                        {rowContent}
                       </div>
                     );
                   })}

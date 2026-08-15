@@ -10,6 +10,7 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
   assignment_due: "Assignment due",
   resubmission_due: "Resubmission due",
   milestone: "Milestone",
+  supervised_session: "Supervised review / assignment writing",
 };
 
 const initialState: FormState = { error: null };
@@ -102,6 +103,16 @@ export function AddEventForm({
           ))}
         </select>
       </div>
+      {type === "supervised_session" ? (
+        <div className="flex flex-col gap-1.5 sm:col-span-2">
+          <p className="rounded-[6px] border border-dashed border-gold bg-gold/5 p-3 text-xs text-ink">
+            Never call this &quot;Self-study&quot; -- name it &quot;Supervised review -- [topic]&quot; (reviewing a
+            prior input session) or &quot;[Assignment] writing&quot; (time set aside to write one). It only counts as
+            contact time because the trainee submits something here and you check it -- see the task each trainee
+            gets on their own Timetable.
+          </p>
+        </div>
+      ) : null}
       {type === "input_session" ? (
         <div className="flex flex-col gap-1.5 sm:col-span-2">
           <label className="text-sm text-muted">Criteria covered (optional -- e.g. &quot;4c, 5f&quot;)</label>

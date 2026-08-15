@@ -19,6 +19,13 @@ export interface RosterRow {
   atRiskReasons: AtRiskReason[];
   provisionalLabel: string | null;
   provisionalSlashed: boolean;
+  // for-claude-code-unified-tracking.md: "Supervised review quizzes --
+  // Column: Done/Pending + score + time spent." No scoring exists yet (the
+  // spec's own open question -- reread-only vs reread+quiz -- isn't
+  // resolved), so this is submitted-count/total + total time, not a score.
+  supervisedDone: number;
+  supervisedTotal: number;
+  supervisedSecondsSpent: number;
 }
 
 // Single source of truth for what a roster row means -- both the roster
@@ -36,7 +43,16 @@ export async function fetchRosterRows(
     .order("full_name");
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
-  const [{ data: taughtPlans }, { data: feedbackRows }, { data: assignments }, { data: celta5Records }, { data: matrixRows }, { data: course }] =
+  const [
+    { data: taughtPlans },
+    { data: feedbackRows },
+    { data: assignments },
+    { data: celta5Records },
+    { data: matrixRows },
+    { data: course },
+    { data: supervisedEvents },
+    { data: supervisedCompletions },
+  ] =
     traineeIds.length > 0
       ? await Promise.all([
           // Real "taught" signal is plan_assignments.taught_at (migration
@@ -61,8 +77,15 @@ export async function fetchRosterRows(
             .eq("course_id", courseId),
           supabase.from("celta5_matrix").select("trainee_id, criteria_code, tutor_status_stage2").eq("course_id", courseId),
           supabase.from("courses").select("total_hours").eq("id", courseId).maybeSingle(),
+          supabase.from("course_timetable_events").select("id").eq("course_id", courseId).eq("type", "supervised_session"),
+          supabase
+            .from("supervised_session_completions")
+            .select("timetable_event_id, trainee_id, submitted_at, time_spent_seconds")
+            .in("trainee_id", traineeIds),
         ])
-      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: null }];
+      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: null }, { data: [] }, { data: [] }];
+
+  const supervisedTotal = (supervisedEvents ?? []).length;
 
   const totalHours = course?.total_hours ?? 120;
   const today = toLocalIso(new Date());
@@ -113,6 +136,10 @@ export async function fetchRosterRows(
       today
     );
 
+    const traineeSupervised = (supervisedCompletions ?? []).filter((c) => c.trainee_id === trainee.id);
+    const supervisedDone = traineeSupervised.filter((c) => c.submitted_at).length;
+    const supervisedSecondsSpent = traineeSupervised.reduce((sum, c) => sum + (c.time_spent_seconds ?? 0), 0);
+
     return {
       id: trainee.id,
       name: trainee.full_name,
@@ -126,6 +153,9 @@ export async function fetchRosterRows(
       atRiskReasons,
       provisionalLabel,
       provisionalSlashed,
+      supervisedDone,
+      supervisedTotal,
+      supervisedSecondsSpent,
     };
   });
 }
