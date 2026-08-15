@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
-import { createResendClient, JOIN_LINK_SENDER } from "@/lib/resend/client";
+import { createResendClient, joinLinkSender } from "@/lib/resend/client";
 import type { DeliveryMode } from "@/lib/delivery-mode";
 
 const VALID_DELIVERY_MODES: DeliveryMode[] = ["f2f", "online", "mixed"];
@@ -192,7 +192,7 @@ export async function sendJoinLinkEmail(
   try {
     const resend = createResendClient();
     const { error } = await resend.emails.send({
-      from: JOIN_LINK_SENDER,
+      from: joinLinkSender(centerName),
       to: toEmail,
       subject: `${centerName} · your CELTA workspace is ready`,
       html: buildJoinEmailHtml({

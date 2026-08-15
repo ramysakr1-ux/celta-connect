@@ -1,7 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createResendClient, JOIN_LINK_SENDER } from "@/lib/resend/client";
+import { createResendClient, centerNameForUserId, joinLinkSender } from "@/lib/resend/client";
 
 export interface ForgotPasswordState {
   error: string | null;
@@ -43,9 +43,10 @@ export async function requestPasswordReset(
   const confirmUrl = `${siteUrl}/auth/confirm?token_hash=${data.properties.hashed_token}&type=recovery&next=/auth/set-password`;
 
   try {
+    const centerName = data.user ? await centerNameForUserId(adminClient, data.user.id) : null;
     const resend = createResendClient();
     await resend.emails.send({
-      from: JOIN_LINK_SENDER,
+      from: joinLinkSender(centerName),
       to: email,
       subject: "Reset your Connect password",
       html: `

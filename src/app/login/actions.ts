@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createResendClient, JOIN_LINK_SENDER } from "@/lib/resend/client";
+import { createResendClient, centerNameForUserId, joinLinkSender } from "@/lib/resend/client";
 
 export interface SignInState {
   error: string | null;
@@ -43,9 +43,10 @@ export async function sendSignInLink(_prevState: SignInLinkState, formData: Form
   const confirmUrl = `${siteUrl}/auth/confirm?token_hash=${data.properties.hashed_token}&type=magiclink&next=/dashboard`;
 
   try {
+    const centerName = data.user ? await centerNameForUserId(admin, data.user.id) : null;
     const resend = createResendClient();
     await resend.emails.send({
-      from: JOIN_LINK_SENDER,
+      from: joinLinkSender(centerName),
       to: email,
       subject: "Your Connect sign-in link",
       html: `

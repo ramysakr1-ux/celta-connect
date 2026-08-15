@@ -18,7 +18,7 @@ import { renderAttendanceRegisterBuffer } from "./attendance-register-pdf";
 import { renderTimetableAsTaughtBuffer } from "./timetable-pdf";
 import { renderGradesReportBuffer, type GradesReportCandidate } from "./grades-report-pdf";
 import { renderObservationsLogBuffer } from "./observations-log-pdf";
-import { createResendClient, JOIN_LINK_SENDER } from "@/lib/resend/client";
+import { createResendClient, joinLinkSender } from "@/lib/resend/client";
 import type { CriteriaRating, Database } from "@/lib/supabase/types";
 
 type Admin = ReturnType<typeof createAdminClient>;
@@ -95,11 +95,12 @@ function provisionalLabel(record: Database["public"]["Tables"]["celta5_records"]
 async function sendReceiptRequestEmail(input: {
   admin: Admin;
   centerId: string;
+  centerName: string;
   courseId: string;
   courseName: string;
   driveFolderUrl: string;
 }): Promise<void> {
-  const { admin, centerId, courseId, courseName, driveFolderUrl } = input;
+  const { admin, centerId, centerName, courseId, courseName, driveFolderUrl } = input;
   const siteUrl = process.env.SITE_URL;
   if (!siteUrl) return;
 
@@ -108,7 +109,7 @@ async function sendReceiptRequestEmail(input: {
 
   const resend = createResendClient();
   await resend.emails.send({
-    from: JOIN_LINK_SENDER,
+    from: joinLinkSender(centerName),
     to: admins.map((a) => a.email),
     subject: `${courseName} is packed up and ready in your Drive`,
     html: `
@@ -535,6 +536,7 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
     await sendReceiptRequestEmail({
       admin,
       centerId: closeOut.center_id,
+      centerName: center?.name ?? "",
       courseId,
       courseName: course.name,
       driveFolderUrl: topFolder.webViewLink,

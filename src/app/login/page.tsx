@@ -12,8 +12,10 @@ export default async function LoginPage({
     <div className="flex flex-1 flex-col">
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="sheet-accent w-full max-w-sm p-8">
-          <Wordmark size="hero" />
-          <p className="mt-1 text-sm text-muted">Teacher training platform. Built for CELTA and Delta centres.</p>
+          <div className="opacity-60">
+            <Wordmark size="header" />
+          </div>
+          <h1 className="mt-5 font-serif text-2xl text-ink">Sign in</h1>
           <p className="mt-2 text-xs text-muted">
             Assessors and volunteer students don&apos;t sign in -- you have your own link. Trainees sign in here too,
             after setting up an account from their join link.

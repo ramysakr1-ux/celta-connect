@@ -97,8 +97,8 @@ Search the whole repo, including `public/`, email templates, migrations' seed te
 
 Three strings currently lean on the old name and need rewriting rather than substituting:
 
-1. Sign-in page subtitle — was implicitly "the CELTA platform". Now: **"Teacher training platform. Built for CELTA and Delta centres."**
-2. Invitation email — subject leads with the **centre**, e.g. `ITI Istanbul · your CELTA workspace is ready`. Sender display name is `Connect`. The body opens with the centre and course, not the platform; the platform appears only as the wordmark at the top.
+1. Sign-in page subtitle — was implicitly "the CELTA platform", briefly **"Teacher training platform. Built for CELTA and Delta centres."** **Removed 2026-08-15**: sign-in card no longer carries brand/tagline copy at all, per Ramy's explicit ask to de-emphasize "Connect" branding on the actual sign-in screen — just a small muted wordmark and a plain "Sign in" heading now.
+2. Invitation email — subject leads with the **centre**, e.g. `ITI Istanbul · your CELTA workspace is ready`. Sender display name is the **centre's own name** (revised 2026-08-15, see "Checks" below — was `Connect`). The body opens with the centre and course, not the platform; the platform appears only as the wordmark at the top.
 3. Certificate and report footers — the mark plus "Connect" in plain text; no descriptor, no strapline.
 
 ## Checks
@@ -108,15 +108,17 @@ Three strings currently lean on the old name and need rewriting rather than subs
 - Favicon and app icon regenerated at the new stroke weight.
 - `Wordmark` renders correctly at all four sizes in the table above, with the tile's stroke-width compensation applied.
 - Gold appears in exactly two places in the identity: the word, and the first arc inside the tile. Nowhere else picks up gold as decoration.
-- Email sender display name is `Connect`; no email subject or body says "CELTA Connect".
+- Email sender display name is the **sending centre's own name**, never `Connect` or "CELTA
+  Connect" — **revised 2026-08-15**, supersedes the original "sender display name is Connect"
+  rule below. Nobody should notice "Connect" as a brand at all; the recipient should recognise
+  their own centre's name in their inbox, not the platform underneath it. `joinLinkSender()` in
+  `src/lib/resend/client.ts` is the one place this is implemented — falls back to "Connect" only
+  when no centre is resolvable (e.g. a sign-in link sent to an email with no matching account).
 
-## Designer credit
+## Designer credit — REMOVED 2026-08-15
 
-A single line, in the **public landing page footer** (`/`) only — nowhere else, and never on an
-exported or Cambridge-facing document. **Revised 2026-08-15**: originally placed on the Centre
-Admin footer and sign-in page footer too, but as a brand mark rather than a functional element it
-was adding visual noise to working/entry screens — moved to the landing page only.
-
-> [mark, 20px] Connect · designed and built by **Ramy**
-
-"Ramy" in `--color-ink`, the rest in `--color-muted`, 11px. Not gold — gold would make the credit the brightest thing on the page.
+Dropped entirely, not relocated. Originally a single line ("[mark, 20px] Connect · designed and
+built by Ramy") on the Centre Admin + sign-in footers, then narrowed to the public landing page
+footer only earlier the same day — then the landing page itself was removed (root `/` now
+redirects straight to `/login`, nobody signs up through the bare domain) and Ramy confirmed he'd
+rather drop the credit than find it a new home. `src/components/designer-credit.tsx` deleted.
