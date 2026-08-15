@@ -6,6 +6,7 @@ import { computeWeekOf, computeCourseState, type CourseState } from "@/lib/cours
 import { toLocalIso } from "@/lib/timetable-grid";
 import { getRecentCentreChanges } from "@/lib/what-changed";
 import { WhatChangedPanel } from "@/components/what-changed-panel";
+import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 
 // Centre Admin.dc.html 1a -- courses group by state instead of a flat
 // date-sorted list. State is purely date-derived (see computeCourseState's
@@ -146,8 +147,8 @@ export default async function AdminDashboardPage() {
                           {row.course.start_date} &rarr; {row.course.end_date}
                         </p>
                       </div>
-                      <span className="shrink-0 text-xs text-muted">{row.people}</span>
-                      <span className="shrink-0 text-xs text-muted">{row.progress}</span>
+                      <span className="hidden shrink-0 text-xs text-muted sm:inline">{row.people}</span>
+                      <span className="hidden shrink-0 text-xs text-muted sm:inline">{row.progress}</span>
                       <span className={STATE_PILL_CLASS[group.state]}>{STATE_LABEL[group.state]}</span>
                     </Link>
                   ))}
@@ -161,6 +162,14 @@ export default async function AdminDashboardPage() {
           <CreateCourseForm />
         </div>
 
+        {/* specs/build-spec.md §7: admin gets "status plus the one or two
+            decisions only they can make" on a phone -- the course list and
+            Create course above are exactly that. These two panels are pure
+            browsing/informational (counts, a recent-activity feed), not a
+            decision or the centre's live status, so they're the one part
+            of this page that's laptop-only. */}
+        <LaptopOnlyGate task="Centre material and recent activity">
+        <div className="flex flex-col gap-6">
         <div className="card flex flex-col gap-3 p-5">
           <div>
             <h2 className="font-serif text-base text-ink">Centre material</h2>
@@ -180,6 +189,8 @@ export default async function AdminDashboardPage() {
         </div>
 
         <WhatChangedPanel changes={recentChanges} />
+        </div>
+        </LaptopOnlyGate>
       </div>
     </div>
   );
