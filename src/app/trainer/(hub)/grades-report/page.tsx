@@ -13,6 +13,7 @@ import { UpgradeConditionsForm } from "@/app/trainer/(hub)/grades-report/upgrade
 import { CohortSheet, type CohortSheetRow } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
 import { FinalGradeForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/final-grade-form";
 import { StandardRatingGlyph } from "@/lib/status-pill";
+import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CriteriaRating, Database } from "@/lib/supabase/types";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
@@ -138,6 +139,7 @@ export default async function GradesReportPage() {
   });
 
   return (
+    <LaptopOnlyGate task="The Grades Report" skip={!trainer}>
     <div className="flex flex-col gap-6">
       <CohortSheet courseId={courseId} courseName={course?.name ?? "Course"} rows={cohortRows} canRelease={Boolean(trainer)} />
 
@@ -225,6 +227,7 @@ export default async function GradesReportPage() {
         </div>
       )}
     </div>
+    </LaptopOnlyGate>
   );
 }
 

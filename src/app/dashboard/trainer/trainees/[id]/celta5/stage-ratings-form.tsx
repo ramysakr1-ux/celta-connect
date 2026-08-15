@@ -10,6 +10,7 @@ import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS, CRITERIA_GUIDANCE } from "@/l
 import { CriteriaRatingPill } from "@/lib/status-pill";
 import { CriteriaRatingPills } from "@/components/criteria-rating-pills";
 import type { Database } from "@/lib/supabase/types";
+import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 
 type MatrixRow = Database["public"]["Tables"]["celta5_matrix"]["Row"];
 
@@ -57,6 +58,7 @@ export function StageRatingsForm({
   }
 
   return (
+    <LaptopOnlyGate task="Marking against criteria">
     <form action={formAction} className="sheet flex flex-col gap-6 p-6">
       <input type="hidden" name="trainee_id" value={traineeId} />
 
@@ -148,5 +150,6 @@ export function StageRatingsForm({
         {pending ? "Saving..." : "Save criteria"}
       </button>
     </form>
+    </LaptopOnlyGate>
   );
 }

@@ -10,6 +10,7 @@ import { TpGroupBoard } from "@/app/trainer/(hub)/rotation/tp-group-board";
 import { RunningOrderPanel } from "@/app/trainer/(hub)/rotation/running-order-panel";
 import { RevealPeerNotesForm } from "@/app/trainer/(hub)/rotation/reveal-peer-notes-form";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
+import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CourseStatus } from "@/lib/supabase/types";
 
 const TP_NUMBERS = [1, 2, 3, 4, 5, 6];
@@ -87,6 +88,7 @@ export default async function TrainerRotationPage() {
   const unpaired = (subgroups ?? []).filter((g) => !g.tp_group_id);
 
   return (
+    <LaptopOnlyGate task="Teaching Practice rotation">
     <div className="flex flex-col gap-6">
       <div className="sheet flex items-start justify-between gap-4 p-6">
         <div>
@@ -226,6 +228,7 @@ export default async function TrainerRotationPage() {
         </div>
       </div>
     </div>
+    </LaptopOnlyGate>
   );
 }
 

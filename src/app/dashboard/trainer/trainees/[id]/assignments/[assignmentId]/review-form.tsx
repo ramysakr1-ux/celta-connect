@@ -110,7 +110,11 @@ export function AssignmentReviewForm({
       </div>
 
       <div className="flex flex-col gap-4 lg:sticky lg:top-6">
-        <div className="card flex flex-col gap-3 p-5">
+        {/* specs/build-spec.md §7 "Laptop only: marking against criteria" --
+            hidden, not removed: the underlying inputs still submit with the
+            form either way (a hidden field's value isn't dropped from
+            FormData), this just keeps the cramped checklist off a phone. */}
+        <div className="card hidden flex-col gap-3 p-5 md:flex">
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
             Assessment criteria · {isResubmission ? "resubmission" : "1st submission"}
           </p>
@@ -136,6 +140,9 @@ export function AssignmentReviewForm({
           <p className="text-[11px] italic text-muted">
             Any criterion Not met on the first submission means Resubmission Needed. These are what the cover sheet prints.
           </p>
+        </div>
+        <div className="card p-5 text-sm text-muted md:hidden">
+          Assessment criteria needs more room than a phone screen -- open this assignment on a laptop or tablet to mark it.
         </div>
 
         <div className="card flex flex-col gap-3 p-5">

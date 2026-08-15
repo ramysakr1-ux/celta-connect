@@ -7,6 +7,7 @@ import { TimetableGrid } from "@/app/trainer/(hub)/timetable/timetable-grid";
 import { TimeBandsForm } from "@/app/trainer/(hub)/timetable/time-bands-form";
 import { resolveTimeBands } from "@/lib/timetable-grid";
 import { Stage2Section } from "@/app/trainer/(hub)/timetable/stage2-section";
+import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 
 // §1.1a v2 -- the course timetable is the single source of truth for the
 // whole course clock (This Week panel, due/overdue states, TP dates).
@@ -103,7 +104,7 @@ export default async function TrainerTimetablePage({
             dates all read from this.
           </p>
         </div>
-        <form action={setTimetableLock}>
+        <form action={setTimetableLock} className="hidden md:block">
           <input type="hidden" name="lock" value={(!locked).toString()} />
           <button
             type="submit"
@@ -132,6 +133,13 @@ export default async function TrainerTimetablePage({
         </div>
       ) : null}
 
+      {/* Everything below is genuinely editing (add/generate/lock/book) --
+          specs/build-spec.md §7 "Laptop only: ... editing the timetable."
+          TimetableGrid further down is deliberately OUTSIDE this gate: its
+          own mobile-day-view already exists and does real work on a phone
+          (browsing the day, marking volunteer attendance) -- gating that too
+          would remove working functionality, not just shrink a cramped one. */}
+      <LaptopOnlyGate task="Adding events, generating the skeleton, time bands, and Stage 2 booking">
       {!locked && events && events.length === 0 ? (
         <div className="sheet border-primary/20 bg-accent/20">
           <h2 className="font-serif text-lg text-ink">Start from the standard skeleton</h2>
@@ -162,6 +170,7 @@ export default async function TrainerTimetablePage({
       ) : null}
 
       <Stage2Section groups={stage2Groups} blocks={stage2Blocks} />
+      </LaptopOnlyGate>
 
       {events && events.length > 0 ? (
         <div className="sheet">

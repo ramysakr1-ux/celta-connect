@@ -7,6 +7,7 @@ import { GoogleDriveTargetsForm } from "@/app/dashboard/admin/settings/targets-f
 import { FeedbackStyleExamplesManager } from "@/components/feedback-style-examples/manager";
 import { TutorsPanel, type TutorsCourseGroup } from "@/app/dashboard/admin/settings/tutors-panel";
 import type { DeliveryMode } from "@/lib/delivery-mode";
+import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 
 const SETTINGS_NAV = [
   { href: "#centre-profile", label: "Centre profile" },
@@ -95,6 +96,7 @@ export default async function AdminSettingsPage({
     .filter((g) => g.tutors.length > 0);
 
   return (
+    <LaptopOnlyGate task="Centre setup">
     <div className="flex flex-col gap-6">
       <div className="card p-6">
         <h1 className="font-serif text-xl text-ink">Settings</h1>
@@ -221,5 +223,6 @@ export default async function AdminSettingsPage({
         </div>
       </div>
     </div>
+    </LaptopOnlyGate>
   );
 }
