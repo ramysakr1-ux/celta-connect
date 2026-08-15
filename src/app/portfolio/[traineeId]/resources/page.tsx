@@ -3,6 +3,9 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { computeThisWeekRange } from "@/lib/course-progress";
+import { CRITERIA_LABELS } from "@/lib/celta-criteria";
+import { toLocalIso } from "@/lib/timetable-grid";
 import {
   RESOURCE_CATEGORY_LABELS,
   RESOURCE_CATEGORY_ORDER,
@@ -16,6 +19,7 @@ import { ResourceContentLink } from "@/components/resource-content-link";
 import { CoursebooksSection } from "@/app/portfolio/[traineeId]/resources/coursebooks-section";
 import { MultimediaSection } from "@/app/portfolio/[traineeId]/resources/multimedia-section";
 import { AssignmentBriefsSection } from "@/app/portfolio/[traineeId]/resources/assignment-briefs-section";
+import { SectionsRail } from "@/app/trainer/(hub)/resource-hub/sections-rail";
 
 // §5 -- Resource Hub, a genuinely new feature (the pre-existing `resources`
 // table had zero UI anywhere). Starts empty by design -- no seeded content,
@@ -80,7 +84,7 @@ export default async function ResourceHubPage({
     : { data: [] };
   const coursebookIds = [...new Set((scheduledCoursebookIds ?? []).map((s) => s.tp_coursebook_id))];
 
-  const [{ data: coursebooks }, { data: audioTracks }, { data: briefs }] = await Promise.all([
+  const [{ data: coursebooks }, { data: audioTracks }, { data: briefs }, { data: course }] = await Promise.all([
     coursebookIds.length > 0
       ? supabase.from("tp_coursebooks").select("id, title, level, access_notes").in("id", coursebookIds).order("title")
       : Promise.resolve({ data: [] }),
@@ -90,7 +94,148 @@ export default async function ResourceHubPage({
       .select("id, assignment_type, sections, published_at")
       .eq("center_id", trainee.center_id)
       .not("published_at", "is", null),
+    trainee.course_id ? supabase.from("courses").select("start_date").eq("id", trainee.course_id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+
+  // for-claude-code-trainee-interface.md §5: "Fewer sections than the
+  // trainer sees" -- a real trainee (or staff/assessor previewing as one)
+  // gets the spec's restricted 3-panel layout; a real trainer/admin editing,
+  // or the assessor (reviewing for Cambridge, needs the same material a
+  // trainer sees), keeps the existing full stacked view with every category
+  // and the composer -- this page is still their one management tool for
+  // course-specific resources, distinct from the course-wide trainer hub.
+  const showTraineeLayout = !canSeeTrainerOnly;
+
+  let thisWeekSessions: {
+    id: string;
+    title: string;
+    event_time: string | null;
+    criteria: string[];
+    materials: (typeof resources)[number][];
+  }[] = [];
+  if (showTraineeLayout && trainee.course_id && course?.start_date) {
+    const today = toLocalIso(new Date());
+    const { weekStart, weekEnd } = computeThisWeekRange(course.start_date, today);
+    const { data: weekEvents } = await supabase
+      .from("course_timetable_events")
+      .select("id, title, event_date, event_time, input_session_criteria")
+      .eq("course_id", trainee.course_id)
+      .eq("type", "input_session")
+      .gte("event_date", weekStart)
+      .lte("event_date", weekEnd)
+      .order("event_date")
+      .order("event_time");
+    const inputSessionResources = byCategory.get("input_sessions") ?? [];
+    thisWeekSessions = (weekEvents ?? []).map((e) => ({
+      id: e.id,
+      title: e.title,
+      event_time: e.event_time,
+      criteria: e.input_session_criteria ?? [],
+      // Best-effort real link, not a fabricated one: a materials resource
+      // is only shown here when its title exactly matches this session's
+      // timetable title (the same name a trainer/admin gave the event).
+      // There's no per-session foreign key in the schema to join on
+      // instead -- resources.category='input_sessions' is a flat list.
+      materials: inputSessionResources.filter((r) => r.title.trim().toLowerCase() === e.title.trim().toLowerCase()),
+    }));
+  }
+  const formResources = byCategory.get("forms") ?? [];
+
+  if (showTraineeLayout) {
+    const railSections = [
+      { href: "#input-sessions", label: "Input sessions", count: byCategory.get("input_sessions")?.length ?? 0 },
+      { href: "#coursebooks", label: "Coursebooks", count: coursebooks?.length ?? 0 },
+      { href: "#multimedia", label: "Multimedia", count: audioTracks?.length ?? 0 },
+      { href: "#assignment-briefs", label: "Assignment briefs", count: briefs?.length ?? 0 },
+      { href: "#forms-and-documents", label: "Forms and documents", count: formResources.length },
+    ];
+
+    return (
+      <div className="flex flex-col gap-4">
+        <div>
+          <h2 className="font-serif text-xl text-ink">Everything the centre has given you</h2>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[210px_1fr_1fr] lg:items-start">
+          <SectionsRail sections={railSections} />
+
+          <div className="flex flex-col gap-6">
+            <div id="input-sessions" className="scroll-mt-4">
+              <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Input sessions -- this week</h3>
+              {thisWeekSessions.length === 0 ? (
+                <p className="mt-3 sheet border-dashed text-sm text-muted">Nothing scheduled this week.</p>
+              ) : (
+                <ul className="mt-3 flex flex-col gap-2">
+                  {thisWeekSessions.map((s) => (
+                    <li key={s.id} className="sheet flex flex-col gap-1.5 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-ink">{s.title}</p>
+                        {s.event_time ? <span className="shrink-0 text-xs tabular-nums text-muted">{s.event_time.slice(0, 5)}</span> : null}
+                      </div>
+                      {s.criteria.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {s.criteria.map((code) => (
+                            <span key={code} className="badge-solid" title={CRITERIA_LABELS[code] ?? ""}>
+                              {code}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                      {s.materials.length === 0 ? (
+                        <p className="text-xs text-muted">No materials linked yet.</p>
+                      ) : (
+                        <ul className="flex flex-col gap-1">
+                          {s.materials.map((m) => (
+                            <li key={m.id}>
+                              <ResourceContentLink title={m.title} fileUrl={m.file_url} storagePath={m.storage_path} contentType={m.content_type} />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div id="coursebooks" className="scroll-mt-4">
+              <CoursebooksSection coursebooks={coursebooks ?? []} isEditableStaff={false} />
+            </div>
+
+            <div id="multimedia" className="scroll-mt-4">
+              <MultimediaSection tracks={audioTracks ?? []} />
+            </div>
+
+            <div id="assignment-briefs" className="scroll-mt-4">
+              <AssignmentBriefsSection briefs={briefs ?? []} />
+            </div>
+          </div>
+
+          <div id="forms-and-documents" className="scroll-mt-4">
+            <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Forms and documents</h3>
+            <p className="mt-1 text-xs text-muted">Blank PDFs for when the platform is down or paper is preferred.</p>
+            {formResources.length === 0 ? (
+              <p className="mt-3 sheet border-dashed text-sm text-muted">Nothing here yet.</p>
+            ) : (
+              <ul className="mt-3 flex flex-col gap-3">
+                {formResources.map((resource) => (
+                  <li key={resource.id} className="sheet flex flex-col gap-1.5 p-4">
+                    <ResourceContentLink
+                      title={resource.title}
+                      fileUrl={resource.file_url}
+                      storagePath={resource.storage_path}
+                      contentType={resource.content_type}
+                    />
+                    {resource.description ? <p className="text-xs leading-relaxed text-muted">{resource.description}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">

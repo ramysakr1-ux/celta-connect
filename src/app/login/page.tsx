@@ -15,6 +15,10 @@ export default async function LoginPage({
         <div className="sheet-accent w-full max-w-sm p-8">
           <Wordmark size="hero" />
           <p className="mt-1 text-sm text-muted">Teacher training platform. Built for CELTA and Delta centres.</p>
+          <p className="mt-2 text-xs text-muted">
+            Assessors and volunteer students don&apos;t sign in -- you have your own link. Trainees sign in here too,
+            after setting up an account from their join link.
+          </p>
           {error === "invite_invalid" ? (
             <p className="mt-4 text-sm text-destructive">
               That invite link is invalid or has expired. Ask your admin to resend it.

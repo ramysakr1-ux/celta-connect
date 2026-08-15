@@ -33,7 +33,7 @@ export const ASSIGNMENT_INFO: Record<AssignmentType, { title: string; descriptio
   "Focus on Learner": {
     title: "Focus on the Learner",
     description:
-      "Profile one learner or a small group: needs, motivation, and a diagnosis of language difficulties with remedial activities.",
+      "Claim a specific grammar or pronunciation problem from the whole cohort's pooled observation log, then profile it: needs, motivation, and remedial activities.",
   },
   LRT: {
     title: "Language Related Tasks",

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { deleteBroadcast } from "@/app/portfolio/[traineeId]/stream-actions";
+import { TodayTab } from "@/app/portfolio/[traineeId]/today-tab";
 import { CandidateStatusCard } from "@/app/portfolio/[traineeId]/withdraw-card";
 import { TUTOR_ROLE_LABELS, type TutorRole } from "@/lib/tutor-roles";
 import { toLocalIso } from "@/lib/timetable-grid";
@@ -67,14 +68,33 @@ export default async function CourseStreamPage({
   // straight into `isStaff` is safe (unlike TP detail/assignment/CELTA5,
   // which need a separate raw staff check for their access gate).
   const isStaff = (viewer?.role === "trainer" || viewer?.role === "admin") && preview !== "trainee";
+
+  // for-claude-code-trainee-interface.md's Today tab replaces this page's
+  // content for a real trainee -- staff/assessor keep Course Stream below,
+  // unchanged. A real trainee previewing normally (not staff-in-preview)
+  // gets Today even under the peer-observation carve-out (viewing a
+  // groupmate's page) -- harmless, every link Today renders still points
+  // at traineeId's own routes, each independently guarded already.
+  if (!isStaff && !assessorCourseId) {
+    const { data: course } = await supabase.from("courses").select("name").eq("id", trainee.course_id).maybeSingle();
+    return <TodayTab supabase={supabase} traineeId={traineeId} courseId={trainee.course_id} courseName={course?.name ?? null} />;
+  }
+
   const today = toLocalIso(new Date());
 
   const [{ data: broadcasts }, { data: timetableEvents }, { data: tutors }, { data: assignments }] =
     await Promise.all([
       supabase
         .from("course_broadcasts")
-        .select("*, profiles(full_name, role), course_timetable_events(event_date, event_time, zoom_url, title)")
+        .select(
+          "*, profiles(full_name, role), course_timetable_events!linked_timetable_event_id(event_date, event_time, zoom_url, title)"
+        )
         .eq("course_id", trainee.course_id)
+        // Scheduling (migration 0093): a still-pending anchored announcement
+        // has sent_at null and must stay invisible to candidates until it
+        // actually fires -- see /trainer/announcements for the trainer-side
+        // Scheduled panel that shows those.
+        .not("sent_at", "is", null)
         .order("pinned", { ascending: false })
         .order("created_at", { ascending: false }),
       supabase

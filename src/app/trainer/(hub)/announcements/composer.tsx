@@ -22,23 +22,33 @@ const ASSESSOR_VISIT_TEMPLATE = {
   body: "An external Cambridge assessor will be visiting the course soon, sitting in on some teaching practice and reviewing portfolios. This is a normal, routine part of every CELTA course -- there's nothing to prepare beyond what you're already doing. If anything is on your mind, the assessor meeting itself is the place to raise it.",
 };
 
-export function BroadcastComposer({
+// for-claude-code-trainer-remaining-screens.md's "Write an announcement"
+// panel -- same core form BroadcastComposer (Today's quick-post widget)
+// already used, extended with the Scheduled panel's send-timing and
+// keep-on-duplicate controls. The linked timetable event doubles as the
+// anchor when "before/after that event" is chosen, rather than asking for
+// the same event twice.
+export function AnnouncementComposer({
   timetableEvents,
   showAssessorTemplate,
+  traineeCount,
+  trainerCount,
 }: {
   timetableEvents: TimetableEventOption[];
   showAssessorTemplate: boolean;
+  traineeCount: number;
+  trainerCount: number;
 }) {
   const [state, formAction, pending] = useActionState(postBroadcast, initialState);
   const [linkedEventId, setLinkedEventId] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [timing, setTiming] = useState<"now" | "anchored">("now");
+  const [offsetDays, setOffsetDays] = useState("-2");
 
   return (
-    <form action={formAction} className="sheet flex flex-col gap-3 border-primary/25 bg-accent/30">
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
-        Broadcast to cohort
-      </p>
+    <form action={formAction} className="sheet flex flex-col gap-3">
+      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Write an announcement</p>
 
       {showAssessorTemplate ? (
         <button
@@ -74,8 +84,8 @@ export function BroadcastComposer({
       {timetableEvents.length > 0 ? (
         <div className="flex flex-col gap-1.5">
           <label className="text-xs text-muted">
-            Link a timetable event (optional) — its date/time shows automatically, no need to
-            retype it
+            Link a timetable event (optional) — its date/time shows automatically, and it's what a
+            scheduled send below anchors to
           </label>
           <select
             name="linked_timetable_event_id"
@@ -93,6 +103,43 @@ export function BroadcastComposer({
           </select>
         </div>
       ) : null}
+
+      <div className="flex flex-col gap-1.5 rounded-[6px] border border-border-faint p-2.5">
+        <p className="text-xs font-semibold text-ink">Send timing</p>
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="radio" checked={timing === "now"} onChange={() => setTiming("now")} />
+          Now
+        </label>
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input
+            type="radio"
+            checked={timing === "anchored"}
+            onChange={() => setTiming("anchored")}
+            disabled={!linkedEventId}
+          />
+          <span className={!linkedEventId ? "text-muted" : ""}>
+            {timing === "anchored" ? (
+              <>
+                <input
+                  type="number"
+                  value={offsetDays}
+                  onChange={(e) => setOffsetDays(e.target.value)}
+                  className="mx-1 h-7 w-14 rounded-[4px] border border-input bg-card px-1.5 text-center text-sm outline-none focus:border-primary"
+                />
+                days relative to the linked event (negative = before)
+              </>
+            ) : (
+              "Days relative to the linked event"
+            )}
+          </span>
+        </label>
+        {timing === "anchored" ? (
+          <>
+            <input type="hidden" name="anchor_event_id" value={linkedEventId} />
+            <input type="hidden" name="anchor_offset_days" value={offsetDays} />
+          </>
+        ) : null}
+      </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <input
@@ -121,18 +168,28 @@ export function BroadcastComposer({
           className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
-      <div className="flex items-center justify-between">
-        <label className="flex items-center gap-2 text-sm text-muted">
-          <input type="checkbox" name="pinned" />
-          Pin to top
-        </label>
+      <p className="text-xs text-muted">
+        This goes to {traineeCount} candidate{traineeCount === 1 ? "" : "s"} and {trainerCount} tutor
+        {trainerCount === 1 ? "" : "s"} {timing === "anchored" ? "once it fires" : "now"}.
+      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-muted">
+            <input type="checkbox" name="pinned" />
+            Pin to top
+          </label>
+          <label className="flex items-center gap-2 text-sm text-muted">
+            <input type="checkbox" name="keep_on_duplicate" />
+            Keep when the course duplicates
+          </label>
+        </div>
         {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
         <button
           type="submit"
           disabled={pending}
           className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
         >
-          {pending ? "Posting…" : "Post announcement"}
+          {pending ? "Saving…" : timing === "anchored" ? "Schedule" : "Post announcement"}
         </button>
       </div>
     </form>

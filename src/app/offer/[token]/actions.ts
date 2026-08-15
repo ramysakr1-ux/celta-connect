@@ -44,6 +44,9 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
   if (applicant.offer_accept_by && applicant.offer_accept_by < new Date().toISOString().slice(0, 10)) {
     return { error: "This offer has expired. Contact the centre." };
   }
+  if (applicant.place_offer_expires_at && applicant.place_offer_expires_at < new Date().toISOString()) {
+    return { error: "This offer has expired. Contact the centre." };
+  }
 
   const uln = (formData.get("uln") as string | null)?.trim() || null;
   const specialConsideration = (formData.get("special_consideration") as string | null)?.trim() || null;

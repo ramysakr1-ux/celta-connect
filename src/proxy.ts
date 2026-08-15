@@ -70,7 +70,14 @@ export async function proxy(request: NextRequest) {
     // itself. Found live: without this, the redirect below fired before the
     // route's own auth check ever ran, so the grace-period wipe would have
     // silently never executed in production.
-    request.nextUrl.pathname.startsWith("/api/cron/");
+    request.nextUrl.pathname.startsWith("/api/cron/") ||
+    // Same reasoning, same bug pattern: a payment provider's webhook (e.g.
+    // Stripe) posts here with no session cookie either, just its own
+    // signature header -- the route verifies that itself. Found live while
+    // testing the payments bridge: without this, every webhook delivery
+    // 307-redirected to /login before the route ever ran, so provider
+    // status updates would have silently never applied in production.
+    request.nextUrl.pathname.startsWith("/api/webhooks/");
 
   // An assessor carries no real Supabase user at all -- just the
   // assessor_token cookie set by /assessor/[token] (migration 0030). This
@@ -86,9 +93,14 @@ export async function proxy(request: NextRequest) {
   // navigated anywhere under it (/trainer/roster, /trainer/grades-report,
   // /trainer/volunteers, all real assessor-facing pages per rosterOnly).
   // Needs the whole /trainer/* subtree, same as /portfolio/ already gets.
+  // for-claude-code-assessor-interface.md: the real dedicated single-screen
+  // app now lives at bare /assessor (the token-entry route redirects here
+  // after setting the cookie) -- distinct from /assessor/[token], which is
+  // already public above since it's the unauthenticated entry point itself.
   const isAssessorReachableRoute =
     hasAssessorCookie &&
-    (request.nextUrl.pathname === "/trainer" ||
+    (request.nextUrl.pathname === "/assessor" ||
+      request.nextUrl.pathname === "/trainer" ||
       request.nextUrl.pathname.startsWith("/trainer/") ||
       request.nextUrl.pathname.startsWith("/portfolio/"));
 

@@ -34,7 +34,7 @@ export default async function AdminSettingsPage({
   const admin = createAdminClient();
   const { data: center } = await admin
     .from("centers")
-    .select("name, center_number, is_uk_centre, auto_tag_criteria_enabled, admissions_email")
+    .select("name, center_number, is_uk_centre, auto_tag_criteria_enabled, admissions_email, chat_retention_days")
     .eq("id", profile.center_id)
     .maybeSingle();
   const { data: connection } = await admin
@@ -130,6 +130,7 @@ export default async function AdminSettingsPage({
                 centerNumber={center?.center_number ?? ""}
                 isUkCentre={center?.is_uk_centre ?? false}
                 admissionsEmail={center?.admissions_email ?? null}
+                chatRetentionDays={center?.chat_retention_days ?? 1}
               />
             </div>
           </div>

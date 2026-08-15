@@ -112,6 +112,8 @@ export default async function GradesReportPage() {
       }
     }
 
+    const taughtForTrainee = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at).length;
+
     return {
       traineeId: trainee.id,
       name: trainee.full_name,
@@ -119,12 +121,25 @@ export default async function GradesReportPage() {
       provisionalLabel: provisionalLabel(record),
       recommendedGrade: record?.final_recommended_grade ?? null,
       outstanding,
+      // for-claude-code-trainer-remaining-screens.md's "Undecided/Settled"
+      // split: undecided = slashed provisional with no justification typed
+      // yet (same wasSlashed/overall_notes pairing the per-candidate detail
+      // below already uses for its red warning text).
+      wasSlashed: Boolean(record?.provisional_grade_upper),
+      justified: Boolean(record?.overall_notes),
+      stage3Status: !record?.stage3_required ? "not_required" : record.stage3_finalized_at ? "given" : "not_given",
+      // TPs still to teach -- the closest real signal to the spec's "a Fail
+      // letter must be issued with at least two lessons left to teach."
+      // There's no letter-issuing feature in the app (confirmed absent, see
+      // grade-query-reply build) so this stays informational context, not
+      // an enforced gate.
+      tpsRemaining: Math.max(8 - taughtForTrainee, 0),
     };
   });
 
   return (
     <div className="flex flex-col gap-6">
-      <CohortSheet courseId={courseId} courseName={course?.name ?? "Course"} rows={cohortRows} />
+      <CohortSheet courseId={courseId} courseName={course?.name ?? "Course"} rows={cohortRows} canRelease={Boolean(trainer)} />
 
       <div className="sheet">
         <p className="mt-2 text-sm text-muted">

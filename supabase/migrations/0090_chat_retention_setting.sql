@@ -1,0 +1,13 @@
+-- "No longer hardcoded to 'resets nightly.' One centre-wide, per-course
+-- setting: a rolling day-count window (Nightly = 1 day, Weekly = 7 days,
+-- or a custom day count)... never a fixed calendar cadence, so it can't
+-- wipe mid-cycle regardless of course length. Applies identically to
+-- trainer and trainee chat; not set separately per role."
+--
+-- Centre-scoped, not course-scoped: checked the actual schema first --
+-- `staff_channels` only has `center_id`, no `course_id` at all (even
+-- tp_group channels), so "per-course" isn't a real option without a wider
+-- schema change to the channels table itself. Course Admin's own spec
+-- shows this control reached from a course-context settings screen, but
+-- the underlying value is centre-wide, matching how the data already works.
+alter table public.centers add column chat_retention_days integer not null default 1 check (chat_retention_days >= 1);

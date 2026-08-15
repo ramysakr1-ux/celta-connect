@@ -4,7 +4,8 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-access";
-import { sendApplicantEmail, offerEmailHtml, rejectionEmailHtml } from "@/lib/admissions-email";
+import { sendApplicantEmail, offerEmailHtml, rejectionEmailHtml, waitingListEmailHtml } from "@/lib/admissions-email";
+import { offerNextWaitingListPlace } from "@/lib/admissions-waiting-list";
 import type { Database } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -300,14 +301,13 @@ export async function rejectApplicant(_prevState: FormState, formData: FormData)
   return { error: emailError ? `Decision recorded, but the email failed to send: ${emailError}` : null };
 }
 
-// ---- Offer, payment tracking, waivers, waiting list ----
-// "Payment is outside the app, deliberately... nothing in Connect takes
-// money" (confirmed over Ramy's own handover, 2026-08-14) -- fee_paid is a
-// tick a person makes after money arrives by whatever route the centre
-// uses, never a real transaction. "Confirmed vs Marked by [name]" from the
-// handover survives as the recording shape even though the provider-
-// integration half of it doesn't: every figure here is "marked by" a
-// named person, never "confirmed" by anything automated.
+// ---- Offer, waivers, waiting list ----
+// Instalment/payment tracking itself moved to src/lib/payments/ (the
+// provider-bridge model, superseding the "payment is outside the app,
+// ever" position this comment used to state -- Ramy revisited that later
+// the same day, 2026-08-14. fee_amount/fee_currency here stay as the
+// headline figure captured at offer time and shown in the offer email;
+// FeeTrackingForm/fee_paid are gone, replaced by PaymentsPanel.
 
 export async function sendOffer(_prevState: FormState, formData: FormData): Promise<FormState> {
   const staff = await requireAdmissionsHandler();
@@ -342,6 +342,15 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
       offer_token: offerToken,
       fee_amount: typeof feeAmount === "string" && feeAmount ? Number(feeAmount) : null,
       fee_currency: typeof feeCurrency === "string" && feeCurrency ? feeCurrency.trim().toUpperCase() : null,
+      // This is a fresh, staff-chosen offer -- clear any leftover
+      // place-freed 48h fields from a prior waiting-list cycle, otherwise
+      // a stale past place_offer_expires_at makes this brand-new offer
+      // look already expired (offer/[token]/page.tsx and acceptOffer both
+      // check it unconditionally when set) and the next cron run would
+      // wrongly treat it as a lapsed place-freed offer and auto-advance
+      // the waiting list on top of a genuine, still-open offer.
+      place_offered_at: null,
+      place_offer_expires_at: null,
     })
     .eq("id", applicantId)
     .eq("center_id", staff.center_id);
@@ -431,7 +440,11 @@ export async function addToWaitingList(formData: FormData): Promise<void> {
   if (!canDecideAdmissions(staff)) return;
 
   const supabase = await createClient();
-  const { data: applicant } = await supabase.from("applicants").select("intake_course_id").eq("id", applicantId).maybeSingle();
+  const { data: applicant } = await supabase
+    .from("applicants")
+    .select("full_name, email, intake_course_id")
+    .eq("id", applicantId)
+    .maybeSingle();
   if (!applicant) return;
 
   const { count } = await supabase
@@ -440,12 +453,59 @@ export async function addToWaitingList(formData: FormData): Promise<void> {
     .eq("intake_course_id", applicant.intake_course_id)
     .eq("stage", "waiting_list");
 
-  await supabase
+  const position = (count ?? 0) + 1;
+  const { error } = await supabase
     .from("applicants")
-    .update({ stage: "waiting_list", waiting_list_position: (count ?? 0) + 1, waiting_list_hear_by: hearBy })
+    .update({ stage: "waiting_list", waiting_list_position: position, waiting_list_hear_by: hearBy })
     .eq("id", applicantId)
     .eq("center_id", staff.center_id);
 
+  // "If the copies fail, the booking still happened" -- same principle as
+  // the offer/rejection emails: the waiting-list placement is recorded
+  // regardless of whether the confirmation send succeeds.
+  if (!error) {
+    const [{ data: course }, { data: center }] = await Promise.all([
+      supabase.from("courses").select("name").eq("id", applicant.intake_course_id).maybeSingle(),
+      supabase.from("centers").select("name, admissions_email").eq("id", staff.center_id).maybeSingle(),
+    ]);
+    await sendApplicantEmail({
+      centerName: center?.name ?? "Your centre",
+      centerAdmissionsEmail: center?.admissions_email ?? null,
+      to: applicant.email,
+      subject: `${course?.name ?? "Your application"} -- waiting list`,
+      html: waitingListEmailHtml({
+        applicantName: applicant.full_name,
+        courseName: course?.name ?? "the course",
+        position,
+        hearBy,
+      }),
+    });
+  }
+
   revalidatePath(`/dashboard/admissions/${applicantId}`);
   revalidatePath("/dashboard/admissions");
+}
+
+// ---- Place-freed offer ----
+// "Triggered by a withdrawal, deferral, unaccepted or expired offer. The
+// app names who is next and drafts it." A place freeing is something staff
+// see happen elsewhere (a trainee withdrawal/deferral, or simply noticing
+// an offer lapsed) -- this button is the single trigger point for all of
+// those sources: the app itself picks who's next, not the staff member.
+export async function offerNextPlace(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const staff = await requireAdmissionsHandler();
+  const intakeCourseId = formData.get("intake_course_id");
+  if (typeof intakeCourseId !== "string" || !intakeCourseId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+  if (!canDecideAdmissions(staff)) {
+    return { error: "Only a verified course tutor or a nominated admissions decider can offer a place." };
+  }
+
+  const supabase = await createClient();
+  const result = await offerNextWaitingListPlace(supabase, { centerId: staff.center_id, intakeCourseId });
+
+  revalidatePath("/dashboard/admissions");
+  if (result.offeredApplicantId === null) return { error: result.reason };
+  return { error: null };
 }

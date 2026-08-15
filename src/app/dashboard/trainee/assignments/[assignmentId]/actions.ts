@@ -111,3 +111,27 @@ export async function submitAssignment(_prevState: FormState, formData: FormData
   revalidatePath(`/portfolio/${trainee.id}/assignments`);
   return { error: null };
 }
+
+// for-claude-code-trainee-interface.md's Assignments tab: "can withdraw only
+// while it's unopened; once a tutor opens it, it locks to 'being marked.'"
+// This app has no "opened_at" tracking at all (marker_id is only set once a
+// trainer actually returns a decision, not when they merely view it), so
+// the closest real signal available is first_status still being 'submitted'
+// -- coarser than "opened," but honest about what the schema can actually
+// tell. Goes through the withdraw_assignment_submission RPC (migration 0097)
+// rather than a plain .update() -- migration 0023 dropped the trainee's
+// direct UPDATE policy on assignments, so a plain client-side update matches
+// zero rows and silently no-ops. The RPC's own WHERE guard is the atomic
+// check: if a trainer's decision landed between page load and this click,
+// first_status has already moved on and the update simply matches zero rows.
+export async function withdrawAssignmentSubmission(formData: FormData): Promise<void> {
+  const trainee = await requireRole("trainee");
+  const assignmentId = formData.get("assignment_id");
+  if (typeof assignmentId !== "string") return;
+
+  const supabase = await createClient();
+  await supabase.rpc("withdraw_assignment_submission", { p_assignment_id: assignmentId });
+
+  revalidatePath(`/portfolio/${trainee.id}/assignments/${assignmentId}`);
+  revalidatePath(`/portfolio/${trainee.id}/assignments`);
+}

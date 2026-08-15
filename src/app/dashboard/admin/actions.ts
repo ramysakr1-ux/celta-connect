@@ -146,9 +146,16 @@ export async function duplicateCourse(
   // wants to tweak it.
   const { data: events } = await supabase
     .from("course_timetable_events")
-    .select("type, title, event_date, event_time, tag, linked_assignment_type, linked_tp_number")
+    .select("id, type, title, event_date, event_time, tag, linked_assignment_type, linked_tp_number")
     .eq("course_id", source.id);
 
+  // Old event id -> new event id, by insert-row-order (a single multi-row
+  // INSERT...RETURNING preserves input order in Postgres) -- lets a kept
+  // announcement's anchor (below) point at the NEW course's corresponding
+  // event instead of the old one, which for-claude-code-trainer-remaining-
+  // screens.md's "always anchored ... so the set duplicates correctly"
+  // depends on.
+  const newEventIdByOldId = new Map<string, string>();
   if (events && events.length > 0) {
     const rows = events.map((e) => ({
       course_id: newCourse.id,
@@ -161,7 +168,48 @@ export async function duplicateCourse(
       linked_tp_number: e.linked_tp_number,
       created_by: admin.id,
     }));
-    await supabase.from("course_timetable_events").insert(rows);
+    const { data: newEvents } = await supabase.from("course_timetable_events").insert(rows).select("id");
+    if (newEvents) {
+      events.forEach((e, i) => {
+        if (newEvents[i]) newEventIdByOldId.set(e.id, newEvents[i].id);
+      });
+    }
+  }
+
+  // Announcements: for-claude-code-trainer-remaining-screens.md's "keep
+  // when the course duplicates" toggle -- only scheduled ones (anchored to
+  // a timetable event) are meaningful to carry over; a one-off immediate
+  // post from the old course has nothing to duplicate into.
+  const { data: keptBroadcasts } = await supabase
+    .from("course_broadcasts")
+    .select("title, body, pinned, zoom_url, attachment_name, attachment_url, anchor_event_id, anchor_offset_days")
+    .eq("course_id", source.id)
+    .eq("keep_on_duplicate", true)
+    .not("anchor_event_id", "is", null);
+
+  const broadcastRows = (keptBroadcasts ?? [])
+    .map((b) => {
+      const newAnchorId = b.anchor_event_id ? newEventIdByOldId.get(b.anchor_event_id) : null;
+      if (!newAnchorId) return null;
+      return {
+        course_id: newCourse.id,
+        author_id: admin.id,
+        title: b.title,
+        body: b.body,
+        pinned: b.pinned,
+        zoom_url: b.zoom_url,
+        attachment_name: b.attachment_name,
+        attachment_url: b.attachment_url,
+        anchor_event_id: newAnchorId,
+        anchor_offset_days: b.anchor_offset_days,
+        keep_on_duplicate: true,
+        sent_at: null,
+      };
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
+
+  if (broadcastRows.length > 0) {
+    await supabase.from("course_broadcasts").insert(broadcastRows);
   }
 
   // Resource Hub: only course-specific attachments need copying -- centre-

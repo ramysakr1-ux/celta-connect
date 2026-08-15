@@ -151,6 +151,7 @@ export function SelfEvaluationForm({
       </Field>
 
       <FormSubmitBar
+        raiseForMobileNav
         warning="Submitting locks your self-evaluation -- you won't be able to edit it afterwards."
         draftPending={draftPending}
         submitPending={submitPending}

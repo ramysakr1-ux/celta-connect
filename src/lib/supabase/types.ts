@@ -150,7 +150,7 @@ export interface CarriedCelta5Record {
   stage3_tutor_written_assignments_notes: string | null;
   stage3_tutor_other_notes: string | null;
 }
-export type StaffChannelType = "center_trainers" | "all_staff" | "dm" | "tp_group";
+export type StaffChannelType = "center_trainers" | "all_staff" | "dm" | "tp_group" | "course_admin";
 export type TpGenerationStatus = "pending" | "processing" | "completed" | "failed";
 export type TpDensityTier = "scripted" | "framework" | "coaching_prose" | "minimal";
 export type TpPointStatus = "pending_review" | "published" | "archived";
@@ -166,7 +166,8 @@ export type ResourceCategory =
   | "input_sessions"
   | "filmed_observations"
   | "admissions"
-  | "centre_documents";
+  | "centre_documents"
+  | "forms";
 export type ResourceType = "template" | "form" | "brief" | "cambridge_doc" | "reading" | "video";
 export type ResourceContentType = "link" | "file" | "html";
 
@@ -197,6 +198,7 @@ export interface Database {
           admissions_stale_threshold_days: number;
           application_low_availability_threshold: number;
           admissions_email: string | null;
+          chat_retention_days: number;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {
@@ -465,7 +467,7 @@ export interface Database {
           id: string;
           center_id: string;
           applicant_id: string;
-          type: "submitted" | "task_returned" | "interview_completed" | "stale_no_decision";
+          type: "submitted" | "task_returned" | "interview_completed" | "stale_no_decision" | "place_offered";
           message: string;
           read_at: string | null;
           created_at: string;
@@ -477,6 +479,98 @@ export interface Database {
           message: string;
         };
         Update: Partial<Database["public"]["Tables"]["admissions_notifications"]["Row"]>;
+        Relationships: [];
+      };
+      payment_plans: {
+        Row: {
+          id: string;
+          center_id: string;
+          course_id: string;
+          applicant_id: string;
+          total_amount: number;
+          currency: string;
+          instalment_count: number;
+          created_at: string;
+          created_by: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["payment_plans"]["Row"]> & {
+          center_id: string;
+          course_id: string;
+          applicant_id: string;
+          total_amount: number;
+          currency: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["payment_plans"]["Row"]>;
+        Relationships: [];
+      };
+      payments: {
+        Row: {
+          id: string;
+          center_id: string;
+          payment_plan_id: string;
+          instalment_index: number;
+          amount: number;
+          currency: string;
+          due_date: string | null;
+          status: "pending" | "paid" | "missed" | "refunded";
+          source: "provider" | "manual" | null;
+          provider: string | null;
+          provider_checkout_url: string | null;
+          provider_transaction_id: string | null;
+          marked_by: string | null;
+          marked_note: string | null;
+          paid_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["payments"]["Row"]> & {
+          center_id: string;
+          payment_plan_id: string;
+          instalment_index: number;
+          amount: number;
+          currency: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["payments"]["Row"]>;
+        Relationships: [];
+      };
+      payment_provider_transactions: {
+        Row: {
+          id: string;
+          center_id: string;
+          provider: string;
+          provider_event_id: string;
+          payment_id: string | null;
+          event_type: "payment_succeeded" | "payment_failed" | "refunded";
+          amount: number | null;
+          currency: string | null;
+          raw_payload: unknown;
+          received_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["payment_provider_transactions"]["Row"]> & {
+          center_id: string;
+          provider_event_id: string;
+          event_type: "payment_succeeded" | "payment_failed" | "refunded";
+          raw_payload: unknown;
+        };
+        Update: Partial<Database["public"]["Tables"]["payment_provider_transactions"]["Row"]>;
+        Relationships: [];
+      };
+      payment_notifications: {
+        Row: {
+          id: string;
+          center_id: string;
+          payment_id: string;
+          type: "instalment_missed";
+          message: string;
+          read_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["payment_notifications"]["Row"]> & {
+          center_id: string;
+          payment_id: string;
+          type: "instalment_missed";
+          message: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["payment_notifications"]["Row"]>;
         Relationships: [];
       };
       tp_lessons: {
@@ -1140,6 +1234,39 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["course_tp_groups"]["Row"]>;
         Relationships: [];
       };
+      stage2_tutorial_blocks: {
+        Row: {
+          id: string;
+          course_id: string;
+          timetable_event_id: string;
+          tp_group_id: string | null;
+          subgroup_id: string | null;
+          slot_length_minutes: number;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["stage2_tutorial_blocks"]["Row"]> & {
+          course_id: string;
+          timetable_event_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["stage2_tutorial_blocks"]["Row"]>;
+        Relationships: [];
+      };
+      stage2_tutorial_slots: {
+        Row: {
+          id: string;
+          block_id: string;
+          position: number;
+          trainee_id: string | null;
+          booked_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["stage2_tutorial_slots"]["Row"]> & {
+          block_id: string;
+          position: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["stage2_tutorial_slots"]["Row"]>;
+        Relationships: [];
+      };
       course_tutors: {
         Row: {
           id: string;
@@ -1198,6 +1325,14 @@ export interface Database {
           attachment_url: string | null;
           linked_timetable_event_id: string | null;
           created_at: string;
+          sent_at: string | null;
+          anchor_event_id: string | null;
+          anchor_offset_days: number | null;
+          keep_on_duplicate: boolean;
+          visible_to_tp_group_id: string | null;
+          visible_to_subgroup_id: string | null;
+          visible_to_trainee_id: string | null;
+          source_key: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["course_broadcasts"]["Row"]> & {
           course_id: string;
@@ -1455,12 +1590,84 @@ export interface Database {
           level: string | null;
           created_at: string;
           removed_at: string | null;
+          signup_written_answers: unknown | null;
+          signup_audio_url: string | null;
+          signup_completed_at: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["volunteer_students"]["Row"]> & {
           course_id: string;
           name: string;
         };
         Update: Partial<Database["public"]["Tables"]["volunteer_students"]["Row"]>;
+        Relationships: [];
+      };
+      volunteer_signup_profiles: {
+        Row: {
+          id: string;
+          center_id: string;
+          course_id: string;
+          volunteer_student_id: string;
+          written_answers: unknown;
+          audio_url: string | null;
+          transcript: string | null;
+          transcript_generated_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["volunteer_signup_profiles"]["Row"]> & {
+          center_id: string;
+          course_id: string;
+          volunteer_student_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["volunteer_signup_profiles"]["Row"]>;
+        Relationships: [];
+      };
+      class_error_log: {
+        Row: {
+          id: string;
+          center_id: string;
+          course_id: string;
+          logged_by_candidate_id: string;
+          learner_id: string;
+          tp_class: string;
+          tp_number: number;
+          lesson_stage: string | null;
+          problem_type: "grammar" | "pronunciation";
+          note: string;
+          logged_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["class_error_log"]["Row"]> & {
+          center_id: string;
+          course_id: string;
+          logged_by_candidate_id: string;
+          learner_id: string;
+          tp_class: string;
+          tp_number: number;
+          problem_type: "grammar" | "pronunciation";
+          note: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["class_error_log"]["Row"]>;
+        Relationships: [];
+      };
+      fol_claims: {
+        Row: {
+          id: string;
+          center_id: string;
+          course_id: string;
+          candidate_id: string;
+          problem_type: "grammar" | "pronunciation";
+          problem_description: string;
+          source: "pooled_log" | "signup_recording";
+          claimed_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["fol_claims"]["Row"]> & {
+          center_id: string;
+          course_id: string;
+          candidate_id: string;
+          problem_type: "grammar" | "pronunciation";
+          problem_description: string;
+          source: "pooled_log" | "signup_recording";
+        };
+        Update: Partial<Database["public"]["Tables"]["fol_claims"]["Row"]>;
         Relationships: [];
       };
       course_access_tokens: {
@@ -1633,6 +1840,10 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      set_stage2_slot_count: {
+        Args: { p_block_id: string; p_slot_count: number };
+        Returns: void;
+      };
       get_my_celta5_record: {
         Args: Record<string, never>;
         // Narrower than the full table Row: omits admin_access_granted_by,
@@ -1705,6 +1916,10 @@ export interface Database {
           p_sub_aim: string | null;
           p_material: string;
         };
+        Returns: void;
+      };
+      withdraw_assignment_submission: {
+        Args: { p_assignment_id: string };
         Returns: void;
       };
     };

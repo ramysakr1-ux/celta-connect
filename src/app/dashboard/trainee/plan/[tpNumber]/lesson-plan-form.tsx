@@ -484,6 +484,7 @@ export function LessonPlanForm({
       </div>
 
       <FormSubmitBar
+        raiseForMobileNav
         warning="Submitting locks this lesson plan -- you won't be able to edit it afterwards."
         draftPending={draftPending}
         submitPending={submitPending}

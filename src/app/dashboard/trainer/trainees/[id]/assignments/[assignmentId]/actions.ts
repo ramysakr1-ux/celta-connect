@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import type { Database } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -90,12 +91,12 @@ async function returnAssignment(
   // resubmission it accompanies" -- a Plagiarism Reflection never gets a
   // resubmission round of its own, so a fail is final on the first round
   // for this type only.
-  const { data: assignmentType } = await supabase
+  const { data: assignmentRow } = await supabase
     .from("assignments")
-    .select("assignment_type")
+    .select("assignment_type, trainee_id, course_id")
     .eq("id", assignmentId)
     .maybeSingle();
-  const isOneChanceReflection = assignmentType?.assignment_type === "Plagiarism Reflection";
+  const isOneChanceReflection = assignmentRow?.assignment_type === "Plagiarism Reflection";
 
   if (decision === "resubmission_required" && isOneChanceReflection) {
     return { error: "A Plagiarism Reflection has one chance only -- pass or fail, no resubmission." };
@@ -137,7 +138,31 @@ async function returnAssignment(
   const { error } = await supabase.from("assignments").update(update).eq("id", assignmentId);
   if (error) return { error: "Could not update the assignment. Try again." };
 
+  // for-claude-code-announcements-list.md table B (system-event, personal
+  // scope): "an assignment is marked / feedback returned -> the one
+  // candidate." Fires immediately, not scheduled -- there's no timetable
+  // anchor for "whenever a trainer happens to finish marking."
+  if (assignmentRow?.trainee_id && assignmentRow.course_id) {
+    const label = assignmentRow.assignment_type ? ASSIGNMENT_INFO[assignmentRow.assignment_type]?.title : null;
+    const title =
+      status === "resubmission_required"
+        ? `${label ?? "An assignment"} needs resubmission`
+        : `${label ?? "An assignment"} feedback is ready`;
+    await supabase.from("course_broadcasts").insert({
+      course_id: assignmentRow.course_id,
+      author_id: marker.id,
+      title,
+      body:
+        status === "resubmission_required"
+          ? "Check the brief for what to revise before resubmitting."
+          : "Open your Written Assignments tab to see the full feedback.",
+      visible_to_trainee_id: assignmentRow.trainee_id,
+      sent_at: new Date().toISOString(),
+    });
+  }
+
   revalidatePath(`/dashboard/trainer/trainees`);
+  revalidatePath(`/portfolio/[traineeId]`, "layout");
   return { error: null };
 }
 

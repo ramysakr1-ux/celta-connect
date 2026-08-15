@@ -7,7 +7,8 @@ import { MarkingForm } from "@/app/dashboard/admissions/[id]/marking-form";
 import { InterviewRecordForm } from "@/app/dashboard/admissions/[id]/interview-record-form";
 import { RejectForm } from "@/app/dashboard/admissions/[id]/reject-form";
 import { OfferForm } from "@/app/dashboard/admissions/[id]/offer-form";
-import { FeeTrackingForm } from "@/app/dashboard/admissions/[id]/fee-tracking-form";
+import { PaymentsPanel } from "@/app/dashboard/admissions/[id]/payments-panel";
+import { WaiverForm } from "@/app/dashboard/admissions/[id]/waiver-form";
 import { WaitingListForm } from "@/app/dashboard/admissions/[id]/waiting-list-form";
 
 export default async function ApplicantDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -35,6 +36,11 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       supabase.from("interview_questions").select("id, question_text, coverage_area").eq("center_id", staff.center_id).eq("active", true),
       supabase.from("interview_records").select("*").eq("applicant_id", id).maybeSingle(),
     ]);
+
+  const { data: paymentPlan } = await supabase.from("payment_plans").select("id").eq("applicant_id", id).maybeSingle();
+  const { data: payments } = paymentPlan
+    ? await supabase.from("payments").select("*").eq("payment_plan_id", paymentPlan.id)
+    : { data: [] };
 
   const canDecide = canDecideAdmissions(staff);
   const isRejected = applicant.stage === "rejected_before_interview" || applicant.stage === "rejected_after_interview";
@@ -182,7 +188,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               {applicant.fee_amount ? ` Fee: ${applicant.fee_amount}${applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}.` : ""}
             </p>
           </div>
-          <FeeTrackingForm applicant={applicant} />
+          <PaymentsPanel applicant={applicant} payments={payments ?? []} />
+          <WaiverForm applicant={applicant} />
         </>
       ) : null}
 

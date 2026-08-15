@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Newsreader, Karla, Instrument_Serif, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -33,6 +33,20 @@ const instrumentSans = Instrument_Sans({
 export const metadata: Metadata = {
   title: "Connect",
   description: "CELTA course administration, built for centers.",
+  // specs/build-spec.md §7: iOS ignores manifest.ts's theme_color/display
+  // for "Add to Home Screen" -- this is the separate metadata iOS actually
+  // reads (apple-touch-icon comes from apple-icon.tsx automatically).
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Connect",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#3e2818",
 };
 
 export default function RootLayout({

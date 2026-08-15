@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { CreateCourseForm } from "@/app/dashboard/admin/create-course-form";
 import { computeWeekOf, computeCourseState, type CourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
+import { getRecentCentreChanges } from "@/lib/what-changed";
+import { WhatChangedPanel } from "@/components/what-changed-panel";
 
 // Centre Admin.dc.html 1a -- courses group by state instead of a flat
 // date-sorted list. State is purely date-derived (see computeCourseState's
@@ -48,6 +50,8 @@ export default async function AdminDashboardPage() {
     { label: "Feedback style examples", count: styleExamples.count ?? 0, suffix: "" },
     { label: "Coursebooks", count: coursebooks.count ?? 0, suffix: "" },
   ];
+
+  const recentChanges = await getRecentCentreChanges(profile.center_id);
 
   const eventDatesByCourse = new Map<string, string[]>();
   for (const e of events ?? []) {
@@ -117,6 +121,14 @@ export default async function AdminDashboardPage() {
             </p>
           </div>
         </div>
+      ) : center?.center_number ? (
+        <div className="flex items-center gap-3 rounded-[6px] border border-border bg-accent/30 p-3">
+          <span className="size-1.5 shrink-0 rounded-full bg-primary" />
+          <p className="text-sm text-ink">
+            Centre number set -- {center.center_number}
+            <span className="text-muted"> &middot; Prints on every final report and cover sheet.</span>
+          </p>
+        </div>
       ) : null}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
@@ -175,6 +187,8 @@ export default async function AdminDashboardPage() {
             ))}
           </div>
         </div>
+
+        <WhatChangedPanel changes={recentChanges} />
       </div>
     </div>
   );

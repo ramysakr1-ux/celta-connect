@@ -25,7 +25,7 @@ export function RosterRowView({ row }: { row: RosterRow }) {
             {row.name}
           </Link>
         </td>
-        <td colSpan={7} className="text-right">
+        <td colSpan={8} className="text-right">
           <span className="pill pill-neutral">{COURSE_STATUS_LABEL[row.courseStatus]}</span>
         </td>
       </tr>
@@ -53,6 +53,9 @@ export function RosterRowView({ row }: { row: RosterRow }) {
         <div className="ml-auto">
           <TrajectoryBarCompact value={row.trajectory} />
         </div>
+      </td>
+      <td className={`text-right ${row.provisionalSlashed ? "font-bold text-destructive" : "text-ink"}`}>
+        {row.provisionalLabel ?? <span className="text-muted">Not set</span>}
       </td>
       <td className="text-right">
         {row.atRiskReasons.length > 0 ? (

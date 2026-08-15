@@ -39,6 +39,7 @@ export async function GET() {
     "Criteria",
     "Attendance",
     "Standing",
+    "Provisional grade",
     "At risk",
   ];
   const lines = [
@@ -53,6 +54,7 @@ export async function GET() {
         csvCell(`${r.criteriaPct}%`),
         csvCell(`${r.attendancePct}%`),
         csvCell(r.trajectory),
+        csvCell(r.provisionalLabel ?? "Not set"),
         csvCell(r.atRiskReasons.map((reason) => AT_RISK_LABELS[reason]).join("; ")),
       ].join(",")
     ),

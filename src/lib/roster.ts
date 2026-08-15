@@ -17,6 +17,8 @@ export interface RosterRow {
   attendancePct: number;
   trajectory: Trajectory;
   atRiskReasons: AtRiskReason[];
+  provisionalLabel: string | null;
+  provisionalSlashed: boolean;
 }
 
 // Single source of truth for what a roster row means -- both the roster
@@ -53,7 +55,10 @@ export async function fetchRosterRows(
             .from("assignments")
             .select("trainee_id, assignment_type, first_status, resubmission_status, due_date, first_submitted_at")
             .eq("course_id", courseId),
-          supabase.from("celta5_records").select("trainee_id, hours_attended").eq("course_id", courseId),
+          supabase
+            .from("celta5_records")
+            .select("trainee_id, hours_attended, provisional_grade, provisional_grade_upper")
+            .eq("course_id", courseId),
           supabase.from("celta5_matrix").select("trainee_id, criteria_code, tutor_status_stage2").eq("course_id", courseId),
           supabase.from("courses").select("total_hours").eq("id", courseId).maybeSingle(),
         ])
@@ -86,8 +91,19 @@ export async function fetchRosterRows(
     const matrixByCode = new Map(traineeMatrix.map((m) => [m.criteria_code, m.tutor_status_stage2]));
     const criteriaPct = computeCriteriaPct(matrixByCode);
 
-    const hoursAttended = celta5Records?.find((r) => r.trainee_id === trainee.id)?.hours_attended ?? 0;
+    const celta5Record = celta5Records?.find((r) => r.trainee_id === trainee.id);
+    const hoursAttended = celta5Record?.hours_attended ?? 0;
     const attendancePct = Math.round((hoursAttended / totalHours) * 100);
+    // for-claude-code-trainer-remaining-screens.md's "slashed provisional"
+    // -- a candidate the tutors haven't settled between two adjacent
+    // grades yet. Same provisional_grade/_upper pairing Grades Report
+    // already reads (see cohort-sheet.tsx's wasSlashed).
+    const provisionalLabel = celta5Record?.provisional_grade
+      ? celta5Record.provisional_grade_upper
+        ? `${celta5Record.provisional_grade} / ${celta5Record.provisional_grade_upper}`
+        : celta5Record.provisional_grade
+      : null;
+    const provisionalSlashed = Boolean(celta5Record?.provisional_grade_upper);
 
     const trajectory = computeTrajectory(CELTA_CRITERIA_CODES.map((code) => matrixByCode.get(code) ?? null));
 
@@ -108,6 +124,8 @@ export async function fetchRosterRows(
       attendancePct,
       trajectory,
       atRiskReasons,
+      provisionalLabel,
+      provisionalSlashed,
     };
   });
 }

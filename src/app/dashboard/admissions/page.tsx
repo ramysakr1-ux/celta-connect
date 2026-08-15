@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
 import { createInterviewSlot } from "@/app/dashboard/admissions/actions";
+import { OfferNextPlaceForm } from "@/app/dashboard/admissions/offer-next-place-form";
 
 const STAGE_LABEL: Record<string, string> = {
   submitted: "Submitted",
@@ -45,6 +46,30 @@ export default async function AdmissionsPage() {
   ]);
 
   const intakeNameById = new Map((intakes ?? []).map((i) => [i.id, i.name]));
+
+  // Waiting-list counts per intake -- fetched independent of the
+  // "accepting_applications" intakes above, since a course can still have
+  // a waiting list after being closed to new applications.
+  const { data: waitingApplicants } = await supabase
+    .from("applicants")
+    .select("intake_course_id")
+    .eq("center_id", staff.center_id)
+    .eq("stage", "waiting_list")
+    .eq("waiting_list_opt_out", false);
+  const waitingIntakeIds = Array.from(new Set((waitingApplicants ?? []).map((a) => a.intake_course_id)));
+  const { data: waitingIntakeCourses } =
+    waitingIntakeIds.length > 0
+      ? await supabase.from("courses").select("id, name").in("id", waitingIntakeIds)
+      : { data: [] as { id: string; name: string }[] };
+  const waitingIntakeNameById = new Map((waitingIntakeCourses ?? []).map((c) => [c.id, c.name]));
+  const waitingByIntake = new Map<string, { name: string; count: number }>();
+  for (const a of waitingApplicants ?? []) {
+    const existing = waitingByIntake.get(a.intake_course_id);
+    waitingByIntake.set(a.intake_course_id, {
+      name: waitingIntakeNameById.get(a.intake_course_id) ?? "--",
+      count: (existing?.count ?? 0) + 1,
+    });
+  }
 
   const stale = (applicants ?? []).filter(
     (a) => !["accepted", "rejected_before_interview", "rejected_after_interview", "not_this_time", "withdrawn_application"].includes(a.stage)
@@ -160,6 +185,24 @@ export default async function AdmissionsPage() {
           <p className="text-xs text-muted">Open a course for applications first (from its admin page) to book interview slots.</p>
         )}
       </div>
+
+      {waitingByIntake.size > 0 ? (
+        <div className="card flex flex-col gap-4 p-6">
+          <h2 className="font-serif text-lg text-ink">Waiting lists</h2>
+          <p className="text-sm text-muted">
+            When a place frees up (a withdrawal, deferral, or a lapsed offer), offer it to whoever's next -- the app
+            picks who, not you.
+          </p>
+          <ul className="flex flex-col gap-3">
+            {Array.from(waitingByIntake.entries()).map(([intakeCourseId, { name, count }]) => (
+              <li key={intakeCourseId} className="flex items-center justify-between border-t border-border pt-3">
+                <span className="text-sm text-ink">{name}</span>
+                <OfferNextPlaceForm intakeCourseId={intakeCourseId} waitingCount={count} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 }

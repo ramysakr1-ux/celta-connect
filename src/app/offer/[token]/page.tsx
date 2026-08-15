@@ -19,7 +19,8 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
   const invalid =
     !applicant ||
     applicant.stage !== "offer_sent" ||
-    (applicant.offer_accept_by && applicant.offer_accept_by < new Date().toISOString().slice(0, 10));
+    (applicant.offer_accept_by && applicant.offer_accept_by < new Date().toISOString().slice(0, 10)) ||
+    (applicant.place_offer_expires_at && applicant.place_offer_expires_at < new Date().toISOString());
 
   if (invalid) {
     return (
@@ -52,6 +53,20 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
           <p className="mt-2 text-sm text-muted">
             Fee: {applicant.fee_amount}
             {applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}. Accept by {formatDate(applicant.offer_accept_by!)}.
+          </p>
+        ) : null}
+        {applicant.place_offer_expires_at ? (
+          <p className="mt-2 text-sm text-muted">
+            This place is available until{" "}
+            {new Date(applicant.place_offer_expires_at).toLocaleString("en-GB", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              hour: "numeric",
+              minute: "2-digit",
+              timeZone: "UTC",
+            })}{" "}
+            UTC. After that, it goes to the next person on the waiting list.
           </p>
         ) : null}
         <OfferAcceptForm token={token} isUkCentre={center?.is_uk_centre ?? false} defaultSpecialConsideration={applicant.special_requirements} />

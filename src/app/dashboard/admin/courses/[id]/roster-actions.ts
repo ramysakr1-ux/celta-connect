@@ -140,7 +140,12 @@ export async function sendJoinLinkEmail(
   _prevState: EmailLinkState,
   formData: FormData
 ): Promise<EmailLinkState> {
-  const admin = await requireRole("admin");
+  // Trainers can only send the *trainee* link, and only for their own
+  // course -- for-claude-code-trainer-remaining-screens.md's Roster "Add
+  // candidate" action. Regenerating/removing stays admin-only (those are
+  // destructive to an already-shared link); sending a fresh invite email
+  // isn't, so it's safe to widen just this one action.
+  const staff = await requireRole(["trainer", "admin"]);
 
   const courseId = formData.get("course_id");
   const role = formData.get("role");
@@ -154,6 +159,9 @@ export async function sendJoinLinkEmail(
   ) {
     return { error: "Enter an email address.", sent: false };
   }
+  if (staff.role === "trainer" && role !== "trainee") {
+    return { error: "Not authorized.", sent: false };
+  }
 
   const supabase = await createClient();
   const { data: course } = await supabase
@@ -162,7 +170,9 @@ export async function sendJoinLinkEmail(
     .eq("id", courseId)
     .maybeSingle();
 
-  if (!course || course.center_id !== admin.center_id) {
+  const authorized =
+    course && (staff.role === "admin" ? course.center_id === staff.center_id : courseId === staff.course_id);
+  if (!course || !authorized) {
     return { error: "Course not found.", sent: false };
   }
 
@@ -176,7 +186,7 @@ export async function sendJoinLinkEmail(
   // Subject leads with the centre, not the platform -- the recipient
   // recognises their centre; Connect is the tool underneath
   // (specs/rename-to-connect.md, "Copy that changes meaning" #2).
-  const { data: center } = await supabase.from("centers").select("name").eq("id", admin.center_id).maybeSingle();
+  const { data: center } = await supabase.from("centers").select("name").eq("id", staff.center_id).maybeSingle();
   const centerName = center?.name ?? "Your centre";
 
   try {

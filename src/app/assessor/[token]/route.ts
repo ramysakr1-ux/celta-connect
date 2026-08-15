@@ -25,7 +25,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
     return NextResponse.redirect(`${origin}/login?error=assessor_link_invalid`);
   }
 
-  const response = NextResponse.redirect(`${origin}/trainer`);
+  const response = NextResponse.redirect(`${origin}/assessor`);
   response.cookies.set(ASSESSOR_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

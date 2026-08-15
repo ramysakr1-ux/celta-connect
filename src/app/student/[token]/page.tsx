@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MaterialsCard } from "@/app/student/[token]/materials-card";
+import { VolunteerSignupForm } from "@/app/student/[token]/signup-form";
+import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
 
 // §14 -- the volunteer-student (TP student) view. No login, no password --
@@ -37,7 +39,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
   const [{ data: volunteer }, { data: course }, { data: attendance }, { data: sharedMaterials }] =
     await Promise.all([
-      admin.from("volunteer_students").select("name").eq("id", accessToken.volunteer_student_id).maybeSingle(),
+      admin.from("volunteer_students").select("name, signup_completed_at").eq("id", accessToken.volunteer_student_id).maybeSingle(),
       admin.from("courses").select("name").eq("id", accessToken.course_id).maybeSingle(),
       admin.from("volunteer_attendance").select("timetable_event_id").eq("volunteer_student_id", accessToken.volunteer_student_id),
       admin
@@ -48,6 +50,28 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     ]);
 
   if (!volunteer) notFound();
+
+  // One-time collection, before the ongoing dashboard ever shows -- feeds
+  // FOL's pooled-evidence model (class_error_log/fol_claims), unlocked to
+  // candidates only from the course's Day-10 divergence session on.
+  if (!volunteer.signup_completed_at) {
+    return (
+      <div className="min-h-screen bg-[#fdf6ec]">
+        <div className="mx-auto flex max-w-xl flex-col gap-6 p-6 sm:p-10">
+          <div>
+            <p className="text-sm font-medium text-[#b3892f] uppercase tracking-wide">{course?.name ?? "Your course"}</p>
+            <h1 className="mt-1 font-serif text-3xl text-[#3a2e18]">Welcome, {volunteer.name}!</h1>
+            <p className="mt-2 text-sm text-[#8a6a2f]">
+              Before your first class, tell us a bit about yourself -- this helps your teachers get to know you.
+            </p>
+          </div>
+          <div className="rounded-xl border border-[#eddfc4] bg-white p-6">
+            <VolunteerSignupForm token={token} questions={SIGNUP_QUESTIONS} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const attendedSessions = attendance?.length ?? 0;
 

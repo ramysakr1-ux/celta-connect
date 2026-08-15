@@ -123,7 +123,7 @@ export async function assignTpRound(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole(["trainer", "admin"]);
+  const trainer = await requireRole(["trainer", "admin"]);
 
   const subgroupId = formData.get("subgroup_id");
   const tpNumber = formData.get("tp_number");
@@ -141,6 +141,36 @@ export async function assignTpRound(
     return { error: error.message };
   }
 
+  // for-claude-code-announcements-list.md table A: "TP round released ->
+  // whole cohort" -- narrowed here to just this subgroup, since release is
+  // itself per-subgroup (a paired TP group's two halves release the same
+  // TP number on different real dates, see rotation.ts). source_key makes
+  // re-clicking an already-released round a no-op, not a duplicate ping --
+  // checked in app code, not via upsert(onConflict), since Postgres won't
+  // take a partial unique index as a conflict target through supabase-js
+  // (see announcements-catalog.ts's comment for the confirmed 42P10).
+  if (trainer.course_id) {
+    const sourceKey = `tp_release:${subgroupId}:${tpNumber}`;
+    const { data: already } = await supabase
+      .from("course_broadcasts")
+      .select("id")
+      .eq("course_id", trainer.course_id)
+      .eq("source_key", sourceKey)
+      .maybeSingle();
+    if (!already) {
+      await supabase.from("course_broadcasts").insert({
+        course_id: trainer.course_id,
+        author_id: trainer.id,
+        title: `TP${tpNumber} points are released — start planning`,
+        body: null,
+        visible_to_subgroup_id: subgroupId,
+        sent_at: new Date().toISOString(),
+        source_key: sourceKey,
+      });
+    }
+  }
+
   revalidatePath("/trainer/rotation");
+  revalidatePath("/trainer/announcements");
   return { error: null };
 }

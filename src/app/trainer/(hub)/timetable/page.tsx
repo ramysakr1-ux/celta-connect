@@ -6,6 +6,7 @@ import { GenerateSkeletonForm } from "@/app/trainer/(hub)/timetable/generate-ske
 import { TimetableGrid } from "@/app/trainer/(hub)/timetable/timetable-grid";
 import { TimeBandsForm } from "@/app/trainer/(hub)/timetable/time-bands-form";
 import { resolveTimeBands } from "@/lib/timetable-grid";
+import { Stage2Section } from "@/app/trainer/(hub)/timetable/stage2-section";
 
 // §1.1a v2 -- the course timetable is the single source of truth for the
 // whole course clock (This Week panel, due/overdue states, TP dates).
@@ -66,6 +67,30 @@ export default async function TrainerTimetablePage({
     set.add(row.volunteer_student_id);
     attendedByEvent.set(row.timetable_event_id, set);
   }
+
+  // Stage 2 tutorial booking sheet (3a) -- groups list matches Rotation's
+  // own paired-tp-group / unpaired-subgroup enumeration exactly, and blocks
+  // aren't gated by timetable_locked_at: tutorials get scheduled as the
+  // course actually progresses, well after the base shape is locked.
+  const [{ data: subgroups }, { data: tpGroups }, { data: blocks }] = await Promise.all([
+    supabase.from("course_subgroups").select("id, name, tp_group_id").eq("course_id", trainer.course_id).order("created_at"),
+    supabase.from("course_tp_groups").select("id, name").eq("course_id", trainer.course_id),
+    supabase
+      .from("stage2_tutorial_blocks")
+      .select("id, tp_group_id, subgroup_id, timetable_event_id")
+      .eq("course_id", trainer.course_id),
+  ]);
+  const pairedTpGroupIds = new Set((subgroups ?? []).filter((s) => s.tp_group_id).map((s) => s.tp_group_id));
+  const stage2Groups = [
+    ...(tpGroups ?? []).filter((g) => pairedTpGroupIds.has(g.id)).map((g) => ({ kind: "tpgroup" as const, id: g.id, name: g.name })),
+    ...(subgroups ?? []).filter((s) => !s.tp_group_id).map((s) => ({ kind: "subgroup" as const, id: s.id, name: s.name })),
+  ];
+  const blockEventById = new Map((events ?? []).map((e) => [e.id, e]));
+  const stage2Blocks = (blocks ?? []).map((b) => {
+    const event = blockEventById.get(b.timetable_event_id);
+    const group = stage2Groups.find((g) => (b.tp_group_id ? g.id === b.tp_group_id : g.id === b.subgroup_id));
+    return { id: b.id, groupName: group?.name ?? "Unknown group", eventDate: event?.event_date ?? "" };
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -135,6 +160,8 @@ export default async function TrainerTimetablePage({
           <AddEventForm existingEvents={(events ?? []).map((e) => ({ id: e.id, title: e.title, event_date: e.event_date }))} />
         </div>
       ) : null}
+
+      <Stage2Section groups={stage2Groups} blocks={stage2Blocks} />
 
       {events && events.length > 0 ? (
         <div className="sheet">

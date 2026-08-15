@@ -310,6 +310,18 @@ h6 {
     box-shadow: none;
   }
 
+  /* Red-tint confirmation card ("check your email" after a magic-link or
+     reset-link send) -- same oklab-mixing rule as .sheet-accent above, same
+     reason: oklch's polar space hits an undefined-hue edge case mixing two
+     near-achromatic colors. Per Entry.dc.html's exact formula. */
+  .sheet-accent-alert {
+    background-color: color-mix(in oklab, var(--color-destructive) 6%, var(--color-card));
+    border: 1px solid color-mix(in oklab, var(--color-destructive) 20%, transparent);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    box-shadow: none;
+  }
+
 
   .pill {
     display: inline-flex;

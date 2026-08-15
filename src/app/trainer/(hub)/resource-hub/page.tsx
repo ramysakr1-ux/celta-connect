@@ -3,6 +3,8 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { ResourceCategoryManager } from "@/app/trainer/(hub)/resource-hub/resource-category-manager";
 import { CoursebooksSection } from "@/app/portfolio/[traineeId]/resources/coursebooks-section";
+import { SectionsRail } from "@/app/trainer/(hub)/resource-hub/sections-rail";
+import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 
 // specs/build-spec.md "Replace the Audio Library tab with a Resource hub
 // tab... six sections: TP points, coursebooks, multimedia, assignment
@@ -23,7 +25,16 @@ export default async function TrainerResourceHubPage() {
     : { data: [] };
   const coursebookIds = [...new Set((scheduledCoursebookIds ?? []).map((s) => s.tp_coursebook_id))];
 
-  const [{ data: coursebooks }, { data: inputSessionResources }, { data: centreDocResources }] = await Promise.all([
+  const [
+    { data: coursebooks },
+    { data: inputSessionResources },
+    { data: centreDocResources },
+    { data: formResources },
+    { count: publishedPointCount },
+    { count: multimediaCount },
+    { count: assignmentBriefCount },
+    { data: schedule },
+  ] = await Promise.all([
     coursebookIds.length > 0
       ? supabase.from("tp_coursebooks").select("id, title, level, access_notes").in("id", coursebookIds).order("title")
       : Promise.resolve({ data: [] }),
@@ -41,10 +52,84 @@ export default async function TrainerResourceHubPage() {
       .eq("category", "centre_documents")
       .or(courseId ? `course_id.eq.${courseId},course_id.is.null` : "course_id.is.null")
       .order("created_at", { ascending: false }),
+    supabase
+      .from("resources")
+      .select("*")
+      .eq("center_id", trainer.center_id)
+      .eq("category", "forms")
+      .or(courseId ? `course_id.eq.${courseId},course_id.is.null` : "course_id.is.null")
+      .order("created_at", { ascending: false }),
+    supabase.from("tp_points").select("id", { count: "exact", head: true }).eq("status", "published").eq("center_id", trainer.center_id),
+    supabase.from("tp_audio_library").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
+    supabase.from("assignment_templates").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
+    courseId ? supabase.from("course_tp_schedule").select("tp_number, tp_coursebook_id") : Promise.resolve({ data: [] }),
   ]);
 
+  // "TP points" inline panel -- release style / round(s) / source / usage,
+  // scoped to the coursebooks actually scheduled on THIS course (the full
+  // centre-wide library stays on /trainer/coursebooks, linked above).
+  const { data: scopedPoints } =
+    coursebookIds.length > 0
+      ? await supabase
+          .from("tp_points")
+          .select("id, tp_coursebook_id, tp_number, short_title, main_lesson_aim, density_tier, status")
+          .in("tp_coursebook_id", coursebookIds)
+          .eq("status", "published")
+          .order("tp_number")
+      : { data: [] };
+
+  const { data: usageRows } = courseId
+    ? await supabase.from("plan_assignments").select("tp_point_id").eq("course_id", courseId).not("tp_point_id", "is", null)
+    : { data: [] };
+  const usageByPointId = new Map<string, number>();
+  for (const row of usageRows ?? []) {
+    if (!row.tp_point_id) continue;
+    usageByPointId.set(row.tp_point_id, (usageByPointId.get(row.tp_point_id) ?? 0) + 1);
+  }
+  const coursebookTitleById = new Map((coursebooks ?? []).map((c) => [c.id, c.title]));
+  // A point can feed more than one round if the same coursebook is
+  // scheduled for multiple TP numbers (course_tp_schedule, not tp_points
+  // itself, is what maps a coursebook to a round).
+  const roundsByCoursebookId = new Map<string, number[]>();
+  for (const s of schedule ?? []) {
+    const list = roundsByCoursebookId.get(s.tp_coursebook_id) ?? [];
+    list.push(s.tp_number);
+    roundsByCoursebookId.set(s.tp_coursebook_id, list);
+  }
+  const tpPointRows = (scopedPoints ?? []).map((p) => ({
+    id: p.id,
+    title: p.short_title || p.main_lesson_aim,
+    releaseStyle: DENSITY_TIER_LABELS[p.density_tier].name,
+    rounds: (roundsByCoursebookId.get(p.tp_coursebook_id) ?? [p.tp_number]).sort((a, b) => a - b),
+    source: coursebookTitleById.get(p.tp_coursebook_id) ?? "Unknown",
+    usageCount: usageByPointId.get(p.id) ?? 0,
+  }));
+
+  const sectionCounts = {
+    tpPoints: publishedPointCount ?? 0,
+    coursebooks: coursebookIds.length,
+    multimedia: multimediaCount ?? 0,
+    assignmentBriefs: assignmentBriefCount ?? 0,
+    inputSessions: (inputSessionResources ?? []).length,
+    centreDocuments: (centreDocResources ?? []).length,
+    forms: (formResources ?? []).length,
+  };
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[190px_1fr]">
+      <SectionsRail
+        sections={[
+          { href: "/trainer/coursebooks", label: "TP points", count: sectionCounts.tpPoints },
+          { href: "#coursebooks", label: "Coursebooks", count: sectionCounts.coursebooks },
+          { href: "/trainer/audio", label: "Multimedia", count: sectionCounts.multimedia },
+          { href: "/dashboard/trainer/assignment-briefs", label: "Assignment briefs", count: sectionCounts.assignmentBriefs },
+          { href: "#input-sessions", label: "Input sessions", count: sectionCounts.inputSessions },
+          { href: "#forms-and-documents", label: "Forms and documents", count: sectionCounts.forms },
+          { href: "#centre-documents", label: "Centre documents", count: sectionCounts.centreDocuments },
+        ]}
+      />
+
+      <div className="flex flex-col gap-8">
       <div className="sheet p-6">
         <h1 className="font-serif text-xl text-ink">Resource hub</h1>
         <p className="mt-2 text-muted">
@@ -66,6 +151,52 @@ export default async function TrainerResourceHubPage() {
           <p className="font-serif text-lg text-ink">Assignment briefs →</p>
           <p className="text-xs text-muted">Upload and publish briefs. Trainees browse published sections from their portfolio.</p>
         </Link>
+      </div>
+
+      <div id="tp-points">
+        <h2 className="font-serif text-lg text-ink">TP points — this course&apos;s schedule</h2>
+        <p className="mt-1 text-sm text-muted">
+          Release style, round, source and usage for every point in a coursebook scheduled on this course. The full
+          centre-wide library (all coursebooks, all courses) is on the{" "}
+          <Link href="/trainer/coursebooks" className="text-primary">
+            TP points library
+          </Link>
+          .
+        </p>
+        <div className="mt-3 overflow-x-auto rounded-[6px] border border-border">
+          {tpPointRows.length === 0 ? (
+            <p className="p-4 text-sm text-muted">
+              No coursebook is scheduled on this course yet -- set one on the{" "}
+              <Link href="/trainer/rotation" className="text-primary">
+                Rotation
+              </Link>{" "}
+              page.
+            </p>
+          ) : (
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Point</th>
+                  <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Release style</th>
+                  <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Round(s)</th>
+                  <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Source</th>
+                  <th className="px-4 py-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Usage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tpPointRows.map((p) => (
+                  <tr key={p.id} className="border-b border-border-faint last:border-none">
+                    <td className="px-4 py-2.5 text-ink">{p.title}</td>
+                    <td className="px-4 py-2.5 text-muted">{p.releaseStyle}</td>
+                    <td className="px-4 py-2.5 text-muted">{p.rounds.map((r) => `TP${r}`).join(", ")}</td>
+                    <td className="px-4 py-2.5 text-muted">{p.source}</td>
+                    <td className="px-4 py-2.5 text-right tabular-nums text-muted">{p.usageCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
 
       <div id="coursebooks">
@@ -95,15 +226,32 @@ export default async function TrainerResourceHubPage() {
         </div>
       </div>
 
+      <div id="forms-and-documents">
+        <h2 className="font-serif text-lg text-ink">Forms and documents</h2>
+        <p className="mt-1 text-sm text-muted">
+          Blank PDFs of the built-in forms -- lesson plan template, self-evaluation form, syllabus, appeals
+          procedure -- for when the platform is down or paper is preferred. Shown on every candidate&apos;s own
+          Resources tab.
+        </p>
+        <div className="mt-3">
+          <ResourceCategoryManager category="forms" centerId={trainer.center_id} resources={formResources ?? []} />
+        </div>
+      </div>
+
       <div id="centre-documents">
         <h2 className="font-serif text-lg text-ink">Centre documents</h2>
         <p className="mt-1 text-sm text-muted">
-          Policies, blank forms, the syllabus. Defaults to trainer-only -- mark specific items visible to trainees
-          (e.g. the appeals procedure) individually.
+          Policies and internal paperwork -- staff-only, never shown on a candidate&apos;s Resources tab regardless
+          of the visible-to-trainee setting below. Public-facing documents like the appeals procedure belong in{" "}
+          <a href="#forms-and-documents" className="text-primary">
+            Forms and documents
+          </a>{" "}
+          instead.
         </p>
         <div className="mt-3">
           <ResourceCategoryManager category="centre_documents" centerId={trainer.center_id} resources={centreDocResources ?? []} />
         </div>
+      </div>
       </div>
     </div>
   );

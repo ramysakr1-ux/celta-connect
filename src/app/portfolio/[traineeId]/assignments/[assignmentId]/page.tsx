@@ -10,6 +10,9 @@ import { AssignmentReviewForm } from "@/app/dashboard/trainer/trainees/[id]/assi
 import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
 import { OpenCaseButton } from "@/app/trainer/(hub)/malpractice/open-case-button";
 import { FindingsBand } from "@/app/trainer/(hub)/malpractice/findings-band";
+import { FolPanel } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/fol-panel";
+import { FolCrossCheck } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/fol-cross-check";
+import { isCourseDayReached } from "@/lib/course-day";
 
 // §8 detail -- trainee viewers get the real editable pipeline
 // (AssignmentAuthoringForm, exactly as built for
@@ -97,6 +100,65 @@ export default async function AssignmentDetailPage({
     sourceCourseLabel: f.source_course_label,
     reviewedAt: f.reviewed_at,
   }));
+
+  const isFol = assignment.assignment_type === "Focus on Learner";
+  let folData: {
+    learners: { id: string; name: string }[];
+    poolEntries: { id: string; learnerName: string; tp_class: string; tp_number: number; problem_type: "grammar" | "pronunciation"; note: string; logged_at: string }[];
+    myClaims: { id: string; problem_type: "grammar" | "pronunciation"; problem_description: string; source: "pooled_log" | "signup_recording"; claimed_at: string }[];
+    day10Reached: boolean;
+    defaultTpClass: string;
+    allClaimsForCrossCheck: { id: string; candidate_id: string; problem_type: string; problem_description: string; source: string }[];
+  } | null = null;
+
+  if (isFol && trainee.course_id) {
+    const [{ data: learnerRows }, { data: logRows }, { data: myClaimRows }, { data: subgroupRow }, day10Reached] = await Promise.all([
+      supabase.from("volunteer_students").select("id, name").eq("course_id", trainee.course_id).is("removed_at", null).order("name"),
+      supabase
+        .from("class_error_log")
+        .select("id, tp_class, tp_number, problem_type, note, logged_at, learner_id")
+        .eq("course_id", trainee.course_id)
+        .order("logged_at", { ascending: false })
+        .limit(50),
+      supabase
+        .from("fol_claims")
+        .select("id, problem_type, problem_description, source, claimed_at")
+        .eq("course_id", trainee.course_id)
+        .eq("candidate_id", traineeId),
+      supabase
+        .from("course_subgroup_members")
+        .select("course_subgroups(name)")
+        .eq("trainee_id", traineeId)
+        .maybeSingle(),
+      isCourseDayReached(supabase, trainee.course_id, 10),
+    ]);
+
+    const learnerNameById = new Map((learnerRows ?? []).map((l) => [l.id, l.name]));
+    const { data: allClaims } = isEditableStaff
+      ? await supabase
+          .from("fol_claims")
+          .select("id, candidate_id, problem_type, problem_description, source")
+          .eq("course_id", trainee.course_id)
+          .eq("candidate_id", traineeId)
+      : { data: [] };
+
+    folData = {
+      learners: learnerRows ?? [],
+      poolEntries: (logRows ?? []).map((r) => ({
+        id: r.id,
+        learnerName: learnerNameById.get(r.learner_id) ?? "Unknown",
+        tp_class: r.tp_class,
+        tp_number: r.tp_number,
+        problem_type: r.problem_type,
+        note: r.note,
+        logged_at: r.logged_at,
+      })),
+      myClaims: myClaimRows ?? [],
+      day10Reached,
+      defaultTpClass: (subgroupRow?.course_subgroups as unknown as { name: string } | null)?.name ?? "",
+      allClaimsForCrossCheck: allClaims ?? [],
+    };
+  }
 
   const deadlinePassed = Boolean(
     assignment.due_date && round === "first" && !locked && new Date(assignment.due_date) < new Date()
@@ -188,6 +250,7 @@ export default async function AssignmentDetailPage({
           </div>
         ) : (
           <div className="flex flex-col gap-3">
+            {isFol && folData ? <FolCrossCheck claims={folData.allClaimsForCrossCheck} poolEntries={folData.poolEntries} /> : null}
             <FindingsBand findings={findings} assignmentId={assignmentId} round={round} traineeId={traineeId} />
             <AssignmentReviewForm
               assignmentId={assignmentId}
@@ -219,14 +282,31 @@ export default async function AssignmentDetailPage({
           />
         )
       ) : (
-        <AssignmentAuthoringForm
-          assignmentId={assignment.id}
-          sections={template.sections}
-          responses={responses ?? []}
-          round={round}
-          locked={locked}
-          deadlinePassed={deadlinePassed}
-        />
+        <div className="flex flex-col gap-3">
+          {isFol && folData ? (
+            <FolPanel
+              learners={folData.learners}
+              poolEntries={folData.poolEntries}
+              myClaims={folData.myClaims}
+              day10Reached={folData.day10Reached}
+              defaultTpClass={folData.defaultTpClass}
+            />
+          ) : null}
+          <AssignmentAuthoringForm
+            assignmentId={assignment.id}
+            sections={template.sections}
+            responses={responses ?? []}
+            round={round}
+            locked={locked}
+            deadlinePassed={deadlinePassed}
+            // for-claude-code-trainee-interface.md: "can withdraw only
+            // while it's unopened" -- round==="first" && locked===true
+            // here specifically means "submitted, not yet approved" (see
+            // this file's own round/locked derivation above), the closest
+            // real signal this schema has to "not yet opened."
+            canWithdraw={round === "first" && locked && assignment.first_status !== "approved"}
+          />
+        </div>
       )}
     </div>
   );

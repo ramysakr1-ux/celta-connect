@@ -32,9 +32,15 @@ export const MessageThread = forwardRef<
     // renders these -- a static look, not a live one, which matches
     // read-only preview anyway (nothing to subscribe to updates for).
     staticMessages?: Message[];
+    // How many days back this channel's centre actually retains messages
+    // (centers.chat_retention_days, migration 0090). Defaults to 1
+    // (today-only) for any caller that hasn't been updated to pass the
+    // real value -- matches the old hardcoded behavior rather than
+    // silently widening what shows up.
+    retentionDays?: number;
   }
 >(function MessageThread(
-  { channelId, myProfileId, nameById, isGroup, hideComposer = false, staticMessages },
+  { channelId, myProfileId, nameById, isGroup, hideComposer = false, staticMessages, retentionDays = 1 },
   ref
 ) {
   const [messages, setMessages] = useState<Message[]>(staticMessages ?? []);
@@ -53,18 +59,21 @@ export const MessageThread = forwardRef<
     const supabase = createClient();
     let cancelled = false;
 
-    // Display-side safety net for the "resets nightly" rule -- the actual
-    // delete runs server-side (staff-chat.ts's deleteStaleStaffMessages,
-    // called whenever a chat-enabled page loads), but this filter means a
-    // stale row never shows up here even in the gap before that next runs.
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+    // Display-side safety net for the retention rule -- the actual delete
+    // runs server-side (staff-chat.ts's deleteStaleStaffMessages, called
+    // whenever a chat-enabled page loads), but this filter means a stale
+    // row never shows up here even in the gap before that next runs. Was
+    // hardcoded to "since local midnight" (only correct for the 1-day
+    // default) -- now a real rolling window matching the centre's actual
+    // setting, so Weekly/Custom retention doesn't hide still-valid older
+    // messages from ever appearing.
+    const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
 
     supabase
       .from("staff_messages")
       .select("*")
       .eq("channel_id", channelId)
-      .gte("created_at", startOfToday.toISOString())
+      .gte("created_at", cutoff.toISOString())
       .order("created_at")
       .then(({ data }) => {
         if (!cancelled) {
@@ -93,7 +102,7 @@ export const MessageThread = forwardRef<
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [channelId, staticMessages]);
+  }, [channelId, staticMessages, retentionDays]);
 
   // build-spec.md §8 bug 1 -- scrollIntoView on a sentinel div can scroll
   // the whole PAGE, not just this panel, if the panel isn't the nearest

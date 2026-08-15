@@ -149,6 +149,31 @@ export default async function TpHubPage({
     return status.label === "Awaiting tutor feedback";
   });
 
+  // for-claude-code-trainee-interface.md's "Carried forward" panel --
+  // starred action points from the MOST RECENT feedback (highest TP number
+  // with feedback submitted), already folded into the next plan as
+  // personal aims. Reuses the exact same starred-point extraction as the
+  // single-TP drill-down's own "previous action point" suggestion
+  // (tp/[tpNumber]/page.tsx), just widened to both planning+teaching and
+  // not capped to one.
+  const mostRecentFeedbackTp = [...TP_NUMBERS].reverse().find((n) => feedbackByTpNumber.get(n)?.submitted_at);
+  let carriedForward: string[] = [];
+  if (mostRecentFeedbackTp) {
+    const plan = planByTpNumber.get(mostRecentFeedbackTp);
+    if (plan) {
+      const { data: fullFeedback } = await supabase
+        .from("tp_feedback")
+        .select("action_points_planning, action_points_teaching")
+        .eq("trainee_id", traineeId)
+        .eq("tp_number", mostRecentFeedbackTp)
+        .maybeSingle();
+      carriedForward = [
+        ...(fullFeedback?.action_points_planning ?? []).filter((p) => p.starred),
+        ...(fullFeedback?.action_points_teaching ?? []).filter((p) => p.starred),
+      ].map((p) => p.text);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-end justify-between gap-4">
@@ -242,6 +267,23 @@ export default async function TpHubPage({
           </tbody>
         </table>
       </div>
+
+      {!isStaff && carriedForward.length > 0 ? (
+        <div className="sheet flex flex-col gap-2.5">
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-gold uppercase">Carried forward</p>
+          <p className="text-xs text-muted">
+            Starred action points from TP{mostRecentFeedbackTp} feedback, already folded into your next lesson plan
+            as personal aims.
+          </p>
+          <ul className="flex flex-col gap-1.5">
+            {carriedForward.map((point, i) => (
+              <li key={i} className="border-l-2 border-gold pl-2.5 text-sm text-ink">
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {canSeeCriteria ? (

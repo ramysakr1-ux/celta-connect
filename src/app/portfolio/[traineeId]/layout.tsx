@@ -7,6 +7,10 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { Wordmark } from "@/components/wordmark";
 import { ViewSwitcherPill } from "@/components/view-switcher-pill";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
+import { TraineeTopNav } from "@/app/portfolio/[traineeId]/trainee-top-nav";
+import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
+import { InstallPrompt } from "@/components/install-prompt";
+import { computeCourseDayProgress } from "@/lib/course-day";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
 import {
   CELTA_CRITERIA_CODES,
@@ -75,6 +79,20 @@ export default async function PortfolioLayout({
 
   const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
   const isStaffView = isStaff || Boolean(assessorCourseId);
+  // for-claude-code-trainee-interface.md's top nav replaces the sidebar only
+  // for a real candidate viewing their own (or, via the peer-observation
+  // carve-out above, a groupmate's) portfolio -- staff/assessor keep the
+  // existing PortfolioTabs sidebar, a deliberately different tool for
+  // browsing one candidate's whole record rather than a daily briefing.
+  const showTraineeNav = !isStaffView;
+
+  const courseDayProgress = trainee.course_id ? await computeCourseDayProgress(supabase, trainee.course_id) : null;
+  const traineeInitials = trainee.full_name
+    .split(" ")
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   // §1.1d: the ViewSwitcherPill's "Trainee" segment promises a real preview
   // of what the candidate sees -- confirmed live it wasn't actually doing
@@ -206,64 +224,73 @@ export default async function PortfolioLayout({
           right. Attendance hours (previously a StatBar) has no slot in this
           layout and isn't shown here any more -- still visible on the
           roster table and Today's "Needs you" alerts. */}
+      {showTraineeNav ? <InstallPrompt /> : null}
+
       <div className="border-b border-border bg-card">
-        <div className="container flex h-14 items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3">
-            {isStaffView ? (
-              <>
-                <Link href="/trainer/roster" className="shrink-0 text-sm text-primary">
-                  ← Roster
-                </Link>
-                <span className="h-5 w-px shrink-0 bg-border" />
-              </>
-            ) : (
-              <Link href={`/portfolio/${trainee.id}`} className="shrink-0 block">
-                <Wordmark size="header" />
-              </Link>
-            )}
-            <h1 className="truncate font-serif text-[17px] text-ink">{trainee.full_name}</h1>
-            {isCourseStatusReadOnly(trainee.course_status) ? (
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-destructive/12 px-2.5 py-0.5 text-[11px] font-semibold text-destructive">
-                <span className="size-1.5 shrink-0 rounded-full bg-current" />
-                {COURSE_STATUS_LABEL[trainee.course_status]}
-              </span>
-            ) : trainee.course_status === "extension" ? (
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
-                <span className="size-1.5 shrink-0 rounded-full bg-current" />
-                Extension
-              </span>
-            ) : null}
-            {isStaffView && trajectory ? (
-              <HideDuringPreview>
-                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gold/16 px-2.5 py-0.5 text-[11px] font-semibold text-gold">
-                  <span className="size-1.5 shrink-0 rounded-full bg-current" />
-                  Tracking {STANDING_LABEL[trajectory]}
+        {showTraineeNav ? (
+          // for-claude-code-trainee-interface.md's header: wordmark left, nav
+          // center, "Day N of 20" + initials avatar right.
+          <div className="container flex h-14 items-center justify-between gap-4">
+            <Link href={`/portfolio/${trainee.id}`} className="shrink-0 block">
+              <Wordmark size="header" />
+            </Link>
+            <TraineeTopNav traineeId={trainee.id} />
+            <div className="flex shrink-0 items-center gap-3">
+              {courseDayProgress ? (
+                <span className="text-xs font-medium text-muted">
+                  Day {courseDayProgress.currentDay} of {courseDayProgress.totalDays}
                 </span>
-              </HideDuringPreview>
-            ) : null}
-            {isStaffView && trainee.special_consideration ? (
-              <HideDuringPreview>
-                <span
-                  title={trainee.special_consideration}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-semibold text-ink"
-                >
-                  <span className="size-1.5 shrink-0 rounded-full bg-current" />
-                  Special consideration declared
-                </span>
-              </HideDuringPreview>
-            ) : null}
+              ) : null}
+              <div className="flex size-[26px] shrink-0 items-center justify-center rounded-full bg-accent">
+                <span className="text-[10px] font-semibold text-primary">{traineeInitials}</span>
+              </div>
+            </div>
           </div>
-          <div className="flex shrink-0 items-center gap-3">
-            <TraineeEyebrowLabel isStaff={isStaff} readOnly={Boolean(assessorCourseId)} />
-            {isStaff ? (
-              <ViewSwitcherPill current="trainee" traineeHref={`/portfolio/${trainee.id}?preview=trainee`} />
-            ) : assessorCourseId ? (
-              <Link href="/trainer/roster" className="text-sm font-semibold text-primary">
-                Roster
+        ) : (
+          <div className="container flex h-14 items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <Link href="/trainer/roster" className="shrink-0 text-sm text-primary">
+                ← Roster
               </Link>
-            ) : null}
+              <span className="h-5 w-px shrink-0 bg-border" />
+              <h1 className="truncate font-serif text-[17px] text-ink">{trainee.full_name}</h1>
+              {isCourseStatusReadOnly(trainee.course_status) ? (
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-destructive/12 px-2.5 py-0.5 text-[11px] font-semibold text-destructive">
+                  <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                  {COURSE_STATUS_LABEL[trainee.course_status]}
+                </span>
+              ) : trainee.course_status === "extension" ? (
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/12 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                  <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                  Extension
+                </span>
+              ) : null}
+              {trajectory ? (
+                <HideDuringPreview>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gold/16 px-2.5 py-0.5 text-[11px] font-semibold text-gold">
+                    <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                    Tracking {STANDING_LABEL[trajectory]}
+                  </span>
+                </HideDuringPreview>
+              ) : null}
+              {trainee.special_consideration ? (
+                <HideDuringPreview>
+                  <span
+                    title={trainee.special_consideration}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-semibold text-ink"
+                  >
+                    <span className="size-1.5 shrink-0 rounded-full bg-current" />
+                    Special consideration declared
+                  </span>
+                </HideDuringPreview>
+              ) : null}
+            </div>
+            <div className="flex shrink-0 items-center gap-3">
+              <TraineeEyebrowLabel isStaff={isStaff} readOnly={Boolean(assessorCourseId)} />
+              {isStaff ? <ViewSwitcherPill current="trainee" traineeHref={`/portfolio/${trainee.id}?preview=trainee`} /> : null}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {isCourseStatusReadOnly(trainee.course_status) ? (
@@ -278,15 +305,17 @@ export default async function PortfolioLayout({
       <PreviewBanner traineeId={trainee.id} traineeName={trainee.full_name} />
 
       <div className="container flex flex-1 gap-8 py-8">
-        <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />
+        {showTraineeNav ? null : <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />}
         <div className="min-w-0 flex-1">{children}</div>
       </div>
 
-      <footer className="mt-auto py-8 text-center text-xs text-muted">
+      <footer className={`mt-auto py-8 text-center text-xs text-muted ${showTraineeNav ? "pb-20 md:pb-8" : ""}`}>
         {[center?.name, center ? `Cambridge CELTA (Centre ${center.center_number})` : null, `Workspace link ${trainee.id.slice(0, 8)}`]
           .filter(Boolean)
           .join(" · ")}
       </footer>
+
+      {showTraineeNav ? <TraineeMobileNav traineeId={trainee.id} /> : null}
 
       <ChatDrawerSwitcher
         staffProfileId={viewer?.id ?? null}
@@ -295,6 +324,7 @@ export default async function PortfolioLayout({
         traineePreviewChat={traineePreviewChat}
         traineePreviewLatestMessage={traineePreviewLatestMessage}
         quietHoursNote={viewer?.role === "trainee" ? quietHoursNote : null}
+        raiseForMobileNav={showTraineeNav}
       />
     </div>
   );

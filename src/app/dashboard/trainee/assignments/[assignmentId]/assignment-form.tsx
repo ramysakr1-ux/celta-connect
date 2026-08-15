@@ -1,7 +1,12 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
-import { saveAssignmentDraft, submitAssignment, type FormState } from "@/app/dashboard/trainee/assignments/[assignmentId]/actions";
+import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  saveAssignmentDraft,
+  submitAssignment,
+  withdrawAssignmentSubmission,
+  type FormState,
+} from "@/app/dashboard/trainee/assignments/[assignmentId]/actions";
 import { FormSubmitBar } from "@/components/form-submit-bar";
 import { VoiceTextarea } from "@/components/voice-textarea";
 import { ASSIGNMENT_WORD_COUNT } from "@/lib/assignment-info";
@@ -13,6 +18,32 @@ const inputClass =
 
 function wordCount(text: string): number {
   return text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length;
+}
+
+// Renders <form action={action}> when asForm, a plain <div> otherwise --
+// see the call site's own comment for why the locked/read-only case must
+// never be a real <form> (it would nest one inside itself around the
+// Withdraw button's own form, which is invalid HTML and silently submits
+// the wrong action).
+function FormOrDiv({
+  asForm,
+  action,
+  className,
+  children,
+}: {
+  asForm: boolean;
+  action: (formData: FormData) => void;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  if (asForm) {
+    return (
+      <form action={action} className={className}>
+        {children}
+      </form>
+    );
+  }
+  return <div className={className}>{children}</div>;
 }
 
 interface SectionResponse {
@@ -31,6 +62,7 @@ export function AssignmentAuthoringForm({
   round,
   locked,
   deadlinePassed,
+  canWithdraw = false,
 }: {
   assignmentId: string;
   sections: TemplateSection[];
@@ -38,6 +70,7 @@ export function AssignmentAuthoringForm({
   round: "first" | "resubmission";
   locked: boolean;
   deadlinePassed: boolean;
+  canWithdraw?: boolean;
 }) {
   const responseByKey = new Map(responses.map((r) => [r.section_key, r]));
   const isResubmission = round === "resubmission";
@@ -60,6 +93,58 @@ export function AssignmentAuthoringForm({
   const [aiDeclared, setAiDeclared] = useState(false);
   const [aiConversationUrl, setAiConversationUrl] = useState("");
   const [ownWorkConfirmed, setOwnWorkConfirmed] = useState(false);
+
+  // for-claude-code-trainee-interface.md: "autosave status ('Saved 2
+  // minutes ago' -- no manual save button), ... Submit is a separate,
+  // deliberate action -- nothing is visible to a tutor until it's pressed."
+  // Debounced on `texts` changes; reuses the exact same saveAssignmentDraft
+  // action the old manual button called, just dispatched programmatically
+  // instead of via a form submit event.
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [, forceTick] = useState(0);
+  const [isAutosaving, startAutosave] = useTransition();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const skipNextAutosave = useRef(true); // don't fire on initial mount, only on real edits
+
+  useEffect(() => {
+    if (locked) return;
+    if (skipNextAutosave.current) {
+      skipNextAutosave.current = false;
+      return;
+    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const fd = new FormData();
+      fd.set("assignment_id", assignmentId);
+      fd.set("round", round);
+      fd.set("sections_payload", JSON.stringify(sections.map((s) => ({ key: s.key, title: s.title, text: texts[s.key] ?? "" }))));
+      fd.set("ai_declared", aiDeclared ? "true" : "false");
+      fd.set("ai_conversation_url", aiConversationUrl);
+      fd.set("own_work_confirmed", ownWorkConfirmed ? "true" : "false");
+      startAutosave(async () => {
+        const result = await saveAssignmentDraft(initialState, fd);
+        if (!result.error) setLastSavedAt(new Date());
+      });
+    }, 2500);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [texts]);
+
+  // Re-render every 30s purely so "Saved N minutes ago" stays current --
+  // the save itself doesn't need this, only the relative-time label does.
+  useEffect(() => {
+    const id = setInterval(() => forceTick((n) => n + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  function formatSavedAgo(date: Date): string {
+    const minutes = Math.floor((Date.now() - date.getTime()) / 60_000);
+    if (minutes < 1) return "Saved just now";
+    if (minutes === 1) return "Saved 1 minute ago";
+    return `Saved ${minutes} minutes ago`;
+  }
 
   const totalWords = useMemo(
     () => sections.reduce((sum, s) => sum + wordCount(texts[s.key] ?? ""), 0),
@@ -225,7 +310,11 @@ export function AssignmentAuthoringForm({
             {!locked ? (
               <>
                 {aiDeclarationBlock}
+                <p className="text-right text-xs text-muted">
+                  {isAutosaving ? "Saving…" : lastSavedAt ? formatSavedAgo(lastSavedAt) : ""}
+                </p>
                 <FormSubmitBar
+                  raiseForMobileNav
                   warning={submitWarning}
                   draftPending={draftPending}
                   submitPending={submitPending}
@@ -233,6 +322,7 @@ export function AssignmentAuthoringForm({
                   onSubmitAction={submitActionFn}
                   submitLabel={deadlinePassed ? "Submit (late)" : "Submit resubmission"}
                   error={state.error}
+                  hideDraftButton
                 />
               </>
             ) : (
@@ -254,8 +344,15 @@ export function AssignmentAuthoringForm({
           </div>
         </div>
       ) : (
-        <form action={draftAction} className="grid grid-cols-1 gap-4 lg:grid-cols-[248px_1fr] lg:items-start">
-          {hiddenFields}
+        // A plain <div> when locked, not <form> -- the withdraw button
+        // below needs its own <form>, and a nested <form> inside this one
+        // is invalid HTML that silently submits the WRONG action (caught
+        // live: clicking Withdraw actually re-ran the draft-save action
+        // instead, since the browser collapses nested forms onto the
+        // outer one). Only the genuinely editable (!locked) case needs to
+        // be a real form at all -- the locked case has no inputs to submit.
+        <FormOrDiv asForm={!locked} action={draftAction} className="grid grid-cols-1 gap-4 lg:grid-cols-[248px_1fr] lg:items-start">
+          {!locked ? hiddenFields : null}
 
           <nav className="card flex flex-col gap-1 p-2 lg:sticky lg:top-6">
             {sections.map((s) => {
@@ -313,7 +410,11 @@ export function AssignmentAuthoringForm({
             {!locked ? (
               <>
                 {aiDeclarationBlock}
+                <p className="text-right text-xs text-muted">
+                  {isAutosaving ? "Saving…" : lastSavedAt ? formatSavedAgo(lastSavedAt) : ""}
+                </p>
                 <FormSubmitBar
+                  raiseForMobileNav
                   warning={submitWarning}
                   draftPending={draftPending}
                   submitPending={submitPending}
@@ -321,13 +422,24 @@ export function AssignmentAuthoringForm({
                   onSubmitAction={submitActionFn}
                   submitLabel={deadlinePassed ? "Submit (late)" : "Submit"}
                   error={state.error}
+                  hideDraftButton
                 />
               </>
             ) : (
-              <p className="text-sm text-muted">Submitted -- awaiting your tutor.</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted">Submitted -- awaiting your tutor.</p>
+                {canWithdraw ? (
+                  <form action={withdrawAssignmentSubmission}>
+                    <input type="hidden" name="assignment_id" value={assignmentId} />
+                    <button type="submit" className="text-xs font-semibold text-destructive hover:underline">
+                      Withdraw submission
+                    </button>
+                  </form>
+                ) : null}
+              </div>
             )}
           </div>
-        </form>
+        </FormOrDiv>
       )}
     </div>
   );

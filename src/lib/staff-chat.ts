@@ -9,22 +9,35 @@ import type { Database } from "@/lib/supabase/types";
 // venting, nothing important lives there" purpose (see
 // feedback_staff_chat_design memory). No new migration/table needed --
 // the admin client (service role, bypasses RLS) can just delete straight
-// out of the existing staff_messages table. Local server midnight, not
-// per-user timezone -- there's no stored timezone to key off, and this is
-// a "keep things tidy" cleanup, not a precision guarantee. Called from
+// out of the existing staff_messages table. Called from
 // getInitialStaffChatData below so it runs on every chat-enabled page
 // load rather than needing a real cron job this environment can't run
 // anyway (no deploy, no pg_cron access confirmed this session).
-async function deleteStaleStaffMessages(): Promise<void> {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+//
+// 2026-08-14: retention is now a real per-centre setting
+// (centers.chat_retention_days, migration 0090) instead of a hardcoded
+// "since local server midnight" cutoff -- a genuine rolling N-day window
+// measured from now, not a fixed calendar cadence, so it can't wipe
+// mid-cycle on a part-time course spread over months. Scoped to just this
+// center's channels (not a global sweep) since the only caller already
+// knows which center it's running for.
+async function deleteStaleStaffMessages(centerId: string): Promise<void> {
   const admin = createAdminClient();
-  await admin.from("staff_messages").delete().lt("created_at", startOfToday.toISOString());
+
+  const { data: center } = await admin.from("centers").select("chat_retention_days").eq("id", centerId).maybeSingle();
+  const retentionDays = center?.chat_retention_days ?? 1;
+  const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+
+  const { data: channels } = await admin.from("staff_channels").select("id").eq("center_id", centerId);
+  const channelIds = (channels ?? []).map((c) => c.id);
+  if (channelIds.length === 0) return;
+
+  await admin.from("staff_messages").delete().in("channel_id", channelIds).lt("created_at", cutoff.toISOString());
 }
 
 export interface ChannelSummary {
   id: string;
-  type: "center_trainers" | "all_staff" | "tp_group" | "dm";
+  type: "center_trainers" | "all_staff" | "tp_group" | "dm" | "course_admin";
   name: string;
 }
 
@@ -49,10 +62,21 @@ export async function getInitialStaffChatData(
 ): Promise<{
   channels: ChannelSummary[];
   coworkers: Coworker[];
+  chatRetentionDays: number;
 }> {
   const supabase = client ?? (await createClient());
 
-  await deleteStaleStaffMessages();
+  const { data: profileForCleanup } = await supabase.from("profiles").select("center_id").eq("id", profileId).maybeSingle();
+  let chatRetentionDays = 1;
+  if (profileForCleanup?.center_id) {
+    await deleteStaleStaffMessages(profileForCleanup.center_id);
+    const { data: center } = await supabase
+      .from("centers")
+      .select("chat_retention_days")
+      .eq("id", profileForCleanup.center_id)
+      .maybeSingle();
+    chatRetentionDays = center?.chat_retention_days ?? 1;
+  }
 
   const { data: memberships } = await supabase
     .from("staff_channel_members")
@@ -61,7 +85,7 @@ export async function getInitialStaffChatData(
 
   const channelIds = (memberships ?? []).map((m) => m.channel_id);
   if (channelIds.length === 0) {
-    return { channels: [], coworkers: [] };
+    return { channels: [], coworkers: [], chatRetentionDays };
   }
 
   const { data: channels } = await supabase
@@ -99,7 +123,11 @@ export async function getInitialStaffChatData(
       name: c.type === "dm" ? (dmNameByChannelId.get(c.id) ?? "Direct message") : (c.name ?? ""),
     }))
     .sort((a, b) => {
-      const order = { center_trainers: 0, all_staff: 0, tp_group: 0, dm: 1 };
+      // course_admin never actually appears here in practice -- admins are
+      // never added to trainer-only channels and vice versa (see
+      // src/lib/admin-chat.ts for the separate admin-facing fetch) -- but
+      // the type includes it, so this map needs to stay exhaustive.
+      const order = { center_trainers: 0, all_staff: 0, tp_group: 0, course_admin: 0, dm: 1 };
       return order[a.type] - order[b.type] || a.name.localeCompare(b.name);
     });
 
@@ -128,5 +156,5 @@ export async function getInitialStaffChatData(
     role: "trainer",
   }));
 
-  return { channels: summaries, coworkers };
+  return { channels: summaries, coworkers, chatRetentionDays };
 }

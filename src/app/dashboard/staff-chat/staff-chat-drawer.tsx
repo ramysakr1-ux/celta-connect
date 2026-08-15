@@ -50,10 +50,19 @@ export function StaffChatDrawer({
   readOnly = false,
   staticMessages,
   quietHoursNote,
+  retentionDays = 1,
+  raiseForMobileNav = false,
 }: {
   profileId: string;
   initialChannels: ChannelSummary[];
   coworkers: Coworker[];
+  // "No longer hardcoded to 'resets nightly'... applies identically to
+  // trainer and trainee chat." Nightly (1, the default) still gets the
+  // live midnight countdown; anything longer has no single shared clear
+  // moment to count down to (each message ages out N days after IT was
+  // sent, not at a shared boundary), so it gets static "resets on the
+  // centre's schedule" copy instead.
+  retentionDays?: number;
   // Used when a staff member is previewing a trainee's view (see
   // portfolio/[traineeId]/preview-chrome.tsx): shows the TRAINEE's own
   // channels/coworkers (not the staff member's) so the preview is
@@ -70,6 +79,12 @@ export function StaffChatDrawer({
   // informational -- there's no message-holding infrastructure to actually
   // delay delivery until morning, this just sets the right expectation.
   quietHoursNote?: string | null;
+  // specs/build-spec.md §7 mobile bottom tab bar (trainee-mobile-nav.tsx) is
+  // a real, fixed, full-width bar below `md` -- this pill needs to sit
+  // above it there, not underneath. Only ever true from the real trainee's
+  // own (non-preview) render, since that's the only context the tab bar
+  // itself renders in -- see portfolio/[traineeId]/layout.tsx.
+  raiseForMobileNav?: boolean;
 }) {
   const [channels, setChannels] = useState(initialChannels);
   const [selectedId, setSelectedId] = useState<string | null>(initialChannels[0]?.id ?? null);
@@ -115,13 +130,15 @@ export function StaffChatDrawer({
 
   // Reset meter -- local midnight, same boundary as staff-chat.ts's
   // deleteStaleStaffMessages, so the countdown never lies about when
-  // messages actually clear.
+  // messages actually clear. Only meaningful for the Nightly (1-day)
+  // default -- see the retentionDays prop comment above.
   useEffect(() => {
+    if (retentionDays !== 1) return;
     const update = () => setMsLeft(msUntilLocalMidnight());
     update();
     const id = setInterval(update, 30_000);
     return () => clearInterval(id);
-  }, []);
+  }, [retentionDays]);
 
   useEffect(() => {
     if (channels.length === 0) return;
@@ -192,7 +209,11 @@ export function StaffChatDrawer({
   }
 
   return (
-    <div className="pointer-events-none fixed bottom-6 left-0 right-0 z-30 flex justify-center">
+    <div
+      className={`pointer-events-none fixed left-0 right-0 z-30 flex justify-center px-3 ${
+        raiseForMobileNav ? "bottom-20 md:bottom-6" : "bottom-6"
+      }`}
+    >
       <div
         className={`pointer-events-auto flex w-full max-w-[840px] flex-col gap-2 transition-[opacity,transform] duration-[260ms] ease-out ${
           awake ? "translate-y-0 opacity-100" : "translate-y-3.5 opacity-40"
@@ -270,6 +291,7 @@ export function StaffChatDrawer({
                 isGroup={selected.type !== "dm"}
                 hideComposer
                 staticMessages={staticMessages}
+                retentionDays={retentionDays}
               />
             ) : null}
           </div>
@@ -279,7 +301,7 @@ export function StaffChatDrawer({
           <p className="rounded-full bg-gold/10 px-3 py-1 text-center text-[11px] text-gold">{quietHoursNote}</p>
         ) : null}
 
-        <div className="flex h-14 items-center gap-3 rounded-[28px] border border-border bg-card pl-2 pr-2.5 shadow-lg">
+        <div className="flex h-14 items-center gap-1.5 rounded-[28px] border border-border bg-card pl-2 pr-2.5 shadow-lg sm:gap-3">
           <button
             type="button"
             onClick={() => setPickerOpen((v) => !v)}
@@ -293,7 +315,7 @@ export function StaffChatDrawer({
             <span className="flex size-6 shrink-0 items-center justify-center rounded-[8px] bg-primary text-[9px] font-semibold text-primary-foreground">
               {selected ? initials(selected.name, selected.type === "dm") : "+"}
             </span>
-            <span className="max-w-[130px] truncate text-[13px] font-semibold text-ink">
+            <span className="max-w-[70px] truncate text-[13px] font-semibold text-ink sm:max-w-[130px]">
               {selected ? selected.name : "Pick who to message"}
             </span>
             {!readOnly ? <ChevronDown className="size-[9px] shrink-0 text-muted" aria-hidden="true" /> : null}
@@ -320,16 +342,20 @@ export function StaffChatDrawer({
                   handleSend();
                 }
               }}
-              placeholder={selected ? `Message ${selected.name} -- clears at midnight` : "Pick who to message"}
+              placeholder={
+                selected
+                  ? `Message ${selected.name} -- ${retentionDays === 1 ? "clears at midnight" : "resets on the centre's schedule"}`
+                  : "Pick who to message"
+              }
               disabled={!selected}
               className="max-h-24 min-w-0 flex-1 resize-none border-0 bg-transparent text-sm text-ink outline-none placeholder:text-muted/70 disabled:opacity-60"
             />
           )}
 
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
             <span className="size-[5px] shrink-0 rounded-full bg-gold" aria-hidden="true" />
             <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted">
-              {formatCountdown(msLeft)}
+              {retentionDays === 1 ? formatCountdown(msLeft) : "Resets on the centre's schedule"}
             </span>
           </div>
 
@@ -337,7 +363,7 @@ export function StaffChatDrawer({
             type="button"
             onClick={toggleThread}
             aria-expanded={threadOpen}
-            className="flex h-[34px] shrink-0 items-center gap-1.5 rounded-[17px] bg-accent/40 px-3 text-xs font-semibold hover:bg-accent/60"
+            className="flex h-[34px] shrink-0 items-center gap-1.5 rounded-[17px] bg-accent/40 px-2 text-xs font-semibold hover:bg-accent/60 sm:px-3"
           >
             {threadOpen ? "Hide" : "Thread"}
             {!threadOpen && unreadCount > 0 ? (

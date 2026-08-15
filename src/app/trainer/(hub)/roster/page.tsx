@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { fetchRosterRows } from "@/lib/roster";
 import { RosterRowView } from "@/app/trainer/(hub)/roster/roster-row";
+import { AddCandidateButton } from "@/app/trainer/(hub)/roster/add-candidate-button";
 
 // The detailed operational roster. Row computation lives in lib/roster.ts,
 // shared with the CSV export route below so the two can't drift on what a
@@ -23,6 +24,16 @@ export default async function TrainerRosterPage() {
   }
 
   const rows = await fetchRosterRows(supabase, courseId);
+
+  // Assessors reuse this same page (createAdminClient path) but have no
+  // reason to invite anyone -- only render the join-link button for a real
+  // trainer/admin session.
+  let joinUrl: string | null = null;
+  if (trainer) {
+    const { data: course } = await supabase.from("courses").select("trainee_join_token").eq("id", courseId).maybeSingle();
+    const siteUrl = process.env.SITE_URL;
+    joinUrl = siteUrl && course?.trainee_join_token ? `${siteUrl}/join/${course.trainee_join_token}` : null;
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,6 +56,7 @@ export default async function TrainerRosterPage() {
           >
             Export CSV
           </a>
+          {trainer ? <AddCandidateButton courseId={courseId} joinUrl={joinUrl} /> : null}
         </div>
       </div>
 
@@ -59,6 +71,7 @@ export default async function TrainerRosterPage() {
               <th className="text-right text-sm text-muted">Criteria</th>
               <th className="text-right text-sm text-muted">Attendance</th>
               <th className="text-right text-sm text-muted">Standing</th>
+              <th className="text-right text-sm text-muted">Provisional</th>
               <th className="text-right text-sm text-muted">At risk</th>
             </tr>
           </thead>
@@ -67,7 +80,7 @@ export default async function TrainerRosterPage() {
               rows.map((row) => <RosterRowView key={row.id} row={row} />)
             ) : (
               <tr>
-                <td colSpan={8} className="text-muted">
+                <td colSpan={9} className="text-muted">
                   No trainees on this course yet.
                 </td>
               </tr>

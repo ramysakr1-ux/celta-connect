@@ -24,6 +24,8 @@ import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rule
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
+import { getRecentCentreChanges } from "@/lib/what-changed";
+import { WhatChangedPanel } from "@/components/what-changed-panel";
 
 export default async function CourseRosterPage({
   params,
@@ -543,6 +545,8 @@ export default async function CourseRosterPage({
           traineeLink={`${process.env.SITE_URL ?? ""}/join/${course.trainee_join_token}`}
           trainerLink={`${process.env.SITE_URL ?? ""}/join/${course.trainer_join_token}`}
         />
+
+        <WhatChangedPanel changes={await getRecentCentreChanges(course.center_id)} />
       </div>
 
       <div>

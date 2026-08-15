@@ -95,6 +95,24 @@ export function computeWeekOf(startDate: string, endDate: string, today: string)
   return `week ${currentWeek} of ${totalWeeks}`;
 }
 
+// for-claude-code-trainee-interface.md §5's "Input sessions (this week)"
+// panel needs an actual date range to filter timetable events by, not just
+// computeWeekOf's display label. Course-start-anchored 7-day blocks (not a
+// calendar Mon-Sun week) -- simple and self-consistent, though it won't
+// always agree exactly with computeWeekOf's own "week N" boundary (that
+// function's +1/ceil math was tuned for its label, not derived from a real
+// week-start date) -- a cosmetic mismatch only, not a data problem.
+export function computeThisWeekRange(startDate: string, today: string): { weekStart: string; weekEnd: string } {
+  const start = new Date(`${startDate}T00:00:00`);
+  const now = new Date(`${today}T00:00:00`);
+  const daysSinceStart = Math.max(0, Math.round((now.getTime() - start.getTime()) / 86400000));
+  const weekIndex = Math.floor(daysSinceStart / 7);
+  const weekStart = new Date(start.getTime() + weekIndex * 7 * 86400000);
+  const weekEnd = new Date(weekStart.getTime() + 6 * 86400000);
+  const toIso = (d: Date) => d.toISOString().slice(0, 10);
+  return { weekStart: toIso(weekStart), weekEnd: toIso(weekEnd) };
+}
+
 export type CourseState = "running" | "upcoming" | "closed";
 
 // Purely date-derived -- Close-out (build-spec item 20, not built yet) will

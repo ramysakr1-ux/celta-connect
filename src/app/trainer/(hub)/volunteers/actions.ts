@@ -80,6 +80,28 @@ export async function getOrCreateRegisterViewToken(): Promise<{ token: string | 
   return { token: created.token, error: null };
 }
 
+// Manual fallback until real speech-to-text is wired in (Claude's Messages
+// API has no audio content-block type, and no transcription service is
+// configured in this app -- see [[project_fol_pooled_evidence]]). A tutor
+// listens to the recording and pastes a transcript here, which unlocks
+// exactly the same way an automated one would (FOL's Day-10 gate doesn't
+// care how transcript got populated).
+export async function saveVolunteerTranscript(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const volunteerId = formData.get("volunteer_id");
+  const transcript = (formData.get("transcript") as string | null)?.trim();
+  if (typeof volunteerId !== "string" || !transcript || !trainer.course_id) return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("volunteer_signup_profiles")
+    .update({ transcript, transcript_generated_at: new Date().toISOString() })
+    .eq("volunteer_student_id", volunteerId)
+    .eq("course_id", trainer.course_id);
+
+  revalidatePath("/trainer/volunteers");
+}
+
 export async function removeVolunteerStudent(formData: FormData): Promise<void> {
   const trainer = await requireRole(["trainer", "admin"]);
   const volunteerId = formData.get("volunteer_id");

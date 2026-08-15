@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { buildSkeletonEvents, DEFAULT_TEACHING_DAYS } from "@/lib/timetable-skeleton";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
+import { generateStandardAnnouncements } from "@/lib/announcements-catalog";
 import type { TimeBand } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -272,5 +273,15 @@ export async function setTimetableLock(formData: FormData): Promise<void> {
     .update({ timetable_locked_at: lock ? new Date().toISOString() : null })
     .eq("id", trainer.course_id);
 
+  // for-claude-code-announcements-list.md table A: the standard reminder
+  // set fires "the moment the timetable is published" -- generated here,
+  // once, idempotently (source_key) rather than re-derived by a cron every
+  // day, since the anchors themselves (assignment due dates etc.) are
+  // already fixed the moment the timetable locks.
+  if (lock) {
+    await generateStandardAnnouncements(supabase, trainer.course_id, trainer.id);
+  }
+
   revalidatePath("/trainer/timetable");
+  revalidatePath("/trainer/announcements");
 }

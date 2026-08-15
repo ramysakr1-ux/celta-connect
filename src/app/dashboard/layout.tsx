@@ -4,6 +4,8 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { signOut } from "@/app/login/actions";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
 import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
+import { getAdminChatCourses } from "@/lib/admin-chat";
+import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { DesignerCredit } from "@/components/designer-credit";
 
@@ -18,7 +20,8 @@ export default async function DashboardLayout({
   const { profile, email } = session;
 
   const staffChat =
-    profile && profile.role !== "trainee" ? await getInitialStaffChatData(profile.id) : null;
+    profile && profile.role !== "trainee" && profile.role !== "admin" ? await getInitialStaffChatData(profile.id) : null;
+  const adminChatCourses = profile && profile.role === "admin" ? await getAdminChatCourses(profile.id) : null;
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
@@ -49,8 +52,10 @@ export default async function DashboardLayout({
           profileId={profile.id}
           initialChannels={staffChat.channels}
           coworkers={staffChat.coworkers}
+          retentionDays={staffChat.chatRetentionDays}
         />
       ) : null}
+      {profile && adminChatCourses ? <AdminChatBar profileId={profile.id} courses={adminChatCourses} /> : null}
     </div>
   );
 }

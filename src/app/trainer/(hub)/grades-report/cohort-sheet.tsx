@@ -19,6 +19,8 @@ const GRADE_PILL_CLASS: Record<FinalGrade, string> = {
   Deferred: "pill-neutral",
 };
 
+export type Stage3Status = "not_required" | "not_given" | "given";
+
 export interface CohortSheetRow {
   traineeId: string;
   name: string;
@@ -26,7 +28,19 @@ export interface CohortSheetRow {
   provisionalLabel: string;
   recommendedGrade: FinalGrade | null;
   outstanding: string;
+  wasSlashed: boolean;
+  justified: boolean;
+  stage3Status: Stage3Status;
+  tpsRemaining: number;
 }
+
+const STAGE3_PILL: Record<Stage3Status, { label: string; cls: string }> = {
+  not_required: { label: "Stage 3 not required", cls: "pill-neutral" },
+  not_given: { label: "Stage 3 tutorial not yet given", cls: "pill-danger" },
+  given: { label: "Stage 3 tutorial given", cls: "pill-success" },
+};
+
+const SETTLED_BANDS: FinalGrade[] = ["Pass A", "Pass B", "Pass", "Fail", "Withdrawn"];
 
 const LEGEND: { code: string; label: string }[] = [
   { code: "S+", label: "Above the standard" },
@@ -43,12 +57,22 @@ export function CohortSheet({
   courseId,
   courseName,
   rows,
+  canRelease,
 }: {
   courseId: string;
   courseName: string;
   rows: CohortSheetRow[];
+  canRelease: boolean;
 }) {
   const [state, action, pending] = useActionState(releaseAllFinalReports, initialState);
+
+  const undecidedRows = rows.filter((r) => r.wasSlashed && !r.justified);
+  const settledRows = rows.filter((r) => !(r.wasSlashed && !r.justified));
+  const settledCounts = SETTLED_BANDS.map((band) => ({
+    band,
+    count: settledRows.filter((r) => r.recommendedGrade === band).length,
+  }));
+  const notYetGradedCount = settledRows.filter((r) => !r.recommendedGrade).length;
 
   return (
     <div className="sheet flex flex-col gap-4">
@@ -59,19 +83,75 @@ export function CohortSheet({
           </p>
           <h2 className="font-serif text-xl text-ink">Grades report</h2>
         </div>
-        <form action={action}>
-          <input type="hidden" name="course_id" value={courseId} />
-          <button
-            type="submit"
-            disabled={pending}
-            className="flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
-          >
-            <span className="size-[5px] rounded-full bg-gold" />
-            {pending ? "Releasing..." : "Release final reports"}
-          </button>
-        </form>
+        {canRelease ? (
+          <form action={action}>
+            <input type="hidden" name="course_id" value={courseId} />
+            <button
+              type="submit"
+              disabled={pending}
+              className="flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+            >
+              <span className="size-[5px] rounded-full bg-gold" />
+              {pending ? "Releasing..." : "Release final reports"}
+            </button>
+          </form>
+        ) : null}
       </div>
-      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {canRelease && state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
+        {/* Undecided -- needs justification */}
+        <div className="rounded-[6px] border border-border">
+          <p className="border-b border-border bg-gold/10 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-gold">
+            Undecided — needs justification · {undecidedRows.length}
+          </p>
+          {undecidedRows.length === 0 ? (
+            <p className="px-4 py-3 text-sm text-muted">No candidate is currently in doubt between two grades.</p>
+          ) : (
+            <div className="divide-y divide-border-faint">
+              {undecidedRows.map((row) => (
+                <Link
+                  key={row.traineeId}
+                  href={`#candidate-${row.traineeId}`}
+                  className="flex flex-col gap-1.5 px-4 py-3 hover:bg-accent/40"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-ink">{row.name}</span>
+                    <span className="text-sm font-bold text-destructive">{row.provisionalLabel}</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`pill ${STAGE3_PILL[row.stage3Status].cls}`}>{STAGE3_PILL[row.stage3Status].label}</span>
+                    <span className="text-xs text-muted">
+                      {row.tpsRemaining} TP{row.tpsRemaining === 1 ? "" : "s"} left to teach
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Settled */}
+        <div className="rounded-[6px] border border-border">
+          <p className="border-b border-border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+            Settled · {settledRows.length}
+          </p>
+          <div className="divide-y divide-border-faint">
+            {settledCounts.map(({ band, count }) => (
+              <div key={band} className="flex items-center justify-between px-4 py-2.5">
+                <span className={`pill ${GRADE_PILL_CLASS[band]}`}>{band}</span>
+                <span className="text-sm tabular-nums text-ink">{count}</span>
+              </div>
+            ))}
+            {notYetGradedCount > 0 ? (
+              <div className="flex items-center justify-between px-4 py-2.5">
+                <span className="pill pill-neutral">Not yet graded</span>
+                <span className="text-sm tabular-nums text-ink">{notYetGradedCount}</span>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
 
       <div className="overflow-x-auto rounded-[6px] border border-border">
         <table className="w-full border-collapse text-sm">

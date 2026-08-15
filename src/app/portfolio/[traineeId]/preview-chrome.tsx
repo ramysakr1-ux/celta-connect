@@ -40,6 +40,7 @@ export function TraineeEyebrowLabel({ isStaff, readOnly }: { isStaff: boolean; r
 interface ChatPayload {
   channels: ChannelSummary[];
   coworkers: Coworker[];
+  chatRetentionDays: number;
 }
 
 // Picks which chat to render: the staff member's own (normal view) vs the
@@ -54,6 +55,7 @@ export function ChatDrawerSwitcher({
   traineePreviewChat,
   traineePreviewLatestMessage,
   quietHoursNote,
+  raiseForMobileNav = false,
 }: {
   staffProfileId: string | null;
   staffChat: ChatPayload | null;
@@ -61,6 +63,12 @@ export function ChatDrawerSwitcher({
   traineePreviewChat: ChatPayload | null;
   traineePreviewLatestMessage?: Message | null;
   quietHoursNote?: string | null;
+  // Only true for the real trainee's own (non-preview) render -- see
+  // StaffChatDrawer's own comment. Preview mode doesn't get the mobile tab
+  // bar (portfolio/[traineeId]/layout.tsx's showTraineeNav is server-role-
+  // computed, not preview-aware -- an existing, separately disclosed gap),
+  // so its chat pill correctly keeps the default offset.
+  raiseForMobileNav?: boolean;
 }) {
   const searchParams = useSearchParams();
   if (isPreviewingAsTrainee(searchParams)) {
@@ -71,6 +79,7 @@ export function ChatDrawerSwitcher({
         initialChannels={traineePreviewChat.channels}
         coworkers={traineePreviewChat.coworkers}
         staticMessages={traineePreviewLatestMessage ? [traineePreviewLatestMessage] : []}
+        retentionDays={traineePreviewChat.chatRetentionDays}
         readOnly
       />
     );
@@ -82,6 +91,8 @@ export function ChatDrawerSwitcher({
       initialChannels={staffChat.channels}
       coworkers={staffChat.coworkers}
       quietHoursNote={quietHoursNote}
+      retentionDays={staffChat.chatRetentionDays}
+      raiseForMobileNav={raiseForMobileNav}
     />
   );
 }
