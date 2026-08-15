@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import {
   requestPasswordReset,
   type ForgotPasswordState,
@@ -8,13 +8,22 @@ import {
 
 const initialState: ForgotPasswordState = { error: null, sent: false };
 
+// `dismissed` tracks whether the user has clicked "Send again" since the
+// last completed action -- useActionState's state has no way to be reset
+// except by dispatching the action again, so `confirmed` is derived from
+// state.sent and dismissed during render (comparing state by reference to
+// detect a fresh action result) rather than synced via an effect.
 export function ForgotPasswordForm() {
   const [state, action, pending] = useActionState(requestPasswordReset, initialState);
-  const [confirmed, setConfirmed] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [prevState, setPrevState] = useState(state);
 
-  useEffect(() => {
-    if (state.sent) setConfirmed(true);
-  }, [state.sent]);
+  if (state !== prevState) {
+    setPrevState(state);
+    if (state.sent) setDismissed(false);
+  }
+
+  const confirmed = state.sent && !dismissed;
 
   if (confirmed) {
     return (
@@ -22,7 +31,7 @@ export function ForgotPasswordForm() {
         <p className="text-sm text-ink">
           If an account exists for that address, a reset link is on its way. It expires in 15 minutes and works once.
         </p>
-        <button type="button" onClick={() => setConfirmed(false)} className="mt-2 text-xs text-primary hover:underline">
+        <button type="button" onClick={() => setDismissed(true)} className="mt-2 text-xs text-primary hover:underline">
           Send again
         </button>
       </div>
