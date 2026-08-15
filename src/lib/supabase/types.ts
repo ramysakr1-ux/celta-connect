@@ -618,6 +618,41 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["observations"]["Row"]>;
         Relationships: [];
       };
+      observation_tasks: {
+        Row: {
+          id: string;
+          course_id: string;
+          title: string;
+          instructions: string;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["observation_tasks"]["Row"]> & {
+          course_id: string;
+          title: string;
+          instructions: string;
+          created_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["observation_tasks"]["Row"]>;
+        Relationships: [];
+      };
+      observation_task_submissions: {
+        Row: {
+          id: string;
+          task_id: string;
+          trainee_id: string;
+          observation_id: string | null;
+          response: string;
+          submitted_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["observation_task_submissions"]["Row"]> & {
+          task_id: string;
+          trainee_id: string;
+          response: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["observation_task_submissions"]["Row"]>;
+        Relationships: [];
+      };
       attendance_absences: {
         Row: {
           id: string;

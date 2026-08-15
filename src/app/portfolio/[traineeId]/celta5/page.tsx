@@ -19,6 +19,7 @@ import { computeProgressIssues, computeAssessedTpStats } from "@/lib/course-prog
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
+import { ObservationTaskForm } from "@/app/portfolio/[traineeId]/celta5/observation-task-form";
 import { FinalChecklistForm } from "@/app/dashboard/trainee/celta5/final-checklist-form";
 import { signOffStage2 } from "@/app/dashboard/trainee/actions";
 import { Stage1Form } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-form";
@@ -108,6 +109,8 @@ export default async function PortfolioCelta5Page({
       { data: course },
       { data: center },
       { data: courseTutorRows },
+      { data: obsTasks },
+      { data: obsTaskSubmissions },
     ] = await Promise.all([
       supabase.rpc("get_my_celta5_record"),
       supabase.rpc("get_my_celta5_matrix"),
@@ -130,8 +133,13 @@ export default async function PortfolioCelta5Page({
       viewer?.course_id
         ? supabase.from("course_tutors").select("profile_id").eq("course_id", viewer.course_id).is("left_at", null)
         : Promise.resolve({ data: [] }),
+      viewer?.course_id
+        ? supabase.from("observation_tasks").select("id, title, instructions").eq("course_id", viewer.course_id).order("created_at")
+        : Promise.resolve({ data: [] }),
+      supabase.from("observation_task_submissions").select("task_id, response, submitted_at").eq("trainee_id", traineeId),
     ]);
     const record = recordRows?.[0];
+    const submissionByTaskId = new Map((obsTaskSubmissions ?? []).map((s) => [s.task_id, s]));
 
     if (!record) {
       return <div className="sheet p-6 text-sm text-muted">No CELTA 5 record found yet. Check with your trainer.</div>;
@@ -436,6 +444,35 @@ export default async function PortfolioCelta5Page({
           </div>
         </div>
 
+        {(obsTasks ?? []).length > 0 ? (
+          <div>
+            <h3 className="font-serif text-lg text-ink">Observation tasks</h3>
+            <p className="mt-1 text-sm text-muted">
+              Directed observations your tutor has assigned -- submitting one also counts toward your 6-hour
+              requirement below.
+            </p>
+            <div className="mt-3 flex flex-col gap-3">
+              {(obsTasks ?? []).map((task) => {
+                const submission = submissionByTaskId.get(task.id);
+                return (
+                  <div key={task.id} className="sheet">
+                    <p className="font-medium text-ink">{task.title}</p>
+                    <p className="mt-1 text-sm text-muted">{task.instructions}</p>
+                    {submission ? (
+                      <div className="mt-3 border-t border-border-faint pt-3">
+                        <p className="text-xs text-muted">Submitted {new Date(submission.submitted_at).toLocaleString()}</p>
+                        <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{submission.response}</p>
+                      </div>
+                    ) : (
+                      <ObservationTaskForm taskId={task.id} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
         <div>
           <h3 className="font-serif text-lg text-ink">Observations of experienced teachers</h3>
           <p className="mt-1 text-sm text-muted">Log the 6 hours you spend observing experienced teachers (up to 3 filmed).</p>
@@ -486,6 +523,15 @@ export default async function PortfolioCelta5Page({
   const { data: courseTutorRows } = trainee.course_id
     ? await supabase.from("course_tutors").select("profile_id").eq("course_id", trainee.course_id).is("left_at", null)
     : { data: [] };
+
+  const { data: obsTasks } = trainee.course_id
+    ? await supabase.from("observation_tasks").select("id, title, instructions").eq("course_id", trainee.course_id).order("created_at")
+    : { data: [] };
+  const { data: obsTaskSubmissions } = await supabase
+    .from("observation_task_submissions")
+    .select("task_id, response, submitted_at")
+    .eq("trainee_id", traineeId);
+  const staffSubmissionByTaskId = new Map((obsTaskSubmissions ?? []).map((s) => [s.task_id, s]));
   const tutorIds = (courseTutorRows ?? []).map((t) => t.profile_id);
   const { data: tutorProfiles } =
     tutorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", tutorIds) : { data: [] };
@@ -594,6 +640,34 @@ export default async function PortfolioCelta5Page({
   const filmedCountedHours = observationHoursCounted - liveHours;
   const observationFilmedPct = Math.min(100 - observationLivePct, (filmedCountedHours / OBSERVATION_HOURS_REQUIRED) * 100);
 
+  const tasksBlock =
+    (obsTasks ?? []).length > 0 ? (
+      <div>
+        <h3 className="font-serif text-lg text-ink">Observation tasks</h3>
+        <div className="sheet mt-2 flex flex-col gap-3">
+          {(obsTasks ?? []).map((task) => {
+            const submission = staffSubmissionByTaskId.get(task.id);
+            return (
+              <div key={task.id} className="border-b border-border-faint pb-3 last:border-none last:pb-0">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-ink">{task.title}</p>
+                  <span className={`pill ${submission ? "pill-success" : "pill-neutral"}`}>
+                    {submission ? "Submitted" : "Not yet"}
+                  </span>
+                </div>
+                {submission ? (
+                  <>
+                    <p className="mt-1 text-xs text-muted">{new Date(submission.submitted_at).toLocaleString()}</p>
+                    <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{submission.response}</p>
+                  </>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    ) : null;
+
   const observationsBlock = (
     <div>
       <h3 className="font-serif text-lg text-ink">Observations of experienced teachers (self-reported)</h3>
@@ -661,6 +735,8 @@ export default async function PortfolioCelta5Page({
             {record.hours_attended ?? 0} / {course?.total_hours ?? 120} hrs
           </p>
         </div>
+
+        {tasksBlock}
 
         {observationsBlock}
 
@@ -827,6 +903,8 @@ export default async function PortfolioCelta5Page({
       </div>
 
       <AttendanceForm key={`attendance-${record.updated_at}`} record={record} totalHours={course?.total_hours ?? 120} absences={absences ?? []} />
+
+      {tasksBlock}
 
       {observationsBlock}
 
