@@ -52,12 +52,23 @@ export default async function TrainerTpCardPage({
     );
   }
 
-  const [{ data: languageAnalysis }, { data: materials }, { data: selfEvaluation }, { data: feedback }] =
+  const [{ data: languageAnalysis }, { data: materials }, { data: selfEvaluation }, { data: feedback }, { data: captureNotes }] =
     await Promise.all([
       supabase.from("tp_language_analyses").select("*").eq("tp_plan_id", plan.id).maybeSingle(),
       supabase.from("tp_materials").select("*").eq("tp_plan_id", plan.id).order("created_at"),
       supabase.from("tp_self_evaluations").select("*").eq("tp_plan_id", plan.id).maybeSingle(),
       supabase.from("tp_feedback").select("*").eq("tp_plan_id", plan.id).maybeSingle(),
+      // specs/build-spec.md §7's mobile capture feature -- points jotted on
+      // a phone during the lesson (src/app/trainer/(hub)/capture/), scoped
+      // to this exact trainee+TP so they surface right where the trainer
+      // writes the real feedback, not buried in a separate inbox.
+      supabase
+        .from("tp_capture_notes")
+        .select("id, text, criteria_codes, captured_at")
+        .eq("trainer_id", trainer.id)
+        .eq("trainee_id", id)
+        .eq("tp_number", tpNumber)
+        .order("captured_at"),
     ]);
 
   return (
@@ -186,6 +197,7 @@ export default async function TrainerTpCardPage({
         tpNumber={tpNumber}
         feedback={feedback ?? null}
         autoTagEnabled={center?.auto_tag_criteria_enabled ?? true}
+        captureNotes={captureNotes ?? []}
       />
 
       {plan.submitted_at && selfEvaluation?.submitted_at && feedback?.submitted_at ? (

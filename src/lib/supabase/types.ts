@@ -864,6 +864,27 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["peer_observation_notes"]["Row"]>;
         Relationships: [];
       };
+      tp_capture_notes: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainer_id: string;
+          trainee_id: string;
+          tp_number: number;
+          text: string;
+          criteria_codes: string[];
+          captured_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_capture_notes"]["Row"]> & {
+          course_id: string;
+          trainer_id: string;
+          trainee_id: string;
+          tp_number: number;
+          text: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_capture_notes"]["Row"]>;
+        Relationships: [];
+      };
       malpractice_cases: {
         Row: {
           id: string;

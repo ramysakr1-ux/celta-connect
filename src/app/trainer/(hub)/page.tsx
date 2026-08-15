@@ -155,7 +155,16 @@ export default async function TodayPage() {
           <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">{overline}</p>
           <h1 className="font-serif text-3xl text-ink">{todayHeading}</h1>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* specs/build-spec.md §7: the one trainer surface meant to be
+              genuinely usable on a phone mid-lesson -- kept first/most
+              prominent in this row for that reason. */}
+          <Link
+            href="/trainer/capture"
+            className="rounded-[6px] border border-gold bg-gold/10 px-3.5 py-2 text-sm font-medium text-gold hover:bg-gold/20"
+          >
+            Capture a point
+          </Link>
           <Link
             href="/trainer/announcements"
             className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"

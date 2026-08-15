@@ -3,15 +3,17 @@
 import { useActionState, useState } from "react";
 import { saveFeedbackDraft, submitFeedback, type FormState } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/actions";
 import { FeedbackPointEditor } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/feedback-point-editor";
+import { deleteCaptureNote } from "@/app/trainer/(hub)/capture/actions";
 import { FormSubmitBar } from "@/components/form-submit-bar";
 import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
-import { STANDARD_RATING_OPTIONS } from "@/lib/celta-criteria";
+import { STANDARD_RATING_OPTIONS, CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { StandardRatingPill } from "@/lib/status-pill";
 import type { FeedbackPoint } from "@/lib/tp-plan-content";
 import type { Database } from "@/lib/supabase/types";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
 type SelfEvaluation = Database["public"]["Tables"]["tp_self_evaluations"]["Row"];
+type CaptureNote = { id: string; text: string; criteria_codes: string[]; captured_at: string };
 
 const initialState: FormState = { error: null };
 const inputClass =
@@ -30,6 +32,7 @@ export function FeedbackForm({
   feedback,
   selfEvaluation,
   autoTagEnabled = true,
+  captureNotes = [],
 }: {
   planId: string;
   traineeId: string;
@@ -37,6 +40,7 @@ export function FeedbackForm({
   feedback: TpFeedback | null;
   selfEvaluation?: SelfEvaluation | null;
   autoTagEnabled?: boolean;
+  captureNotes?: CaptureNote[];
 }) {
   const locked = Boolean(feedback?.submitted_at);
   const [draftState, draftAction, draftPending] = useActionState(saveFeedbackDraft, initialState);
@@ -53,6 +57,23 @@ export function FeedbackForm({
   );
 
   const state = submitPending ? submitState : draftState;
+  const [notes, setNotes] = useState<CaptureNote[]>(captureNotes);
+
+  // Adds the captured note straight into the chosen array (as a real,
+  // already-tagged FeedbackPoint -- same shape typing one manually would
+  // produce) and removes the scratch capture row, since it's now living in
+  // the real feedback draft instead. Optimistic on the list (removes
+  // immediately); the delete itself just needs to not be lost if it fails,
+  // not block the UI on a round trip.
+  function pullInNote(note: CaptureNote, target: (points: FeedbackPoint[]) => void, current: FeedbackPoint[]) {
+    target([...current, { text: note.text, criteria_codes: note.criteria_codes, starred: false }]);
+    setNotes((prev) => prev.filter((n) => n.id !== note.id));
+    const fd = new FormData();
+    fd.set("note_id", note.id);
+    fd.set("trainee_id", traineeId);
+    fd.set("tp_number", String(tpNumber));
+    deleteCaptureNote(fd);
+  }
 
   if (locked) {
     return (
@@ -97,6 +118,60 @@ export function FeedbackForm({
           ))}
         </div>
       </div>
+
+      {notes.length > 0 ? (
+        <div className="rounded-[6px] border border-dashed border-gold bg-gold/5 p-4">
+          <p className="text-xs font-semibold tracking-[0.08em] text-gold uppercase">Captured during the lesson</p>
+          <p className="mt-1 text-xs text-muted">Pulling one in removes it from here and drops it, already tagged, into the section you choose.</p>
+          <ul className="mt-3 flex flex-col gap-3">
+            {notes.map((note) => (
+              <li key={note.id} className="rounded-[6px] border border-border-faint bg-card p-3">
+                <p className="text-xs text-muted">{new Date(note.captured_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</p>
+                <p className="mt-1 text-sm text-ink">{note.text}</p>
+                {note.criteria_codes.length > 0 ? (
+                  <p className="mt-1.5 flex flex-wrap gap-1">
+                    {note.criteria_codes.map((code) => (
+                      <span key={code} className="badge-solid" title={CRITERIA_LABELS[code] ?? ""}>
+                        {code}
+                      </span>
+                    ))}
+                  </p>
+                ) : null}
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => pullInNote(note, setStrengthsTeaching, strengthsTeaching)}
+                    className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-ink hover:border-primary"
+                  >
+                    + Strength (teaching)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => pullInNote(note, setActionPointsTeaching, actionPointsTeaching)}
+                    className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-ink hover:border-primary"
+                  >
+                    + Action point (teaching)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => pullInNote(note, setStrengthsPlanning, strengthsPlanning)}
+                    className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-ink hover:border-primary"
+                  >
+                    + Strength (planning)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => pullInNote(note, setActionPointsPlanning, actionPointsPlanning)}
+                    className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-ink hover:border-primary"
+                  >
+                    + Action point (planning)
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="flex flex-col gap-4">
