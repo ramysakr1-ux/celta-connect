@@ -12,14 +12,15 @@ Every trackable item is a **column** on the existing Standing table (Roster tab)
 
 ### Full list of what's trackable today, and its column
 
-1. **Attendance** — existing register/Zoom auto-tick. Column: % + hours credited.
+1. **Attendance** — existing register/Zoom auto-tick, **trainee course attendance only** (not volunteer/TP-student attendance, which is tracked separately in the volunteer view and feeds the assessor pack from there). Column: % + hours credited.
 2. **TP lesson stages** (per round) — plan submitted, self-evaluation written, feedback returned. Column: pill per stage or a single "on track / behind" rollup, with the per-TP detail one click away (existing '1c My teaching' pattern stays as the drill-down, not replaced).
 3. **Supervised review quizzes** — Column: Done/Pending + score (e.g. "9/10") + time spent. Replaces the standalone '1d3' screen — that screen's content becomes this column's drill-down instead of a separate nav destination.
 4. **Observation logging** (filmed / peer / experienced-teacher hours) — Column: hours logged toward each syllabus minimum, flagged if short.
-5. **Stage 2 / Stage 3 tutorials** — Column: Booked (with position) / Not booked / N/A (Stage 3 is by invitation, not universal).
-6. **CELTA 5 self-assessment & sign-off** — Column: Not started / Candidate signed / Both signed.
-7. **Assignments** — Column: N of 4 passed, resubmission flag if used.
-8. **FOL error-log entries** (class_error_log) — Column: count logged this course, flagged low if a candidate is under the expected rate.
+5. **Stage 1 report** — required for every candidate, filed by the trainer (the report is mandatory; only the tutorial conversation itself is optional). Column: Filed / Not filed.
+6. **Stage 2 / Stage 3 tutorials** — Stage 2 booking is filled by both trainee (books slot) and trainer; Stage 3 report is trainer-filed only, by invitation (not universal). Column: Booked (with position) / Not booked / N/A.
+7. **CELTA 5 self-assessment & sign-off** — Column: Not started / Candidate signed / Both signed.
+8. **Assignments** — Column: N of 4 passed, resubmission flag if used.
+9. **FOL error-log entries** (class_error_log) — Column: count logged this course, flagged low if a candidate is under the expected rate.
 
 ### Drill-down, not duplication
 
