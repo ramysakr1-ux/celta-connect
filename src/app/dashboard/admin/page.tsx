@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { CreateCourseForm } from "@/app/dashboard/admin/create-course-form";
 import { computeWeekOf, computeCourseState, type CourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { getRecentCentreChanges } from "@/lib/what-changed";
@@ -115,12 +114,12 @@ export default async function AdminDashboardPage() {
         {/* The create form already lives in the sidebar, so this jumps to it
             rather than pointing at a /courses/new route that does not exist --
             a primary button that 404s is worse than no button. */}
-        <a
-          href="#new-course"
+        <Link
+          href="/dashboard/admin/courses/new"
           className="flex h-[34px] shrink-0 items-center rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold whitespace-nowrap text-primary-foreground"
         >
           New course
-        </a>
+        </Link>
       </div>
 
       {center?.center_number.startsWith("PENDING-") ? (
@@ -184,10 +183,6 @@ export default async function AdminDashboardPage() {
           ) : (
             <p className="text-muted">No courses yet.</p>
           )}
-
-          <div id="new-course">
-            <CreateCourseForm centerNumber={center?.center_number ?? null} />
-          </div>
         </div>
 
         {/* specs/build-spec.md §7: admin gets "status plus the one or two
