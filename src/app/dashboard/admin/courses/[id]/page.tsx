@@ -25,6 +25,7 @@ import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { InvitationsPanel } from "@/app/dashboard/admin/courses/[id]/invitations-panel";
+import { TutorRoleControl } from "@/app/dashboard/admin/courses/[id]/tutor-role-control";
 import { getRecentCentreChanges } from "@/lib/what-changed";
 import { WhatChangedPanel } from "@/components/what-changed-panel";
 
@@ -53,6 +54,15 @@ export default async function CourseRosterPage({
     .eq("course_id", id)
     .order("role")
     .order("full_name");
+
+  // course_tutors carries the role; profiles carries the person. The roster
+  // needs both, keyed by profile.
+  const { data: courseTutors } = await supabase
+    .from("course_tutors")
+    .select("id, profile_id, tutor_role")
+    .eq("course_id", id)
+    .is("left_at", null);
+  const tutorRowByProfile = new Map((courseTutors ?? []).map((t) => [t.profile_id, t]));
 
   // Named invitations that haven't been taken up. Withdrawn ones are excluded
   // but not deleted -- who was invited and never came is worth keeping.
@@ -426,11 +436,27 @@ export default async function CourseRosterPage({
                         <td className="text-ink">{member.full_name}</td>
                         <td className="text-muted">{member.email}</td>
                         <td>
-                          <span className="status-pill status-pill-pending capitalize">
-                            {member.role}
-                          </span>
+                          <div className="flex flex-col gap-1">
+                            <span className="status-pill status-pill-pending capitalize">
+                              {member.role === "trainee" ? "candidate" : member.role}
+                            </span>
+                            {/* The role travels with the invitation, but has to
+                                be changeable afterwards -- an MCT who stops
+                                working is a real Tuesday. */}
+                            {member.role === "trainer" && tutorRowByProfile.get(member.id) ? (
+                              <TutorRoleControl
+                                courseTutorId={tutorRowByProfile.get(member.id)!.id}
+                                courseId={course.id}
+                                current={tutorRowByProfile.get(member.id)!.tutor_role}
+                              />
+                            ) : null}
+                          </div>
                         </td>
                         <td>
+                          {/* "Joined / Invited -- deliberately distinguishable,
+                              unlike an earlier build where an invited and
+                              joined person looked identical." */}
+                          <span className="pill pill-success">Joined</span>{" "}
                           {member.role === "trainee" && member.course_status !== "active" ? (
                             <span className={`pill ${member.course_status === "extension" ? "pill-info" : "pill-neutral"}`}>
                               {COURSE_STATUS_LABEL[member.course_status]}
@@ -448,13 +474,38 @@ export default async function CourseRosterPage({
                         </td>
                       </tr>
                     ))
-                  ) : (
+                  ) : null}
+
+                  {/* Invited but not arrived. In the same table on purpose: a
+                      separate list is where people stop looking, and the whole
+                      point of the pill is that the difference is visible in
+                      the place you already check. */}
+                  {pendingInvites.map((inv) => (
+                    <tr key={inv.id}>
+                      <td className="text-muted">{inv.fullName ?? "—"}</td>
+                      <td className="text-muted">{inv.email}</td>
+                      <td>
+                        <span className="status-pill status-pill-pending capitalize">
+                          {inv.role === "trainee" ? "candidate" : "trainer"}
+                        </span>
+                        {inv.tutorRole ? (
+                          <span className="mt-1 block text-[11px] text-muted">{inv.tutorRole.replace(/_/g, " ")}</span>
+                        ) : null}
+                      </td>
+                      <td>
+                        <span className="pill pill-neutral">Invited</span>
+                      </td>
+                      <td />
+                    </tr>
+                  ))}
+
+                  {(!roster || roster.length === 0) && pendingInvites.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="text-muted">
                         No one on this course yet.
                       </td>
                     </tr>
-                  )}
+                  ) : null}
                 </tbody>
               </table>
             </div>
