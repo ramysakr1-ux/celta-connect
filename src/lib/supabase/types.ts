@@ -337,6 +337,9 @@ export interface Database {
           center_id: string;
           intake_course_id: string;
           source_link_id: string | null;
+          // migration 0101 -- set only on rows a spreadsheet import created, so
+          // an undo can remove exactly those and nothing added by hand since.
+          import_id: string | null;
           full_name: string;
           email: string;
           phone: string | null;
@@ -1389,6 +1392,29 @@ export interface Database {
           event_date: string;
         };
         Update: Partial<Database["public"]["Tables"]["course_timetable_events"]["Row"]>;
+        Relationships: [];
+      };
+      spreadsheet_imports: {
+        Row: {
+          id: string;
+          center_id: string;
+          intake_course_id: string;
+          source_filename: string;
+          column_mapping: Record<string, string | null>;
+          status_value_mapping: Record<string, string | null>;
+          tallies: Record<string, number>;
+          created_by: string;
+          created_at: string;
+          undone_at: string | null;
+          undone_by: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["spreadsheet_imports"]["Row"]> & {
+          center_id: string;
+          intake_course_id: string;
+          source_filename: string;
+          created_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["spreadsheet_imports"]["Row"]>;
         Relationships: [];
       };
       supervised_session_completions: {
