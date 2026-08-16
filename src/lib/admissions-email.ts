@@ -1,6 +1,6 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend/client";
-import { emailShell, rawP, p, esc, EMAIL_TONE } from "@/lib/email-layout";
+import { emailShell, rawP, p, list, inlineButton, signature, esc, EMAIL_TONE } from "@/lib/email-layout";
 
 // "Every email is from the centre... sender is the centre's name, reply-to
 // is a centre address. Connect never appears in anyone's inbox." The
@@ -317,54 +317,6 @@ export function taskWaitingEmailHtml(input: {
 }
 
 
-
-// "Group, level, the day-one activity, and the practical details. The only
-// email in the fortnight before." That last clause is a constraint on everyone
-// else, not a feature of this email.
-export function startsMondayEmailHtml(input: {
-  candidateName: string;
-  courseName: string;
-  startDate: string;
-  groupName: string | null;
-  level: string | null;
-  firstActivity: string | null;
-  practicalDetails: string | null;
-  tutorName: string;
-}): string {
-  return `
-    <p>Dear ${input.candidateName},</p>
-    <p>${input.courseName} starts on <strong>${input.startDate}</strong>. Here's what you need for day one.</p>
-    ${input.groupName ? `<p><strong>Your group:</strong> ${input.groupName}${input.level ? ` (teaching ${input.level})` : ""}</p>` : ""}
-    ${input.firstActivity ? `<p><strong>First activity:</strong> ${input.firstActivity}</p>` : ""}
-    ${input.practicalDetails ? `<p><strong>Practical details:</strong> ${input.practicalDetails}</p>` : ""}
-    <p>Anything you're unsure about, reply to this and it reaches me directly.</p>
-    <p>${input.tutorName}</p>
-  `;
-}
-
-// "For somebody accepted days before. Says plainly which of the pre-course work
-// is now optional." Without this they arrive on Monday having tried to do four
-// weeks of preparation in three days, or having done none and assuming they're
-// already behind.
-export function lateEnrolmentEmailHtml(input: {
-  candidateName: string;
-  courseName: string;
-  startDate: string;
-  skipItems: string[];
-  tutorName: string;
-}): string {
-  return `
-    <p>Dear ${input.candidateName},</p>
-    <p>Welcome to ${input.courseName} -- you're joining us on <strong>${input.startDate}</strong>, which is soon, so let me be direct about what matters between now and then.</p>
-    ${
-      input.skipItems.length
-        ? `<p><strong>You can safely skip:</strong></p><ul>${input.skipItems.map((s) => `<li>${s}</li>`).join("")}</ul><p>These are useful, not required. Nobody will ask you about them and you're not behind for having skipped them.</p>`
-        : ""
-    }
-    <p>I'm your point of contact for the first week. Reply to this email with anything at all -- it comes to me, not a shared inbox.</p>
-    <p>${input.tutorName}</p>
-  `;
-}
 
 // "Names the course, the groups and the dates. Staff terms are accepted once
 // per centre, not per course." The getting-started guide is linked here because
@@ -704,5 +656,176 @@ export function placeFreedEmailHtml(input: {
       ),
     cta: { label: input.hoursLeftLabel, url: input.offerUrl },
     footnote: `Declining costs you nothing: we carry you to the ${input.nextCourseName ?? "next"} course automatically, with your task and interview still on file.`,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// The three from Course Emails.dc.html, verbatim.
+//
+// These interleave buttons with the copy rather than closing with one, and
+// the order is the message: pay the deposit first, then "there are two more
+// things to do, and neither is urgent". Flattening that into a single trailing
+// CTA would change what the email says, so the shell grew inline buttons
+// instead.
+//
+// Signed by the Course Director by name. All three are from a person, not
+// from a system.
+// ---------------------------------------------------------------------------
+
+/**
+ * Acceptance — the place is offered, the deposit secures it.
+ *
+ * "Sometimes sent months ahead, when no levels, groups or tutors exist yet",
+ * which is why nothing here names a group or a tutor: those are the welcome
+ * email's job, the Friday before.
+ */
+export function acceptancePlaceEmailHtml(input: {
+  candidateName: string;
+  courseName: string;
+  courseDates: string;
+  centreLocation: string;
+  feeAmount: string;
+  depositAmount: string;
+  depositBy: string;
+  balanceBy: string;
+  payUrl: string;
+  setupUrl: string;
+  directorName: string;
+  directorRole: string;
+}): string {
+  return emailShell({
+    heading: `Your place on ${input.courseName}`,
+    tone: "teal",
+    body:
+      p(`Dear ${input.candidateName},`) +
+      p(
+        `We are pleased to offer you a place on ${input.courseName}, running from ${input.courseDates} at ${input.centreLocation}.`
+      ) +
+      p(
+        `The course fee is ${input.feeAmount}. To secure the place we need a deposit of ${input.depositAmount} by ${input.depositBy}. After that date the place is offered to the next applicant — we will not chase you for it, so please treat this part as the deadline it is.`
+      ) +
+      inlineButton({
+        label: "Pay the deposit",
+        url: input.payUrl,
+        sub: `A receipt is sent automatically. The balance is due by ${input.balanceBy}.`,
+      }) +
+      p("Once the deposit clears, there are two more things to do, and neither is urgent.") +
+      inlineButton({
+        label: "Set up your Connect account",
+        url: input.setupUrl,
+        sub: "This is where the whole course lives — your timetable, your lesson plans, your assignments.",
+      }) +
+      p(
+        "Second, the pre-course task. It takes most people eight to ten hours spread over a few weeks, and you hand it in on the first morning. It is not graded. Do not leave it until the week before."
+      ) +
+      p(
+        "You will hear from us again the Friday before the course starts, with your group, your level, and what happens on day one. Nothing else is expected before then."
+      ) +
+      p("If anything changes for you between now and then, tell us early — we can almost always help.") +
+      signature(input.directorName, input.directorRole),
+  });
+}
+
+/**
+ * Welcome — the Friday before.
+ *
+ * "The first moment levels and groups are settled", which is why this one
+ * carries them and the acceptance email cannot.
+ */
+export function startsMondayEmailHtml(input: {
+  candidateName: string;
+  courseName: string;
+  startTime: string;
+  startDay: string;
+  room: string;
+  groupName: string;
+  levelName: string;
+  tutorNames: string;
+  activitiesUrl: string;
+  directorName: string;
+  directorRole: string;
+}): string {
+  return emailShell({
+    heading: `${input.courseName} starts ${input.startDay}`,
+    tone: "gold",
+    body:
+      p(`Dear ${input.candidateName},`) +
+      p(
+        `We start at ${input.startTime} on ${input.startDay}, in ${input.room}. Bring the pre-course task and something to write with. Nothing else.`
+      ) +
+      p(
+        `You are in ${input.groupName}, teaching the ${input.levelName} class. Your tutors are ${input.tutorNames}.`
+      ) +
+      p(
+        "On Monday afternoon, after the demo lesson, each of you will spend twenty minutes with the class doing a getting-to-know-you activity. It is not assessed, nobody is watching, and it is meant to be enjoyable. We have put three to choose from in Connect — have a look this weekend and pick whichever appeals."
+      ) +
+      inlineButton({
+        label: "See your three activities",
+        url: input.activitiesUrl,
+        sub: "Two minutes. Choose one, and that is genuinely all the preparation Monday needs.",
+        tone: "gold",
+      }) +
+      p("Everything else on Monday is watching and listening. There is nothing else to prepare.") +
+      p(
+        "Your tutors will answer any questions on the first morning, so please do not worry about anything between now and then."
+      ) +
+      p("See you Monday.") +
+      signature(input.directorName, input.directorRole),
+  });
+}
+
+/**
+ * Late enrolment — days rather than months.
+ *
+ * "Every expectation the standard welcome sets is quietly lowered, and the one
+ * thing that genuinely matters is named." The reassurance near the end is
+ * muted in the design rather than emphasised, which is the right instinct: it
+ * is meant to settle someone, not to be the loudest thing on the page.
+ */
+export function lateEnrolmentEmailHtml(input: {
+  candidateName: string;
+  courseName: string;
+  daysNotice: string;
+  startTime: string;
+  startDay: string;
+  room: string;
+  groupName: string;
+  levelName: string;
+  tutorNames: string;
+  setupUrl: string;
+  directorName: string;
+  directorRole: string;
+}): string {
+  return emailShell({
+    heading: `Welcome to ${input.courseName} — starting ${input.startDay}, and what to ignore`,
+    tone: "red",
+    body:
+      p(`Dear ${input.candidateName},`) +
+      p(
+        `Welcome to ${input.courseName}. A place came free and we are glad you took it — but you have ${input.daysNotice} rather than four weeks, so this email is mostly about what you can safely ignore.`
+      ) +
+      p(
+        `We start at ${input.startTime} on ${input.startDay}, ${input.room}. You are in ${input.groupName}, teaching the ${input.levelName} class, with ${input.tutorNames}.`
+      ) +
+      p(
+        "The pre-course task normally takes eight to ten hours. Do what you can and bring whatever you have — nobody will comment on how much. You can finish it during the first week."
+      ) +
+      list([
+        "Setting up Connect — a minute at most, and worth doing before Monday.",
+        "The getting-to-know-you activity — twenty minutes on Monday afternoon, three to choose from, unassessed. Pick one if you have time. If not, your tutor will choose for you and that is completely fine.",
+        "Everything else can wait until you are here.",
+      ]) +
+      inlineButton({
+        label: "Set up Connect and see your activities",
+        url: input.setupUrl,
+        sub: "The only thing on this list worth doing before Monday.",
+      }) +
+      // Muted in the design, deliberately -- it is meant to settle someone,
+      // not to shout.
+      `<p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#6d655c;">Starting late is much more common than you would think, and it makes no difference at all to how the course goes or how you are assessed.</p>` +
+      p(
+        "If you would rather talk it through before Monday, call me on the centre number and ask for me directly."
+      ) +
+      signature(input.directorName, input.directorRole),
   });
 }

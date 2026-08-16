@@ -103,6 +103,33 @@ export function list(items: string[]): string {
   return `<ul style="margin:0 0 12px;padding-left:20px;">${li}</ul>`;
 }
 
+/**
+ * A button inside the body, with its own caption beneath.
+ *
+ * Course Emails.dc.html interleaves these mid-flow rather than closing with
+ * one: the acceptance email puts "Pay the deposit" after the fee paragraph
+ * and "Set up your Connect account" several paragraphs later, each with its
+ * own sub-line. That sequencing is the message -- pay first, then the other
+ * two things, "and neither is urgent" -- so it cannot be flattened into a
+ * single trailing CTA without rewriting what the email says.
+ */
+export function inlineButton(input: { label: string; url: string; sub?: string; tone?: EmailTone }): string {
+  const accent = EMAIL_TONE[input.tone ?? "teal"];
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:14px 0 6px;">
+      <tr><td style="border-radius:6px;background:${accent};">
+        <a href="${input.url}" style="display:inline-block;padding:10px 20px;font-size:13.5px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:6px;">${esc(input.label)}</a>
+      </td></tr>
+    </table>
+    ${input.sub ? `<p style="margin:0 0 16px;font-size:12px;line-height:1.55;color:${MUTED};">${esc(input.sub)}</p>` : ""}`;
+}
+
+/** A signature block -- "Nazlı Aydın\nCourse Director" renders as two lines. */
+export function signature(name: string, role?: string): string {
+  return `<p style="margin:18px 0 0;font-size:14px;line-height:1.5;color:${INK};">${esc(name)}${
+    role ? `<br /><span style="color:${MUTED};">${esc(role)}</span>` : ""
+  }</p>`;
+}
+
 export function emailShell(input: EmailShellInput): string {
   const accent = EMAIL_TONE[input.tone ?? "teal"];
 
