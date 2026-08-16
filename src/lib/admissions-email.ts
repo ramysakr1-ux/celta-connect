@@ -282,25 +282,27 @@ export function acknowledgementEmailHtml(input: {
   `;
 }
 
-// Its own email, sent BEFORE the interview. for-claude-code-email-copy.md §1
-// item 2: "Tells them the task is waiting; the task itself opens in Connect
-// and autosaves. Carries: link to the task only." Item 3, the interview
-// invite, then opens "Thank you for the written tasks -- we have read them",
-// so it can only follow this one.
+// NEVER SENT. There is no pre-interview task email at all.
 //
-// There are TWO tasks in the journey and they are not interchangeable: this
-// pre-INTERVIEW task, and the pre-COURSE task that rides with the workspace
-// invitation (item 11, "Before day one - Pre-course task, about 4 hours").
-// An earlier version of this comment merged the two and folded this email into
-// the workspace invitation. That was wrong, and it would have meant a
-// candidate being asked to do the selection task after they had already been
-// accepted onto the course.
+// Ramy, 2026-08-16, settling this directly: "the pre-interview task is
+// something they do when they sign up to Connect -- they click a link on the
+// website, the link takes them to Connect, and then they do the pre-interview
+// task. So there's no email with the pre-interview task. It's already built
+// in."
 //
-// NOT YET SENDABLE, and the reason is structural rather than missing plumbing:
-// the spec has the task opening in Connect and autosaving, which means it is a
-// thing that exists before they touch it. This build puts the writing task
-// inside the application form itself, so there is no moment at which a task
-// "becomes ready" to announce. Splitting the task out of the form is the fix.
+// So the applicant is already in Connect doing the task; announcing by email
+// that a task is waiting would arrive while they are sitting in front of it.
+// The current build is right: the writing task is part of the application
+// flow. Item 2 in the inventory is a description of that step, not a message.
+//
+// Kept as a function only so the wording survives if it is ever needed on the
+// page itself. Do not wire it to a send.
+//
+// The two tasks are NOT interchangeable, and this comment has been wrong in
+// both directions already: the pre-INTERVIEW task is part of applying, and the
+// pre-COURSE task rides with the workspace invitation (item 11, "Before day
+// one - Pre-course task, about 4 hours"). Merging them would mean asking a
+// candidate to sit the selection task after they had been accepted.
 export function taskWaitingEmailHtml(input: {
   applicantName: string;
   courseName: string;

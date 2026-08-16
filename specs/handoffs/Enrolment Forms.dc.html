@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 44px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 12px; max-width: 960px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · day one · signed once, referenced all course</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Three things a candidate must sign, and one route out when something goes wrong.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Cambridge requires the AI disclaimer, the special-consideration declaration and an internal complaints procedure with recourse beyond the tutors. All three are currently paper, or missing. Wording below is from Cambridge's own guidance and your centre documents, not mine.</div>
+  </div>
+
+  <!-- 1a -->
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Disclaimer for AI use</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">Cambridge's three sections, verbatim</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 26px 24px; display: grid; grid-template-columns: 700px 1fr; gap: 22px; align-items: start;">
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Cambridge English Teaching Qualifications</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 23px; font-weight: 600; color: oklch(23.5% 0.017 65);">Disclaimer for AI use</div>
+        </div>
+
+        <sc-for list="{{ aiSections }}" as="s" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 10px; padding: 15px 16px; border-radius: 6px; background: {{ s.bg }}; border: 1px solid {{ s.border }};">
+            <div style="display: flex; align-items: flex-start; gap: 11px;">
+              <div style="width: 20px; height: 20px; border-radius: 5px; background: {{ s.chipBg }}; color: {{ s.chipInk }}; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">{{ s.letter }}</div>
+              <div style="font-size: 13px; line-height: 1.55; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ s.lead }}</div>
+            </div>
+            <sc-for list="{{ s.items }}" as="i" hint-placeholder-count="3">
+              <div style="display: flex; align-items: flex-start; gap: 10px; padding-left: 31px;">
+                <div style="width: 4px; height: 4px; border-radius: 50%; background: {{ s.dot }}; margin-top: 7px; flex: none;"></div>
+                <div style="font-size: 12.5px; line-height: 1.55; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ i }}</div>
+              </div>
+            </sc-for>
+            <div style="display: flex; align-items: center; gap: 10px; padding-left: 31px; padding-top: 3px;">
+              <div style="width: 15px; height: 15px; border-radius: 4px; border: 1px solid {{ s.tickBorder }}; background: {{ s.tickBg }}; display: flex; align-items: center; justify-content: center; flex: none;">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="oklch(99.2% 0.005 90)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+              </div>
+              <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ s.tick }}</div>
+            </div>
+          </div>
+        </sc-for>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 12px; color: oklch(51% 0.017 70);">Type your full name to sign</div>
+          <div style="height: 44px; border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 35%, transparent); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 0 13px; display: flex; align-items: center;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; color: oklch(23.5% 0.017 65);">Sara Yılmaz</div>
+          </div>
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">Name, date and time are recorded. A copy is filed in your portfolio.</div>
+        </div>
+
+        <div style="height: 40px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer;">Sign the disclaimer</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <sc-for list="{{ aiNotes }}" as="n" hint-placeholder-count="4">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1b -->
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1b</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Special consideration — declared at enrolment</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 26px 24px; display: grid; grid-template-columns: 620px 1fr; gap: 22px; align-items: start;">
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 22px; display: flex; flex-direction: column; gap: 17px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600; color: oklch(23.5% 0.017 65);">Is there anything we should know?</div>
+          <div style="font-size: 12.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">If you have a condition or circumstance that affects how you work — dyslexia, a health condition, caring responsibilities — tell us now rather than later. It does not appear on your certificate and it does not change the standard you are assessed against. It changes what we arrange.</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <sc-for list="{{ scOptions }}" as="o" hint-placeholder-count="3">
+            <div onClick="{{ o.pick }}" style="padding: 12px 13px; border-radius: 6px; border: 1px solid {{ o.border }}; background: {{ o.bg }}; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+              <div style="width: 14px; height: 14px; border-radius: 999px; border: 1px solid {{ o.dotBorder }}; background: {{ o.dotBg }}; flex: none; margin-top: 2px;"></div>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 13px; font-weight: 600; color: {{ o.ink }};">{{ o.label }}</div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ o.note }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ scDeclared }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 13px; padding-top: 3px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-size: 12px; color: oklch(51% 0.017 70);">What would help</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 7px;">
+                <sc-for list="{{ arrangements }}" as="a" hint-placeholder-count="5">
+                  <div style="height: 32px; padding: 0 13px; border-radius: 999px; border: 1px solid {{ a.border }}; background: {{ a.bg }}; display: flex; align-items: center; font-size: 12px; font-weight: 600; color: {{ a.ink }}; cursor: pointer;">{{ a.label }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+              <div style="font-size: 12px; color: oklch(51% 0.017 70);">Tell us in your own words</div>
+              <div style="min-height: 72px; border: 1px solid oklch(88% 0.016 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 10px 12px; font-size: 13px; line-height: 1.55; color: oklch(51% 0.017 70);">Write or dictate…</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+              <div style="font-size: 12px; color: oklch(51% 0.017 70);">Supporting evidence, if you have any</div>
+              <div style="height: 44px; border: 1px dashed oklch(88% 0.016 82); border-radius: 6px; background: oklch(96.4% 0.014 85); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="oklch(51% 0.017 70)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                <div style="font-size: 12px; color: oklch(51% 0.017 70);">Attach a report or letter</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="padding: 12px 13px; border-radius: 6px; background: color-mix(in oklab, oklch(38% 0.072 195) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 22%, transparent); font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">Only the course tutors and the centre see this. It is not visible to other candidates, and it is not sent to Cambridge unless an extension is later requested on your behalf.</div>
+
+        <div style="height: 40px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer;">{{ scCta }}</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <sc-for list="{{ scNotes }}" as="n" hint-placeholder-count="4">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1c -->
+  <div id="1c" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1c</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Raising a concern — the internal complaints route</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">Cambridge requires recourse beyond the tutors</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 26px 24px; display: grid; grid-template-columns: 620px 1fr; gap: 22px; align-items: start;">
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 22px; display: flex; flex-direction: column; gap: 17px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600; color: oklch(23.5% 0.017 65);">Raise a concern</div>
+          <div style="font-size: 12.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">CELTA is short and intensive, so a problem left for a week is a problem that has already affected your course. Say it early.</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <div style="font-size: 12px; color: oklch(51% 0.017 70);">Who should see this?</div>
+          <sc-for list="{{ routes }}" as="r" hint-placeholder-count="3">
+            <div onClick="{{ r.pick }}" style="padding: 13px; border-radius: 6px; border: 1px solid {{ r.border }}; background: {{ r.bg }}; display: flex; align-items: flex-start; gap: 11px; cursor: pointer;">
+              <div style="width: 14px; height: 14px; border-radius: 999px; border: 1px solid {{ r.dotBorder }}; background: {{ r.dotBg }}; flex: none; margin-top: 2px;"></div>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 13px; font-weight: 600; color: {{ r.ink }};">{{ r.label }}</div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ r.note }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 7px;">
+          <div style="font-size: 12px; color: oklch(51% 0.017 70);">What has happened</div>
+          <div style="min-height: 96px; border: 1px solid oklch(88% 0.016 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 10px 12px; font-size: 13px; line-height: 1.55; color: oklch(51% 0.017 70);">Write or dictate…</div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 15px; height: 15px; border-radius: 4px; border: 1px solid oklch(88% 0.016 82); background: oklch(96.4% 0.014 85); flex: none;"></div>
+          <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">Send this anonymously — the centre manager sees the concern but not my name</div>
+        </div>
+
+        <div style="height: 40px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer;">{{ routeCta }}</div>
+
+        <div style="padding-top: 13px; border-top: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent); display: flex; flex-direction: column; gap: 9px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">If you are still not satisfied</div>
+          <sc-for list="{{ escalation }}" as="e" hint-placeholder-count="3">
+            <div style="display: flex; align-items: flex-start; gap: 11px;">
+              <div style="font-size: 11px; font-weight: 700; color: oklch(51% 0.017 70); width: 16px; flex: none;">{{ e.step }}</div>
+              <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">{{ e.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <sc-for list="{{ routeNotes }}" as="n" hint-placeholder-count="4">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:2400}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.16 27)';
+const BORDER = 'oklch(88% 0.016 82)';
+const CARD = 'oklch(99.2% 0.005 90)';
+
+class Component extends DCLogic {
+  state = { sc: 'yes', route: 'tutor' };
+
+  renderVals() {
+    const { sc, route } = this.state;
+    const declared = sc === 'yes';
+
+    const radio = (on, accent) => ({
+      bg: on ? 'color-mix(in oklab, ' + accent + ' 8%, ' + CARD + ')' : 'transparent',
+      border: on ? 'color-mix(in oklab, ' + accent + ' 35%, transparent)' : BORDER,
+      dotBg: on ? accent : 'transparent',
+      dotBorder: on ? accent : BORDER,
+      ink: on ? INK : MUTED,
+    });
+
+    const ROUTES = {
+      tutor: 'your tutor',
+      mct: 'the Main Course Tutor',
+      manager: 'the centre manager',
+    };
+
+    return {
+      // Verbatim from Cambridge's "Disclaimer for AI Use", May 2024
+      aiSections: [
+        {
+          letter: 'A', lead: 'I understand that, on the CELTA course, I can use AI for the following purposes.',
+          items: [
+            'to generate ideas for teaching practice including texts, activities, etc.,',
+            'to carry out initial research for written assignments, including generating a bibliography,',
+            'to proofread work.',
+          ],
+          tick: 'I understand what I may use AI for',
+          bg: 'color-mix(in oklab, ' + TEAL + ' 5%, ' + CARD + ')',
+          border: 'color-mix(in oklab, ' + TEAL + ' 20%, transparent)',
+          chipBg: TEAL, chipInk: CARD, dot: TEAL, tickBg: TEAL, tickBorder: TEAL,
+        },
+        {
+          letter: 'B', lead: 'I understand that I need to reference use of generative AI in my work and I have been informed how to do so.',
+          items: ['In-text citation stating the prompt, the quoted text, the tool and the date — plus a reference list entry. APA is recommended.'],
+          tick: 'I have been shown how to reference AI use',
+          bg: 'color-mix(in oklab, ' + TEAL + ' 5%, ' + CARD + ')',
+          border: 'color-mix(in oklab, ' + TEAL + ' 20%, transparent)',
+          chipBg: TEAL, chipInk: CARD, dot: TEAL, tickBg: TEAL, tickBorder: TEAL,
+        },
+        {
+          letter: 'C', lead: 'I understand that the following will be treated as an attempt at malpractice and will result in failing the work:',
+          items: [
+            'Generating a lesson plan, language analysis, or a written assignment using AI,',
+            'Using AI for purposes other than the ones mentioned in section A above or in “Candidate declaration” sections in each written assignment.',
+            'Failing to acknowledge use of AI, regardless of the scope and the purpose of use.',
+          ],
+          tick: 'I understand what counts as malpractice',
+          bg: 'color-mix(in oklab, ' + GOLD + ' 9%, ' + CARD + ')',
+          border: 'color-mix(in oklab, ' + GOLD + ' 28%, transparent)',
+          chipBg: GOLD, chipInk: CARD, dot: GOLD, tickBg: GOLD, tickBorder: GOLD,
+        },
+      ],
+      aiNotes: [
+        { title: 'Cambridge’s wording, not mine', text: 'Sections A, B and C are the disclaimer as published (May 2024). The only addition is a tick per section, so acceptance is recorded per clause rather than as one blanket signature.' },
+        { title: 'It connects to the cover sheets', text: 'Your assignment cover sheets already ask candidates to declare AI use and attach the conversation link. This is the course-level agreement those per-assignment declarations refer back to.' },
+        { title: 'Proofreading is permitted', text: 'Worth making prominent — candidates routinely assume all AI use is banned, then either hide legitimate proofreading or avoid a tool that would have helped their written English.' },
+        { title: 'Referencing is the failure point', text: 'Most malpractice here is unreferenced rather than deliberate. An in-app example of a correct citation at the moment of submission would prevent more failures than the disclaimer does.' },
+      ],
+      scDeclared: declared,
+      scOptions: [
+        Object.assign({ label: 'Yes, there is something', note: 'A condition, a health issue, or a circumstance affecting how you work.', pick: () => this.setState({ sc: 'yes' }) }, radio(declared, TEAL)),
+        Object.assign({ label: 'No, nothing to declare', note: 'You can add this later — conditions and circumstances change mid-course.', pick: () => this.setState({ sc: 'no' }) }, radio(!declared, TEAL)),
+      ],
+      arrangements: ['Extended time for assignments', 'Materials in advance', 'Written instructions', 'A quiet room for TP prep', 'Screen-reader friendly files', 'Something else'].map((label, i) => Object.assign({ label },
+        i === 0 || i === 1
+          ? { bg: 'color-mix(in oklab, ' + TEAL + ' 10%, ' + CARD + ')', border: 'color-mix(in oklab, ' + TEAL + ' 38%, transparent)', ink: INK }
+          : { bg: 'transparent', border: BORDER, ink: MUTED })),
+      scCta: declared ? 'Send to the centre' : 'Continue',
+      scNotes: [
+        { title: 'Cambridge asks for this at entry', text: 'The administration handbook has candidates confirm whether they require special consideration — extended time and the like — at the start, not when they are already struggling.' },
+        { title: 'It is the root of an extension', text: 'An extension, where a candidate completes after the official end date and the grade is recorded as “extension”, follows from special consideration. Declared here, it is on record before it is needed.' },
+        { title: 'It never reaches the certificate', text: 'Saying so on the form matters. Candidates hide conditions because they assume disclosure marks their result — it does not, and the sentence that says so belongs beside the question.' },
+        { title: 'It can be added later', text: 'A four-week intensive course produces new circumstances. The “no” option says so explicitly, so declining on day one is not a door closing.' },
+      ],
+      routes: [
+        Object.assign({ label: 'My tutor', note: 'The fastest route for anything about a lesson, feedback or a deadline.', pick: () => this.setState({ route: 'tutor' }) }, radio(route === 'tutor', TEAL)),
+        Object.assign({ label: 'The Main Course Tutor', note: 'For something about the course as a whole, or about another tutor.', pick: () => this.setState({ route: 'mct' }) }, radio(route === 'mct', TEAL)),
+        Object.assign({ label: 'The centre manager', note: 'Independent of the teaching team. For anything you would rather the tutors did not see first.', pick: () => this.setState({ route: 'manager' }) }, radio(route === 'manager', GOLD)),
+      ],
+      routeCta: 'Send to ' + ROUTES[route],
+      escalation: [
+        { step: '1', text: 'The centre replies to every concern. If it is not resolved, ask for it to be reviewed by someone outside the teaching team — the centre must offer that.' },
+        { step: '2', text: 'If you are still not satisfied after the centre’s procedure, you can contact the Cambridge Helpdesk.' },
+        { step: '3', text: 'Concerns about a result are different, and go through the Cambridge appeals procedure after results are issued.' },
+      ],
+      routeNotes: [
+        { title: 'Cambridge requires recourse beyond the tutors', text: 'The administration handbook is explicit: an internal complaints procedure must include final recourse to someone other than the tutors. A candidate who can only tell their assessor is not being offered one.' },
+        { title: 'The centre-manager route is the whole point', text: 'Tinted gold, worded plainly: independent of the teaching team, for anything you would rather the tutors did not see first. Everything else on this screen exists to make that option ordinary rather than dramatic.' },
+        { title: 'Anonymity is offered, not assumed', text: 'On a cohort of eight, anonymity is thin — but the option changes who is willing to speak. It should be honest about its limits rather than promising more than it can deliver.' },
+        { title: 'It is not the appeals procedure', text: 'Concerns about the course go to the centre; concerns about a result go to Cambridge after results are issued. Keeping the two apart on the screen prevents a candidate raising a grade dispute in the wrong place and losing time.' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

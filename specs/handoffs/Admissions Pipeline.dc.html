@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 44px; width: 1620px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 13px; max-width: 960px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · centre admin · admissions</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 36px; font-weight: 600; line-height: 1.14; color: oklch(23.5% 0.017 65);">Twelve places, and the only number that matters is how many are actually paid for.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">A course fills in stages, and each stage leaks. Applications that never complete, offers that expire unpaid, deposits that never become full payment. This is the one screen that shows where the leak is while there is still time to do something about it.</div>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">The pipeline</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">click a stage to see who is in it</div>
+    </div>
+
+    <div style="background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 22px 24px; display: flex; flex-direction: column; gap: 18px;">
+
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">IT059 C2/2026 · full time · starts 6 January</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ headline }}</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px; flex: none;">
+          <sc-for list="{{ headStats }}" as="s" hint-placeholder-count="3">
+            <div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-end;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; line-height: 1; color: {{ s.ink }};">{{ s.v }}</div>
+              <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ s.k }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: stretch; gap: 8px;">
+        <sc-for list="{{ stages }}" as="s" hint-placeholder-count="6">
+          <div onClick="{{ s.pick }}" style="flex: {{ s.flex }}; min-width: 0; background: {{ s.bg }}; border: 1px solid {{ s.border }}; border-top: 3px solid {{ s.spine }}; border-radius: 6px; padding: 14px 15px; display: flex; flex-direction: column; gap: 7px; cursor: pointer;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 27px; line-height: 1; color: {{ s.numInk }};">{{ s.n }}</div>
+              <sc-if value="{{ s.drop }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size: 11px; font-weight: 700; color: {{ s.dropInk }};">{{ s.drop }}</div>
+              </sc-if>
+            </div>
+            <div style="font-size: 12.5px; font-weight: 600; color: {{ s.labelInk }}; text-wrap: pretty;">{{ s.label }}</div>
+            <div style="font-size: 10.5px; line-height: 1.45; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ s.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; align-items: start;">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 7px; overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid oklch(88% 0.016 82); background: oklch(96.4% 0.014 85);">
+            <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ listTitle }}</div>
+            <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ listNote }}</div>
+          </div>
+          <sc-for list="{{ people }}" as="p" hint-placeholder-count="5">
+            <div style="display: grid; grid-template-columns: 1.3fr 1fr 118px; gap: 12px; padding: 11px 16px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent); align-items: center;">
+              <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+                <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ p.name }}</div>
+                <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ p.meta }}</div>
+              </div>
+              <div style="font-size: 11.5px; color: {{ p.stateInk }};">{{ p.state }}</div>
+              <div style="font-size: 11px; font-weight: 600; color: {{ p.actionInk }}; text-align: right;">{{ p.action }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 13px;">
+          <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="3">
+            <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ a.border }}; border-left: 3px solid {{ a.spine }}; border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 12px; font-weight: 700; color: {{ a.ink }};">{{ a.title }}</div>
+              <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ a.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1b</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Across all open courses</div>
+    </div>
+
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: 1.1fr repeat(5, 1fr) 1.35fr; background: oklch(96.4% 0.014 85); border-bottom: 1px solid oklch(88% 0.016 82);">
+        <sc-for list="{{ tableHead }}" as="h" hint-placeholder-count="7">
+          <div style="padding: 10px 13px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ h }}</div>
+        </sc-for>
+      </div>
+      <sc-for list="{{ courses }}" as="c" hint-placeholder-count="4">
+        <div style="display: grid; grid-template-columns: 1.1fr repeat(5, 1fr) 1.35fr; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent);">
+          <div style="padding: 12px 13px; display: flex; flex-direction: column; gap: 1px;">
+            <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ c.code }}</div>
+            <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ c.starts }}</div>
+          </div>
+          <sc-for list="{{ c.cells }}" as="v" hint-placeholder-count="6">
+            <div style="padding: 12px 13px; font-size: 13px; color: {{ v.ink }}; font-weight: {{ v.weight }}; font-variant-numeric: tabular-nums;">{{ v.v }}</div>
+          </sc-for>
+          <div style="padding: 12px 13px; font-size: 11.5px; line-height: 1.45; color: {{ c.verdictInk }};">{{ c.verdict }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1620,&quot;height&quot;:1250}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.16 27)';
+const GREEN = 'oklch(48% 0.09 150)';
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+const mix = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, transparent)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+const STAGES = [
+  { key: 'app', n: 24, label: 'Applications', sub: 'form completed', tone: MUTED, drop: '' },
+  { key: 'int', n: 19, label: 'Interviewed', sub: 'task marked, decision made', tone: TEAL, drop: '−21%' },
+  { key: 'off', n: 16, label: 'Offered', sub: 'acceptance email sent', tone: TEAL, drop: '−16%' },
+  { key: 'dep', n: 13, label: 'Deposit paid', sub: 'place held', tone: GOLD, drop: '−19%' },
+  { key: 'paid', n: 9, label: 'Paid in full', sub: 'confirmed', tone: GREEN, drop: '−31%' },
+];
+
+const PEOPLE = {
+  app: [
+    { name: 'Kerem Uysal', meta: 'applied 19 Nov · task not returned', state: 'Pre-interview task outstanding', tone: 'warm', action: 'Chase' },
+    { name: 'Pelin Doğan', meta: 'applied 24 Nov', state: 'Ready to interview', tone: 'warm', action: 'Book' },
+  ],
+  int: [
+    { name: 'Mert Kaya', meta: 'interviewed 1 Dec', state: 'Accept — strong task', tone: 'good', action: 'Send offer' },
+    { name: 'Hakan Bulut', meta: 'interviewed 3 Dec', state: 'Language work needed first', tone: 'cold', action: 'Decline' },
+  ],
+  off: [
+    { name: 'Aylin Koç', meta: 'offered 5 Dec · deposit due 19 Dec', state: 'No response · 3 days left', tone: 'urgent', action: 'Call' },
+    { name: 'Emre Toprak', meta: 'offered 8 Dec · deposit due 22 Dec', state: 'Opened, not paid', tone: 'warm', action: 'Remind' },
+    { name: 'Deniz Aksöy', meta: 'offered 9 Dec · deposit due 23 Dec', state: 'Asked about instalments', tone: 'warm', action: 'Reply' },
+  ],
+  dep: [
+    { name: 'Sara Yılmaz', meta: 'deposit 11 Dec · balance due 2 Jan', state: 'On track', tone: 'good', action: '—' },
+    { name: 'Elif Demir', meta: 'deposit 12 Dec · balance due 2 Jan', state: 'Instalment plan agreed', tone: 'good', action: '—' },
+    { name: 'Burak Aslan', meta: 'deposit 6 Dec · balance due 2 Jan', state: 'Balance overdue by 4 days', tone: 'urgent', action: 'Call' },
+  ],
+  paid: [
+    { name: 'Sara Yılmaz', meta: 'paid in full 18 Dec', state: 'Confirmed · signed up to Connect', tone: 'good', action: '—' },
+    { name: 'Elif Demir', meta: 'paid in full 20 Dec', state: 'Confirmed · not signed up', tone: 'warm', action: 'Nudge' },
+    { name: 'Nil Özkan', meta: 'paid in full 14 Dec', state: 'Confirmed · signed up to Connect', tone: 'good', action: '—' },
+  ],
+};
+
+const TONES = {
+  good: { ink: GREEN, action: MUTED },
+  warm: { ink: MUTED, action: TEAL },
+  cold: { ink: MUTED, action: MUTED },
+  urgent: { ink: RED, action: RED },
+};
+
+class Component extends DCLogic {
+  state = { stage: 'app' };
+
+  renderVals() {
+    const sel = this.state.stage;
+    const cur = STAGES.filter(s => s.key === sel)[0];
+    const people = PEOPLE[sel] || [];
+
+    const num = (v, ink, weight) => ({ v: String(v), ink: ink || INK, weight: weight || '400' });
+
+    return {
+      headline: '9 of 12 places paid for · 25 days to go',
+      headStats: [
+        { k: 'Places', v: '12', ink: INK },
+        { k: 'Paid', v: '9', ink: GREEN },
+        { k: 'At risk', v: '4', ink: RED },
+      ],
+      stages: STAGES.map(s => {
+        const on = s.key === sel;
+        return {
+          n: s.n, label: s.label, sub: s.sub, drop: s.drop,
+          pick: () => this.setState({ stage: s.key }),
+          flex: String(1 + s.n / 30),
+          bg: on ? CARD : 'transparent',
+          border: on ? mix(s.tone, 45) : BORDER,
+          spine: on ? s.tone : 'oklch(90% 0.010 85)',
+          numInk: on ? s.tone : INK,
+          labelInk: on ? s.tone : INK,
+          dropInk: MUTED,
+        };
+      }),
+      listTitle: cur ? cur.label : '',
+      listNote: cur ? people.length + ' of ' + cur.n + ' shown' : '',
+      people: people.map(p => {
+        const t = TONES[p.tone] || TONES.warm;
+        return { name: p.name, meta: p.meta, state: p.state, action: p.action, stateInk: t.ink, actionInk: t.action };
+      }),
+      alerts: [
+        { title: 'Three offers expire this week', text: 'Aylin has three days left and has not opened the email. An unpaid deposit past its deadline releases the place automatically — but only if somebody says so, and nobody wants to be the one who says it in December.', spine: RED, border: mix(RED, 30), ink: RED },
+        { title: 'The waiting list has four people on it', text: 'If two of the three offers lapse, both places can be filled from the list with eleven days to spare. After day one begins they cannot be filled at all — a candidate who misses a day of twenty is under the 120-hour minimum.', spine: GOLD, border: mix(GOLD, 30), ink: 'oklch(46% 0.11 62)' },
+        { title: 'One balance is overdue', text: 'Burak paid his deposit on 6 December and the balance was due on 2 January. He is on the roster, has a group, and has been sent his day-one activity. Decide now rather than on the first morning.', spine: RED, border: mix(RED, 30), ink: RED },
+      ],
+      tableHead: ['Course', 'Applied', 'Interv.', 'Offered', 'Deposit', 'Paid', 'Where it stands'],
+      courses: [
+        { code: 'IT059 C2/2026', starts: 'starts 6 Jan · 25 days',
+          cells: [num(24), num(19), num(16), num(13, GOLD, '600'), num(9, GREEN, '600')],
+          verdict: '3 short, 4 on the waiting list', verdictInk: 'oklch(46% 0.11 62)' },
+        { code: 'IT060 C3/2026', starts: 'starts 3 Feb · 53 days',
+          cells: [num(14), num(9), num(7), num(5, GOLD, '600'), num(2, GREEN, '600')],
+          verdict: 'Early, but applications are thin', verdictInk: MUTED },
+        { code: 'IT061 O1/2026', starts: 'starts 2 Mar · 80 days',
+          cells: [num(29), num(21), num(18), num(14, GOLD, '600'), num(11, GREEN, '600')],
+          verdict: 'Will fill · consider closing early', verdictInk: GREEN },
+        { code: 'IT058 C1/2026', starts: 'started 2 Dec · running',
+          cells: [num(26), num(20), num(14), num(12, GOLD, '600'), num(12, GREEN, '600')],
+          verdict: 'Full and paid', verdictInk: GREEN },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

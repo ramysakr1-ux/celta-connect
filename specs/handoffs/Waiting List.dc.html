@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(37.5% 0.058 195); text-decoration: none; }
+  a:hover { color: oklch(63% 0.096 72); }
+  button { font: inherit; cursor: pointer; }
+</style>
+</helmet>
+
+<div style="width: 1400px; box-sizing: border-box; padding: 34px 40px 60px; font-family: Karla, Helvetica, sans-serif; color: oklch(23.5% 0.017 65); display: flex; flex-direction: column; gap: 30px;">
+
+  <div style="display: flex; flex-direction: column; gap: 9px; max-width: 1060px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · the waiting list · a full course is not a closed one</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">Someone always drops out. The question is whether you can fill the place in a day.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">A waiting list is only worth having if the people on it have already been interviewed and can be offered a place in one action. A list of names and email addresses is not a waiting list.</div>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: baseline; gap: 12px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">{{ courseTitle }}</div>
+        <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ listMeta }}</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <sc-if value="{{ hasPlace }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size: 11.5px; font-weight: 600; color: oklch(45% 0.15 27);">{{ placeLine }}</div>
+        </sc-if>
+        <button onClick="{{ toggleFree }}" style="font-size: 11.5px; font-weight: 600; padding: 7px 13px; border-radius: 6px; border: 1px solid oklch(89.5% 0.012 82); background: oklch(99.5% 0.004 90); color: oklch(23.5% 0.017 65);">{{ toggleLabel }}</button>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <sc-for list="{{ courseTabs }}" as="t" hint-placeholder-count="4">
+        <div onClick="{{ t.pick }}" style="flex: 1; background: {{ t.bg }}; border: 1px solid {{ t.border }}; border-top: 3px solid {{ t.spine }}; border-radius: 6px; padding: 11px 14px; display: flex; flex-direction: column; gap: 2px; cursor: pointer;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+            <div style="font-size: 13px; font-weight: 700; color: {{ t.ink }};">{{ t.code }}</div>
+            <div style="font-size: 11px; font-weight: 600; color: {{ t.ink }};">{{ t.n }}</div>
+          </div>
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ t.meta }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: 42px 1.3fr 210px 132px 1fr 150px; gap: 12px; padding: 11px 16px; background: oklch(30% 0.042 58); color: oklch(97% 0.008 88); font-size: 11px; font-weight: 600;">
+        <div>#</div>
+        <div>Name</div>
+        <div>Waiting for</div>
+        <div>Interviewed</div>
+        <div>Why they are waiting</div>
+        <div></div>
+      </div>
+      <sc-for list="{{ waiting }}" as="w" hint-placeholder-count="5">
+        <div style="display: grid; grid-template-columns: 42px 1.3fr 210px 132px 1fr 150px; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 55%, transparent); background: {{ w.bg }};">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: {{ w.rankInk }};">{{ w.rank }}</div>
+          <div onClick="{{ w.open }}" style="display: flex; flex-direction: column; gap: 1px; cursor: pointer;">
+            <div style="font-size: 13px; font-weight: 600; color: oklch(37.5% 0.058 195);">{{ w.name }}</div>
+            <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ w.sub }}</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <sc-for list="{{ w.courses }}" as="c" hint-placeholder-count="1">
+              <div style="display: flex; flex-direction: column; gap: 1px; background: {{ c.chip }}; border: 1px solid {{ c.border }}; border-radius: 5px; padding: 4px 8px;">
+                <div style="font-size: 11px; font-weight: 700; color: {{ c.ink }};">{{ c.code }}</div>
+                <div style="font-size: 10px; color: oklch(51% 0.017 70);">{{ c.meta }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ w.interviewed }}</div>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 10.5px; font-weight: 600; color: {{ w.ink }}; background: {{ w.chip }}; border-radius: 99px; padding: 3px 9px; text-align: center; align-self: flex-start;">{{ w.outcome }}</div>
+            <div style="font-size: 11.5px; line-height: 1.45; color: oklch(51% 0.017 70);">{{ w.why }}</div>
+          </div>
+          <div style="display: flex; justify-content: flex-end;">
+            <sc-if value="{{ w.canOffer }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ w.offer }}" style="font-size: 11.5px; font-weight: 600; padding: 7px 13px; border-radius: 6px; border: 1px solid oklch(37.5% 0.058 195); background: oklch(37.5% 0.058 195); color: oklch(99.5% 0.004 90);">{{ w.offerLabel }}</button>
+            </sc-if>
+            <sc-if value="{{ w.blocked }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 11px; color: oklch(56% 0.017 70); text-align: right;">{{ w.blockedWhy }}</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ listEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 26px 16px; font-size: 12.5px; color: oklch(51% 0.017 70);">Nobody waiting for this course.</div>
+      </sc-if>
+      <div style="padding: 12px 16px; font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ listFoot }}</div>
+    </div>
+  </div>
+
+  <sc-if value="{{ fileOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid color-mix(in oklab, oklch(37.5% 0.058 195) 34%, transparent); border-radius: 6px; overflow: hidden;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 13px 18px; background: oklch(30% 0.042 58); color: oklch(97% 0.008 88);">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <div style="font-size: 13.5px; font-weight: 600;">{{ file.name }} · application file</div>
+          <div style="font-size: 11px; color: oklch(76% 0.02 80);">{{ file.meta }}</div>
+        </div>
+        <button onClick="{{ closeFile }}" style="font-size: 11.5px; font-weight: 600; padding: 7px 14px; border-radius: 6px; border: 1px solid oklch(45% 0.045 58); background: oklch(24% 0.036 58); color: oklch(97% 0.008 88);">Close</button>
+      </div>
+      <sc-for list="{{ file.rows }}" as="r" hint-placeholder-count="6">
+        <div style="display: grid; grid-template-columns: 220px 1fr 110px; gap: 14px; align-items: center; padding: 11px 18px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 55%, transparent);">
+          <div style="font-size: 12.5px; font-weight: 600;">{{ r.label }}</div>
+          <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ r.value }}</div>
+          <div style="font-size: 11px; font-weight: 600; color: {{ r.ink }}; text-align: right;">{{ r.state }}</div>
+        </div>
+      </sc-for>
+      <div style="padding: 12px 18px; font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ file.foot }}</div>
+    </div>
+  </sc-if>
+
+  <div id="1b" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Ranked by the centre, not by date</div>
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 13px;">
+        <sc-for list="{{ ranking }}" as="r" hint-placeholder-count="4">
+          <div style="display: flex; gap: 11px; align-items: flex-start; padding-bottom: 11px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 45%, transparent);">
+            <div style="width: 3px; align-self: stretch; border-radius: 99px; background: {{ r.spine }}; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 12.5px; font-weight: 600;">{{ r.title }}</div>
+              <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ r.note }}</div>
+            </div>
+          </div>
+        </sc-for>
+        <div style="font-size: 11.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Order is set by a tutor and can be dragged. First come, first served is a defensible default, but it is not always the right cohort — and the reason for moving somebody is recorded.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">The offer that expires</div>
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid color-mix(in oklab, oklch(63% 0.096 72) 34%, transparent); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 13px;">
+        <div style="display: flex; flex-direction: column; gap: 3px; border-bottom: 1px solid oklch(89.5% 0.012 82); padding-bottom: 11px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(42% 0.075 75);">Sent the moment a place frees</div>
+          <div style="font-size: 13.5px; font-weight: 600;">A place has come free on C3/2026</div>
+        </div>
+        <sc-for list="{{ offerBody }}" as="p" hint-placeholder-count="3">
+          <div style="font-size: 12.5px; line-height: 1.6; color: oklch(38% 0.017 65); text-wrap: pretty;">{{ p }}</div>
+        </sc-for>
+        <div style="background: oklch(96.5% 0.008 85); border-radius: 5px; padding: 12px 13px; display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 12px; font-weight: 600;">{{ expiryLabel }}</div>
+          <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ expiryNote }}</div>
+        </div>
+        <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">If it expires, the next person is offered automatically and the first is told plainly rather than left wondering. Nobody holds two places at once.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="1c" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">When the course starts and they are still waiting</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">the part centres forget, and the reason people do not reapply</div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+      <sc-for list="{{ after }}" as="a" hint-placeholder-count="3">
+        <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-top: 3px solid {{ a.spine }}; border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 9px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: {{ a.spine }};">{{ a.tag }}</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; line-height: 1.25;">{{ a.title }}</div>
+          <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ a.note }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+    <sc-for list="{{ notes }}" as="n" hint-placeholder-count="3">
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-left: 3px solid {{ n.spine }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 12.5px; font-weight: 700; color: {{ n.spine }};">{{ n.title }}</div>
+        <div style="font-size: 12px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;expiryHours&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:48,&quot;min&quot;:12,&quot;max&quot;:120,&quot;step&quot;:12,&quot;unit&quot;:&quot; h&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Offer&quot;}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const GOLD = 'oklch(63% 0.096 72)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = 'oklch(48% 0.09 150)';
+const CARD = 'oklch(99.5% 0.004 90)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+const COURSES = {
+  c3: { code: 'C3/2026', dates: '6 – 30 April', mode: 'Full-time', tone: TEAL },
+  s1: { code: 'S1/2026', dates: '6 July – 7 Aug', mode: 'Full-time · summer', tone: GOLD },
+  p2: { code: 'P2/2026', dates: '12 Sep – 5 Dec', mode: 'Part-time', tone: MUTED },
+  o1: { code: 'O1/2026', dates: '2 Nov – 27 Nov', mode: 'Fully online', tone: MUTED },
+};
+
+const PEOPLE = [
+  { name: 'Deniz Yurdakul', sub: 'applied 28 Feb · via website', interviewed: '9 March', outcome: 'Suitable', tone: GREEN, why: 'Course was full when she was interviewed', wants: ['c3'] },
+  { name: 'Emre Çakır', sub: 'applied 2 Mar · via referral', interviewed: '11 March', outcome: 'Suitable', tone: GREEN, why: 'Cannot take unpaid leave before July', wants: ['s1'] },
+  { name: 'Pelin Aksu', sub: 'applied 3 Mar · via Instagram', interviewed: '11 March', outcome: 'Suitable', tone: GREEN, why: 'Either date works — whichever frees first', wants: ['c3', 's1'] },
+  { name: 'Tolga Şimşek', sub: 'applied 5 Mar · via website', interviewed: 'not yet', outcome: 'Interview booked', tone: GOLD, why: 'Interview is Thursday — cannot be offered before it', wants: ['c3'] },
+  { name: 'Ayça Doğan', sub: 'applied 6 Mar · via website', interviewed: 'not yet', outcome: 'Task returned', tone: MUTED, why: 'Task read, no interview booked yet', wants: ['p2'] },
+];
+
+class Component extends DCLogic {
+  state = { free: true, offeredTo: null, course: 'c3', openFile: null };
+
+  renderVals() {
+    const free = this.state.free;
+    const hours = this.props.expiryHours ?? 48;
+    const offered = this.state.offeredTo;
+    const key = this.state.course;
+    const course = COURSES[key];
+
+    const forCourse = PEOPLE
+      .map((p, i) => Object.assign({}, p, { seed: i }))
+      .filter(p => p.wants.indexOf(key) >= 0)
+      .sort((a, b) => {
+        const ra = a.outcome === 'Suitable' ? 0 : a.outcome === 'Interview booked' ? 1 : 2;
+        const rb = b.outcome === 'Suitable' ? 0 : b.outcome === 'Interview booked' ? 1 : 2;
+        return ra - rb || a.seed - b.seed;
+      });
+
+    const ready = forCourse.filter(p => p.outcome === 'Suitable').length;
+
+    return {
+      courseTitle: course.code + ' · waiting',
+      listMeta: forCourse.length + ' waiting for this course · ' + ready + ' interviewed and ready',
+      courseTabs: Object.keys(COURSES).map(k => {
+        const c = COURSES[k];
+        const n = PEOPLE.filter(p => p.wants.indexOf(k) >= 0).length;
+        const on = k === key;
+        return {
+          code: c.code, meta: c.dates + ' · ' + c.mode, n: n + ' waiting',
+          pick: () => this.setState({ course: k, offeredTo: null }),
+          bg: on ? CARD : 'transparent',
+          border: on ? c.tone : 'oklch(89.5% 0.012 82)',
+          ink: on ? INK : MUTED,
+          spine: on ? c.tone : 'transparent',
+        };
+      }),
+      hasPlace: free,
+      placeLine: offered === null ? '1 place free — Selin Arıkan withdrew this morning' : 'Place offered, waiting on a reply',
+      toggleLabel: free ? 'Course is full again' : 'A place has come free',
+      toggleFree: () => this.setState({ free: !free, offeredTo: null }),
+
+      fileOpen: this.state.openFile !== null,
+      closeFile: () => this.setState({ openFile: null }),
+      file: (() => {
+        const p = PEOPLE[this.state.openFile];
+        if (!p) return {};
+        return {
+          name: p.name,
+          meta: p.sub + ' · waiting for ' + p.wants.map(k => COURSES[k].code).join(' and '),
+          rows: [
+            { label: 'Application form', value: 'Submitted ' + p.sub.split('·')[0].replace('applied ', '').trim(), state: 'Complete', ink: GREEN },
+            { label: 'Language awareness task', value: p.interviewed === 'not yet' ? 'Marked · at standard' : 'Marked · above standard', state: 'Read', ink: GREEN },
+            { label: 'Extended writing task', value: 'Marked · at standard on 5 of 5', state: 'Read', ink: GREEN },
+            { label: 'Interview record', value: p.interviewed === 'not yet' ? 'Not interviewed' : p.interviewed + ' · Helen Whitmore (verified tutor)', state: p.interviewed === 'not yet' ? 'Missing' : 'Complete', ink: p.interviewed === 'not yet' ? GOLD : GREEN },
+            { label: 'Selection outcome', value: p.outcome + ' · no place available at the time', state: 'Recorded', ink: TEAL },
+            { label: 'Special arrangements', value: 'None declared', state: '—', ink: MUTED },
+            { label: 'Commitments and conduct', value: 'Accepted at application · v1, 2 February', state: 'On file', ink: GREEN },
+          ],
+          foot: 'The whole file lives on the candidate record and is kept six months after the course ends, accepted or not. Nothing is re-collected if a place comes free.',
+        };
+      })(),
+      listEmpty: forCourse.length === 0,
+      waiting: forCourse.map((p, i) => {
+        const ready = p.outcome === 'Suitable';
+        const isOffered = offered === p.seed;
+        return {
+          rank: i + 1,
+          rankInk: ready ? INK : 'oklch(72% 0.012 80)',
+          name: p.name, sub: p.sub, interviewed: p.interviewed,
+          courses: p.wants.map(k => ({
+            code: COURSES[k].code,
+            meta: COURSES[k].dates + ' · ' + COURSES[k].mode,
+            ink: COURSES[k].tone,
+            chip: tint(COURSES[k].tone, 12),
+            border: 'color-mix(in oklab, ' + COURSES[k].tone + ' 30%, transparent)',
+          })),
+          outcome: isOffered ? 'Offered' : p.outcome,
+          ink: isOffered ? TEAL : p.tone,
+          chip: tint(isOffered ? TEAL : p.tone, 12),
+          why: isOffered ? 'Offered ' + hours + ' hours ago · reply awaited' : p.why,
+          bg: isOffered ? tint(TEAL, 6) : 'transparent',
+          open: () => this.setState({ openFile: p.seed }),
+          canOffer: free && ready && offered === null,
+          offerLabel: 'Offer the place',
+          offer: () => this.setState({ offeredTo: p.seed }),
+          blocked: !ready,
+          blockedWhy: p.outcome === 'Interview booked' ? 'After the interview' : 'Not interviewed',
+        };
+      }),
+
+      listFoot: forCourse.length === 0
+        ? 'Nobody is waiting for this course yet. An applicant who is suitable but has not asked for these dates is not on it.'
+        : free
+        ? 'Only interviewed applicants can be offered a place, and only for the course they asked for. Anyone not yet interviewed sits below them however early they applied.'
+        : 'The course is full. The list stays live, and everyone on it keeps the course they chose.',
+
+      ranking: [
+        { spine: TEAL, title: 'Interviewed and suitable comes first', note: 'The whole point of the list is that these people can start on Monday. Anybody not yet interviewed sits below them regardless of when they applied.' },
+        { spine: GOLD, title: 'A tutor can move somebody up', note: 'A candidate whose employer is paying, or who has waited through two courses, can be moved — and the reason is recorded next to the change.' },
+        { spine: MUTED, title: 'Date is the tie-breaker, not the rule', note: 'Among equals, whoever applied first. It is defensible and it is what an applicant assumes.' },
+        { spine: RED, title: 'Nobody is on two lists silently', note: 'Pelin is waiting for both April and the summer course, so she appears on both. Accepting one removes her from the other, and both lists say so.' },
+      ],
+
+      offerBody: [
+        'Dear Deniz,',
+        'A place has become available on the course starting 6 April, and you are first on our list.',
+        'Everything from your application still stands — there is nothing to complete again. Accepting confirms the place and the deposit is due within a week.',
+      ],
+      expiryLabel: 'This offer expires in ' + hours + ' hours',
+      expiryNote: 'Short enough that the place does not sit idle, long enough for somebody to talk to their employer. The clock is visible in the email and on the record.',
+
+      after: [
+        { spine: TEAL, tag: 'The course starts', title: 'They stay on the courses they chose', note: 'Not rolled onto whatever comes next. Somebody waiting for the summer course wants the summer course — moving them to April is how a centre loses them.' },
+        { spine: GOLD, tag: 'They ask to come off', title: 'One line, and it is honoured', note: 'A reply removes them. The record keeps the application, because a rejected or withdrawn applicant is still evidence of a selection process.' },
+        { spine: MUTED, tag: 'Two courses pass', title: 'The centre writes properly', note: 'Not silence. Somebody who has waited through two intakes is told honestly whether a place is likely, and their interview may need refreshing.' },
+      ],
+
+      notes: [
+        { spine: TEAL, title: 'A waiting list is an interviewed list', text: 'Names collected on a form are a mailing list. The value here is that everyone above the line has been met, assessed and could start immediately.' },
+        { spine: GOLD, title: 'The withdrawal is what triggers it', text: 'A place freeing up is an event, not something an administrator notices. The list surfaces on the course page the moment somebody withdraws.' },
+        { spine: RED, title: 'Late is a judgement, not a rule', text: 'Filling a place two days before the start is possible; filling it in week two is not, because the candidate has missed assessed teaching. The app warns and a tutor decides.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
