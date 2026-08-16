@@ -181,19 +181,26 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
     "volunteers.manage": true,
     "enrolment.view": true,
     "import.run": true,
-    // Course administration: sees all of it, changes none of it. Ramy,
-    // 2026-08-16, correcting an earlier draft of this matrix: "creating and
-    // editing courses, and the assessor pack -- that's not part of the centre
-    // owner. That all goes under course administration, so it should be read
-    // only for the centre owner."
-    "course.create": false,
-    "course.editRecord": "read",
-    "assessorPack.export": false,
-    "courseAdmin.view": "read",
-    "courseAdmin.invite": false,
-    "courseAdmin.groups": false,
-    "courseAdmin.settings": false,
-    "timetable.publish": false,
+    // Everything a centre administrator can do. Ramy, 2026-08-16, asked
+    // directly and answering the conflict between this matrix and
+    // Centre Admin.dc.html: "The centre owner can do everything the centre
+    // admin can do. Yes, that's correct. But cannot do everything the course
+    // admin can do. There's a difference."
+    //
+    // This SUPERSEDES an earlier instruction the same day that made these
+    // read-only. The line he is drawing is not centre-admin powers versus
+    // owner powers -- it is that holding this role never makes someone a
+    // course administrator on a particular course. Course administration is
+    // scoped to named courses and comes with a Cambridge-approval gate; the
+    // owner acts centre-wide and does not inherit that scope by being owner.
+    "course.create": true,
+    "course.editRecord": true,
+    "assessorPack.export": true,
+    "courseAdmin.view": true,
+    "courseAdmin.invite": true,
+    "courseAdmin.groups": true,
+    "courseAdmin.settings": true,
+    "timetable.publish": true,
   },
 };
 

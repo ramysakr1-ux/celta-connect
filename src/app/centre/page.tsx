@@ -139,15 +139,40 @@ export default async function CentreOverviewPage({
 
   return (
     <div className="flex flex-col gap-[26px]">
-      <div>
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
-          {shown
-            ? `${shown.name}${shown.centerNumber ? ` · Cambridge centre ${shown.centerNumber}` : ""}`
-            : multiBranch
-              ? `${branches.length} branches`
-              : `${branches[0]?.name ?? ""}${branches[0]?.centerNumber ? ` · Cambridge centre ${branches[0].centerNumber}` : ""}`}
-        </p>
-        <h1 className="mt-1 font-serif text-[26px] text-ink">{heading}</h1>
+      {/* Centre Admin.dc.html puts two actions at the top right of the title
+          row: "Export financials" (outlined) and "Invite people" (filled).
+          Each is gated on the capability it actually needs, so a Centre
+          manager -- read-only by design, "the absence of an edit button
+          everywhere is the whole design" -- sees neither. */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
+            {shown
+              ? `${shown.name}${shown.centerNumber ? ` · Cambridge centre ${shown.centerNumber}` : ""}`
+              : multiBranch
+                ? `${branches.length} branches`
+                : `${branches[0]?.name ?? ""}${branches[0]?.centerNumber ? ` · Cambridge centre ${branches[0].centerNumber}` : ""}`}
+          </p>
+          <h1 className="mt-1 font-serif text-[26px] text-ink">{heading}</h1>
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {can(ctx.roles, "payments.view") ? (
+            <a
+              href={`/centre/financials.csv${branch ? `?branch=${branch}` : ""}`}
+              className="rounded-[6px] border border-border px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
+            >
+              Export financials
+            </a>
+          ) : null}
+          {can(ctx.roles, "roles.grant") ? (
+            <Link
+              href="/centre/roles"
+              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+            >
+              Invite people
+            </Link>
+          ) : null}
+        </div>
       </div>
 
       {canView(ctx.roles, "payments.view") ? (
