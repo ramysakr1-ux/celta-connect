@@ -102,6 +102,7 @@ export default async function CourseRosterPage({
     .order("base_slot");
 
   const nameByTraineeId = new Map((roster ?? []).map((m) => [m.id, m.full_name]));
+
   const assignedTraineeIds = new Set((members ?? []).map((m) => m.trainee_id));
   const unassignedTrainees = (roster ?? []).filter(
     (m) => m.role === "trainee" && !assignedTraineeIds.has(m.id)
@@ -513,6 +514,72 @@ export default async function CourseRosterPage({
 
           <div>
             <h2 className="font-serif text-lg text-ink">Teaching Practice subgroups</h2>
+
+            {/* "A warning banner appears when candidates aren't yet grouped:
+                rotation can't be released until every candidate has a group --
+                stated at the point that causes the block, not buried in help
+                text." So it sits directly above the groups, not in a help
+                panel and not at the top of the page. */}
+            {unassignedTrainees.length > 0 ? (
+              <div className="mt-3 rounded-[8px] border border-[color-mix(in_oklab,oklch(60%_0.11_70)_30%,transparent)] bg-[color-mix(in_oklab,oklch(60%_0.11_70)_9%,transparent)] px-4 py-3">
+                <p className="text-sm font-semibold text-[oklch(52%_0.1_70)]">
+                  {unassignedTrainees.length} candidate{unassignedTrainees.length === 1 ? " is" : "s are"} not in a group
+                </p>
+                <p className="mt-0.5 text-xs text-ink">
+                  The rotation can&apos;t be released until every candidate has one.{" "}
+                  {unassignedTrainees.map((t) => t.full_name).join(", ")}
+                </p>
+              </div>
+            ) : null}
+
+            {/* The two group cards. Each shows its tutor and meeting days, and
+                its members split into the halves the rotation actually runs
+                on -- half_order 1 and 2 on course_subgroups. */}
+            {(tpGroups ?? []).length > 0 ? (
+              <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                {(tpGroups ?? []).map((g) => {
+                  const halves = (subgroups ?? []).filter((sg) => sg.tp_group_id === g.id);
+                  return (
+                    <div key={g.id} className="card p-5">
+                      <h3 className="font-serif text-base text-ink">{g.name}</h3>
+                      {/* Course Admin.dc.html shows a tutor and meeting days
+                          here ("Nadia Farouk · odd days"). Nothing stores
+                          either: course_tp_groups holds id, course_id and name
+                          and nothing else, and no table links a tutor to a TP
+                          group. Left out rather than faked -- a group card
+                          naming the wrong tutor is worse than one naming
+                          none. */}
+                      <div className="mt-3 flex flex-col gap-3">
+                        {[1, 2].map((half) => {
+                          const sg = halves.find((h) => h.half_order === half);
+                          const names = sg
+                            ? (members ?? [])
+                                .filter((m) => m.subgroup_id === sg.id)
+                                .map((m) => nameByTraineeId.get(m.trainee_id) ?? "Unknown")
+                            : [];
+                          return (
+                            <div key={half}>
+                              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+                                {half === 1 ? "First half" : "Second half"}
+                              </p>
+                              {names.length > 0 ? (
+                                names.map((n) => (
+                                  <p key={n} className="text-sm text-ink">
+                                    {n}
+                                  </p>
+                                ))
+                              ) : (
+                                <p className="text-sm text-muted">Nobody yet</p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
             <p className="mt-1 text-sm text-muted">
               Trainees are split into fixed subgroups by teaching day; membership stays fixed for the
               course. Trainers manage rotation order from their own Rotation page.
