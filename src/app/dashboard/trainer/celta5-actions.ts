@@ -509,6 +509,41 @@ export async function updateGradeReviewComments(
   return { error: null };
 }
 
+
+/**
+ * Administration Handbook 13.6: end-of-course reports must not be released
+ * before the final day. Nothing enforced this -- both release paths set
+ * final_report_released_at with no date check, so a whole cohort's reports
+ * could go out on day one. Found by the 2026-08-16 compliance audit.
+ *
+ * A hard block rather than a warning, because releasing early cannot be undone
+ * in a candidate's memory: the report is visible to them the moment it lands
+ * (portfolio/[traineeId]/celta5), and un-setting the timestamp afterwards does
+ * not unsee it.
+ *
+ * A course with no end date is also blocked -- if nobody has said when the
+ * course ends, "the final day" has not arrived by definition, and guessing
+ * would defeat the rule.
+ */
+async function finalDayBlock(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  courseId: string
+): Promise<string | null> {
+  const { data: course } = await supabase.from("courses").select("end_date, name").eq("id", courseId).maybeSingle();
+  if (!course?.end_date) {
+    return "This course has no end date set, so reports can't be released yet -- set the course dates first.";
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  if (today < course.end_date) {
+    const finalDay = new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+    });
+    return `Reports can't be released before the final day of the course (${finalDay}) -- Administration Handbook 13.6.`;
+  }
+  return null;
+}
+
 // Cohort sheet's "Release final reports" -- the same release as
 // releaseFinalReport above, just batched for everyone on the course who is
 // actually ready (recommended grade set, not Withdrawn, trainer already
@@ -523,6 +558,9 @@ export async function releaseAllFinalReports(_prevState: FormState, formData: Fo
   }
 
   const supabase = await createClient();
+  const blocked = await finalDayBlock(supabase, courseId);
+  if (blocked) return { error: blocked };
+
   const { error } = await supabase
     .from("celta5_records")
     .update({ final_report_released_at: new Date().toISOString() })
@@ -562,6 +600,17 @@ export async function releaseFinalReport(
   }
 
   const supabase = await createClient();
+  // Same gate as the bulk path -- releasing one candidate early breaches 13.6
+  // exactly as much as releasing everyone.
+  const { data: record } = await supabase
+    .from("celta5_records")
+    .select("course_id")
+    .eq("trainee_id", traineeId)
+    .maybeSingle();
+  if (!record?.course_id) return { error: "Could not find that candidate's course." };
+  const blocked = await finalDayBlock(supabase, record.course_id);
+  if (blocked) return { error: blocked };
+
   const { error } = await supabase
     .from("celta5_records")
     .update({ final_report_released_at: new Date().toISOString() })
