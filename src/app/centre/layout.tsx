@@ -69,7 +69,11 @@ export default async function CentreLayout({ children }: { children: React.React
             <div>
               <p className="font-serif text-[15px] font-semibold text-ink">Centre settings</p>
               <p className="text-[11.5px] text-muted">
-                Centre profile, Google Drive connection, payment providers, admin roles
+                Centre profile, Google Drive connection,{" "}
+                <Link href="/centre/payments" className="text-primary hover:underline">
+                  payment providers
+                </Link>
+                , admin roles
               </p>
             </div>
             <Link href="/dashboard/admin/settings" className="text-sm font-medium text-primary hover:underline">

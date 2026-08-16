@@ -40,11 +40,38 @@ export interface PaymentProviderAdapter {
   parseWebhookEvent(rawBody: string, signatureHeader: string): NormalizedPaymentEvent | null;
 }
 
-// Only place in the app that knows which concrete adapter is active --
-// server actions and the webhook route call this, never `stripeAdapter`
-// directly. Swapping providers later means adding a new adapter file and
-// changing this one line, not touching UI or payments-task logic.
-export async function getActivePaymentProvider(): Promise<PaymentProviderAdapter> {
-  const { stripeAdapter } = await import("@/lib/payments/stripe-adapter");
-  return stripeAdapter;
+// Only place in the app that knows which concrete adapter is active -- server
+// actions and the webhook route call this, never `stripeAdapter` directly.
+//
+// Reads the centre's own choice (centers.payment_provider, migration 0106)
+// rather than being hardcoded: "only one provider can be connected at a time
+// per centre." Adding a provider means writing its adapter and adding a case
+// here -- nothing in the UI or the payments-task logic changes.
+export async function getActivePaymentProvider(centerId?: string): Promise<PaymentProviderAdapter> {
+  let chosen: string | null = "stripe";
+
+  if (centerId) {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("centers")
+      .select("payment_provider, payment_provider_connected_at")
+      .eq("id", centerId)
+      .maybeSingle();
+    // A selected-but-not-connected provider is not usable -- the centre picked
+    // it and never finished onboarding, so refusing here is more honest than
+    // sending an applicant to a checkout that cannot complete.
+    chosen = data?.payment_provider_connected_at ? data.payment_provider : null;
+  }
+
+  if (chosen === "stripe") {
+    const { stripeAdapter } = await import("@/lib/payments/stripe-adapter");
+    return stripeAdapter;
+  }
+
+  throw new Error(
+    chosen
+      ? `No integration exists for ${chosen} yet, so card payment is unavailable. The centre's other payment methods are unaffected.`
+      : "This centre has no payment provider connected, so card payment is unavailable. Connect one under Centre settings, or take payment by bank transfer, cash or invoice."
+  );
 }

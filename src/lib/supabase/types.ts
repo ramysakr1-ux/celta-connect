@@ -199,6 +199,14 @@ export interface Database {
           application_low_availability_threshold: number;
           admissions_email: string | null;
           chat_retention_days: number;
+          // migration 0106 -- which provider this centre uses, and whether
+          // onboarding finished. Never a key or anything in PCI scope: the
+          // centre onboards with the provider directly and Connect keeps only
+          // a reference. Null is a perfectly normal centre -- card is one of
+          // four accepted methods and is never required.
+          payment_provider: "stripe" | "iyzico" | "paytr" | "mollie" | "adyen" | null;
+          payment_provider_connected_at: string | null;
+          payment_provider_connected_by: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {
