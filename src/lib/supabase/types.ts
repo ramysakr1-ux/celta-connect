@@ -1352,6 +1352,11 @@ export interface Database {
           course_id: string;
           name: string;
           created_at: string;
+          // migration 0121 -- the tutor who owns this group, and how the
+          // centre describes when it teaches. Both null-valid: a group can
+          // exist before it is staffed.
+          tutor_profile_id: string | null;
+          meeting_days: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["course_tp_groups"]["Row"]> & {
           course_id: string;

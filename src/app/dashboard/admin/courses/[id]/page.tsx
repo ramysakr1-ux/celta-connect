@@ -26,6 +26,7 @@ import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { InvitationsPanel } from "@/app/dashboard/admin/courses/[id]/invitations-panel";
 import { TutorRoleControl } from "@/app/dashboard/admin/courses/[id]/tutor-role-control";
+import { GroupTutorForm } from "@/app/dashboard/admin/courses/[id]/group-tutor-form";
 import { getRecentCentreChanges } from "@/lib/what-changed";
 import { WhatChangedPanel } from "@/components/what-changed-panel";
 
@@ -93,7 +94,10 @@ export default async function CourseRosterPage({
   // than a join since course_tp_groups can exist with zero/one linked
   // subgroup mid-pairing-flow-edge-cases; simpler to read both flat and
   // join in JS.
-  const { data: tpGroups } = await supabase.from("course_tp_groups").select("id, name").eq("course_id", id);
+  const { data: tpGroups } = await supabase
+    .from("course_tp_groups")
+    .select("id, name, tutor_profile_id, meeting_days")
+    .eq("course_id", id);
 
   const { data: members } = await supabase
     .from("course_subgroup_members")
@@ -102,6 +106,11 @@ export default async function CourseRosterPage({
     .order("base_slot");
 
   const nameByTraineeId = new Map((roster ?? []).map((m) => [m.id, m.full_name]));
+  // Any trainer on the course may own a group -- the MCT/ACT distinction
+  // governs announcements, not teaching.
+  const courseTutorOptions = (roster ?? [])
+    .filter((m) => m.role === "trainer")
+    .map((m) => ({ id: m.id, name: m.full_name }));
 
   const assignedTraineeIds = new Set((members ?? []).map((m) => m.trainee_id));
   const unassignedTrainees = (roster ?? []).filter(
@@ -542,13 +551,17 @@ export default async function CourseRosterPage({
                   return (
                     <div key={g.id} className="card p-5">
                       <h3 className="font-serif text-base text-ink">{g.name}</h3>
-                      {/* Course Admin.dc.html shows a tutor and meeting days
-                          here ("Nadia Farouk · odd days"). Nothing stores
-                          either: course_tp_groups holds id, course_id and name
-                          and nothing else, and no table links a tutor to a TP
-                          group. Left out rather than faked -- a group card
-                          naming the wrong tutor is worse than one naming
-                          none. */}
+                      {/* "Nadia Farouk · odd days" -- the tutor who owns this
+                          group and when it meets, editable in place.
+                          Migration 0121 added both; before it, nothing in the
+                          app could say who had a group. */}
+                      <GroupTutorForm
+                        groupId={g.id}
+                        courseId={course.id}
+                        tutors={courseTutorOptions}
+                        currentTutorId={g.tutor_profile_id}
+                        currentMeetingDays={g.meeting_days}
+                      />
                       <div className="mt-3 flex flex-col gap-3">
                         {[1, 2].map((half) => {
                           const sg = halves.find((h) => h.half_order === half);
