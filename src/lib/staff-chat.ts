@@ -37,7 +37,7 @@ async function deleteStaleStaffMessages(centerId: string): Promise<void> {
 
 export interface ChannelSummary {
   id: string;
-  type: "center_trainers" | "all_staff" | "tp_group" | "dm" | "course_admin";
+  type: "center_trainers" | "all_staff" | "tp_group" | "dm" | "course_admin" | "centre_admin";
   name: string;
 }
 
@@ -127,7 +127,7 @@ export async function getInitialStaffChatData(
       // never added to trainer-only channels and vice versa (see
       // src/lib/admin-chat.ts for the separate admin-facing fetch) -- but
       // the type includes it, so this map needs to stay exhaustive.
-      const order = { center_trainers: 0, all_staff: 0, tp_group: 0, course_admin: 0, dm: 1 };
+      const order = { center_trainers: 0, all_staff: 0, tp_group: 0, course_admin: 0, centre_admin: 0, dm: 1 };
       return order[a.type] - order[b.type] || a.name.localeCompare(b.name);
     });
 

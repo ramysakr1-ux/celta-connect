@@ -150,7 +150,7 @@ export interface CarriedCelta5Record {
   stage3_tutor_written_assignments_notes: string | null;
   stage3_tutor_other_notes: string | null;
 }
-export type StaffChannelType = "center_trainers" | "all_staff" | "dm" | "tp_group" | "course_admin";
+export type StaffChannelType = "center_trainers" | "all_staff" | "dm" | "tp_group" | "course_admin" | "centre_admin";
 export type TpGenerationStatus = "pending" | "processing" | "completed" | "failed";
 export type TpDensityTier = "scripted" | "framework" | "coaching_prose" | "minimal";
 export type TpPointStatus = "pending_review" | "published" | "archived";
