@@ -43,7 +43,11 @@ export default async function DashboardLayout({
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-border">
         <div className="container flex h-14 items-center justify-between gap-6">
-          <Link href="/dashboard" className="flex shrink-0 items-center gap-3 hover:opacity-80">
+          {/* The logo keeps you in Course Admin. It used to link to /dashboard,
+              whose landing preference sends anyone holding a centre role to
+              /centre -- so clicking the logo from inside Course Admin kicked
+              you into Centre Admin. */}
+          <Link href={profile?.role === "admin" ? "/dashboard/admin" : "/dashboard"} className="flex shrink-0 items-center gap-3 hover:opacity-80">
             <Wordmark size="header" />
             {/* Course Admin.dc.html's own header carries a role pill beside
                 the mark: 11px/700 uppercase at 0.06em with a 5px dot, on a 12%
