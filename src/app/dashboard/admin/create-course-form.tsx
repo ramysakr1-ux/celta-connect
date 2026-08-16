@@ -7,7 +7,7 @@ import type { DeliveryMode } from "@/lib/delivery-mode";
 
 const initialState: FormState = { error: null };
 
-export function CreateCourseForm() {
+export function CreateCourseForm({ centerNumber }: { centerNumber?: string | null }) {
   const [state, action, pending] = useActionState(createCourse, initialState);
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("f2f");
 
@@ -54,8 +54,19 @@ export function CreateCourseForm() {
         </div>
       </div>
 
+      {/* The step card, matched to Course Admin.dc.html 2a: an 11px uppercase
+          eyebrow at 0.1em, a Newsreader 22px question, then the explanatory
+          line at 12.5px/1.6 muted. The eyebrow carries the real centre code
+          and course name rather than the design's sample. */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">How is teaching practice delivered?</label>
+        <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
+          New course{centerNumber ? ` · ${centerNumber}` : ""} · step 2 of 6
+        </p>
+        <h3 className="font-serif text-[22px] font-semibold text-ink">How is teaching practice delivered?</h3>
+        <p className="max-w-[62ch] text-[12.5px] leading-relaxed text-muted">
+          The mode is defined by where teaching practice happens, not where input happens. A course can deliver
+          input online and still be face-to-face.
+        </p>
         <input type="hidden" name="delivery_mode" value={deliveryMode} />
         <DeliveryModePicker value={deliveryMode} onChange={setDeliveryMode} />
       </div>

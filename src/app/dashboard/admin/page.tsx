@@ -179,7 +179,7 @@ export default async function AdminDashboardPage() {
           )}
 
           <div id="new-course">
-            <CreateCourseForm />
+            <CreateCourseForm centerNumber={center?.center_number ?? null} />
           </div>
         </div>
 

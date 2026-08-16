@@ -19,7 +19,7 @@ export function DeliveryModePicker({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-[9px]">
         {DELIVERY_MODE_OPTIONS.map((option) => {
           const active = option.value === value;
           return (
@@ -27,19 +27,22 @@ export function DeliveryModePicker({
               key={option.value}
               type="button"
               onClick={() => onChange(option.value)}
-              className={`flex items-start gap-3 rounded-[6px] border px-4 py-3 text-left transition-colors ${
+              className={`flex items-start gap-3 rounded-[6px] border px-4 py-[15px] text-left transition-colors ${
                 active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/50"
               }`}
             >
               <span
-                className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${
+                className={`mt-[2px] flex size-4 shrink-0 items-center justify-center rounded-full border-[1.5px] ${
                   active ? "border-primary" : "border-border-faint"
                 }`}
               >
                 {active ? <span className="size-2 rounded-full bg-primary" /> : null}
               </span>
-              <span className="flex flex-col gap-0.5">
-                <span className={`text-sm font-semibold ${active ? "text-primary" : "text-ink"}`}>{option.label}</span>
+              {/* Course Admin.dc.html: label 13px/600 ink, description 12px
+                  muted, 3px apart. The label does NOT change colour when
+                  selected in the design -- the ring and the fill carry that. */}
+              <span className="flex flex-1 flex-col gap-[3px]">
+                <span className="text-[13px] font-semibold text-ink">{option.label}</span>
                 <span className="text-xs text-muted">{option.description}</span>
               </span>
             </button>
