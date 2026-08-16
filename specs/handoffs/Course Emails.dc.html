@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 44px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 13px; max-width: 940px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · the three emails before a course starts</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 36px; font-weight: 600; line-height: 1.14; color: oklch(23.5% 0.017 65);">Two emails everyone gets, and one for the person who enrolled on Thursday.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Acceptance goes out when a place is offered, sometimes months ahead, and carries the pre-course task. Welcome goes out the Friday before and carries the link to their day-one activity, because that is the first moment levels and groups exist. A late enrolment gets the same welcome with its expectations lowered.</div>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">The three</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">click to switch</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 620px; gap: 20px; align-items: start;">
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+          <div onClick="{{ t.pick }}" style="background: {{ t.bg }}; border: 1px solid {{ t.border }}; border-left: 3px solid {{ t.spine }}; border-radius: 7px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px; cursor: pointer;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+              <div style="font-size: 14.5px; font-weight: 600; color: {{ t.ink }};">{{ t.name }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ t.when }}</div>
+            </div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ t.job }}</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 5px; padding-top: 2px;">
+              <sc-for list="{{ t.carries }}" as="c" hint-placeholder-count="2">
+                <div style="font-size: 10.5px; padding: 2px 8px; border-radius: 4px; background: oklch(96.4% 0.014 85); color: oklch(23.5% 0.017 65); border: 1px solid oklch(88% 0.016 82);">{{ c }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; padding-top: 6px;">
+          <sc-for list="{{ notes }}" as="n" hint-placeholder-count="4">
+            <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ n.border }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+              <div style="font-size: 12px; font-weight: 700; color: {{ n.labelInk }};">{{ n.label }}</div>
+              <div style="font-size: 12px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ n.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; overflow: hidden;">
+        <div style="padding: 16px 22px; border-bottom: 1px solid oklch(88% 0.016 82); background: oklch(96.4% 0.014 85); display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <div style="font-size: 11px; color: oklch(51% 0.017 70); width: 46px; flex: none;">From</div>
+            <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65);">Meridian English Centre CELTA &lt;info@meridian-english.com&gt;</div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <div style="font-size: 11px; color: oklch(51% 0.017 70); width: 46px; flex: none;">To</div>
+            <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65);">{{ email.to }}</div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <div style="font-size: 11px; color: oklch(51% 0.017 70); width: 46px; flex: none;">Subject</div>
+            <div style="font-size: 13.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ email.subject }}</div>
+          </div>
+        </div>
+
+        <div style="padding: 26px 30px 30px; display: flex; flex-direction: column; gap: 15px;">
+          <sc-for list="{{ email.body }}" as="p" hint-placeholder-count="5">
+            <sc-if value="{{ p.isButton }}" hint-placeholder-val="{{ false }}">
+              <div style="padding: 4px 0 2px;">
+                <div style="display: inline-flex; height: 40px; padding: 0 20px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 13.5px; font-weight: 600; align-items: center; cursor: pointer;">{{ p.text }}</div>
+                <sc-if value="{{ p.sub }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size: 11.5px; color: oklch(51% 0.017 70); padding-top: 7px;">{{ p.sub }}</div>
+                </sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ p.isList }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 7px; padding: 2px 0;">
+                <sc-for list="{{ p.items }}" as="i" hint-placeholder-count="3">
+                  <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(51% 0.017 70); margin-top: 8px; flex: none;"></div>
+                    <div style="font-size: 13.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ i }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ p.isText }}" hint-placeholder-val="{{ true }}">
+              <div style="font-size: 13.5px; line-height: 1.65; color: {{ p.ink }}; text-wrap: pretty;">{{ p.text }}</div>
+            </sc-if>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:1250}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.16 27)';
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+const mix = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, transparent)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+const T = (text, ink) => ({ isText: true, isList: false, isButton: false, text, ink: ink || INK, items: [], sub: '' });
+const L = (items) => ({ isText: false, isList: true, isButton: false, items, text: '', ink: INK, sub: '' });
+const B = (text, sub) => ({ isText: false, isList: false, isButton: true, text, sub: sub || '', items: [], ink: INK });
+
+const EMAILS = {
+  accept: {
+    name: 'Acceptance', when: 'when a place is offered', tone: TEAL,
+    job: 'Confirms the place, secures it with a deposit, and starts the pre-course task. Sometimes sent months ahead, when no levels, groups or tutors exist yet.',
+    carries: ['Fee and deposit', 'Pre-course task', 'Connect sign-up', 'Terms'],
+    to: 'aylin.koc@example.com',
+    subject: 'Your place on CELTA IT059 · 6 January – 1 February',
+    body: [
+      T('Dear Aylin,'),
+      T('We are pleased to offer you a place on CELTA IT059, running from 6 January to 1 February at our Istanbul centre.'),
+      T('The course fee is 24,500 TL. To secure the place we need a deposit of 5,000 TL by Friday 12 December. After that date the place is offered to the next applicant \u2014 we will not chase you for it, so please treat this part as the deadline it is.'),
+      B('Pay the deposit', 'A receipt is sent automatically. The balance is due by 20 December.'),
+      T('Once the deposit clears, there are two more things to do, and neither is urgent.'),
+      B('Set up your Connect account', 'This is where the whole course lives — your timetable, your lesson plans, your assignments.'),
+      T('Second, the pre-course task. It takes most people eight to ten hours spread over a few weeks, and you hand it in on the first morning. It is not graded. Do not leave it until the week before.'),
+      T('You will hear from us again the Friday before the course starts, with your group, your level, and what happens on day one. Nothing else is expected before then.'),
+      T('If anything changes for you between now and January, tell us early — we can almost always help.'),
+      T('Nazlı Aydın\nCourse Director'),
+    ],
+  },
+  welcome: {
+    name: 'Welcome', when: 'the Friday before', tone: GOLD,
+    job: 'The one that carries the day-one activity, because Friday is the first moment levels and groups are settled. Also the nudge that gets everyone signed in before Monday.',
+    carries: ['Group and level', 'Day-one activity link', 'Practical details'],
+    to: 'aylin.koc@example.com',
+    subject: 'CELTA IT059 starts Monday — here is your group and your first activity',
+    body: [
+      T('Dear Aylin,'),
+      T('We start at 09:30 on Monday 6 January, in Room 6 on the second floor. Bring the pre-course task and something to write with. Nothing else.'),
+      T('You are in Group ABC, teaching the elementary class. Your tutors are Nazlı Aydın and Deniz Arslan.'),
+      T('On Monday afternoon, after the demo lesson, each of you will spend twenty minutes with the class doing a getting-to-know-you activity. It is not assessed, nobody is watching, and it is meant to be enjoyable. We have put three to choose from in Connect — have a look this weekend and pick whichever appeals.'),
+      B('See your three activities', 'Two minutes. Choose one, and that is genuinely all the preparation Monday needs.'),
+      T('Everything else on Monday is watching and listening. There is nothing else to prepare.'),
+      T('Your tutors will answer any questions on the first morning, so please do not worry about anything between now and then.'),
+      T('See you Monday.\n\nNazlı Aydın\nCourse Director'),
+    ],
+  },
+  late: {
+    name: 'Welcome — late enrolment', when: 'within days of the start', tone: RED,
+    job: 'Same course, days rather than months to prepare. Every expectation the standard welcome sets is quietly lowered, and the one thing that genuinely matters is named.',
+    carries: ['Everything is optional', 'Same links', 'A named person'],
+    to: 'emre.toprak@example.com',
+    subject: 'Welcome to CELTA IT059 — starting Monday, and what to ignore',
+    body: [
+      T('Dear Emre,'),
+      T('Welcome to CELTA IT059. A place came free and we are glad you took it — but you have four days rather than four weeks, so this email is mostly about what you can safely ignore.'),
+      T('We start at 09:30 on Monday 6 January, Room 6, second floor. You are in Group DEF, teaching the elementary class, with Nazlı Aydın and Deniz Arslan.'),
+      T('The pre-course task normally takes eight to ten hours. Do what you can and bring whatever you have — nobody will comment on how much. You can finish it during the first week.'),
+      L([
+        'Setting up Connect — a minute at most, and worth doing before Monday.',
+        'The getting-to-know-you activity — twenty minutes on Monday afternoon, three to choose from, unassessed. Pick one if you have time. If not, your tutor will choose for you and that is completely fine.',
+        'Everything else can wait until you are here.',
+      ]),
+      B('Set up Connect and see your activities', 'The only thing on this list worth doing before Monday.'),
+      T('Starting late is much more common than you would think, and it makes no difference at all to how the course goes or how you are assessed.', MUTED),
+      T('If you would rather talk it through before Monday, call me on the centre number and ask for me directly.'),
+      T('Nazlı Aydın\nCourse Director'),
+    ],
+  },
+};
+
+class Component extends DCLogic {
+  state = { which: 'welcome' };
+
+  renderVals() {
+    const k = this.state.which;
+    const e = EMAILS[k];
+
+    return {
+      tabs: Object.keys(EMAILS).map(key => {
+        const t = EMAILS[key];
+        const on = key === k;
+        return {
+          name: t.name, when: t.when, job: t.job, carries: t.carries,
+          pick: () => this.setState({ which: key }),
+          bg: on ? tint(t.tone, 7) : CARD,
+          border: on ? mix(t.tone, 40) : BORDER,
+          spine: on ? t.tone : 'oklch(90% 0.010 85)',
+          ink: on ? t.tone : INK,
+        };
+      }),
+      email: { to: e.to, subject: e.subject, body: e.body },
+      notes: [
+        { label: 'Two emails, not five', labelInk: TEAL, border: mix(TEAL, 26),
+          text: 'Acceptance and welcome. A candidate who gets a third message before the course starts reads none of them properly, and every extra email is another chance to contradict the last one. The late-enrolment version is a variant of the welcome, not an addition to the sequence.' },
+        { label: 'Friday is not arbitrary', labelInk: GOLD, border: mix(GOLD, 26),
+          text: 'It is the first moment levels, groups and tutors are settled, so it is the earliest the welcome can carry anything personal. It also lands when a candidate has a weekend to act on it, and the nudge to sign in is worth more than anything the email actually says.' },
+        { label: 'It doubles as the sign-up reminder', labelInk: GOLD, border: mix(GOLD, 26),
+          text: 'Anyone who has not set up their account by the Friday opens the same email with one sentence in front of it: your account is not set up yet, and the activities are behind it. No separate chase from an administrator, and no second email. The link is the same one either way — signing in is what stands between them and the activities, so the sign-in page is the reminder.' },
+        { label: 'Nothing is attached', labelInk: MUTED, border: BORDER,
+          text: 'The activities live in Connect and the email links to them. Six candidates would otherwise need six different attachments, one of them would get the wrong file, and a change on Sunday would need a correction nobody reads.' },
+        { label: 'Late means before day one, never after it', labelInk: RED, border: mix(RED, 26),
+          text: 'On a full-time course the cut-off is the moment day one begins. Not because of the demo lesson or the groups forming, survivable as those are — because 120 contact hours is a minimum rather than a target, and a candidate who misses a day of twenty is under it with no way to make it up. Part-time is a different question, since an evening session can be caught up across a longer calendar.' },
+        { label: 'The late one lowers every expectation on purpose', labelInk: RED, border: mix(RED, 26),
+          text: 'It names what to ignore before what to do, says outright that starting late changes nothing about assessment, and offers a phone call with a named person. A late enrolment arrives assuming they are already behind, and that assumption does more damage in the first week than the missing preparation.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(37.5% 0.058 195); text-decoration: none; }
+  a:hover { color: oklch(30% 0.042 58); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 40px; width: 1500px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 11px; max-width: 920px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · application and selection · before anyone is a candidate</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">The file starts at first contact, not on day one.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Cambridge requires application forms and completed selection tasks for accepted <em>and rejected</em> applicants, available to the assessor. Today those are uploaded documents. Here the file exists from the moment someone applies, and the accepted ones become candidates without anything being retyped.</div>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 11px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.5% 0.004 90);">1a</div>
+      <div style="font-size: 14px; font-weight: 600; color: oklch(30% 0.042 58);">The pipeline</div>
+      <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">centre admin · one course's intake</div>
+    </div>
+
+    <div style="width: 1380px; box-sizing: border-box; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Applications · C3/2024, starts 8 January</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 25px; font-weight: 600; color: oklch(30% 0.042 58);">14 applied · 6 places left</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <div style="height: 34px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(89.5% 0.012 82); background: oklch(99.5% 0.004 90); font-size: 13px; font-weight: 500; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer;">Application link</div>
+          <div style="height: 34px; padding: 0 14px; border-radius: 6px; background: oklch(37.5% 0.058 195); color: oklch(98.5% 0.006 90); font-size: 13px; font-weight: 600; display: flex; align-items: center; cursor: pointer;">Add an applicant</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr) 24px 0.85fr; gap: 10px; align-items: stretch;">
+        <sc-for list="{{ stages }}" as="st" hint-placeholder-count="4">
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid {{ st.border }}; border-radius: 6px; padding: 13px 14px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: {{ st.labelInk }};">{{ st.label }}</div>
+            <div style="display: flex; align-items: baseline; gap: 7px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: oklch(30% 0.042 58); line-height: 1;">{{ st.n }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ st.sub }}</div>
+            </div>
+          </div>
+        </sc-for>
+
+        <div style="display: flex; align-items: center; justify-content: center;">
+          <div style="width: 1px; height: 100%; background: oklch(89.5% 0.012 82);"></div>
+        </div>
+
+        <div style="background: transparent; border: 1px dashed color-mix(in srgb, oklch(89.5% 0.012 82) 88%, oklch(51% 0.017 70)); border-radius: 6px; padding: 13px 14px; display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Not suitable</div>
+          <div style="display: flex; align-items: baseline; gap: 7px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: oklch(51% 0.017 70); line-height: 1;">3</div>
+            <div style="font-size: 11px; color: oklch(51% 0.017 70);">files kept</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 1.7fr 1fr 1fr 1.1fr 1fr 130px; padding: 11px 18px; border-bottom: 1px solid oklch(89.5% 0.012 82);">
+          <sc-for list="{{ head }}" as="h" hint-placeholder-count="6">
+            <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70); text-align: {{ h.align }};">{{ h.label }}</div>
+          </sc-for>
+        </div>
+        <sc-for list="{{ applicants }}" as="a" hint-placeholder-count="7">
+          <div style="display: grid; grid-template-columns: 1.7fr 1fr 1fr 1.1fr 1fr 130px; align-items: center; padding: 12px 18px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent); cursor: pointer;" style-hover="background: color-mix(in oklab, oklch(93% 0.019 190) 26%, oklch(99.5% 0.004 90));">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 13px; font-weight: {{ a.weight }}; color: {{ a.ink }};">{{ a.name }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ a.sub }}</div>
+            </div>
+            <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ a.applied }}</div>
+            <div style="font-size: 12px; color: {{ a.taskInk }};">{{ a.task }}</div>
+            <div style="font-size: 12px; color: {{ a.interviewInk }};">{{ a.interview }}</div>
+            <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ a.by }}</div>
+            <div style="display: flex; justify-content: flex-end;">
+              <div style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{ a.pillBg }}; color: {{ a.pillInk }};">
+                <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+                <div>{{ a.status }}</div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; align-items: flex-start; gap: 11px; padding: 12px 15px; border-radius: 6px; background: color-mix(in oklab, oklch(63% 0.096 72) 9%, oklch(99.5% 0.004 90)); border: 1px solid color-mix(in oklab, oklch(63% 0.096 72) 26%, transparent);">
+        <div style="width: 6px; height: 6px; border-radius: 50%; background: oklch(63% 0.096 72); margin-top: 6px; flex: none;"></div>
+        <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">Rejected applicants stay on this list, and their files stay in the assessor pack — Cambridge asks to see the ones who were turned down as much as the ones who were taken. They are also the most sensitive data here: people who never became candidates and never signed anything, so they fall under the same retention and deletion rules as everyone else.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 11px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.5% 0.004 90);">1b</div>
+      <div style="font-size: 14px; font-weight: 600; color: oklch(30% 0.042 58);">One applicant's file</div>
+      <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">everything the assessor may ask for, on one page</div>
+    </div>
+
+    <div style="width: 1380px; box-sizing: border-box; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">← Applications · applied 3 December</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 25px; font-weight: 600; color: oklch(30% 0.042 58);">Leyla Tunç</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <div style="height: 34px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(89.5% 0.012 82); background: oklch(99.5% 0.004 90); font-size: 13px; font-weight: 500; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer;">Not suitable</div>
+          <div style="height: 34px; padding: 0 14px; border-radius: 6px; background: oklch(37.5% 0.058 195); color: oklch(98.5% 0.006 90); font-size: 13px; font-weight: 600; display: flex; align-items: center; cursor: pointer;">Offer a place</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 18px; align-items: start;">
+        <sc-for list="{{ filePanels }}" as="p" hint-placeholder-count="3">
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+              <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ p.label }}</div>
+              <sc-if value="{{ p.meta }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ p.meta }}</div>
+              </sc-if>
+            </div>
+            <sc-for list="{{ p.rows }}" as="r" hint-placeholder-count="4">
+              <div style="display: flex; flex-direction: column; gap: 3px; padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent);">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+                  <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ r.label }}</div>
+                  <sc-if value="{{ r.right }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size: 11px; font-weight: 600; color: {{ r.rightInk }}; flex: none;">{{ r.right }}</div>
+                  </sc-if>
+                </div>
+                <div style="font-size: 12.5px; line-height: 1.55; color: {{ r.ink }}; text-wrap: pretty;">{{ r.text }}</div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ p.foot }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ p.foot }}</div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 340px; gap: 18px; align-items: start;">
+        <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70);">Interview record · 11 December · Ramy Sakr</div>
+          <sc-for list="{{ interview }}" as="q" hint-placeholder-count="4">
+            <div style="display: flex; flex-direction: column; gap: 4px; padding: 9px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent);">
+              <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ q.q }}</div>
+              <div style="font-size: 12.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ q.a }}</div>
+            </div>
+          </sc-for>
+          <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">The questions are the centre's own, imported at setup the way assignment briefs are. Every applicant is asked the same set, which is what makes the file defensible if a rejection is ever challenged.</div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid oklch(89.5% 0.012 82); padding-top: 13px;">
+            <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70);">Signed</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <sc-for list="{{ signatures }}" as="s" hint-placeholder-count="2">
+                <div style="display: flex; flex-direction: column; gap: 5px; background: {{ s.bg }}; border: 1px solid {{ s.border }}; border-radius: 5px; padding: 12px 13px;">
+                  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: {{ s.ink }};">{{ s.role }}</div>
+                  <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ s.name }}</div>
+                  <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ s.when }}</div>
+                  <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ s.note }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ signNote }}</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid color-mix(in oklab, oklch(37.5% 0.058 195) 26%, transparent); border-radius: 6px; padding: 15px 16px; display: flex; flex-direction: column; gap: 11px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(37.5% 0.058 195);">A reading of the task</div>
+              <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">Suggestion</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; font-weight: 600; color: oklch(30% 0.042 58);">{{ aiPanel.verdict }}</div>
+              <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ aiPanel.confidence }}</div>
+            </div>
+            <sc-for list="{{ aiPanel.rows }}" as="r" hint-placeholder-count="4">
+              <div style="display: flex; flex-direction: column; gap: 3px; padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent);">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+                  <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ r.label }}</div>
+                  <div style="font-size: 10.5px; font-weight: 600; color: {{ r.ink }}; flex: none;">{{ r.flag }}</div>
+                </div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ r.text }}</div>
+              </div>
+            </sc-for>
+            <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">Never a score, never accept or reject. The rows are the centre's own marking scheme, one for one, so the reading and the marks can be compared line by line. It says where to look, never what to decide — the phonology gap became the second interview question.</div>
+          </div>
+
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 15px 16px; display: flex; flex-direction: column; gap: 9px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(63% 0.096 72);">If accepted</div>
+            <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">The applicant becomes a candidate on C3/2024 with one click. Name, contact details, teaching background and any declared special consideration carry across — nobody retypes them, and the name that goes on the Cambridge entry form is the one they typed themselves.</div>
+          </div>
+          <sc-for list="{{ fileNotes }}" as="n" hint-placeholder-count="3">
+            <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 15px 16px; display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+              <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="1c" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 11px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.5% 0.004 90);">1c</div>
+      <div style="font-size: 14px; font-weight: 600; color: oklch(30% 0.042 58);">What the applicant sees</div>
+      <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">a public link, no account until they are offered a place</div>
+    </div>
+
+    <div style="width: 1380px; box-sizing: border-box; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 24px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; align-items: start;">
+      <sc-for list="{{ applicantView }}" as="p" hint-placeholder-count="4">
+        <div style="background: oklch(99.5% 0.004 90); border: 1px solid {{ p.border }}; border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 13px;">
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: {{ p.labelInk }};">{{ p.label }}</div>
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; line-height: 1.25; color: oklch(30% 0.042 58); text-wrap: pretty;">{{ p.title }}</div>
+          </div>
+          <sc-for list="{{ p.rows }}" as="r" hint-placeholder-count="4">
+            <div style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent);">
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 12.5px; font-weight: {{ r.weight }}; color: {{ r.ink }}; line-height: 1.4;">{{ r.text }}</div>
+                <sc-if value="{{ r.sub }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size: 11.5px; color: oklch(51% 0.017 70); line-height: 1.45;">{{ r.sub }}</div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ r.right }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size: 11px; color: oklch(51% 0.017 70); flex: none;">{{ r.right }}</div>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{ p.acks }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 8px; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 13px 14px;">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(42% 0.075 75);">Before you submit — tick each one</div>
+              <sc-for list="{{ p.acks }}" as="a" hint-placeholder-count="5">
+                <div style="display: flex; align-items: flex-start; gap: 9px;">
+                  <div style="width: 14px; height: 14px; border-radius: 3px; background: oklch(63% 0.096 72); flex: none; margin-top: 1px; display: flex; align-items: center; justify-content: center; color: oklch(99.5% 0.004 90); font-size: 10px; font-weight: 700;">✓</div>
+                  <div style="font-size: 12px; line-height: 1.45; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ a }}</div>
+                </div>
+              </sc-for>
+              <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70); border-top: 1px solid oklch(89.5% 0.012 82); padding-top: 9px; text-wrap: pretty;">{{ p.acksNote }}</div>
+            </div>
+          </sc-if>
+
+          <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ p.foot }}</div>
+
+          <sc-if value="{{ p.showPicker }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px;">
+              <div onClick="{{ togglePicker }}" style="height: 40px; border-radius: 6px; border: 1px solid {{ pickerBorder }}; background: oklch(99.5% 0.004 90); display: flex; align-items: center; justify-content: space-between; padding: 0 13px; cursor: pointer;" style-hover="border-color: color-mix(in oklab, oklch(37.5% 0.058 195) 45%, transparent);">
+                <div style="font-size: 12.5px; font-weight: {{ pickedWeight }}; color: {{ pickedInk }};">{{ pickedLabel }}</div>
+                <div style="font-size: 9px; color: oklch(51% 0.017 70);">▾</div>
+              </div>
+
+              <sc-if value="{{ pickerOpen }}" hint-placeholder-val="{{ true }}">
+                <div style="border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; background: oklch(99.5% 0.004 90); overflow: hidden;">
+                  <sc-for list="{{ prompts }}" as="pr" hint-placeholder-count="3">
+                    <div onClick="{{ pr.pick }}" style="padding: 11px 13px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 45%, transparent); cursor: pointer; background: {{ pr.bg }}; display: flex; flex-direction: column; gap: 3px;" style-hover="background: color-mix(in oklab, oklch(93% 0.019 190) 34%, oklch(99.5% 0.004 90));">
+                      <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ pr.kind }}</div>
+                      <div style="font-size: 12.5px; line-height: 1.45; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ pr.text }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ hasPicked }}" hint-placeholder-val="{{ false }}">
+                <div style="border: 1px solid color-mix(in oklab, oklch(37.5% 0.058 195) 30%, transparent); border-radius: 6px; background: oklch(97.8% 0.008 85); padding: 12px 13px; min-height: 96px; display: flex; flex-direction: column; gap: 7px;">
+                  <div style="font-size: 11px; color: oklch(51% 0.017 70);">Start writing. Around 400 words. Saves as you type.</div>
+                  <div style="font-size: 12.5px; line-height: 1.55; color: oklch(51% 0.017 70);">|</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div id="1d" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 11px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.5% 0.004 90);">1d</div>
+      <div style="font-size: 14px; font-weight: 600; color: oklch(30% 0.042 58);">{{ replyCount }} replies</div>
+      <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">nobody is left without an answer</div>
+    </div>
+
+    <div style="width: 1380px; box-sizing: border-box; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: start;">
+      <sc-for list="{{ replies }}" as="r" hint-placeholder-count="6">
+        <div style="display: flex; flex-direction: column; gap: 11px;">
+
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid {{ r.border }}; border-radius: 6px; overflow: hidden;">
+            <div style="padding: 13px 16px 11px; border-bottom: 1px solid oklch(89.5% 0.012 82); display: flex; flex-direction: column; gap: 7px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 88px; height: 26px; border: 1px dashed color-mix(in srgb, oklch(89.5% 0.012 82) 88%, oklch(51% 0.017 70)); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex: none;">
+                  <div style="font-size: 7.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Centre logo</div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Subject</div>
+                <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ r.subject }}</div>
+              </div>
+            </div>
+
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 11px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; line-height: 1.25; color: oklch(30% 0.042 58); text-wrap: pretty;">{{ r.heading }}</div>
+              <sc-for list="{{ r.body }}" as="p" hint-placeholder-count="3">
+                <div style="font-size: 12.5px; line-height: 1.65; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ p }}</div>
+              </sc-for>
+              <sc-if value="{{ r.cta }}" hint-placeholder-val="{{ false }}">
+                <div style="height: 38px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.5% 0.004 90); font-size: 12.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer;">{{ r.cta }}</div>
+              </sc-if>
+              <div style="font-size: 11px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ r.footnote }}</div>
+            </div>
+          </div>
+
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 14px 15px; display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ r.noteTitle }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ r.noteText }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1500,&quot;height&quot;:2200}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const GOLD = 'oklch(63% 0.096 72)';
+const RED = 'oklch(45% 0.15 27)';
+const AMBER = 'oklch(44% 0.095 68)';
+const BORDER = 'oklch(89.5% 0.012 82)';
+const CARD = 'oklch(99.5% 0.004 90)';
+
+const NEUTRAL = 'oklch(93.5% 0.008 85)';
+
+const PROMPTS = [
+  { kind: 'Narrative', text: 'Describe a time you learned a language, and what helped or hindered you.' },
+  { kind: 'Descriptive', text: 'Describe a teacher who taught you well, and what they actually did.' },
+  { kind: 'Argumentative', text: 'Can anyone learn a language as an adult? Take a position and defend it.' },
+];
+
+class Component extends DCLogic {
+  state = { pickerOpen: false, picked: -1 };
+
+  renderVals() {
+    const { pickerOpen, picked } = this.state;
+    const st = (label, n, sub, active) => ({
+      label, n: String(n), sub,
+      border: active ? 'color-mix(in oklab, ' + TEAL + ' 32%, transparent)' : BORDER,
+      labelInk: active ? TEAL : MUTED,
+    });
+
+    const app = (name, sub, applied, task, taskInk, interview, interviewInk, by, status, pillBg, pillInk, o = {}) => ({
+      name, sub, applied, task, taskInk, interview, interviewInk, by, status, pillBg, pillInk,
+      weight: o.bold ? '600' : '400',
+      ink: o.ink || INK,
+    });
+
+    const vals = {
+      pickerOpen,
+      hasPicked: picked > -1,
+      pickedLabel: picked > -1 ? PROMPTS[picked].text : 'Choose your writing task',
+      pickedInk: picked > -1 ? INK : MUTED,
+      pickedWeight: picked > -1 ? '500' : '400',
+      pickerBorder: pickerOpen ? 'color-mix(in oklab, ' + TEAL + ' 45%, transparent)' : BORDER,
+      togglePicker: () => this.setState(st => ({ pickerOpen: !st.pickerOpen })),
+      prompts: PROMPTS.map((p, i) => ({
+        ...p,
+        bg: i === picked ? 'color-mix(in oklab, ' + TEAL + ' 8%, ' + CARD + ')' : 'transparent',
+        pick: () => this.setState({ picked: i, pickerOpen: false }),
+      })),
+      stages: [
+        st('Applied', 14, 'total', false),
+        st('Task returned', 11, 'of 14', false),
+        st('Interviewed', 8, 'of 11', true),
+        st('Offered', 6, '6 places left', false),
+      ],
+      head: [
+        { label: 'Applicant', align: 'left' },
+        { label: 'Applied', align: 'left' },
+        { label: 'Language task', align: 'left' },
+        { label: 'Interview', align: 'left' },
+        { label: 'Seen by', align: 'left' },
+        { label: 'Status', align: 'right' },
+      ],
+      applicants: [
+        app('Leyla Tunç', 'Teaches young learners, 3 yrs', '3 Dec', 'Returned 6 Dec', INK, '11 Dec, 10:00', INK, 'Ramy Sakr', 'Decision due', 'oklch(94.5% 0.065 85)', AMBER, { bold: true }),
+        app('Kaan Erdoğan', 'No teaching experience', '3 Dec', 'Returned 5 Dec', INK, '11 Dec, 11:00', INK, 'Ramy Sakr', 'Offered', NEUTRAL, INK),
+        app('Nur Bilgin', 'Volunteer tutoring, 1 yr', '4 Dec', 'Returned 8 Dec', INK, '12 Dec, 09:30', INK, 'Hakan Şen', 'Offered', NEUTRAL, INK),
+        app('Onur Yalçın', 'Business trainer', '5 Dec', 'Returned 9 Dec', INK, '12 Dec, 10:30', INK, 'Hakan Şen', 'Offered', NEUTRAL, INK),
+        app('Selin Arıkan', 'Recent graduate', '6 Dec', 'Not returned', AMBER, 'Not booked', MUTED, '—', 'Waiting on task', 'oklch(94.5% 0.065 85)', AMBER),
+        app('Tolga Şimşek', 'Teaches maths', '7 Dec', 'Returned 10 Dec', INK, '13 Dec, 14:00', INK, 'Ramy Sakr', 'Not suitable', 'oklch(94% 0.043 25)', RED),
+        app('Yasemin Ak', 'Teaches adults abroad', '8 Dec', 'Returned 11 Dec', INK, 'Not booked', MUTED, '—', 'To interview', 'oklch(93% 0.019 190)', 'oklch(32% 0.05 195)'),
+      ],
+      filePanels: [
+        {
+          label: 'Application form', meta: 'submitted 3 Dec',
+          rows: [
+            { label: 'Name as it should appear on the certificate', text: 'Leyla Tunç', ink: INK, right: '', rightInk: MUTED },
+            { label: 'Education', text: 'BA English Language Teaching, Boğaziçi University, 2019', ink: INK, right: '', rightInk: MUTED },
+            { label: 'Teaching experience', text: 'Three years with young learners at a private language school. No adult teaching.', ink: INK, right: '', rightInk: MUTED },
+            { label: 'Why CELTA, why now', text: 'I want to teach adults and I have been told repeatedly that I cannot without this. I also want to know why the things I do in class work when they work.', ink: INK, right: '', rightInk: MUTED },
+            { label: 'Special consideration', text: 'Dyslexia — diagnosis attached. Requests extra time on written assignments.', ink: INK, right: 'Declared', rightInk: GOLD },
+          ],
+          foot: 'The certificate name is captured here, in the applicant’s own words, and carries all the way to the Cambridge entry form untouched.',
+        },
+        {
+          label: 'Pre-interview task · marked', meta: 'returned 6 Dec · Ramy Sakr',
+          rows: [
+            { label: 'Language awareness · 7 of 8 correct', text: 'Missed the present perfect with a finished time reference. Pronunciation left blank on both analysis items.', ink: INK, right: 'At standard', rightInk: INK },
+            { label: 'Writing · accuracy', text: 'One comma splice in 400 words. Spelling and punctuation otherwise clean.', ink: INK, right: 'At standard', rightInk: INK },
+            { label: 'Writing · organisation', text: 'Four paragraphs with a clear line of argument. Ends where it should.', ink: INK, right: 'Above', rightInk: INK },
+            { label: 'Writing · range', text: 'Varied sentence length, some subordination. Vocabulary plain but precise.', ink: INK, right: 'At standard', rightInk: INK },
+            { label: 'Writing · substance', text: 'Chose the narrative prompt. Described what her teacher did — “she waited four or five seconds after asking” — rather than how it felt. That is the harder thing, and the thing the course will ask for.', ink: INK, right: 'Above', rightInk: INK },
+          ],
+          foot: 'Five rows, each Above / At standard / Below, with a required note on any Below. Deliberately the same shape as the Standard of English criterion on the assignment cover sheets, so a weak writer is visible in December rather than in week two. Whichever prompt they chose, the criteria are the same. Weak areas become the first things the interview asks about.',
+        },
+        {
+          label: 'Entry requirements · Handbook 6.3', meta: '',
+          rows: [
+            { label: 'At least 18', text: '27. Cambridge recommends 20 or over; 18–20 is at the centre’s discretion.', ink: INK, right: 'Met', rightInk: INK },
+            { label: 'Awareness of language and competence in written and spoken English', text: 'C1+ demonstrated in the written task and interview. Recommended level is C2 or C1+.', ink: INK, right: 'Met', rightInk: INK },
+            { label: 'Standard of education equivalent to higher education entry', text: 'BA English Language Teaching, Boğaziçi University.', ink: INK, right: 'Met', rightInk: INK },
+            { label: 'Written tasks submitted before acceptance', text: 'Language awareness and extended writing task, returned 6 Dec.', ink: INK, right: 'Met', rightInk: INK },
+            { label: 'Interviewed', text: '11 Dec, in person, in a private room. Face-to-face course, so no digital literacy check required.', ink: INK, right: 'Met', rightInk: INK },
+            { label: 'Made aware that completing the course does not guarantee success', text: 'Stated at interview and repeated in the offer letter.', ink: INK, right: 'Yes', rightInk: INK },
+          ],
+          foot: 'The first three are Cambridge’s entry requirements from Administration Handbook 6.3 — an applicant must meet all of them. The last three are Handbook 6.2, the selection process: written tasks before acceptance including a language awareness task and an extended writing task, an interview in surroundings where privacy can be assured, and telling the applicant that completing the course does not guarantee success.',
+        },
+      ],
+      aiPanel: {
+        verdict: 'Worth interviewing',
+        confidence: 'Meets on 4 of 5 · one gap to probe',
+        rows: [
+          { label: 'Language awareness', text: '7 of 8 correct; the miss is the present perfect with a finished time reference, common and teachable. Both phonology items left blank — no evidence either way rather than evidence of weakness.', flag: 'Ask at interview', ink: AMBER },
+          { label: 'Writing · accuracy', text: 'One comma splice in 400 words. Spelling and punctuation otherwise clean.', flag: 'Meets', ink: INK },
+          { label: 'Writing · organisation', text: 'Four paragraphs, one line of argument, ends where it should.', flag: 'Meets', ink: INK },
+          { label: 'Writing · range', text: 'Varied sentence length with some subordination. Vocabulary plain but precise.', flag: 'Meets', ink: INK },
+          { label: 'Writing · substance', text: 'Described what her teacher did — “waited four or five seconds” — rather than how it felt.', flag: 'Meets', ink: INK },
+        ],
+      },
+      replies: [
+        {
+          border: 'color-mix(in oklab, ' + TEAL + ' 30%, transparent)',
+          subject: 'Meridian English Centre · your CELTA interview — choose a time',
+          heading: 'We would like to meet you',
+          body: [
+            'Dear Leyla,',
+            'Thank you for the written tasks — we have read them and we would like to meet you.',
+            'The interview takes about 45 minutes. We will talk about your teaching, and work through some of the language from your task together. There is nothing to prepare.',
+            'Choose whichever of the times below suits you. If none of them work, reply to this email and we will find another.',
+          ],
+          cta: 'Choose a time',
+          footnote: 'Times are held for 48 hours. Monday interviews are in person at the centre; Thursday interviews are online.',
+          noteTitle: 'One template, two ways it can be sent',
+          noteText: 'Either the reading found nothing to argue about and it sent itself after a fifteen-minute hold, or a tutor read the task and sent it by hand — including a tutor overruling an admin who flagged it. The applicant cannot tell the difference and should not be able to; the file records which it was, and who.',
+        },
+        {
+          border: 'color-mix(in oklab, ' + TEAL + ' 30%, transparent)',
+          subject: 'Meridian English Centre · your place on CELTA C3/2024',
+          heading: 'We would like to offer you a place',
+          body: [
+            'Dear Leyla,',
+            'Following your written task and your interview on 11 December, we are offering you a place on CELTA course C3/2024, running 8 January to 2 February, full time.',
+            'Your extended writing task was strong on organisation and substance — you described what your teacher actually did rather than how it felt, which is exactly the habit this course builds on. We will work on phonology with you; both analysis items were left blank and that is worth attention early.',
+            'The course fee is 32,000 TL. Use the link below to accept your place — it sets up your workspace, where your pre-course task and reading list are waiting. For payment options, including instalments, contact the centre office on +90 212 000 0000 or reply to this email.',
+          ],
+          cta: 'Accept your place',
+          footnote: 'Please accept within 14 days. We will hold your place until 22 December, after which it goes to the waiting list.',
+          noteTitle: 'Accepting is what creates the account',
+          noteText: 'The link handles the agreement and the workspace. Payment is deliberately outside the app — the email names the fee and points at the office, and a tutor ticks “fee paid” when it lands. Most centres already run on transfers and instalments; building a payment flow before one is asked for would be inventing a problem.',
+        },
+        {
+          border: 'oklch(89.5% 0.012 82)',
+          subject: 'Meridian English Centre · your CELTA application',
+          heading: 'We are not taking your application further',
+          body: [
+            'Dear Selin,',
+            'Thank you for applying to CELTA at Meridian English Centre, and for the time you gave to the written task.',
+            'We are not taking your application to interview. The language awareness section showed gaps that would make the first two weeks of the course very difficult — the analysis items described the language rather than analysing it, and meaning and form were not separated.',
+            'This is not a judgement about whether you can teach, and it is not final. Work through a grammar reference written for teachers — Parrott or Swan — and apply again for a later course. We would read a fresh application properly.',
+          ],
+          cta: '',
+          footnote: 'If you would like to talk it through before reapplying, reply and Ramy Sakr will call you.',
+          noteTitle: 'Rejected on the task, before interview',
+          noteText: 'The harder of the two to write, because you have only read their writing and never met them. It must name the specific gap, since “not suitable” from someone who never spoke to you is the version people repeat to others. Requires a human-written reason, always.',
+        },
+        {
+          border: 'oklch(89.5% 0.012 82)',
+          subject: 'Meridian English Centre · your CELTA application',
+          heading: 'We are not able to offer you a place this time',
+          body: [
+            'Dear Tolga,',
+            'Thank you for coming in on 13 December. It was a good conversation and I am sorry this is not the answer.',
+            'We are not offering you a place. Your written task was accurate and well organised, but when we worked through the target language together it was clear that analysing language — separating meaning, form and pronunciation — is not yet somewhere you can start from, and the first fortnight would be very hard.',
+            'You teach already and you clearly think about it. What is missing is a specific, learnable thing. Spend some time with Parrott, apply again for the May course, and we will look at it fresh.',
+          ],
+          cta: '',
+          footnote: 'Ramy Sakr will call you this week if you would like to go through it.',
+          noteTitle: 'Rejected after interview',
+          noteText: 'Different from the pre-interview one: they gave up an afternoon and met a person, so it is written by the tutor who interviewed them and names what happened in the room. Both are required before sending; neither is ever generated.',
+        },
+        {
+          border: 'color-mix(in oklab, ' + GOLD + ' 30%, transparent)',
+          subject: 'Meridian English Centre · you are on the waiting list for C3/2024',
+          heading: 'You are second on the waiting list',
+          body: [
+            'Dear Yasemin,',
+            'We would like to have you on CELTA C3/2024, but the course is full. You are second on the waiting list.',
+            'Places do come free — candidates withdraw, defer, or do not take up an offer — and when one does, we work down the list in order. We will tell you either way by 2 January, six days before the course starts.',
+            'If nothing opens, we will carry your application to the March course automatically, with nothing further for you to do. Tell us if you would rather not.',
+          ],
+          cta: '',
+          footnote: 'Your written task and interview stay on file, so you would not repeat them.',
+          noteTitle: 'A date, or it is just an unanswered application',
+          noteText: 'Position, the course, and a date by which they hear either way. The list rolls into the next intake unless the applicant opts out.',
+        },
+        {
+          border: 'oklch(89.5% 0.012 82)',
+          subject: 'Meridian English Centre · your CELTA application',
+          heading: 'The course filled before a place came free',
+          body: [
+            'Dear Yasemin,',
+            'We said we would tell you either way by today, so: no place opened on C3/2024. We are sorry — you were second on the list and it was close.',
+            'This is nothing to do with your application, which was strong. The course simply filled.',
+            'We have carried you to the March course, starting 4 March, with nothing further for you to do. Your written task and interview stay on file, so you would not repeat either. Tell us if you would rather we did not.',
+          ],
+          cta: '',
+          footnote: 'Sent automatically on the date we promised. If you would like to talk it through, reply and Ramy Sakr will call you.',
+          noteTitle: 'The only reply that sends itself',
+          noteText: 'Nothing is being judged, so no human sentence is needed — and silence on the promised date is the worst outcome and exactly what happens when a person has to remember. A merit rejection is never automatic; this one always is.',
+        },
+        {
+          border: 'color-mix(in oklab, ' + GOLD + ' 44%, transparent)',
+          subject: 'Meridian English Centre · a place has opened on C3/2024',
+          heading: 'A place has come free — it is yours if you want it',
+          body: [
+            'Dear Yasemin,',
+            'A candidate has withdrawn from C3/2024 and you were next on the list, so the place is yours. The course runs 8 January to 2 February, full time.',
+            'We know this is short notice — it starts in eleven days. Your written task and interview are already on file, so there is nothing to repeat. The fee is 32,000 TL; contact the office about payment, and the pre-course task takes about four hours.',
+            'Please tell us by 6pm on Friday 29 December. There are others on the list behind you, and if we have not heard we will pass the place on.',
+          ],
+          cta: 'Accept — 2 days left',
+          footnote: 'Declining costs you nothing: we carry you to the March course automatically, with your task and interview still on file.',
+          noteTitle: 'The one the app has to prompt, and the one with a clock',
+          noteText: 'A freed place is where centres most often drop the ball, and there is usually more than one person waiting. The deadline is a named day and hour, it says plainly that others are behind them, and the button counts down. When it expires the app moves to the next person and drafts the same email — the list keeps moving without anyone remembering to work it.',
+        },
+      ],
+      signatures: [
+        { role: 'Interviewer · verified course tutor', name: 'Ramy Sakr', when: 'signed 11 December, 16:40', note: 'Required. 6.2 asks who conducted selection, not just when — the name and the role are both on the record.', bg: 'color-mix(in oklab, ' + TEAL + ' 5%, ' + CARD + ')', border: 'color-mix(in oklab, ' + TEAL + ' 28%, transparent)', ink: TEAL },
+        { role: 'Applicant', name: 'Aylin Koç', when: 'signed 11 December, 16:44', note: 'Optional, and worth having. Confirms the notes reflect the conversation, which matters if a rejection is ever challenged.', bg: CARD, border: BORDER, ink: MUTED },
+      ],
+      signNote: 'Typed at the end of the interview, both people in the room, before anyone leaves. The interviewer’s signature is what turns notes into a selection record; the applicant’s is what makes it hard to dispute later. An online interview signs the same way.',
+      interview: [
+        { q: 'Talk me through a lesson that did not go the way you planned.', a: 'Described a reading lesson where learners finished in half the time. Filled it with an unplanned speaking task rather than moving on. Reflected without prompting on why the text was too easy.' },
+        { q: 'In the task you corrected “I have been to the cinema last night”. Why is it wrong?', a: 'Knew it was wrong, could not say why beyond “it sounds wrong”. Got there with one prompt about finished time. Honest about not knowing rather than guessing.' },
+        { q: 'This course is intensive and full-time. What have you arranged?', a: 'Unpaid leave agreed with her school. Childcare arranged for the four weeks. Has read the timetable and understood the evening workload.' },
+        { q: 'Anything you want to ask us?', a: 'Asked how extra time for assignments would work, and whether it would be visible to other candidates.' },
+      ],
+      fileNotes: [
+        { title: 'Rejections need a reason, in writing', text: 'A candidate turned down can ask why, and an assessor may look. The decision field is required for “not suitable”, and the wording goes into the letter the applicant receives.' },
+        { title: 'Special consideration starts here', text: 'Declared at application, so the centre knows before they commit to a place — and so the arrangements exist on day one rather than being scrambled in week two.' },
+        { title: 'The file never leaves the pack', text: 'Accepted or rejected, it stays available to the assessor for the course it belongs to, then goes with the close-out export and is deleted with everything else.' },
+      ],
+      applicantView: [
+        {
+          label: 'Step 1 · public link', title: 'Apply for CELTA at Meridian English Centre',
+          border: BORDER, labelInk: MUTED,
+          rows: [
+            { text: 'About you', sub: 'Name as you want it on your certificate, contact details, date of birth', weight: '600', ink: INK, right: '' },
+            { text: 'Education and teaching', sub: 'What you have studied, what you have taught, if anything', weight: '400', ink: INK, right: '' },
+            { text: 'Why CELTA, why now', sub: 'A few sentences in your own words', weight: '400', ink: INK, right: '' },
+            { text: 'Anything we should know', sub: 'Disabilities, learning differences, anything needing adjustment', weight: '400', ink: INK, right: '' },
+          ],
+          acks: [
+            'The course is full-time and intensive. I understand I should not be working during it.',
+            'I will be observed teaching from the first week, and given feedback in front of my group.',
+            'I will need a laptop, and a reliable internet connection if any part of my course is online.',
+            'There is work in the evenings and at weekends, including assignments and lesson planning.',
+            'I have read the code of conduct and accept it — respect for others, care with our volunteer learners, honest work including any use of AI, and confidentiality.',
+          ],
+          acksNote: 'The short form of the centre’s course commitments and code of conduct, accepted here and nowhere else — someone who hesitates at “I should not be working” should hesitate now rather than in week two. The file keeps what they ticked, when, and the text of the version they saw. The assessor can open it.',
+          foot: 'No account. A public link, saved as they type, submitted once. They get an email confirming it and nothing else until the centre replies.',
+        },
+        {
+          label: 'Step 2 · in Connect', title: 'Your pre-interview language task',
+          border: 'color-mix(in oklab, ' + TEAL + ' 30%, transparent)', labelInk: TEAL,
+          rows: [
+            { text: 'Eight sentences — which are correct?', sub: 'Correct the ones that are not', weight: '600', ink: INK, right: '' },
+            { text: 'Analyse two pieces of language', sub: 'Meaning, form, pronunciation', weight: '400', ink: INK, right: '' },
+            { text: 'A learner has written this. What has gone wrong?', sub: 'One paragraph', weight: '400', ink: INK, right: '' },
+            { text: 'Take your time', sub: 'No timer. It is not an exam, and we expect you to look things up.', weight: '400', ink: MUTED, right: '' },
+          ],
+          showPicker: true,
+          foot: 'Handbook 6.2 requires both parts before anyone is accepted: language awareness tasks and an extended writing task. The prompts differ but the criteria do not, so whichever you choose, you are being read the same way as everyone else.',
+        },
+        {
+          label: 'Step 3 · the interview', title: 'Choose a time, then meet a tutor',
+          border: 'color-mix(in oklab, ' + TEAL + ' 30%, transparent)', labelInk: TEAL,
+          rows: [
+            { text: 'An invitation, with times attached', sub: 'Sent once the task has been read — never a machine’s decision about a place', weight: '600', ink: INK, right: '' },
+            { text: 'Pick whichever suits you', sub: 'The centre’s own availability. Nothing suits? One reply and an administrator finds another.', weight: '400', ink: INK, right: '' },
+            { text: 'About 45 minutes', sub: 'Your teaching, and some of the language from your task, worked through together', weight: '400', ink: INK, right: '' },
+            { text: 'Nothing to prepare', sub: 'The tutor has already read your task before you sit down', weight: '400', ink: MUTED, right: '' },
+          ],
+          foot: 'The interview is where a place is decided, by a person. Everything before it only decides whether the conversation is worth having.',
+        },
+        {
+          label: 'Step 4 · the reply', title: 'A decision, either way, in writing',
+          border: 'color-mix(in oklab, ' + GOLD + ' 30%, transparent)', labelInk: GOLD,
+          rows: [
+            { text: 'Offered a place', sub: 'Course dates, fee, what to do next, and the pre-course task', weight: '600', ink: INK, right: '' },
+            { text: 'Accepting the offer creates the account', sub: 'The invitation email and candidate agreement follow from here', weight: '400', ink: INK, right: '' },
+            { text: 'Not suitable this time', sub: 'The centre’s reason, in the tutor’s own words, and what would change it', weight: '400', ink: INK, right: '' },
+            { text: 'Waiting list', sub: 'Named course, and a date by which they will hear', weight: '400', ink: INK, right: '' },
+          ],
+          foot: 'Nobody is left without an answer. A rejection that explains itself is the difference between someone who reapplies next term and someone who does not.',
+        },
+      ],
+    };
+    const words = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'];
+    vals.replyCount = words[vals.replies.length] || String(vals.replies.length);
+    return vals;
+  }
+}
+
+</script>
+</body>
+</html>

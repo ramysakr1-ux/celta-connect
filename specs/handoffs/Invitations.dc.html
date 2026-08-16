@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&family=Instrument+Serif:ital@1&family=Instrument+Sans:wght@600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 46px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 11px; max-width: 940px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · invitations and acceptance · five roles</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 33px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Every link opens with the terms attached to it.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Green is gone. The palette is ink, cream, gold and teal only — teal is the action colour, gold means a system rule is in force, and a ticked box is ink rather than a colour of its own. Trainees, trainers and centre admins accept while setting up an account; assessors and volunteers accept instead of setting one up, since there is no account to make.</div>
+  </div>
+
+  <sc-for list="{{ roles }}" as="r" hint-placeholder-count="4">
+    <div style="display: flex; flex-direction: column; gap: 13px;">
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">{{ r.id }}</div>
+        <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ r.name }}</div>
+        <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ r.mode }}</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 470px 1fr 300px; gap: 20px; align-items: start;">
+
+        <div style="background: oklch(96.2% 0.015 84); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 22px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: baseline; gap: 9px; padding-bottom: 2px;">
+            <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70); width: 46px; flex: none;">From</div>
+            <div style="font-size: 12px; color: oklch(23.5% 0.017 65);">Connect</div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 9px; padding-bottom: 10px; border-bottom: 1px solid oklch(88% 0.016 82);">
+            <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70); width: 46px; flex: none;">Subject</div>
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ r.subject }}</div>
+          </div>
+
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+            <div style="padding: 18px 24px 15px; border-bottom: 1px solid oklch(88% 0.016 82); display: flex; align-items: center; gap: 9px;">
+              <div style="width: 44px; height: 44px; border-radius: 10px; background: oklch(30% 0.042 58); display: flex; align-items: center; justify-content: center; flex: none;">
+                <svg width="28" height="16" viewBox="8 30 104 60" fill="none">
+                  <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" stroke-width="11" stroke-linecap="round"></path>
+                  <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" stroke-width="11" stroke-linecap="round"></path>
+                </svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 26px; line-height: 0.9; color: oklch(60% 0.11 70);">Connect</div>
+                <div style="font-family: 'Instrument Sans', Karla, sans-serif; font-weight: 600; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: oklch(51% 0.017 70); padding-left: 5px;">Teacher training platform</div>
+              </div>
+            </div>
+
+            <div style="padding: 22px 24px 24px; display: flex; flex-direction: column; gap: 14px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600; line-height: 1.22; color: oklch(30% 0.042 58); text-wrap: pretty;">{{ r.heading }}</div>
+              <div style="font-size: 13px; line-height: 1.65; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ r.body }}</div>
+
+              <div style="border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+                <sc-for list="{{ r.facts }}" as="f" hint-placeholder-count="3">
+                  <div style="display: flex; align-items: baseline; gap: 12px; padding: 9px 13px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent);">
+                    <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(47% 0.032 60); width: 96px; flex: none;">{{ f.label }}</div>
+                    <div style="font-size: 12.5px; line-height: 1.45; color: oklch(23.5% 0.017 65);">{{ f.value }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="height: 42px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.2% 0.005 90); font-size: 13.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer;">{{ r.cta }}</div>
+              <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ r.footnote }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: oklch(96.2% 0.015 84); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 22px; display: flex; justify-content: center;">
+          <div style="width: 100%; max-width: 470px; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 26px 28px 28px; display: flex; flex-direction: column; gap: 18px;">
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ r.gateEyebrow }}</div>
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; line-height: 1.2; color: oklch(30% 0.042 58);">{{ r.gateTitle }}</div>
+            </div>
+
+            <sc-if value="{{ r.hasCredentials }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 4px;">
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Email</div>
+                  <div style="height: 38px; border: 1px solid oklch(88% 0.016 82); border-radius: 5px; background: oklch(96.2% 0.015 84); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 13px; color: oklch(51% 0.017 70);">
+                    <div>{{ r.email }}</div>
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">From your invitation</div>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Choose a password</div>
+                  <div style="height: 38px; border: 1px solid oklch(38% 0.072 195); border-radius: 5px; background: oklch(99.2% 0.005 90); display: flex; align-items: center; padding: 0 12px; font-size: 13px; color: oklch(51% 0.017 70); letter-spacing: 0.2em;">••••••••••</div>
+                  <div style="font-size: 11px; color: oklch(51% 0.017 70); padding-top: 1px;">At least 10 characters.</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Confirm password</div>
+                  <div style="height: 38px; border: 1px solid oklch(88% 0.016 82); border-radius: 5px; background: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 13px; color: oklch(51% 0.017 70); letter-spacing: 0.2em;">
+                    <div>••••••••••</div>
+                    <div style="display: flex; align-items: center; gap: 6px; letter-spacing: 0;">
+                      <svg width="11" height="9" viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4.2L3.6 6.8L9 1.4" stroke="oklch(23.5% 0.017 65)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                      <div style="font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65);">Match</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70); padding-bottom: 7px;">{{ r.termsLabel }}</div>
+              <sc-for list="{{ r.terms }}" as="t" hint-placeholder-count="4">
+                <div style="display: flex; align-items: flex-start; gap: 11px; padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent); cursor: pointer;">
+                  <div style="width: 17px; height: 17px; border-radius: 4px; border: 1.5px solid {{ t.boxBorder }}; background: {{ t.boxBg }}; display: flex; align-items: center; justify-content: center; flex: none; margin-top: 1px;">
+                    <sc-if value="{{ t.checked }}" hint-placeholder-val="{{ true }}">
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4.2L3.6 6.8L9 1.4" stroke="oklch(99.2% 0.005 90)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                    </sc-if>
+                  </div>
+                  <div style="font-size: 12.5px; line-height: 1.55; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ t.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="height: 42px; border-radius: 5px; background: {{ r.buttonBg }}; color: {{ r.buttonInk }}; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer;">{{ r.buttonLabel }}</div>
+              <div style="display: flex; align-items: flex-start; gap: 8px;">
+                <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(60% 0.11 70); margin-top: 6px; flex: none;"></div>
+                <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ r.gateNote }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <sc-for list="{{ r.notes }}" as="n" hint-placeholder-count="2">
+            <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 15px 16px; display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+              <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-for>
+
+  <div style="max-width: 940px; display: flex; flex-direction: column; gap: 11px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70);">On the colour</div>
+    <div style="font-size: 14px; line-height: 1.65; color: oklch(23.5% 0.017 65); text-wrap: pretty;">A ticked box is ink, not green. Green was doing a job the interface never needed: these are not achievements, they are agreements, and colouring them congratulates someone for reading terms. The only accent on these screens is the small gold dot marking the sentence about expiry — the one line that states a system rule rather than a promise the person is making.</div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:2400}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const BROWN = 'oklch(30% 0.042 58)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const BORDER = 'oklch(88% 0.016 82)';
+const CARD = 'oklch(99.2% 0.005 90)';
+
+const on = (text) => ({ text, checked: true, boxBorder: BROWN, boxBg: BROWN });
+const off = (text) => ({ text, checked: false, boxBorder: BORDER, boxBg: 'transparent' });
+
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      roles: [
+        {
+          id: '1a', name: 'Trainee', mode: 'account + candidate agreement, one card',
+          subject: 'Meridian English Centre · your CELTA workspace is ready',
+          heading: 'Your CELTA workspace is ready',
+          body: 'Sara — you are enrolled on C2/2024 at Meridian English Centre. Your tutors are Ramy Sakr and Hakan Şen. Everything for the course lives behind the link below: your timetable, teaching practice, assignments and feedback.',
+          facts: [
+            { label: 'Course', value: 'C2/2024 · full-time, 4 weeks' },
+            { label: 'Starts', value: 'Monday 6 November, 9:00' },
+            { label: 'Before day one', value: 'Pre-course task — about 4 hours' },
+          ],
+          cta: 'Set up your account',
+          footnote: 'The link is yours alone and expires when the course ends. You will be asked to agree to the candidate terms as you set up — it takes a minute.',
+          gateEyebrow: 'Sara Yılmaz · C2/2024',
+          gateTitle: 'Set up your account',
+          hasCredentials: true,
+          email: 'sara.yilmaz@example.com',
+          termsLabel: 'Candidate agreement',
+          terms: [
+            on('All work I submit will be my own, and I will acknowledge every source I use.'),
+            on('I will declare any use of generative AI tools, and keep the conversation available if my tutor asks for it.'),
+            off('I understand my workspace closes when the course ends, and my course record is exported to the centre and then removed from here.'),
+          ],
+          buttonBg: 'oklch(88% 0.016 82)', buttonInk: MUTED,
+          buttonLabel: 'Create my account and accept',
+          gateNote: 'All three must be ticked before the account can be created. The acceptance is timestamped and prints into the CELTA 5 as the portfolio-requirements signature, so it is collected once rather than twice.',
+          notes: [
+            { title: 'One card, not two screens', text: 'The agreement sits under the password fields rather than on a separate step. A second screen after a password field is skimmed; this way the button itself says what is being agreed to.' },
+            { title: 'The AI clause is Cambridge’s, not ours', text: 'Their guidance asks candidates to declare tool use and keep the conversation available. Wording follows it rather than inventing a stricter rule.' },
+          ],
+        },
+        {
+          id: '1b', name: 'Trainer', mode: 'account + staff terms, once per centre',
+          subject: 'Meridian English Centre · you have been added as a course tutor',
+          heading: 'You have been added as a tutor',
+          body: 'Hakan — Ramy Sakr has added you to C2/2024 at Meridian English Centre as a TP tutor. Your groups and teaching practice will appear once the course is set up.',
+          facts: [
+            { label: 'Course', value: 'C2/2024 · full-time, 6 Nov – 7 Dec' },
+            { label: 'Your role', value: 'TP tutor' },
+            { label: 'Added by', value: 'Ramy Sakr, main course tutor' },
+          ],
+          cta: 'Set up your account',
+          footnote: 'You will only do this once. On later courses at this centre you sign in as normal.',
+          gateEyebrow: 'Hakan Şen · Meridian English Centre',
+          gateTitle: 'Set up your account',
+          hasCredentials: true,
+          email: 'hakan.sen@example.com',
+          termsLabel: 'Staff terms',
+          terms: [
+            on('I will keep candidate work, assessments and personal data confidential, and use them only for running and assessing this course.'),
+            on('I will not copy, reproduce or reverse-engineer the platform, its templates or its structure.'),
+            off('I understand access ends when my involvement with the centre ends, and course material is exported to the centre before removal.'),
+          ],
+          buttonBg: 'oklch(88% 0.016 82)', buttonInk: MUTED,
+          buttonLabel: 'Create my account and accept',
+          gateNote: 'Three, not four. Nothing here states the obvious — a verified tutor does not need telling that assessment decisions are their own.',
+          notes: [
+            { title: 'The middle one is the one that matters', text: 'A tutor sees the whole structure: templates, criteria, the rotation model, the close-out flow. Trainers move between centres, and some run their own. This is the only clause on any of the four screens protecting the product rather than the people.' },
+            { title: 'The role is one of four', text: 'Main course tutor, assistant course tutor, TP tutor, or input tutor. Set when the tutor is added, printed here so they know what they were invited for.' },
+            { title: 'Once per centre, not per course', text: 'A tutor on their fourth course does not re-accept. Recorded against the person and the centre, re-shown only if the terms change.' },
+          ],
+        },
+        {
+          id: '1c', name: 'Centre admin', mode: 'account + centre agreement, once per centre',
+          subject: 'Meridian English Centre · your centre is ready on Connect',
+          heading: 'Your centre is ready',
+          body: 'Ayşe — Meridian English Centre has been set up. From here you add tutors and courses, import your own assignment briefs, connect your Drive, and export everything at the end of each course.',
+          facts: [
+            { label: 'Centre', value: 'Meridian English Centre · Türkiye' },
+            { label: 'Your role', value: 'Centre administrator' },
+            { label: 'To do first', value: 'Connect Drive, then import your briefs' },
+          ],
+          cta: 'Set up your account',
+          footnote: 'You do not need to be on a course. Your link opens the centre, not a cohort.',
+          gateEyebrow: 'Ayşe Demirtaş · Meridian English Centre',
+          gateTitle: 'Set up your account',
+          hasCredentials: true,
+          email: 'ayse.demirtas@example.com',
+          termsLabel: 'Centre agreement',
+          terms: [
+            on('The centre is responsible for the candidate and applicant data it holds here, and for what its staff do with it.'),
+            on('The centre will not copy, reproduce or reverse-engineer the platform, its templates or its structure.'),
+            off('I understand that when a course closes its record is exported to our Drive and then removed from here, and that the centre keeps its own retained copies.'),
+          ],
+          buttonBg: 'oklch(88% 0.016 82)', buttonInk: MUTED,
+          buttonLabel: 'Create my account and accept',
+          gateNote: 'A centre director sees more of the product than anyone — every template, the rotation model, the whole close-out flow. This is the clause that matters most, and the one place it is worth a solicitor’s eye.',
+          notes: [
+            { title: 'This is really a contract', text: 'Three checkboxes are the right *interface*, but a commercial relationship needs terms behind them. The checkboxes should reference a full agreement, not replace it.' },
+            { title: 'Not on a course', text: 'The admin link opens the centre. Many admins are never on a cohort at all, which is why their invitation names no course and no dates.' },
+          ],
+        },
+        {
+          id: '1d', name: 'Assessor', mode: 'no account — the terms are the screen',
+          subject: 'Meridian English Centre · assessment visit pack for C2/2024',
+          heading: 'Your assessment pack is ready',
+          body: 'The pack for C2/2024 at Meridian English Centre is prepared and read-only: portfolios, the timetable, teaching practice arrangements for the day, written assignment titles, the application file and the attendance registers.',
+          facts: [
+            { label: 'Visit', value: 'Thursday 30 November' },
+            { label: 'Portfolios', value: '6 — including 2 potential fails' },
+            { label: 'Access ends', value: 'When the course closes, 7 Dec' },
+          ],
+          cta: 'Open the assessment pack',
+          footnote: 'No account and no password. The link identifies you; opening it is all that is needed.',
+          gateEyebrow: 'Cambridge assessor · read-only access',
+          gateTitle: 'Before you open the pack',
+          hasCredentials: false,
+          email: '',
+          termsLabel: 'Terms of access',
+          terms: [
+            on('I will use this material only for the assessment of this course.'),
+            on('I will not copy, download, share or store it outside the assessment process.'),
+            on('I will keep candidate and student information confidential.'),
+            off('I understand my access ends when the course closes, and the material is no longer available here after that.'),
+          ],
+          buttonBg: 'oklch(88% 0.016 82)', buttonInk: MUTED,
+          buttonLabel: 'Accept and open the pack',
+          gateNote: 'Acceptance is remembered against the link, so a second visit goes straight in. Re-issuing the link asks again.',
+          notes: [
+            { title: 'The terms are the screen', text: 'There is no account to create, so accepting is what opens the pack. It is the only place terms can be presented to someone who never signs up.' },
+            { title: 'Careful wording on deletion', text: '“No longer available here” rather than “deleted” — the centre keeps its own exported copy on its Drive, and promising deletion you do not perform is worse than promising nothing.' },
+          ],
+        },
+        {
+          id: '1e', name: 'Volunteer student', mode: 'no account — class details and consent',
+          subject: 'Meridian English Centre · your free English classes start Monday',
+          heading: 'Your free English classes start Monday',
+          body: 'Thank you for volunteering. You will be in the Upper-Intermediate class, taught by teachers training to become qualified English teachers, with an experienced tutor watching every lesson.',
+          facts: [
+            { label: 'Your class', value: 'Upper-Intermediate' },
+            { label: 'When', value: 'Mon–Fri, 9:30–12:00 · from 6 November' },
+          ],
+          cta: 'Join here',
+          footnote: 'No account and no password. Keep this email — the same link opens your class each time.',
+          gateEyebrow: 'Upper-Intermediate · C2/2024',
+          gateTitle: 'Before your first class',
+          hasCredentials: false,
+          email: '',
+          termsLabel: 'Please confirm',
+          terms: [
+            on('I understand my classes are taught by teachers in training, with a qualified tutor observing.'),
+            on('I am happy for my tutor and an external assessor to observe the lessons I attend, and for some lessons to be recorded for training purposes.'),
+            on('I will keep to the class times, and let the centre know if I cannot come.'),
+            off('I understand my details are held only for this course and removed when it ends.'),
+          ],
+          buttonBg: 'oklch(88% 0.016 82)', buttonInk: MUTED,
+          buttonLabel: 'Confirm and see my class',
+          gateNote: 'Plainer language than the other three. This is the only person in the system who is not a professional, and the terms should read as if written for a neighbour.',
+          notes: [
+            { title: 'The observation clause matters', text: 'A volunteer will have strangers at the back of the room on assessment day. Saying so before the first class is fairer than explaining it at the door.' },
+            { title: 'No jargon', text: 'No “candidates”, no “teaching practice”, no “CELTA”. Teachers in training, a tutor watching, twelve lessons, a certificate at the end.' },
+          ],
+        },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

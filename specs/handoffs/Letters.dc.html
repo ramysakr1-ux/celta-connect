@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(37.5% 0.058 195); text-decoration: none; }
+  a:hover { color: oklch(30% 0.042 58); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 42px; width: 1500px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 11px; max-width: 920px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · letters · written by the system, signed by a person</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">Four letters nobody should have to write from scratch.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Each is triggered by a state the app already knows about, drafted with the specifics filled in, edited by a tutor, then signed and filed. They exist so that nothing serious happens to a candidate without a written record — which is as much a protection for the centre as for them.</div>
+  </div>
+
+  <sc-for list="{{ letters }}" as="L" hint-placeholder-count="4">
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+
+      <div style="display: flex; align-items: baseline; gap: 11px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.5% 0.004 90);">{{ L.id }}</div>
+        <div style="font-size: 14px; font-weight: 600; color: oklch(30% 0.042 58);">{{ L.title }}</div>
+        <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">{{ L.note }}</div>
+      </div>
+
+      <div style="width: 1380px; box-sizing: border-box; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 22px; display: grid; grid-template-columns: 720px 1fr; gap: 20px; align-items: start;">
+
+        <div style="width: 720px; box-sizing: border-box; background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); padding: 40px 48px 36px; display: flex; flex-direction: column; gap: 18px;">
+
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 22px; padding-bottom: 15px; border-bottom: 1px solid oklch(30% 0.042 58);">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="font-size: 15px; font-weight: 600; color: oklch(30% 0.042 58);">ITI Istanbul</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">Cambridge CELTA centre · C2/2024</div>
+            </div>
+            <div style="width: 96px; height: 34px; border: 1px dashed color-mix(in srgb, oklch(89.5% 0.012 82) 90%, oklch(51% 0.017 70)); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex: none;">
+              <div style="font-size: 8.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Centre logo</div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ L.kicker }}</div>
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 23px; font-weight: 600; line-height: 1.2; color: oklch(30% 0.042 58);">{{ L.docTitle }}</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-end; flex: none;">
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ L.date }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ L.dayLine }}</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; padding: 12px 0; border-top: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 60%, transparent); border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 60%, transparent);">
+            <sc-for list="{{ L.facts }}" as="f" hint-placeholder-count="4">
+              <div style="display: flex; align-items: baseline; gap: 10px;">
+                <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70); width: 92px; flex: none;">{{ f.label }}</div>
+                <div style="font-size: 12px; color: oklch(23.5% 0.017 65);">{{ f.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-for list="{{ L.body }}" as="para" hint-placeholder-count="3">
+            <div style="font-size: 13px; line-height: 1.7; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ para }}</div>
+          </sc-for>
+
+          <sc-if value="{{ L.listTitle }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 9px; padding: 14px 16px; border-radius: 5px; background: oklch(97.8% 0.008 85); border: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 70%, transparent);">
+              <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ L.listTitle }}</div>
+              <sc-for list="{{ L.list }}" as="item" hint-placeholder-count="3">
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                  <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(63% 0.096 72); margin-top: 7px; flex: none;"></div>
+                  <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ item }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ L.closing }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size: 13px; line-height: 1.7; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ L.closing }}</div>
+          </sc-if>
+
+          <div style="display: grid; grid-template-columns: repeat({{ L.sigCols }}, 1fr); gap: 20px; padding-top: 20px;">
+            <sc-for list="{{ L.signatures }}" as="sig" hint-placeholder-count="2">
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="height: 26px; border-bottom: 1px solid oklch(30% 0.042 58); display: flex; align-items: flex-end; font-size: 12px; color: {{ sig.ink }};">{{ sig.value }}</div>
+                <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ sig.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="font-size: 10px; line-height: 1.6; color: oklch(51% 0.017 70); padding-top: 6px; text-wrap: pretty;">{{ L.filed }}</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(63% 0.096 72);">What triggers it</div>
+            <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ L.trigger }}</div>
+          </div>
+
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 9px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Filled in from the record</div>
+            <sc-for list="{{ L.auto }}" as="a" hint-placeholder-count="4">
+              <div style="display: flex; align-items: flex-start; gap: 9px; padding: 6px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 45%, transparent);">
+                <div style="width: 4px; height: 4px; border-radius: 50%; background: oklch(37.5% 0.058 195); margin-top: 6px; flex: none;"></div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ a }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-for list="{{ L.notes }}" as="n" hint-placeholder-count="2">
+            <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 15px 16px; display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+              <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+            </div>
+          </sc-for>
+
+          <div style="display: flex; gap: 8px;">
+            <div style="flex: 1; height: 34px; border-radius: 6px; border: 1px solid oklch(89.5% 0.012 82); background: oklch(99.5% 0.004 90); font-size: 12.5px; font-weight: 500; color: oklch(23.5% 0.017 65); display: flex; align-items: center; justify-content: center; cursor: pointer;">Edit the draft</div>
+            <div style="flex: 1; height: 34px; border-radius: 6px; background: oklch(37.5% 0.058 195); color: oklch(98.5% 0.006 90); font-size: 12.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer;">{{ L.cta }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-for>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1500,&quot;height&quot;:2600}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+
+const sig = (label, value, filled) => ({ label, value, ink: filled ? INK : MUTED });
+
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      letters: [
+        {
+          id: '1a', title: 'Fail letter', note: 'CELTA 5 Section A · must be issued with two lessons still to teach',
+          kicker: 'Formal notice · potential fail',
+          docTitle: 'Notice of a potential Fail outcome',
+          date: '21 November 2023', dayLine: 'Day 12 of 20',
+          facts: [
+            { label: 'Candidate', value: 'Mert Kaya' },
+            { label: 'Course', value: 'C2/2024 · 6 Nov – 1 Dec' },
+            { label: 'Main tutor', value: 'Ramy Sakr' },
+            { label: 'Lessons left', value: 'TP7 and TP8' },
+          ],
+          body: [
+            'Dear Mert,',
+            'Following your Stage 3 tutorial on 20 November with Hakan Şen, we are writing to make clear that on your current progress you are at risk of a Fail outcome on this course. This letter is not a decision. It is a formal notice, given while you still have two assessed lessons to teach, so that you have the opportunity and the information to change the outcome.',
+            'Your tutors have identified the following action points in your CELTA 5 record. They are the areas your final two lessons will be judged against.',
+          ],
+          listTitle: 'Action points from your CELTA 5, Stage 3 record',
+          list: [
+            'Give one instruction, check it, and stop. Instructions have been repeated in three forms in each of the last four lessons, and learners have started before you finished.',
+            'Plan for the time you have. Three of your last four lessons over-ran and the final stage was cut.',
+            'Anticipate the language your learners will need, not the language you intend to teach. Your written plans have anticipated problems for one item where the lesson needed four.',
+          ],
+          closing: 'Your final two lessons are on 27 and 29 November, both face to face. Please come and talk to your tutor before the first of them — the slots are in the timetable, and we would rather you used one than not.',
+          sigCols: '3',
+          signatures: [sig('Course tutor', 'Hakan Şen · 21 Nov 2023', true), sig('Main course tutor', 'Ramy Sakr · 21 Nov 2023', true), sig('Received by candidate', 'Awaiting acknowledgement', false)],
+          filed: 'Filed in CELTA 5 Section A · visible to the assessor · exported with the course at close-out. This is ITI Istanbul’s document; Connect produced it and does not appear on it.',
+          trigger: 'A provisional grade of Fail, or Fail/Pass, at any point after the Stage 3 tutorial. The app raises it the moment the grade is recorded, and warns daily while it remains unissued.',
+          auto: [
+            'The action points, verbatim from the Stage 3 progress record — no retyping, and no divergence between the letter and the CELTA 5.',
+            'The number of assessed lessons remaining, from the rotation and the timetable.',
+            'The dates and mode of those lessons, so the mixed-mode rule can be checked.',
+            'The Stage 3 tutorial date and who conducted it.',
+          ],
+          notes: [
+            { title: 'The deadline is real', text: 'Admin Handbook 9.2 requires the letter with at least two lessons left to teach. If a Fail-risk candidate drops below two remaining TPs with no letter issued, that is a compliance failure — the app should block the day from closing without flagging it.' },
+            { title: 'Two or three signatures, decided by who ran the tutorial', text: 'If a course tutor gave the Stage 3 tutorial: they sign, the main course tutor countersigns, the candidate acknowledges — three. If the MCT ran it themselves, the first two collapse into one and the letter shows two. The app knows who conducted the tutorial, so it picks; a tutor can still add or remove a signatory before issuing.' },
+          ],
+          cta: 'Issue the letter',
+        },
+        {
+          id: '1b', title: 'Assignment warning letter', note: 'after one failed assignment — the safeguard before the second',
+          kicker: 'Formal notice · written assignments',
+          docTitle: 'Notice following a failed assignment',
+          date: '24 November 2023', dayLine: 'Day 15 of 20',
+          facts: [
+            { label: 'Candidate', value: 'Emre Doğan' },
+            { label: 'Course', value: 'C2/2024 · 6 Nov – 1 Dec' },
+            { label: 'Assignment', value: '2 · Language Related Tasks' },
+            { label: 'Outcome', value: 'Fail on resubmission' },
+          ],
+          body: [
+            'Dear Emre,',
+            'Your resubmission of Assignment 2, Language Related Tasks, has not met the assessment criteria. As you have already used the one resubmission available for that assignment, it is recorded as a Fail.',
+            'A candidate must pass three of the four written assignments to be eligible for a Pass on this course. You have passed one and failed one, with two still to submit. This means you cannot fail another assignment.',
+          ],
+          listTitle: 'Criteria not met on the resubmission',
+          list: [
+            'Analyses language correctly — the phonemic transcription was incomplete for three of the five items, and word stress was not marked.',
+            'Anticipates learner problems — one problem was given for the set rather than one per item, as the brief requires.',
+          ],
+          closing: 'Assignment 3 is due on 27 November and Assignment 4 on 1 December. Both must pass. Your tutor Hakan Şen has offered a tutorial before you submit Assignment 3; please take it.',
+          sigCols: '3',
+          signatures: [sig('Course tutor', 'Hakan Şen · 24 Nov 2023', true), sig('Main course tutor', 'Ramy Sakr · 24 Nov 2023', true), sig('Received by candidate', 'Emre Doğan · 24 Nov 2023', true)],
+          filed: 'Filed in CELTA 5 Section A · attached to the assignment record · visible to the assessor.',
+          trigger: 'Any assignment reaching a Fail outcome — that is, failing after its one resubmission. Issued immediately, not at the next tutorial.',
+          auto: [
+            'The criteria not met, verbatim from the cover sheet, with the tutor comments that accompanied them.',
+            'The arithmetic: how many assignments passed, how many failed, how many remain, and how many must now pass.',
+            'The due dates of the remaining assignments, from the timetable.',
+            'The marking tutor and the second marker.',
+          ],
+          notes: [
+            { title: 'The arithmetic is the point', text: 'A candidate who fails an assignment rarely works out what it costs them. Spelling out "you cannot fail another" is the whole reason the letter exists.' },
+            { title: 'Three signatures here too', text: 'The assessing tutor, the main course tutor, and the candidate’s acknowledgement — the same rule as the Fail letter, because both change what the rest of the course means. Withdrawal and deferral keep two: those are agreements between the candidate and the centre, not notices issued to them.' },
+          ],
+          cta: 'Issue the letter',
+        },
+        {
+          id: '1c', title: 'Withdrawal', note: 'the candidate writes it, the centre countersigns',
+          kicker: 'Candidate declaration',
+          docTitle: 'Withdrawal from the course',
+          date: '22 November 2023', dayLine: 'Day 13 of 20',
+          facts: [
+            { label: 'Candidate', value: 'Aylin Koç' },
+            { label: 'Course', value: 'C2/2024 · 6 Nov – 1 Dec' },
+            { label: 'Entry form', value: 'Submitted 23 Oct 2023' },
+            { label: 'Reported as', value: 'Withdrawn' },
+          ],
+          body: [
+            'I am writing to confirm that I am withdrawing from the CELTA course C2/2024 at ITI Istanbul, with effect from 22 November 2023.',
+            'My reason for withdrawing is: a change in my work circumstances which means I can no longer attend the remaining teaching practice days.',
+            'I understand that because the course entry form was submitted to Cambridge on 23 October 2023, my result will be recorded and reported as Withdrawn. I understand that this is final and that I cannot rejoin this course.',
+          ],
+          listTitle: 'What happens to your record',
+          list: [
+            'Your portfolio is paused as it stands — three lessons taught, two assignments passed — and becomes read-only. Nothing is deleted.',
+            'Your teaching practice slot in Group ABC is left empty. The rotation for the other candidates does not change.',
+            'Your file remains available to the Cambridge assessor, who is required to review it and record the reason for withdrawal.',
+            'At the end of the course your record is exported to the centre and then removed from Connect, in line with the terms you accepted.',
+          ],
+          closing: 'You may continue to attend input sessions as an observer if you wish, and you would be welcome to. You will not be observed or assessed.',
+          sigCols: '2',
+          signatures: [sig('Candidate', 'Aylin Koç · 22 Nov 2023', true), sig('Centre, countersigned', 'Ramy Sakr · 22 Nov 2023', true)],
+          filed: 'Filed with the course record · reported to Cambridge on the final grades · included in the assessor pack marked Withdrawn.',
+          trigger: 'The candidate starts it from their own workspace, or a tutor starts it on their behalf and sends it for signature. It cannot be completed by the centre alone — Cambridge requires the candidate’s own written notice.',
+          auto: [
+            'Whether the entry form has been submitted, and its date — this is what decides whether Cambridge ever sees the withdrawal.',
+            'What the candidate has completed: lessons taught, hours assessed, assignments passed, criteria met.',
+            'Which TP slot empties, and confirmation that the rotation does not re-derive.',
+            'The retention and deletion terms they accepted at sign-up, quoted rather than paraphrased.',
+          ],
+          notes: [
+            { title: 'The entry form date changes everything', text: 'Before it, withdrawal is an internal event Cambridge never hears about. After it, the candidate appears in the final grades with an outcome of Withdrawn. Same action, two different obligations — so the letter reads differently depending on the date.' },
+            { title: 'Withdrawing is not the same as leaving the building', text: 'A withdrawn candidate may still attend sessions, unobserved and unassessed. The letter says so, because otherwise people assume they have to disappear.' },
+          ],
+          cta: 'Send for signature',
+        },
+        {
+          id: '1d', title: 'Deferral', note: 'more than half the course completed · six months to finish',
+          kicker: 'Centre record · Admin Handbook 6.9',
+          docTitle: 'Deferral — centre record and candidate letter',
+          date: '24 November 2023', dayLine: 'Day 16 of 20',
+          facts: [
+            { label: 'Candidate', value: 'Can Şahin' },
+            { label: 'Completed', value: '15 of 20 days · 4.5 of 6 hours' },
+            { label: 'Grounds', value: 'Medical, certificate provided' },
+            { label: 'Must complete by', value: '1 June 2024' },
+          ],
+          body: [
+            'Dear Can,',
+            'Following your request of 23 November and the medical certificate you provided, ITI Istanbul supports your application to defer completion of CELTA course C2/2024 to a subsequent course. You have completed more than half of this course, which is the condition Cambridge requires for a deferral rather than a withdrawal.',
+            'The centre is submitting a deferral form in Appian, giving full details of the reasons and the arrangements for your re-integration and completion. Cambridge then confirms the arrangements. Your result on this course will be recorded as Deferred on the centre grade form, and your name added to the entry form of your destination course marked as deferred. The assessor for that course will be told in advance and given the previous assessor’s comments.',
+          ],
+          listTitle: 'What carries to your next course',
+          list: [
+            'Your five completed teaching practice lessons, credited and read-only. Your numbering continues from TP6.',
+            'Assignments 1 and 2, both passed, with their original markers named.',
+            'Your CELTA 5 criteria as met, each recording who assessed it and on which course.',
+            'What does not carry: chat, your workspace link, and anything not part of the assessed record.',
+          ],
+          closing: 'You must complete on a course finishing no later than 1 June 2024 — six months from the end of this one. We will hold your place on the February and April courses; tell us which suits you when you are ready.',
+          sigCols: '2',
+          signatures: [sig('Centre', 'Ramy Sakr · 24 Nov 2023', true), sig('Candidate', 'Can Şahin · 24 Nov 2023', true)],
+          filed: 'The Appian form is submitted by the centre, on Cambridge’s own system — this document is the centre’s record and the candidate’s letter, not a replacement for it.',
+          trigger: 'A tutor starts it when a candidate cannot continue. The app refuses to open it if less than half the course is complete, and offers withdrawal with a fee-free restart instead — the other route in Handbook 6.9.',
+          auto: [
+            'Days completed and assessed hours, to prove the more-than-half condition rather than asserting it.',
+            'The six-month deadline, counted from the end date of this course, and shown as a date rather than a duration.',
+            'The exact list of what carries, generated from the assessed record — not a generic paragraph.',
+            'The centre’s upcoming courses, so a destination can be chosen from real options.',
+          ],
+          notes: [
+            { title: 'Cambridge’s form lives in Appian, not here', text: 'Handbook 6.9: the centre submits a deferral/extension form in Appian and Cambridge confirms. That form is theirs and we cannot reproduce it. What this document does is gather everything Appian will ask for — reasons, re-integration arrangements, completion date — so the tutor fills the Appian form by copying, and the candidate gets a letter Cambridge never sees but they need.' },
+            { title: 'It blocks close-out', text: 'A course with an unresolved deferral cannot be closed and erased. The app holds the export until a destination course is chosen or the centre explicitly parks the record.' },
+          ],
+          cta: 'Record and send',
+        },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

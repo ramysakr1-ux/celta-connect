@@ -297,13 +297,16 @@ h6 {
      expired/invalid-link gates on the tokenized routes) under one visual
      language instead of each screen inventing its own.  */
   .sheet-accent {
-    /* oklab, not oklch -- both --color-accent and --color-card are very
-       pale/low-chroma, and mixing two near-achromatic colors in oklch's
-       polar space hits an undefined-hue edge case (rendered as a stray
-       pink tint in testing). oklab is rectangular (no hue component), so
-       it has no such edge case -- also matches how Tailwind's own opacity
-       utilities (e.g. bg-accent/50 on the Zoom card) mix under the hood. */
-    background-color: color-mix(in oklab, var(--color-accent) 45%, var(--color-card));
+    /* The green wash is gone (Ramy, 16 Aug 2026): "we're not going with that
+       anymore" -- every entry surface now sits on the same warm paper as the
+       rest of the product, with teal kept as a hairline accent rather than a
+       fill. --color-accent (the pale teal-green) is no longer used here; it
+       stays defined because hover states elsewhere still read it.
+
+       This class is the shared entry look -- login, join, offer, register,
+       student and forgot-password all use it, which is why unifying it here
+       is one edit rather than seven. */
+    background-color: var(--color-card);
     border: 1px solid color-mix(in oklab, var(--color-primary) 25%, transparent);
     border-radius: var(--radius-card);
     padding: 16px;
