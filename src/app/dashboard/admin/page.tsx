@@ -104,7 +104,7 @@ export default async function AdminDashboardPage() {
           <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Connect · course admin</p>
           <h1 className="mt-1 font-serif text-[26px] text-ink">
             {center?.name ?? "Your centre"}
-            {center?.center_number ? <span className="text-muted"> · {center.center_number}</span> : null}
+            {center?.center_number ? <span className="text-muted"> · Centre {center.center_number}</span> : null}
           </h1>
         </div>
         {/* The create form already lives in the sidebar, so this jumps to it
@@ -144,6 +144,9 @@ export default async function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
         <div className="flex flex-col gap-5">
+          {/* The design labels the list, so the state groups read as
+              subdivisions of one thing rather than three separate lists. */}
+          <h2 className="font-serif text-lg text-ink">Courses</h2>
           {groups.length > 0 ? (
             groups.map((group) => (
               <div key={group.state} className="flex flex-col gap-2">
