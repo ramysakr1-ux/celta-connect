@@ -37,4 +37,4 @@ alter table public.applicant_emails add constraint applicant_emails_type_check c
 -- volunteer. applicant_id was already nullable, but the FK meant a staff email
 -- had nowhere to record WHO it went to beyond the address. This keeps the
 -- recipient's name for the log without pretending they are an applicant.
-alter table public.applicant_emails add column recipient_name text;
+alter table public.applicant_emails add column if not exists recipient_name text;

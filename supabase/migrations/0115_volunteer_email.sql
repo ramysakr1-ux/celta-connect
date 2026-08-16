@@ -9,7 +9,7 @@
 -- and must remain a perfectly valid volunteer -- so the two emails are sent
 -- when an address exists and skipped when it doesn't, rather than the address
 -- becoming a condition of taking part.
-alter table public.volunteer_students add column email text;
+alter table public.volunteer_students add column if not exists email text;
 
 comment on column public.volunteer_students.email is
   'Optional. Used only for the two volunteer emails. A volunteer never has an account, and a volunteer without an email is valid.';

@@ -7,7 +7,7 @@
 -- software is worse than no promise: the whole point of the line is that the
 -- applicant can chase if the date passes.
 alter table public.centers
-  add column application_response_days integer not null default 10;
+  add column if not exists application_response_days integer not null default 10;
 
 comment on column public.centers.application_response_days is
   'Working days after an application arrives by which the centre promises to respond. Used to compute the date in the acknowledgement email.';
