@@ -121,6 +121,14 @@ export default async function AssessorPage() {
   // the denominator is the cohort's requirement, not an arbitrary target.
   const hoursRequired = readiness.totalCandidates * 6;
 
+  // The design writes dates the way a person says them -- "Assessor visit --
+  // 30 November", "Send by 28 Aug" -- never ISO. An assessor reading
+  // "2026-11-30" has to translate it.
+  const longDate = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+  const shortDate = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+
   const CARD = "oklch(99.2% 0.005 90)";
   const BORDER = "oklch(88% 0.016 82)";
   const INK = "oklch(23.5% 0.017 65)";
@@ -206,11 +214,11 @@ export default async function AssessorPage() {
                 {courseDates ? ` · ${courseDates}` : ""}
               </p>
               <h1 style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 28, fontWeight: 600, color: INK, marginTop: 6 }}>
-                Assessor visit{course.assessor_visit_date ? ` — ${course.assessor_visit_date}` : ""}
+                Assessor visit{course.assessor_visit_date ? ` — ${longDate(course.assessor_visit_date)}` : ""}
               </h1>
             </div>
             <div style={{ display: "flex", gap: 34 }}>
-              <Figure label="Send by" value={sendByDate ?? "Not set"} ink={GOLD} />
+              <Figure label="Send by" value={sendByDate ? shortDate(sendByDate) : "Not set"} ink={GOLD} />
               <Figure
                 label="Portfolios complete"
                 value={`${readiness.portfoliosCompleteCount} of ${readiness.totalCandidates}`}
@@ -239,7 +247,7 @@ export default async function AssessorPage() {
             }}
           >
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD }}>
-              {sendByDate ? `Send the pack by ${sendByDate}` : "No visit date set"}
+              {sendByDate ? `Send the pack by ${longDate(sendByDate)}` : "No visit date set"}
               {daysOut !== null ? ` · ${daysOut} day${daysOut === 1 ? "" : "s"} out` : ""}
             </span>
             <span style={{ fontSize: 12, color: INK }}>
