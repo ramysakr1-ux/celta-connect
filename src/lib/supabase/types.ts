@@ -204,7 +204,17 @@ export interface Database {
           // centre onboards with the provider directly and Connect keeps only
           // a reference. Null is a perfectly normal centre -- card is one of
           // four accepted methods and is never required.
-          payment_provider: "stripe" | "iyzico" | "paytr" | "mollie" | "adyen" | null;
+          payment_provider:
+            | "stripe"
+            | "paypal"
+            | "adyen"
+            | "checkout_com"
+            | "mollie"
+            | "gocardless"
+            | "square"
+            | "iyzico"
+            | "paytr"
+            | null;
           payment_provider_connected_at: string | null;
           payment_provider_connected_by: string | null;
           created_at: string;
