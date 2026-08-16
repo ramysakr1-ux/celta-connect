@@ -33,7 +33,7 @@ Everything decided/built today, in one place, so nothing has to be pieced togeth
 ## Explicitly NOT decided / still open
 - Whether Progress tab later also houses Stage 1/2/3 tutorial outcomes long-term.
 - Quiz content/format for observation-review tasks beyond the language/phonology/classroom-management three already built.
-- Full read-only (non-admin) timetable view — explicitly deferred, not written up.
+- Full read-only (non-admin) timetable view — **resolved 16 Aug: this note was stale.** `for-claude-code-timetable-view.md` already specs it in full (glass-card color system, "Mine" filter, live-now bar). Build from that file.
 - Week 5 (part-time) structure.
 - Centre Admin Payments/Volunteers detail screens.
 - Final compliance-audit pass.

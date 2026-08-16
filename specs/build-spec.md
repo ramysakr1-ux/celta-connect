@@ -203,7 +203,7 @@ Close-out as designed erases at the end of the course. Cambridge requires severa
 - **Tutors retain a record of the provisional grades agreed at the grading meeting**, to refer to when completing the centre grade approval form in Appian.
 - **The assessor's report is the property of Cambridge**, confidential, and **must not be quoted from or used for advertising**. Nothing in the design breaches this — it is a constraint on marketing, not on the app. Two build rules follow: the demo course must never contain real assessor report text, and a freelance tutor sees the report at the centre rather than receiving an exportable copy (2.4.6).
 
-So the close-out sequence is not one erasure but a staged one: export everything at close, erase candidate workspaces and accounts, **hold applicant records six months**, and keep the centre's exported copies indefinitely on its own Drive.
+So the close-out sequence is one staged erasure, same clock for everyone including rejected applicants: export everything at close (PDFs to the centre's Drive, including rejected applicants' files), seven days of grace, then erase. Connect never holds anything for six months — that retention is the centre's own responsibility once the files are theirs, who may keep copies indefinitely on its own Drive. **Resolved 16 Aug, corrects an earlier draft of this line that had Connect holding applicant records for six months — it does not.**
 
 **AI-assisted marking is a per-tutor, per-course permission**
 

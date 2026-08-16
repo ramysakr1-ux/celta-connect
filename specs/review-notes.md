@@ -5,7 +5,7 @@ Comments captured during Ramy's walkthrough. Not yet applied; to be discussed at
 ## Presentation.dc.html
 
 - Slide 5 (Deposits / Course Emails) — approved as is.
-- **Name: "Connect", not "CELTA Connect".** Title slide changed. Open question for the rest of the project — the mark, the emails, the app chrome and the spec all still say CELTA Connect in places. Decide once, then apply everywhere.
+- **Name: "Connect", not "CELTA Connect" — resolved, see `rename-to-connect.md` (locked 7 Aug).** The domain `celtaconnect.com` is a legacy address only, never spelled out as the brand; emails send with display name `Connect`, sender address may be `@celtaconnect.com` but nobody reads that. Slide 5 and the rest of the deck/app/emails should already match; if anything still shows "CELTA Connect" spelled out as the product name, that's a stale miss to fix against the locked spec, not an open question.Decide once, then apply everywhere.
 
 ## New — Interview Booking.dc.html
 
@@ -45,7 +45,7 @@ Cheaper middle options if the manual version needs shoring up:
 
 1. **Acceptance email — order the next steps.** In the acceptance email to Eileen (the first of the three), the next-steps list should be explicitly numbered in this order: **1. set up your Connect account, 2. the pre-course task.** Currently the account setup is not stated as step one before the task.
 
-2. **Pre-course task — can they submit it in the app?** Open question: does the candidate submit the pre-course task through Connect, or return it by email? To discuss.
+2. **Pre-course task — resolved 16 Aug.** Self-check inside Connect, never emailed as content or handed in. Sequence: offer email (fee/deposit/deadline only) → deposit clears → workspace invitation → the welcome email (sent the Friday before, or the centre's chosen point) carries the login link → candidate logs in, finds the three get-to-know-Connect activities alongside the pre-course task in the same place. Nothing is submitted; the answer key releases to the whole cohort at the centre's chosen date.
 
 3. **Welcome email — the activities link needs a fallback for people not yet signed up.** The welcome email points candidates at their three get-to-know-you activities. If they have not set up their Connect account yet, the link should still work: it goes to the activities, and anyone not signed in lands on sign-up first, then arrives there.
    - If that redirect already happens, no copy change needed.

@@ -12,5 +12,5 @@ Reasoning: this covers a required certification step (Cambridge sign-off, observ
 - Observation-hours log: peer observation, filmed observation, and observation of experienced teachers (with the video-hours cap tracked separately from live hours), each with a running total against the syllabus minimum.
 - Nothing renamed "Grades" or "CELTA 5" on the tab label — call the tab **"Progress"**, broad enough to cover self-assessment, sign-off, and hours without promising a grades view it doesn't have.
 
-## Not decided yet, flag if relevant
-Whether Progress also becomes the home for Stage 1/2/3 tutorial outcomes long-term is unresolved — for now it holds only CELTA 5 sign-off and observation-hours logging, per the immediate ask.
+## Resolved 16 Aug — Progress tab does house Stage 1/2/3
+Confirmed against `build-spec.md`'s verbatim Stage 1/2/3 rules: Stage 1 (report mandatory, tutorial optional), Stage 2 (both mandatory), Stage 3 (report mandatory only when triggered — not-to-standard at Stage 2, above-standard-but-slipping, or a failed written assignment; tutorial optional even when triggered). The Progress tab is the home for all three, sourced from the unified Standing table's rollup, matching the existing per-candidate trigger logic already specced — no new decision needed, this was already written elsewhere and just not connected to this tab.

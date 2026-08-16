@@ -33,9 +33,11 @@ One card per candidate: name, meta line (TPs/hours/levels), grade pill (Pass A g
 4. **Not in this pack** — explicitly lists what's excluded and why: the assessor's own report (goes to Cambridge's own secure system, not here), staff chat (trainer-only, resets on the centre's schedule), trainee-only chat (a deliberate privacy boundary).
 
 ## Open questions (unresolved — ask the user, don't invent)
-- How many portfolios does a real assessor typically scrutinize — do they pick, or does the centre nominate?
-- Do assessors observe teaching practice live and need their own joining link for that, beyond the "Observable" status shown?
 - Confirm the exact centre-level document list against what a real assessor visit requires.
+
+## Resolved 16 Aug
+- **Portfolio count is not size-scaled.** Unlike double-marking's sample (3/4/5 by cohort size), portfolio selection is a flat minimum of four plus fixed mandatory categories (everyone the assessor observes teaching, every Fail/potential-Fail, every withdrawn candidate) — see `build-spec.md` line 57. No centre-nomination step; the categories are the rule regardless of course size. The app proposes the mandatory set automatically; the admin picks the remainder (recommended: Pass A/potential Pass A candidates).
+- **The observation link is the same link the trainees already use** for that specific TP session — no separate assessor-only joining link. Which TPs the assessor observes (typically the Fail/potential-Fail and Pass A/potential-Pass-A candidates from the portfolio selection above) is **decided in advance manually by the MCT**, not automated — the app surfaces the mandatory-category candidates as a starting point, but the actual observation schedule is the MCT's call.
 
 ## Design tokens
 Ink `oklch(23.5% 0.017 65)`, muted `oklch(51% 0.017 70)`, teal (action) `oklch(38% 0.072 195)`, gold (Pass A / on-the-day emphasis) `oklch(60% 0.11 70)`, red (Fail) `oklch(45% 0.16 27)`, amber (needs attention) `oklch(44% 0.1 68)`, silver (Pass B) `oklch(65% 0.008 90)`, card `oklch(99.2% 0.005 90)`, border `oklch(88% 0.016 82)`, page bg `oklch(92.5% 0.012 85)`. Fonts: Karla (UI), Newsreader (headings).

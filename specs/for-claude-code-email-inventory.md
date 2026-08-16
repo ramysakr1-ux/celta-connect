@@ -39,7 +39,7 @@ Every email: sender is the **centre's name** (never Connect), reply-to is a cent
 - **Late-enrolment welcome** — separate template, only for joining in the final days before day one (never for joining after day one — that's structurally refused)
 - **Task-waiting notification** (pre-interview task or pre-course task ready to open) — *do-not-reply*
 - **Workspace-ready confirmation** — *do-not-reply*
-- **Staff invitations** (tutor/volunteer account setup) — *do-not-reply*
+- **Staff invitations** (tutor/volunteer account setup) — *do-not-reply*. **Resolved 16 Aug: carries a "Getting started" link/attachment** — setup steps + FAQ, reusing the seven guides already written in `Admin Task Guides.dc.html`, so a new admin has something to reference before they're stuck rather than an in-app help system to build separately.
 - **Assessor pack** (link, no account/password) — *replies-to-admissions*
 - **Internal notifications** (bounce tasks, stalled-application nudges at the centre's own days-without-decision threshold, default 5 working days) — *do-not-reply*
 
