@@ -6,7 +6,8 @@ import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { RoleStrip } from "@/app/centre/roles/role-strip";
 import { GrantRoleForm, RevokeRoleButton, AssignAreaForm } from "@/app/centre/roles/role-forms";
-import { getAreaHolders, AREAS, AREA_LABELS } from "@/lib/auth/areas";
+import { AREAS, AREA_LABELS } from "@/lib/auth/areas";
+import { getAreaHolders } from "@/lib/auth/area-holders";
 
 // Centre Admin's Roles tab. Layout per the 2026-08-16 visual spec: a headline
 // and subhead, then the four-segment selector strip, then the selected role's

@@ -10,6 +10,10 @@ import { OfferForm } from "@/app/dashboard/admissions/[id]/offer-form";
 import { PaymentsPanel } from "@/app/dashboard/admissions/[id]/payments-panel";
 import { DepositForm } from "@/app/dashboard/admissions/[id]/deposit-form";
 import { computeApplicantPaymentState } from "@/lib/payments/applicant-payment-state";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { areaVerdict } from "@/lib/auth/areas";
+import { getAreaHolders } from "@/lib/auth/area-holders";
+import { AreaAction } from "@/components/area-action";
 import { WaiverForm } from "@/app/dashboard/admissions/[id]/waiver-form";
 import { WaitingListForm } from "@/app/dashboard/admissions/[id]/waiting-list-form";
 
@@ -58,6 +62,18 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
     ? await supabase.from("profiles").select("full_name").eq("id", applicant.deposit_marked_by).maybeSingle()
     : { data: null };
   const depositMarkedByName = depositMarkedBy?.full_name ?? null;
+
+  // build-spec.md §11: whose job this actually is. Areas only apply to the
+  // admin family -- a trainer handling admissions isn't in the area model at
+  // all, so they see the controls their role already allows.
+  const centreCtx = staff.role === "admin" ? await getCentreRoleContext(staff) : null;
+  const areaHolders = centreCtx ? await getAreaHolders(centreCtx.activeCenterId ?? staff.center_id) : new Map();
+  const offerVerdict = centreCtx
+    ? areaVerdict({ area: "admissions", viewerProfileId: staff.id, roles: centreCtx.roles, holders: areaHolders })
+    : ({ kind: "act" } as const);
+  const paymentVerdict = centreCtx
+    ? areaVerdict({ area: "payments", viewerProfileId: staff.id, roles: centreCtx.roles, holders: areaHolders })
+    : ({ kind: "act" } as const);
 
   const canDecide = canDecideAdmissions(staff);
   const isRejected = applicant.stage === "rejected_before_interview" || applicant.stage === "rejected_after_interview";
@@ -212,6 +228,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               {paymentState.outstanding !== null ? ` \u00b7 ${paymentState.outstanding} outstanding` : ""}
             </p>
             <div className="mt-3">
+              <AreaAction verdict={paymentVerdict}>
               <DepositForm
                 applicantId={applicant.id}
                 depositAmount={applicant.deposit_amount}
@@ -220,6 +237,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                 markedByName={depositMarkedByName}
                 note={applicant.deposit_note}
               />
+              </AreaAction>
             </div>
           </div>
           <PaymentsPanel applicant={applicant} payments={payments ?? []} />
@@ -238,7 +256,9 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
       {canDecide && !isSettled ? (
         <>
-          <OfferForm applicantId={applicant.id} hasDeposit={Boolean(applicant.deposit_paid_at)} />
+          <AreaAction verdict={offerVerdict}>
+            <OfferForm applicantId={applicant.id} hasDeposit={Boolean(applicant.deposit_paid_at)} />
+          </AreaAction>
           <WaitingListForm applicantId={applicant.id} />
           <RejectForm applicantId={applicant.id} />
         </>

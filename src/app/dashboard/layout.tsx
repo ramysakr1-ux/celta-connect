@@ -4,7 +4,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { signOut } from "@/app/login/actions";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
 import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
-import { getAdminChatCourses } from "@/lib/admin-chat";
+import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { AdminTabs } from "@/app/dashboard/admin/admin-tabs";
@@ -23,7 +23,6 @@ export default async function DashboardLayout({
 
   const staffChat =
     profile && profile.role !== "trainee" && profile.role !== "admin" ? await getInitialStaffChatData(profile.id) : null;
-  const adminChatCourses = profile && profile.role === "admin" ? await getAdminChatCourses(profile.id) : null;
 
   // The nav is built from what this person can actually do, not from
   // role === "admin". The spec's read-only role is defined by absence -- "the
@@ -32,6 +31,12 @@ export default async function DashboardLayout({
   const centreCtx = profile?.role === "admin" ? await getCentreRoleContext(profile) : null;
   const centreRoles = centreCtx?.roles ?? [];
   const tabs = profile?.role === "admin" ? visibleAdminTabs(centreRoles) : [];
+
+  // §12: one room per centre, not per course. Membership follows the role
+  // grants, so this covers every branch the person administers.
+  const adminChatRooms =
+    profile && profile.role === "admin" && centreCtx ? await getAdminChatRooms(profile.id, centreCtx.availableCenterIds) : null;
+
 
 
   return (
@@ -63,7 +68,7 @@ export default async function DashboardLayout({
           retentionDays={staffChat.chatRetentionDays}
         />
       ) : null}
-      {profile && adminChatCourses ? <AdminChatBar profileId={profile.id} courses={adminChatCourses} /> : null}
+      {profile && adminChatRooms ? <AdminChatBar profileId={profile.id} rooms={adminChatRooms} /> : null}
     </div>
   );
 }
