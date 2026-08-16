@@ -165,11 +165,13 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
   // Interventions that are permitted are logged -- see centre_owner_actions
   // (migration 0103).
   centre_owner: {
-    "course.create": true,
-    "course.editRecord": true,
+    // Custodial powers over a course's EXISTENCE and ownership -- explicitly
+    // the owner's in the spec, and distinct from running one. These are what
+    // the role exists for: somebody left, somebody is off sick.
     "course.restoreDeleted": true,
     "course.reassignUnowned": true,
     "roles.grant": true,
+    // Centre level: may intervene, and every one of these is logged.
     "centre.settings.edit": true,
     "payments.view": true,
     "payments.edit": true,
@@ -179,8 +181,14 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
     "volunteers.manage": true,
     "enrolment.view": true,
     "import.run": true,
-    "assessorPack.export": true,
-    // Course administration: sees it, never changes it.
+    // Course administration: sees all of it, changes none of it. Ramy,
+    // 2026-08-16, correcting an earlier draft of this matrix: "creating and
+    // editing courses, and the assessor pack -- that's not part of the centre
+    // owner. That all goes under course administration, so it should be read
+    // only for the centre owner."
+    "course.create": false,
+    "course.editRecord": "read",
+    "assessorPack.export": false,
     "courseAdmin.view": "read",
     "courseAdmin.invite": false,
     "courseAdmin.groups": false,

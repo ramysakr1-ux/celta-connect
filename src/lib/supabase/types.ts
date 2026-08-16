@@ -246,6 +246,10 @@ export interface Database {
           full_name: string;
           role: UserRole;
           center_id: string;
+          // migration 0103 -- the centre this person is currently acting in.
+          // center_id above stays their home centre. Only honoured when a live
+          // centre_roles grant backs it, so it's a preference, never authority.
+          active_center_id: string | null;
           course_id: string | null;
           tutor_role: string | null;
           terms_accepted_at: string | null;
@@ -1427,6 +1431,56 @@ export interface Database {
           event_date: string;
         };
         Update: Partial<Database["public"]["Tables"]["course_timetable_events"]["Row"]>;
+        Relationships: [];
+      };
+      centre_roles: {
+        Row: {
+          id: string;
+          profile_id: string;
+          center_id: string;
+          role: "centre_administrator" | "centre_manager" | "course_administrator" | "centre_owner";
+          granted_by: string | null;
+          granted_at: string;
+          revoked_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_roles"]["Row"]> & {
+          profile_id: string;
+          center_id: string;
+          role: "centre_administrator" | "centre_manager" | "course_administrator" | "centre_owner";
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_roles"]["Row"]>;
+        Relationships: [];
+      };
+      course_administrator_scope: {
+        Row: {
+          id: string;
+          centre_role_id: string;
+          course_id: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_administrator_scope"]["Row"]> & {
+          centre_role_id: string;
+          course_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_administrator_scope"]["Row"]>;
+        Relationships: [];
+      };
+      centre_owner_actions: {
+        Row: {
+          id: string;
+          center_id: string;
+          actor_profile_id: string;
+          action: string;
+          target_table: string | null;
+          target_id: string | null;
+          detail: Record<string, unknown>;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_owner_actions"]["Row"]> & {
+          center_id: string;
+          actor_profile_id: string;
+          action: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_owner_actions"]["Row"]>;
         Relationships: [];
       };
       spreadsheet_imports: {

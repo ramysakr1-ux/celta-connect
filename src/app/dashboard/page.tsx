@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { landingFor } from "@/lib/auth/centre-permissions";
 
 export default async function DashboardIndexPage() {
   const session = await getCurrentProfile();
@@ -29,5 +31,22 @@ export default async function DashboardIndexPage() {
   // it predated the SS13 rebuild.
   if (profile.role === "trainer") redirect("/trainer");
   if (profile.role === "trainee") redirect(`/portfolio/${profile.id}`);
+
+  // Centre Admin and Course Admin are two separate roles with two separate
+  // landing screens -- "never merge these two builds". Until now one flat
+  // `admin` sent everyone to /dashboard/admin, which is the Course Admin
+  // screen (its own handoff: "the CELTA main course tutor's own credentials"),
+  // so a centre administrator landed on a course-shaped page. Which door you
+  // get is now decided by what you actually hold.
+  //
+  // Anyone with no centre_roles grant keeps the old destination exactly, so
+  // nobody is stranded while grants are still being handed out.
+  if (profile.role === "admin") {
+    const ctx = await getCentreRoleContext(profile);
+    const landing = landingFor(ctx.roles);
+    if (landing === "centre-admin") redirect("/dashboard/centre");
+    if (landing === "course-admin") redirect("/dashboard/admin");
+  }
+
   redirect(`/dashboard/${profile.role}`);
 }
