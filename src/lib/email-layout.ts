@@ -21,8 +21,19 @@ import "server-only";
 // rather than nudge the hex by hand.
 
 export const EMAIL_TONE = {
-  /** Setup and informational. */
-  teal: "#0f4a4b",
+  /**
+   * Setup and informational.
+   *
+   * Brass, not the handoff's teal. oklch(37.5% 0.058 195) converts to #0f4a4b,
+   * which on screen reads as a dark green -- and green is out of the palette
+   * (Ramy, 2026-08-16, twice: the first pass changed the token literally named
+   * "green", which no email used, so nothing visibly changed).
+   *
+   * This is the colour on the spine and the buttons of the interview
+   * invitation, the offer, the acceptance and the workspace invitation, so it
+   * is the one that was actually being looked at.
+   */
+  teal: "#ad7f43",
   /** Waiting, time-limited, warm. */
   gold: "#ad7f43",
   /** Rejection, flag. */
