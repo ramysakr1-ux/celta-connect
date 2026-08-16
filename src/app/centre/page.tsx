@@ -204,6 +204,11 @@ export default async function CentreOverviewPage({
         </div>
       ) : null}
 
+      {/* Centre Admin.dc.html: a 1fr / 360px split. All courses fills the
+          left; the right column stacks admissions, payments, volunteers and
+          settings in that order. */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px] lg:items-start">
+        <div className="flex flex-col gap-4">
       <div className="rounded-[10px] border border-border bg-card">
         <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
           <h2 className="font-serif text-base text-ink">All courses</h2>
@@ -277,7 +282,9 @@ export default async function CentreOverviewPage({
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        </div>
+
+        <div className="flex flex-col gap-4">
         {canView(ctx.roles, "admissions.view") ? (
           <div className="rounded-[10px] border border-border bg-card">
             <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
@@ -311,7 +318,6 @@ export default async function CentreOverviewPage({
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-4">
           {canView(ctx.roles, "payments.view") ? (
             <div className="rounded-[10px] border border-border bg-card">
               <div className="border-b border-border px-5 py-3.5">
@@ -344,6 +350,28 @@ export default async function CentreOverviewPage({
                 Hours toward certificates are tracked per course. A total across courses needs a way to recognise the
                 same volunteer twice, which the records don&apos;t carry.
               </p>
+            </div>
+          ) : null}
+
+          {/* Last in the stack, per the design. It used to sit in the layout as
+              a full-width bar under every tab; the design puts it here, at the
+              foot of the Overview's right column. */}
+          {can(ctx.roles, "centre.settings.edit") ? (
+            <div className="rounded-[10px] border border-border bg-card">
+              <div className="border-b border-border px-5 py-3.5">
+                <h2 className="font-serif text-base text-ink">Centre settings</h2>
+              </div>
+              <div className="flex flex-col gap-2 px-5 py-3.5">
+                <Link href="/dashboard/admin/settings" className="text-sm font-medium text-primary hover:underline">
+                  Centre details and branding →
+                </Link>
+                <Link href="/centre/payments" className="text-sm font-medium text-primary hover:underline">
+                  Payment providers →
+                </Link>
+                <Link href="/dashboard/admin/email-preview" className="text-sm font-medium text-primary hover:underline">
+                  What your centre sends →
+                </Link>
+              </div>
             </div>
           ) : null}
         </div>
