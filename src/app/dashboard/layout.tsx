@@ -43,8 +43,19 @@ export default async function DashboardLayout({
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-border">
         <div className="container flex h-14 items-center justify-between gap-6">
-          <Link href="/dashboard" className="shrink-0 hover:opacity-80">
+          <Link href="/dashboard" className="flex shrink-0 items-center gap-3 hover:opacity-80">
             <Wordmark size="header" />
+            {/* Course Admin.dc.html's own header carries a role pill beside
+                the mark: 11px/700 uppercase at 0.06em with a 5px dot, on a 12%
+                accent tint. Centre Admin has the same device at /centre; this
+                screen had none, so it read as the generic dashboard rather
+                than as the course admin's own view. */}
+            {profile?.role === "admin" ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_oklab,var(--color-primary)_28%,transparent)] bg-[color-mix(in_oklab,var(--color-primary)_12%,var(--color-card))] px-2.5 py-0.5 text-[11px] font-bold tracking-[0.06em] text-primary uppercase">
+                <span className="size-[5px] rounded-full bg-current" />
+                Course admin
+              </span>
+            ) : null}
           </Link>
           {tabs.length > 0 ? <AdminTabs tabs={tabs} /> : null}
           <div className="flex shrink-0 items-center gap-4 text-sm text-muted">
