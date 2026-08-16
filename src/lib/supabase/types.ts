@@ -1493,6 +1493,28 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["applicant_emails"]["Row"]>;
         Relationships: [];
       };
+      centre_areas: {
+        Row: {
+          id: string;
+          center_id: string;
+          area: "admissions" | "payments" | "volunteers" | "timetabling" | "assessor_liaison" | "close_out";
+          profile_id: string;
+          assigned_by: string;
+          assigned_at: string;
+          // A date makes it a temporary handover that lapses on its own; null
+          // is indefinite (migration 0110).
+          ends_at: string | null;
+          revoked_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_areas"]["Row"]> & {
+          center_id: string;
+          area: string;
+          profile_id: string;
+          assigned_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_areas"]["Row"]>;
+        Relationships: [];
+      };
       centre_roles: {
         Row: {
           id: string;

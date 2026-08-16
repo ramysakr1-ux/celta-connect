@@ -4,9 +4,12 @@ import { useActionState } from "react";
 import {
   grantCentreRole,
   revokeCentreRole,
+  assignArea,
   type GrantRoleState,
   type RevokeRoleState,
+  type AssignAreaState,
 } from "@/app/centre/roles/actions";
+import { AREAS, AREA_LABELS } from "@/lib/auth/areas";
 import { CENTRE_ROLES, CENTRE_ROLE_LABELS } from "@/lib/auth/centre-permissions";
 
 const grantInitial: GrantRoleState = {};
@@ -70,6 +73,64 @@ export function RevokeRoleButton({ grantId }: { grantId: string }) {
         {pending ? "Removing..." : "Remove"}
       </button>
       {state.error ? <span className="text-xs text-destructive">{state.error}</span> : null}
+    </form>
+  );
+}
+
+const assignInitial: AssignAreaState = {};
+
+/**
+ * §11: areas are assigned by the centre owner and never self-selected. The end
+ * date makes it a temporary handover that lapses on its own, "so holiday cover
+ * does not become a permanent reassignment nobody remembers to undo."
+ */
+export function AssignAreaForm() {
+  const [state, action, pending] = useActionState(assignArea, assignInitial);
+
+  return (
+    <form action={action} className="flex flex-wrap items-end gap-3">
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm text-muted">Area</span>
+        <select
+          name="area"
+          defaultValue="admissions"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+        >
+          {AREAS.map((a) => (
+            <option key={a} value={a}>
+              {AREA_LABELS[a]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="flex min-w-[14rem] flex-1 flex-col gap-1.5">
+        <span className="text-sm text-muted">Whose job it is</span>
+        <input
+          name="email"
+          type="email"
+          required
+          placeholder="someone@centre.com"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+        />
+      </label>
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm text-muted">Until (optional)</span>
+        <input
+          name="ends_at"
+          type="date"
+          title="Leave blank for indefinite; a date makes this temporary cover that lapses on its own."
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+        />
+      </label>
+      <button
+        type="submit"
+        disabled={pending}
+        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+      >
+        {pending ? "Assigning..." : "Assign"}
+      </button>
+      {state.error ? <p className="w-full text-sm text-destructive">{state.error}</p> : null}
+      {state.notice ? <p className="w-full text-sm text-primary">{state.notice}</p> : null}
     </form>
   );
 }

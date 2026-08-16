@@ -5,7 +5,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { RoleStrip } from "@/app/centre/roles/role-strip";
-import { GrantRoleForm, RevokeRoleButton } from "@/app/centre/roles/role-forms";
+import { GrantRoleForm, RevokeRoleButton, AssignAreaForm } from "@/app/centre/roles/role-forms";
+import { getAreaHolders, AREAS, AREA_LABELS } from "@/lib/auth/areas";
 
 // Centre Admin's Roles tab. Layout per the 2026-08-16 visual spec: a headline
 // and subhead, then the four-segment selector strip, then the selected role's
@@ -44,6 +45,10 @@ export default async function CentreRolesPage() {
     : { data: [] };
   const nameOf = new Map((people ?? []).map((p) => [p.id, p.full_name]));
 
+  // §11: "Everyone sees everything. Areas never hide information" -- so this
+  // list renders for every admin, not only the owner who can change it.
+  const areaHolders = await getAreaHolders(centerId);
+
   const holders: Record<string, { id: string; name: string }[]> = {};
   for (const g of grants ?? []) {
     (holders[g.role] ??= []).push({ id: g.id, name: nameOf.get(g.profile_id) ?? "Unknown" });
@@ -62,6 +67,48 @@ export default async function CentreRolesPage() {
       </div>
 
       <RoleStrip holders={holders} />
+
+      <div className="rounded-[10px] border border-border bg-card px-5 py-4">
+        <h2 className="font-serif text-base text-ink">Areas of responsibility</h2>
+        <p className="mt-1 text-xs text-muted">
+          A role says what someone is capable of; an area says what is actually their job. Everyone sees every area —
+          only its holder can act in it, and everyone else sees their name instead of the button.
+        </p>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {AREAS.map((a) => {
+            const h = areaHolders.get(a);
+            return (
+              <div key={a} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/60 px-3 py-2">
+                <span className="text-[13px] text-ink">{AREA_LABELS[a]}</span>
+                <span className="shrink-0 text-xs text-muted">
+                  {h ? (
+                    <>
+                      {h.name}
+                      {h.endsAt ? (
+                        <span className="text-muted">
+                          {" "}
+                          until {new Date(`${h.endsAt}T00:00:00`).toLocaleDateString("en-GB")}
+                        </span>
+                      ) : null}
+                    </>
+                  ) : (
+                    "Nobody yet — anyone with the role can act"
+                  )}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        {mayAppoint ? (
+          <div className="mt-4 border-t border-border-faint pt-3">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Assign an area</p>
+            <p className="mt-1 mb-2 text-xs text-muted">
+              Nobody assigns their own. An end date makes it temporary cover that lapses on its own.
+            </p>
+            <AssignAreaForm />
+          </div>
+        ) : null}
+      </div>
 
       {/* Absent, not disabled, for anyone who isn't an owner. */}
       {mayAppoint ? (
