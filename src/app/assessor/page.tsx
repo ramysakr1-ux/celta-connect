@@ -6,6 +6,7 @@ import { ASSESSOR_COOKIE, getAssessorCourseId } from "@/lib/auth/portfolio-acces
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { DesignerCredit } from "@/components/designer-credit";
+import { Wordmark } from "@/components/wordmark";
 
 function addDays(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -13,6 +14,25 @@ function addDays(iso: string, days: number): string {
   date.setUTCDate(date.getUTCDate() + days);
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
 }
+
+// The design file's own palette, so status colour is not re-invented here.
+const GOLD = "oklch(60% 0.11 70)";
+const GREEN = "oklch(48% 0.09 150)";
+const AMBER = "oklch(44% 0.1 68)";
+
+// Verbatim from Assessor Visit.dc.html -- names and captions both. Handbook
+// terms, not paraphrases: "Application files / Including rejected applicants"
+// and "The previous assessor's report" are the assessor pack's own wording.
+const CENTRE_DOCUMENTS: { name: string; meta: string }[] = [
+  { name: "Centre authorisation certificate", meta: "Cambridge centre number on file" },
+  { name: "Candidate agreement & policies", meta: "Attendance, plagiarism, complaints, resubmission" },
+  { name: "Application files", meta: "Including rejected applicants" },
+  { name: "Volunteer attendance registers", meta: "All classes taught on this course" },
+  { name: "Double-marking record", meta: "Blind second marks, all assignments" },
+  { name: "Sample end-of-course report", meta: "Format only \u2014 the real one follows the grade meeting" },
+  { name: "The previous assessor's report", meta: "The centre's most recent visit" },
+  { name: "Marking guidance", meta: "Centre's standardisation evidence, dated" },
+];
 
 const GRADE_PILL: Record<string, string> = {
   "Pass A": "pill-gold",
@@ -81,17 +101,41 @@ export default async function AssessorPage() {
 
   return (
     <div className="min-h-screen bg-[oklch(92.5%_0.012_85)]">
-      <div className="bg-[oklch(38%_0.072_195)] px-6 py-2.5 text-center text-sm text-white">
-        Assessor access — read-only. Nothing you open here can be edited, and no action you take is recorded
-        against a candidate.
-        {accessToken ? ` · Link expires ${accessToken.expires_at.slice(0, 10)}` : null}
+      {/* "Top banner (full-width, warm-dark bg, cream text, 10px/32px
+          padding)" -- warm dark is oklch(30% 0.042 58), not the teal this
+          used to be. The expiry sits right-aligned, per the spec. */}
+      <div className="flex flex-wrap items-center justify-between gap-2 bg-[oklch(30%_0.042_58)] px-8 py-2.5 text-sm text-[oklch(97%_0.008_88)]">
+        <span>
+          Assessor access — read-only. Nothing you open here can be edited, and no action you take is recorded
+          against a candidate.
+        </span>
+        {accessToken ? (
+          <span className="shrink-0 text-[oklch(88%_0.012_85)]">Link expires {accessToken.expires_at.slice(0, 10)}</span>
+        ) : null}
       </div>
 
-      <header className="flex items-center justify-between border-b border-[oklch(88%_0.016_82)] bg-[oklch(99.2%_0.005_90)] px-6 py-3">
+      {/* "30px ink-tile mark + italic Connect wordmark (static) + divider +
+          gold-tinted 'Assessor · read-only' pill -- left. 'Download whole
+          pack' button (outlined, download icon) -- right." The mark is the
+          shared Wordmark component, static: a document, not an app chrome. */}
+      <header className="flex h-[60px] items-center justify-between border-b border-[oklch(88%_0.016_82)] bg-[oklch(99.2%_0.005_90)] px-8">
         <div className="flex items-center gap-3">
-          <span className="font-serif text-lg italic text-[oklch(60%_0.11_70)]">Connect</span>
-          <span className="pill pill-neutral">Assessor · read-only</span>
+          <Wordmark size="header" spin={false} />
+          <span className="h-5 w-px bg-[oklch(88%_0.016_82)]" aria-hidden />
+          <span className="rounded-full border border-[color-mix(in_oklab,oklch(60%_0.11_70)_36%,transparent)] bg-[color-mix(in_oklab,oklch(60%_0.11_70)_12%,transparent)] px-2.5 py-1 text-[11px] font-semibold text-[oklch(52%_0.1_70)]">
+            Assessor · read-only
+          </span>
         </div>
+        <a
+          href="/assessor/pack.pdf"
+          className="inline-flex items-center gap-2 rounded-[6px] border border-[oklch(88%_0.016_82)] px-3.5 py-2 text-sm font-semibold text-[oklch(23.5%_0.017_65)] hover:bg-[oklch(96.4%_0.014_85)]"
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+            <path d="M8 2v8m0 0 3-3m-3 3L5 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M2.5 11.5v1a1.5 1.5 0 0 0 1.5 1.5h8a1.5 1.5 0 0 0 1.5-1.5v-1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+          Download whole pack
+        </a>
       </header>
 
       <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-6 py-6">
@@ -112,11 +156,23 @@ export default async function AssessorPage() {
               </div>
             ) : null}
           </div>
+          {/* The four figures the design names, in its order: Send by /
+              Portfolios complete / Hours logged / Grades entered. "Candidates"
+              used to sit here as a fifth; it isn't in the spec, and the count
+              it showed is already the denominator of two of the others. */}
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Figure label="Portfolios complete" value={`${readiness.portfoliosCompleteCount} / ${readiness.totalCandidates}`} />
-            <Figure label="Assessed hours logged" value={readiness.hoursAssessedTotal.toFixed(1)} />
-            <Figure label="Grades entered" value={`${readiness.gradesEnteredCount} / ${readiness.totalCandidates}`} />
-            <Figure label="Candidates" value={String(readiness.totalCandidates)} />
+            <Figure label="Send by" value={sendByDate ?? "Not set"} ink={GOLD} />
+            <Figure
+              label="Portfolios complete"
+              value={`${readiness.portfoliosCompleteCount} of ${readiness.totalCandidates}`}
+              ink={readiness.portfoliosCompleteCount >= readiness.totalCandidates ? GREEN : AMBER}
+            />
+            <Figure label="Hours logged" value={readiness.hoursAssessedTotal.toFixed(1)} ink={GREEN} />
+            <Figure
+              label="Grades entered"
+              value={`${readiness.gradesEnteredCount} of ${readiness.totalCandidates}`}
+              ink={readiness.gradesEnteredCount >= readiness.totalCandidates ? GREEN : AMBER}
+            />
           </div>
         </div>
 
@@ -153,9 +209,15 @@ export default async function AssessorPage() {
 
           {/* Right panels */}
           <div className="flex flex-col gap-4">
+            {/* All six the design names, in its order. Each carries a "Live"
+                status and an "Open" action. */}
             <Panel title="Cohort documents">
               <DocRow label="Grades report" href="/trainer/grades-report" />
+              <DocRow label="Course timetable" href="/trainer/timetable" />
               {firstCandidateId ? <DocRow label="Assignment titles" href={`/portfolio/${firstCandidateId}/resources`} /> : null}
+              <DocRow label="Tutor list and roles" href="#tutor-list" />
+              <DocRow label="Candidate descriptions" href="/trainer/roster" />
+              <DocRow label="Lesson plans for the day" href="/trainer/timetable" />
             </Panel>
 
             <Panel title="On the day" gold>
@@ -177,14 +239,40 @@ export default async function AssessorPage() {
               </p>
             </Panel>
 
+            {/* The eight the design names, each with its own caption, ALWAYS
+                all eight. This used to render only whatever the centre had
+                uploaded -- so a missing double-marking record simply had no
+                row, and the assessor saw a shorter list with nothing to say
+                anything was absent. Showing all eight is what makes a gap
+                visible, which is the whole job of a readiness screen. */}
             <Panel title="Centre documents">
-              {(centreDocs ?? []).length === 0 ? (
-                <p className="text-xs text-[oklch(51%_0.017_70)]">Nothing uploaded yet.</p>
-              ) : (
-                (centreDocs ?? []).map((d) => <DocRow key={d.id} label={d.title} href={d.file_url ?? "#"} />)
-              )}
+              {CENTRE_DOCUMENTS.map((doc) => {
+                const uploaded = (centreDocs ?? []).find(
+                  (d) => d.title.trim().toLowerCase() === doc.name.toLowerCase()
+                );
+                return (
+                  <div key={doc.name} className="flex items-start justify-between gap-3 py-1.5">
+                    <div>
+                      <p className="text-xs text-[oklch(23.5%_0.017_65)]">{doc.name}</p>
+                      <p className="text-[11px] text-[oklch(51%_0.017_70)]">{doc.meta}</p>
+                    </div>
+                    {uploaded?.file_url ? (
+                      <a
+                        href={uploaded.file_url}
+                        className="shrink-0 text-xs font-medium text-[oklch(38%_0.072_195)] hover:underline"
+                      >
+                        Open →
+                      </a>
+                    ) : (
+                      <span className="shrink-0 text-[11px] font-semibold" style={{ color: AMBER }}>
+                        Not uploaded
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
               {(tutorNameById.size ?? 0) > 0 ? (
-                <div className="mt-2 border-t border-[oklch(88%_0.016_82)] pt-2">
+                <div id="tutor-list" className="mt-2 border-t border-[oklch(88%_0.016_82)] pt-2">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[oklch(51%_0.017_70)]">Tutor list</p>
                   {(tutorRows ?? []).map((t) => (
                     <p key={t.profile_id} className="text-xs text-[oklch(23.5%_0.017_65)]">
@@ -212,11 +300,13 @@ export default async function AssessorPage() {
   );
 }
 
-function Figure({ label, value }: { label: string; value: string }) {
+function Figure({ label, value, ink }: { label: string; value: string; ink?: string }) {
   return (
     <div>
       <p className="text-[10px] uppercase tracking-[0.08em] text-[oklch(51%_0.017_70)]">{label}</p>
-      <p className="mt-0.5 font-serif text-lg text-[oklch(23.5%_0.017_65)]">{value}</p>
+      <p className="mt-0.5 font-serif text-[21px]" style={{ color: ink ?? "oklch(23.5% 0.017 65)" }}>
+        {value}
+      </p>
     </div>
   );
 }
