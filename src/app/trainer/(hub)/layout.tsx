@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { LayoutGrid } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
-import { ViewSwitcherPill } from "@/components/view-switcher-pill";
 import { TrainerTabs } from "@/app/trainer/trainer-tabs";
 import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
@@ -28,10 +28,17 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   const staffChat = profile?.role === "trainer" ? await getInitialStaffChatData(profile.id) : null;
 
   let isDemo = false;
+  // Spec's header carries the course code as a teal pill ("C2/2024") -- that's
+  // courses.name, which is already stored in exactly that form.
+  let courseCode: string | null = null;
   if (profile) {
     const supabase = await createClient();
     const { data: center } = await supabase.from("centers").select("is_demo").eq("id", profile.center_id).maybeSingle();
     isDemo = center?.is_demo ?? false;
+    if (profile.course_id) {
+      const { data: course } = await supabase.from("courses").select("name").eq("id", profile.course_id).maybeSingle();
+      courseCode = course?.name ?? null;
+    }
   }
 
   return (
@@ -51,27 +58,37 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             <TrainerTabs rosterOnly={isAssessor} />
           </div>
           <div className="flex shrink-0 items-center gap-3">
+            {/* Spec: course code as a teal pill, then the trainer's name, then
+                the Hub icon. The ViewSwitcherPill that used to sit here is
+                retired (Ramy, 2026-08-16) -- both its live segments pointed at
+                pages that are already nav tabs, and candidate preview moved to
+                a per-candidate button on the Portfolio screen. */}
+            {courseCode ? (
+              <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground">
+                {courseCode}
+              </span>
+            ) : null}
             {isRealStaff ? (
-              profile?.connect_hub_link ? (
-                <a
-                  href={profile.connect_hub_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
-                >
-                  Connect Hub
-                </a>
-              ) : (
-                <Link
-                  href="/trainer/connect-hub"
-                  className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
-                >
-                  Connect Hub
-                </Link>
-              )
+              // Spec shrinks this from a labelled button to a 26x26 hollow
+              // icon. NOTE: it also says to show it only for accounts with
+              // `hub_access` -- no such column exists (0065 added only
+              // profiles.connect_hub_link, self-service: anyone pastes their
+              // own link). Gating strictly on "link is set" would make
+              // /trainer/connect-hub unreachable for anyone who hasn't set one,
+              // i.e. everyone, so the entry point is kept until Ramy decides
+              // whether Hub access is meant to be granted rather than
+              // self-served.
+              <a
+                href={profile?.connect_hub_link ?? "/trainer/connect-hub"}
+                {...(profile?.connect_hub_link ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                title={profile?.connect_hub_link ? "Open your Connect Hub" : "Set up your Connect Hub link"}
+                aria-label={profile?.connect_hub_link ? "Open your Connect Hub" : "Set up your Connect Hub link"}
+                className="flex size-[26px] shrink-0 items-center justify-center rounded-[6px] border border-border text-muted hover:border-primary hover:text-primary"
+              >
+                <LayoutGrid className="size-3.5" aria-hidden="true" />
+              </a>
             ) : null}
             {isRealStaff ? <AssessorLinkButton /> : null}
-            {isRealStaff ? <ViewSwitcherPill current="trainer" /> : null}
             <span className="text-sm text-muted">{profile?.full_name ?? session?.email}</span>
           </div>
         </div>

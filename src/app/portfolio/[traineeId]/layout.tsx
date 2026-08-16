@@ -4,8 +4,8 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { Eye } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
-import { ViewSwitcherPill } from "@/components/view-switcher-pill";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
 import { TraineeTopNav } from "@/app/portfolio/[traineeId]/trainee-top-nav";
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
@@ -94,7 +94,7 @@ export default async function PortfolioLayout({
     .join("")
     .toUpperCase();
 
-  // §1.1d: the ViewSwitcherPill's "Trainee" segment promises a real preview
+  // §1.1d: the "Preview as trainee" button promises a real preview
   // of what the candidate sees -- confirmed live it wasn't actually doing
   // that (the broadcast composer, trajectory pill etc. all still rendered,
   // since every page independently re-derives isStaff from the real
@@ -220,8 +220,8 @@ export default async function PortfolioLayout({
       {/* Checkpoint 2 (App Redesign.dc.html 1d) -- collapses the old 2-block
           header (14px wordmark bar + a separate .sheet identity block with
           avatar/3 StatBars/trajectory pill) into one 56px bar: back-link +
-          name + trajectory-status pill on the left, ViewSwitcherPill on the
-          right. Attendance hours (previously a StatBar) has no slot in this
+          name + trajectory-status pill on the left, "Preview as trainee" on
+          the right. Attendance hours (previously a StatBar) has no slot in this
           layout and isn't shown here any more -- still visible on the
           roster table and Today's "Needs you" alerts. */}
       {showTraineeNav ? <InstallPrompt /> : null}
@@ -287,7 +287,23 @@ export default async function PortfolioLayout({
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <TraineeEyebrowLabel isStaff={isStaff} readOnly={Boolean(assessorCourseId)} />
-              {isStaff ? <ViewSwitcherPill current="trainee" traineeHref={`/portfolio/${trainee.id}?preview=trainee`} /> : null}
+              {/* Replaces the retired global ViewSwitcherPill (Ramy, 2026-08-16):
+                  candidate preview is a per-candidate action on that candidate's
+                  own screen, not an app-wide toggle. Same ?preview=trainee URL
+                  the pill already built -- the preview machinery and its own
+                  "Exit preview" banner are unchanged. Wrapped in HideDuringPreview
+                  so it doesn't sit there offering to enter a mode you're in. */}
+              {isStaff ? (
+                <HideDuringPreview>
+                  <Link
+                    href={`/portfolio/${trainee.id}?preview=trainee`}
+                    className="flex shrink-0 items-center gap-1.5 rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-ink hover:border-primary"
+                  >
+                    <Eye className="size-3.5" aria-hidden="true" />
+                    Preview as trainee
+                  </Link>
+                </HideDuringPreview>
+              ) : null}
             </div>
           </div>
         )}
