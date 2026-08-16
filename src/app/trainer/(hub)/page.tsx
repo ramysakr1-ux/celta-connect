@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { fetchRosterRows } from "@/lib/roster";
 import { categorize, isEventLive, toLocalIso } from "@/lib/timetable-grid";
@@ -45,7 +44,16 @@ export default async function TodayPage() {
         .eq("course_id", courseId)
         .eq("event_date", today)
         .order("event_time"),
-      supabase.from("tp_lessons").select("trainee_id, lesson_date, tp_number").eq("course_id", courseId).not("lesson_date", "is", null),
+      // NOT `tp_lessons` -- that table is permanently empty on live courses
+      // (1 row DB-wide vs. 90 real taught plans, checked 2026-08-16) and this
+      // panel's whole "TP feedback unsent" alert was silently dead because of
+      // it. `plan_assignments.taught_at` is the real taught signal; same bug
+      // already fixed in roster.ts, tp/page.tsx and portfolio layout.tsx.
+      supabase
+        .from("plan_assignments")
+        .select("trainee_id, tp_number, taught_at")
+        .eq("course_id", courseId)
+        .not("taught_at", "is", null),
       // tp_feedback has no course_id column -- scope by this course's trainee ids instead.
       traineeIds.length > 0
         ? supabase.from("tp_feedback").select("trainee_id, tp_number, submitted_at").in("trainee_id", traineeIds)
@@ -79,9 +87,12 @@ export default async function TodayPage() {
     const hasFeedback = (feedbackRows ?? []).some(
       (f) => f.trainee_id === lesson.trainee_id && f.tp_number === lesson.tp_number && f.submitted_at
     );
-    if (!hasFeedback && lesson.lesson_date) {
+    // taught_at is a timestamptz, not a date -- slice to the date part so the
+    // string compare below stays a real date compare.
+    const taughtDate = lesson.taught_at?.slice(0, 10);
+    if (!hasFeedback && taughtDate) {
       const existing = unsentByTrainee.get(lesson.trainee_id);
-      if (!existing || lesson.lesson_date > existing) unsentByTrainee.set(lesson.trainee_id, lesson.lesson_date);
+      if (!existing || taughtDate > existing) unsentByTrainee.set(lesson.trainee_id, taughtDate);
     }
   }
   if (unsentByTrainee.size > 0) {
@@ -131,17 +142,55 @@ export default async function TodayPage() {
   const visibleAlerts = alerts.slice(0, 3);
 
   const cohort = rows.slice(0, 6);
-  const barColor = (r: (typeof rows)[number]) =>
-    r.trajectory === "Pass A"
-      ? "var(--color-gold)"
-      : r.trajectory === "Fail"
-        ? "var(--color-destructive)"
-        : "var(--color-primary)";
+
+  // Spec's per-candidate avatar hues -- explicitly decorative, "for visual
+  // variety, not semantic", so they're indexed by position rather than
+  // derived from anything meaningful. A flagged candidate drops its hue for
+  // the alert red instead, which IS semantic.
+  const AVATAR_HUES = [
+    "oklch(52% 0.1 260)", // blue
+    "oklch(55% 0.11 25)", // terracotta
+    "oklch(58% 0.1 145)", // green
+    "oklch(60% 0.1 300)", // purple
+    "var(--color-gold)",
+  ] as const;
+
+  // The one conflict Ramy's 2026-08-16 diff turned up between the trainer-
+  // homepage spec and what's live: the spec drew a bespoke "3 / 8" taught
+  // count here. Per specs/for-claude-code-unified-tracking.md, tracked
+  // activities have exactly ONE source -- the Roster Standing table -- so
+  // this reads that table's own TP-stages rollup instead of recomputing.
+  // Keep this in step with roster-row.tsx's TP stages cell; if that cell's
+  // meaning changes, this changes with it.
+  const stageStatus = (r: (typeof rows)[number]) =>
+    r.tpStagesTaught === 0
+      ? { label: "No TPs yet", className: "text-muted" }
+      : r.tpStagesBehind > 0
+        ? { label: "Behind", className: "text-status-warning-text font-semibold" }
+        : { label: "On track", className: "text-muted" };
+
+  const initialsOf = (name: string) =>
+    name
+      .split(" ")
+      .map((p) => p[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
 
   const weekOf =
     course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
 
-  const overline = [course?.name, course ? `${course.start_date} – ${course.end_date}` : null, weekOf].filter(Boolean).join(" · ");
+  // Spec's eyebrow reads "... · 6 Nov – 1 Dec · week 2 of 4" -- these were
+  // rendering as raw ISO dates.
+  const shortDate = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const overline = [
+    course?.name,
+    course?.start_date && course?.end_date ? `${shortDate(course.start_date)} – ${shortDate(course.end_date)}` : null,
+    weekOf,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   const todayHeading = new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
@@ -181,10 +230,13 @@ export default async function TodayPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.15fr_1fr_1.1fr]">
-        {/* Today's schedule */}
-        <div className="sheet flex flex-col gap-3.5">
+        {/* Today's schedule. The spec gives each panel a 3px top accent and a
+            label in the matching colour, so the three read as distinct at a
+            glance: teal = the day's material, gold = a system rule is in force
+            (globals.css reserves gold for exactly that), ink = plain content. */}
+        <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-primary">
           <div className="flex items-baseline justify-between">
-            <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Today&apos;s schedule</p>
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">Today&apos;s schedule</p>
             <p className="text-[11px] text-muted">from the timetable</p>
           </div>
           <div className="flex flex-col">
@@ -206,17 +258,28 @@ export default async function TodayPage() {
                       {event.event_time?.slice(0, 5)}
                     </span>
                     <div className="flex flex-1 flex-col gap-1.5">
-                      <p className="text-sm text-ink">{event.title}</p>
+                      {/* Spec: a live TP session gets a bold row and a teal
+                          "Live" pill. Kept as a link when there's a Zoom URL
+                          to open -- the pill is the affordance that was
+                          already here, only its label and weight change. */}
+                      <p className={`text-sm text-ink ${live ? "font-semibold" : ""}`}>{event.title}</p>
                       {live ? (
-                        <a
-                          href={event.zoom_url ?? undefined}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-primary-foreground"
-                        >
-                          <span className="size-[5px] shrink-0 rounded-full bg-gold" />
-                          Join now
-                        </a>
+                        event.zoom_url ? (
+                          <a
+                            href={event.zoom_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold tracking-[0.06em] text-primary-foreground uppercase"
+                          >
+                            <span className="size-[5px] shrink-0 rounded-full bg-gold" />
+                            Live · join
+                          </a>
+                        ) : (
+                          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold tracking-[0.06em] text-primary-foreground uppercase">
+                            <span className="size-[5px] shrink-0 rounded-full bg-gold" />
+                            Live
+                          </span>
+                        )
                       ) : null}
                     </div>
                   </div>
@@ -227,7 +290,7 @@ export default async function TodayPage() {
         </div>
 
         {/* Needs you */}
-        <div className="sheet flex flex-col gap-3.5">
+        <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-gold">
           <p className="text-[11px] font-semibold tracking-[0.12em] text-gold uppercase">Needs you · {alerts.length}</p>
           <div className="flex flex-col">
             {visibleAlerts.length === 0 ? (
@@ -256,30 +319,35 @@ export default async function TodayPage() {
         </div>
 
         {/* Cohort */}
-        <div className="sheet flex flex-col gap-3.5">
+        <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-ink-warm">
           <div className="flex items-baseline justify-between">
-            <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Cohort · {rows.length}</p>
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-ink-warm uppercase">Cohort · {rows.length}</p>
             <Link href="/trainer/roster" className="text-[11px] text-primary">
               Full roster →
             </Link>
           </div>
           <div className="flex flex-col">
-            {cohort.map((r, i) => (
-              <Link
-                key={r.id}
-                href={`/portfolio/${r.id}`}
-                className={`flex items-center gap-3 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}
-              >
-                <span className="flex-1 truncate text-sm text-ink">{r.name}</span>
-                <span className="text-xs text-muted tabular-nums">{r.tpsPassed} / 8</span>
-                <span className="h-1 w-[54px] shrink-0 overflow-hidden rounded-full bg-surface-muted">
+            {cohort.map((r, i) => {
+              const status = stageStatus(r);
+              const flagged = r.atRiskReasons.length > 0;
+              return (
+                <Link
+                  key={r.id}
+                  href={`/portfolio/${r.id}`}
+                  className={`flex items-center gap-3 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}
+                >
                   <span
-                    className="block h-1 rounded-full"
-                    style={{ width: `${r.criteriaPct}%`, backgroundColor: barColor(r) }}
-                  />
-                </span>
-              </Link>
-            ))}
+                    aria-hidden="true"
+                    className="flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-primary-foreground"
+                    style={{ backgroundColor: flagged ? "var(--color-destructive)" : AVATAR_HUES[i % AVATAR_HUES.length] }}
+                  >
+                    {initialsOf(r.name)}
+                  </span>
+                  <span className="flex-1 truncate text-sm text-ink">{r.name}</span>
+                  <span className={`shrink-0 text-xs ${status.className}`}>{status.label}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
