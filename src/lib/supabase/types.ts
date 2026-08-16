@@ -414,6 +414,13 @@ export interface Database {
           marking_substance_note: string | null;
           marked_by: string | null;
           marked_at: string | null;
+          // migration 0117 -- the tutor's words about the task, carried into
+          // the offer or rejection email. AI drafts it, a person edits it; the
+          // draft is kept so "did anyone actually read this" is answerable.
+          task_feedback: string | null;
+          task_feedback_ai_draft: string | null;
+          task_feedback_edited_by: string | null;
+          task_feedback_edited_at: string | null;
           stage:
             | "submitted"
             | "task_returned"
@@ -1527,6 +1534,36 @@ export interface Database {
           status: string;
         };
         Update: Partial<Database["public"]["Tables"]["applicant_emails"]["Row"]>;
+        Relationships: [];
+      };
+      // migration 0116 -- a refund is agreed first and settled second, and the
+      // gap between those two is what "Refunds pending" counts.
+      refunds: {
+        Row: {
+          id: string;
+          center_id: string;
+          payment_instalment_id: string | null;
+          applicant_id: string | null;
+          amount: number;
+          currency: string;
+          reason: string | null;
+          status: "pending" | "completed" | "cancelled";
+          // Manual = someone ticks it off. Provider = a payout was initiated
+          // and a webhook closes it.
+          settlement: "manual" | "provider";
+          provider_refund_id: string | null;
+          agreed_by: string | null;
+          agreed_at: string;
+          completed_at: string | null;
+          completed_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["refunds"]["Row"]> & {
+          center_id: string;
+          amount: number;
+          currency: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["refunds"]["Row"]>;
         Relationships: [];
       };
       organisations: {

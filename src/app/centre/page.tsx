@@ -93,6 +93,12 @@ export default async function CentreOverviewPage({
   const owing = (payments ?? []).filter((p) => p.status === "pending" || p.status === "missed");
   const outstanding = owing.reduce((sum, p) => sum + Number(p.amount), 0);
   const owingCourseCount = new Set(owing.map((p) => courseOfPlan.get(p.payment_plan_id)).filter(Boolean)).size;
+  const { data: pendingRefundRows } = canView(ctx.roles, "payments.view")
+    ? await admin.from("refunds").select("id, amount").in("center_id", scope).eq("status", "pending")
+    : { data: [] };
+  const pendingRefunds = pendingRefundRows ?? [];
+  const refundsPending = pendingRefunds.reduce((sum, r) => sum + Number(r.amount), 0);
+
   const withDeposit = (applicants ?? []).filter((a) => a.deposit_paid_at);
   const depositsHeld = withDeposit.reduce((sum, a) => sum + Number(a.deposit_amount ?? 0), 0);
   const missed = (payments ?? []).filter((p) => p.status === "missed");
@@ -132,6 +138,17 @@ export default async function CentreOverviewPage({
     { label: "Collected this month", value: money(collectedThisMonth), note: `${paid.length} confirmed payment${paid.length === 1 ? "" : "s"}`, alert: false },
     { label: "Outstanding balance", value: money(outstanding), note: owingCourseCount > 0 ? `across ${owingCourseCount} course${owingCourseCount === 1 ? "" : "s"}` : "nothing owed", alert: outstanding > 0 },
     { label: "Deposits held", value: money(depositsHeld), note: `${withDeposit.length} place${withDeposit.length === 1 ? "" : "s"}, not yet fully paid`, alert: false },
+    // "Refunds pending" -- agreed but not yet returned. Alerts on any amount
+    // at all, unlike the others: a refund somebody was promised and never
+    // received is a different kind of problem from money merely outstanding.
+    {
+      label: "Refunds pending",
+      value: money(refundsPending),
+      note: pendingRefunds.length
+        ? `${pendingRefunds.length} awaiting payout`
+        : "Nothing awaiting action",
+      alert: refundsPending > 0,
+    },
   ];
 
   const heading = multiBranch && !branch ? "Across your branches" : "Centre overview";
@@ -176,7 +193,7 @@ export default async function CentreOverviewPage({
       </div>
 
       {canView(ctx.roles, "payments.view") ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {metrics.map((m) => (
             <div key={m.label} className="rounded-[10px] border border-border bg-card px-5 py-4">
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{m.label}</p>

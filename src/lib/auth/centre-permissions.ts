@@ -204,7 +204,18 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
   },
 };
 
-/** Every action logged as an owner intervention, for centre_owner_actions. */
+/**
+ * Every action logged as an owner intervention, for centre_owner_actions.
+ *
+ * "Obviously, everything would leave a digital footprint" (Ramy, 2026-08-16).
+ * That sentence is what makes the owner role safe to widen: the role exists
+ * for the day somebody leaves without handing over, and an unlogged power that
+ * broad would be indistinguishable from interfering with a colleague's course.
+ *
+ * So this list tracks the grant list exactly -- the five course-administration
+ * capabilities below were added the moment the owner gained them, rather than
+ * left behind as a silent gap.
+ */
 export const LOGGED_FOR_OWNER: Capability[] = [
   "course.create",
   "course.editRecord",
@@ -216,6 +227,11 @@ export const LOGGED_FOR_OWNER: Capability[] = [
   "admissions.manage",
   "volunteers.manage",
   "import.run",
+  "assessorPack.export",
+  "courseAdmin.invite",
+  "courseAdmin.groups",
+  "courseAdmin.settings",
+  "timetable.publish",
 ];
 
 /**
