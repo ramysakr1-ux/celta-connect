@@ -9,6 +9,7 @@ import { RejectForm } from "@/app/dashboard/admissions/[id]/reject-form";
 import { OfferForm } from "@/app/dashboard/admissions/[id]/offer-form";
 import { PaymentsPanel } from "@/app/dashboard/admissions/[id]/payments-panel";
 import { DepositForm } from "@/app/dashboard/admissions/[id]/deposit-form";
+import { ReleaseWorkspaceForm } from "@/app/dashboard/admissions/[id]/release-workspace-form";
 import { computeApplicantPaymentState } from "@/lib/payments/applicant-payment-state";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { areaVerdict } from "@/lib/auth/areas";
@@ -62,6 +63,11 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
     ? await supabase.from("profiles").select("full_name").eq("id", applicant.deposit_marked_by).maybeSingle()
     : { data: null };
   const depositMarkedByName = depositMarkedBy?.full_name ?? null;
+
+  const { data: releasedBy } = applicant.workspace_released_by
+    ? await supabase.from("profiles").select("full_name").eq("id", applicant.workspace_released_by).maybeSingle()
+    : { data: null };
+  const releasedByName = releasedBy?.full_name ?? null;
 
   // build-spec.md §11: whose job this actually is. Areas only apply to the
   // admin family -- a trainer handling admissions isn't in the area model at
@@ -241,6 +247,18 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             </div>
           </div>
           <PaymentsPanel applicant={applicant} payments={payments ?? []} />
+          {/* The green light sits with the money, because that is what informs
+              it -- but it is a separate decision, which is the whole point of
+              the gate. */}
+          <AreaAction verdict={paymentVerdict}>
+            <ReleaseWorkspaceForm
+              applicantId={applicant.id}
+              releasedAt={applicant.workspace_released_at}
+              releasedReason={applicant.workspace_released_reason}
+              releasedByName={releasedByName}
+              hasDeposit={Boolean(applicant.deposit_paid_at)}
+            />
+          </AreaAction>
           <WaiverForm applicant={applicant} />
         </>
       ) : null}

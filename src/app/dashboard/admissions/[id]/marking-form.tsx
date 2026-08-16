@@ -62,6 +62,44 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
         ))}
       </div>
 
+      {/*
+        The tutor's words about the task, carried into whichever email goes out
+        -- offer or rejection -- and shown in the application file the assessor
+        reads. Sits here because this is the moment someone has actually read
+        the work.
+
+        The AI suggestion appears above it, clearly labelled and never
+        pre-filled into the box: "AI will only flag it out, and then the
+        trainer would take a look at it and then make a decision" (Ramy,
+        2026-08-16). Copying it in would make accepting it the path of least
+        resistance, which is exactly what "never generated" is meant to
+        prevent.
+      */}
+      <div className="flex flex-col gap-1.5 border-t border-border-faint pt-4">
+        <label htmlFor="task_feedback" className="text-sm text-ink">
+          What to say about their task
+        </label>
+        <p className="text-xs text-muted">
+          Your words, in the offer or the rejection, and in the application file. Never sent unedited.
+        </p>
+
+        {applicant.task_feedback_ai_suggestion ? (
+          <div className="mt-1 rounded-[6px] border border-border bg-surface-muted p-3">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Suggested — not sent</p>
+            <p className="mt-1 text-sm text-ink">{applicant.task_feedback_ai_suggestion}</p>
+          </div>
+        ) : null}
+
+        <textarea
+          id="task_feedback"
+          name="task_feedback"
+          rows={4}
+          defaultValue={applicant.task_feedback ?? ""}
+          placeholder="Strong on organisation and substance. Both analysis items were left blank, and that is worth attention early."
+          className="mt-1 rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        />
+      </div>
+
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 
       <button

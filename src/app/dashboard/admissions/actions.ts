@@ -254,6 +254,16 @@ export async function saveMarkingScheme(_prevState: FormState, formData: FormDat
     (update as Record<string, unknown>)[noteKey] = typeof note === "string" ? note.trim() || null : null;
   }
 
+  // The tutor's own words. Recording who last edited it is what makes
+  // "human-written, never generated" checkable rather than merely claimed --
+  // an untouched AI suggestion has no editor.
+  const feedback = (formData.get("task_feedback") as string | null)?.trim() || null;
+  if (feedback !== null) {
+    (update as Record<string, unknown>).task_feedback = feedback;
+    (update as Record<string, unknown>).task_feedback_edited_by = staff.id;
+    (update as Record<string, unknown>).task_feedback_edited_at = new Date().toISOString();
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.from("applicants").update(update).eq("id", applicantId).eq("center_id", staff.center_id);
   if (error) return { error: "Could not save the marking. Try again." };
@@ -819,4 +829,74 @@ export async function releaseWorkspace(_prevState: FormState, formData: FormData
   // The release is recorded either way -- it happened, and hiding that because
   // an email bounced would leave the centre unable to see who has been let in.
   return { error: sendError ? `Access released, but the email failed to send: ${sendError}` : null };
+}
+
+// ---- Refunds ----
+
+/**
+ * Agree a refund, and later mark it settled.
+ *
+ * Two steps rather than one, because the gap between them is the whole reason
+ * the "Refunds pending" figure exists: a centre that agreed a refund three
+ * weeks ago and never sent the money needs to see that on its own dashboard.
+ * A single "refunded" flag would hide exactly the case worth surfacing.
+ */
+export async function agreeRefund(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const staff = await requireAdmissionsHandler();
+  if (!canDecideAdmissions(staff)) return { error: "You can't agree refunds." };
+
+  const applicantId = (formData.get("applicant_id") as string | null) || null;
+  const amountRaw = formData.get("amount");
+  const currency = (formData.get("currency") as string | null)?.trim().toUpperCase() || null;
+  const reason = (formData.get("reason") as string | null)?.trim() || null;
+  const settlement = formData.get("settlement") === "provider" ? "provider" : "manual";
+
+  const amount = typeof amountRaw === "string" ? Number(amountRaw) : NaN;
+  if (!Number.isFinite(amount) || amount <= 0) return { error: "How much is being refunded?" };
+  if (!currency) return { error: "Which currency?" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("refunds").insert({
+    center_id: staff.center_id,
+    applicant_id: applicantId,
+    amount,
+    currency,
+    reason,
+    settlement,
+    agreed_by: staff.id,
+  });
+  if (error) return { error: `Could not record the refund: ${error.message}` };
+
+  revalidatePath("/centre");
+  revalidatePath("/centre/payments");
+  if (applicantId) revalidatePath(`/dashboard/admissions/${applicantId}`);
+  return { error: null };
+}
+
+export async function settleRefund(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const staff = await requireAdmissionsHandler();
+  if (!canDecideAdmissions(staff)) return { error: "You can't settle refunds." };
+
+  const refundId = formData.get("refund_id");
+  const cancel = formData.get("cancel") === "1";
+  if (typeof refundId !== "string") return { error: "Something went wrong. Refresh and try again." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("refunds")
+    .update(
+      cancel
+        // Cancelled, not deleted -- somebody was told a refund was coming, and
+        // that conversation should not vanish from the record.
+        ? { status: "cancelled", completed_at: new Date().toISOString(), completed_by: staff.id }
+        : { status: "completed", completed_at: new Date().toISOString(), completed_by: staff.id }
+    )
+    .eq("id", refundId)
+    .eq("center_id", staff.center_id)
+    .eq("status", "pending");
+  if (error) return { error: "Could not update the refund. Try again." };
+
+  revalidatePath("/centre");
+  revalidatePath("/centre/payments");
+  return { error: null };
 }
