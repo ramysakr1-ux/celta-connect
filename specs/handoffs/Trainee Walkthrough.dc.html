@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(30% 0.042 58); }
+  @keyframes wordmark-spin { 0%, 11.11% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+  .stage { perspective: 400px; }
+  .spin { animation: wordmark-spin 90s linear infinite; transform-origin: 50% 50%; transform-style: preserve-3d; }
+  @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 38px; width: 1460px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 11px; max-width: 900px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · the trainee's course, screen by screen</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">Sara Yılmaz, Tuesday of week two.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">A candidate does this once in their life, over four intensive weeks, while anxious. So every screen answers one question — what is happening now, and what is waiting on me — before it offers anything else. Fewer tabs than a trainer, and no grades anywhere.</div>
+  </div>
+
+  <sc-for list="{{ screens }}" as="s" hint-placeholder-count="6">
+    <div style="display: flex; flex-direction: column; gap: 11px;">
+
+      <div style="display: flex; align-items: baseline; gap: 11px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.2% 0.005 90);">{{ s.id }}</div>
+        <div style="font-size: 14px; font-weight: 600; color: oklch(30% 0.042 58);">{{ s.title }}</div>
+        <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">{{ s.note }}</div>
+      </div>
+
+      <div style="width: 1340px; box-sizing: border-box; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 8px; overflow: hidden;">
+
+        <div style="height: 56px; background: oklch(99.5% 0.004 90); border-bottom: 1px solid oklch(89.5% 0.012 82); display: flex; align-items: center; gap: 24px; padding: 0 20px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex: none;">
+            <div class="stage" style="width: 32px; height: 32px; border-radius: 8px; background: oklch(30% 0.042 58); display: flex; align-items: center; justify-content: center;">
+              <svg class="spin" width="20" height="12" viewBox="8 30 104 60" fill="none">
+                <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" stroke-width="13" stroke-linecap="round"></path>
+                <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" stroke-width="13" stroke-linecap="round"></path>
+              </svg>
+            </div>
+            <div style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 20px; line-height: 0.9; color: oklch(60% 0.11 70);">Connect</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+            <sc-for list="{{ s.nav }}" as="t" hint-placeholder-count="5">
+              <div style="font-size: 12.5px; font-weight: {{ t.weight }}; color: {{ t.ink }}; padding: 19px 0 17px; border-bottom: 2px solid {{ t.rule }};">{{ t.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display: flex; align-items: center; gap: 11px; flex: none;">
+            <div style="font-size: 11px; color: oklch(51% 0.017 70);">Day 7 of 20</div>
+            <div style="width: 26px; height: 26px; border-radius: 8px; background: oklch(93% 0.019 190); color: oklch(32% 0.05 195); font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">SY</div>
+          </div>
+        </div>
+
+        <div style="padding: 26px 22px 30px; display: flex; flex-direction: column; gap: 20px;">
+
+          <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 22px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ s.eyebrow }}</div>
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 27px; font-weight: 600; line-height: 1.1; color: oklch(30% 0.042 58);">{{ s.heading }}</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex: none;">
+              <sc-for list="{{ s.actions }}" as="a" hint-placeholder-count="2">
+                <div style="height: 34px; padding: 0 14px; border-radius: 6px; background: {{ a.bg }}; border: 1px solid {{ a.border }}; color: {{ a.ink }}; font-size: 13px; font-weight: {{ a.weight }}; display: flex; align-items: center; cursor: pointer;">{{ a.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: {{ s.cols }}; gap: 18px; align-items: start;">
+            <sc-for list="{{ s.panels }}" as="p" hint-placeholder-count="3">
+              <div style="background: {{ p.panelBg }}; border: 1px solid {{ p.panelBorder }}; border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 13px;">
+
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+                  <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: {{ p.labelInk }};">{{ p.label }}</div>
+                  <sc-if value="{{ p.meta }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ p.meta }}</div>
+                  </sc-if>
+                </div>
+
+                <sc-if value="{{ p.big }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; flex-direction: column; gap: 9px;">
+                    <div style="font-family: Newsreader, Georgia, serif; font-size: 25px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58); text-wrap: pretty;">{{ p.big }}</div>
+                    <div style="font-size: 13px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ p.bigSub }}</div>
+                    <div style="display: flex; align-items: center; gap: 8px; padding-top: 3px;">
+                      <div style="height: 34px; padding: 0 14px; border-radius: 6px; background: oklch(37.5% 0.058 195); color: oklch(98.5% 0.006 90); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; cursor: pointer;">
+                        <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(63% 0.096 72);"></div>
+                        <div>{{ p.bigCta }}</div>
+                      </div>
+                      <div style="height: 34px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(89.5% 0.012 82); background: oklch(99.5% 0.004 90); font-size: 13px; font-weight: 500; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer;">{{ p.bigAlt }}</div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.isRows }}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; flex-direction: column;">
+                    <sc-for list="{{ p.rows }}" as="r" hint-placeholder-count="4">
+                      <div style="display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent);">
+                        <sc-if value="{{ r.rule }}" hint-placeholder-val="{{ false }}">
+                          <div style="width: 3px; align-self: stretch; border-radius: 2px; background: {{ r.ruleColor }}; flex: none;"></div>
+                        </sc-if>
+                        <sc-if value="{{ r.lead }}" hint-placeholder-val="{{ false }}">
+                          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: oklch(51% 0.017 70); width: {{ r.leadW }}; flex: none;">{{ r.lead }}</div>
+                        </sc-if>
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+                          <div style="font-size: 13px; font-weight: {{ r.weight }}; color: {{ r.ink }}; line-height: 1.35; text-wrap: pretty;">{{ r.text }}</div>
+                          <sc-if value="{{ r.sub }}" hint-placeholder-val="{{ false }}">
+                            <div style="font-size: 11.5px; color: oklch(51% 0.017 70); line-height: 1.45; text-wrap: pretty;">{{ r.sub }}</div>
+                          </sc-if>
+                        </div>
+                        <sc-if value="{{ r.pill }}" hint-placeholder-val="{{ false }}">
+                          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{ r.pillBg }}; color: {{ r.pillInk }}; flex: none;">
+                            <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+                            <div>{{ r.pill }}</div>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.foot }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ p.foot }}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid oklch(89.5% 0.012 82); background: oklch(99.5% 0.004 90); padding: 11px 20px; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 720px; height: 44px; border-radius: 22px; background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); display: flex; align-items: center; gap: 10px; padding: 0 8px 0 6px; opacity: 0.55;">
+            <div style="display: flex; align-items: center; gap: 7px; height: 32px; padding: 0 10px 0 6px; border-radius: 16px; background: color-mix(in oklab, oklch(93% 0.019 190) 45%, oklch(99.5% 0.004 90)); flex: none;">
+              <div style="width: 20px; height: 20px; border-radius: 6px; background: oklch(37.5% 0.058 195); color: oklch(98.5% 0.006 90); font-size: 8px; font-weight: 600; display: flex; align-items: center; justify-content: center;">AB</div>
+              <div style="font-size: 12px; font-weight: 600; color: oklch(30% 0.042 58);">Group ABC</div>
+              <div style="font-size: 8px; color: oklch(51% 0.017 70);">▾</div>
+            </div>
+            <div style="width: 1px; height: 20px; background: oklch(89.5% 0.012 82);"></div>
+            <div style="flex: 1; font-size: 12.5px; color: oklch(51% 0.017 70);">Message Group ABC — resets on the centre’s schedule</div>
+            <div style="display: flex; align-items: center; gap: 5px; flex: none;">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(63% 0.096 72);"></div>
+              <div style="font-size: 9.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(51% 0.017 70);">Clears in 8h 12m</div>
+            </div>
+            <div style="width: 30px; height: 30px; border-radius: 15px; background: oklch(30% 0.042 58); color: oklch(99.5% 0.004 90); display: flex; align-items: center; justify-content: center; flex: none; font-size: 12px;">↑</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-for>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1460,&quot;height&quot;:3000}}">
+const BODY = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const GOLD = 'oklch(63% 0.096 72)';
+const AMBER = 'oklch(44% 0.095 68)';
+const BORDER = 'oklch(89.5% 0.012 82)';
+const CARD = 'oklch(99.5% 0.004 90)';
+
+const TABS = ['Today', 'Timetable', 'My teaching', 'Assignments', 'Resources'];
+
+const nav = (active) => TABS.map(label => ({
+  label,
+  weight: label === active ? '600' : '500',
+  ink: label === active ? TEAL : MUTED,
+  rule: label === active ? TEAL : 'transparent',
+}));
+
+const act = (label, kind) => kind === 'primary'
+  ? { label, bg: TEAL, border: TEAL, ink: 'oklch(98.5% 0.006 90)', weight: '600' }
+  : { label, bg: CARD, border: BORDER, ink: BODY, weight: '500' };
+
+const row = (text, o = {}) => ({
+  text,
+  sub: o.sub || '',
+  weight: o.bold ? '600' : '400',
+  ink: o.ink || BODY,
+  lead: o.lead || '',
+  leadW: o.leadW || '46px',
+  rule: !!o.rule,
+  ruleColor: o.rule || 'transparent',
+  pill: o.pill || '',
+  pillBg: o.pillBg || 'oklch(93.5% 0.008 85)',
+  pillInk: o.pillInk || MUTED,
+});
+
+const panel = (label, o = {}) => ({
+  label,
+  labelInk: o.gold ? GOLD : MUTED,
+  panelBg: o.accent ? 'color-mix(in oklab, oklch(93% 0.019 190) 40%, ' + CARD + ')' : CARD,
+  panelBorder: o.accent ? 'color-mix(in oklab, ' + TEAL + ' 22%, transparent)' : BORDER,
+  meta: o.meta || '',
+  big: o.big || '',
+  bigSub: o.bigSub || '',
+  bigCta: o.bigCta || '',
+  bigAlt: o.bigAlt || '',
+  isRows: !!o.rows,
+  rows: o.rows || [],
+  foot: o.foot || '',
+});
+
+const TODAY = { bg: 'oklch(93% 0.019 190)', ink: 'oklch(32% 0.05 195)' };
+const DUE = { bg: 'oklch(94.5% 0.065 85)', ink: AMBER };
+const DONE = { bg: 'oklch(93.5% 0.008 85)', ink: BODY };
+
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      screens: [
+        {
+          id: '1a', title: 'Today', note: 'the landing page — where Sara arrives every morning',
+          nav: nav('Today'),
+          eyebrow: 'ITI Istanbul C2/2024 · four weeks · week 2',
+          heading: 'Tuesday 14 November',
+          actions: [act('My timetable'), act('Open TP2 plan', 'primary')],
+          cols: '1.2fr 1fr 1fr',
+          panels: [
+            panel('You teach today', {
+              accent: true, meta: 'in 90 minutes',
+              big: 'TP2 — Teaching lexis',
+              bigSub: '9:30 · Room 5 · Upper-Intermediate · 11 students · you teach second',
+              bigCta: 'Join the room',
+              bigAlt: 'Open your plan',
+              foot: 'The one thing that matters this morning, and nothing above it. Everything else here can wait until after 12:15.',
+            }),
+            panel('Announcements · 2 new', {
+              gold: true,
+              rows: [
+                row('Reading for tomorrow is chapter 4 only, not 4 and 5', { bold: true, rule: GOLD, sub: 'Pinned · Ramy Sakr, yesterday' }),
+                row('Observation slots for Thursday are open', { rule: MUTED, sub: 'Ramy Sakr, 20 minutes ago' }),
+                row('Assignment 2 briefs are in Resources', { rule: MUTED, sub: 'Ramy Sakr, 9 Nov', ink: MUTED }),
+              ],
+              foot: 'Directly under the next session, above the to-do list. If a tutor tells the whole cohort something, it lands here.',
+            }),
+            panel('Waiting on you · 3', {
+              rows: [
+                row('Assignment 3 due today', { bold: true, ink: AMBER, sub: 'Skills Related Task · 23:59', pill: 'Today', pillBg: DUE.bg, pillInk: DUE.ink }),
+                row('Self-evaluation for TP1', { bold: true, sub: 'Due before feedback is released' }),
+                row('Observation 4 of 6 to log', { sub: 'Two hours left · one may still be filmed' }),
+              ],
+              foot: 'Three items, never a longer list. Anything further out lives on the timetable, not here.',
+            }),
+          ],
+        },
+        {
+          id: '1b', title: 'Timetable', note: 'the tutors’ grid, read-only, filtered to Sara',
+          nav: nav('Timetable'),
+          eyebrow: 'Your week · 13 – 17 November',
+          heading: 'Week 2 of 4',
+          actions: [act('Add to my calendar')],
+          cols: '1fr',
+          panels: [
+            panel('This week', {
+              rows: [
+                row('TP1 — DEF teaching, you observe', { lead: 'MON', leadW: '52px', rule: MUTED, sub: '9:30 · Room 5 · note 4c, two lines' }),
+                row('TP2 — you teach second', { lead: 'TUE', leadW: '52px', rule: TEAL, bold: true, sub: '9:30 · Room 5 · Teaching lexis · plan submitted', pill: 'Today', pillBg: TODAY.bg, pillInk: TODAY.ink }),
+                row('TP2 — DEF teaching, you observe', { lead: 'WED', leadW: '52px', rule: MUTED, sub: '9:30 · Room 6' }),
+                row('TP3 — you teach first', { lead: 'THU', leadW: '52px', rule: TEAL, sub: '9:30 · Room 5 · points released Wednesday', pill: 'Plan due Wed', pillBg: DUE.bg, pillInk: DUE.ink }),
+                row('Study day', { lead: 'FRI', leadW: '52px', ink: MUTED, sub: 'No teaching practice' }),
+              ],
+              foot: 'Your own lessons carry a teal rule, lessons you observe are grey. The same events the tutors edit, without the editing.',
+            }),
+          ],
+        },
+        {
+          id: '1b2', title: 'Book Stage 2 tutorial', note: 'opens from a Timetable block or the Today nudge · Sara is in Group ABC',
+          nav: nav('Timetable'),
+          eyebrow: 'Stage 2 tutorials · Group ABC · Wed 15 Nov, 13:00–14:30',
+          heading: 'Book your slot',
+          cols: '1fr 1fr',
+          panels: [
+            panel('Positions', {
+              meta: 'around 15–20 min each, starting from 13:00 · running a little over is normal',
+              rows: [
+                row('1st', { bold: true, rule: TEAL, sub: 'Sara Yılmaz (you)', pill: 'Booked', pillBg: 'oklch(93% 0.019 190)', pillInk: TEAL }),
+                row('2nd', { bold: true, rule: TEAL, sub: 'Deniz Aksoy', pill: 'Booked', pillBg: 'oklch(93.5% 0.008 85)', pillInk: BODY }),
+                row('3rd', { bold: true, rule: AMBER, sub: 'Open', pill: 'Open', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+                row('4th', { bold: true, rule: AMBER, sub: 'Open', pill: 'Open', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+                row('5th', { bold: true, rule: AMBER, sub: 'Open', pill: 'Open', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+                row('6th', { bold: true, rule: AMBER, sub: 'Open', pill: 'Open', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+              ],
+              foot: 'No time picker. Booking claims the next open position in order — 1st to book gets 1st.',
+            }),
+            panel('You\u2019re booked \u2014 1st', {
+              accent: true,
+              rows: [
+                row('Release my slot', { bold: true, sub: 'Puts 1st back to open — someone else can claim it. You can rebook after.' }),
+                row('The sheet is the source of truth', { bold: true, sub: 'No message fires when someone else books — check here to see what\u2019s left.' }),
+                row('Only Group ABC sees this sheet', { bold: true, sub: 'Group DEF has its own block, its own sheet, possibly a different day.' }),
+              ],
+              foot: 'You got this Wed 15 Nov nudge on Today when your tutor added the block — that\u2019s the only announcement.',
+            }),
+          ],
+        },
+        {
+          nav: nav('My teaching'),
+          eyebrow: 'Teaching practice',
+          heading: '3 of 8 taught · 4.5 hours assessed',
+          actions: [act('Log an observation'), act('Open TP2 plan', 'primary')],
+          cols: '1.5fr 1fr',
+          panels: [
+            panel('Your lessons', {
+              rows: [
+                row('TP1 · Receptive skills — reading', { rule: MUTED, sub: '9 Nov · 45 min · feedback returned', pill: 'To standard', pillBg: DONE.bg, pillInk: DONE.ink }),
+                row('TP2 · Teaching lexis', { bold: true, rule: TEAL, sub: 'Today 9:30 · plan submitted 20:14 last night', pill: 'Today', pillBg: TODAY.bg, pillInk: TODAY.ink }),
+                row('TP3 · Grammar — past forms', { rule: MUTED, sub: '16 Nov · points released Wednesday', pill: 'Plan due', pillBg: DUE.bg, pillInk: DUE.ink }),
+                row('TP4 · Not yet assigned', { ink: MUTED, sub: '20 Nov' }),
+              ],
+              foot: 'No grade column anywhere. A candidate never sees a provisional grade — they see whether a lesson was to standard, and what to do next.',
+            }),
+            panel('Carried forward from TP1', {
+              gold: true,
+              rows: [
+                row('Give one instruction, then check it', { bold: true, rule: GOLD, sub: 'Starred by Ramy · already in your TP2 plan' }),
+                row('Let the pair task run its full time', { rule: GOLD, sub: 'Starred by Ramy' }),
+              ],
+              foot: 'Starred action points arrive as personal aims in your next plan automatically. You never copy them across.',
+            }),
+          ],
+        },
+        {
+          id: '1d', title: 'One lesson', note: 'plan, self-evaluation, feedback — and the peers, below the line',
+          nav: nav('My teaching'),
+          eyebrow: '← My teaching · TP1 · 9 November',
+          heading: 'Receptive skills — reading',
+          actions: [act('Download as PDF')],
+          cols: '1fr 1fr 1fr',
+          panels: [
+            panel('Your lesson plan', {
+              meta: 'submitted 8 Nov',
+              rows: [
+                row('Main aim', { sub: 'By the end learners will have practised reading for gist and detail in an article about commuting.' }),
+                row('Personal aims', { sub: 'Give one instruction then check it · let the pair task run' }),
+                row('Anticipated problems', { sub: 'Four entries, each with a solution' }),
+                row('Procedure', { sub: 'Seven stages · 45 minutes · timings add up' }),
+              ],
+            }),
+            panel('Your self-evaluation', {
+              meta: 'from your lesson plan',
+              rows: [
+                row('4c · How did your instructions land?', { sub: 'I demonstrated the pair task instead of explaining it, which worked. The gist question I gave twice and two learners still read closely.' }),
+                row('One thing to change next time', { sub: 'Say it once, demonstrate, then check with one question.' }),
+              ],
+              foot: 'Written in the feedback slot before you read anything else, so it is your account rather than a reply to someone else’s.',
+            }),
+            panel('Ramy’s feedback', {
+              meta: 'released 9 Nov, 14:02',
+              rows: [
+                row('To standard for this stage of the course', { bold: true }),
+                row('Give one instruction, then check it', { rule: GOLD, sub: 'Starred — carries into your next plan' }),
+                row('Let the pair task run its full time', { rule: GOLD, sub: 'Starred — carries into your next plan' }),
+                row('Strong lead-in — the picture gave everyone something to say.', { ink: MUTED }),
+              ],
+              foot: 'Below all this, outside the assessed record, sits “From your peers” — what the group wrote about this lesson. Yours to keep, never marked, never in the portfolio.',
+            }),
+          ],
+        },
+        {
+          id: '1e', title: 'Assignments', note: 'four, one resubmission each',
+          nav: nav('Assignments'),
+          eyebrow: 'Written assignments',
+          heading: '1 due today',
+          actions: [act('Open Assignment 3', 'primary')],
+          cols: '1.4fr 1fr',
+          panels: [
+            panel('Your four', {
+              rows: [
+                row('1 · Focus on the Learner', { sub: 'Submitted 12 Nov, marked 14 Nov', pill: 'Pass', pillBg: DONE.bg, pillInk: DONE.ink }),
+                row('2 · Language Related Tasks', { sub: 'One resubmission, marked 30 Nov', pill: 'Pass on resub', pillBg: DONE.bg, pillInk: DONE.ink }),
+                row('3 · Skills Related Task', { bold: true, ink: AMBER, sub: 'Due today 23:59 · draft saved 21:40 yesterday', pill: 'Due today', pillBg: DUE.bg, pillInk: DUE.ink }),
+                row('4 · Lessons from the Classroom', { ink: MUTED, sub: 'Opens 27 Nov' }),
+              ],
+              foot: 'You must pass three of the four, with one resubmission each. Withdrawing a submission before it is marked never uses that up.',
+            }),
+            panel('Writing Assignment 3', {
+              accent: true,
+              rows: [
+                row('Saved 2 minutes ago', { bold: true, sub: 'Everything saves as you type. There is no save button.' }),
+                row('842 of 750–1,000 words', { sub: 'Counted across all four sections' }),
+                row('Submit is a separate, deliberate act', { sub: 'Until you press it, nobody sees a word' }),
+              ],
+              foot: 'Once submitted you can withdraw it while it is unopened. After a tutor opens it, it locks and you see “being marked”.',
+            }),
+          ],
+        },
+        {
+          id: '1f', title: 'Resources', note: 'the centre’s material, read-only',
+          nav: nav('Resources'),
+          eyebrow: 'Resource hub',
+          heading: 'Everything the centre has given you',
+          actions: [act('Search')],
+          cols: '210px 1fr 1fr',
+          panels: [
+            panel('Sections', {
+              rows: [
+                row('Input sessions', { bold: true, ink: TEAL }),
+                row('Coursebooks') ,
+                row('Multimedia'),
+                row('Assignment briefs'),
+                row('Forms and documents'),
+              ],
+              foot: 'Fewer sections than a tutor sees. TP points and centre documents are staff-only.',
+            }),
+            panel('Input sessions', {
+              meta: 'this week',
+              rows: [
+                row('Presenting language — PPP vs guided discovery', { sub: 'Slides, handout, 2 clips · Tuesday 15:30' }),
+                row('Phonology — stress and intonation', { sub: 'Slides, drill audio ×3 · Tuesday 14:00' }),
+                row('Classroom management — giving instructions', { sub: 'Slides, worksheet · Monday · criterion 4c' }),
+              ],
+              foot: 'Each session carries its own materials, and the criterion it covers — which is the same criterion your peer task and self-evaluation are asking about this week.',
+            }),
+            panel('Forms and documents', {
+              rows: [
+                row('Lesson plan template', { sub: 'Blank PDF, if you ever need paper' }),
+                row('Self-evaluation form', { sub: 'Blank PDF' }),
+                row('CELTA syllabus', { sub: 'Cambridge' }),
+                row('Appeals and complaints procedure', { sub: 'ITI Istanbul' }),
+              ],
+              foot: 'Every built-in form has a blank PDF here — for a morning when the platform is down, or a tutor who wants paper.',
+            }),
+          ],
+        },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

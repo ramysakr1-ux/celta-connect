@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+  .answer-key-print { display: none; }
+  @media print {
+    @page { size: A4; margin: 14mm; }
+    body { background: white; }
+    [data-print-hide] { display: none !important; }
+    body.print-key #main-body { display: none !important; }
+    body.print-key .answer-key-print { display: flex !important; }
+  }
+</style>
+</helmet>
+
+<div id="main-body" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; display: flex; flex-direction: column; gap: 28px; width: 960px; box-sizing: border-box; position: relative;">
+  <div data-print-hide style="position: absolute; top: 12px; right: 18px; height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 6px; cursor: pointer;" onClick="{{ doPrint }}">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+    <div>Print</div>
+  </div>
+  <div style="position: absolute; bottom: 14px; right: 18px; font-size: 10px; letter-spacing: 0.06em; color: oklch(51% 0.017 70 / 0.35);">SO</div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Resource Hub · 45 minutes · phonology, spoken aloud</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 32px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Sounds.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Every phoneme and minimal pair on this page is spoken aloud, not just written as a symbol. Click any word or symbol to hear it.</div>
+  </div>
+
+  <div style="background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px 17px; display: flex; flex-direction: column; gap: 4px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(51% 0.017 70);">What you're actually learning to teach</div>
+    <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">Hearing "ship" and "sheep" apart is the easy part — you already can. The job is teaching a student who genuinely can't yet: knowing why they can't, what to do with your mouth to show the difference, and which pairs are worth drilling for their L1. That's what the next two sections are for.</div>
+  </div>
+
+  <div style="background: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent); border-radius: 8px; padding: 16px 19px; display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Voice</div>
+    <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ voiceStatus }}</div>
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+      <sc-for list="{{ voiceOptions }}" as="v" hint-placeholder-count="4">
+        <div onClick="{{ v.pick }}" style="padding: 6px 12px; border-radius: 999px; border: 1.5px solid {{ v.border }}; background: {{ v.bg }}; font-size: 11.5px; font-weight: 600; color: {{ v.ink }}; cursor: pointer;">{{ v.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Lead-in · 2 minutes</div>
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px 17px; display: flex; align-items: center; gap: 12px;">
+      <div onClick="{{ leadInPlay }}" style="width: 36px; height: 36px; border-radius: 50%; background: oklch(38% 0.072 195); color: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+      </div>
+      <div style="font-size: 13px; color: oklch(23.5% 0.017 65);">Listen: "ship" then "sheep." Same spelling pattern almost, one letter of difference on the page. Can you hear which is which without seeing the words?</div>
+    </div>
+  </div>
+
+
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">The 45 minutes</div>
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
+      <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="6">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-left: 3px solid {{ a.spine }}; border-radius: 6px; padding: 11px 12px; display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.03em; color: oklch(51% 0.017 70);">{{ a.time }}</div>
+          <div style="font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); line-height: 1.25;">{{ a.title }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Terminology — match it up</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ matchScoreLabel }}</div>
+    </div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Click a term, then click the definition you think it goes with.</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <sc-for list="{{ matchTerms }}" as="t" hint-placeholder-count="6">
+          <div onClick="{{ t.pick }}" style="padding: 10px 13px; border-radius: 6px; border: 1.5px solid {{ t.border }}; background: {{ t.bg }}; font-size: 12.5px; font-weight: 700; color: {{ t.ink }}; cursor: pointer;">{{ t.label }}</div>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <sc-for list="{{ matchDefs }}" as="d" hint-placeholder-count="6">
+          <div onClick="{{ d.pick }}" style="padding: 10px 13px; border-radius: 6px; border: 1.5px solid {{ d.border }}; background: {{ d.bg }}; font-size: 12px; line-height: 1.4; color: {{ d.ink }}; cursor: pointer;">{{ d.label }}</div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Where the sound is made</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Click each sound to hear it, then say it back yourself and notice where your own tongue, lips or teeth move.</div>
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px; display: flex; gap: 16px; align-items: flex-start;">
+      <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+        <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">Consonants are formed when airflow from the lungs is obstructed by the moveable parts of the mouth — tongue, teeth, lips, palate. Click a sound to hear it and see where it's obstructed.</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <sc-for list="{{ obstructionSounds }}" as="s" hint-placeholder-count="6">
+            <div onClick="{{ s.play }}" style="padding: 6px 11px; border-radius: 999px; border: 1.5px solid oklch(88% 0.016 82); background: oklch(96.4% 0.014 85); font-family: Newsreader, Georgia, serif; font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65); cursor: pointer;">/{{ s.symbol }}/ <span style="font-weight: 400; color: oklch(51% 0.017 70); font-family: Karla, sans-serif;">— {{ s.place }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">The phonemic chart, spoken</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Click any symbol to hear the sound in isolation, then in a real word.</div>
+    <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px;">
+      <sc-for list="{{ chart }}" as="p" hint-placeholder-count="16">
+        <div onClick="{{ p.play }}" style="background: {{ p.bg }}; border: 1.5px solid {{ p.border }}; border-radius: 6px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; font-weight: 600; color: {{ p.ink }};">/{{ p.symbol }}/</div>
+          <div style="font-size: 9.5px; color: oklch(51% 0.017 70);">{{ p.example }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Articulation — how to physically produce it</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">A learner can't copy a written symbol — they need to see the mouth move. On the site below, click each of these four sounds on the real IPA chart and watch the video, then write down what you actually see — tongue, lips, teeth — before checking it against the summary underneath.</div>
+    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent); border-radius: 8px;">
+      <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65); flex: 1;">Show the real thing rather than a diagram — <strong>Seeing Speech</strong> is a clickable IPA chart with real ultrasound, MRI and animated vocal-tract video for every sound, free.</div>
+      <a href="https://www.seeingspeech.ac.uk/ipa-charts/" target="_blank" style="flex: none; height: 32px; padding: 0 14px; border-radius: 6px; background: oklch(60% 0.11 70); color: oklch(23.5% 0.017 65); font-size: 12px; font-weight: 700; display: flex; align-items: center;">seeingspeech.ac.uk</a>
+    </div>
+    <sc-for list="{{ articulation }}" as="a" hint-placeholder-count="4">
+      <div onClick="{{ a.play }}" style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; gap: 14px; cursor: pointer;" style-hover="border-color: color-mix(in oklab, oklch(38% 0.072 195) 45%, transparent);">
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: oklch(38% 0.072 195); color: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: center; flex: none;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+        </div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65); flex: none; width: 46px;">/{{ a.symbol }}/</div>
+        <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70); flex: 1;">{{ a.how }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Where learners typically struggle</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">The same four pairs from the clap game — each is a known trouble spot for a common set of L1 backgrounds.</div>
+    <sc-for list="{{ struggles }}" as="s" hint-placeholder-count="4">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 12px 15px; display: flex; flex-direction: column; gap: 4px;">
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 14px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ s.pair }}</div>
+          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(60% 0.11 70);">{{ s.who }}</div>
+        </div>
+        <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ s.note }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Now try it yourself \u2014 clap for what you heard</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ pairsScoreLabel }}</div>
+    </div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">The same drill, from the student's seat. Hit replay for a fresh random word each time, then clap the pad you heard — the technique you'd run live with a class.</div>
+    <sc-for list="{{ pairs }}" as="p" hint-placeholder-count="5">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; gap: 14px;">
+        <div onClick="{{ p.replay }}" style="width: 32px; height: 32px; border-radius: 50%; background: oklch(60% 0.11 70); color: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+        </div>
+        <div style="display: flex; gap: 10px; flex: 1;">
+          <sc-for list="{{ p.options }}" as="o" hint-placeholder-count="2">
+            <div onClick="{{ o.pick }}" style="flex: 1; text-align: center; padding: 12px 10px; border-radius: 999px; border: 2px solid {{ o.border }}; background: {{ o.bg }}; font-family: Newsreader, Georgia, serif; font-size: 14px; font-weight: 700; color: {{ o.ink }}; cursor: pointer; transform: {{ o.scale }}; transition: transform 120ms ease;">👏 {{ o.word }}</div>
+          </sc-for>
+        </div>
+        <div style="font-size: 11px; font-weight: 600; color: {{ p.resultInk }}; width: 60px; text-align: right;">{{ p.result }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Dictation — sound to spelling</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">English spelling doesn't reliably show pronunciation. Listen and pick the word that matches the sound, not the sound that matches the usual spelling.</div>
+    <sc-for list="{{ dictation }}" as="d" hint-placeholder-count="3">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; gap: 14px;">
+        <div onClick="{{ d.play }}" style="width: 32px; height: 32px; border-radius: 50%; background: oklch(38% 0.072 195); color: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+        </div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; flex: 1;">
+          <sc-for list="{{ d.options }}" as="o" hint-placeholder-count="4">
+            <div onClick="{{ o.pick }}" style="padding: 6px 11px; border-radius: 999px; border: 1.5px solid {{ o.border }}; background: {{ o.bg }}; font-size: 11.5px; font-weight: 600; color: {{ o.ink }}; cursor: pointer;">{{ o.word }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ !notesOpen }}" hint-placeholder-val="{{ true }}">
+    <div data-print-hide onClick="{{ toggleReveal }}" style="align-self: flex-start; height: 34px; padding: 0 15px; border-radius: 999px; border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 45%, transparent); background: color-mix(in oklab, oklch(60% 0.11 70) 10%, oklch(99.2% 0.005 90)); font-size: 12px; font-weight: 600; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 7px; cursor: pointer;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M11 12 20 3"></path><path d="M16 8l2 2"></path><path d="M13 11l2 2"></path></svg>
+      <div>Show trainer notes</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ notesOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="background: color-mix(in oklab, oklch(45% 0.15 27) 6%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.15 27) 22%, transparent); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(45% 0.15 27); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Trainer only — trainer notes</div>
+        <div data-print-hide onClick="{{ toggleReveal }}" style="font-size: 10.5px; font-weight: 600; color: oklch(45% 0.15 27); cursor: pointer;">Hide</div>
+      </div>
+      <sc-for list="{{ trainerScript }}" as="t" hint-placeholder-count="7">
+        <div style="display: flex; gap: 10px;">
+          <div style="font-size: 10.5px; font-weight: 700; color: oklch(45% 0.15 27); flex: none; width: 56px; padding-top: 1px;">{{ t.time }}</div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ t.step }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">{{ t.note }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+</div>
+
+
+<div class="answer-key-print" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; flex-direction: column; gap: 20px; width: 900px; box-sizing: border-box;">
+  <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Answer key</div>
+  <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: oklch(23.5% 0.017 65);">Sounds — minimal pairs and dictation, in print</div>
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Minimal pairs</div>
+    <sc-for list="{{ pairsKey }}" as="row" hint-placeholder-count="5">
+      <div style="display: grid; grid-template-columns: 200px 1fr; gap: 10px; padding: 4px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ row.pair }}</div>
+        <div style="font-size: 11px; line-height: 1.4; color: oklch(51% 0.017 70);">{{ row.symbols }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:960,&quot;height&quot;:2200}}">
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = 'oklch(48% 0.09 150)';
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+
+const CHART = [
+  { symbol: 'iː', example: 'sheep' }, { symbol: 'ɪ', example: 'ship' }, { symbol: 'ʊ', example: 'book' }, { symbol: 'uː', example: 'boot' },
+  { symbol: 'e', example: 'bed' }, { symbol: 'ə', example: 'about' }, { symbol: 'ɜː', example: 'bird' }, { symbol: 'ɔː', example: 'door' },
+  { symbol: 'æ', example: 'cat' }, { symbol: 'ʌ', example: 'cup' }, { symbol: 'ɑː', example: 'car' }, { symbol: 'ɒ', example: 'hot' },
+  { symbol: 'p', example: 'pen' }, { symbol: 'b', example: 'bad' }, { symbol: 'θ', example: 'think' }, { symbol: 'ð', example: 'this' },
+];
+
+const PAIRS = [
+  { w1: 'ship', w2: 'sheep' }, { w1: 'sink', w2: 'think' }, { w1: 'light', w2: 'right' }, { w1: 'vest', w2: 'west' },
+];
+
+const ARTICULATION = [
+  { symbol: 'iː', how: 'Lips spread wide, like a small smile. Tongue high and forward, tense. Longer than /\u026a/.',
+    tongue: { x: 50, y: 44 }, lip: 'spread', teeth: false },
+  { symbol: '\u026a', how: 'Lips relaxed, more open than /i\u02d0/. Tongue lower and more central, muscles relaxed. Shorter.',
+    tongue: { x: 48, y: 52 }, lip: 'neutral', teeth: false },
+  { symbol: '\u03b8', how: 'Tongue tip between the teeth, air pushed through \u2014 voiceless, so no vocal cord buzz. Compare with /\u00f0/, same position, voiced.',
+    tongue: { x: 24, y: 66 }, lip: 'open', teeth: true },
+  { symbol: '\u00f0', how: 'Same tongue position as /\u03b8/, tongue tip between the teeth \u2014 but voiced, so the vocal cords buzz. Put a hand on your throat to feel the difference.',
+    tongue: { x: 24, y: 66 }, lip: 'open', teeth: true },
+];
+
+const STRUGGLES = [
+  { pair: '/i\u02d0/ vs /\u026a/ \u2014 sheep / ship', who: 'Turkish, Spanish, Japanese, Korean speakers', note: 'Many languages have only one vowel in this space. Learners often can\u2019t hear the contrast before they can produce it \u2014 the ear has to be trained first, which is why this session leads with listening.' },
+  { pair: '/\u03b8/ vs /\u00f0/ \u2014 think / this', who: 'Almost every L1 without a dental fricative', note: 'Commonly replaced with /s/, /z/, /t/, or /d/ (French: "zis" for "this"; many Asian L1s: "tink" for "think"). Showing the tongue position directly is far more effective than describing it.' },
+  { pair: '/r/ vs /l/ \u2014 right / light', who: 'Japanese, Korean speakers', note: 'A famously hard pair because many East Asian languages have one sound occupying the space between English /r/ and /l/. Needs sustained, low-pressure drilling rather than one-off correction.' },
+  { pair: '/v/ vs /w/ \u2014 vest / west', who: 'German, Turkish, Hindi speakers', note: 'Some L1s don\u2019t distinguish these, or map both onto one sound. Lip position is the visible cue worth demonstrating: teeth on lip for /v/, rounded lips for /w/.' },
+];
+
+const DICTATION = [
+  { correct: 'through', word: 'through', distractors: ['though', 'thorough', 'tough'] },
+  { correct: 'colonel', word: 'colonel', distractors: ['kernel', 'coronal', 'colonial'] },
+  { correct: 'debt', word: 'debt', distractors: ['debit', 'deb', 'debate'] },
+];
+
+const INITIAL_PAIR_ANSWERS = PAIRS.map(() => (Math.random() < 0.5 ? 'w1' : 'w2'));
+
+const HOMOPHONE_LINES = [
+  { line: 'Eye here you want to meat hour sun.', answer: 'I hear you want to meet our son.' },
+  { line: 'Hour jump a risen may jet.', answer: 'Our jumper is in my jacket.' },
+  { line: 'Weave scene hour glass is.', answer: "We've seen our glasses." },
+];
+
+const MATCH_PAIRS = [
+  { term: 'Vowels', def: 'are formed by activating the vocal cords' },
+  { term: 'Diphthongs', def: 'are a glide from one vowel to another' },
+  { term: 'Monophthongs', def: 'are single vowels' },
+  { term: 'Consonants', def: 'are formed when the airflow from the lungs is obstructed by the moveable parts of the mouth, including the tongue and the lips' },
+  { term: 'Voiced consonants', def: 'are formed by modifying its passage through the mouth, principally through the use of the tongue and lips' },
+  { term: 'Unvoiced consonants', def: 'do not require the activation of vocal cords' },
+];
+
+const OBSTRUCTION_SOUNDS = [
+  { symbol: 'b', word: 'ban', place: 'lips' }, { symbol: 'm', word: 'man', place: 'lips' },
+  { symbol: 'v', word: 'van', place: 'lips and teeth' }, { symbol: 'n', word: 'nan', place: 'tongue tip, alveolar ridge' },
+  { symbol: 't', word: 'tan', place: 'tongue tip, alveolar ridge' }, { symbol: 'k', word: 'can', place: 'tongue back, velum' },
+];
+
+function shuffled(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const SHUFFLED_DEFS = shuffled(MATCH_PAIRS.map((p, i) => i));
+
+class Component extends DCLogic {
+  state = { voiceIdx: 0, voicesLoaded: false, revealed: false, pairPicks: {}, pairAnswer: INITIAL_PAIR_ANSWERS, dictPicks: {},
+    matchSelectedTerm: null, matchSolved: {}, matchWrong: null, homophoneShown: {} };
+
+  componentDidMount() {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const load = () => {
+      const voices = window.speechSynthesis.getVoices().filter(v => /en/i.test(v.lang));
+      if (voices.length) this.setState({ voicesLoaded: true });
+    };
+    load();
+    window.speechSynthesis.onvoiceschanged = load;
+  }
+
+  pickVoicePreference(i) { this.setState({ voiceIdx: i }); }
+
+  speak(text) {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const all = window.speechSynthesis.getVoices();
+    const prefs = [
+      v => /Google UK English Female/i.test(v.name),
+      v => /Google UK English Male/i.test(v.name),
+      v => /Google US English/i.test(v.name),
+      v => /en-GB/i.test(v.lang),
+      v => /en-US/i.test(v.lang),
+      v => /en/i.test(v.lang),
+    ];
+    const order = [this.state.voiceIdx, 3, 4, 5];
+    let chosen = null;
+    for (const i of order) { chosen = all.find(prefs[i]); if (chosen) break; }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    if (chosen) u.voice = chosen;
+    u.rate = 0.92;
+    window.speechSynthesis.speak(u);
+  }
+
+  playPair(idx) {
+    const p = PAIRS[idx];
+    const fresh = Math.random() < 0.5 ? 'w1' : 'w2';
+    this.setState(s => {
+      const pa = s.pairAnswer.slice(); pa[idx] = fresh;
+      const pp = { ...s.pairPicks }; delete pp[idx];
+      return { pairAnswer: pa, pairPicks: pp };
+    });
+    this.speak(p[fresh]);
+  }
+
+  pickTerm(i) {
+    if (this.state.matchSolved[i]) return;
+    this.setState({ matchSelectedTerm: i, matchWrong: null });
+  }
+
+  pickDef(i) {
+    const sel = this.state.matchSelectedTerm;
+    if (sel === null || this.state.matchSolved[i]) return;
+    if (sel === i) {
+      this.setState(s => ({ matchSolved: { ...s.matchSolved, [i]: true }, matchSelectedTerm: null, matchWrong: null }));
+    } else {
+      this.setState({ matchWrong: i });
+      setTimeout(() => this.setState({ matchWrong: null }), 700);
+    }
+  }
+
+  renderVals() {
+    const { voicesLoaded, revealed, pairPicks, pairAnswer, dictPicks, matchSelectedTerm, matchSolved, matchWrong } = this.state;
+
+    const matchTerms = MATCH_PAIRS.map((p, i) => {
+      const solved = matchSolved[i];
+      const selected = matchSelectedTerm === i;
+      return { label: p.term, pick: () => this.pickTerm(i),
+        border: solved ? GREEN : (selected ? TEAL : BORDER),
+        bg: solved ? 'color-mix(in oklab, ' + GREEN + ' 12%, ' + CARD + ')' : (selected ? 'color-mix(in oklab, ' + TEAL + ' 10%, ' + CARD + ')' : CARD),
+        ink: solved ? GREEN : (selected ? TEAL : INK) };
+    });
+    const matchDefs = SHUFFLED_DEFS.map(i => {
+      const p = MATCH_PAIRS[i];
+      const solved = matchSolved[i];
+      const wrong = matchWrong === i;
+      return { label: p.def, pick: () => this.pickDef(i),
+        border: solved ? GREEN : (wrong ? RED : BORDER),
+        bg: solved ? 'color-mix(in oklab, ' + GREEN + ' 12%, ' + CARD + ')' : (wrong ? 'color-mix(in oklab, ' + RED + ' 10%, ' + CARD + ')' : CARD),
+        ink: solved ? GREEN : (wrong ? RED : INK) };
+    });
+    const matchSolvedCount = Object.keys(matchSolved).length;
+    const speak = (t) => this.speak(t);
+
+    const voiceOptions = [
+      { label: 'British \u2014 female', idx: 0 }, { label: 'British \u2014 male', idx: 1 }, { label: 'American', idx: 2 },
+    ].map(v => ({
+      label: v.label, pick: () => this.pickVoicePreference(v.idx),
+      bg: this.state.voiceIdx === v.idx ? 'color-mix(in oklab, ' + TEAL + ' 12%, ' + CARD + ')' : CARD,
+      border: this.state.voiceIdx === v.idx ? TEAL : BORDER,
+      ink: this.state.voiceIdx === v.idx ? TEAL : INK,
+    }));
+
+    const pairsCorrect = Object.keys(pairPicks).filter(k => pairPicks[k] === 'correct').length;
+    const pairsAnswered = Object.keys(pairPicks).length;
+
+    const pairs = PAIRS.map((p, i) => {
+      const answer = pairAnswer[i] || 'w1';
+      const picked = pairPicks[i];
+      const mk = (key, word) => {
+        const isPicked = picked === key;
+        const isRight = key === answer;
+        const show = !!picked;
+        return {
+          word,
+          pick: () => { if (picked) return; this.setState(s => ({ pairPicks: { ...s.pairPicks, [i]: isRight ? 'correct' : 'wrong' } })); },
+          border: show && isRight ? GREEN : (show && isPicked ? RED : BORDER),
+          bg: show && isRight ? 'color-mix(in oklab, ' + GREEN + ' 14%, ' + CARD + ')' : (show && isPicked ? 'color-mix(in oklab, ' + RED + ' 10%, ' + CARD + ')' : CARD),
+          ink: show && isRight ? GREEN : (show && isPicked ? RED : INK),
+          scale: show && isPicked ? 'scale(1.06)' : 'scale(1)',
+        };
+      };
+      return {
+        replay: () => this.playPair(i),
+        options: [mk('w1', p.w1), mk('w2', p.w2)],
+        result: picked ? (picked === 'correct' ? 'Correct' : 'Try again') : '',
+        resultInk: picked === 'correct' ? GREEN : RED,
+      };
+    });
+
+    const dictation = DICTATION.map((d, di) => {
+      const opts = [d.correct, ...d.distractors];
+      const picked = dictPicks[di];
+      return {
+        play: () => this.speak(d.word),
+        options: opts.map(opt => {
+          const isCorrectPick = picked === opt && opt === d.correct;
+          return {
+            word: opt,
+            pick: () => this.setState(s => ({ dictPicks: { ...s.dictPicks, [di]: opt } })),
+            border: isCorrectPick ? GREEN : (picked === opt ? RED : BORDER),
+            bg: isCorrectPick ? 'color-mix(in oklab, ' + GREEN + ' 14%, ' + CARD + ')' : (picked === opt ? 'color-mix(in oklab, ' + RED + ' 10%, ' + CARD + ')' : CARD),
+            ink: isCorrectPick ? GREEN : (picked === opt ? RED : INK),
+          };
+        }),
+      };
+    });
+
+    return {
+      doPrint: () => window.print(),
+      voiceStatus: voicesLoaded ? 'Using your browser\u2019s built-in speech \u2014 in Chrome this is Google\u2019s natural voices, free and offline once loaded.' : 'Loading voices\u2026 works best in Chrome, where Google\u2019s natural voices are built in.',
+      voiceOptions,
+      matchScoreLabel: matchSolvedCount === MATCH_PAIRS.length ? 'All matched' : (matchSolvedCount ? matchSolvedCount + ' of ' + MATCH_PAIRS.length + ' matched' : ''),
+      matchTerms, matchDefs,
+      obstructionSounds: OBSTRUCTION_SOUNDS.map(s => ({ symbol: s.symbol, place: s.place, play: () => { this.speak(s.symbol); setTimeout(() => this.speak(s.word), 700); } })),
+      leadInPlay: () => { this.speak('ship'); setTimeout(() => this.speak('sheep'), 900); },
+
+      agenda: [
+        { time: '0\u20132', spine: GOLD, title: 'Lead-in' },
+        { time: '2\u201310', spine: TEAL, title: 'The phonemic chart, spoken' },
+        { time: '10\u201325', spine: RED, title: 'Minimal pairs' },
+        { time: '25\u201338', spine: GREEN, title: 'Dictation' },
+        { time: '38\u201345', spine: RED, title: 'Trainer notes' },
+      ],
+      chart: CHART.map(c => ({ symbol: c.symbol, example: c.example, play: () => { this.speak(c.symbol); setTimeout(() => this.speak(c.example), 700); }, bg: CARD, border: BORDER, ink: INK })),
+      articulation: ARTICULATION.map(a => ({ symbol: a.symbol, how: a.how, play: () => this.speak(a.symbol) })),
+      struggles: STRUGGLES,
+      pairsScoreLabel: pairsAnswered ? pairsCorrect + ' of ' + pairsAnswered + ' correct' : '',
+      pairs,
+      dictation,
+      trainerScript: [
+        { time: '0\u20132', step: 'Play both, cold', note: 'Say nothing first. Play "ship" then "sheep" and ask by show of hands which was which. Some will be wrong \u2014 that\u2019s the point, not a problem to fix yet.' },
+        { time: '2\u201310', step: 'Chart, sound then word', note: 'Go symbol by symbol. Click for the isolated sound, then the example word, and ask trainees to repeat both before moving on. Don\u2019t explain IPA conventions yet \u2014 let the sound come first.' },
+        { time: '10\u201317', step: 'Articulation, on the real chart', note: 'Open Seeing Speech on the shared screen. Click each of the four sounds on the real IPA chart and let the video play \u2014 real ultrasound or MRI, not a drawing. Trainees write down, for each sound, what they actually saw: tongue height, lip shape, whether the tongue touches the teeth. Then have them mouth the shape silently before they voice it \u2014 isolates the articulation from the sound itself.' },
+        { time: '17\u201325', step: 'Learner struggles, by L1', note: 'Read each pair\u2019s "who" line aloud and ask if anyone has taught (or is) a speaker of that L1. Real anecdotes land harder than the printed note \u2014 let the room supply them.' },
+        { time: '25\u201338', step: 'Clap game, as a class would run it', note: 'Run it exactly as staged: replay, then clap. After two rounds, stop and ask: "What would you change running this with eight A2 students instead of six trainees?" \u2014 slower pace, fewer pairs at once, more repetition.' },
+        { time: '38\u201343', step: 'Dictation, spelling betrays them', note: 'These three words are chosen because the spelling actively misleads. Let trainees get it wrong once before revealing \u2014 the surprise is the lesson.' },
+        { time: '43\u201345', step: 'Close on the transfer question', note: 'One minute: "Which of today\u2019s four sounds is most likely to come up in your own TP group, based on their L1s?" No feedback needed \u2014 just plant it before they plan.' },
+      ],
+      notesOpen: revealed,
+      toggleReveal: () => this.setState(s => ({ revealed: !s.revealed })),
+      pairsKey: PAIRS.map(p => ({ pair: p.w1 + ' / ' + p.w2, symbols: 'Two different vowel sounds \u2014 play both and compare on the chart above.' })),
+    };
+  }
+}
+</script>
+</body>
+</html>

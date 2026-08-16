@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+  @media print {
+    @page { size: A4; margin: 14mm; }
+    body { background: white; }
+    [data-print-hide] { display: none !important; }
+  }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 48px; display: flex; flex-direction: column; gap: 28px; width: 960px; box-sizing: border-box; position: relative;">
+  <div data-print-hide style="position: absolute; top: 12px; right: 18px; height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 6px; cursor: pointer;" onClick="{{ doPrint }}">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+    <div>Print</div>
+  </div>
+  <div style="position: absolute; bottom: 14px; right: 18px; font-size: 10px; letter-spacing: 0.06em; color: oklch(51% 0.017 70 / 0.35);">LF</div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Resource Hub · 45 minutes · loop input</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 32px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Lesson framework — finding your shape.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">A map of the six lesson shapes trainees will meet across the course, and the one question that decides between them: is the main aim language or skills?</div>
+  </div>
+
+  <div style="background: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent); border-radius: 8px; padding: 16px 19px; display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Running this session</div>
+    <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">This is deliberately an overview, not a deep dive — each shape gets its own full loop input elsewhere. Treat this as the map trainees return to before choosing a framework for their own TP.</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Lead-in · 2 minutes</div>
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px 17px;">
+      <div style="font-size: 13px; color: oklch(23.5% 0.017 65);">Quick show of hands: when you plan a lesson, what's the first decision you make — the language point, the skill, or the activity?</div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">The 45 minutes</div>
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
+      <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="6">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-left: 3px solid {{ a.spine }}; border-radius: 6px; padding: 11px 12px; display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.03em; color: oklch(51% 0.017 70);">{{ a.time }}</div>
+          <div style="font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); line-height: 1.25;">{{ a.title }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">The one question that decides your shape</div>
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 24px 20px 20px; display: flex; flex-direction: column; align-items: center; gap: 0;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; color: oklch(23.5% 0.017 65); text-align: center; padding: 10px 20px; border: 1.5px solid oklch(88% 0.016 82); border-radius: 8px; background: oklch(96.4% 0.014 85);">Is the main aim language or skills?</div>
+      <div style="width: 1.5px; height: 20px; background: oklch(80% 0.016 82);"></div>
+      <div style="display: flex; width: 100%; justify-content: center; position: relative; height: 20px;">
+        <div style="position: absolute; top: 0; left: 25%; right: 25%; height: 1.5px; background: oklch(80% 0.016 82);"></div>
+        <div style="position: absolute; top: 0; left: 25%; width: 1.5px; height: 20px; background: oklch(80% 0.016 82);"></div>
+        <div style="position: absolute; top: 0; right: 25%; width: 1.5px; height: 20px; background: oklch(80% 0.016 82);"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: 100%;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(38% 0.072 195);">Language</div>
+          <div style="font-size: 12px; color: oklch(51% 0.017 70); text-align: center;">Does the target language arise from a text?</div>
+          <div style="width: 1.5px; height: 12px; background: oklch(80% 0.016 82);"></div>
+          <div style="display: flex; width: 100%; justify-content: center; position: relative; height: 12px;">
+            <div style="position: absolute; top: 0; left: 25%; right: 25%; height: 1.5px; background: oklch(80% 0.016 82);"></div>
+            <div style="position: absolute; top: 0; left: 25%; width: 1.5px; height: 12px; background: oklch(80% 0.016 82);"></div>
+            <div style="position: absolute; top: 0; right: 25%; width: 1.5px; height: 12px; background: oklch(80% 0.016 82);"></div>
+          </div>
+          <div style="display: flex; gap: 8px; width: 100%;">
+            <div style="flex: 1; background: color-mix(in oklab, oklch(38% 0.072 195) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 24%, transparent); border-radius: 6px; padding: 8px; text-align: center; font-size: 11.5px; font-weight: 600; color: oklch(38% 0.072 195);">No → PPP / TTT</div>
+            <div style="flex: 1; background: color-mix(in oklab, oklch(48% 0.09 150) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(48% 0.09 150) 24%, transparent); border-radius: 6px; padding: 8px; text-align: center; font-size: 11.5px; font-weight: 600; color: oklch(48% 0.09 150);">Yes → Text-Based</div>
+          </div>
+          <div style="width: 1.5px; height: 12px; background: oklch(80% 0.016 82);"></div>
+          <div style="background: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 24%, transparent); border-radius: 6px; padding: 8px; text-align: center; font-size: 11.5px; font-weight: 600; color: oklch(44% 0.1 68); width: 100%;">Practice only → Language Practice</div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(45% 0.15 27);">Skills</div>
+          <div style="font-size: 12px; color: oklch(51% 0.017 70); text-align: center;">Is it listening or reading?</div>
+          <div style="width: 1.5px; height: 12px; background: oklch(80% 0.016 82);"></div>
+          <div style="display: flex; width: 100%; justify-content: center; position: relative; height: 12px;">
+            <div style="position: absolute; top: 0; left: 25%; right: 25%; height: 1.5px; background: oklch(80% 0.016 82);"></div>
+            <div style="position: absolute; top: 0; left: 25%; width: 1.5px; height: 12px; background: oklch(80% 0.016 82);"></div>
+            <div style="position: absolute; top: 0; right: 25%; width: 1.5px; height: 12px; background: oklch(80% 0.016 82);"></div>
+          </div>
+          <div style="display: flex; gap: 8px; width: 100%;">
+            <div style="flex: 1; background: color-mix(in oklab, oklch(45% 0.15 27) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.15 27) 24%, transparent); border-radius: 6px; padding: 8px; text-align: center; font-size: 11.5px; font-weight: 600; color: oklch(45% 0.15 27);">Yes → Receptive Skills</div>
+            <div style="flex: 1; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 8px; text-align: center; font-size: 11.5px; font-weight: 600; color: oklch(51% 0.017 70);">No → Productive Skills</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">The six shapes, stage by stage</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Study these for a couple of minutes before the card sort below — you'll need them.</div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+      <sc-for list="{{ shapeCards }}" as="sh" hint-placeholder-count="6">
+        <div style="background: {{ sh.bg }}; border: 1px solid {{ sh.border }}; border-top: 3px solid {{ sh.spine }}; border-radius: 8px; padding: 12px 13px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 13.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ sh.name }}</div>
+          <div style="font-size: 10.5px; line-height: 1.55; color: oklch(51% 0.017 70);">{{ sh.stages }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Card sort — pin each stage to its shape</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ sortProgressLabel }}</div>
+    </div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Click a stage, then the shape you think it belongs to.</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+      <sc-for list="{{ trayCards }}" as="c" hint-placeholder-count="6">
+        <div onClick="{{ c.pick }}" style="padding: 8px 13px; border-radius: 6px; background: {{ c.bg }}; border: 1.5px solid {{ c.border }}; font-size: 12px; font-weight: 600; color: {{ c.ink }}; cursor: {{ c.cursor }}; opacity: {{ c.opacity }};">{{ c.text }}</div>
+      </sc-for>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+      <sc-for list="{{ zones }}" as="z" hint-placeholder-count="6">
+        <div onClick="{{ z.pick }}" style="min-height: 70px; border-radius: 8px; border: 1.5px dashed {{ z.border }}; background: {{ z.bg }}; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ z.name }}</div>
+          <sc-if value="{{ z.filled }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size: 10.5px; font-weight: 600; color: {{ z.spine }}; text-align: center;">{{ z.droppedText }}</div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Build the sequence — pick a shape</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ seqStatusLabel }}</div>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+      <sc-for list="{{ seqFwButtons }}" as="f" hint-placeholder-count="4">
+        <div onClick="{{ f.pick }}" style="padding: 6px 13px; border-radius: 999px; border: 1.5px solid {{ f.border }}; background: {{ f.bg }}; font-size: 11.5px; font-weight: 600; color: {{ f.ink }}; cursor: pointer;">{{ f.name }}</div>
+      </sc-for>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+      <sc-for list="{{ seqBankChips }}" as="c" hint-placeholder-count="5">
+        <div onClick="{{ c.pick }}" style="padding: 7px 12px; border-radius: 6px; background: {{ c.bg }}; border: 1.5px solid {{ c.border }}; font-size: 11.5px; font-weight: 600; color: {{ c.ink }}; cursor: {{ c.cursor }}; opacity: {{ c.opacity }};">{{ c.text }}</div>
+      </sc-for>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px; min-height: 40px;">
+      <sc-for list="{{ seqBuilt }}" as="b" hint-placeholder-count="0">
+        <div onClick="{{ b.remove }}" style="display: flex; align-items: center; gap: 10px; background: {{ b.bg }}; border: 1.5px solid {{ b.border }}; border-radius: 6px; padding: 8px 12px; cursor: pointer;">
+          <div style="width: 18px; height: 18px; border-radius: 50%; background: {{ b.numBg }}; color: {{ b.numInk }}; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">{{ b.num }}</div>
+          <div style="font-size: 11.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ b.text }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Name that framework</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ scenarioProgressLabel }}</div>
+    </div>
+    <sc-for list="{{ scenarios }}" as="s" hint-placeholder-count="4">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 12.5px; line-height: 1.55; color: oklch(23.5% 0.017 65);">{{ s.text }}</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 7px;">
+          <sc-for list="{{ s.options }}" as="o" hint-placeholder-count="4">
+            <div onClick="{{ o.pick }}" style="padding: 5px 11px; border-radius: 999px; border: 1.5px solid {{ o.border }}; background: {{ o.bg }}; font-size: 11.5px; font-weight: 600; color: {{ o.ink }}; cursor: pointer;">{{ o.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Stage timer — pacing challenge</div>
+    <div style="font-size: 12px; line-height: 1.6; color: oklch(51% 0.017 70);">You have 45 minutes for a Text-Based lesson. Budget the minutes across the three stages below — the total should land close to 45.</div>
+    <sc-for list="{{ pacingRows }}" as="p" hint-placeholder-count="3">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 10px 14px;">
+        <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ p.name }}</div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <input type="number" min="0" max="45" value="{{ p.value }}" onChange="{{ p.onChange }}" style="width: 56px; padding: 5px 7px; border-radius: 5px; border: 1.5px solid oklch(80% 0.016 82); font-size: 12px; text-align: center; font-family: Karla, Helvetica, sans-serif;">
+          <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">min</div>
+        </div>
+      </div>
+    </sc-for>
+    <div style="padding: 10px 16px; border-radius: 6px; background: {{ pacingTotalBg }}; color: {{ pacingTotalInk }}; font-family: Newsreader, Georgia, serif; font-size: 15px; text-align: center;">Total: {{ pacingTotal }} / 45 min</div>
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">If your Lead-in &amp; Text Reading stage runs 5 minutes over, which stage do you trim without destroying the lesson aim?</div>
+      <div data-print-hide onClick="{{ togglePacingReveal }}" style="align-self: flex-start; height: 30px; padding: 0 13px; border-radius: 999px; border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 40%, transparent); background: color-mix(in oklab, oklch(38% 0.072 195) 8%, oklch(99.2% 0.005 90)); font-size: 11.5px; font-weight: 600; color: oklch(38% 0.072 195); display: flex; align-items: center; cursor: pointer;">Reveal the answer</div>
+      <sc-if value="{{ pacingRevealed }}" hint-placeholder-val="{{ false }}">
+        <div style="border-left: 3px solid oklch(48% 0.09 150); background: color-mix(in oklab, oklch(48% 0.09 150) 8%, oklch(99.2% 0.005 90)); border-radius: 4px; padding: 10px 13px; font-size: 12px; line-height: 1.6; color: oklch(23.5% 0.017 65);">
+            Trim <strong>Controlled Practice &amp; Feedback</strong>, not Clarification. Clarification (meaning, form, pronunciation) is where the actual learning happens — cutting it short undermines the lesson aim. Practice can run one activity instead of two, or feedback can be briefer, without losing the core teaching point.
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ !notesOpen }}" hint-placeholder-val="{{ true }}">
+    <div data-print-hide onClick="{{ toggleReveal }}" style="align-self: flex-start; height: 34px; padding: 0 15px; border-radius: 999px; border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 45%, transparent); background: color-mix(in oklab, oklch(60% 0.11 70) 10%, oklch(99.2% 0.005 90)); font-size: 12px; font-weight: 600; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 7px; cursor: pointer;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M11 12 20 3"></path><path d="M16 8l2 2"></path><path d="M13 11l2 2"></path></svg>
+      <div>Show trainer notes</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ notesOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="background: color-mix(in oklab, oklch(45% 0.15 27) 6%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.15 27) 22%, transparent); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+      <div style="display: inline-flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: oklch(45% 0.15 27);"></div><div style="font-size: 9.5px; font-weight: 800; letter-spacing: 0.12em; color: oklch(45% 0.15 27);">TRAINER ONLY</div></div>
+        <div data-print-hide onClick="{{ toggleReveal }}" style="font-size: 10.5px; font-weight: 600; color: oklch(45% 0.15 27); cursor: pointer;">Hide</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">This is a map, not a rulebook</div>
+        <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">Some real lessons blend two shapes — flag that a text-based lesson's language-focus stage can itself run as guided discovery.</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">"Useful language" isn't target language</div>
+        <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">In Productive Skills lessons, this trips people up constantly — it's optional support for the task, not something to formally present and drill.</div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:960,&quot;height&quot;:2200}}">
+
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = 'oklch(48% 0.09 150)';
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+
+const ZONE_NAMES = ['PPP', 'TTT', 'Text-Based', 'Language Practice', 'Receptive Skills', 'Productive Skills'];
+const STAGES = [
+  { text: 'Present: clarify meaning, form, pronunciation', zone: 'PPP' },
+  { text: 'First test — diagnostic', zone: 'TTT' },
+  { text: 'Highlight target language in the text', zone: 'Text-Based' },
+  { text: 'Set up a controlled practice activity', zone: 'Language Practice' },
+  { text: 'Prediction task', zone: 'Receptive Skills' },
+  { text: 'Useful language (optional support)', zone: 'Productive Skills' },
+];
+
+const SHAPES = [
+  { name: 'PPP', spine: TEAL, stages: 'Lead-in \u2192 Present (meaning, form, pronunciation) \u2192 Practice (accuracy) \u2192 Production (fluency) \u2192 Error correction' },
+  { name: 'Test-Teach-Test', spine: GOLD, stages: 'Lead-in \u2192 First test (diagnostic) \u2192 Teach (clarify gaps) \u2192 Second test \u2192 Feedback' },
+  { name: 'Text-Based', spine: GREEN, stages: 'Lead-in \u2192 Reading/listening task \u2192 Highlight target language \u2192 Clarify \u2192 Practice \u2192 Feedback' },
+  { name: 'Language Practice', spine: GOLD, stages: 'Lead-in (optional) \u2192 Set up \u2192 Controlled practice \u2192 Freer practice \u2192 Feedback' },
+  { name: 'Receptive Skills', spine: RED, stages: 'Lead-in \u2192 (Prediction) \u2192 Pre-teach vocab \u2192 Gist \u2192 Detail \u2192 Specific info \u2192 Post-task response' },
+  { name: 'Productive Skills', spine: 'oklch(48% 0.11 300)', stages: 'Lead-in \u2192 Preparing to write/speak \u2192 Useful language (optional) \u2192 Task \u2192 Feedback' },
+];
+
+const SEQ_FRAMEWORKS = {
+  'PPP': ['Lead-in', 'Present: clarify and focus on TL', 'Practice', 'Production', 'Error correction'],
+  'TTT': ['Lead-in', 'First test (diagnostic)', 'Teach (clarifying)', 'Second test', 'Feedback'],
+  'Receptive Skills': ['Lead-in', '(Prediction task)', 'Pre-teach vocabulary', 'Gist task', 'Detail task', 'Post-task response'],
+  'Language Practice': ['Lead-in (optional)', 'Set up', 'Controlled practice', 'Freer practice', 'Feedback'],
+};
+
+const PACING_STAGES = ['Lead-in & Text Reading (Gist/Detail)', 'Clarification (MFPA)', 'Controlled Practice & Feedback'];
+
+const SCENARIOS = [
+  { text: 'Students do a gap-fill on reported speech with no prior teaching. The teacher notes common errors, then clarifies just those before a second, similar task.', options: ['PPP', 'TTT', 'Text-Based', 'Language Practice'], correct: 'TTT' },
+  { text: 'A short listening about someone\u2019s daily routine. The teacher elicits present simple examples from the audio script, then clarifies meaning, form and pronunciation before controlled practice.', options: ['Text-Based', 'PPP', 'Receptive Skills', 'Productive Skills'], correct: 'Text-Based' },
+  { text: 'The teacher presents the third conditional with a timeline and CCQs, drills pronunciation, then moves to a gap-fill followed by a freer personalised speaking task.', options: ['PPP', 'TTT', 'Language Practice', 'Text-Based'], correct: 'PPP' },
+  { text: 'Students skim a news article for gist, read again for detail, then react orally to the content in pairs.', options: ['Receptive Skills', 'Productive Skills', 'Text-Based', 'TTT'], correct: 'Receptive Skills' },
+];
+
+class Component extends DCLogic {
+  doPrint = () => window.print();
+  state = { selected: null, placed: {}, scenarioSolved: {}, revealed: false, seqFw: 'PPP', seqBuilt: [], seqUsed: {}, pacing: [0, 0, 0], pacingRevealed: false };
+
+  pickSeqFw(fw) { this.setState({ seqFw: fw, seqBuilt: [], seqUsed: {} }); }
+  pickSeqChip(stage) {
+    if (this.state.seqUsed[stage]) return;
+    this.setState(s => ({ seqBuilt: [...s.seqBuilt, stage], seqUsed: { ...s.seqUsed, [stage]: true } }));
+  }
+  removeSeqSlot(idx) {
+    this.setState(s => {
+      const stage = s.seqBuilt[idx];
+      const built = s.seqBuilt.filter((_, i) => i !== idx);
+      const used = { ...s.seqUsed };
+      delete used[stage];
+      return { seqBuilt: built, seqUsed: used };
+    });
+  }
+
+  pickCard(idx) {
+    if (this.state.placed[idx]) return;
+    this.setState({ selected: idx });
+  }
+  pickZone(zoneName) {
+    const { selected, placed } = this.state;
+    if (selected === null) return;
+    if (STAGES[selected].zone === zoneName) {
+      this.setState(s => ({ placed: { ...s.placed, [selected]: zoneName }, selected: null }));
+    } else {
+      this.setState({ selected: null });
+    }
+  }
+
+  renderVals() {
+    const { selected, placed, scenarioSolved, revealed, seqFw, seqBuilt, seqUsed } = this.state;
+    const placedCount = Object.keys(placed).length;
+    const scenarioCount = Object.keys(scenarioSolved).length;
+
+    const shapeCards = SHAPES.map(sh => ({
+      name: sh.name, stages: sh.stages, spine: sh.spine,
+      bg: 'color-mix(in oklab, ' + sh.spine + ' 5%, ' + CARD + ')',
+      border: 'color-mix(in oklab, ' + sh.spine + ' 18%, ' + BORDER + ')',
+    }));
+
+    const { pacing, pacingRevealed } = this.state;
+    const pacingRows = PACING_STAGES.map((name, i) => ({
+      name, value: pacing[i],
+      onChange: e => { const v = parseInt(e.target.value, 10) || 0; this.setState(s => { const p = [...s.pacing]; p[i] = v; return { pacing: p }; }); },
+    }));
+    const pacingTotal = pacing.reduce((a, b) => a + b, 0);
+    const pacingTotalBg = pacingTotal === 45 ? 'color-mix(in oklab, ' + GREEN + ' 16%, ' + CARD + ')' : (pacingTotal > 45 ? 'color-mix(in oklab, ' + RED + ' 12%, ' + CARD + ')' : 'oklch(96.4% 0.014 85)');
+    const pacingTotalInk = pacingTotal === 45 ? GREEN : (pacingTotal > 45 ? RED : INK);
+
+    const seqCorrect = SEQ_FRAMEWORKS[seqFw];
+    const seqDone = seqBuilt.length === seqCorrect.length;
+    const seqAllCorrect = seqDone && seqBuilt.every((s, i) => s === seqCorrect[i]);
+    const seqFwButtons = Object.keys(SEQ_FRAMEWORKS).map(fw => ({
+      name: fw, pick: () => this.pickSeqFw(fw),
+      bg: fw === seqFw ? 'color-mix(in oklab, ' + TEAL + ' 12%, ' + CARD + ')' : CARD,
+      border: fw === seqFw ? TEAL : BORDER,
+      ink: fw === seqFw ? TEAL : INK,
+    }));
+    const seqBankChips = seqCorrect.map(stage => ({
+      text: stage, pick: () => this.pickSeqChip(stage),
+      cursor: seqUsed[stage] ? 'default' : 'pointer',
+      opacity: seqUsed[stage] ? 0.25 : 1,
+      bg: CARD, border: BORDER,
+    }));
+    const seqBuilt_ = seqBuilt.map((stage, i) => {
+      const isCorrect = seqDone && stage === seqCorrect[i];
+      const bad = seqDone && !isCorrect;
+      return {
+        text: stage, num: i + 1, remove: () => this.removeSeqSlot(i),
+        bg: bad ? 'color-mix(in oklab, ' + RED + ' 10%, ' + CARD + ')' : (isCorrect ? 'color-mix(in oklab, ' + GREEN + ' 10%, ' + CARD + ')' : CARD),
+        border: bad ? RED : (isCorrect ? GREEN : BORDER),
+        numBg: bad ? RED : (isCorrect ? GREEN : 'oklch(96.4% 0.014 85)'),
+        numInk: bad || isCorrect ? 'oklch(98.5% 0.006 90)' : MUTED,
+      };
+    });
+
+    const trayCards = STAGES.map((s, i) => {
+      const isPlaced = !!placed[i];
+      const isSel = selected === i;
+      return {
+        text: s.text,
+        pick: () => this.pickCard(i),
+        cursor: isPlaced ? 'default' : 'pointer',
+        opacity: isPlaced ? 0.25 : 1,
+        bg: isSel ? 'color-mix(in oklab, ' + TEAL + ' 10%, ' + CARD + ')' : CARD,
+        border: isSel ? TEAL : BORDER,
+        ink: INK,
+      };
+    });
+
+    const zones = ZONE_NAMES.map(name => {
+      const filledIdx = Object.keys(placed).find(k => placed[k] === name);
+      return {
+        name,
+        pick: () => this.pickZone(name),
+        filled: filledIdx !== undefined,
+        droppedText: filledIdx !== undefined ? STAGES[filledIdx].text : '',
+        bg: filledIdx !== undefined ? 'color-mix(in oklab, ' + GREEN + ' 10%, ' + CARD + ')' : CARD,
+        border: filledIdx !== undefined ? GREEN : BORDER,
+        spine: GREEN,
+      };
+    });
+
+    const scenarios = SCENARIOS.map((s, si) => ({
+      text: s.text,
+      options: s.options.map(opt => {
+        const solved = scenarioSolved[si];
+        const isCorrect = opt === s.correct;
+        const show = solved && isCorrect;
+        return {
+          label: opt,
+          pick: () => { if (opt === s.correct) this.setState(st => ({ scenarioSolved: { ...st.scenarioSolved, [si]: true } })); },
+          bg: show ? 'color-mix(in oklab, ' + GREEN + ' 14%, ' + CARD + ')' : CARD,
+          border: show ? GREEN : BORDER,
+          ink: show ? GREEN : INK,
+        };
+      }),
+    }));
+
+    return {
+      doPrint: this.doPrint,
+      agenda: [
+        { time: '0\u20132', spine: GOLD, title: 'Lead-in' },
+        { time: '2\u20137', spine: TEAL, title: 'The decision tree' },
+        { time: '7\u201312', spine: TEAL, title: 'The six shapes' },
+        { time: '12\u201322', spine: GREEN, title: 'Card sort' },
+        { time: '22\u201330', spine: GREEN, title: 'Build the sequence' },
+        { time: '30\u201338', spine: RED, title: 'Name that framework' },
+        { time: '38\u201343', spine: GOLD, title: 'Stage timer' },
+        { time: '43\u201345', spine: RED, title: 'Trainer notes' },
+      ],
+      shapeCards,
+      pacingRows, pacingTotal, pacingTotalBg, pacingTotalInk,
+      pacingRevealed, togglePacingReveal: () => this.setState(s => ({ pacingRevealed: !s.pacingRevealed })),
+      sortProgressLabel: placedCount + ' of ' + STAGES.length + ' pinned',
+      trayCards, zones,
+      seqStatusLabel: seqDone ? (seqAllCorrect ? 'Correct order!' : 'Not quite — click a slot to remove it and retry') : (seqBuilt.length + ' of ' + seqCorrect.length + ' placed'),
+      seqFwButtons, seqBankChips, seqBuilt: seqBuilt_,
+      scenarioProgressLabel: scenarioCount + ' of ' + SCENARIOS.length + ' correct',
+      scenarios,
+      allDone: (placedCount === STAGES.length && scenarioCount === SCENARIOS.length && seqAllCorrect) || revealed,
+      notesOpen: revealed,
+      toggleReveal: () => this.setState(s => ({ revealed: !s.revealed })),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

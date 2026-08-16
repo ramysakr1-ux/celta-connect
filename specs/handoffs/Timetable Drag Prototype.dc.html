@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,600&display=swap" rel="stylesheet">
+<style>body { margin: 0; background: oklch(92.5% 0.012 85); }</style>
+</helmet>
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 32px; width: 1180px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; background: oklch(94% 0.018 78);">
+  <div style="display: flex; flex-direction: column; gap: 4px;">
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">All four weeks, one system</div>
+    <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">Grab "Filmed observation" (Day 16) and drag it onto another day — targets light up brown / gold / red live. Every other tile here is static, same visual language.</div>
+  </div>
+
+  <sc-for list="{{ weeks }}" as="w" hint-placeholder-count="4">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ w.label }}</div>
+      <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+        <sc-for list="{{ w.days }}" as="d" hint-placeholder-count="5">
+          <div
+            onDragOver="{{ d.onDragOver }}"
+            onDrop="{{ d.onDrop }}"
+            style="background: {{ d.bg }}; border: 2px solid {{ d.border }}; border-radius: 8px; padding: 12px; min-height: 108px; display: flex; flex-direction: column; gap: 6px; transition: background 120ms ease, border-color 120ms ease;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 14px; color: oklch(23.5% 0.017 65);">{{ d.num }}</div>
+              <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ d.day }}</div>
+            </div>
+            <sc-for list="{{ d.tiles }}" as="t" hint-placeholder-count="2">
+              <div
+                draggable="{{ t.draggable }}"
+                onDragStart="{{ t.onDragStart }}"
+                onDragEnd="{{ t.onDragEnd }}"
+                onClick="{{ t.onClick }}"
+                style="background: {{ t.bg }}; border: 1px solid {{ t.border }}; border-left: 3px solid {{ t.spine }}; border-radius: 6px; padding: 6px 8px; display: flex; flex-direction: column; gap: 3px; cursor: pointer; opacity: {{ t.opacity }};">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 5px;">
+                  <div style="font-size: 10.5px; font-weight: 600; color: oklch(23.5% 0.017 65); line-height: 1.25; min-width: 0;">{{ t.title }}</div>
+                  <div style="display: flex; align-items: center; gap: 4px; flex: none;">
+                    <sc-if value="{{ t.zoom }}" hint-placeholder-val="{{ false }}">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="oklch(51% 0.017 70)" stroke-width="2"><path d="M15 10l4.5-2.5v9L15 14"></path><rect x="3" y="6" width="12" height="12" rx="2"></rect></svg>
+                    </sc-if>
+                    <sc-if value="{{ t.who }}" hint-placeholder-val="{{ false }}">
+                      <div style="width: 14px; height: 14px; border-radius: 50%; background: oklch(30% 0.042 58); color: white; font-size: 6.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;">{{ t.who }}</div>
+                    </sc-if>
+                  </div>
+                </div>
+                <sc-if value="{{ t.meta }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size: 8.5px; color: oklch(51% 0.017 70); line-height: 1.3;">{{ t.meta }}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+
+  <sc-if value="{{ detailOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-left: 4px solid {{ detailSpine }}; border-radius: 8px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 8px 24px color-mix(in oklab, black 10%, transparent);">
+      <div style="display: flex; align-items: baseline; justify-content: space-between;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ detailTitle }}</div>
+        <div onClick="{{ detailClose }}" style="font-size: 13px; color: oklch(51% 0.017 70); cursor: pointer;">Close ×</div>
+      </div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ detailWhen }}</div>
+      <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: oklch(23.5% 0.017 65); line-height: 1.5;">
+        <sc-for list="{{ detailRows }}" as="r" hint-placeholder-count="3">
+          <div><strong>{{ r.label }}:</strong> {{ r.value }}</div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ cascadeOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 8px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 8px 24px color-mix(in oklab, black 12%, transparent);">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; color: oklch(23.5% 0.017 65);">Confirm the move</div>
+      <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65); line-height: 1.6;">"Filmed observation" moves from Day 16 to Day {{ cascadeTarget }}. One thing downstream shifts to keep its gap:</div>
+      <div style="background: oklch(94.5% 0.065 85); border-left: 3px solid oklch(60% 0.11 70); border-radius: 4px; padding: 8px 12px; font-size: 12px; color: oklch(23.5% 0.017 65);">Assessor meeting note stays anchored to "the day before the visit" — it moves with it, from Day 16 to Day {{ cascadeTarget }}.</div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <div onClick="{{ cascadeCancel }}" style="padding: 7px 14px; border-radius: 6px; border: 1px solid oklch(89.5% 0.012 82); background: oklch(99.5% 0.004 90); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); cursor: pointer;">Cancel</div>
+        <div onClick="{{ cascadeConfirm }}" style="padding: 7px 14px; border-radius: 6px; background: oklch(30% 0.042 58); font-size: 12px; font-weight: 600; color: white; cursor: pointer;">Confirm move</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="display: flex; gap: 16px; font-size: 11px; color: oklch(51% 0.017 70); align-items: center;">
+    <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; border-radius: 3px; background: color-mix(in oklab, oklch(30% 0.042 58) 18%, white); border: 1px solid oklch(30% 0.042 58);"></div>Clean move</div>
+    <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; border-radius: 3px; background: oklch(94.5% 0.065 85); border: 1px solid oklch(60% 0.11 70);"></div>Shifts a dependency</div>
+    <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; border-radius: 3px; background: color-mix(in oklab, oklch(52% 0.16 27) 15%, white); border: 1px solid oklch(52% 0.16 27);"></div>Blocked</div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const NEUTRAL_BG = 'oklch(99.2% 0.005 90)';
+const NEUTRAL_BORDER = 'oklch(88% 0.016 82)';
+const MUTED = 'oklch(51% 0.017 70)';
+const INK_WARM = 'oklch(30% 0.042 58)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(52% 0.16 27)';
+const TILE_BG = 'oklch(97.5% 0.014 78)';
+const TILE_BORDER = 'oklch(85% 0.025 75)';
+
+const T_TP = '10:00\u201312:30';
+const T_LP = '12:45\u201313:30';
+const T_IN1 = '13:45\u201314:30';
+const T_IN2 = '15:30\u201317:00';
+const T_LATE = '10:45\u201311:30';
+const T_ALLDAY = '10:00\u201318:00';
+
+const WEEKS_DATA = [
+  { label: 'Week 1', days: [
+    { num: '01', day: 'MON', tiles: [{ title: 'Course introduction', spine: GOLD, zoom: true, who: 'RS', meta: 'Whole cohort' }, { title: 'Demo lesson', spine: GOLD, zoom: true, who: 'RS', meta: 'Tutor-taught model' }] },
+    { num: '02', day: 'TUE', tiles: [{ title: 'TP1 · A/B/C', spine: INK_WARM, who: 'RS' }, { title: 'Assignment 3 Q&A', spine: MUTED, meta: '09:00, before release' }] },
+    { num: '03', day: 'WED', tiles: [{ title: 'TP1 · D/E/F', spine: INK_WARM, who: 'AK' }, { title: 'Filmed observation 1', spine: GOLD, zoom: true, meta: 'Recorded, with task' }] },
+    { num: '04', day: 'THU', tiles: [{ title: 'TP2 · A/B/C', spine: INK_WARM, who: 'RS' }, { title: 'Consultation', spine: MUTED, who: 'RS', meta: 'Bookable' }] },
+    { num: '05', day: 'FRI', tiles: [{ title: 'TP2 · D/E/F', spine: INK_WARM, who: 'AK' }, { title: 'Filmed observation 2', spine: GOLD, zoom: true, meta: 'Recorded, with task' }] },
+  ]},
+  { label: 'Week 2', days: [
+    { num: '06', day: 'MON', tiles: [{ title: 'TP3 · A/B/C', spine: INK_WARM, who: 'RS' }, { title: 'Connected speech', spine: GOLD, zoom: true, who: 'AK', meta: 'Strong/weak forms, linking' }] },
+    { num: '07', day: 'TUE', tiles: [{ title: 'TP3 · D/E/F', spine: INK_WARM, who: 'AK' }, { title: 'Stress and intonation', spine: GOLD, zoom: true, who: 'AK', meta: 'Marking stress for LRT' }] },
+    { num: '08', day: 'WED', tiles: [{ title: 'TP4 · A/B/C', spine: INK_WARM, who: 'RS' }, { title: 'Giving feedback on tasks', spine: GOLD, zoom: true, who: 'MY', meta: 'Peer feedback technique' }] },
+    { num: '09', day: 'THU', tiles: [{ title: 'TP4 · D/E/F', spine: INK_WARM, who: 'AK' }, { title: 'Stage 2 tutorials', spine: MUTED, who: 'RS', meta: 'One-to-one, own tutor' }] },
+    { num: '10', day: 'FRI', tiles: [{ title: 'Demo lesson', spine: GOLD, zoom: true, who: 'MY', meta: 'New level' }, { title: 'Unassessed teach / GTKY', spine: INK_WARM, meta: 'Trainee planning' }] },
+  ]},
+  { label: 'Week 3', days: [
+    { num: '11', day: 'MON', tiles: [{ title: 'TP5 · A/B/C', spine: INK_WARM, who: 'RS', meta: 'New level' }, { title: 'Consultation', spine: MUTED, who: 'RS', meta: 'Bookable' }] },
+    { num: '12', day: 'TUE', tiles: [{ title: 'TP5 · D/E/F', spine: INK_WARM, who: 'AK' }, { title: 'Lesson framework', spine: GOLD, zoom: true, who: 'MY', meta: 'The six lesson shapes' }] },
+    { num: '13', day: 'WED', tiles: [{ title: 'TP6 · A/B/C', spine: INK_WARM, who: 'RS' }, { title: 'Syllabus planning · ABC', spine: GOLD, zoom: true, meta: 'Own TP7\u20138 points' }] },
+    { num: '14', day: 'THU', tiles: [{ title: 'TP6 · D/E/F', spine: INK_WARM, who: 'AK' }, { title: 'Language practice', spine: GOLD, zoom: true, who: 'MY', meta: 'Pronunciation drilling' }] },
+    { num: '15', day: 'FRI', tiles: [{ title: 'Late start', spine: MUTED, meta: '10:00\u201310:45' }, { title: 'Stage 3 tutorials', spine: MUTED, who: 'RS', meta: 'By invitation' }] },
+  ]},
+  { label: 'Week 4', days: [
+    { num: '16', day: 'MON', tiles: [{ title: 'TP7 · A/B/C', spine: INK_WARM, who: 'RS' }, { title: 'Filmed observation', spine: GOLD, zoom: true, meta: 'Recorded, with task', draggableTile: true, isDragSource: true }] },
+    { num: '17', day: 'TUE', tiles: [{ title: 'TP7 · D/E/F', spine: INK_WARM, who: 'AK' }, { title: 'Consultation', spine: MUTED, who: 'MY', meta: 'Assignment 2 questions' }], blocked: true },
+    { num: '18', day: 'WED', tiles: [{ title: 'TP8 · A/B/C', spine: INK_WARM, who: 'RS', meta: 'Final assessed' }, { title: 'Teaching literacy', spine: GOLD, zoom: true, meta: 'Elective' }], amber: true },
+    { num: '19', day: 'THU', tiles: [{ title: 'TP8 · D/E/F', spine: INK_WARM, who: 'AK', meta: 'Final assessed' }, { title: 'Written feedback only', spine: MUTED, who: 'AK', meta: 'Final TP' }], amber: true },
+    { num: '20', day: 'FRI', tiles: [{ title: 'Course close', spine: GOLD, meta: 'Whole cohort' }, { title: 'Course close', spine: GOLD, meta: 'Grades, certificates' }] },
+  ]},
+];
+
+const DETAIL_ROWS = (title, day) => {
+  if (title.startsWith('TP')) return [
+    { label: 'Room', value: 'Zoom link opens 10 minutes before' },
+    { label: 'Candidates', value: 'One teaches, the rest peer-observe' },
+    { label: 'Criteria in scope', value: '4a, 4d, 5a, 5f — accumulated from prior sessions' },
+    { label: 'Materials', value: 'Own lesson plan, submitted the evening before' },
+  ];
+  if (title === 'Consultation' || title.includes('tutorial')) return [
+    { label: 'Format', value: 'Bookable, 15-minute slots within the block' },
+    { label: 'Tutor', value: 'Whoever taught the group that day' },
+    { label: 'Booking sheet', value: 'Positions, not clock times — first to book gets 1st' },
+  ];
+  if (title === 'Filmed observation' || title.startsWith('Filmed')) return [
+    { label: 'Format', value: 'Recorded lesson, watched together in the room' },
+    { label: 'Task', value: 'Observation task completed during the session' },
+    { label: 'Counts toward', value: 'The 6-hour experienced-teacher observation minimum, video-capped at 3h' },
+  ];
+  if (title === 'Course close' || title === 'Written feedback only') return [
+    { label: 'Attendance', value: 'Whole cohort' },
+    { label: 'Output', value: 'Final grades recorded, certificates released' },
+  ];
+  return [
+    { label: 'Trainer', value: 'Assigned per the syllabus planning grid' },
+    { label: 'Materials', value: 'Slides, handout, linked from Resources' },
+    { label: 'Covers', value: 'Named syllabus strands feeding this week\u2019s TP criteria' },
+  ];
+};
+
+class Component extends DCLogic {
+  state = { dragging: false, dragOverDay: null, cascadeOpen: false, cascadeTarget: null, detailTile: null };
+
+  startDrag = () => this.setState({ dragging: true });
+  endDrag = () => this.setState({ dragging: false, dragOverDay: null });
+  dragOver = (num) => (e) => { e.preventDefault(); if (this.state.dragging) this.setState({ dragOverDay: num }); };
+  drop = (num) => (e) => {
+    e.preventDefault();
+    if (!this.state.dragging || num === '16') return;
+    this.setState({ dragging: false, dragOverDay: null, cascadeOpen: true, cascadeTarget: num });
+  };
+  cascadeCancel = () => this.setState({ cascadeOpen: false, cascadeTarget: null });
+  cascadeConfirm = () => this.setState({ cascadeOpen: false, cascadeTarget: null });
+  openDetail = (tile, day) => () => this.setState({ detailTile: { tile, day } });
+  closeDetail = () => this.setState({ detailTile: null });
+
+  renderVals() {
+    const { dragging, dragOverDay, cascadeOpen, cascadeTarget, detailTile } = this.state;
+
+    const weeks = WEEKS_DATA.map(w => ({
+      label: w.label,
+      days: w.days.map(d => {
+        let bg = NEUTRAL_BG, border = NEUTRAL_BORDER;
+        const isOver = dragging && dragOverDay === d.num && d.num !== '16';
+        if (isOver) {
+          if (d.blocked) { bg = 'color-mix(in oklab, ' + RED + ' 15%, white)'; border = RED; }
+          else if (d.amber) { bg = 'oklch(94.5% 0.065 85)'; border = GOLD; }
+          else { bg = 'color-mix(in oklab, ' + INK_WARM + ' 15%, white)'; border = INK_WARM; }
+        }
+        return {
+          num: d.num, day: d.day,
+          bg, border,
+          onDragOver: this.dragOver(d.num),
+          onDrop: this.drop(d.num),
+          tiles: d.tiles.map(t => ({
+            title: t.title, spine: t.spine, zoom: !!t.zoom, who: t.who || '', meta: t.meta || '',
+            draggable: !!t.draggableTile,
+            cursor: t.draggableTile ? 'grab' : 'default',
+            opacity: dragging && t.draggableTile ? 0.4 : 1,
+            bg: 'color-mix(in oklab, ' + t.spine + ' 12%, oklch(99% 0.004 90))',
+            border: 'color-mix(in oklab, ' + t.spine + ' 28%, white)',
+            onDragStart: t.draggableTile ? this.startDrag : () => {},
+            onDragEnd: this.endDrag,
+            onClick: this.openDetail(t, d),
+          })),
+        };
+      }),
+    }));
+
+    const detailOpen = !!detailTile;
+    return {
+      weeks, cascadeOpen, cascadeTarget, cascadeCancel: this.cascadeCancel, cascadeConfirm: this.cascadeConfirm,
+      detailOpen,
+      detailTitle: detailOpen ? detailTile.tile.title : '',
+      detailWhen: detailOpen ? 'Day ' + detailTile.day.num + ' \u00b7 ' + detailTile.day.day + ' \u00b7 ' + detailTile.tile.time : '',
+      detailSpine: detailOpen ? detailTile.tile.spine : NEUTRAL_BORDER,
+      detailRows: detailOpen ? DETAIL_ROWS(detailTile.tile.title, detailTile.day) : [],
+      detailClose: this.closeDetail,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+  .answer-key-print { display: none; }
+  @media print {
+    @page { size: A4; margin: 14mm; }
+    body { background: white; }
+    [data-print-hide] { display: none !important; }
+    body.print-key #main-body { display: none !important; }
+    body.print-key .answer-key-print { display: flex !important; }
+  }
+</style>
+</helmet>
+
+<div id="main-body" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; display: flex; flex-direction: column; gap: 28px; width: 960px; box-sizing: border-box; position: relative;">
+  <div data-print-hide style="position: absolute; top: 12px; right: 98px; height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 45%, transparent); background: color-mix(in oklab, oklch(60% 0.11 70) 10%, oklch(99.2% 0.005 90)); font-size: 11px; font-weight: 600; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 6px; cursor: pointer;" onClick="{{ toggleExample }}">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M9 13h6"></path><path d="M9 17h6"></path></svg>
+    <div>Staging example</div>
+  </div>
+  <div data-print-hide style="position: absolute; top: 12px; right: 18px; height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 6px; cursor: pointer;" onClick="{{ doPrint }}">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+    <div>Print</div>
+  </div>
+  <div style="position: absolute; bottom: 14px; right: 18px; font-size: 10px; letter-spacing: 0.06em; color: oklch(51% 0.017 70 / 0.35);">TV</div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Resource Hub · 45 minutes · language awareness</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 32px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Teaching vocabulary and lexis.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">A word isn't one fact to give — it's several: meaning, form, pronunciation, and how it combines with other words. This session works through a real item using techniques you'll use in your own teaching.</div>
+  </div>
+
+  <div style="background: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent); border-radius: 8px; padding: 16px 19px; display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Running this session</div>
+    <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">Push past "look it up in a dictionary" — the point of this session is choosing a clarification technique deliberately, not defaulting to the same one every time.</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Lead-in · 2 minutes</div>
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px 17px;">
+      <div style="font-size: 13px; color: oklch(23.5% 0.017 65);">Quick show of hands: how many words do you think a word "take up (a hobby)" actually is — one, or more than one?</div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">The 45 minutes</div>
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
+      <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="6">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-left: 3px solid {{ a.spine }}; border-radius: 6px; padding: 11px 12px; display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.03em; color: oklch(51% 0.017 70);">{{ a.time }}</div>
+          <div style="font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); line-height: 1.25;">{{ a.title }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Match the term to its meaning</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ termProgressLabel }}</div>
+    </div>
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 16px; display: flex; gap: 16px;">
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+        <sc-for list="{{ termLeft }}" as="r" hint-placeholder-count="6">
+          <div onClick="{{ r.pick }}" style="min-height: 38px; border-radius: 6px; border: 1.5px solid {{ r.border }}; background: {{ r.bg }}; display: flex; align-items: center; padding: 0 12px; font-family: Newsreader, Georgia, serif; font-size: 12.5px; font-weight: 600; color: {{ r.ink }}; cursor: {{ r.cursor }};">{{ r.text }}</div>
+        </sc-for>
+      </div>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+        <sc-for list="{{ termRight }}" as="r" hint-placeholder-count="6">
+          <div onClick="{{ r.pick }}" style="min-height: 38px; border-radius: 6px; border: 1.5px solid {{ r.border }}; background: {{ r.bg }}; display: flex; align-items: center; padding: 0 12px; font-size: 11px; line-height: 1.35; color: {{ r.ink }}; cursor: {{ r.cursor }};">{{ r.text }}</div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Choose a technique for each item</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">For each word, click the technique you'd actually use to clarify it — then check.</div>
+    <sc-for list="{{ chooseItems }}" as="c" hint-placeholder-count="4">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 12px 15px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 14px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ c.word }}</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <sc-for list="{{ c.options }}" as="o" hint-placeholder-count="4">
+            <div onClick="{{ o.pick }}" style="padding: 6px 11px; border-radius: 999px; border: 1.5px solid {{ o.border }}; background: {{ o.bg }}; font-size: 11.5px; font-weight: 600; color: {{ o.ink }}; cursor: pointer;">{{ o.label }}</div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ c.feedback }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ c.feedback }}</div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Build the collocations</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Vocabulary rarely stands alone. Click the words that naturally collocate with "make," then with "do."</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <sc-for list="{{ colloGroups }}" as="g" hint-placeholder-count="2">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 14px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ g.verb }} ___</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{ g.options }}" as="o" hint-placeholder-count="5">
+              <div onClick="{{ o.pick }}" style="padding: 5px 10px; border-radius: 6px; border: 1.5px solid {{ o.border }}; background: {{ o.bg }}; font-size: 11.5px; font-weight: 600; color: {{ o.ink }}; cursor: pointer;">{{ o.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Discuss: your own examples</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Think of your own next TP point's vocabulary. For each question, jot a quick answer before comparing with a partner.</div>
+    <sc-for list="{{ discussQs }}" as="d" hint-placeholder-count="3">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 11px 14px;">
+        <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ d.n }}. {{ d.q }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ keyClosed }}" hint-placeholder-val="{{ true }}">
+    <div data-print-hide onClick="{{ toggleKey }}" style="align-self: flex-start; height: 34px; padding: 0 15px; border-radius: 999px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 7px; cursor: pointer;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M11 12 20 3"></path><path d="M16 8l2 2"></path><path d="M13 11l2 2"></path></svg>
+      <div>Reveal answer key — save or print to keep</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ keyOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="border-top: 1px solid oklch(88% 0.016 82); padding-top: 18px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Answer key — handout, to keep</div>
+        <div style="display: flex; gap: 8px;">
+          <div data-print-hide onClick="{{ toggleKey }}" style="height: 28px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer;">Hide</div>
+          <div data-print-hide onClick="{{ doPrintKey }}" style="height: 28px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+            <div>Print</div>
+          </div>
+        </div>
+      </div>
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Terms</div>
+      <sc-for list="{{ keyTerms }}" as="row" hint-placeholder-count="6">
+        <div style="display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 4px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ row.term }}</div>
+          <div style="font-size: 11px; line-height: 1.4; color: oklch(51% 0.017 70);">{{ row.def }}</div>
+        </div>
+      </sc-for>
+    </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ !notesOpen }}" hint-placeholder-val="{{ true }}">
+    <div data-print-hide onClick="{{ toggleReveal }}" style="align-self: flex-start; height: 34px; padding: 0 15px; border-radius: 999px; border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 45%, transparent); background: color-mix(in oklab, oklch(60% 0.11 70) 10%, oklch(99.2% 0.005 90)); font-size: 12px; font-weight: 600; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 7px; cursor: pointer;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M11 12 20 3"></path><path d="M16 8l2 2"></path><path d="M13 11l2 2"></path></svg>
+      <div>Show trainer notes</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ notesOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="background: color-mix(in oklab, oklch(45% 0.15 27) 6%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.15 27) 22%, transparent); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(45% 0.15 27); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Trainer only — trainer notes</div>
+        <div data-print-hide onClick="{{ toggleReveal }}" style="font-size: 10.5px; font-weight: 600; color: oklch(45% 0.15 27); cursor: pointer;">Hide</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Chunks, not just single words</div>
+        <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">Push trainees to teach "take up a hobby" as one chunk, not "take" plus "up" separately — much vocabulary is multi-word by nature.</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Don't over-teach</div>
+        <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">Not every item needs full MFP treatment — a receptive vocabulary item met in a text may only need a quick gloss, not a full clarification stage.</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Watch for false friends between techniques and levels</div>
+        <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">A technique that works cleanly at B1 (a definition) may need a very different one at A1 (realia, mime) — the "right" technique depends on the group.</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showExample }}" hint-placeholder-val="{{ false }}">
+    <div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid oklch(88% 0.016 82); padding-top: 20px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; color: oklch(23.5% 0.017 65);">Example — clarifying "take up (a hobby)"</div>
+      <div style="border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+        <sc-for list="{{ exampleRows }}" as="r" hint-placeholder-count="5">
+          <div style="display: grid; grid-template-columns: 150px 1fr; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+            <div style="padding: 9px 12px; background: oklch(96.4% 0.014 85); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ r.label }}</div>
+            <div style="padding: 9px 12px; font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ r.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+
+<div class="answer-key-print" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; flex-direction: column; gap: 20px; width: 900px; box-sizing: border-box;">
+  <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Answer key</div>
+  <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: oklch(23.5% 0.017 65);">Teaching vocabulary — answer key</div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Terms</div>
+    <sc-for list="{{ keyTerms }}" as="row" hint-placeholder-count="6">
+      <div style="display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 4px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ row.term }}</div>
+        <div style="font-size: 11px; line-height: 1.4; color: oklch(51% 0.017 70);">{{ row.def }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:960,&quot;height&quot;:2200}}">
+
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = 'oklch(48% 0.09 150)';
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+
+const TERMS = [
+  { term: 'Lexical set', def: 'A group of words that share a topic, e.g. weather words.' },
+  { term: 'Collocation', def: 'Words that naturally occur together — "make a decision," not "do a decision."' },
+  { term: 'Receptive vocabulary', def: 'Words a learner can understand but might not produce.' },
+  { term: 'Productive vocabulary', def: 'Words a learner can understand and actively use.' },
+  { term: 'Realia', def: 'Real objects brought into the classroom to clarify meaning.' },
+  { term: 'Connotation', def: 'The feeling or association a word carries beyond its literal meaning.' },
+];
+
+const CHOOSE_ITEMS = [
+  { word: 'furious', correct: 'Cline / scale', feedback: 'A cline against "angry" and "annoyed" shows the relative strength — a definition alone doesn\u2019t convey intensity.' },
+  { word: 'umbrella', correct: 'Realia / picture', feedback: 'A concrete object — showing beats defining.' },
+  { word: 'take up (a hobby)', correct: 'Situation / example sentences', feedback: 'A phrasal verb with a non-literal meaning needs context to show what "take up" actually means here.' },
+  { word: 'nostalgic', correct: 'Definition + example', feedback: 'An abstract feeling word usually needs a clear definition plus a relatable example, since it can\u2019t be shown.' },
+];
+const CHOOSE_OPTIONS = ['Realia / picture', 'Cline / scale', 'Situation / example sentences', 'Definition + example'];
+
+const COLLO_MAKE = ['a decision', 'a mistake', 'progress', 'money'];
+const COLLO_MAKE_DISTRACTORS = ['homework', 'a favour'];
+const COLLO_DO = ['homework', 'a favour', 'business', 'the shopping'];
+const COLLO_DO_DISTRACTORS = ['a decision', 'money'];
+
+class Component extends DCLogic {
+  doPrint = () => window.print();
+  doPrintKey = () => {
+    document.body.classList.add('print-key');
+    window.print();
+    setTimeout(() => document.body.classList.remove('print-key'), 500);
+  };
+  state = { tSelL: null, tSelR: null, tMatched: {}, tShake: [], choosePicked: {}, colloPicked: { make: {}, do: {} }, revealed: false, showExample: false, keyOpen: false };
+  tKey(id) { return 't:' + id; }
+  tryMatch() {
+    const { tSelL, tSelR, tMatched } = this.state;
+    if (tSelL === null || tSelR === null) return;
+    if (tSelL === tSelR) this.setState({ tMatched: { ...tMatched, [this.tKey(tSelL)]: true }, tSelL: null, tSelR: null });
+    else { this.setState({ tShake: [tSelL, tSelR] }); setTimeout(() => this.setState({ tSelL: null, tSelR: null, tShake: [] }), 400); }
+  }
+  pickLeft(id) { if (this.state.tMatched[this.tKey(id)]) return; this.setState({ tSelL: id }, () => this.tryMatch()); }
+  pickRight(id) { if (this.state.tMatched[this.tKey(id)]) return; this.setState({ tSelR: id }, () => this.tryMatch()); }
+
+  renderVals() {
+    const { tSelL, tSelR, tMatched, tShake, choosePicked, colloPicked, revealed, showExample } = this.state;
+    const termStyle = (id, sel) => {
+      const isMatched = tMatched[this.tKey(id)];
+      const isSel = sel === id;
+      const isShake = tShake.includes(id);
+      return {
+        bg: isMatched ? 'color-mix(in oklab, ' + GREEN + ' 12%, ' + CARD + ')' : (isSel ? 'color-mix(in oklab, ' + TEAL + ' 10%, ' + CARD + ')' : CARD),
+        border: isMatched ? GREEN : (isSel ? TEAL : (isShake ? RED : BORDER)),
+        ink: isMatched ? GREEN : INK,
+        cursor: isMatched ? 'default' : 'pointer',
+      };
+    };
+    const rightOrder = TERMS.map((_, i) => i).reverse();
+    const matchedCount = Object.keys(tMatched).length;
+
+    const chooseItems = CHOOSE_ITEMS.map((c, ci) => {
+      const picked = choosePicked[ci];
+      return {
+        word: c.word,
+        options: CHOOSE_OPTIONS.map(opt => {
+          const isCorrectPick = picked === opt && opt === c.correct;
+          return {
+            label: opt,
+            pick: () => this.setState(s => ({ choosePicked: { ...s.choosePicked, [ci]: opt } })),
+            border: isCorrectPick ? GREEN : (picked === opt ? RED : BORDER),
+            bg: isCorrectPick ? 'color-mix(in oklab, ' + GREEN + ' 14%, ' + CARD + ')' : (picked === opt ? 'color-mix(in oklab, ' + RED + ' 10%, ' + CARD + ')' : CARD),
+            ink: isCorrectPick ? GREEN : (picked === opt ? RED : INK),
+          };
+        }),
+        feedback: picked ? c.feedback : '',
+      };
+    });
+
+    function shuffle(arr) { return [...arr].sort(() => 0.5 - Math.random()); }
+    const makeOptions = shuffle([...COLLO_MAKE, ...COLLO_MAKE_DISTRACTORS]);
+    const doOptions = shuffle([...COLLO_DO, ...COLLO_DO_DISTRACTORS]);
+
+    const buildGroup = (options, correctSet, key) => options.map(word => {
+      const picked = colloPicked[key][word];
+      const isCorrect = correctSet.includes(word);
+      return {
+        label: word,
+        pick: () => this.setState(s => ({ colloPicked: { ...s.colloPicked, [key]: { ...s.colloPicked[key], [word]: true } } })),
+        border: picked ? (isCorrect ? GREEN : RED) : BORDER,
+        bg: picked ? (isCorrect ? 'color-mix(in oklab, ' + GREEN + ' 14%, ' + CARD + ')' : 'color-mix(in oklab, ' + RED + ' 10%, ' + CARD + ')') : CARD,
+        ink: picked ? (isCorrect ? GREEN : RED) : INK,
+      };
+    });
+
+    return {
+      doPrint: this.doPrint,
+      doPrintKey: this.doPrintKey,
+      agenda: [
+        { time: '0\u20132', spine: GOLD, title: 'Lead-in' },
+        { time: '2\u201312', spine: TEAL, title: 'Match the terms' },
+        { time: '12\u201325', spine: RED, title: 'Choose a technique' },
+        { time: '25\u201335', spine: GREEN, title: 'Build the collocations' },
+        { time: '35\u201340', spine: GOLD, title: 'Discuss: your own examples' },
+        { time: '40\u201345', spine: RED, title: 'Trainer notes' },
+      ],
+      termProgressLabel: matchedCount + ' of ' + TERMS.length + ' matched',
+      termLeft: TERMS.map((t, i) => ({ text: t.term, pick: () => this.pickLeft(i), ...termStyle(i, tSelL) })),
+      termRight: rightOrder.map(idx => ({ text: TERMS[idx].def, pick: () => this.pickRight(idx), ...termStyle(idx, tSelR) })),
+      chooseItems,
+      colloGroups: [
+        { verb: 'Make', options: buildGroup(makeOptions, COLLO_MAKE, 'make') },
+        { verb: 'Do', options: buildGroup(doOptions, COLLO_DO, 'do') },
+      ],
+      discussQs: [
+        'What\u2019s one item from your point that could be a whole lexical set, not just a single word?',
+        'Which technique would you use for it, and why not one of the others?',
+        'Is there a collocation your students are likely to get wrong with this item?',
+      ].map((q, i) => ({ n: i + 1, q })),
+      keyOpen: this.state.keyOpen,
+      keyClosed: !this.state.keyOpen,
+      toggleKey: () => this.setState(s => ({ keyOpen: !s.keyOpen })),
+      keyTerms: TERMS,
+      notesOpen: revealed,
+      toggleReveal: () => this.setState(s => ({ revealed: !s.revealed })),
+      showExample,
+      toggleExample: () => this.setState(s => ({ showExample: !s.showExample })),
+      exampleRows: [
+        { label: 'Item', value: 'take up (a hobby)' },
+        { label: 'Meaning', value: 'To start doing something regularly, as a new habit or interest.' },
+        { label: 'Technique', value: 'Situation: "I was bored last year, so I took up painting." Elicit what "took up" means from context.' },
+        { label: 'Form', value: 'take up + noun (the object, an activity)' },
+        { label: 'Pronunciation', value: '/ˈteɪk ʌp/ — stress on both words equally, linking across the phrasal verb.' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+  .answer-key-print { display: none; }
+  @media print {
+    @page { size: A4; margin: 14mm; }
+    body { background: white; }
+    [data-print-hide] { display: none !important; }
+    body.print-key #main-body { display: none !important; }
+    body.print-key .answer-key-print { display: flex !important; }
+  }
+</style>
+</helmet>
+
+<div id="main-body" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; display: flex; flex-direction: column; gap: 28px; width: 960px; box-sizing: border-box; position: relative;">
+  <div data-print-hide style="position: absolute; top: 12px; right: 18px; height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 6px; cursor: pointer;" onClick="{{ doPrint }}">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+    <div>Print</div>
+  </div>
+  <div style="position: absolute; bottom: 14px; right: 18px; font-size: 10px; letter-spacing: 0.06em; color: oklch(51% 0.017 70 / 0.35);">SI</div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Resource Hub · 45 minutes · phonology, spoken aloud</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 32px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Stress and intonation.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Word stress and sentence tune, both spoken aloud, both worth a mark on FOL and LRT. Click any word or line to hear it.</div>
+  </div>
+
+  <div style="background: color-mix(in oklab, oklch(38% 0.072 195) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 26%, transparent); border-radius: 8px; padding: 16px 19px; display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(38% 0.072 195); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Where this feeds back in</div>
+    <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">FOL asks you to record and analyse a learner's pronunciation errors — stress and intonation are two of the categories you'll be sorting those errors into. LRT asks you to analyse language for teaching, including its phonological features — the word-stress marking convention practised here is the one your LRT write-up should use.</div>
+  </div>
+
+  <div style="background: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent); border-radius: 8px; padding: 16px 19px; display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Voice</div>
+    <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ voiceStatus }}</div>
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+      <sc-for list="{{ voiceOptions }}" as="v" hint-placeholder-count="3">
+        <div onClick="{{ v.pick }}" style="padding: 6px 12px; border-radius: 999px; border: 1.5px solid {{ v.border }}; background: {{ v.bg }}; font-size: 11.5px; font-weight: 600; color: {{ v.ink }}; cursor: pointer;">{{ v.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">The 45 minutes</div>
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
+      <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="6">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-left: 3px solid {{ a.spine }}; border-radius: 6px; padding: 11px 12px; display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.03em; color: oklch(51% 0.017 70);">{{ a.time }}</div>
+          <div style="font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); line-height: 1.25;">{{ a.title }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Intonation — question or statement?</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">The words don't change, only the tune does. "You're coming." falling means a statement; rising means a question — click each line to hear the tune, then guess before revealing.</div>
+    <sc-for list="{{ intonation }}" as="i" hint-placeholder-count="3">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; gap: 14px;">
+        <div onClick="{{ i.play }}" style="width: 32px; height: 32px; border-radius: 50%; background: oklch(38% 0.072 195); color: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+        </div>
+        <div style="font-size: 13px; color: oklch(23.5% 0.017 65); flex: 1;">"{{ i.text }}"</div>
+        <sc-if value="{{ i.revealed }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size: 11.5px; font-weight: 600; color: {{ i.ink }};">{{ i.answer }}</div>
+        </sc-if>
+        <sc-if value="{{ !i.revealed }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ i.reveal }}" style="font-size: 11px; font-weight: 600; color: oklch(38% 0.072 195); cursor: pointer;">Reveal</div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Marking stress for LRT</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">The convention: a bold syllable, or a small mark before it — <strong>re</strong>cord vs re<strong>cord</strong>. Click a word to hear it, then click the syllable you think carries the stress.</div>
+    <sc-for list="{{ markingWords }}" as="w" hint-placeholder-count="4">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; gap: 14px;">
+        <div onClick="{{ w.play }}" style="width: 32px; height: 32px; border-radius: 50%; background: oklch(60% 0.11 70); color: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+        </div>
+        <div style="display: flex; gap: 4px; flex: 1;">
+          <sc-for list="{{ w.syllables }}" as="s" hint-placeholder-count="3">
+            <div onClick="{{ s.pick }}" style="padding: 6px 12px; border-radius: 6px; border: 1.5px solid {{ s.border }}; background: {{ s.bg }}; font-family: Newsreader, Georgia, serif; font-size: 14px; font-weight: {{ s.weight }}; color: {{ s.ink }}; cursor: pointer;">{{ s.text }}</div>
+          </sc-for>
+        </div>
+        <div style="font-size: 11px; font-weight: 600; color: {{ w.resultInk }}; width: 70px; text-align: right;">{{ w.result }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Primary and secondary stress</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Longer words often carry two stresses, not one — a strong primary stress and a weaker secondary stress. Click the speaker to hear the word said naturally (the synthesised voice can't fake syllable-level stress convincingly — listen for it yourself, or say the word aloud). Click each circle once for secondary stress, twice for primary.</div>
+    <sc-for list="{{ doubleStress }}" as="w" hint-placeholder-count="6">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; gap: 14px;">
+        <div onClick="{{ w.play }}" style="width: 32px; height: 32px; border-radius: 50%; background: oklch(38% 0.072 195); color: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+        </div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 14px; font-weight: 600; color: oklch(23.5% 0.017 65); flex: none; width: 130px;">{{ w.word }}</div>
+        <div style="display: flex; align-items: flex-end; gap: 8px; flex: 1;">
+          <sc-for list="{{ w.syllables }}" as="s" hint-placeholder-count="4">
+            <div onClick="{{ s.pick }}" style="width: {{ s.size }}px; height: {{ s.size }}px; border-radius: 50%; border: 1.5px solid {{ s.border }}; background: {{ s.bg }}; cursor: pointer;"></div>
+          </sc-for>
+        </div>
+        <div onClick="{{ w.reveal }}" style="font-size: 11px; font-weight: 600; color: {{ w.resultInk }}; width: 70px; text-align: right; cursor: pointer;">{{ w.result }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Extension, if there's time — stress carries attitude</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Same sentence, same words — the stressed word changes what's actually meant. Read the context, then click the word you'd stress in the reply.</div>
+    <sc-for list="{{ contrastive }}" as="c" hint-placeholder-count="4">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 13px 16px; display: flex; flex-direction: column; gap: 9px;">
+        <div style="font-size: 12px; color: oklch(51% 0.017 70); font-style: italic;">{{ c.context }}</div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+            <sc-for list="{{ c.words }}" as="w" hint-placeholder-count="6">
+              <div onClick="{{ w.pick }}" style="font-size: 14px; font-weight: {{ w.weight }}; color: {{ w.ink }}; cursor: pointer; padding: 2px 4px; border-radius: 4px; background: {{ w.bg }};">{{ w.text }}</div>
+            </sc-for>
+          </div>
+          <div onClick="{{ c.reveal }}" style="font-size: 11px; font-weight: 600; color: oklch(38% 0.072 195); width: 70px; text-align: right; cursor: pointer; flex: none;">{{ c.revealLabel }}</div>
+        </div>
+        <sc-if value="{{ c.show }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size: 11.5px; color: oklch(23.5% 0.017 65); border-top: 1px solid oklch(88% 0.016 82); padding-top: 8px;">{{ c.explain }}</div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ !notesOpen }}" hint-placeholder-val="{{ true }}">
+    <div data-print-hide onClick="{{ toggleReveal }}" style="align-self: flex-start; height: 34px; padding: 0 15px; border-radius: 999px; border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 45%, transparent); background: color-mix(in oklab, oklch(60% 0.11 70) 10%, oklch(99.2% 0.005 90)); font-size: 12px; font-weight: 600; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 7px; cursor: pointer;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M11 12 20 3"></path><path d="M16 8l2 2"></path><path d="M13 11l2 2"></path></svg>
+      <div>Show trainer notes</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ notesOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="background: color-mix(in oklab, oklch(45% 0.15 27) 6%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.15 27) 22%, transparent); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(45% 0.15 27); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Trainer only — stage-by-stage script</div>
+        <div data-print-hide onClick="{{ toggleReveal }}" style="font-size: 10.5px; font-weight: 600; color: oklch(45% 0.15 27); cursor: pointer;">Hide</div>
+      </div>
+      <sc-for list="{{ trainerScript }}" as="t" hint-placeholder-count="6">
+        <div style="display: flex; gap: 10px;">
+          <div style="font-size: 10.5px; font-weight: 700; color: oklch(45% 0.15 27); flex: none; width: 56px; padding-top: 1px;">{{ t.time }}</div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ t.step }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">{{ t.note }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+
+<div class="answer-key-print" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; flex-direction: column; gap: 20px; width: 900px; box-sizing: border-box;">
+  <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Answer key</div>
+  <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: oklch(23.5% 0.017 65);">Stress and intonation — for a paper run</div>
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Intonation lines</div>
+    <sc-for list="{{ intonationKey }}" as="row" hint-placeholder-count="3">
+      <div style="display: grid; grid-template-columns: 220px 1fr; gap: 10px; padding: 4px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">"{{ row.text }}"</div>
+        <div style="font-size: 11px; line-height: 1.4; color: oklch(51% 0.017 70);">{{ row.answer }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:960,&quot;height&quot;:2100}}">
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = 'oklch(48% 0.09 150)';
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+
+const INTONATION = [
+  { text: 'You\u2019re coming?', rising: true, answer: 'Question \u2014 rising tune, checking' },
+  { text: 'You\u2019re coming.', rising: false, answer: 'Statement \u2014 falling tune, telling' },
+  { text: 'Coffee or tea?', rising: false, answer: 'Choice question \u2014 rise on the first option, fall on the last' },
+];
+
+const DOUBLE_STRESS_WORDS = [
+  { word: 'information', syllables: ['in', 'for', 'ma', 'tion'], levels: [1, 0, 2, 0] },
+  { word: 'understand', syllables: ['un', 'der', 'stand'], levels: [1, 0, 2] },
+  { word: 'afternoon', syllables: ['af', 'ter', 'noon'], levels: [1, 0, 2] },
+  { word: 'engineer', syllables: ['en', 'gi', 'neer'], levels: [1, 0, 2] },
+  { word: 'conversation', syllables: ['con', 'ver', 'sa', 'tion'], levels: [1, 0, 2, 0] },
+  { word: 'university', syllables: ['u', 'ni', 'ver', 'si', 'ty'], levels: [1, 0, 2, 0, 0] },
+];
+
+const MARKING_WORDS = [
+  { syllables: ['pho', 'to', 'graph'], stressed: 0 },
+  { syllables: ['pho', 'to', 'gra', 'phy'], stressed: 2 },
+  { syllables: ['pho', 'to', 'gra', 'phic'], stressed: 2 },
+  { syllables: ['con', 'sid', 'er'], stressed: 1 },
+];
+
+class Component extends DCLogic {
+  state = { voiceIdx: 0, voicesLoaded: false, revealed: false, intonationRevealed: {}, markingPicks: {}, doubleStressPicks: {}, doubleStressRevealed: {}, contrastivePick: {}, contrastiveRevealed: {} };
+
+  componentDidMount() {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const load = () => {
+      const voices = window.speechSynthesis.getVoices().filter(v => /en/i.test(v.lang));
+      if (voices.length) this.setState({ voicesLoaded: true });
+    };
+    load();
+    window.speechSynthesis.onvoiceschanged = load;
+  }
+
+  speak(text) {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const all = window.speechSynthesis.getVoices();
+    const prefs = [v => /Google UK English Female/i.test(v.name), v => /Google UK English Male/i.test(v.name), v => /Google US English/i.test(v.name)];
+    let chosen = prefs[this.state.voiceIdx] ? all.find(prefs[this.state.voiceIdx]) : null;
+    if (!chosen) chosen = all.find(v => /en-GB/i.test(v.lang)) || all.find(v => /en/i.test(v.lang));
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    if (chosen) u.voice = chosen;
+    u.rate = 0.92;
+    window.speechSynthesis.speak(u);
+  }
+
+  speakSyllablesAt(syllables, stressedIdx) {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const all = window.speechSynthesis.getVoices();
+    const prefs = [v => /Google UK English Female/i.test(v.name), v => /Google UK English Male/i.test(v.name), v => /Google US English/i.test(v.name)];
+    let voice = prefs[this.state.voiceIdx] ? all.find(prefs[this.state.voiceIdx]) : null;
+    if (!voice) voice = all.find(v => /en-GB/i.test(v.lang)) || all.find(v => /en/i.test(v.lang));
+    window.speechSynthesis.cancel();
+    syllables.forEach((syl, i) => {
+      const isStressed = i === stressedIdx;
+      const u = new SpeechSynthesisUtterance(syl);
+      if (voice) u.voice = voice;
+      u.rate = isStressed ? 0.85 : 1.0;
+      u.pitch = isStressed ? 1.1 : 0.95;
+      u.volume = isStressed ? 1 : 0.85;
+      window.speechSynthesis.speak(u);
+    });
+  }
+
+  speakWithLevels(syllables, levels) {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const all = window.speechSynthesis.getVoices();
+    const prefs = [v => /Google UK English Female/i.test(v.name), v => /Google UK English Male/i.test(v.name), v => /Google US English/i.test(v.name)];
+    let voice = prefs[this.state.voiceIdx] ? all.find(prefs[this.state.voiceIdx]) : null;
+    if (!voice) voice = all.find(v => /en-GB/i.test(v.lang)) || all.find(v => /en/i.test(v.lang));
+    window.speechSynthesis.cancel();
+    const RATE = [1.0, 0.95, 0.85], PITCH = [0.95, 1.0, 1.1], VOL = [0.85, 0.95, 1];
+    syllables.forEach((syl, i) => {
+      const lvl = levels[i];
+      const u = new SpeechSynthesisUtterance(syl);
+      if (voice) u.voice = voice;
+      u.rate = RATE[lvl]; u.pitch = PITCH[lvl]; u.volume = VOL[lvl];
+      window.speechSynthesis.speak(u);
+    });
+  }
+
+  speakIntonation(i) {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const it = INTONATION[i];
+    const words = it.text.replace(/[?.]/g, '').split(' ');
+    const all = window.speechSynthesis.getVoices();
+    const voice = all.find(v => /en-GB/i.test(v.lang)) || all[0];
+    window.speechSynthesis.cancel();
+    words.forEach((w, i2) => {
+      const frac = words.length > 1 ? i2 / (words.length - 1) : 1;
+      const u = new SpeechSynthesisUtterance(w);
+      if (voice) u.voice = voice;
+      u.pitch = it.rising ? (0.95 + frac * 0.55) : (1.35 - frac * 0.55);
+      window.speechSynthesis.speak(u);
+    });
+  }
+
+  renderVals() {
+    const { voicesLoaded, revealed, intonationRevealed, markingPicks } = this.state;
+
+    const voiceOptions = [{ label: 'British \u2014 female', idx: 0 }, { label: 'British \u2014 male', idx: 1 }, { label: 'American', idx: 2 }]
+      .map(v => ({ label: v.label, pick: () => this.setState({ voiceIdx: v.idx }),
+        bg: this.state.voiceIdx === v.idx ? 'color-mix(in oklab, ' + TEAL + ' 12%, ' + CARD + ')' : CARD,
+        border: this.state.voiceIdx === v.idx ? TEAL : BORDER, ink: this.state.voiceIdx === v.idx ? TEAL : INK }));
+
+    const intonation = INTONATION.map((it, i) => ({
+      text: it.text, play: () => this.speakIntonation(i),
+      revealed: !!intonationRevealed[i], reveal: () => this.setState(s => ({ intonationRevealed: { ...s.intonationRevealed, [i]: true } })),
+      answer: it.answer, ink: it.rising ? TEAL : GOLD,
+    }));
+
+    const markingWords = MARKING_WORDS.map((w, wi) => {
+      const picked = markingPicks[wi];
+      return {
+        play: () => this.speakSyllablesAt(w.syllables, w.stressed),
+        syllables: w.syllables.map((s, si) => {
+          const isStressed = si === w.stressed; const isPicked = picked === si; const show = picked !== undefined;
+          return { text: s, weight: isStressed ? '700' : '400',
+            pick: () => { if (show) return; this.setState(st => ({ markingPicks: { ...st.markingPicks, [wi]: si } })); },
+            border: show && isStressed ? GREEN : (show && isPicked ? RED : BORDER),
+            bg: show && isStressed ? 'color-mix(in oklab, ' + GREEN + ' 14%, ' + CARD + ')' : (show && isPicked ? 'color-mix(in oklab, ' + RED + ' 10%, ' + CARD + ')' : CARD),
+            ink: show && isStressed ? GREEN : (show && isPicked ? RED : INK) };
+        }),
+        result: picked !== undefined ? (picked === w.stressed ? 'Correct' : 'Try again') : '', resultInk: picked === w.stressed ? GREEN : RED,
+      };
+    });
+
+    const CONTRASTIVE = [
+  { context: 'A: "Did Sara take my charger?"', reply: 'I didn\u2019t take your charger.',
+    explains: { 0: 'Stress on "I" \u2014 someone else did, not me.', 2: 'Stress on "your" \u2014 I took a charger, just not yours.', 4: 'Stress on "charger" \u2014 I took something of yours, but not that.' } },
+  { context: 'A: "You said you\u2019d finish the report today."', reply: 'I said I\u2019d try to finish it today.',
+    explains: { 4: 'Stress on "try" \u2014 pushing back on the accusation of a broken promise; "try" was the actual claim.', 6: 'Stress on "today" \u2014 conceding the deadline was today, defending only the effort.' } },
+  { context: 'A: "This isn\u2019t the shirt I ordered."', reply: 'That\u2019s the shirt we sent.',
+    explains: { 1: 'Stress on "that\u2019s" \u2014 flat correction, almost defensive.', 3: 'Stress on "we" \u2014 shifting blame toward the warehouse, away from the speaker.', 4: 'Stress on "sent" \u2014 emphasising the order was fulfilled correctly on their end.' } },
+];
+
+const SIZE = [14, 22, 32]; // unstressed, secondary, primary
+    const doubleStress = DOUBLE_STRESS_WORDS.map((w, wi) => {
+      const picks = this.state.doubleStressPicks[wi] || w.syllables.map(() => 0);
+      const revealed2 = !!this.state.doubleStressRevealed[wi];
+      const shown = revealed2 ? w.levels : picks;
+      const done = picks.every((p, i2) => p === w.levels[i2]) && picks.some(p => p > 0);
+      return {
+        word: w.word,
+        play: () => this.speak(w.word),
+        syllables: w.syllables.map((s, si) => ({
+          size: SIZE[shown[si]],
+          border: done ? GREEN : (revealed2 ? GOLD : BORDER),
+          bg: done ? 'color-mix(in oklab, ' + GREEN + ' 14%, ' + CARD + ')' : (revealed2 ? 'color-mix(in oklab, ' + GOLD + ' 12%, ' + CARD + ')' : CARD),
+          pick: revealed2 ? (() => {}) : (() => this.setState(st => {
+            const cur = st.doubleStressPicks[wi] || w.syllables.map(() => 0);
+            const next = cur.slice(); next[si] = (next[si] + 1) % 3;
+            return { doubleStressPicks: { ...st.doubleStressPicks, [wi]: next } };
+          })),
+        })),
+        result: done ? 'Correct' : (revealed2 ? 'Hide' : 'Reveal'), resultInk: done ? GREEN : (revealed2 ? MUTED : 'oklch(38% 0.072 195)'),
+        reveal: done ? (() => {}) : (() => this.setState(st => ({ doubleStressRevealed: { ...st.doubleStressRevealed, [wi]: !st.doubleStressRevealed[wi] } }))),
+      };
+    });
+
+    const contrastive = CONTRASTIVE.map((c, ci) => {
+      const words = c.reply.split(' ');
+      const pick = this.state.contrastivePick[ci];
+      const revealed3 = !!this.state.contrastiveRevealed[ci];
+      return {
+        context: c.context,
+        show: revealed3 && pick !== undefined,
+        explain: pick !== undefined ? (c.explains[pick] || 'Try one of the words with an explanation below \u2014 not every word carries a distinct attitude here.') : '',
+        revealLabel: revealed3 ? 'Hide' : 'Reveal',
+        reveal: () => this.setState(s => ({ contrastiveRevealed: { ...s.contrastiveRevealed, [ci]: !s.contrastiveRevealed[ci] } })),
+        words: words.map((w, wi) => ({
+          text: w, weight: pick === wi ? '800' : '500',
+          ink: pick === wi ? 'oklch(38% 0.072 195)' : 'oklch(23.5% 0.017 65)',
+          bg: pick === wi ? 'color-mix(in oklab, oklch(38% 0.072 195) 12%, oklch(99.2% 0.005 90))' : 'transparent',
+          pick: () => this.setState(s => ({ contrastivePick: { ...s.contrastivePick, [ci]: wi } })),
+        })),
+      };
+    });
+
+    return {
+      doPrint: () => window.print(),
+      doubleStress,
+      contrastive,
+      voiceStatus: voicesLoaded ? 'Using your browser\u2019s built-in speech \u2014 in Chrome this is Google\u2019s natural voices.' : 'Loading voices\u2026 works best in Chrome.',
+      voiceOptions,
+      agenda: [
+        { time: '0\u20138', spine: TEAL, title: 'Intonation: question or statement' },
+        { time: '8\u201320', spine: GOLD, title: 'Marking stress for LRT' },
+        { time: '20\u201330', spine: TEAL, title: 'Primary and secondary stress' },
+        { time: '30\u201340', spine: RED, title: 'Connect to FOL' },
+        { time: '40\u201345', spine: GREEN, title: 'Close' },
+      ],
+      intonation, markingWords,
+      notesOpen: revealed,
+      toggleReveal: () => this.setState(s => ({ revealed: !s.revealed })),
+      trainerScript: [
+        { time: '0\u20138', step: 'Intonation, minimal context', note: 'Play each line without telling them whether it\u2019s a question or statement. The words are identical in two of the three \u2014 make the point that punctuation on a page can\u2019t carry this, only the ear can.' },
+        { time: '8\u201320', step: 'Marking convention for LRT', note: 'This is a direct LRT skill: showing you can locate and mark word stress is part of the language analysis section. Have trainees mark all four words on paper first, then check against the interactive version.' },
+        { time: '20\u201330', step: 'Primary and secondary stress', note: 'Word stress in longer words, same clap/circle logic as marking \u2014 keep it brisk, most trainees pick up the pattern fast.' },
+        { time: '30\u201340', step: 'Connect to FOL', note: 'Ask: "In your FOL recording, did your learner stress any word wrongly, or use a flat/wrong-direction intonation anywhere?" This is the moment to point trainees back to their own recording with new ears.' },
+        { time: '\u2014', step: 'Delivery', note: 'For face-to-face, everything above works live off a laptop and projector \u2014 no student devices needed. For real spoken intonation beyond synthesised speech, the BBC\u2019s Learning English pronunciation series (bbc.co.uk/learningenglish/english/features/pronunciation) has short free videos worth linking to.' },
+        { time: '\u2014', step: 'Contrastive stress extension', note: 'TTS can\u2019t fake this convincingly \u2014 once trainees have picked and read the explanation, say the line aloud yourself with the stress they chose.' },
+        { time: '40\u201345', step: 'Close', note: 'One-sentence transfer: which of today\u2019s two features \u2014 stress or intonation \u2014 is most likely to trip up their own TP group, based on L1.' },
+      ],
+      intonationKey: INTONATION.map(it => ({ text: it.text, answer: it.answer })),
+    };
+  }
+}
+</script>
+</body>
+</html>

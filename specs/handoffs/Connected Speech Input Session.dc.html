@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+  .answer-key-print { display: none; }
+  @media print {
+    @page { size: A4; margin: 14mm; }
+    body { background: white; }
+    [data-print-hide] { display: none !important; }
+    body.print-key #main-body { display: none !important; }
+    body.print-key .answer-key-print { display: flex !important; }
+  }
+</style>
+</helmet>
+
+<div id="main-body" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; display: flex; flex-direction: column; gap: 26px; width: 960px; box-sizing: border-box; position: relative;">
+  <div data-print-hide style="position: absolute; top: 12px; right: 18px; height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 6px; cursor: pointer;" onClick="{{ doPrint }}">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+    <div>Print</div>
+  </div>
+  <div style="position: absolute; bottom: 14px; right: 18px; font-size: 10px; letter-spacing: 0.06em; color: oklch(51% 0.017 70 / 0.35);">CS</div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Resource Hub · 45 minutes · phonology, spoken aloud</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 32px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Connected speech.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Five features, one example each: strong and weak forms, linking, intrusion, assimilation, elision.</div>
+  </div>
+
+  <div style="background: color-mix(in oklab, oklch(38% 0.072 195) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 26%, transparent); border-radius: 8px; padding: 16px 19px; display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(38% 0.072 195); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Where this feeds back in</div>
+    <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">FOL's listening-comprehension section is where connected speech usually shows up: a learner who reads a script fine but can't follow the same words spoken naturally. LRT's phonological analysis should note where a text's natural pronunciation departs from its spelling — these five terms are the vocabulary for that.</div>
+  </div>
+
+  <div style="background: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent); border-radius: 8px; padding: 16px 19px; display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Voice</div>
+    <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ voiceStatus }}</div>
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+      <sc-for list="{{ voiceOptions }}" as="v" hint-placeholder-count="3">
+        <div onClick="{{ v.pick }}" style="padding: 6px 12px; border-radius: 999px; border: 1.5px solid {{ v.border }}; background: {{ v.bg }}; font-size: 11.5px; font-weight: 600; color: {{ v.ink }}; cursor: pointer;">{{ v.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Lead-in · 3 minutes</div>
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px 17px; display: flex; align-items: center; gap: 12px;">
+      <div onClick="{{ leadInPlay }}" style="width: 36px; height: 36px; border-radius: 50%; background: oklch(38% 0.072 195); color: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+      </div>
+      <div style="font-size: 13px; color: oklch(23.5% 0.017 65);">Listen: "gonna." Now try writing what you heard using only words from a dictionary. There isn't one — that's the session.</div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Lead-in, alternative · read these aloud</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Sound out each line fast — they're homophone strings, not real sentences on the page.</div>
+    <sc-for list="{{ homophoneLines }}" as="h" hint-placeholder-count="3">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; gap: 12px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 14px; color: oklch(23.5% 0.017 65); flex: 1;">{{ h.line }}</div>
+        <sc-if value="{{ h.show }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ h.answer }}</div>
+        </sc-if>
+        <div onClick="{{ h.toggle }}" style="font-size: 10.5px; font-weight: 600; color: oklch(38% 0.072 195); cursor: pointer; flex: none;">{{ h.toggleLabel }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Terminology — match it up</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ matchScoreLabel }}</div>
+    </div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Click a term, then click the definition you think it goes with.</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <sc-for list="{{ matchTerms }}" as="t" hint-placeholder-count="5">
+          <div onClick="{{ t.pick }}" style="padding: 10px 13px; border-radius: 6px; border: 1.5px solid {{ t.border }}; background: {{ t.bg }}; font-size: 12.5px; font-weight: 700; color: {{ t.ink }}; cursor: pointer;">{{ t.label }}</div>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <sc-for list="{{ matchDefs }}" as="d" hint-placeholder-count="5">
+          <div onClick="{{ d.pick }}" style="padding: 10px 13px; border-radius: 6px; border: 1.5px solid {{ d.border }}; background: {{ d.bg }}; font-size: 12px; line-height: 1.4; color: {{ d.ink }}; cursor: pointer;">{{ d.label }}</div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">The 45 minutes — one feature at a time</div>
+    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px;">
+      <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="7">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-left: 3px solid {{ a.spine }}; border-radius: 6px; padding: 10px 10px; display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.02em; color: oklch(51% 0.017 70);">{{ a.time }}</div>
+          <div style="font-size: 10.5px; font-weight: 600; color: oklch(23.5% 0.017 65); line-height: 1.25;">{{ a.title }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">For each feature below: listen to the clip, then choose the answer that matches what you heard.</div>
+
+  <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="5">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; align-items: baseline; gap: 10px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ sec.n }}. {{ sec.title }}</div>
+        <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ sec.def }}</div>
+      </div>
+      <sc-for list="{{ sec.examples }}" as="ex" hint-placeholder-count="2">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 12px 15px; display: flex; flex-direction: column; gap: 9px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div onClick="{{ ex.play }}" style="width: 32px; height: 32px; border-radius: 50%; background: {{ sec.tone }}; color: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </div>
+            <div style="font-size: 13px; color: oklch(23.5% 0.017 65); flex: 1;">{{ ex.label }}</div>
+          </div>
+          <div style="display: flex; gap: 8px; padding-left: 46px; flex-wrap: wrap;">
+            <sc-for list="{{ ex.choices }}" as="c" hint-placeholder-count="2">
+              <div onClick="{{ c.pick }}" style="padding: 7px 13px; border-radius: 6px; border: 1.5px solid {{ c.border }}; background: {{ c.bg }}; font-size: 12px; font-weight: 600; color: {{ c.ink }}; cursor: pointer;">{{ c.label }}</div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ ex.revealed }}" hint-placeholder-val="{{ false }}">
+            <div style="padding-left: 46px; font-size: 12px; line-height: 1.5; color: {{ sec.tone }};">{{ ex.answer }}</div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </sc-for>
+
+  <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px 17px; display: flex; align-items: center; gap: 14px;">
+    <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65); flex: 1;">For face-to-face, run every clip live from a laptop speaker — no headphones needed. The BBC's <strong>Learning English</strong> pronunciation series has short free clips of natural connected speech if you want more examples beyond today's five.</div>
+    <a href="https://www.bbc.co.uk/learningenglish/english/features/pronunciation" target="_blank" style="flex: none; height: 32px; padding: 0 14px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(99.2% 0.005 90); font-size: 12px; font-weight: 700; display: flex; align-items: center;">bbc.co.uk/learningenglish</a>
+  </div>
+
+  <sc-if value="{{ !notesOpen }}" hint-placeholder-val="{{ true }}">
+    <div data-print-hide onClick="{{ toggleReveal }}" style="align-self: flex-start; height: 34px; padding: 0 15px; border-radius: 999px; border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 45%, transparent); background: color-mix(in oklab, oklch(60% 0.11 70) 10%, oklch(99.2% 0.005 90)); font-size: 12px; font-weight: 600; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 7px; cursor: pointer;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M11 12 20 3"></path><path d="M16 8l2 2"></path><path d="M13 11l2 2"></path></svg>
+      <div>Show trainer notes</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ notesOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="background: color-mix(in oklab, oklch(45% 0.15 27) 6%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.15 27) 22%, transparent); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(45% 0.15 27); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Trainer only — stage-by-stage script</div>
+        <div data-print-hide onClick="{{ toggleReveal }}" style="font-size: 10.5px; font-weight: 600; color: oklch(45% 0.15 27); cursor: pointer;">Hide</div>
+      </div>
+      <sc-for list="{{ trainerScript }}" as="t" hint-placeholder-count="8">
+        <div style="display: flex; gap: 10px;">
+          <div style="font-size: 10.5px; font-weight: 700; color: oklch(45% 0.15 27); flex: none; width: 56px; padding-top: 1px;">{{ t.time }}</div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ t.step }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">{{ t.note }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+
+<div class="answer-key-print" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; flex-direction: column; gap: 20px; width: 900px; box-sizing: border-box;">
+  <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Answer key</div>
+  <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: oklch(23.5% 0.017 65);">Connected speech — for a paper run</div>
+  <sc-for list="{{ sectionsKey }}" as="sec" hint-placeholder-count="5">
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 14px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ sec.title }}</div>
+      <sc-for list="{{ sec.rows }}" as="row" hint-placeholder-count="2">
+        <div style="display: grid; grid-template-columns: 220px 1fr; gap: 10px; padding: 3px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ row.label }}</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ row.answer }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:960,&quot;height&quot;:2000}}">
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = 'oklch(48% 0.09 150)';
+const INK = 'oklch(23.5% 0.017 65)';
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+const MUTED = 'oklch(51% 0.017 70)';
+
+const SECTIONS = [
+  { title: 'Strong and weak forms', tone: TEAL,
+    def: 'small function words shrink and lose their vowel sound in fast speech',
+    examples: [
+      { label: '"A cup of tea, please."', full: 'A cup of tea, please.', options: ['/ɒv/, the full vowel', '/əv/, the weak form'], correct: 1, answer: '/əv/ — the vowel shrinks to schwa. Function words like "of," "to," "and" almost always take their weak form in running speech.' },
+      { label: '"I\u2019d like to go."', full: 'I\u2019d like to go.', options: ['/tuː/, the full vowel', '/tə/, the weak form'], correct: 1, answer: '/tə/ — "to" loses its vowel the same way "of" does. Learners who only ever hear the dictionary form /tuː/ won\u2019t recognise it here.' },
+      { label: '"What are you doing?"', full: 'What are you doing?', options: ['/ɑː/, the full vowel', '/ə/, the weak form'], correct: 1, answer: '/ə/ — "are" almost always weakens in a question like this, running into "you" as "whaddaya."' },
+    ] },
+  { title: 'Linking', tone: GOLD,
+    def: 'a final consonant joins onto the next word\u2019s vowel',
+    examples: [
+      { label: '"an egg"', full: 'an egg', options: ['Said as two separate words', 'The /n/ joins onto "egg"'], correct: 1, answer: '/ə\u02c8neg/ — the final /n/ of "an" links onto the vowel that starts "egg," so the words run together.' },
+      { label: '"turn it off"', full: 'turn it off', options: ['Said as three separate words', 'The /n/ and /t/ link across the words'], correct: 1, answer: '\u201cTurn it\u201d links to sound like "tur-nit," and "it off" links to sound like "i-toff" \u2014 every consonant-to-vowel boundary is a potential join.' },
+      { label: '"far away"', full: 'far away', options: ['Said as two separate words', 'The /r/ links onto "away"'], correct: 1, answer: 'The written /r/ at the end of "far," silent on its own in most British accents, resurfaces because a vowel follows \u2014 "fa-raway."' },
+    ] },
+  { title: 'Intrusion', tone: RED,
+    def: 'an extra /r/, /w/ or /j/ is inserted between two vowel sounds',
+    examples: [
+      { label: '"go away"', full: 'go away', options: ['Nothing is added between the words', 'An extra /w/ sound appears'], correct: 1, answer: 'A /w/ sound intrudes between "go" and "away" \u2014 neither word\u2019s spelling shows it, but two vowel sounds in a row are hard to say cleanly, so English inserts a glide.' },
+      { label: '"I saw it"', full: 'I saw it', options: ['Nothing is added between the words', 'An extra /r/ sound appears after "saw"'], correct: 1, answer: 'The famous "intrusive r" \u2014 "saw it" is often pronounced "saw-r-it," even though there\u2019s no r in "saw" at all.' },
+      { label: '"do it"', full: 'do it', options: ['Nothing is added between the words', 'An extra /w/ sound appears'], correct: 1, answer: '"Do it" becomes "do-w-it" \u2014 the lip-rounding from /uː/ carries over as a /w/ before the next vowel starts.' },
+    ] },
+  { title: 'Assimilation', tone: GREEN,
+    def: 'a sound changes to match the sound that follows it',
+    examples: [
+      { label: '"ten bikes"', full: 'ten bikes', options: ['/n/ stays /n/', '/n/ becomes /m/'], correct: 1, answer: '/n/ becomes /m/ before the /b/ that follows \u2014 "tem bikes." The tongue is already anticipating the lips closing for /b/.' },
+      { label: '"good girl"', full: 'good girl', options: ['/d/ stays /d/', '/d/ becomes /g/'], correct: 1, answer: '/d/ shifts toward /g/ before the /g/ of "girl" \u2014 "gug girl." Same principle: the earlier sound moves to anticipate the later one.' },
+      { label: '"handbag"', full: 'handbag', options: ['/d/ stays /d/', '/d/ becomes /b/'], correct: 1, answer: '/d/ shifts toward /b/ before the /b/ of "bag" \u2014 "hambag." Same anticipation, this time with the lips.' },
+    ] },
+  { title: 'Elision', tone: INK,
+    def: 'a sound or whole syllable is dropped to make a phrase easier to say',
+    examples: [
+      { label: '"next day"', full: 'next day', options: ['All sounds are said', 'The /t/ disappears'], correct: 1, answer: 'The /t/ in "next" is dropped \u2014 "nex\u2019 day." Three consonants in a row (/k/, /s/, /t/) followed by another consonant is too much, so one goes.' },
+      { label: '"probably"', full: 'probably', options: ['All three syllables are said', 'The middle syllable disappears'], correct: 1, answer: 'The middle syllable vanishes \u2014 "prob\u2019ly," two syllables instead of three. Very common in fast, informal speech.' },
+      { label: '"friendship"', full: 'friendship', options: ['The /d/ is fully said', 'The /d/ disappears'], correct: 1, answer: 'The /d/ drops between /n/ and /ʃ/ \u2014 "frien\u2019ship." Same crowded-consonant pattern as "next day."' },
+    ] },
+];
+
+const HOMOPHONE_LINES = [
+  { line: 'Eye here you want to meat hour sun.', answer: 'I hear you want to meet our son.' },
+  { line: 'Hour jump a risen may jet.', answer: "Our jumper isn't made yet." },
+  { line: 'Weave scene hour glass is.', answer: "We've seen our glasses." },
+];
+
+const MATCH_PAIRS = [
+  { term: 'Linking', def: 'a final consonant joins onto the next word\u2019s vowel' },
+  { term: 'Intrusion', def: 'an extra /r/, /w/ or /j/ is inserted between two vowel sounds' },
+  { term: 'Assimilation', def: 'a sound changes to match the sound that follows it' },
+  { term: 'Elision', def: 'a sound or whole syllable is dropped to make a phrase easier to say' },
+  { term: 'Weak form', def: 'the reduced, schwa-vowel version a function word takes in fast speech' },
+];
+
+function shuffled(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const SHUFFLED_DEFS = shuffled(MATCH_PAIRS.map((p, i) => i));
+
+class Component extends DCLogic {
+  state = { voiceIdx: 0, voicesLoaded: false, revealed: false, exPicks: {},
+    matchSelectedTerm: null, matchSolved: {}, matchWrong: null, homophoneShown: {} };
+
+  componentDidMount() {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const load = () => { if (window.speechSynthesis.getVoices().filter(v => /en/i.test(v.lang)).length) this.setState({ voicesLoaded: true }); };
+    load();
+    window.speechSynthesis.onvoiceschanged = load;
+  }
+
+  speak(text, rate) {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const all = window.speechSynthesis.getVoices();
+    const prefs = [v => /Google UK English Female/i.test(v.name), v => /Google UK English Male/i.test(v.name), v => /Google US English/i.test(v.name)];
+    let chosen = prefs[this.state.voiceIdx] ? all.find(prefs[this.state.voiceIdx]) : null;
+    if (!chosen) chosen = all.find(v => /en-GB/i.test(v.lang)) || all.find(v => /en/i.test(v.lang));
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    if (chosen) u.voice = chosen;
+    u.rate = rate || 0.9;
+    window.speechSynthesis.speak(u);
+  }
+
+  pickTerm(i) {
+    if (this.state.matchSolved[i]) return;
+    this.setState({ matchSelectedTerm: i, matchWrong: null });
+  }
+
+  pickDef(i) {
+    const sel = this.state.matchSelectedTerm;
+    if (sel === null || this.state.matchSolved[i]) return;
+    if (sel === i) this.setState(s => ({ matchSolved: { ...s.matchSolved, [i]: true }, matchSelectedTerm: null, matchWrong: null }));
+    else { this.setState({ matchWrong: i }); setTimeout(() => this.setState({ matchWrong: null }), 700); }
+  }
+
+  renderVals() {
+    const { voicesLoaded, revealed, exPicks, matchSelectedTerm, matchSolved, matchWrong } = this.state;
+
+    const matchTerms = MATCH_PAIRS.map((p, i) => {
+      const solved = matchSolved[i]; const selected = matchSelectedTerm === i;
+      return { label: p.term, pick: () => this.pickTerm(i),
+        border: solved ? GREEN : (selected ? TEAL : BORDER),
+        bg: solved ? 'color-mix(in oklab, ' + GREEN + ' 12%, ' + CARD + ')' : (selected ? 'color-mix(in oklab, ' + TEAL + ' 10%, ' + CARD + ')' : CARD),
+        ink: solved ? GREEN : (selected ? TEAL : INK) };
+    });
+    const matchDefs = SHUFFLED_DEFS.map(i => {
+      const p = MATCH_PAIRS[i]; const solved = matchSolved[i]; const wrong = matchWrong === i;
+      return { label: p.def, pick: () => this.pickDef(i),
+        border: solved ? GREEN : (wrong ? RED : BORDER),
+        bg: solved ? 'color-mix(in oklab, ' + GREEN + ' 12%, ' + CARD + ')' : (wrong ? 'color-mix(in oklab, ' + RED + ' 10%, ' + CARD + ')' : CARD),
+        ink: solved ? GREEN : (wrong ? RED : INK) };
+    });
+    const matchSolvedCount = Object.keys(matchSolved).length;
+    const voiceOptions = [{ label: 'British \u2014 female', idx: 0 }, { label: 'British \u2014 male', idx: 1 }, { label: 'American', idx: 2 }]
+      .map(v => ({ label: v.label, pick: () => this.setState({ voiceIdx: v.idx }),
+        bg: this.state.voiceIdx === v.idx ? 'color-mix(in oklab, ' + TEAL + ' 12%, ' + CARD + ')' : CARD,
+        border: this.state.voiceIdx === v.idx ? TEAL : BORDER, ink: this.state.voiceIdx === v.idx ? TEAL : INK }));
+
+    const sections = SECTIONS.map((sec, si) => ({
+      n: si + 1, title: sec.title, def: sec.def, tone: sec.tone,
+      examples: sec.examples.map((ex, ei) => {
+        const key = si + '-' + ei;
+        const picked = exPicks[key];
+        return {
+          label: ex.label, answer: ex.answer,
+          play: () => this.speak(ex.full, 1.1),
+          revealed: picked !== undefined,
+          choices: ex.options.map((label, oi) => {
+            const isRight = oi === ex.correct; const isPicked = picked === oi; const show = picked !== undefined;
+            return { label, pick: () => { if (picked !== undefined) return; this.setState(s => ({ exPicks: { ...s.exPicks, [key]: oi } })); },
+              border: show && isRight ? GREEN : (show && isPicked ? RED : BORDER),
+              bg: show && isRight ? 'color-mix(in oklab, ' + GREEN + ' 12%, ' + CARD + ')' : (show && isPicked ? 'color-mix(in oklab, ' + RED + ' 10%, ' + CARD + ')' : CARD),
+              ink: show && isRight ? GREEN : (show && isPicked ? RED : INK) };
+          }),
+        };
+      }),
+    }));
+
+    return {
+      doPrint: () => window.print(),
+      voiceStatus: voicesLoaded ? 'Using your browser\u2019s built-in speech \u2014 in Chrome this is Google\u2019s natural voices.' : 'Loading voices\u2026 works best in Chrome.',
+      voiceOptions,
+      leadInPlay: () => this.speak('gonna', 0.9),
+      homophoneLines: HOMOPHONE_LINES.map((h, i) => ({
+        line: h.line, answer: h.answer, show: !!this.state.homophoneShown[i],
+        toggleLabel: this.state.homophoneShown[i] ? 'Hide' : 'Reveal',
+        toggle: () => this.setState(s => ({ homophoneShown: { ...s.homophoneShown, [i]: !s.homophoneShown[i] } })),
+      })),
+      agenda: [
+        { time: '0\u20133', spine: GOLD, title: 'Lead-in' },
+        { time: '3\u20137', spine: MUTED, title: 'Terminology match' },
+        { time: '7\u201314', spine: TEAL, title: 'Strong/weak forms \u00b7 3 items' },
+        { time: '14\u201322', spine: GOLD, title: 'Linking \u00b7 3 items' },
+        { time: '22\u201330', spine: RED, title: 'Intrusion \u00b7 3 items' },
+        { time: '30\u201339', spine: GREEN, title: 'Assimilation \u00b7 3 items' },
+        { time: '39\u201347', spine: INK, title: 'Elision \u00b7 3 items' },
+        { time: '47\u201350', spine: RED, title: 'Close' },
+      ],
+      sections,
+      notesOpen: revealed,
+      toggleReveal: () => this.setState(s => ({ revealed: !s.revealed })),
+      trainerScript: [
+        { time: '0\u20133', step: 'Lead-in: "gonna"', note: 'Play it cold, no spelling shown. Ask what they heard, then reveal it\u2019s "going to." Name the session\u2019s promise: five reasons English doesn\u2019t sound like it\u2019s spelled, two examples each.' },
+        { time: '3\u20137', step: 'Terminology match', note: 'Have trainees match the five terms to their definitions before any audio. This is the vocabulary they need for the rest of the session and for their LRT write-up \u2014 get it settled before the listening starts.' },
+        { time: '7\u201314', step: 'Strong and weak forms, 3 items', note: 'Play each sentence, let trainees guess which vowel they heard before revealing. After all three, ask them to say each sentence back themselves using the weak form \u2014 producing it is what makes it stick.' },
+        { time: '14\u201322', step: 'Linking, 3 items', note: 'After each guess, replay the careful word-by-word version so the join is audible only by contrast. Ask: what do the examples have in common structurally? (consonant end, vowel start)' },
+        { time: '22\u201330', step: 'Intrusion, 3 items', note: 'This is the hardest of the five to hear. Give each item two plays before revealing. If trainees disagree on exactly which sound intrudes, that\u2019s fine \u2014 the point is noticing something is added at all.' },
+        { time: '30\u201339', step: 'Assimilation, 3 items', note: 'After each guess, have trainees say the phrase back at natural speed themselves. Producing it usually surfaces the sound change before they can consciously hear it in a recording. Name the direction explicitly: the earlier sound anticipates the later one.' },
+        { time: '39\u201347', step: 'Elision, 3 items', note: 'Good to end the guessing on a high note. Ask what trainees notice in common across the examples \u2014 each drops a sound that would otherwise be awkward to fit in.' },
+        { time: '47\u201350', step: 'Close: connect to FOL and LRT', note: 'Ask: "Which of these five features showed up in your FOL learner\u2019s listening, or in your own natural speech that a learner might struggle with?" For LRT, remind them the phonological analysis section should name the specific feature, not just say "the pronunciation is different."' },
+      ],
+      sectionsKey: SECTIONS.map(sec => ({ title: sec.title, rows: sec.examples.map(ex => ({ label: ex.label, answer: ex.options[ex.correct] + ' \u2014 ' + ex.answer })) })),
+    };
+  }
+}
+</script>
+</body>
+</html>

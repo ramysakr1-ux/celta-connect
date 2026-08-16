@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+  .answer-key-print { display: none; }
+  @media print {
+    @page { size: A4; margin: 14mm; }
+    body { background: white; }
+    [data-print-hide] { display: none !important; }
+    body.print-key #main-body { display: none !important; }
+    body.print-key .answer-key-print { display: flex !important; }
+  }
+</style>
+</helmet>
+
+<div id="main-body" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; display: flex; flex-direction: column; gap: 28px; width: 960px; box-sizing: border-box; position: relative;">
+  <div data-print-hide style="position: absolute; top: 12px; right: 98px; height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 45%, transparent); background: color-mix(in oklab, oklch(60% 0.11 70) 10%, oklch(99.2% 0.005 90)); font-size: 11px; font-weight: 600; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 6px; cursor: pointer;" onClick="{{ toggleExample }}">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M9 13h6"></path><path d="M9 17h6"></path></svg>
+    <div>Staging example</div>
+  </div>
+  <div data-print-hide style="position: absolute; top: 12px; right: 18px; height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 6px; cursor: pointer;" onClick="{{ doPrint }}">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+    <div>Print</div>
+  </div>
+  <div style="position: absolute; bottom: 14px; right: 18px; font-size: 10px; letter-spacing: 0.06em; color: oklch(51% 0.017 70 / 0.35);">CM</div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Resource Hub · 45 minutes · language awareness</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 32px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Checking meaning — CCQs and beyond.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">"Do you understand?" tells you nothing. This session is staged the way a real checking-meaning lesson is staged — writing real CCQs, spotting the bad ones, and trying the non-verbal techniques that work when questions won't.</div>
+  </div>
+
+  <div style="background: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent); border-radius: 8px; padding: 16px 19px; display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Running this session</div>
+    <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">Ban "Do you understand?" and "Is that clear?" from the room for the next 45 minutes — including from yourself. Trainees will reach for them constantly; that's the point of banning them.</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Lead-in · 2 minutes</div>
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px 17px;">
+      <div style="font-size: 13px; color: oklch(23.5% 0.017 65);">Quick show of hands: has anyone ever said "yes, I understand" in a foreign language class, and not actually understood?</div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">The 45 minutes</div>
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
+      <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="6">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-left: 3px solid {{ a.spine }}; border-radius: 6px; padding: 11px 12px; display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.03em; color: oklch(51% 0.017 70);">{{ a.time }}</div>
+          <div style="font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); line-height: 1.25;">{{ a.title }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Spot the bad CCQ</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ ccqProgressLabel }}</div>
+    </div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Target: "I've lived here for six years." Click the question you think is genuinely a bad CCQ.</div>
+    <sc-for list="{{ ccqItems }}" as="c" hint-placeholder-count="5">
+      <div onClick="{{ c.pick }}" style="background: {{ c.bg }}; border: 1px solid {{ c.border }}; border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer;">
+        <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65);">{{ c.text }}</div>
+        <sc-if value="{{ c.showTag }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size: 10.5px; font-weight: 700; color: {{ c.tagColor }};">{{ c.tag }}</div>
+        </sc-if>
+      </div>
+    </sc-for>
+    <sc-if value="{{ ccqExplain }}" hint-placeholder-val="{{ false }}">
+      <div style="border-left: 3px solid oklch(48% 0.09 150); background: color-mix(in oklab, oklch(48% 0.09 150) 8%, oklch(99.2% 0.005 90)); border-radius: 4px; padding: 10px 13px; font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">{{ ccqExplain }}</div>
+    </sc-if>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Write your own CCQs</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">For each target item, write two CCQs. Compare with a model once you've tried.</div>
+    <sc-for list="{{ writeItems }}" as="w" hint-placeholder-count="4">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 14px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ w.item }}</div>
+        <div data-print-hide onClick="{{ w.flip }}" style="align-self: flex-start; height: 28px; padding: 0 12px; border-radius: 999px; border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 40%, transparent); background: color-mix(in oklab, oklch(38% 0.072 195) 8%, oklch(99.2% 0.005 90)); font-size: 11px; font-weight: 600; color: oklch(38% 0.072 195); display: flex; align-items: center; cursor: pointer;">{{ w.buttonLabel }}</div>
+        <sc-if value="{{ w.open }}" hint-placeholder-val="{{ false }}">
+          <div style="border-left: 3px solid oklch(38% 0.072 195); background: color-mix(in oklab, oklch(38% 0.072 195) 6%, oklch(99.2% 0.005 90)); border-radius: 4px; padding: 10px 13px; font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">{{ w.model }}</div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Beyond CCQs — match the technique</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">CCQs aren't the only tool. Match each technique to when you'd actually use it.</div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <sc-for list="{{ techniqueItems }}" as="t" hint-placeholder-count="4">
+        <div onClick="{{ t.flip }}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; background: {{ t.bg }}; border: 1px solid {{ t.border }}; border-radius: 6px; padding: 10px 14px; cursor: pointer;">
+          <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ t.technique }}</div>
+          <sc-if value="{{ t.open }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size: 11.5px; color: oklch(48% 0.09 150);">{{ t.use }}</div>
+          </sc-if>
+          <sc-if value="{{ t.closed }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size: 10.5px; font-weight: 600; color: oklch(51% 0.017 70);">When would you use this? Click to reveal</div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Discuss: near misses</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">These sound like CCQs but aren't quite. Click each to see why, then discuss: what would fix it?</div>
+    <sc-for list="{{ nearMisses }}" as="n" hint-placeholder-count="2">
+      <div onClick="{{ n.flip }}" style="background: {{ n.bg }}; border: 1px solid {{ n.border }}; border-radius: 8px; padding: 12px 15px; display: flex; flex-direction: column; gap: 6px; cursor: pointer;">
+        <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65);">{{ n.text }}</div>
+        <sc-if value="{{ n.open }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size: 11.5px; font-style: italic; color: {{ n.spine }}; padding-top: 3px; border-top: 1px solid {{ n.border }};">{{ n.why }}</div>
+        </sc-if>
+        <sc-if value="{{ n.closed }}" hint-placeholder-val="{{ true }}">
+          <div data-print-hide style="font-size: 10.5px; font-weight: 600; color: {{ n.spine }};">Click to reveal ▾</div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Discuss: near misses</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">These sound like CCQs but aren't quite. Click each to see why, then discuss: what would fix it?</div>
+    <sc-for list="{{ nearMisses }}" as="n" hint-placeholder-count="2">
+      <div onClick="{{ n.flip }}" style="background: {{ n.bg }}; border: 1px solid {{ n.border }}; border-radius: 8px; padding: 12px 15px; display: flex; flex-direction: column; gap: 6px; cursor: pointer;">
+        <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65);">{{ n.text }}</div>
+        <sc-if value="{{ n.open }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size: 11.5px; font-style: italic; color: {{ n.spine }}; padding-top: 3px; border-top: 1px solid {{ n.border }};">{{ n.why }}</div>
+        </sc-if>
+        <sc-if value="{{ n.closed }}" hint-placeholder-val="{{ true }}">
+          <div data-print-hide style="font-size: 10.5px; font-weight: 600; color: {{ n.spine }};">Click to reveal ▾</div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ keyClosed }}" hint-placeholder-val="{{ true }}">
+    <div data-print-hide onClick="{{ toggleKey }}" style="align-self: flex-start; height: 34px; padding: 0 15px; border-radius: 999px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 7px; cursor: pointer;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M11 12 20 3"></path><path d="M16 8l2 2"></path><path d="M13 11l2 2"></path></svg>
+      <div>Reveal answer key — save or print to keep</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ keyOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="border-top: 1px solid oklch(88% 0.016 82); padding-top: 18px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Answer key — handout, to keep</div>
+        <div style="display: flex; gap: 8px;">
+          <div data-print-hide onClick="{{ toggleKey }}" style="height: 28px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer;">Hide</div>
+          <div data-print-hide onClick="{{ doPrintKey }}" style="height: 28px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+            <div>Print</div>
+          </div>
+        </div>
+      </div>
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Good CCQ or bad CCQ?</div>
+        <sc-for list="{{ keyCCQItems }}" as="row" hint-placeholder-count="6">
+          <div style="padding: 5px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent); display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 11.5px; color: oklch(23.5% 0.017 65);">{{ row.text }}</div>
+            <div style="font-size: 11px; font-style: italic; color: oklch(51% 0.017 70);">{{ row.verdict }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Model CCQs</div>
+        <sc-for list="{{ keyWrite }}" as="row" hint-placeholder-count="4">
+          <div style="padding: 5px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent); display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 11.5px; color: oklch(23.5% 0.017 65);">{{ row.item }}</div>
+            <div style="font-size: 11px; font-style: italic; color: oklch(51% 0.017 70);">{{ row.model }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ !notesOpen }}" hint-placeholder-val="{{ true }}">
+    <div data-print-hide onClick="{{ toggleReveal }}" style="align-self: flex-start; height: 34px; padding: 0 15px; border-radius: 999px; border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 45%, transparent); background: color-mix(in oklab, oklch(60% 0.11 70) 10%, oklch(99.2% 0.005 90)); font-size: 12px; font-weight: 600; color: oklch(44% 0.1 68); display: flex; align-items: center; gap: 7px; cursor: pointer;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M11 12 20 3"></path><path d="M16 8l2 2"></path><path d="M13 11l2 2"></path></svg>
+      <div>Show trainer notes</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ notesOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="background: color-mix(in oklab, oklch(45% 0.15 27) 6%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.15 27) 22%, transparent); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(45% 0.15 27); display: flex; align-items: center; gap: 5px;"><div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>Trainer only — trainer notes</div>
+        <div data-print-hide onClick="{{ toggleReveal }}" style="font-size: 10.5px; font-weight: 600; color: oklch(45% 0.15 27); cursor: pointer;">Hide</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">A good CCQ never contains the target language</div>
+        <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">If the question requires understanding the item to answer it, it isn't checking anything — flag this constantly, it's the single most common CCQ mistake.</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Simpler language than the target, always</div>
+        <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">A CCQ pitched at or above the target item's level defeats the purpose — push trainees to go simpler than feels natural.</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Non-verbal techniques aren't a fallback, they're often better</div>
+        <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">A timeline or realia can check meaning faster and more reliably than a string of questions, especially at lower levels.</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showExample }}" hint-placeholder-val="{{ false }}">
+    <div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid oklch(88% 0.016 82); padding-top: 20px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; color: oklch(23.5% 0.017 65);">Example — checking "used to" for past habits</div>
+      <div style="border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+        <sc-for list="{{ exampleRows }}" as="r" hint-placeholder-count="4">
+          <div style="display: grid; grid-template-columns: 130px 1fr; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+            <div style="padding: 9px 12px; background: oklch(96.4% 0.014 85); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ r.label }}</div>
+            <div style="padding: 9px 12px; font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ r.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+
+<div class="answer-key-print" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; flex-direction: column; gap: 20px; width: 900px; box-sizing: border-box;">
+  <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Answer key</div>
+  <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: oklch(23.5% 0.017 65);">Checking meaning — answer key</div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Good CCQ or bad CCQ?</div>
+    <sc-for list="{{ keyCCQItems }}" as="row" hint-placeholder-count="6">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ row.text }}</div>
+        <div style="font-size: 11px; line-height: 1.4; color: oklch(51% 0.017 70);">{{ row.verdict }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Model CCQs</div>
+    <sc-for list="{{ keyWrite }}" as="row" hint-placeholder-count="6">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ row.item }}</div>
+        <div style="font-size: 11px; line-height: 1.4; color: oklch(51% 0.017 70);">{{ row.model }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:960,&quot;height&quot;:2200}}">
+
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = 'oklch(48% 0.09 150)';
+const INK = 'oklch(23.5% 0.017 65)';
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+
+const CCQ_ITEMS = [
+  { text: 'Do you understand "I\u2019ve lived here for six years"?', bad: true, why: 'This just asks if they understand — it contains the target language and gives no way to check anything beyond a yes/no guess.' },
+  { text: 'Did I move here six years ago?', bad: false },
+  { text: 'Do I still live here now?', bad: false },
+  { text: 'Have you ever lived somewhere for six years?', bad: true, why: 'This asks about the student\u2019s own experience, not the meaning of the target sentence — it doesn\u2019t check anything about the grammar.' },
+  { text: 'Is this a completed action in the past, or does it continue?', bad: true, why: 'This uses grammatical terminology ("completed action") the student may not know — a CCQ should be simpler than the target, not more technical.' },
+];
+
+const WRITE_ITEMS = [
+  { item: 'Target: "She might be at work."', model: 'Model: "Do I know for sure where she is?" (No.) "Is this a guess?" (Yes.)' },
+  { item: 'Target: "If I were you, I\u2019d apologise."', model: 'Model: "Am I really you?" (No.) "Is this real advice or an imaginary situation?" (Imaginary, but real advice.)' },
+  { item: 'Target: "I wish I hadn\u2019t said that."', model: 'Model: "Did I say it?" (Yes.) "Am I happy about it?" (No.) "Can I change it now?" (No.)' },
+  { item: 'Target: "By the time I arrived, the film had started."', model: 'Model: "Which happened first, my arriving or the film starting?" (The film.) "Was the film still starting when I got there?" (No, already going.)' },
+];
+
+const NEAR_MISSES = [
+  { text: '"Is \u2018might\u2019 the same as \u2018will\u2019?"', why: 'A near miss — it sounds like a CCQ but only tests if they can spot a synonym, not whether they grasp the concept of possibility versus certainty.' },
+  { text: '"So it means maybe, right?"', why: 'A near miss — the teacher supplies the answer inside the question. Students agree without proving understanding.' },
+];
+
+const TECHNIQUES = [
+  { technique: 'Timeline', use: 'Best for tense and aspect — showing when an action happens relative to now.' },
+  { technique: 'Realia (the real object)', use: 'Fast and unambiguous for concrete nouns — showing an umbrella beats defining one.' },
+  { technique: 'Situation / short story', use: 'Good for functional language or attitude words — meaning that needs a context to make sense.' },
+  { technique: 'Cline (a scale drawn on the board)', use: 'Good for grading words like "furious" vs. "annoyed" — shows relative strength.' },
+];
+
+const CORRECT_ORDER = ['Pre-teach terms', 'Predict the staging', 'Read the text, check ideas', 'Detail check'];
+
+class Component extends DCLogic {
+  doPrint = () => window.print();
+  doPrintKey = () => {
+    document.body.classList.add('print-key');
+    window.print();
+    setTimeout(() => document.body.classList.remove('print-key'), 500);
+  };
+  state = { ccqPicked: null, writeOpen: {}, techOpen: {}, nearMissOpen: {}, revealed: false, showExample: false, keyOpen: false };
+
+  renderVals() {
+    const { ccqPicked, writeOpen, techOpen, nearMissOpen, revealed, showExample } = this.state;
+
+    const nearMisses = NEAR_MISSES.map((n, i) => ({
+      text: n.text, why: n.why,
+      open: !!nearMissOpen[i], closed: !nearMissOpen[i],
+      flip: () => this.setState(s => ({ nearMissOpen: { ...s.nearMissOpen, [i]: !s.nearMissOpen[i] } })),
+      spine: RED, bg: CARD, border: BORDER,
+    }));
+
+    const ccqItems = CCQ_ITEMS.map((c, i) => {
+      const picked = ccqPicked === i;
+      const show = picked;
+      return {
+        text: c.text,
+        pick: () => this.setState({ ccqPicked: i }),
+        bg: show ? (c.bad ? 'color-mix(in oklab, ' + GREEN + ' 10%, ' + CARD + ')' : 'color-mix(in oklab, ' + RED + ' 8%, ' + CARD + ')') : CARD,
+        border: show ? (c.bad ? GREEN : RED) : BORDER,
+        showTag: show,
+        tag: c.bad ? 'Bad CCQ' : 'Actually fine',
+        tagColor: c.bad ? GREEN : RED,
+      };
+    });
+    const ccqExplain = ccqPicked !== null ? (CCQ_ITEMS[ccqPicked].why || 'This one is a genuinely good CCQ — simple, doesn\u2019t contain the target language, and checks meaning directly.') : '';
+
+    const writeItems = WRITE_ITEMS.map((w, i) => ({
+      item: w.item, model: w.model,
+      open: !!writeOpen[i],
+      buttonLabel: writeOpen[i] ? 'Hide model CCQs' : 'Compare with model CCQs',
+      flip: () => this.setState(s => ({ writeOpen: { ...s.writeOpen, [i]: !s.writeOpen[i] } })),
+    }));
+
+    const techniqueItems = TECHNIQUES.map((t, i) => ({
+      technique: t.technique, use: t.use,
+      open: !!techOpen[i], closed: !techOpen[i],
+      flip: () => this.setState(s => ({ techOpen: { ...s.techOpen, [i]: !s.techOpen[i] } })),
+      bg: techOpen[i] ? 'color-mix(in oklab, ' + GREEN + ' 6%, ' + CARD + ')' : CARD,
+      border: techOpen[i] ? 'color-mix(in oklab, ' + GREEN + ' 20%, ' + BORDER + ')' : BORDER,
+    }));
+
+    return {
+      doPrint: this.doPrint,
+      doPrintKey: this.doPrintKey,
+      agenda: [
+        { time: '0\u20132', spine: GOLD, title: 'Lead-in' },
+        { time: '2\u201311', spine: RED, title: 'Spot the bad CCQ' },
+        { time: '11\u201325', spine: TEAL, title: 'Write your own CCQs' },
+        { time: '25\u201334', spine: GREEN, title: 'Beyond CCQs' },
+        { time: '34\u201340', spine: GOLD, title: 'Discuss: near misses' },
+        { time: '40\u201345', spine: RED, title: 'Trainer notes' },
+      ],
+      ccqProgressLabel: ccqPicked !== null ? '1 of 5 examined' : '0 of 5 examined',
+      ccqItems,
+      ccqExplain,
+      writeItems,
+      techniqueItems,
+      nearMisses,
+      keyOpen: this.state.keyOpen,
+      keyClosed: !this.state.keyOpen,
+      toggleKey: () => this.setState(s => ({ keyOpen: !s.keyOpen })),
+      keyCCQItems: CCQ_ITEMS.map(c => ({ text: c.text, verdict: c.bad ? ('Bad CCQ — ' + c.why) : 'Good CCQ' })),
+      keyWrite: WRITE_ITEMS,
+      notesOpen: revealed,
+      toggleReveal: () => this.setState(s => ({ revealed: !s.revealed })),
+      showExample,
+      toggleExample: () => this.setState(s => ({ showExample: !s.showExample })),
+      exampleRows: [
+        { label: 'Target', value: '"I used to play basketball." (past habit, not now)' },
+        { label: 'CCQ 1', value: '"Do I play basketball now?" (No.)' },
+        { label: 'CCQ 2', value: '"Did I play basketball in the past, many times?" (Yes.)' },
+        { label: 'Non-verbal backup', value: 'A timeline: mark repeated Xs in the past, a clear stop before "now."' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>
