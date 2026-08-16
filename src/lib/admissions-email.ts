@@ -122,6 +122,21 @@ export async function sendApplicantEmail(input: {
     }
   }
 
+  // "All the emails should lead with the centre name" (Ramy, 2026-08-16).
+  // Applied here rather than at each call site for the same reason the
+  // reply-to rule is: nineteen callers each remembering to prefix a string is
+  // nineteen chances to forget, and the one that forgets is the one that lands
+  // in a stranger's inbox with no clue who it is from.
+  //
+  // full-email-specs.md writes it as "Meridian English Centre · your CELTA
+  // application". Some of its sample subjects lead with the course instead;
+  // the instruction above settles those -- every email leads with the centre.
+  //
+  // Skipped when the subject already starts with the centre's name, so a
+  // caller that spells it out in full doesn't produce "Centre · Centre · ...".
+  const leadsWithCentre = input.subject.trim().toLowerCase().startsWith(input.centerName.trim().toLowerCase());
+  const subject = leadsWithCentre ? input.subject : `${input.centerName} · ${input.subject}`;
+
   // Which of the three rules applies. Derived from the email's type rather
   // than passed in, so a caller cannot accidentally send a rejection that
   // replies to a shared inbox.
@@ -141,7 +156,7 @@ export async function sendApplicantEmail(input: {
       from: `${input.centerName} <noreply@celtaconnect.com>`,
       to: input.to,
       replyTo,
-      subject: input.subject,
+      subject,
       html: input.html,
     });
     failure = error ? error.message : null;
@@ -164,7 +179,7 @@ export async function sendApplicantEmail(input: {
         type: input.type,
         to_email: input.to,
         recipient_name: input.recipientName ?? null,
-        subject: input.subject,
+        subject,
         // "sent" means the provider accepted it and nothing more -- delivered,
         // opened and bounced arrive later from the webhook.
         status: failure ? "failed" : "sent",
