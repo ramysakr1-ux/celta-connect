@@ -53,7 +53,7 @@ export function AddVolunteerForm({ token }: { token: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="h-10 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
       >
         {pending ? "Adding…" : "Add student"}
       </button>

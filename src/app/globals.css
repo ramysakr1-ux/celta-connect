@@ -296,6 +296,17 @@ h6 {
      invite/sign-in entry point (login, join-as-trainer-or-trainee, and the
      expired/invalid-link gates on the tokenized routes) under one visual
      language instead of each screen inventing its own.  */
+  /* The beige ground the entry surfaces sit on. The app's --color-background
+     is oklch(97.8%), so a white card on it has almost nothing to separate it
+     -- the card reads as a white page rather than paper laid on a surface.
+     The handoff palette is explicit that the ground is oklch(92.5% 0.012 85)
+     and the paper is oklch(99.5% 0.004 90); the gap between those two IS the
+     effect. Scoped to entry surfaces rather than changing the global token,
+     which would restyle every screen in the product. */
+  .entry-ground {
+    background-color: oklch(92.5% 0.012 85);
+  }
+
   .sheet-accent {
     /* The green wash is gone (Ramy, 16 Aug 2026): "we're not going with that
        anymore" -- every entry surface now sits on the same warm paper as the

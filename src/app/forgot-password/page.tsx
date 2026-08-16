@@ -6,7 +6,7 @@ import { Wordmark } from "@/components/wordmark";
 // sheet, same width, same mark as everything else."
 export default function ForgotPasswordPage() {
   return (
-    <div className="flex flex-1 items-center justify-center p-8">
+    <div className="entry-ground flex flex-1 items-center justify-center p-8">
       <div className="sheet-accent w-full max-w-sm p-8">
         <Wordmark size="hero" />
         <h1 className="mt-4 font-serif text-2xl text-ink">Reset your password</h1>

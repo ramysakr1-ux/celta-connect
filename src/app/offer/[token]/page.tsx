@@ -24,7 +24,7 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
 
   if (invalid) {
     return (
-      <div className="flex min-h-screen flex-1 items-center justify-center p-8">
+      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="sheet-accent w-full max-w-sm p-8">
           <Wordmark size="hero" />
           <p className="mt-4 text-sm text-destructive">
@@ -42,7 +42,7 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
   ]);
 
   return (
-    <div className="flex min-h-screen flex-1 items-center justify-center p-8">
+    <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="sheet-accent w-full max-w-sm p-8">
         <Wordmark size="hero" />
         <p className="mt-1 text-sm text-ink">

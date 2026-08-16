@@ -27,7 +27,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
   if (!accessToken || !accessToken.volunteer_student_id || new Date(accessToken.expires_at) < new Date()) {
     return (
-      <div className="flex min-h-screen flex-1 items-center justify-center p-8">
+      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="sheet-accent w-full max-w-sm p-8 text-center">
           <Wordmark size="hero" />
           <p className="mt-4 text-sm text-destructive">

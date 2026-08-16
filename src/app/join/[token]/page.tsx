@@ -33,7 +33,7 @@ export default async function JoinPage({
   if (course && closeOut?.status === "wiped") {
     const { data: center } = await admin.from("centers").select("name, admissions_email").eq("id", course.center_id).maybeSingle();
     return (
-      <div className="flex min-h-screen flex-1 items-center justify-center p-8">
+      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="sheet-accent w-full max-w-sm p-8">
           <Wordmark size="hero" />
           <h1 className="mt-4 font-serif text-xl text-ink">The course has closed</h1>
@@ -47,7 +47,7 @@ export default async function JoinPage({
           {center?.admissions_email ? (
             <a
               href={`mailto:${center.admissions_email}`}
-              className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+              className="mt-4 inline-block rounded-[6px] bg-ink-warm px-4 py-2 text-sm font-semibold text-card hover:bg-ink-warm/90"
             >
               Email {center.name}
             </a>
@@ -63,7 +63,7 @@ export default async function JoinPage({
 
   if (!course) {
     return (
-      <div className="flex min-h-screen flex-1 items-center justify-center p-8">
+      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="sheet-accent w-full max-w-sm p-8">
           <Wordmark size="hero" />
           <p className="mt-4 text-sm text-destructive">
@@ -78,7 +78,7 @@ export default async function JoinPage({
   const { data: center } = await admin.from("centers").select("is_uk_centre").eq("id", course.center_id).maybeSingle();
 
   return (
-    <div className="flex min-h-screen flex-1 items-center justify-center p-8">
+    <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="sheet-accent w-full max-w-sm p-8">
         <Wordmark size="hero" />
         <p className="mt-1 text-sm text-muted">

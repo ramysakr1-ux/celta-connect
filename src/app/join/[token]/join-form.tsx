@@ -222,7 +222,7 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+        className="mt-2 rounded-[6px] bg-ink-warm px-4 py-2 text-sm font-semibold text-card hover:bg-ink-warm/90 disabled:opacity-60"
       >
         {pending ? "Joining..." : "Join course"}
       </button>

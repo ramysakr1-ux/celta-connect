@@ -9,7 +9,7 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="entry-ground flex flex-1 flex-col">
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="sheet-accent w-full max-w-sm p-8">
           <Wordmark size="hero" />

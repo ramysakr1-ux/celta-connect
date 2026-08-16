@@ -29,7 +29,7 @@ export default async function ApplyPage() {
 
   if (!center) {
     return (
-      <div className="flex min-h-screen flex-1 items-center justify-center p-8">
+      <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="sheet-accent w-full max-w-sm p-8 text-center">
           <p className="text-sm text-muted">Applications aren&apos;t open right now.</p>
         </div>
@@ -90,7 +90,7 @@ export default async function ApplyPage() {
     .order("prompt_type");
 
   return (
-    <div className="flex min-h-screen flex-1 items-center justify-center p-8">
+    <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="sheet-accent w-full max-w-xl p-8">
         {center.logo_url ? (
           // eslint-disable-next-line @next/next/no-img-element

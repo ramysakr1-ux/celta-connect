@@ -75,7 +75,7 @@ export function SignInLinkForm() {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+        className="rounded-[6px] bg-ink-warm px-4 py-2 text-sm font-semibold text-card hover:bg-ink-warm/90 disabled:opacity-60"
       >
         {pending ? "Sending..." : "Send sign-in link"}
       </button>
