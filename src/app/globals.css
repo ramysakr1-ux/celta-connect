@@ -317,8 +317,22 @@ h6 {
        This class is the shared entry look -- login, join, offer, register,
        student and forgot-password all use it, which is why unifying it here
        is one edit rather than seven. */
-    background-color: var(--color-card);
-    border: 1px solid color-mix(in oklab, var(--color-primary) 25%, transparent);
+    background-color: oklch(99.2% 0.005 90);
+    border: 1px solid oklch(88.8% 0.013 82);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    box-shadow: none;
+  }
+
+  /* Entry.dc.html doesn't give every gate the same card. Sign-in is plain
+     paper; the join card and the reset / dead-link gates are gold-tinted; the
+     "check your email" confirmation is red-tinted (.sheet-accent-alert).
+     Values are lifted from Entry.dc.html literally rather than rebuilt from
+     the app's --color-gold, which is a slightly different gold
+     (oklch(63% 0.096 72) vs the 60% 0.11 70 the entry screens use). */
+  .sheet-gold {
+    background-color: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90));
+    border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent);
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;

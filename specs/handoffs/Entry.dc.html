@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&family=Instrument+Serif:ital@1&family=Instrument+Sans:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 44px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 12px; max-width: 940px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · entry screens</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">The first screen anyone sees, and the four ways it can go wrong.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Error wording is verbatim from your code. One card, one width, one look across sign in, join, reset and every expired-link gate — including <span style="font-weight: 600;">forgot-password</span>, which currently uses a plain card and no wordmark while everything around it uses the accent sheet.</div>
+  </div>
+
+  <!-- 1a -->
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Sign in, and its three error states</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 34px 24px; display: flex; align-items: flex-start; justify-content: center; gap: 20px;">
+
+      <div style="width: 380px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; padding: 30px; display: flex; flex-direction: column; gap: 18px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+            <div style="width: 54px; height: 54px; border-radius: 12px; background: oklch(30% 0.042 58); display: flex; align-items: center; justify-content: center; flex: none;">
+              <svg width="34" height="20" viewBox="8 30 104 60" fill="none">
+                <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" stroke-width="10" stroke-linecap="round"></path>
+                <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" stroke-width="10" stroke-linecap="round"></path>
+              </svg>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 30px; line-height: 0.85; color: oklch(60% 0.11 70);">Connect</div>
+              <div style="font-family: 'Instrument Sans', Karla, sans-serif; font-weight: 600; font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase; color: oklch(51% 0.017 70); padding-left: 6px;">Teacher training platform</div>
+            </div>
+          </div>
+          <div style="font-size: 13px; color: oklch(51% 0.017 70); padding-left: 2px;">Sign in to your centre.</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Email</div>
+            <div style="height: 40px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(99.2% 0.005 90); padding: 0 12px; display: flex; align-items: center; font-size: 13px; color: oklch(23.5% 0.017 65);">sara.yilmaz@example.com</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+              <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Password</div>
+              <div style="font-size: 11px; font-weight: 600; color: oklch(38% 0.072 195); cursor: pointer;">Forgot?</div>
+            </div>
+            <div style="height: 40px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(99.2% 0.005 90); padding: 0 12px; display: flex; align-items: center; font-size: 13px; letter-spacing: 0.2em; color: oklch(51% 0.017 70);">••••••••</div>
+          </div>
+        </div>
+
+        <div style="height: 40px; border-radius: 6px; background: oklch(30% 0.042 58); color: oklch(98.5% 0.006 90); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer;">Sign in</div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex: 1; height: 1px; background: color-mix(in oklab, oklch(38% 0.072 195) 18%, transparent);"></div>
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">or</div>
+          <div style="flex: 1; height: 1px; background: color-mix(in oklab, oklch(38% 0.072 195) 18%, transparent);"></div>
+        </div>
+
+        <div style="height: 40px; border-radius: 6px; border: 1px solid oklch(88.8% 0.013 82); background: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65); cursor: pointer;" style-hover="border-color: oklch(38% 0.072 195);">Email me a sign-in link</div>
+
+        <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70);">Assessors and volunteer students don't sign in — you have your own link. Trainees sign in here too, after setting up an account from their join link.</div>
+      </div>
+
+      <div style="width: 380px; box-sizing: border-box; background: color-mix(in oklab, oklch(45% 0.15 27) 6%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.15 27) 22%, transparent); border-radius: 6px; padding: 30px; display: flex; flex-direction: column; gap: 16px; align-self: stretch; justify-content: center;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(45% 0.15 27);">After "Email me a sign-in link"</div>
+        <div style="width: 44px; height: 44px; border-radius: 10px; background: color-mix(in oklab, oklch(38% 0.072 195) 12%, oklch(99.2% 0.005 90)); display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="oklch(38% 0.072 195)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"></path><path d="m4 4 8 8 8-8"></path></svg>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: oklch(23.5% 0.017 65);">Check your email</div>
+          <div style="font-size: 12.5px; line-height: 1.55; color: oklch(51% 0.017 70);">We've sent a sign-in link to <strong style="color: oklch(23.5% 0.017 65); font-weight: 600;">sara.yilmaz@example.com</strong>. Click it to sign in — no password needed.</div>
+        </div>
+        <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">The link expires in 15 minutes and works once. Didn't get it? <span style="color: oklch(38% 0.072 195); font-weight: 600; cursor: pointer;">Send again</span></div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; width: 420px;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Error states, wording as written</div>
+        <sc-for list="{{ errors }}" as="e" hint-placeholder-count="3">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 7px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ e.key }}</div>
+            <div style="display: flex; align-items: flex-start; gap: 9px; padding: 10px 12px; border-radius: 6px; background: color-mix(in oklab, oklch(45% 0.16 27) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.16 27) 25%, transparent);">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(45% 0.16 27); margin-top: 6px; flex: none;"></div>
+              <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ e.text }}</div>
+            </div>
+            <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ e.note }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 340px;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Changes</div>
+        <sc-for list="{{ signInNotes }}" as="n" hint-placeholder-count="3">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 13px 15px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1b -->
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1b</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Joining by link — account and agreement on one card</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 34px 24px; display: flex; align-items: flex-start; justify-content: center; gap: 20px;">
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 3px; padding: 3px; border-radius: 8px; background: oklch(93.5% 0.012 85); border: 1px solid oklch(88% 0.016 82); align-self: flex-start;">
+          <sc-for list="{{ joinTabs }}" as="t" hint-placeholder-count="2">
+            <div onClick="{{ t.pick }}" style="height: 28px; padding: 0 13px; border-radius: 5px; font-size: 12px; font-weight: 600; display: flex; align-items: center; cursor: pointer; background: {{ t.bg }}; color: {{ t.ink }};">{{ t.label }}</div>
+          </sc-for>
+        </div>
+
+        <div style="width: 420px; box-sizing: border-box; background: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent); border-radius: 6px; padding: 30px; display: flex; flex-direction: column; gap: 18px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 13px;">
+              <div style="width: 54px; height: 54px; border-radius: 12px; background: oklch(30% 0.042 58); display: flex; align-items: center; justify-content: center; flex: none;">
+                <svg width="34" height="20" viewBox="8 30 104 60" fill="none">
+                  <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" stroke-width="10" stroke-linecap="round"></path>
+                  <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" stroke-width="10" stroke-linecap="round"></path>
+                </svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 30px; line-height: 0.85; color: oklch(60% 0.11 70);">Connect</div>
+                <div style="font-family: 'Instrument Sans', Karla, sans-serif; font-weight: 600; font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase; color: oklch(51% 0.017 70); padding-left: 6px;">Teacher training platform</div>
+              </div>
+            </div>
+            <div style="font-size: 13px; line-height: 1.5; color: oklch(51% 0.017 70); padding-left: 2px;">{{ joinLine }}</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 11px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Full name</div>
+              <div style="height: 38px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(99.2% 0.005 90); padding: 0 12px; display: flex; align-items: center; font-size: 13px; color: oklch(23.5% 0.017 65);">{{ joinName }}</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Email</div>
+              <div style="height: 38px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(99.2% 0.005 90); padding: 0 12px; display: flex; align-items: center; font-size: 13px; color: oklch(23.5% 0.017 65);">{{ joinEmail }}</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Choose a password</div>
+              <div style="height: 38px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(99.2% 0.005 90); padding: 0 12px; display: flex; align-items: center; font-size: 13px; letter-spacing: 0.2em; color: oklch(51% 0.017 70);">••••••••••</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 9px; padding-top: 3px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ agreementTitle }}</div>
+            <sc-for list="{{ agreement }}" as="a" hint-placeholder-count="4">
+              <div style="display: flex; align-items: flex-start; gap: 9px; cursor: pointer;">
+                <div style="width: 15px; height: 15px; border-radius: 4px; border: 1px solid {{ a.border }}; background: {{ a.bg }}; margin-top: 1px; flex: none; display: flex; align-items: center; justify-content: center;">
+                  <sc-if value="{{ a.checked }}" hint-placeholder-val="{{ true }}">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="oklch(98.5% 0.006 90)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                  </sc-if>
+                </div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ a.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="height: 40px; border-radius: 6px; background: oklch(30% 0.042 58); color: oklch(98.5% 0.006 90); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer;">Create my account and accept</div>
+          <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ joinFoot }}</div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 380px;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Changes</div>
+        <sc-for list="{{ joinNotes }}" as="n" hint-placeholder-count="4">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 13px 15px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1c -->
+  <div id="1c" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1c</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Reset, and the dead-link gates</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 34px 24px; display: flex; align-items: flex-start; justify-content: center; gap: 18px;">
+      <sc-for list="{{ gates }}" as="g" hint-placeholder-count="3">
+        <div style="width: 340px; box-sizing: border-box; background: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent); border-radius: 6px; padding: 26px; display: flex; flex-direction: column; gap: 15px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 42px; height: 42px; border-radius: 10px; background: oklch(30% 0.042 58); display: flex; align-items: center; justify-content: center; flex: none;">
+              <svg width="27" height="16" viewBox="8 30 104 60" fill="none">
+                <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" stroke-width="11" stroke-linecap="round"></path>
+                <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" stroke-width="11" stroke-linecap="round"></path>
+              </svg>
+            </div>
+            <div style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 25px; line-height: 0.85; color: oklch(60% 0.11 70);">Connect</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ g.title }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: {{ g.bodyInk }};">{{ g.body }}</div>
+          </div>
+
+          <sc-if value="{{ g.field }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Email</div>
+              <div style="height: 38px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(99.2% 0.005 90); padding: 0 12px; display: flex; align-items: center; font-size: 13px; color: oklch(51% 0.017 70);">you@centre.com</div>
+            </div>
+          </sc-if>
+
+          <div style="height: 38px; border-radius: 6px; background: {{ g.ctaBg }}; color: {{ g.ctaInk }}; border: 1px solid {{ g.ctaBorder }}; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer;">{{ g.cta }}</div>
+          <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ g.foot }}</div>
+        </div>
+      </sc-for>
+
+      <div style="width: 340px; box-sizing: border-box; background: color-mix(in oklab, oklch(45% 0.15 27) 6%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.15 27) 22%, transparent); border-radius: 6px; padding: 26px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(45% 0.15 27);">After "Send reset link"</div>
+        <div style="width: 40px; height: 40px; border-radius: 10px; background: color-mix(in oklab, oklch(38% 0.072 195) 12%, oklch(99.2% 0.005 90)); display: flex; align-items: center; justify-content: center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="oklch(38% 0.072 195)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"></path><path d="m4 4 8 8 8-8"></path></svg>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; color: oklch(23.5% 0.017 65);">Check your email</div>
+          <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70);">If an account exists for that address, a reset link is on its way. Click it to set a new password — the link expires in 15 minutes.</div>
+        </div>
+        <div style="font-size: 11px; color: oklch(51% 0.017 70);">Didn't get it? <span style="color: oklch(38% 0.072 195); font-weight: 600; cursor: pointer;">Send again</span></div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 340px;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Changes</div>
+        <sc-for list="{{ gateNotes }}" as="n" hint-placeholder-count="3">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 13px 15px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:2200}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const INK_WARM = 'oklch(30% 0.042 58)';
+const BORDER = 'oklch(88.8% 0.013 82)';
+
+class Component extends DCLogic {
+  state = { join: 'trainee' };
+
+  renderVals() {
+    const trainee = this.state.join === 'trainee';
+
+    const tab = (key, label) => ({
+      label,
+      pick: () => this.setState({ join: key }),
+      bg: this.state.join === key ? TEAL : 'transparent',
+      ink: this.state.join === key ? 'oklch(98.5% 0.006 90)' : MUTED,
+    });
+
+    const term = (text, checked) => ({
+      text, checked,
+      bg: checked ? TEAL : 'oklch(99.2% 0.005 90)',
+      border: checked ? TEAL : BORDER,
+    });
+
+    return {
+      errors: [
+        { key: 'invite_invalid', text: 'That invite link is invalid or has expired. Ask your admin to resend it.', note: 'Reached when a join token no longer matches a course.' },
+        { key: 'session_expired', text: 'Your session expired before you could set a password. Ask your admin to resend the invite.', note: 'The one error a user can do nothing about — worth a “resend to me” button rather than asking them to chase an admin.' },
+        { key: 'assessor_link_invalid', text: 'That assessor link is invalid or has expired. Ask the centre for a new one.', note: 'An assessor has no account, so this is a dead end. It should name the centre and show its contact.' },
+      ],
+      signInNotes: [
+        { title: 'Sign-in links, not just passwords', text: 'Trainers sign in a few times a course and will forget a password every time. An emailed link removes the most common support request you will get.' },
+        { title: 'Say who does not sign in here', text: 'Assessors and volunteers have their own links and never set up an account. Trainees do sign in here — but only after setting up an account from their one-time join link.' },
+        { title: 'Forgot moves next to the field', text: 'It currently lives below the form. Beside the password label is where someone looks the moment the password fails.' },
+      ],
+      joinTabs: [tab('trainee', 'Trainee'), tab('trainer', 'Trainer')],
+      joinLine: trainee
+        ? "You're joining Meridian English Centre C/4 as a trainee. Your workspace opens as soon as you accept."
+        : "You're joining Meridian English Centre C/4 as a trainer.",
+      joinName: trainee ? 'Sara Yılmaz' : 'Hakan Şen',
+      joinEmail: trainee ? 'sara.yilmaz@example.com' : 'hakan.sen@meridian-english.com',
+      agreementTitle: trainee ? 'Candidate agreement' : 'Staff terms',
+      agreement: trainee
+        ? [
+            term('I accept the centre’s attendance, plagiarism, complaints and resubmission policies.', true),
+            term('The work I submit here is my own, and I will confirm that per assignment.', true),
+            term('I will keep my workspace link private — it opens my portfolio and nobody else’s.', true),
+            term('I will not copy, reverse engineer, or rebuild any part of this platform.', false),
+          ]
+        : [
+            term('Candidate work, grades and records are confidential to this course and this centre.', true),
+            term('I will follow the centre’s malpractice and safeguarding procedures.', true),
+            term('I will not copy, reverse engineer, or rebuild any part of this platform, and I will not share access with anyone not registered on this course.', true),
+          ],
+      joinFoot: trainee
+        ? 'Your acceptance is recorded with today’s date and prints into section 2 of your CELTA 5.'
+        : 'Accepted once per centre. You will not be asked again on your next course.',
+      joinNotes: [
+        { title: 'The agreement is on this card, not a second screen', text: 'A candidate accepts once, at the moment they arrive, and the button says what it does: create the account and accept. No separate visit, no unticked box discovered later.' },
+        { title: 'Name and email are shown, not assumed', text: 'The link identifies the person and the course, so nothing is typed to prove identity — but they should see who the app thinks they are before committing.' },
+        { title: 'Trainee and trainer differ only in the terms', text: 'Same card, same flow. The trainer’s acceptance is once per centre; the trainee’s prints into their CELTA 5.' },
+        { title: 'Invalid links keep the wordmark', text: 'Your join page already does this. It matters — a dead link with no branding looks like a broken site rather than an expired invitation.' },
+      ],
+      gates: [
+        {
+          title: 'Reset your password',
+          body: "Enter your email and we'll send you a reset link.",
+          bodyInk: MUTED, field: true,
+          cta: 'Send reset link', ctaBg: INK_WARM, ctaInk: 'oklch(98.5% 0.006 90)', ctaBorder: INK_WARM,
+          foot: 'Only staff accounts have passwords. If you hold a workspace or assessor link, use that instead.',
+        },
+        {
+          title: 'This link has expired',
+          body: 'This join link is invalid or has expired. Ask your centre admin for a new one.',
+          bodyInk: INK, field: false,
+          cta: 'Email Meridian English Centre', ctaBg: 'oklch(99.2% 0.005 90)', ctaInk: INK, ctaBorder: BORDER,
+          foot: 'Naming the centre and offering the contact turns a dead end into one click.',
+        },
+        {
+          title: 'The course has closed',
+          body: 'Meridian English Centre C/4 finished on 7 December 2023. Course material was returned to the centre and this workspace is no longer available.',
+          bodyInk: INK, field: false,
+          cta: 'Email Meridian English Centre', ctaBg: 'oklch(99.2% 0.005 90)', ctaInk: INK, ctaBorder: BORDER,
+          foot: 'A closed course is not an error. It deserves its own message rather than the invalid-link one.',
+        },
+      ],
+      gateNotes: [
+        { title: 'Forgot-password joins the family', text: 'It is the only entry screen using a plain card with no wordmark. Same accent sheet, same width, same mark as everything else.' },
+        { title: '"Check your email" never confirms an account exists', text: 'Same wording whether or not that address has an account — so the reset flow can\u2019t be used to find out who has signed up.' },
+        { title: 'Closed is different from broken', text: 'After close-out every trainee and assessor link stops working. Showing “invalid or expired” makes a normal, expected end look like a fault.' },
+        { title: 'Every dead end offers a way out', text: 'Each gate names the centre and offers its contact, because the person hitting it has no account and no other route in.' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>
