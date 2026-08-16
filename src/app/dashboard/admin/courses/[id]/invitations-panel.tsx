@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { inviteToCourse, revokeInvitation, type InviteState } from "./invitation-actions";
+import { TUTOR_ROLE_LABEL, DEFAULT_INVITE_TUTOR_ROLE, tutorRoleLabel } from "@/lib/tutor-roles";
 
 const initial: InviteState = { error: null };
 
@@ -14,13 +15,6 @@ export interface PendingInvite {
   invitedAt: string;
 }
 
-const TUTOR_ROLE_LABEL: Record<string, string> = {
-  main_course_tutor: "Main course tutor",
-  assistant_course_tutor: "Assistant course tutor",
-  teaching_practice_tutor: "Teaching practice tutor",
-  input_session_tutor: "Input session tutor",
-  external_assessor: "External assessor",
-};
 
 /**
  * Invite by name, with the role attached.
@@ -47,7 +41,7 @@ export function InvitationsPanel({
 
   return (
     <div className="card p-6">
-      <h2 className="font-serif text-lg text-ink">Invite someone by name</h2>
+      <h2 className="font-serif text-lg text-ink">Invite a tutor by name</h2>
       <p className="mt-1 text-sm text-muted">
         The invitation is bound to the address, and carries the role — forwarding it doesn&apos;t work, by design.
       </p>
@@ -61,6 +55,7 @@ export function InvitationsPanel({
             name="email"
             type="email"
             required
+            placeholder="tutor@email.com"
             className="h-9 w-full rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
@@ -87,7 +82,7 @@ export function InvitationsPanel({
           <label className="text-[11px] font-medium text-muted">Tutor role</label>
           <select
             name="tutor_role"
-            defaultValue=""
+            defaultValue={DEFAULT_INVITE_TUTOR_ROLE}
             className="h-9 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Not set yet</option>
@@ -142,7 +137,7 @@ export function InvitationsPanel({
                 {inv.fullName ? <span className="text-muted"> · {inv.email}</span> : null}
                 <span className="text-muted">
                   {" "}
-                  · {inv.role === "trainer" ? (inv.tutorRole ? TUTOR_ROLE_LABEL[inv.tutorRole] : "Tutor, role not set") : "Candidate"}
+                  · {inv.role === "trainer" ? (inv.tutorRole ? tutorRoleLabel(inv.tutorRole) : "Tutor, role not set") : "Candidate"}
                 </span>
               </span>
               <form action={revokeAction}>

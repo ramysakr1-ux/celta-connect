@@ -2,16 +2,10 @@
 
 import { useActionState } from "react";
 import { changeTutorRole, type InviteState } from "./invitation-actions";
+import { TUTOR_ROLE_LABEL } from "@/lib/tutor-roles";
 
 const initial: InviteState = { error: null };
 
-const TUTOR_ROLE_LABEL: Record<string, string> = {
-  main_course_tutor: "Main course tutor",
-  assistant_course_tutor: "Assistant course tutor",
-  teaching_practice_tutor: "Teaching practice tutor",
-  input_session_tutor: "Input session tutor",
-  external_assessor: "External assessor",
-};
 
 /**
  * Change a tutor's role, including handing the MCT to someone else.
