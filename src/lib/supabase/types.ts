@@ -217,6 +217,9 @@ export interface Database {
             | null;
           payment_provider_connected_at: string | null;
           payment_provider_connected_by: string | null;
+          // migration 0111 -- the optional tier above the centre. Null for a
+          // single-centre customer, who never sees any of it.
+          organisation_id: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {
@@ -371,6 +374,13 @@ export interface Database {
           deposit_paid_at: string | null;
           deposit_marked_by: string | null;
           deposit_note: string | null;
+          // migration 0111 -- referral between branches. The originating record
+          // stays and is marked, so conversion figures aren't flattered by
+          // people who went elsewhere in the family.
+          referred_to_center_id: string | null;
+          referred_from_applicant_id: string | null;
+          referred_at: string | null;
+          referred_by: string | null;
           full_name: string;
           email: string;
           phone: string | null;
@@ -1491,6 +1501,30 @@ export interface Database {
           status: string;
         };
         Update: Partial<Database["public"]["Tables"]["applicant_emails"]["Row"]>;
+        Relationships: [];
+      };
+      organisations: {
+        Row: { id: string; name: string; created_at: string };
+        Insert: Partial<Database["public"]["Tables"]["organisations"]["Row"]> & { name: string };
+        Update: Partial<Database["public"]["Tables"]["organisations"]["Row"]>;
+        Relationships: [];
+      };
+      organisation_roles: {
+        Row: {
+          id: string;
+          organisation_id: string;
+          profile_id: string;
+          role: "organisation_owner";
+          granted_by: string | null;
+          granted_at: string;
+          revoked_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["organisation_roles"]["Row"]> & {
+          organisation_id: string;
+          profile_id: string;
+          role: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["organisation_roles"]["Row"]>;
         Relationships: [];
       };
       centre_areas: {
