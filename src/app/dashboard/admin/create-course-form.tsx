@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { createCourse, type FormState } from "@/app/dashboard/admin/actions";
 import { DeliveryModePicker } from "@/components/delivery-mode-picker";
+import { TUTOR_ROLE_LABEL, DEFAULT_INVITE_TUTOR_ROLE } from "@/lib/tutor-roles";
 import type { DeliveryMode } from "@/lib/delivery-mode";
 
 const initialState: FormState = { error: null };
@@ -10,40 +11,98 @@ const initialState: FormState = { error: null };
 const field =
   "h-10 rounded-[6px] border border-border bg-card px-3 text-sm text-ink outline-none focus:border-primary";
 
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+
+const MODE_LABEL: Record<DeliveryMode, string> = {
+  f2f: "Face-to-face",
+  online: "Fully online",
+  mixed: "Mixed — input online, TP in person",
+};
+
 /**
- * The new-course wizard, steps 1 and 2 of 6 (Course Admin.dc.html).
+ * The new-course wizard, all six steps (Course Admin.dc.html).
  *
- * Two steps rather than one screen, because the design separates them and the
- * separation carries meaning: step 1 is what the course IS and prints on
- * Cambridge documents, step 2 is a decision that rewrites the timetable if
- * changed later. "Continue to delivery mode" is the design's own button label.
+ * One <form>, six panels. Every field stays mounted while other steps show, so
+ * moving back and forth never loses anything and the whole course is created
+ * in a single submit at step 6 — "Launch course" is the submit, and launching
+ * is what opens the course to invites.
  *
- * Both steps live in one <form>: the fields from step 1 stay mounted while
- * step 2 shows, so going back never loses what was typed and the whole thing
- * submits once.
+ * The design's own escape hatches are kept: tutors can be skipped at step 5,
+ * and pricing fields are optional. Only step 1's name and dates are required,
+ * because a course record without them is not a course.
  */
 export function CreateCourseForm({ centerNumber }: { centerNumber?: string | null }) {
   const [state, action, pending] = useActionState(createCourse, initialState);
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("f2f");
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
+  const [daysOff, setDaysOff] = useState<string[]>([]);
+
+  // Step 6's review reads live field values without controlled inputs
+  // everywhere: cheap summary state, set as the user leaves each step.
+  const [summary, setSummary] = useState<Record<string, string>>({});
+
+  function captureStep(form: HTMLFormElement | null) {
+    if (!form) return;
+    const g = (n: string) => (form.elements.namedItem(n) as HTMLInputElement | null)?.value ?? "";
+    setSummary({
+      code: g("course_code"),
+      name: g("name"),
+      dates: g("start_date") && g("end_date") ? `${g("start_date")} – ${g("end_date")}` : "",
+      cohort: g("cohort_size"),
+      fee: g("fee_amount"),
+      deposit: g("deposit_amount"),
+      currency: g("fee_currency"),
+      inviteEmail: g("invite_email"),
+    });
+  }
+
+  const eyebrow = `New course${centerNumber ? ` · ${centerNumber}` : ""}`;
+
+  function StepHeader({ n, title, blurb }: { n: number; title: string; blurb: string }) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
+          {eyebrow} · step {n} of 6
+        </p>
+        <h3 className="font-serif text-[22px] font-semibold text-ink">{title}</h3>
+        <p className="max-w-[62ch] text-[12.5px] leading-relaxed text-muted">{blurb}</p>
+      </div>
+    );
+  }
+
+  function nav(next: 1 | 2 | 3 | 4 | 5 | 6, label: string) {
+    return (
+      <button
+        type="button"
+        onClick={(e) => {
+          captureStep(e.currentTarget.form);
+          setStep(next);
+        }}
+        className="self-start rounded-[6px] bg-primary px-[15px] py-2 text-[13px] font-semibold text-primary-foreground"
+      >
+        {label}
+      </button>
+    );
+  }
+
+  function back(prev: 1 | 2 | 3 | 4 | 5) {
+    return (
+      <button type="button" onClick={() => setStep(prev)} className="text-sm text-muted underline">
+        Back
+      </button>
+    );
+  }
 
   return (
-    <form action={action} className="card mt-4 flex flex-col gap-4 p-6">
+    <form action={action} className="card flex flex-col gap-4 p-6">
       {/* Step 1 — course details */}
       <div className={step === 1 ? "flex flex-col gap-4" : "hidden"}>
-        <div className="flex flex-col gap-1.5">
-          <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
-            New course · step 1 of 6
-          </p>
-          <h3 className="font-serif text-[22px] font-semibold text-ink">Course details</h3>
-          <p className="max-w-[62ch] text-[12.5px] leading-relaxed text-muted">
-            The centre number and course code print on every certificate and report — get them right here.
-          </p>
-        </div>
+        <StepHeader
+          n={1}
+          title="Course details"
+          blurb="The centre number and course code print on every certificate and report — get them right here."
+        />
 
-        {/* "Prefilled from the centre profile and locked here — change it in
-            Centre Admin, not per course." Rendered as text, not a disabled
-            input: a greyed-out box invites people to try to type in it. */}
         <div className="flex flex-col gap-1">
           <label className="text-[13px] font-semibold text-ink">Cambridge centre number</label>
           <p className="text-sm text-ink">{centerNumber ?? "Not set"}</p>
@@ -63,14 +122,7 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
           <label htmlFor="name" className="text-[13px] font-semibold text-ink">
             Course name (internal, candidates don&apos;t see this)
           </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            placeholder="January intensive 2024"
-            className={field}
-          />
+          <input id="name" name="name" type="text" required placeholder="January intensive 2024" className={field} />
         </div>
 
         <div className="grid grid-cols-2 gap-[14px]">
@@ -102,47 +154,232 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
           />
         </div>
 
-        <button
-          type="button"
-          onClick={() => setStep(2)}
-          className="self-start rounded-[6px] bg-ink-warm px-4 py-2 text-sm font-semibold text-card"
-        >
-          Continue to delivery mode
-        </button>
+        {nav(2, "Continue to delivery mode")}
       </div>
 
       {/* Step 2 — delivery mode */}
       <div className={step === 2 ? "flex flex-col gap-4" : "hidden"}>
+        <StepHeader
+          n={2}
+          title="How is teaching practice delivered?"
+          blurb="The mode is defined by where teaching practice happens, not where input happens. A course can deliver input online and still be face-to-face."
+        />
+        <input type="hidden" name="delivery_mode" value={deliveryMode} />
+        <DeliveryModePicker value={deliveryMode} onChange={setDeliveryMode} />
+        <div className="flex items-center gap-3">
+          {nav(3, "Continue to dates and pattern")}
+          {back(1)}
+        </div>
+      </div>
+
+      {/* Step 3 — dates and timetable pattern */}
+      <div className={step === 3 ? "flex flex-col gap-4" : "hidden"}>
+        <StepHeader
+          n={3}
+          title="Confirm dates and weekly pattern"
+          blurb="This pattern seeds the timetable-tile system — the same tiles trainers drag and admins edit later in Run a course."
+        />
+
+        <div className="grid grid-cols-2 gap-[14px]">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="input_start_time" className="text-[13px] font-semibold text-ink">
+              Weekday input starts
+            </label>
+            <input id="input_start_time" name="input_start_time" type="time" defaultValue="09:30" className={field} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="tp_start_time" className="text-[13px] font-semibold text-ink">
+              TP block starts
+            </label>
+            <input id="tp_start_time" name="tp_start_time" type="time" defaultValue="13:00" className={field} />
+          </div>
+        </div>
+
         <div className="flex flex-col gap-1.5">
-          <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
-            New course{centerNumber ? ` · ${centerNumber}` : ""} · step 2 of 6
-          </p>
-          <h3 className="font-serif text-[22px] font-semibold text-ink">How is teaching practice delivered?</h3>
-          <p className="max-w-[62ch] text-[12.5px] leading-relaxed text-muted">
-            The mode is defined by where teaching practice happens, not where input happens. A course can deliver
-            input online and still be face-to-face.
+          <span className="text-[13px] font-semibold text-ink">Days off</span>
+          <div className="flex flex-wrap gap-1.5">
+            {WEEKDAYS.map((d) => {
+              const on = daysOff.includes(d);
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDaysOff((prev) => (on ? prev.filter((x) => x !== d) : [...prev, d]))}
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                    on
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-card text-muted hover:text-ink"
+                  }`}
+                >
+                  {d}
+                </button>
+              );
+            })}
+          </div>
+          {daysOff.map((d) => (
+            <input key={d} type="hidden" name="days_off" value={d} />
+          ))}
+        </div>
+
+        {/* The design's gold callout: confirming generates the tiles. */}
+        <div className="rounded-[6px] border border-[color-mix(in_oklab,oklch(60%_0.11_70)_30%,transparent)] bg-[color-mix(in_oklab,oklch(60%_0.11_70)_9%,var(--color-card))] px-[15px] py-[13px]">
+          <p className="text-[13px] font-semibold text-[oklch(45%_0.1_70)]">Tiles, not a blank calendar</p>
+          <p className="mt-0.5 text-xs leading-relaxed text-ink">
+            Confirming here generates the timetable tiles automatically. Tiles can be moved individually
+            afterwards without altering the pattern.
           </p>
         </div>
 
-        <input type="hidden" name="delivery_mode" value={deliveryMode} />
-        <DeliveryModePicker value={deliveryMode} onChange={setDeliveryMode} />
+        <div className="flex items-center gap-3">
+          {nav(4, "Continue to capacity and pricing")}
+          {back(2)}
+        </div>
+      </div>
 
-        {/* The design says this plainly at setup, because the obvious next
-            question after choosing a mode is "where do I add my tutors?" */}
-        <p className="rounded-[6px] border border-border bg-surface-muted px-3 py-2 text-xs text-muted">
-          Tutors are assigned on the roster, not in this wizard.
-        </p>
+      {/* Step 4 — capacity and pricing */}
+      <div className={step === 4 ? "flex flex-col gap-4" : "hidden"}>
+        <StepHeader
+          n={4}
+          title="Capacity and pricing"
+          blurb="The fee and deposit print on the offer email; the deposit-due window is what the acceptance email promises."
+        />
 
+        <div className="grid grid-cols-2 gap-[14px]">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="fee_amount" className="text-[13px] font-semibold text-ink">
+              Course fee
+            </label>
+            <input id="fee_amount" name="fee_amount" type="number" min="0" step="0.01" placeholder="1395" className={field} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="deposit_amount" className="text-[13px] font-semibold text-ink">
+              Deposit
+            </label>
+            <input id="deposit_amount" name="deposit_amount" type="number" min="0" step="0.01" placeholder="250" className={field} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-[14px]">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="fee_currency" className="text-[13px] font-semibold text-ink">
+              Currency
+            </label>
+            <input id="fee_currency" name="fee_currency" type="text" maxLength={3} placeholder="GBP" className={`${field} uppercase`} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="deposit_due_days" className="text-[13px] font-semibold text-ink">
+              Deposit due
+            </label>
+            <div className="flex items-center gap-2">
+              <input id="deposit_due_days" name="deposit_due_days" type="number" min="1" placeholder="7" className={`${field} w-24`} />
+              <span className="text-sm text-muted">days after offer</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <span className="text-[13px] font-semibold text-ink">Payment provider</span>
+          <p className="text-sm text-ink">Uses the centre&apos;s connected provider</p>
+          <p className="text-xs text-muted">
+            Set once in Centre Admin → Payment providers, not per course. Card is one of four accepted methods
+            and is never required.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {nav(5, "Continue to tutors")}
+          {back(3)}
+        </div>
+      </div>
+
+      {/* Step 5 — assign tutors */}
+      <div className={step === 5 ? "flex flex-col gap-4" : "hidden"}>
+        <StepHeader
+          n={5}
+          title="Assign your first tutor"
+          blurb="Every course needs a Main Course Tutor before it can launch. Add more tutors any time afterwards from the roster."
+        />
+
+        <div className="grid grid-cols-[1fr_auto] gap-[14px]">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="invite_email" className="text-[13px] font-semibold text-ink">
+              Email
+            </label>
+            <input id="invite_email" name="invite_email" type="email" placeholder="tutor@email.com" className={field} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="invite_tutor_role" className="text-[13px] font-semibold text-ink">
+              Role
+            </label>
+            <select id="invite_tutor_role" name="invite_tutor_role" defaultValue={DEFAULT_INVITE_TUTOR_ROLE} className={field}>
+              {Object.entries(TUTOR_ROLE_LABEL).map(([k, v]) => (
+                <option key={k} value={k}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <p className="text-xs text-muted">Same role picker as the roster — the role travels with the invitation.</p>
+
+        <div className="flex items-center gap-3">
+          {nav(6, "Continue to review")}
+          <button
+            type="button"
+            onClick={(e) => {
+              const form = e.currentTarget.form;
+              const el = form?.elements.namedItem("invite_email") as HTMLInputElement | null;
+              if (el) el.value = "";
+              captureStep(form);
+              setStep(6);
+            }}
+            className="text-sm text-muted underline"
+          >
+            Skip — I&apos;ll assign a tutor later
+          </button>
+          {back(4)}
+        </div>
+      </div>
+
+      {/* Step 6 — review and launch */}
+      <div className={step === 6 ? "flex flex-col gap-4" : "hidden"}>
+        <StepHeader
+          n={6}
+          title="Review before launch"
+          blurb="Launch opens the course to invites. Once launched, this course moves to Centre home and its Invitations panel becomes active."
+        />
+
+        <div className="overflow-hidden rounded-[6px] border border-border">
+          {[
+            ["Course", [centerNumber, summary.code, summary.name].filter(Boolean).join(" · ") || "—"],
+            ["Dates", summary.dates || "—"],
+            ["Delivery", MODE_LABEL[deliveryMode]],
+            [
+              "Capacity",
+              summary.cohort
+                ? `${summary.cohort} candidates${summary.fee ? ` · ${summary.currency || ""}${summary.fee} fee${summary.deposit ? `, ${summary.currency || ""}${summary.deposit} deposit` : ""}` : ""}`
+                : "—",
+            ],
+            ["Tutors", summary.inviteEmail ? `${summary.inviteEmail} — invited at launch` : "None yet — assign from the roster"],
+          ].map(([label, value]) => (
+            <div key={label} className="grid grid-cols-[128px_1fr] gap-3 border-b border-border-faint px-4 py-3 text-sm last:border-none">
+              <span className="font-semibold text-muted">{label}</span>
+              <span className="text-ink">{value}</span>
+            </div>
+          ))}
+        </div>
+
+        <input type="hidden" name="launch" value="1" />
         <div className="flex items-center gap-3">
           <button
             type="submit"
             disabled={pending}
-            className="rounded-[6px] bg-ink-warm px-4 py-2 text-sm font-semibold text-card disabled:opacity-60"
+            className="rounded-[6px] bg-primary px-[15px] py-2 text-[13px] font-bold text-primary-foreground disabled:opacity-60"
           >
-            {pending ? "Creating…" : "Create course"}
+            {pending ? "Launching…" : "Launch course"}
           </button>
           <button type="button" onClick={() => setStep(1)} className="text-sm text-muted underline">
-            Back to course details
+            Back to edit
           </button>
         </div>
       </div>

@@ -26,6 +26,20 @@ export async function createCourse(
   // number; cohort size is "Maximum cohort size".
   const courseCode = (formData.get("course_code") as string | null)?.trim() || null;
   const cohortRaw = (formData.get("cohort_size") as string | null) || null;
+  // Steps 3-6 (Course Admin.dc.html). All optional at creation: the design's
+  // sidebar says what can be deferred, and only step 6's launch gates invites.
+  const inputStart = (formData.get("input_start_time") as string | null)?.trim() || null;
+  const tpStart = (formData.get("tp_start_time") as string | null)?.trim() || null;
+  const daysOff = (formData.getAll("days_off") as string[]).filter(Boolean);
+  const feeRaw = (formData.get("fee_amount") as string | null) || null;
+  const depositRaw = (formData.get("deposit_amount") as string | null) || null;
+  const feeCurrency = (formData.get("fee_currency") as string | null)?.trim().toUpperCase() || null;
+  const depositDueRaw = (formData.get("deposit_due_days") as string | null) || null;
+  const launch = formData.get("launch") === "1";
+  // Step 5's tutor. Optional -- "Skip, I'll assign a tutor later" is a real
+  // path -- but when given, the invitation is created and emailed at launch.
+  const inviteEmail = (formData.get("invite_email") as string | null)?.trim().toLowerCase() || null;
+  const inviteRole = (formData.get("invite_tutor_role") as string | null) || null;
 
   if (
     typeof name !== "string" ||
@@ -50,6 +64,15 @@ export async function createCourse(
   if (cohortSize !== null && (!Number.isInteger(cohortSize) || cohortSize <= 0)) {
     return { error: "Maximum cohort size should be a whole number." };
   }
+  const feeAmount = feeRaw ? Number(feeRaw) : null;
+  const depositAmount = depositRaw ? Number(depositRaw) : null;
+  const depositDueDays = depositDueRaw ? Number(depositDueRaw) : null;
+  if ((feeAmount !== null && !(feeAmount >= 0)) || (depositAmount !== null && !(depositAmount >= 0))) {
+    return { error: "Fee and deposit should be amounts." };
+  }
+  if (depositDueDays !== null && (!Number.isInteger(depositDueDays) || depositDueDays <= 0)) {
+    return { error: "Deposit due should be a number of days." };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.from("courses").insert({
@@ -57,6 +80,16 @@ export async function createCourse(
     name,
     course_code: courseCode,
     cohort_size: cohortSize,
+    input_start_time: inputStart,
+    tp_start_time: tpStart,
+    days_off: daysOff.length ? daysOff : null,
+    fee_amount: feeAmount,
+    deposit_amount: depositAmount,
+    fee_currency: feeCurrency,
+    deposit_due_days: depositDueDays,
+    // "Launch opens the course to invites." Created from the wizard without
+    // launching = a draft.
+    launched_at: launch ? new Date().toISOString() : null,
     start_date: startDate,
     end_date: endDate,
     delivery_mode: deliveryMode as DeliveryMode,
@@ -64,6 +97,34 @@ export async function createCourse(
 
   if (error) {
     return { error: "Could not create the course. Try again." };
+  }
+
+  // Step 5's tutor invitation, sent through the same named-invitation path the
+  // roster uses -- one code path, one email, one record. A failure here never
+  // fails the launch: the course exists, and the invitation can be resent from
+  // the roster.
+  if (inviteEmail) {
+    try {
+      const { data: created } = await supabase
+        .from("courses")
+        .select("id")
+        .eq("center_id", admin.center_id)
+        .eq("name", name)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (created) {
+        const { inviteToCourse } = await import("@/app/dashboard/admin/courses/[id]/invitation-actions");
+        const fd = new FormData();
+        fd.set("course_id", created.id);
+        fd.set("email", inviteEmail);
+        fd.set("role", "trainer");
+        if (inviteRole) fd.set("tutor_role", inviteRole);
+        await inviteToCourse({ error: null }, fd);
+      }
+    } catch {
+      // Launch stands; the invitation can be sent from the roster.
+    }
   }
 
   revalidatePath("/dashboard/admin");

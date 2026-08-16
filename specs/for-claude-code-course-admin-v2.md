@@ -1,38 +1,31 @@
 # Course Admin.dc.html — full design spec
 
-## Color palette (oklch) — audited, no true green remains
-Ink `oklch(23.5% 0.017 65)` · muted `oklch(51% 0.017 70)` · warm dark (rails/callouts) `oklch(30% 0.042 58)` · teal (accent/primary/links) `oklch(38% 0.072 195)` · bronze `oklch(50% 0.09 62)` · gold (invited/attention) `oklch(60% 0.11 70)` · red (destructive, e.g. "Regenerate") `oklch(45% 0.16 27)` · border `oklch(88% 0.016 82)` · card `oklch(99.2% 0.005 90)` · page bg `oklch(92.5% 0.012 85)`.
-A `GREEN` variable name exists in code for historical reasons but resolves to the same ink tone as everything else — no hue near green is rendered anywhere on this page (fixed 16 Aug: the "Centre number set" callout previously used a real green dot/tint, now the warm dark tone).
+## Tokens
+Karla (400–700, UI), Newsreader (500/600, headings). Ink `oklch(23.5% 0.017 65)` · muted `oklch(51% 0.017 70)` · warm dark `oklch(30% 0.042 58)` (headers, banners) · teal/accent `oklch(38% 0.072 195)` (primary actions, links) · gold `oklch(60% 0.11 70)` (attention/callouts) · bronze `oklch(50% 0.09 62)` · red `oklch(45% 0.16 27)` · card `oklch(99.2% 0.005 90)` · border `oklch(88% 0.016 82)` · page `oklch(92.5% 0.012 85)` · outer section bg `oklch(96.4% 0.014 85)`. No green anywhere in this file — the one instance (a "centre number set" callout) was corrected to the warm dark tone.
 
-## Fonts
-Karla (400–700, UI), Newsreader (500/600, headings/serif figures).
+## New-course wizard (6 steps, identical card+sidebar layout: 1.15fr form card / 1fr sidebar notes, 20px gap)
+Each step: eyebrow "New course · [centre] [code] · step N of 6", Newsreader 22px title, muted description, then fields, then a teal "Continue to [next]" button. Sidebar holds 1–2 note cards explaining what's locked, deferred, or downstream.
 
-## Screen 1a — Centre home: courses by state
-Wordmark + centre name/number header. Callout bar (warm-dark tint): "Centre number set — UK205 · Prints on every final report and cover sheet."
-Courses grouped by state — **Running** (green-adjacent removed, ink label) → **Upcoming** (teal) → **Closed** (muted) — never sorted by date alone. Each row: course code/dates, people count, progress label, state pill.
-Centre material row (TP points library, assignment briefs, resource hub, feedback style examples, coursebooks counts).
-Admin↔tutor chat pill: per-course channel, retention selector (Nightly/Weekly/Custom-days).
+1. **Course details** — Cambridge centre number (locked, prefilled), course code, internal course name, start/end dates, max cohort size. Sidebar: tutors are assigned later on the roster, not here; centre number is locked (set in Centre Admin).
+2. **Delivery mode** — 3 radio-style cards (defined by where TP happens, not input) with a live "impact" panel showing downstream effects of the picked mode.
+3. **Dates and timetable pattern** — weekday input start time, TP block start time, days-off pill selector, and a gold callout: confirming here generates timetable tiles automatically (28 tiles typical for a 4-week course) — tiles can be moved individually afterward without altering the pattern.
+4. **Capacity and pricing** — course fee, deposit, deposit-due window, payment provider (Stripe only — sidebar flags PayPal/others as unbuilt, per the payment-provider spec).
+5. **Assign tutors** — single email + role dropdown (reusing the roster's role-invite control) to guarantee a Main Course Tutor exists before launch; "Skip — I'll assign a tutor later" escape hatch.
+6. **Review and launch** — a locked summary table (course / delivery / capacity / tutors) + "Launch course" (bold teal) / "Back to edit". Sidebar: launching moves the course to Centre home under "Open" and activates its Invitations panel.
 
-## Screen — Course setup wizard (6 steps, steps 1–2 designed)
-**Step 1 — Course details** (new, added 16 Aug): centre number (locked, prefilled from centre profile), course code, internal course name, start/end dates, max cohort size. Sidebar notes: tutors are NOT assigned here — added later from the roster (1b); centre number is set once, changed only in Centre Admin.
-**Step 2 — Delivery mode**: radio-style cards (Face-to-face / Fully online / Mixed-mode), each with description; selecting one reveals a mode-impact box (Timetable / Required extras / Observations / Tutors / Length rows) and a "Continue to dates" action. Sidebar: 4 rule notes (asked once, mode is about TP not input, changing later is a real change requiring JCA sign-off, Moodle changes what the assessor needs).
-Steps 3–6 (dates confirmation, capacity/pricing, tutor assignment, review-and-launch) are still unbuilt.
+## Centre home (1a)
+Courses grouped by state (Open / In progress / Closing / Archived), each a row card: name, code, dates, mode chip, cohort-fill bar, tutor avatars, status pill. Density toggle (compact/comfortable/airy) controls row padding globally.
 
-## Screen 1b — One course: roster, groups, invitations
-Header: course code/dates/mode/week, "Duplicate course" + "Invite people" actions.
+## Course workspace — Invitations (1b)
+Two invite paths, stacked in one panel:
+1. **Invite a tutor by name** (new) — email field, role dropdown (Main Course Tutor / Assistant Course Tutor / TP Tutor / Input Tutor / Assessor (if known)), "Send invite as [role]" button. The role travels with the invite; changeable later from the roster.
+2. **Or share a general link** — the original candidate-link and tutor-link cards (Copy / Email it / Regenerate), unchanged, for bulk/self-serve joining.
 
-**Roster** — one row per person (name / email / role / join-state pill). Tutor rows: role is a **clickable dropdown** (added 16 Aug) — click the role text to open a menu of Main Course Tutor / Assistant Course Tutor / TP Tutor / Input Tutor / Assessor (if known); picking one reassigns that person's role on this course immediately. Candidate rows show plain "Candidate" text, not clickable. Join-state pill (Joined/Invited) is deliberately distinct in color from the role text.
+## Roster (1b, table below Invitations)
+Rows for tutors and candidates together. Tutor rows: name/email + a clickable role pill (teal text, caret) — opens a dropdown of the same 5 roles; picking one reassigns immediately, highlighted bold+tinted if current. Candidate rows: plain "Candidate" label, not clickable. Right-aligned status pill (Joined/Invited).
 
-**Teaching practice groups** — two side-by-side group cards, each with assigned tutor + meeting days, members split First half/Second half. Warning banner when candidates aren't grouped yet (rotation blocked).
-
-**Invitations panel**, redesigned 16 Aug:
-1. *Invite a tutor by name* (new) — email field + role dropdown (same 5 roles as the roster menu) + "Send invite as [role]" button. The role travels with the invite; whoever accepts joins already assigned. Caption clarifies the role can still be changed later from the roster.
-2. *Or share a general link* (renamed from the old sole option) — one card per role-link (Candidate link, Tutor link) with usage count, the link itself, and Copy / Email it / Regenerate in one row. Regenerating invalidates the old link immediately (stated as a footnote next to the button).
-
-Sidebar: "What changed" notes.
-
-## Screen 1c — Settings
-Left rail: Centre profile, Google Drive, Assignment briefs, Feedback style, Tutors — active item gets a colored left rule; a flag dot marks anything needing attention. Centre profile fields: centre name + Cambridge centre number (both print on every course's cover sheet/final report).
+## Centre material, chat, other tabs
+Centre material: TP points library, resource hub, etc. — card grid, unchanged from prior spec. Tutors ↔ centre admin chat channel: retention toggle (nightly reset / custom days), unchanged.
 
 ## Source
-`Course Admin.dc.html`, full working file, included.
+`Course Admin.dc.html` — full working file included.

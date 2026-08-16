@@ -257,6 +257,16 @@ export interface Database {
           // label, which the design says candidates never see.
           course_code: string | null;
           cohort_size: number | null;
+          // migration 0123 -- wizard steps 3-6 (Course Admin.dc.html).
+          input_start_time: string | null;
+          tp_start_time: string | null;
+          days_off: string[] | null;
+          fee_amount: number | null;
+          deposit_amount: number | null;
+          fee_currency: string | null;
+          deposit_due_days: number | null;
+          // Null = launched, so courses predating the wizard stay live.
+          launched_at: string | null;
           accepting_applications: boolean;
           created_at: string;
         };
