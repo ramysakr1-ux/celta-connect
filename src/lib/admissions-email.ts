@@ -282,9 +282,17 @@ export function acknowledgementEmailHtml(input: {
   `;
 }
 
-// "Tells them the task is waiting. The task itself opens in Connect and saves
-// as they type." Worth saying, because a candidate who thinks they must finish
-// in one sitting will put it off.
+// NOT SENT ON ITS OWN. Ramy, 2026-08-16: "The task is sent with the acceptance
+// email and the link -- so once they get the link, they also get the task."
+//
+// Kept as a function because the wording still has to appear somewhere: it
+// becomes a section inside the workspace-invitation email rather than a
+// nineteenth message of its own. Sending it separately would mean two emails
+// arriving minutes apart, each telling the candidate to go and do something.
+//
+// This also closes the gap that made it unsendable anyway -- there was no
+// moment in the app where a task "became ready", because the writing task is
+// part of the application form.
 export function taskWaitingEmailHtml(input: {
   applicantName: string;
   courseName: string;
