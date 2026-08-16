@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<section id="1a" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; width: 1180px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px;">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Admissions</div>
+    <div style="width: 22px; height: 18px; border-radius: 5px; background: oklch(38% 0.072 195); color: oklch(98% 0.004 90); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;">1a</div>
+    <div style="font-size: 11px; color: oklch(51% 0.017 70);">Payments — C25 / 2025, TRY</div>
+  </div>
+
+  <div style="font-family: Newsreader, Georgia, serif; font-size: 26px; font-weight: 600; color: oklch(23.5% 0.017 65);">Who has paid</div>
+
+  <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 10px; overflow: hidden;">
+    <div style="display: grid; grid-template-columns: 1.3fr 1fr 0.9fr 1.1fr 1fr; padding: 10px 16px; background: oklch(96.5% 0.008 85); border-bottom: 1px solid oklch(88% 0.016 82); font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(51% 0.017 70);">
+      <div>Candidate</div><div>Method</div><div>Amount</div><div>Status</div><div>Recorded by</div>
+    </div>
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+      <div style="display: grid; grid-template-columns: 1.3fr 1fr 0.9fr 1.1fr 1fr; align-items: center; padding: 12px 16px; border-bottom: 1px solid oklch(92.5% 0.008 85);">
+        <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65); font-weight: 600;">{{ r.name }}</div>
+        <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ r.method }}</div>
+        <div style="font-size: 12px; color: oklch(23.5% 0.017 65); font-variant-numeric: tabular-nums;">{{ r.amount }}</div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div style="width: 6px; height: 6px; border-radius: 50%; background: {{ r.dot }};"></div>
+          <div style="font-size: 12px; color: {{ r.statusInk }};">{{ r.status }}</div>
+        </div>
+        <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ r.by }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; gap: 12px;">
+    <div style="flex: 1; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 13px 16px; display: flex; flex-direction: column; gap: 3px;">
+      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(38% 0.072 195);">Confirmed</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70); line-height: 1.5;">The provider said so \u2014 a card payment through the connected account.</div>
+    </div>
+    <div style="flex: 1; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 13px 16px; display: flex; flex-direction: column; gap: 3px;">
+      <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(52% 0.11 75);">Marked by [name]</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70); line-height: 1.5;">Bank transfer, cash, invoice \u2014 a person recorded it. Same figure, different kind of fact.</div>
+    </div>
+  </div>
+
+  <div style="background: color-mix(in oklab, oklch(45% 0.16 27) 7%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.16 27) 24%, transparent); border-radius: 8px; padding: 14px 17px; display: flex; gap: 12px; align-items: flex-start;">
+    <div style="width: 6px; height: 6px; border-radius: 50%; background: oklch(45% 0.16 27); margin-top: 6px; flex: none;"></div>
+    <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65);">Deniz Aksoy \u2014 3rd instalment missed. Not an automatic consequence; a payments task, sitting here until someone follows up. Nobody loses a place because a card expired.</div>
+  </div>
+</section>
+
+<section id="1b" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; width: 620px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px;">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Candidate view</div>
+    <div style="width: 22px; height: 18px; border-radius: 5px; background: oklch(38% 0.072 195); color: oklch(98% 0.004 90); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;">1b</div>
+    <div style="font-size: 11px; color: oklch(51% 0.017 70);">The Pay link in the acceptance email</div>
+  </div>
+
+  <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px;">
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600; color: oklch(23.5% 0.017 65);">Secure your place</div>
+    <div style="display: flex; justify-content: space-between; font-size: 13px; color: oklch(23.5% 0.017 65);">
+      <div>C25 / 2025 CELTA, full-time</div><div style="font-weight: 700;">\u20ba38,500</div>
+    </div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70); line-height: 1.6;">You'll be taken to our payment partner's own secure page. Connect never sees or stores your card details.</div>
+    <div style="height: 1px; background: oklch(88% 0.016 82);"></div>
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <div style="font-size: 11px; font-weight: 700; color: oklch(23.5% 0.017 65);">Pay in instalments</div>
+      <div style="display: flex; gap: 8px;">
+        <sc-for list="{{ plans }}" as="p" hint-placeholder-count="3">
+          <div style="flex: 1; text-align: center; padding: 8px; border-radius: 6px; border: 1px solid {{ p.border }}; background: {{ p.bg }}; font-size: 12px; font-weight: 600; color: {{ p.ink }};">{{ p.label }}</div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="height: 40px; border-radius: 7px; background: oklch(30% 0.042 58); color: oklch(98% 0.004 90); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;">Continue to payment</div>
+  </div>
+</section>
+
+<section id="1c" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; width: 620px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px;">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Centre settings</div>
+    <div style="width: 22px; height: 18px; border-radius: 5px; background: oklch(38% 0.072 195); color: oklch(98% 0.004 90); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;">1c</div>
+    <div style="font-size: 11px; color: oklch(51% 0.017 70);">Payment provider</div>
+  </div>
+
+  <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: oklch(23.5% 0.017 65);">Connect a payment provider</div>
+  <div style="font-size: 12.5px; line-height: 1.6; color: oklch(51% 0.017 70);">Card payment is optional. Connect a provider account the centre already holds — Connect never touches the money, never sees card numbers, and only stores a reference to each transaction.</div>
+
+  <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div style="font-size: 11px; font-weight: 700; color: oklch(23.5% 0.017 65);">Provider</div>
+      <sc-for list="{{ providers }}" as="pv" hint-placeholder-count="5">
+        <div onClick="{{ pv.pick }}" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 6px; border: 1px solid {{ pv.border }}; background: {{ pv.bg }}; cursor: pointer;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: {{ pv.dot }};"></div>
+            <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65); font-weight: 600;">{{ pv.name }}</div>
+          </div>
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ pv.region }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="height: 1px; background: oklch(88% 0.016 82);"></div>
+    <div style="font-size: 11.5px; line-height: 1.6; color: oklch(51% 0.017 70);">Connecting redirects to {{ selectedProvider.name }}'s own onboarding (KYC included). Nothing here processes a payment — this only wires the acceptance email's Pay link to that account.</div>
+    <div style="height: 40px; border-radius: 7px; background: oklch(38% 0.072 195); color: oklch(98% 0.004 90); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;">Connect {{ selectedProvider.name }}</div>
+  </div>
+
+  <div style="font-size: 11px; color: oklch(51% 0.017 70); line-height: 1.6;">One currency per course, set by the centre. Card is one of four accepted methods alongside bank transfer, cash, and employer/sponsor invoice — never required.</div>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const PROVIDERS = [
+  { key: 'stripe', name: 'Stripe', region: 'Global', dot: 'oklch(48% 0.14 275)' },
+  { key: 'iyzico', name: 'iyzico', region: 'Turkey — cards, instalments', dot: 'oklch(56% 0.14 25)' },
+  { key: 'paytr', name: 'PayTR', region: 'Turkey', dot: 'oklch(48% 0.11 220)' },
+  { key: 'mollie', name: 'Mollie', region: 'Europe', dot: 'oklch(30% 0.02 260)' },
+  { key: 'adyen', name: 'Adyen', region: 'Global', dot: 'oklch(45% 0.12 145)' },
+];
+
+class Component extends DCLogic {
+  state = { provider: 'stripe' };
+
+  renderVals() {
+    const sel = PROVIDERS.filter(p => p.key === this.state.provider)[0];
+    const row = (name, method, amount, status, by) => {
+      const map = {
+        Confirmed: ['oklch(38% 0.072 195)', 'oklch(38% 0.072 195)'],
+        'Marked': ['oklch(52% 0.11 75)', 'oklch(52% 0.11 75)'],
+        'Behind': ['oklch(45% 0.16 27)', 'oklch(45% 0.16 27)'],
+        'Unpaid': ['oklch(60% 0.017 70)', 'oklch(60% 0.017 70)'],
+      };
+      const key = Object.keys(map).find(k => status.startsWith(k)) || 'Unpaid';
+      const [dot, ink] = map[key];
+      return { name, method, amount, status, by, dot, statusInk: ink };
+    };
+    return {
+      rows: [
+        row('Aylin Kaya', 'Card', '\u20ba38,500', 'Confirmed', 'Provider'),
+        row('Deniz Aksoy', 'Card, 3 instalments', '\u20ba12,833', 'Behind \u2014 instalment 3', 'Provider'),
+        row('Omar Farouk', 'Bank transfer', '\u20ba38,500', 'Marked by Selin Ar\u0131kan', 'Selin Ar\u0131kan'),
+        row('Maya Torres', 'Employer invoice', '\u20ba38,500', 'Marked by Selin Ar\u0131kan', 'Selin Ar\u0131kan'),
+        row('Lin Zhao', 'Cash', '\u20ba38,500', 'Marked by Ramy Sakr', 'Ramy Sakr'),
+        row('Jonah Weiss', '\u2014', '\u2014', 'Unpaid', '\u2014'),
+      ],
+      plans: [
+        { label: 'Full', bg: 'oklch(30% 0.042 58)', border: 'oklch(30% 0.042 58)', ink: 'oklch(98% 0.004 90)' },
+        { label: '3 mo.', bg: 'oklch(99.2% 0.005 90)', border: 'oklch(88% 0.016 82)', ink: 'oklch(23.5% 0.017 65)' },
+        { label: '6 mo.', bg: 'oklch(99.2% 0.005 90)', border: 'oklch(88% 0.016 82)', ink: 'oklch(23.5% 0.017 65)' },
+      ],
+      selectedProvider: sel,
+      providers: PROVIDERS.map(p => ({
+        name: p.name, region: p.region, dot: p.dot,
+        pick: () => this.setState({ provider: p.key }),
+        bg: p.key === sel.key ? 'color-mix(in oklab, oklch(38% 0.072 195) 8%, oklch(99.2% 0.005 90))' : 'oklch(99.2% 0.005 90)',
+        border: p.key === sel.key ? 'oklch(38% 0.072 195)' : 'oklch(88% 0.016 82)',
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

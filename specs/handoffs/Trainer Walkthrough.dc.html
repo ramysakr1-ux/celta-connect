@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(30% 0.042 58); }
+  @keyframes wordmark-spin { 0%, 11.11% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+  .stage { perspective: 400px; }
+  .spin { animation: wordmark-spin 90s linear infinite; transform-origin: 50% 50%; transform-style: preserve-3d; }
+  @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 38px; width: 1460px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 11px; max-width: 900px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · the trainer's app, tab by tab</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">Where you land, and everywhere you can go from there.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">One 56px header on every screen. Teal is the action colour, gold means a system rule is in force, warm brown is the identity. Tuesday 14 November, week two of five.</div>
+  </div>
+
+  <sc-for list="{{ screens }}" as="s" hint-placeholder-count="8">
+    <div style="display: flex; flex-direction: column; gap: 11px;">
+
+      <div style="display: flex; align-items: baseline; gap: 11px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.2% 0.005 90);">{{ s.id }}</div>
+        <div style="font-size: 14px; font-weight: 600; color: oklch(30% 0.042 58);">{{ s.title }}</div>
+        <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">{{ s.note }}</div>
+      </div>
+
+      <div style="width: 1340px; box-sizing: border-box; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 8px; overflow: hidden;">
+
+        <div style="height: 56px; background: oklch(99.5% 0.004 90); border-bottom: 1px solid oklch(89.5% 0.012 82); display: flex; align-items: center; gap: 24px; padding: 0 20px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex: none;">
+            <div class="stage" style="width: 32px; height: 32px; border-radius: 8px; background: oklch(30% 0.042 58); display: flex; align-items: center; justify-content: center;">
+              <svg class="spin" width="20" height="12" viewBox="8 30 104 60" fill="none">
+                <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" stroke-width="13" stroke-linecap="round"></path>
+                <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" stroke-width="13" stroke-linecap="round"></path>
+              </svg>
+            </div>
+            <div style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 20px; line-height: 0.9; color: oklch(60% 0.11 70);">Connect</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 18px; flex: 1;">
+            <sc-for list="{{ s.nav }}" as="t" hint-placeholder-count="8">
+              <div style="font-size: 12.5px; font-weight: {{ t.weight }}; color: {{ t.ink }}; padding: 19px 0 17px; border-bottom: 2px solid {{ t.rule }};">{{ t.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display: flex; align-items: center; gap: 11px; flex: none;">
+            <div style="height: 26px; padding: 0 9px; border-radius: 4px; background: oklch(37.5% 0.058 195); color: oklch(98.5% 0.006 90); font-size: 11px; font-weight: 600; display: flex; align-items: center;">C2/2024</div>
+            <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">Ramy Sakr</div>
+            <sc-if value="{{ s.showHub }}" hint-placeholder-val="{{ false }}">
+              <div title="Connect Hub" style="width: 26px; height: 26px; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: oklch(51% 0.017 70); border: 1px solid oklch(89.5% 0.012 82);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 7l9 5 9-5-9-5z"></path><path d="M3 12l9 5 9-5"></path><path d="M3 17l9 5 9-5"></path></svg>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="padding: 26px 22px 30px; display: flex; flex-direction: column; gap: 20px;">
+
+          <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 22px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ s.eyebrow }}</div>
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 27px; font-weight: 600; line-height: 1.1; color: oklch(30% 0.042 58);">{{ s.heading }}</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex: none;">
+              <sc-for list="{{ s.actions }}" as="a" hint-placeholder-count="2">
+                <div style="height: 34px; padding: 0 14px; border-radius: 6px; background: {{ a.bg }}; border: 1px solid {{ a.border }}; color: {{ a.ink }}; font-size: 13px; font-weight: {{ a.weight }}; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <sc-if value="{{ a.dot }}" hint-placeholder-val="{{ false }}">
+                    <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(63% 0.096 72);"></div>
+                  </sc-if>
+                  <div>{{ a.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: {{ s.cols }}; gap: 18px; align-items: start;">
+            <sc-for list="{{ s.panels }}" as="p" hint-placeholder-count="3">
+              <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 13px;">
+
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+                  <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: {{ p.labelInk }};">{{ p.label }}</div>
+                  <sc-if value="{{ p.meta }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ p.meta }}</div>
+                  </sc-if>
+                </div>
+
+                <sc-if value="{{ p.isFigure }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; align-items: baseline; gap: 9px;">
+                    <div style="font-family: Newsreader, Georgia, serif; font-size: 30px; font-weight: 600; color: oklch(30% 0.042 58); line-height: 1;">{{ p.figure }}</div>
+                    <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ p.figureNote }}</div>
+                  </div>
+                  <div style="height: 4px; border-radius: 2px; background: oklch(94.8% 0.01 85); overflow: hidden;">
+                    <div style="height: 4px; width: {{ p.figurePct }}; border-radius: 2px; background: oklch(37.5% 0.058 195);"></div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.isGrid }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: grid; grid-template-columns: {{ p.gridCols }}; gap: 0;">
+                    <sc-for list="{{ p.head }}" as="h" hint-placeholder-count="4">
+                      <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70); padding-bottom: 9px; border-bottom: 1px solid oklch(89.5% 0.012 82); text-align: {{ h.align }};">{{ h.label }}</div>
+                    </sc-for>
+                    <sc-for list="{{ p.cells }}" as="c" hint-placeholder-count="24">
+                      <div style="font-size: {{ c.size }}; font-weight: {{ c.weight }}; color: {{ c.ink }}; padding: 9px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent); text-align: {{ c.align }}; font-variant-numeric: tabular-nums;">{{ c.v }}</div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.isRows }}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; flex-direction: column;">
+                    <sc-for list="{{ p.rows }}" as="r" hint-placeholder-count="4">
+                      <div style="display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent);">
+                        <sc-if value="{{ r.rule }}" hint-placeholder-val="{{ false }}">
+                          <div style="width: 3px; align-self: stretch; border-radius: 2px; background: {{ r.ruleColor }}; flex: none;"></div>
+                        </sc-if>
+                        <sc-if value="{{ r.lead }}" hint-placeholder-val="{{ false }}">
+                          <div style="font-size: 12px; font-weight: 600; color: oklch(51% 0.017 70); width: {{ r.leadW }}; flex: none; font-variant-numeric: tabular-nums;">{{ r.lead }}</div>
+                        </sc-if>
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+                          <div style="font-size: 13px; font-weight: {{ r.weight }}; color: {{ r.ink }}; line-height: 1.35; text-wrap: pretty;">{{ r.text }}</div>
+                          <sc-if value="{{ r.sub }}" hint-placeholder-val="{{ false }}">
+                            <div style="font-size: 11.5px; color: oklch(51% 0.017 70); line-height: 1.4;">{{ r.sub }}</div>
+                          </sc-if>
+                        </div>
+                        <sc-if value="{{ r.pill }}" hint-placeholder-val="{{ false }}">
+                          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{ r.pillBg }}; color: {{ r.pillInk }}; flex: none;">
+                            <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+                            <div>{{ r.pill }}</div>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{ r.right }}" hint-placeholder-val="{{ false }}">
+                          <div style="font-size: 12px; color: {{ r.rightInk }}; flex: none; font-variant-numeric: tabular-nums;">{{ r.right }}</div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ p.foot }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ p.foot }}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid oklch(89.5% 0.012 82); background: oklch(99.5% 0.004 90); padding: 11px 20px; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 720px; height: 44px; border-radius: 22px; background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); display: flex; align-items: center; gap: 10px; padding: 0 8px 0 6px; opacity: 0.55;">
+            <div style="display: flex; align-items: center; gap: 7px; height: 32px; padding: 0 10px 0 6px; border-radius: 16px; background: color-mix(in oklab, oklch(93% 0.019 190) 45%, oklch(99.5% 0.004 90)); flex: none;">
+              <div style="width: 20px; height: 20px; border-radius: 6px; background: oklch(37.5% 0.058 195); color: oklch(98.5% 0.006 90); font-size: 8px; font-weight: 600; display: flex; align-items: center; justify-content: center;">CT</div>
+              <div style="font-size: 12px; font-weight: 600; color: oklch(30% 0.042 58);">Centre trainers</div>
+              <div style="font-size: 8px; color: oklch(51% 0.017 70);">▾</div>
+            </div>
+            <div style="width: 1px; height: 20px; background: oklch(89.5% 0.012 82);"></div>
+            <div style="flex: 1; font-size: 12.5px; color: oklch(51% 0.017 70);">Message Centre trainers — resets on the centre’s schedule</div>
+            <div style="display: flex; align-items: center; gap: 5px; flex: none;">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(63% 0.096 72);"></div>
+              <div style="font-size: 9.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(51% 0.017 70);">Clears in 8h 12m</div>
+            </div>
+            <div style="width: 30px; height: 30px; border-radius: 15px; background: oklch(30% 0.042 58); color: oklch(99.5% 0.004 90); display: flex; align-items: center; justify-content: center; flex: none; font-size: 12px;">↑</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-for>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1460,&quot;height&quot;:4200}}">
+const INK = 'oklch(30% 0.042 58)';
+const BODY = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const GOLD = 'oklch(63% 0.096 72)';
+const RED = 'oklch(45% 0.15 27)';
+const AMBER = 'oklch(44% 0.095 68)';
+const BORDER = 'oklch(89.5% 0.012 82)';
+const CARD = 'oklch(99.5% 0.004 90)';
+
+const TABS = ['Today', 'Roster', 'Timetable', 'Volunteers', 'Teaching Practice', 'Resource hub', 'Grades Report'];
+
+const nav = (active) => TABS.map(label => ({
+  label,
+  weight: label === active ? '600' : '500',
+  ink: label === active ? TEAL : MUTED,
+  rule: label === active ? TEAL : 'transparent',
+}));
+
+const act = (label, kind, dot) => kind === 'primary'
+  ? { label, bg: TEAL, border: TEAL, ink: 'oklch(98.5% 0.006 90)', weight: '600', dot: !!dot }
+  : { label, bg: CARD, border: BORDER, ink: BODY, weight: '500', dot: !!dot };
+
+const row = (text, o = {}) => ({
+  text,
+  sub: o.sub || '',
+  weight: o.bold ? '600' : '400',
+  ink: o.ink || BODY,
+  lead: o.lead || '',
+  leadW: o.leadW || '46px',
+  rule: !!o.rule,
+  ruleColor: o.rule || 'transparent',
+  pill: o.pill || '',
+  pillBg: o.pillBg || 'oklch(93.5% 0.008 85)',
+  pillInk: o.pillInk || MUTED,
+  right: o.right || '',
+  rightInk: o.rightInk || MUTED,
+});
+
+const cell = (v, o = {}) => ({
+  v: String(v),
+  size: o.size || '13px',
+  weight: o.bold ? '600' : '400',
+  ink: o.ink || BODY,
+  align: o.align || 'left',
+});
+
+const head = (labels) => labels.map((label, i) => ({ label, align: i === 0 ? 'left' : 'right' }));
+
+const panel = (label, o = {}) => ({
+  label,
+  labelInk: o.gold ? GOLD : MUTED,
+  meta: o.meta || '',
+  isFigure: !!o.figure,
+  figure: o.figure || '',
+  figureNote: o.figureNote || '',
+  figurePct: o.figurePct || '0%',
+  isGrid: !!o.head,
+  gridCols: o.gridCols || '1fr',
+  head: o.head ? head(o.head) : [],
+  cells: o.cells || [],
+  isRows: !!o.rows,
+  rows: o.rows || [],
+  foot: o.foot || '',
+});
+
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      screens: [
+        {
+          id: '1a', title: 'Today', note: 'where you land · the icon at top right is Connect Hub — rendered only when your account has hub_access, so other tutors never see it',
+          nav: nav('Today'), showHub: true,
+          eyebrow: 'ITI Istanbul C2/2024 · 6 Nov – 1 Dec · week 2 of 4',
+          heading: 'Tuesday 14 November',
+          actions: [act('Post announcement'), act('Write TP feedback', 'primary')],
+          cols: '1.15fr 1fr 1.05fr',
+          panels: [
+            panel('Today’s schedule', {
+              meta: 'from the timetable',
+              rows: [
+                row('TP prep', { lead: '9:00', rule: MUTED }),
+                row('TP2 — Group ABC', { lead: '9:30', rule: INK, bold: true, sub: 'Room 5 · Sara, Deniz, Mert', pill: 'Live', pillBg: TEAL, pillInk: 'oklch(98.5% 0.006 90)' }),
+                row('Feedback & lesson plans', { lead: '12:15', rule: MUTED }),
+                row('Phonology — stress and intonation', { lead: '14:00', rule: TEAL }),
+                row('PPP', { lead: '15:30', rule: TEAL }),
+              ],
+            }),
+            panel('Needs you · 3', {
+              gold: true,
+              rows: [
+                row('TP1 feedback unsent — 2 candidates', { bold: true, sub: 'Sara Yılmaz, Deniz Aksoy · taught 9 Nov' }),
+                row('Assignment 3 due today', { bold: true, sub: '6 of 8 submitted' }),
+                row('Attendance below threshold — Mert Kaya', { bold: true, ink: RED, sub: '74% · 89 of 120 hrs' }),
+              ],
+            }),
+            panel('Cohort · 8', {
+              meta: 'Full roster →',
+              rows: [
+                row('Sara Yılmaz', { right: '3 / 8' }),
+                row('Deniz Aksoy', { right: '3 / 8' }),
+                row('Mert Kaya', { right: '2 / 8', ink: RED }),
+                row('Elif Demir', { right: '3 / 8' }),
+                row('Can Şahin', { right: '3 / 8' }),
+                row('Zeynep Arslan', { right: '3 / 8' }),
+              ],
+            }),
+          ],
+        },
+        {
+          id: '1b', title: 'Roster', note: 'one row per candidate, one emphasis per row',
+          nav: nav('Roster'),
+          eyebrow: 'Roster',
+          heading: '8 candidates',
+          actions: [act('Export CSV'), act('Add candidate', 'primary')],
+          cols: '1fr',
+          panels: [
+            panel('Standing', {
+              meta: 'click a row to open a portfolio',
+              head: ['Candidate', 'Assessed hrs', 'TPs', 'Assign. left', 'Criteria', 'Attendance', 'Provisional'],
+              gridCols: '2fr repeat(6, 1fr)',
+              cells: [
+                cell('Sara Yılmaz'), cell('4.50', { align: 'right' }), cell('3 / 8', { align: 'right' }), cell('2', { align: 'right', ink: MUTED }), cell('62%', { align: 'right' }), cell('96%', { align: 'right' }), cell('Pass A', { align: 'right', bold: true, ink: GOLD }),
+                cell('Deniz Aksoy'), cell('4.50', { align: 'right' }), cell('3 / 8', { align: 'right' }), cell('2', { align: 'right', ink: MUTED }), cell('55%', { align: 'right' }), cell('93%', { align: 'right' }), cell('Pass', { align: 'right' }),
+                cell('Mert Kaya'), cell('3.00', { align: 'right', ink: AMBER }), cell('2 / 8', { align: 'right' }), cell('3', { align: 'right', ink: MUTED }), cell('38%', { align: 'right' }), cell('74%', { align: 'right', bold: true, ink: RED }), cell('Fail / Pass', { align: 'right', bold: true, ink: RED }),
+                cell('Elif Demir'), cell('4.50', { align: 'right' }), cell('3 / 8', { align: 'right' }), cell('1', { align: 'right', ink: MUTED }), cell('71%', { align: 'right' }), cell('98%', { align: 'right' }), cell('Pass A', { align: 'right', bold: true, ink: GOLD }),
+                cell('Can Şahin'), cell('4.50', { align: 'right' }), cell('3 / 8', { align: 'right' }), cell('2', { align: 'right', ink: MUTED }), cell('48%', { align: 'right' }), cell('90%', { align: 'right' }), cell('Pass', { align: 'right' }),
+                cell('Zeynep Arslan'), cell('5.25', { align: 'right' }), cell('3 / 8', { align: 'right' }), cell('2', { align: 'right', ink: MUTED }), cell('64%', { align: 'right' }), cell('95%', { align: 'right' }), cell('Pass / Pass B', { align: 'right', bold: true, ink: AMBER }),
+                cell('Emre Doğan'), cell('2.25', { align: 'right', ink: AMBER }), cell('2 / 8', { align: 'right' }), cell('3', { align: 'right', ink: MUTED }), cell('31%', { align: 'right' }), cell('86%', { align: 'right' }), cell('Fail / Pass', { align: 'right', bold: true, ink: RED }),
+                cell('Aylin Koç'), cell('4.50', { align: 'right' }), cell('3 / 8', { align: 'right' }), cell('2', { align: 'right', ink: MUTED }), cell('58%', { align: 'right' }), cell('92%', { align: 'right' }), cell('Pass', { align: 'right' }),
+              ],
+              foot: 'A slashed provisional means the tutors have not decided between two adjacent grades. It blocks finalisation until a written justification exists, and it is what triggers a Stage 3 tutorial and a Fail letter.',
+            }),
+          ],
+        },
+        {
+          id: '1c', title: 'Timetable', note: 'days as rows, time bands as columns — the app’s own orientation',
+          nav: nav('Timetable'),
+          eyebrow: 'Course timetable · week 2 of 4',
+          heading: '13 – 17 November',
+          actions: [act('Time bands'), act('Add event'), act('Lock timetable', 'primary', true)],
+          cols: '1fr',
+          panels: [
+            panel('This week', {
+              head: ['', 'Admin & deadlines', '9:00', '9:30', '12:15', '14:00', '15:30'],
+              gridCols: '64px repeat(6, 1fr)',
+              cells: [
+                cell('MON 13', { size: '11px', bold: true, ink: MUTED }), cell('Assignment 2 out', { size: '12px', ink: GOLD }), cell('TP prep', { size: '12px', ink: MUTED }), cell('TP1 — DEF', { size: '12px', bold: true }), cell('Feedback & LP', { size: '12px', ink: MUTED }), cell('Phonology — sounds', { size: '12px' }), cell('Language awareness 1', { size: '12px' }),
+                cell('TUE 14', { size: '11px', bold: true, ink: TEAL }), cell('TP points 3a · Stage 1', { size: '12px', ink: GOLD }), cell('TP prep', { size: '12px', ink: MUTED }), cell('TP2 — ABC · live', { size: '12px', bold: true, ink: TEAL }), cell('Feedback & LP', { size: '12px', ink: MUTED }), cell('Stress and intonation', { size: '12px' }), cell('PPP vs guided discovery', { size: '12px' }),
+                cell('WED 15', { size: '11px', bold: true, ink: MUTED }), cell('TP points 3b · Stage 1', { size: '12px', ink: GOLD }), cell('TP prep', { size: '12px', ink: MUTED }), cell('TP2 — DEF', { size: '12px', bold: true }), cell('Feedback & LP', { size: '12px', ink: MUTED }), cell('Connected speech', { size: '12px' }), cell('Presenting language — TTT', { size: '12px' }),
+                cell('THU 16', { size: '11px', bold: true, ink: MUTED }), cell('Assignment 3 in', { size: '12px', ink: GOLD }), cell('TP prep', { size: '12px', ink: MUTED }), cell('TP3 — ABC', { size: '12px', bold: true }), cell('Feedback & LP', { size: '12px', ink: MUTED }), cell('Eliciting and CCQs', { size: '12px' }), cell('Filmed observation', { size: '12px' }),
+                cell('FRI 17', { size: '11px', bold: true, ink: MUTED }), cell('—', { size: '12px', ink: MUTED }), cell('—', { size: '12px', ink: MUTED }), cell('Study day', { size: '12px', ink: MUTED }), cell('—', { size: '12px', ink: MUTED }), cell('—', { size: '12px', ink: MUTED }), cell('—', { size: '12px', ink: MUTED }),
+              ],
+              foot: 'The timetable is the clock. TP dates, assignment deadlines, resubmission dates and “this week” all derive from it, so it must be locked before rounds can be assigned.',
+            }),
+          ],
+        },
+        {
+          id: '1d', title: 'Teaching Practice', note: 'the marking queue',
+          nav: nav('Teaching Practice'),
+          eyebrow: 'Teaching practice · round 3 of 8',
+          heading: '2 lessons waiting on you',
+          actions: [act('TP points library'), act('Write feedback', 'primary')],
+          cols: '1.4fr 1fr',
+          panels: [
+            panel('Waiting on you', {
+              rows: [
+                row('Sara Yılmaz · TP1', { bold: true, rule: AMBER, sub: 'Receptive skills — reading · taught 9 Nov, 45 min', pill: 'Feedback due', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+                row('Deniz Aksoy · TP1', { bold: true, rule: AMBER, sub: 'Grammar — past forms · taught 9 Nov, 45 min', pill: 'Feedback due', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+                row('Mert Kaya · TP2', { bold: true, rule: TEAL, sub: 'Teaching lexis · today, 9:30', pill: 'Teaching now', pillBg: 'oklch(93.5% 0.033 235)', pillInk: 'oklch(42% 0.09 250)' }),
+                row('Elif Demir · TP3', { rule: MUTED, sub: 'Not yet planned · 16 Nov', pill: 'Planned', pillBg: 'oklch(93.5% 0.008 85)', pillInk: MUTED }),
+              ],
+              foot: 'Starred action points from the last feedback carry into the candidate’s next lesson plan as personal aims. That carry-forward is the loop the whole course runs on.',
+            }),
+            panel('Your groups', {
+              rows: [
+                row('Group ABC', { bold: true, sub: 'Sara Yılmaz, Deniz Aksoy, Mert Kaya', right: 'Mon / Wed' }),
+                row('Group DEF', { bold: true, sub: 'Elif Demir, Can Şahin, Zeynep Arslan', right: 'Tue / Thu' }),
+              ],
+              foot: 'Six candidates, two halves of three, alternate days. No more than three TPs in one day.',
+            }),
+          ],
+        },
+        { id: '1d2', title: 'Stage 2 tutorial sheet', note: 'opens from a Timetable block · Group ABC only sees this one',
+          nav: nav('Timetable'),
+          eyebrow: 'Stage 2 tutorials · Group ABC · Wed 15 Nov, 13:00–14:30',
+          heading: 'Book your slot',
+          actions: [act('Lengthen block'), act('Message group')],
+          cols: '1fr 1fr',
+          panels: [
+            panel('Positions', {
+              meta: 'around 15–20 min each, starting from 13:00 · running a little over is normal',
+              rows: [
+                row('1st', { bold: true, rule: TEAL, sub: 'Sara Yılmaz', pill: 'Booked', pillBg: 'oklch(93.5% 0.008 85)', pillInk: BODY }),
+                row('2nd', { bold: true, rule: TEAL, sub: 'Deniz Aksoy', pill: 'Booked', pillBg: 'oklch(93.5% 0.008 85)', pillInk: BODY }),
+                row('3rd', { bold: true, rule: AMBER, sub: 'Open', pill: 'Open', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+                row('4th', { bold: true, rule: AMBER, sub: 'Open', pill: 'Open', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+                row('5th', { bold: true, rule: AMBER, sub: 'Open', pill: 'Open', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+                row('6th', { bold: true, rule: AMBER, sub: 'Open', pill: 'Open', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+              ],
+              foot: 'No time picker. Booking claims the next open position in order — 1st to book gets 1st.',
+            }),
+            panel('How this works', {
+              rows: [
+                row('The sheet is the source of truth', { bold: true, sub: 'No message fires per booking — check here to see what’s left, same as Consultation.' }),
+                row('One booking per trainee', { bold: true, sub: 'Can release a slot back to open, not swap directly into another’s.' }),
+                row('Only Group ABC sees this sheet', { bold: true, sub: 'Group DEF has its own block, its own sheet, possibly a different day.' }),
+                row('One announcement only', { bold: true, sub: '“Stage 2 tutorials Wed — book your spot” fired once, when this block was added.' }),
+              ],
+              foot: 'If the group doesn’t fit, lengthen the block — anyone already booked keeps their position.',
+            }),
+          ],
+        },
+        {
+          id: '1e', title: 'Rotation', note: 'not a tab — it lives under Teaching Practice, as in the code today',
+          nav: nav('Teaching Practice'),
+          eyebrow: 'Rotation · Group ABC',
+          heading: 'Who teaches when',
+          actions: [act('Change base order'), act('Release round 3', 'primary', true)],
+          cols: '1fr',
+          panels: [
+            panel('Rounds 1 – 8', {
+              head: ['Candidate', 'TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6', 'TP7', 'TP8'],
+              gridCols: '1.6fr repeat(8, 1fr)',
+              cells: [
+                cell('Sara Yılmaz'), cell('1st', { align: 'right' }), cell('2nd', { align: 'right' }), cell('3rd', { align: 'right' }), cell('1st', { align: 'right' }), cell('2nd', { align: 'right' }), cell('3rd', { align: 'right' }), cell('1st', { align: 'right' }), cell('2nd', { align: 'right' }),
+                cell('Deniz Aksoy'), cell('2nd', { align: 'right' }), cell('3rd', { align: 'right' }), cell('1st', { align: 'right' }), cell('2nd', { align: 'right' }), cell('3rd', { align: 'right' }), cell('1st', { align: 'right' }), cell('2nd', { align: 'right' }), cell('3rd', { align: 'right' }),
+                cell('Mert Kaya'), cell('3rd', { align: 'right' }), cell('1st', { align: 'right' }), cell('2nd', { align: 'right' }), cell('3rd', { align: 'right' }), cell('1st', { align: 'right' }), cell('2nd', { align: 'right' }), cell('3rd', { align: 'right' }), cell('1st', { align: 'right' }),
+              ],
+              foot: 'Nobody teaches first twice in a row. If a candidate withdraws, their slot simply empties — the others keep their positions, and nothing re-derives.',
+            }),
+          ],
+        },
+        {
+          id: '1f', title: 'Grades Report', note: 'trainer-only until release; the one tab an assessor also sees',
+          nav: nav('Grades Report'),
+          eyebrow: 'Grades · provisional',
+          heading: 'Grade meeting, 4 December',
+          actions: [act('Export report'), act('Record final grades', 'primary')],
+          cols: '1.3fr 1fr',
+          panels: [
+            panel('Undecided · needs justification', {
+              gold: true,
+              rows: [
+                row('Mert Kaya — Fail / Pass', { bold: true, ink: RED, sub: 'Stage 3 tutorial given 20 Nov · Fail letter issued 21 Nov', pill: 'No justification', pillBg: 'oklch(94% 0.043 25)', pillInk: RED }),
+                row('Emre Doğan — Fail / Pass', { bold: true, ink: RED, sub: 'Stage 3 tutorial due · no Fail letter yet', pill: '2 TPs left', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+                row('Zeynep Arslan — Pass / Pass B', { bold: true, sub: 'Written 2 Dec by Ramy Sakr', pill: 'Justified', pillBg: 'oklch(93.5% 0.008 85)', pillInk: BODY }),
+              ],
+              foot: 'A Fail letter must be issued with at least two lessons left to teach. Emre has exactly two, so this is the last day it can go out.',
+            }),
+            panel('Settled', {
+              rows: [
+                row('Pass A', { right: '2 candidates', bold: true, ink: GOLD }),
+                row('Pass B', { right: '0 candidates', ink: MUTED }),
+                row('Pass', { right: '3 candidates' }),
+                row('Fail', { right: '0 candidates', ink: MUTED }),
+                row('Withdrawn', { right: '1 candidate', ink: MUTED }),
+              ],
+              foot: 'Final grades are subject to confirmation by Cambridge. The app is never the authority.',
+            }),
+          ],
+        },
+        {
+          id: '1g', title: 'Volunteers', note: 'the language students who make TP possible',
+          nav: nav('Volunteers'),
+          eyebrow: 'Volunteer students · Upper-Intermediate',
+          heading: '11 registered, 9 in today',
+          actions: [act('Send links'), act('Add volunteer', 'primary')],
+          cols: '1.3fr 1fr',
+          panels: [
+            panel('Register · today’s session', {
+              meta: 'Zoom, auto-ticked at 90 min',
+              rows: [
+                row('Ayla Öztürk', { right: '2h 15m · tick', rightInk: BODY }),
+                row('Burak Yıldız', { right: '2h 15m · tick', rightInk: BODY }),
+                row('Cemre Aydın', { right: '1h 38m · tick', rightInk: BODY }),
+                row('Deniz Polat', { right: '41m · no tick', rightInk: AMBER }),
+                row('Ece Kurt', { right: 'not joined', rightInk: MUTED, ink: MUTED }),
+              ],
+              foot: 'Join and leave times are summed across rejoins. Ninety minutes earns a tick, and the tick credits the whole session at 2¼ hours.',
+            }),
+            panel('Hours toward certificates', {
+              rows: [
+                row('Ayla Öztürk', { right: '138 of 160 hrs' }),
+                row('Burak Yıldız', { right: '42 of 160 hrs' }),
+                row('Cemre Aydın', { right: '160 — earned', bold: true, ink: GOLD }),
+                row('Deniz Polat', { right: '18 of 160 hrs' }),
+              ],
+              foot: 'Hours accumulate across courses and across levels, since volunteers move between levels depending on what is running.',
+            }),
+          ],
+        },
+        {
+          id: '1h', title: 'Resource hub', note: 'one tab for all course material — replaces the Audio Library tab',
+          nav: nav('Resource hub'),
+          eyebrow: 'Resource hub · ITI Istanbul',
+          heading: 'Reused every course',
+          actions: [act('Upload'), act('New TP point', 'primary')],
+          cols: '190px 1fr 1fr',
+          panels: [
+            panel('Sections', {
+              rows: [
+                row('TP points', { bold: true, ink: TEAL, right: '64' }),
+                row('Coursebooks', { right: '6' }),
+                row('Multimedia', { right: '48' }),
+                row('Assignment briefs', { right: '4' }),
+                row('Input sessions', { right: '31' }),
+                row('Centre documents', { right: '9' }),
+              ],
+              foot: 'Six sections, one tab. Audio was never big enough to earn a place in the header while coursebooks and TP points did not have one.',
+            }),
+            panel('TP points', {
+              meta: '64 · scripted through to aim-only',
+              rows: [
+                row('Receptive skills — reading', { sub: 'Scripted · TP1–2 · Empower Upper-Int u4', right: 'used 12×' }),
+                row('Grammar — past forms', { sub: 'Framework · TP3–4 · Empower Int u7', right: 'used 9×' }),
+                row('Teaching lexis', { sub: 'Framework · TP3–4 · Outcomes Pre-Int u3', right: 'used 11×' }),
+                row('Functional language', { sub: 'Coaching prose · TP5 · tutor’s own', right: 'used 7×' }),
+                row('Free practice — speaking', { sub: 'Aim only · TP6 · candidate chooses', right: 'used 5×' }),
+              ],
+              foot: 'Four release styles, getting less prescriptive as the course goes on. A TP point is assigned to a round from Teaching Practice; it is written and stored here.',
+            }),
+            panel('Input sessions', {
+              meta: '31 · with their materials',
+              rows: [
+                row('PPP', { sub: 'Slides, worksheet', right: 'week 2' }),
+                row('Guided discovery', { sub: 'Slides, worksheet', right: 'week 2' }),
+                row('Phonology — stress and intonation', { sub: 'Slides, drill audio ×3', right: 'week 2' }),
+                row('Eliciting and concept checking', { sub: 'Slides, worksheet', right: 'week 3' }),
+                row('Classroom management — pairing', { sub: 'Slides, filmed lesson', right: 'week 1' }),
+              ],
+              foot: 'Centre-level, so the whole hub survives close-out and duplicates into the next course. Nothing candidate-specific lives here.',
+            }),
+          ],
+        },
+        {
+          id: '1i', title: 'Portfolio', note: 'not a tab — you reach it by clicking a roster row',
+          nav: nav('Roster'),
+          eyebrow: '← Roster · Sara Yılmaz · tracking Pass A',
+          heading: 'One candidate, everything about them',
+          actions: [act('Preview as trainee'), act('Write TP4 feedback', 'primary')],
+          cols: '210px 1.25fr 1fr',
+          panels: [
+            panel('Workspace', {
+              rows: [
+                row('Course stream', { right: '4 new' }),
+                row('Teaching practice', { bold: true, ink: TEAL, right: '3 / 8' }),
+                row('Written assignments', { right: '1 due' }),
+                row('CELTA 5', { right: '62%' }),
+                row('Attendance', { right: '96%' }),
+              ],
+              foot: 'A rail, not an accordion. Every section is one click from every other.',
+            }),
+            panel('Written assignments', {
+              meta: 'pass 3 of 4 to be eligible',
+              rows: [
+                row('1 · Focus on the Learner', { sub: 'Marked by Ramy Sakr · 2nd marker Hakan Şen', pill: 'Pass', pillBg: 'oklch(93.5% 0.008 85)', pillInk: BODY }),
+                row('2 · Language Related Tasks', { sub: 'Resubmitted 29 Nov · both rounds in one PDF', pill: 'Pass on resub', pillBg: 'oklch(93.5% 0.008 85)', pillInk: BODY }),
+                row('3 · Skills Related Task', { bold: true, sub: 'Due today · not submitted', pill: 'Due', pillBg: 'oklch(94.5% 0.065 85)', pillInk: AMBER }),
+                row('4 · Lessons from the Classroom', { ink: MUTED, sub: 'Opens 27 Nov', pill: 'Not open', pillBg: 'oklch(93.5% 0.008 85)', pillInk: MUTED }),
+              ],
+              foot: 'Marked Met / Not met against the centre’s own criteria, imported from its cover sheets. One resubmission each; a withdraw-before-marking never consumes it.',
+            }),
+            panel('CELTA 5', {
+              meta: 'the document of record',
+              figure: '26', figureNote: 'of 42 criteria met · 62%', figurePct: '62%',
+              foot: 'Stage 2 is blind: the candidate self-assesses before seeing the tutor’s column. Signed digitally by both, and the final-day declaration is what decides Withdrawn from Fail.',
+            }),
+          ],
+        },
+        {
+          id: '1j', title: 'Announcements', note: 'today it lives inside a candidate’s portfolio — it should not',
+          nav: nav('Today'),
+          eyebrow: 'Course stream · C2/2024',
+          heading: 'Announcements',
+          actions: [act('Schedule for later'), act('Post to cohort', 'primary')],
+          cols: '1fr 1fr 1fr',
+          panels: [
+            panel('Write an announcement', {
+              rows: [
+                row('Observation slots for Thursday are open — grab one before the end of today.', { bold: true, sub: 'Draft · 8 recipients · every candidate on C2/2024' }),
+                row('Send', { ink: MUTED, sub: 'Now, or anchored to a timetable event', right: 'Now' }),
+                row('Pin to the top of their home', { ink: MUTED, right: 'Off' }),
+                row('Keep when the course duplicates', { ink: MUTED, sub: 'Carries into the next course with its anchor', right: 'On' }),
+              ],
+              foot: 'Candidates see it on their home screen directly under the next session, above their to-do list. There is no cohort chat channel, so this is the only way to reach everyone at once.',
+            }),
+            panel('Scheduled · 6', {
+              gold: true,
+              meta: 'written once, sent by the timetable',
+              rows: [
+                row('Assignment 3 is due tomorrow — the brief is in the hub', { rule: GOLD, sub: 'Sends the day before Assignment 3 in · 15 Nov', right: 'Post now' , rightInk: TEAL }),
+                row('TP4 points are released — start planning', { rule: GOLD, sub: 'Sends when round 4 is released · 20 Nov', right: 'Post now', rightInk: TEAL }),
+                row('Your assessor visits on Thursday', { rule: GOLD, sub: 'Sends 2 days before the assessment visit · 28 Nov', right: 'Post now', rightInk: TEAL }),
+                row('Final day — bring your portfolio complete', { rule: GOLD, sub: 'Sends the morning before the last day · 6 Dec', right: 'Post now', rightInk: TEAL }),
+              ],
+              foot: 'Anchored to a timetable event, never a fixed date — that is what lets the set duplicate into the next course and land on the right days. Any of them can be sent early with Post now, edited, or skipped; scheduling is a default, not a lock.',
+            }),
+            panel('Posted', {
+              meta: '4 this course',
+              rows: [
+                row('Reading for tomorrow is chapter 4 only', { rule: GOLD, sub: 'Pinned · 13 Nov · Ramy Sakr', pill: 'Pinned', pillBg: 'oklch(93.5% 0.008 85)', pillInk: GOLD }),
+                row('Room 2 projector is fixed — sessions run as scheduled', { rule: MUTED, sub: '13 Nov · Ayşe Demirtaş' }),
+                row('Assignment 2 briefs are in the resource hub', { rule: MUTED, sub: '9 Nov · Ramy Sakr' }),
+                row('Welcome — read the pre-course task before Monday', { rule: MUTED, sub: '2 Nov · Ramy Sakr' }),
+              ],
+              foot: 'In the code today the composer sits at /portfolio/[traineeId] — you open one candidate’s page to post to all eight. It belongs on Today, or on its own route, not inside a person.',
+            }),
+          ],
+        },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

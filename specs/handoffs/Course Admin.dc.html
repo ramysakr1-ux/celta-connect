@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@600&family=Instrument+Serif:ital@1&family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 44px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 12px; max-width: 940px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · course admin</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Course admin — the CELTA trainer's own credentials to run a course.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Distinct from Centre Admin — a separate role and a separate link, covering payments and volunteer students (built elsewhere). This is the main course tutor's own view: setting up a course, its roster, groups, invitations, and course-level settings. Everything reusable — TP points, assignment briefs, resources, feedback examples, the Drive connection — is shared by every course this trainer runs. Everything about a person is course-level and leaves at close-out.</div>
+  </div>
+
+  <div id="2a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">2a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Course setup — delivery mode</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">asked once, and everything downstream reads it</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 20px; align-items: start;">
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 24px 26px; display: flex; flex-direction: column; gap: 18px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">New course · UK205 C3/2024 · step 2 of 6</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">How is teaching practice delivered?</div>
+          <div style="font-size: 12.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">The mode is defined by where teaching practice happens, not where input happens. A course can deliver input online and still be face-to-face.</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <sc-for list="{{ modeCards }}" as="m" hint-placeholder-count="3">
+            <div onClick="{{ m.pick }}" style="display: flex; align-items: flex-start; gap: 12px; padding: 15px 16px; border-radius: 6px; border: 1px solid {{ m.border }}; background: {{ m.bg }}; cursor: pointer;">
+              <div style="width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid {{ m.dotBorder }}; flex: none; margin-top: 2px; display: flex; align-items: center; justify-content: center;">
+                <sc-if value="{{ m.on }}" hint-placeholder-val="{{ false }}">
+                  <div style="width: 8px; height: 8px; border-radius: 50%; background: {{ m.dotBg }};"></div>
+                </sc-if>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 3px; flex: 1;">
+                <div style="font-size: 14px; font-weight: 600; color: {{ m.ink }};">{{ m.label }}</div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ m.desc }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px; padding: 15px 16px; border-radius: 6px; background: {{ modeImpact.bg }}; border: 1px solid {{ modeImpact.border }};">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: {{ modeImpact.ink }};">{{ modeImpact.head }}</div>
+          <sc-for list="{{ modeImpact.rows }}" as="r" hint-placeholder-count="4">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <div style="font-size: 11px; font-weight: 700; color: {{ r.ink }}; flex: none; width: 118px;">{{ r.what }}</div>
+              <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65); flex: 1;">{{ r.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="height: 34px; padding: 0 16px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 12.5px; font-weight: 600; display: flex; align-items: center; cursor: pointer;">Continue to dates</div>
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ modeFoot }}</div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <sc-for list="{{ modeNotes }}" as="n" hint-placeholder-count="4">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ n.border }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 12px; font-weight: 700; color: {{ n.labelInk }};">{{ n.label }}</div>
+            <div style="font-size: 12px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1a -->
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Centre home — courses by state</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: {{ padOuter }}; display: flex; flex-direction: column; gap: {{ gapOuter }};">
+
+      <div style="height: 44px; margin: -8px 0 4px; border-bottom: 1px solid oklch(88% 0.016 82); display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; align-items: center; gap: 3px;">
+          <div style="width: 30px; height: 30px; border-radius: 7px; background: oklch(30% 0.042 58); display: flex; align-items: center; justify-content: center; flex: none;">
+            <svg width="19" height="11" viewBox="8 30 104 60" fill="none">
+              <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" stroke-width="10" stroke-linecap="round"></path>
+              <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" stroke-width="10" stroke-linecap="round"></path>
+            </svg>
+          </div>
+          <div style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 17px; line-height: 0.85; color: oklch(60% 0.11 70);">Connect</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; background: color-mix(in oklab, {{ accent }} 12%, oklch(99.2% 0.005 90)); color: {{ accent }}; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;">
+            <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+            <div>Course admin</div>
+          </div>
+          <div style="font-size: 13px; color: oklch(51% 0.017 70);">Ramy Sakr</div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Meridian English Centre · Centre UK205</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: oklch(23.5% 0.017 65);">Courses</div>
+        </div>
+        <div style="height: 34px; padding: 0 15px; border-radius: 6px; background: {{ accent }}; color: oklch(98.5% 0.006 90); font-size: 13px; font-weight: 600; display: flex; align-items: center; cursor: pointer; white-space: nowrap;">New course</div>
+      </div>
+
+      <div style="display: flex; align-items: flex-start; gap: 11px; padding: 13px 15px; border-radius: 6px; background: color-mix(in oklab, oklch(43% 0.09 145) 9%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(43% 0.09 145) 30%, transparent);">
+        <div style="width: 6px; height: 6px; border-radius: 50%; background: oklch(43% 0.09 145); margin-top: 6px; flex: none;"></div>
+        <div style="display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Centre number set — UK205</div>
+          <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70);">Prints on every final report and cover sheet.</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 336px; gap: 16px; align-items: start;">
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <sc-for list="{{ courseGroups }}" as="g" hint-placeholder-count="3">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: baseline; gap: 9px;">
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: {{ g.labelInk }};">{{ g.label }}</div>
+                <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ g.count }}</div>
+              </div>
+              <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+                <sc-for list="{{ g.courses }}" as="c" hint-placeholder-count="2">
+                  <div style="display: grid; grid-template-columns: 1fr 180px 128px 92px; align-items: center; gap: 14px; padding: {{ rowPad }}; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent); border-left: {{ c.railWidth }} solid {{ c.rail }}; cursor: pointer;" style-hover="background: color-mix(in oklab, oklch(92% 0.028 190) 26%, oklch(99.2% 0.005 90));">
+                    <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ c.name }}</div>
+                      <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ c.dates }}</div>
+                    </div>
+                    <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ c.people }}</div>
+                    <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ c.progress }}</div>
+                    <div style="display: flex; justify-content: flex-end;">
+                      <div style="display: inline-flex; align-items: center; gap: 6px; padding: {{ pillPad }}; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{ c.pillBg }}; color: {{ c.pillInk }}; opacity: {{ pillOpacity }};">
+                        <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+                        <div>{{ c.state }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 11px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; color: oklch(23.5% 0.017 65);">Centre material</div>
+            <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70);">Shared by every course at this centre. Built once, carried forward.</div>
+            <sc-for list="{{ centreMaterial }}" as="m" hint-placeholder-count="5">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent); cursor: pointer;">
+                <div style="font-size: 12px; color: oklch(23.5% 0.017 65);">{{ m.label }}</div>
+                <div style="font-size: 11px; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">{{ m.count }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 9px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">What changed</div>
+            <sc-for list="{{ homeNotes }}" as="n" hint-placeholder-count="3">
+              <div style="display: flex; align-items: flex-start; gap: 9px;">
+                <div style="width: 5px; height: 5px; border-radius: 50%; background: {{ accent }}; margin-top: 6px; flex: none;"></div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ n }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 6px; display: flex; justify-content: center;">
+        <div style="width: 720px; height: 52px; border-radius: 26px; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); box-shadow: 0 10px 30px oklch(23.5% 0.017 65 / 0.09); display: flex; align-items: center; gap: 11px; padding: 0 9px 0 7px;">
+          <div style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px 0 7px; border-radius: 19px; background: color-mix(in oklab, {{ accent }} 12%, oklch(99.2% 0.005 90)); flex: none; cursor: pointer;">
+            <div style="width: 24px; height: 24px; border-radius: 8px; background: {{ accent }}; color: oklch(98.5% 0.006 90); font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">C2</div>
+            <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65); white-space: nowrap;">C2/2024 tutors</div>
+            <div style="font-size: 9px; color: oklch(51% 0.017 70);">▾</div>
+          </div>
+          <div style="width: 1px; height: 22px; background: oklch(88% 0.016 82); flex: none;"></div>
+          <div style="flex: 1; min-width: 0; font-size: 13px; color: oklch(51% 0.017 70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Message the tutors on this course — resets on the centre's schedule</div>
+          <div style="display: flex; align-items: center; gap: 6px; flex: none;">
+            <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(60% 0.11 70);"></div>
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(51% 0.017 70); white-space: nowrap;">Clears in 6h 40m</div>
+          </div>
+          <div style="width: 34px; height: 34px; border-radius: 17px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90); display: flex; align-items: center; justify-content: center; flex: none; font-size: 14px; cursor: pointer;">↑</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 336px; gap: 16px; align-items: start;">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 9px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">An admin who isn't on the course</div>
+          <sc-for list="{{ adminChatNotes }}" as="n" hint-placeholder-count="4">
+            <div style="display: flex; align-items: flex-start; gap: 9px;">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: {{ n.dot }}; margin-top: 6px; flex: none;"></div>
+              <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ n.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Chat reset — this course</div>
+          <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70);">Applies to every chat channel on this course, trainer and trainee alike. Nightly by default.</div>
+          <div style="display: flex; gap: 6px;">
+            <sc-for list="{{ chatRetentionOpts }}" as="ro" hint-placeholder-count="3">
+              <div onClick="{{ ro.pick }}" style="flex: 1; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; cursor: pointer; background: {{ ro.bg }}; color: {{ ro.ink }}; border: 1px solid {{ ro.border }};">{{ ro.label }}</div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ chatRetentionCustom }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <input value="{{ chatCustomDays }}" onChange="{{ onChatCustomDays }}" placeholder="N" style="width: 44px; height: 30px; border: 1px solid oklch(88% 0.016 82); border-radius: 5px; text-align: center; font-size: 12px; color: oklch(23.5% 0.017 65);">
+              <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">days — a rolling window, never a fixed calendar date, so it never wipes mid-cycle on a part-time course.</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1b -->
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1b</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">One course — roster, groups, invitations</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: {{ padOuter }}; display: flex; flex-direction: column; gap: {{ gapOuter }};">
+
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">6 Nov – 7 Dec 2023 · full-time · week 2 of 5</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: oklch(23.5% 0.017 65);">UK205 C2/2024</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <div style="height: 34px; padding: 0 14px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 13px; font-weight: 500; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Duplicate course</div>
+          <div style="height: 34px; padding: 0 15px; border-radius: 6px; background: {{ accent }}; color: oklch(98.5% 0.006 90); font-size: 13px; font-weight: 600; display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Invite people</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 380px; gap: 16px; align-items: start;">
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 14px 16px 11px; border-bottom: 1px solid oklch(88% 0.016 82);">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; color: oklch(23.5% 0.017 65);">Roster</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">3 tutors · 12 candidates · 2 not joined</div>
+            </div>
+            <sc-for list="{{ roster }}" as="r" hint-placeholder-count="6">
+              <div style="display: grid; grid-template-columns: 1fr 232px 104px 84px; align-items: center; gap: 12px; padding: {{ rowPad }}; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent);">
+                <div style="font-size: 13px; color: oklch(23.5% 0.017 65);">{{ r.name }}</div>
+                <div style="font-size: 12px; color: oklch(51% 0.017 70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.email }}</div>
+                <div style="font-size: 11px; font-weight: 600; color: {{ r.roleInk }};">{{ r.role }}</div>
+                <div style="display: flex; justify-content: flex-end;">
+                  <div style="display: inline-flex; align-items: center; gap: 6px; padding: {{ pillPad }}; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{ r.pillBg }}; color: {{ r.pillInk }}; opacity: {{ pillOpacity }};">
+                    <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+                    <div>{{ r.state }}</div>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; color: oklch(23.5% 0.017 65);">Teaching practice groups</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">membership fixed for the course · trainers own the rotation</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <sc-for list="{{ groups }}" as="grp" hint-placeholder-count="2">
+                <div style="border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 12px; background: color-mix(in oklab, oklch(92% 0.028 190) 32%, oklch(99.2% 0.005 90)); border-bottom: 1px solid oklch(88% 0.016 82);">
+                    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">{{ grp.name }}</div>
+                    <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ grp.meta }}</div>
+                  </div>
+                  <sc-for list="{{ grp.members }}" as="m" hint-placeholder-count="6">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 12px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 35%, transparent);">
+                      <div style="font-size: 12px; color: oklch(23.5% 0.017 65);">{{ m.name }}</div>
+                      <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ m.half }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 6px; background: color-mix(in oklab, oklch(60% 0.11 70) 11%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 28%, transparent);">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(60% 0.11 70); margin-top: 6px; flex: none;"></div>
+              <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">Two candidates aren't in a group yet. The rotation can't be released until every candidate is placed.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid color-mix(in oklab, {{ accent }} 30%, transparent); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; color: oklch(23.5% 0.017 65);">Invitations</div>
+            <sc-for list="{{ invites }}" as="i" hint-placeholder-count="2">
+              <div style="display: flex; flex-direction: column; gap: 7px; padding-bottom: 12px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent);">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                  <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ i.role }}</div>
+                  <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ i.used }}</div>
+                </div>
+                <div style="height: 32px; border: 1px solid oklch(88% 0.016 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 0 10px; display: flex; align-items: center; font-size: 11px; color: oklch(51% 0.017 70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ i.link }}</div>
+                <div style="display: flex; align-items: center; gap: 7px;">
+                  <div style="height: 28px; padding: 0 11px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Copy</div>
+                  <div style="height: 28px; padding: 0 11px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Email it</div>
+                  <div style="height: 28px; padding: 0 11px; border-radius: 6px; font-size: 12px; font-weight: 600; color: oklch(45% 0.16 27); display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Regenerate</div>
+                </div>
+              </div>
+            </sc-for>
+            <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70);">Regenerating invalidates the old link immediately — anyone who hasn't joined yet needs the new one.</div>
+          </div>
+
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 9px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">What changed</div>
+            <sc-for list="{{ courseNotes }}" as="n" hint-placeholder-count="4">
+              <div style="display: flex; align-items: flex-start; gap: 9px;">
+                <div style="width: 5px; height: 5px; border-radius: 50%; background: {{ accent }}; margin-top: 6px; flex: none;"></div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ n }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1c -->
+  <div id="1c" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1c</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Settings — what the centre is, and what it's connected to</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: {{ padOuter }}; display: grid; grid-template-columns: 232px 1fr; gap: 20px; align-items: start;">
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 14px 0; display: flex; flex-direction: column; gap: 2px;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70); padding: 0 16px 10px;">Settings</div>
+        <sc-for list="{{ settingsNav }}" as="s" hint-placeholder-count="5">
+          <div style="padding: 9px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; background: {{ s.bg }}; border-left: 3px solid {{ s.rule }};">
+            <div style="font-size: 12px; font-weight: {{ s.weight }}; color: {{ s.ink }};">{{ s.label }}</div>
+            <sc-if value="{{ s.flag }}" hint-placeholder-val="{{ false }}">
+              <div style="width: 6px; height: 6px; border-radius: 50%; background: oklch(45% 0.16 27); flex: none;"></div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 13px;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; font-weight: 600; color: oklch(23.5% 0.017 65);">Centre profile</div>
+            <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70);">Prints on every course, every cover sheet, and the final report.</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 12px; color: oklch(51% 0.017 70);">Centre name</div>
+              <div style="height: 36px; border: 1px solid oklch(88% 0.016 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 0 11px; display: flex; align-items: center; font-size: 13px; color: oklch(23.5% 0.017 65);">Meridian English Centre</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 12px; color: oklch(51% 0.017 70);">Cambridge centre number</div>
+              <div style="height: 36px; border: 1px solid oklch(88% 0.016 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 0 11px; display: flex; align-items: center; font-size: 13px; color: oklch(23.5% 0.017 65);">UK205</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 13px;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; font-weight: 600; color: oklch(23.5% 0.017 65);">Google Drive</div>
+              <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70);">Where course files are imported from at setup, and exported to at close-out.</div>
+            </div>
+            <div style="display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; border-radius: 999px; background: oklch(93.5% 0.008 85); color: oklch(23.5% 0.017 65); font-size: 12px; font-weight: 600; flex: none;">
+              <div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>
+              <div>Connected</div>
+            </div>
+          </div>
+          <sc-for list="{{ driveRows }}" as="d" hint-placeholder-count="3">
+            <div style="display: grid; grid-template-columns: 168px 1fr; gap: 14px; align-items: center; padding: 9px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent);">
+              <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ d.label }}</div>
+              <div style="font-size: 12px; color: oklch(23.5% 0.017 65);">{{ d.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; font-weight: 600; color: oklch(23.5% 0.017 65);">Feedback style examples</div>
+            <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70);">Real snippets that teach the tone cleanup how your centre writes. Added once, used on every rewrite.</div>
+          </div>
+          <sc-for list="{{ styleExamples }}" as="e" hint-placeholder-count="2">
+            <div style="padding: 11px 13px; border-radius: 6px; background: oklch(96.4% 0.014 85); border: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent); font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">{{ e }}</div>
+          </sc-for>
+        </div>
+
+        <div style="padding-top: 14px; border-top: 1px solid oklch(88% 0.016 82); display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="24" height="14" viewBox="8 30 104 60" fill="none">
+              <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(60% 0.11 70)" stroke-width="9" stroke-linecap="round"></path>
+              <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(51% 0.017 70)" stroke-width="9" stroke-linecap="round"></path>
+            </svg>
+            <div style="font-size: 11px; color: oklch(51% 0.017 70);">Connect · v1.0</div>
+          </div>
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">Designed and built by <span style="font-weight: 600; color: oklch(23.5% 0.017 65);">Ramy</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:2600},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;compact&quot;,&quot;comfortable&quot;,&quot;airy&quot;],&quot;default&quot;:&quot;comfortable&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Feel&quot;},&quot;statusEmphasis&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;quiet&quot;,&quot;balanced&quot;,&quot;loud&quot;],&quot;default&quot;:&quot;balanced&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Feel&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;options&quot;:[&quot;oklch(38% 0.072 195)&quot;,&quot;oklch(50% 0.09 62)&quot;,&quot;oklch(30% 0.02 65)&quot;],&quot;default&quot;:&quot;oklch(38% 0.072 195)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Feel&quot;}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const BRONZE = 'oklch(50% 0.09 62)';
+const GOLD = 'oklch(60% 0.11 70)';
+const GREEN = 'oklch(23.5% 0.017 65)';
+const RED = 'oklch(45% 0.16 27)';
+const BORDER = 'oklch(88% 0.016 82)';
+
+const STATES = {
+  running: { ink: GREEN, bg: 'oklch(93.5% 0.008 85)' },
+  upcoming: { ink: TEAL, bg: 'oklch(92% 0.045 235)' },
+  closed: { ink: MUTED, bg: 'oklch(93% 0.012 85)' },
+  joined: { ink: GREEN, bg: 'oklch(93.5% 0.008 85)' },
+  invited: { ink: GOLD, bg: 'oklch(93.5% 0.08 85)' },
+};
+
+class Component extends DCLogic {
+  state = { cmode: 'mixed', chatRetention: 'nightly', chatCustomDays: '30' };
+
+  renderVals() {
+    const density = this.props.density ?? 'comfortable';
+    const emphasis = this.props.statusEmphasis ?? 'balanced';
+    const accent = this.props.accent ?? TEAL;
+
+    const compact = density === 'compact';
+    const airy = density === 'airy';
+
+    const rowPad = compact ? '8px 14px' : airy ? '16px 20px' : '12px 16px';
+    const padOuter = compact ? '18px' : airy ? '32px' : '24px';
+    const gapOuter = compact ? '12px' : airy ? '22px' : '16px';
+
+    // statusEmphasis reshapes how a row announces its state: quiet = a
+    // dimmed pill only, balanced = pill plus a hairline rail, loud = a
+    // heavy rail and a full-strength pill.
+    const rail = (ink) => emphasis === 'quiet' ? { rail: 'transparent', railWidth: '0px' }
+      : emphasis === 'loud' ? { rail: ink, railWidth: '4px' }
+      : { rail: 'color-mix(in oklab, ' + ink + ' 45%, transparent)', railWidth: '2px' };
+
+    const pillOpacity = emphasis === 'quiet' ? 0.6 : 1;
+    const pillPad = emphasis === 'loud' ? '4px 12px' : '2px 10px';
+
+    const course = (name, dates, people, progress, state, label) => ({
+      name, dates, people, progress, state: label,
+      pillBg: STATES[state].bg, pillInk: STATES[state].ink,
+      ...rail(STATES[state].ink),
+    });
+
+    const person = (name, email, role, state, label) => ({
+      name, email, role, state: label,
+      roleInk: role === 'Tutor' ? accent : MUTED,
+      pillBg: STATES[state].bg, pillInk: STATES[state].ink,
+    });
+
+    const cmode = this.state.cmode || 'mixed';
+    const cmix = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, transparent)';
+    const ctint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, oklch(99.2% 0.005 90))';
+
+    const MODES = [
+      { key: 'f2f', label: 'Face-to-face', desc: 'All teaching practice on-site. Input may still be online or on Moodle.' },
+      { key: 'online', label: 'Fully online', desc: 'All teaching practice online, live, on the centre platform.' },
+      { key: 'mixed', label: 'Mixed-mode', desc: 'Teaching practice in both modes — each candidate teaches one level face-to-face and the other online.' },
+    ];
+
+    const IMPACT = {
+      f2f: { head: 'What this sets', ink: TEAL, bg: ctint(TEAL, 7), border: cmix(TEAL, 26), rows: [
+        { what: 'Timetable', ink: TEAL, text: 'Every TP is on-site. No mode column, nothing to validate.' },
+        { what: 'Observations', ink: TEAL, text: 'The six hours of experienced-teacher observation are face-to-face, up to three of them filmed.' },
+        { what: 'Pre-course task', ink: MUTED, text: 'Section 6 goes out with Part A shortened to two awareness-raising tasks — recommended even on single-mode courses.' },
+      ] },
+      online: { head: 'What this sets', ink: TEAL, bg: ctint(TEAL, 7), border: cmix(TEAL, 26), rows: [
+        { what: 'Required extras', ink: GOLD, text: 'A tutor demonstration lesson and an unassessed TP slot, at least 20 minutes of individual teaching, before assessed TP begins.' },
+        { what: 'Observations', ink: TEAL, text: 'Experienced-teacher observation is online live, up to three hours filmed.' },
+        { what: 'Tutors', ink: MUTED, text: 'Every tutor on the course must be able to evidence online teaching or training experience.' },
+        { what: 'Length', ink: MUTED, text: 'Extending beyond four weeks is advised for screen-time breaks and technical contingency.' },
+      ] },
+      mixed: { head: 'What this sets — and the two rules that bite', ink: GOLD, bg: ctint(GOLD, 9), border: cmix(GOLD, 30), rows: [
+        { what: 'One mode per block', ink: RED, text: 'A TP group teaches in only one mode at a time. Each candidate teaches one level face-to-face and the other online — never a mix inside one group at one stage. The timetable enforces it rather than warning.' },
+        { what: 'Two hours minimum', ink: RED, text: 'At least two of the six assessed hours in each mode; 3 / 3 is what Cambridge calls desirable. The hours counter splits in two.' },
+        { what: 'Block order', ink: GOLD, text: 'No required order between the modes — start with either. But if the six hours split into a 2-hour and a 4-hour block, the 2-hour block goes first.' },
+        { what: 'Observations', ink: MUTED, text: 'Experienced-teacher observation must cover both modes, so the observation log gains a mode.' },
+        { what: 'Length', ink: MUTED, text: 'Add at least one day to the 20-day minimum for the transition between modes.' },
+      ] },
+    };
+
+    const modeCards = MODES.map(m => ({
+      label: m.label, desc: m.desc,
+      on: m.key === cmode,
+      pick: () => this.setState({ cmode: m.key }),
+      bg: m.key === cmode ? ctint(TEAL, 7) : 'oklch(99.2% 0.005 90)',
+      border: m.key === cmode ? TEAL : BORDER,
+      ink: m.key === cmode ? TEAL : INK,
+      dotBorder: m.key === cmode ? TEAL : cmix(INK, 35),
+      dotBg: TEAL,
+    }));
+
+    const modeNotes = [
+      { label: 'Asked once, read everywhere', labelInk: TEAL, border: cmix(TEAL, 26),
+        text: 'The timetable, the rotation, the observation log, the pre-course pack and the assessor pack all read this one field. It is the earliest question in setup for that reason — answering it late means rebuilding the timetable.' },
+      { label: 'Mode is about teaching practice', labelInk: GOLD, border: cmix(GOLD, 26),
+        text: 'Handbook 2.2.1: what makes a course face-to-face is that all TP is face-to-face. Input can be online, or on Cambridge Moodle, and the course is still face-to-face. Centres get this the wrong way round.' },
+      { label: 'Changing it later is a real change', labelInk: RED, border: cmix(RED, 26),
+        text: 'A first-time move to a mode a centre has not run before must be discussed with the JCA, with a revised timetable submitted, before CELTA Admin is asked to approve it. Mid-course emergency switches are handled separately and CELTA Admin is contacted immediately.' },
+      { label: 'Moodle changes what the assessor needs', labelInk: MUTED, border: BORDER,
+        text: 'If the course uses Cambridge Moodle for input on an online or mixed-mode course, it must be augmented with the centre\u2019s own online input, and the assessor is given a schedule of which Moodle sections candidates completed and what the centre added.' },
+    ];
+
+    return {
+      modeCards,
+      modeNotes,
+      modeImpact: IMPACT[cmode],
+      modeFoot: cmode === 'mixed'
+        ? 'You can change this until the timetable is locked.'
+        : 'You can change this until the timetable is locked.',
+      accent, rowPad, padOuter, gapOuter, pillOpacity, pillPad,
+
+      courseGroups: [
+        {
+          label: 'Running', count: '1 course', labelInk: GREEN,
+          courses: [course('UK205 C2/2024', '6 Nov – 7 Dec 2023', '12 candidates · 3 tutors', 'Week 2 of 5', 'running', 'Running')],
+        },
+        {
+          label: 'Upcoming', count: '2 courses', labelInk: TEAL,
+          courses: [
+            course('UK205 C3/2024', '8 Jan – 8 Feb 2024', '6 candidates · 2 tutors', 'Timetable draft', 'upcoming', 'Upcoming'),
+            course('UK205 P1/2024 (part-time)', '2 Mar – 14 Jun 2024', 'No one yet', 'Not set up', 'upcoming', 'Upcoming'),
+          ],
+        },
+        {
+          label: 'Closed', count: '2 courses', labelInk: MUTED,
+          courses: [
+            course('UK205 C1/2024', '4 Sep – 5 Oct 2023', '11 candidates', 'Exported 12 Oct', 'closed', 'Closed'),
+            course('UK205 C4/2023', '5 Jun – 6 Jul 2023', '12 candidates', 'Exported 14 Jul', 'closed', 'Closed'),
+          ],
+        },
+      ],
+
+      centreMaterial: [
+        { label: 'TP points library', count: '148 points' },
+        { label: 'Assignment briefs', count: '4' },
+        { label: 'Resource hub', count: '62 items' },
+        { label: 'Feedback style examples', count: '9' },
+        { label: 'Coursebooks', count: '7' },
+      ],
+
+      homeNotes: [
+        'Courses group by state instead of sorting by date — running first, then upcoming, then closed. A centre with four years of courses shouldn’t scroll to find the live one.',
+        'Each row carries what an admin actually checks: who’s on it and where it has got to.',
+        'Centre material sits beside the courses, so it reads as the shared shell rather than a link in the header.',
+      ],
+
+      adminChatNotes: [
+        { dot: accent, text: 'An admin isn’t a course member, so they can’t appear in a TP group chat or a candidate DM — migration 0039’s rule holds. The pill gives them one channel per course: that course’s tutors.' },
+        { dot: accent, text: 'The channel picker lists courses, not people. An admin thinks “I need to tell C2’s tutors”, not “I need to message Nadia”.' },
+        { dot: GOLD, text: 'Tutors see it as a normal channel in their own pill, named “Centre admin”, so it’s obvious who is speaking and that they aren’t on the course.' },
+        { dot: GOLD, text: 'Same reset as every other channel on the course, whatever the centre has set — an admin message is coordination, not a record. Anything that must persist belongs in a broadcast.' },
+      ],
+      chatRetentionOpts: ['nightly', 'weekly', 'custom'].map(key => ({
+        label: key === 'nightly' ? 'Nightly' : key === 'weekly' ? 'Weekly' : 'Custom',
+        bg: this.state.chatRetention === key ? accent : 'transparent',
+        ink: this.state.chatRetention === key ? 'oklch(98.5% 0.006 90)' : 'oklch(23.5% 0.017 65)',
+        border: this.state.chatRetention === key ? accent : 'oklch(88% 0.016 82)',
+        pick: () => this.setState({ chatRetention: key }),
+      })),
+      chatRetentionCustom: this.state.chatRetention === 'custom',
+      chatCustomDays: this.state.chatCustomDays,
+      onChatCustomDays: (e) => this.setState({ chatCustomDays: e.target.value.replace(/[^0-9]/g, '') }),
+
+      roster: [
+        person('Ramy Sakr', 'ramy@meridian-english.com', 'Tutor', 'joined', 'Joined'),
+        person('Hakan Şen', 'hakan@meridian-english.com', 'Tutor', 'joined', 'Joined'),
+        person('Nadia Farouk', 'nadia@meridian-english.com', 'Tutor', 'invited', 'Invited'),
+        person('Sara Yılmaz', 'sara.yilmaz@gmail.com', 'Candidate', 'joined', 'Joined'),
+        person('Deniz Aksoy', 'deniz.aksoy@gmail.com', 'Candidate', 'joined', 'Joined'),
+        person('Mert Kaya', 'mert.kaya@gmail.com', 'Candidate', 'invited', 'Invited'),
+      ],
+
+      groups: [
+        {
+          name: 'Group ABC', meta: 'Nadia Farouk · odd days',
+          members: [
+            { name: 'Sara Yılmaz', half: 'First half' },
+            { name: 'Deniz Aksoy', half: 'First half' },
+            { name: 'Mert Kaya', half: 'First half' },
+            { name: 'Elif Demir', half: 'Second half' },
+            { name: 'Can Şahin', half: 'Second half' },
+            { name: 'Zeynep Arslan', half: 'Second half' },
+          ],
+        },
+        {
+          name: 'Group DEF', meta: 'Ramy Sakr · even days',
+          members: [
+            { name: 'Emre Doğan', half: 'First half' },
+            { name: 'Aylin Koç', half: 'First half' },
+            { name: 'Burak Yıldız', half: 'First half' },
+            { name: 'Selin Öz', half: 'Second half' },
+            { name: 'Kaan Aydın', half: 'Second half' },
+            { name: 'Ece Polat', half: 'Second half' },
+          ],
+        },
+      ],
+
+      invites: [
+        { role: 'Candidate link', used: '10 of 12 joined', link: 'connectcelta.com/join/8f3a…c21b' },
+        { role: 'Tutor link', used: '2 of 3 joined', link: 'connectcelta.com/join/4d90…7ae2' },
+      ],
+
+      courseNotes: [
+        'Roster shows who has actually joined. Today an invited person and a joined one look identical.',
+        'Groups show the two halves, because that is what the rotation runs on.',
+        'Invitations sit in one card with copy, email and regenerate together, and the warning next to the button that causes it.',
+        'The blocking condition is stated where it is caused — the rotation can’t release while a candidate has no group.',
+      ],
+
+      settingsNav: [
+        { label: 'Centre profile', active: true, flag: true },
+        { label: 'Google Drive', active: false, flag: false },
+        { label: 'Assignment briefs', active: false, flag: false },
+        { label: 'Feedback style', active: false, flag: false },
+        { label: 'Tutors', active: false, flag: false },
+      ].map(s => ({
+        label: s.label, flag: s.flag,
+        bg: s.active ? 'color-mix(in oklab, ' + accent + ' 10%, oklch(99.2% 0.005 90))' : 'transparent',
+        rule: s.active ? accent : 'transparent',
+        ink: s.active ? INK : MUTED,
+        weight: s.active ? '600' : '500',
+      })),
+
+      driveRows: [
+        { label: 'Connected', value: 'ramy@meridian-english.com · 14 Sep 2023' },
+        { label: 'Export folder', value: 'Meridian English Centre / CELTA / Course archives' },
+        { label: 'CELTA 5 template', value: 'CELTA5_template_2024.docx' },
+      ],
+
+      styleExamples: [
+        '“The lead-in worked because you gave them the situation before the language — keep that order.”',
+        '“Instructions ran long. Say it once, check it with a question, then hand out the task.”',
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

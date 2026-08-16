@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(30% 0.042 58); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; width: 1440px; min-height: 900px; box-sizing: border-box; display: flex; flex-direction: column;">
+
+  <div style="height: 56px; background: oklch(99.5% 0.004 90); border-bottom: 1px solid oklch(89.5% 0.012 82); display: flex; align-items: center; gap: 24px; padding: 0 24px; flex: none;">
+    <div style="display: flex; align-items: center; gap: 8px; flex: none;">
+      <div style="width: 32px; height: 32px; border-radius: 8px; background: oklch(30% 0.042 58); display: flex; align-items: center; justify-content: center;">
+        <svg width="20" height="12" viewBox="8 30 104 60" fill="none">
+          <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" stroke-width="13" stroke-linecap="round"></path>
+          <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" stroke-width="13" stroke-linecap="round"></path>
+        </svg>
+      </div>
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 20px; line-height: 0.9; color: oklch(60% 0.11 70);">Connect</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+      <sc-for list="{{ nav }}" as="t" hint-placeholder-count="7">
+        <div style="font-size: 13px; font-weight: {{ t.weight }}; color: {{ t.ink }}; padding: 19px 0 17px; border-bottom: 2px solid {{ t.rule }};">{{ t.label }}</div>
+      </sc-for>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; flex: none;">
+      <div style="height: 26px; padding: 0 9px; border-radius: 4px; background: oklch(37.5% 0.058 195); color: oklch(98.5% 0.006 90); font-size: 11px; font-weight: 600; display: flex; align-items: center;">C2/2024</div>
+      <div style="font-size: 13px; color: oklch(51% 0.017 70);">Ramy Sakr</div>
+      <div title="Connect Hub" style="width: 26px; height: 26px; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: oklch(51% 0.017 70); border: 1px solid oklch(89.5% 0.012 82); cursor: pointer;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 7l9 5 9-5-9-5z"></path><path d="M3 12l9 5 9-5"></path><path d="M3 17l9 5 9-5"></path></svg>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 32px 32px 40px; display: flex; flex-direction: column; gap: 26px; flex: 1;">
+
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;">
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">ITI Istanbul C2/2024 · 6 Nov – 1 Dec · week 2 of 4</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 32px; font-weight: 600; line-height: 1.1; color: oklch(30% 0.042 58);">Tuesday 14 November</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: none;">
+        <div style="height: 38px; padding: 0 16px; border-radius: 6px; background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); color: oklch(23.5% 0.017 65); font-size: 13.5px; font-weight: 500; display: flex; align-items: center; cursor: pointer;">Post announcement</div>
+        <div style="height: 38px; padding: 0 16px; border-radius: 6px; background: oklch(37.5% 0.058 195); border: 1px solid oklch(37.5% 0.058 195); color: oklch(98.5% 0.006 90); font-size: 13.5px; font-weight: 600; display: flex; align-items: center; cursor: pointer;">Write TP feedback</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.15fr 1fr 1.05fr; gap: 20px; align-items: start;">
+
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-top: 3px solid oklch(37.5% 0.058 195); border-radius: 8px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(37.5% 0.058 195);">Today's schedule</div>
+          <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">from the timetable</div>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <sc-for list="{{ schedule }}" as="r" hint-placeholder-count="5">
+            <div style="display: flex; align-items: flex-start; gap: 13px; padding: 11px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent);">
+              <div style="width: 4px; align-self: stretch; border-radius: 2px; background: {{ r.ruleColor }}; flex: none;"></div>
+              <div style="font-size: 12.5px; font-weight: 600; color: oklch(51% 0.017 70); width: 48px; flex: none; font-variant-numeric: tabular-nums;">{{ r.time }}</div>
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+                <div style="font-size: 13.5px; font-weight: {{ r.weight }}; color: {{ r.ink }}; line-height: 1.35;">{{ r.text }}</div>
+                <sc-if value="{{ r.sub }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size: 12px; color: oklch(51% 0.017 70); line-height: 1.4;">{{ r.sub }}</div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ r.pill }}" hint-placeholder-val="{{ false }}">
+                <div style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{ r.pillBg }}; color: {{ r.pillInk }}; flex: none;">
+                  <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+                  <div>{{ r.pill }}</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-top: 3px solid oklch(63% 0.096 72); border-radius: 8px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(63% 0.096 72);">Needs you · 3</div>
+        <div style="display: flex; flex-direction: column;">
+          <sc-for list="{{ needsYou }}" as="r" hint-placeholder-count="3">
+            <div style="display: flex; flex-direction: column; gap: 3px; padding: 12px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent);">
+              <div style="font-size: 13.5px; font-weight: 600; color: {{ r.ink }}; line-height: 1.35; text-wrap: pretty;">{{ r.text }}</div>
+              <div style="font-size: 12px; color: oklch(51% 0.017 70); line-height: 1.4;">{{ r.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-top: 3px solid oklch(30% 0.042 58); border-radius: 8px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(30% 0.042 58);">Cohort · 8</div>
+          <div style="font-size: 11.5px; color: oklch(38% 0.072 195); cursor: pointer;">Full roster →</div>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <sc-for list="{{ cohort }}" as="r" hint-placeholder-count="6">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent);">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: {{ r.avatarBg }}; color: oklch(98.5% 0.006 90); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">{{ r.initials }}</div>
+                <div style="font-size: 13.5px; color: oklch(23.5% 0.017 65);">{{ r.name }}</div>
+              </div>
+              <div style="font-size: 12.5px; color: {{ r.ink }}; font-variant-numeric: tabular-nums;">{{ r.right }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const INK = 'oklch(30% 0.042 58)';
+const BODY = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const RED = 'oklch(45% 0.15 27)';
+
+const TABS = ['Today', 'Roster', 'Timetable', 'Volunteers', 'Teaching Practice', 'Resource hub', 'Grades Report'];
+
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      nav: TABS.map(label => ({
+        label,
+        weight: label === 'Today' ? '600' : '500',
+        ink: label === 'Today' ? TEAL : MUTED,
+        rule: label === 'Today' ? TEAL : 'transparent',
+      })),
+      schedule: [
+        { time: '9:00', text: 'TP prep', ink: BODY, weight: '400', ruleColor: MUTED },
+        { time: '9:30', text: 'TP2 — Group ABC', ink: INK, weight: '600', ruleColor: INK, sub: 'Room 5 · Sara, Deniz, Mert', pill: 'Live', pillBg: TEAL, pillInk: 'oklch(98.5% 0.006 90)' },
+        { time: '12:15', text: 'Feedback & lesson plans', ink: BODY, weight: '400', ruleColor: MUTED },
+        { time: '14:00', text: 'Phonology — stress and intonation', ink: BODY, weight: '400', ruleColor: TEAL },
+        { time: '15:30', text: 'PPP', ink: BODY, weight: '400', ruleColor: TEAL },
+      ],
+      needsYou: [
+        { text: 'TP1 feedback unsent — 2 candidates', ink: BODY, sub: 'Sara Yılmaz, Deniz Aksoy · taught 9 Nov' },
+        { text: 'Assignment 3 due today', ink: BODY, sub: '6 of 8 submitted' },
+        { text: 'Attendance below threshold — Mert Kaya', ink: RED, sub: '74% · 89 of 120 hrs' },
+      ],
+      cohort: [
+        { name: 'Sara Yılmaz', right: '3 / 8', ink: MUTED, initials: 'SY', avatarBg: 'oklch(52% 0.1 260)' },
+        { name: 'Deniz Aksoy', right: '3 / 8', ink: MUTED, initials: 'DA', avatarBg: 'oklch(55% 0.11 25)' },
+        { name: 'Mert Kaya', right: '2 / 8', ink: RED, initials: 'MK', avatarBg: RED },
+        { name: 'Elif Demir', right: '3 / 8', ink: MUTED, initials: 'ED', avatarBg: 'oklch(58% 0.1 145)' },
+        { name: 'Can Şahin', right: '3 / 8', ink: MUTED, initials: 'CŞ', avatarBg: 'oklch(60% 0.1 300)' },
+        { name: 'Zeynep Arslan', right: '3 / 8', ink: MUTED, initials: 'ZA', avatarBg: 'oklch(63% 0.096 72)' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

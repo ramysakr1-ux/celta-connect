@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600;1,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+  @keyframes centre-admin-mark-spin { 0%, 11.11% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+  .mark-stage { perspective: 400px; }
+  .mark-spin { animation: centre-admin-mark-spin 54s linear infinite; transform-origin: 50% 50%; transform-style: preserve-3d; }
+  @media (prefers-reduced-motion: reduce) { .mark-spin { animation: none; } }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 40px 56px 60px; display: flex; flex-direction: column; gap: 26px; width: 1620px; box-sizing: border-box;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <div class="mark-stage" style="width: 32px; height: 32px; border-radius: 8px; background: oklch(23.5% 0.017 65); display: flex; align-items: center; justify-content: center; flex: none;">
+        <svg class="mark-spin" width="20" height="12" viewBox="8 30 104 60" fill="none"><path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" stroke-width="12" stroke-linecap="round"></path><path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" stroke-width="12" stroke-linecap="round"></path></svg>
+      </div>
+      <div style="font-family: Newsreader, serif; font-style: italic; font-size: 18px; color: oklch(23.5% 0.017 65);">Connect</div>
+      <div style="width: 1px; height: 18px; background: oklch(88% 0.016 82);"></div>
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(38% 0.072 195); background: color-mix(in oklab, oklch(38% 0.072 195) 10%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 26%, transparent); padding: 4px 10px; border-radius: 5px;">Centre admin</div>
+    </div>
+    <div style="font-size: 13px; color: oklch(51% 0.017 70);">{{ adminName }}</div>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 8px; border-bottom: 1px solid oklch(88% 0.016 82); padding-bottom: 2px;">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+      <div onClick="{{ t.pick }}" style="padding: 10px 6px; font-size: 13px; font-weight: 600; color: {{ t.ink }}; border-bottom: 2px solid {{ t.spine }}; cursor: pointer; margin-bottom: -1px;">{{ t.label }}</div>
+    </sc-for>
+  </div>
+
+  <!-- OVERVIEW -->
+  <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+  <div style="display: flex; flex-direction: column; gap: 22px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ centreName }} &middot; Cambridge centre {{ centreCode }}</div>
+        <div style="font-family: Newsreader, serif; font-size: 24px; font-weight: 600; color: oklch(23.5% 0.017 65);">Centre overview</div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <div style="padding: 9px 16px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65); cursor: pointer;">Export financials</div>
+        <div style="padding: 9px 16px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98% 0.004 90); font-size: 12.5px; font-weight: 700; cursor: pointer;">Invite people</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+      <sc-for list="{{ moneyStats }}" as="m" hint-placeholder-count="4">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ m.label }}</div>
+          <div style="font-family: Newsreader, serif; font-size: 24px; font-weight: 600; color: {{ m.ink }};">{{ m.value }}</div>
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ m.note }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px;">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 10px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="font-family: Newsreader, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">All courses</div>
+          <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ courseCount }} across the centre</div>
+        </div>
+        <sc-for list="{{ courses }}" as="c" hint-placeholder-count="4">
+          <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 90px; gap: 10px; align-items: center; padding: 11px 0; border-top: 1px solid oklch(92% 0.012 82);">
+            <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+              <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ c.name }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70); white-space: nowrap;">{{ c.dates }} &middot; {{ c.mode }}</div>
+            </div>
+            <div style="font-size: 12px; color: oklch(23.5% 0.017 65);">{{ c.admin }}</div>
+            <div style="font-size: 12px; color: {{ c.balanceInk }};">{{ c.balance }}</div>
+            <div style="justify-self: end; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 12px; background: {{ c.stateBg }}; color: {{ c.stateInk }};">{{ c.state }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 10px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="font-family: Newsreader, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Admissions pipeline</div>
+          <a href="#">Open pipeline</a>
+        </div>
+        <sc-for list="{{ pipelineStages }}" as="p" hint-placeholder-count="5">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid oklch(92% 0.012 82);">
+            <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65);">{{ p.label }}</div>
+            <div style="font-size: 13px; font-weight: 700; color: oklch(23.5% 0.017 65);">{{ p.count }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px;">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 10px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-family: Newsreader, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Payments needing attention</div>
+        <sc-for list="{{ paymentIssues }}" as="p" hint-placeholder-count="3">
+          <div style="display: flex; align-items: flex-start; gap: 10px; background: color-mix(in oklab, oklch(45% 0.16 27) 6%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.16 27) 22%, transparent); border-radius: 8px; padding: 12px 14px;">
+            <div style="width: 6px; height: 6px; border-radius: 50%; background: oklch(45% 0.16 27); margin-top: 6px; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ p.who }} &middot; {{ p.course }}</div>
+              <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ p.detail }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 10px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="font-family: Newsreader, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Volunteer pool</div>
+          <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ volunteerCount }} registered</div>
+        </div>
+        <div style="font-size: 11.5px; color: oklch(51% 0.017 70); line-height: 1.5;">Hours accumulate across every course and level a volunteer attends toward the centre's own certificate threshold.</div>
+        <sc-for list="{{ volunteers }}" as="v" hint-placeholder-count="4">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid oklch(92% 0.012 82);">
+            <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65);">{{ v.name }}</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 60px; height: 5px; border-radius: 3px; background: oklch(92% 0.012 82); position: relative;">
+                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{ v.pct }}%; border-radius: 3px; background: oklch(60% 0.11 70);"></div>
+              </div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70); min-width: 52px; text-align: right;">{{ v.hours }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ROLES -->
+  <sc-if value="{{ isRoles }}" hint-placeholder-val="{{ false }}">
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: flex; flex-direction: column; gap: 10px; max-width: 900px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 26px; font-weight: 600; line-height: 1.16; color: oklch(23.5% 0.017 65);">The manager wants to see the money without being able to break anything.</div>
+      <div style="font-size: 13px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">One person does admissions and chases payment; another wants a view of enrolment and cash and should change nothing. That is two roles, not one shared login.</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start;">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; overflow: hidden;">
+        <div style="display: flex; align-items: stretch; border-bottom: 1px solid oklch(88% 0.016 82);">
+          <sc-for list="{{ roles }}" as="r" hint-placeholder-count="4">
+            <div onClick="{{ r.pick }}" style="flex: 1; padding: 15px 17px; background: {{ r.bg }}; border-right: 1px solid oklch(88% 0.016 82); border-top: 3px solid {{ r.spine }}; display: flex; flex-direction: column; gap: 4px; cursor: pointer;">
+              <div style="font-size: 13.5px; font-weight: 600; color: {{ r.ink }};">{{ r.name }}</div>
+              <div style="font-size: 11px; line-height: 1.45; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ r.who }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 13px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ role.summary }}</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <sc-for list="{{ role.perms }}" as="p" hint-placeholder-count="8">
+              <div style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 5px; background: {{ p.bg }}; border: 1px solid {{ p.border }};">
+                <div style="font-size: 12px; font-weight: 700; color: {{ p.ink }}; flex: none; width: 13px;">{{ p.mark }}</div>
+                <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+                  <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65);">{{ p.what }}</div>
+                  <sc-if value="{{ p.note }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ p.note }}</div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 11px; padding: 13px 15px; border-radius: 6px; background: {{ role.ruleBg }}; border: 1px solid {{ role.ruleBorder }};">
+            <div style="width: 6px; height: 6px; border-radius: 50%; background: {{ role.ruleInk }}; margin-top: 6px; flex: none;"></div>
+            <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ role.rule }}</div>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 13px;">
+        <sc-for list="{{ roleNotes }}" as="n" hint-placeholder-count="4">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ n.border }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 12px; font-weight: 700; color: {{ n.labelInk }};">{{ n.label }}</div>
+            <div style="font-size: 12px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- IMPORT -->
+  <sc-if value="{{ isImport }}" hint-placeholder-val="{{ false }}">
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+    <div style="background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 20px 22px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+          <div onClick="{{ s.pick }}" style="flex: 1; padding: 11px 14px; border-radius: 6px; border: 1px solid {{ s.border }}; background: {{ s.bg }}; display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; line-height: 1; color: {{ s.numInk }};">{{ s.n }}</div>
+            <div style="font-size: 12.5px; font-weight: 600; color: {{ s.ink }};">{{ s.label }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 24px 26px; display: flex; flex-direction: column; gap: 17px; min-height: 380px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ step.title }}</div>
+          <div style="font-size: 13px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ step.text }}</div>
+        </div>
+
+        <sc-if value="{{ step.isMap }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <div style="display: grid; grid-template-columns: 1fr 34px 1fr 108px; gap: 12px; padding: 0 2px;">
+              <sc-for list="{{ mapHead }}" as="h" hint-placeholder-count="4">
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ h }}</div>
+              </sc-for>
+            </div>
+            <sc-for list="{{ step.rows }}" as="r" hint-placeholder-count="6">
+              <div style="display: grid; grid-template-columns: 1fr 34px 1fr 108px; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid {{ r.border }}; border-radius: 6px; background: {{ r.bg }};">
+                <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65); font-family: ui-monospace, monospace;">{{ r.from }}</div>
+                <div style="font-size: 13px; color: oklch(51% 0.017 70); text-align: center;">&rarr;</div>
+                <div style="font-size: 12.5px; font-weight: 600; color: {{ r.toInk }};">{{ r.to }}</div>
+                <div style="font-size: 11px; font-weight: 600; color: {{ r.stateInk }}; text-align: right;">{{ r.state }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ step.isPreview }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; align-items: center; gap: 18px; padding: 14px 16px; border-radius: 6px; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82);">
+            <sc-for list="{{ step.tally }}" as="t" hint-placeholder-count="4">
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-family: Newsreader, Georgia, serif; font-size: 23px; line-height: 1; color: {{ t.ink }};">{{ t.v }}</div>
+                <div style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ t.k }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <sc-for list="{{ step.people }}" as="p" hint-placeholder-count="5">
+              <div style="display: grid; grid-template-columns: 1.1fr 1.2fr 1fr 1.4fr; gap: 12px; align-items: center; padding: 11px 13px; border: 1px solid {{ p.border }}; border-left: 3px solid {{ p.spine }}; border-radius: 6px; background: {{ p.bg }};">
+                <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ p.name }}</div>
+                <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ p.email }}</div>
+                <div style="font-size: 12px; color: {{ p.stageInk }};">{{ p.stage }}</div>
+                <div style="font-size: 11.5px; color: {{ p.noteInk }};">{{ p.note }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ step.isPlain }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <sc-for list="{{ step.points }}" as="p" hint-placeholder-count="4">
+              <div style="display: flex; align-items: flex-start; gap: 11px; padding: 13px 15px; border-radius: 6px; border: 1px solid {{ p.border }}; background: {{ p.bg }};">
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: {{ p.ink }}; margin-top: 6px; flex: none;"></div>
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                  <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ p.title }}</div>
+                  <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ p.text }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <div style="margin-top: auto; display: flex; align-items: center; gap: 11px; padding-top: 6px;">
+          <div style="height: 38px; padding: 0 18px; border-radius: 6px; background: {{ step.ctaBg }}; color: {{ step.ctaInk }}; border: 1px solid {{ step.ctaBorder }}; font-size: 13px; font-weight: 600; display: flex; align-items: center; cursor: pointer;">{{ step.cta }}</div>
+          <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ step.ctaNote }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 10px; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; flex-direction: column; gap: 3px;">
+      <div style="font-family: Newsreader, serif; font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">Centre settings</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Centre profile, Google Drive connection, payment providers, admin roles</div>
+    </div>
+    <a href="#">Open settings &rarr;</a>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.16 27)';
+const GREEN = 'oklch(48% 0.09 150)';
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+const mix = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, transparent)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+const Y = (what, note) => ({ can: true, what, note: note || '' });
+const R = (what, note) => ({ can: 'read', what, note: note || '' });
+const X = (what, note) => ({ can: false, what, note: note || '' });
+
+const ROLES = [
+  { key: 'centre', name: 'Centre administrator', who: 'runs admissions, payments and course setup', tone: TEAL,
+    summary: 'The working role. Creates courses, invites people, chases money, forms groups. Everything except grading and anything a tutor does inside a course.',
+    perms: [Y('Create and edit courses'), Y('Invite tutors, candidates, volunteers'), Y('See and edit fees, deposits, payments'), Y('Form groups and publish timetables'), Y('Export the assessor pack'), X('Course chat', 'trainer-only, no admin exception'), X('Grade or mark anything'), X('See lesson feedback or CELTA 5 records')],
+    rule: 'A centre administrator who is also a registered tutor on a course gets that course\u2019s chat and grading \u2014 as a tutor, on that course. The two roles never merge into one set of powers.',
+    ruleTone: TEAL },
+  { key: 'manager', name: 'Centre manager', who: 'wants the numbers, changes nothing', tone: GOLD,
+    summary: 'Read-only across the whole centre. Built for the person who asks how many are enrolled and whether the January course will fill \u2014 so they can look instead of asking.',
+    perms: [R('Every course and its state'), R('The admissions pipeline'), R('Fees, deposits and outstanding balances'), R('Enrolment and completion figures'), X('Edit anything at all'), X('Invite or remove people'), X('Course chat'), X('Candidate work, feedback or grades')],
+    rule: 'The absence of an edit button everywhere is the whole design. A read-only role that hides its restrictions behind error messages is worse than no role at all \u2014 the buttons simply are not there.',
+    ruleTone: GOLD },
+  { key: 'course', name: 'Course administrator', who: 'one or two courses, not the centre', tone: MUTED,
+    summary: 'Everything a centre administrator can do, scoped to named courses. For a centre where one person handles the January intake and somebody else handles February.',
+    perms: [Y('Edit their own courses'), Y('Invite people to their own courses'), Y('Chase payment on their own courses'), R('Other courses, in outline only'), X('Create a new course'), X('Change centre settings'), X('Course chat'), X('Grade or mark anything')],
+    rule: 'Scope is a list of courses, not a date range or a category. When somebody leaves, their courses are reassigned individually \u2014 which is deliberately a small chore, because it forces someone to notice what was theirs.',
+    ruleTone: MUTED },
+  { key: 'super', name: 'Centre owner', who: 'the centre\u2019s own way back in', tone: RED,
+    summary: 'Full access to everything inside this centre, and nothing outside it. Held by the centre director, for when an administrator leaves without handing over or a course ends up with nobody attached to it.',
+    perms: [Y('Everything a centre administrator can do'), Y('Every course in this centre', 'and no other centre, ever'), Y('Restore a deleted course within 30 days'), Y('Reassign a course with no administrator'), Y('Appoint and remove administrators'), X('Grade or mark anything'), X('Course chat'), X('Anything in another centre')],
+    rule: 'The reach stops at the centre boundary. Nobody at Connect holds a key to a centre\u2019s courses, and there is no role above this one \u2014 a centre that hands over its grading needs to know the platform cannot quietly read it.',
+    ruleTone: RED },
+];
+
+const STEPS = [
+  { key: 'connect', label: 'Connect the sheet', title: 'Point Connect at the file you already have',
+    text: 'A centre with forty applicants in a spreadsheet will not retype them, and asking them to reformat it first is the same as asking them not to switch. Connect reads their file as it is.',
+    isPlain: true,
+    points: [
+      { title: 'Google Drive, or a file', text: 'Sign in to Drive and pick the sheet, or drag a .xlsx or .csv straight in. Nothing is written anywhere yet.', tone: TEAL },
+      { title: 'Read-only access to one file', text: 'Connect asks for the single file you choose, not the drive. The permission can be revoked the moment the import is finished.', tone: TEAL },
+      { title: 'It stays a copy', text: 'This is a one-time read, not a live link. The spreadsheet keeps working exactly as it did, and nothing in Connect changes when somebody edits it afterwards.', tone: MUTED },
+    ],
+    cta: 'Choose a file', ctaTone: 'primary', ctaNote: 'Nothing is created until you have seen the preview.' },
+  { key: 'map', label: 'Match the columns', title: 'Their column names, our fields',
+    text: 'Connect guesses from the headings and gets most of them right. What it cannot guess is what a centre\u2019s own words mean \u2014 every centre has a status column and no two use the same vocabulary.',
+    isMap: true,
+    rows: [
+      { from: 'Name', to: 'Full name', state: 'Matched', tone: 'ok' },
+      { from: 'E-mail', to: 'Email', state: 'Matched', tone: 'ok' },
+      { from: 'Tel', to: 'Phone', state: 'Matched', tone: 'ok' },
+      { from: 'Status', to: 'Pipeline stage', state: 'Needs you', tone: 'warn' },
+      { from: 'Dep. paid', to: 'Deposit paid', state: 'Matched', tone: 'ok' },
+      { from: 'Notes', to: 'Not imported', state: 'Skipped', tone: 'skip' },
+    ],
+    cta: 'Match the status values', ctaTone: 'primary', ctaNote: 'Four of six matched automatically. One needs a decision, one is being skipped.' },
+  { key: 'preview', label: 'See what happens', title: 'Forty-one rows, and what each will become',
+    text: 'Nothing has been written. This is the whole import laid out with its problems on top, so the mapping can be fixed before it becomes forty phantom candidates nobody can delete.',
+    isPreview: true,
+    tally: [
+      { k: 'Will import', v: '36', ink: GREEN },
+      { k: 'Duplicates', v: '2', ink: GOLD },
+      { k: 'Missing email', v: '2', ink: RED },
+      { k: 'Skipped by you', v: '1', ink: MUTED },
+    ],
+    people: [
+      { name: 'Aylin Ko\u00e7', email: 'aylin.koc@example.com', stage: 'Offered', note: 'New', tone: 'ok' },
+      { name: 'Emre Toprak', email: 'emre.t@example.com', stage: 'Deposit paid', note: 'New', tone: 'ok' },
+      { name: 'Sara Y\u0131lmaz', email: 'sara.yilmaz@example.com', stage: 'Applied', note: 'Already in Connect \u2014 will be skipped', tone: 'warn' },
+      { name: 'Kerem Uysal', email: '\u2014', stage: 'Enquiry', note: 'No email \u2014 cannot be invited later', tone: 'bad' },
+      { name: 'Berna Y\u0131ld\u0131z', email: 'berna@example.com', stage: 'Interviewed', note: 'Status "phone int." read as Interviewed', tone: 'warn' },
+    ],
+    cta: 'Import 36 people', ctaTone: 'primary', ctaNote: 'Four rows are held back. You can fix them in the sheet and run this again.' },
+  { key: 'after', label: 'Afterwards', title: 'Imported, and nobody has been emailed',
+    text: 'The pipeline now has thirty-six people in it at the right stages. Not one of them has heard from Connect, because an import that silently emails forty people is the fastest way to lose a centre in its first hour.',
+    isPlain: true,
+    points: [
+      { title: 'No invitations were sent', text: 'Imported people exist as records, not accounts. Inviting them is a separate, deliberate action you take when you are ready \u2014 one at a time or all at once.', tone: RED },
+      { title: 'The import can be undone for seven days', text: 'One button removes everything it created, provided nobody has been invited or paid since. After seven days it is simply data like any other.', tone: GOLD },
+      { title: 'It can be run again', text: 'Fix the four held-back rows in the original sheet and re-import. Connect matches on email and will not duplicate anyone it has already seen.', tone: TEAL },
+      { title: 'The spreadsheet still works', text: 'Nothing was changed in it and nothing is syncing. Most centres keep it running alongside for a course or two, and that is fine.', tone: MUTED },
+    ],
+    cta: 'Go to the pipeline', ctaTone: 'plain', ctaNote: '36 people added \u00b7 undo available until 14 December.' },
+];
+
+class Component extends DCLogic {
+  state = { tab: 'overview', role: 'centre', step: 'preview' };
+
+  renderVals() {
+    const tab = this.state.tab;
+    const rk = this.state.role;
+    const role = ROLES.filter(r => r.key === rk)[0];
+    const sk = this.state.step;
+    const step = STEPS.filter(s => s.key === sk)[0];
+
+    const permStyle = (p) => {
+      if (p.can === true) return { mark: '\u2713', ink: GREEN, bg: tint(GREEN, 6), border: mix(GREEN, 24) };
+      if (p.can === 'read') return { mark: '\ud83d\udc41', ink: GOLD, bg: tint(GOLD, 7), border: mix(GOLD, 26) };
+      return { mark: '\u2014', ink: MUTED, bg: 'oklch(96.4% 0.014 85)', border: BORDER };
+    };
+    const rowTone = { ok: GREEN, warn: GOLD, skip: MUTED, bad: RED };
+
+    return {
+      adminName: 'Ramy',
+      centreName: 'Connect International',
+      centreCode: 'UK205',
+      isOverview: tab === 'overview', isRoles: tab === 'roles', isImport: tab === 'import',
+      tabs: [
+        { key: 'overview', label: 'Overview' },
+        { key: 'roles', label: 'Roles' },
+        { key: 'import', label: 'Import' },
+      ].map(t => ({
+        label: t.label, pick: () => this.setState({ tab: t.key }),
+        ink: tab === t.key ? TEAL : MUTED, spine: tab === t.key ? TEAL : 'transparent',
+      })),
+      courseCount: 4,
+      moneyStats: [
+        { label: 'Collected this month', value: '\u00a338,400', note: '19 confirmed payments', ink: INK },
+        { label: 'Outstanding balance', value: '\u00a36,150', note: '5 candidates, across 2 courses', ink: RED },
+        { label: 'Deposits held', value: '\u00a34,800', note: '8 places, not yet full fee', ink: INK },
+        { label: 'Refunds pending', value: '\u00a30', note: 'Nothing awaiting action', ink: MUTED },
+      ],
+      courses: [
+        { name: 'January intensive', dates: '6 Jan \u2013 31 Jan', mode: 'Face-to-face', admin: 'Deniz Aksoy', balance: '\u00a31,200 due', balanceInk: RED, state: 'Running', stateBg: tint(TEAL, 12), stateInk: TEAL },
+        { name: 'February weekend', dates: '7 Feb \u2013 8 Mar', mode: 'Mixed-mode', admin: 'Ramy', balance: 'Fully paid', balanceInk: MUTED, state: 'Running', stateBg: tint(TEAL, 12), stateInk: TEAL },
+        { name: 'April online', dates: '6 Apr \u2013 1 May', mode: 'Fully online', admin: 'Nadia Farouk', balance: '\u00a34,950 due', balanceInk: RED, state: 'Upcoming', stateBg: tint(GOLD, 14), stateInk: GOLD },
+        { name: 'November intensive', dates: '3 Nov \u2013 28 Nov', mode: 'Face-to-face', admin: 'Ramy', balance: 'Fully paid', balanceInk: MUTED, state: 'Closed', stateBg: 'oklch(94% 0.008 85)', stateInk: MUTED },
+      ],
+      pipelineStages: [
+        { label: 'Enquired', count: 12 }, { label: 'Interview booked', count: 6 },
+        { label: 'Interviewed, awaiting offer', count: 4 }, { label: 'Offer sent', count: 3 },
+        { label: 'Accepted, paying', count: 5 },
+      ],
+      paymentIssues: [
+        { who: 'Deniz Aksoy', course: 'January intensive', detail: '3rd instalment missed \u2014 due 5 days ago' },
+        { who: 'Marco Villa', course: 'April online', detail: 'Deposit paid, full fee not started \u2014 course starts in 3 weeks' },
+      ],
+      volunteerCount: 14,
+      volunteers: [
+        { name: 'Elena Popescu', hours: '142 / 160', pct: 89 },
+        { name: 'Yusuf Demir', hours: '98 / 160', pct: 61 },
+        { name: 'Grace Owusu', hours: '160 / 160', pct: 100 },
+        { name: 'Hana Saito', hours: '54 / 160', pct: 34 },
+      ],
+      roles: ROLES.map(r => {
+        const on = r.key === rk;
+        return { name: r.name, who: r.who, pick: () => this.setState({ role: r.key }),
+          bg: on ? CARD : 'oklch(97.6% 0.009 85)', spine: on ? r.tone : 'transparent', ink: on ? r.tone : INK };
+      }),
+      role: {
+        summary: role.summary, rule: role.rule,
+        perms: role.perms.map(p => Object.assign({ what: p.what, note: p.note }, permStyle(p))),
+        ruleInk: role.ruleTone, ruleBg: tint(role.ruleTone, 7), ruleBorder: mix(role.ruleTone, 26),
+      },
+      roleNotes: [
+        { label: 'Read-only is a real role, not a downgrade', labelInk: GOLD, border: mix(GOLD, 26),
+          text: 'The centre manager exists so nobody shares a login. Two people on one account means no audit trail, no way to revoke access when one of them leaves.' },
+        { label: 'Nobody chooses their own role', labelInk: TEAL, border: mix(TEAL, 26),
+          text: 'The invitation carries it. There is no screen anywhere that promotes an account, which is why a forwarded code cannot create an administrator.' },
+        { label: 'Course chat is absent from every admin role', labelInk: RED, border: mix(RED, 26),
+          text: 'Including the centre owner. A tutor writes candidly in a course channel because they know exactly who can read it, and one exception anywhere ends that permanently.' },
+        { label: 'The owner\u2019s reach stops at the centre', labelInk: RED, border: mix(RED, 26),
+          text: 'There is no cross-centre role and nobody at Connect holds a key \u2014 a centre that hands over its grading needs to know the platform cannot quietly read it.' },
+      ],
+      steps: STEPS.map(s => {
+        const on = s.key === sk;
+        return { n: String(STEPS.indexOf(s) + 1), label: s.label, pick: () => this.setState({ step: s.key }),
+          bg: on ? CARD : 'transparent', border: on ? TEAL : BORDER, ink: on ? TEAL : INK, numInk: on ? TEAL : MUTED };
+      }),
+      mapHead: ['In their sheet', '', 'In Connect', ''],
+      step: Object.assign({}, step, {
+        isMap: !!step.isMap, isPreview: !!step.isPreview, isPlain: !!step.isPlain,
+        rows: (step.rows || []).map(r => {
+          const t = rowTone[r.tone];
+          return { from: r.from, to: r.to, state: r.state, toInk: r.tone === 'skip' ? MUTED : INK, stateInk: t,
+            bg: r.tone === 'warn' ? tint(GOLD, 7) : CARD, border: r.tone === 'warn' ? mix(GOLD, 30) : BORDER };
+        }),
+        people: (step.people || []).map(p => {
+          const t = rowTone[p.tone];
+          return { name: p.name, email: p.email, stage: p.stage, note: p.note, stageInk: MUTED,
+            noteInk: p.tone === 'ok' ? MUTED : t, spine: t, bg: p.tone === 'ok' ? CARD : tint(t, 6), border: p.tone === 'ok' ? BORDER : mix(t, 26) };
+        }),
+        points: (step.points || []).map(p => ({ title: p.title, text: p.text, ink: p.tone, bg: tint(p.tone, 6), border: mix(p.tone, 24) })),
+        tally: step.tally || [],
+        ctaBg: step.ctaTone === 'primary' ? TEAL : CARD,
+        ctaInk: step.ctaTone === 'primary' ? 'oklch(98.5% 0.006 90)' : INK,
+        ctaBorder: step.ctaTone === 'primary' ? TEAL : BORDER,
+      }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
