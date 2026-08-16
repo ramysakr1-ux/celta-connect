@@ -16,9 +16,9 @@
 create table public.refunds (
   id uuid primary key default gen_random_uuid(),
   center_id uuid not null references public.centers (id) on delete cascade,
-  -- Either origin: a refund can be owed against an instalment already paid, or
+  -- Either origin: a refund can be owed against a payment already made, or
   -- against a deposit taken before the candidate ever had an account.
-  payment_instalment_id uuid references public.payment_instalments (id) on delete set null,
+  payment_id uuid references public.payments (id) on delete set null,
   applicant_id uuid references public.applicants (id) on delete set null,
 
   amount numeric(10, 2) not null check (amount > 0),

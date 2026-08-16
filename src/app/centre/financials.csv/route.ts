@@ -66,7 +66,7 @@ export async function GET(request: Request) {
     const [{ data: instalments }, { data: people }] = await Promise.all([
       planIds.length
         ? admin
-            .from("payment_instalments")
+            .from("payments")
             .select("payment_plan_id, amount, currency, status, due_date, paid_at")
             .in("payment_plan_id", planIds)
         : Promise.resolve({ data: [] as { payment_plan_id: string; amount: number; currency: string; status: string; due_date: string | null; paid_at: string | null }[] }),
