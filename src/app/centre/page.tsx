@@ -197,6 +197,36 @@ export default async function CentreOverviewPage({
         )}
       </div>
 
+      {/* "Only 'bounced' creates a task." Above the fold, because a bounced
+          workspace invitation to a paid-up candidate is someone with no way
+          into the course they've paid for. */}
+      {(bounces ?? []).length > 0 ? (
+        <div className="rounded-[10px] border border-destructive/25 bg-destructive/5">
+          <div className="flex items-baseline justify-between border-b border-destructive/20 px-5 py-3.5">
+            <h2 className="font-serif text-base text-ink">Email couldn&apos;t be delivered</h2>
+            <span className="text-xs text-muted">{(bounces ?? []).length} to fix</span>
+          </div>
+          {(bounces ?? []).map((b, i) => (
+            <div key={b.id} className={`px-5 py-2.5 ${i > 0 ? "border-t border-destructive/15" : ""}`}>
+              <div className="flex items-center justify-between gap-3">
+                {b.applicant_id ? (
+                  <Link href={`/dashboard/admissions/${b.applicant_id}`} className="text-sm text-ink hover:underline">
+                    {b.email_address}
+                  </Link>
+                ) : (
+                  <span className="text-sm text-ink">{b.email_address}</span>
+                )}
+                <span className="shrink-0 text-xs font-semibold text-destructive">
+                  {b.consecutive_bounces >= 2 ? "Sending stopped" : "Bounced"}
+                </span>
+              </div>
+              {/* The provider's own words, never a status code. */}
+              <p className="text-xs text-muted">{b.reason}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {canView(ctx.roles, "admissions.view") ? (
           <div className="rounded-[10px] border border-border bg-card">
