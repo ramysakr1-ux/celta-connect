@@ -34,11 +34,23 @@ const CENTRE_DOCUMENTS: { name: string; meta: string }[] = [
   { name: "Marking guidance", meta: "Centre's standardisation evidence, dated" },
 ];
 
-const GRADE_PILL: Record<string, string> = {
-  "Pass A": "pill-gold",
-  "Pass B": "pill-neutral",
-  Pass: "pill-success",
-  Fail: "pill-danger",
+// Verbatim from Assessor Visit.dc.html's own GRADE table. These are not
+// decoration: Pass A is gold, Pass B is silver, a plain Pass is deliberately
+// NEUTRAL, and Fail is red. The previous mapping used the app's generic pill
+// classes and coloured a plain Pass green -- which read as "good" on a grade
+// that is simply a pass, and left Pass B and Pass looking alike.
+//
+// Green in this design means complete/good as a STATUS (a met dot, hours
+// logged), never a grade. Keeping the two apart is the point.
+const GOLD_TINT = "color-mix(in oklab, oklch(60% 0.11 70) 18%, oklch(99.2% 0.005 90))";
+const SILVER_TINT = "color-mix(in oklab, oklch(65% 0.008 90) 30%, oklch(99.2% 0.005 90))";
+const RED_TINT = "color-mix(in oklab, oklch(45% 0.16 27) 14%, oklch(99.2% 0.005 90))";
+
+const GRADE: Record<string, { bg: string; ink: string }> = {
+  "Pass A": { bg: GOLD_TINT, ink: "oklch(40% 0.09 68)" },
+  "Pass B": { bg: SILVER_TINT, ink: "oklch(42% 0.01 90)" },
+  Pass: { bg: "oklch(94% 0.012 85)", ink: "oklch(51% 0.017 70)" },
+  Fail: { bg: RED_TINT, ink: "oklch(45% 0.16 27)" },
 };
 
 // for-claude-code-assessor-interface.md -- the real dedicated single
@@ -103,6 +115,11 @@ export default async function AssessorPage() {
     course.start_date && course.end_date
       ? `${new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} \u2013 ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
       : "";
+
+  // build-spec.md: "120 contact hours; 6 hours of assessed teaching per
+  // candidate". The design shows this figure as a fraction ("48 of 48"), so
+  // the denominator is the cohort's requirement, not an arbitrary target.
+  const hoursRequired = readiness.totalCandidates * 6;
 
   const CARD = "oklch(99.2% 0.005 90)";
   const BORDER = "oklch(88% 0.016 82)";
@@ -199,7 +216,11 @@ export default async function AssessorPage() {
                 value={`${readiness.portfoliosCompleteCount} of ${readiness.totalCandidates}`}
                 ink={readiness.portfoliosCompleteCount >= readiness.totalCandidates ? GREEN : AMBER}
               />
-              <Figure label="Hours logged" value={readiness.hoursAssessedTotal.toFixed(1)} ink={GREEN} />
+              <Figure
+                label="Hours logged"
+                value={`${readiness.hoursAssessedTotal.toFixed(readiness.hoursAssessedTotal % 1 === 0 ? 0 : 1)} of ${hoursRequired}`}
+                ink={readiness.hoursAssessedTotal >= hoursRequired ? GREEN : AMBER}
+              />
               <Figure
                 label="Grades entered"
                 value={`${readiness.gradesEnteredCount} of ${readiness.totalCandidates}`}
@@ -209,7 +230,7 @@ export default async function AssessorPage() {
           </div>
         </div>
 
-        {sendByDate ? (
+        {(
           <div
             style={{
               display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 7,
@@ -218,12 +239,16 @@ export default async function AssessorPage() {
             }}
           >
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD }}>
-              Send the pack by {sendByDate}
+              {sendByDate ? `Send the pack by ${sendByDate}` : "No visit date set"}
               {daysOut !== null ? ` · ${daysOut} day${daysOut === 1 ? "" : "s"} out` : ""}
             </span>
-            <span style={{ fontSize: 12, color: INK }}>Everything below must be complete by that date, not the visit date.</span>
+            <span style={{ fontSize: 12, color: INK }}>
+              {sendByDate
+                ? "Everything below must be complete by that date, not the visit date."
+                : "Set the assessor visit date on the course to fix the send-by deadline."}
+            </span>
           </div>
-        ) : null}
+        )}
 
         <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 20, alignItems: "start" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
@@ -232,8 +257,8 @@ export default async function AssessorPage() {
                 key={c.traineeId}
                 href={`/portfolio/${c.traineeId}`}
                 style={{
-                  background: CARD,
-                  border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 45%, transparent)" : BORDER}`,
+                  background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, oklch(99.2% 0.005 90))" : CARD,
+                  border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 35%, transparent)" : BORDER}`,
                   borderRadius: 8, padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10,
                   textDecoration: "none",
                 }}
@@ -241,7 +266,14 @@ export default async function AssessorPage() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                   <span style={{ fontSize: 13.5, fontWeight: 600, color: INK }}>{c.name}</span>
                   {c.provisionalLabel ? (
-                    <span className={`pill ${GRADE_PILL[c.provisionalLabel] ?? "pill-neutral"}`} style={{ fontSize: 10.5, fontWeight: 700, padding: "3px 9px", borderRadius: 99 }}>
+                    <span
+                      style={{
+                        fontSize: 10.5, fontWeight: 700, padding: "3px 9px", borderRadius: 99,
+                        background: (GRADE[c.provisionalLabel] ?? GRADE.Pass).bg,
+                        color: (GRADE[c.provisionalLabel] ?? GRADE.Pass).ink,
+                        flex: "none", whiteSpace: "nowrap",
+                      }}
+                    >
                       {c.provisionalLabel}
                     </span>
                   ) : null}
