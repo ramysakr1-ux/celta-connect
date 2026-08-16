@@ -127,9 +127,21 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
   //
   // IMPORTANT: every `true` here is additionally scoped to the courses this
   // person is granted -- use canOnCourse(), not can(), for anything
-  // course-specific. Course administrator is also Cambridge-approval-gated
-  // (Ramy, 2026-08-16), enforced by requiring a course_tutors row alongside
-  // the scope row.
+  // course-specific.
+  //
+  // Course administrator is Cambridge-approval-gated, but MUST NOT be gated on
+  // being a tutor on the course. Ramy, 2026-08-16: "Course admin is often the
+  // main course tutor, but sometimes also a Cambridge-approved trainer who is
+  // not on the course. Someone who works at the centre would set up the course
+  // and invite the MCT and the ACT. But it could be the same person as well."
+  //
+  // An earlier version of this comment said the gate was "enforced by
+  // requiring a course_tutors row alongside the scope row". That was never
+  // implemented -- which is the only reason it did no harm -- and it would
+  // have locked out exactly the person described above: the approved trainer
+  // who sets a course up and never teaches on it.
+  //
+  // So the approval lives on the person, not on their presence in the cohort.
   course_administrator: {
     "course.editRecord": true,
     "payments.view": true,
