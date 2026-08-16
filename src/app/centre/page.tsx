@@ -113,11 +113,19 @@ export default async function CentreOverviewPage({
     const fmt = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
     return a && b ? `${fmt(a)} – ${fmt(b)}` : "Dates not set";
   };
+  // Centre Admin.dc.html gives each state its own tint, and they aren't
+  // interchangeable: Upcoming is gold (something is coming that needs
+  // preparing), Running is teal, Closed is grey and deliberately inert.
+  // "Running" previously used bg-accent -- the pale green wash Ramy retired
+  // on 16 Aug 2026 -- and "Upcoming" was the same grey as a finished course,
+  // which lost the distinction the design draws.
   const courseState = (start: string | null, end: string | null) => {
     const today = new Date().toISOString().slice(0, 10);
-    if (start && today < start) return { label: "Upcoming", cls: "bg-surface-muted text-muted" };
-    if (end && today > end) return { label: "Finished", cls: "bg-surface-muted text-muted" };
-    return { label: "Running", cls: "bg-accent text-primary" };
+    if (start && today < start) {
+      return { label: "Upcoming", cls: "bg-[color-mix(in_oklab,oklch(60%_0.11_70)_14%,transparent)] text-[oklch(60%_0.11_70)]" };
+    }
+    if (end && today > end) return { label: "Closed", cls: "bg-surface-muted text-muted" };
+    return { label: "Running", cls: "bg-[color-mix(in_oklab,oklch(38%_0.072_195)_12%,transparent)] text-primary" };
   };
 
   const metrics = [
