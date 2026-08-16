@@ -58,50 +58,43 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
 
   const eyebrow = `New course${centerNumber ? ` · ${centerNumber}` : ""}`;
 
-  function StepHeader({ n, title, blurb }: { n: number; title: string; blurb: string }) {
-    return (
-      <div className="flex flex-col gap-1.5">
-        <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
-          {eyebrow} · step {n} of 6
-        </p>
-        <h3 className="font-serif text-[22px] font-semibold text-ink">{title}</h3>
-        <p className="max-w-[62ch] text-[12.5px] leading-relaxed text-muted">{blurb}</p>
-      </div>
-    );
-  }
+  // Element helpers, not components -- lint is right that defining components
+  // inside render recreates their type every pass, which remounts the subtree.
+  // These return elements directly, so nothing remounts.
+  const stepHeader = (n: number, title: string, blurb: string) => (
+    <div className="flex flex-col gap-1.5">
+      <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
+        {eyebrow} · step {n} of 6
+      </p>
+      <h3 className="font-serif text-[22px] font-semibold text-ink">{title}</h3>
+      <p className="max-w-[62ch] text-[12.5px] leading-relaxed text-muted">{blurb}</p>
+    </div>
+  );
 
-  function nav(next: 1 | 2 | 3 | 4 | 5 | 6, label: string) {
-    return (
-      <button
-        type="button"
-        onClick={(e) => {
-          captureStep(e.currentTarget.form);
-          setStep(next);
-        }}
-        className="self-start rounded-[6px] bg-primary px-[15px] py-2 text-[13px] font-semibold text-primary-foreground"
-      >
-        {label}
-      </button>
-    );
-  }
+  const nav = (next: 1 | 2 | 3 | 4 | 5 | 6, label: string) => (
+    <button
+      type="button"
+      onClick={(e) => {
+        captureStep(e.currentTarget.form);
+        setStep(next);
+      }}
+      className="self-start rounded-[6px] bg-primary px-[15px] py-2 text-[13px] font-semibold text-primary-foreground"
+    >
+      {label}
+    </button>
+  );
 
-  function back(prev: 1 | 2 | 3 | 4 | 5) {
-    return (
-      <button type="button" onClick={() => setStep(prev)} className="text-sm text-muted underline">
-        Back
-      </button>
-    );
-  }
+  const back = (prev: 1 | 2 | 3 | 4 | 5) => (
+    <button type="button" onClick={() => setStep(prev)} className="text-sm text-muted underline">
+      Back
+    </button>
+  );
 
   return (
     <form action={action} className="card flex flex-col gap-4 p-6">
       {/* Step 1 — course details */}
       <div className={step === 1 ? "flex flex-col gap-4" : "hidden"}>
-        <StepHeader
-          n={1}
-          title="Course details"
-          blurb="The centre number and course code print on every certificate and report — get them right here."
-        />
+        {stepHeader(1, "Course details", "The centre number and course code print on every certificate and report — get them right here.")}
 
         <div className="flex flex-col gap-1">
           <label className="text-[13px] font-semibold text-ink">Cambridge centre number</label>
@@ -159,11 +152,7 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
 
       {/* Step 2 — delivery mode */}
       <div className={step === 2 ? "flex flex-col gap-4" : "hidden"}>
-        <StepHeader
-          n={2}
-          title="How is teaching practice delivered?"
-          blurb="The mode is defined by where teaching practice happens, not where input happens. A course can deliver input online and still be face-to-face."
-        />
+        {stepHeader(2, "How is teaching practice delivered?", "The mode is defined by where teaching practice happens, not where input happens. A course can deliver input online and still be face-to-face.")}
         <input type="hidden" name="delivery_mode" value={deliveryMode} />
         <DeliveryModePicker value={deliveryMode} onChange={setDeliveryMode} />
         <div className="flex items-center gap-3">
@@ -174,11 +163,7 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
 
       {/* Step 3 — dates and timetable pattern */}
       <div className={step === 3 ? "flex flex-col gap-4" : "hidden"}>
-        <StepHeader
-          n={3}
-          title="Confirm dates and weekly pattern"
-          blurb="This pattern seeds the timetable-tile system — the same tiles trainers drag and admins edit later in Run a course."
-        />
+        {stepHeader(3, "Confirm dates and weekly pattern", "This pattern seeds the timetable-tile system — the same tiles trainers drag and admins edit later in Run a course.")}
 
         <div className="grid grid-cols-2 gap-[14px]">
           <div className="flex flex-col gap-1">
@@ -238,11 +223,7 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
 
       {/* Step 4 — capacity and pricing */}
       <div className={step === 4 ? "flex flex-col gap-4" : "hidden"}>
-        <StepHeader
-          n={4}
-          title="Capacity and pricing"
-          blurb="The fee and deposit print on the offer email; the deposit-due window is what the acceptance email promises."
-        />
+        {stepHeader(4, "Capacity and pricing", "The fee and deposit print on the offer email; the deposit-due window is what the acceptance email promises.")}
 
         <div className="grid grid-cols-2 gap-[14px]">
           <div className="flex flex-col gap-1">
@@ -294,11 +275,7 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
 
       {/* Step 5 — assign tutors */}
       <div className={step === 5 ? "flex flex-col gap-4" : "hidden"}>
-        <StepHeader
-          n={5}
-          title="Assign your first tutor"
-          blurb="Every course needs a Main Course Tutor before it can launch. Add more tutors any time afterwards from the roster."
-        />
+        {stepHeader(5, "Assign your first tutor", "Every course needs a Main Course Tutor before it can launch. Add more tutors any time afterwards from the roster.")}
 
         <div className="grid grid-cols-[1fr_auto] gap-[14px]">
           <div className="flex flex-col gap-1">
@@ -343,11 +320,7 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
 
       {/* Step 6 — review and launch */}
       <div className={step === 6 ? "flex flex-col gap-4" : "hidden"}>
-        <StepHeader
-          n={6}
-          title="Review before launch"
-          blurb="Launch opens the course to invites. Once launched, this course moves to Centre home and its Invitations panel becomes active."
-        />
+        {stepHeader(6, "Review before launch", "Launch opens the course to invites. Once launched, this course moves to Centre home and its Invitations panel becomes active.")}
 
         <div className="overflow-hidden rounded-[6px] border border-border">
           {[
