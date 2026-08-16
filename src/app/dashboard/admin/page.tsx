@@ -100,19 +100,24 @@ export default async function AdminDashboardPage() {
           It used to read "Welcome, <name>", which tells the person something
           they already know and omits the two facts that print on every report. */}
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Connect · course admin</p>
-          <h1 className="mt-1 font-serif text-[26px] text-ink">
+        {/* The design's own hierarchy, which I had inverted: the centre and
+            its Cambridge number are the EYEBROW, and the page's title is
+            "Courses" -- because that is what the screen is. Putting the centre
+            name in the H1 made every admin screen look like the same page with
+            a different list under it. */}
+        <div className="flex flex-col gap-[5px]">
+          <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
             {center?.name ?? "Your centre"}
-            {center?.center_number ? <span className="text-muted"> · Centre {center.center_number}</span> : null}
-          </h1>
+            {center?.center_number ? ` · Centre ${center.center_number}` : ""}
+          </p>
+          <h1 className="font-serif text-[24px] font-semibold text-ink">Courses</h1>
         </div>
         {/* The create form already lives in the sidebar, so this jumps to it
             rather than pointing at a /courses/new route that does not exist --
             a primary button that 404s is worse than no button. */}
         <a
           href="#new-course"
-          className="shrink-0 rounded-[6px] bg-ink-warm px-4 py-2 text-sm font-semibold text-card"
+          className="flex h-[34px] shrink-0 items-center rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold whitespace-nowrap text-primary-foreground"
         >
           New course
         </a>
@@ -133,20 +138,19 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
       ) : center?.center_number ? (
-        <div className="flex items-center gap-3 rounded-[6px] border border-border bg-card p-3">
-          <span className="size-1.5 shrink-0 rounded-full bg-primary" />
-          <p className="text-sm text-ink">
-            Centre number set -- {center.center_number}
-            <span className="text-muted"> &middot; Prints on every final report and cover sheet.</span>
-          </p>
+        /* The design's confirmation banner: warm-ink 9% fill, a 30% border, a
+           6px dot, and the two lines stacked rather than run together. */
+        <div className="flex items-start gap-[11px] rounded-[6px] border border-[color-mix(in_oklab,oklch(30%_0.042_58)_30%,transparent)] bg-[color-mix(in_oklab,oklch(30%_0.042_58)_9%,var(--color-card))] px-[15px] py-[13px]">
+          <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[oklch(30%_0.042_58)]" />
+          <div className="flex flex-col gap-[3px]">
+            <p className="text-[13px] font-semibold text-ink">Centre number set — {center.center_number}</p>
+            <p className="text-xs leading-relaxed text-muted">Prints on every final report and cover sheet.</p>
+          </div>
         </div>
       ) : null}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
         <div className="flex flex-col gap-5">
-          {/* The design labels the list, so the state groups read as
-              subdivisions of one thing rather than three separate lists. */}
-          <h2 className="font-serif text-lg text-ink">Courses</h2>
           {groups.length > 0 ? (
             groups.map((group) => (
               <div key={group.state} className="flex flex-col gap-2">
