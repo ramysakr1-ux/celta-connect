@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   analyseRows,
   isWithinUndoWindow,
@@ -84,7 +85,17 @@ export async function commitImport(_prev: CommitImportState, formData: FormData)
     .single();
   if (importError || !importRow) return { error: "Could not start the import. Nothing was created." };
 
-  const { error: insertError } = await supabase.from("applicants").insert(
+  // `applicants` has SELECT and UPDATE policies but deliberately NO INSERT
+  // policy (migration 0081) -- every write goes through the admin client after
+  // the action has done its own validation, same documented pattern as
+  // apply/actions.ts's public application form. Caught live: with the session
+  // client this failed with "new row violates row-level security policy".
+  //
+  // Service role means no RLS backstop, so the centre scoping above is the
+  // only thing enforcing it: center_id comes from the caller's own profile,
+  // never from the form, and the intake course was checked to be in it.
+  const admin = createAdminClient();
+  const { error: insertError } = await admin.from("applicants").insert(
     toInsert.map((r) => ({
       center_id: profile.center_id,
       intake_course_id: intakeCourseId,
@@ -103,7 +114,12 @@ export async function commitImport(_prev: CommitImportState, formData: FormData)
   if (insertError) {
     // Roll the import record back so a failed run doesn't leave a phantom
     // undo-able import with nothing attached to it.
-    await supabase.from("spreadsheet_imports").delete().eq("id", importRow.id);
+    //
+    // Via the admin client: spreadsheet_imports has select/insert/update
+    // policies but no DELETE one, so on the session client this rollback
+    // silently deleted nothing and the failed run still showed up under
+    // "Recent imports" claiming rows it never created. Caught live.
+    await admin.from("spreadsheet_imports").delete().eq("id", importRow.id);
     return { error: `Could not import: ${insertError.message}` };
   }
 
@@ -141,10 +157,16 @@ export async function undoImport(_prev: UndoImportState, formData: FormData): Pr
     return { error: "This import is more than seven days old -- it's ordinary data now and can't be bulk-undone." };
   }
 
-  const { data: people } = await supabase
+  // Same reason as the insert above: applicants has no DELETE policy either,
+  // so the removal below must go through the admin client. Reads are fine on
+  // the session client (can_handle_admissions() covers admins) but are done
+  // here too so the rows read are exactly the rows deleted.
+  const admin = createAdminClient();
+  const { data: people } = await admin
     .from("applicants")
     .select("id, full_name, offer_sent_at, offer_token")
-    .eq("import_id", importId);
+    .eq("import_id", importId)
+    .eq("center_id", profile.center_id);
   const ids = (people ?? []).map((p) => p.id);
   if (ids.length === 0) return { error: "This import has nothing left to remove." };
 
@@ -163,7 +185,11 @@ export async function undoImport(_prev: UndoImportState, formData: FormData): Pr
     return { error: `Can't undo -- ${paid!.length} of these people have a payment plan. Remove them individually instead.` };
   }
 
-  const { error: deleteError } = await supabase.from("applicants").delete().eq("import_id", importId);
+  const { error: deleteError } = await admin
+    .from("applicants")
+    .delete()
+    .eq("import_id", importId)
+    .eq("center_id", profile.center_id);
   if (deleteError) return { error: `Could not undo: ${deleteError.message}` };
 
   await supabase
