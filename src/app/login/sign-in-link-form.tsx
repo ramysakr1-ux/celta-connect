@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { sendSignInLink, type SignInLinkState } from "@/app/login/actions";
 
 const initialState: SignInLinkState = { error: null, sent: false };
@@ -9,19 +9,27 @@ const initialState: SignInLinkState = { error: null, sent: false };
 // password-free alternative to the main sign-in form, for anyone who's
 // forgotten their password but doesn't want the full reset flow.
 //
-// `confirmed` is local UI state, separate from the action's own `sent`
-// flag -- useActionState's state has no way to be reset except by
-// dispatching the action again, so "Send again" needs its own local switch
-// back to the form rather than trying to un-set state.sent directly.
+// `dismissed` is local UI state tracking whether the user has clicked "Send
+// again" since the last completed action -- useActionState's state has no
+// way to be reset except by dispatching the action again, so we derive
+// `confirmed` from state.sent and dismissed during render (comparing state
+// by reference to detect a fresh action result) rather than syncing via
+// an effect.
 export function SignInLinkForm() {
   const [state, action, pending] = useActionState(sendSignInLink, initialState);
   const [open, setOpen] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [prevState, setPrevState] = useState(state);
+  // Echoed back in the confirmation so a typo'd address is obvious before the
+  // user sits waiting for mail that will never arrive.
   const [email, setEmail] = useState("");
 
-  useEffect(() => {
-    if (state.sent) setConfirmed(true);
-  }, [state.sent]);
+  if (state !== prevState) {
+    setPrevState(state);
+    if (state.sent) setDismissed(false);
+  }
+
+  const confirmed = state.sent && !dismissed;
 
   if (confirmed) {
     return (
@@ -30,13 +38,15 @@ export function SignInLinkForm() {
           We&apos;ve sent a sign-in link to {email}. Click it to sign in -- no password needed. The link expires in 15
           minutes and works once.
         </p>
-        <button type="button" onClick={() => setConfirmed(false)} className="mt-2 text-xs text-primary hover:underline">
+        <button type="button" onClick={() => setDismissed(true)} className="mt-2 text-xs text-primary hover:underline">
           Send again
         </button>
       </div>
     );
   }
 
+  // A real secondary button rather than a text link -- login-form.tsx puts an
+  // "OR" rule directly above this, which needs something with weight under it.
   if (!open) {
     return (
       <button
@@ -65,7 +75,7 @@ export function SignInLinkForm() {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+        className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
         {pending ? "Sending..." : "Send sign-in link"}
       </button>

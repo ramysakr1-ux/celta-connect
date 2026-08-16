@@ -37,7 +37,7 @@ export function RosterRowView({ row }: { row: RosterRow }) {
             {row.name}
           </Link>
         </td>
-        <td colSpan={15} className="text-right">
+        <td colSpan={16} className="text-right">
           <span className="pill pill-neutral">{COURSE_STATUS_LABEL[row.courseStatus]}</span>
         </td>
       </tr>
@@ -150,6 +150,19 @@ export function RosterRowView({ row }: { row: RosterRow }) {
       </td>
       <td className={`text-right ${row.provisionalSlashed ? "font-bold text-destructive" : "text-ink"}`}>
         {row.provisionalLabel ?? <span className="text-muted">Not set</span>}
+      </td>
+      <td className="text-right tabular-nums">
+        {row.obsTasksTotal > 0 ? (
+          <Link
+            href={`/portfolio/${row.id}/celta5`}
+            onClick={(e) => e.stopPropagation()}
+            className={`hover:underline ${row.obsTasksDone < row.obsTasksTotal ? "text-status-warning-text" : "text-ink"}`}
+          >
+            {row.obsTasksDone} / {row.obsTasksTotal}
+          </Link>
+        ) : (
+          <span className="text-muted">--</span>
+        )}
       </td>
       <td className="text-right">
         {row.atRiskReasons.length > 0 ? (

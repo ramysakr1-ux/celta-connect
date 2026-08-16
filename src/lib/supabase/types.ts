@@ -337,7 +337,7 @@ export interface Database {
           center_id: string;
           intake_course_id: string;
           source_link_id: string | null;
-          // migration 0101 -- set only on rows a spreadsheet import created, so
+          // migration 0102 -- set only on rows a spreadsheet import created, so
           // an undo can remove exactly those and nothing added by hand since.
           import_id: string | null;
           full_name: string;
@@ -619,6 +619,41 @@ export interface Database {
           trainee_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["observations"]["Row"]>;
+        Relationships: [];
+      };
+      observation_tasks: {
+        Row: {
+          id: string;
+          course_id: string;
+          title: string;
+          instructions: string;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["observation_tasks"]["Row"]> & {
+          course_id: string;
+          title: string;
+          instructions: string;
+          created_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["observation_tasks"]["Row"]>;
+        Relationships: [];
+      };
+      observation_task_submissions: {
+        Row: {
+          id: string;
+          task_id: string;
+          trainee_id: string;
+          observation_id: string | null;
+          response: string;
+          submitted_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["observation_task_submissions"]["Row"]> & {
+          task_id: string;
+          trainee_id: string;
+          response: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["observation_task_submissions"]["Row"]>;
         Relationships: [];
       };
       attendance_absences: {

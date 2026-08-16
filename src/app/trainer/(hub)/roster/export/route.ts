@@ -51,6 +51,7 @@ export async function GET() {
     "FOL logged",
     "Standing",
     "Provisional grade",
+    "Observation tasks",
     "At risk",
   ];
   const lines = [
@@ -79,6 +80,7 @@ export async function GET() {
         csvCell(r.folEntriesLogged),
         csvCell(r.trajectory),
         csvCell(r.provisionalLabel ?? "Not set"),
+        csvCell(r.obsTasksTotal > 0 ? `${r.obsTasksDone} / ${r.obsTasksTotal}` : "--"),
         csvCell(r.atRiskReasons.map((reason) => AT_RISK_LABELS[reason]).join("; ")),
       ].join(",")
     ),

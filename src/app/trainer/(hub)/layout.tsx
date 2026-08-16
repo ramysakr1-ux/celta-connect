@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { LayoutGrid } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
 import { TrainerTabs } from "@/app/trainer/trainer-tabs";
-import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -44,11 +43,17 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   return (
     <>
       {isDemo ? <DemoModeBanner /> : null}
-      {/* Checkpoint 1 shell consolidation (specs/build-spec.md phase 1) --
-          this used to be 3 stacked bars (this one, a duplicate name-only
-          bar in trainer/layout.tsx, and TrainerTabs' own wrapper). Now one
-          56px (h-14) header: wordmark + nav on the left, assessor
-          link/view-switcher/name on the right. */}
+      {/* for-claude-code-trainer-homepage.md's header spec: wordmark + nav
+          on the left, just trainer name + a conditional Connect Hub icon on
+          the right -- "only if the account has hub access... other tutors
+          on the same course never see this icon." Approximated with the
+          real signal that already exists (profile.connect_hub_link set),
+          rather than inventing a new access-flag column: whoever hasn't
+          personally connected a link never sees anything here at all, no
+          "go set one up" fallback either (that moved to Roster, along with
+          Share Assessor Link and the Trainer/Trainee/Student switcher --
+          neither is in this spec's header list, and both are real,
+          course-wide actions that fit better there anyway). */}
       <header className="border-b border-border bg-card">
         <div className="container flex h-14 items-stretch justify-between gap-6">
           <div className="flex items-center gap-6">
@@ -58,37 +63,30 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             <TrainerTabs rosterOnly={isAssessor} />
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            {/* Spec: course code as a teal pill, then the trainer's name, then
-                the Hub icon. The ViewSwitcherPill that used to sit here is
-                retired (Ramy, 2026-08-16) -- both its live segments pointed at
-                pages that are already nav tabs, and candidate preview moved to
-                a per-candidate button on the Portfolio screen. */}
+            {/* Merge note (2026-08-16): the overnight session's Hub-icon
+                gating wins over this morning's -- it gates strictly on
+                connect_hub_link being set, exactly as the spec's `hub_access`
+                asks, and moved the "go set one up" entry point to Roster so
+                nothing is stranded. That answers the question this morning's
+                version had left open. Only the course-code pill is kept from
+                this side; the spec's header lists it and the overnight header
+                didn't have one. */}
             {courseCode ? (
               <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground">
                 {courseCode}
               </span>
             ) : null}
-            {isRealStaff ? (
-              // Spec shrinks this from a labelled button to a 26x26 hollow
-              // icon. NOTE: it also says to show it only for accounts with
-              // `hub_access` -- no such column exists (0065 added only
-              // profiles.connect_hub_link, self-service: anyone pastes their
-              // own link). Gating strictly on "link is set" would make
-              // /trainer/connect-hub unreachable for anyone who hasn't set one,
-              // i.e. everyone, so the entry point is kept until Ramy decides
-              // whether Hub access is meant to be granted rather than
-              // self-served.
+            {isRealStaff && profile?.connect_hub_link ? (
               <a
-                href={profile?.connect_hub_link ?? "/trainer/connect-hub"}
-                {...(profile?.connect_hub_link ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                title={profile?.connect_hub_link ? "Open your Connect Hub" : "Set up your Connect Hub link"}
-                aria-label={profile?.connect_hub_link ? "Open your Connect Hub" : "Set up your Connect Hub link"}
-                className="flex size-[26px] shrink-0 items-center justify-center rounded-[6px] border border-border text-muted hover:border-primary hover:text-primary"
+                href={profile.connect_hub_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Connect Hub"
+                className="flex size-[26px] items-center justify-center rounded-full border border-border text-muted hover:border-primary hover:text-primary"
               >
-                <LayoutGrid className="size-3.5" aria-hidden="true" />
+                <ExternalLink className="size-3.5" aria-hidden="true" />
               </a>
             ) : null}
-            {isRealStaff ? <AssessorLinkButton /> : null}
             <span className="text-sm text-muted">{profile?.full_name ?? session?.email}</span>
           </div>
         </div>

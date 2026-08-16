@@ -15,17 +15,19 @@ export async function GET(request: NextRequest) {
 
   const cookieStore = await cookies();
   const expectedState = cookieStore.get("google_oauth_state")?.value;
+  const codeVerifier = cookieStore.get("google_oauth_code_verifier")?.value;
   cookieStore.delete("google_oauth_state");
+  cookieStore.delete("google_oauth_code_verifier");
 
   if (oauthError) {
     redirect(`${settingsUrl}?google_error=${encodeURIComponent(oauthError)}`);
   }
-  if (!code || !state || !expectedState || state !== expectedState) {
+  if (!code || !state || !expectedState || state !== expectedState || !codeVerifier) {
     redirect(`${settingsUrl}?google_error=invalid_state`);
   }
 
   try {
-    const refreshToken = await exchangeCodeForRefreshToken(code);
+    const refreshToken = await exchangeCodeForRefreshToken(code, codeVerifier);
     const admin = createAdminClient();
     const { error } = await admin
       .from("center_google_connections")

@@ -61,6 +61,10 @@ export interface RosterRow {
   // spec gave no fixed threshold.
   folEntriesLogged: number;
   folEntriesLow: boolean;
+  // Observation Tasks (2026-08-16) -- same unified-tracking pattern as
+  // every item above: a column here, not a new bespoke screen.
+  obsTasksDone: number;
+  obsTasksTotal: number;
 }
 
 // Single source of truth for what a roster row means -- both the roster
@@ -100,6 +104,8 @@ export async function fetchRosterRows(
     { data: observations },
     { data: stage2Slots },
     { data: errorLog },
+    { data: obsTasks },
+    { data: obsTaskSubmissions },
   ] =
     traineeIds.length > 0
       ? await Promise.all([
@@ -139,6 +145,11 @@ export async function fetchRosterRows(
             ? supabase.from("stage2_tutorial_slots").select("position, trainee_id, booked_at").in("block_id", stage2BlockIds)
             : Promise.resolve({ data: [] }),
           supabase.from("class_error_log").select("logged_by_candidate_id").eq("course_id", courseId),
+          supabase.from("observation_tasks").select("id").eq("course_id", courseId),
+          supabase
+            .from("observation_task_submissions")
+            .select("trainee_id, task_id")
+            .in("trainee_id", traineeIds),
         ])
       : [
           { data: [] },
@@ -147,6 +158,8 @@ export async function fetchRosterRows(
           { data: [] },
           { data: [] },
           { data: null },
+          { data: [] },
+          { data: [] },
           { data: [] },
           { data: [] },
           { data: [] },
@@ -259,6 +272,9 @@ export async function fetchRosterRows(
     const folEntriesLogged = folCountsByTrainee.get(trainee.id) ?? 0;
     const folEntriesLow = folAverage > 0 && folEntriesLogged < folAverage / 2;
 
+    const obsTasksTotal = (obsTasks ?? []).length;
+    const obsTasksDone = (obsTaskSubmissions ?? []).filter((s) => s.trainee_id === trainee.id).length;
+
     return {
       id: trainee.id,
       name: trainee.full_name,
@@ -289,6 +305,8 @@ export async function fetchRosterRows(
       assignmentsResubmitted,
       folEntriesLogged,
       folEntriesLow,
+      obsTasksDone,
+      obsTasksTotal,
     };
   });
 }

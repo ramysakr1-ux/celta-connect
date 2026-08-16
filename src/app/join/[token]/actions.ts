@@ -55,7 +55,10 @@ export async function joinCourse(
   if (password !== confirmPassword) {
     return { error: "Passwords do not match." };
   }
-  if (!formData.get("agree_ip") || !formData.get("agree_data") || !formData.get("agree_link_private")) {
+  // agree_link_private is on both role branches of the form, so it's checked
+  // here alongside agree_ip rather than in either role block below. A
+  // `required` attribute alone is only a client-side courtesy.
+  if (!formData.get("agree_ip") || !formData.get("agree_link_private")) {
     return { error: "You need to agree to all the checkboxes to join." };
   }
 
@@ -74,11 +77,15 @@ export async function joinCourse(
   // checkbox is the plain-English acknowledgment, not a substitute for it.
   if (
     role === "trainee" &&
-    (!formData.get("agree_ai_policy") ||
+    (!formData.get("agree_data") ||
+      !formData.get("agree_ai_policy") ||
       !formData.get("agree_fingerprint") ||
-      !formData.get("agree_course_policies") ||
+      !formData.get("agree_policies") ||
       !formData.get("agree_own_work"))
   ) {
+    return { error: "You need to agree to all the checkboxes to join." };
+  }
+  if (role === "trainer" && (!formData.get("agree_confidentiality") || !formData.get("agree_procedures"))) {
     return { error: "You need to agree to all the checkboxes to join." };
   }
   const specialConsideration =

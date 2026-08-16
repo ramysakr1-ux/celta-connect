@@ -1,18 +1,19 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { categorize, toLocalIso } from "@/lib/timetable-grid";
-import { CATEGORY_ACCENT } from "@/app/trainer/(hub)/timetable/event-cell";
-import { halfTpDates, type TpTimetableEvent } from "@/lib/rotation";
+import { resolveTimeBands, toLocalIso } from "@/lib/timetable-grid";
+import { halfTpDates, halfOwningDate, type TpTimetableEvent } from "@/lib/rotation";
+import { groupCodeForHalf, isMine, type HalfInfo } from "@/lib/timetable-read-only";
+import { ReadOnlyTimetableBoard } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
+import type { TimetableEvent } from "@/lib/timetable-grid";
 
-// for-claude-code-trainee-interface.md's Timetable tab -- read-only,
-// filtered to this trainee. Grouped by day rather than literally one row
-// per day (a real day can carry several events -- input session, TP,
-// deadline -- and collapsing those would lose real information), each
-// event still rendered as its own detail row underneath its day header.
+// for-claude-code-timetable-view.md's read-only 4-week board -- trainee's
+// own view, and what staff see when previewing a trainee's portfolio
+// (preview !== "trainee" gate below, same pattern as the rest of this
+// section). "Mine" involvement and TP letter codes are derived fresh each
+// render (see timetable-read-only.ts) -- nothing new stored.
 export default async function TraineeTimetablePage({
   params,
   searchParams,
@@ -29,13 +30,14 @@ export default async function TraineeTimetablePage({
   const isStaff = (viewer?.role === "trainer" || viewer?.role === "admin") && preview !== "trainee";
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
-  const { data: trainee } = await supabase.from("profiles").select("course_id").eq("id", traineeId).maybeSingle();
+  const { data: trainee } = await supabase.from("profiles").select("course_id, full_name").eq("id", traineeId).maybeSingle();
   if (!trainee?.course_id) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
   const today = toLocalIso(new Date());
 
-  const [{ data: events }, { data: plans }, { data: subgroupMember }, { data: supervisedCompletions }] = await Promise.all([
+  const [{ data: course }, { data: events }, { data: plans }, { data: subgroupMember }, { data: supervisedCompletions }] = await Promise.all([
+    supabase.from("courses").select("time_bands").eq("id", trainee.course_id).maybeSingle(),
     supabase
       .from("course_timetable_events")
       .select("*")
@@ -43,118 +45,135 @@ export default async function TraineeTimetablePage({
       .order("event_date")
       .order("event_time"),
     supabase.from("plan_assignments").select("tp_number, taught_at").eq("trainee_id", traineeId),
-    supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle(),
-    // for-claude-code-supervised-review.md -- lets the trainee's own
-    // Timetable show whether they've already submitted a given supervised
-    // session, without a separate query per row.
+    supabase.from("course_subgroup_members").select("subgroup_id, base_slot").eq("trainee_id", traineeId).maybeSingle(),
     supabase.from("supervised_session_completions").select("timetable_event_id, submitted_at").eq("trainee_id", traineeId),
   ]);
-  const supervisedSubmittedByEventId = new Map((supervisedCompletions ?? []).map((c) => [c.timetable_event_id, Boolean(c.submitted_at)]));
+  void supervisedCompletions; // reserved for a future supervised-session detail row; not surfaced in the board yet
 
-  // "Their own TP lessons get a teal left rule" -- only resolvable for a
-  // paired subgroup, where a real date maps to a real TP number (same
-  // honest limit as Today tab's "you teach today" and the trainer-side TP
-  // Marking Queue: an unpaired subgroup has no date system to check
-  // against, so every TP event reads as "observed" for those trainees).
+  const timeBands = resolveTimeBands(course?.time_bands ?? null);
+  const allEvents: TimetableEvent[] = events ?? [];
+  const tpEvents: TpTimetableEvent[] = allEvents.filter((e) => e.type === "tp").map((e) => ({ event_date: e.event_date }));
+
+  // "Their own TP lessons" -- only resolvable for a paired subgroup, same
+  // honest limit as the trainer-side TP Marking Queue/Rotation board (see
+  // src/lib/rotation.ts's own comments): an unpaired subgroup has no date
+  // system to check a personal teaching date against.
   const ownTpDates = new Set<string>();
+  let viewerHalfOrder: 1 | 2 | null = null;
+  let viewerSubgroupId: string | null = null;
+  let viewerGroupLabel: string | null = null;
+  const halvesByCode = new Map<string, string>(); // computed "ABC"/"DEF" -> subgroupId
+
   if (subgroupMember) {
+    viewerSubgroupId = subgroupMember.subgroup_id;
     const { data: subgroup } = await supabase
       .from("course_subgroups")
-      .select("half_order")
+      .select("id, tp_group_id, half_order, name")
       .eq("id", subgroupMember.subgroup_id)
       .maybeSingle();
+
     if (subgroup?.half_order) {
-      const tpTimetableEvents: TpTimetableEvent[] = (events ?? []).filter((e) => e.type === "tp").map((e) => ({ event_date: e.event_date }));
-      const halfDates = halfTpDates(tpTimetableEvents, subgroup.half_order);
+      viewerHalfOrder = subgroup.half_order as 1 | 2;
+      const halfTpTimetableEvents: TpTimetableEvent[] = tpEvents;
+      const halfDates = halfTpDates(halfTpTimetableEvents, viewerHalfOrder);
       const assignedTpNumbers = new Set((plans ?? []).map((p) => p.tp_number));
       halfDates.forEach((date, i) => {
         if (assignedTpNumbers.has(i + 1)) ownTpDates.add(date);
       });
     }
+
+    if (subgroup?.tp_group_id) {
+      const { data: tpGroup } = await supabase.from("course_tp_groups").select("name").eq("id", subgroup.tp_group_id).maybeSingle();
+      const { data: siblingSubgroups } = await supabase
+        .from("course_subgroups")
+        .select("id, half_order")
+        .eq("tp_group_id", subgroup.tp_group_id);
+      const subgroupIds = (siblingSubgroups ?? []).map((s) => s.id);
+      const { data: allMembers } = subgroupIds.length
+        ? await supabase.from("course_subgroup_members").select("subgroup_id, trainee_id, base_slot").in("subgroup_id", subgroupIds)
+        : { data: [] };
+
+      const halves: HalfInfo[] = (siblingSubgroups ?? [])
+        .filter((s): s is { id: string; half_order: 1 | 2 } => s.half_order === 1 || s.half_order === 2)
+        .map((s) => ({
+          subgroupId: s.id,
+          halfOrder: s.half_order as 1 | 2,
+          members: (allMembers ?? [])
+            .filter((m) => m.subgroup_id === s.id)
+            .map((m) => ({ traineeId: m.trainee_id, subgroupId: s.id, baseSlot: m.base_slot })),
+        }));
+
+      for (const half of halves) {
+        halvesByCode.set(groupCodeForHalf(half), half.subgroupId);
+      }
+      viewerGroupLabel = tpGroup?.name ?? subgroup.name ?? null;
+    } else {
+      viewerGroupLabel = subgroup?.name ?? null;
+    }
   }
 
-  const eventsByDate = new Map<string, typeof events>();
-  for (const e of events ?? []) {
-    const list = eventsByDate.get(e.event_date) ?? [];
-    list.push(e);
-    eventsByDate.set(e.event_date, list);
+  const isMineEvent = (event: TimetableEvent) =>
+    isMine({
+      eventTag: event.tag,
+      eventType: event.type,
+      eventDate: event.event_date,
+      viewer: { subgroupId: viewerSubgroupId, tpGroupId: null },
+      tpEvents,
+      viewerHalfOrder,
+      groupCodeByTag: halvesByCode,
+    });
+
+  const isOwnTpSlot = (event: TimetableEvent) => event.type === "tp" && ownTpDates.has(event.event_date);
+
+  const teachingLettersFor = (event: TimetableEvent): string | null => {
+    if (event.type !== "tp" || !viewerSubgroupId) return null;
+    const owningHalfOrder = halfOwningDate(tpEvents, event.event_date);
+    if (owningHalfOrder === null) return null;
+    for (const [code, subgroupId] of halvesByCode) {
+      if (subgroupId === viewerSubgroupId && owningHalfOrder === viewerHalfOrder) return code;
+    }
+    // Not the viewer's own half teaching that day -- still show the owning
+    // half's code if we can find it (any half whose halfOrder matches).
+    return null;
+  };
+
+  // Functions can't cross the server/client component boundary -- precompute
+  // per-event involvement here and pass plain data down instead.
+  const eventMeta: Record<string, { mine: boolean; ownTpSlot: boolean; teachingLetters: string | null }> = {};
+  for (const event of allEvents) {
+    eventMeta[event.id] = {
+      mine: isMineEvent(event),
+      ownTpSlot: isOwnTpSlot(event),
+      teachingLetters: teachingLettersFor(event),
+    };
   }
-  const dates = [...eventsByDate.keys()].sort();
-  const firstDate = dates[0];
-  const lastDate = dates[dates.length - 1];
-  const weekRange =
-    firstDate && lastDate
-      ? `${new Date(`${firstDate}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} – ${new Date(`${lastDate}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`
-      : null;
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Timetable</p>
-          <h1 className="font-serif text-2xl text-ink">{weekRange ?? "Nothing scheduled yet"}</h1>
-        </div>
-        {!isStaff ? (
+      {!isStaff ? (
+        <div className="flex justify-end">
           <a
             href={`/api/portfolio/${traineeId}/timetable.ics`}
             className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
           >
             Add to my calendar
           </a>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
-      <div className="sheet flex flex-col !p-0">
-        {dates.length === 0 ? (
-          <p className="p-6 text-sm text-muted">No events yet.</p>
-        ) : (
-          dates.map((date, i) => {
-            const dayEvents = eventsByDate.get(date) ?? [];
-            const isToday = date === today;
-            return (
-              <div key={date} className={`px-5 py-3.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-                  {new Date(`${date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
-                  {isToday ? <span className="pill pill-info ml-2">Today</span> : null}
-                </p>
-                <div className="mt-2 flex flex-col gap-2">
-                  {dayEvents.map((event) => {
-                    const isOwnTp = event.type === "tp" && ownTpDates.has(event.event_date);
-                    const category = categorize(event);
-                    const planDue = event.linked_assignment_type && event.event_date >= today;
-                    const isSupervised = event.type === "supervised_session";
-                    const supervisedSubmitted = isSupervised && (supervisedSubmittedByEventId.get(event.id) ?? false);
-                    const rowContent = (
-                      <>
-                        <span className="w-14 shrink-0 text-xs tabular-nums text-muted">{event.event_time?.slice(0, 5) ?? ""}</span>
-                        <span className={`flex-1 text-sm ${isOwnTp ? "font-semibold text-ink" : "text-ink"}`}>{event.title}</span>
-                        {isOwnTp ? <span className="pill pill-success">Your TP</span> : null}
-                        {planDue ? <span className="pill pill-neutral">Plan due</span> : null}
-                        {isSupervised ? (
-                          <span className={supervisedSubmitted ? "pill pill-success" : "pill pill-info"}>
-                            {supervisedSubmitted ? "Done" : "Open task →"}
-                          </span>
-                        ) : null}
-                      </>
-                    );
-                    const rowClass = "flex items-center gap-3 border-l-[3px] pl-3";
-                    const rowStyle = { borderLeftColor: isOwnTp ? "var(--color-primary)" : CATEGORY_ACCENT[category] };
-                    return isSupervised && !isStaff ? (
-                      <Link key={event.id} href={`/portfolio/${traineeId}/supervised/${event.id}`} className={`${rowClass} hover:bg-accent/20`} style={rowStyle}>
-                        {rowContent}
-                      </Link>
-                    ) : (
-                      <div key={event.id} className={rowClass} style={rowStyle}>
-                        {rowContent}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
+      {allEvents.length === 0 ? (
+        <div className="sheet text-sm text-muted">No events yet.</div>
+      ) : (
+        <ReadOnlyTimetableBoard
+          events={allEvents}
+          eventMeta={eventMeta}
+          timeBands={timeBands}
+          viewerName={trainee.full_name ?? "You"}
+          viewerGroupLabel={viewerGroupLabel}
+          today={today}
+          nowIso={new Date().toISOString()}
+        />
+      )}
     </div>
   );
 }

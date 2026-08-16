@@ -122,3 +122,68 @@ export async function saveObservation(
   revalidatePath("/dashboard/trainee/celta5");
   return { error: null };
 }
+
+export interface ObservationTaskFormState {
+  error: string | null;
+}
+
+// Submitting a directed observation task also creates a real `observations`
+// row (date/length/level/filmed, same fields as the plain self-log) so the
+// task-based path feeds the same 6-hour requirement through the same one
+// computeObservationHours() function -- no second hour-tracking system.
+export async function submitObservationTask(
+  _prevState: ObservationTaskFormState,
+  formData: FormData
+): Promise<ObservationTaskFormState> {
+  const trainee = await requireRole("trainee");
+
+  const taskId = formData.get("task_id");
+  const response = (formData.get("response") as string | null)?.trim();
+  if (typeof taskId !== "string" || !taskId) return { error: "Missing task." };
+  if (!response) return { error: "Write a response before submitting." };
+
+  const observationDate = (formData.get("observation_date") as string) || null;
+  const lengthMinutes = formData.get("length_minutes") ? Number(formData.get("length_minutes")) : null;
+  const level = (formData.get("level") as string) || null;
+  const learnersPresent = formData.get("learners_present") ? Number(formData.get("learners_present")) : null;
+  const filmed = formData.get("filmed") === "on";
+
+  const supabase = await createClient();
+
+  const { data: observation, error: observationError } = await supabase
+    .from("observations")
+    .insert({
+      course_id: trainee.course_id!,
+      trainee_id: trainee.id,
+      observation_date: observationDate,
+      length_minutes: lengthMinutes,
+      level,
+      learners_present: learnersPresent,
+      filmed,
+    })
+    .select("id")
+    .single();
+
+  if (observationError || !observation) {
+    return { error: "Could not save. Try again." };
+  }
+
+  const { error: submissionError } = await supabase.from("observation_task_submissions").insert({
+    task_id: taskId,
+    trainee_id: trainee.id,
+    observation_id: observation.id,
+    response,
+  });
+
+  if (submissionError) {
+    // Roll back the observation row -- otherwise a failed submission
+    // (e.g. already submitted, unique constraint) would still silently
+    // count toward the trainee's observation hours with no visible task
+    // response attached to it.
+    await supabase.from("observations").delete().eq("id", observation.id);
+    return { error: "Could not submit -- you may have already submitted this task." };
+  }
+
+  revalidatePath("/portfolio", "layout");
+  return { error: null };
+}

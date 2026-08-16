@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { setTimetableLock } from "@/app/trainer/(hub)/timetable/actions";
 import { AddEventForm } from "@/app/trainer/(hub)/timetable/add-event-form";
 import { GenerateSkeletonForm } from "@/app/trainer/(hub)/timetable/generate-skeleton-form";
-import { TimetableGrid } from "@/app/trainer/(hub)/timetable/timetable-grid";
+import { DragBoard } from "@/app/trainer/(hub)/timetable/drag-board";
 import { TimeBandsForm } from "@/app/trainer/(hub)/timetable/time-bands-form";
 import { resolveTimeBands } from "@/lib/timetable-grid";
 import { Stage2Section } from "@/app/trainer/(hub)/timetable/stage2-section";
@@ -174,13 +174,7 @@ export default async function TrainerTimetablePage({
 
       {events && events.length > 0 ? (
         <div className="sheet">
-          <TimetableGrid
-            events={events}
-            locked={locked}
-            timeBands={timeBands}
-            volunteers={volunteers ?? []}
-            attendedByEvent={attendedByEvent}
-          />
+          <DragBoard events={events} locked={locked} volunteers={volunteers ?? []} attendedByEvent={attendedByEvent} />
         </div>
       ) : (
         <div className="sheet text-sm text-muted">No events yet.</div>
