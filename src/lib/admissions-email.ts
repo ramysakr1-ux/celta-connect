@@ -282,17 +282,25 @@ export function acknowledgementEmailHtml(input: {
   `;
 }
 
-// NOT SENT ON ITS OWN. Ramy, 2026-08-16: "The task is sent with the acceptance
-// email and the link -- so once they get the link, they also get the task."
+// Its own email, sent BEFORE the interview. for-claude-code-email-copy.md §1
+// item 2: "Tells them the task is waiting; the task itself opens in Connect
+// and autosaves. Carries: link to the task only." Item 3, the interview
+// invite, then opens "Thank you for the written tasks -- we have read them",
+// so it can only follow this one.
 //
-// Kept as a function because the wording still has to appear somewhere: it
-// becomes a section inside the workspace-invitation email rather than a
-// nineteenth message of its own. Sending it separately would mean two emails
-// arriving minutes apart, each telling the candidate to go and do something.
+// There are TWO tasks in the journey and they are not interchangeable: this
+// pre-INTERVIEW task, and the pre-COURSE task that rides with the workspace
+// invitation (item 11, "Before day one - Pre-course task, about 4 hours").
+// An earlier version of this comment merged the two and folded this email into
+// the workspace invitation. That was wrong, and it would have meant a
+// candidate being asked to do the selection task after they had already been
+// accepted onto the course.
 //
-// This also closes the gap that made it unsendable anyway -- there was no
-// moment in the app where a task "became ready", because the writing task is
-// part of the application form.
+// NOT YET SENDABLE, and the reason is structural rather than missing plumbing:
+// the spec has the task opening in Connect and autosaving, which means it is a
+// thing that exists before they touch it. This build puts the writing task
+// inside the application form itself, so there is no moment at which a task
+// "becomes ready" to announce. Splitting the task out of the form is the fix.
 export function taskWaitingEmailHtml(input: {
   applicantName: string;
   courseName: string;
