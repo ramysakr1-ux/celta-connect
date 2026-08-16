@@ -101,6 +101,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   signName: { fontSize: 9, color: COLOR.ink },
+  platformCredit: {
+    marginTop: 14,
+    textAlign: "center",
+    fontSize: 7,
+    letterSpacing: 0.6,
+    color: "#a9a094",
+  },
   signRole: { fontSize: 8, color: COLOR.muted },
 });
 
@@ -156,6 +163,14 @@ export async function renderCertificateBuffer(input: CertificateInput): Promise<
               ))}
             </View>
           </View>
+
+          {/* Ramy, 2026-08-16: "We can have Connect at the bottom, small one."
+              Outside the inner frame and deliberately quiet -- the certificate
+              belongs to the centre and to the person named on it, and the
+              platform that printed it is a footnote, not a party to the
+              achievement. Still no Cambridge logo: this is not a Cambridge
+              award. */}
+          <Text style={styles.platformCredit}>Issued through Connect</Text>
         </View>
       </Page>
     </Document>
