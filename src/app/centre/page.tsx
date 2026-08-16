@@ -61,6 +61,19 @@ export default async function CentreOverviewPage({
       ? await admin.from("volunteer_students").select("id, course_id").in("course_id", courseIds)
       : { data: [] };
 
+  // "Only 'bounced' creates a task -- on the admissions screen, scoped to the
+  // candidate." Surfaced here too because a bounced workspace invitation to a
+  // paid-up candidate is the one nobody can afford to miss.
+  const { data: bounces } = canView(ctx.roles, "admissions.view")
+    ? await admin
+        .from("email_bounce_tasks")
+        .select("id, email_address, reason, consecutive_bounces, applicant_id")
+        .in("center_id", scope)
+        .is("resolved_at", null)
+        .order("created_at", { ascending: false })
+        .limit(5)
+    : { data: [] };
+
   const { data: plans } =
     canView(ctx.roles, "payments.view") && courseIds.length > 0
       ? await admin.from("payment_plans").select("id, course_id").in("course_id", courseIds)

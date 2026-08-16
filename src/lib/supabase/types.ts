@@ -1487,7 +1487,12 @@ export interface Database {
           subject: string;
           // "sent" means the provider accepted it -- never that it was
           // delivered or read. Delivery webhooks are a separate, unbuilt piece.
-          status: "sent" | "failed";
+          status: "sent" | "delivered" | "opened" | "bounced" | "failed";
+          provider_message_id: string | null;
+          bounce_reason: string | null;
+          delivered_at: string | null;
+          opened_at: string | null;
+          bounced_at: string | null;
           error: string | null;
           // Null for anything a cron sent.
           sent_by: string | null;
@@ -1525,6 +1530,24 @@ export interface Database {
           role: string;
         };
         Update: Partial<Database["public"]["Tables"]["organisation_roles"]["Row"]>;
+        Relationships: [];
+      };
+      email_bounce_tasks: {
+        Row: {
+          id: string;
+          center_id: string;
+          applicant_id: string | null;
+          email_address: string;
+          reason: string | null;
+          consecutive_bounces: number;
+          resolved_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["email_bounce_tasks"]["Row"]> & {
+          center_id: string;
+          email_address: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["email_bounce_tasks"]["Row"]>;
         Relationships: [];
       };
       centre_areas: {

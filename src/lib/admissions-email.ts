@@ -31,10 +31,38 @@ export async function sendApplicantEmail(input: {
   type?: ApplicantEmailType;
   sentBy?: string | null;
 }): Promise<{ error: string | null }> {
+  // "After **two consecutive bounces** to the same address, Connect stops
+  // sending and requires a new address." Checked before sending rather than
+  // after, because the point is to stop mail leaving for an address already
+  // known to be dead. The bounce that matters most is a workspace invitation
+  // to a paid-up candidate -- a person with no way into the course they've
+  // paid for -- so this refuses loudly rather than silently dropping it.
+  if (input.centerId) {
+    try {
+      const { createAdminClient } = await import("@/lib/supabase/admin");
+      const { data: task } = await createAdminClient()
+        .from("email_bounce_tasks")
+        .select("consecutive_bounces, reason")
+        .eq("center_id", input.centerId)
+        .eq("email_address", input.to)
+        .is("resolved_at", null)
+        .maybeSingle();
+      if (task && task.consecutive_bounces >= 2) {
+        return {
+          error: `Mail to ${input.to} has bounced twice (${task.reason ?? "no reason given"}). Connect won't send there again until the address is corrected.`,
+        };
+      }
+    } catch {
+      // A lookup failure must not block a send -- refusing to email because we
+      // couldn't check is worse than sending one that may bounce.
+    }
+  }
+
   let failure: string | null = null;
+  let providerMessageId: string | null = null;
   try {
     const resend = createResendClient();
-    const { error } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: `${input.centerName} <noreply@celtaconnect.com>`,
       to: input.to,
       replyTo: input.centerAdmissionsEmail ?? undefined,
@@ -42,6 +70,8 @@ export async function sendApplicantEmail(input: {
       html: input.html,
     });
     failure = error ? error.message : null;
+    // Kept so the delivery webhook can find this row later.
+    providerMessageId = data?.id ?? null;
   } catch (err) {
     failure = err instanceof Error ? err.message : "Could not send the email.";
   }
@@ -59,8 +89,11 @@ export async function sendApplicantEmail(input: {
         type: input.type,
         to_email: input.to,
         subject: input.subject,
+        // "sent" means the provider accepted it and nothing more -- delivered,
+        // opened and bounced arrive later from the webhook.
         status: failure ? "failed" : "sent",
         error: failure,
+        provider_message_id: providerMessageId,
         sent_by: input.sentBy ?? null,
       });
     } catch {
