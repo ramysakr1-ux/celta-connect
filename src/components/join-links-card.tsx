@@ -93,11 +93,12 @@ export function JoinLinksCard({
   return (
     <div className="card flex flex-col gap-4 p-6">
       <div>
-        <h2 className="font-serif text-lg text-ink">Join links</h2>
+        <h2 className="font-serif text-lg text-ink">Or share a general link</h2>
         <p className="mt-1 text-sm text-muted">
-          Share these links directly (text, WhatsApp, in person) -- whoever opens one sets up
-          their own account instantly, no email required. Regenerating a link invalidates the old
-          one.
+          Share these directly (text, WhatsApp, in person) -- whoever opens one sets up their own
+          account instantly, no email required. Use these for a cohort of candidates; invite tutors
+          by name above, so the role travels with the invitation. Regenerating a link invalidates
+          the old one.
         </p>
       </div>
       <LinkRow label="Trainee join link" link={traineeLink} courseId={courseId} role="trainee" />

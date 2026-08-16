@@ -127,6 +127,12 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
         <input type="hidden" name="delivery_mode" value={deliveryMode} />
         <DeliveryModePicker value={deliveryMode} onChange={setDeliveryMode} />
 
+        {/* The design says this plainly at setup, because the obvious next
+            question after choosing a mode is "where do I add my tutors?" */}
+        <p className="rounded-[6px] border border-border bg-surface-muted px-3 py-2 text-xs text-muted">
+          Tutors are assigned on the roster, not in this wizard.
+        </p>
+
         <div className="flex items-center gap-3">
           <button
             type="submit"
