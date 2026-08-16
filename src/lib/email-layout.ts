@@ -27,20 +27,29 @@ export const EMAIL_TONE = {
   gold: "#ad7f43",
   /** Rejection, flag. */
   red: "#972622",
-  /** Confirmation, positive. */
-  green: "#346c42",
+  /**
+   * Confirmation, positive. Brass, not green (Ramy, 2026-08-16) -- the green
+   * is out of the palette, here as everywhere else. Same value as gold; kept
+   * as its own name so an email can still say "this is a confirmation" rather
+   * than "this is time-limited", even though they now look alike.
+   */
+  green: "#ad7f43",
   /** Plain acknowledgements, nothing to signal. */
   muted: "#6d655c",
   /**
-   * No accent at all -- the card's own border colour as the spine.
+   * The sober one, for the rejections and "the course filled before a place
+   * came free".
    *
-   * Applications.dc.html gives this to both rejections and to "the course
-   * filled before a place came free", while the interview invitation and offer
-   * get teal and the waiting-list pair get gold. It is a deliberate silence:
-   * a coloured bar shouting at someone you have just turned down would be
-   * gratuitous, and red in particular would read as an alarm about them.
+   * Applications.dc.html leaves these with no accent at all -- the card's own
+   * near-white border. Ramy overrode that on 2026-08-16: every email carries a
+   * coloured line, because a set where some have one and some don't reads as a
+   * mistake rather than as restraint.
+   *
+   * So this is the warm muted brown rather than teal or gold. It is visibly a
+   * line, which is what was asked for, without a bright bar celebrating at
+   * someone who has just been turned down.
    */
-  plain: "#e0dcd4",
+  plain: "#6d655c",
 } as const;
 
 export type EmailTone = keyof typeof EMAIL_TONE;

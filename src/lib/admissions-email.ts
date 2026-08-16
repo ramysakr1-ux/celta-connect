@@ -689,7 +689,6 @@ export function acceptancePlaceEmailHtml(input: {
   depositBy: string;
   balanceBy: string;
   payUrl: string;
-  setupUrl: string;
   directorName: string;
   directorRole: string;
 }): string {
@@ -710,11 +709,18 @@ export function acceptancePlaceEmailHtml(input: {
         sub: `A receipt is sent automatically. The balance is due by ${input.balanceBy}.`,
       }) +
       p("Once the deposit clears, there are two more things to do, and neither is urgent.") +
-      inlineButton({
-        label: "Set up your Connect account",
-        url: input.setupUrl,
-        sub: "This is where the whole course lives — your timetable, your lesson plans, your assignments.",
-      }) +
+      // Course Emails.dc.html puts a live "Set up your Connect account" button
+      // here. It cannot stay: Ramy, 2026-08-16 -- "the Connect account will
+      // only be set up after they pay a deposit; they will be sent a different
+      // email after that."
+      //
+      // A button now would hand over the link before the centre has given its
+      // green light, and then the workspace email would hand over the same link
+      // again a week later. So the sentence survives and the button does not:
+      // this email says what is coming, the workspace email delivers it.
+      p(
+        "The first is your Connect account — that is where the whole course lives: your timetable, your lesson plans, your assignments. We will send you the link as soon as the deposit clears."
+      ) +
       p(
         "Second, the pre-course task. It takes most people eight to ten hours spread over a few weeks, and you hand it in on the first morning. It is not graded. Do not leave it until the week before."
       ) +

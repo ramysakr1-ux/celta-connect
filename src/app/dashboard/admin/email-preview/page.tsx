@@ -139,7 +139,6 @@ const SAMPLES: { key: string; label: string; source: string; html: string }[] = 
       depositBy: "Friday 12 December",
       balanceBy: "20 December",
       payUrl: "https://celtaconnect.com/pay/sample",
-      setupUrl: "https://celtaconnect.com/offer/sample",
       directorName: "Nazlı Aydın",
       directorRole: "Course Director",
     }),
