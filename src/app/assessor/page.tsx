@@ -99,6 +99,11 @@ export default async function AssessorPage() {
   // since briefs are identical for the whole cohort.
   const firstCandidateId = candidates[0]?.traineeId ?? null;
 
+  const courseDates =
+    course.start_date && course.end_date
+      ? `${new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} \u2013 ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
+      : "";
+
   return (
     <div className="min-h-screen bg-[oklch(92.5%_0.012_85)]">
       {/* "Top banner (full-width, warm-dark bg, cream text, 10px/32px
@@ -138,13 +143,14 @@ export default async function AssessorPage() {
         </a>
       </header>
 
-      <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-6 py-6">
+      <div className="mx-auto flex max-w-[1620px] flex-col gap-[22px] px-8 pt-7 pb-11">
         <div className="rounded-[8px] border border-[oklch(88%_0.016_82)] bg-[oklch(99.2%_0.005_90)] p-6">
           <p className="text-xs uppercase tracking-[0.1em] text-[oklch(51%_0.017_70)]">
             {center?.name ?? "Centre"} · {center?.center_number ?? ""} · {course.name}
+            {course.start_date && course.end_date ? ` · ${courseDates}` : ""}
           </p>
           <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
-            <h1 className="font-serif text-2xl text-[oklch(23.5%_0.017_65)]">
+            <h1 className="font-serif text-[28px] leading-tight text-[oklch(23.5%_0.017_65)]">
               Assessor visit{course.assessor_visit_date ? ` — ${course.assessor_visit_date}` : ""}
             </h1>
             {sendByDate ? (
@@ -176,7 +182,7 @@ export default async function AssessorPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-[1.6fr_1fr]">
           {/* Candidate portfolios */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {candidates.map((c) => (
