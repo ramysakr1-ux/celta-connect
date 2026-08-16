@@ -1581,6 +1581,24 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["refunds"]["Row"]>;
         Relationships: [];
       };
+      // migration 0119 -- Handbook 14.2's candidate-concerns meeting. The
+      // assessor sees a COUNT before the visit, never the names: a list
+      // circulating beforehand would deter the candidate this exists for.
+      assessor_meeting_requests: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          requested_at: string;
+          withdrawn_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["assessor_meeting_requests"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["assessor_meeting_requests"]["Row"]>;
+        Relationships: [];
+      };
       organisations: {
         Row: { id: string; name: string; created_at: string };
         Insert: Partial<Database["public"]["Tables"]["organisations"]["Row"]> & { name: string };

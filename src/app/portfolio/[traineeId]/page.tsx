@@ -13,6 +13,7 @@ import { toLocalIso } from "@/lib/timetable-grid";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 import { DesignerCredit } from "@/components/designer-credit";
+import { AssessorMeetingCard } from "./assessor-meeting-card";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   input_session: "Input session",
@@ -137,6 +138,10 @@ export default async function CourseStreamPage({
   // §3 -- once deferred, the frozen transfer record itself is the fuller
   // status detail worth showing (reasons, hours carried, whether it's been
   // linked to a destination course yet), not just the generic status note.
+  const { data: courseForVisit } = trainee.course_id
+    ? await supabase.from("courses").select("assessor_visit_date").eq("id", trainee.course_id).maybeSingle()
+    : { data: null };
+
   let deferralTransfer: { reasons: string; hours_carried: number; reintegration_deadline: string | null; linked_at: string | null } | null =
     null;
   if (isStaff && trainee.course_status === "deferred") {
@@ -149,6 +154,20 @@ export default async function CourseStreamPage({
       .maybeSingle();
     deferralTransfer = data;
   }
+
+  // Handbook 14.2's candidate-concerns meeting. Only offered to the candidate
+  // themselves, and only when a visit is actually scheduled -- a permanent
+  // control would read as an invitation to complain, and a tutor viewing the
+  // portfolio must never be able to raise or cancel one on someone's behalf.
+  const ownVisitDate = !isStaff && trainee.course_id ? (courseForVisit?.assessor_visit_date ?? null) : null;
+  const { data: ownMeetingRequest } = ownVisitDate
+    ? await supabase
+        .from("assessor_meeting_requests")
+        .select("id")
+        .eq("trainee_id", traineeId)
+        .is("withdrawn_at", null)
+        .maybeSingle()
+    : { data: null };
 
   return (
     <div className="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-[1fr_300px] lg:grid-rows-[auto_1fr]">
@@ -381,6 +400,19 @@ export default async function CourseStreamPage({
           ) : null}
         </div>
       </div>
+
+      {ownVisitDate ? (
+        <div className="lg:col-start-2">
+          <AssessorMeetingCard
+            traineeId={traineeId}
+            visitDate={new Date(`${ownVisitDate}T00:00:00`).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "long",
+            })}
+            alreadyRequested={Boolean(ownMeetingRequest)}
+          />
+        </div>
+      ) : null}
 
       <DesignerCredit />
     </div>

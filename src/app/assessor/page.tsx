@@ -92,6 +92,15 @@ export default async function AssessorPage({
     admin.from("resources").select("id, title, file_url").eq("center_id", course.center_id).eq("category", "centre_documents"),
   ]);
 
+  // "A count of candidates who requested to speak with the assessor" -- a
+  // count, never the names. Read head-only so the identities never even leave
+  // the database.
+  const { count: concernsCount } = await admin
+    .from("assessor_meeting_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("course_id", courseId)
+    .is("withdrawn_at", null);
+
   const tutorProfileIds = (tutorRows ?? []).map((t) => t.profile_id);
   const { data: tutorProfiles } =
     tutorProfileIds.length > 0 ? await admin.from("profiles").select("id, full_name").in("id", tutorProfileIds) : { data: [] };
@@ -413,16 +422,46 @@ export default async function AssessorPage({
                   </span>
                 ) : (
                   (onDayEvents ?? []).map((e) => (
-                    <div key={e.id} style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+                    <div key={e.id} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                       <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none", fontVariantNumeric: "tabular-nums" }}>
                         {e.event_time?.slice(0, 5) ?? ""}
                       </span>
-                      <span style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{e.title}</span>
+                      <span>
+                        <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>{e.title}</span>
+                        {/* "which TPs are observable and when (with Zoom link
+                            timing for online ones)". An assessor needs to know
+                            whether to be in a room or at a screen. */}
+                        <span style={{ fontSize: 11, color: MUTED }}>
+                          {e.type === "tp" ? "Observable · " : ""}
+                          {e.zoom_url ? "Online — joining link opens 10 minutes before" : "In person at the centre"}
+                        </span>
+                      </span>
                     </div>
                   ))
                 )}
+
+                {/* The two fixed meetings the visit day always carries. They
+                    are not timetable events, so nothing would ever have put
+                    them here. */}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
+                  <span>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Tutor meeting</span>
+                    <span style={{ fontSize: 11, color: MUTED }}>Time agreed with the main course tutor</span>
+                  </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
+                  <span>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Candidate-concerns meeting</span>
+                    <span style={{ fontSize: 11, color: MUTED }}>Private, without tutors present</span>
+                  </span>
+                </div>
+
                 <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(90% 0.012 85)" }}>
-                  Live TP joining links and the count of candidates who requested to speak with the assessor aren&apos;t tracked yet.
+                  {concernsCount && concernsCount > 0
+                    ? `${concernsCount} candidate${concernsCount === 1 ? " has" : "s have"} asked to speak with you. Names are not shown before the meeting.`
+                    : "No candidate has asked to speak with you."}
                 </span>
               </div>
             </div>
