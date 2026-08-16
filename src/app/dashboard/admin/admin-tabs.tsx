@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 const TABS = [
   { href: "/admin", label: "Admin" },
   { href: "/admissions", label: "Admissions" },
+  { href: "/admin/import", label: "Import" },
   { href: "/admin/coursebooks", label: "TP Points Library" },
   { href: "/admin/settings", label: "Settings" },
 ] as const;
