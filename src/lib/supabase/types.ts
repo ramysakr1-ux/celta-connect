@@ -414,11 +414,13 @@ export interface Database {
           marking_substance_note: string | null;
           marked_by: string | null;
           marked_at: string | null;
-          // migration 0117 -- the tutor's words about the task, carried into
-          // the offer or rejection email. AI drafts it, a person edits it; the
-          // draft is kept so "did anyone actually read this" is answerable.
+          // migration 0117 -- the trainer's words about the task, shown on the
+          // application form and carried into the offer or rejection email.
+          // The AI suggestion beside it is advisory: AI never sends anything to
+          // an applicant and never makes the decision.
           task_feedback: string | null;
-          task_feedback_ai_draft: string | null;
+          task_feedback_ai_suggestion: string | null;
+          task_feedback_ai_accepted: boolean | null;
           task_feedback_edited_by: string | null;
           task_feedback_edited_at: string | null;
           stage:
