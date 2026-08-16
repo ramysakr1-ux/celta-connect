@@ -19,7 +19,16 @@
   input, warning/info/neutral status tints, brass-foreground).
 */
 :root {
-  --color-background: oklch(97.8% 0.008 85); /* warm cream page bg */
+  /* The page ground. oklch(92.5% 0.012 85) is what FIFTEEN handoff specs say
+     -- Entry, Assessor Visit, Course Admin, Centre Admin, the email shell,
+     every one of them. The app sat at oklch(97.8%) against cards at 99.5%,
+     roughly one percent apart, so nothing separated from anything and every
+     screen read flat. The gap between ground and paper IS the design.
+
+     Changed app-wide on 2026-08-16 rather than per-surface: a scoped fix on
+     the entry pages earlier the same day left the rest of the product
+     inconsistent with its own specs. */
+  --color-background: oklch(92.5% 0.012 85); /* warm beige page ground */
   --color-card: oklch(99.5% 0.004 90); /* card / paper */
   --color-border: oklch(89.5% 0.012 82); /* hairline neutral */
   --color-ink: oklch(23.5% 0.017 65); /* near-black warm ink (body text) */
@@ -303,8 +312,11 @@ h6 {
      and the paper is oklch(99.5% 0.004 90); the gap between those two IS the
      effect. Scoped to entry surfaces rather than changing the global token,
      which would restyle every screen in the product. */
+  /* Kept as a class because entry pages set their own ground explicitly --
+     they render outside the app shell -- but it is now the same value as the
+     global page background rather than a special case. */
   .entry-ground {
-    background-color: oklch(92.5% 0.012 85);
+    background-color: var(--color-background);
   }
 
   .sheet-accent {
