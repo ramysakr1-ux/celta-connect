@@ -8,13 +8,30 @@ import { createResendClient } from "@/lib/resend/client";
 // the recipient's inbox does the word "Connect" appear. Reply-to is the
 // centre's real admissions address when one's configured; falls back to
 // the sending address (still no "Connect" branding visible) otherwise.
+export type ApplicantEmailType =
+  | "offer"
+  | "rejection"
+  | "waiting_list"
+  | "place_freed"
+  | "not_this_time"
+  | "interview_invitation"
+  | "welcome";
+
 export async function sendApplicantEmail(input: {
   centerName: string;
   centerAdmissionsEmail: string | null;
   to: string;
   subject: string;
   html: string;
+  // Logging context. Optional only so an unrelated future caller can't be
+  // blocked from sending -- but every caller in the app passes them, and
+  // without them the send simply isn't recorded.
+  centerId?: string;
+  applicantId?: string | null;
+  type?: ApplicantEmailType;
+  sentBy?: string | null;
 }): Promise<{ error: string | null }> {
+  let failure: string | null = null;
   try {
     const resend = createResendClient();
     const { error } = await resend.emails.send({
@@ -24,11 +41,34 @@ export async function sendApplicantEmail(input: {
       subject: input.subject,
       html: input.html,
     });
-    if (error) return { error: error.message };
-    return { error: null };
+    failure = error ? error.message : null;
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "Could not send the email." };
+    failure = err instanceof Error ? err.message : "Could not send the email.";
   }
+
+  // Logged here rather than at each call site so a new email type cannot
+  // forget to record itself -- and failures are logged too, since a bounced
+  // email is exactly the one a centre needs to see. Never throws: a logging
+  // problem must not turn a sent email into a reported failure.
+  if (input.centerId && input.type) {
+    try {
+      const { createAdminClient } = await import("@/lib/supabase/admin");
+      await createAdminClient().from("applicant_emails").insert({
+        center_id: input.centerId,
+        applicant_id: input.applicantId ?? null,
+        type: input.type,
+        to_email: input.to,
+        subject: input.subject,
+        status: failure ? "failed" : "sent",
+        error: failure,
+        sent_by: input.sentBy ?? null,
+      });
+    } catch {
+      // Deliberately swallowed -- see above.
+    }
+  }
+
+  return { error: failure };
 }
 
 export function offerEmailHtml(input: {

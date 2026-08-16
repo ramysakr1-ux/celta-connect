@@ -35,6 +35,29 @@ export default async function CentreOverviewPage() {
       : Promise.resolve({ data: [] }),
   ]);
 
+  // "There should be an indication there" (Ramy) -- unread admissions
+  // notifications, and what the centre has actually emailed, both belong on
+  // this page rather than only inside an applicant.
+  const [{ data: notifications }, { data: recentEmails }] = await Promise.all([
+    canView(ctx.roles, "admissions.view")
+      ? supabase
+          .from("admissions_notifications")
+          .select("id, type, message, created_at, applicant_id")
+          .eq("center_id", centerId)
+          .is("read_at", null)
+          .order("created_at", { ascending: false })
+          .limit(6)
+      : Promise.resolve({ data: [] }),
+    canView(ctx.roles, "admissions.view")
+      ? supabase
+          .from("applicant_emails")
+          .select("id, type, to_email, status, created_at")
+          .eq("center_id", centerId)
+          .order("created_at", { ascending: false })
+          .limit(6)
+      : Promise.resolve({ data: [] }),
+  ]);
+
   const courseIds = (courses ?? []).map((c) => c.id);
   // volunteer_students is scoped by course, not centre -- it carries a
   // course_id and no center_id.
@@ -217,6 +240,60 @@ export default async function CentreOverviewPage() {
           ) : null}
         </div>
       </div>
+
+      {canView(ctx.roles, "admissions.view") ? (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="rounded-[10px] border border-border bg-card">
+            <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
+              <h2 className="font-serif text-base text-ink">Needs a decision</h2>
+              <span className="text-xs text-muted">{(notifications ?? []).length} unread</span>
+            </div>
+            {(notifications ?? []).length === 0 ? (
+              <p className="px-5 py-4 text-sm text-muted">Nothing waiting on the centre.</p>
+            ) : (
+              (notifications ?? []).map((n, i) => (
+                <Link
+                  key={n.id}
+                  href={n.applicant_id ? `/dashboard/admissions/${n.applicant_id}` : "/dashboard/admissions"}
+                  className={`flex items-center justify-between gap-3 px-5 py-2.5 hover:bg-surface-muted/50 ${i > 0 ? "border-t border-border-faint" : ""}`}
+                >
+                  <span className="text-sm text-ink">{n.message}</span>
+                  <span className="shrink-0 text-xs text-muted">
+                    {new Date(n.created_at).toLocaleDateString("en-GB")}
+                  </span>
+                </Link>
+              ))
+            )}
+          </div>
+
+          <div className="rounded-[10px] border border-border bg-card">
+            <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
+              <h2 className="font-serif text-base text-ink">Emails sent</h2>
+              <span className="text-xs text-muted">most recent</span>
+            </div>
+            {(recentEmails ?? []).length === 0 ? (
+              <p className="px-5 py-4 text-sm text-muted">Nothing sent yet.</p>
+            ) : (
+              (recentEmails ?? []).map((e, i) => (
+                <div key={e.id} className={`flex items-center justify-between gap-3 px-5 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm text-ink capitalize">{e.type.replace(/_/g, " ")}</span>
+                    <span className="block truncate text-xs text-muted">{e.to_email}</span>
+                  </span>
+                  {/* "Sent" means the provider accepted it -- not that it was
+                      delivered or read. Delivery webhooks aren't built, so the
+                      label must not overclaim. */}
+                  <span
+                    className={`shrink-0 text-xs font-semibold ${e.status === "sent" ? "text-muted" : "text-destructive"}`}
+                  >
+                    {e.status === "sent" ? "Sent" : "Failed"}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      ) : null}
 
       {can(ctx.roles, "course.create") ? (
         <div>

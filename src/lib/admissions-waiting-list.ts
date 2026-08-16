@@ -81,6 +81,11 @@ export async function offerNextWaitingListPlace(
       centerAdmissionsEmail: center?.admissions_email ?? null,
       to: next.email,
       subject: `${course?.name ?? "Your application"} -- a place has come free`,
+      centerId: input.centerId,
+      applicantId: next.id,
+      type: "place_freed",
+      // No sentBy -- a cron sent this, and naming a person who didn't would be
+      // a small lie in an audit trail.
       html: placeFreedEmailHtml({
         applicantName: next.full_name,
         courseName: course?.name ?? "the course",

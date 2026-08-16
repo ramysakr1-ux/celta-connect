@@ -288,6 +288,10 @@ export async function rejectApplicant(_prevState: FormState, formData: FormData)
     centerAdmissionsEmail: center?.admissions_email ?? null,
     to: applicant.email,
     subject: `${course?.name ?? "Your application"} -- update on your application`,
+    centerId: staff.center_id,
+    applicantId: applicantId,
+    type: "rejection",
+    sentBy: staff.id,
     html: rejectionEmailHtml({
       applicantName: applicant.full_name,
       courseName: course?.name ?? "the course",
@@ -380,6 +384,10 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
       centerAdmissionsEmail: center?.admissions_email ?? null,
       to: applicant.email,
       subject: `${course?.name ?? "Your course"} -- offer of a place`,
+      centerId: staff.center_id,
+      applicantId: applicantId,
+      type: "offer",
+      sentBy: staff.id,
       html: offerEmailHtml({
         applicantName: applicant.full_name,
         courseName: course?.name ?? "the course",
@@ -482,6 +490,10 @@ export async function addToWaitingList(formData: FormData): Promise<void> {
       centerAdmissionsEmail: center?.admissions_email ?? null,
       to: applicant.email,
       subject: `${course?.name ?? "Your application"} -- waiting list`,
+      centerId: staff.center_id,
+      applicantId: applicantId,
+      type: "waiting_list",
+      sentBy: staff.id,
       html: waitingListEmailHtml({
         applicantName: applicant.full_name,
         courseName: course?.name ?? "the course",

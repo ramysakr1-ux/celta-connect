@@ -46,6 +46,9 @@ export async function runAdmissionsWaitingListCron(): Promise<{ lapsedOffers: nu
       centerAdmissionsEmail: center?.admissions_email ?? null,
       to: applicant.email,
       subject: `${course?.name ?? "Your application"} -- update on your application`,
+      centerId: applicant.center_id,
+      applicantId: applicant.id,
+      type: "not_this_time",
       html: notThisTimeEmailHtml({ applicantName: applicant.full_name, courseName: course?.name ?? "the course" }),
     });
     lapsedOffers++;
@@ -79,6 +82,9 @@ export async function runAdmissionsWaitingListCron(): Promise<{ lapsedOffers: nu
       centerAdmissionsEmail: center?.admissions_email ?? null,
       to: applicant.email,
       subject: `${course?.name ?? "Your application"} -- update on your application`,
+      centerId: applicant.center_id,
+      applicantId: applicant.id,
+      type: "not_this_time",
       html: notThisTimeEmailHtml({ applicantName: applicant.full_name, courseName: course?.name ?? "the course" }),
     });
     notThisTime++;

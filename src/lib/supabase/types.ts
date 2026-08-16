@@ -1460,6 +1460,39 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["course_timetable_events"]["Row"]>;
         Relationships: [];
       };
+      applicant_emails: {
+        Row: {
+          id: string;
+          center_id: string;
+          applicant_id: string | null;
+          type:
+            | "offer"
+            | "rejection"
+            | "waiting_list"
+            | "place_freed"
+            | "not_this_time"
+            | "interview_invitation"
+            | "welcome";
+          to_email: string;
+          subject: string;
+          // "sent" means the provider accepted it -- never that it was
+          // delivered or read. Delivery webhooks are a separate, unbuilt piece.
+          status: "sent" | "failed";
+          error: string | null;
+          // Null for anything a cron sent.
+          sent_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["applicant_emails"]["Row"]> & {
+          center_id: string;
+          type: string;
+          to_email: string;
+          subject: string;
+          status: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["applicant_emails"]["Row"]>;
+        Relationships: [];
+      };
       centre_roles: {
         Row: {
           id: string;
