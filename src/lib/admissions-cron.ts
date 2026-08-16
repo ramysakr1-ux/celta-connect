@@ -58,7 +58,6 @@ export async function runAdmissionsWaitingListCron(): Promise<{ lapsedOffers: nu
         positionWord: null,
         nextCourseName: null,
         nextCourseStart: null,
-        callerName: null,
       }),
     });
     lapsedOffers++;
@@ -104,7 +103,6 @@ export async function runAdmissionsWaitingListCron(): Promise<{ lapsedOffers: nu
         positionWord: null,
         nextCourseName: null,
         nextCourseStart: null,
-        callerName: null,
       }),
     });
     notThisTime++;

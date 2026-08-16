@@ -68,7 +68,6 @@ const SAMPLES: { key: string; label: string; source: string; html: string }[] = 
       centreName: "Meridian English Centre",
       reason:
         "We are not taking your application to interview. The language awareness section showed gaps that would make the first two weeks of the course very difficult — the analysis items described the language rather than analysing it, and meaning and form were not separated.",
-      callerName: "Ramy Sakr",
     }),
   },
   {
@@ -80,7 +79,6 @@ const SAMPLES: { key: string; label: string; source: string; html: string }[] = 
       interviewDate: "13 December",
       reason:
         "We are not offering you a place. Your written task was accurate and well organised, but when we worked through the target language together it was clear that analysing language — separating meaning, form and pronunciation — is not yet somewhere you can start from, and the first fortnight would be very hard.",
-      callerName: "Ramy Sakr",
     }),
   },
   {
@@ -106,7 +104,6 @@ const SAMPLES: { key: string; label: string; source: string; html: string }[] = 
       positionWord: "second",
       nextCourseName: "March",
       nextCourseStart: "4 March",
-      callerName: "Ramy Sakr",
     }),
   },
   {

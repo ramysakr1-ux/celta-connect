@@ -318,52 +318,7 @@ export function taskWaitingEmailHtml(input: {
 
 
 
-// "Names the course, the groups and the dates. Staff terms are accepted once
-// per centre, not per course." The getting-started guide is linked here because
-// the recipient has no account yet -- for-claude-code-getting-started-doc.md:
-// "it must stand alone with no app around it."
-export function tutorAddedEmailHtml(input: {
-  tutorName: string;
-  courseName: string;
-  groups: string[];
-  dates: string;
-  inviteUrl: string;
-  gettingStartedUrl: string;
-  needsStaffTerms: boolean;
-}): string {
-  return `
-    <p>Dear ${input.tutorName},</p>
-    <p>You've been added as a tutor on ${input.courseName}, running ${input.dates}.</p>
-    ${input.groups.length ? `<p><strong>Your groups:</strong> ${input.groups.join(", ")}</p>` : ""}
-    <p>Set up your access here:</p>
-    <p><a href="${input.inviteUrl}">${input.inviteUrl}</a></p>
-    ${input.needsStaffTerms ? `<p>You'll be asked to accept the staff terms once. That's per centre, not per course -- you won't be asked again for your next course here.</p>` : ""}
-    <p>If you'd like to read up before you log in, everything worth knowing is here: <a href="${input.gettingStartedUrl}">${input.gettingStartedUrl}</a></p>
-  `;
-}
 
-// "The first login for a centre. What to do first: connect storage, import
-// briefs." A centre with nothing connected can't export a closed course, so the
-// order in this email is the order that avoids a problem later.
-export function centreCreatedEmailHtml(input: {
-  adminName: string;
-  centreName: string;
-  inviteUrl: string;
-  gettingStartedUrl: string;
-}): string {
-  return `
-    <p>Dear ${input.adminName},</p>
-    <p>${input.centreName} is set up. This link creates your account:</p>
-    <p><a href="${input.inviteUrl}">${input.inviteUrl}</a></p>
-    <p>Two things worth doing first:</p>
-    <ol>
-      <li><strong>Connect your storage.</strong> Everything a closed course exports goes to your own Drive, so this needs to exist before your first course closes, not after.</li>
-      <li><strong>Import your existing records.</strong> Any spreadsheet, any column order -- you'll see the whole import before anything is written, and nobody is emailed.</li>
-    </ol>
-    <p>You'll be asked to accept the centre agreement once, when you first sign in.</p>
-    <p>Before you start, this covers the seven things that come up most: <a href="${input.gettingStartedUrl}">${input.gettingStartedUrl}</a></p>
-  `;
-}
 
 // "To whoever holds admissions and to the named interviewer, with a link to the
 // marked task." Both recipients, because the interviewer needs to prepare and
@@ -403,24 +358,6 @@ export function readingFlaggedEmailHtml(input: {
   `;
 }
 
-// "A tokenised read-only link. No account, and it expires when the course
-// closes." The assessor never creates an account, so the link is the whole
-// mechanism -- and the expiry has to be stated or it looks like a permanent one.
-export function assessorPackEmailHtml(input: {
-  assessorName: string;
-  courseName: string;
-  visitDate: string | null;
-  packUrl: string;
-  centreName: string;
-}): string {
-  return `
-    <p>Dear ${input.assessorName},</p>
-    <p>Your pack for ${input.courseName}${input.visitDate ? `, visit on ${input.visitDate}` : ""}.</p>
-    <p><a href="${input.packUrl}">${input.packUrl}</a></p>
-    <p>The link opens directly -- there's no account to create and no password. It's read-only, and it stops working when the course closes.</p>
-    <p>Anything missing or unclear, reply to this and it reaches ${input.centreName} directly.</p>
-  `;
-}
 
 // "Confirms it arrived and says honestly that classes run every few months."
 // The honesty is deliberate: a volunteer who hears nothing for two months
@@ -437,26 +374,6 @@ export function volunteerSignedUpEmailHtml(input: {
   `;
 }
 
-// "Level, dates, address, and what the class is -- taught by teachers in
-// training, watched by a tutor." Naming that plainly is a consent matter, not a
-// caveat: nobody should arrive without knowing.
-export function volunteerClassStartingEmailHtml(input: {
-  volunteerName: string;
-  level: string;
-  dates: string;
-  address: string;
-  centreName: string;
-}): string {
-  return `
-    <p>Dear ${input.volunteerName},</p>
-    <p>Your free English classes with ${input.centreName} are starting.</p>
-    <p><strong>Level:</strong> ${input.level}<br/>
-       <strong>When:</strong> ${input.dates}<br/>
-       <strong>Where:</strong> ${input.address}</p>
-    <p>So you know exactly what you're coming to: these classes are taught by teachers in training, with an experienced tutor watching every lesson and responsible for it. The classes are free because the teachers are learning, and you're helping them do it.</p>
-    <p>If you'd rather not take part, just reply and we'll take you off the list -- no explanation needed.</p>
-  `;
-}
 
 // ---------------------------------------------------------------------------
 // The seven from Applications.dc.html, verbatim.
@@ -531,7 +448,6 @@ export function rejectionEmailHtml(input: {
   applicantName: string;
   centreName: string;
   reason: string;
-  callerName: string | null;
 }): string {
   return emailShell({
     heading: "We are not taking your application further",
@@ -545,9 +461,11 @@ export function rejectionEmailHtml(input: {
       p(
         "This is not a judgement about whether you can teach, and it is not final. Work through a grammar reference written for teachers — Parrott or Swan — and apply again for a later course. We would read a fresh application properly."
       ),
-    footnote: input.callerName
-      ? `If you would like to talk it through before reapplying, reply and ${input.callerName} will call you.`
-      : "If you would like to talk it through before reapplying, just reply.",
+    // Applications.dc.html ends this with "reply and [name] will call you."
+    // Removed on Ramy's instruction: the software was committing a named
+    // person to a phone call, automatically, every time -- and that person was
+    // never asked. A reply still reaches the tutor who wrote the reason, which
+    // is what the reply-to rule already guarantees.
   });
 }
 
@@ -555,7 +473,6 @@ export function rejectionAfterInterviewEmailHtml(input: {
   applicantName: string;
   interviewDate: string | null;
   reason: string;
-  callerName: string | null;
 }): string {
   return emailShell({
     heading: "We are not able to offer you a place this time",
@@ -569,9 +486,7 @@ export function rejectionAfterInterviewEmailHtml(input: {
       p(
         "What is missing is a specific, learnable thing. Spend some time with Parrott, apply again for a later course, and we will look at it fresh."
       ),
-    footnote: input.callerName
-      ? `${input.callerName} will call you this week if you would like to go through it.`
-      : "Reply to this email if you would like to go through it.",
+    // See above -- the "will call you this week" promise is gone.
   });
 }
 
@@ -607,7 +522,6 @@ export function notThisTimeEmailHtml(input: {
   positionWord: string | null;
   nextCourseName: string | null;
   nextCourseStart: string | null;
-  callerName: string | null;
 }): string {
   return emailShell({
     heading: "The course filled before a place came free",
@@ -623,9 +537,10 @@ export function notThisTimeEmailHtml(input: {
           ? `We have carried you to the ${input.nextCourseName} course${input.nextCourseStart ? `, starting ${input.nextCourseStart}` : ""}, with nothing further for you to do. Your written task and interview stay on file, so you would not repeat either. Tell us if you would rather we did not.`
           : "We will carry your application to our next intake, with nothing further for you to do. Your written task and interview stay on file, so you would not repeat either. Tell us if you would rather we did not."
       ),
-    footnote: input.callerName
-      ? `Sent automatically on the date we promised. If you would like to talk it through, reply and ${input.callerName} will call you.`
-      : "Sent automatically on the date we promised. If you would like to talk it through, just reply.",
+    // The design's footnote ends "reply and [name] will call you". The call
+    // promise is gone here too, for the same reason as the rejections -- the
+    // sentence that matters is that a date was promised and kept.
+    footnote: "Sent automatically on the date we promised.",
   });
 }
 
@@ -833,5 +748,106 @@ export function lateEnrolmentEmailHtml(input: {
         "If you would rather talk it through before Monday, call me on the centre number and ask for me directly."
       ) +
       signature(input.directorName, input.directorRole),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// The four staff/assessor/volunteer invitations, verbatim from
+// Invitations.dc.html. Each is a Facts block and one CTA -- no prose padding,
+// because each answers "what is this and what do I do" in three rows.
+// ---------------------------------------------------------------------------
+
+export function tutorAddedEmailHtml(input: {
+  tutorFirstName: string;
+  addedByName: string;
+  addedByRole: string;
+  courseName: string;
+  courseFact: string;
+  roleFact: string;
+  centreName: string;
+  inviteUrl: string;
+}): string {
+  return emailShell({
+    heading: "You have been added as a tutor",
+    tone: "teal",
+    body: p(
+      `${input.tutorFirstName} — ${input.addedByName} has added you to ${input.courseName} at ${input.centreName} as a ${input.roleFact}. Your groups and teaching practice will appear once the course is set up.`
+    ),
+    facts: [
+      { label: "Course", value: input.courseFact },
+      { label: "Your role", value: input.roleFact },
+      { label: "Added by", value: `${input.addedByName}, ${input.addedByRole}` },
+    ],
+    cta: { label: "Set up your account", url: input.inviteUrl },
+    footnote: "You will only do this once. On later courses at this centre you sign in as normal.",
+  });
+}
+
+export function centreCreatedEmailHtml(input: {
+  adminFirstName: string;
+  centreName: string;
+  centreFact: string;
+  inviteUrl: string;
+}): string {
+  return emailShell({
+    heading: "Your centre is ready",
+    tone: "teal",
+    body: p(
+      `${input.adminFirstName} — ${input.centreName} has been set up. From here you add tutors and courses, import your own assignment briefs, connect your Drive, and export everything at the end of each course.`
+    ),
+    facts: [
+      { label: "Centre", value: input.centreFact },
+      { label: "Your role", value: "Centre administrator" },
+      { label: "To do first", value: "Connect Drive, then import your briefs" },
+    ],
+    cta: { label: "Set up your account", url: input.inviteUrl },
+    footnote: "You do not need to be on a course. Your link opens the centre, not a cohort.",
+  });
+}
+
+export function assessorPackEmailHtml(input: {
+  courseName: string;
+  centreName: string;
+  visitFact: string;
+  portfoliosFact: string;
+  accessEndsFact: string;
+  packUrl: string;
+}): string {
+  return emailShell({
+    heading: "Your assessment pack is ready",
+    tone: "gold",
+    body: p(
+      `The pack for ${input.courseName} at ${input.centreName} is prepared and read-only: portfolios, the timetable, teaching practice arrangements for the day, written assignment titles, the application file and the attendance registers.`
+    ),
+    facts: [
+      { label: "Visit", value: input.visitFact },
+      { label: "Portfolios", value: input.portfoliosFact },
+      { label: "Access ends", value: input.accessEndsFact },
+    ],
+    cta: { label: "Open the assessment pack", url: input.packUrl },
+    footnote: "No account and no password. The link identifies you; opening it is all that is needed.",
+  });
+}
+
+export function volunteerClassStartingEmailHtml(input: {
+  centreName: string;
+  levelName: string;
+  classFact: string;
+  whenFact: string;
+  joinUrl: string;
+}): string {
+  return emailShell({
+    heading: "Your free English classes start Monday",
+    // Confirmation. Brass, like everything else in the palette now.
+    tone: "green",
+    body: p(
+      `Thank you for volunteering. You will be in the ${input.levelName} class, taught by teachers training to become qualified English teachers, with an experienced tutor watching every lesson.`
+    ),
+    facts: [
+      { label: "Your class", value: input.classFact },
+      { label: "When", value: input.whenFact },
+    ],
+    cta: { label: "Join here", url: input.joinUrl },
+    footnote: "No account and no password. Keep this email — the same link opens your class each time.",
   });
 }

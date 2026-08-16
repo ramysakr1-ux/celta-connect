@@ -427,14 +427,11 @@ export async function rejectApplicant(_prevState: FormState, formData: FormData)
           reason: reason.trim(),
           // "Ramy Sakr will call you this week" -- a named person, and it is
           // the tutor who wrote the reason, so a reply and a call reach the
-          // same human.
-          callerName: staff.full_name,
         })
       : rejectionEmailHtml({
           applicantName: applicant.full_name,
           centreName: center?.name ?? "this centre",
           reason: reason.trim(),
-          callerName: staff.full_name,
         }),
   });
   emailError = sendError;
