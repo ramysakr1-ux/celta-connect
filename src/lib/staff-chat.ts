@@ -44,7 +44,12 @@ export interface ChannelSummary {
 export interface Coworker {
   id: string;
   full_name: string;
-  role: "trainer";
+  /**
+   * Who the viewer is allowed to reach: another admin, or a trainer on their
+   * own course. Never both -- an admin's list contains admins only, so no
+   * course tutor is ever reachable from the admin side.
+   */
+  role: "trainer" | "admin";
 }
 
 // `client` defaults to the normal RLS-scoped session client, which reads
@@ -133,27 +138,48 @@ export async function getInitialStaffChatData(
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("course_id")
+    .select("course_id, center_id, role")
     .eq("id", profileId)
     .maybeSingle();
 
-  // Only registered trainers on the SAME course -- "you cannot be on the
-  // course unless registered as one of the trainers on the course," no
-  // admin exception, ever (see migration 0039).
-  const { data: coworkerRows } = profile?.course_id
-    ? await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .eq("course_id", profile.course_id)
-        .eq("role", "trainer")
-        .neq("id", profileId)
-        .order("full_name")
-    : { data: [] };
+  // Who this person may start a conversation with.
+  //
+  // An ADMIN may message other admins, and nobody on a course. Ramy,
+  // 2026-08-16: "they can only message people from the centre admin, but not
+  // course tutors." Previously this read "trainers on the same course" for
+  // everyone, so an admin who happened to have a course_id was offered that
+  // course's tutors -- the exact thing the trainer-only rule exists to
+  // prevent, and it would have looked like a feature rather than a leak.
+  //
+  // A TRAINER may message registered trainers on the same course -- "you
+  // cannot be on the course unless registered as one of the trainers on the
+  // course," no admin exception, ever (migration 0039).
+  const isAdmin = profile?.role === "admin";
+
+  const { data: coworkerRows } = isAdmin
+    ? profile?.center_id
+      ? await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .eq("center_id", profile.center_id)
+          .eq("role", "admin")
+          .neq("id", profileId)
+          .order("full_name")
+      : { data: [] }
+    : profile?.course_id
+      ? await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .eq("course_id", profile.course_id)
+          .eq("role", "trainer")
+          .neq("id", profileId)
+          .order("full_name")
+      : { data: [] };
 
   const coworkers: Coworker[] = (coworkerRows ?? []).map((c) => ({
     id: c.id,
     full_name: c.full_name,
-    role: "trainer",
+    role: isAdmin ? "admin" : "trainer",
   }));
 
   return { channels: summaries, coworkers, chatRetentionDays };

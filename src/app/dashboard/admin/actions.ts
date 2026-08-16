@@ -22,6 +22,10 @@ export async function createCourse(
   const startDate = formData.get("start_date");
   const endDate = formData.get("end_date");
   const deliveryMode = formData.get("delivery_mode");
+  // Course Admin.dc.html step 1. The course code is the Cambridge course
+  // number; cohort size is "Maximum cohort size".
+  const courseCode = (formData.get("course_code") as string | null)?.trim() || null;
+  const cohortRaw = (formData.get("cohort_size") as string | null) || null;
 
   if (
     typeof name !== "string" ||
@@ -42,10 +46,17 @@ export async function createCourse(
     return { error: "Choose how teaching practice is delivered." };
   }
 
+  const cohortSize = cohortRaw ? Number(cohortRaw) : null;
+  if (cohortSize !== null && (!Number.isInteger(cohortSize) || cohortSize <= 0)) {
+    return { error: "Maximum cohort size should be a whole number." };
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.from("courses").insert({
     center_id: admin.center_id,
     name,
+    course_code: courseCode,
+    cohort_size: cohortSize,
     start_date: startDate,
     end_date: endDate,
     delivery_mode: deliveryMode as DeliveryMode,

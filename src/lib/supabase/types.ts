@@ -252,6 +252,11 @@ export interface Database {
           cambridge_grades_confirmed_at: string | null;
           cambridge_grades_confirmed_by: string | null;
           application_cap: number | null;
+          // migration 0122 -- Course Admin.dc.html step 1. course_code is the
+          // Cambridge course number (C3/2024); name is the centre's internal
+          // label, which the design says candidates never see.
+          course_code: string | null;
+          cohort_size: number | null;
           accepting_applications: boolean;
           created_at: string;
         };
