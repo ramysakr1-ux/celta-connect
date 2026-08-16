@@ -24,6 +24,7 @@ import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rule
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
+import { InvitationsPanel } from "@/app/dashboard/admin/courses/[id]/invitations-panel";
 import { getRecentCentreChanges } from "@/lib/what-changed";
 import { WhatChangedPanel } from "@/components/what-changed-panel";
 
@@ -52,6 +53,24 @@ export default async function CourseRosterPage({
     .eq("course_id", id)
     .order("role")
     .order("full_name");
+
+  // Named invitations that haven't been taken up. Withdrawn ones are excluded
+  // but not deleted -- who was invited and never came is worth keeping.
+  const { data: invitations } = await supabase
+    .from("course_invitations")
+    .select("id, email, full_name, role, tutor_role, invited_at")
+    .eq("course_id", id)
+    .is("accepted_at", null)
+    .is("revoked_at", null)
+    .order("invited_at", { ascending: false });
+  const pendingInvites = (invitations ?? []).map((i) => ({
+    id: i.id,
+    email: i.email,
+    fullName: i.full_name,
+    role: i.role,
+    tutorRole: i.tutor_role,
+    invitedAt: i.invited_at,
+  }));
 
   const { data: subgroups } = await supabase
     .from("course_subgroups")
@@ -539,6 +558,15 @@ export default async function CourseRosterPage({
             </div>
           </div>
         </div>
+
+        <InvitationsPanel
+          courseId={course.id}
+          pending={pendingInvites}
+          joinedCounts={{
+            trainees: (roster ?? []).filter((m) => m.role === "trainee").length,
+            trainers: (roster ?? []).filter((m) => m.role === "trainer").length,
+          }}
+        />
 
         <JoinLinksCard
           courseId={course.id}

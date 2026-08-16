@@ -1599,6 +1599,40 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["assessor_meeting_requests"]["Row"]>;
         Relationships: [];
       };
+      // migration 0120 -- named invitations. The shared join links stay; this
+      // is the path where the centre decides who is what before they arrive,
+      // and it is what makes "10 of 12 joined" and the Invited pill real.
+      course_invitations: {
+        Row: {
+          id: string;
+          course_id: string;
+          center_id: string;
+          email: string;
+          full_name: string | null;
+          role: "trainee" | "trainer";
+          tutor_role:
+            | "main_course_tutor"
+            | "assistant_course_tutor"
+            | "teaching_practice_tutor"
+            | "input_session_tutor"
+            | "external_assessor"
+            | null;
+          token: string;
+          invited_by: string | null;
+          invited_at: string;
+          accepted_at: string | null;
+          accepted_profile_id: string | null;
+          revoked_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_invitations"]["Row"]> & {
+          course_id: string;
+          center_id: string;
+          email: string;
+          role: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_invitations"]["Row"]>;
+        Relationships: [];
+      };
       organisations: {
         Row: { id: string; name: string; created_at: string };
         Insert: Partial<Database["public"]["Tables"]["organisations"]["Row"]> & { name: string };
