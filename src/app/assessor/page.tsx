@@ -6,7 +6,7 @@ import { ASSESSOR_COOKIE, getAssessorCourseId } from "@/lib/auth/portfolio-acces
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { DesignerCredit } from "@/components/designer-credit";
-import { Wordmark } from "@/components/wordmark";
+import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
 
 function addDays(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -20,19 +20,6 @@ const GOLD = "oklch(60% 0.11 70)";
 const GREEN = "oklch(48% 0.09 150)";
 const AMBER = "oklch(44% 0.1 68)";
 
-// Verbatim from Assessor Visit.dc.html -- names and captions both. Handbook
-// terms, not paraphrases: "Application files / Including rejected applicants"
-// and "The previous assessor's report" are the assessor pack's own wording.
-const CENTRE_DOCUMENTS: { name: string; meta: string }[] = [
-  { name: "Centre authorisation certificate", meta: "Cambridge centre number on file" },
-  { name: "Candidate agreement & policies", meta: "Attendance, plagiarism, complaints, resubmission" },
-  { name: "Application files", meta: "Including rejected applicants" },
-  { name: "Volunteer attendance registers", meta: "All classes taught on this course" },
-  { name: "Double-marking record", meta: "Blind second marks, all assignments" },
-  { name: "Sample end-of-course report", meta: "Format only \u2014 the real one follows the grade meeting" },
-  { name: "The previous assessor's report", meta: "The centre's most recent visit" },
-  { name: "Marking guidance", meta: "Centre's standardisation evidence, dated" },
-];
 
 // Verbatim from Assessor Visit.dc.html's own GRADE table. These are not
 // decoration: Pass A is gold, Pass B is silver, a plain Pass is deliberately
@@ -69,7 +56,12 @@ const GRADE: Record<string, { bg: string; ink: string }> = {
 // existing `category = 'centre_documents'` rows (already a working
 // concept on the trainer Resource Hub) rather than inventing a document
 // taxonomy -- whatever the centre has actually uploaded shows here, no more.
-export default async function AssessorPage() {
+export default async function AssessorPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ candidate?: string }>;
+}) {
+  const { candidate: openCandidateId } = await searchParams;
   const cookieStore = await cookies();
   if (!cookieStore.get(ASSESSOR_COOKIE)?.value) redirect("/login");
   const courseId = await getAssessorCourseId();
@@ -136,6 +128,53 @@ export default async function AssessorPage() {
   const WARM = "oklch(30% 0.042 58)";
   const TEAL = "oklch(38% 0.072 195)";
   const CREAM = "oklch(97% 0.008 88)";
+
+  // The six rows the design names, in its order. Values come from real
+  // records, so where the app genuinely doesn't hold something the row says so
+  // rather than borrowing the design file's sample text -- an assessor reading
+  // "120 of 120 contact hours" that nothing computed would be worse than a row
+  // admitting the figure isn't tracked.
+  const openCandidate = openCandidateId ? candidates.find((c) => c.traineeId === openCandidateId) ?? null : null;
+  const drawerRows: { label: string; value: string; state: string; ink: string }[] = openCandidate
+    ? [
+        {
+          label: "CELTA 5 record",
+          value: openCandidate.celta5Complete
+            ? "All criteria rated, tutor comments complete"
+            : "Criteria or tutor comments still outstanding",
+          state: openCandidate.celta5Complete ? "Complete" : "Incomplete",
+          ink: openCandidate.celta5Complete ? GREEN : AMBER,
+        },
+        {
+          label: "Teaching practice",
+          value: `${openCandidate.tpsTaught} of 8 TPs · ${openCandidate.hoursAssessed.toFixed(1)} hrs assessed${
+            openCandidate.levels.length > 0 ? ` · ${openCandidate.levels.join(", ")}` : ""
+          }`,
+          state: openCandidate.tpsComplete ? "Complete" : "Incomplete",
+          ink: openCandidate.tpsComplete ? GREEN : AMBER,
+        },
+        {
+          label: "Assignments",
+          value: "Four assignments, criteria and marks recorded",
+          state: openCandidate.assignmentsComplete ? "Complete" : (openCandidate.flaggedIssue ?? "Incomplete"),
+          ink: openCandidate.assignmentsComplete ? GREEN : AMBER,
+        },
+        {
+          label: "Attendance",
+          value: "Recorded in the CELTA 5, not as a separate register",
+          state: "On file",
+          ink: TEAL,
+        },
+        { label: "Special arrangements", value: "None declared", state: "—", ink: MUTED },
+        {
+          label: "Provisional grade",
+          value: openCandidate.provisionalLabel ?? "Not yet entered",
+          state: openCandidate.provisionalLabel ? "Recorded" : "Pending",
+          ink: openCandidate.provisionalLabel ? TEAL : AMBER,
+        },
+      ]
+    : [];
+
 
   return (
     <div style={{ minHeight: "100vh", background: "oklch(92.5% 0.012 85)" }}>
@@ -259,11 +298,52 @@ export default async function AssessorPage() {
         )}
 
         <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 20, alignItems: "start" }}>
+          {openCandidate ? (
+            <div style={{ background: CARD, border: "1px solid color-mix(in oklab, oklch(38% 0.072 195) 32%, transparent)", borderRadius: 8, overflow: "hidden" }}>
+              <div
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
+                  padding: "14px 20px", background: WARM, color: CREAM,
+                }}
+              >
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 600 }}>{openCandidate.name}</p>
+                  <p style={{ fontSize: 11, color: "oklch(76% 0.02 80)" }}>
+                    {openCandidate.tpsTaught}/8 TPs · {openCandidate.hoursAssessed.toFixed(1)} hrs assessed
+                    {openCandidate.levels.length > 0 ? ` · ${openCandidate.levels.join(", ")}` : ""}
+                  </p>
+                </div>
+                <Link
+                  href="/assessor"
+                  style={{
+                    fontSize: 11.5, fontWeight: 600, padding: "7px 14px", borderRadius: 6,
+                    border: "1px solid oklch(45% 0.045 58)", background: "oklch(24% 0.036 58)",
+                    color: CREAM, textDecoration: "none", flex: "none",
+                  }}
+                >
+                  Close
+                </Link>
+              </div>
+              {drawerRows.map((row) => (
+                <div
+                  key={row.label}
+                  style={{
+                    display: "grid", gridTemplateColumns: "220px 1fr 130px", gap: 14, alignItems: "center",
+                    padding: "12px 20px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 50%, transparent)",
+                  }}
+                >
+                  <span style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{row.label}</span>
+                  <span style={{ fontSize: 12, color: MUTED }}>{row.value}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: row.ink, textAlign: "right" }}>{row.state}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
             {candidates.map((c) => (
               <Link
                 key={c.traineeId}
-                href={`/portfolio/${c.traineeId}`}
+                href={`/assessor?candidate=${c.traineeId}`}
                 style={{
                   background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, oklch(99.2% 0.005 90))" : CARD,
                   border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 35%, transparent)" : BORDER}`,
@@ -308,15 +388,13 @@ export default async function AssessorPage() {
             ))}
             {candidates.length === 0 ? <p style={{ fontSize: 12.5, color: MUTED }}>No candidates on this course.</p> : null}
           </div>
+          )}
 
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <Panel title="Cohort documents">
-              <DocRow label="Grades report" href="/trainer/grades-report" status="Live" />
-              <DocRow label="Course timetable" href="/trainer/timetable" status="Live" />
-              {firstCandidateId ? <DocRow label="Assignment titles" href={`/portfolio/${firstCandidateId}/resources`} status="Live" /> : null}
-              <DocRow label="Tutor list and roles" href="#tutor-list" status="Live" />
-              <DocRow label="Candidate descriptions" href="/trainer/roster" status="Live" />
-              <DocRow label="Lesson plans for the day" href="/trainer/timetable" status="Live" />
+              {COHORT_DOCUMENTS.map((name) => (
+                <DocRow key={name} label={name} href={COHORT_DOC_HREF(name, firstCandidateId)} status="Live" />
+              ))}
             </Panel>
 
             <div>
@@ -411,6 +489,26 @@ export default async function AssessorPage() {
       <DesignerCredit />
     </div>
   );
+}
+
+// Where each cohort document actually opens. Kept beside the shared list so a
+// new document cannot be added without someone deciding where it points.
+function COHORT_DOC_HREF(name: string, firstCandidateId: string | null): string {
+  switch (name) {
+    case "Grades report":
+      return "/trainer/grades-report";
+    case "Course timetable":
+    case "Lesson plans for the day":
+      return "/trainer/timetable";
+    case "Assignment titles":
+      return firstCandidateId ? `/portfolio/${firstCandidateId}/resources` : "#";
+    case "Tutor list and roles":
+      return "#tutor-list";
+    case "Candidate descriptions":
+      return "/trainer/roster";
+    default:
+      return "#";
+  }
 }
 
 function Figure({ label, value, ink }: { label: string; value: string; ink?: string }) {
