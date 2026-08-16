@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, canView, CENTRE_ROLE_LABELS } from "@/lib/auth/centre-permissions";
+import { DesignerCredit } from "@/components/designer-credit";
 
 // Centre Admin's Overview tab (for-claude-code-centre-admin-full.md):
 // "Financial summary strip, all courses across the centre, admissions pipeline
@@ -195,6 +196,8 @@ export default async function CentreOverviewPage() {
           </p>
         </div>
       ) : null}
+
+      <DesignerCredit />
     </div>
   );
 }

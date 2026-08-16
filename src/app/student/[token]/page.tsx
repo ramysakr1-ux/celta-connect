@@ -4,6 +4,7 @@ import { MaterialsCard } from "@/app/student/[token]/materials-card";
 import { VolunteerSignupForm } from "@/app/student/[token]/signup-form";
 import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
+import { DesignerCredit } from "@/components/designer-credit";
 
 // §14 -- the volunteer-student (TP student) view. No login, no password --
 // resolved entirely from a tokenized, course-scoped, auto-expiring link
@@ -123,6 +124,8 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
         <MaterialsCard materials={materials} />
       </div>
+
+      <DesignerCredit />
     </div>
   );
 }

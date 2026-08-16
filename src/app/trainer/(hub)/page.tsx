@@ -8,6 +8,7 @@ import { categorize, isEventLive, toLocalIso } from "@/lib/timetable-grid";
 import { CATEGORY_ACCENT } from "@/app/trainer/(hub)/timetable/event-cell";
 import { computeWeekOf } from "@/lib/course-progress";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
+import { DesignerCredit } from "@/components/designer-credit";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -351,6 +352,8 @@ export default async function TodayPage() {
           </div>
         </div>
       </div>
+
+      <DesignerCredit />
     </div>
   );
 }

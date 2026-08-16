@@ -12,6 +12,7 @@ import { TUTOR_ROLE_LABELS, type TutorRole } from "@/lib/tutor-roles";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
+import { DesignerCredit } from "@/components/designer-credit";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   input_session: "Input session",
@@ -380,6 +381,8 @@ export default async function CourseStreamPage({
           ) : null}
         </div>
       </div>
+
+      <DesignerCredit />
     </div>
   );
 }

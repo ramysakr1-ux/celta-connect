@@ -7,6 +7,7 @@ import { toLocalIso } from "@/lib/timetable-grid";
 import { getRecentCentreChanges } from "@/lib/what-changed";
 import { WhatChangedPanel } from "@/components/what-changed-panel";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
+import { DesignerCredit } from "@/components/designer-credit";
 
 // Centre Admin.dc.html 1a -- courses group by state instead of a flat
 // date-sorted list. State is purely date-derived (see computeCourseState's
@@ -192,6 +193,8 @@ export default async function AdminDashboardPage() {
         </div>
         </LaptopOnlyGate>
       </div>
+
+      <DesignerCredit />
     </div>
   );
 }

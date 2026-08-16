@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ASSESSOR_COOKIE, getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
 import { toLocalIso } from "@/lib/timetable-grid";
+import { DesignerCredit } from "@/components/designer-credit";
 
 function addDays(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -205,6 +206,8 @@ export default async function AssessorPage() {
           </div>
         </div>
       </div>
+
+      <DesignerCredit />
     </div>
   );
 }
