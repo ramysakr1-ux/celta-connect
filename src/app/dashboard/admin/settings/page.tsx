@@ -6,10 +6,11 @@ import { CenterProfileForm } from "@/app/dashboard/admin/settings/center-profile
 import { GoogleDriveTargetsForm } from "@/app/dashboard/admin/settings/targets-form";
 import { FeedbackStyleExamplesManager } from "@/components/feedback-style-examples/manager";
 import { TutorsPanel, type TutorsCourseGroup } from "@/app/dashboard/admin/settings/tutors-panel";
+import { SettingsNav } from "@/app/dashboard/admin/settings/settings-nav";
 import type { DeliveryMode } from "@/lib/delivery-mode";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 
-const SETTINGS_NAV = [
+const SETTINGS_NAV_BASE = [
   { href: "#centre-profile", label: "Centre profile" },
   { href: "#auto-tagging", label: "TP feedback tagging" },
   { href: "#google-drive", label: "Google Drive" },
@@ -43,6 +44,15 @@ export default async function AdminSettingsPage({
     .select("center_id, template_doc_id, output_folder_id, connected_at")
     .eq("center_id", profile.center_id)
     .maybeSingle();
+
+  // Whether a Drive is actually connected, rather than whether one was just
+  // connected in this request's query string.
+  const { data: driveRow } = await admin
+    .from("center_google_connections")
+    .select("id")
+    .eq("center_id", profile.center_id)
+    .maybeSingle();
+  const driveConnected = Boolean(driveRow);
 
   const { data: styleExamples } = await admin
     .from("feedback_style_examples")
@@ -95,6 +105,26 @@ export default async function AdminSettingsPage({
     }))
     .filter((g) => g.tutors.length > 0);
 
+  // "A red dot flag if something there needs attention." Each reads real
+  // state -- a flag that is sometimes wrong is worse than none, because people
+  // stop trusting it and then miss the one that mattered.
+  const settingsNavItems = SETTINGS_NAV_BASE.map((item) => {
+    let needsAttention: string | null = null;
+    if (item.href === "#centre-profile" && center?.center_number?.startsWith("PENDING-")) {
+      needsAttention = "The Cambridge centre number is still a placeholder, and it prints on every report.";
+    }
+    if (item.href === "#google-drive" && !driveConnected) {
+      needsAttention = "No Drive connected — a closed course has nowhere to export to.";
+    }
+    if (item.href === "#feedback-style" && (styleExamples ?? []).length === 0) {
+      needsAttention = "No examples yet, so there is nothing to match the centre's tone against.";
+    }
+    if (item.href === "#tutors" && tutorGroups.some((g) => g.tutors.some((t) => !t.verifiedAt))) {
+      needsAttention = "A tutor has no Cambridge verification date on file.";
+    }
+    return { ...item, needsAttention };
+  });
+
   return (
     <LaptopOnlyGate task="Centre setup">
     <div className="flex flex-col gap-6">
@@ -104,20 +134,7 @@ export default async function AdminSettingsPage({
       </div>
 
       <div className="grid grid-cols-[232px_1fr] items-start gap-5">
-        <nav className="sticky top-4 flex flex-col gap-0.5 rounded-[6px] border border-border bg-card py-3.5">
-          <p className="px-4 pb-2 text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Settings</p>
-          {SETTINGS_NAV.map((item) =>
-            "external" in item && item.external ? (
-              <Link key={item.href} href={item.href} className="px-4 py-2 text-sm text-muted hover:text-ink">
-                {item.label}
-              </Link>
-            ) : (
-              <a key={item.href} href={item.href} className="px-4 py-2 text-sm text-muted hover:text-ink">
-                {item.label}
-              </a>
-            )
-          )}
-        </nav>
+        <SettingsNav items={settingsNavItems} />
 
         <div className="flex flex-col gap-5">
           <div id="centre-profile" className="card scroll-mt-6 p-6">
