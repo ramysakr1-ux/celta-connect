@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { can } from "@/lib/auth/centre-permissions";
 import { createClient } from "@/lib/supabase/server";
 import { ImportWizard } from "@/app/dashboard/admin/import/import-wizard";
 import { UndoImportButton } from "@/app/dashboard/admin/import/undo-import-button";
@@ -10,6 +13,10 @@ import { UNDO_WINDOW_DAYS, isWithinUndoWindow, undoDeadline } from "@/lib/spread
 // money-and-oversight role's screen, not a tutor's.
 export default async function ImportPage() {
   const profile = await requireRole("admin");
+  // A Centre manager is also a flat `admin`, and must not reach this screen at
+  // all -- the nav omits the tab, and this stops the direct URL.
+  const ctx = await getCentreRoleContext(profile);
+  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) redirect("/dashboard/centre");
   const supabase = await createClient();
 
   const [{ data: courses }, { data: applicants }, { data: imports }] = await Promise.all([

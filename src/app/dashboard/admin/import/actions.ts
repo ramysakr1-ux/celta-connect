@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { can } from "@/lib/auth/centre-permissions";
 import {
   analyseRows,
   isWithinUndoWindow,
@@ -29,6 +31,14 @@ export interface CommitImportState {
  */
 export async function commitImport(_prev: CommitImportState, formData: FormData): Promise<CommitImportState> {
   const profile = await requireRole("admin");
+  // requireRole only proves flat `admin`, which a Centre manager also is. An
+  // import creates people, which is squarely "edit anything at all" -- the one
+  // thing that role may never do. The nav already omits the tab; this is the
+  // check that matters if someone reaches the URL directly.
+  const ctx = await getCentreRoleContext(profile);
+  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) {
+    return { error: "Your role can't import people." };
+  }
   const supabase = await createClient();
 
   const intakeCourseId = formData.get("intake_course_id") as string | null;
@@ -140,6 +150,10 @@ export interface UndoImportState {
  */
 export async function undoImport(_prev: UndoImportState, formData: FormData): Promise<UndoImportState> {
   const profile = await requireRole("admin");
+  const ctx = await getCentreRoleContext(profile);
+  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) {
+    return { error: "Your role can't undo an import." };
+  }
   const supabase = await createClient();
 
   const importId = formData.get("import_id") as string | null;

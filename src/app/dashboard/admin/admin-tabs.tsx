@@ -2,29 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { AdminTab } from "@/lib/auth/admin-tabs";
 
 // Ramy, live-testing the preview 2026-08-15: the admin home page's own
-// "Admissions / TP Points Library / Settings" links (admin/page.tsx) lived
-// only in that page's own content, not the shared dashboard/layout.tsx
-// header -- so they vanished the moment you clicked into any of them, with
-// no way back except the browser's own back button. This makes them a real
-// persistent nav instead, same pattern as the trainer hub's TrainerTabs.
-const TABS = [
-  { href: "/admin", label: "Admin" },
-  { href: "/admissions", label: "Admissions" },
-  { href: "/admin/import", label: "Import" },
-  { href: "/admin/coursebooks", label: "TP Points Library" },
-  { href: "/admin/settings", label: "Settings" },
-] as const;
-
-export function AdminTabs() {
+// "Admissions / TP Points Library / Settings" links lived only in that page's
+// own content, not the shared header -- so they vanished the moment you
+// clicked into any of them, with no way back except the browser's own back
+// button. This makes them a real persistent nav instead.
+//
+// Which tabs exist is decided server-side by visibleAdminTabs (lib/auth/
+// admin-tabs.ts) from the Centre Admin permission layer, and passed in. This
+// component only renders and highlights them.
+export function AdminTabs({ tabs }: { tabs: AdminTab[] }) {
   const pathname = usePathname();
 
   return (
     <nav className="flex h-full items-center gap-6">
-      {TABS.map((tab) => {
+      {tabs.map((tab) => {
         const href = `/dashboard${tab.href}`;
-        const active = tab.href === "/admin" ? pathname === href : pathname.startsWith(href);
+        // Exact match for the two index routes, otherwise every deeper page
+        // would light up its parent too -- /centre/roles would mark Overview
+        // active, and /admin/import would mark Course admin active.
+        const exact = tab.href === "/admin" || tab.href === "/centre";
+        const active = exact ? pathname === href : pathname.startsWith(href);
         return (
           <Link
             key={tab.href}
