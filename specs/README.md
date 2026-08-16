@@ -59,6 +59,10 @@ So each centre uploads its logo at setup, alongside its name and address, and ev
 
 The one exception is the designer credit line (`Connect · designed and built by Ramy`), which appears in the Centre Admin and sign-in footers only — never on a document.
 
+## Read this first: `foundation-audit.md`
+
+Five problems in the current schema, two of them expensive to fix later. It carries the exact instruction to act on. Nothing else in this folder matters as much — a screen built on the wrong grouping model has to be rebuilt.
+
 ## Which design files to build from
 
 **Read `design-files.md` first.** Twenty-odd designs were built across several sessions, and some are superseded explorations. That file lists which is current and which to ignore — building from a stale one is the failure mode that already happened once.
@@ -78,7 +82,7 @@ The domain stays `celtaconnect.com`. The brand is Connect; the domain is a legac
 **2. `apply-to-app.md`** — the token mapping, plus detailed specs for the chat pill and the timetable finish.
 The chat pill replaces the current `StaffChatDrawer` chrome: always visible, dimmed at rest, keyboard-reachable. The timetable keeps its transposed orientation and equal cell dimensions; only the finish changes — hairlines instead of coloured boxes.
 
-**3. `build-spec.md`** — everything else.
+**3. `build-spec.md`** — everything else, in five parts: **A** the course as candidates and tutors meet it, **B** centre administration, **C** who can talk to whom, **D** the interface, **E** what is broken or undecided.
 Constraining rules from Cambridge's syllabus and handbook, build order for 22 screens, the Drive import/export model, the three leaving statuses, the guidance system, mobile scope, nine bugs found in the current build, and three genuinely open questions.
 
 ## What the designs are
@@ -103,7 +107,7 @@ These came out of long conversations with Ramy and are not recoverable from the 
 
 ## Still open — ask Ramy
 
-1. ~~Carried TPs and the six hours?~~ **Answered:** Handbook 6.9 sets no rule — it is the centre's judgement per candidate. The app defaults to hours already assessed and lets a tutor change it with a note.
+1. ~~Carried TPs and the six hours?~~ **Answered:** no carry-over. The candidate redoes the whole second half of the new course regardless of whether she'd reached 50% or 60% on the old one — the app does not credit TPs done past halfway. The app defaults to hours already assessed and lets a tutor change it with a note.
 2. Rejected applicants stay in the applications area and the assessor sees all of them. Narrowly still open: **how long is the file kept, and what does the application form tell them when they apply?**
 3. ~~Which storage holds the CELTA 5?~~ **Answered:** blank original in the Resource hub as the centre's reference copy; the working record is the built-in CELTA 5; the completed, signed version exports at close-out.
 
@@ -120,3 +124,6 @@ Specified in `build-spec.md` but never drawn. Build from the prose.
 - **Grade query reply** — the explanation a tutor sends when a candidate asks why they got a Pass and not a Pass B. Generated from the record (TP outcomes, criteria met, assignments, tutorials, letters, the slash justification), edited and signed by a person, never sent automatically. Specified in `build-spec.md`; answering these well ends most of them before they become appeals.
 - **Special consideration mid-course** — distinct from the declaration at application.
 - **The centre's pre-course supplement** — six to eight tasks on teaching online and the use of L1.
+
+
+`twenty-decisions.md` — the short version of the build spec: the decisions that are easy to reverse by accident and expensive to discover late. Read before `build-spec.md`.

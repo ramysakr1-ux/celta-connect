@@ -1,57 +1,50 @@
-# Design handoffs — the current set
+# Design handoffs — where the specs live
 
-Every spec Ramy has sent, in one place and under version control. Copied in on
-2026-08-16 after they'd been spread across four Desktop zips and a `specs/`
-directory whose newest file was nine days old — which is how a session ended up
-quoting an eleven-day-old note as current and building Centre Admin inside the
-wrong chrome.
+**`specs/*.md` is the source of truth.** The complete set (43 files) landed on
+2026-08-16 and is version-controlled. Read from there, not from the Desktop.
 
-**Read from here, not from the Desktop.** If a newer bundle arrives, copy it in
-and note what changed.
+This folder holds only what doesn't belong alongside them:
 
-## Build specs
+- **`.dc.html` design files** — prototypes in a template format that **does not
+  render outside the design tool**. Served through a browser they show raw
+  `{{ }}` placeholders. Read the data arrays inside the `<script>` block
+  instead; that's where the real content lives (role permission lists, step
+  definitions, email copy, sample rows).
+- **`compliance-audit-findings.md`** — our per-item verdicts against
+  `specs/for-claude-code-compliance-audit.md`, written 2026-08-16.
 
-| File | Covers | State |
-|---|---|---|
-| `for-claude-code-centre-admin-full.md` | Centre Admin: four roles, access model, Overview + Import | **Built** — `/centre` |
-| `for-claude-code-payment-provider.md` | Provider connection screen, five providers | **Built** — `/centre/payments`, list widened to nine |
-| `for-claude-code-email-inventory.md` | 19 emails, AI triage lanes, bounce handling, assessor pack | **Barely started** — 5 of 19 emails; log built, delivery states not |
-| `for-claude-code-compliance-audit.md` | 19 gaps against Cambridge documents | **Not audited** — 3 confirmed built, 16 unverified |
-| `for-claude-code-trainer-homepage.md` | Trainer Today tab | **Built** |
-| `for-claude-code-trainer-remaining-screens.md` | Trainer screens | **Built** (see the walkthrough sweep) |
-| `for-claude-code-unified-tracking.md` | ARCHITECTURAL: one Roster column per trackable item | **Built** — binds all future work |
-| `for-claude-code-timetable-tiles.md` | Timetable tile system | **Built** |
-| `for-claude-code-supervised-review.md` | Supervised review sessions | **Built** |
-| `for-claude-code-progress-tab.md` | Trainee Progress tab | **Built** (closed, no changes needed) |
-| `for-claude-code-session-changelog-2026-08-15.md` | What shipped on 15 Aug | Reference |
+## Why this folder exists at all
 
-## Design files (`.dc.html`)
+Before 2026-08-16 the specs were spread across four Desktop zips and a `specs/`
+directory whose newest file was nine days old. Only two handoffs had ever been
+committed. That scattering cost a full morning: a session quoted an eleven-day-
+old note as current work, and Centre Admin was built inside the wrong chrome
+because its layout spec hadn't arrived. The design team believed everything was
+already on GitHub; it wasn't.
 
-These are prototypes in a template format that **does not render outside the
-design tool** — served through a browser they show raw `{{ }}` placeholders.
-Read the data arrays inside the `<script>` block instead; that is where the real
-content lives (role permission lists, step definitions, sample rows).
+If a newer bundle arrives, copy it into `specs/` and note what changed.
 
-`Centre Admin.dc.html`, `Payments.dc.html`, `Course Admin.dc.html`,
-`Trainer Homepage.dc.html`, `Trainer Walkthrough.dc.html`
+## Design files and the specs they belong to
 
-## Referenced but never received
+| Design file | Written spec |
+|---|---|
+| `All Emails.dc.html` | `for-claude-code-email-inventory.md` |
+| `Email Delivery.dc.html` | same |
+| `Interview Availability/Booking/Questions.dc.html` | `for-claude-code-interview-payments-email.md` |
+| `Centre Admin.dc.html` | `for-claude-code-centre-admin-full.md`, `centre-admin-layout-design-spec.md` |
+| `Payments.dc.html` | `for-claude-code-payment-provider.md`, `for-claude-code-payments-bridge.md` |
+| `Course Admin.dc.html` | `for-claude-code-course-admin.md` |
+| `Trainer Homepage/Walkthrough.dc.html` | `for-claude-code-trainer-homepage.md`, `-remaining-screens.md` |
+| `Course Commitments`, `Filming Consent`, `Volunteer Sign-Up Desktop` | no written spec yet |
 
-The email inventory cites these as its sources. None has ever arrived, so where
-it is terse there is reasoning we don't have:
+## Superseded in the repo by the complete set
 
-- `specs/admissions-and-close-out.md`
-- `specs/twenty-decisions.md`
-- `specs/for-claude-code-interview-payments-email.md`
-- `specs/review-notes.md`
-- `specs/for-claude-code-announcements.md`
-- `Course Emails.dc.html` — the actual email copy
-- `Presentation.dc.html` — the fees slide
+`build-spec.md` grew 698 → 1252 lines and was restructured (11 sections → 24
+plus a long tail). New sections cover ground built on 2026-08-16 from other
+specs — **admin roles, organisations with more than one branch, sharing between
+branches, importing an existing spreadsheet** — so what shipped that day should
+be reconciled against them before more is built on top.
 
-## Open decisions, flagged not guessed
-
-- **Which tutor** gets the "clear problems" notification. The email inventory
-  proposes the MCT as a reasonable default and explicitly says not to build a
-  silent one.
-- **Course administrator scope** has no UI — the schema holds "administers these
-  named courses" but nothing assigns them.
+`README.md`, `chat-pill-and-timetable.md`, `design-files.md` and
+`for-claude-code-unified-tracking.md` were also updated. `dry-run.md` and
+`rename-to-connect.md` exist only in the repo and were kept.

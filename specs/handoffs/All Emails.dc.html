@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  button { font: inherit; cursor: pointer; }
+</style>
+</helmet>
+
+<div style="width: 1400px; box-sizing: border-box; padding: 34px 40px 60px; font-family: Karla, Helvetica, sans-serif; color: oklch(23.5% 0.017 65); display: flex; flex-direction: column; gap: 26px;">
+
+  <div style="display: flex; flex-direction: column; gap: 9px; max-width: 1060px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · every email the system sends</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">{{ total }} emails, and nobody receives more than five.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Seen together rather than a file at a time, because the risk is not any single email — it is the volume landing on one person, and the same thing said two different ways in two of them.</div>
+  </div>
+
+  <div style="display: flex; gap: 10px;">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+      <button onClick="{{ t.pick }}" style="flex: 1; text-align: left; background: {{ t.bg }}; border: 1px solid {{ t.border }}; border-top: 3px solid {{ t.spine }}; border-radius: 6px; padding: 11px 14px; display: flex; flex-direction: column; gap: 2px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+          <div style="font-size: 13px; font-weight: 700; color: {{ t.ink }};">{{ t.label }}</div>
+          <div style="font-size: 11px; font-weight: 600; color: {{ t.ink }};">{{ t.n }}</div>
+        </div>
+        <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ t.who }}</div>
+      </button>
+    </sc-for>
+  </div>
+
+  <div id="1a" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start;">
+    <sc-for list="{{ emails }}" as="e" hint-placeholder-count="6">
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-top: 3px solid {{ e.spine }}; border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 11px; min-height: 210px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: {{ e.spine }};">{{ e.trigger }}</div>
+            <div style="font-size: 10px; font-weight: 600; color: oklch(56% 0.017 70);">{{ e.to }}</div>
+          </div>
+          <div style="font-size: 13.5px; font-weight: 600; line-height: 1.35;">{{ e.subject }}</div>
+        </div>
+        <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ e.does }}</div>
+        <div style="flex: 1;"></div>
+        <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+          <sc-for list="{{ e.carries }}" as="c" hint-placeholder-count="2">
+            <div style="font-size: 10.5px; font-weight: 600; color: oklch(51% 0.017 70); background: oklch(96.4% 0.011 85); border-radius: 99px; padding: 3px 9px;">{{ c }}</div>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 3px; border-top: 1px solid oklch(89.5% 0.012 82); padding-top: 8px;">
+          <div style="font-size: 10.5px; font-weight: 600; color: {{ e.replyInk }};">{{ e.replyLabel }}</div>
+          <div style="font-size: 10.5px; color: oklch(56% 0.017 70);">{{ e.file }}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">What one candidate actually receives</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">accepted, enrolled, passed — five emails across four months</div>
+    </div>
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; overflow: hidden;">
+      <sc-for list="{{ journey }}" as="j" hint-placeholder-count="5">
+        <div style="display: grid; grid-template-columns: 132px 1fr 200px; gap: 16px; align-items: center; padding: 12px 18px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 55%, transparent);">
+          <div style="font-size: 11.5px; font-weight: 600; color: {{ j.spine }};">{{ j.when }}</div>
+          <div style="font-size: 12.5px; font-weight: 600;">{{ j.subject }}</div>
+          <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ j.why }}</div>
+        </div>
+      </sc-for>
+      <div style="padding: 12px 18px; font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">Nothing during the five weeks. Once the course starts, everything is an announcement in the app anchored to the timetable — one a day at most, carrying that candidate's own dates. A course that emails daily is a course people stop reading.</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+    <sc-for list="{{ notes }}" as="n" hint-placeholder-count="4">
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-left: 3px solid {{ n.spine }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 12.5px; font-weight: 700; color: {{ n.spine }};">{{ n.title }}</div>
+        <div style="font-size: 12px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const GOLD = 'oklch(63% 0.096 72)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = 'oklch(48% 0.09 150)';
+const CARD = 'oklch(99.5% 0.004 90)';
+
+const E = (trigger, to, subject, does, carries, file, spine, reply) => ({ trigger, to, subject, does, carries, file, spine, reply: reply || 'noreply' });
+
+const GROUPS = {
+  apply: { label: 'Applying', who: 'applicants', emails: [
+    E('Form submitted', 'Applicant', 'We have your application', 'A plain acknowledgement. Says nothing about the outcome and gives a date by which they will hear.', ['Confirmation only'], 'Applications', MUTED, 'noreply'),
+    E('Task waiting', 'Applicant', 'Your pre-interview task is ready in Connect', 'Tells them the task is waiting. The task itself opens in Connect and saves as they type.', ['Link to the task'], 'Applications', TEAL, 'noreply'),
+    E('Task read · clear', 'Applicant', 'Your CELTA interview — choose a time', 'Sent fifteen minutes after a clear reading, or by hand after a tutor decides. Carries times.', ['Interview slots', 'Held 48h'], 'Applications', TEAL, 'admissions'),
+  ]},
+  decide: { label: 'The decision', who: 'applicants', emails: [
+    E('Offered', 'Applicant', 'Your place on CELTA C3/2026', 'Fee, deposit and deadline first, with the line saying what the deposit secures. The pre-course pack does not come with it.', ['Fee', 'Deposit deadline', 'Terms'], 'Applications', GREEN, 'admissions'),
+    E('Not suitable · after task', 'Applicant', 'Your CELTA application', 'The centre’s reason in the tutor’s own words, and what would change it. Never written by the app.', ['Reason', 'What would change it'], 'Applications', RED, 'tutor'),
+    E('Not suitable · after interview', 'Applicant', 'We are not able to offer you a place', 'Same shape, written after meeting them, so it can be specific about the conversation.', ['Reason', 'Reapplication'], 'Applications', RED, 'tutor'),
+    E('Waiting list', 'Applicant', 'You are on the waiting list for C3/2026', 'Names the course, their position, and a date by which they will know.', ['Position', 'A date'], 'Applications', GOLD, 'admissions'),
+    E('List closed', 'Applicant', 'The course filled before a place came free', 'Sent when the course starts. Nobody is left wondering, and the next intake is named.', ['Next intake'], 'Applications', MUTED, 'admissions'),
+    E('Place freed', 'Applicant', 'A place has opened on C3/2026', 'Everything from their application still stands. Expires in 48 hours and then goes to the next person.', ['48-hour clock', 'Deposit'], 'Waiting List', GOLD, 'admissions'),
+  ]},
+  onboard: { label: 'Before the course', who: 'candidates', emails: [
+    E('Deposit cleared', 'Candidate', 'Your CELTA workspace is ready', 'The account invitation. Set up Connect first, then the pre-course task — in that order.', ['Account setup', 'Pre-course task'], 'Invitations', TEAL, 'noreply'),
+    E('One week before', 'Candidate', 'CELTA C3/2026 starts Monday', 'Group, level, the day-one activity, and the practical details. The only email in the fortnight before.', ['Group', 'First activity', 'Practicals'], 'Course Emails', TEAL, 'tutor'),
+    E('Late enrolment', 'Candidate', 'Welcome — starting Monday, and what to ignore', 'For somebody accepted days before. Says plainly which of the pre-course work is now optional.', ['What to skip', 'A named person'], 'Course Emails', GOLD, 'tutor'),
+  ]},
+  staff: { label: 'Staff and assessor', who: 'tutors, admins, assessors', emails: [
+    E('Added to a course', 'Tutor', 'You have been added as a course tutor', 'Names the course, the groups and the dates. Staff terms are accepted once per centre, not per course.', ['Groups', 'Staff terms'], 'Invitations', TEAL, 'noreply'),
+    E('Centre created', 'Centre admin', 'Your centre is ready on Connect', 'The first login for a centre. What to do first: connect storage, import briefs.', ['Centre agreement'], 'Invitations', TEAL, 'noreply'),
+    E('Interview booked', 'Tutor + admin', 'An interview has been booked', 'To whoever holds admissions and to the named interviewer, with a link to the marked task.', ['Time', 'The marked task'], 'Interview Booking', TEAL, 'noreply'),
+    E('Reading flagged', 'Tutor', 'An application needs a tutor', 'Sent when a reading finds clear problems. No email goes to the applicant.', ['Which rows', 'Nothing sent'], 'Interview Booking', RED, 'noreply'),
+    E('Visit arranged', 'Assessor', 'Assessment visit pack for C3/2026', 'A tokenised read-only link. No account, and it expires when the course closes.', ['Read-only link', 'Expiry'], 'Invitations', GOLD, 'admissions'),
+  ]},
+  vol: { label: 'Volunteers', who: 'learners', emails: [
+    E('Signed up', 'Volunteer', 'Thank you for volunteering', 'Confirms it arrived and says honestly that classes run every few months.', ['No account'], 'Volunteer Sign-Up', GREEN, 'noreply'),
+    E('Class needs learners', 'Volunteer', 'Your free English classes start Monday', 'Level, dates, address, and what the class is — taught by teachers in training, watched by a tutor.', ['Dates', 'Address', 'Consent'], 'Invitations', GREEN, 'admissions'),
+  ]},
+};
+
+class Component extends DCLogic {
+  state = { tab: 'apply' };
+
+  renderVals() {
+    const tab = this.state.tab;
+    const total = Object.keys(GROUPS).reduce((a, k) => a + GROUPS[k].emails.length, 0);
+
+    return {
+      total,
+      tabs: Object.keys(GROUPS).map(k => {
+        const on = k === tab;
+        return {
+          label: GROUPS[k].label, who: GROUPS[k].who, n: GROUPS[k].emails.length,
+          pick: () => this.setState({ tab: k }),
+          bg: on ? CARD : 'transparent',
+          border: on ? TEAL : 'oklch(89.5% 0.012 82)',
+          spine: on ? TEAL : 'transparent',
+          ink: on ? INK : MUTED,
+        };
+      }),
+      emails: GROUPS[tab].emails.map(e => {
+        const R = {
+          noreply: { label: 'Do not reply · sent automatically', ink: MUTED },
+          admissions: { label: 'Replies go to admissions', ink: TEAL },
+          tutor: { label: 'Replies go to the tutor who wrote it', ink: GREEN },
+        }[e.reply];
+        return Object.assign({}, e, { replyLabel: R.label, replyInk: R.ink });
+      }),
+
+      journey: [
+        { spine: MUTED, when: '2 March', subject: 'We have your application', why: 'Acknowledgement only' },
+        { spine: TEAL, when: '12 March', subject: 'Your CELTA interview — choose a time', why: 'After the task was read' },
+        { spine: GREEN, when: '20 March', subject: 'Your place on CELTA C3/2026', why: 'Fee and deadline' },
+        { spine: TEAL, when: '25 March', subject: 'Your CELTA workspace is ready', why: 'Once the deposit cleared' },
+        { spine: TEAL, when: '30 March', subject: 'CELTA C3/2026 starts Monday', why: 'Group and first activity' },
+      ],
+
+      notes: [
+        { spine: TEAL, title: 'Every email is from the centre', text: 'The sender is the centre’s name and the reply-to is a centre address. An applicant should never see Connect in their inbox — it is the centre writing to them, and the software is not part of that relationship.' },
+        { spine: TEAL, title: 'Money and onboarding never share an email', text: 'The offer carries the fee and the deadline and nothing else. The workspace invitation follows once the deposit clears, so neither is competing with the other for attention.' },
+        { spine: GOLD, title: 'Rejections are written by people', text: 'Four of these are refusals of one kind or another, and none is generated. The template holds the structure; the reason is the tutor’s own words.' },
+        { spine: RED, title: 'Silence is the failure mode', text: 'The list-closed email exists only so that nobody is left wondering. It is the cheapest email here and the one a centre would forget to write.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -23,10 +23,10 @@ This is where a trainer lands after login — the `Today` tab, first of seven in
 
 2. **Needs you** (gold accent — signals a system-flagged rule, not routine content) — up to a handful of bold action items that need the trainer's attention today: unsent TP feedback (names + date taught), assignments due today (submitted count), attendance below threshold (shown in red with the percentage and hours). Empty when nothing needs attention — don't force filler.
 
-3. **Cohort** (brown/ink accent) — one row per candidate: a small colored initials avatar (each candidate gets a distinct hue), name, and a running count like "3 / 8" (TPs taught so far). A candidate below their expected pace is shown in red. Panel footer links to the full Roster.
+3. **Cohort** (brown/ink accent) — one row per candidate: a small colored initials avatar (each candidate gets a distinct hue), name, and status sourced from the unified Roster Standing table's TP-lesson-stages rollup ("on track" / "behind"), not a bespoke count. A candidate flagged behind is shown in amber, matching Roster's color for the same metric — not red. Panel footer links to the full Roster.
 
 ## Design tokens used
-Ink `oklch(30% 0.042 58)`, body text `oklch(23.5% 0.017 65)`, muted `oklch(51% 0.017 70)`, teal (action) `oklch(37.5% 0.058 195)`, gold (system rule) `oklch(63% 0.096 72)`, red (alert) `oklch(45% 0.15 27)`, amber (warning) `oklch(44% 0.095 68)`, border `oklch(89.5% 0.012 82)`, card bg `oklch(99.5% 0.004 90)`, page bg `oklch(92.5% 0.012 85)`. Fonts: Karla (UI), Newsreader (headings), Instrument Serif italic (wordmark only).
+Ink `oklch(30% 0.042 58)`, body text `oklch(23.5% 0.017 65)`, muted `oklch(51% 0.017 70)`, teal (action) `oklch(37.5% 0.058 195)`, gold (system rule) `oklch(63% 0.096 72)`, red (alert) `oklch(45% 0.15 27)`, amber (warning / behind-on-stages, matches Roster) `oklch(44% 0.095 68)`, border `oklch(89.5% 0.012 82)`, card bg `oklch(99.5% 0.004 90)`, page bg `oklch(92.5% 0.012 85)`. Fonts: Karla (UI), Newsreader (headings), Instrument Serif italic (wordmark only).
 
 Cohort avatar hues (one per candidate, for visual variety — not semantic): blue `oklch(52% 0.1 260)`, terracotta `oklch(55% 0.11 25)`, green `oklch(58% 0.1 145)`, purple `oklch(60% 0.1 300)`, gold `oklch(63% 0.096 72)`; a candidate flagged red uses the alert red instead of a hue.
 

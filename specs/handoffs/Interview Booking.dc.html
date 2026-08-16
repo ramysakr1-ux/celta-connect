@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<section id="1a" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; width: 1180px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px;">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Admissions</div>
+    <div style="width: 22px; height: 18px; border-radius: 5px; background: oklch(38% 0.072 195); color: oklch(98% 0.004 90); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;">1a</div>
+    <div style="font-size: 11px; color: oklch(51% 0.017 70);">Interview booking — panel view</div>
+  </div>
+
+  <div style="font-family: Newsreader, Georgia, serif; font-size: 26px; font-weight: 600; color: oklch(23.5% 0.017 65);">This week's interviews</div>
+
+  <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+    <sc-for list="{{ days }}" as="d" hint-placeholder-count="5">
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div style="font-size: 11px; font-weight: 700; color: oklch(51% 0.017 70); text-align: center;">{{ d.label }}</div>
+        <sc-for list="{{ d.slots }}" as="s" hint-placeholder-count="3">
+          <div style="background: {{ s.bg }}; border: 1px solid {{ s.border }}; border-radius: 8px; padding: 10px 11px; display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-size: 10.5px; font-weight: 700; color: {{ s.timeInk }};">{{ s.time }}</div>
+            <sc-if value="{{ s.filled }}" hint-placeholder-val="{{ true }}">
+              <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ s.name }}</div>
+              <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ s.interviewer }}</div>
+            </sc-if>
+            <sc-if value="{{ s.panel }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 9.5px; font-weight: 700; color: oklch(52% 0.11 75);">Panel — 2 interviewers</div>
+            </sc-if>
+            <sc-if value="{{ !s.filled }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 11px; color: oklch(60% 0.017 70); font-style: italic;">Open</div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background: color-mix(in oklab, oklch(45% 0.16 27) 7%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(45% 0.16 27) 24%, transparent); border-radius: 8px; padding: 14px 17px; display: flex; gap: 12px; align-items: flex-start;">
+    <div style="width: 6px; height: 6px; border-radius: 50%; background: oklch(45% 0.16 27); margin-top: 6px; flex: none;"></div>
+    <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65);">3 applicants waiting, no slots open this week. Each holds an honest email: "we would like to meet you, we are finding a time, we will write within two working days." Flag clears when a slot is added.</div>
+  </div>
+</section>
+
+<section id="1b" style="font-family: Karla, Helvetica, sans-serif; padding: 48px; width: 1180px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px;">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Admissions</div>
+    <div style="width: 22px; height: 18px; border-radius: 5px; background: oklch(38% 0.072 195); color: oklch(98% 0.004 90); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;">1b</div>
+    <div style="font-size: 11px; color: oklch(51% 0.017 70);">The interview itself</div>
+  </div>
+
+  <div style="display: flex; align-items: baseline; justify-content: space-between;">
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: oklch(23.5% 0.017 65);">Maya Torres</div>
+    <div style="font-size: 12px; color: oklch(51% 0.017 70);">Wed 19 Nov · 14:00 · with Sara Demir</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Fixed questions — every applicant answers these</div>
+    <sc-for list="{{ fixed }}" as="q" hint-placeholder-count="7">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 7px; padding: 11px 14px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65);">{{ q.n }}. {{ q.text }}</div>
+        <div style="font-size: 11.5px; color: oklch(51% 0.017 70); border-top: 1px solid oklch(92% 0.012 85); padding-top: 6px;">{{ q.note }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(52% 0.11 75);">Drawn — weakest areas from the marked task</div>
+    <sc-for list="{{ drawn }}" as="q" hint-placeholder-count="2">
+      <div style="background: color-mix(in oklab, oklch(52% 0.11 75) 6%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(52% 0.11 75) 24%, transparent); border-radius: 7px; padding: 11px 14px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 12.5px; color: oklch(23.5% 0.017 65);">{{ q.text }}</div>
+        <div style="font-size: 11px; color: oklch(52% 0.11 75); font-weight: 600;">Flagged from the pre-interview task, {{ q.area }}</div>
+      </div>
+    </sc-for>
+    <div style="font-size: 11px; color: oklch(51% 0.017 70); font-style: italic;">Suggested, never asked automatically. What was actually asked is what goes on the record below.</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-size: 12px; font-weight: 700; color: oklch(23.5% 0.017 65);">Signed at the end, both people in the room</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 7px; padding: 12px 14px;">
+        <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(51% 0.017 70); margin-bottom: 4px;">Interviewer — required</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 17px; color: oklch(23.5% 0.017 65);">Sara Demir</div>
+      </div>
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 7px; padding: 12px 14px;">
+        <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(51% 0.017 70); margin-bottom: 4px;">Applicant — optional</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 17px; color: oklch(23.5% 0.017 65);">Maya Torres</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const FIXED = [
+  { text: 'What draws you to teaching English rather than another field?', note: 'Motivation and realistic expectations of the profession.' },
+  { text: 'Tell us about a time you had to explain something to someone who didn\u2019t share your first language.', note: 'Awareness of communication across a language barrier.' },
+  { text: 'How do you feel about receiving direct feedback on your performance?', note: 'Coachability \u2014 the course runs on daily feedback.' },
+  { text: 'What would you do if a lesson you planned clearly wasn\u2019t working halfway through?', note: 'Flexibility under pressure.' },
+  { text: 'Describe your experience with online tools \u2014 video calls, shared documents, breakout rooms.', note: 'Digital literacy \u2014 required once any course runs mixed-mode (Handbook 6.2).' },
+  { text: 'What do you think will be hardest about balancing five weeks of full-time study?', note: 'Realistic view of the course intensity.' },
+  { text: 'Is there anything about the course, the schedule, or the fee you\u2019d like to ask before we continue?', note: 'Closing the loop \u2014 gives them a real chance to ask.' },
+];
+const DRAWN = [
+  { text: 'Your written task used the word "grammar" to mean several different things \u2014 can you talk me through what you meant each time?', area: 'language awareness' },
+  { text: 'You wrote quite briefly about your own learning experience \u2014 could you say more about what helped or didn\u2019t?', area: 'extended writing' },
+];
+
+class Component extends DCLogic {
+  renderVals() {
+    const slotRow = (label, slots) => ({ label, slots });
+    const s = (time, opts) => Object.assign({ time, filled: false, panel: false, bg: 'oklch(99.2% 0.005 90)', border: 'oklch(88% 0.016 82)', timeInk: 'oklch(51% 0.017 70)' }, opts || {});
+    const filled = (time, name, interviewer, panel) => s(time, {
+      filled: true, name, interviewer, panel,
+      bg: 'color-mix(in oklab, oklch(38% 0.072 195) 6%, oklch(99.2% 0.005 90))',
+      border: 'color-mix(in oklab, oklch(38% 0.072 195) 22%, transparent)',
+      timeInk: 'oklch(38% 0.072 195)',
+    });
+    return {
+      days: [
+        slotRow('MON', [filled('10:00', 'Aylin Kaya', 'Sara Demir'), filled('14:00', 'Deniz Aksoy', 'Sara Demir'), s('16:00')]),
+        slotRow('TUE', [filled('11:00', 'Omar Farouk', 'Jason Wells'), s('13:00'), s('15:00')]),
+        slotRow('WED', [s('10:00'), filled('14:00', 'Maya Torres', 'Sara Demir'), s('16:00')]),
+        slotRow('THU', [filled('09:00', 'Lin Zhao', 'Jason Wells', true), s('11:00'), s('14:00')]),
+        slotRow('FRI', [s('10:00'), s('13:00'), s('15:00')]),
+      ],
+      fixed: FIXED.map((q, i) => ({ n: i + 1, text: q.text, note: q.note })),
+      drawn: DRAWN,
+    };
+  }
+}
+</script>
+</body>
+</html>

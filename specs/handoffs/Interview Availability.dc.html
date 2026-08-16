@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(37.5% 0.058 195); text-decoration: none; }
+  a:hover { color: oklch(63% 0.096 72); }
+</style>
+</helmet>
+
+<div style="width: 1400px; box-sizing: border-box; padding: 34px 40px 60px; font-family: Karla, Helvetica, sans-serif; color: oklch(23.5% 0.017 65); display: flex; flex-direction: column; gap: 30px;">
+
+  <div style="display: flex; flex-direction: column; gap: 9px; max-width: 1040px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · interview availability · what makes booking possible</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">Slots are generated from a rule, not typed in every week.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Each interviewer sets a weekly pattern once. The app produces bookable slots from it, {{ weeksLabel }} ahead, and stops producing them the moment somebody blocks a day out.</div>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Who can interview</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">a centre decision, not an app one</div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+      <sc-for list="{{ interviewers }}" as="i" hint-placeholder-count="4">
+        <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-top: 3px solid {{ i.spine }}; border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600;">{{ i.name }}</div>
+            <div style="font-size: 10.5px; font-weight: 600; color: {{ i.spine }};">{{ i.mode }}</div>
+          </div>
+          <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ i.role }}</div>
+          <div style="display: flex; flex-direction: column; gap: 6px; border-top: 1px solid oklch(89.5% 0.012 82); padding-top: 10px;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+              <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Pattern</div>
+              <div style="font-size: 12px; font-weight: 600; text-align: right;">{{ i.pattern }}</div>
+            </div>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+              <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">Open next {{ weeksShort }}</div>
+              <div style="font-size: 12px; font-weight: 600; color: {{ i.openInk }}; text-align: right;">{{ i.open }}</div>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: baseline; gap: 12px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Week of 16 March</div>
+        <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">what an applicant is offered, and what they are not</div>
+      </div>
+      <div style="display: flex; gap: 14px;">
+        <sc-for list="{{ legend }}" as="g" hint-placeholder-count="4">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 11px; height: 11px; border-radius: 3px; background: {{ g.bg }}; border: 1px solid {{ g.border }}; flex: none;"></div>
+            <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ g.label }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: 92px repeat(6, 1fr); background: oklch(30% 0.042 58); color: oklch(97% 0.008 88);">
+        <div style="padding: 11px 12px; font-size: 11px; font-weight: 600; color: oklch(76% 0.02 80);">Time</div>
+        <sc-for list="{{ days }}" as="d" hint-placeholder-count="6">
+          <div style="padding: 11px 12px; display: flex; flex-direction: column; gap: 1px; border-left: 1px solid color-mix(in oklab, oklch(97% 0.008 88) 16%, transparent);">
+            <div style="font-size: 12px; font-weight: 600;">{{ d.name }}</div>
+            <div style="font-size: 10.5px; color: oklch(76% 0.02 80);">{{ d.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+        <div style="display: grid; grid-template-columns: 92px repeat(6, 1fr); border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 55%, transparent);">
+          <div style="padding: 13px 12px; font-size: 11.5px; font-weight: 600; color: oklch(51% 0.017 70);">{{ r.time }}</div>
+          <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="6">
+            <div style="padding: 9px 10px; border-left: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 55%, transparent); background: {{ c.bg }}; display: flex; flex-direction: column; gap: 2px; justify-content: center; min-height: 52px;">
+              <div style="font-size: 11.5px; font-weight: 600; color: {{ c.ink }};">{{ c.label }}</div>
+              <div style="font-size: 10.5px; color: {{ c.subInk }};">{{ c.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+      <div style="padding: 12px 15px; font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ gridFoot }}</div>
+    </div>
+  </div>
+
+  <div id="1c" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">The rule that makes the slots</div>
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 19px 21px; display: flex; flex-direction: column; gap: 12px;">
+        <sc-for list="{{ rules }}" as="r" hint-placeholder-count="5">
+          <div style="display: flex; flex-direction: column; gap: 3px; padding-bottom: 10px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 45%, transparent);">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+              <div style="font-size: 12.5px; font-weight: 600;">{{ r.label }}</div>
+              <div style="font-size: 11.5px; font-weight: 600; color: oklch(37.5% 0.058 195); text-align: right;">{{ r.value }}</div>
+            </div>
+            <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ r.note }}</div>
+          </div>
+        </sc-for>
+        <div style="font-size: 11.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Nobody maintains a calendar. Change the pattern and every unbooked slot regenerates; slots already booked stay exactly where they are.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Blocking a day out</div>
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 19px 21px; display: flex; flex-direction: column; gap: 13px;">
+        <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="4">
+          <div style="display: flex; gap: 11px; align-items: flex-start; padding-bottom: 11px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 45%, transparent);">
+            <div style="width: 3px; align-self: stretch; border-radius: 99px; background: {{ b.spine }}; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 12.5px; font-weight: 600;">{{ b.title }}</div>
+              <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ b.note }}</div>
+            </div>
+          </div>
+        </sc-for>
+        <div style="font-size: 11.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">An interviewer blocks their own time. An administrator can block on their behalf, and the entry says who did it — covering for a colleague is normal, doing it invisibly is not.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="1d" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">When there is nothing to offer</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">the case that decides whether any of this is trustworthy</div>
+    </div>
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid color-mix(in oklab, oklch(63% 0.096 72) 34%, transparent); border-radius: 6px; padding: 19px 21px; display: flex; flex-direction: column; gap: 15px;">
+      <div style="font-size: 13px; line-height: 1.6; color: oklch(38% 0.017 65); max-width: 1020px; text-wrap: pretty;">A strong applicant is read on a Friday, and every slot for the next fortnight is taken. The app must not invent a time, and it must not go quiet.</div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+        <sc-for list="{{ empty }}" as="e" hint-placeholder-count="3">
+          <div style="border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 15px 16px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: {{ e.spine }};">{{ e.when }}</div>
+            <div style="font-size: 13px; font-weight: 600; line-height: 1.3;">{{ e.what }}</div>
+            <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ e.note }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="font-size: 12px; line-height: 1.6; color: oklch(51% 0.017 70); border-top: 1px solid oklch(89.5% 0.012 82); padding-top: 13px; text-wrap: pretty;">The applicant is told the truth — that the centre wants to meet them and is finding a time — rather than being left to wonder whether the task was any good.</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+    <sc-for list="{{ notes }}" as="n" hint-placeholder-count="3">
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-left: 3px solid {{ n.spine }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 12.5px; font-weight: 700; color: {{ n.spine }};">{{ n.title }}</div>
+        <div style="font-size: 12px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;weeksAhead&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:3,&quot;min&quot;:1,&quot;max&quot;:8,&quot;step&quot;:1,&quot;unit&quot;:&quot; wks&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pattern&quot;},&quot;slotMinutes&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:45,&quot;min&quot;:30,&quot;max&quot;:90,&quot;step&quot;:15,&quot;unit&quot;:&quot; min&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pattern&quot;},&quot;includeSaturday&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Pattern&quot;}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const GOLD = 'oklch(63% 0.096 72)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = 'oklch(48% 0.09 150)';
+const BORDER = 'oklch(89.5% 0.012 82)';
+
+const OPEN = { bg: 'oklch(96% 0.021 190)', ink: 'oklch(32% 0.05 195)', subInk: 'oklch(45% 0.035 195)' };
+const BOOKED = { bg: 'oklch(97.5% 0.006 88)', ink: INK, subInk: MUTED };
+const BLOCKED = { bg: 'oklch(95.5% 0.022 85)', ink: 'oklch(42% 0.075 75)', subInk: 'oklch(52% 0.05 75)' };
+const OUT = { bg: 'oklch(97% 0.004 88)', ink: 'oklch(72% 0.012 80)', subInk: 'oklch(78% 0.008 80)' };
+
+const cell = (kind, label, sub) => ({ bg: kind.bg, ink: kind.ink, subInk: kind.subInk, label, sub: sub || '' });
+
+class Component extends DCLogic {
+  renderVals() {
+    const weeks = this.props.weeksAhead ?? 3;
+    const slot = this.props.slotMinutes ?? 45;
+    const weekend = this.props.includeSaturday ?? false;
+
+    const days = [
+      { name: 'Mon 16', sub: 'interview day' },
+      { name: 'Tue 17', sub: 'teaching' },
+      { name: 'Wed 18', sub: 'teaching' },
+      { name: 'Thu 19', sub: 'interview day' },
+      { name: 'Fri 20', sub: 'teaching' },
+      { name: 'Sat 21', sub: weekend ? 'interview day' : 'closed' },
+    ];
+
+    const sat = (label, sub, kind) => weekend ? cell(kind, label, sub) : cell(OUT, '—', 'closed');
+
+    const rows = [
+      { time: '14:00', cells: [
+        cell(BOOKED, 'Leyla Tunç', 'Helen · in person'),
+        cell(OUT, '—', ''), cell(OUT, '—', ''),
+        cell(OPEN, 'Open', 'Hakan · online'),
+        cell(OUT, '—', ''),
+        sat('Open', 'Helen · online', OPEN),
+      ]},
+      { time: '14:45', cells: [
+        cell(BOOKED, 'Kaan Erdoğan', 'Helen · in person'),
+        cell(OUT, '—', ''), cell(OUT, '—', ''),
+        cell(BOOKED, 'Nur Bilgin', 'Hakan · online'),
+        cell(OUT, '—', ''),
+        sat('Open', 'Helen · online', OPEN),
+      ]},
+      { time: '15:30', cells: [
+        cell(OPEN, '2 open', 'Helen · Sema'),
+        cell(OUT, '—', ''), cell(OUT, '—', ''),
+        cell(BOOKED, 'Onur Yalçın', 'Hakan · online'),
+        cell(OUT, '—', ''),
+        sat('—', 'half day', OUT),
+      ]},
+      { time: '16:15', cells: [
+        cell(BLOCKED, 'Blocked', 'Helen · standardisation'),
+        cell(OUT, '—', ''), cell(OUT, '—', ''),
+        cell(OPEN, '2 open', 'Hakan · Sema'),
+        cell(OUT, '—', ''),
+        sat('—', 'half day', OUT),
+      ]},
+    ];
+
+    return {
+      weeksLabel: weeks + ' weeks',
+      weeksShort: weeks + ' wks',
+
+      interviewers: [
+        { spine: TEAL, name: 'Helen Whitmore', role: 'Main course tutor · approved to interview', mode: 'In person', pattern: 'Mon, 14:00–17:00', open: '1 open', openInk: TEAL },
+        { spine: TEAL, name: 'Hakan Şen', role: 'Course tutor · approved to interview', mode: 'Online', pattern: 'Thu, 14:00–17:00', open: '2 open', openInk: TEAL },
+        { spine: TEAL, name: 'Sema Koç', role: 'Freelance tutor · approved to interview', mode: 'Either', pattern: 'Mon and Thu, from 15:30', open: '2 open', openInk: TEAL },
+        { spine: GOLD, name: 'Nazlı Aydın', role: 'Centre administrator · admissions', mode: 'Books, does not interview', pattern: 'Not an interviewer', open: '—', openInk: MUTED },
+      ],
+
+      legend: [
+        { label: 'Open', bg: OPEN.bg, border: 'color-mix(in oklab, ' + TEAL + ' 30%, transparent)' },
+        { label: 'Booked', bg: BOOKED.bg, border: BORDER },
+        { label: 'Blocked', bg: BLOCKED.bg, border: 'color-mix(in oklab, ' + GOLD + ' 34%, transparent)' },
+        { label: 'Outside the pattern', bg: OUT.bg, border: BORDER },
+      ],
+
+      days, rows,
+      gridFoot: 'Five open slots this week across three interviewers, overlapping at 15:30 and 16:15. An applicant sees a time, not a roster — the grid is the centre’s view, not theirs.',
+
+      rules: [
+        { label: 'Interview length', value: slot + ' minutes', note: 'Plus a ten-minute gap, so an overrun does not push into the next applicant.' },
+        { label: 'Slots open', value: weeks + ' weeks ahead', note: 'Far enough that there is always something to offer; near enough that a pattern change is not fighting bookings made two months ago.' },
+        { label: 'Cut-off', value: '24 hours', note: 'Nothing is bookable for tomorrow morning. An interviewer needs the evening to read the task.' },
+        { label: 'Mode', value: 'Per interviewer', note: 'Helen interviews in person, Hakan online, Sema either. The applicant is told which before they choose, not after.' },
+        { label: 'Two free at once', value: 'Balanced by load', note: 'The applicant sees one time, not two names. The app gives it to whoever has interviewed least this intake, and an administrator can override to a named interviewer.' },
+        { label: 'Two in the room', value: 'Booked as one slot', note: 'A panel — a trainer in training sitting in, or a second opinion on a borderline applicant — occupies both interviewers and shows as a single booking.' },
+        { label: 'Who sees the grid', value: 'Staff only', note: 'The applicant is offered times. They never see the week, and never see another applicant’s name.' },
+      ],
+
+      blocks: [
+        { spine: GOLD, title: 'A single afternoon', note: 'Standardisation, a school visit, anything. Unbooked slots disappear from the applicant’s view immediately.' },
+        { spine: GOLD, title: 'A whole week', note: 'Leave, or a course running that eats the afternoons. Set once, and the pattern resumes on its own afterwards.' },
+        { spine: RED, title: 'A slot that is already booked', note: 'Cannot simply vanish. Blocking it requires rebooking the applicant first, and they are emailed by a person with an apology and a new time.' },
+        { spine: TEAL, title: 'Centre closures', note: 'Public holidays and the centre’s own closed days are set once for everybody, not by each interviewer separately.' },
+      ],
+
+      empty: [
+        { spine: RED, when: 'What must not happen', what: 'A time is invented', note: 'No slot outside the pattern, ever. An applicant arriving to an empty room is worse than a day’s wait.' },
+        { spine: GOLD, when: 'What the applicant gets', what: 'An honest holding email', note: 'We have read your task and would like to meet you. We are finding a time and will write within two working days.' },
+        { spine: TEAL, when: 'What the centre gets', what: 'A flag that will not clear', note: 'Admissions sees “3 waiting, no availability” until slots exist. It is the one alert that escalates on its own.' },
+      ],
+
+      notes: [
+        { spine: TEAL, title: 'The pattern is the maintenance', text: 'Set once per interviewer. Everything an applicant is offered comes from it, so there is no weekly calendar to keep tidy and nothing to forget.' },
+        { spine: GOLD, title: 'Availability is not the course timetable', text: 'An interviewer is usually recruiting for a course they are not teaching, often months out. The two calendars are deliberately separate.' },
+        { spine: RED, title: 'A booking is a commitment', text: 'Once an applicant holds a time, only a person can move it, and moving it writes to them. The app will not quietly reshuffle somebody’s afternoon.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

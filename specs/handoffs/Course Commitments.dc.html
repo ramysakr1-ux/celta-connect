@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<script src="./doc-page.js"></script>
+<style>
+  body { margin: 0; }
+  doc-page:not(:defined) { visibility: hidden; }
+</style>
+</helmet>
+
+<doc-page margin="0.85in">
+
+  <div slot="header" style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; padding-bottom: 8px; border-bottom: 1px solid oklch(84% 0.016 82); font-family: Karla, Helvetica, sans-serif; font-size: 9pt; color: oklch(51% 0.017 70);">
+    <div style="font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">Connect · centre template</div>
+    <div>Course commitments and code of conduct</div>
+  </div>
+
+  <div slot="footer" style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; padding-top: 8px; border-top: 1px solid oklch(84% 0.016 82); font-family: Karla, Helvetica, sans-serif; font-size: 8.5pt; color: oklch(56% 0.017 70);">
+    <div>Shown at application. Accepted once, before the form can be submitted.</div>
+    <div>Template v1 · each centre edits and dates its own</div>
+  </div>
+
+  <div style="font-family: Karla, Helvetica, sans-serif; font-size: 9.5pt; line-height: 1.5; color: oklch(45% 0.04 70); background: oklch(96.5% 0.018 85); border-left: 3px solid oklch(63% 0.096 72); padding: 10pt 12pt; margin: 0 0 18pt;">A template Connect ships so a centre is not drafting this from nothing. The hours, the length and the working advice in section 1 fill from the course itself — four weeks Monday to Friday reads differently from part-time over twelve — and every paragraph stays editable. A centre that changes nothing still has a defensible document; a centre that changes everything keeps the structure.</div>
+
+  <h1 style="font-family: Newsreader, Georgia, serif; font-size: 25pt; font-weight: 600; line-height: 1.12; color: oklch(23.5% 0.017 65); margin: 0 0 10pt;">What the course asks of you</h1>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11.5pt; line-height: 1.55; color: oklch(38% 0.017 65); margin: 0 0 16pt;">CELTA is short, intensive and assessed throughout. Most people who struggle are not short of ability — they are short of time, or they arrived expecting something gentler. This document says plainly what the course involves, so you can decide before you apply rather than in the second week.</p>
+
+  <h2 style="font-family: Newsreader, Georgia, serif; font-size: 15pt; font-weight: 600; color: oklch(30% 0.042 58); margin: 0 0 7pt;">1 · Your time</h2>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 9pt;">{{ pattern }} {{ evening }}</p>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 9pt;"><strong>{{ adviceLead }}</strong>{{ adviceRest }}</p>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 16pt;">Full attendance is a Cambridge requirement, not a centre preference. Absence is recorded, and missing teaching practice or input sessions can put your certificate at risk. If you are ill, tell us the same day.</p>
+
+  <h2 style="font-family: Newsreader, Georgia, serif; font-size: 15pt; font-weight: 600; color: oklch(30% 0.042 58); margin: 0 0 7pt;">2 · Being observed, and being given feedback</h2>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 9pt;">You will teach real learners from the first week, watched by a tutor and by the other candidates in your group. Afterwards you will receive feedback in front of that group, and you will hear your peers receive theirs.</p>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 16pt;">This is uncomfortable at first for almost everybody, and it is how the course works. Feedback is about the lesson, never about you as a person. We ask you to receive it in that spirit, and to give the same courtesy when you are watching someone else teach.</p>
+
+  <h2 style="font-family: Newsreader, Georgia, serif; font-size: 15pt; font-weight: 600; color: oklch(30% 0.042 58); margin: 0 0 7pt;">3 · What you need</h2>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 9pt;"><strong>A laptop.</strong> Assignments, lesson plans and materials cannot realistically be produced on a phone. If you do not have one, tell us at application and we will tell you what the centre can lend.</p>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 16pt;"><strong>A reliable internet connection</strong>, if any part of your course is taught or observed online. Teaching a lesson on a connection that drops is assessed as the lesson it became, not the lesson you planned. Test it before the course starts, and tell us early if it is a risk.</p>
+
+  <h2 style="font-family: Newsreader, Georgia, serif; font-size: 15pt; font-weight: 600; color: oklch(30% 0.042 58); margin: 0 0 7pt;">4 · How we treat each other</h2>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 9pt;">You will spend five intense weeks with a small group of people, and you will teach learners who have volunteered their time. We expect everyone at the centre — candidates, tutors and staff alike — to work to the same standard of conduct.</p>
+
+  <ul style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 9pt; padding-left: 18pt;">
+    <li style="margin-bottom: 5pt;"><strong>Respect for people.</strong> No discrimination or harassment on grounds of race, nationality, religion, sex, gender identity, sexual orientation, age or disability — in the classroom, in materials you write, or in conversation around the course.</li>
+    <li style="margin-bottom: 5pt;"><strong>Care with your learners.</strong> The people in your teaching practice classes are volunteers. They are not there to be experimented on, recorded without consent, or discussed by name outside the course.</li>
+    <li style="margin-bottom: 5pt;"><strong>Honest work.</strong> Assignments must be your own. Working together on ideas is encouraged; submitting shared text is not. Sources are acknowledged, including anything generated by AI.</li>
+    <li style="margin-bottom: 5pt;"><strong>Punctuality and reliability.</strong> A lesson plan that arrives late, or a candidate who does not, affects the people teaching alongside you.</li>
+    <li style="margin-bottom: 5pt;"><strong>Confidentiality.</strong> Feedback given to a peer, and anything shared about a learner, stays inside the course.</li>
+  </ul>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 16pt;">Serious or repeated breaches are handled under the centre's disciplinary procedure and may end your place on the course. If something happens to you, or you see it happen to someone else, tell any tutor or the centre administrator. You will be taken seriously.</p>
+
+  <h2 style="font-family: Newsreader, Georgia, serif; font-size: 15pt; font-weight: 600; color: oklch(30% 0.042 58); margin: 0 0 7pt;">5 · What we owe you in return</h2>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 16pt;">Tutors qualified and approved by Cambridge. Written feedback on every assessed lesson. A minimum of two progress reports, telling you honestly how you are doing — more if you need them, and you will never reach the final week and be surprised. Clear deadlines set at the start. A named person to raise a concern with, and a complaints procedure that does not run through the tutors teaching you.</p>
+
+  <h2 style="font-family: Newsreader, Georgia, serif; font-size: 15pt; font-weight: 600; color: oklch(30% 0.042 58); margin: 0 0 7pt;">6 · Acceptance</h2>
+
+  <p style="font-family: Karla, Helvetica, sans-serif; font-size: 11pt; line-height: 1.6; color: oklch(38% 0.017 65); margin: 0 0 12pt;">By submitting your application you confirm that you have read this document, that you understand what the course asks of you, and that you accept the standards of conduct set out in section 4. You accept it once, at application. There is nothing further to sign.</p>
+
+  <div style="border: 1px solid oklch(84% 0.016 82); border-radius: 4pt; padding: 12pt 14pt; font-family: Karla, Helvetica, sans-serif; font-size: 10pt; line-height: 1.55; color: oklch(45% 0.02 70);">
+    <div style="font-weight: 700; color: oklch(23.5% 0.017 65); margin-bottom: 5pt;">Recorded on your application file</div>
+    <div>Your name, the date and time you accepted, and the version of this document as it stood that day. If the centre revises it later, your file keeps the text you actually read — and a copy of that version is stored with it, not just its number. The file is available to the Cambridge assessor and kept for six months after the course ends.</div>
+  </div>
+
+</doc-page>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;courseMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Five weeks, Fridays off&quot;,&quot;options&quot;:[&quot;Five weeks, Fridays off&quot;,&quot;Four weeks, Monday to Friday&quot;,&quot;Part-time, twelve weeks&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Course&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const mode = this.props.courseMode ?? 'Five weeks, Fridays off';
+
+    const M = {
+      'Five weeks, Fridays off': {
+        pattern: 'Timetabled hours are 09:00 to 17:00, Monday to Thursday, for five weeks.',
+        evening: 'Beyond that, expect three to four hours most evenings for lesson planning, materials and assignments, and a substantial part of most weekends. Fridays are not a day off in practice — they are when most people write.',
+        advice: 'We strongly advise against working during the course',
+        alt: 'a part-time course may suit you better',
+      },
+      'Four weeks, Monday to Friday': {
+        pattern: 'Timetabled hours are 09:00 to 17:00, Monday to Friday, for four weeks.',
+        evening: 'Beyond that, expect three to four hours every evening for lesson planning, materials and assignments, and most of both weekend days. This is the most compressed version of the course: the same 120 hours and the same four assignments in a fortnight less than some centres allow.',
+        advice: 'You cannot work during this course',
+        alt: 'the five-week or part-time course would suit you better',
+      },
+      'Part-time, twelve weeks': {
+        pattern: 'Timetabled sessions are Saturdays 09:00 to 17:00 and Wednesday evenings 17:30 to 21:30, for twelve weeks.',
+        evening: 'Beyond that, expect six to eight hours across the rest of each week for lesson planning, materials and assignments. The course is spread out, not lighter — it is the same 120 hours and the same assessment.',
+        advice: 'This course is designed to be taken alongside work',
+        alt: 'talk to us about which intake fits your year',
+      },
+    };
+    const m = M[mode] || M['Five weeks, Fridays off'];
+
+    return {
+      pattern: m.pattern,
+      evening: m.evening,
+      adviceLead: m.advice,
+      adviceRest: mode === 'Part-time, twelve weeks'
+        ? ', but it is not a light commitment. Two evenings and a Saturday disappear for three months, and candidates who also take on extra hours at work are the ones who fall behind on assignments. Tell us if your hours are likely to change.'
+        : ', including part-time and evening work. Candidates who try it are the ones who fall behind on assignments first. If your circumstances make that impossible, speak to us before you apply — ' + m.alt + ', and we would rather move you than watch you struggle.',
+    };
+  }
+}
+</script>
+</body>
+</html>

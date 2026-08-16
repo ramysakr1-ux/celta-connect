@@ -1,4 +1,4 @@
-# Connect CELTA — Chat Pill & Timetable Spec
+# Connect — Chat Pill & Timetable Spec
 
 Source file: `Chat Pill.dc.html` (design reference, HTML prototype). Implement in your existing stack; do not copy the HTML.
 
