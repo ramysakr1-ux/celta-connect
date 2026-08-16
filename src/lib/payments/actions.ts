@@ -141,7 +141,10 @@ export async function createProviderCheckoutLink(_prevState: PaymentFormState, f
   const { data: course } = await supabase.from("courses").select("name").eq("id", applicant.intake_course_id).maybeSingle();
 
   try {
-    const provider = await getActivePaymentProvider();
+    // Pass the centre so the resolver reads THAT centre's connected provider
+    // (migration 0106) rather than falling back to Stripe. Without this the
+    // provider screen's setting would be decorative.
+    const provider = await getActivePaymentProvider(staff.center_id);
     const { checkoutUrl } = await provider.createCheckoutSession({
       paymentId: payment.id,
       amount: payment.amount,

@@ -12,6 +12,10 @@ export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
   if (!signature) return NextResponse.json({ error: "Missing signature." }, { status: 400 });
 
+  // No centre id here on purpose: this route IS the Stripe endpoint, so the
+  // adapter that must parse the payload is Stripe's regardless of which
+  // provider any given centre has since connected -- an event already in
+  // flight still has to be understood. A second provider gets its own route.
   const provider = await getActivePaymentProvider();
   let event;
   try {

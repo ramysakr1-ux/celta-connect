@@ -27,6 +27,12 @@ export default async function PaymentProvidersPage() {
     .eq("id", centerId)
     .maybeSingle();
 
+  // Checked server-side so the light tells the truth: Stripe can be "connected"
+  // on paper while the server has no key, in which case the first real checkout
+  // throws. Only the boolean crosses to the client -- never the key itself.
+  const credentialsPresent =
+    center?.payment_provider === "stripe" ? Boolean(process.env.STRIPE_SECRET_KEY) : false;
+
   return (
     <div className="flex max-w-[720px] flex-col gap-5">
       <div>
@@ -43,6 +49,7 @@ export default async function PaymentProvidersPage() {
       <ProviderList
         connectedKey={(center?.payment_provider ?? null) as PaymentProviderKey | null}
         connectedAt={center?.payment_provider_connected_at ?? null}
+        credentialsPresent={credentialsPresent}
       />
 
       <p className="text-xs leading-relaxed text-muted">
