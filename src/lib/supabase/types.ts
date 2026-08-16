@@ -418,6 +418,19 @@ export interface Database {
           // application form and carried into the offer or rejection email.
           // The AI suggestion beside it is advisory: AI never sends anything to
           // an applicant and never makes the decision.
+          // migration 0118 -- the centre's green light. Null means no Connect
+          // link has been sent, whatever has been paid: access follows a
+          // decision, not funds.
+          workspace_released_at: string | null;
+          workspace_released_by: string | null;
+          workspace_released_reason:
+            | "paid_in_full"
+            | "deposit_paid"
+            | "promised_to_pay"
+            | "provider_confirmed"
+            | "other"
+            | null;
+          workspace_released_note: string | null;
           task_feedback: string | null;
           task_feedback_ai_suggestion: string | null;
           task_feedback_ai_accepted: boolean | null;

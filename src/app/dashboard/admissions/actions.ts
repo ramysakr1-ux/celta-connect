@@ -700,3 +700,123 @@ export async function recordDeposit(_prevState: FormState, formData: FormData): 
   revalidatePath("/centre");
   return { error: null };
 }
+
+// ---- The green light ----
+
+/**
+ * Releases workspace access and sends the invitation.
+ *
+ * Ramy, 2026-08-16: "The link only goes there once they are accepted on the
+ * course, or once the centre admin signals that they are accepted. This could
+ * be done after they pay in full, or pay a deposit, or they promise to pay.
+ * But before they receive the Connect link, there should be a green light from
+ * the centre."
+ *
+ * So the gate is a decision, not a payment. The reason is recorded because
+ * "promised to pay" is a real, chosen state a centre needs to be able to see
+ * later -- who is in on trust, and who should be chased.
+ *
+ * Idempotent: releasing twice does not send twice. A second click is far more
+ * likely to be someone unsure whether the first worked than a deliberate
+ * resend, and a duplicate "your workspace is ready" reads as a mistake.
+ */
+export async function releaseWorkspace(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const staff = await requireAdmissionsHandler();
+  if (!canDecideAdmissions(staff)) return { error: "You can't release workspace access." };
+
+  const applicantId = formData.get("applicant_id");
+  const reason = formData.get("reason");
+  const note = (formData.get("note") as string | null)?.trim() || null;
+
+  // Narrowed to the union rather than a string[], so the check that validates
+  // the form value is the same one the database column enforces.
+  const REASONS = ["paid_in_full", "deposit_paid", "promised_to_pay", "provider_confirmed", "other"] as const;
+  type ReleaseReason = (typeof REASONS)[number];
+  if (typeof applicantId !== "string" || typeof reason !== "string" || !REASONS.includes(reason as ReleaseReason)) {
+    return { error: "Choose why access is being given." };
+  }
+
+  const supabase = await createClient();
+  const { data: applicant } = await supabase
+    .from("applicants")
+    .select("id, full_name, email, intake_course_id, offer_token, workspace_released_at")
+    .eq("id", applicantId)
+    .eq("center_id", staff.center_id)
+    .maybeSingle();
+  if (!applicant) return { error: "Applicant not found." };
+  if (applicant.workspace_released_at) {
+    return { error: "They already have their link -- released earlier. Nothing sent." };
+  }
+  if (!applicant.offer_token) {
+    return { error: "There's no offer link for them yet. Send the offer first." };
+  }
+
+  const { error: updateError } = await supabase
+    .from("applicants")
+    .update({
+      workspace_released_at: new Date().toISOString(),
+      workspace_released_by: staff.id,
+      workspace_released_reason: reason as ReleaseReason,
+      workspace_released_note: note,
+    })
+    .eq("id", applicantId)
+    .eq("center_id", staff.center_id);
+  if (updateError) return { error: `Could not record the release: ${updateError.message}` };
+
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const admin = createAdminClient();
+  const [{ data: course }, { data: center }] = await Promise.all([
+    admin
+      .from("courses")
+      .select("name, start_date, end_date, delivery_mode")
+      .eq("id", applicant.intake_course_id)
+      .maybeSingle(),
+    admin.from("centers").select("name, admissions_email").eq("id", staff.center_id).maybeSingle(),
+  ]);
+
+  // Tutor names for "Your tutors are ..." -- the email says it plainly, so an
+  // empty list simply drops the sentence rather than printing "Your tutors are".
+  const { data: tutors } = await admin
+    .from("course_tutors")
+    .select("profiles(full_name)")
+    .eq("course_id", applicant.intake_course_id);
+  const tutorNames = (tutors ?? [])
+    .map((t) => (t.profiles as { full_name?: string } | null)?.full_name)
+    .filter((n): n is string => Boolean(n));
+
+  const fmt = (iso: string | null) =>
+    iso ? new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) : "";
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://celtaconnect.com";
+
+  const { welcomeEmailHtml } = await import("@/lib/admissions-email");
+  const { error: sendError } = await sendApplicantEmail({
+    centerName: center?.name ?? "Your centre",
+    centerAdmissionsEmail: center?.admissions_email ?? null,
+    to: applicant.email,
+    subject: "your CELTA workspace is ready",
+    centerId: staff.center_id,
+    applicantId,
+    type: "welcome",
+    sentBy: staff.id,
+    html: welcomeEmailHtml({
+      candidateName: applicant.full_name,
+      courseName: course?.name ?? "your course",
+      centreName: center?.name ?? "the centre",
+      tutorNames,
+      courseFact: course?.name
+        ? `${course.name}${course.delivery_mode === "online" ? ", fully online" : course.delivery_mode === "mixed" ? ", mixed mode" : ""}`
+        : "Your course",
+      startsFact: fmt(course?.start_date ?? null) || "Dates to be confirmed",
+      preCourseTaskFact: "Pre-course task, about 4 hours",
+      setupUrl: `${base}/offer/${applicant.offer_token}`,
+      readingListUrl: `${base}/resources?category=reading`,
+    }),
+  });
+
+  revalidatePath(`/dashboard/admissions/${applicantId}`);
+  revalidatePath("/dashboard/admissions");
+  revalidatePath("/centre");
+  // The release is recorded either way -- it happened, and hiding that because
+  // an email bounced would leave the centre unable to see who has been let in.
+  return { error: sendError ? `Access released, but the email failed to send: ${sendError}` : null };
+}
