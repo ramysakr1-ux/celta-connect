@@ -6,7 +6,7 @@ import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { CentreTabs } from "@/app/centre/centre-tabs";
-import { CentreSwitcher } from "@/app/dashboard/centre-switcher";
+import { BranchFilter } from "@/app/centre/branch-filter";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DesignerCredit } from "@/components/designer-credit";
 
@@ -22,6 +22,8 @@ export default async function CentreLayout({ children }: { children: React.React
   const ctx = await getCentreRoleContext(profile);
   if (ctx.roles.length === 0) redirect("/dashboard");
 
+  // §13: "a single-centre customer never sees it" -- only loaded when there is
+  // more than one branch to narrow between.
   const switchable =
     ctx.availableCenterIds.length > 1
       ? (
@@ -45,7 +47,7 @@ export default async function CentreLayout({ children }: { children: React.React
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-4 text-[13px] text-muted">
-          <CentreSwitcher centres={switchable} activeId={ctx.activeCenterId} />
+          <BranchFilter branches={switchable} />
           <span>{profile.full_name}</span>
           <form action={signOut}>
             <button type="submit" className="hover:text-ink">
