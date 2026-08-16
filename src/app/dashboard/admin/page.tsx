@@ -19,7 +19,7 @@ const STATE_ORDER: CourseState[] = ["running", "upcoming", "closed"];
 const STATE_PILL_CLASS: Record<CourseState, string> = {
   running: "status-pill status-pill-on-track",
   upcoming: "status-pill bg-primary/10 text-primary",
-  closed: "status-pill bg-accent/50 text-muted",
+  closed: "status-pill bg-surface-muted text-muted",
 };
 
 export default async function AdminDashboardPage() {
@@ -95,9 +95,27 @@ export default async function AdminDashboardPage() {
           moved to a persistent AdminTabs nav in dashboard/layout.tsx so they
           don't disappear the moment you click into one (Ramy, live-testing
           2026-08-15: no way back except the browser's own back button). */}
-      <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">Welcome, {profile.full_name}</h1>
-        <p className="mt-2 text-muted">Manage your centre&apos;s courses and roster.</p>
+      {/* for-claude-code-course-admin.md, screen 1a: "Title: centre name +
+          Cambridge centre number", with "New course" as the primary action.
+          It used to read "Welcome, <name>", which tells the person something
+          they already know and omits the two facts that print on every report. */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Connect · course admin</p>
+          <h1 className="mt-1 font-serif text-[26px] text-ink">
+            {center?.name ?? "Your centre"}
+            {center?.center_number ? <span className="text-muted"> · {center.center_number}</span> : null}
+          </h1>
+        </div>
+        {/* The create form already lives in the sidebar, so this jumps to it
+            rather than pointing at a /courses/new route that does not exist --
+            a primary button that 404s is worse than no button. */}
+        <a
+          href="#new-course"
+          className="shrink-0 rounded-[6px] bg-ink-warm px-4 py-2 text-sm font-semibold text-card"
+        >
+          New course
+        </a>
       </div>
 
       {center?.center_number.startsWith("PENDING-") ? (
@@ -115,7 +133,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
       ) : center?.center_number ? (
-        <div className="flex items-center gap-3 rounded-[6px] border border-border bg-accent/30 p-3">
+        <div className="flex items-center gap-3 rounded-[6px] border border-border bg-card p-3">
           <span className="size-1.5 shrink-0 rounded-full bg-primary" />
           <p className="text-sm text-ink">
             Centre number set -- {center.center_number}
@@ -140,7 +158,7 @@ export default async function AdminDashboardPage() {
                     <Link
                       key={row.course.id}
                       href={`/dashboard/admin/courses/${row.course.id}`}
-                      className="flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 last:border-none hover:bg-accent/20"
+                      className="flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 last:border-none hover:bg-surface-muted"
                     >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-ink">{row.course.name}</p>
@@ -160,7 +178,9 @@ export default async function AdminDashboardPage() {
             <p className="text-muted">No courses yet.</p>
           )}
 
-          <CreateCourseForm />
+          <div id="new-course">
+            <CreateCourseForm />
+          </div>
         </div>
 
         {/* specs/build-spec.md §7: admin gets "status plus the one or two
