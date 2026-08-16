@@ -17,7 +17,7 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
   return (
     <form action={action} className="sheet flex flex-col gap-4 p-6">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
-      <h2 className="font-serif text-lg text-ink">Stage Two -- mid-course tutorial</h2>
+      <h2 className="font-serif text-lg text-ink">Progress Record — Stage 2: mid-course tutorial</h2>
 
       {record.stage2_candidate_submitted_at ? (
         <div className="rounded-[6px] border border-border p-3">
@@ -112,10 +112,10 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
           name="stage2_completed"
           defaultChecked={!!record.stage2_completed_at}
         />
-        Stage One and Two complete -- reveal to trainee
+        Progress Record — Stages 1 and 2 complete — reveal to trainee
       </label>
       <p className="text-xs text-muted">
-        Checking this is what makes Stage One and Two (including your ratings above) visible
+        Checking this is what makes Progress Record Stages 1 and 2 (including your ratings above) visible
         to the trainee for the first time, so they can review and sign off. Nothing is shown
         to them before this, however far along you&apos;ve gotten.
       </p>

@@ -16,7 +16,7 @@ export function Stage3OverallForm({ record }: { record: Celta5Record }) {
   return (
     <form action={action} className="sheet flex flex-col gap-4 p-6">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
-      <h2 className="font-serif text-lg text-ink">Stage Three -- final third (conditional)</h2>
+      <h2 className="font-serif text-lg text-ink">Progress Record — Stage 3 / Tutorial: final third (conditional)</h2>
       <p className="text-xs text-muted">
         Only required if the candidate was not to standard at Stage 2, stalled after being
         on/above standard, or is showing signs of a higher grade (Pass B/A) but not
@@ -29,7 +29,7 @@ export function Stage3OverallForm({ record }: { record: Celta5Record }) {
           name="stage3_required"
           defaultChecked={record.stage3_required}
         />
-        Stage Three required for this candidate
+        Progress Record — Stage 3 required for this candidate
       </label>
 
       <label className="flex items-center gap-2 text-sm text-ink">
@@ -104,7 +104,7 @@ export function Stage3OverallForm({ record }: { record: Celta5Record }) {
           name="stage3_finalized"
           defaultChecked={!!record.stage3_finalized_at}
         />
-        Finalize Stage Three (reveals these ratings to the candidate)
+        Finalize Progress Record — Stage 3 (reveals these ratings to the candidate)
       </label>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

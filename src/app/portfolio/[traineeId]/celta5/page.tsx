@@ -242,24 +242,24 @@ export default async function PortfolioCelta5Page({
 
         {!stage2Submitted ? (
           <div>
-            <h3 className="font-serif text-lg text-ink">Stage Two self-assessment</h3>
+            <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2: self-assessment</h3>
             <div className="mt-3">
               <SelfAssessmentForm />
             </div>
           </div>
         ) : !stage1And2Released ? (
           <div className="sheet">
-            <h3 className="font-serif text-lg text-ink">Stage Two</h3>
+            <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2</h3>
             <p className="mt-2 text-muted">
               Your self-assessment was submitted {new Date(record.stage2_candidate_submitted_at!).toLocaleString()}.
-              Your tutor is reviewing it -- your Stage One and Two record will appear here once they release it.
+              Your tutor is reviewing it -- your Progress Record for Stages 1 and 2 will appear here once they release it.
             </p>
           </div>
         ) : (
           <>
             {record.stage1_strengths || record.stage1_action_plan ? (
               <div className="sheet">
-                <h3 className="font-serif text-lg text-ink">Stage One</h3>
+                <h3 className="font-serif text-lg text-ink">Progress Record — Stage 1</h3>
                 {record.stage1_strengths ? (
                   <div className="mt-2">
                     <p className="text-sm text-muted">Strengths</p>
@@ -277,7 +277,7 @@ export default async function PortfolioCelta5Page({
 
             <div>
               <div className="flex items-center justify-between gap-3">
-                <h3 className="font-serif text-lg text-ink">Stage Two</h3>
+                <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2</h3>
                 <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
                   You: {candidateRatedCount} of {CELTA_CRITERIA_CODES.length} · Tutor: {tutorRatedCount} of{" "}
                   {CELTA_CRITERIA_CODES.length}
@@ -747,7 +747,7 @@ export default async function PortfolioCelta5Page({
 
         {record.stage1_strengths || record.stage1_action_plan ? (
           <div className="sheet">
-            <h3 className="font-serif text-lg text-ink">Stage One</h3>
+            <h3 className="font-serif text-lg text-ink">Progress Record — Stage 1</h3>
             <ReadOnlyField label="Strengths" value={record.stage1_strengths} />
             <ReadOnlyField label="Action plan" value={record.stage1_action_plan} />
           </div>
@@ -755,7 +755,7 @@ export default async function PortfolioCelta5Page({
 
         <div>
           <div className="flex items-center justify-between gap-3">
-            <h3 className="font-serif text-lg text-ink">Stage Two -- criteria ratings</h3>
+            <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h3>
             <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
               Candidate: {stage2CandidateRatedCount} of {CELTA_CRITERIA_CODES.length} · Tutor: {stage2TutorRatedCount} of{" "}
               {CELTA_CRITERIA_CODES.length}
@@ -916,7 +916,7 @@ export default async function PortfolioCelta5Page({
       <Stage1Form key={`stage1-${record.updated_at}`} record={record} />
 
       <div>
-        <h3 className="font-serif text-lg text-ink">Stage Two -- criteria ratings</h3>
+        <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h3>
         <div className="mt-3">
           <StageRatingsForm key={`s2-${matrixKey}`} stage={2} traineeId={traineeId} rows={matrixRows} suggestions={suggestions} />
         </div>

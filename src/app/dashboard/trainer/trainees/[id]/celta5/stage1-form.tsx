@@ -16,7 +16,7 @@ export function Stage1Form({ record }: { record: Celta5Record }) {
     <form action={action} className="sheet flex flex-col gap-4 p-6">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
       <h2 className="font-serif text-lg text-ink">
-        Stage One -- first third of the course
+        Progress Record — Stage 1: first third of the course
       </h2>
 
       <label className="flex items-center gap-2 text-sm text-ink">
@@ -65,7 +65,7 @@ export function Stage1Form({ record }: { record: Celta5Record }) {
           name="stage1_completed"
           defaultChecked={!!record.stage1_completed_at}
         />
-        Stage One complete
+        Progress Record — Stage 1 complete
       </label>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

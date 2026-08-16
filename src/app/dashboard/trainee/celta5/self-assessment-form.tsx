@@ -21,7 +21,7 @@ export function SelfAssessmentForm() {
     <form action={action} className="card flex flex-col gap-6 p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-serif text-lg text-ink">Stage Two self-assessment</h2>
+          <h2 className="font-serif text-lg text-ink">Progress Record — Stage 2: self-assessment</h2>
           <p className="mt-1 text-sm text-muted">
             Rate yourself on each criterion before your tutorial. Your tutor&apos;s ratings
             stay hidden until you submit this.

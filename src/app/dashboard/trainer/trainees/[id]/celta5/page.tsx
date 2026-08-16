@@ -200,7 +200,7 @@ export default async function Celta5RecordPage({
       <Stage1Form key={`stage1-${record.updated_at}`} record={record} />
 
       <div>
-        <h2 className="font-serif text-lg text-ink">Stage Two -- criteria ratings</h2>
+        <h2 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h2>
         <div className="mt-3">
           <StageRatingsForm
             key={`s2-${matrixKey}`}
