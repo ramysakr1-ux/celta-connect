@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getActivePaymentProvider } from "@/lib/payments/provider";
+import { stripeAdapter } from "@/lib/payments/stripe-adapter";
 
 // Stripe (or whichever provider is active) posts here on every payment
 // event. No user session exists -- the signature check IS the auth, same
@@ -12,11 +12,11 @@ export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
   if (!signature) return NextResponse.json({ error: "Missing signature." }, { status: 400 });
 
-  // No centre id here on purpose: this route IS the Stripe endpoint, so the
-  // adapter that must parse the payload is Stripe's regardless of which
-  // provider any given centre has since connected -- an event already in
-  // flight still has to be understood. A second provider gets its own route.
-  const provider = await getActivePaymentProvider();
+  // This route IS Stripe's endpoint, so it parses with Stripe's adapter
+  // directly rather than asking which provider a centre has chosen -- an event
+  // already in flight still has to be understood even if the centre has since
+  // switched. Every other provider gets its own route and its own adapter.
+  const provider = stripeAdapter;
   let event;
   try {
     event = provider.parseWebhookEvent(rawBody, signature);
