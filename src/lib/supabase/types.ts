@@ -199,6 +199,10 @@ export interface Database {
           application_low_availability_threshold: number;
           admissions_email: string | null;
           chat_retention_days: number;
+          // migration 0114 -- working days by which the centre promises to
+          // respond to an application. The acknowledgement email turns this
+          // into a real date.
+          application_response_days: number;
           // migration 0106 -- which provider this centre uses, and whether
           // onboarding finished. Never a key or anything in PCI scope: the
           // centre onboards with the provider directly and Connect keeps only
@@ -1475,18 +1479,35 @@ export interface Database {
           id: string;
           center_id: string;
           applicant_id: string | null;
+          // All nineteen from All Emails.dc.html. Kept in step with migration
+          // 0113's check constraint and with ApplicantEmailType.
           type:
+            | "acknowledgement"
+            | "task_waiting"
+            | "interview_invitation"
             | "offer"
             | "rejection"
+            | "rejection_after_interview"
             | "waiting_list"
-            | "place_freed"
             | "not_this_time"
-            | "interview_invitation"
-            | "welcome";
+            | "place_freed"
+            | "welcome"
+            | "starts_monday"
+            | "late_enrolment"
+            | "tutor_added"
+            | "centre_created"
+            | "interview_booked"
+            | "reading_flagged"
+            | "assessor_pack"
+            | "volunteer_signed_up"
+            | "volunteer_class_starting";
           to_email: string;
+          // Six of the nineteen go to staff, assessors or volunteers, who have
+          // no applicant row to take a name from.
+          recipient_name: string | null;
           subject: string;
           // "sent" means the provider accepted it -- never that it was
-          // delivered or read. Delivery webhooks are a separate, unbuilt piece.
+          // delivered or read. The later three arrive from the delivery webhook.
           status: "sent" | "delivered" | "opened" | "bounced" | "failed";
           provider_message_id: string | null;
           bounce_reason: string | null;
@@ -1882,6 +1903,9 @@ export interface Database {
           course_id: string;
           name: string;
           level: string | null;
+          // migration 0115 -- optional, and only ever used for the two
+          // volunteer emails. A volunteer never has an account.
+          email: string | null;
           created_at: string;
           removed_at: string | null;
           signup_written_answers: unknown | null;

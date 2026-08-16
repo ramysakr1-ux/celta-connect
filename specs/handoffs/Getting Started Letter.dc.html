@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600;1,600&display=swap" rel="stylesheet">
+<script src="./doc-page.js"></script>
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+  doc-page:not(:defined) { visibility: hidden; }
+</style>
+</helmet>
+
+<doc-page margin="0.85in">
+<div style="font-family: Karla, Helvetica, sans-serif; color: oklch(23.5% 0.017 65);">
+
+  <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 30px;">
+    <div style="width: 46px; height: 46px; border-radius: 10px; background: oklch(30% 0.042 58); display: flex; align-items: center; justify-content: center; flex: none;">
+      <svg width="27" height="16" viewBox="8 30 104 60" fill="none">
+        <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" stroke-width="12" stroke-linecap="round"></path>
+        <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" stroke-width="12" stroke-linecap="round"></path>
+      </svg>
+    </div>
+    <div>
+      <div style="font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 26px; line-height: 1; color: oklch(60% 0.11 70);">Connect</div>
+      <div style="font-family: Instrument Sans, Karla, sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: oklch(51% 0.017 70); padding-left: 2px;">Teacher training platform</div>
+    </div>
+  </div>
+
+  <div style="height: 3px; width: 64px; background: oklch(38% 0.072 195); border-radius: 2px; margin-bottom: 26px;"></div>
+
+  <div style="font-family: Newsreader, Georgia, serif; font-size: 30px; font-weight: 600; line-height: 1.2; margin-bottom: 22px;">Welcome to Connect — a short letter before you start</div>
+
+  <div style="font-size: 14px; line-height: 1.75; color: oklch(23.5% 0.017 65); max-width: 620px; text-wrap: pretty;">
+    <p>Hi, and welcome —</p>
+    <p>You've just been invited to Connect as a <strong>Centre administrator</strong>. Before you log in, I wanted to send you the seven things that come up most while running a course — set up, admissions, invitations, imports, timetabling, the assessor visit, and closing a course out.</p>
+    <p>None of this is required reading. It's here so the first time you hit one of these tasks, you're not guessing.</p>
+    <p style="margin-top: 22px;">Warmly,</p>
+  </div>
+
+  <div style="margin-top: 6px; margin-bottom: 8px;">
+    <div style="font-family: 'Newsreader', Georgia, serif; font-style: italic; font-size: 27px; color: oklch(23.5% 0.017 65);">Ramy Sakr</div>
+    <div style="font-size: 11.5px; color: oklch(51% 0.017 70); margin-top: 2px;">Founder, Connect</div>
+  </div>
+
+  <div style="margin-top: 6px; padding: 12px 16px; border-radius: 8px; background: color-mix(in oklab, oklch(38% 0.072 195) 6%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 22%, transparent); font-size: 12.5px; line-height: 1.6; max-width: 620px;">
+    Need anything at all? Write to <a href="mailto:support@celtaconnect.com">support@celtaconnect.com</a> and we'll help directly.
+  </div>
+
+  <div style="height: 1px; background: oklch(88% 0.016 82); margin: 36px 0 30px;"></div>
+
+  <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; margin-bottom: 8px;">The seven guides</div>
+  <div style="font-size: 12.5px; line-height: 1.6; color: oklch(51% 0.017 70); max-width: 620px; margin-bottom: 28px;">Each one below is also available inside Connect, right on the screen it's about. No screenshots here — they go stale fast and end up teaching the wrong thing.</div>
+
+  <sc-for list="{{ guides }}" as="g" hint-placeholder-count="7">
+    <div style="margin-bottom: 26px; break-inside: avoid;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: {{ g.tone }}; flex: none;"></div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600;">{{ g.title }}</div>
+      </div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70); margin-bottom: 10px; padding-left: 18px;">{{ g.when }}</div>
+      <div style="padding-left: 18px; display: flex; flex-direction: column; gap: 9px;">
+        <sc-for list="{{ g.steps }}" as="s" hint-placeholder-count="4">
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <div style="width: 18px; height: 18px; border-radius: 50%; background: {{ g.tone }}; color: oklch(98.5% 0.006 90); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; margin-top: 1px;">{{ s.n }}</div>
+            <div style="font-size: 12.5px; line-height: 1.55;"><strong>{{ s.title }}</strong> — {{ s.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+
+  <div style="height: 1px; background: oklch(88% 0.016 82); margin: 20px 0 16px;"></div>
+  <div style="font-size: 11px; color: oklch(51% 0.017 70);">This letter is addressed to a Centre administrator. Course administrators and Centre owners receive the same seven guides with the wording adjusted to their role's scope.</div>
+
+</div>
+</doc-page>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const GREEN = 'oklch(48% 0.09 150)';
+const S = (title, text) => ({ title, text });
+
+const GUIDES = [
+  { title: 'Setting up a new course', when: 'Once per intake, often months ahead', tone: TEAL, steps: [
+    S('Dates and course code', 'the Cambridge course number and your own reference — both fixed once anyone is enrolled.'),
+    S('Delivery mode', 'face to face, online, or mixed. Changing this later rebuilds the timetable from scratch.'),
+    S('Applications and fees', 'fee, deposit, and how long an offer stays open.'),
+    S('Tutors', 'assign a lead trainer and any others, including a trainer in training.'),
+    S('Levels and groups', 'two levels, two groups — everything downstream reads this.'),
+    S('Timetable', 'duplicate a reference course rather than building from scratch.'),
+  ]},
+  { title: 'Taking an application through to enrolment', when: 'Continuously, from the day applications open', tone: GOLD, steps: [
+    S('Application arrives', 'logged automatically the moment they submit — name, email, source, and the pre-interview task waiting for them in Connect.'),
+    S('The task gets read automatically', "Connect reads it and sorts into three lanes: clearly strong books an interview itself after a 15-minute hold you can still cancel; borderline queues for you to decide; a flagged problem notifies a tutor directly. It never rejects anyone on its own — that's always a person's words."),
+    S('Interview happens', 'against the availability you set up once — the booking and its record are the same entry, so nothing depends on an email arriving.'),
+    S('You make the offer', 'fee, deposit and an expiry date — the only step that\u2019s genuinely yours to write.'),
+    S('Deposit clears', 'the workspace invitation fires itself the instant a connected provider confirms payment. Paying another way? You mark it received and Connect sends the invitation for you.'),
+    S('Enrolled', 'nothing left to send by hand — you\u2019ve been driving the offer, Connect has been driving the paperwork around it.'),
+  ]},
+  { title: 'Inviting people to Connect', when: 'Each time someone new joins a course or the centre', tone: TEAL, steps: [
+    S('Choose a role', 'this is the one step that stays a deliberate, human decision — a role is invited, never self-selected, and nothing in Connect promotes an account on its own.'),
+    S('Enter the email', 'the invitation is bound to that address — forwarding it doesn\u2019t work, by design.'),
+    S('Send', 'one email, one code, one account — Connect handles the rest of the setup once they click through.'),
+  ]},
+  { title: 'Importing existing records', when: 'Once, when a centre first moves to Connect', tone: GOLD, steps: [
+    S('Connect the sheet', 'Drive pick or drag in a spreadsheet, any column order — read-only, and revocable the moment the import finishes.'),
+    S('Connect maps the columns itself', 'name, email, phone and deposit usually match automatically. Only your centre\u2019s own vocabulary — a custom status column, say — needs a decision from you.'),
+    S('See the whole thing before anything is written', 'a full dry run: what will import, what\u2019s duplicated, what\u2019s missing an email, all flagged before you commit to anything.'),
+    S('Import', 'records only — nobody is emailed automatically. Run it again later and Connect matches on email so nobody doubles up.'),
+  ]},
+  { title: 'Publishing and changing a timetable', when: 'Once before the course, then whenever something moves', tone: TEAL, steps: [
+    S('Duplicate a reference course', 'four-week, five-week Fridays-off, or part-time.'),
+    S('Check the warnings', 'each one is a rule stated at the moment it is broken.'),
+    S('Publish', 'candidates see their own dates only.'),
+    S('Change something afterwards', 'moving a deadline moves its marking slot and resubmission window with it.'),
+  ]},
+  { title: 'Preparing for the assessor visit', when: 'Once the visit date is confirmed \u2014 how much notice you get varies', tone: GOLD, steps: [
+    S('Confirm the date and session', 'candidates teaching that session are told weeks ahead.'),
+    S('Check the pack', 'timetable, tutor records, portfolios, assignment records, TinT arrangement.'),
+    S('Fill the gaps', 'anything missing is listed with a link to where it is created.'),
+    S('Send', "a point-in-time export — later changes don't alter a pack already sent."),
+  ]},
+  { title: 'Closing a course', when: 'The final week, and the week after', tone: GREEN, steps: [
+    S('Check all submissions are in', 'including resubmissions.'),
+    S('Complete the portfolios', 'assembled as the course ran, not at the end.'),
+    S('Grades and CELTA 5s', 'both need typed-name signatures.'),
+    S('Send the results', 'candidates are told in a tutorial first, never by email first.'),
+    S('Archive', 'everything exports to your Drive, then Connect keeps it seven more days \u2014 check the export in that window, because after it, the course is erased permanently. No copy stays with us. That\u2019s a promise: your candidates\u2019 records exist only where you put them.'),
+  ]},
+];
+
+class Component extends DCLogic {
+  renderVals() {
+    return { guides: GUIDES.map(g => ({ ...g, steps: g.steps.map((s, i) => ({ n: i + 1, ...s })) })) };
+  }
+}
+
+</script>
+</body>
+</html>

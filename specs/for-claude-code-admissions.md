@@ -111,6 +111,6 @@ Nine new screens and four corrections to existing behaviour. Nothing here change
 
 ## Open
 
-- Whether the tutorial stages should be renamed "progress stage 1/2/3" to avoid collision with Cambridge's Appeal Stage One.
+- ~~Whether the tutorial stages should be renamed "progress stage 1/2/3" to avoid collision with Cambridge's Appeal Stage One.~~ **Resolved 16 Aug, corrected against the CELTA 5 source: use "Progress Record — Stage 1/2/3" verbatim** (the CELTA 5 booklet's own heading) — not "Progress Report." See `admissions-and-close-out.md` §9.
 - The welcome email's activities link needs a fallback for a candidate who has not set up their account. Preferred: the link goes to the activities and sign-in intercepts, so the email carries one link and no conditional wording.
 - `Compliance Audit.dc.html` still lists nineteen open Cambridge requirements — ten needing build, nine needing validation against this repo. Unchanged by this work.

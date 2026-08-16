@@ -58,6 +58,11 @@ export async function proxy(request: NextRequest) {
     // /forgot-password is how a logged-out user requests a reset link --
     // inherently unauthenticated, same as /login.
     request.nextUrl.pathname.startsWith("/forgot-password") ||
+    // The getting-started guide is linked from the staff invitation email, and
+    // "the recipient has no account yet when they see it, so it must stand
+    // alone with no app around it" -- gating it behind login would make the
+    // link in that email bounce off a sign-in wall.
+    request.nextUrl.pathname.startsWith("/getting-started") ||
     // Tokenized no-login links (course_access_tokens, migration 0030) --
     // volunteer students, the admissions register link, and assessors never
     // get a real Supabase session at all, so these must stay reachable

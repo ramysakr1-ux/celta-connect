@@ -4,7 +4,13 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-access";
-import { sendApplicantEmail, offerEmailHtml, rejectionEmailHtml, waitingListEmailHtml } from "@/lib/admissions-email";
+import {
+  sendApplicantEmail,
+  offerEmailHtml,
+  rejectionEmailHtml,
+  rejectionAfterInterviewEmailHtml,
+  waitingListEmailHtml,
+} from "@/lib/admissions-email";
 import { offerNextWaitingListPlace } from "@/lib/admissions-waiting-list";
 import type { Database } from "@/lib/supabase/types";
 
@@ -137,7 +143,91 @@ export async function bookInterviewSlot(formData: FormData): Promise<void> {
 
   await supabase.from("interview_slots").update({ booked_applicant_id: applicantId }).eq("id", slotId);
   await supabase.from("applicants").update({ stage: "interview_booked" }).eq("id", applicantId).eq("center_id", staff.center_id);
+
+  await notifyInterviewBooked({ applicantId, slotId, centerId: staff.center_id });
+
   revalidatePath(`/dashboard/admissions/${applicantId}`);
+}
+
+/**
+ * "Interview booked -> To whoever holds admissions and to the named
+ * interviewer, with a link to the marked task."
+ *
+ * Two recipients, deduplicated -- when the person who holds admissions is also
+ * the interviewer (routine in a small centre) they get one email, not two
+ * copies of the same sentence.
+ *
+ * Never throws: a booking that succeeded must not be reported as failed
+ * because a notification didn't go out. The booking is already visible in
+ * Connect, which is the record; this email is a convenience on top of it.
+ */
+async function notifyInterviewBooked(input: { applicantId: string; slotId: string; centerId: string }) {
+  try {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const admin = createAdminClient();
+
+    const [{ data: slot }, { data: applicant }, { data: center }] = await Promise.all([
+      admin
+        .from("interview_slots")
+        .select("slot_date, slot_time, mode, interviewer_id, second_interviewer_id")
+        .eq("id", input.slotId)
+        .maybeSingle(),
+      admin.from("applicants").select("full_name, intake_course_id").eq("id", input.applicantId).maybeSingle(),
+      admin.from("centers").select("name, admissions_email").eq("id", input.centerId).maybeSingle(),
+    ]);
+    if (!slot || !applicant || !center) return;
+
+    const { data: course } = await admin.from("courses").select("name").eq("id", applicant.intake_course_id).maybeSingle();
+
+    // The interviewer, the second interviewer on a panel, and whoever holds
+    // the admissions area. getAreaHolders is the single source for the
+    // last one -- "whoever holds admissions" is a real assignment, not a role.
+    const { getAreaHolders } = await import("@/lib/auth/area-holders");
+    const holders = await getAreaHolders(input.centerId);
+    const admissionsHolderId = holders.get("admissions")?.profileId ?? null;
+
+    const ids = [slot.interviewer_id, slot.second_interviewer_id, admissionsHolderId].filter(
+      (id): id is string => typeof id === "string" && id.length > 0
+    );
+    if (!ids.length) return;
+
+    const { data: people } = await admin.from("profiles").select("id, full_name, email").in("id", [...new Set(ids)]);
+    if (!people?.length) return;
+
+    const when = `${new Date(`${slot.slot_date}T${slot.slot_time}`).toLocaleString("en-GB", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      hour: "2-digit",
+      minute: "2-digit",
+    })} (${slot.mode === "online" ? "online" : "in person"})`;
+
+    const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://celtaconnect.com";
+    const { sendApplicantEmail, interviewBookedEmailHtml } = await import("@/lib/admissions-email");
+
+    for (const person of people) {
+      if (!person.email) continue;
+      await sendApplicantEmail({
+        centerName: center.name,
+        centerAdmissionsEmail: center.admissions_email,
+        to: person.email,
+        subject: "An interview has been booked",
+        centerId: input.centerId,
+        applicantId: input.applicantId,
+        type: "interview_booked",
+        recipientName: person.full_name,
+        html: interviewBookedEmailHtml({
+          recipientName: person.full_name,
+          applicantName: applicant.full_name,
+          courseName: course?.name ?? "the course",
+          when,
+          markedTaskUrl: `${base}/dashboard/admissions/${input.applicantId}`,
+        }),
+      });
+    }
+  } catch {
+    // See above -- a notification failure never fails the booking.
+  }
 }
 
 // ---- Marking scheme (selection task) ----
@@ -283,20 +373,41 @@ export async function rejectApplicant(_prevState: FormState, formData: FormData)
     supabase.from("courses").select("name").eq("id", applicant.intake_course_id).maybeSingle(),
     supabase.from("centers").select("name, admissions_email").eq("id", staff.center_id).maybeSingle(),
   ]);
+  // Two different emails, not one with a variable. All Emails.dc.html lists
+  // "Not suitable - after task" and "Not suitable - after interview"
+  // separately: the second is "written after meeting them, so it can be
+  // specific about the conversation", and it says so ("thank you for coming to
+  // interview"). Sending the after-task wording to someone who sat an interview
+  // reads as though nobody remembered they came.
+  //
+  // Both reply to the tutor who wrote the reason rather than to admissions --
+  // "Replies go to the tutor who wrote it". A reply to a rejection is almost
+  // always "what did you mean?", and only one person can answer it.
+  const afterInterview = stage === "rejected_after_interview";
   const { error: sendError } = await sendApplicantEmail({
     centerName: center?.name ?? "Your centre",
     centerAdmissionsEmail: center?.admissions_email ?? null,
     to: applicant.email,
-    subject: `${course?.name ?? "Your application"} -- update on your application`,
+    subject: afterInterview
+      ? "We are not able to offer you a place"
+      : `${course?.name ?? "Your application"} -- update on your application`,
     centerId: staff.center_id,
     applicantId: applicantId,
-    type: "rejection",
+    type: afterInterview ? "rejection_after_interview" : "rejection",
     sentBy: staff.id,
-    html: rejectionEmailHtml({
-      applicantName: applicant.full_name,
-      courseName: course?.name ?? "the course",
-      reason: reason.trim(),
-    }),
+    tutorEmail: staff.email,
+    html: afterInterview
+      ? rejectionAfterInterviewEmailHtml({
+          applicantName: applicant.full_name,
+          courseName: course?.name ?? "the course",
+          reason: reason.trim(),
+          tutorName: staff.full_name,
+        })
+      : rejectionEmailHtml({
+          applicantName: applicant.full_name,
+          courseName: course?.name ?? "the course",
+          reason: reason.trim(),
+        }),
   });
   emailError = sendError;
 

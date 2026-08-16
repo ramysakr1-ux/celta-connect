@@ -3,6 +3,20 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+// Working days, not calendar days -- a centre promising "10 days" and meaning
+// two working weeks would otherwise miss its own deadline every time an
+// application lands on a Friday.
+function addWorkingDays(from: Date, days: number): Date {
+  const d = new Date(from);
+  let left = days;
+  while (left > 0) {
+    d.setDate(d.getDate() + 1);
+    const day = d.getDay();
+    if (day !== 0 && day !== 6) left--;
+  }
+  return d;
+}
+
 export interface ApplyFormState {
   error: string | null;
   submitted: boolean;
@@ -43,7 +57,7 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
 
   const { data: course } = await admin
     .from("courses")
-    .select("id, center_id, accepting_applications, delivery_mode")
+    .select("id, name, center_id, accepting_applications, delivery_mode")
     .eq("id", intakeCourseId)
     .maybeSingle();
   if (!course || course.center_id !== centerId || !course.accepting_applications) {
@@ -100,6 +114,39 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
     type: "submitted",
     message: `${fullName} applied for this intake.`,
   });
+
+  // "Form submitted -> A plain acknowledgement. Says nothing about the outcome
+  // and gives a date by which they will hear." Sent here rather than from a
+  // cron so it arrives while they're still on the confirmation screen.
+  //
+  // A failure to send is deliberately NOT surfaced to the applicant: their
+  // application is already saved, and telling them "could not submit" because
+  // an email bounced would be a lie that makes them apply twice. The failure is
+  // recorded in applicant_emails either way, which is where admissions looks.
+  const { data: centre } = await admin
+    .from("centers")
+    .select("name, admissions_email, application_response_days")
+    .eq("id", centerId)
+    .maybeSingle();
+
+  if (centre) {
+    const { sendApplicantEmail, acknowledgementEmailHtml } = await import("@/lib/admissions-email");
+    const hearBy = addWorkingDays(new Date(), centre.application_response_days ?? 10);
+    await sendApplicantEmail({
+      centerName: centre.name,
+      centerAdmissionsEmail: centre.admissions_email,
+      to: email,
+      subject: "We have your application",
+      html: acknowledgementEmailHtml({
+        applicantName: fullName,
+        courseName: course.name,
+        hearBy: hearBy.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
+      }),
+      centerId,
+      applicantId: applicant.id,
+      type: "acknowledgement",
+    });
+  }
 
   return { error: null, submitted: true };
 }

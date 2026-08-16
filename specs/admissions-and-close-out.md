@@ -19,6 +19,8 @@ Everything decided in the session of 8–9 August. Written as build rules, not a
 4. Evening and weekend work.
 5. The code of conduct — respect, care with volunteer learners, honest work including AI, confidentiality.
 
+**A sixth, separate consent — resolved 16 Aug, applies to every applicant, not just rejected ones.** At the point of applying (before interview, before any outcome is known), one line: whether accepted or rejected, their application file is kept at the centre. Not folded into the five course-commitments acknowledgements above (those are signed only once accepted) — this one is checked by everyone who applies, since it covers the case that matters most: someone who's rejected and never signs anything else.
+
 Accepted **once**, at application. Nothing further is signed. The file keeps the name, the timestamp, and **a stored copy of the document text as it stood that day** — not a version number. An assessor asking what a candidate agreed to must be shown the actual words.
 
 ### No enquiry stage
@@ -251,7 +253,7 @@ Final day → CELTA 5s signed. Results issued → **the clock starts** (six mont
 
 An open extension, a deferral with no destination, or a live appeal all block it — and the refusal names the thing. Closing starts a six-month clock on evidence still being used.
 
-**Naming:** Cambridge's *Appeal Stage One* is unrelated to the centre's *Stage 1/2/3 tutorials*. Consider "progress stage" for the tutorials so nobody confuses them.
+**Naming — resolved 16 Aug, corrected against the CELTA 5 source.** The CELTA 5 booklet itself already carries two distinct, non-colliding names: **"Stage One/Two/Three Progress Record"** (the candidate tutorials) and, inside "Cambridge English Appeals Procedure," **"Appeal Stage One"** / **"Appeal Stage Two"** (the grade-challenge process). They were never actually ambiguous in Cambridge's own document — the risk was only in our casual internal shorthand ("Stage 1/2/3") collapsing both into one term. Fix: use the CELTA 5's own label verbatim — **"Progress Record — Stage 1"**, **"Progress Record — Stage 2"**, **"Progress Record — Stage 3 / Tutorial"** — everywhere in Connect's UI, and never shorten Cambridge's appeal stages below "Appeal Stage One/Two."
 
 ---
 

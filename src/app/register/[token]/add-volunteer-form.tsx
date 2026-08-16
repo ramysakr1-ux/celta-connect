@@ -21,6 +21,19 @@ export function AddVolunteerForm({ token }: { token: string }) {
           className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
+      {/*
+        Optional -- a volunteer signed up at the door may not have one, and
+        that must stay a valid volunteer. It only ever carries the two
+        volunteer emails; there's still no account behind it.
+      */}
+      <div className="flex flex-1 flex-col gap-1.5">
+        <label className="text-sm text-muted">Email (optional)</label>
+        <input
+          name="email"
+          type="email"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+        />
+      </div>
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Class level</label>
         <select

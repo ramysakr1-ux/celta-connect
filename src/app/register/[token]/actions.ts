@@ -32,9 +32,11 @@ export async function addVolunteerStudentViaRegister(_prevState: FormState, form
     return { error: "This link has expired or isn't valid." };
   }
 
+  const email = (formData.get("email") as string | null)?.trim() || null;
+
   const { data: volunteer, error } = await admin
     .from("volunteer_students")
-    .insert({ course_id: accessToken.course_id, name, level })
+    .insert({ course_id: accessToken.course_id, name, level, email })
     .select("id")
     .single();
   if (error || !volunteer) return { error: "Could not add the student. Try again." };
@@ -45,6 +47,38 @@ export async function addVolunteerStudentViaRegister(_prevState: FormState, form
     volunteer_student_id: volunteer.id,
     expires_at: accessToken.expires_at,
   });
+
+  // "Signed up -> Confirms it arrived and says honestly that classes run every
+  // few months." Skipped without an address -- see migration 0115: a volunteer
+  // with no email is a valid volunteer, not a failed one, so this never turns
+  // into an error the person at the register screen has to deal with.
+  if (email) {
+    const { data: course } = await admin
+      .from("courses")
+      .select("center_id")
+      .eq("id", accessToken.course_id)
+      .maybeSingle();
+    if (course) {
+      const { data: center } = await admin
+        .from("centers")
+        .select("name, admissions_email")
+        .eq("id", course.center_id)
+        .maybeSingle();
+      if (center) {
+        const { sendApplicantEmail, volunteerSignedUpEmailHtml } = await import("@/lib/admissions-email");
+        await sendApplicantEmail({
+          centerName: center.name,
+          centerAdmissionsEmail: center.admissions_email,
+          to: email,
+          subject: "Thank you for volunteering",
+          centerId: course.center_id,
+          type: "volunteer_signed_up",
+          recipientName: name,
+          html: volunteerSignedUpEmailHtml({ volunteerName: name, centreName: center.name }),
+        });
+      }
+    }
+  }
 
   revalidatePath(`/register/${token}`);
   return { error: null };

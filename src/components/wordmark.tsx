@@ -47,7 +47,7 @@ function strokeWidthForTile(tilePx: number): number {
 // --color-card -- regardless of onDark (per spec: "Reversed... arcs
 // unchanged"). The tile background is what changes for onDark, not the
 // arcs.
-function Mark({ tilePx }: { tilePx: number }) {
+function Mark({ tilePx, spin = true }: { tilePx: number; spin?: boolean }) {
   const markWidth = tilePx * 0.63;
   const markHeight = markWidth / MARK_ASPECT;
   const strokeWidth = strokeWidthForTile(tilePx);
@@ -61,7 +61,7 @@ function Mark({ tilePx }: { tilePx: number }) {
       shapeRendering="geometricPrecision"
       role="img"
       aria-label="Connect"
-      className="wordmark-spin"
+      className={spin ? "wordmark-spin" : undefined}
     >
       <path
         d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8"
@@ -101,10 +101,13 @@ export function Wordmark({
   onDark = false,
   className = "",
   iconSizePx,
+  spin = true,
 }: {
   size?: WordmarkSize;
   onDark?: boolean;
   className?: string;
+  /** A document is not an app -- the getting-started letter wants the mark still. */
+  spin?: boolean;
   /** Only used with size="icon" -- overrides the tile's default 32px (spec's icon range is 22-48px, context-dependent, e.g. the 20px designer-credit mark). */
   iconSizePx?: number;
 }) {
@@ -119,7 +122,7 @@ export function Wordmark({
       className="wordmark-mark-stage inline-flex shrink-0 items-center justify-center"
       style={{ width: tilePx, height: tilePx, borderRadius: tileRadius, background: tileBg }}
     >
-      <Mark tilePx={tilePx} />
+      <Mark tilePx={tilePx} spin={spin} />
     </span>
   );
 
