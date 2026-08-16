@@ -28,6 +28,10 @@ export function visibleAdminTabs(roles: CentreRole[]): AdminTab[] {
   if (canView(roles, "courseAdmin.view")) tabs.push({ href: "/admin", label: "Course admin" });
   if (canView(roles, "admissions.view")) tabs.push({ href: "/admissions", label: "Admissions" });
   if (canView(roles, "courseAdmin.view")) tabs.push({ href: "/admin/coursebooks", label: "TP Points Library" });
+  // What the centre sends in its own name. Gated on admissions visibility
+  // rather than settings: the people who write to candidates are the ones who
+  // need to see what those emails actually look like.
+  if (canView(roles, "admissions.view")) tabs.push({ href: "/admin/email-preview", label: "Emails" });
   if (can(roles, "centre.settings.edit")) tabs.push({ href: "/admin/settings", label: "Settings" });
 
   return tabs;
