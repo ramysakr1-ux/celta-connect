@@ -4,8 +4,8 @@ import { requireRole } from "@/lib/auth/require-role";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { createClient } from "@/lib/supabase/server";
-import { ImportWizard } from "@/app/dashboard/admin/import/import-wizard";
-import { UndoImportButton } from "@/app/dashboard/admin/import/undo-import-button";
+import { ImportWizard } from "@/app/centre/import/import-wizard";
+import { UndoImportButton } from "@/app/centre/import/undo-import-button";
 import { UNDO_WINDOW_DAYS, isWithinUndoWindow, undoDeadline } from "@/lib/spreadsheet-import";
 
 // Centre Admin's "Import" tab (for-claude-code-centre-admin-full.md). Lives
@@ -16,7 +16,7 @@ export default async function ImportPage() {
   // A Centre manager is also a flat `admin`, and must not reach this screen at
   // all -- the nav omits the tab, and this stops the direct URL.
   const ctx = await getCentreRoleContext(profile);
-  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) redirect("/dashboard/centre");
+  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) redirect("/centre");
   const supabase = await createClient();
 
   const [{ data: courses }, { data: applicants }, { data: imports }] = await Promise.all([

@@ -6,7 +6,7 @@ import {
   revokeCentreRole,
   type GrantRoleState,
   type RevokeRoleState,
-} from "@/app/dashboard/centre/roles/actions";
+} from "@/app/centre/roles/actions";
 import { CENTRE_ROLES, CENTRE_ROLE_LABELS } from "@/lib/auth/centre-permissions";
 
 const grantInitial: GrantRoleState = {};

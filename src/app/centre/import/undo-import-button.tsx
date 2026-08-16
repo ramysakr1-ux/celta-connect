@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { undoImport, type UndoImportState } from "@/app/dashboard/admin/import/actions";
+import { undoImport, type UndoImportState } from "@/app/centre/import/actions";
 
 const initial: UndoImportState = {};
 

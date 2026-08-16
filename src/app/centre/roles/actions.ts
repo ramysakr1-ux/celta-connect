@@ -74,7 +74,7 @@ export async function grantCentreRole(_prev: GrantRoleState, formData: FormData)
     role,
   });
 
-  revalidatePath("/dashboard/centre/roles");
+  revalidatePath("/centre/roles");
   return { granted: `${CENTRE_ROLE_LABELS[role]} granted to ${target.full_name}` };
 }
 
@@ -130,7 +130,7 @@ export async function revokeCentreRole(_prev: RevokeRoleState, formData: FormDat
     role: grant.role,
   });
 
-  revalidatePath("/dashboard/centre/roles");
+  revalidatePath("/centre/roles");
   return { revoked: true };
 }
 

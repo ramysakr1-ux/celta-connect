@@ -44,7 +44,7 @@ export default async function DashboardIndexPage() {
   if (profile.role === "admin") {
     const ctx = await getCentreRoleContext(profile);
     const landing = landingFor(ctx.roles);
-    if (landing === "centre-admin") redirect("/dashboard/centre");
+    if (landing === "centre-admin") redirect("/centre");
     if (landing === "course-admin") redirect("/dashboard/admin");
   }
 

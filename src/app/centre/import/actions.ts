@@ -133,7 +133,7 @@ export async function commitImport(_prev: CommitImportState, formData: FormData)
     return { error: `Could not import: ${insertError.message}` };
   }
 
-  revalidatePath("/dashboard/admin/import");
+  revalidatePath("/centre/import");
   revalidatePath("/dashboard/admissions");
   return { importId: importRow.id, imported: toInsert.length };
 }
@@ -211,7 +211,7 @@ export async function undoImport(_prev: UndoImportState, formData: FormData): Pr
     .update({ undone_at: new Date().toISOString(), undone_by: profile.id })
     .eq("id", importId);
 
-  revalidatePath("/dashboard/admin/import");
+  revalidatePath("/centre/import");
   revalidatePath("/dashboard/admissions");
   return { removed: ids.length };
 }

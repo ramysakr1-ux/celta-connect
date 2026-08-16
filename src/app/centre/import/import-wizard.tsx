@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
-import { commitImport, type CommitImportState } from "@/app/dashboard/admin/import/actions";
+import { commitImport, type CommitImportState } from "@/app/centre/import/actions";
 import {
   APPLICANT_STAGES,
   IMPORT_FIELDS,
@@ -97,22 +97,21 @@ export function ImportWizard({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex gap-6 border-b border-border">
+      {/* Numbered step cards in a row, per the layout spec -- the active one
+          bordered and teal, the rest quiet. */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {STEPS.map((s, i) => {
-          const reached = STEPS.findIndex((x) => x.key === currentStep) >= i;
+          const active = s.key === currentStep;
           return (
-            <span
+            <div
               key={s.key}
-              className={`-mb-px border-b-2 pb-2 text-sm font-medium ${
-                s.key === currentStep
-                  ? "border-primary text-primary"
-                  : reached
-                    ? "border-transparent text-ink"
-                    : "border-transparent text-muted"
+              className={`flex items-center gap-2.5 rounded-[8px] border px-4 py-3 ${
+                active ? "border-primary bg-card" : "border-border bg-surface-muted/40"
               }`}
             >
-              {i + 1}. {s.label}
-            </span>
+              <span className={`font-serif text-lg ${active ? "text-primary" : "text-muted"}`}>{i + 1}</span>
+              <span className={`text-[13px] font-medium ${active ? "text-primary" : "text-muted"}`}>{s.label}</span>
+            </div>
           );
         })}
       </div>
@@ -120,7 +119,7 @@ export function ImportWizard({
       {currentStep === "connect" ? (
         <div className="sheet flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-lg text-ink">Point Connect at the file you already have</h2>
+            <h2 className="font-serif text-[22px] text-ink">Point Connect at the file you already have</h2>
             <p className="mt-1 text-sm text-muted">
               Nothing is written anywhere yet. This is a one-time read, not a live link -- your spreadsheet keeps
               working exactly as it did, and nothing here changes when somebody edits it afterwards.
@@ -166,7 +165,7 @@ export function ImportWizard({
       {currentStep === "map" ? (
         <div className="sheet flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-lg text-ink">Their column names, our fields</h2>
+            <h2 className="font-serif text-[22px] text-ink">Their column names, our fields</h2>
             <p className="mt-1 text-sm text-muted">
               Connect guesses from the headings. What it can&apos;t guess is what your own words mean -- every centre
               has a status column and no two use the same vocabulary.
@@ -268,7 +267,7 @@ export function ImportWizard({
       {currentStep === "preview" ? (
         <div className="sheet flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-lg text-ink">
+            <h2 className="font-serif text-[22px] text-ink">
               {rows.length} row{rows.length === 1 ? "" : "s"}, and what each will become
             </h2>
             <p className="mt-1 text-sm text-muted">
@@ -277,9 +276,9 @@ export function ImportWizard({
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-6 border-y border-border-faint py-3">
+          <div className="flex flex-wrap gap-10 rounded-[8px] border border-border bg-surface-muted/50 px-5 py-4">
             {[
-              { k: "Will import", v: analysis.tallies.willImport, cls: "text-primary" },
+              { k: "Will import", v: analysis.tallies.willImport, cls: "text-[oklch(48%_0.09_150)]" },
               { k: "Duplicates", v: analysis.tallies.duplicates, cls: "text-gold" },
               { k: "Missing email", v: analysis.tallies.missingEmail, cls: "text-destructive" },
               { k: "Skipped by you", v: analysis.tallies.skipped, cls: "text-muted" },
@@ -293,7 +292,18 @@ export function ImportWizard({
 
           <div className="max-h-80 overflow-y-auto">
             {analysis.rows.map((r) => (
-              <div key={r.rowNumber} className="flex items-center gap-3 border-b border-border-faint py-2 last:border-b-0">
+              <div
+                key={r.rowNumber}
+                className={`mb-1 flex items-center gap-3 rounded-[6px] border-l-[3px] bg-surface-muted/40 py-2 pr-3 pl-3 ${
+                  r.verdict === "import"
+                    ? "border-l-[oklch(48%_0.09_150)]"
+                    : r.verdict === "missing_email"
+                      ? "border-l-destructive"
+                      : r.verdict === "duplicate"
+                        ? "border-l-gold"
+                        : "border-l-border"
+                }`}
+              >
                 <span className="w-8 shrink-0 text-xs text-muted tabular-nums">{r.rowNumber}</span>
                 <span className="w-44 shrink-0 truncate text-sm text-ink">{r.fullName}</span>
                 <span className="w-56 shrink-0 truncate text-xs text-muted">{r.email ?? "--"}</span>
@@ -346,7 +356,7 @@ export function ImportWizard({
       {currentStep === "after" ? (
         <div className="sheet flex flex-col gap-4">
           <div>
-            <h2 className="font-serif text-lg text-ink">Imported, and nobody has been emailed</h2>
+            <h2 className="font-serif text-[22px] text-ink">Imported, and nobody has been emailed</h2>
             <p className="mt-1 text-sm text-muted">
               The pipeline now has {state.imported} more {state.imported === 1 ? "person" : "people"} in it, at the
               stages you chose. Not one of them has heard from Connect.

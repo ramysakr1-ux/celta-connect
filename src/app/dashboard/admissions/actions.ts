@@ -574,6 +574,6 @@ export async function recordDeposit(_prevState: FormState, formData: FormData): 
 
   revalidatePath(`/dashboard/admissions/${applicantId}`);
   revalidatePath("/dashboard/admissions");
-  revalidatePath("/dashboard/centre");
+  revalidatePath("/centre");
   return { error: null };
 }

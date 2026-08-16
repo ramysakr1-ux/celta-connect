@@ -19,14 +19,9 @@ export interface AdminTab {
 export function visibleAdminTabs(roles: CentreRole[]): AdminTab[] {
   const tabs: AdminTab[] = [];
 
-  // Centre Admin's own tabs, per the spec: Overview / Roles / Import.
-  if (roles.length > 0) {
-    tabs.push({ href: "/centre", label: "Overview" });
-    // Everyone in the family may SEE who holds what -- appointing is the
-    // owner-only part. Access here is meant to be legible, not secret.
-    tabs.push({ href: "/centre/roles", label: "Roles" });
-  }
-  if (can(roles, "import.run")) tabs.push({ href: "/admin/import", label: "Import" });
+  // Centre Admin's three tabs live in its OWN chrome now (src/app/centre/
+  // centre-tabs.tsx), outside /dashboard -- the layout spec gives that screen
+  // its own header and tab bar. What remains here is the Course Admin side.
 
   // Course Admin's screen and the shared centre material. A Centre manager may
   // read the course admin screen but not act on it, so the tab stays.
