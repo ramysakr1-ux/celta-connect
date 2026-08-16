@@ -104,38 +104,75 @@ export default async function AssessorPage() {
       ? `${new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} \u2013 ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
       : "";
 
+  const CARD = "oklch(99.2% 0.005 90)";
+  const BORDER = "oklch(88% 0.016 82)";
+  const INK = "oklch(23.5% 0.017 65)";
+  const MUTED = "oklch(51% 0.017 70)";
+  const WARM = "oklch(30% 0.042 58)";
+  const TEAL = "oklch(38% 0.072 195)";
+  const CREAM = "oklch(97% 0.008 88)";
+
   return (
-    <div className="min-h-screen bg-[oklch(92.5%_0.012_85)]">
-      {/* "Top banner (full-width, warm-dark bg, cream text, 10px/32px
-          padding)" -- warm dark is oklch(30% 0.042 58), not the teal this
-          used to be. The expiry sits right-aligned, per the spec. */}
-      <div className="flex flex-wrap items-center justify-between gap-2 bg-[oklch(30%_0.042_58)] px-8 py-2.5 text-sm text-[oklch(97%_0.008_88)]">
-        <span>
+    <div style={{ minHeight: "100vh", background: "oklch(92.5% 0.012 85)" }}>
+      <div
+        style={{
+          background: WARM, color: CREAM, padding: "10px 32px", display: "flex",
+          alignItems: "center", justifyContent: "space-between", gap: 16,
+        }}
+      >
+        <span style={{ fontSize: 12.5, fontWeight: 500 }}>
           Assessor access — read-only. Nothing you open here can be edited, and no action you take is recorded
           against a candidate.
         </span>
         {accessToken ? (
-          <span className="shrink-0 text-[oklch(88%_0.012_85)]">Link expires {accessToken.expires_at.slice(0, 10)}</span>
+          <span style={{ fontSize: 11.5, color: "oklch(76% 0.02 80)", flex: "none" }}>
+            Link expires {accessToken.expires_at.slice(0, 10)}
+          </span>
         ) : null}
       </div>
 
-      {/* "30px ink-tile mark + italic Connect wordmark (static) + divider +
-          gold-tinted 'Assessor · read-only' pill -- left. 'Download whole
-          pack' button (outlined, download icon) -- right." The mark is the
-          shared Wordmark component, static: a document, not an app chrome. */}
-      <header className="flex h-[60px] items-center justify-between border-b border-[oklch(88%_0.016_82)] bg-[oklch(99.2%_0.005_90)] px-8">
-        <div className="flex items-center gap-3">
-          <Wordmark size="header" spin={false} />
-          <span className="h-5 w-px bg-[oklch(88%_0.016_82)]" aria-hidden />
-          <span className="rounded-full border border-[color-mix(in_oklab,oklch(60%_0.11_70)_36%,transparent)] bg-[color-mix(in_oklab,oklch(60%_0.11_70)_12%,transparent)] px-2.5 py-1 text-[11px] font-semibold text-[oklch(52%_0.1_70)]">
+      <header
+        style={{
+          height: 60, background: CARD, borderBottom: `1px solid ${BORDER}`, display: "flex",
+          alignItems: "center", justifyContent: "space-between", padding: "0 32px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span
+            style={{
+              width: 30, height: 30, borderRadius: 7, background: WARM, display: "flex",
+              alignItems: "center", justifyContent: "center", flex: "none",
+            }}
+          >
+            <svg viewBox="8 30 104 60" width={19} height={11} fill="none" aria-label="Connect" role="img">
+              <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" strokeWidth={15} strokeLinecap="round" />
+              <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke={CARD} strokeWidth={15} strokeLinecap="round" />
+            </svg>
+          </span>
+          <span style={{ fontFamily: "var(--font-instrument-serif), Newsreader, Georgia, serif", fontStyle: "italic", fontSize: 18, color: INK }}>
+            Connect
+          </span>
+          <span style={{ width: 1, height: 20, background: BORDER }} aria-hidden />
+          <span
+            style={{
+              fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+              color: "oklch(60% 0.11 70)", background: "color-mix(in oklab, oklch(60% 0.11 70) 10%, oklch(99.2% 0.005 90))",
+              border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent)",
+              borderRadius: 99, padding: "4px 10px",
+            }}
+          >
             Assessor · read-only
           </span>
         </div>
         <a
           href="/assessor/pack.pdf"
-          className="inline-flex items-center gap-2 rounded-[6px] border border-[oklch(88%_0.016_82)] px-3.5 py-2 text-sm font-semibold text-[oklch(23.5%_0.017_65)] hover:bg-[oklch(96.4%_0.014_85)]"
+          style={{
+            height: 34, padding: "0 15px", borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD,
+            color: INK, fontSize: 12.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
+            textDecoration: "none",
+          }}
         >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
             <path d="M8 2v8m0 0 3-3m-3 3L5 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M2.5 11.5v1a1.5 1.5 0 0 0 1.5 1.5h8a1.5 1.5 0 0 0 1.5-1.5v-1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
           </svg>
@@ -143,160 +180,190 @@ export default async function AssessorPage() {
         </a>
       </header>
 
-      <div className="mx-auto flex max-w-[1620px] flex-col gap-[22px] px-8 pt-7 pb-11">
-        <div className="rounded-[8px] border border-[oklch(88%_0.016_82)] bg-[oklch(99.2%_0.005_90)] p-6">
-          <p className="text-xs uppercase tracking-[0.1em] text-[oklch(51%_0.017_70)]">
-            {center?.name ?? "Centre"} · {center?.center_number ?? ""} · {course.name}
-            {course.start_date && course.end_date ? ` · ${courseDates}` : ""}
-          </p>
-          <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
-            <h1 className="font-serif text-[28px] leading-tight text-[oklch(23.5%_0.017_65)]">
-              Assessor visit{course.assessor_visit_date ? ` — ${course.assessor_visit_date}` : ""}
-            </h1>
-            {sendByDate ? (
-              <div className="flex flex-col items-end gap-0.5">
-                <span className="pill pill-gold">
-                  Send the pack by {sendByDate} {daysOut !== null ? `(${daysOut} day${daysOut === 1 ? "" : "s"} out)` : ""}
-                </span>
-                <span className="text-[11px] text-[oklch(51%_0.017_70)]">Complete by that date, not the visit date.</span>
-              </div>
-            ) : null}
-          </div>
-          {/* The four figures the design names, in its order: Send by /
-              Portfolios complete / Hours logged / Grades entered. "Candidates"
-              used to sit here as a fifth; it isn't in the spec, and the count
-              it showed is already the denominator of two of the others. */}
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Figure label="Send by" value={sendByDate ?? "Not set"} ink={GOLD} />
-            <Figure
-              label="Portfolios complete"
-              value={`${readiness.portfoliosCompleteCount} of ${readiness.totalCandidates}`}
-              ink={readiness.portfoliosCompleteCount >= readiness.totalCandidates ? GREEN : AMBER}
-            />
-            <Figure label="Hours logged" value={readiness.hoursAssessedTotal.toFixed(1)} ink={GREEN} />
-            <Figure
-              label="Grades entered"
-              value={`${readiness.gradesEnteredCount} of ${readiness.totalCandidates}`}
-              ink={readiness.gradesEnteredCount >= readiness.totalCandidates ? GREEN : AMBER}
-            />
+      <div style={{ padding: "28px 32px 44px", display: "flex", flexDirection: "column", gap: 22 }}>
+        <div>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 20 }}>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED }}>
+                {center?.name ?? "Centre"} · {center?.center_number ?? ""} · {course.name}
+                {courseDates ? ` · ${courseDates}` : ""}
+              </p>
+              <h1 style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 28, fontWeight: 600, color: INK, marginTop: 6 }}>
+                Assessor visit{course.assessor_visit_date ? ` — ${course.assessor_visit_date}` : ""}
+              </h1>
+            </div>
+            <div style={{ display: "flex", gap: 34 }}>
+              <Figure label="Send by" value={sendByDate ?? "Not set"} ink={GOLD} />
+              <Figure
+                label="Portfolios complete"
+                value={`${readiness.portfoliosCompleteCount} of ${readiness.totalCandidates}`}
+                ink={readiness.portfoliosCompleteCount >= readiness.totalCandidates ? GREEN : AMBER}
+              />
+              <Figure label="Hours logged" value={readiness.hoursAssessedTotal.toFixed(1)} ink={GREEN} />
+              <Figure
+                label="Grades entered"
+                value={`${readiness.gradesEnteredCount} of ${readiness.totalCandidates}`}
+                ink={readiness.gradesEnteredCount >= readiness.totalCandidates ? GREEN : AMBER}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-[1.6fr_1fr]">
-          {/* Candidate portfolios */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {sendByDate ? (
+          <div
+            style={{
+              display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 7,
+              background: "color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90))",
+              border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent)",
+            }}
+          >
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD }}>
+              Send the pack by {sendByDate}
+              {daysOut !== null ? ` · ${daysOut} day${daysOut === 1 ? "" : "s"} out` : ""}
+            </span>
+            <span style={{ fontSize: 12, color: INK }}>Everything below must be complete by that date, not the visit date.</span>
+          </div>
+        ) : null}
+
+        <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 20, alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
             {candidates.map((c) => (
               <Link
                 key={c.traineeId}
                 href={`/portfolio/${c.traineeId}`}
-                className={`rounded-[8px] border bg-[oklch(99.2%_0.005_90)] p-4 ${
-                  c.flaggedIssue ? "border-[oklch(44%_0.1_68)]" : "border-[oklch(88%_0.016_82)]"
-                }`}
+                style={{
+                  background: CARD,
+                  border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 45%, transparent)" : BORDER}`,
+                  borderRadius: 8, padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10,
+                  textDecoration: "none",
+                }}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-semibold text-[oklch(23.5%_0.017_65)]">{c.name}</p>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                  <span style={{ fontSize: 13.5, fontWeight: 600, color: INK }}>{c.name}</span>
                   {c.provisionalLabel ? (
-                    <span className={`pill ${GRADE_PILL[c.provisionalLabel] ?? "pill-neutral"}`}>{c.provisionalLabel}</span>
+                    <span className={`pill ${GRADE_PILL[c.provisionalLabel] ?? "pill-neutral"}`} style={{ fontSize: 10.5, fontWeight: 700, padding: "3px 9px", borderRadius: 99 }}>
+                      {c.provisionalLabel}
+                    </span>
                   ) : null}
                 </div>
-                <p className="mt-1 text-xs text-[oklch(51%_0.017_70)]">
+                <span style={{ fontSize: 11, color: MUTED }}>
                   {c.tpsTaught}/8 TPs · {c.hoursAssessed.toFixed(1)} hrs{c.levels.length > 0 ? ` · ${c.levels.join(", ")}` : ""}
-                </p>
-                <div className="mt-2.5 flex items-center gap-3">
+                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <Dot ok={c.celta5Complete} label="CELTA 5" />
                   <Dot ok={c.tpsComplete} label="TPs" />
                   <Dot ok={c.assignmentsComplete} label="Assignments" />
                 </div>
-                {c.flaggedIssue ? <p className="mt-2 text-xs text-[oklch(44%_0.1_68)]">{c.flaggedIssue}</p> : null}
+                {c.flaggedIssue ? (
+                  <span
+                    style={{
+                      fontSize: 11, lineHeight: 1.4, color: AMBER, borderRadius: 5, padding: "6px 9px",
+                      background: "color-mix(in oklab, oklch(44% 0.1 68) 10%, oklch(99.2% 0.005 90))",
+                    }}
+                  >
+                    {c.flaggedIssue}
+                  </span>
+                ) : null}
               </Link>
             ))}
-            {candidates.length === 0 ? <p className="text-sm text-[oklch(51%_0.017_70)]">No candidates on this course.</p> : null}
+            {candidates.length === 0 ? <p style={{ fontSize: 12.5, color: MUTED }}>No candidates on this course.</p> : null}
           </div>
 
-          {/* Right panels */}
-          <div className="flex flex-col gap-4">
-            {/* All six the design names, in its order. Each carries a "Live"
-                status and an "Open" action. */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <Panel title="Cohort documents">
-              <DocRow label="Grades report" href="/trainer/grades-report" />
-              <DocRow label="Course timetable" href="/trainer/timetable" />
-              {firstCandidateId ? <DocRow label="Assignment titles" href={`/portfolio/${firstCandidateId}/resources`} /> : null}
-              <DocRow label="Tutor list and roles" href="#tutor-list" />
-              <DocRow label="Candidate descriptions" href="/trainer/roster" />
-              <DocRow label="Lesson plans for the day" href="/trainer/timetable" />
+              <DocRow label="Grades report" href="/trainer/grades-report" status="Live" />
+              <DocRow label="Course timetable" href="/trainer/timetable" status="Live" />
+              {firstCandidateId ? <DocRow label="Assignment titles" href={`/portfolio/${firstCandidateId}/resources`} status="Live" /> : null}
+              <DocRow label="Tutor list and roles" href="#tutor-list" status="Live" />
+              <DocRow label="Candidate descriptions" href="/trainer/roster" status="Live" />
+              <DocRow label="Lesson plans for the day" href="/trainer/timetable" status="Live" />
             </Panel>
 
-            <Panel title="On the day" gold>
-              {(onDayEvents ?? []).length === 0 ? (
-                <p className="text-xs text-[oklch(51%_0.017_70)]">
-                  {course.assessor_visit_date ? "No timetable events on the visit date yet." : "No assessor visit date set yet."}
-                </p>
-              ) : (
-                (onDayEvents ?? []).map((e) => (
-                  <div key={e.id} className="flex items-center justify-between py-1.5 text-xs">
-                    <span className="text-[oklch(23.5%_0.017_65)]">{e.title}</span>
-                    <span className="text-[oklch(51%_0.017_70)]">{e.event_time?.slice(0, 5) ?? ""}</span>
-                  </div>
-                ))
-              )}
-              <p className="mt-2 border-t border-[oklch(88%_0.016_82)] pt-2 text-[11px] text-[oklch(51%_0.017_70)]">
-                Live TP joining links and the count of candidates who requested to speak with the assessor aren&apos;t
-                tracked yet.
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD, marginBottom: 8 }}>
+                On the day
               </p>
-            </Panel>
+              <div
+                style={{
+                  background: CARD, border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent)",
+                  borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
+                }}
+              >
+                {(onDayEvents ?? []).length === 0 ? (
+                  <span style={{ fontSize: 12, color: MUTED }}>
+                    {course.assessor_visit_date ? "No timetable events on the visit date yet." : "No assessor visit date set yet."}
+                  </span>
+                ) : (
+                  (onDayEvents ?? []).map((e) => (
+                    <div key={e.id} style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+                      <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none", fontVariantNumeric: "tabular-nums" }}>
+                        {e.event_time?.slice(0, 5) ?? ""}
+                      </span>
+                      <span style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{e.title}</span>
+                    </div>
+                  ))
+                )}
+                <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(90% 0.012 85)" }}>
+                  Live TP joining links and the count of candidates who requested to speak with the assessor aren&apos;t tracked yet.
+                </span>
+              </div>
+            </div>
 
-            {/* The eight the design names, each with its own caption, ALWAYS
-                all eight. This used to render only whatever the centre had
-                uploaded -- so a missing double-marking record simply had no
-                row, and the assessor saw a shorter list with nothing to say
-                anything was absent. Showing all eight is what makes a gap
-                visible, which is the whole job of a readiness screen. */}
             <Panel title="Centre documents">
               {CENTRE_DOCUMENTS.map((doc) => {
-                const uploaded = (centreDocs ?? []).find(
-                  (d) => d.title.trim().toLowerCase() === doc.name.toLowerCase()
-                );
+                const uploaded = (centreDocs ?? []).find((d) => d.title.trim().toLowerCase() === doc.name.toLowerCase());
                 return (
-                  <div key={doc.name} className="flex items-start justify-between gap-3 py-1.5">
+                  <div
+                    key={doc.name}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                      padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
+                    }}
+                  >
                     <div>
-                      <p className="text-xs text-[oklch(23.5%_0.017_65)]">{doc.name}</p>
-                      <p className="text-[11px] text-[oklch(51%_0.017_70)]">{doc.meta}</p>
+                      <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{doc.name}</p>
+                      <p style={{ fontSize: 10.5, color: MUTED }}>{doc.meta}</p>
                     </div>
                     {uploaded?.file_url ? (
-                      <a
-                        href={uploaded.file_url}
-                        className="shrink-0 text-xs font-medium text-[oklch(38%_0.072_195)] hover:underline"
-                      >
+                      <a href={uploaded.file_url} style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}>
                         Open →
                       </a>
                     ) : (
-                      <span className="shrink-0 text-[11px] font-semibold" style={{ color: AMBER }}>
-                        Not uploaded
-                      </span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: AMBER, flex: "none" }}>Not uploaded</span>
                     )}
                   </div>
                 );
               })}
-              {(tutorNameById.size ?? 0) > 0 ? (
-                <div id="tutor-list" className="mt-2 border-t border-[oklch(88%_0.016_82)] pt-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[oklch(51%_0.017_70)]">Tutor list</p>
+              {tutorNameById.size > 0 ? (
+                <div id="tutor-list" style={{ padding: "11px 15px" }}>
+                  <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>Tutor list</p>
                   {(tutorRows ?? []).map((t) => (
-                    <p key={t.profile_id} className="text-xs text-[oklch(23.5%_0.017_65)]">
+                    <p key={t.profile_id} style={{ fontSize: 12, color: INK }}>
                       {tutorNameById.get(t.profile_id) ?? "Unknown"}
-                      {t.tutor_role ? <span className="text-[oklch(51%_0.017_70)]"> · {t.tutor_role.replace(/_/g, " ")}</span> : null}
+                      {t.tutor_role ? <span style={{ color: MUTED }}> · {t.tutor_role.replace(/_/g, " ")}</span> : null}
                     </p>
                   ))}
                 </div>
               ) : null}
             </Panel>
 
-            <Panel title="Not in this pack">
-              <ul className="flex flex-col gap-1.5 text-xs text-[oklch(51%_0.017_70)]">
-                <li>The assessor&apos;s own report — goes to Cambridge&apos;s own secure system, not here.</li>
-                <li>Staff chat — trainer-only, resets on the centre&apos;s schedule.</li>
-                <li>Trainee-only chat — a deliberate privacy boundary.</li>
-              </ul>
-            </Panel>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>
+                Not in this pack
+              </p>
+              <div style={{ background: "oklch(96.4% 0.014 85)", border: `1px solid ${BORDER}`, borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9 }}>
+                {[
+                  { title: "The assessor's own report", why: "Goes to Cambridge's own secure system, not here." },
+                  { title: "Staff chat", why: "Trainer-only, resets on the centre's schedule." },
+                  { title: "Trainee-only chat", why: "A deliberate privacy boundary." },
+                ].map((x) => (
+                  <div key={x.title}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: INK }}>{x.title}</p>
+                    <p style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED }}>{x.why}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -309,8 +376,10 @@ export default async function AssessorPage() {
 function Figure({ label, value, ink }: { label: string; value: string; ink?: string }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-[0.08em] text-[oklch(51%_0.017_70)]">{label}</p>
-      <p className="mt-0.5 font-serif text-[21px]" style={{ color: ink ?? "oklch(23.5% 0.017 65)" }}>
+      <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "oklch(51% 0.017 70)" }}>
+        {label}
+      </p>
+      <p style={{ fontFamily: "Newsreader, Georgia, serif", fontSize: 21, lineHeight: 1, color: ink ?? "oklch(23.5% 0.017 65)", marginTop: 5 }}>
         {value}
       </p>
     </div>
@@ -319,29 +388,39 @@ function Figure({ label, value, ink }: { label: string; value: string; ink?: str
 
 function Dot({ ok, label }: { ok: boolean; label: string }) {
   return (
-    <span className="flex items-center gap-1 text-[11px] text-[oklch(51%_0.017_70)]">
-      <span className={`size-[6px] rounded-full ${ok ? "bg-[oklch(55%_0.09_155)]" : "bg-[oklch(44%_0.1_68)]"}`} />
-      {label}
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: ok ? GREEN : AMBER }} />
+      <span style={{ fontSize: 10.5, color: "oklch(51% 0.017 70)" }}>{label}</span>
     </span>
   );
 }
 
-function Panel({ title, gold, children }: { title: string; gold?: boolean; children: React.ReactNode }) {
+function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-[8px] border border-[oklch(88%_0.016_82)] bg-[oklch(99.2%_0.005_90)] p-4">
-      <p className={`text-[10.5px] font-bold uppercase tracking-[0.1em] ${gold ? "text-[oklch(60%_0.11_70)]" : "text-[oklch(51%_0.017_70)]"}`}>
+    <div>
+      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(51% 0.017 70)", marginBottom: 8 }}>
         {title}
       </p>
-      <div className="mt-2.5">{children}</div>
+      <div style={{ background: "oklch(99.2% 0.005 90)", border: "1px solid oklch(88% 0.016 82)", borderRadius: 7, overflow: "hidden" }}>
+        {children}
+      </div>
     </div>
   );
 }
 
-function DocRow({ label, href }: { label: string; href: string }) {
+function DocRow({ label, href, status }: { label: string; href: string; status: string }) {
   return (
-    <div className="flex items-center justify-between py-1.5 text-sm">
-      <span className="text-[oklch(23.5%_0.017_65)]">{label}</span>
-      <a href={href} target="_blank" rel="noreferrer" className="text-xs font-semibold text-[oklch(38%_0.072_195)] hover:underline">
+    <div
+      style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+        padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
+      }}
+    >
+      <div>
+        <p style={{ fontSize: 12.5, fontWeight: 600, color: "oklch(23.5% 0.017 65)" }}>{label}</p>
+        <p style={{ fontSize: 10.5, color: GREEN }}>{status}</p>
+      </div>
+      <a href={href} style={{ fontSize: 11, fontWeight: 600, color: "oklch(38% 0.072 195)", flex: "none", textDecoration: "none" }}>
         Open →
       </a>
     </div>
