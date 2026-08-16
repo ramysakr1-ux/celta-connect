@@ -1,5 +1,6 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend/client";
+import { emailShell, rawP, esc, EMAIL_TONE } from "@/lib/email-layout";
 
 // "Every email is from the centre... sender is the centre's name, reply-to
 // is a centre address. Connect never appears in anyone's inbox." The
@@ -280,6 +281,65 @@ export function acknowledgementEmailHtml(input: {
     <p>We'll be in touch by <strong>${input.hearBy}</strong>. If you don't hear from us by then, please do chase us.</p>
     <p>This message is automatic -- there's nothing you need to do in reply.</p>
   `;
+}
+
+// The workspace invitation. Copy is verbatim from
+// for-claude-code-email-copy.md item 11 -- heading, body, the three Facts
+// rows, CTA and footnote -- not a paraphrase of it.
+//
+// Sent when the centre gives its green light (migration 0118), which is
+// usually cleared funds but may be a deposit or a promise to pay. Ramy,
+// 2026-08-16: "before they receive the Connect link, there should be a green
+// light from the centre."
+//
+// Carries the pre-COURSE task and the reading list, both from the Resource
+// hub -- build-spec.md: "the pre-course task and reading list from the
+// Resource hub". Not the pre-interview task, which the applicant already did
+// while applying.
+export function welcomeEmailHtml(input: {
+  candidateName: string;
+  courseName: string;
+  centreName: string;
+  tutorNames: string[];
+  courseFact: string;
+  startsFact: string;
+  preCourseTaskFact: string;
+  setupUrl: string;
+  readingListUrl: string | null;
+}): string {
+  const tutors =
+    input.tutorNames.length === 0
+      ? ""
+      : input.tutorNames.length === 1
+        ? `Your tutor is ${esc(input.tutorNames[0])}. `
+        : `Your tutors are ${esc(input.tutorNames.slice(0, -1).join(", "))} and ${esc(input.tutorNames[input.tutorNames.length - 1])}. `;
+
+  const body =
+    rawP(
+      `${esc(input.candidateName)} &mdash; you are enrolled on ${esc(input.courseName)} at ${esc(input.centreName)}. ` +
+        tutors +
+        "Everything for the course lives behind the link below: your timetable, teaching practice, assignments and feedback."
+    ) +
+    (input.readingListUrl
+      ? rawP(
+          `Your pre-course task and reading list are waiting there too. ` +
+            `<a href="${input.readingListUrl}" style="color:${EMAIL_TONE.teal};">The reading list</a> is worth a look before you start.`
+        )
+      : "");
+
+  return emailShell({
+    heading: "Your CELTA workspace is ready",
+    tone: "teal",
+    body,
+    facts: [
+      { label: "Course", value: input.courseFact },
+      { label: "Starts", value: input.startsFact },
+      { label: "Before day one", value: input.preCourseTaskFact },
+    ],
+    cta: { label: "Set up your account", url: input.setupUrl },
+    footnote:
+      "The link is yours alone and expires when the course ends. You will be asked to agree to the candidate terms as you set up -- it takes a minute.",
+  });
 }
 
 // NEVER SENT. There is no pre-interview task email at all.
