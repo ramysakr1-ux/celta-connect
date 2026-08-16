@@ -17,6 +17,7 @@ export function SignInLinkForm() {
   const [state, action, pending] = useActionState(sendSignInLink, initialState);
   const [open, setOpen] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     if (state.sent) setConfirmed(true);
@@ -24,8 +25,11 @@ export function SignInLinkForm() {
 
   if (confirmed) {
     return (
-      <div className="sheet-accent-alert mt-4">
-        <p className="text-sm text-ink">Check your email -- a sign-in link is on its way. It expires in 15 minutes and works once.</p>
+      <div className="sheet-accent-alert">
+        <p className="text-sm text-ink">
+          We&apos;ve sent a sign-in link to {email}. Click it to sign in -- no password needed. The link expires in 15
+          minutes and works once.
+        </p>
         <button type="button" onClick={() => setConfirmed(false)} className="mt-2 text-xs text-primary hover:underline">
           Send again
         </button>
@@ -35,8 +39,12 @@ export function SignInLinkForm() {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="text-center text-sm text-muted hover:text-ink">
-        Email me a sign-in link instead
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-full rounded-[6px] border border-border bg-card px-4 py-2 text-sm font-semibold text-ink hover:border-primary"
+      >
+        Email me a sign-in link
       </button>
     );
   }
@@ -49,6 +57,8 @@ export function SignInLinkForm() {
         required
         placeholder="Your email"
         autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
         className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
       />
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

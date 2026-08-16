@@ -26,9 +26,14 @@ export function LoginForm() {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="password" className="text-sm text-muted">
-            Password
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="text-sm text-muted">
+              Password
+            </label>
+            <a href="/forgot-password" className="text-xs text-muted hover:text-ink">
+              Forgot?
+            </a>
+          </div>
           <input
             id="password"
             name="password"
@@ -50,11 +55,14 @@ export function LoginForm() {
         >
           {pending ? "Signing in..." : "Sign in"}
         </button>
-
-        <a href="/forgot-password" className="text-center text-sm text-muted hover:text-ink">
-          Forgot password?
-        </a>
       </form>
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Or</span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
       <SignInLinkForm />
     </div>
   );

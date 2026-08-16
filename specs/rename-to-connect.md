@@ -97,7 +97,7 @@ Search the whole repo, including `public/`, email templates, migrations' seed te
 
 Three strings currently lean on the old name and need rewriting rather than substituting:
 
-1. Sign-in page subtitle — was implicitly "the CELTA platform", briefly **"Teacher training platform. Built for CELTA and Delta centres."** **Removed 2026-08-15**: sign-in card no longer carries brand/tagline copy at all, per Ramy's explicit ask to de-emphasize "Connect" branding on the actual sign-in screen — just a small muted wordmark and a plain "Sign in" heading now.
+1. Sign-in page subtitle — was implicitly "the CELTA platform". Briefly de-emphasized to a small muted mark with no tagline (2026-08-15), then **reverted the same day** once the real entry-screens PDF spec arrived: full hero Wordmark (with its built-in "Teacher training platform" descriptor) plus "Sign in to your centre." underneath, per the PDF's own mockup. Ramy confirmed this over the de-emphasized version.
 2. Invitation email — subject leads with the **centre**, e.g. `ITI Istanbul · your CELTA workspace is ready`. Sender display name is the **centre's own name** (revised 2026-08-15, see "Checks" below — was `Connect`). The body opens with the centre and course, not the platform; the platform appears only as the wordmark at the top.
 3. Certificate and report footers — the mark plus "Connect" in plain text; no descriptor, no strapline.
 

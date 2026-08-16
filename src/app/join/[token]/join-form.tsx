@@ -130,8 +130,26 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
             afterwards.
           </span>
         </label>
+        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+          <input type="checkbox" name="agree_link_private" required className="mt-0.5 accent-primary" />
+          {/* Shared by both roles, so it can't say "portfolio" -- a trainer
+              doesn't have one, and the link opens the whole course for them. */}
+          <span>
+            {role === "trainee"
+              ? "I will keep my workspace link private -- it opens my portfolio and nobody else's."
+              : "I will keep my workspace link private -- it opens every candidate's records on this course."}
+          </span>
+        </label>
         {role === "trainee" ? (
           <>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_course_policies" required className="mt-0.5 accent-primary" />
+              <span>I accept the centre&apos;s attendance, plagiarism, complaints and resubmission policies.</span>
+            </label>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_own_work" required className="mt-0.5 accent-primary" />
+              <span>The work I submit here is my own, and I will confirm that per assignment.</span>
+            </label>
             <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
               <input type="checkbox" name="agree_fingerprint" required className="mt-0.5 accent-primary" />
               <span>
@@ -182,7 +200,7 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
         disabled={pending}
         className="mt-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
-        {pending ? "Joining..." : "Join course"}
+        {pending ? "Joining..." : "Create my account and accept"}
       </button>
     </form>
   );

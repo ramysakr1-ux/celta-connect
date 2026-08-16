@@ -12,29 +12,28 @@ export default async function LoginPage({
     <div className="flex flex-1 flex-col">
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="sheet-accent w-full max-w-sm p-8">
-          <div className="opacity-60">
-            <Wordmark size="header" />
-          </div>
-          <h1 className="mt-5 font-serif text-2xl text-ink">Sign in</h1>
+          <Wordmark size="hero" />
+          <p className="mt-3 text-sm text-muted">Sign in to your centre.</p>
           <p className="mt-2 text-xs text-muted">
             Assessors and volunteer students don&apos;t sign in -- you have your own link. Trainees sign in here too,
             after setting up an account from their join link.
           </p>
           {error === "invite_invalid" ? (
-            <p className="mt-4 text-sm text-destructive">
-              That invite link is invalid or has expired. Ask your admin to resend it.
-            </p>
+            <div className="sheet-accent-alert mt-4">
+              <p className="text-sm text-ink">That invite link is invalid or has expired. Ask your admin to resend it.</p>
+            </div>
           ) : null}
           {error === "session_expired" ? (
-            <p className="mt-4 text-sm text-destructive">
-              Your session expired before you could set a password. Ask your admin to resend the
-              invite.
-            </p>
+            <div className="sheet-accent-alert mt-4">
+              <p className="text-sm text-ink">
+                Your session expired before you could set a password. Ask your admin to resend the invite.
+              </p>
+            </div>
           ) : null}
           {error === "assessor_link_invalid" ? (
-            <p className="mt-4 text-sm text-destructive">
-              That assessor link is invalid or has expired. Ask the centre for a new one.
-            </p>
+            <div className="sheet-accent-alert mt-4">
+              <p className="text-sm text-ink">That assessor link is invalid or has expired. Ask the centre for a new one.</p>
+            </div>
           ) : null}
           <LoginForm />
         </div>

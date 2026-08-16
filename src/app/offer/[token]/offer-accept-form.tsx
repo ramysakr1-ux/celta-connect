@@ -93,6 +93,18 @@ export function OfferAcceptForm({
           </span>
         </label>
         <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+          <input type="checkbox" name="agree_link_private" required className="mt-0.5 accent-primary" />
+          <span>I will keep my workspace link private -- it opens my portfolio and nobody else&apos;s.</span>
+        </label>
+        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+          <input type="checkbox" name="agree_course_policies" required className="mt-0.5 accent-primary" />
+          <span>I accept the centre&apos;s attendance, plagiarism, complaints and resubmission policies.</span>
+        </label>
+        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+          <input type="checkbox" name="agree_own_work" required className="mt-0.5 accent-primary" />
+          <span>The work I submit here is my own, and I will confirm that per assignment.</span>
+        </label>
+        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
           <input type="checkbox" name="agree_fingerprint" required className="mt-0.5 accent-primary" />
           <span>
             I understand that Connect keeps a text fingerprint of my written assignments -- not the assignments

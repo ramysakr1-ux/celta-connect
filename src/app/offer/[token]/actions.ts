@@ -32,7 +32,15 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
   }
   if (password.length < 8) return { error: "Password must be at least 8 characters." };
   if (password !== confirmPassword) return { error: "Passwords do not match." };
-  if (!formData.get("agree_ip") || !formData.get("agree_data") || !formData.get("agree_ai_policy") || !formData.get("agree_fingerprint")) {
+  if (
+    !formData.get("agree_ip") ||
+    !formData.get("agree_data") ||
+    !formData.get("agree_link_private") ||
+    !formData.get("agree_course_policies") ||
+    !formData.get("agree_own_work") ||
+    !formData.get("agree_ai_policy") ||
+    !formData.get("agree_fingerprint")
+  ) {
     return { error: "You need to agree to all the checkboxes to accept." };
   }
 
