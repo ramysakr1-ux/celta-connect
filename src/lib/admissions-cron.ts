@@ -45,11 +45,21 @@ export async function runAdmissionsWaitingListCron(): Promise<{ lapsedOffers: nu
       centerName: center?.name ?? "Your centre",
       centerAdmissionsEmail: center?.admissions_email ?? null,
       to: applicant.email,
-      subject: `${course?.name ?? "Your application"} -- update on your application`,
+      subject: "your CELTA application",
       centerId: applicant.center_id,
       applicantId: applicant.id,
       type: "not_this_time",
-      html: notThisTimeEmailHtml({ applicantName: applicant.full_name, courseName: course?.name ?? "the course" }),
+      html: notThisTimeEmailHtml({
+        applicantName: applicant.full_name,
+        courseName: course?.name ?? "the course",
+        // Sent by the nightly job, so there is no person to name and no next
+        // intake picked yet. The template drops those clauses rather than
+        // printing a placeholder.
+        positionWord: null,
+        nextCourseName: null,
+        nextCourseStart: null,
+        callerName: null,
+      }),
     });
     lapsedOffers++;
 
@@ -81,11 +91,21 @@ export async function runAdmissionsWaitingListCron(): Promise<{ lapsedOffers: nu
       centerName: center?.name ?? "Your centre",
       centerAdmissionsEmail: center?.admissions_email ?? null,
       to: applicant.email,
-      subject: `${course?.name ?? "Your application"} -- update on your application`,
+      subject: "your CELTA application",
       centerId: applicant.center_id,
       applicantId: applicant.id,
       type: "not_this_time",
-      html: notThisTimeEmailHtml({ applicantName: applicant.full_name, courseName: course?.name ?? "the course" }),
+      html: notThisTimeEmailHtml({
+        applicantName: applicant.full_name,
+        courseName: course?.name ?? "the course",
+        // Sent by the nightly job, so there is no person to name and no next
+        // intake picked yet. The template drops those clauses rather than
+        // printing a placeholder.
+        positionWord: null,
+        nextCourseName: null,
+        nextCourseStart: null,
+        callerName: null,
+      }),
     });
     notThisTime++;
   }

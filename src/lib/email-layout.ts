@@ -31,6 +31,16 @@ export const EMAIL_TONE = {
   green: "#346c42",
   /** Plain acknowledgements, nothing to signal. */
   muted: "#6d655c",
+  /**
+   * No accent at all -- the card's own border colour as the spine.
+   *
+   * Applications.dc.html gives this to both rejections and to "the course
+   * filled before a place came free", while the interview invitation and offer
+   * get teal and the waiting-list pair get gold. It is a deliberate silence:
+   * a coloured bar shouting at someone you have just turned down would be
+   * gratuitous, and red in particular would read as an alarm about them.
+   */
+  plain: "#e0dcd4",
 } as const;
 
 export type EmailTone = keyof typeof EMAIL_TONE;

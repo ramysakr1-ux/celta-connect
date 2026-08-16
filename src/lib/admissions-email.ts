@@ -1,6 +1,6 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend/client";
-import { emailShell, rawP, esc, EMAIL_TONE } from "@/lib/email-layout";
+import { emailShell, rawP, p, esc, EMAIL_TONE } from "@/lib/email-layout";
 
 // "Every email is from the centre... sender is the centre's name, reply-to
 // is a centre address. Connect never appears in anyone's inbox." The
@@ -196,70 +196,10 @@ export async function sendApplicantEmail(input: {
   return { error: failure };
 }
 
-export function offerEmailHtml(input: {
-  applicantName: string;
-  courseName: string;
-  feeAmount: number | null;
-  feeCurrency: string | null;
-  acceptBy: string;
-  offerUrl: string;
-}): string {
-  return `
-    <p>Dear ${input.applicantName},</p>
-    <p>We're pleased to offer you a place on ${input.courseName}.</p>
-    ${input.feeAmount ? `<p>The course fee is ${input.feeAmount} ${input.feeCurrency}.</p>` : ""}
-    <p>To confirm your place, set up your account, and receive your pre-course task, follow this link by ${input.acceptBy}:</p>
-    <p><a href="${input.offerUrl}">${input.offerUrl}</a></p>
-    <p>If we don't hear from you by then, we'll assume the place is no longer needed and offer it to someone else.</p>
-  `;
-}
 
-export function rejectionEmailHtml(input: { applicantName: string; courseName: string; reason: string }): string {
-  return `
-    <p>Dear ${input.applicantName},</p>
-    <p>Thank you for applying to ${input.courseName}. We're not able to offer you a place at this time.</p>
-    <p>${input.reason}</p>
-    <p>This isn't final, and we'd welcome a future application if the above changes.</p>
-  `;
-}
 
-// "Position, the course, and a date by which they will hear either way.
-// Without that date it is just an unanswered application." Sent once, when
-// added to the list -- not the "place has come free" email below.
-export function waitingListEmailHtml(input: { applicantName: string; courseName: string; position: number; hearBy: string }): string {
-  return `
-    <p>Dear ${input.applicantName},</p>
-    <p>${input.courseName} is full, but we're keeping your application on our waiting list -- you're currently number ${input.position}.</p>
-    <p>You'll hear from us either way by ${input.hearBy}. Your application and any task or interview you've already completed stay on file, so you won't need to repeat them.</p>
-    <p>If a place frees up before then, we'll be in touch straight away.</p>
-  `;
-}
 
-// "A named day and hour, not a number of days... the button carries the
-// countdown." Reuses the same /offer/[token] link and accept flow as a
-// fresh offer -- accepting this literally is accepting the offer.
-export function placeFreedEmailHtml(input: { applicantName: string; courseName: string; expiresAt: string; offerUrl: string }): string {
-  return `
-    <p>Dear ${input.applicantName},</p>
-    <p>A place has come free on ${input.courseName}, and you're next on our waiting list.</p>
-    <p>To confirm your place, set up your account, and receive your pre-course task, follow this link by <strong>${input.expiresAt}</strong>:</p>
-    <p><a href="${input.offerUrl}">${input.offerUrl}</a></p>
-    <p>If we don't hear from you by then, we'll offer the place to the next person on the list. Declining costs you nothing -- your application carries forward to the next intake, with your task and interview still on file.</p>
-  `;
-}
 
-// "Sends automatically when the waiting-list deadline passes with no place
-// freed... apologises, explains that the course filled, and carries them
-// to the next intake unless they opt out." No human sentence -- nobody is
-// being judged, so unlike the two rejection emails this is never gated on
-// a written reason.
-export function notThisTimeEmailHtml(input: { applicantName: string; courseName: string }): string {
-  return `
-    <p>Dear ${input.applicantName},</p>
-    <p>We're sorry -- ${input.courseName} filled before a place came free for you from the waiting list.</p>
-    <p>This isn't a reflection on your application. We'll carry your details forward and be in touch about our next intake, unless you'd rather we didn't -- just reply to let us know.</p>
-  `;
-}
 
 // ---------------------------------------------------------------------------
 // The rest of the nineteen, from All Emails.dc.html. Each carries what the
@@ -376,47 +316,7 @@ export function taskWaitingEmailHtml(input: {
   `;
 }
 
-// "Sent fifteen minutes after a clear reading, or by hand after a tutor
-// decides. Carries times." The fifteen-minute hold is the AI-triage window --
-// this email is what it releases.
-export function interviewInvitationEmailHtml(input: {
-  applicantName: string;
-  courseName: string;
-  bookingUrl: string;
-  slots: string[];
-}): string {
-  return `
-    <p>Dear ${input.applicantName},</p>
-    <p>Thank you for completing your task for ${input.courseName}. We'd like to invite you to an interview.</p>
-    ${
-      input.slots.length
-        ? `<p>These times are currently free:</p><ul>${input.slots.map((s) => `<li>${s}</li>`).join("")}</ul>`
-        : ""
-    }
-    <p>Choose a time here:</p>
-    <p><a href="${input.bookingUrl}">${input.bookingUrl}</a></p>
-    <p>Your slot is held for 48 hours. If none of these work, reply and we'll find another.</p>
-  `;
-}
 
-// "Same shape, written after meeting them, so it can be specific about the
-// conversation." Distinct from the after-task rejection because this one can
-// and should refer to what was actually said -- and because it replies to the
-// tutor who wrote it.
-export function rejectionAfterInterviewEmailHtml(input: {
-  applicantName: string;
-  courseName: string;
-  reason: string;
-  tutorName: string;
-}): string {
-  return `
-    <p>Dear ${input.applicantName},</p>
-    <p>Thank you for coming to interview for ${input.courseName}, and for the time you gave it. I'm sorry to say we're not able to offer you a place.</p>
-    <p>${input.reason}</p>
-    <p>You'd be welcome to apply again once that's in place -- a previous application is never held against you. If you'd like to talk any of this through, reply to this email and it comes straight to me.</p>
-    <p>${input.tutorName}</p>
-  `;
-}
 
 // "Group, level, the day-one activity, and the practical details. The only
 // email in the fortnight before." That last clause is a constraint on everyone
@@ -604,4 +504,205 @@ export function volunteerClassStartingEmailHtml(input: {
     <p>So you know exactly what you're coming to: these classes are taught by teachers in training, with an experienced tutor watching every lesson and responsible for it. The classes are free because the teachers are learning, and you're helping them do it.</p>
     <p>If you'd rather not take part, just reply and we'll take you off the list -- no explanation needed.</p>
   `;
+}
+
+// ---------------------------------------------------------------------------
+// The seven from Applications.dc.html, verbatim.
+//
+// Copy, headings, CTAs and footnotes are the design file's own words, with
+// only the specifics (name, course, dates, fee) substituted. Nothing here is
+// paraphrased -- the earlier versions of these were written from subject lines
+// alone and were not close.
+//
+// The accents are the file's too, and the silences are deliberate: teal for
+// the interview invitation and the offer, gold for the two waiting-list
+// emails, and NO accent at all on the rejections and on "the course filled" --
+// a coloured bar shouting at someone you have just turned down would be
+// gratuitous.
+// ---------------------------------------------------------------------------
+
+export function interviewInvitationEmailHtml(input: {
+  applicantName: string;
+  bookingUrl: string;
+  slotsNote: string;
+}): string {
+  return emailShell({
+    heading: "We would like to meet you",
+    tone: "teal",
+    body:
+      p(`Dear ${input.applicantName},`) +
+      p("Thank you for the written tasks — we have read them and we would like to meet you.") +
+      p(
+        "The interview takes about 45 minutes. We will talk about your teaching, and work through some of the language from your task together. There is nothing to prepare."
+      ) +
+      p(
+        "Choose whichever of the times below suits you. If none of them work, reply to this email and we will find another."
+      ),
+    cta: { label: "Choose a time", url: input.bookingUrl },
+    footnote: input.slotsNote,
+  });
+}
+
+export function offerEmailHtml(input: {
+  applicantName: string;
+  courseName: string;
+  courseDates: string;
+  interviewDate: string | null;
+  taskFeedback: string | null;
+  feeLine: string;
+  officeContact: string;
+  offerUrl: string;
+  acceptWithinDays: number;
+  holdUntil: string;
+}): string {
+  return emailShell({
+    heading: "We would like to offer you a place",
+    tone: "teal",
+    body:
+      p(`Dear ${input.applicantName},`) +
+      p(
+        `Following your written task${input.interviewDate ? ` and your interview on ${input.interviewDate}` : ""}, we are offering you a place on ${input.courseName}, running ${input.courseDates}.`
+      ) +
+      // The tutor's own paragraph about their task. Omitted rather than
+      // faked when nobody has written one -- an invented sentence about a
+      // candidate's work is the worst thing this email could contain.
+      (input.taskFeedback ? p(input.taskFeedback) : "") +
+      p(
+        `${input.feeLine} Use the link below to accept your place — it sets up your workspace, where your pre-course task and reading list are waiting. For payment options, including instalments, contact the centre office on ${input.officeContact} or reply to this email.`
+      ),
+    cta: { label: "Accept your place", url: input.offerUrl },
+    footnote: `Please accept within ${input.acceptWithinDays} days. We will hold your place until ${input.holdUntil}, after which it goes to the waiting list.`,
+  });
+}
+
+export function rejectionEmailHtml(input: {
+  applicantName: string;
+  centreName: string;
+  reason: string;
+  callerName: string | null;
+}): string {
+  return emailShell({
+    heading: "We are not taking your application further",
+    tone: "plain",
+    body:
+      p(`Dear ${input.applicantName},`) +
+      p(
+        `Thank you for applying to CELTA at ${input.centreName}, and for the time you gave to the written task.`
+      ) +
+      p(input.reason) +
+      p(
+        "This is not a judgement about whether you can teach, and it is not final. Work through a grammar reference written for teachers — Parrott or Swan — and apply again for a later course. We would read a fresh application properly."
+      ),
+    footnote: input.callerName
+      ? `If you would like to talk it through before reapplying, reply and ${input.callerName} will call you.`
+      : "If you would like to talk it through before reapplying, just reply.",
+  });
+}
+
+export function rejectionAfterInterviewEmailHtml(input: {
+  applicantName: string;
+  interviewDate: string | null;
+  reason: string;
+  callerName: string | null;
+}): string {
+  return emailShell({
+    heading: "We are not able to offer you a place this time",
+    tone: "plain",
+    body:
+      p(`Dear ${input.applicantName},`) +
+      p(
+        `Thank you for coming in${input.interviewDate ? ` on ${input.interviewDate}` : ""}. It was a good conversation and I am sorry this is not the answer.`
+      ) +
+      p(input.reason) +
+      p(
+        "What is missing is a specific, learnable thing. Spend some time with Parrott, apply again for a later course, and we will look at it fresh."
+      ),
+    footnote: input.callerName
+      ? `${input.callerName} will call you this week if you would like to go through it.`
+      : "Reply to this email if you would like to go through it.",
+  });
+}
+
+export function waitingListEmailHtml(input: {
+  applicantName: string;
+  courseName: string;
+  positionWord: string;
+  hearBy: string;
+  daysBeforeStart: string;
+  nextCourseName: string | null;
+}): string {
+  return emailShell({
+    heading: `You are ${input.positionWord} on the waiting list`,
+    tone: "gold",
+    body:
+      p(`Dear ${input.applicantName},`) +
+      p(
+        `We would like to have you on ${input.courseName}, but the course is full. You are ${input.positionWord} on the waiting list.`
+      ) +
+      p(
+        `Places do come free — candidates withdraw, defer, or do not take up an offer — and when one does, we work down the list in order. We will tell you either way by ${input.hearBy}${input.daysBeforeStart ? `, ${input.daysBeforeStart} before the course starts` : ""}.`
+      ) +
+      p(
+        `If nothing opens, we will carry your application to the ${input.nextCourseName ?? "next"} course automatically, with nothing further for you to do. Tell us if you would rather not.`
+      ),
+    footnote: "Your written task and interview stay on file, so you would not repeat them.",
+  });
+}
+
+export function notThisTimeEmailHtml(input: {
+  applicantName: string;
+  courseName: string;
+  positionWord: string | null;
+  nextCourseName: string | null;
+  nextCourseStart: string | null;
+  callerName: string | null;
+}): string {
+  return emailShell({
+    heading: "The course filled before a place came free",
+    tone: "plain",
+    body:
+      p(`Dear ${input.applicantName},`) +
+      p(
+        `We said we would tell you either way by today, so: no place opened on ${input.courseName}. We are sorry${input.positionWord ? ` — you were ${input.positionWord} on the list and it was close` : ""}.`
+      ) +
+      p("This is nothing to do with your application, which was strong. The course simply filled.") +
+      p(
+        input.nextCourseName
+          ? `We have carried you to the ${input.nextCourseName} course${input.nextCourseStart ? `, starting ${input.nextCourseStart}` : ""}, with nothing further for you to do. Your written task and interview stay on file, so you would not repeat either. Tell us if you would rather we did not.`
+          : "We will carry your application to our next intake, with nothing further for you to do. Your written task and interview stay on file, so you would not repeat either. Tell us if you would rather we did not."
+      ),
+    footnote: input.callerName
+      ? `Sent automatically on the date we promised. If you would like to talk it through, reply and ${input.callerName} will call you.`
+      : "Sent automatically on the date we promised. If you would like to talk it through, just reply.",
+  });
+}
+
+export function placeFreedEmailHtml(input: {
+  applicantName: string;
+  courseName: string;
+  courseDates: string;
+  startsInPhrase: string;
+  feeLine: string;
+  respondBy: string;
+  offerUrl: string;
+  hoursLeftLabel: string;
+  nextCourseName: string | null;
+}): string {
+  return emailShell({
+    heading: "A place has come free — it is yours if you want it",
+    tone: "gold",
+    body:
+      p(`Dear ${input.applicantName},`) +
+      p(
+        `A candidate has withdrawn from ${input.courseName} and you were next on the list, so the place is yours. The course runs ${input.courseDates}.`
+      ) +
+      p(
+        `We know this is short notice${input.startsInPhrase ? ` — it starts ${input.startsInPhrase}` : ""}. Your written task and interview are already on file, so there is nothing to repeat. ${input.feeLine} contact the office about payment, and the pre-course task takes about four hours.`
+      ) +
+      p(
+        `Please tell us by ${input.respondBy}. There are others on the list behind you, and if we have not heard we will pass the place on.`
+      ),
+    cta: { label: input.hoursLeftLabel, url: input.offerUrl },
+    footnote: `Declining costs you nothing: we carry you to the ${input.nextCourseName ?? "next"} course automatically, with your task and interview still on file.`,
+  });
 }

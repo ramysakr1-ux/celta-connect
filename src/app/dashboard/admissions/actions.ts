@@ -14,6 +14,20 @@ import {
 import { offerNextWaitingListPlace } from "@/lib/admissions-waiting-list";
 import type { Database } from "@/lib/supabase/types";
 
+/** "You are second on the waiting list" -- the design spells the rank out. */
+const ORDINAL_WORD: Record<number, string> = {
+  1: "first",
+  2: "second",
+  3: "third",
+  4: "fourth",
+  5: "fifth",
+  6: "sixth",
+  7: "seventh",
+  8: "eighth",
+  9: "ninth",
+  10: "tenth",
+};
+
 export interface FormState {
   error: string | null;
 }
@@ -409,14 +423,18 @@ export async function rejectApplicant(_prevState: FormState, formData: FormData)
     html: afterInterview
       ? rejectionAfterInterviewEmailHtml({
           applicantName: applicant.full_name,
-          courseName: course?.name ?? "the course",
+          interviewDate: null,
           reason: reason.trim(),
-          tutorName: staff.full_name,
+          // "Ramy Sakr will call you this week" -- a named person, and it is
+          // the tutor who wrote the reason, so a reply and a call reach the
+          // same human.
+          callerName: staff.full_name,
         })
       : rejectionEmailHtml({
           applicantName: applicant.full_name,
-          courseName: course?.name ?? "the course",
+          centreName: center?.name ?? "this centre",
           reason: reason.trim(),
+          callerName: staff.full_name,
         }),
   });
   emailError = sendError;
@@ -451,7 +469,7 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
   const supabase = await createClient();
   const { data: applicant } = await supabase
     .from("applicants")
-    .select("full_name, email, intake_course_id, deposit_paid_at")
+    .select("full_name, email, intake_course_id, deposit_paid_at, task_feedback")
     .eq("id", applicantId)
     .eq("center_id", staff.center_id)
     .maybeSingle();
@@ -497,14 +515,14 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
   let emailError: string | null = null;
   if (siteUrl) {
     const [{ data: course }, { data: center }] = await Promise.all([
-      supabase.from("courses").select("name").eq("id", applicant.intake_course_id).maybeSingle(),
+      supabase.from("courses").select("name, start_date, end_date").eq("id", applicant.intake_course_id).maybeSingle(),
       supabase.from("centers").select("name, admissions_email").eq("id", staff.center_id).maybeSingle(),
     ]);
     const { error: sendError } = await sendApplicantEmail({
       centerName: center?.name ?? "Your centre",
       centerAdmissionsEmail: center?.admissions_email ?? null,
       to: applicant.email,
-      subject: `${course?.name ?? "Your course"} -- offer of a place`,
+      subject: `your place on ${course?.name ?? "the course"}`,
       centerId: staff.center_id,
       applicantId: applicantId,
       type: "offer",
@@ -512,10 +530,22 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
       html: offerEmailHtml({
         applicantName: applicant.full_name,
         courseName: course?.name ?? "the course",
-        feeAmount: typeof feeAmount === "string" && feeAmount ? Number(feeAmount) : null,
-        feeCurrency: typeof feeCurrency === "string" && feeCurrency ? feeCurrency.trim().toUpperCase() : null,
-        acceptBy,
+        courseDates:
+          course?.start_date && course?.end_date
+            ? `${new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} to ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`
+            : "the dates confirmed with you",
+        interviewDate: null,
+        // The tutor's own paragraph, written at marking. Omitted rather than
+        // invented when nobody has written one.
+        taskFeedback: applicant.task_feedback ?? null,
+        feeLine:
+          typeof feeAmount === "string" && feeAmount
+            ? `The course fee is ${Number(feeAmount).toLocaleString("en-GB")} ${typeof feeCurrency === "string" && feeCurrency ? feeCurrency.trim().toUpperCase() : ""}.`.replace(/ \./, ".")
+            : "The course fee is as discussed with you.",
+        officeContact: center?.admissions_email ?? "the centre office",
         offerUrl: `${siteUrl}/offer/${offerToken}`,
+        acceptWithinDays: 14,
+        holdUntil: acceptBy,
       }),
     });
     emailError = sendError;
@@ -618,8 +648,12 @@ export async function addToWaitingList(formData: FormData): Promise<void> {
       html: waitingListEmailHtml({
         applicantName: applicant.full_name,
         courseName: course?.name ?? "the course",
-        position,
+        // The design writes the position in words -- "You are second on the
+        // waiting list" -- not "number 2".
+        positionWord: ORDINAL_WORD[position] ?? `number ${position}`,
         hearBy,
+        daysBeforeStart: "",
+        nextCourseName: null,
       }),
     });
   }

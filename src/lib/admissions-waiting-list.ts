@@ -73,14 +73,14 @@ export async function offerNextWaitingListPlace(
   const siteUrl = process.env.SITE_URL;
   if (siteUrl) {
     const [{ data: course }, { data: center }] = await Promise.all([
-      supabase.from("courses").select("name").eq("id", input.intakeCourseId).maybeSingle(),
+      supabase.from("courses").select("name, start_date, end_date").eq("id", input.intakeCourseId).maybeSingle(),
       supabase.from("centers").select("name, admissions_email").eq("id", input.centerId).maybeSingle(),
     ]);
     await sendApplicantEmail({
       centerName: center?.name ?? "Your centre",
       centerAdmissionsEmail: center?.admissions_email ?? null,
       to: next.email,
-      subject: `${course?.name ?? "Your application"} -- a place has come free`,
+      subject: `a place has opened on ${course?.name ?? "the course"}`,
       centerId: input.centerId,
       applicantId: next.id,
       type: "place_freed",
@@ -89,8 +89,25 @@ export async function offerNextWaitingListPlace(
       html: placeFreedEmailHtml({
         applicantName: next.full_name,
         courseName: course?.name ?? "the course",
-        expiresAt: formatDeadline(expiresAt),
+        courseDates:
+          course?.start_date && course?.end_date
+            ? `${new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} to ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`
+            : "the dates confirmed with you",
+        // "it starts in eleven days" -- the design says it plainly, because
+        // short notice is the whole reason this email reads as it does.
+        startsInPhrase: course?.start_date
+          ? (() => {
+              const days = Math.ceil(
+                (new Date(`${course.start_date}T00:00:00`).getTime() - Date.now()) / 86400000
+              );
+              return days > 0 ? `in ${days} day${days === 1 ? "" : "s"}` : "very soon";
+            })()
+          : "",
+        feeLine: "The fee is as set for this course;",
+        respondBy: formatDeadline(expiresAt),
         offerUrl: `${siteUrl}/offer/${offerToken}`,
+        hoursLeftLabel: "Accept your place",
+        nextCourseName: null,
       }),
     });
   }
