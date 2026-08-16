@@ -28,7 +28,7 @@ export default async function CentreOverviewPage() {
     supabase.from("centers").select("name, center_number").eq("id", centerId).maybeSingle(),
     supabase.from("courses").select("id, name, start_date, end_date, delivery_mode").eq("center_id", centerId).order("start_date", { ascending: false }),
     canView(ctx.roles, "admissions.view")
-      ? supabase.from("applicants").select("stage").eq("center_id", centerId)
+      ? supabase.from("applicants").select("stage, deposit_amount, deposit_paid_at").eq("center_id", centerId)
       : Promise.resolve({ data: [] }),
     canView(ctx.roles, "payments.view")
       ? supabase.from("payments").select("amount, currency, status, due_date, paid_at").eq("center_id", centerId)
@@ -44,10 +44,10 @@ export default async function CentreOverviewPage() {
       ? await supabase.from("volunteer_students").select("id, name, course_id").in("course_id", courseIds)
       : { data: [] };
 
-  // Financial strip. "Deposits held" from the spec has no field to read --
-  // there is no deposit concept in the payments schema (migration 0087 models
-  // plans and instalments), so it is left out rather than faked with a number
-  // that would look authoritative and mean nothing.
+  // Financial strip. "Deposits held" now has a real field behind it: the
+  // deposit is what lets a centre invite someone before the balance is settled
+  // (migration 0105), and it lives on the applicant because it normally
+  // arrives before any instalment schedule is agreed.
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const paid = (payments ?? []).filter((p) => p.status === "paid");
@@ -58,6 +58,9 @@ export default async function CentreOverviewPage() {
     .filter((p) => p.status === "pending" || p.status === "missed")
     .reduce((sum, p) => sum + Number(p.amount), 0);
   const refunded = (payments ?? []).filter((p) => p.status === "refunded").reduce((sum, p) => sum + Number(p.amount), 0);
+  const depositsHeld = (applicants ?? [])
+    .filter((a) => a.deposit_paid_at)
+    .reduce((sum, a) => sum + Number(a.deposit_amount ?? 0), 0);
   const missed = (payments ?? []).filter((p) => p.status === "missed");
   const currency = (payments ?? [])[0]?.currency ?? "";
 
@@ -95,6 +98,7 @@ export default async function CentreOverviewPage() {
         <div className="sheet flex flex-wrap gap-8 border-t-[3px] border-t-primary">
           {[
             { k: "Collected this month", v: money(collectedThisMonth) },
+            { k: "Deposits held", v: money(depositsHeld) },
             { k: "Outstanding balance", v: money(outstanding) },
             { k: "Refunds", v: money(refunded) },
           ].map((m) => (

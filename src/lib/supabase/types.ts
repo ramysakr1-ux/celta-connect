@@ -344,6 +344,15 @@ export interface Database {
           // migration 0102 -- set only on rows a spreadsheet import created, so
           // an undo can remove exactly those and nothing added by hand since.
           import_id: string | null;
+          // migration 0105 -- the deposit that lets a centre invite someone
+          // before the balance is settled. On the applicant rather than the
+          // payment plan, because it usually arrives before any schedule is
+          // agreed, and a payments row can only exist inside a plan.
+          deposit_amount: number | null;
+          deposit_currency: string | null;
+          deposit_paid_at: string | null;
+          deposit_marked_by: string | null;
+          deposit_note: string | null;
           full_name: string;
           email: string;
           phone: string | null;

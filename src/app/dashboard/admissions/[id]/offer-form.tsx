@@ -6,7 +6,7 @@ import { sendOffer, type FormState } from "@/app/dashboard/admissions/actions";
 const initialState: FormState = { error: null };
 const inputClass = "rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary";
 
-export function OfferForm({ applicantId }: { applicantId: string }) {
+export function OfferForm({ applicantId, hasDeposit }: { applicantId: string; hasDeposit: boolean }) {
   const [state, action, pending] = useActionState(sendOffer, initialState);
 
   return (
@@ -38,6 +38,15 @@ export function OfferForm({ applicantId }: { applicantId: string }) {
         </div>
       </div>
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+      {/* Only offered once the server has objected -- there is no point
+          pre-emptively asking someone to override a rule they haven't hit. */}
+      {!hasDeposit && state.error?.includes("No deposit") ? (
+        <label className="flex items-start gap-2 text-xs text-muted">
+          <input type="checkbox" name="confirm_no_deposit" value="1" className="mt-0.5 accent-primary" />
+          <span>Send this offer without a recorded deposit.</span>
+        </label>
+      ) : null}
+
       <button
         type="submit"
         disabled={pending}

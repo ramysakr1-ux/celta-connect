@@ -326,11 +326,20 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
   const supabase = await createClient();
   const { data: applicant } = await supabase
     .from("applicants")
-    .select("full_name, email, intake_course_id")
+    .select("full_name, email, intake_course_id, deposit_paid_at")
     .eq("id", applicantId)
     .eq("center_id", staff.center_id)
     .maybeSingle();
   if (!applicant) return { error: "Applicant not found." };
+
+  // The deposit is what lets a centre invite someone before the balance is
+  // settled, so sending an offer without one is worth stopping on -- once.
+  // Deliberately a warning and not a block: centres take deposits by bank
+  // transfer and out of band all the time, and a hard gate would have staff
+  // fighting the app on day one. Tick the box and it proceeds.
+  if (!applicant.deposit_paid_at && formData.get("confirm_no_deposit") !== "1") {
+    return { error: "No deposit is recorded for this applicant. Record one first, or tick to send the offer anyway." };
+  }
 
   const offerToken = crypto.randomUUID();
   const { error } = await supabase
@@ -507,5 +516,64 @@ export async function offerNextPlace(_prevState: FormState, formData: FormData):
 
   revalidatePath("/dashboard/admissions");
   if (result.offeredApplicantId === null) return { error: result.reason };
+  return { error: null };
+}
+
+/**
+ * Records a deposit against an applicant.
+ *
+ * Deposits usually arrive by bank transfer, outside anything Connect can see,
+ * so this is a record of what a named person observed -- never a claim the app
+ * processed a payment. Same "never 'confirmed', always 'marked by'" principle
+ * the manual half of `payments` already uses.
+ *
+ * Lives on the applicant rather than inside a payment plan because the deposit
+ * normally comes first: it secures the place, and the balance is scheduled
+ * afterwards. See migration 0105.
+ */
+export async function recordDeposit(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const staff = await requireAdmissionsHandler();
+  if (!canDecideAdmissions(staff)) return { error: "You can't record payments." };
+
+  const applicantId = formData.get("applicant_id") as string | null;
+  const amountRaw = formData.get("deposit_amount") as string | null;
+  const currency = (formData.get("deposit_currency") as string | null)?.trim().toUpperCase() || null;
+  const note = (formData.get("deposit_note") as string | null)?.trim() || null;
+  const clearing = formData.get("clear") === "1";
+
+  if (!applicantId) return { error: "Missing the applicant." };
+
+  const supabase = await createClient();
+
+  if (clearing) {
+    const { error } = await supabase
+      .from("applicants")
+      .update({ deposit_amount: null, deposit_currency: null, deposit_paid_at: null, deposit_marked_by: null, deposit_note: null })
+      .eq("id", applicantId)
+      .eq("center_id", staff.center_id);
+    if (error) return { error: "Could not clear the deposit." };
+    revalidatePath(`/dashboard/admissions/${applicantId}`);
+    return { error: null };
+  }
+
+  const amount = amountRaw ? Number(amountRaw) : NaN;
+  if (!Number.isFinite(amount) || amount <= 0) return { error: "How much was the deposit?" };
+
+  const { error } = await supabase
+    .from("applicants")
+    .update({
+      deposit_amount: amount,
+      deposit_currency: currency,
+      deposit_paid_at: new Date().toISOString(),
+      deposit_marked_by: staff.id,
+      deposit_note: note,
+    })
+    .eq("id", applicantId)
+    .eq("center_id", staff.center_id);
+  if (error) return { error: `Could not record the deposit: ${error.message}` };
+
+  revalidatePath(`/dashboard/admissions/${applicantId}`);
+  revalidatePath("/dashboard/admissions");
+  revalidatePath("/dashboard/centre");
   return { error: null };
 }

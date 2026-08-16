@@ -28,7 +28,7 @@ export default async function AdmissionsPage() {
   const [{ data: applicants }, { data: intakes }, { data: openSlots }] = await Promise.all([
     supabase
       .from("applicants")
-      .select("id, full_name, email, stage, intake_course_id, created_at")
+      .select("id, full_name, email, stage, intake_course_id, created_at, deposit_amount, deposit_paid_at")
       .eq("center_id", staff.center_id)
       .order("created_at", { ascending: false }),
     supabase
@@ -94,6 +94,7 @@ export default async function AdmissionsPage() {
               <th className="text-sm text-muted">Name</th>
               <th className="text-sm text-muted">Intake</th>
               <th className="text-sm text-muted">Stage</th>
+              <th className="text-sm text-muted">Deposit</th>
               <th className="text-sm text-muted">Applied</th>
             </tr>
           </thead>
@@ -110,12 +111,19 @@ export default async function AdmissionsPage() {
                   <td>
                     <span className="status-pill status-pill-pending">{STAGE_LABEL[a.stage] ?? a.stage}</span>
                   </td>
+                  {/* The deposit is what lets a centre invite someone before
+                      the balance is settled, so it belongs in the list you scan
+                      when deciding who to invite -- not only on the detail
+                      page. */}
+                  <td className={a.deposit_paid_at ? "text-ink" : "text-muted"}>
+                    {a.deposit_paid_at ? `${a.deposit_amount}` : "--"}
+                  </td>
                   <td className="text-muted">{a.created_at.slice(0, 10)}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="text-muted">
+                <td colSpan={5} className="text-muted">
                   No applicants awaiting a decision.
                 </td>
               </tr>

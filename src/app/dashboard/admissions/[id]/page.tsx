@@ -8,6 +8,8 @@ import { InterviewRecordForm } from "@/app/dashboard/admissions/[id]/interview-r
 import { RejectForm } from "@/app/dashboard/admissions/[id]/reject-form";
 import { OfferForm } from "@/app/dashboard/admissions/[id]/offer-form";
 import { PaymentsPanel } from "@/app/dashboard/admissions/[id]/payments-panel";
+import { DepositForm } from "@/app/dashboard/admissions/[id]/deposit-form";
+import { computeApplicantPaymentState } from "@/lib/payments/applicant-payment-state";
 import { WaiverForm } from "@/app/dashboard/admissions/[id]/waiver-form";
 import { WaitingListForm } from "@/app/dashboard/admissions/[id]/waiting-list-form";
 
@@ -37,10 +39,25 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       supabase.from("interview_records").select("*").eq("applicant_id", id).maybeSingle(),
     ]);
 
-  const { data: paymentPlan } = await supabase.from("payment_plans").select("id").eq("applicant_id", id).maybeSingle();
+  const { data: paymentPlan } = await supabase.from("payment_plans").select("id, total_amount").eq("applicant_id", id).maybeSingle();
   const { data: payments } = paymentPlan
     ? await supabase.from("payments").select("*").eq("payment_plan_id", paymentPlan.id)
     : { data: [] };
+
+  // The four states: not paid / deposit paid / paying instalments / paid in
+  // full. Derived from the deposit plus the plan, never stored -- a stored
+  // status is a second source of truth that drifts the moment an instalment is
+  // marked paid somewhere else.
+  const paymentState = computeApplicantPaymentState({
+    depositPaidAt: applicant.deposit_paid_at,
+    depositAmount: applicant.deposit_amount,
+    instalments: (payments ?? []).map((p) => ({ amount: Number(p.amount), status: p.status })),
+    planTotal: paymentPlan ? Number(paymentPlan.total_amount) : null,
+  });
+  const { data: depositMarkedBy } = applicant.deposit_marked_by
+    ? await supabase.from("profiles").select("full_name").eq("id", applicant.deposit_marked_by).maybeSingle()
+    : { data: null };
+  const depositMarkedByName = depositMarkedBy?.full_name ?? null;
 
   const canDecide = canDecideAdmissions(staff);
   const isRejected = applicant.stage === "rejected_before_interview" || applicant.stage === "rejected_after_interview";
@@ -188,6 +205,23 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               {applicant.fee_amount ? ` Fee: ${applicant.fee_amount}${applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}.` : ""}
             </p>
           </div>
+          <div className="card p-6">
+            <h2 className="font-serif text-lg text-ink">Deposit</h2>
+            <p className="mt-1 text-sm text-muted">
+              {paymentState.label}
+              {paymentState.outstanding !== null ? ` \u00b7 ${paymentState.outstanding} outstanding` : ""}
+            </p>
+            <div className="mt-3">
+              <DepositForm
+                applicantId={applicant.id}
+                depositAmount={applicant.deposit_amount}
+                depositCurrency={applicant.deposit_currency}
+                depositPaidAt={applicant.deposit_paid_at}
+                markedByName={depositMarkedByName}
+                note={applicant.deposit_note}
+              />
+            </div>
+          </div>
           <PaymentsPanel applicant={applicant} payments={payments ?? []} />
           <WaiverForm applicant={applicant} />
         </>
@@ -204,7 +238,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
       {canDecide && !isSettled ? (
         <>
-          <OfferForm applicantId={applicant.id} />
+          <OfferForm applicantId={applicant.id} hasDeposit={Boolean(applicant.deposit_paid_at)} />
           <WaitingListForm applicantId={applicant.id} />
           <RejectForm applicantId={applicant.id} />
         </>
