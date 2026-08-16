@@ -155,7 +155,7 @@ export default async function AssessorPage() {
           <div className="flex flex-col gap-4">
             <Panel title="Cohort documents">
               <DocRow label="Grades report" href="/trainer/grades-report" />
-              {firstCandidateId ? <DocRow label="Assignment briefs" href={`/portfolio/${firstCandidateId}/resources`} /> : null}
+              {firstCandidateId ? <DocRow label="Assignment titles" href={`/portfolio/${firstCandidateId}/resources`} /> : null}
             </Panel>
 
             <Panel title="On the day" gold>
