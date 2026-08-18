@@ -8,6 +8,8 @@ import {
   toggleSpeakingPromptActive,
   addInterviewQuestion,
   toggleQuestionActive,
+  toggleAdmissionsAiShadowMode,
+  toggleAdmissionsAiAutobook,
 } from "@/app/dashboard/admissions/actions";
 
 const COVERAGE_AREAS = [
@@ -32,6 +34,11 @@ const COVERAGE_LABEL: Record<string, string> = {
 export default async function AdmissionsSettingsPage() {
   const staff = await requireAdmissionsHandler();
   const supabase = await createClient();
+  const { data: center } = await supabase
+    .from("centers")
+    .select("admissions_ai_shadow_mode_enabled, admissions_ai_autobook_enabled")
+    .eq("id", staff.center_id)
+    .maybeSingle();
 
   const [{ data: prompts }, { data: speakingPrompts }, { data: questions }] = await Promise.all([
     supabase.from("application_writing_prompts").select("*").eq("center_id", staff.center_id).order("prompt_type"),
@@ -54,6 +61,54 @@ export default async function AdmissionsSettingsPage() {
           Extended writing task prompts and the fixed interview question bank. Imported once, edited any time, carried
           into every future course.
         </p>
+      </div>
+
+      <div className="card flex flex-col gap-4 p-6">
+        <h2 className="font-serif text-lg text-ink">AI reading of the selection task</h2>
+        <p className="text-sm text-muted">
+          Reads the written task against the marking scheme below and sorts it into three lanes -- clear books an
+          interview automatically, borderline queues for a human, clear problems flags a tutor. It never writes a
+          rejection, at any confidence.{" "}
+          {staff.role !== "admin" ? <span className="text-muted">Only a centre admin can change these.</span> : null}
+        </p>
+
+        <div className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3">
+          <div>
+            <p className="text-sm text-ink">Shadow mode</p>
+            <p className="text-xs text-muted">Records a reading on every applicant. Nothing is ever sent from this alone.</p>
+          </div>
+          <form action={toggleAdmissionsAiShadowMode}>
+            <input type="hidden" name="enabled" value={center?.admissions_ai_shadow_mode_enabled ? "false" : "true"} />
+            <button
+              type="submit"
+              disabled={staff.role !== "admin"}
+              className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-ink hover:border-primary disabled:opacity-50"
+            >
+              {center?.admissions_ai_shadow_mode_enabled ? "On -- turn off" : "Off -- turn on"}
+            </button>
+          </form>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3">
+          <div>
+            <p className="text-sm text-ink">Auto-book the clear lane</p>
+            <p className="text-xs text-muted">
+              Books an interview and sends the invitation automatically after a 15-minute hold, for readings clear on
+              every criterion. Needs shadow mode on first -- turn this on once shadow-mode readings look right against
+              real decisions, not before.
+            </p>
+          </div>
+          <form action={toggleAdmissionsAiAutobook}>
+            <input type="hidden" name="enabled" value={center?.admissions_ai_autobook_enabled ? "false" : "true"} />
+            <button
+              type="submit"
+              disabled={staff.role !== "admin" || !center?.admissions_ai_shadow_mode_enabled}
+              className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-ink hover:border-primary disabled:opacity-50"
+            >
+              {center?.admissions_ai_autobook_enabled ? "On -- turn off" : "Off -- turn on"}
+            </button>
+          </form>
+        </div>
       </div>
 
       <div className="card flex flex-col gap-4 p-6">

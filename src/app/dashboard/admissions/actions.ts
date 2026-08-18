@@ -231,6 +231,57 @@ export async function bookInterviewSlot(formData: FormData): Promise<void> {
   revalidatePath(`/dashboard/admissions/${applicantId}`);
 }
 
+// Centre-level policy, not routine admissions handling -- same reasoning as
+// every other admin-only toggle in this app (centre.settings.edit). Autobook
+// can never be turned on while shadow mode is off; the migration's own check
+// constraint backs this up, but refusing here means the toggle in the UI
+// never round-trips into a form error the admin has to decode.
+export async function toggleAdmissionsAiShadowMode(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  if (staff.role !== "admin") return;
+  const enabled = formData.get("enabled") === "true";
+  const supabase = await createClient();
+  const update: Database["public"]["Tables"]["centers"]["Update"] = { admissions_ai_shadow_mode_enabled: enabled };
+  if (!enabled) update.admissions_ai_autobook_enabled = false;
+  await supabase.from("centers").update(update).eq("id", staff.center_id);
+  revalidatePath("/dashboard/admissions/settings");
+}
+
+export async function toggleAdmissionsAiAutobook(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  if (staff.role !== "admin") return;
+  const enabled = formData.get("enabled") === "true";
+  const supabase = await createClient();
+
+  const { data: center } = await supabase.from("centers").select("admissions_ai_shadow_mode_enabled").eq("id", staff.center_id).maybeSingle();
+  if (enabled && !center?.admissions_ai_shadow_mode_enabled) return;
+
+  await supabase.from("centers").update({ admissions_ai_autobook_enabled: enabled }).eq("id", staff.center_id);
+  revalidatePath("/dashboard/admissions/settings");
+}
+
+// "A 15-minute hold between verdict and email... a cancellation window with
+// a Hold button in the admin queue" (review-notes.md). Clicking it stops
+// the auto-send permanently -- it does not merely pause it -- so the
+// applicant falls back to the ordinary human-decided path, same as any
+// other applicant. A held invitation can still be sent by hand afterwards
+// via the normal booking action above.
+export async function holdAutoSentInterview(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  const applicantId = formData.get("applicant_id");
+  if (typeof applicantId !== "string") return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("applicants")
+    .update({ interview_auto_send_cancelled_at: new Date().toISOString(), interview_auto_send_cancelled_by: staff.id })
+    .eq("id", applicantId)
+    .eq("center_id", staff.center_id)
+    .is("interview_auto_send_sent_at", null);
+
+  revalidatePath(`/dashboard/admissions/${applicantId}`);
+}
+
 /**
  * "Interview booked -> To whoever holds admissions and to the named
  * interviewer, with a link to the marked task."

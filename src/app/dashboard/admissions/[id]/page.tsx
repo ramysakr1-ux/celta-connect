@@ -4,6 +4,7 @@ import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-
 import { createClient } from "@/lib/supabase/server";
 import { bookInterviewSlot } from "@/app/dashboard/admissions/actions";
 import { MarkingForm } from "@/app/dashboard/admissions/[id]/marking-form";
+import { AiReadingPanel } from "@/app/dashboard/admissions/[id]/ai-reading-panel";
 import { InterviewRecordForm } from "@/app/dashboard/admissions/[id]/interview-record-form";
 import { RejectForm } from "@/app/dashboard/admissions/[id]/reject-form";
 import { OfferForm } from "@/app/dashboard/admissions/[id]/offer-form";
@@ -293,6 +294,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           <p className="text-sm text-muted">Not yet accepted -- this applicant predates the commitments requirement.</p>
         )}
       </div>
+
+      <AiReadingPanel applicant={applicant} />
 
       <MarkingForm applicant={applicant} />
 

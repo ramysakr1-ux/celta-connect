@@ -30,7 +30,7 @@ export default async function AdmissionsPage() {
     await Promise.all([
       supabase
         .from("applicants")
-        .select("id, full_name, email, stage, intake_course_id, created_at, deposit_amount, deposit_paid_at")
+        .select("id, full_name, email, stage, intake_course_id, created_at, deposit_amount, deposit_paid_at, ai_reading_lane")
         .eq("center_id", staff.center_id)
         .order("created_at", { ascending: false }),
       supabase
@@ -147,6 +147,14 @@ export default async function AdmissionsPage() {
                     <Link href={`/dashboard/admissions/${a.id}`} className="font-medium text-ink hover:underline">
                       {a.full_name}
                     </Link>
+                    {a.ai_reading_lane === "clear_problems" ? (
+                      // "A tutor is notified... in-app flag, not push/email"
+                      // -- this table is the surface a tutor or admissions
+                      // handler actually scans, so the flag lives here.
+                      <span className="ml-2 rounded-full border border-destructive/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-destructive">
+                        Task reading: read directly
+                      </span>
+                    ) : null}
                   </td>
                   <td className="text-muted">{intakeNameById.get(a.intake_course_id) ?? "--"}</td>
                   <td>

@@ -139,6 +139,14 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
     // recording rather than losing the application entirely.
   }
 
+  // Shadow mode / triage (specs/for-claude-code-email-inventory.md Part 1):
+  // both task parts are already in from the single application form above,
+  // so this is the one moment a reading can run. No-ops entirely unless the
+  // centre has turned shadow mode on; never blocks the application if it
+  // fails, same reasoning as the speaking-task upload above.
+  const { runSelectionTaskTriage } = await import("@/lib/admissions-ai-triage");
+  await runSelectionTaskTriage(admin, applicant.id).catch(() => null);
+
   // "Notify the centre when an application is submitted -- with the
   // applicant's name, which intake they chose." Phase F builds the full
   // notification system (email + opt-outs); this is the one trigger point

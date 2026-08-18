@@ -234,6 +234,12 @@ export interface Database {
           // migration 0111 -- the optional tier above the centre. Null for a
           // single-centre customer, who never sees any of it.
           organisation_id: string | null;
+          // migration 0151 -- shadow mode records an AI reading on every
+          // applicant without sending anything; autobook (separate, stronger)
+          // is what actually lets the "clear" lane auto-send an interview
+          // invitation, and can only be on while shadow mode is too.
+          admissions_ai_shadow_mode_enabled: boolean;
+          admissions_ai_autobook_enabled: boolean;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {
@@ -468,6 +474,15 @@ export interface Database {
           language_awareness_submission: { question: string; answer: string }[];
           ai_reading_summary: unknown | null;
           ai_reading_generated_at: string | null;
+          // migration 0151 -- specs/for-claude-code-email-inventory.md Part 1's
+          // three lanes. Never a fourth "reject" lane -- the AI only ever
+          // routes towards an interview or a human, never away from one.
+          ai_reading_lane: "clear" | "borderline" | "clear_problems" | null;
+          interview_auto_send_at: string | null;
+          interview_auto_send_cancelled_at: string | null;
+          interview_auto_send_cancelled_by: string | null;
+          interview_auto_send_sent_at: string | null;
+          clear_problems_notified_at: string | null;
           marking_language_awareness: "above" | "at" | "below" | null;
           marking_language_awareness_note: string | null;
           marking_accuracy: "above" | "at" | "below" | null;
@@ -648,7 +663,7 @@ export interface Database {
           id: string;
           center_id: string;
           applicant_id: string;
-          type: "submitted" | "task_returned" | "interview_completed" | "stale_no_decision" | "place_offered";
+          type: "submitted" | "task_returned" | "interview_completed" | "stale_no_decision" | "place_offered" | "clear_problems";
           message: string;
           read_at: string | null;
           created_at: string;
