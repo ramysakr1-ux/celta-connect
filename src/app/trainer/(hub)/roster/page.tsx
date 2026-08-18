@@ -28,15 +28,31 @@ export default async function TrainerRosterPage() {
   const rows = await fetchRosterRows(supabase, courseId);
   const isMct = trainer?.tutor_role === "main_course_tutor";
 
+  // build-spec.md §18 -- "Visibility follows the chat rule: tutors
+  // registered on that course, nobody else. No admin exception." An admin
+  // scoped to this same course still sees the roster, just not the contact
+  // tooling.
+  const isRegisteredTutor = trainer?.role === "trainer";
+
   // Assessors reuse this same page (createAdminClient path) but have no
   // reason to invite anyone -- only render the join-link button for a real
   // trainer/admin session.
   let joinUrl: string | null = null;
+  let courseCode = "";
   if (trainer) {
-    const { data: course } = await supabase.from("courses").select("trainee_join_token").eq("id", courseId).maybeSingle();
+    const { data: course } = await supabase.from("courses").select("trainee_join_token, course_code, name").eq("id", courseId).maybeSingle();
     const siteUrl = process.env.SITE_URL;
     joinUrl = siteUrl && course?.trainee_join_token ? `${siteUrl}/join/${course.trainee_join_token}` : null;
+    courseCode = course?.course_code || course?.name || "";
   }
+
+  // §18 "Emailing the whole group" -- BCC only, never To/Cc, and the app
+  // never renders a To-formatted address list or a copy-addresses button
+  // anywhere: "if a tutor cannot paste the list into the wrong field, they
+  // cannot make the mistake."
+  const bccMailto = isRegisteredTutor
+    ? `mailto:?bcc=${rows.map((r) => encodeURIComponent(r.email)).join(",")}&subject=${encodeURIComponent(courseCode)}`
+    : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -71,6 +87,15 @@ export default async function TrainerRosterPage() {
           >
             Export CSV
           </a>
+          {bccMailto ? (
+            <a
+              href={bccMailto}
+              title="Outside Connect -- urgent only. Opens your mail client with every candidate BCC'd."
+              className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary"
+            >
+              Email all candidates
+            </a>
+          ) : null}
           {trainer ? (
             <Link
               href="/trainer/connect-hub"
@@ -96,6 +121,7 @@ export default async function TrainerRosterPage() {
           <thead>
             <tr>
               <th className="text-sm text-muted">Candidate</th>
+              {isRegisteredTutor ? <th className="text-right text-sm text-muted">Outside Connect -- urgent only</th> : <th />}
               <th className="text-right text-sm text-muted">Assessed hrs</th>
               <th className="text-right text-sm text-muted">TPs passed</th>
               <th className="text-right text-sm text-muted">Assignments</th>
@@ -116,10 +142,12 @@ export default async function TrainerRosterPage() {
           </thead>
           <tbody>
             {rows.length > 0 ? (
-              rows.map((row) => <RosterRowView key={row.id} row={row} isMct={isMct} />)
+              rows.map((row) => (
+                <RosterRowView key={row.id} row={row} isMct={isMct} showContact={isRegisteredTutor} courseCode={courseCode} />
+              ))
             ) : (
               <tr>
-                <td colSpan={17} className="text-muted">
+                <td colSpan={18} className="text-muted">
                   No trainees on this course yet.
                 </td>
               </tr>

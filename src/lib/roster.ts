@@ -12,6 +12,10 @@ export type Celta5SignoffStatus = "not_started" | "candidate_signed" | "both_sig
 export interface RosterRow {
   id: string;
   name: string;
+  email: string;
+  // build-spec.md §18 -- "phone matters more than email for the real
+  // cases." Never required at enrolment, so this is commonly null.
+  phone: string | null;
   courseStatus: CourseStatus;
   assessedHrs: number;
   tpsPassed: number;
@@ -84,7 +88,7 @@ export async function fetchRosterRows(
 ): Promise<RosterRow[]> {
   const { data: trainees } = await supabase
     .from("profiles")
-    .select("id, full_name, course_status")
+    .select("id, full_name, email, phone, course_status")
     .eq("course_id", courseId)
     .eq("role", "trainee")
     .order("full_name");
@@ -299,6 +303,8 @@ export async function fetchRosterRows(
     return {
       id: trainee.id,
       name: trainee.full_name,
+      email: trainee.email,
+      phone: trainee.phone,
       courseStatus: trainee.course_status,
       assessedHrs,
       tpsPassed,

@@ -60,12 +60,20 @@ export default async function CourseStreamPage({
   const { data: trainee } = await supabase
     .from("profiles")
     .select(
-      "course_id, course_status, course_status_set_at, course_status_note, withdrawal_reportable, extension_completes_by, special_consideration, special_consideration_arrangements, special_consideration_evidence_url"
+      "course_id, email, phone, course_status, course_status_set_at, course_status_note, withdrawal_reportable, extension_completes_by, special_consideration, special_consideration_arrangements, special_consideration_evidence_url"
     )
     .eq("id", traineeId)
     .maybeSingle();
   if (!trainee?.course_id) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
+
+  // build-spec.md §18 -- "Visibility follows the chat rule: tutors
+  // registered on that course, nobody else. No admin exception."
+  const isRegisteredTutor = viewer?.role === "trainer" && preview !== "trainee";
+  const { data: contactCourse } = isRegisteredTutor
+    ? await supabase.from("courses").select("course_code, name").eq("id", trainee.course_id).maybeSingle()
+    : { data: null };
+  const contactCourseCode = contactCourse?.course_code || contactCourse?.name || "";
 
   // See portfolio/[traineeId]/layout.tsx's previewAsTrainee comment -- same
   // "hide staff-only rendering, never touch real authorization" rule here.
@@ -342,6 +350,30 @@ export default async function CourseStreamPage({
               <p className="mt-3 text-sm text-muted">Nothing scheduled yet.</p>
             )}
           </div>
+
+          {isRegisteredTutor ? (
+            <div className="sheet-accent h-fit">
+              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Outside Connect -- urgent only</p>
+              <p className="mt-1 text-xs text-muted">
+                Everything else belongs in the app, where it&apos;s on the record and the whole group sees it.
+              </p>
+              <div className="mt-2 flex flex-col gap-1 text-sm">
+                <a
+                  href={`mailto:${trainee.email}?subject=${encodeURIComponent(contactCourseCode)}`}
+                  className="font-medium text-primary hover:underline"
+                >
+                  Email
+                </a>
+                {trainee.phone ? (
+                  <a href={`tel:${trainee.phone}`} className="font-medium text-primary hover:underline">
+                    Call {trainee.phone}
+                  </a>
+                ) : (
+                  <span className="text-xs text-muted">No phone on file.</span>
+                )}
+              </div>
+            </div>
+          ) : null}
 
           <div className="sheet-accent h-fit">
             <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Course tutors</p>

@@ -78,6 +78,19 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
         />
       </div>
 
+      {role === "trainee" ? (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="phone" className="text-sm text-muted">
+            Phone (optional)
+          </label>
+          <p className="text-xs text-muted">
+            So a tutor can reach you directly if something&apos;s urgent -- for example, if you haven&apos;t arrived
+            for teaching practice.
+          </p>
+          <input id="phone" name="phone" type="tel" autoComplete="tel" className={inputClass} />
+        </div>
+      ) : null}
+
       {role === "trainee" && isUkCentre ? (
         <div className="flex flex-col gap-1.5">
           <label htmlFor="uln" className="text-sm text-muted">
@@ -150,6 +163,13 @@ export function JoinForm({ token, role, isUkCentre }: { token: string; role: Use
             <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
               <input type="checkbox" name="agree_link_private" required className="mt-0.5 accent-primary" />
               <span>I will keep my workspace link private -- it opens my portfolio and nobody else&apos;s.</span>
+            </label>
+            <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+              <input type="checkbox" name="agree_contact" required className="mt-0.5 accent-primary" />
+              <span>
+                I understand a tutor on my course may contact me directly by phone or email in an urgent situation --
+                for example, if I have not arrived for teaching practice.
+              </span>
             </label>
           </>
         ) : (

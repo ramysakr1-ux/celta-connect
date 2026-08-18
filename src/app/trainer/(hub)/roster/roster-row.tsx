@@ -85,10 +85,30 @@ const CELTA5_SIGNOFF_LABEL: Record<RosterRow["celta5SignoffStatus"], string> = {
   both_signed: "Both signed",
 };
 
+// build-spec.md §18 -- "Visibility follows the chat rule: tutors registered
+// on that course, nobody else. No admin exception." A real trainer viewer
+// only, never role==='admin' even when scoped to the same course.
+function ContactCell({ row, courseCode }: { row: RosterRow; courseCode: string }) {
+  return (
+    <td className="text-right text-xs" onClick={(e) => e.stopPropagation()}>
+      <div className="flex justify-end gap-2">
+        <a href={`mailto:${row.email}?subject=${encodeURIComponent(courseCode)}`} className="text-primary hover:underline">
+          Email
+        </a>
+        {row.phone ? (
+          <a href={`tel:${row.phone}`} className="text-primary hover:underline">
+            Call
+          </a>
+        ) : null}
+      </div>
+    </td>
+  );
+}
+
 // build-spec.md §8 bug 3 -- rows carried cursor-pointer but only the name
 // cell actually navigated. Whole row now pushes to the portfolio; the
 // name keeps its own <Link> too, for keyboard nav and hover color.
-export function RosterRowView({ row, isMct }: { row: RosterRow; isMct: boolean }) {
+export function RosterRowView({ row, isMct, showContact, courseCode }: { row: RosterRow; isMct: boolean; showContact: boolean; courseCode: string }) {
   const router = useRouter();
 
   // §3 -- a withdrawn/deferred/etc. candidate is "present in the roster"
@@ -103,6 +123,7 @@ export function RosterRowView({ row, isMct }: { row: RosterRow; isMct: boolean }
             {row.name}
           </Link>
         </td>
+        {showContact ? <ContactCell row={row} courseCode={courseCode} /> : <td />}
         <td colSpan={16} className="text-right">
           <span className="pill pill-neutral">{COURSE_STATUS_LABEL[row.courseStatus]}</span>
         </td>
@@ -118,6 +139,7 @@ export function RosterRowView({ row, isMct }: { row: RosterRow; isMct: boolean }
         </Link>
         {row.courseStatus === "extension" ? <span className="pill pill-info ml-2">Extension</span> : null}
       </td>
+      {showContact ? <ContactCell row={row} courseCode={courseCode} /> : <td />}
       <td className={`text-right tabular-nums ${row.assessedHrs < 6 ? "text-status-warning-text" : "text-ink"}`}>
         {row.assessedHrs.toFixed(2)}
       </td>

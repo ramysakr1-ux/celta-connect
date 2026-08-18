@@ -288,6 +288,10 @@ export interface Database {
           full_name: string;
           role: UserRole;
           center_id: string;
+          // migration 0145 -- build-spec.md §18: "phone matters more than
+          // email for the real cases." Never required -- a direct course
+          // join has no applicant record to carry one across.
+          phone: string | null;
           // migration 0103 -- the centre this person is currently acting in.
           // center_id above stays their home centre. Only honoured when a live
           // centre_roles grant backs it, so it's a preference, never authority.

@@ -78,7 +78,8 @@ export async function joinCourse(
     (!formData.get("agree_data") ||
       !formData.get("agree_fingerprint") ||
       !formData.get("agree_policies") ||
-      !formData.get("agree_own_work"))
+      !formData.get("agree_own_work") ||
+      !formData.get("agree_contact"))
   ) {
     return { error: "You need to agree to all the checkboxes to join." };
   }
@@ -94,6 +95,7 @@ export async function joinCourse(
   const specialConsiderationArrangements = role === "trainee" ? (formData.getAll("special_consideration_arrangements") as string[]) : [];
   const specialConsiderationEvidence = role === "trainee" ? formData.get("special_consideration_evidence") : null;
   const uln = role === "trainee" ? (formData.get("uln") as string | null)?.trim() || null : null;
+  const phone = role === "trainee" ? (formData.get("phone") as string | null)?.trim() || null : null;
 
   const tutorRoleInput = formData.get("tutor_role");
   const tutorRole =
@@ -132,6 +134,7 @@ export async function joinCourse(
     id: created.user.id,
     email,
     full_name: fullName,
+    phone,
     role,
     center_id: course.center_id,
     course_id: course.id,

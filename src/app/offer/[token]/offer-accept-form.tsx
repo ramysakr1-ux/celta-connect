@@ -104,6 +104,13 @@ export function OfferAcceptForm({
             against it.
           </span>
         </label>
+        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+          <input type="checkbox" name="agree_contact" required className="mt-0.5 accent-primary" />
+          <span>
+            I understand a tutor on my course may contact me directly by phone or email in an urgent situation --
+            for example, if I have not arrived for teaching practice.
+          </span>
+        </label>
       </div>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

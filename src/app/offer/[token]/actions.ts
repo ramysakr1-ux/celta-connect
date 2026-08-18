@@ -42,6 +42,9 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
   ) {
     return { error: "You need to agree to all the checkboxes to accept." };
   }
+  if (!formData.get("agree_contact")) {
+    return { error: "You need to agree to all the checkboxes to accept." };
+  }
   if (!formData.get("ai_disclaimer_ticked") || !(formData.get("ai_disclaimer_signed_name") as string | null)?.trim()) {
     return { error: "Tick all three sections of the AI disclaimer and type your name to sign it." };
   }
@@ -94,6 +97,7 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
     id: created.user.id,
     email: applicant.email,
     full_name: applicant.full_name,
+    phone: applicant.phone,
     role: "trainee",
     center_id: applicant.center_id,
     course_id: applicant.intake_course_id,
