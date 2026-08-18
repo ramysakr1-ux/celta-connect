@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { releaseAllFinalReports, type FormState } from "@/app/dashboard/trainer/celta5-actions";
+import { ProvisionalDeadlineBanner } from "@/app/trainer/(hub)/grades-report/provisional-deadline-banner";
 import { StandardRatingGlyph } from "@/lib/status-pill";
 import type { TpGlyphSlot } from "@/lib/tp-grades";
 import type { FinalGrade } from "@/lib/supabase/types";
@@ -32,6 +33,8 @@ export interface CohortSheetRow {
   justified: boolean;
   stage3Status: Stage3Status;
   tpsRemaining: number;
+  provisionalApproved: boolean;
+  hasProvisional: boolean;
 }
 
 const STAGE3_PILL: Record<Stage3Status, { label: string; cls: string }> = {
@@ -58,13 +61,19 @@ export function CohortSheet({
   courseName,
   rows,
   canRelease,
+  provisionalDueAt,
+  isMct,
 }: {
   courseId: string;
   courseName: string;
   rows: CohortSheetRow[];
   canRelease: boolean;
+  provisionalDueAt: string | null;
+  isMct: boolean;
 }) {
   const [state, action, pending] = useActionState(releaseAllFinalReports, initialState);
+  const withProvisional = rows.filter((r) => r.hasProvisional);
+  const approvedCount = withProvisional.filter((r) => r.provisionalApproved).length;
 
   const undecidedRows = rows.filter((r) => r.wasSlashed && !r.justified);
   const settledRows = rows.filter((r) => !(r.wasSlashed && !r.justified));
@@ -98,6 +107,13 @@ export function CohortSheet({
         ) : null}
       </div>
       {canRelease && state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
+
+      <ProvisionalDeadlineBanner
+        dueAt={provisionalDueAt}
+        isMct={isMct}
+        approvedCount={approvedCount}
+        totalCount={withProvisional.length}
+      />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
         {/* Undecided -- needs justification */}

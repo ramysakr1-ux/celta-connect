@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { PROVISIONAL_SLOTS } from "@/lib/provisional-grade";
+import { isMctOnCourse } from "@/lib/course-mct";
 import type { CriteriaRating, StandardRating } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -403,7 +404,7 @@ export async function updateProvisionalGrade(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole("trainer");
+  const trainer = await requireRole("trainer");
 
   const traineeId = formData.get("trainee_id");
   const slot = formData.get("provisional_slot");
@@ -436,6 +437,10 @@ export async function updateProvisionalGrade(
       provisional_grade: grade,
       provisional_grade_upper: upper,
       provisional_set_at: grade ? new Date().toISOString() : null,
+      provisional_proposed_by: grade ? trainer.id : null,
+      // Editing un-approves rather than locking -- see migration 0127.
+      provisional_approved_at: null,
+      provisional_approved_by: null,
     })
     .eq("trainee_id", traineeId);
 
@@ -445,6 +450,69 @@ export async function updateProvisionalGrade(
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   revalidatePath("/trainer/grades-report");
+  return { error: null };
+}
+
+// MCT-only. "Each TP tutor proposes for their own group; the MCT approves
+// all of them before anything is sent" -- proposing stays open to any
+// trainer (unchanged above), but approval is the one action gated to the
+// single MCT on the course.
+export async function approveProvisionalGrade(formData: FormData): Promise<FormState> {
+  const trainer = await requireRole("trainer");
+  if (!trainer.course_id) return { error: "No course assigned." };
+
+  const traineeId = formData.get("trainee_id");
+  if (typeof traineeId !== "string" || !traineeId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const supabase = await createClient();
+  if (!(await isMctOnCourse(supabase, trainer.course_id, trainer.id))) {
+    return { error: "Only the Main Course Tutor can approve provisional grades." };
+  }
+
+  const { data: record } = await supabase
+    .from("celta5_records")
+    .select("provisional_grade")
+    .eq("trainee_id", traineeId)
+    .maybeSingle();
+  if (!record?.provisional_grade) {
+    return { error: "Set a provisional grade before approving it." };
+  }
+
+  const { error } = await supabase
+    .from("celta5_records")
+    .update({ provisional_approved_at: new Date().toISOString(), provisional_approved_by: trainer.id })
+    .eq("trainee_id", traineeId);
+  if (error) return { error: "Could not approve. Try again." };
+
+  revalidatePath("/trainer/grades-report");
+  return { error: null };
+}
+
+// MCT-only, course-wide -- one deadline for the whole cohort, set from the
+// actual timetable rather than computed from the assessor visit date. See
+// migration 0127.
+export async function setProvisionalGradesDueDate(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const trainer = await requireRole("trainer");
+  if (!trainer.course_id) return { error: "No course assigned." };
+
+  const dueDate = formData.get("due_date");
+  if (typeof dueDate !== "string") return { error: "Something went wrong. Refresh and try again." };
+
+  const supabase = await createClient();
+  if (!(await isMctOnCourse(supabase, trainer.course_id, trainer.id))) {
+    return { error: "Only the Main Course Tutor can set this deadline." };
+  }
+
+  const { error } = await supabase
+    .from("courses")
+    .update({ provisional_grades_due_at: dueDate ? new Date(`${dueDate}T23:59:59`).toISOString() : null })
+    .eq("id", trainer.course_id);
+  if (error) return { error: "Could not save. Try again." };
+
+  revalidatePath("/trainer/grades-report");
+  revalidatePath("/trainer");
   return { error: null };
 }
 

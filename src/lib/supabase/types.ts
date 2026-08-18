@@ -267,6 +267,8 @@ export interface Database {
           deposit_due_days: number | null;
           // Null = launched, so courses predating the wizard stay live.
           launched_at: string | null;
+          // migration 0127 -- MCT-set, not computed from assessor_visit_date.
+          provisional_grades_due_at: string | null;
           accepting_applications: boolean;
           created_at: string;
         };
@@ -1189,6 +1191,9 @@ export interface Database {
           provisional_grade_upper: FinalGrade | null;
           provisional_set_at: string | null;
           provisional_upgrade_conditions: string | null;
+          provisional_proposed_by: string | null;
+          provisional_approved_at: string | null;
+          provisional_approved_by: string | null;
           final_recommended_grade: FinalGrade | null;
           final_teaching_grade: "Pass" | "Pass B" | "Pass A" | "Fail" | null;
           final_assignments_grade: "Pass" | "Fail" | null;

@@ -37,7 +37,11 @@ export default async function GradesReportPage() {
     return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
   }
 
-  const { data: course } = await supabase.from("courses").select("name").eq("id", courseId).maybeSingle();
+  const { data: course } = await supabase
+    .from("courses")
+    .select("name, provisional_grades_due_at")
+    .eq("id", courseId)
+    .maybeSingle();
 
   const { data: trainees } = await supabase
     .from("profiles")
@@ -45,6 +49,16 @@ export default async function GradesReportPage() {
     .eq("course_id", courseId)
     .eq("role", "trainee")
     .order("full_name");
+
+  // Proposer names for the "Proposed by X" tag, and whether the current
+  // viewer is the one person who can approve.
+  const { data: courseTutors } = await supabase
+    .from("profiles")
+    .select("id, full_name, tutor_role")
+    .eq("course_id", courseId)
+    .eq("role", "trainer");
+  const tutorNameById = new Map((courseTutors ?? []).map((t) => [t.id, t.full_name]));
+  const isMct = trainer ? (courseTutors ?? []).some((t) => t.id === trainer.id && t.tutor_role === "main_course_tutor") : false;
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
   const [{ data: records }, { data: matrixRows }, { data: tpFeedbackRows }, { data: assignments }, { data: planAssignments }] =
@@ -135,13 +149,22 @@ export default async function GradesReportPage() {
       // grade-query-reply build) so this stays informational context, not
       // an enforced gate.
       tpsRemaining: Math.max(8 - taughtForTrainee, 0),
+      hasProvisional: Boolean(record?.provisional_grade),
+      provisionalApproved: Boolean(record?.provisional_approved_at),
     };
   });
 
   return (
     <LaptopOnlyGate task="The Grades Report" skip={!trainer}>
     <div className="flex flex-col gap-6">
-      <CohortSheet courseId={courseId} courseName={course?.name ?? "Course"} rows={cohortRows} canRelease={Boolean(trainer)} />
+      <CohortSheet
+        courseId={courseId}
+        courseName={course?.name ?? "Course"}
+        rows={cohortRows}
+        canRelease={Boolean(trainer)}
+        provisionalDueAt={course?.provisional_grades_due_at ?? null}
+        isMct={isMct}
+      />
 
       <div className="sheet">
         <p className="mt-2 text-sm text-muted">
@@ -184,7 +207,12 @@ export default async function GradesReportPage() {
 
                 {trainer ? (
                   <>
-                    <ProvisionalGradeForm traineeId={trainee.id} record={record} />
+                    <ProvisionalGradeForm
+                      traineeId={trainee.id}
+                      record={record}
+                      proposedByName={record?.provisional_proposed_by ? (tutorNameById.get(record.provisional_proposed_by) ?? null) : null}
+                      isMct={isMct}
+                    />
                     <UpgradeConditionsForm traineeId={trainee.id} record={record} />
                   </>
                 ) : null}
