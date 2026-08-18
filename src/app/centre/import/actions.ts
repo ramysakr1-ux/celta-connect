@@ -6,12 +6,48 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
+import { getAccessTokenFromRefreshToken } from "@/lib/google/oauth";
 import {
   analyseRows,
   isWithinUndoWindow,
   type ColumnMapping,
   type StatusValueMapping,
 } from "@/lib/spreadsheet-import";
+
+// Same requireRole + centre-role check as commitImport below -- picking a
+// file is part of the same import.run-gated flow, not a lesser action.
+async function requireImportRole() {
+  const profile = await requireRole("admin");
+  const ctx = await getCentreRoleContext(profile);
+  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) {
+    throw new Error("Your role can't import people.");
+  }
+  return profile;
+}
+
+// Reuses the same center_google_connections row the trainee TP-materials
+// picker reads (src/app/dashboard/trainee/plan/[tpNumber]/materials-actions.ts)
+// -- one centre-level Drive connection, set once in Course Admin > Settings,
+// good for every picker in the app rather than a per-feature reconnect.
+export async function getCenterDriveAccessTokenForImport(): Promise<{ accessToken: string } | { error: string }> {
+  const profile = await requireImportRole();
+  const admin = createAdminClient();
+
+  const { data: connection } = await admin
+    .from("center_google_connections")
+    .select("refresh_token")
+    .eq("center_id", profile.center_id)
+    .maybeSingle();
+
+  if (!connection) return { error: "Your centre hasn't connected Google Drive yet -- connect it in Settings first." };
+
+  try {
+    const accessToken = await getAccessTokenFromRefreshToken(connection.refresh_token);
+    return { accessToken };
+  } catch {
+    return { error: "Could not connect to the centre's Google Drive. Ask your admin to reconnect it in Settings." };
+  }
+}
 
 export interface CommitImportState {
   error?: string;

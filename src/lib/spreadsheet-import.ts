@@ -4,10 +4,22 @@
 // out with its problems on top... before it becomes forty phantom candidates
 // nobody can delete", which only holds if preview and commit can't disagree.
 
-// Only .csv today. .xlsx needs a parsing dependency this project doesn't have
-// and one wasn't added unannounced -- parsing is isolated behind parseDelimited
-// so a real xlsx reader can slot in beside it without touching anything below.
-export const SUPPORTED_EXTENSIONS = [".csv", ".tsv"] as const;
+// .xlsx via SheetJS -- installed from cdn.sheetjs.com rather than the npm
+// registry copy, which carries two unpatched high-severity advisories
+// (prototype pollution, ReDoS) SheetJS never backported there after moving
+// off npm. Isolated behind this one function, same as parseDelimited below,
+// so parsing stays swappable.
+export const SUPPORTED_EXTENSIONS = [".csv", ".tsv", ".xlsx", ".xls"] as const;
+
+export async function parseXlsx(data: ArrayBuffer): Promise<string[][]> {
+  const XLSX = await import("xlsx");
+  const workbook = XLSX.read(data, { type: "array" });
+  const firstSheetName = workbook.SheetNames[0];
+  if (!firstSheetName) return [];
+  const sheet = workbook.Sheets[firstSheetName];
+  const rows: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: "" });
+  return rows.map((row) => row.map((cell) => (cell == null ? "" : String(cell))));
+}
 
 /**
  * RFC4180-ish: quoted fields may contain the delimiter, newlines, and ""

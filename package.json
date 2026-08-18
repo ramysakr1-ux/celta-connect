@@ -21,7 +21,8 @@
     "react-dom": "19.2.4",
     "resend": "^6.18.1",
     "server-only": "^0.0.1",
-    "stripe": "^22.5.0"
+    "stripe": "^22.5.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

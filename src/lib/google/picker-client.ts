@@ -14,6 +14,8 @@ interface PickerView {
   setIncludeFolders: (include: boolean) => PickerView;
 }
 
+export type PickerViewId = "DOCS" | "SPREADSHEETS";
+
 interface PickerInstance {
   addView: (view: PickerView) => PickerInstance;
   setOAuthToken: (token: string) => PickerInstance;
@@ -30,7 +32,7 @@ declare global {
     google: {
       picker: {
         DocsView: new (viewId: unknown) => PickerView;
-        ViewId: { DOCS: unknown };
+        ViewId: { DOCS: unknown; SPREADSHEETS: unknown };
         Action: { PICKED: string };
         PickerBuilder: new () => PickerInstance;
       };
@@ -77,11 +79,13 @@ function ensurePickerLoaded(): Promise<void> {
 export async function openDrivePicker(opts: {
   accessToken: string;
   apiKey: string;
+  viewId?: PickerViewId;
   onPicked: (file: PickedDriveFile) => void;
 }): Promise<void> {
   await ensurePickerLoaded();
 
-  const view = new window.google.picker.DocsView(window.google.picker.ViewId.DOCS).setIncludeFolders(false);
+  const viewId = opts.viewId === "SPREADSHEETS" ? window.google.picker.ViewId.SPREADSHEETS : window.google.picker.ViewId.DOCS;
+  const view = new window.google.picker.DocsView(viewId).setIncludeFolders(false);
 
   const picker = new window.google.picker.PickerBuilder()
     .addView(view)
@@ -96,4 +100,30 @@ export async function openDrivePicker(opts: {
     .build();
 
   picker.setVisible(true);
+}
+
+const GOOGLE_SHEET_MIME_TYPE = "application/vnd.google-apps.spreadsheet";
+export const XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+// A native Google Sheet has no file bytes to download -- it has to be
+// exported, and export only ever returns the FIRST tab. An uploaded
+// .csv/.tsv living in Drive is a real file, downloaded as-is instead.
+export async function fetchDriveFileAsText(file: PickedDriveFile, accessToken: string): Promise<string> {
+  const url =
+    file.mimeType === GOOGLE_SHEET_MIME_TYPE
+      ? `https://www.googleapis.com/drive/v3/files/${file.id}/export?mimeType=text/csv`
+      : `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`;
+  const response = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!response.ok) throw new Error("Could not read that file from Drive.");
+  return response.text();
+}
+
+// A real .xlsx living in Drive (not a native Google Sheet, which has no
+// bytes) -- downloaded as binary and handed to parseXlsx rather than read as
+// text, which would corrupt it.
+export async function fetchDriveFileAsArrayBuffer(file: PickedDriveFile, accessToken: string): Promise<ArrayBuffer> {
+  const url = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`;
+  const response = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!response.ok) throw new Error("Could not read that file from Drive.");
+  return response.arrayBuffer();
 }

@@ -2,13 +2,15 @@
 
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
-import { commitImport, type CommitImportState } from "@/app/centre/import/actions";
+import { commitImport, getCenterDriveAccessTokenForImport, type CommitImportState } from "@/app/centre/import/actions";
+import { fetchDriveFileAsArrayBuffer, fetchDriveFileAsText, openDrivePicker, XLSX_MIME_TYPE } from "@/lib/google/picker-client";
 import {
   APPLICANT_STAGES,
   IMPORT_FIELDS,
   analyseRows,
   guessMapping,
   parseDelimited,
+  parseXlsx,
   statusValuesIn,
   type ColumnMapping,
   type ImportFieldKey,
@@ -54,30 +56,81 @@ export function ImportWizard({
   const [mapping, setMapping] = useState<ColumnMapping>({});
   const [statusMapping, setStatusMapping] = useState<StatusValueMapping>({});
   const [readError, setReadError] = useState<string | null>(null);
+  const [drivePending, setDrivePending] = useState(false);
   const [state, action, pending] = useActionState(commitImport, initialCommit);
 
   const emailSet = useMemo(() => new Set(existingEmails), [existingEmails]);
 
-  async function onFile(file: File) {
-    setReadError(null);
-    const name = file.name.toLowerCase();
-    if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
-      setReadError("Excel files aren't readable yet -- save it as .csv and try again.");
-      return;
-    }
-    const text = await file.text();
-    const parsed = parseDelimited(text, name.endsWith(".tsv") ? "\t" : ",");
+  function ingestRows(name: string, parsed: string[][]) {
     if (parsed.length < 2) {
       setReadError("That file has no rows under its headings.");
       return;
     }
     const [head, ...body] = parsed;
-    setFilename(file.name);
+    setFilename(name);
     setHeaders(head);
     setRows(body);
     setMapping(guessMapping(head));
     setStatusMapping({});
     setStep("map");
+  }
+
+  async function onFile(file: File) {
+    setReadError(null);
+    const name = file.name.toLowerCase();
+    try {
+      if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
+        ingestRows(file.name, await parseXlsx(await file.arrayBuffer()));
+        return;
+      }
+      const text = await file.text();
+      ingestRows(file.name, parseDelimited(text, name.endsWith(".tsv") ? "\t" : ","));
+    } catch {
+      setReadError("Could not read that file. Try again.");
+    }
+  }
+
+  // Native Google Sheets export as CSV regardless of the sheet's own
+  // delimiter -- an uploaded .csv/.tsv/.xlsx living in Drive keeps its real
+  // type, so that part still branches on the file's mime type / name.
+  async function onDriveConnect() {
+    setReadError(null);
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+    if (!apiKey) {
+      setReadError("Google Drive isn't configured for this app yet.");
+      return;
+    }
+    setDrivePending(true);
+    try {
+      const result = await getCenterDriveAccessTokenForImport();
+      if ("error" in result) {
+        setReadError(result.error);
+        return;
+      }
+      await openDrivePicker({
+        accessToken: result.accessToken,
+        apiKey,
+        viewId: "SPREADSHEETS",
+        onPicked: async (file) => {
+          try {
+            if (file.mimeType === XLSX_MIME_TYPE) {
+              const buffer = await fetchDriveFileAsArrayBuffer(file, result.accessToken);
+              ingestRows(file.name, await parseXlsx(buffer));
+              return;
+            }
+            const text = await fetchDriveFileAsText(file, result.accessToken);
+            const delimiter = file.name.toLowerCase().endsWith(".tsv") ? "\t" : ",";
+            ingestRows(file.name, parseDelimited(text, delimiter));
+          } catch {
+            setReadError("Could not read that file from Drive. Try again.");
+          }
+        },
+      });
+    } catch {
+      setReadError("Could not open the Drive picker. Try again.");
+    } finally {
+      setDrivePending(false);
+    }
   }
 
   const statusValues = useMemo(() => statusValuesIn(headers, rows, mapping), [headers, rows, mapping]);
@@ -141,23 +194,36 @@ export function ImportWizard({
             </select>
           </label>
 
-          <label className="flex max-w-sm flex-col gap-1.5">
+          <div className="flex max-w-sm flex-col gap-1.5">
             <span className="text-sm text-muted">Choose a file</span>
-            <input
-              type="file"
-              accept=".csv,.tsv,text/csv"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void onFile(f);
-              }}
-              className="text-sm text-ink file:mr-3 file:rounded-[6px] file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-sm file:text-ink"
-            />
-          </label>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={onDriveConnect}
+                disabled={drivePending}
+                className="h-10 shrink-0 rounded-[6px] border border-border bg-card px-3.5 text-sm text-ink hover:border-primary disabled:opacity-50"
+              >
+                {drivePending ? "Opening…" : "Connect centre's Drive"}
+              </button>
+              <span className="shrink-0 text-xs text-muted">or</span>
+              <input
+                type="file"
+                accept=".csv,.tsv,.xlsx,.xls,text/csv"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void onFile(f);
+                }}
+                className="text-sm text-ink file:mr-3 file:rounded-[6px] file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-sm file:text-ink"
+              />
+            </div>
+          </div>
 
           {readError ? <p className="text-sm text-destructive">{readError}</p> : null}
           <p className="text-xs text-muted">
-            Nothing is created until you have seen the preview. Google Drive picking and Excel files aren&apos;t wired
-            up yet -- export the sheet as .csv for now.
+            Nothing is created until you have seen the preview. The Drive option reads through your centre&apos;s
+            existing connection (Settings &gt; Google Drive) -- picking a file doesn&apos;t grant any new standing
+            access beyond what&apos;s already connected there. .csv, .tsv, .xlsx, and native Google Sheets all read
+            straight in -- an .xlsx with more than one tab only reads the first.
           </p>
         </div>
       ) : null}
