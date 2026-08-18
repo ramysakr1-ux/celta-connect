@@ -1179,6 +1179,12 @@ export interface Database {
           stage2_tutor_written_assignments_notes: string | null;
           stage2_tutor_other_notes: string | null;
           stage2_completed_at: string | null;
+          // migration 0131 -- "moved earlier" for a standing concern, before
+          // the stage's own standard checkpoint. No Stage 1 equivalent --
+          // Stage 1 timing is fixed.
+          stage2_moved_earlier_at: string | null;
+          stage2_moved_earlier_reason: string | null;
+          stage2_moved_earlier_by: string | null;
           stage3_required: boolean;
           stage3_tutorial_given: boolean;
           stage3_hours_taught: number | null;
@@ -1187,6 +1193,9 @@ export interface Database {
           stage3_tutor_written_assignments_notes: string | null;
           stage3_tutor_other_notes: string | null;
           stage3_finalized_at: string | null;
+          stage3_moved_earlier_at: string | null;
+          stage3_moved_earlier_reason: string | null;
+          stage3_moved_earlier_by: string | null;
           provisional_grade: FinalGrade | null;
           provisional_grade_upper: FinalGrade | null;
           provisional_set_at: string | null;

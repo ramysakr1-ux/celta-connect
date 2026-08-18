@@ -522,6 +522,72 @@ export async function setProvisionalGradesDueDate(_prevState: FormState, formDat
   return { error: null };
 }
 
+// Grade Pipeline handoff, "Decided": Stage 2/3 (not Stage 1, which is
+// fixed) can be moved earlier by the MCT with a required reason, "if
+// there's a standing concern before the standard checkpoint... Not
+// available once a stage has already been given."
+export async function moveStage2Earlier(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const trainer = await requireRole("trainer");
+  if (!trainer.course_id) return { error: "No course assigned." };
+
+  const traineeId = formData.get("trainee_id");
+  const reason = formData.get("reason");
+  if (typeof traineeId !== "string" || !traineeId) return { error: "Something went wrong. Refresh and try again." };
+  if (typeof reason !== "string" || !reason.trim()) return { error: "A reason is required." };
+
+  const supabase = await createClient();
+  if (!(await isMctOnCourse(supabase, trainer.course_id, trainer.id))) {
+    return { error: "Only the Main Course Tutor can move a stage earlier." };
+  }
+
+  const { data: record } = await supabase
+    .from("celta5_records")
+    .select("stage2_completed_at")
+    .eq("trainee_id", traineeId)
+    .maybeSingle();
+  if (record?.stage2_completed_at) return { error: "Stage 2 has already been given." };
+
+  const { error } = await supabase
+    .from("celta5_records")
+    .update({ stage2_moved_earlier_at: new Date().toISOString(), stage2_moved_earlier_reason: reason.trim(), stage2_moved_earlier_by: trainer.id })
+    .eq("trainee_id", traineeId);
+  if (error) return { error: "Could not save. Try again." };
+
+  revalidatePath("/trainer/roster");
+  return { error: null };
+}
+
+export async function moveStage3Earlier(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const trainer = await requireRole("trainer");
+  if (!trainer.course_id) return { error: "No course assigned." };
+
+  const traineeId = formData.get("trainee_id");
+  const reason = formData.get("reason");
+  if (typeof traineeId !== "string" || !traineeId) return { error: "Something went wrong. Refresh and try again." };
+  if (typeof reason !== "string" || !reason.trim()) return { error: "A reason is required." };
+
+  const supabase = await createClient();
+  if (!(await isMctOnCourse(supabase, trainer.course_id, trainer.id))) {
+    return { error: "Only the Main Course Tutor can move a stage earlier." };
+  }
+
+  const { data: record } = await supabase
+    .from("celta5_records")
+    .select("stage3_finalized_at")
+    .eq("trainee_id", traineeId)
+    .maybeSingle();
+  if (record?.stage3_finalized_at) return { error: "Stage 3 has already been given." };
+
+  const { error } = await supabase
+    .from("celta5_records")
+    .update({ stage3_moved_earlier_at: new Date().toISOString(), stage3_moved_earlier_reason: reason.trim(), stage3_moved_earlier_by: trainer.id })
+    .eq("trainee_id", traineeId);
+  if (error) return { error: "Could not save. Try again." };
+
+  revalidatePath("/trainer/roster");
+  return { error: null };
+}
+
 // The tutor's free-text "in order to deserve a higher grade, they need
 // to..." working note (migration 0053) -- one condition per line, gated to
 // release to the candidate only alongside the final report (same UI-layer
