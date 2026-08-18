@@ -7,6 +7,7 @@ import { DragBoard } from "@/app/trainer/(hub)/timetable/drag-board";
 import { TimeBandsForm } from "@/app/trainer/(hub)/timetable/time-bands-form";
 import { resolveTimeBands } from "@/lib/timetable-grid";
 import { Stage2Section } from "@/app/trainer/(hub)/timetable/stage2-section";
+import { IndividualTutorialSection } from "@/app/trainer/(hub)/timetable/individual-tutorial-section";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 
 // §1.1a v2 -- the course timetable is the single source of truth for the
@@ -93,6 +94,44 @@ export default async function TrainerTimetablePage({
     return { id: b.id, groupName: group?.name ?? "Unknown group", eventDate: event?.event_date ?? "" };
   });
 
+  // Stage 1 / Stage 3 individualized invites -- one candidate, one time,
+  // unlike Stage 2's group sheet above. Stage 3 only offers candidates the
+  // trainer has actually flagged (celta5_records.stage3_required) -- it's
+  // conditional per-candidate, not a whole-cohort checkpoint like Stage 1.
+  const [{ data: activeTrainees }, { data: stage3Records }, { data: invites }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, full_name")
+      .eq("course_id", trainer.course_id)
+      .eq("role", "trainee")
+      .eq("course_status", "active")
+      .order("full_name"),
+    supabase.from("celta5_records").select("trainee_id, stage3_required").eq("course_id", trainer.course_id),
+    supabase
+      .from("individual_tutorial_invites")
+      .select("id, trainee_id, stage, timetable_event_id, confirmed_at")
+      .eq("course_id", trainer.course_id),
+  ]);
+  const traineeNameById = new Map((activeTrainees ?? []).map((t) => [t.id, t.full_name]));
+  const stage3EligibleIds = new Set((stage3Records ?? []).filter((r) => r.stage3_required).map((r) => r.trainee_id));
+  const allCandidates = (activeTrainees ?? []).map((t) => ({ id: t.id, name: t.full_name }));
+  const stage3Candidates = allCandidates.filter((t) => stage3EligibleIds.has(t.id));
+
+  const inviteSummaries = (invites ?? []).map((i) => {
+    const event = blockEventById.get(i.timetable_event_id);
+    return {
+      id: i.id,
+      stage: i.stage,
+      traineeId: i.trainee_id,
+      traineeName: traineeNameById.get(i.trainee_id) ?? "Unknown",
+      eventDate: event?.event_date ?? "",
+      eventTime: event?.event_time ?? null,
+      confirmed: Boolean(i.confirmed_at),
+    };
+  });
+  const stage1Invites = inviteSummaries.filter((i) => i.stage === "stage1");
+  const stage3Invites = inviteSummaries.filter((i) => i.stage === "stage3");
+
   return (
     <div className="flex flex-col gap-6">
       <div className="sheet flex items-center justify-between">
@@ -173,6 +212,8 @@ export default async function TrainerTimetablePage({
       ) : null}
 
       <Stage2Section groups={stage2Groups} blocks={stage2Blocks} />
+      <IndividualTutorialSection stage="stage1" candidates={allCandidates} invites={stage1Invites} />
+      <IndividualTutorialSection stage="stage3" candidates={stage3Candidates} invites={stage3Invites} />
       </LaptopOnlyGate>
 
       {events && events.length > 0 ? (

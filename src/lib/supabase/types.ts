@@ -1483,6 +1483,26 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["stage2_tutorial_slots"]["Row"]>;
         Relationships: [];
       };
+      individual_tutorial_invites: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          stage: "stage1" | "stage3";
+          timetable_event_id: string;
+          confirmed_at: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["individual_tutorial_invites"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          stage: "stage1" | "stage3";
+          timetable_event_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["individual_tutorial_invites"]["Row"]>;
+        Relationships: [];
+      };
       course_tutors: {
         Row: {
           id: string;
