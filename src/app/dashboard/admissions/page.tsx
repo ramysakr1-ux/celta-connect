@@ -118,9 +118,14 @@ export default async function AdmissionsPage() {
           <h1 className="font-serif text-xl text-ink">Admissions</h1>
           <p className="mt-2 text-muted">The applicant pipeline for every course at your centre.</p>
         </div>
-        <Link href="/dashboard/admissions/settings" className="text-sm text-muted hover:text-ink">
-          Settings
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard/admissions/pipeline" className="text-sm font-semibold text-primary hover:underline">
+            Pipeline →
+          </Link>
+          <Link href="/dashboard/admissions/settings" className="text-sm text-muted hover:text-ink">
+            Settings
+          </Link>
+        </div>
       </div>
 
       <div className="card overflow-hidden !p-0">
