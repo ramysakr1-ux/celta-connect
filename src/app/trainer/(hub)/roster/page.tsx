@@ -59,6 +59,12 @@ export default async function TrainerRosterPage() {
             Observation tasks →
           </a>
           <a
+            href="/trainer/gtky"
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Day-one activities →
+          </a>
+          <a
             href="/trainer/roster/export"
             className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary"
           >
