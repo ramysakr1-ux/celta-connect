@@ -69,7 +69,12 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
             UTC. After that, it goes to the next person on the waiting list.
           </p>
         ) : null}
-        <OfferAcceptForm token={token} isUkCentre={center?.is_uk_centre ?? false} defaultSpecialConsideration={applicant.special_requirements} />
+        <OfferAcceptForm
+          token={token}
+          isUkCentre={center?.is_uk_centre ?? false}
+          defaultSpecialConsideration={applicant.special_requirements}
+          fullName={applicant.full_name}
+        />
       </div>
     </div>
   );

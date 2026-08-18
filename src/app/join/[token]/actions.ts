@@ -68,17 +68,14 @@ export async function joinCourse(
   }
   const { course, role } = resolved;
 
-  // Two more real disclosures build-spec.md names as required candidate-
-  // agreement content -- cross-course text fingerprinting and the AI/
-  // plagiarism policy -- trainee-only, same boundary as tutor_role being
-  // trainer-only below. The exact official Cambridge AI disclaimer wording
-  // is explicitly meant to live as an uploaded, versioned centre document
-  // (it's "subject to constant review"), not hardcoded here -- this
-  // checkbox is the plain-English acknowledgment, not a substitute for it.
+  // Cross-course text fingerprinting -- trainee-only, same boundary as
+  // tutor_role being trainer-only below. The AI disclaimer itself
+  // (Enrolment Forms.dc.html 1a, Cambridge's own verbatim wording) is a
+  // separate signed record now, not a checkbox here -- see
+  // ai_disclaimer_ticked/ai_disclaimer_signed_name below.
   if (
     role === "trainee" &&
     (!formData.get("agree_data") ||
-      !formData.get("agree_ai_policy") ||
       !formData.get("agree_fingerprint") ||
       !formData.get("agree_policies") ||
       !formData.get("agree_own_work"))
@@ -88,6 +85,10 @@ export async function joinCourse(
   if (role === "trainer" && (!formData.get("agree_confidentiality") || !formData.get("agree_procedures"))) {
     return { error: "You need to agree to all the checkboxes to join." };
   }
+  if (role === "trainee" && (!formData.get("ai_disclaimer_ticked") || !(formData.get("ai_disclaimer_signed_name") as string | null)?.trim())) {
+    return { error: "Tick all three sections of the AI disclaimer and type your name to sign it." };
+  }
+  const aiDisclaimerSignedName = role === "trainee" ? ((formData.get("ai_disclaimer_signed_name") as string | null)?.trim() ?? null) : null;
   const specialConsideration =
     role === "trainee" ? (formData.get("special_consideration") as string | null)?.trim() || null : null;
   const specialConsiderationArrangements = role === "trainee" ? (formData.getAll("special_consideration_arrangements") as string[]) : [];
@@ -138,6 +139,8 @@ export async function joinCourse(
     special_consideration: specialConsideration,
     special_consideration_arrangements: specialConsiderationArrangements,
     special_consideration_evidence_url: specialConsiderationEvidenceUrl,
+    ai_disclaimer_signed_at: role === "trainee" ? new Date().toISOString() : null,
+    ai_disclaimer_signed_name: aiDisclaimerSignedName,
     uln,
     terms_accepted_at: new Date().toISOString(),
   });

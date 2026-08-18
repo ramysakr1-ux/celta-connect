@@ -300,6 +300,12 @@ export interface Database {
           // alongside the existing free-text field above.
           special_consideration_arrangements: string[];
           special_consideration_evidence_url: string | null;
+          // migration 0142 -- Cambridge's own 3-section AI-use disclaimer,
+          // signed once at enrolment. signed_name is kept distinct from
+          // full_name (which can change later) so the record shows exactly
+          // what was typed at the moment of signing.
+          ai_disclaimer_signed_at: string | null;
+          ai_disclaimer_signed_name: string | null;
           uln: string | null;
           connect_hub_link: string | null;
           course_status: CourseStatus;

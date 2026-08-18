@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { acceptOffer, type AcceptOfferState } from "@/app/offer/[token]/actions";
 import { SpecialConsiderationFields } from "@/components/special-consideration-fields";
+import { AiDisclaimerFields } from "@/components/ai-disclaimer-fields";
 
 const initialState: AcceptOfferState = { error: null };
 const inputClass = "h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary";
@@ -16,10 +17,12 @@ export function OfferAcceptForm({
   token,
   isUkCentre,
   defaultSpecialConsideration,
+  fullName,
 }: {
   token: string;
   isUkCentre: boolean;
   defaultSpecialConsideration: string | null;
+  fullName: string;
 }) {
   const [state, action, pending] = useActionState(acceptOffer, initialState);
 
@@ -54,6 +57,9 @@ export function OfferAcceptForm({
         </div>
       ) : null}
 
+      <div className="border-t border-border pt-4">
+        <AiDisclaimerFields fullName={fullName} />
+      </div>
       <SpecialConsiderationFields defaultText={defaultSpecialConsideration} />
 
       <div className="mt-2 flex flex-col gap-3 border-t border-border pt-4">
@@ -96,37 +102,6 @@ export function OfferAcceptForm({
             I understand that Connect keeps a text fingerprint of my written assignments -- not the assignments
             themselves -- even after my course records are archived, so future candidates&apos; work can be checked
             against it.
-          </span>
-        </label>
-        <label className="flex items-start gap-2 text-xs leading-relaxed text-muted">
-          <input type="checkbox" name="agree_ai_policy" required className="mt-0.5 accent-primary" />
-          <span>
-            I have read and understood the centre&apos;s policy on using AI in coursework.
-            <details className="mt-1">
-              <summary className="cursor-pointer text-ink hover:text-primary">What&apos;s permitted / not permitted</summary>
-              <div className="mt-2 flex flex-col gap-2 text-ink">
-                <div>
-                  <p className="font-medium">Permitted</p>
-                  <ul className="list-disc pl-4">
-                    <li>generating ideas for teaching practice, including texts and activities</li>
-                    <li>initial research for written assignments, including generating a bibliography</li>
-                    <li>proofreading work</li>
-                  </ul>
-                </div>
-                <div>
-                  <p className="font-medium">Treated as malpractice</p>
-                  <ul className="list-disc pl-4">
-                    <li>generating a lesson plan, a language analysis, or a written assignment using AI</li>
-                    <li>using AI for any purpose beyond those permitted</li>
-                    <li>failing to acknowledge AI use, regardless of scope or purpose</li>
-                  </ul>
-                </div>
-                <p className="text-xs">
-                  Summarised from Cambridge&apos;s own guidance -- see your centre&apos;s uploaded disclaimer document for the
-                  full, current wording.
-                </p>
-              </div>
-            </details>
           </span>
         </label>
       </div>

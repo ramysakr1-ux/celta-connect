@@ -38,11 +38,14 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
     !formData.get("agree_link_private") ||
     !formData.get("agree_course_policies") ||
     !formData.get("agree_own_work") ||
-    !formData.get("agree_ai_policy") ||
     !formData.get("agree_fingerprint")
   ) {
     return { error: "You need to agree to all the checkboxes to accept." };
   }
+  if (!formData.get("ai_disclaimer_ticked") || !(formData.get("ai_disclaimer_signed_name") as string | null)?.trim()) {
+    return { error: "Tick all three sections of the AI disclaimer and type your name to sign it." };
+  }
+  const aiDisclaimerSignedName = (formData.get("ai_disclaimer_signed_name") as string | null)?.trim() ?? null;
 
   const admin = createAdminClient();
   const { data: applicant } = await admin.from("applicants").select("*").eq("offer_token", token).maybeSingle();
@@ -97,6 +100,8 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
     special_consideration: specialConsideration,
     special_consideration_arrangements: specialConsiderationArrangements,
     special_consideration_evidence_url: specialConsiderationEvidenceUrl,
+    ai_disclaimer_signed_at: new Date().toISOString(),
+    ai_disclaimer_signed_name: aiDisclaimerSignedName,
     uln,
     terms_accepted_at: new Date().toISOString(),
   });
