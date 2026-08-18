@@ -115,9 +115,19 @@ export function AssignmentReviewForm({
             form either way (a hidden field's value isn't dropped from
             FormData), this just keeps the cramped checklist off a phone. */}
         <div className="card hidden flex-col gap-3 p-5 md:flex">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
-            Assessment criteria · {isResubmission ? "resubmission" : "1st submission"}
-          </p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+              Assessment criteria · {isResubmission ? "resubmission" : "1st submission"}
+            </p>
+            <a
+              href={`/dashboard/trainer/marking-guidance?type=${encodeURIComponent(assignmentType)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="shrink-0 text-[11px] font-medium text-primary hover:underline"
+            >
+              Marking guidance →
+            </a>
+          </div>
           <div className="flex flex-col">
             {criteria.map((c) => {
               const met = marks[c.key] === true;

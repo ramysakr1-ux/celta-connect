@@ -833,6 +833,27 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["assignment_templates"]["Row"]>;
         Relationships: [];
       };
+      marking_guidance_entries: {
+        Row: {
+          id: string;
+          center_id: string;
+          assignment_type: string;
+          criterion_key: string;
+          met_text: string | null;
+          grey_text: string | null;
+          not_text: string | null;
+          agreed_text: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["marking_guidance_entries"]["Row"]> & {
+          center_id: string;
+          assignment_type: string;
+          criterion_key: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["marking_guidance_entries"]["Row"]>;
+        Relationships: [];
+      };
       assignment_type_definitions: {
         Row: {
           id: string;
