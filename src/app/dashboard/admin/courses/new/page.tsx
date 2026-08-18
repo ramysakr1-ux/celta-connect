@@ -24,12 +24,23 @@ export default async function NewCoursePage() {
 
   return (
     <div className="flex flex-col gap-[22px]">
-      <div className="flex flex-col gap-[5px]">
-        <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
-          {center?.name ?? "Your centre"}
-          {center?.center_number ? ` · Centre ${center.center_number}` : ""}
+      {/* The design's own opening: an eyebrow, then this exact H1 and
+          paragraph, sitting directly above step 1 -- Ramy, 2026-08-17: "It's
+          extremely important that [it's] frame by frame telling someone what
+          to do, especially if it's the first time... I want it there."
+          Verbatim from Course Admin.dc.html, not paraphrased. */}
+      <div className="flex flex-col gap-3">
+        <p className="text-[11px] font-bold tracking-[0.14em] text-muted uppercase">Connect · course admin</p>
+        <h1 className="font-serif text-[34px] leading-[1.15] font-semibold text-ink">
+          Course admin — the CELTA trainer&apos;s own credentials to run a course.
+        </h1>
+        <p className="max-w-[62ch] text-sm leading-relaxed text-muted text-pretty">
+          Distinct from Centre Admin — a separate role and a separate link, covering payments and volunteer
+          students (built elsewhere). This is the main course tutor&apos;s own view: setting up a course, its
+          roster, groups, invitations, and course-level settings. Everything reusable — TP points, assignment
+          briefs, resources, feedback examples, the Drive connection — is shared by every course this trainer runs.
+          Everything about a person is course-level and leaves at close-out.
         </p>
-        <h1 className="font-serif text-[24px] font-semibold text-ink">Course setup</h1>
       </div>
 
       {/* 1.15fr / 1fr, the design's split for the setup screen. */}
