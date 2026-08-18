@@ -6,6 +6,8 @@ import { computeWeekOf } from "@/lib/course-progress";
 import { rotationPosition, halfTpDates, type TpTimetableEvent } from "@/lib/rotation";
 import { getTpCardStatus } from "@/lib/tp-plan-content";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
+import { PushSubscribeButton } from "@/components/push-subscribe-button";
+import { subscribeSessionPush, unsubscribeSessionPush } from "@/lib/push/actions";
 
 const TP_LESSON_LENGTH_MINUTES = 45;
 // Matches celta5/page.tsx's own local OBSERVATION_HOURS_REQUIRED -- kept as
@@ -287,6 +289,7 @@ export async function TodayTab({
           <h1 className="font-serif text-2xl text-ink">{todayHeading}</h1>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <PushSubscribeButton subscribe={subscribeSessionPush} unsubscribe={unsubscribeSessionPush} />
           <Link href={`/portfolio/${traineeId}/timetable`} className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary">
             My timetable
           </Link>

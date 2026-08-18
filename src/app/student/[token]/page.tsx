@@ -6,6 +6,8 @@ import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
 import { DesignerCredit } from "@/components/designer-credit";
 import { getVolunteerIdentityData, TICK_THRESHOLD_MINUTES, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-cross-course";
+import { PushSubscribeButton } from "@/components/push-subscribe-button";
+import { subscribeVolunteerPush, unsubscribeVolunteerPush } from "@/lib/push/actions";
 
 // Four evenly-spaced markers scaled to whatever the centre has set --
 // quarters of the threshold, rounded to the nearest 10 hours, rather than
@@ -242,8 +244,12 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                 Add to calendar
               </a>
             </div>
-            <div className="border-t border-border-faint pt-3">
+            <div className="flex items-center justify-between gap-3 border-t border-border-faint pt-3">
               <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
+              <PushSubscribeButton
+                subscribe={(input) => subscribeVolunteerPush(token, input)}
+                unsubscribe={(endpoint) => unsubscribeVolunteerPush(token, endpoint)}
+              />
             </div>
           </div>
         ) : null}

@@ -2376,6 +2376,24 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["centre_delete_codes"]["Row"]>;
         Relationships: [];
       };
+      push_subscriptions: {
+        Row: {
+          id: string;
+          profile_id: string | null;
+          volunteer_student_id: string | null;
+          endpoint: string;
+          p256dh: string;
+          auth_key: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["push_subscriptions"]["Row"]> & {
+          endpoint: string;
+          p256dh: string;
+          auth_key: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["push_subscriptions"]["Row"]>;
+        Relationships: [];
+      };
       spreadsheet_imports: {
         Row: {
           id: string;
@@ -2787,6 +2805,20 @@ export interface Database {
           timetable_event_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["volunteer_declines"]["Row"]>;
+        Relationships: [];
+      };
+      volunteer_session_reminders_sent: {
+        Row: {
+          id: string;
+          volunteer_student_id: string;
+          timetable_event_id: string;
+          sent_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["volunteer_session_reminders_sent"]["Row"]> & {
+          volunteer_student_id: string;
+          timetable_event_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["volunteer_session_reminders_sent"]["Row"]>;
         Relationships: [];
       };
       pre_course_task_sections: {
