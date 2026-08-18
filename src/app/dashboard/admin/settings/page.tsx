@@ -37,7 +37,7 @@ export default async function AdminSettingsPage({
   const { data: center } = await admin
     .from("centers")
     .select(
-      "name, center_number, is_uk_centre, auto_tag_criteria_enabled, admissions_email, chat_retention_days, volunteer_certificate_hours_threshold"
+      "name, center_number, is_uk_centre, auto_tag_criteria_enabled, admissions_email, volunteer_certificate_hours_threshold"
     )
     .eq("id", profile.center_id)
     .maybeSingle();
@@ -151,7 +151,6 @@ export default async function AdminSettingsPage({
                 centerNumber={center?.center_number ?? ""}
                 isUkCentre={center?.is_uk_centre ?? false}
                 admissionsEmail={center?.admissions_email ?? null}
-                chatRetentionDays={center?.chat_retention_days ?? 1}
                 volunteerCertificateHoursThreshold={center?.volunteer_certificate_hours_threshold ?? 160}
               />
             </div>

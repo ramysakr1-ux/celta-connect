@@ -198,7 +198,6 @@ export interface Database {
           admissions_stale_threshold_days: number;
           application_low_availability_threshold: number;
           admissions_email: string | null;
-          chat_retention_days: number;
           // migration 0146 -- was a plain 160 constant ("the spec's own
           // illustrative figure... no centre setting for this yet").
           volunteer_certificate_hours_threshold: number;
@@ -280,6 +279,12 @@ export interface Database {
           fee_amount: number | null;
           deposit_amount: number | null;
           fee_currency: string | null;
+          // migration 0154 -- moved from centers.chat_retention_days: "chat
+          // retention lives in Course Admin, configured by the MCT per
+          // course." Null means the fixed 1-day/midnight-clear default,
+          // same as every channel already fell back to before this setting
+          // existed.
+          chat_retention_days: number | null;
           deposit_due_days: number | null;
           // Null = launched, so courses predating the wizard stay live.
           launched_at: string | null;

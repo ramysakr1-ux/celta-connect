@@ -40,7 +40,6 @@ export function TraineeEyebrowLabel({ isStaff, readOnly }: { isStaff: boolean; r
 interface ChatPayload {
   channels: ChannelSummary[];
   coworkers: Coworker[];
-  chatRetentionDays: number;
 }
 
 // Picks which chat to render: the staff member's own (normal view) vs the
@@ -79,7 +78,6 @@ export function ChatDrawerSwitcher({
         initialChannels={traineePreviewChat.channels}
         coworkers={traineePreviewChat.coworkers}
         staticMessages={traineePreviewLatestMessage ? [traineePreviewLatestMessage] : []}
-        retentionDays={traineePreviewChat.chatRetentionDays}
         readOnly
       />
     );
@@ -91,7 +89,6 @@ export function ChatDrawerSwitcher({
       initialChannels={staffChat.channels}
       coworkers={staffChat.coworkers}
       quietHoursNote={quietHoursNote}
-      retentionDays={staffChat.chatRetentionDays}
       raiseForMobileNav={raiseForMobileNav}
     />
   );

@@ -50,6 +50,25 @@ export async function updateApplicationSettings(formData: FormData): Promise<voi
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
 }
 
+// Ramy, 2026-08-18: "chat retention lives in Course Admin, configured by
+// the MCT per course" -- moved from the old centre-wide setting
+// (migration 0154). Null means the fixed 1-day/midnight-clear default.
+export async function updateChatRetentionDays(formData: FormData): Promise<void> {
+  const staff = await requireRole("admin");
+  const courseId = formData.get("course_id");
+  const chatRetentionRaw = formData.get("chat_retention_days");
+  const chatRetentionDays = typeof chatRetentionRaw === "string" && chatRetentionRaw ? Number(chatRetentionRaw) : 1;
+  if (typeof courseId !== "string") return;
+  if (!Number.isInteger(chatRetentionDays) || chatRetentionDays < 1) return;
+
+  const supabase = await createClient();
+  const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
+  if (!course || course.center_id !== staff.center_id) return;
+
+  await supabase.from("courses").update({ chat_retention_days: chatRetentionDays }).eq("id", courseId);
+  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+}
+
 export async function updateAssessorVisitDate(formData: FormData): Promise<void> {
   const admin = await requireRole("admin");
   const courseId = formData.get("course_id");

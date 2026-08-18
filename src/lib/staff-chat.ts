@@ -14,31 +14,54 @@ import type { Database } from "@/lib/supabase/types";
 // load rather than needing a real cron job this environment can't run
 // anyway (no deploy, no pg_cron access confirmed this session).
 //
-// 2026-08-14: retention is now a real per-centre setting
-// (centers.chat_retention_days, migration 0090) instead of a hardcoded
-// "since local server midnight" cutoff -- a genuine rolling N-day window
-// measured from now, not a fixed calendar cadence, so it can't wipe
-// mid-cycle on a part-time course spread over months. Scoped to just this
-// center's channels (not a global sweep) since the only caller already
-// knows which center it's running for.
+// 2026-08-14: retention is a real setting instead of a hardcoded "since
+// local server midnight" cutoff -- a genuine rolling N-day window measured
+// from now, not a fixed calendar cadence, so it can't wipe mid-cycle on a
+// part-time course spread over months.
+//
+// 2026-08-18: moved from centers.chat_retention_days to courses --
+// "chat retention lives in Course Admin, configured by the MCT per
+// course." Resolved per channel via its own course_id, not one blanket
+// cutoff for the whole centre: a tp_group/course_admin channel uses ITS
+// course's setting, and a centre-wide channel (all_staff, centre_admin,
+// dm -- no course to own the setting) keeps the fixed 1-day default every
+// channel already fell back to before this setting existed.
 async function deleteStaleStaffMessages(centerId: string): Promise<void> {
   const admin = createAdminClient();
 
-  const { data: center } = await admin.from("centers").select("chat_retention_days").eq("id", centerId).maybeSingle();
-  const retentionDays = center?.chat_retention_days ?? 1;
-  const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+  const { data: channels } = await admin.from("staff_channels").select("id, course_id").eq("center_id", centerId);
+  if (!channels || channels.length === 0) return;
 
-  const { data: channels } = await admin.from("staff_channels").select("id").eq("center_id", centerId);
-  const channelIds = (channels ?? []).map((c) => c.id);
-  if (channelIds.length === 0) return;
+  const courseIds = [...new Set(channels.map((c) => c.course_id).filter((id): id is string => !!id))];
+  const { data: courses } =
+    courseIds.length > 0 ? await admin.from("courses").select("id, chat_retention_days").in("id", courseIds) : { data: [] };
+  const retentionByCourseId = new Map((courses ?? []).map((c) => [c.id, c.chat_retention_days ?? 1]));
 
-  await admin.from("staff_messages").delete().in("channel_id", channelIds).lt("created_at", cutoff.toISOString());
+  const channelIdsByRetention = new Map<number, string[]>();
+  for (const channel of channels) {
+    const days = channel.course_id ? (retentionByCourseId.get(channel.course_id) ?? 1) : 1;
+    const list = channelIdsByRetention.get(days) ?? [];
+    list.push(channel.id);
+    channelIdsByRetention.set(days, list);
+  }
+
+  for (const [days, channelIds] of channelIdsByRetention) {
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    await admin.from("staff_messages").delete().in("channel_id", channelIds).lt("created_at", cutoff.toISOString());
+  }
+}
+
+function resolveRetentionDays(courseId: string | null, retentionByCourseId: Map<string, number>): number {
+  return courseId ? (retentionByCourseId.get(courseId) ?? 1) : 1;
 }
 
 export interface ChannelSummary {
   id: string;
   type: "center_trainers" | "all_staff" | "tp_group" | "dm" | "course_admin" | "centre_admin";
   name: string;
+  // Resolved per channel from its own course (migration 0154) -- a
+  // centre-wide channel (no course_id) always reads 1.
+  retentionDays: number;
 }
 
 export interface Coworker {
@@ -67,20 +90,12 @@ export async function getInitialStaffChatData(
 ): Promise<{
   channels: ChannelSummary[];
   coworkers: Coworker[];
-  chatRetentionDays: number;
 }> {
   const supabase = client ?? (await createClient());
 
   const { data: profileForCleanup } = await supabase.from("profiles").select("center_id").eq("id", profileId).maybeSingle();
-  let chatRetentionDays = 1;
   if (profileForCleanup?.center_id) {
     await deleteStaleStaffMessages(profileForCleanup.center_id);
-    const { data: center } = await supabase
-      .from("centers")
-      .select("chat_retention_days")
-      .eq("id", profileForCleanup.center_id)
-      .maybeSingle();
-    chatRetentionDays = center?.chat_retention_days ?? 1;
   }
 
   const { data: memberships } = await supabase
@@ -90,13 +105,18 @@ export async function getInitialStaffChatData(
 
   const channelIds = (memberships ?? []).map((m) => m.channel_id);
   if (channelIds.length === 0) {
-    return { channels: [], coworkers: [], chatRetentionDays };
+    return { channels: [], coworkers: [] };
   }
 
   const { data: channels } = await supabase
     .from("staff_channels")
     .select("*")
     .in("id", channelIds);
+
+  const channelCourseIds = [...new Set((channels ?? []).map((c) => c.course_id).filter((id): id is string => !!id))];
+  const { data: channelCourses } =
+    channelCourseIds.length > 0 ? await supabase.from("courses").select("id, chat_retention_days").in("id", channelCourseIds) : { data: [] };
+  const retentionByCourseId = new Map((channelCourses ?? []).map((c) => [c.id, c.chat_retention_days ?? 1]));
 
   const dmChannelIds = (channels ?? []).filter((c) => c.type === "dm").map((c) => c.id);
 
@@ -126,6 +146,7 @@ export async function getInitialStaffChatData(
       id: c.id,
       type: c.type,
       name: c.type === "dm" ? (dmNameByChannelId.get(c.id) ?? "Direct message") : (c.name ?? ""),
+      retentionDays: resolveRetentionDays(c.course_id, retentionByCourseId),
     }))
     .sort((a, b) => {
       // course_admin never actually appears here in practice -- admins are
@@ -182,5 +203,5 @@ export async function getInitialStaffChatData(
     role: isAdmin ? "admin" : "trainer",
   }));
 
-  return { channels: summaries, coworkers, chatRetentionDays };
+  return { channels: summaries, coworkers };
 }

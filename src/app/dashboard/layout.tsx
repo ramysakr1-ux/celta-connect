@@ -76,12 +76,7 @@ export default async function DashboardLayout({
       <main className="container w-full flex-1 py-8">{children}</main>
 
       {profile && staffChat ? (
-        <StaffChatDrawer
-          profileId={profile.id}
-          initialChannels={staffChat.channels}
-          coworkers={staffChat.coworkers}
-          retentionDays={staffChat.chatRetentionDays}
-        />
+        <StaffChatDrawer profileId={profile.id} initialChannels={staffChat.channels} coworkers={staffChat.coworkers} />
       ) : null}
       {profile && adminChatRooms ? <AdminChatBar profileId={profile.id} rooms={adminChatRooms} /> : null}
     </div>

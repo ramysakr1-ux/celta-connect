@@ -50,19 +50,11 @@ export function StaffChatDrawer({
   readOnly = false,
   staticMessages,
   quietHoursNote,
-  retentionDays = 1,
   raiseForMobileNav = false,
 }: {
   profileId: string;
   initialChannels: ChannelSummary[];
   coworkers: Coworker[];
-  // "No longer hardcoded to 'resets nightly'... applies identically to
-  // trainer and trainee chat." Nightly (1, the default) still gets the
-  // live midnight countdown; anything longer has no single shared clear
-  // moment to count down to (each message ages out N days after IT was
-  // sent, not at a shared boundary), so it gets static "resets on the
-  // centre's schedule" copy instead.
-  retentionDays?: number;
   // Used when a staff member is previewing a trainee's view (see
   // portfolio/[traineeId]/preview-chrome.tsx): shows the TRAINEE's own
   // channels/coworkers (not the staff member's) so the preview is
@@ -102,6 +94,11 @@ export function StaffChatDrawer({
   const selected = channels.find((c) => c.id === selectedId) ?? null;
   const groupChannel = channels.find((c) => c.type !== "dm") ?? null;
   const nameById = new Map(coworkers.map((c) => [c.id, c.full_name]));
+  // Retention is per-channel now (its own course's setting, migration
+  // 0154), not one number for the whole drawer -- "the one unacceptable
+  // outcome is a bar promising a midnight clear on a centre [course] that
+  // retains," so this must track whichever channel is actually open.
+  const retentionDays = selected?.retentionDays ?? 1;
 
   useEffect(() => {
     threadOpenRef.current = threadOpen;
@@ -131,7 +128,10 @@ export function StaffChatDrawer({
   // Reset meter -- local midnight, same boundary as staff-chat.ts's
   // deleteStaleStaffMessages, so the countdown never lies about when
   // messages actually clear. Only meaningful for the Nightly (1-day)
-  // default -- see the retentionDays prop comment above.
+  // default -- anything longer has no single shared clear moment to count
+  // down to (each message ages out N days after IT was sent, not at a
+  // shared boundary), so it gets static "resets on the course's schedule"
+  // copy instead.
   useEffect(() => {
     if (retentionDays !== 1) return;
     const update = () => setMsLeft(msUntilLocalMidnight());
@@ -176,7 +176,9 @@ export function StaffChatDrawer({
     setChannels((prev) =>
       prev.some((c) => c.id === channelId)
         ? prev
-        : [...prev, { id: channelId, type: "dm", name: coworker.full_name }]
+        // A DM has no course_id -- always the fixed 1-day default, same
+        // as every other centre-wide channel.
+        : [...prev, { id: channelId, type: "dm", name: coworker.full_name, retentionDays: 1 }]
     );
     setSelectedId(channelId);
   }
@@ -344,7 +346,7 @@ export function StaffChatDrawer({
               }}
               placeholder={
                 selected
-                  ? `Message ${selected.name} -- ${retentionDays === 1 ? "clears at midnight" : "resets on the centre's schedule"}`
+                  ? `Message ${selected.name} -- ${retentionDays === 1 ? "clears at midnight" : "resets on the course's schedule"}`
                   : "Pick who to message"
               }
               disabled={!selected}
@@ -355,7 +357,7 @@ export function StaffChatDrawer({
           <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
             <span className="size-[5px] shrink-0 rounded-full bg-gold" aria-hidden="true" />
             <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted">
-              {retentionDays === 1 ? formatCountdown(msLeft) : "Resets on the centre's schedule"}
+              {retentionDays === 1 ? formatCountdown(msLeft) : "Resets on the course's schedule"}
             </span>
           </div>
 

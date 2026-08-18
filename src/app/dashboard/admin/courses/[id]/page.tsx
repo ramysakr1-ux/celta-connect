@@ -20,6 +20,7 @@ import { linkRestartTransfer } from "@/app/dashboard/admin/courses/[id]/restart-
 import { linkDeferralTransfer } from "@/app/dashboard/admin/courses/[id]/deferral-actions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { DeliveryModeCard } from "@/app/dashboard/admin/courses/[id]/delivery-mode-card";
+import { ChatRetentionForm } from "@/app/dashboard/admin/courses/[id]/chat-retention-form";
 import { CloseOutCard } from "@/app/dashboard/admin/courses/[id]/close-out-card";
 import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rules";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
@@ -324,6 +325,18 @@ export default async function CourseRosterPage({
             Save
           </button>
         </form>
+      </div>
+
+      <div className="card flex items-center justify-between gap-4 p-6">
+        <div>
+          <h2 className="font-serif text-lg text-ink">Chat retention</h2>
+          <p className="mt-1 text-sm text-muted">
+            A rolling window, not a fixed reset time -- a message is deleted once it&apos;s this many days old.
+            Applies to this course&apos;s own channels (trainer and trainee alike); a centre-wide channel always
+            clears nightly.
+          </p>
+        </div>
+        <ChatRetentionForm courseId={course.id} chatRetentionDays={course.chat_retention_days ?? 1} />
       </div>
 
       {(pendingRestarts ?? []).length > 0 ? (

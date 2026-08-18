@@ -25,16 +25,11 @@ export async function updateCenterProfile(
   const centerNumber = (formData.get("center_number") as string | null)?.trim();
   const isUkCentre = formData.get("is_uk_centre") === "on";
   const admissionsEmail = (formData.get("admissions_email") as string | null)?.trim() || null;
-  const chatRetentionRaw = formData.get("chat_retention_days");
-  const chatRetentionDays = typeof chatRetentionRaw === "string" && chatRetentionRaw ? Number(chatRetentionRaw) : 1;
   const volunteerThresholdRaw = formData.get("volunteer_certificate_hours_threshold");
   const volunteerCertificateHoursThreshold =
     typeof volunteerThresholdRaw === "string" && volunteerThresholdRaw ? Number(volunteerThresholdRaw) : 160;
   if (!name || !centerNumber) {
     return { error: "Enter both the centre name and centre number." };
-  }
-  if (!Number.isInteger(chatRetentionDays) || chatRetentionDays < 1) {
-    return { error: "Chat retention must be at least 1 day." };
   }
   if (!Number.isInteger(volunteerCertificateHoursThreshold) || volunteerCertificateHoursThreshold < 1) {
     return { error: "The volunteer certificate threshold must be at least 1 hour." };
@@ -48,7 +43,6 @@ export async function updateCenterProfile(
       center_number: centerNumber,
       is_uk_centre: isUkCentre,
       admissions_email: admissionsEmail,
-      chat_retention_days: chatRetentionDays,
       volunteer_certificate_hours_threshold: volunteerCertificateHoursThreshold,
     })
     .eq("id", profile.center_id);

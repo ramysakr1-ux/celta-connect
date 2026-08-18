@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { updateCenterProfile, type FormState } from "@/app/dashboard/admin/settings/actions";
 
 const initialState: FormState = { error: null };
@@ -10,23 +10,16 @@ export function CenterProfileForm({
   centerNumber,
   isUkCentre,
   admissionsEmail,
-  chatRetentionDays,
   volunteerCertificateHoursThreshold,
 }: {
   name: string;
   centerNumber: string;
   isUkCentre: boolean;
   admissionsEmail: string | null;
-  chatRetentionDays: number;
   volunteerCertificateHoursThreshold: number;
 }) {
   const [state, action, pending] = useActionState(updateCenterProfile, initialState);
   const isPlaceholder = centerNumber.startsWith("PENDING-");
-
-  const initialPreset = chatRetentionDays === 1 ? "nightly" : chatRetentionDays === 7 ? "weekly" : "custom";
-  const [retentionPreset, setRetentionPreset] = useState<"nightly" | "weekly" | "custom">(initialPreset);
-  const [customDays, setCustomDays] = useState(chatRetentionDays);
-  const effectiveDays = retentionPreset === "nightly" ? 1 : retentionPreset === "weekly" ? 7 : customDays;
 
   return (
     <form action={action} className="flex flex-col gap-4">
@@ -94,36 +87,6 @@ export function CenterProfileForm({
         <p className="text-xs text-muted">
           Where replies to applicant emails (offers, rejections) land. Every email is sent from your
           centre&apos;s name, never Connect&apos;s.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="chat_retention_preset" className="text-sm text-muted">
-          Chat retention
-        </label>
-        <select
-          id="chat_retention_preset"
-          value={retentionPreset}
-          onChange={(e) => setRetentionPreset(e.target.value as "nightly" | "weekly" | "custom")}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
-        >
-          <option value="nightly">Nightly (1 day)</option>
-          <option value="weekly">Weekly (7 days)</option>
-          <option value="custom">Custom</option>
-        </select>
-        {retentionPreset === "custom" ? (
-          <input
-            type="number"
-            min={1}
-            value={customDays}
-            onChange={(e) => setCustomDays(Math.max(1, Number(e.target.value) || 1))}
-            className="w-24 rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
-          />
-        ) : null}
-        <input type="hidden" name="chat_retention_days" value={effectiveDays} />
-        <p className="text-xs text-muted">
-          A rolling window, not a fixed reset time -- a message is deleted once it&apos;s this many days old.
-          Applies to every chat channel (trainer and trainee alike), never set separately per role.
         </p>
       </div>
 
