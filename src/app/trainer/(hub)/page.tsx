@@ -11,6 +11,7 @@ import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { DesignerCredit } from "@/components/designer-credit";
 import { getFeedbackAssistState } from "@/lib/feedback-assist";
 import { FeedbackAssistCard } from "@/app/trainer/(hub)/feedback-assist-card";
+import { findMaterialsOverlaps } from "@/lib/materials-overlap";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -90,6 +91,10 @@ export default async function TodayPage() {
           .is("reviewed_at", null)
       : { data: [] };
   const assignmentsWithFindings = new Set((unreviewedFindings ?? []).map((f) => f.assignment_id)).size;
+
+  // Handbook 8.2: "raise as a note to the tutor, never an accusation" --
+  // same bare-count, no-names treatment as the plagiarism line above.
+  const materialsOverlapCount = new Set((await findMaterialsOverlaps(supabase, courseId)).map((f) => f.assignmentId)).size;
 
   // "Needs you" -- capped at 3 total, this priority order.
   type Alert = { title: string; meta: string; href: string; destructive?: boolean };
@@ -437,6 +442,14 @@ export default async function TodayPage() {
               className="border-t border-border-faint pt-2.5 text-xs text-muted hover:text-primary"
             >
               {assignmentsWithFindings} assignment{assignmentsWithFindings === 1 ? "" : "s"} have scanner findings
+            </Link>
+          ) : null}
+          {materialsOverlapCount > 0 ? (
+            <Link
+              href="/trainer/roster"
+              className="border-t border-border-faint pt-2.5 text-xs text-muted hover:text-primary"
+            >
+              {materialsOverlapCount} assignment{materialsOverlapCount === 1 ? "" : "s"} share wording with a TP&apos;s materials
             </Link>
           ) : null}
         </div>
