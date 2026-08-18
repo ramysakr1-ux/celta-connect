@@ -296,14 +296,24 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   { type: "tp", title: "TP5 -- Half A", position: pos(10), time: "10:00", tag: "individual", linkedTpNumber: 5 },
   { type: "milestone", title: "Stage 2 tutorials begin", position: pos(10), time: "14:30", tag: "individual" },
   {
-    // Ramy, 2026-08-18 correction: no "3c" -- speaking and writing are one
-    // combined criterion, 3b, per the certified CELTA 5 (Appendix 1):
-    // "helping learners to produce oral and written language." 3b is
-    // FIRST introduced in Text-based teaching (day 4 above), which is
-    // where it gates live from; these are the two dedicated reinforcing
-    // passes named in the mapping, Week 3+. No exact day was given for
-    // either -- placed here, alongside the existing new-level TP5 cluster,
-    // as a reasonable estimate that doesn't change the gate either way.
+    // Ramy, 2026-08-18: no "3c" on the certified CELTA 5 -- speaking and
+    // writing are one combined Cambridge criterion, 3b ("helping learners
+    // to produce oral and written language", Appendix 1), confirmed again
+    // 2026-08-19 by reading the actual PDF text directly. That stays true
+    // everywhere the OFFICIAL criteria set is used -- celta5_matrix,
+    // CRITERIA_LABELS, CRITERIA_ENTERS_AT_TP, the booklet PDF -- none of
+    // that has a 3c and none of it should.
+    //
+    // "3c" below is session-mapping-only, per Ramy 2026-08-19: this array
+    // is consumed by criteriaForTpDate() for peer-observation's "this
+    // week's focus criterion", a separate feature from official grading,
+    // so distinguishing which of the two reinforcing passes a session is
+    // for (oral vs written) is useful here even though Cambridge doesn't
+    // split it. 3b is FIRST introduced in Text-based teaching (day 4
+    // above), which is where the OFFICIAL 3b still gates live from --
+    // untouched. No exact day was given for either reinforcing pass --
+    // placed here, alongside the existing new-level TP5 cluster, as a
+    // reasonable estimate that doesn't change the gate either way.
     type: "input_session",
     title: "Teaching speaking",
     position: pos(10),
@@ -318,7 +328,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     position: pos(11),
     time: "14:30",
     tag: "whole_group",
-    inputSessionCriteria: ["3b"],
+    inputSessionCriteria: ["3c"],
   },
   {
     type: "assignment_due",
@@ -714,12 +724,15 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     linkedAssignmentType: "LfC",
   },
   {
+    // "3c" is session-mapping-only (Ramy, 2026-08-19) -- see the matching
+    // comment on Teaching speaking above. Official grading (celta5_matrix,
+    // CRITERIA_LABELS, CRITERIA_ENTERS_AT_TP) has no 3c and stays 3b-only.
     type: "input_session",
     title: "Productive skills -- writing",
     position: partTimePos(19),
     time: "13:45",
     tag: "whole_group",
-    inputSessionCriteria: ["3b"],
+    inputSessionCriteria: ["3c"],
   },
 
   { type: "milestone", title: "Resubmission clinic", position: partTimePos(20), time: "10:00", tag: "whole_group" },
