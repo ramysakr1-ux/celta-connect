@@ -22,6 +22,7 @@ const TABS = [
   // /audio and /coursebooks keep working as direct routes (linked from the
   // hub's own cards) -- only the top-nav tab itself moved.
   { href: "/resource-hub", label: "Resource hub", alsoMatch: ["/audio"] },
+  { href: "/trainer-in-training", label: "Trainer-in-Training" },
 ] as const;
 
 // Grades Report is assessor-facing material, not an operational trainer

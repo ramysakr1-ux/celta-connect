@@ -1716,6 +1716,163 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["course_tutors"]["Row"]>;
         Relationships: [];
       };
+      tit_records: {
+        Row: {
+          id: string;
+          course_tutors_id: string;
+          scheme: "internal" | "external";
+          modes_trained: string[];
+          reflective_essay: string | null;
+          reflective_essay_submitted_at: string | null;
+          portfolio_submitted_at: string | null;
+          outcome: "confirmed_act" | "extended" | "not_verified" | null;
+          outcome_decided_at: string | null;
+          outcome_note: string | null;
+          assessor_day_booked_at: string | null;
+          assessor_day_completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tit_records"]["Row"]> & {
+          course_tutors_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tit_records"]["Row"]>;
+        Relationships: [];
+      };
+      tit_pre_course_tasks: {
+        Row: {
+          id: string;
+          tit_record_id: string;
+          task_key: string;
+          completed_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tit_pre_course_tasks"]["Row"]> & {
+          tit_record_id: string;
+          task_key: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tit_pre_course_tasks"]["Row"]>;
+        Relationships: [];
+      };
+      tit_observed_sessions: {
+        Row: {
+          id: string;
+          tit_record_id: string;
+          timetable_event_id: string;
+          asynchronous: boolean;
+          observed_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tit_observed_sessions"]["Row"]> & {
+          tit_record_id: string;
+          timetable_event_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tit_observed_sessions"]["Row"]>;
+        Relationships: [];
+      };
+      tit_task12_stage1: {
+        Row: {
+          id: string;
+          tit_record_id: string;
+          timetable_event_id: string | null;
+          handout_description: string;
+          filed_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tit_task12_stage1"]["Row"]> & {
+          tit_record_id: string;
+          handout_description: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tit_task12_stage1"]["Row"]>;
+        Relationships: [];
+      };
+      tit_delivered_sessions: {
+        Row: {
+          id: string;
+          tit_record_id: string;
+          title: string;
+          delivered_at: string;
+          self_evaluation: string | null;
+          self_evaluation_at: string | null;
+          supervisor_feedback: string | null;
+          supervisor_feedback_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tit_delivered_sessions"]["Row"]> & {
+          tit_record_id: string;
+          title: string;
+          delivered_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tit_delivered_sessions"]["Row"]>;
+        Relationships: [];
+      };
+      tit_feedback_sessions: {
+        Row: {
+          id: string;
+          tit_record_id: string;
+          trainee_id: string | null;
+          tp_number: number | null;
+          conducted_at: string;
+          observed_by_supervisor: boolean;
+          private_draft: string | null;
+          supervisor_discussion_notes: string | null;
+          finalized_at: string | null;
+          feedback_on_feedback_notes: string | null;
+          feedback_on_feedback_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tit_feedback_sessions"]["Row"]> & {
+          tit_record_id: string;
+          conducted_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tit_feedback_sessions"]["Row"]>;
+        Relationships: [];
+      };
+      tit_candidates_followed: {
+        Row: {
+          id: string;
+          tit_record_id: string;
+          trainee_id: string;
+          notes_beginning: string | null;
+          notes_middle: string | null;
+          notes_end: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tit_candidates_followed"]["Row"]> & {
+          tit_record_id: string;
+          trainee_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tit_candidates_followed"]["Row"]>;
+        Relationships: [];
+      };
+      tit_shadow_marking: {
+        Row: {
+          id: string;
+          tit_record_id: string;
+          assignment_id: string | null;
+          tit_grade: string | null;
+          supervisor_grade: string | null;
+          agreed: boolean | null;
+          marked_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tit_shadow_marking"]["Row"]> & {
+          tit_record_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tit_shadow_marking"]["Row"]>;
+        Relationships: [];
+      };
+      tit_task_record_items: {
+        Row: {
+          id: string;
+          tit_record_id: string;
+          item_number: number;
+          label: string;
+          tit_signed_at: string | null;
+          supervisor_signed_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tit_task_record_items"]["Row"]> & {
+          tit_record_id: string;
+          item_number: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["tit_task_record_items"]["Row"]>;
+        Relationships: [];
+      };
       course_subgroup_members: {
         Row: {
           id: string;
