@@ -9,7 +9,13 @@ type Observation = Database["public"]["Tables"]["observations"]["Row"];
 
 const initialState: ObservationFormState = { error: null };
 
-export function ObservationForm({ observation }: { observation?: Observation }) {
+export function ObservationForm({
+  observation,
+  deliveryMode,
+}: {
+  observation?: Observation;
+  deliveryMode?: "f2f" | "online" | "mixed";
+}) {
   const [state, action, pending] = useActionState(saveObservation, initialState);
 
   return (
@@ -77,6 +83,24 @@ export function ObservationForm({ observation }: { observation?: Observation }) 
         <input type="checkbox" name="filmed" defaultChecked={observation?.filmed} />
         Filmed lesson
       </label>
+
+      {deliveryMode === "mixed" ? (
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm text-muted">Mode observed</label>
+          <select
+            name="mode"
+            required
+            defaultValue={observation?.mode ?? ""}
+            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          >
+            <option value="" disabled>
+              Select a mode
+            </option>
+            <option value="f2f">Face-to-face</option>
+            <option value="online">Online</option>
+          </select>
+        </div>
+      ) : null}
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 

@@ -126,7 +126,7 @@ export default async function PortfolioCelta5Page({
       supabase.from("plan_assignments").select("tp_number, tp_point_id, taught_at").eq("trainee_id", traineeId),
       supabase.from("assignments").select("assignment_type, first_status, resubmission_status").eq("trainee_id", traineeId),
       viewer?.course_id
-        ? supabase.from("courses").select("name, start_date, end_date").eq("id", viewer.course_id).maybeSingle()
+        ? supabase.from("courses").select("name, start_date, end_date, delivery_mode").eq("id", viewer.course_id).maybeSingle()
         : Promise.resolve({ data: null }),
       viewer?.center_id
         ? supabase.from("centers").select("name, center_number, is_uk_centre").eq("id", viewer.center_id).maybeSingle()
@@ -465,7 +465,7 @@ export default async function PortfolioCelta5Page({
                         <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{submission.response}</p>
                       </div>
                     ) : (
-                      <ObservationTaskForm taskId={task.id} />
+                      <ObservationTaskForm taskId={task.id} deliveryMode={course?.delivery_mode ?? undefined} />
                     )}
                   </div>
                 );
@@ -477,11 +477,30 @@ export default async function PortfolioCelta5Page({
         <div>
           <h3 className="font-serif text-lg text-ink">Observations of experienced teachers</h3>
           <p className="mt-1 text-sm text-muted">Log the 6 hours you spend observing experienced teachers (up to 3 filmed).</p>
+          {course?.delivery_mode === "mixed"
+            ? (() => {
+                const hasF2f = (observations ?? []).some((o) => o.mode === "f2f");
+                const hasOnline = (observations ?? []).some((o) => o.mode === "online");
+                const covered = hasF2f && hasOnline;
+                return (
+                  <p className={`mt-1 text-sm ${covered ? "text-primary" : "text-gold"}`}>
+                    Mixed-mode course: your observations should cover both face-to-face and online teaching.{" "}
+                    {covered
+                      ? "Both modes logged."
+                      : !hasF2f && !hasOnline
+                        ? "Neither mode logged yet."
+                        : !hasF2f
+                          ? "Face-to-face not logged yet."
+                          : "Online not logged yet."}
+                  </p>
+                );
+              })()
+            : null}
           <div className="mt-3 flex flex-col gap-3">
             {observations?.map((o) => (
-              <ObservationForm key={`${o.id}-${o.updated_at}`} observation={o} />
+              <ObservationForm key={`${o.id}-${o.updated_at}`} observation={o} deliveryMode={course?.delivery_mode ?? undefined} />
             ))}
-            <ObservationForm />
+            <ObservationForm deliveryMode={course?.delivery_mode ?? undefined} />
           </div>
         </div>
       </div>

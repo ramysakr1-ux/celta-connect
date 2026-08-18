@@ -104,6 +104,7 @@ export async function saveObservation(
       : null,
     lesson_focus: (formData.get("lesson_focus") as string) || null,
     filmed: formData.get("filmed") === "on",
+    mode: (formData.get("mode") as "f2f" | "online" | null) || null,
   };
 
   const { error } =
@@ -147,6 +148,7 @@ export async function submitObservationTask(
   const level = (formData.get("level") as string) || null;
   const learnersPresent = formData.get("learners_present") ? Number(formData.get("learners_present")) : null;
   const filmed = formData.get("filmed") === "on";
+  const mode = (formData.get("mode") as "f2f" | "online" | null) || null;
 
   const supabase = await createClient();
 
@@ -160,6 +162,7 @@ export async function submitObservationTask(
       level,
       learners_present: learnersPresent,
       filmed,
+      mode,
     })
     .select("id")
     .single();

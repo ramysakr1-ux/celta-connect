@@ -693,6 +693,9 @@ export interface Database {
           learners_present: number | null;
           lesson_focus: string | null;
           filmed: boolean;
+          // migration 0126 -- only meaningful (and only asked) on a
+          // mixed-mode course; null on f2f/online-only courses.
+          mode: "f2f" | "online" | null;
           created_at: string;
           updated_at: string;
         };

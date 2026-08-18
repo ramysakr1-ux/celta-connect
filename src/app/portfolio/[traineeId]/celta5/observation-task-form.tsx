@@ -6,7 +6,13 @@ import { CEFR_LEVELS } from "@/lib/levels";
 
 const initialState: ObservationTaskFormState = { error: null };
 
-export function ObservationTaskForm({ taskId }: { taskId: string }) {
+export function ObservationTaskForm({
+  taskId,
+  deliveryMode,
+}: {
+  taskId: string;
+  deliveryMode?: "f2f" | "online" | "mixed";
+}) {
   const [state, action, pending] = useActionState(submitObservationTask, initialState);
 
   return (
@@ -58,6 +64,24 @@ export function ObservationTaskForm({ taskId }: { taskId: string }) {
         <input type="checkbox" name="filmed" />
         Filmed lesson
       </label>
+
+      {deliveryMode === "mixed" ? (
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm text-muted">Mode observed</label>
+          <select
+            name="mode"
+            required
+            defaultValue=""
+            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          >
+            <option value="" disabled>
+              Select a mode
+            </option>
+            <option value="f2f">Face-to-face</option>
+            <option value="online">Online</option>
+          </select>
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Your response</label>
