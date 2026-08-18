@@ -47,7 +47,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       supabase.from("interview_slots").select("*").eq("booked_applicant_id", id).maybeSingle(),
       supabase
         .from("interview_slots")
-        .select("id, slot_date, slot_time, mode, panel")
+        .select("id, slot_date, slot_time, mode, panel, interviewer_id")
         .eq("center_id", staff.center_id)
         .eq("intake_course_id", applicant.intake_course_id)
         .is("booked_applicant_id", null)
@@ -140,6 +140,30 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
   const { data: referredByProfile } = applicant.referred_by
     ? await referralAdmin.from("profiles").select("full_name").eq("id", applicant.referred_by).maybeSingle()
     : { data: null };
+
+  // Interview Availability.dc.html: "the applicant sees one time, not two
+  // names." Grouped by (date, time, mode) for the default auto-assign
+  // picker; the raw per-slot list stays available underneath as a named
+  // override for a staff member who wants to choose the interviewer.
+  const interviewerIds = [...new Set((openSlots ?? []).map((s) => s.interviewer_id))];
+  const { data: interviewerProfiles } = interviewerIds.length
+    ? await supabase.from("profiles").select("id, full_name").in("id", interviewerIds)
+    : { data: [] };
+  const interviewerNameById = new Map((interviewerProfiles ?? []).map((p) => [p.id, p.full_name]));
+
+  const groupedSlotMap = new Map<string, { slotDate: string; slotTime: string; mode: string; panel: boolean; count: number }>();
+  for (const s of openSlots ?? []) {
+    const key = `${applicant.intake_course_id}::${s.slot_date}::${s.slot_time}`;
+    const existing = groupedSlotMap.get(key);
+    groupedSlotMap.set(key, {
+      slotDate: s.slot_date,
+      slotTime: s.slot_time,
+      mode: s.mode,
+      panel: s.panel,
+      count: (existing?.count ?? 0) + 1,
+    });
+  }
+  const groupedSlots = [...groupedSlotMap.entries()].sort(([, a], [, b]) => (a.slotDate + a.slotTime).localeCompare(b.slotDate + b.slotTime));
 
   const canDecide = canDecideAdmissions(staff);
   const isRejected = applicant.stage === "rejected_before_interview" || applicant.stage === "rejected_after_interview";
@@ -280,25 +304,46 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             {bookedSlot.panel ? ", panel" : ""})
           </p>
         ) : (openSlots ?? []).length > 0 ? (
-          <form action={bookInterviewSlot} className="flex flex-wrap items-end gap-3">
-            <input type="hidden" name="applicant_id" value={applicant.id} />
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="slot_id" className="text-xs text-muted">
-                Book a slot
-              </label>
-              <select id="slot_id" name="slot_id" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
-                {(openSlots ?? []).map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.slot_date} {s.slot_time} ({s.mode === "online" ? "Online" : "Face to face"}
-                    {s.panel ? ", panel" : ""})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
-              Book
-            </button>
-          </form>
+          <>
+            <form action={bookInterviewSlot} className="flex flex-wrap items-end gap-3">
+              <input type="hidden" name="applicant_id" value={applicant.id} />
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="time_key" className="text-xs text-muted">
+                  Book a time -- assigned to whoever has interviewed least this intake
+                </label>
+                <select id="time_key" name="time_key" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+                  {groupedSlots.map(([key, g]) => (
+                    <option key={key} value={key}>
+                      {g.slotDate} {g.slotTime.slice(0, 5)} ({g.mode === "online" ? "Online" : "Face to face"}
+                      {g.panel ? ", panel" : ""}
+                      {g.count > 1 ? ` -- ${g.count} interviewers free` : ""})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+                Book
+              </button>
+            </form>
+            <details className="text-xs text-muted">
+              <summary className="cursor-pointer font-semibold text-primary hover:underline">Or choose a specific interviewer instead</summary>
+              <form action={bookInterviewSlot} className="mt-2 flex flex-wrap items-end gap-3">
+                <input type="hidden" name="applicant_id" value={applicant.id} />
+                <select name="slot_id" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+                  {(openSlots ?? []).map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.slot_date} {s.slot_time.slice(0, 5)} -- {interviewerNameById.get(s.interviewer_id) ?? "Unknown"} (
+                      {s.mode === "online" ? "Online" : "Face to face"}
+                      {s.panel ? ", panel" : ""})
+                    </option>
+                  ))}
+                </select>
+                <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary">
+                  Book with this interviewer
+                </button>
+              </form>
+            </details>
+          </>
         ) : (
           <p className="text-sm text-muted">
             No open slots for this intake yet.{" "}

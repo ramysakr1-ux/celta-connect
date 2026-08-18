@@ -202,6 +202,13 @@ export interface Database {
           // migration 0146 -- was a plain 160 constant ("the spec's own
           // illustrative figure... no centre setting for this yet").
           volunteer_certificate_hours_threshold: number;
+          // migration 0149 -- interview slot generation rule. Per-interviewer
+          // WHICH days/hours lives on interview_availability_patterns; these
+          // four are the shared "how long, how far ahead" numbers.
+          interview_slot_minutes: number;
+          interview_gap_minutes: number;
+          interview_weeks_ahead: number;
+          interview_cutoff_hours: number;
           // migration 0114 -- working days by which the centre promises to
           // respond to an application. The acknowledgement email turns this
           // into a real date.
@@ -567,6 +574,51 @@ export interface Database {
           mode: "online" | "face_to_face";
         };
         Update: Partial<Database["public"]["Tables"]["interview_slots"]["Row"]>;
+        Relationships: [];
+      };
+      interview_availability_patterns: {
+        Row: {
+          id: string;
+          center_id: string;
+          interviewer_id: string;
+          weekday: number;
+          start_time: string;
+          end_time: string;
+          mode: "online" | "face_to_face";
+          active: boolean;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["interview_availability_patterns"]["Row"]> & {
+          center_id: string;
+          interviewer_id: string;
+          weekday: number;
+          start_time: string;
+          end_time: string;
+          mode: "online" | "face_to_face";
+        };
+        Update: Partial<Database["public"]["Tables"]["interview_availability_patterns"]["Row"]>;
+        Relationships: [];
+      };
+      interview_blocks: {
+        Row: {
+          id: string;
+          center_id: string;
+          interviewer_id: string | null;
+          start_date: string;
+          end_date: string;
+          start_time: string | null;
+          end_time: string | null;
+          reason: string | null;
+          blocked_by: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["interview_blocks"]["Row"]> & {
+          center_id: string;
+          start_date: string;
+          end_date: string;
+          blocked_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["interview_blocks"]["Row"]>;
         Relationships: [];
       };
       interview_records: {

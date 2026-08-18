@@ -3,6 +3,7 @@ import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
 import { createInterviewSlot } from "@/app/dashboard/admissions/actions";
 import { OfferNextPlaceForm } from "@/app/dashboard/admissions/offer-next-place-form";
+import { InterviewAvailabilityPanel, type PatternRow, type BlockRow } from "@/app/dashboard/admissions/interview-availability-panel";
 
 const STAGE_LABEL: Record<string, string> = {
   submitted: "Submitted",
@@ -25,27 +26,62 @@ export default async function AdmissionsPage() {
   const staff = await requireAdmissionsHandler();
   const supabase = await createClient();
 
-  const [{ data: applicants }, { data: intakes }, { data: openSlots }] = await Promise.all([
-    supabase
-      .from("applicants")
-      .select("id, full_name, email, stage, intake_course_id, created_at, deposit_amount, deposit_paid_at")
-      .eq("center_id", staff.center_id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("courses")
-      .select("id, name")
-      .eq("center_id", staff.center_id)
-      .eq("accepting_applications", true)
-      .order("start_date"),
-    supabase
-      .from("interview_slots")
-      .select("id, intake_course_id, slot_date, slot_time, mode, panel, booked_applicant_id")
-      .eq("center_id", staff.center_id)
-      .is("booked_applicant_id", null)
-      .order("slot_date"),
-  ]);
+  const [{ data: applicants }, { data: intakes }, { data: openSlots }, { data: interviewStaff }, { data: patternRows }, { data: blockRows }, { data: center }] =
+    await Promise.all([
+      supabase
+        .from("applicants")
+        .select("id, full_name, email, stage, intake_course_id, created_at, deposit_amount, deposit_paid_at")
+        .eq("center_id", staff.center_id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("courses")
+        .select("id, name")
+        .eq("center_id", staff.center_id)
+        .eq("accepting_applications", true)
+        .order("start_date"),
+      supabase
+        .from("interview_slots")
+        .select("id, intake_course_id, slot_date, slot_time, mode, panel, booked_applicant_id")
+        .eq("center_id", staff.center_id)
+        .is("booked_applicant_id", null)
+        .order("slot_date"),
+      supabase.from("profiles").select("id, full_name").eq("center_id", staff.center_id).in("role", ["admin", "trainer"]).order("full_name"),
+      supabase.from("interview_availability_patterns").select("*").eq("center_id", staff.center_id).eq("active", true),
+      supabase.from("interview_blocks").select("*").eq("center_id", staff.center_id).order("start_date"),
+      supabase
+        .from("centers")
+        .select("interview_slot_minutes, interview_gap_minutes, interview_weeks_ahead, interview_cutoff_hours")
+        .eq("id", staff.center_id)
+        .maybeSingle(),
+    ]);
 
   const intakeNameById = new Map((intakes ?? []).map((i) => [i.id, i.name]));
+  const staffNameById = new Map((interviewStaff ?? []).map((s) => [s.id, s.full_name]));
+  const interviewerOptions = (interviewStaff ?? []).map((s) => ({ id: s.id, name: s.full_name }));
+  const patterns: PatternRow[] = (patternRows ?? []).map((p) => ({
+    id: p.id,
+    interviewerId: p.interviewer_id,
+    interviewerName: staffNameById.get(p.interviewer_id) ?? "Unknown",
+    weekday: p.weekday,
+    startTime: p.start_time,
+    endTime: p.end_time,
+    mode: p.mode,
+  }));
+  const blocks: BlockRow[] = (blockRows ?? []).map((b) => ({
+    id: b.id,
+    interviewerName: b.interviewer_id ? (staffNameById.get(b.interviewer_id) ?? "Unknown") : null,
+    startDate: b.start_date,
+    endDate: b.end_date,
+    startTime: b.start_time,
+    endTime: b.end_time,
+    reason: b.reason,
+  }));
+  const generationSettings = {
+    slotMinutes: center?.interview_slot_minutes ?? 45,
+    gapMinutes: center?.interview_gap_minutes ?? 10,
+    weeksAhead: center?.interview_weeks_ahead ?? 3,
+    cutoffHours: center?.interview_cutoff_hours ?? 24,
+  };
 
   // Waiting-list counts per intake -- fetched independent of the
   // "accepting_applications" intakes above, since a course can still have
@@ -132,6 +168,14 @@ export default async function AdmissionsPage() {
         </table>
       </div>
 
+      <div className="card p-6">
+        <h2 className="font-serif text-lg text-ink">Interview availability</h2>
+        <p className="mt-1 text-sm text-muted">Slots are generated from a rule, not typed in every week.</p>
+        <div className="mt-4">
+          <InterviewAvailabilityPanel interviewers={interviewerOptions} patterns={patterns} blocks={blocks} settings={generationSettings} />
+        </div>
+      </div>
+
       <div className="card flex flex-col gap-4 p-6">
         <h2 className="font-serif text-lg text-ink">Open interview slots</h2>
         {(openSlots ?? []).length > 0 ? (
@@ -198,7 +242,7 @@ export default async function AdmissionsPage() {
         <div className="card flex flex-col gap-4 p-6">
           <h2 className="font-serif text-lg text-ink">Waiting lists</h2>
           <p className="text-sm text-muted">
-            When a place frees up (a withdrawal, deferral, or a lapsed offer), offer it to whoever's next -- the app
+            When a place frees up (a withdrawal, deferral, or a lapsed offer), offer it to whoever&apos;s next -- the app
             picks who, not you.
           </p>
           <ul className="flex flex-col gap-3">

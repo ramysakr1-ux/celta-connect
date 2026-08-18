@@ -14,6 +14,7 @@ import {
   waitingListEmailHtml,
 } from "@/lib/admissions-email";
 import { offerNextWaitingListPlace } from "@/lib/admissions-waiting-list";
+import { regenerateSlotsForInterviewer } from "@/lib/interview-availability";
 import type { Database } from "@/lib/supabase/types";
 
 /** "You are second on the waiting list" -- the design spells the rank out. */
@@ -169,13 +170,56 @@ export async function createInterviewSlot(formData: FormData): Promise<void> {
   revalidatePath("/dashboard/admissions");
 }
 
+// Interview Availability.dc.html: "the applicant sees one time, not two
+// names. The app gives it to whoever has interviewed least this intake,
+// and an administrator can override to a named interviewer." Two paths
+// into the same action: `slot_id` books that exact row (the override --
+// staff named a specific interviewer), `time_key` books a time and lets
+// the server resolve which of the interviewers free at that moment has
+// the fewest bookings on this intake so far.
 export async function bookInterviewSlot(formData: FormData): Promise<void> {
   const staff = await requireAdmissionsHandler();
   const applicantId = formData.get("applicant_id");
-  const slotId = formData.get("slot_id");
-  if (typeof applicantId !== "string" || typeof slotId !== "string" || !slotId) return;
+  const slotIdOverride = (formData.get("slot_id") as string | null) || null;
+  const timeKey = (formData.get("time_key") as string | null) || null;
+  if (typeof applicantId !== "string" || (!slotIdOverride && !timeKey)) return;
 
   const supabase = await createClient();
+  let slotId = slotIdOverride;
+
+  if (!slotId && timeKey) {
+    const [intakeCourseId, slotDate, slotTime] = timeKey.split("::");
+    if (!intakeCourseId || !slotDate || !slotTime) return;
+
+    const { data: candidates } = await supabase
+      .from("interview_slots")
+      .select("id, interviewer_id")
+      .eq("center_id", staff.center_id)
+      .eq("intake_course_id", intakeCourseId)
+      .eq("slot_date", slotDate)
+      .eq("slot_time", slotTime)
+      .is("booked_applicant_id", null);
+    if (!candidates || candidates.length === 0) return;
+
+    const interviewerIds = [...new Set(candidates.map((c) => c.interviewer_id))];
+    const { data: bookedCounts } = await supabase
+      .from("interview_slots")
+      .select("interviewer_id")
+      .eq("intake_course_id", intakeCourseId)
+      .in("interviewer_id", interviewerIds)
+      .not("booked_applicant_id", "is", null);
+    const countByInterviewer = new Map<string, number>();
+    for (const id of interviewerIds) countByInterviewer.set(id, 0);
+    for (const row of bookedCounts ?? []) {
+      countByInterviewer.set(row.interviewer_id, (countByInterviewer.get(row.interviewer_id) ?? 0) + 1);
+    }
+    const leastLoaded = candidates
+      .slice()
+      .sort((a, b) => (countByInterviewer.get(a.interviewer_id) ?? 0) - (countByInterviewer.get(b.interviewer_id) ?? 0))[0];
+    slotId = leastLoaded.id;
+  }
+  if (!slotId) return;
+
   const { data: slot } = await supabase.from("interview_slots").select("id, center_id, booked_applicant_id").eq("id", slotId).maybeSingle();
   if (!slot || slot.center_id !== staff.center_id || slot.booked_applicant_id) return;
 
@@ -266,6 +310,165 @@ async function notifyInterviewBooked(input: { applicantId: string; slotId: strin
   } catch {
     // See above -- a notification failure never fails the booking.
   }
+}
+
+// ---- Interview availability: pattern, blocks, generation ----
+
+export interface RegenState {
+  error: string | null;
+  created?: number;
+}
+
+// "Each interviewer sets a weekly pattern once. The app produces bookable
+// slots from it." Adding a pattern window doesn't itself create slots --
+// regenerate (below) reads every active pattern and writes the actual
+// interview_slots rows, so the two stay explicit and separate.
+export async function addAvailabilityPattern(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  const interviewerId = (formData.get("interviewer_id") as string | null) || staff.id;
+  const weekday = formData.get("weekday");
+  const startTime = formData.get("start_time");
+  const endTime = formData.get("end_time");
+  const mode = formData.get("mode");
+  if (
+    typeof weekday !== "string" ||
+    typeof startTime !== "string" ||
+    typeof endTime !== "string" ||
+    typeof mode !== "string" ||
+    !["online", "face_to_face"].includes(mode) ||
+    !startTime ||
+    !endTime ||
+    startTime >= endTime
+  ) {
+    return;
+  }
+
+  const supabase = await createClient();
+  await supabase.from("interview_availability_patterns").insert({
+    center_id: staff.center_id,
+    interviewer_id: interviewerId,
+    weekday: Number(weekday),
+    start_time: startTime,
+    end_time: endTime,
+    mode: mode as "online" | "face_to_face",
+  });
+  revalidatePath("/dashboard/admissions");
+}
+
+export async function removeAvailabilityPattern(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  const id = formData.get("id");
+  if (typeof id !== "string") return;
+  const supabase = await createClient();
+  await supabase.from("interview_availability_patterns").delete().eq("id", id).eq("center_id", staff.center_id);
+  revalidatePath("/dashboard/admissions");
+}
+
+// "A single afternoon... a whole week... centre closures set once for
+// everybody." interviewer_id left blank means centre-wide. Blocking an
+// already-booked slot is refused below rather than silently orphaning an
+// applicant who is expecting to be there.
+export async function addInterviewBlock(_prevState: RegenState, formData: FormData): Promise<RegenState> {
+  const staff = await requireAdmissionsHandler();
+  const interviewerId = (formData.get("interviewer_id") as string | null) || null;
+  const startDate = formData.get("start_date");
+  const endDate = (formData.get("end_date") as string | null) || startDate;
+  const startTime = (formData.get("start_time") as string | null) || null;
+  const endTime = (formData.get("end_time") as string | null) || null;
+  const reason = (formData.get("reason") as string | null)?.trim() || null;
+  if (typeof startDate !== "string" || !startDate || typeof endDate !== "string" || endDate < startDate) {
+    return { error: "Give at least a start date." };
+  }
+
+  const supabase = await createClient();
+
+  // "Blocking it requires rebooking the applicant first" -- refuse the
+  // block outright rather than silently dropping a booked applicant.
+  let bookedQuery = supabase
+    .from("interview_slots")
+    .select("id", { count: "exact", head: true })
+    .eq("center_id", staff.center_id)
+    .gte("slot_date", startDate)
+    .lte("slot_date", endDate)
+    .not("booked_applicant_id", "is", null);
+  if (interviewerId) bookedQuery = bookedQuery.eq("interviewer_id", interviewerId);
+  const { count: bookedCount } = await bookedQuery;
+  if (bookedCount && bookedCount > 0) {
+    return { error: `${bookedCount} slot${bookedCount === 1 ? " is" : "s are"} already booked in that window -- rebook ${bookedCount === 1 ? "it" : "them"} first.` };
+  }
+
+  const { error } = await supabase.from("interview_blocks").insert({
+    center_id: staff.center_id,
+    interviewer_id: interviewerId,
+    start_date: startDate,
+    end_date: endDate,
+    start_time: startTime,
+    end_time: endTime,
+    reason,
+    blocked_by: staff.id,
+  });
+  if (error) return { error: "Could not save. Try again." };
+
+  // "Unbooked slots disappear from the applicant's view immediately" --
+  // remove any now-blocked unbooked slots that already existed.
+  let cleanupQuery = supabase
+    .from("interview_slots")
+    .delete()
+    .eq("center_id", staff.center_id)
+    .gte("slot_date", startDate)
+    .lte("slot_date", endDate)
+    .is("booked_applicant_id", null);
+  if (interviewerId) cleanupQuery = cleanupQuery.eq("interviewer_id", interviewerId);
+  await cleanupQuery;
+
+  revalidatePath("/dashboard/admissions");
+  return { error: null };
+}
+
+export async function removeInterviewBlock(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  const id = formData.get("id");
+  if (typeof id !== "string") return;
+  const supabase = await createClient();
+  await supabase.from("interview_blocks").delete().eq("id", id).eq("center_id", staff.center_id);
+  revalidatePath("/dashboard/admissions");
+}
+
+export async function updateInterviewGenerationSettings(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  const slotMinutes = Number(formData.get("interview_slot_minutes"));
+  const gapMinutes = Number(formData.get("interview_gap_minutes"));
+  const weeksAhead = Number(formData.get("interview_weeks_ahead"));
+  const cutoffHours = Number(formData.get("interview_cutoff_hours"));
+  if (![slotMinutes, gapMinutes, weeksAhead, cutoffHours].every((n) => Number.isFinite(n) && n >= 0)) return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("centers")
+    .update({
+      interview_slot_minutes: slotMinutes,
+      interview_gap_minutes: gapMinutes,
+      interview_weeks_ahead: weeksAhead,
+      interview_cutoff_hours: cutoffHours,
+    })
+    .eq("id", staff.center_id);
+  revalidatePath("/dashboard/admissions");
+}
+
+// "Nobody maintains a calendar. Change the pattern and every unbooked slot
+// regenerates." Regenerates for the acting interviewer (or, for someone
+// who only holds admissions and doesn't interview themselves, for whoever
+// interviewer_id names -- an admin regenerating on behalf of a colleague).
+export async function regenerateInterviewSlots(_prevState: RegenState, formData: FormData): Promise<RegenState> {
+  const staff = await requireAdmissionsHandler();
+  const interviewerId = (formData.get("interviewer_id") as string | null) || staff.id;
+
+  const supabase = await createClient();
+  const result = await regenerateSlotsForInterviewer(supabase, staff.center_id, interviewerId);
+  if (result.error) return { error: result.error };
+
+  revalidatePath("/dashboard/admissions");
+  return { error: null, created: result.created };
 }
 
 // ---- Marking scheme (selection task) ----
