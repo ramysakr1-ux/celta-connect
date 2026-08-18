@@ -752,6 +752,39 @@ export function lateEnrolmentEmailHtml(input: {
   });
 }
 
+/**
+ * "It doubles as the sign-up reminder... Anyone who has not set up their
+ * account by the Friday opens the same email with one sentence in front of
+ * it." Course Emails.dc.html. Group and level genuinely cannot be named yet
+ * -- both are set on the trainee's profile, which does not exist until this
+ * link is used -- so this is a distinct, shorter email rather than the
+ * standard one with placeholder text stuffed into its fixed sentences.
+ */
+export function accountNotSetUpEmailHtml(input: {
+  candidateName: string;
+  courseName: string;
+  startTime: string;
+  startDay: string;
+  setupUrl: string;
+  directorName: string;
+  directorRole: string;
+}): string {
+  return emailShell({
+    heading: `${input.courseName} starts ${input.startDay}`,
+    tone: "gold",
+    body:
+      p(`Dear ${input.candidateName},`) +
+      p(`We start at ${input.startTime} on ${input.startDay}. You have not set up your Connect account yet — do that first.`) +
+      inlineButton({
+        label: "Set up Connect",
+        url: input.setupUrl,
+        sub: "Your group, your level and your first activity are waiting behind this link.",
+      }) +
+      p("Once you are in, everything else about Monday will be there — nothing to prepare beyond that.") +
+      signature(input.directorName, input.directorRole),
+  });
+}
+
 // ---------------------------------------------------------------------------
 // The four staff/assessor/volunteer invitations, verbatim from
 // Invitations.dc.html. Each is a Facts block and one CTA -- no prose padding,

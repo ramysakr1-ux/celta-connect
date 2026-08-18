@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { runAdmissionsWaitingListCron } from "@/lib/admissions-cron";
 import { runMissedInstalmentsCron } from "@/lib/payments-cron";
 import { runAnnouncementsFireCron } from "@/lib/announcements-cron";
+import { runStartsMondayCron } from "@/lib/starts-monday-cron";
 
 // Vercel Cron hits this once a day (vercel.json). Same auth pattern as
 // /api/cron/course-close-out-wipe -- Vercel signs cron requests with this
@@ -27,10 +28,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Not authorized." }, { status: 401 });
   }
 
-  const [admissions, payments, announcements] = await Promise.all([
+  const [admissions, payments, announcements, startsMonday] = await Promise.all([
     runAdmissionsWaitingListCron(),
     runMissedInstalmentsCron(),
     runAnnouncementsFireCron(),
+    runStartsMondayCron(),
   ]);
-  return NextResponse.json({ admissions, payments, announcements });
+  return NextResponse.json({ admissions, payments, announcements, startsMonday });
 }
