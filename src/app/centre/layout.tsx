@@ -9,6 +9,8 @@ import { CentreTabs } from "@/app/centre/centre-tabs";
 import { BranchFilter } from "@/app/centre/branch-filter";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DesignerCredit } from "@/components/designer-credit";
+import { getAdminChatRooms } from "@/lib/admin-chat";
+import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 
 // Centre Admin has its own chrome, deliberately outside /dashboard: the layout
 // spec gives it a header with a "Centre admin" pill and exactly THREE tabs
@@ -21,6 +23,16 @@ export default async function CentreLayout({ children }: { children: React.React
 
   const ctx = await getCentreRoleContext(profile);
   if (ctx.roles.length === 0) redirect("/dashboard");
+
+  // for-claude-code-centre-settings.md addendum: "the same fixed
+  // bottom-center admin chat pill... is also present on Centre Settings,
+  // not just Centre Admin -- it should persist across every centre-level
+  // admin screen." This layout wraps every /centre/* route (including
+  // /centre/settings, since there's no nested layout underneath it), so
+  // rendering it once here covers all of them. Reuses the exact component
+  // and getAdminChatRooms() Course Admin already has -- same centre-scoped,
+  // permanent, admins-only channel, not a second implementation.
+  const adminChatRooms = await getAdminChatRooms(profile.id, ctx.availableCenterIds);
 
   // §13: "a single-centre customer never sees it" -- only loaded when there is
   // more than one branch to narrow between.
@@ -87,6 +99,8 @@ export default async function CentreLayout({ children }: { children: React.React
       <div className="container pb-10">
         <DesignerCredit />
       </div>
+
+      {adminChatRooms.length > 0 ? <AdminChatBar profileId={profile.id} rooms={adminChatRooms} /> : null}
     </div>
   );
 }

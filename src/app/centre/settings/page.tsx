@@ -9,6 +9,8 @@ import { ProfileDriveForm } from "@/app/centre/settings/profile-drive-form";
 import { AdminRoster, type RosterRow } from "@/app/centre/settings/admin-roster";
 import { TransferOwnershipCard, DeleteCentreCard } from "@/app/centre/settings/danger-zone";
 import { SettingsTabs } from "@/app/centre/settings/settings-tabs";
+import { ProviderList } from "@/app/centre/payments/provider-list";
+import type { PaymentProviderKey } from "@/lib/payments/providers";
 import type { CentreRole } from "@/lib/auth/centre-permissions";
 
 // for-claude-code-centre-settings.md: the real Centre Settings hub,
@@ -33,7 +35,9 @@ export default async function CentreSettingsPage() {
   const [{ data: center }, { data: driveConnection }, { data: grants }, { data: invites }] = await Promise.all([
     admin
       .from("centers")
-      .select("name, center_number, address, primary_contact_email, time_zone, currency, payment_provider, payment_provider_connected_at")
+      .select(
+        "name, center_number, address, primary_contact_email, time_zone, currency, payment_provider, payment_provider_connected_at"
+      )
       .eq("id", centerId)
       .maybeSingle(),
     admin.from("center_google_connections").select("connected_at, template_doc_id, output_folder_id").eq("center_id", centerId).maybeSingle(),
@@ -50,6 +54,11 @@ export default async function CentreSettingsPage() {
   ]);
 
   if (!center) redirect("/centre");
+
+  // Same server-side check /centre/payments itself uses -- "connected" on
+  // paper (a provider chosen) can still have no server-side key, in which
+  // case the first real checkout throws.
+  const credentialsPresent = center.payment_provider === "stripe" ? Boolean(process.env.STRIPE_SECRET_KEY) : false;
 
   const grantProfileIds = [...new Set((grants ?? []).map((g) => g.profile_id))];
   const { data: people } = grantProfileIds.length
@@ -106,26 +115,25 @@ export default async function CentreSettingsPage() {
           )
         }
         payments={
-          <div className="flex flex-col gap-4">
-            <div className="rounded-[8px] border border-primary/25 bg-primary/5 px-4 py-3 text-sm text-ink">
-              Connect never holds or moves money. It stores a reference to a payment made through the centre&apos;s
-              own provider — balances shown everywhere else in Connect are read from that reference, not moved by
-              Connect.
-            </div>
-            <div className="flex items-center justify-between gap-4 rounded-[8px] border border-border px-4 py-3">
-              <div>
-                <p className="text-sm text-ink">
-                  {center.payment_provider ? center.payment_provider : "No provider connected yet"}
-                </p>
-                {center.payment_provider_connected_at ? (
-                  <p className="text-xs text-muted">Connected {new Date(center.payment_provider_connected_at).toLocaleDateString()}</p>
-                ) : null}
+          canEdit ? (
+            <div className="flex flex-col gap-4">
+              <div className="rounded-[8px] border border-primary/25 bg-primary/5 px-4 py-3 text-sm text-ink">
+                Connect never holds or moves money. It stores a reference to a payment made through the centre&apos;s
+                own provider — balances shown everywhere else in Connect are read from that reference, not moved by
+                Connect.
               </div>
-              <Link href="/centre/payments" className="text-sm font-medium text-primary hover:underline">
-                Manage payment providers &rarr;
+              <ProviderList
+                connectedKey={(center.payment_provider ?? null) as PaymentProviderKey | null}
+                connectedAt={center.payment_provider_connected_at}
+                credentialsPresent={credentialsPresent}
+              />
+              <Link href="/centre/payments" className="self-start text-sm font-medium text-primary hover:underline">
+                Refund history &rarr;
               </Link>
             </div>
-          </div>
+          ) : (
+            <p className="text-sm text-muted">You don&apos;t hold a role that can manage payment providers.</p>
+          )
         }
         people={<AdminRoster rows={rosterRows} invites={(invites ?? []) as { id: string; role: CentreRole; created_at: string }[]} mayAppoint={mayAppoint} />}
         danger={
