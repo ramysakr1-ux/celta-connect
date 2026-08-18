@@ -620,3 +620,34 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
     throw err;
   }
 }
+
+// for-claude-code-centre-settings.md: "Delete this centre... anything
+// covered by Cambridge's own retention rules is kept regardless of this
+// action." A centre hard-delete has no per-course grace period or human
+// review the way normal close-out does, so this is the backstop that makes
+// that sentence true: called once per course before centreHardDelete's
+// account-removal loop starts, for every course that has never had a
+// successful export. Skips the human verification step deliberately --
+// the point here is "don't lose the record," not "certify the course is
+// portfolio-complete" -- and reuses the exact same Drive write path close-
+// out already uses, so the surviving copy is the real close-out export,
+// not a second, different archive format.
+export async function ensureCourseArchived(courseId: string, centerId: string, exportedBy: string): Promise<void> {
+  const admin = createAdminClient();
+
+  const { data: existing } = await admin
+    .from("course_close_outs")
+    .select("id, drive_folder_url")
+    .eq("course_id", courseId)
+    .maybeSingle();
+
+  if (existing?.drive_folder_url) return; // Already archived -- nothing to do.
+
+  if (existing) {
+    await admin.from("course_close_outs").update({ status: "verifying", updated_at: new Date().toISOString() }).eq("id", existing.id);
+  } else {
+    await admin.from("course_close_outs").insert({ course_id: courseId, center_id: centerId, status: "verifying", created_by: exportedBy });
+  }
+
+  await exportCourseToDrive(courseId, exportedBy);
+}

@@ -97,8 +97,10 @@ export function DeleteCentreCard({ centreName }: { centreName: string }) {
       <div>
         <h3 className="font-serif text-base text-ink">Delete this centre</h3>
         <p className="mt-1 text-sm text-muted">
-          Permanent. Every course, candidate record, and CELTA 5 in the centre becomes inaccessible immediately —
-          there is no grace period and no way to undo this. This is not the same as a course close-out.
+          Permanent. Every course, candidate record, and CELTA 5 in the centre becomes inaccessible in Connect
+          immediately — there is no grace period and no way to undo this. Any course not already archived is
+          exported to your centre&apos;s Drive first, the same archive a normal close-out produces, so nothing
+          covered by Cambridge&apos;s own retention rules is lost. This is not the same as a course close-out.
         </p>
       </div>
 

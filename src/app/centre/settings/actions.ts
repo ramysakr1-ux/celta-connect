@@ -9,6 +9,7 @@ import { can } from "@/lib/auth/centre-permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createResendClient } from "@/lib/resend/client";
 import { signOut } from "@/app/login/actions";
+import { ensureCourseArchived } from "@/lib/course-close-out/export";
 
 export interface FormState {
   error: string | null;
@@ -161,19 +162,29 @@ export interface DeleteCentreState {
 }
 
 // "Every course, candidate record, and CELTA 5 in the centre becomes
-// inaccessible" -- hard delete, immediately, confirmed with Ramy
-// 2026-08-19. profiles.center_id is `on delete restrict` by design, so
-// every account at this centre must be removed via the Auth Admin API
-// FIRST (deleting an auth.users row cascades its profiles row) --
-// centre_hard_delete (migration 0156) is only the "everything else" half
-// and refuses if any profile is still left, so a wrong call order fails
-// loudly rather than leaving a half-deleted centre.
+// inaccessible; anything covered by Cambridge's own retention rules is
+// kept regardless of this action" -- hard delete, immediately, confirmed
+// with Ramy 2026-08-19, WITH that retention carve-out (also confirmed
+// 2026-08-19, after the first pass of this feature missed it): every
+// course gets archived to the centre's Drive first, via the exact same
+// export close-out already uses, before anything irreversible starts.
+// That's the "kept" copy -- there's no separate retention store, the
+// close-out archive already IS what Cambridge's records requirement
+// means everywhere else in this app.
 //
-// If the account-removal loop fails partway through, this stops and
-// reports the error WITHOUT calling centre_hard_delete -- nothing about
-// the centre's course/candidate data has been touched at that point, and
-// the action is safe to retry (already-removed accounts simply won't be
-// in the list next time).
+// profiles.center_id is `on delete restrict` by design, so every account
+// at this centre must be removed via the Auth Admin API FIRST (deleting
+// an auth.users row cascades its profiles row) -- centre_hard_delete
+// (migration 0156) is only the "everything else" half and refuses if any
+// profile is still left, so a wrong call order fails loudly rather than
+// leaving a half-deleted centre.
+//
+// If either the archive pass or the account-removal loop fails partway
+// through, this stops and reports the error WITHOUT calling
+// centre_hard_delete -- nothing about the centre's course/candidate data
+// has been touched at that point, and the action is safe to retry
+// (already-archived courses and already-removed accounts simply won't
+// need redoing next time).
 export async function deleteCentre(_prevState: DeleteCentreState, formData: FormData): Promise<DeleteCentreState> {
   const session = await getCurrentProfile();
   const profile = session?.profile;
@@ -203,6 +214,19 @@ export async function deleteCentre(_prevState: DeleteCentreState, formData: Form
     .order("created_at", { ascending: false })
     .maybeSingle();
   if (!codeRow) return { error: "That code is wrong or has expired. Request a new one." };
+
+  const { data: courses } = await admin.from("courses").select("id, name").eq("center_id", centerId);
+  for (const course of courses ?? []) {
+    try {
+      await ensureCourseArchived(course.id, centerId, profile.id);
+    } catch (err) {
+      return {
+        error: `Could not archive "${course.name}" to Drive before deleting (${
+          err instanceof Error ? err.message : "unknown error"
+        }). Nothing was touched -- fix this and run delete again.`,
+      };
+    }
+  }
 
   await admin.from("centre_delete_codes").update({ consumed_at: nowIso }).eq("id", codeRow.id);
 
