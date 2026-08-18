@@ -763,6 +763,103 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["observation_task_submissions"]["Row"]>;
         Relationships: [];
       };
+      filmed_observation_sessions: {
+        Row: {
+          id: string;
+          course_id: string;
+          timetable_event_id: string;
+          lesson_title: string | null;
+          recording_url: string | null;
+          length_minutes: number | null;
+          level: string | null;
+          learner_count: number | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["filmed_observation_sessions"]["Row"]> & {
+          course_id: string;
+          timetable_event_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["filmed_observation_sessions"]["Row"]>;
+        Relationships: [];
+      };
+      filmed_observation_breaks: {
+        Row: {
+          id: string;
+          session_id: string;
+          break_number: number;
+          timestamp_seconds: number;
+          duration_seconds: number;
+          prompt: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["filmed_observation_breaks"]["Row"]> & {
+          session_id: string;
+          break_number: number;
+          timestamp_seconds: number;
+          prompt: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["filmed_observation_breaks"]["Row"]>;
+        Relationships: [];
+      };
+      filmed_observation_messages: {
+        Row: {
+          id: string;
+          session_id: string;
+          author_id: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["filmed_observation_messages"]["Row"]> & {
+          session_id: string;
+          author_id: string;
+          body: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["filmed_observation_messages"]["Row"]>;
+        Relationships: [];
+      };
+      filmed_observation_tasks: {
+        Row: {
+          id: string;
+          session_id: string;
+          criteria_codes: string[];
+          prompt_1: string;
+          prompt_2: string;
+          general_prompt: string;
+          rating_label: string;
+          rating_options: string[];
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["filmed_observation_tasks"]["Row"]> & {
+          session_id: string;
+          prompt_1: string;
+          prompt_2: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["filmed_observation_tasks"]["Row"]>;
+        Relationships: [];
+      };
+      filmed_observation_task_responses: {
+        Row: {
+          id: string;
+          task_id: string;
+          trainee_id: string;
+          response_1: string | null;
+          response_2: string | null;
+          response_general: string | null;
+          rating: string | null;
+          timestamped_notes: { timestamp_seconds: number; note: string }[];
+          completed_at: string | null;
+          observation_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["filmed_observation_task_responses"]["Row"]> & {
+          task_id: string;
+          trainee_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["filmed_observation_task_responses"]["Row"]>;
+        Relationships: [];
+      };
       attendance_absences: {
         Row: {
           id: string;

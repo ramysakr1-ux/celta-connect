@@ -100,6 +100,54 @@ export async function TodayTab({
       : { data: [] };
   const tutorialEventById = new Map((tutorialEvents ?? []).map((e) => [e.id, e]));
 
+  // Filmed observation -- group watch session (design_handoff_filmed_
+  // observation_watch): reminder surfaces from 10 minutes before the
+  // scheduled start, same day only. The recording is persisted, so this
+  // never needs to linger past today -- anyone who misses the sitting can
+  // reach the same screen from their own portfolio/celta5 page afterward
+  // and watch solo, no reminder required to do that.
+  const { data: todaysFilmedEvents } = await supabase
+    .from("course_timetable_events")
+    .select("id, event_date, event_time")
+    .eq("course_id", courseId)
+    .eq("event_date", today)
+    .eq("type", "milestone");
+  const todaysFilmedEventIds = (todaysFilmedEvents ?? []).map((e) => e.id);
+  const { data: todaysFilmedSessions } =
+    todaysFilmedEventIds.length > 0
+      ? await supabase
+          .from("filmed_observation_sessions")
+          .select("id, lesson_title, timetable_event_id")
+          .in("timetable_event_id", todaysFilmedEventIds)
+      : { data: [] };
+  const todaysFilmedEventById = new Map((todaysFilmedEvents ?? []).map((e) => [e.id, e]));
+  let filmedObservationReminder: WaitingItem | null = null;
+  if (todaysFilmedSessions && todaysFilmedSessions.length > 0) {
+    const now = new Date();
+    for (const s of todaysFilmedSessions) {
+      const event = todaysFilmedEventById.get(s.timetable_event_id);
+      if (!event) continue;
+      const startsAt = event.event_time ? new Date(`${event.event_date}T${event.event_time}`) : null;
+      if (startsAt && now.getTime() < startsAt.getTime() - 10 * 60 * 1000) continue; // more than 10 min out
+      const { data: task } = await supabase.from("filmed_observation_tasks").select("id").eq("session_id", s.id).maybeSingle();
+      const { data: response } = task
+        ? await supabase
+            .from("filmed_observation_task_responses")
+            .select("completed_at")
+            .eq("task_id", task.id)
+            .eq("trainee_id", traineeId)
+            .maybeSingle()
+        : { data: null };
+      if (response?.completed_at) continue;
+      filmedObservationReminder = {
+        label: `Filmed observation${s.lesson_title ? ` — ${s.lesson_title}` : ""}`,
+        detail: event.event_time ? `Group watch · ${event.event_time.slice(0, 5)}` : "Group watch, today",
+        href: `/portfolio/${traineeId}/filmed-observation/${s.id}`,
+      };
+      break;
+    }
+  }
+
   const { data: gtkyAssignment } = await supabase
     .from("gtky_assignments")
     .select("chosen_slug")
@@ -168,6 +216,7 @@ export async function TodayTab({
       });
     }
   }
+  if (filmedObservationReminder) waiting.push(filmedObservationReminder);
   for (const invite of tutorialInvites ?? []) {
     const event = tutorialEventById.get(invite.timetable_event_id);
     const stageLabel = invite.stage === "stage1" ? "Stage 1" : "Stage 3";

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { categorize, toLocalIso, type TimetableEvent } from "@/lib/timetable-grid";
 import { moveTimetableEvent, deleteTimetableEvent, setAttendance, setInputSessionCriteria } from "@/app/trainer/(hub)/timetable/actions";
 import type { Volunteer } from "@/app/trainer/(hub)/timetable/event-cell";
@@ -294,6 +295,12 @@ function DetailPanel({
           </div>
         ))}
       </div>
+
+      {event.type === "milestone" && event.title.startsWith("Filmed observation") ? (
+        <Link href={`/trainer/timetable/filmed-observation/${event.id}`} className="text-sm font-medium text-primary hover:underline">
+          Set up this session →
+        </Link>
+      ) : null}
 
       {event.type === "input_session" ? (
         <details className="mt-1" open>
