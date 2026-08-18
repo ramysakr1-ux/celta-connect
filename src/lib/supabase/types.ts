@@ -2107,6 +2107,9 @@ export interface Database {
           audio_url: string | null;
           transcript: string | null;
           transcript_generated_at: string | null;
+          l1_language: string | null;
+          consent_given_at: string | null;
+          recording_consent_given_at: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["volunteer_signup_profiles"]["Row"]> & {
