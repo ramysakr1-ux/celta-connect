@@ -9,16 +9,15 @@ import { sendApplicantEmail, interviewAutoBookedEmailHtml } from "@/lib/admissio
 // autobook on; this is the sweep that actually fires once that time has
 // passed, unless a human clicked Hold in the meantime.
 //
-// Runs from the same once-a-day admissions cron route rather than its own
-// schedule -- see src/app/api/cron/admissions-waiting-list/route.ts's own
-// comment: the Vercel Hobby plan this project is on caps cron jobs at
-// 2/day, both already spoken for. This means the 15-minute hold is a floor,
-// not a target -- an invitation clear at 9am and not cancelled sits until
-// the next day's run, not 15 minutes later. Genuinely worth a tighter
-// schedule (a paid Vercel plan, or a Supabase pg_cron job running inside
-// the database itself, independent of Vercel's cron limits) if a centre
-// turns autobook on and finds the delay matters in practice -- flagged
-// rather than assumed, since either is a real infra decision.
+// specs/for-claude-code-auto-booked-interview.md: piggybacking this on the
+// once-a-day admissions cron (the first version of this file did) made the
+// 15-minute hold meaningless -- a delay of up to a day is a real gap, not
+// a steady state, against a lane whose whole purpose is a fast,
+// trustworthy auto-send. Runs instead from its own route
+// (/api/cron/admissions-auto-book) on its own tight schedule, fired by a
+// Supabase pg_cron job every few minutes (migration 0152) -- independent
+// of the Vercel Hobby plan's cron limits, since pg_cron runs inside the
+// database itself rather than through Vercel's scheduler.
 export async function runAdmissionsAutoBookCron(): Promise<{ booked: number; skipped: number }> {
   const admin = createAdminClient();
   const nowIso = new Date().toISOString();
