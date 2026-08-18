@@ -1489,6 +1489,28 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["course_subgroup_members"]["Row"]>;
         Relationships: [];
       };
+      gtky_assignments: {
+        Row: {
+          id: string;
+          center_id: string;
+          course_id: string;
+          trainee_id: string;
+          level_band: "a1" | "elem" | "pre" | "inter" | "upper";
+          offered_slugs: string[];
+          chosen_slug: string | null;
+          assigned_at: string;
+          chosen_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["gtky_assignments"]["Row"]> & {
+          center_id: string;
+          course_id: string;
+          trainee_id: string;
+          level_band: "a1" | "elem" | "pre" | "inter" | "upper";
+          offered_slugs: string[];
+        };
+        Update: Partial<Database["public"]["Tables"]["gtky_assignments"]["Row"]>;
+        Relationships: [];
+      };
       course_broadcasts: {
         Row: {
           id: string;
