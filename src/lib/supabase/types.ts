@@ -1635,6 +1635,8 @@ export interface Database {
           is_asynchronous: boolean;
           linked_live_session_event_id: string | null;
           input_session_criteria: string[];
+          tp_group_scope_id: string | null;
+          register_submitted_at: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
