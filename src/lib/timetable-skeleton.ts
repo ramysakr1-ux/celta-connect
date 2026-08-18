@@ -17,6 +17,15 @@ export interface SkeletonEventDraft {
   tag?: string;
   linkedAssignmentType?: AssignmentType;
   linkedTpNumber?: number;
+  /**
+   * "Every sub-criterion names the session that teaches it" --
+   * project_spec_audit_2026-08-18's assessment-model.md link 1, seeded
+   * from Ramy's INPUT_WEEKS mapping (2026-08-18): the exact CELTA
+   * criteria codes this session introduces. Feeds
+   * peer-observation.ts's criteriaForTpDate once the skeleton is
+   * generated -- input session -> criterion -> TP point -> peer task.
+   */
+  inputSessionCriteria?: string[];
 }
 
 export const DEFAULT_TEACHING_DAYS = 20; // standard full-time CELTA: 4 weeks, Mon-Fri
@@ -54,29 +63,119 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // Day 0 (Mon) -- orientation, demo, FOL's own teaching slot (FOL is
   // "released" the moment it's taught, not a separate milestone).
   { type: "milestone", title: "Course begins -- orientation", position: pos(0), time: "10:00", tag: "whole_group" },
-  { type: "input_session", title: "Introduction to CELTA & Learner Needs", position: pos(0), time: "10:00", tag: "whole_group" },
+  // Ramy's INPUT_WEEKS mapping, 2026-08-18: Day 1 carries three sessions,
+  // not one -- the old single "Introduction to CELTA & Learner Needs"
+  // placeholder is split into the two real sessions it stood in for.
+  {
+    type: "input_session",
+    title: "Classroom management",
+    position: pos(0),
+    time: "10:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["5b", "5d", "5f", "5i", "5j", "5k", "4g", "1d"],
+  },
   { type: "milestone", title: "Demo lesson (trainer-led)", position: pos(0), time: "12:45", tag: "whole_group" },
   {
     type: "input_session",
     title: "Focus on the Learner -- the assignment session",
     position: pos(0),
-    time: "15:30",
+    time: "13:30",
     tag: "whole_group",
     linkedAssignmentType: "Focus on Learner",
+    inputSessionCriteria: ["1a", "1b", "1c"],
+  },
+  {
+    type: "input_session",
+    title: "Classroom arrangements and material use",
+    position: pos(0),
+    time: "15:30",
+    tag: "whole_group",
+    inputSessionCriteria: ["5a", "5e", "4d"],
   },
 
   // Day 1-2 (Tue/Wed) -- TP1, one half each day.
   { type: "tp", title: "TP1 -- Half A", position: pos(1), time: "10:00", tag: "individual", linkedTpNumber: 1 },
-  { type: "input_session", title: "Lesson Planning Fundamentals", position: pos(1), time: "14:30", tag: "whole_group" },
+  {
+    type: "input_session",
+    title: "Lesson planning input",
+    position: pos(1),
+    time: "14:30",
+    tag: "whole_group",
+    inputSessionCriteria: ["4a", "4b", "4e", "4f", "4h", "4j", "4k", "4m", "4n"],
+  },
+  {
+    type: "input_session",
+    title: "Receptive skills",
+    position: pos(1),
+    time: "16:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["3a", "4l"],
+  },
   { type: "tp", title: "TP1 -- Half B", position: pos(2), time: "10:00", tag: "individual", linkedTpNumber: 1 },
+  {
+    type: "input_session",
+    title: "Eliciting and concept checking",
+    position: pos(2),
+    time: "14:30",
+    tag: "whole_group",
+    inputSessionCriteria: ["5g", "2c", "2e"],
+  },
+  {
+    // "2c overlaps with PPP and Eliciting -- first session to teach it
+    // still gates it" (Ramy) -- this is that first session; criteria
+    // recorded here so criteriaForTpDate() reflects THIS session's own
+    // focus, same as every other row.
+    type: "input_session",
+    title: "Teaching vocabulary",
+    position: pos(2),
+    time: "16:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["2a", "2c"],
+  },
   { type: "milestone", title: "Filmed observation 1", position: pos(2), time: "17:00", tag: "individual" },
 
   // Day 3-4 (Thu/Fri) -- TP2, one half each day. SRT released day 3
   // (Timetable Refresh.dc.html FULL week 1, "9"), Stage 1 tutorials begin
   // once both halves have TP2 behind them (day 4).
   { type: "tp", title: "TP2 -- Half A", position: pos(3), time: "10:00", tag: "individual", linkedTpNumber: 2 },
+  {
+    type: "input_session",
+    title: "PPP",
+    position: pos(3),
+    time: "14:30",
+    tag: "whole_group",
+    inputSessionCriteria: ["5c", "4b", "4f", "2c"],
+  },
+  {
+    type: "input_session",
+    title: "Text-based teaching",
+    position: pos(3),
+    time: "16:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["3a", "3b", "4c"],
+  },
   { type: "milestone", title: "Language Skills Related Tasks released", position: pos(3), time: "17:00", tag: "whole_group" },
   { type: "tp", title: "TP2 -- Half B", position: pos(4), time: "10:00", tag: "individual", linkedTpNumber: 2 },
+  {
+    // "overlaps with Language analysis 1 on 4i" (Ramy) -- both rows below
+    // carry 4i; whichever the trainer actually runs later that day wins
+    // via criteriaForTpDate()'s own "most recent session" rule, same as
+    // every other overlap in this mapping.
+    type: "input_session",
+    title: "Sounds",
+    position: pos(4),
+    time: "14:30",
+    tag: "whole_group",
+    inputSessionCriteria: ["2e", "4i"],
+  },
+  {
+    type: "input_session",
+    title: "Language analysis 1",
+    position: pos(4),
+    time: "16:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["4i", "2b", "2f"],
+  },
   { type: "milestone", title: "Filmed observation 2", position: pos(4), time: "17:00", tag: "individual" },
   { type: "milestone", title: "Stage 1 tutorials begin", position: pos(4), time: "14:30", tag: "individual" },
 
@@ -85,7 +184,42 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // own due tile lands on day 7 below (assignment-due-dates.ts resolves
   // the real per-trainee date; this tile is the display-only echo of it).
   { type: "tp", title: "TP3 -- Half A", position: pos(5), time: "10:00", tag: "individual", linkedTpNumber: 3 },
+  {
+    type: "input_session",
+    title: "Giving feedback on tasks",
+    position: pos(5),
+    time: "14:30",
+    tag: "whole_group",
+    inputSessionCriteria: ["5h"],
+  },
+  {
+    type: "input_session",
+    title: "Providing models -- drilling",
+    position: pos(5),
+    time: "16:00",
+    tag: "whole_group",
+    // "This is the ONLY session touching 2d's session-taught aspects --
+    // but per build-spec.md, 2d itself is also a standing baseline
+    // requirement from day one, not purely session-gated" (Ramy).
+    inputSessionCriteria: ["2d"],
+  },
   { type: "tp", title: "TP3 -- Half B", position: pos(6), time: "10:00", tag: "individual", linkedTpNumber: 3 },
+  {
+    type: "input_session",
+    title: "Staging controlled practice",
+    position: pos(6),
+    time: "14:30",
+    tag: "whole_group",
+    inputSessionCriteria: ["2g"],
+  },
+  {
+    type: "input_session",
+    title: "Portfolio and record-keeping",
+    position: pos(6),
+    time: "16:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["5l"],
+  },
   { type: "milestone", title: "Filmed observation 3", position: pos(6), time: "17:00", tag: "individual" },
   {
     type: "assignment_due",
@@ -99,6 +233,27 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // Day 7-8 (Wed/Thu) -- TP4. Half B's Skills due lands the day after
   // their own TP3, which is Half A's TP4 day.
   { type: "tp", title: "TP4 -- Half A", position: pos(7), time: "10:00", tag: "individual", linkedTpNumber: 4 },
+  {
+    type: "input_session",
+    title: "Self-evaluation and responding to feedback",
+    position: pos(7),
+    time: "14:30",
+    tag: "whole_group",
+    inputSessionCriteria: ["5m", "5n"],
+  },
+  {
+    // "Second pass -- 4c already introduced day 4" (Ramy, Text-based
+    // teaching). Recorded again here so criteriaForTpDate() picks it up
+    // as the live focus for TPs from this point on, per the "gate on the
+    // first session, but each session's own row still reflects what it
+    // itself reinforces" reading of the mapping.
+    type: "input_session",
+    title: "Adapting materials for level",
+    position: pos(7),
+    time: "16:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["4c"],
+  },
   {
     type: "assignment_due",
     title: "Language Skills Related Tasks -- due 9am (Half B)",
@@ -115,6 +270,16 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // session (comparing pooled notes before claiming), LRT due for both
   // groups at once since neither is teaching TP that day.
   { type: "milestone", title: "Demo lesson 2 -- new level", position: pos(9), time: "10:00", tag: "whole_group" },
+  {
+    // "Second pass for the level change" (Ramy) -- pairs naturally with
+    // the demo-lesson-2/new-level milestone already on this day.
+    type: "input_session",
+    title: "Teaching a new level -- needs analysis",
+    position: pos(9),
+    time: "11:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["1a", "1c"],
+  },
   { type: "milestone", title: "FOL divergence session", position: pos(9), time: "14:30", tag: "whole_group" },
   {
     type: "assignment_due",
@@ -434,6 +599,7 @@ export function buildSkeletonEvents(
       tag: draft.tag ?? null,
       linked_assignment_type: draft.linkedAssignmentType ?? null,
       linked_tp_number: draft.linkedTpNumber ?? null,
+      input_session_criteria: draft.inputSessionCriteria ?? [],
     };
   });
 }
