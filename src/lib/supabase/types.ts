@@ -2357,6 +2357,25 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["centre_admin_invites"]["Row"]>;
         Relationships: [];
       };
+      centre_delete_codes: {
+        Row: {
+          id: string;
+          center_id: string;
+          requested_by: string;
+          code: string;
+          expires_at: string;
+          consumed_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_delete_codes"]["Row"]> & {
+          center_id: string;
+          requested_by: string;
+          code: string;
+          expires_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_delete_codes"]["Row"]>;
+        Relationships: [];
+      };
       spreadsheet_imports: {
         Row: {
           id: string;
@@ -2908,6 +2927,10 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      centre_hard_delete: {
+        Args: { p_center_id: string };
+        Returns: void;
+      };
       set_stage2_slot_count: {
         Args: { p_block_id: string; p_slot_count: number };
         Returns: void;

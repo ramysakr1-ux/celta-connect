@@ -1,11 +1,14 @@
 "use server";
 
 import "server-only";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createResendClient } from "@/lib/resend/client";
+import { signOut } from "@/app/login/actions";
 
 export interface FormState {
   error: string | null;
@@ -105,4 +108,121 @@ export async function transferCentreOwnership(_prevState: TransferOwnershipState
   revalidatePath("/centre/settings");
   revalidatePath("/centre/roles");
   return { error: null };
+}
+
+export interface RequestDeleteCodeState {
+  error: string | null;
+  sent: boolean;
+}
+
+// "Delete specifically also gets identity re-verification on top of the
+// role gate and type-to-confirm: ... a confirmation code emailed to the
+// owner." Chosen over password re-entry -- same guarantee, without a
+// password ever passing through a server action's plain-text formData.
+// The code is never returned to the client here; it only ever reaches the
+// owner by email, which is the actual point of the check.
+export async function requestCentreDeleteCode(_prevState: RequestDeleteCodeState, _formData: FormData): Promise<RequestDeleteCodeState> {
+  const session = await getCurrentProfile();
+  const profile = session?.profile;
+  if (!profile) return { error: "Not signed in.", sent: false };
+  const ctx = await getCentreRoleContext(profile);
+  if (!ctx.roles.includes("centre_owner")) return { error: "Only the centre owner can delete the centre.", sent: false };
+
+  const centerId = ctx.activeCenterId ?? profile.center_id;
+  const admin = createAdminClient();
+  const { data: center } = await admin.from("centers").select("name").eq("id", centerId).maybeSingle();
+  if (!center) return { error: "Centre not found.", sent: false };
+
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+  const { error: insertError } = await admin
+    .from("centre_delete_codes")
+    .insert({ center_id: centerId, requested_by: profile.id, code, expires_at: expiresAt });
+  if (insertError) return { error: "Could not send a code. Try again.", sent: false };
+
+  try {
+    const resend = createResendClient();
+    await resend.emails.send({
+      from: `Connect <noreply@celtaconnect.com>`,
+      to: profile.email,
+      subject: `Confirm deleting ${center.name}`,
+      html: `<p>Someone -- hopefully you -- asked to permanently delete ${center.name} on Connect.</p><p>Confirmation code: <strong style="font-size:20px;letter-spacing:2px;">${code}</strong></p><p>This code expires in 15 minutes and works once. If you didn't request this, ignore this email -- nothing happens without the code.</p>`,
+    });
+  } catch {
+    return { error: "Could not send the email. Try again.", sent: false };
+  }
+
+  return { error: null, sent: true };
+}
+
+export interface DeleteCentreState {
+  error: string | null;
+}
+
+// "Every course, candidate record, and CELTA 5 in the centre becomes
+// inaccessible" -- hard delete, immediately, confirmed with Ramy
+// 2026-08-19. profiles.center_id is `on delete restrict` by design, so
+// every account at this centre must be removed via the Auth Admin API
+// FIRST (deleting an auth.users row cascades its profiles row) --
+// centre_hard_delete (migration 0156) is only the "everything else" half
+// and refuses if any profile is still left, so a wrong call order fails
+// loudly rather than leaving a half-deleted centre.
+//
+// If the account-removal loop fails partway through, this stops and
+// reports the error WITHOUT calling centre_hard_delete -- nothing about
+// the centre's course/candidate data has been touched at that point, and
+// the action is safe to retry (already-removed accounts simply won't be
+// in the list next time).
+export async function deleteCentre(_prevState: DeleteCentreState, formData: FormData): Promise<DeleteCentreState> {
+  const session = await getCurrentProfile();
+  const profile = session?.profile;
+  if (!profile) return { error: "Not signed in." };
+  const ctx = await getCentreRoleContext(profile);
+  if (!ctx.roles.includes("centre_owner")) return { error: "Only the centre owner can delete the centre." };
+
+  const centerId = ctx.activeCenterId ?? profile.center_id;
+  const confirmName = (formData.get("confirm_name") as string | null)?.trim();
+  const code = (formData.get("code") as string | null)?.trim();
+  if (!code) return { error: "Enter the code from the email." };
+
+  const admin = createAdminClient();
+  const { data: center } = await admin.from("centers").select("name").eq("id", centerId).maybeSingle();
+  if (!center) return { error: "Centre not found." };
+  if (confirmName !== center.name) return { error: "Type the centre's exact name to confirm." };
+
+  const nowIso = new Date().toISOString();
+  const { data: codeRow } = await admin
+    .from("centre_delete_codes")
+    .select("id")
+    .eq("center_id", centerId)
+    .eq("requested_by", profile.id)
+    .eq("code", code)
+    .is("consumed_at", null)
+    .gt("expires_at", nowIso)
+    .order("created_at", { ascending: false })
+    .maybeSingle();
+  if (!codeRow) return { error: "That code is wrong or has expired. Request a new one." };
+
+  await admin.from("centre_delete_codes").update({ consumed_at: nowIso }).eq("id", codeRow.id);
+
+  const { data: allProfiles } = await admin.from("profiles").select("id").eq("center_id", centerId);
+  for (const p of allProfiles ?? []) {
+    const { error: deleteUserError } = await admin.auth.admin.deleteUser(p.id);
+    if (deleteUserError) {
+      return {
+        error: `Stopped partway through removing accounts (${deleteUserError.message}). Nothing else was touched -- run delete again to pick up where this left off.`,
+      };
+    }
+  }
+
+  const { error: rpcError } = await admin.rpc("centre_hard_delete", { p_center_id: centerId });
+  if (rpcError) {
+    return { error: `Accounts were removed, but the rest of the delete failed (${rpcError.message}). Run delete again.` };
+  }
+
+  // The owner's own account is now gone -- their session is no longer
+  // valid for anything. signOut() clears it and redirects to /login.
+  await signOut();
+  redirect("/login");
 }

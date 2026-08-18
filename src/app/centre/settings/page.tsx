@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileDriveForm } from "@/app/centre/settings/profile-drive-form";
 import { AdminRoster, type RosterRow } from "@/app/centre/settings/admin-roster";
-import { TransferOwnershipCard } from "@/app/centre/settings/danger-zone";
+import { TransferOwnershipCard, DeleteCentreCard } from "@/app/centre/settings/danger-zone";
 import { SettingsTabs } from "@/app/centre/settings/settings-tabs";
 import type { CentreRole } from "@/lib/auth/centre-permissions";
 
@@ -132,6 +132,7 @@ export default async function CentreSettingsPage() {
           isOwner ? (
             <div className="flex flex-col gap-4">
               <TransferOwnershipCard centreName={center.name} />
+              <DeleteCentreCard centreName={center.name} />
             </div>
           ) : null
         }
