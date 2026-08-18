@@ -359,6 +359,13 @@ export async function TodayTab({
           )}
         </div>
       </div>
+
+      <p className="text-center text-xs text-muted">
+        Something not right?{" "}
+        <Link href={`/portfolio/${traineeId}/concern`} className="text-primary hover:underline">
+          Raise a concern
+        </Link>
+      </p>
     </div>
   );
 }

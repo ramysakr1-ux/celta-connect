@@ -1042,6 +1042,28 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["formal_letters"]["Row"]>;
         Relationships: [];
       };
+      concerns: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          route: "tutor" | "mct" | "manager";
+          body: string;
+          anonymous: boolean;
+          response: string | null;
+          responded_at: string | null;
+          responded_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["concerns"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          route: "tutor" | "mct" | "manager";
+          body: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["concerns"]["Row"]>;
+        Relationships: [];
+      };
       deferral_transfers: {
         Row: {
           id: string;

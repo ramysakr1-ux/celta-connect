@@ -95,6 +95,24 @@ export default async function TodayPage() {
   type Alert = { title: string; meta: string; href: string; destructive?: boolean };
   const alerts: Alert[] = [];
 
+  // Enrolment Forms.dc.html 1c -- "the centre replies to every concern."
+  // Surfaced to any trainer, not routed to just the one named recipient
+  // (see migration 0140's own reasoning).
+  if (trainer?.course_id) {
+    const { count: openConcernCount } = await supabase
+      .from("concerns")
+      .select("id", { count: "exact", head: true })
+      .eq("course_id", trainer.course_id)
+      .is("response", null);
+    if (openConcernCount && openConcernCount > 0) {
+      alerts.push({
+        title: `${openConcernCount} concern${openConcernCount === 1 ? "" : "s"} awaiting a reply`,
+        meta: "Raised through the internal complaints route",
+        href: "/trainer/concerns",
+      });
+    }
+  }
+
   // Grade Pipeline handoff: reminder is MCT-specific (only they can act on
   // it) and computed from the deadline the MCT set themselves, not a fixed
   // offset from the assessor visit date. 4 days is a starting judgment call,
