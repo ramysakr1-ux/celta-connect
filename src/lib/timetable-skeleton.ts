@@ -295,7 +295,31 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // assignment-due-dates.ts.
   { type: "tp", title: "TP5 -- Half A", position: pos(10), time: "10:00", tag: "individual", linkedTpNumber: 5 },
   { type: "milestone", title: "Stage 2 tutorials begin", position: pos(10), time: "14:30", tag: "individual" },
+  {
+    // Ramy, 2026-08-18 correction: no "3c" -- speaking and writing are one
+    // combined criterion, 3b, per the certified CELTA 5 (Appendix 1):
+    // "helping learners to produce oral and written language." 3b is
+    // FIRST introduced in Text-based teaching (day 4 above), which is
+    // where it gates live from; these are the two dedicated reinforcing
+    // passes named in the mapping, Week 3+. No exact day was given for
+    // either -- placed here, alongside the existing new-level TP5 cluster,
+    // as a reasonable estimate that doesn't change the gate either way.
+    type: "input_session",
+    title: "Teaching speaking",
+    position: pos(10),
+    time: "16:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["3b"],
+  },
   { type: "tp", title: "TP5 -- Half B", position: pos(11), time: "10:00", tag: "individual", linkedTpNumber: 5 },
+  {
+    type: "input_session",
+    title: "Productive skills -- writing",
+    position: pos(11),
+    time: "14:30",
+    tag: "whole_group",
+    inputSessionCriteria: ["3b"],
+  },
   {
     type: "assignment_due",
     title: "Focus on the Learner -- due 9am",
