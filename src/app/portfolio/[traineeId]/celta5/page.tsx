@@ -18,6 +18,7 @@ import { AssignmentsSummary, TpFeedbackSummary, AssessedTpStatsBadge } from "@/a
 import { CriteriaRatingPill, StandardRatingPill } from "@/lib/status-pill";
 import { computeProgressIssues, computeAssessedTpStats } from "@/lib/course-progress";
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
+import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
 import { ObservationTaskForm } from "@/app/portfolio/[traineeId]/celta5/observation-task-form";
@@ -112,6 +113,8 @@ export default async function PortfolioCelta5Page({
       { data: courseTutorRows },
       { data: obsTasks },
       { data: obsTaskSubmissions },
+      { data: tutorialInvites },
+      { data: peerNotes },
     ] = await Promise.all([
       supabase.rpc("get_my_celta5_record"),
       supabase.rpc("get_my_celta5_matrix"),
@@ -138,6 +141,8 @@ export default async function PortfolioCelta5Page({
         ? supabase.from("observation_tasks").select("id, title, instructions").eq("course_id", viewer.course_id).order("created_at")
         : Promise.resolve({ data: [] }),
       supabase.from("observation_task_submissions").select("task_id, response, submitted_at").eq("trainee_id", traineeId),
+      supabase.from("individual_tutorial_invites").select("stage, timetable_event_id, confirmed_at").eq("trainee_id", traineeId),
+      supabase.from("peer_observation_notes").select("sheet_id, submitted_at").eq("observer_id", traineeId).not("submitted_at", "is", null),
     ]);
     const record = recordRows?.[0];
     const submissionByTaskId = new Map((obsTaskSubmissions ?? []).map((s) => [s.task_id, s]));
@@ -169,6 +174,11 @@ export default async function PortfolioCelta5Page({
     const stage2Submitted = !!record.stage2_candidate_submitted_at;
     const stage1And2Released = !!record.stage2_completed_at;
     const finalReleased = !!record.trainer_signoff_final_at;
+    // "Both signed" specifically means the candidate's own final sign-off
+    // (trainee_signoff_stage2_at, set by signOffStage2 below), not just the
+    // tutor's release of the matrix -- release makes the sign-off button
+    // available, it isn't the signature itself.
+    const bothSigned = !!record.trainee_signoff_stage2_at;
 
     const taughtTpNumbers = new Set((plans ?? []).filter((p) => p.taught_at).map((p) => p.tp_number));
     const assignmentStatusByType = new Map((assignments ?? []).map((a) => [a.assignment_type, a]));
@@ -184,8 +194,152 @@ export default async function PortfolioCelta5Page({
       tutorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", tutorIds) : { data: [] };
     const tutorNames = (tutorProfiles ?? []).map((t) => t.full_name);
 
+    // design_handoff_progress_tab, screen 1g -- three glanceable panels
+    // (Stage 1/2/3, self-assessment, observation hours) above the detailed
+    // record below, which stays as the drill-down. Stage 2 slot and Stage
+    // 1/3 invites are fetched here rather than in the main Promise.all
+    // since they depend on viewer.course_id being resolved first, same
+    // pattern as tpPointsForLevels above.
+    const [{ data: stage2Blocks }, { data: tutorialEvents }] = await Promise.all([
+      viewer?.course_id ? supabase.from("stage2_tutorial_blocks").select("id").eq("course_id", viewer.course_id) : Promise.resolve({ data: [] }),
+      tutorialInvites && tutorialInvites.length > 0
+        ? supabase
+            .from("course_timetable_events")
+            .select("id, event_date, event_time")
+            .in("id", tutorialInvites.map((i) => i.timetable_event_id))
+        : Promise.resolve({ data: [] }),
+    ]);
+    const stage2BlockIds = (stage2Blocks ?? []).map((b) => b.id);
+    const { data: myStage2Slot } =
+      stage2BlockIds.length > 0
+        ? await supabase.from("stage2_tutorial_slots").select("position, booked_at").in("block_id", stage2BlockIds).eq("trainee_id", traineeId).not("booked_at", "is", null).maybeSingle()
+        : { data: null };
+    const tutorialEventById = new Map((tutorialEvents ?? []).map((e) => [e.id, e]));
+    const stage1Invite = (tutorialInvites ?? []).find((i) => i.stage === "stage1");
+    const stage3Invite = (tutorialInvites ?? []).find((i) => i.stage === "stage3");
+
+    // Peer observation has no duration field of its own (peer_observation_
+    // notes is a written-note model, not an hours-logged model) -- each
+    // submitted note represents one full TP round observed, so hours are
+    // derived from the real TP length rather than fabricated.
+    const peerSheetsObserved = new Set((peerNotes ?? []).map((n) => n.sheet_id)).size;
+    const peerHours = (peerSheetsObserved * TP_LESSON_LENGTH_MINUTES) / 60;
+    const { liveHours: experiencedTeacherHours, filmedHours } = computeObservationHours(observations ?? []);
+
+    const progressHeadingParts: string[] = [];
+    if (myStage2Slot) progressHeadingParts.push(`Stage 2 tutorial booked`);
+    else if (stage2BlockIds.length > 0) progressHeadingParts.push(`Stage 2 tutorial not booked`);
+    progressHeadingParts.push(bothSigned ? "CELTA 5 signed off" : stage2Submitted ? "CELTA 5 under review" : "CELTA 5 not started");
+    const progressHeading = progressHeadingParts.join(" · ");
+
     return (
       <div className="flex flex-col gap-4">
+        <div>
+          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Certification progress</p>
+          <h1 className="mt-1 font-serif text-2xl text-ink">{progressHeading}</h1>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="sheet flex flex-col gap-3">
+            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Stage 1 / 2 / 3</p>
+            <div className="flex flex-col">
+              <div className="flex items-start justify-between gap-3 border-b border-border-faint py-2.5">
+                <div>
+                  <p className="text-sm font-semibold text-ink">Stage 1 report</p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    {record.stage1_completed_at
+                      ? "Filed by your tutor · the tutorial itself is optional, not held up on this"
+                      : stage1Invite
+                        ? `Tutorial ${stage1Invite.confirmed_at ? "confirmed" : "invited, not yet confirmed"}${
+                            tutorialEventById.get(stage1Invite.timetable_event_id)
+                              ? ` · ${tutorialEventById.get(stage1Invite.timetable_event_id)!.event_date}`
+                              : ""
+                          } -- the report itself isn't filed yet`
+                        : "Not yet filed"}
+                  </p>
+                </div>
+                <span className={`pill ${record.stage1_completed_at ? "pill-success" : "pill-warning"}`}>
+                  {record.stage1_completed_at ? "Filed" : "Not filed"}
+                </span>
+              </div>
+              <div className="flex items-start justify-between gap-3 border-b border-border-faint py-2.5">
+                <div>
+                  <p className="text-sm font-semibold text-ink">Stage 2 tutorial</p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    {myStage2Slot
+                      ? `You booked ${myStage2Slot.position === 1 ? "1st" : myStage2Slot.position === 2 ? "2nd" : myStage2Slot.position === 3 ? "3rd" : `${myStage2Slot.position}th`}`
+                      : "Book your slot from the timetable"}
+                  </p>
+                </div>
+                <span className={`pill ${myStage2Slot ? "pill-success" : "pill-warning"}`}>{myStage2Slot ? "Booked" : "Not booked"}</span>
+              </div>
+              <div className="flex items-start justify-between gap-3 py-2.5">
+                <div>
+                  <p className="text-sm font-semibold text-ink">Stage 3 report</p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    {record.stage3_required
+                      ? record.stage3_finalized_at
+                        ? "Filed by your tutor"
+                        : stage3Invite
+                          ? `Tutorial ${stage3Invite.confirmed_at ? "confirmed" : "invited, not yet confirmed"}${
+                              tutorialEventById.get(stage3Invite.timetable_event_id)
+                                ? ` · ${tutorialEventById.get(stage3Invite.timetable_event_id)!.event_date}`
+                                : ""
+                            }`
+                          : "Triggered -- not yet filed"
+                      : "Only filed if triggered -- not-to-standard at Stage 2, slipping from above-standard, or a failed assignment"}
+                  </p>
+                </div>
+                <span className={`pill ${!record.stage3_required ? "pill-neutral" : record.stage3_finalized_at ? "pill-success" : "pill-warning"}`}>
+                  {!record.stage3_required ? "N/A so far" : record.stage3_finalized_at ? "Filed" : "Pending"}
+                </span>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted">Sourced from the same Standing table your tutor sees -- this is your own row, not a separate record.</p>
+          </div>
+
+          <div className="sheet flex flex-col gap-3">
+            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">CELTA 5 self-assessment</p>
+            <div className="flex flex-col gap-1">
+              <p className={`text-sm font-semibold ${bothSigned ? "text-ink" : stage2Submitted ? "text-primary" : "text-gold"}`}>
+                {bothSigned ? "Both signed" : stage2Submitted ? "Candidate signed" : "Not started"}
+              </p>
+              <p className="text-xs text-muted">
+                {bothSigned
+                  ? "Signed off by you and your tutor."
+                  : stage2Submitted
+                    ? stage1And2Released
+                      ? "Your tutor has released the matrix -- review it below and sign off."
+                      : "Submitted -- your tutor is reviewing it."
+                    : "Best completed after TP2, once you have some feedback to reflect on."}
+              </p>
+            </div>
+            <p className="text-xs text-muted">You sign, then your tutor countersigns -- neither alone finishes it.</p>
+            <p className="text-[11px] text-muted">No grade lives here. This is your own reflection against the five CELTA components, not an assessment.</p>
+          </div>
+
+          <div className="sheet flex flex-col gap-3">
+            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Observation hours</p>
+            <div className="flex flex-col">
+              <div className="flex items-start gap-3 border-b border-border-faint py-2.5">
+                <span className="w-9 shrink-0 text-sm font-semibold text-ink">{experiencedTeacherHours.toFixed(1)}h</span>
+                <p className="text-xs text-muted">
+                  of {OBSERVATION_HOURS_REQUIRED}h minimum, experienced teachers{experiencedTeacherHours >= OBSERVATION_HOURS_REQUIRED ? " -- complete" : ""}
+                </p>
+              </div>
+              <div className="flex items-start gap-3 border-b border-border-faint py-2.5">
+                <span className="w-9 shrink-0 text-sm font-semibold text-ink">{peerHours.toFixed(1)}h</span>
+                <p className="text-xs text-muted">peer observation, live only</p>
+              </div>
+              <div className="flex items-start gap-3 py-2.5">
+                <span className="w-9 shrink-0 text-sm font-semibold text-ink">{filmedHours.toFixed(1)}h</span>
+                <p className="text-xs text-muted">filmed, capped separately -- does not count toward the peer minimum</p>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted">Full log further down this page -- every entry ties back to a specific session.</p>
+          </div>
+        </div>
+
         <div>
           <h2 className="font-serif text-xl text-ink">CELTA 5 record</h2>
           {/* remaining-compliance.md item 4: front matter populated from
