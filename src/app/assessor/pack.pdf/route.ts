@@ -45,11 +45,24 @@ export async function GET() {
   ]);
   if (!course) return NextResponse.json({ error: "Course not found." }, { status: 404 });
 
-  const [{ data: centre }, { data: uploadedDocs }, markingGuidancePresent] = await Promise.all([
-    admin.from("centers").select("name, center_number").eq("id", course.center_id).maybeSingle(),
-    admin.from("resources").select("title").eq("center_id", course.center_id).eq("category", "centre_documents"),
-    hasMarkingGuidance(admin, course.center_id),
-  ]);
+  const [{ data: centre }, { data: uploadedDocs }, markingGuidancePresent, { count: applicantCount }, { count: rejectedCount }] =
+    await Promise.all([
+      admin.from("centers").select("name, center_number").eq("id", course.center_id).maybeSingle(),
+      admin.from("resources").select("title").eq("center_id", course.center_id).eq("category", "centre_documents"),
+      hasMarkingGuidance(admin, course.center_id),
+      // "Application files -- including rejected applicants." Appeals.dc.html:
+      // application and selection notes are already first-class system
+      // records, not something a centre uploads -- so this reads applicants
+      // directly (the same records the admissions pipeline and the
+      // close-out export use) rather than checking for an uploaded document
+      // that would never exist for this row.
+      admin.from("applicants").select("id", { count: "exact", head: true }).eq("intake_course_id", courseId),
+      admin
+        .from("applicants")
+        .select("id", { count: "exact", head: true })
+        .eq("intake_course_id", courseId)
+        .in("stage", ["rejected_before_interview", "rejected_after_interview"]),
+    ]);
 
   const uploadedTitles = new Set((uploadedDocs ?? []).map((d) => d.title.trim().toLowerCase()));
 
@@ -76,10 +89,17 @@ export async function GET() {
     gradesEntered: readiness.gradesApprovedCount,
     candidates,
     cohortDocuments: [...COHORT_DOCUMENTS],
-    centreDocuments: CENTRE_DOCUMENTS.map((d) => ({
-      ...d,
-      present: d.name === "Marking guidance" ? markingGuidancePresent : uploadedTitles.has(d.name.toLowerCase()),
-    })),
+    centreDocuments: CENTRE_DOCUMENTS.map((d) => {
+      if (d.name === "Marking guidance") return { ...d, present: markingGuidancePresent };
+      if (d.name === "Application files") {
+        return {
+          ...d,
+          present: (applicantCount ?? 0) > 0,
+          meta: `${applicantCount ?? 0} applicants, including ${rejectedCount ?? 0} rejected`,
+        };
+      }
+      return { ...d, present: uploadedTitles.has(d.name.toLowerCase()) };
+    }),
     generatedAt: new Date().toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" }),
   });
 

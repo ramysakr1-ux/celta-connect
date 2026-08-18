@@ -31,6 +31,20 @@ function safeName(name: string): string {
   return name.replace(/[/\\:*?"<>|]/g, "-").trim();
 }
 
+function csvCell(value: unknown): string {
+  const s = value === null || value === undefined ? "" : String(value);
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+async function uploadCsv(accessToken: string, parentId: string, filename: string, csv: string): Promise<void> {
+  await uploadFileToDrive(accessToken, {
+    name: filename,
+    parentId,
+    mimeType: "text/csv",
+    bytes: Buffer.from(csv, "utf-8"),
+  });
+}
+
 async function uploadPdf(
   accessToken: string,
   parentId: string,
@@ -172,6 +186,59 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
         tutors: (trainers ?? []).map((t) => ({ name: t.full_name, tutorRole: t.tutor_role })),
       })
     );
+
+    // "Application files -- application forms and completed selection
+    // tasks for both rejected and accepted applicants." build-spec.md /
+    // Appeals.dc.html: these are first-class system records, not an
+    // upload, and the assessor pack (src/app/assessor/pack.pdf/route.ts)
+    // now reads the same table -- this was the other place spec'd to
+    // include them that didn't yet. A centre with no rejections on file
+    // looks like one that accepts everybody, which is itself a flag to an
+    // assessor, so rejected applicants are never filtered out here.
+    const { data: applicants } = await admin
+      .from("applicants")
+      .select(
+        "full_name, email, phone, stage, created_at, rejected_at, rejection_reason, marking_language_awareness, marking_accuracy, marking_organisation, marking_range, marking_substance, task_feedback"
+      )
+      .eq("intake_course_id", courseId)
+      .order("created_at");
+    if (applicants && applicants.length > 0) {
+      const header = [
+        "Name",
+        "Email",
+        "Phone",
+        "Stage",
+        "Applied",
+        "Rejected",
+        "Rejection reason",
+        "Language awareness",
+        "Accuracy",
+        "Organisation",
+        "Range",
+        "Substance",
+        "Task feedback",
+      ];
+      const rows = applicants.map((a) =>
+        [
+          a.full_name,
+          a.email,
+          a.phone,
+          a.stage,
+          a.created_at?.slice(0, 10),
+          a.rejected_at?.slice(0, 10) ?? "",
+          a.rejection_reason ?? "",
+          a.marking_language_awareness ?? "",
+          a.marking_accuracy ?? "",
+          a.marking_organisation ?? "",
+          a.marking_range ?? "",
+          a.marking_substance ?? "",
+          a.task_feedback ?? "",
+        ]
+          .map(csvCell)
+          .join(",")
+      );
+      await uploadCsv(accessToken, topFolder.id, "Applicants (including rejected).csv", [header.join(","), ...rows].join("\r\n"));
+    }
 
     const { data: timetableEvents } = await admin
       .from("course_timetable_events")
