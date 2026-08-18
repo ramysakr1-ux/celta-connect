@@ -48,3 +48,49 @@ export function halfOwningDate(tpEvents: TpTimetableEvent[], date: string): 1 | 
 export function nextTpDateForHalf(tpEvents: TpTimetableEvent[], halfOrder: 1 | 2, today: string): string | null {
   return halfTpDates(tpEvents, halfOrder).find((d) => d >= today) ?? null;
 }
+
+function daysBetween(a: string, b: string): number {
+  const [ay, am, ad] = a.split("-").map(Number);
+  const [by, bm, bd] = b.split("-").map(Number);
+  const msPerDay = 24 * 60 * 60 * 1000;
+  return Math.round((Date.UTC(by, bm - 1, bd) - Date.UTC(ay, am - 1, ad)) / msPerDay);
+}
+
+export interface IntensiveTpBreakCheck {
+  longestConsecutiveRun: number;
+  exceedsMaxConsecutive: boolean;
+  hasTwoDayBreak: boolean;
+}
+
+// Handbook 8.1.4: "two-day minimum break midway, no more than six
+// consecutive TP days." Advisory only, same pattern as the tutor
+// double-booking warning -- computed straight from the real timetable
+// (course_timetable_events, type='tp'), never a stored setting. The
+// spec's third clause ("the block should not end on the final day") isn't
+// checked here: "final day" is ambiguous between the TP block's own end
+// and the whole course's, and this is advisory, not worth guessing at.
+export function checkIntensiveTpBreaks(tpDates: string[]): IntensiveTpBreakCheck {
+  const MAX_CONSECUTIVE = 6;
+  const MIN_BREAK_DAYS = 2;
+
+  let longestRun = tpDates.length > 0 ? 1 : 0;
+  let currentRun = tpDates.length > 0 ? 1 : 0;
+  let hasTwoDayBreak = false;
+
+  for (let i = 1; i < tpDates.length; i++) {
+    const gap = daysBetween(tpDates[i - 1], tpDates[i]);
+    if (gap === 1) {
+      currentRun += 1;
+      longestRun = Math.max(longestRun, currentRun);
+    } else {
+      currentRun = 1;
+    }
+    if (gap - 1 >= MIN_BREAK_DAYS) hasTwoDayBreak = true;
+  }
+
+  return {
+    longestConsecutiveRun: longestRun,
+    exceedsMaxConsecutive: longestRun > MAX_CONSECUTIVE,
+    hasTwoDayBreak,
+  };
+}

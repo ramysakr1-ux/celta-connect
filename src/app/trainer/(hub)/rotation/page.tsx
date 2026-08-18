@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { rotationPosition, distinctTpDates, halfOwningDate } from "@/lib/rotation";
+import { rotationPosition, distinctTpDates, halfOwningDate, checkIntensiveTpBreaks } from "@/lib/rotation";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { ReorderForm } from "@/app/trainer/(hub)/rotation/reorder-form";
 import { ScheduleForm } from "@/app/trainer/(hub)/rotation/schedule-form";
@@ -104,6 +104,14 @@ export default async function TrainerRotationPage() {
   const tpEventRows = tpEvents ?? [];
   const today = toLocalIso(new Date());
 
+  // Handbook 8.1.4: "two-day minimum break midway, no more than six
+  // consecutive TP days." The break-check only means something once a
+  // course actually looks like an intensive block (a normal 2-3x/week
+  // course always has gaps) -- gated on the run already being long enough
+  // to read as intensive, so a typical course never sees a false flag.
+  const intensiveCheck = checkIntensiveTpBreaks(distinctTpDates(tpEventRows));
+  const looksIntensive = intensiveCheck.longestConsecutiveRun >= 4;
+
   const buildMembers = (subgroupId: string) =>
     (members ?? [])
       .filter((m) => m.subgroup_id === subgroupId)
@@ -135,6 +143,20 @@ export default async function TrainerRotationPage() {
           Manual override →
         </Link>
       </div>
+
+      {looksIntensive ? (
+        <div className="sheet p-6">
+          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Intensive TP block</p>
+          <p className="mt-1 text-xs text-muted">Handbook 8.1.4: a two-day minimum break midway, no more than six consecutive TP days.</p>
+          <p className="mt-2 text-sm text-ink">Longest run so far: {intensiveCheck.longestConsecutiveRun} consecutive TP days.</p>
+          {intensiveCheck.exceedsMaxConsecutive ? (
+            <p className="mt-1 text-xs text-status-warning-text">Over six days in a row -- worth a look.</p>
+          ) : null}
+          {!intensiveCheck.hasTwoDayBreak ? (
+            <p className="mt-1 text-xs text-status-warning-text">No two-day break anywhere in the schedule yet.</p>
+          ) : null}
+        </div>
+      ) : null}
 
       {tpDistribution.length >= 2 ? (
         <div className="sheet p-6">
