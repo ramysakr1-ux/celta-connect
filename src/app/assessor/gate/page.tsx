@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getAssessorTermsStatus } from "@/lib/auth/portfolio-access";
 import { AssessorTermsForm } from "@/app/assessor/gate/terms-form";
 
-// Invitations.dc.html screen 1d, "no account -- the terms are the screen":
+// specs/ASSESSOR-GATE-TERMS.md, "no account -- the terms are the screen":
 // there's no account to create, so accepting these is the only place terms
 // can be presented to someone who never signs up.
 export default async function AssessorGatePage() {
