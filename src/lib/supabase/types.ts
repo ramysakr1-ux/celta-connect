@@ -483,6 +483,11 @@ export interface Database {
           interview_auto_send_cancelled_by: string | null;
           interview_auto_send_sent_at: string | null;
           clear_problems_notified_at: string | null;
+          // migration 0153 -- the picker link, and general "an invite went
+          // out" tracking that doesn't care which lane sent it.
+          interview_invite_token: string | null;
+          interview_invite_sent_at: string | null;
+          interview_invite_reminder_sent_at: string | null;
           marking_language_awareness: "above" | "at" | "below" | null;
           marking_language_awareness_note: string | null;
           marking_accuracy: "above" | "at" | "below" | null;
@@ -663,7 +668,14 @@ export interface Database {
           id: string;
           center_id: string;
           applicant_id: string;
-          type: "submitted" | "task_returned" | "interview_completed" | "stale_no_decision" | "place_offered" | "clear_problems";
+          type:
+            | "submitted"
+            | "task_returned"
+            | "interview_completed"
+            | "stale_no_decision"
+            | "place_offered"
+            | "clear_problems"
+            | "no_interview_slots";
           message: string;
           read_at: string | null;
           created_at: string;

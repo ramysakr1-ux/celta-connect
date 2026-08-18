@@ -412,23 +412,6 @@ export function interviewInvitationEmailHtml(input: {
   });
 }
 
-// specs/for-claude-code-email-inventory.md Part 1's "clear" lane: "invitation
-// drafted, held 15 minutes, then auto-sent with interview times." Confirms a
-// slot outright rather than offering a choice, since there is no applicant
-// self-booking page yet for interviewInvitationEmailHtml's "Choose a time"
-// link to point to -- a separate, unbuilt piece of Interview Booking.dc.html,
-// not guessed at here.
-export function interviewAutoBookedEmailHtml(input: { applicantName: string; when: string }): string {
-  return emailShell({
-    heading: "We would like to meet you",
-    tone: "teal",
-    body:
-      p(`Dear ${input.applicantName},`) +
-      p("Thank you for the written tasks — we have read them and we would like to meet you.") +
-      p(`We have booked you in for ${input.when}. The interview takes about 45 minutes — there is nothing to prepare.`) +
-      p("If that time doesn't work, just reply to this email and we will find another."),
-  });
-}
 
 export function offerEmailHtml(input: {
   applicantName: string;

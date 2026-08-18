@@ -260,6 +260,24 @@ export async function toggleAdmissionsAiAutobook(formData: FormData): Promise<vo
   revalidatePath("/dashboard/admissions/settings");
 }
 
+// Staff-triggered send, for the borderline lane (a human decided) or a
+// manual re-send -- same picker-link email the clear lane's cron sends
+// automatically, just immediate and human-initiated, so no hold applies.
+export async function sendInterviewInviteManually(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  const applicantId = formData.get("applicant_id");
+  if (typeof applicantId !== "string") return;
+
+  const admin = createAdminClient();
+  const { data: applicant } = await admin.from("applicants").select("center_id").eq("id", applicantId).maybeSingle();
+  if (!applicant || applicant.center_id !== staff.center_id) return;
+
+  const { sendInterviewInvite } = await import("@/lib/admissions-invite");
+  await sendInterviewInvite(admin, applicantId);
+
+  revalidatePath(`/dashboard/admissions/${applicantId}`);
+}
+
 // "A 15-minute hold between verdict and email... a cancellation window with
 // a Hold button in the admin queue" (review-notes.md). Clicking it stops
 // the auto-send permanently -- it does not merely pause it -- so the

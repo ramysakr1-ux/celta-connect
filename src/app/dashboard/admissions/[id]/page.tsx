@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
-import { bookInterviewSlot } from "@/app/dashboard/admissions/actions";
+import { bookInterviewSlot, sendInterviewInviteManually } from "@/app/dashboard/admissions/actions";
 import { MarkingForm } from "@/app/dashboard/admissions/[id]/marking-form";
 import { AiReadingPanel } from "@/app/dashboard/admissions/[id]/ai-reading-panel";
 import { InterviewRecordForm } from "@/app/dashboard/admissions/[id]/interview-record-form";
@@ -306,9 +306,39 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             Booked: {bookedSlot.slot_date} {bookedSlot.slot_time} ({bookedSlot.mode === "online" ? "Online" : "Face to face"}
             {bookedSlot.panel ? ", panel" : ""})
           </p>
-        ) : (openSlots ?? []).length > 0 ? (
+        ) : (
           <>
-            <form action={bookInterviewSlot} className="flex flex-wrap items-end gap-3">
+            {/*
+              "Every interview invite -- any lane -- sends the same picker
+              link... the applicant always picks their own time." This is
+              the primary path; the direct-booking form below stays as a
+              manual override (e.g. a time agreed by phone), not the
+              standard flow.
+            */}
+            <div className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3">
+              <div>
+                <p className="text-sm text-ink">
+                  {applicant.interview_invite_sent_at
+                    ? `Invite sent ${new Date(applicant.interview_invite_sent_at).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} -- no time picked yet`
+                    : "Send the applicant a link to pick their own time"}
+                </p>
+                <p className="text-xs text-muted">Same link every time -- reply to admissions if none of the times suit.</p>
+              </div>
+              <form action={sendInterviewInviteManually}>
+                <input type="hidden" name="applicant_id" value={applicant.id} />
+                <button type="submit" className="shrink-0 rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+                  {applicant.interview_invite_sent_at ? "Resend invite" : "Send interview invite"}
+                </button>
+              </form>
+            </div>
+          </>
+        )}
+        {!bookedSlot && (openSlots ?? []).length > 0 ? (
+          <details className="text-xs text-muted">
+            <summary className="cursor-pointer font-semibold text-primary hover:underline">
+              Or book a specific time on their behalf (e.g. agreed by phone)
+            </summary>
+            <form action={bookInterviewSlot} className="mt-2 flex flex-wrap items-end gap-3">
               <input type="hidden" name="applicant_id" value={applicant.id} />
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="time_key" className="text-xs text-muted">
@@ -346,8 +376,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                 </button>
               </form>
             </details>
-          </>
-        ) : (
+          </details>
+        ) : !bookedSlot ? (
           <p className="text-sm text-muted">
             No open slots for this intake yet.{" "}
             <Link href="/dashboard/admissions" className="text-primary hover:underline">
@@ -355,7 +385,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             </Link>
             .
           </p>
-        )}
+        ) : null}
 
         {bookedSlot ? (
           <InterviewRecordForm
