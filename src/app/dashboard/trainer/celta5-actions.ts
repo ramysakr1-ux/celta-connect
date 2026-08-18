@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { PROVISIONAL_SLOTS } from "@/lib/provisional-grade";
 import { isMctOnCourse } from "@/lib/course-mct";
+import { checkStage1RecordsMilestone, checkFinalGradeMilestone } from "@/lib/cohort-milestones";
 import type { CriteriaRating, StandardRating } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -98,12 +99,14 @@ export async function updateStage1(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole("trainer");
+  const trainer = await requireRole("trainer");
 
   const traineeId = formData.get("trainee_id");
   if (typeof traineeId !== "string" || !traineeId) {
     return { error: "Something went wrong. Refresh and try again." };
   }
+
+  const completed = formData.get("stage1_completed") === "on";
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -113,14 +116,15 @@ export async function updateStage1(
       stage1_hours_taught: optionalNumber(formData.get("stage1_hours_taught")),
       stage1_strengths: optionalString(formData.get("stage1_strengths")),
       stage1_action_plan: optionalString(formData.get("stage1_action_plan")),
-      stage1_completed_at:
-        formData.get("stage1_completed") === "on" ? new Date().toISOString() : null,
+      stage1_completed_at: completed ? new Date().toISOString() : null,
     })
     .eq("trainee_id", traineeId);
 
   if (error) {
     return { error: "Could not save. Try again." };
   }
+
+  if (completed && trainer.course_id) await checkStage1RecordsMilestone(supabase, trainer.course_id, trainer.id);
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   return { error: null };
@@ -335,7 +339,7 @@ export async function updateFinalGrade(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole("trainer");
+  const trainer = await requireRole("trainer");
 
   const traineeId = formData.get("trainee_id");
   const finalGrade = formData.get("final_recommended_grade");
@@ -373,6 +377,8 @@ export async function updateFinalGrade(
   if (error) {
     return { error: "Could not save. Try again." };
   }
+
+  if (grade && trainer.course_id) await checkFinalGradeMilestone(supabase, trainer.course_id, trainer.id);
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   revalidatePath("/trainer/grades-report");

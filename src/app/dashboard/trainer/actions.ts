@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
+import { checkTaughtMilestones } from "@/lib/cohort-milestones";
 import type { PassFail, StandardRating, SubmissionStatus } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -86,6 +87,7 @@ export async function createTpLesson(
       .eq("trainee_id", traineeId)
       .eq("tp_number", tpNumber)
       .is("taught_at", null);
+    if (trainer.course_id) await checkTaughtMilestones(supabase, trainer.course_id, trainer.id, tpNumber);
   }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
@@ -100,7 +102,7 @@ export async function updateTpLesson(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole("trainer");
+  const trainer = await requireRole("trainer");
 
   const lessonId = formData.get("lesson_id");
   const traineeId = formData.get("trainee_id");
@@ -141,6 +143,7 @@ export async function updateTpLesson(
       .eq("trainee_id", traineeId)
       .eq("tp_number", tpNumber)
       .is("taught_at", null);
+    if (trainer.course_id) await checkTaughtMilestones(supabase, trainer.course_id, trainer.id, tpNumber);
   }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
