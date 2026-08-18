@@ -14,6 +14,9 @@ import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 import { DesignerCredit } from "@/components/designer-credit";
 import { AssessorMeetingCard } from "./assessor-meeting-card";
+import { buildDeferralDraft } from "@/lib/letters/deferral";
+import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
+import { DeferralLetterSection } from "./deferral-letter-section";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   input_session: "Input session",
@@ -142,17 +145,33 @@ export default async function CourseStreamPage({
     ? await supabase.from("courses").select("assessor_visit_date").eq("id", trainee.course_id).maybeSingle()
     : { data: null };
 
-  let deferralTransfer: { reasons: string; hours_carried: number; reintegration_deadline: string | null; linked_at: string | null } | null =
-    null;
+  let deferralTransfer:
+    | { id: string; reasons: string; hours_carried: number; reintegration_deadline: string | null; linked_at: string | null }
+    | null = null;
+  let deferralLetters: { id: string; issued_at: string; acknowledged_at: string | null }[] = [];
+  let deferralLetterDraft: FormalLetterInput | null = null;
   if (isStaff && trainee.course_status === "deferred") {
     const { data } = await supabase
       .from("deferral_transfers")
-      .select("reasons, hours_carried, reintegration_deadline, linked_at")
+      .select("id, reasons, hours_carried, reintegration_deadline, linked_at")
       .eq("source_trainee_id", traineeId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     deferralTransfer = data;
+    if (deferralTransfer && trainee.course_id) {
+      const [{ data: letters }, draft] = await Promise.all([
+        supabase
+          .from("formal_letters")
+          .select("id, issued_at, acknowledged_at")
+          .eq("related_deferral_transfer_id", deferralTransfer.id)
+          .eq("letter_type", "deferral")
+          .order("issued_at", { ascending: false }),
+        buildDeferralDraft(supabase, trainee.course_id, deferralTransfer.id, viewer?.full_name ?? "Your tutor"),
+      ]);
+      deferralLetters = letters ?? [];
+      deferralLetterDraft = draft?.input ?? null;
+    }
   }
 
   // Handbook 14.2's candidate-concerns meeting. Only offered to the candidate
@@ -395,6 +414,16 @@ export default async function CourseStreamPage({
                 >
                   Download withdrawal letter →
                 </a>
+              ) : null}
+              {trainee.course_status === "deferred" && deferralTransfer ? (
+                <div className="mt-3">
+                  <DeferralLetterSection
+                    traineeId={traineeId}
+                    deferralTransferId={deferralTransfer.id}
+                    draft={deferralLetterDraft}
+                    existingLetters={deferralLetters}
+                  />
+                </div>
               ) : null}
             </div>
           ) : null}

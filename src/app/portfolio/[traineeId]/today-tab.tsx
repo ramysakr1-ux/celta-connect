@@ -14,6 +14,12 @@ const TP_LESSON_LENGTH_MINUTES = 45;
 // for a single fixed CELTA number.
 const OBSERVATION_HOURS_REQUIRED = 6;
 
+const LETTER_LABEL: Record<string, string> = {
+  fail_risk: "A formal notice about your progress",
+  assignment_warning: "A formal notice about an assignment",
+  deferral: "Your deferral letter",
+};
+
 interface WaitingItem {
   label: string;
   detail: string;
@@ -148,6 +154,12 @@ export async function TodayTab({
     }
   }
 
+  const { data: unacknowledgedLetters } = await supabase
+    .from("formal_letters")
+    .select("id, letter_type")
+    .eq("trainee_id", traineeId)
+    .is("acknowledged_at", null);
+
   const { data: gtkyAssignment } = await supabase
     .from("gtky_assignments")
     .select("chosen_slug")
@@ -217,6 +229,13 @@ export async function TodayTab({
     }
   }
   if (filmedObservationReminder) waiting.push(filmedObservationReminder);
+  for (const letter of unacknowledgedLetters ?? []) {
+    waiting.push({
+      label: LETTER_LABEL[letter.letter_type] ?? "A formal letter",
+      detail: "Please read and acknowledge it",
+      href: `/portfolio/${traineeId}/letters/${letter.id}`,
+    });
+  }
   for (const invite of tutorialInvites ?? []) {
     const event = tutorialEventById.get(invite.timetable_event_id);
     const stageLabel = invite.stage === "stage1" ? "Stage 1" : "Stage 3";

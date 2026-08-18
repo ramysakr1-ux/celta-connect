@@ -19,6 +19,8 @@ import { FinalGradeForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/fin
 import { AttendanceForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/attendance-form";
 import { AdminGrantForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/admin-grant-form";
 import { FinalizeRecordForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/finalize-record-form";
+import { isFailRiskTriggered, buildFailRiskDraft } from "@/lib/letters/fail-risk";
+import { FailRiskLetterSection } from "@/app/dashboard/trainer/trainees/[id]/celta5/fail-risk-letter-section";
 
 const TRAJECTORY_LABEL: Record<string, string> = {
   "Pass A": "Pass A",
@@ -225,6 +227,23 @@ export default async function Celta5RecordPage({
 
       {record.stage3_required ? (
         <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
+      ) : null}
+
+      {isFailRiskTriggered(record) ? (
+        <FailRiskLetterSection
+          traineeId={id}
+          draft={(await buildFailRiskDraft(supabase, trainer.course_id ?? "", id, trainer.full_name))?.input ?? null}
+          existingLetters={
+            (
+              await supabase
+                .from("formal_letters")
+                .select("id, issued_at, acknowledged_at")
+                .eq("trainee_id", id)
+                .eq("letter_type", "fail_risk")
+                .order("issued_at", { ascending: false })
+            ).data ?? []
+          }
+        />
       ) : null}
 
       <FinalGradeForm key={`final-${record.updated_at}`} record={record} />

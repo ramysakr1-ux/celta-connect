@@ -1013,6 +1013,30 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["restart_transfers"]["Row"]>;
         Relationships: [];
       };
+      formal_letters: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          letter_type: "fail_risk" | "assignment_warning" | "deferral";
+          snapshot: Record<string, unknown>;
+          issued_at: string;
+          issued_by: string;
+          acknowledged_at: string | null;
+          related_assignment_id: string | null;
+          related_deferral_transfer_id: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["formal_letters"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          letter_type: "fail_risk" | "assignment_warning" | "deferral";
+          snapshot: Record<string, unknown>;
+          issued_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["formal_letters"]["Row"]>;
+        Relationships: [];
+      };
       deferral_transfers: {
         Row: {
           id: string;

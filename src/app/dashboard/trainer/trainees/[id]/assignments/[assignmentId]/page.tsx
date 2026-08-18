@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { AssignmentReviewForm } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/review-form";
 import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
+import { isAssignmentWarningTriggered, buildAssignmentWarningDraft } from "@/lib/letters/assignment-warning";
+import { AssignmentWarningLetterSection } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/assignment-warning-letter-section";
 
 export default async function TrainerAssignmentReviewPage({
   params,
@@ -82,6 +84,24 @@ export default async function TrainerAssignmentReviewPage({
           </button>
         </form>
       </div>
+
+      {isAssignmentWarningTriggered(assignment) ? (
+        <AssignmentWarningLetterSection
+          traineeId={id}
+          assignmentId={assignmentId}
+          draft={(await buildAssignmentWarningDraft(supabase, trainer.course_id ?? "", assignmentId, trainer.full_name))?.input ?? null}
+          existingLetters={
+            (
+              await supabase
+                .from("formal_letters")
+                .select("id, issued_at, acknowledged_at")
+                .eq("related_assignment_id", assignmentId)
+                .eq("letter_type", "assignment_warning")
+                .order("issued_at", { ascending: false })
+            ).data ?? []
+          }
+        />
+      ) : null}
 
       {!template ? (
         <div className="card p-6">
