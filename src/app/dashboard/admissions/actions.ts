@@ -3,7 +3,9 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-access";
+import { referApplicant } from "@/lib/admissions-referral";
 import {
   sendApplicantEmail,
   offerEmailHtml,
@@ -376,6 +378,62 @@ export async function saveInterviewRecord(_prevState: FormState, formData: FormD
 // "Both require a human-written reason before they can be sent, and
 // neither is ever generated." The reason is captured and the stage moves
 // now; actually SENDING the rejection email is Phase E.
+
+export interface ReferFormState {
+  error: string | null;
+}
+
+// build-spec.md §14 "Sharing between branches": "One person holding
+// admissions at both branches refers in a single action. Where nobody
+// spans the two, it becomes a request the receiving branch accepts." Only
+// the single-action case is built here -- the request/accept workflow for
+// the "nobody spans both" case is a separate, larger feature, left unbuilt
+// rather than half-built. The UI (refer-form.tsx) only ever offers
+// destination centres this same check would pass, but the check is
+// re-run here server-side rather than trusted from the form.
+export async function referApplicantAction(_prevState: ReferFormState, formData: FormData): Promise<ReferFormState> {
+  const staff = await requireAdmissionsHandler();
+  const applicantId = formData.get("applicant_id");
+  const destination = formData.get("destination");
+  if (typeof applicantId !== "string" || !applicantId || typeof destination !== "string" || !destination) {
+    return { error: "Pick a branch and intake to refer to." };
+  }
+  if (staff.role !== "admin") {
+    return { error: "Only a centre admin holding admissions at both branches can refer a candidate." };
+  }
+  const [toCenterId, toCourseId] = destination.split("::");
+  if (!toCenterId || !toCourseId) return { error: "Pick a branch and intake to refer to." };
+
+  const admin = createAdminClient();
+  const { data: fromCentre } = await admin.from("centers").select("id, organisation_id").eq("id", staff.center_id).maybeSingle();
+  const { data: toCentre } = await admin.from("centers").select("id, organisation_id").eq("id", toCenterId).maybeSingle();
+  if (!fromCentre?.organisation_id || fromCentre.organisation_id !== toCentre?.organisation_id) {
+    return { error: "That branch isn't part of your organisation." };
+  }
+  const { data: grant } = await admin
+    .from("centre_roles")
+    .select("role")
+    .eq("profile_id", staff.id)
+    .eq("center_id", toCenterId)
+    .is("revoked_at", null)
+    .in("role", ["centre_administrator", "centre_owner"])
+    .maybeSingle();
+  if (!grant) {
+    return { error: "You don't hold admissions at that branch -- ask someone there to accept a referral request instead." };
+  }
+
+  const result = await referApplicant({
+    applicantId,
+    toCenterId,
+    toCourseId,
+    byProfileId: staff.id,
+    fromCenterId: staff.center_id,
+  });
+  if (result.error) return { error: result.error };
+
+  revalidatePath(`/dashboard/admissions/${applicantId}`);
+  return { error: null };
+}
 
 export async function rejectApplicant(_prevState: FormState, formData: FormData): Promise<FormState> {
   const staff = await requireAdmissionsHandler();

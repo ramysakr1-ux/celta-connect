@@ -17,6 +17,8 @@ import { getAreaHolders } from "@/lib/auth/area-holders";
 import { AreaAction } from "@/components/area-action";
 import { WaiverForm } from "@/app/dashboard/admissions/[id]/waiver-form";
 import { WaitingListForm } from "@/app/dashboard/admissions/[id]/waiting-list-form";
+import { ReferForm, type ReferDestination } from "@/app/dashboard/admissions/[id]/refer-form";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function ApplicantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const staff = await requireAdmissionsHandler();
@@ -95,6 +97,50 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
     ? areaVerdict({ area: "payments", viewerProfileId: staff.id, roles: centreCtx.roles, holders: areaHolders })
     : ({ kind: "act" } as const);
 
+  // build-spec.md §14 -- only offered when the viewer already holds
+  // admissions (centre_administrator or centre_owner) at a sibling branch
+  // in the same organisation. Nothing here is trusted by the action itself
+  // (referApplicantAction re-checks), this only decides what's shown.
+  let referDestinations: ReferDestination[] = [];
+  if (staff.role === "admin" && !applicant.referred_to_center_id) {
+    const admin = createAdminClient();
+    const { data: ownCentre } = await admin.from("centers").select("organisation_id").eq("id", staff.center_id).maybeSingle();
+    if (ownCentre?.organisation_id) {
+      const [{ data: grants }, { data: siblingCentres }] = await Promise.all([
+        admin
+          .from("centre_roles")
+          .select("center_id")
+          .eq("profile_id", staff.id)
+          .is("revoked_at", null)
+          .in("role", ["centre_administrator", "centre_owner"])
+          .neq("center_id", staff.center_id),
+        admin.from("centers").select("id, name").eq("organisation_id", ownCentre.organisation_id).neq("id", staff.center_id),
+      ]);
+      const siblingNameById = new Map((siblingCentres ?? []).map((c) => [c.id, c.name]));
+      const qualifyingCenterIds = [...new Set((grants ?? []).map((g) => g.center_id))].filter((id) => siblingNameById.has(id));
+      if (qualifyingCenterIds.length > 0) {
+        const { data: siblingCourses } = await admin.from("courses").select("id, name, center_id").in("center_id", qualifyingCenterIds).order("start_date", { ascending: false });
+        referDestinations = (siblingCourses ?? []).map((c) => ({
+          centerId: c.center_id,
+          centerName: siblingNameById.get(c.center_id) ?? "Unknown branch",
+          courseId: c.id,
+          courseName: c.name,
+        }));
+      }
+    }
+  }
+
+  // Admin client for both -- the destination centre and its staff are a
+  // sibling branch's own data, outside this session's ordinary RLS scope,
+  // and the spec calls this audit line "readable at both ends."
+  const referralAdmin = createAdminClient();
+  const { data: referredToCentre } = applicant.referred_to_center_id
+    ? await referralAdmin.from("centers").select("name").eq("id", applicant.referred_to_center_id).maybeSingle()
+    : { data: null };
+  const { data: referredByProfile } = applicant.referred_by
+    ? await referralAdmin.from("profiles").select("full_name").eq("id", applicant.referred_by).maybeSingle()
+    : { data: null };
+
   const canDecide = canDecideAdmissions(staff);
   const isRejected = applicant.stage === "rejected_before_interview" || applicant.stage === "rejected_after_interview";
   const hasOffer = applicant.stage === "offer_sent" || applicant.stage === "accepted";
@@ -116,6 +162,13 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           </div>
           <span className="status-pill status-pill-pending">{applicant.stage.replaceAll("_", " ")}</span>
         </div>
+        {applicant.referred_to_center_id ? (
+          <p className="mt-2 text-xs text-muted">
+            Referred to {referredToCentre?.name ?? "another branch"}
+            {referredByProfile ? ` by ${referredByProfile.full_name}` : ""}
+            {applicant.referred_at ? ` · ${new Date(applicant.referred_at).toLocaleString("en-GB")}` : ""}
+          </p>
+        ) : null}
       </div>
 
       {isRejected ? (
@@ -327,6 +380,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           </AreaAction>
           <WaitingListForm applicantId={applicant.id} />
           <RejectForm applicantId={applicant.id} />
+          <ReferForm applicantId={applicant.id} destinations={referDestinations} />
         </>
       ) : null}
     </div>
