@@ -7,6 +7,7 @@ import { resolveTimeBands, toLocalIso } from "@/lib/timetable-grid";
 import { halfTpDates, halfOwningDate, type TpTimetableEvent } from "@/lib/rotation";
 import { groupCodeForHalf, isMine, type HalfInfo } from "@/lib/timetable-read-only";
 import { ReadOnlyTimetableBoard } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
+import { SupervisedSessionsPanel } from "@/app/portfolio/[traineeId]/timetable/supervised-sessions-panel";
 import type { TimetableEvent } from "@/lib/timetable-grid";
 
 // for-claude-code-timetable-view.md's read-only 4-week board -- trainee's
@@ -46,9 +47,11 @@ export default async function TraineeTimetablePage({
       .order("event_time"),
     supabase.from("plan_assignments").select("tp_number, taught_at").eq("trainee_id", traineeId),
     supabase.from("course_subgroup_members").select("subgroup_id, base_slot").eq("trainee_id", traineeId).maybeSingle(),
-    supabase.from("supervised_session_completions").select("timetable_event_id, submitted_at").eq("trainee_id", traineeId),
+    supabase
+      .from("supervised_session_completions")
+      .select("timetable_event_id, time_spent_seconds, response, submitted_at, checked_at")
+      .eq("trainee_id", traineeId),
   ]);
-  void supervisedCompletions; // reserved for a future supervised-session detail row; not surfaced in the board yet
 
   const timeBands = resolveTimeBands(course?.time_bands ?? null);
   const allEvents: TimetableEvent[] = events ?? [];
@@ -174,6 +177,14 @@ export default async function TraineeTimetablePage({
           nowIso={new Date().toISOString()}
         />
       )}
+
+      {isStaff ? (
+        <SupervisedSessionsPanel
+          traineeId={traineeId}
+          events={allEvents.filter((e) => e.type === "supervised_session").map((e) => ({ id: e.id, title: e.title, event_date: e.event_date }))}
+          completions={supervisedCompletions ?? []}
+        />
+      ) : null}
     </div>
   );
 }

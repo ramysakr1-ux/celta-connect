@@ -35,6 +35,29 @@ export interface SubmitState {
   error: string | null;
 }
 
+// for-claude-code-supervised-review.md's "completion flag" is the tick
+// itself (already computed in roster.ts's supervisedDone/supervisedTotal);
+// this is the other half -- a trainer actually marking one submission as
+// checked, which nothing wrote before this (checked_at/checked_by were
+// read in task-form.tsx's "waiting on your trainer to check this" but
+// never set anywhere).
+export async function checkSupervisedSession(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const timetableEventId = formData.get("timetable_event_id");
+  const traineeId = formData.get("trainee_id");
+  if (typeof timetableEventId !== "string" || typeof traineeId !== "string") return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("supervised_session_completions")
+    .update({ checked_at: new Date().toISOString(), checked_by: trainer.id })
+    .eq("timetable_event_id", timetableEventId)
+    .eq("trainee_id", traineeId)
+    .not("submitted_at", "is", null);
+
+  revalidatePath(`/portfolio/${traineeId}/timetable`);
+}
+
 export async function submitSupervisedSession(_prev: SubmitState, formData: FormData): Promise<SubmitState> {
   const trainee = await requireRole("trainee");
   const eventId = formData.get("event_id");
