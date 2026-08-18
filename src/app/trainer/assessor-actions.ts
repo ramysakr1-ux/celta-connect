@@ -3,7 +3,9 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
-import { computeAssessorReadiness } from "@/lib/assessor-pack";
+import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
+import { createResendClient, joinLinkSender } from "@/lib/resend/client";
+import { buildAssessorInviteEmailHtml } from "@/lib/assessor-invite-email";
 
 export interface AssessorTokenResult {
   token: string | null;
@@ -57,4 +59,76 @@ export async function getOrCreateAssessorToken(): Promise<AssessorTokenResult> {
 
   if (error || !created) return { token: null, error: "Could not create the link. Try again.", readinessIssues: null };
   return { token: created.token, error: null, readinessIssues: null };
+}
+
+export interface SendAssessorEmailState {
+  error: string | null;
+  sent: boolean;
+}
+
+// The welcome email (email #18, design_handoff_all_emails). Reuses the
+// exact same readiness-gated token as the copy-link button above -- an
+// emailed pack and a copied link point at the same access, so they share
+// the same gate.
+export async function sendAssessorInviteEmail(
+  _prevState: SendAssessorEmailState,
+  formData: FormData
+): Promise<SendAssessorEmailState> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return { error: "No course assigned.", sent: false };
+
+  const toEmail = formData.get("email");
+  if (typeof toEmail !== "string" || !toEmail.includes("@")) {
+    return { error: "Enter a valid email address.", sent: false };
+  }
+
+  const { token, error: tokenError, readinessIssues } = await getOrCreateAssessorToken();
+  if (!token) {
+    return {
+      error: readinessIssues && readinessIssues.length > 0 ? "Some portfolios aren't complete yet." : (tokenError ?? "Could not create the link."),
+      sent: false,
+    };
+  }
+
+  const siteUrl = process.env.SITE_URL;
+  if (!siteUrl) return { error: "SITE_URL is missing from .env.local.", sent: false };
+
+  const supabase = await createClient();
+  const [{ data: course }, { data: center }, readiness, candidates] = await Promise.all([
+    supabase.from("courses").select("name, end_date, assessor_visit_date").eq("id", trainer.course_id).maybeSingle(),
+    supabase.from("centers").select("name").eq("id", trainer.center_id).maybeSingle(),
+    computeAssessorReadiness(supabase, trainer.course_id),
+    buildCandidateCards(supabase, trainer.course_id),
+  ]);
+  if (!course) return { error: "Could not find your course.", sent: false };
+
+  const centerName = center?.name ?? "Your centre";
+  const potentialFails = candidates.filter((c) => c.provisionalLabel?.includes("Fail")).length;
+  const visitDateLabel = course.assessor_visit_date
+    ? new Date(`${course.assessor_visit_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })
+    : null;
+  const accessEndsLabel = `When the course closes, ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`;
+
+  try {
+    const resend = createResendClient();
+    const { error } = await resend.emails.send({
+      from: joinLinkSender(centerName),
+      to: toEmail,
+      subject: `${centerName} · assessment visit pack for ${course.name}`,
+      html: buildAssessorInviteEmailHtml({
+        centerName,
+        courseName: course.name,
+        visitDateLabel,
+        totalCandidates: readiness.totalCandidates,
+        potentialFails,
+        accessEndsLabel,
+        packUrl: `${siteUrl}/assessor/${token}`,
+      }),
+    });
+    if (error) return { error: "Could not send the email. Try copying the link instead.", sent: false };
+  } catch {
+    return { error: "Could not send the email. Try copying the link instead.", sent: false };
+  }
+
+  return { error: null, sent: true };
 }

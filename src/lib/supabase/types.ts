@@ -2201,6 +2201,7 @@ export interface Database {
           volunteer_student_id: string | null;
           expires_at: string;
           created_at: string;
+          terms_accepted_at: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["course_access_tokens"]["Row"]> & {
           course_id: string;

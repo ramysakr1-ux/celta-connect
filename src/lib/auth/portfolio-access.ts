@@ -30,3 +30,27 @@ export async function getAssessorCourseId(): Promise<string | null> {
   if (!data || new Date(data.expires_at) < new Date()) return null;
   return data.course_id;
 }
+
+// Separate from getAssessorCourseId() on purpose: that function is used
+// everywhere as a blunt "is this a live assessor session" check, and
+// folding the terms-gate into it would make an assessor who just hasn't
+// clicked accept yet indistinguishable from an invalid/expired link --
+// they'd land on "this link is not valid" instead of the gate they still
+// need to finish. Only the couple of entry points that need to send
+// someone to /assessor/gate specifically call this instead.
+export async function getAssessorTermsStatus(): Promise<{ courseId: string; accepted: boolean } | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ASSESSOR_COOKIE)?.value;
+  if (!token) return null;
+
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("course_access_tokens")
+    .select("course_id, expires_at, terms_accepted_at")
+    .eq("token", token)
+    .eq("role", "assessor")
+    .maybeSingle();
+
+  if (!data || new Date(data.expires_at) < new Date()) return null;
+  return { courseId: data.course_id, accepted: Boolean(data.terms_accepted_at) };
+}

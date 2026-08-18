@@ -14,7 +14,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
 
   const { data: accessToken } = await admin
     .from("course_access_tokens")
-    .select("expires_at")
+    .select("expires_at, terms_accepted_at")
     .eq("token", token)
     .eq("role", "assessor")
     .maybeSingle();
@@ -25,7 +25,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
     return NextResponse.redirect(`${origin}/login?error=assessor_link_invalid`);
   }
 
-  const response = NextResponse.redirect(`${origin}/assessor`);
+  // "Before you open the pack" -- Invitations.dc.html screen 1d. First
+  // visit on this token goes to the gate; once accepted it's remembered
+  // against the token row, so every later visit skips straight to /assessor.
+  const destination = accessToken.terms_accepted_at ? "/assessor" : "/assessor/gate";
+  const response = NextResponse.redirect(`${origin}${destination}`);
   response.cookies.set(ASSESSOR_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
