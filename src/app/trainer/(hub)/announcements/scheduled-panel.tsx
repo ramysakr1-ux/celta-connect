@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { deleteBroadcast, editBroadcast, postBroadcastNow, type FormState } from "@/app/portfolio/[traineeId]/stream-actions";
 
 const initialState: FormState = { error: null };
@@ -130,14 +130,15 @@ function EditRow({
   // useActionState has no onSuccess hook -- a completed (pending:false),
   // error-free submit after having been pending is the signal a save just
   // landed. wasSubmitted guards against firing on first mount, where
-  // pending is already false and error is already null.
-  const [wasSubmitted, setWasSubmitted] = useState(false);
+  // pending is already false and error is already null -- a ref rather
+  // than state since it's never read for rendering, only tracked.
+  const wasSubmitted = useRef(false);
   useEffect(() => {
     if (pending) {
-      setWasSubmitted(true);
+      wasSubmitted.current = true;
       return;
     }
-    if (wasSubmitted && state.error === null) onSaved();
+    if (wasSubmitted.current && state.error === null) onSaved();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pending, state]);
 
@@ -149,6 +150,13 @@ function EditRow({
         defaultValue={row.title}
         rows={2}
         required
+        className="rounded-[6px] border border-input bg-card p-2 text-[13px] text-ink outline-none focus:border-primary"
+      />
+      <textarea
+        name="body"
+        defaultValue={row.body ?? ""}
+        rows={3}
+        placeholder="Write your announcement…"
         className="rounded-[6px] border border-input bg-card p-2 text-[13px] text-ink outline-none focus:border-primary"
       />
       <div className="flex flex-col gap-1.5">
