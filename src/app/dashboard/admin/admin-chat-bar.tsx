@@ -54,8 +54,16 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
           <p className="mb-2 text-[11px] text-muted">
             Admins only — this reaches no tutor and no candidate. To reach a tutor, use their contact details on the
             roster.
+            <span className="ml-1 font-semibold text-ink">Permanent — never resets.</span>
           </p>
-          <MessageThread key={selected.channelId} channelId={selected.channelId} myProfileId={profileId} nameById={nameById} isGroup />
+          <MessageThread
+            key={selected.channelId}
+            channelId={selected.channelId}
+            myProfileId={profileId}
+            nameById={nameById}
+            isGroup
+            retentionDays={null}
+          />
         </div>
       ) : (
         <button

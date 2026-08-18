@@ -23,13 +23,23 @@ import type { Database } from "@/lib/supabase/types";
 // "chat retention lives in Course Admin, configured by the MCT per
 // course." Resolved per channel via its own course_id, not one blanket
 // cutoff for the whole centre: a tp_group/course_admin channel uses ITS
-// course's setting, and a centre-wide channel (all_staff, centre_admin,
-// dm -- no course to own the setting) keeps the fixed 1-day default every
-// channel already fell back to before this setting existed.
+// course's setting, and a centre-wide channel (all_staff, dm -- no course
+// to own the setting) keeps the fixed 1-day default every channel already
+// fell back to before this setting existed.
+//
+// centre_admin is the one exception, not a default at all -- for-claude-
+// code-centre-settings.md: "Permanent -- does not reset. Unlike the
+// trainer/course chat... this admin channel stores its history
+// indefinitely." Excluded from the sweep entirely, never just given a
+// long retention number.
 async function deleteStaleStaffMessages(centerId: string): Promise<void> {
   const admin = createAdminClient();
 
-  const { data: channels } = await admin.from("staff_channels").select("id, course_id").eq("center_id", centerId);
+  const { data: channels } = await admin
+    .from("staff_channels")
+    .select("id, course_id")
+    .eq("center_id", centerId)
+    .neq("type", "centre_admin");
   if (!channels || channels.length === 0) return;
 
   const courseIds = [...new Set(channels.map((c) => c.course_id).filter((id): id is string => !!id))];

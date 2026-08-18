@@ -32,12 +32,15 @@ export const MessageThread = forwardRef<
     // renders these -- a static look, not a live one, which matches
     // read-only preview anyway (nothing to subscribe to updates for).
     staticMessages?: Message[];
-    // How many days back this channel's centre actually retains messages
-    // (centers.chat_retention_days, migration 0090). Defaults to 1
+    // How many days back this channel actually retains messages
+    // (courses.chat_retention_days, migration 0154). Defaults to 1
     // (today-only) for any caller that hasn't been updated to pass the
     // real value -- matches the old hardcoded behavior rather than
-    // silently widening what shows up.
-    retentionDays?: number;
+    // silently widening what shows up. `null` means permanent (the
+    // centre_admin channel, for-claude-code-centre-settings.md: "stores
+    // its history indefinitely") -- fetches with no lower-bound filter at
+    // all, never a very-large-number stand-in for forever.
+    retentionDays?: number | null;
   }
 >(function MessageThread(
   { channelId, myProfileId, nameById, isGroup, hideComposer = false, staticMessages, retentionDays = 1 },
@@ -64,16 +67,18 @@ export const MessageThread = forwardRef<
     // whenever a chat-enabled page loads), but this filter means a stale
     // row never shows up here even in the gap before that next runs. Was
     // hardcoded to "since local midnight" (only correct for the 1-day
-    // default) -- now a real rolling window matching the centre's actual
+    // default) -- now a real rolling window matching the course's actual
     // setting, so Weekly/Custom retention doesn't hide still-valid older
-    // messages from ever appearing.
-    const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+    // messages from ever appearing. retentionDays === null (the permanent
+    // admin channel) skips this filter entirely -- deleteStaleStaffMessages
+    // never sweeps it either, so there is no cutoff to apply.
+    let query = supabase.from("staff_messages").select("*").eq("channel_id", channelId);
+    if (retentionDays !== null) {
+      const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+      query = query.gte("created_at", cutoff.toISOString());
+    }
 
-    supabase
-      .from("staff_messages")
-      .select("*")
-      .eq("channel_id", channelId)
-      .gte("created_at", cutoff.toISOString())
+    query
       .order("created_at")
       .then(({ data }) => {
         if (!cancelled) {
