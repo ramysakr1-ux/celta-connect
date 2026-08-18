@@ -71,6 +71,8 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
   const writingTaskPromptId = (formData.get("writing_task_prompt_id") as string | null) || null;
   const writingTaskSubmission = (formData.get("writing_task_submission") as string | null)?.trim() || null;
   const languageAwarenessAnswer = (formData.get("language_awareness_answer") as string | null)?.trim() || null;
+  const speakingTaskPromptId = (formData.get("speaking_task_prompt_id") as string | null) || null;
+  const speakingTaskAudio = formData.get("speaking_task_audio");
 
   const { data: applicant, error: insertError } = await admin
     .from("applicants")
@@ -91,6 +93,7 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
       acknowledged_mixed_mode_demand_at: course.delivery_mode === "mixed" ? new Date().toISOString() : null,
       writing_task_prompt_id: writingTaskPromptId,
       writing_task_submission: writingTaskSubmission,
+      speaking_task_prompt_id: speakingTaskPromptId,
       language_awareness_submission: languageAwarenessAnswer
         ? [{ question: "Identify and correct the language errors in the passage provided.", answer: languageAwarenessAnswer }]
         : [],
@@ -101,6 +104,27 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
 
   if (insertError || !applicant) {
     return { error: "Could not submit your application. Try again.", submitted: false };
+  }
+
+  // Uploaded after the row exists -- the storage path is keyed off the
+  // applicant's own id, same reasoning as volunteer-signup-audio (0089):
+  // no session to sign a direct browser->Storage write, so this goes
+  // through the admin client from here.
+  if (speakingTaskAudio instanceof File && speakingTaskAudio.size > 0) {
+    const storagePath = `${centerId}/${applicant.id}-${Date.now()}.${speakingTaskAudio.name.split(".").pop() ?? "webm"}`;
+    const { error: uploadError } = await admin.storage.from("applicant-speaking-task-audio").upload(storagePath, speakingTaskAudio, {
+      contentType: speakingTaskAudio.type || "audio/webm",
+    });
+    if (!uploadError) {
+      await admin
+        .from("applicants")
+        .update({ speaking_task_audio_url: storagePath, speaking_task_submitted_at: new Date().toISOString() })
+        .eq("id", applicant.id);
+    }
+    // A failed upload doesn't fail the whole application -- same
+    // reasoning as the confirmation email below: the applicant's record
+    // is already saved, and admissions staff can ask them to re-send a
+    // recording rather than losing the application entirely.
   }
 
   // "Notify the centre when an application is submitted -- with the

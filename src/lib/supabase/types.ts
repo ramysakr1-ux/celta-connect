@@ -335,6 +335,21 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["application_writing_prompts"]["Row"]>;
         Relationships: [];
       };
+      speaking_task_prompts: {
+        Row: {
+          id: string;
+          center_id: string;
+          prompt_text: string;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["speaking_task_prompts"]["Row"]> & {
+          center_id: string;
+          prompt_text: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["speaking_task_prompts"]["Row"]>;
+        Relationships: [];
+      };
       interview_questions: {
         Row: {
           id: string;
@@ -416,6 +431,11 @@ export interface Database {
           acknowledged_mixed_mode_demand_at: string | null;
           writing_task_prompt_id: string | null;
           writing_task_submission: string | null;
+          // migration 0132 -- third pre-interview component. No transcript
+          // column by design (Ramy, 2026-08-17) -- reviewed directly by a person.
+          speaking_task_prompt_id: string | null;
+          speaking_task_audio_url: string | null;
+          speaking_task_submitted_at: string | null;
           language_awareness_submission: { question: string; answer: string }[];
           ai_reading_summary: unknown | null;
           ai_reading_generated_at: string | null;

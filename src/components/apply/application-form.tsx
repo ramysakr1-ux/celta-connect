@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { submitApplication, type ApplyFormState } from "@/app/apply/actions";
+import { AudioRecorder } from "@/components/audio-recorder";
 
 interface Intake {
   id: string;
@@ -19,6 +20,11 @@ interface WritingPrompt {
   prompt_text: string;
 }
 
+interface SpeakingPrompt {
+  id: string;
+  prompt_text: string;
+}
+
 const initialState: ApplyFormState = { error: null, submitted: false };
 
 const inputClass =
@@ -28,14 +34,17 @@ export function ApplicationForm({
   centerId,
   intakes,
   prompts,
+  speakingPrompts,
 }: {
   centerId: string;
   intakes: Intake[];
   prompts: WritingPrompt[];
+  speakingPrompts: SpeakingPrompt[];
 }) {
   const [state, action, pending] = useActionState(submitApplication, initialState);
   const [selectedIntakeId, setSelectedIntakeId] = useState(intakes[0]?.id ?? "");
   const [selectedPromptId, setSelectedPromptId] = useState(prompts[0]?.id ?? "");
+  const [selectedSpeakingPromptId, setSelectedSpeakingPromptId] = useState(speakingPrompts[0]?.id ?? "");
   const selectedIntake = intakes.find((i) => i.id === selectedIntakeId);
 
   if (state.submitted) {
@@ -175,6 +184,36 @@ export function ApplicationForm({
         </div>
       ) : null}
 
+      {speakingPrompts.length > 0 ? (
+        <div className="flex flex-col gap-3 border-t border-border pt-4">
+          <p className="text-sm font-semibold text-ink">Speaking task</p>
+          <p className="text-xs text-muted">
+            This isn&apos;t an interview -- there&apos;s no follow-up, no conversation. Pick a prompt, record your
+            response, and submit. It&apos;s reviewed by a person ahead of your real interview.
+          </p>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="speaking_task_prompt_id" className="text-sm text-muted">
+              Choose one prompt
+            </label>
+            <select
+              id="speaking_task_prompt_id"
+              name="speaking_task_prompt_id"
+              required
+              value={selectedSpeakingPromptId}
+              onChange={(e) => setSelectedSpeakingPromptId(e.target.value)}
+              className={inputClass}
+            >
+              {speakingPrompts.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.prompt_text}
+                </option>
+              ))}
+            </select>
+          </div>
+          <AudioRecorder name="speaking_task_audio" required />
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-1.5 border-t border-border pt-4">
         <p className="text-sm font-semibold text-ink">Language awareness</p>
         <label htmlFor="language_awareness_answer" className="text-sm text-muted">
@@ -201,7 +240,7 @@ export function ApplicationForm({
         ) : null}
         <label className="flex items-start gap-2">
           <input type="checkbox" name="ack_writing_task" required className="mt-0.5" />
-          I confirm the writing task and language awareness answers above are my own work.
+          I confirm the writing, speaking and language awareness responses above are my own work.
         </label>
       </div>
 

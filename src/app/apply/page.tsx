@@ -89,6 +89,13 @@ export default async function ApplyPage() {
     .eq("active", true)
     .order("prompt_type");
 
+  const { data: speakingPrompts } = await admin
+    .from("speaking_task_prompts")
+    .select("id, prompt_text")
+    .eq("center_id", center.id)
+    .eq("active", true)
+    .order("created_at");
+
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="sheet-accent w-full max-w-xl p-8">
@@ -100,7 +107,7 @@ export default async function ApplyPage() {
         )}
         <p className="mb-4 text-sm text-muted">Apply for a Cambridge CELTA course</p>
 
-        <ApplicationForm centerId={center.id} intakes={intakes} prompts={prompts ?? []} />
+        <ApplicationForm centerId={center.id} intakes={intakes} prompts={prompts ?? []} speakingPrompts={speakingPrompts ?? []} />
 
         <div className="mt-8 flex items-center justify-end gap-1.5 border-t border-border pt-4">
           <span className="text-[10px] text-muted">Powered by</span>
