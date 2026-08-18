@@ -1,12 +1,78 @@
 "use client";
 
 import Link from "next/link";
+import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TrajectoryBarCompact } from "@/components/trajectory-gradient-bar";
 import type { RosterRow } from "@/lib/roster";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { ordinal } from "@/lib/stage2-tutorials";
+import { moveStage2Earlier, moveStage3Earlier, type FormState } from "@/app/dashboard/trainer/celta5-actions";
+
+const moveEarlierInitialState: FormState = { error: null };
+
+// Grade Pipeline handoff: "a 'Move earlier' link appears next to a
+// not-yet-given Stage 2/3 badge; confirming with a reason shows 'Moved
+// earlier -- [reason]' under the badge." Inline in the cell rather than an
+// absolute-positioned popover -- this table already scrolls horizontally
+// inside its own container, and a popover would clip against that.
+function MoveEarlierControl({
+  traineeId,
+  stage,
+}: {
+  traineeId: string;
+  stage: "stage2" | "stage3";
+}) {
+  const [open, setOpen] = useState(false);
+  const action = stage === "stage2" ? moveStage2Earlier : moveStage3Earlier;
+  const [state, formAction, pending] = useActionState(action, moveEarlierInitialState);
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(true);
+        }}
+        className="text-[11px] text-primary hover:underline"
+      >
+        Move earlier
+      </button>
+    );
+  }
+
+  return (
+    <form
+      action={formAction}
+      onClick={(e) => e.stopPropagation()}
+      className="mt-1 flex flex-col gap-1"
+    >
+      <input type="hidden" name="trainee_id" value={traineeId} />
+      <input
+        type="text"
+        name="reason"
+        required
+        placeholder="Reason for moving earlier"
+        className="h-7 w-40 rounded-[6px] border border-border bg-card px-2 text-[11px] text-ink outline-none focus:border-primary"
+      />
+      {state.error ? <p className="text-[11px] text-destructive">{state.error}</p> : null}
+      <div className="flex items-center gap-2">
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-[6px] bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground disabled:opacity-60"
+        >
+          {pending ? "Saving…" : "Confirm"}
+        </button>
+        <button type="button" onClick={() => setOpen(false)} className="text-[11px] text-muted hover:text-ink">
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+}
 
 function formatSupervisedTime(totalSeconds: number): string {
   const m = Math.round(totalSeconds / 60);
@@ -22,7 +88,7 @@ const CELTA5_SIGNOFF_LABEL: Record<RosterRow["celta5SignoffStatus"], string> = {
 // build-spec.md §8 bug 3 -- rows carried cursor-pointer but only the name
 // cell actually navigated. Whole row now pushes to the portfolio; the
 // name keeps its own <Link> too, for keyboard nav and hover color.
-export function RosterRowView({ row }: { row: RosterRow }) {
+export function RosterRowView({ row, isMct }: { row: RosterRow; isMct: boolean }) {
   const router = useRouter();
 
   // §3 -- a withdrawn/deferred/etc. candidate is "present in the roster"
@@ -119,14 +185,39 @@ export function RosterRowView({ row }: { row: RosterRow }) {
           className={`hover:underline ${row.stage1Filed ? "text-ink" : "text-status-warning-text"}`}
         >
           {row.stage1Filed ? "Filed" : "Not filed"}
+          {!row.stage1Filed && row.stage1TutorialConfirmed !== null ? (
+            <span className="ml-1 text-[11px] text-muted">({row.stage1TutorialConfirmed ? "confirmed" : "invited"})</span>
+          ) : null}
         </Link>
       </td>
       <td className="text-right">
         <Link href={`/portfolio/${row.id}/celta5`} onClick={(e) => e.stopPropagation()} className="hover:underline text-ink">
           {row.stage2BookedPosition ? ordinal(row.stage2BookedPosition) : <span className="text-status-warning-text">Not booked</span>}
           {" · "}
-          {row.stage3Required ? (row.stage3Done ? "Stage 3 done" : "Stage 3 pending") : "Stage 3 N/A"}
+          {row.stage3Required
+            ? row.stage3Done
+              ? "Stage 3 done"
+              : row.stage3TutorialConfirmed === null
+                ? "Stage 3 pending"
+                : row.stage3TutorialConfirmed
+                  ? "Stage 3 confirmed"
+                  : "Stage 3 invited"
+            : "Stage 3 N/A"}
         </Link>
+        {isMct ? (
+          <div className="mt-1 flex flex-col items-end gap-1">
+            {row.stage2MovedEarlierReason ? (
+              <p className="text-[11px] text-gold">Stage 2 moved earlier — {row.stage2MovedEarlierReason}</p>
+            ) : row.stage2CanMoveEarlier ? (
+              <MoveEarlierControl traineeId={row.id} stage="stage2" />
+            ) : null}
+            {row.stage3MovedEarlierReason ? (
+              <p className="text-[11px] text-gold">Stage 3 moved earlier — {row.stage3MovedEarlierReason}</p>
+            ) : row.stage3CanMoveEarlier ? (
+              <MoveEarlierControl traineeId={row.id} stage="stage3" />
+            ) : null}
+          </div>
+        ) : null}
       </td>
       <td className="text-right">
         <Link

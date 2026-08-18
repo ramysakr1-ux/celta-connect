@@ -42,12 +42,20 @@ export interface RosterRow {
   observationHoursShort: boolean;
   // Item 5
   stage1Filed: boolean;
-  // Item 6: Stage 2 booking is a real slot with a position; Stage 3 is
-  // by-invitation only (stage3_required), no booking mechanism exists for
-  // it so "booked" isn't meaningful -- only required/done.
+  // Item 6: Stage 2 booking is a real slot with a position. Stage 1/3 are
+  // individualized invites (migration 0129) -- null means not invited yet,
+  // otherwise whether the candidate has confirmed the time the tutor set.
   stage2BookedPosition: number | null;
+  stage1TutorialConfirmed: boolean | null;
+  // Grade Pipeline handoff: MCT can flag a standing concern before the
+  // standard checkpoint. Stage 1 has no equivalent -- its timing is fixed.
+  stage2CanMoveEarlier: boolean;
+  stage2MovedEarlierReason: string | null;
   stage3Required: boolean;
   stage3Done: boolean;
+  stage3TutorialConfirmed: boolean | null;
+  stage3CanMoveEarlier: boolean;
+  stage3MovedEarlierReason: string | null;
   // Item 7
   celta5SignoffStatus: Celta5SignoffStatus;
   // Item 8: refines the existing "assignmentsLeft" with the raw counts +
@@ -90,6 +98,11 @@ export async function fetchRosterRows(
     traineeIds.length > 0 ? await supabase.from("stage2_tutorial_blocks").select("id").eq("course_id", courseId) : { data: [] };
   const stage2BlockIds = (stage2Blocks ?? []).map((b) => b.id);
 
+  const { data: tutorialInvites } =
+    traineeIds.length > 0
+      ? await supabase.from("individual_tutorial_invites").select("trainee_id, stage, confirmed_at").eq("course_id", courseId)
+      : { data: [] };
+
   const [
     { data: taughtPlans },
     { data: feedbackRows },
@@ -128,7 +141,7 @@ export async function fetchRosterRows(
           supabase
             .from("celta5_records")
             .select(
-              "trainee_id, hours_attended, provisional_grade, provisional_grade_upper, stage1_completed_at, stage2_candidate_submitted_at, trainee_signoff_final_at, trainer_signoff_final_at, stage3_required, stage3_finalized_at"
+              "trainee_id, hours_attended, provisional_grade, provisional_grade_upper, stage1_completed_at, stage2_candidate_submitted_at, stage2_completed_at, stage2_moved_earlier_at, stage2_moved_earlier_reason, trainee_signoff_final_at, trainer_signoff_final_at, stage3_required, stage3_finalized_at, stage3_moved_earlier_at, stage3_moved_earlier_reason"
             )
             .eq("course_id", courseId),
           supabase.from("celta5_matrix").select("trainee_id, criteria_code, tutor_status_stage2").eq("course_id", courseId),
@@ -256,8 +269,16 @@ export async function fetchRosterRows(
 
     const traineeStage2Slot = (stage2Slots ?? []).find((s) => s.trainee_id === trainee.id && s.booked_at);
     const stage2BookedPosition = traineeStage2Slot?.position ?? null;
+    const stage1Invite = (tutorialInvites ?? []).find((i) => i.trainee_id === trainee.id && i.stage === "stage1");
+    const stage1TutorialConfirmed = stage1Invite ? Boolean(stage1Invite.confirmed_at) : null;
     const stage3Required = Boolean(celta5Record?.stage3_required);
     const stage3Done = Boolean(celta5Record?.stage3_finalized_at);
+    const stage3Invite = (tutorialInvites ?? []).find((i) => i.trainee_id === trainee.id && i.stage === "stage3");
+    const stage3TutorialConfirmed = stage3Invite ? Boolean(stage3Invite.confirmed_at) : null;
+    const stage2MovedEarlierReason = celta5Record?.stage2_moved_earlier_reason ?? null;
+    const stage2CanMoveEarlier = !celta5Record?.stage2_completed_at && !stage2MovedEarlierReason;
+    const stage3MovedEarlierReason = celta5Record?.stage3_moved_earlier_reason ?? null;
+    const stage3CanMoveEarlier = stage3Required && !stage3Done && !stage3MovedEarlierReason;
 
     const celta5SignoffStatus: Celta5SignoffStatus =
       celta5Record?.trainee_signoff_final_at && celta5Record?.trainer_signoff_final_at
@@ -297,8 +318,14 @@ export async function fetchRosterRows(
       observationHoursShort,
       stage1Filed,
       stage2BookedPosition,
+      stage1TutorialConfirmed,
+      stage2CanMoveEarlier,
+      stage2MovedEarlierReason,
       stage3Required,
       stage3Done,
+      stage3TutorialConfirmed,
+      stage3CanMoveEarlier,
+      stage3MovedEarlierReason,
       celta5SignoffStatus,
       assignmentsPassed,
       assignmentsTotal,

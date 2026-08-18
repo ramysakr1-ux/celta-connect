@@ -26,6 +26,7 @@ export default async function TrainerRosterPage() {
   }
 
   const rows = await fetchRosterRows(supabase, courseId);
+  const isMct = trainer?.tutor_role === "main_course_tutor";
 
   // Assessors reuse this same page (createAdminClient path) but have no
   // reason to invite anyone -- only render the join-link button for a real
@@ -115,7 +116,7 @@ export default async function TrainerRosterPage() {
           </thead>
           <tbody>
             {rows.length > 0 ? (
-              rows.map((row) => <RosterRowView key={row.id} row={row} />)
+              rows.map((row) => <RosterRowView key={row.id} row={row} isMct={isMct} />)
             ) : (
               <tr>
                 <td colSpan={17} className="text-muted">
