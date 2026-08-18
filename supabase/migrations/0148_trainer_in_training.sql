@@ -186,11 +186,17 @@ alter table public.tit_shadow_marking enable row level security;
 alter table public.tit_task_record_items enable row level security;
 
 -- Single access rule, shared by every table above: the TinT themselves,
--- their supervisor, or admin at the centre. A helper function so the same
--- three-way OR (and the course_tutors/courses join to reach it) isn't
--- repeated nine times -- same reasoning as current_center_id() (migration
--- 0103).
-create or replace function public.tit_can_access(record_id uuid)
+-- their supervisor, or admin at the centre. Split into two functions
+-- rather than one self-referencing tit_records lookup: a WITH CHECK on
+-- tit_records' own INSERT can't safely re-query tit_records for the row
+-- currently being inserted (visibility of an uncommitted row to a
+-- sub-query run as part of evaluating its own INSERT's check is not
+-- something to rely on), so the base function takes course_tutors_id
+-- directly -- available straight off the new row's own column, no
+-- self-lookup involved. Child tables' tit_record_id points at an ALREADY-
+-- EXISTING parent row, so looking that parent's course_tutors_id up is
+-- safe there.
+create or replace function public.tit_can_access_course_tutor(target_course_tutors_id uuid)
 returns boolean
 language sql
 stable
@@ -198,10 +204,9 @@ security definer
 set search_path = public
 as $$
   select exists (
-    select 1 from public.tit_records r
-    join public.course_tutors ct on ct.id = r.course_tutors_id
+    select 1 from public.course_tutors ct
     join public.courses c on c.id = ct.course_id
-    where r.id = record_id
+    where ct.id = target_course_tutors_id
       and (
         ct.profile_id = auth.uid()
         or ct.supervisor_profile_id = auth.uid()
@@ -213,11 +218,23 @@ as $$
   );
 $$;
 
+create or replace function public.tit_can_access(record_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select public.tit_can_access_course_tutor(
+    (select course_tutors_id from public.tit_records where id = record_id)
+  );
+$$;
+
 create policy "tit_records: TinT, supervisor and admin can access"
 on public.tit_records for all
 to authenticated
-using (public.tit_can_access(id))
-with check (public.tit_can_access(id));
+using (public.tit_can_access_course_tutor(course_tutors_id))
+with check (public.tit_can_access_course_tutor(course_tutors_id));
 
 create policy "tit_pre_course_tasks: same access as its record"
 on public.tit_pre_course_tasks for all
