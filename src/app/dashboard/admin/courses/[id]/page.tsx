@@ -113,6 +113,20 @@ export default async function CourseRosterPage({
     .filter((m) => m.role === "trainer")
     .map((m) => ({ id: m.id, name: m.full_name }));
 
+  // Handbook 8.1.4 -- "tutor not expected to observe two groups in one
+  // day." A TP group's tutor is a whole-group assignment with no per-date
+  // granularity (course_tp_groups.tutor_profile_id, migration 0121), and
+  // every paired group in a course shares the same calendar TP dates
+  // (src/lib/rotation.ts's distinctTpDates()) -- so a tutor on more than
+  // one group here IS double-booked, on every TP day, by construction.
+  // Advisory, not blocking: the handbook says "not expected to," and a
+  // small/short-staffed centre may have no other choice.
+  const tutorGroupCounts = new Map<string, number>();
+  for (const g of tpGroups ?? []) {
+    if (!g.tutor_profile_id) continue;
+    tutorGroupCounts.set(g.tutor_profile_id, (tutorGroupCounts.get(g.tutor_profile_id) ?? 0) + 1);
+  }
+
   const assignedTraineeIds = new Set((members ?? []).map((m) => m.trainee_id));
   const unassignedTrainees = (roster ?? []).filter(
     (m) => m.role === "trainee" && !assignedTraineeIds.has(m.id)
@@ -571,6 +585,12 @@ export default async function CourseRosterPage({
                         currentTutorId={g.tutor_profile_id}
                         currentMeetingDays={g.meeting_days}
                       />
+                      {g.tutor_profile_id && (tutorGroupCounts.get(g.tutor_profile_id) ?? 0) > 1 ? (
+                        <p className="mt-1.5 text-[11px] text-status-warning-text">
+                          On another group too -- Handbook 8.1.4 says a tutor isn&apos;t expected to observe two
+                          groups the same day.
+                        </p>
+                      ) : null}
                       <div className="mt-3 flex flex-col gap-3">
                         {[1, 2].map((half) => {
                           const sg = halves.find((h) => h.half_order === half);
