@@ -17,8 +17,10 @@ const initialState: FormState = { error: null };
 
 export function AddEventForm({
   existingEvents,
+  tpGroups,
 }: {
   existingEvents: { id: string; title: string; event_date: string }[];
+  tpGroups: { id: string; name: string }[];
 }) {
   const [state, formAction, pending] = useActionState(addTimetableEvent, initialState);
   const [type, setType] = useState("input_session");
@@ -103,6 +105,27 @@ export function AddEventForm({
           ))}
         </select>
       </div>
+      {type === "assignment_due" && tpGroups.length > 0 ? (
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm text-muted">Applies to (optional -- leave blank for the whole cohort)</label>
+          <select
+            name="tp_group_scope_id"
+            defaultValue=""
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          >
+            <option value="">Whole cohort</option>
+            {tpGroups.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name} only
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted">
+            For a staggered deadline, add one event per group with its own date -- each one&apos;s reminder reaches
+            only that group.
+          </p>
+        </div>
+      ) : null}
       {type === "supervised_session" ? (
         <div className="flex flex-col gap-1.5 sm:col-span-2">
           <p className="rounded-[6px] border border-dashed border-gold bg-gold/5 p-3 text-xs text-ink">

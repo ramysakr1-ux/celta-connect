@@ -118,6 +118,35 @@ export default async function TodayPage() {
     });
   }
 
+  // for-claude-code-announcement-infra-fixes.md item 2, C2's trainer-facing
+  // reminder -- "the trainer who ran it" resolves to every trainer on the
+  // course (no per-session tutor assignment exists yet), same simplification
+  // A5/A6's group-nudge messages made before tutor_group_assignments-style
+  // ownership existed. One week lookback: older gaps are a close-out
+  // question, not a daily nudge.
+  const REGISTER_LOOKBACK_DAYS = 7;
+  const lookbackDate = (() => {
+    const d = new Date(`${today}T00:00:00`);
+    d.setDate(d.getDate() - REGISTER_LOOKBACK_DAYS);
+    return toLocalIso(d);
+  })();
+  const { data: unloggedSessions } = await supabase
+    .from("course_timetable_events")
+    .select("id, title, event_date")
+    .eq("course_id", courseId)
+    .eq("type", "tp")
+    .lt("event_date", today)
+    .gte("event_date", lookbackDate)
+    .is("register_submitted_at", null)
+    .order("event_date", { ascending: false });
+  for (const session of unloggedSessions ?? []) {
+    alerts.push({
+      title: `Register not logged — ${session.title}`,
+      meta: session.event_date,
+      href: "/trainer/timetable",
+    });
+  }
+
   const dueByType = new Map<string, { total: number; submitted: number }>();
   for (const a of dueAssignments ?? []) {
     const entry = dueByType.get(a.assignment_type) ?? { total: 0, submitted: 0 };

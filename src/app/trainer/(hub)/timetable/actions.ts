@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
-import { buildSkeletonEvents, DEFAULT_TEACHING_DAYS } from "@/lib/timetable-skeleton";
+import { buildSkeletonEvents, DEFAULT_TEACHING_DAYS, PART_TIME_SKELETON } from "@/lib/timetable-skeleton";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { generateStandardAnnouncements } from "@/lib/announcements-catalog";
 import type { TimeBand } from "@/lib/supabase/types";
@@ -43,6 +43,7 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
   const linkedTpNumber = linkedTpNumberRaw ? Number(linkedTpNumberRaw) : null;
   const isAsynchronous = formData.get("is_asynchronous") === "on";
   const linkedLiveSessionEventId = (formData.get("linked_live_session_event_id") as string | null) || null;
+  const tpGroupScopeId = (formData.get("tp_group_scope_id") as string | null) || null;
 
   if (typeof type !== "string" || !EVENT_TYPES.includes(type as (typeof EVENT_TYPES)[number])) {
     return { error: "Invalid event type." };
@@ -78,6 +79,9 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
     is_asynchronous: type === "input_session" ? isAsynchronous : false,
     linked_live_session_event_id: type === "input_session" ? linkedLiveSessionEventId : null,
     input_session_criteria: type === "input_session" ? parseCriteriaCodes(formData.get("input_session_criteria") as string | null) : [],
+    // Only meaningful on assignment_due -- a second row for the same
+    // assignment_type on a different date, one per staggered group.
+    tp_group_scope_id: type === "assignment_due" ? tpGroupScopeId : null,
     created_by: trainer.id,
   });
 
@@ -136,6 +140,13 @@ export async function generateTimetableSkeleton(_prevState: FormState, formData:
     .filter((n) => Number.isInteger(n) && n >= 0 && n <= 6);
   if (meetingDays.length === 0) return { error: "Pick at least one day the course meets on." };
 
+  // Part-time's rhythm is qualitatively different (two independent,
+  // unpaired TP groups on their own fixed weekday each, not one group
+  // split into daily-alternating halves) -- a distinct draft array, not
+  // just a different day count/pattern on the standard one.
+  const shape = formData.get("shape");
+  const skeletonDrafts = shape === "part_time" ? PART_TIME_SKELETON : undefined;
+
   const supabase = await createClient();
 
   const { count } = await supabase
@@ -146,7 +157,7 @@ export async function generateTimetableSkeleton(_prevState: FormState, formData:
     return { error: "The timetable already has events -- clear them first to regenerate the skeleton." };
   }
 
-  const events = buildSkeletonEvents(startDate, totalTeachingDays, meetingDays).map((event) => ({
+  const events = buildSkeletonEvents(startDate, totalTeachingDays, meetingDays, skeletonDrafts).map((event) => ({
     ...event,
     course_id: trainer.course_id!,
     created_by: trainer.id,
@@ -226,6 +237,12 @@ export async function setAttendance(formData: FormData): Promise<void> {
       }))
     );
   }
+
+  // Stamped regardless of attendee count -- this is what tells "logged,
+  // zero present" apart from "never logged" (for-claude-code-announcement-
+  // infra-fixes.md item 2). Before this column, both looked identical: zero
+  // volunteer_attendance rows for the event either way.
+  await supabase.from("course_timetable_events").update({ register_submitted_at: new Date().toISOString() }).eq("id", eventId);
 
   revalidatePath("/trainer/timetable");
 }

@@ -165,7 +165,10 @@ export default async function TrainerTimetablePage({
             Add a single dated item to the timetable below -- an input session, a TP, an
             assignment or resubmission due date, or a milestone.
           </p>
-          <AddEventForm existingEvents={(events ?? []).map((e) => ({ id: e.id, title: e.title, event_date: e.event_date }))} />
+          <AddEventForm
+            existingEvents={(events ?? []).map((e) => ({ id: e.id, title: e.title, event_date: e.event_date }))}
+            tpGroups={tpGroups ?? []}
+          />
         </div>
       ) : null}
 

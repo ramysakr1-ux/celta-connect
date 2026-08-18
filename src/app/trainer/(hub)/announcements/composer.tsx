@@ -28,16 +28,24 @@ const ASSESSOR_VISIT_TEMPLATE = {
 // keep-on-duplicate controls. The linked timetable event doubles as the
 // anchor when "before/after that event" is chosen, rather than asking for
 // the same event twice.
+interface GroupOption {
+  id: string;
+  name: string;
+  memberCount: number;
+}
+
 export function AnnouncementComposer({
   timetableEvents,
   showAssessorTemplate,
   traineeCount,
   trainerCount,
+  groups,
 }: {
   timetableEvents: TimetableEventOption[];
   showAssessorTemplate: boolean;
   traineeCount: number;
   trainerCount: number;
+  groups: GroupOption[];
 }) {
   const [state, formAction, pending] = useActionState(postBroadcast, initialState);
   const [linkedEventId, setLinkedEventId] = useState("");
@@ -45,6 +53,8 @@ export function AnnouncementComposer({
   const [body, setBody] = useState("");
   const [timing, setTiming] = useState<"now" | "anchored">("now");
   const [offsetDays, setOffsetDays] = useState("-2");
+  const [groupScopeId, setGroupScopeId] = useState("");
+  const selectedGroup = groups.find((g) => g.id === groupScopeId) ?? null;
 
   return (
     <form action={formAction} className="sheet flex flex-col gap-3">
@@ -61,6 +71,25 @@ export function AnnouncementComposer({
         >
           Use assessor-visit template
         </button>
+      ) : null}
+
+      {groups.length > 0 ? (
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs text-muted">Send to</label>
+          <select
+            value={groupScopeId}
+            onChange={(e) => setGroupScopeId(e.target.value)}
+            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          >
+            <option value="">Whole cohort</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name} only
+              </option>
+            ))}
+          </select>
+          <input type="hidden" name="visible_to_tp_group_id" value={groupScopeId} />
+        </div>
       ) : null}
 
       <input
@@ -169,8 +198,10 @@ export function AnnouncementComposer({
         />
       </div>
       <p className="text-xs text-muted">
-        This goes to {traineeCount} candidate{traineeCount === 1 ? "" : "s"} and {trainerCount} tutor
-        {trainerCount === 1 ? "" : "s"} {timing === "anchored" ? "once it fires" : "now"}.
+        {selectedGroup
+          ? `This goes to ${selectedGroup.memberCount} candidate${selectedGroup.memberCount === 1 ? "" : "s"} in ${selectedGroup.name}`
+          : `This goes to ${traineeCount} candidate${traineeCount === 1 ? "" : "s"} and ${trainerCount} tutor${trainerCount === 1 ? "" : "s"}`}{" "}
+        {timing === "anchored" ? "once it fires" : "now"}.
       </p>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-4">

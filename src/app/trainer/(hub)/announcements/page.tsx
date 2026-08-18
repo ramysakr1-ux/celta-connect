@@ -48,6 +48,36 @@ export default async function AnnouncementsPage() {
       supabase.from("profiles").select("id", { count: "exact", head: true }).eq("course_id", courseId).eq("role", "trainer"),
     ]);
 
+  // D2's "send to one TP group" option. Member count per group joins
+  // through course_subgroups (a tp_group can be paired into two subgroups
+  // or stand alone unpaired) -- same shape Rotation and the Stage 2 sheet
+  // already read, not a new relationship.
+  const [{ data: tpGroups }, { data: subgroups }] = await Promise.all([
+    supabase.from("course_tp_groups").select("id, name").eq("course_id", courseId),
+    supabase.from("course_subgroups").select("id, tp_group_id").eq("course_id", courseId),
+  ]);
+  const subgroupIdsByTpGroup = new Map<string, string[]>();
+  for (const s of subgroups ?? []) {
+    if (!s.tp_group_id) continue;
+    const list = subgroupIdsByTpGroup.get(s.tp_group_id) ?? [];
+    list.push(s.id);
+    subgroupIdsByTpGroup.set(s.tp_group_id, list);
+  }
+  const allSubgroupIds = (subgroups ?? []).map((s) => s.id);
+  const { data: subgroupMembers } =
+    allSubgroupIds.length > 0
+      ? await supabase.from("course_subgroup_members").select("subgroup_id").in("subgroup_id", allSubgroupIds)
+      : { data: [] };
+  const memberCountBySubgroup = new Map<string, number>();
+  for (const m of subgroupMembers ?? []) {
+    memberCountBySubgroup.set(m.subgroup_id, (memberCountBySubgroup.get(m.subgroup_id) ?? 0) + 1);
+  }
+  const composerGroups = (tpGroups ?? []).map((g) => ({
+    id: g.id,
+    name: g.name,
+    memberCount: (subgroupIdsByTpGroup.get(g.id) ?? []).reduce((sum, sid) => sum + (memberCountBySubgroup.get(sid) ?? 0), 0),
+  }));
+
   const authorIds = [...new Set((broadcasts ?? []).map((b) => b.author_id))];
   const { data: authors } = authorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", authorIds) : { data: [] };
   const authorNameById = new Map((authors ?? []).map((a) => [a.id, a.full_name]));
@@ -108,6 +138,7 @@ export default async function AnnouncementsPage() {
           showAssessorTemplate={showAssessorTemplate}
           traineeCount={traineeCount ?? 0}
           trainerCount={trainerCount ?? 0}
+          groups={composerGroups}
         />
 
         <ScheduledPanel scheduled={scheduledRows} timetableEvents={editPickerEvents} />

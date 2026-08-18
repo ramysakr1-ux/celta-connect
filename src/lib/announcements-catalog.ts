@@ -37,15 +37,16 @@ export async function generateStandardAnnouncements(
 
   const { data: events } = await supabase
     .from("course_timetable_events")
-    .select("id, type, title, event_date, linked_assignment_type")
+    .select("id, type, title, event_date, linked_assignment_type, tp_group_scope_id")
     .eq("course_id", courseId);
 
   const rows: Database["public"]["Tables"]["course_broadcasts"]["Insert"][] = [];
 
-  // Day before an assignment's deadline -- whole cohort. (Spec's "or one
-  // group, if staggered ABC/DEF dates" isn't buildable: course_timetable_
-  // events has no group-scoping column, so a staggered per-group deadline
-  // can't be told apart from a single course-wide one.)
+  // Day before an assignment's deadline. Whole cohort by default;
+  // tp_group_scope_id (for-claude-code-announcement-infra-fixes.md item 1)
+  // narrows it to one group when a course stages ABC/DEF on different
+  // dates -- a second assignment_due row for the same assignment_type,
+  // its own date, its own scope.
   for (const e of events ?? []) {
     if (e.type !== "assignment_due") continue;
     const title = e.linked_assignment_type ? ASSIGNMENT_INFO[e.linked_assignment_type as AssignmentType]?.title : null;
@@ -54,6 +55,7 @@ export async function generateStandardAnnouncements(
       author_id: authorId,
       title: `${title ?? "An assignment"} is due tomorrow`,
       body: "The brief is in the Resource hub.",
+      visible_to_tp_group_id: e.tp_group_scope_id,
       anchor_event_id: e.id,
       anchor_offset_days: -1,
       sent_at: null,

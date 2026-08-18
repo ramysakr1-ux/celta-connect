@@ -31,6 +31,7 @@ export async function postBroadcast(_prevState: FormState, formData: FormData): 
   const linkedTimetableEventId = (formData.get("linked_timetable_event_id") as string | null) || null;
   const pinned = formData.get("pinned") === "on";
   const keepOnDuplicate = formData.get("keep_on_duplicate") === "on";
+  const groupScopeId = (formData.get("visible_to_tp_group_id") as string | null) || null;
 
   // Scheduling: for-claude-code-trainer-remaining-screens.md's "always
   // anchored to a timetable event, never a fixed date, so the set
@@ -48,14 +49,26 @@ export async function postBroadcast(_prevState: FormState, formData: FormData): 
 
   const supabase = await createClient();
 
-  // for-claude-code-announcements-list.md table D: "course-wide broadcast:
-  // MCT only." Fails OPEN, not closed -- if no main_course_tutor is
-  // assigned on this course yet (tutor_role is frequently null on real
-  // courses, confirmed in the DB), blocking everyone would leave the
-  // course unable to broadcast at all. Admin is never blocked (centre
-  // owner). This composer only ever produces course-wide posts today (no
-  // group-targeting UI yet), so every call here IS the course-wide case.
-  if (trainer.role === "trainer") {
+  // for-claude-code-announcements-list.md table D: two different senders
+  // for two different reaches. D1, course-wide: MCT only, failing OPEN if
+  // no MCT is assigned yet (tutor_role is frequently null on real courses)
+  // so the course is never left unable to broadcast; admin is never
+  // blocked. D2, group-scoped: "any tutor attached to that group" --
+  // course_tp_groups.tutor_profile_id (migration 0121) is that attachment,
+  // already built for the Rotation admin screen, reused here rather than a
+  // new ownership table.
+  if (groupScopeId) {
+    const { data: group } = await supabase
+      .from("course_tp_groups")
+      .select("tutor_profile_id")
+      .eq("id", groupScopeId)
+      .eq("course_id", trainer.course_id)
+      .maybeSingle();
+    if (!group) return { error: "That group could not be found." };
+    if (trainer.role === "trainer" && group.tutor_profile_id && group.tutor_profile_id !== trainer.id) {
+      return { error: "Group messages are sent by a tutor attached to that group." };
+    }
+  } else if (trainer.role === "trainer") {
     const { data: mct } = await supabase
       .from("course_tutors")
       .select("profile_id")
@@ -73,6 +86,7 @@ export async function postBroadcast(_prevState: FormState, formData: FormData): 
     author_id: trainer.id,
     title,
     body,
+    visible_to_tp_group_id: groupScopeId,
     pinned,
     // A linked timetable event is the preferred source for the Zoom time
     // (read live at display time, see page.tsx) -- these manual fields are
