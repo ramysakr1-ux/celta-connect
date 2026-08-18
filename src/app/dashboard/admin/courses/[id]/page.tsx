@@ -30,6 +30,7 @@ import { TutorRoleControl } from "@/app/dashboard/admin/courses/[id]/tutor-role-
 import { GroupTutorForm } from "@/app/dashboard/admin/courses/[id]/group-tutor-form";
 import { getRecentCentreChanges } from "@/lib/what-changed";
 import { WhatChangedPanel } from "@/components/what-changed-panel";
+import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 
 export default async function CourseRosterPage({
   params,
@@ -266,15 +267,29 @@ export default async function CourseRosterPage({
         </div>
       </form>
 
-      <div className="card flex items-center justify-between gap-4 p-6">
-        <div>
-          <h2 className="font-serif text-lg text-ink">Entry form sent to Cambridge</h2>
-          <p className="mt-1 text-sm text-muted">
-            Fixes the cohort and the candidates&apos; names as Cambridge holds them, and decides
-            whether a later withdrawal is internal only or reportable. Comes from Cambridge&apos;s
-            own calendar, not the timetable.
-          </p>
+      <div className="card flex flex-col gap-4 p-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="font-serif text-lg text-ink">Entry form sent to Cambridge</h2>
+            <p className="mt-1 text-sm text-muted">
+              Fixes the cohort and the candidates&apos; names as Cambridge holds them, and decides
+              whether a later withdrawal is internal only or reportable. Comes from Cambridge&apos;s
+              own calendar, not the timetable.
+            </p>
+          </div>
         </div>
+        {!course.entry_form_sent_at ? (
+          (() => {
+            const deadline = computeEntryFormDeadline(course.start_date, course.delivery_mode);
+            const overdue = deadline < today;
+            return (
+              <p className={`text-sm ${overdue ? "font-semibold text-destructive" : "text-muted"}`}>
+                {overdue ? "Overdue" : "Due"} {deadline} -- {course.delivery_mode === "online" ? "four" : "two"} weeks
+                before the course starts (Handbook 3.1).
+              </p>
+            );
+          })()
+        ) : null}
         <form action={updateEntryFormSentAt} className="flex items-center gap-2">
           <input type="hidden" name="course_id" value={course.id} />
           <input
