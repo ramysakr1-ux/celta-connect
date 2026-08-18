@@ -79,6 +79,78 @@ export async function grantCentreRole(_prev: GrantRoleState, formData: FormData)
   return { granted: `${CENTRE_ROLE_LABELS[role]} granted to ${target.full_name}` };
 }
 
+export interface CreateInviteState {
+  error?: string;
+  createdToken?: string;
+}
+
+/**
+ * Invitations.dc.html 1c: a Centre owner adding a second admin/manager who
+ * has no account here yet. Distinct from grantCentreRole() above, which only
+ * appoints an EXISTING profile -- this one issues a link that creates the
+ * account. Still gated on the same roles.grant capability, and still
+ * server-side only (centre_admin_invites has no insert policy at all,
+ * migration 0144).
+ */
+export async function createCentreAdminInvite(_prev: CreateInviteState, formData: FormData): Promise<CreateInviteState> {
+  const profile = await requireRole("admin");
+  const ctx = await getCentreRoleContext(profile);
+  if (!can(ctx.roles, "roles.grant")) {
+    return { error: "Only a Centre owner can invite administrators." };
+  }
+
+  const role = formData.get("role") as CentreRole | null;
+  if (!role || !CENTRE_ROLES.includes(role)) return { error: "Pick a role." };
+
+  const centerId = ctx.activeCenterId ?? profile.center_id;
+  const admin = createAdminClient();
+  const { data: invite, error } = await admin
+    .from("centre_admin_invites")
+    .insert({ center_id: centerId, role, created_by: profile.id })
+    .select("token")
+    .single();
+  if (error || !invite) return { error: "Could not create the invite. Try again." };
+
+  await logOwnerAction(centerId, profile.id, "roles.invite", { role });
+
+  revalidatePath("/centre/roles");
+  return { createdToken: invite.token };
+}
+
+export interface RevokeInviteState {
+  error?: string;
+  revoked?: boolean;
+}
+
+export async function revokeCentreAdminInvite(_prev: RevokeInviteState, formData: FormData): Promise<RevokeInviteState> {
+  const profile = await requireRole("admin");
+  const ctx = await getCentreRoleContext(profile);
+  if (!can(ctx.roles, "roles.grant")) {
+    return { error: "Only a Centre owner can withdraw an invite." };
+  }
+
+  const inviteId = formData.get("invite_id") as string | null;
+  if (!inviteId) return { error: "Missing the invite." };
+
+  const centerId = ctx.activeCenterId ?? profile.center_id;
+  const admin = createAdminClient();
+  const { data: invite } = await admin
+    .from("centre_admin_invites")
+    .select("id, role")
+    .eq("id", inviteId)
+    .eq("center_id", centerId)
+    .maybeSingle();
+  if (!invite) return { error: "That invite isn't in this centre." };
+
+  const { error } = await admin.from("centre_admin_invites").update({ revoked_at: new Date().toISOString() }).eq("id", inviteId);
+  if (error) return { error: "Could not withdraw that invite." };
+
+  await logOwnerAction(centerId, profile.id, "roles.invite.revoke", { role: invite.role });
+
+  revalidatePath("/centre/roles");
+  return { revoked: true };
+}
+
 export interface RevokeRoleState {
   error?: string;
   revoked?: boolean;

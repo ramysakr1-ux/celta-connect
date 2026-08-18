@@ -1,19 +1,96 @@
 "use client";
 
+import { useState } from "react";
 import { useActionState } from "react";
 import {
   grantCentreRole,
   revokeCentreRole,
   assignArea,
+  createCentreAdminInvite,
+  revokeCentreAdminInvite,
   type GrantRoleState,
   type RevokeRoleState,
   type AssignAreaState,
+  type CreateInviteState,
+  type RevokeInviteState,
 } from "@/app/centre/roles/actions";
 import { AREAS, AREA_LABELS } from "@/lib/auth/areas";
 import { CENTRE_ROLES, CENTRE_ROLE_LABELS } from "@/lib/auth/centre-permissions";
 
 const grantInitial: GrantRoleState = {};
 const revokeInitial: RevokeRoleState = {};
+const createInviteInitial: CreateInviteState = {};
+const revokeInviteInitial: RevokeInviteState = {};
+
+export function CreateInviteForm() {
+  const [state, action, pending] = useActionState(createCentreAdminInvite, createInviteInitial);
+  const [copied, setCopied] = useState(false);
+
+  const link = state.createdToken && typeof window !== "undefined" ? `${window.location.origin}/join-centre/${state.createdToken}` : null;
+
+  return (
+    <form action={action} className="flex flex-wrap items-end gap-3">
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm text-muted">Role</span>
+        <select
+          name="role"
+          defaultValue="centre_administrator"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+        >
+          {CENTRE_ROLES.map((r) => (
+            <option key={r} value={r}>
+              {CENTRE_ROLE_LABELS[r]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button
+        type="submit"
+        disabled={pending}
+        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+      >
+        {pending ? "Creating link..." : "Create invite link"}
+      </button>
+      {state.error ? <p className="w-full text-sm text-destructive">{state.error}</p> : null}
+      {link ? (
+        <div className="flex w-full flex-wrap items-center gap-2 rounded-[6px] border border-primary/30 bg-primary/5 px-3 py-2">
+          <code className="min-w-0 flex-1 truncate text-xs text-ink">{link}</code>
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard.writeText(link);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}
+            className="shrink-0 text-xs font-semibold text-primary hover:underline"
+          >
+            {copied ? "Copied" : "Copy link"}
+          </button>
+        </div>
+      ) : null}
+    </form>
+  );
+}
+
+export function RevokeInviteButton({ inviteId }: { inviteId: string }) {
+  const [state, action, pending] = useActionState(revokeCentreAdminInvite, revokeInviteInitial);
+
+  return (
+    <form
+      action={action}
+      onSubmit={(e) => {
+        if (!confirm("Withdraw this invite link? It will stop working.")) e.preventDefault();
+      }}
+      className="flex items-center gap-2"
+    >
+      <input type="hidden" name="invite_id" value={inviteId} />
+      <button type="submit" disabled={pending} className="text-xs text-muted hover:text-destructive disabled:opacity-60">
+        {pending ? "Withdrawing..." : "Withdraw"}
+      </button>
+      {state.error ? <span className="text-xs text-destructive">{state.error}</span> : null}
+    </form>
+  );
+}
 
 export function GrantRoleForm() {
   const [state, action, pending] = useActionState(grantCentreRole, grantInitial);

@@ -5,7 +5,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { RoleStrip } from "@/app/centre/roles/role-strip";
-import { GrantRoleForm, RevokeRoleButton, AssignAreaForm } from "@/app/centre/roles/role-forms";
+import { GrantRoleForm, RevokeRoleButton, AssignAreaForm, CreateInviteForm, RevokeInviteButton } from "@/app/centre/roles/role-forms";
+import { CENTRE_ROLE_LABELS } from "@/lib/auth/centre-permissions";
 import { AREAS, AREA_LABELS } from "@/lib/auth/areas";
 import { getAreaHolders } from "@/lib/auth/area-holders";
 
@@ -28,7 +29,7 @@ export default async function CentreRolesPage() {
   // profiles through it would depend on a second policy agreeing. The page is
   // already gated on holding a role in this centre.
   const admin = createAdminClient();
-  const [{ data: grants }, { data: log }] = await Promise.all([
+  const [{ data: grants }, { data: log }, { data: invites }] = await Promise.all([
     admin.from("centre_roles").select("id, role, profile_id").eq("center_id", centerId).is("revoked_at", null).order("granted_at"),
     mayAppoint
       ? admin
@@ -37,6 +38,15 @@ export default async function CentreRolesPage() {
           .eq("center_id", centerId)
           .order("created_at", { ascending: false })
           .limit(6)
+      : Promise.resolve({ data: [] }),
+    mayAppoint
+      ? admin
+          .from("centre_admin_invites")
+          .select("id, role, created_at")
+          .eq("center_id", centerId)
+          .is("used_at", null)
+          .is("revoked_at", null)
+          .order("created_at", { ascending: false })
       : Promise.resolve({ data: [] }),
   ]);
 
@@ -116,9 +126,9 @@ export default async function CentreRolesPage() {
         <div className="rounded-[10px] border border-border bg-card px-5 py-4">
           <h2 className="font-serif text-base text-ink">Appoint someone</h2>
           <p className="mt-1 text-xs text-muted">
-            Roles are appointed, never chosen — there is no screen anywhere that promotes an account. They need an
-            account in this centre already; appointing gives a role to an existing person, it doesn&apos;t invite
-            anyone.
+            Roles are appointed, never chosen — nobody promotes their own account. They need an account in this
+            centre already; appointing gives a role to an existing person. Inviting someone who doesn&apos;t have
+            one yet is below.
           </p>
           <div className="mt-3">
             <GrantRoleForm />
@@ -135,6 +145,36 @@ export default async function CentreRolesPage() {
                       <span className="text-muted">{g.role.replace(/_/g, " ")}</span>
                     </span>
                     <RevokeRoleButton grantId={g.id} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {mayAppoint ? (
+        <div className="rounded-[10px] border border-border bg-card px-5 py-4">
+          <h2 className="font-serif text-base text-ink">Invite a new admin</h2>
+          <p className="mt-1 text-xs text-muted">
+            For someone who has no account here at all. The link opens the centre, not a course — they set up their
+            account and accept the centre agreement in one step, and their access lasts for as long as the centre
+            runs, not just one course.
+          </p>
+          <div className="mt-3">
+            <CreateInviteForm />
+          </div>
+
+          {(invites ?? []).length > 0 ? (
+            <div className="mt-4 border-t border-border-faint pt-3">
+              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Pending invites</p>
+              <div className="mt-2 flex flex-col gap-1.5">
+                {(invites ?? []).map((inv) => (
+                  <div key={inv.id} className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-ink">
+                      {CENTRE_ROLE_LABELS[inv.role]} <span className="text-muted">· not yet accepted</span>
+                    </span>
+                    <RevokeInviteButton inviteId={inv.id} />
                   </div>
                 ))}
               </div>

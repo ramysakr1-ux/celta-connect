@@ -2059,6 +2059,26 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["centre_owner_actions"]["Row"]>;
         Relationships: [];
       };
+      centre_admin_invites: {
+        Row: {
+          id: string;
+          center_id: string;
+          role: "centre_administrator" | "centre_manager" | "course_administrator" | "centre_owner";
+          token: string;
+          created_by: string;
+          created_at: string;
+          used_at: string | null;
+          used_by: string | null;
+          revoked_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_admin_invites"]["Row"]> & {
+          center_id: string;
+          role: "centre_administrator" | "centre_manager" | "course_administrator" | "centre_owner";
+          created_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_admin_invites"]["Row"]>;
+        Relationships: [];
+      };
       spreadsheet_imports: {
         Row: {
           id: string;
