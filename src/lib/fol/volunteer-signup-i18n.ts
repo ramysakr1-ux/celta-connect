@@ -1,0 +1,155 @@
+// Not a Server Action -- copy for Volunteer Sign-Up.dc.html's screens 1
+// (language) and 2 (consent), the only two screens that get translated
+// ("three things get translated, not the questions... a handful of
+// sentences, translated properly once, with nothing to keep in sync").
+//
+// Best-effort translations for Arabic/Russian/Persian/Ukrainian -- the
+// Turkish text below is taken verbatim from the design handoff; the other
+// four follow its meaning and register but have not had a native-speaker
+// legal review. Worth one pass before this goes in front of real
+// volunteers, same as the design doc's own "translated once by a human"
+// principle -- this is a first draft, not that pass.
+export interface SignupLanguage {
+  code: string;
+  native: string;
+  english: string;
+  isFallback?: boolean;
+}
+
+export const SIGNUP_LANGUAGES: SignupLanguage[] = [
+  { code: "tr", native: "Türkçe", english: "Turkish" },
+  { code: "ar", native: "العربية", english: "Arabic" },
+  { code: "ru", native: "Русский", english: "Russian" },
+  { code: "fa", native: "فارسی", english: "Persian" },
+  { code: "uk", native: "Українська", english: "Ukrainian" },
+  { code: "en", native: "English", english: "English" },
+  { code: "other", native: "My language is not here", english: "Continue in English", isFallback: true },
+];
+
+export interface SignupTranslation {
+  greeting: string;
+  langQuestion: string;
+  continueLabel: string;
+  languageSub: string;
+  consentHeading: string;
+  consentIntro: string;
+  consentLines: [string, string, string];
+  agreeLabel: string;
+  answerInEnglishNote: string;
+  recordingConsentLine: string;
+}
+
+export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
+  tr: {
+    greeting: "Hoş geldiniz",
+    langQuestion: "Hangi dilde okumak istersiniz?",
+    continueLabel: "Devam et",
+    languageSub: "You will answer in English, but everything we explain is in your language.",
+    consentHeading: "Başlamadan önce",
+    consentIntro: "Lütfen bunu okuyun. Kısa ve anlamanız önemli olduğu için Türkçe yazılmıştır.",
+    consentLines: [
+      "Verdiğiniz bilgiler öğretmen eğitimi için merkezle paylaşılacaktır.",
+      "Öğretmen adayları bu bilgileri ödevlerinde kullanabilir. Başka kimseyle paylaşılmaz.",
+      "İstediğiniz zaman vazgeçebilirsiniz.",
+    ],
+    agreeLabel: "Kabul ediyorum",
+    answerInEnglishNote: "İngilizce cevap vereceksiniz, ancak açıkladığımız her şey kendi dilinizde.",
+    recordingConsentLine: "Ses kaydı için ayrıca onay veriyorum.",
+  },
+  ar: {
+    greeting: "مرحبًا",
+    langQuestion: "بأي لغة تفضل القراءة؟",
+    continueLabel: "متابعة",
+    languageSub: "You will answer in English, but everything we explain is in your language.",
+    consentHeading: "قبل أن نبدأ",
+    consentIntro: "يرجى قراءة هذا. إنه قصير، وهو مكتوب بلغتك لأنه من المهم أن تفهمه.",
+    consentLines: [
+      "المعلومات التي تقدمها ستُشارك مع المركز لأغراض تدريب المعلمين.",
+      "قد يستخدمها المعلمون المتدربون في أعمالهم الدراسية. لن تُشارك مع أي شخص آخر.",
+      "يمكنك التراجع في أي وقت.",
+    ],
+    agreeLabel: "أوافق",
+    answerInEnglishNote: "ستجيب باللغة الإنجليزية، لكن كل ما نشرحه هو بلغتك.",
+    recordingConsentLine: "أوافق بشكل منفصل على التسجيل الصوتي.",
+  },
+  ru: {
+    greeting: "Добро пожаловать",
+    langQuestion: "На каком языке вы хотите читать?",
+    continueLabel: "Продолжить",
+    languageSub: "You will answer in English, but everything we explain is in your language.",
+    consentHeading: "Прежде чем начать",
+    consentIntro: "Пожалуйста, прочитайте это. Текст короткий и написан на вашем языке, потому что важно, чтобы вы его поняли.",
+    consentLines: [
+      "Предоставленная вами информация будет передана центру для обучения преподавателей.",
+      "Стажёры-преподаватели могут использовать её в своих учебных работах. Она не передаётся никому другому.",
+      "Вы можете отказаться в любое время.",
+    ],
+    agreeLabel: "Я согласен",
+    answerInEnglishNote: "Вы будете отвечать по-английски, но всё, что мы объясняем, — на вашем языке.",
+    recordingConsentLine: "Я отдельно соглашаюсь на аудиозапись.",
+  },
+  fa: {
+    greeting: "خوش آمدید",
+    langQuestion: "می‌خواهید به چه زبانی بخوانید؟",
+    continueLabel: "ادامه",
+    languageSub: "You will answer in English, but everything we explain is in your language.",
+    consentHeading: "پیش از شروع",
+    consentIntro: "لطفاً این را بخوانید. کوتاه است و به زبان شما نوشته شده چون مهم است که آن را بفهمید.",
+    consentLines: [
+      "اطلاعاتی که ارائه می‌دهید برای آموزش مربیان با مرکز به اشتراک گذاشته می‌شود.",
+      "کارآموزان معلمی ممکن است از آن در تکالیف خود استفاده کنند. با کس دیگری به اشتراک گذاشته نمی‌شود.",
+      "می‌توانید هر زمان انصراف دهید.",
+    ],
+    agreeLabel: "موافقم",
+    answerInEnglishNote: "شما به انگلیسی پاسخ خواهید داد، اما هرچه توضیح می‌دهیم به زبان شماست.",
+    recordingConsentLine: "من جداگانه با ضبط صدا موافقت می‌کنم.",
+  },
+  uk: {
+    greeting: "Ласкаво просимо",
+    langQuestion: "Якою мовою ви хочете читати?",
+    continueLabel: "Продовжити",
+    languageSub: "You will answer in English, but everything we explain is in your language.",
+    consentHeading: "Перш ніж почати",
+    consentIntro: "Будь ласка, прочитайте це. Текст короткий і написаний вашою мовою, бо важливо, щоб ви його зрозуміли.",
+    consentLines: [
+      "Надана вами інформація буде передана центру для навчання викладачів.",
+      "Стажери-викладачі можуть використовувати її у своїх навчальних роботах. Вона не передається нікому іншому.",
+      "Ви можете відмовитися в будь-який час.",
+    ],
+    agreeLabel: "Погоджуюсь",
+    answerInEnglishNote: "Ви відповідатимете англійською, але все, що ми пояснюємо, — вашою мовою.",
+    recordingConsentLine: "Я окремо погоджуюсь на аудіозапис.",
+  },
+  en: {
+    greeting: "Welcome",
+    langQuestion: "Which language would you like to read in?",
+    continueLabel: "Continue",
+    languageSub: "You will answer in English throughout.",
+    consentHeading: "Before we start",
+    consentIntro: "Please read this. It's short, and it matters that you understand it.",
+    consentLines: [
+      "What you tell us is shared with the centre for teacher training.",
+      "Trainee teachers may use it in their coursework. It is not shared with anyone else.",
+      "You can withdraw at any time.",
+    ],
+    agreeLabel: "I agree",
+    answerInEnglishNote: "You will answer in English throughout.",
+    recordingConsentLine: "I separately agree to being recorded.",
+  },
+  other: {
+    greeting: "Welcome",
+    langQuestion: "Which language would you like to read in?",
+    continueLabel: "Continue in English",
+    languageSub: "The centre can help you in person if English is difficult here.",
+    consentHeading: "Before we start",
+    consentIntro: "Please read this. It matters that you understand it.",
+    consentLines: [
+      "What you tell us is shared with the centre for teacher training.",
+      "Trainee teachers may use it in their coursework. It is not shared with anyone else.",
+      "You can withdraw at any time.",
+    ],
+    agreeLabel: "I agree",
+    answerInEnglishNote: "You will answer in English throughout.",
+    recordingConsentLine: "I separately agree to being recorded.",
+  },
+};

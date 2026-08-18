@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
+import { transcribeAudio } from "@/lib/openai/transcribe";
 
 export interface VolunteerSignupState {
   error: string | null;
@@ -14,14 +15,21 @@ export interface VolunteerSignupState {
 // action rather than a direct browser->Storage upload, since there's no
 // authenticated user to sign that upload as.
 //
-// Placeholder question wording (SIGNUP_QUESTIONS above) pending the real
-// Volunteer Sign-Up.dc.html handover -- the underlying data shape
-// (six {question, answer} pairs + one audio file) is what FOL's Day-10
-// unlock actually depends on, not the exact wording, so this unblocks FOL
-// now without waiting on that file.
+// Matches Volunteer Sign-Up.dc.html now that it's been handed off: six
+// optional written questions ("a blank answer moves on"), a chosen L1
+// language ("becomes their L1 on file"), two separate consent moments
+// (data consent on screen 2, recording consent on screen 4), and one
+// continuous recording across all eight escalating prompts.
 export async function submitVolunteerSignupProfile(_prevState: VolunteerSignupState, formData: FormData): Promise<VolunteerSignupState> {
   const token = formData.get("token");
   if (typeof token !== "string" || !token) return { error: "Something went wrong. Refresh and try again." };
+
+  const l1Language = formData.get("l1_language");
+  if (typeof l1Language !== "string" || !l1Language) return { error: "Choose a language to continue." };
+
+  if (!formData.get("consent_given") || !formData.get("recording_consent_given")) {
+    return { error: "Both consents are needed to continue." };
+  }
 
   const admin = createAdminClient();
   const { data: accessToken } = await admin
@@ -41,33 +49,44 @@ export async function submitVolunteerSignupProfile(_prevState: VolunteerSignupSt
   if (!volunteer || !course) return { error: "Something went wrong. Refresh and try again." };
   const centerId = course.center_id;
 
+  // Optional -- "nothing here is marked... a blank answer moves on."
   const answers = SIGNUP_QUESTIONS.map((question, i) => ({
     question,
     answer: (formData.get(`answer_${i}`) as string | null)?.trim() || "",
   }));
-  if (answers.some((a) => !a.answer)) return { error: "Please answer every question." };
 
   const audioFile = formData.get("audio");
-  let audioUrl: string | null = null;
-  if (audioFile instanceof File && audioFile.size > 0) {
-    const storagePath = `${centerId}/${volunteer.id}-${Date.now()}.${audioFile.name.split(".").pop() ?? "webm"}`;
-    const { error: uploadError } = await admin.storage.from("volunteer-signup-audio").upload(storagePath, audioFile, {
-      contentType: audioFile.type || "audio/webm",
-    });
-    if (uploadError) return { error: "Could not upload the recording. Try again." };
-    audioUrl = storagePath;
+  if (!(audioFile instanceof File) || audioFile.size === 0) {
+    return { error: "A recording is needed before you can finish." };
   }
 
+  const storagePath = `${centerId}/${volunteer.id}-${Date.now()}.${audioFile.name.split(".").pop() ?? "webm"}`;
+  const { error: uploadError } = await admin.storage.from("volunteer-signup-audio").upload(storagePath, audioFile, {
+    contentType: audioFile.type || "audio/webm",
+  });
+  if (uploadError) return { error: "Could not upload the recording. Try again." };
+
+  // Best-effort -- a missing OPENAI_API_KEY or a flaky API never blocks the
+  // sign-up itself, same reasoning as a failed audio upload elsewhere in
+  // this app not failing the whole submission.
+  const transcript = await transcribeAudio(audioFile, audioFile.name);
+
+  const now = new Date().toISOString();
   const { error: profileError } = await admin.from("volunteer_signup_profiles").insert({
     center_id: centerId,
     course_id: volunteer.course_id,
     volunteer_student_id: volunteer.id,
     written_answers: answers,
-    audio_url: audioUrl,
+    audio_url: storagePath,
+    transcript,
+    transcript_generated_at: transcript ? now : null,
+    l1_language: l1Language,
+    consent_given_at: now,
+    recording_consent_given_at: now,
   });
   if (profileError) return { error: "Could not save your answers. Try again." };
 
-  await admin.from("volunteer_students").update({ signup_completed_at: new Date().toISOString() }).eq("id", volunteer.id);
+  await admin.from("volunteer_students").update({ signup_completed_at: now }).eq("id", volunteer.id);
 
   // No client-side navigation happens on a plain "use server" form action
   // without one of revalidatePath/redirect -- without this, the page kept
