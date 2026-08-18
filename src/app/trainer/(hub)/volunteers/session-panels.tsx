@@ -1,5 +1,3 @@
-import { CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-attendance";
-
 interface VolunteerSession {
   id: string;
   name: string;
@@ -13,7 +11,13 @@ interface VolunteerSession {
 // enrollments (checked: no phone/email/external id, just name+course_id),
 // so a real cross-course/cross-level running total would need a new
 // volunteer-identity model first. Flagged, not guessed at.
-export function VolunteerSessionPanels({ sessions }: { sessions: VolunteerSession[] }) {
+export function VolunteerSessionPanels({
+  sessions,
+  certificateHoursThreshold,
+}: {
+  sessions: VolunteerSession[];
+  certificateHoursThreshold: number;
+}) {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
       <div className="rounded-[6px] border border-border">
@@ -50,13 +54,13 @@ export function VolunteerSessionPanels({ sessions }: { sessions: VolunteerSessio
         ) : (
           <div className="divide-y divide-border-faint">
             {sessions.map((v) => {
-              const pct = Math.min(100, Math.round((v.certificateHours / CERTIFICATE_HOURS_THRESHOLD) * 100));
+              const pct = Math.min(100, Math.round((v.certificateHours / certificateHoursThreshold) * 100));
               return (
                 <div key={v.id} className="flex flex-col gap-1 px-4 py-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-ink">{v.name}</span>
                     <span className="text-xs tabular-nums text-muted">
-                      {v.certificateHours.toFixed(1)} / {CERTIFICATE_HOURS_THRESHOLD} hrs
+                      {v.certificateHours.toFixed(1)} / {certificateHoursThreshold} hrs
                     </span>
                   </div>
                   <span className="h-1 w-full overflow-hidden rounded-full bg-surface-muted">

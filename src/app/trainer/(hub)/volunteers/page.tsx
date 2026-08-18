@@ -10,7 +10,7 @@ import { RegisterLinkButton } from "@/app/trainer/(hub)/volunteers/register-link
 import { AttendanceRegisterGrid } from "@/components/attendance-register-grid";
 import { VolunteerSessionPanels } from "@/app/trainer/(hub)/volunteers/session-panels";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
-import { computeSessionTicks } from "@/lib/volunteer-attendance";
+import { computeSessionTicks, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-attendance";
 import { toLocalIso } from "@/lib/timetable-grid";
 
 // §14 -- the trainer-side register that mints the tokenized links volunteer
@@ -39,6 +39,12 @@ export default async function VolunteersPage() {
     .eq("course_id", courseId)
     .is("removed_at", null)
     .order("name");
+
+  const { data: courseForThreshold } = await supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle();
+  const { data: centerForThreshold } = courseForThreshold
+    ? await supabase.from("centers").select("volunteer_certificate_hours_threshold").eq("id", courseForThreshold.center_id).maybeSingle()
+    : { data: null };
+  const certificateHoursThreshold = centerForThreshold?.volunteer_certificate_hours_threshold ?? CERTIFICATE_HOURS_THRESHOLD;
 
   const volunteerIds = (volunteers ?? []).map((v) => v.id);
   const [{ data: tokens }, { data: tpEvents }, { data: attendanceRows }, { data: signupProfiles }] = await Promise.all([
@@ -110,7 +116,7 @@ export default async function VolunteersPage() {
         </div>
       </div>
 
-      <VolunteerSessionPanels sessions={volunteerSessions} />
+      <VolunteerSessionPanels sessions={volunteerSessions} certificateHoursThreshold={certificateHoursThreshold} />
 
       <AddVolunteerForm />
 

@@ -60,6 +60,7 @@ export function creditedHours(sessionTicks: SessionTick[]): number {
   return sessionTicks.reduce((sum, s) => sum + s.creditedMinutes, 0) / 60;
 }
 
-// Spec's own illustrative figure ("e.g. 160 hrs") -- there's no centre
-// setting for this yet, so it's a plain constant, not a fabricated one.
+// migration 0146 -- was a plain constant with no centre setting behind it;
+// now centers.volunteer_certificate_hours_threshold is the real source and
+// this is only the fallback for a row that predates the column somehow.
 export const CERTIFICATE_HOURS_THRESHOLD = 160;

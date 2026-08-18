@@ -7,7 +7,14 @@ import { Wordmark } from "@/components/wordmark";
 import { DesignerCredit } from "@/components/designer-credit";
 import { getVolunteerIdentityData, TICK_THRESHOLD_MINUTES, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-cross-course";
 
-const MILESTONES = [40, 80, 120, CERTIFICATE_HOURS_THRESHOLD];
+// Four evenly-spaced markers scaled to whatever the centre has set --
+// quarters of the threshold, rounded to the nearest 10 hours, rather than
+// the old fixed 40/80/120/160 which only made sense at the default value.
+function milestonesFor(threshold: number): number[] {
+  const step = Math.max(Math.round(threshold / 4 / 10) * 10, 1);
+  const marks = [step, step * 2, step * 3, threshold];
+  return [...new Set(marks)].sort((a, b) => a - b);
+}
 
 function formatEventDate(iso: string): string {
   const date = new Date(`${iso}T00:00:00`);
@@ -53,7 +60,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
   const [{ data: volunteer }, { data: course }, { data: sharedMaterials }] = await Promise.all([
     admin.from("volunteer_students").select("name, signup_completed_at").eq("id", accessToken.volunteer_student_id).maybeSingle(),
-    admin.from("courses").select("name, end_date").eq("id", accessToken.course_id).maybeSingle(),
+    admin.from("courses").select("name, end_date, center_id").eq("id", accessToken.course_id).maybeSingle(),
     admin
       .from("volunteer_shared_materials")
       .select("id, created_at, tp_materials(id, file_name, slides_url, storage_path, tp_plans(main_aims))")
@@ -94,7 +101,13 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     );
   }
 
-  const { hoursCredited, classes } = await getVolunteerIdentityData(admin, accessToken.volunteer_student_id);
+  const [{ hoursCredited, classes }, { data: centerForThreshold }] = await Promise.all([
+    getVolunteerIdentityData(admin, accessToken.volunteer_student_id),
+    course?.center_id
+      ? admin.from("centers").select("volunteer_certificate_hours_threshold").eq("id", course.center_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  const certificateHoursThreshold = centerForThreshold?.volunteer_certificate_hours_threshold ?? CERTIFICATE_HOURS_THRESHOLD;
 
   // Scoped to this token's own course only (not the cross-course list
   // below) -- the decline action re-resolves volunteer_student_id from the
@@ -181,8 +194,9 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   );
   const materials = resolvedMaterials.filter((m): m is NonNullable<typeof m> => m !== null);
 
-  const hoursRemaining = Math.max(CERTIFICATE_HOURS_THRESHOLD - hoursCredited, 0);
-  const progressPct = Math.min((hoursCredited / CERTIFICATE_HOURS_THRESHOLD) * 100, 100);
+  const hoursRemaining = Math.max(certificateHoursThreshold - hoursCredited, 0);
+  const progressPct = Math.min((hoursCredited / certificateHoursThreshold) * 100, 100);
+  const milestones = milestonesFor(certificateHoursThreshold);
 
   return (
     <div className="min-h-screen bg-background">
@@ -278,7 +292,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                 <div className="h-full rounded-full bg-primary" style={{ width: `${progressPct}%` }} />
               </div>
               <div className="mt-3 flex justify-between text-[10px] text-muted">
-                {MILESTONES.map((m) => (
+                {milestones.map((m) => (
                   <span key={m} className={hoursCredited >= m ? "font-semibold text-ink" : ""}>
                     {m}h
                   </span>

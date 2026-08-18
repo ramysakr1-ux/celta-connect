@@ -11,12 +11,14 @@ export function CenterProfileForm({
   isUkCentre,
   admissionsEmail,
   chatRetentionDays,
+  volunteerCertificateHoursThreshold,
 }: {
   name: string;
   centerNumber: string;
   isUkCentre: boolean;
   admissionsEmail: string | null;
   chatRetentionDays: number;
+  volunteerCertificateHoursThreshold: number;
 }) {
   const [state, action, pending] = useActionState(updateCenterProfile, initialState);
   const isPlaceholder = centerNumber.startsWith("PENDING-");
@@ -122,6 +124,25 @@ export function CenterProfileForm({
         <p className="text-xs text-muted">
           A rolling window, not a fixed reset time -- a message is deleted once it&apos;s this many days old.
           Applies to every chat channel (trainer and trainee alike), never set separately per role.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="volunteer_certificate_hours_threshold" className="text-sm text-muted">
+          Volunteer certificate threshold (hours)
+        </label>
+        <input
+          id="volunteer_certificate_hours_threshold"
+          name="volunteer_certificate_hours_threshold"
+          type="number"
+          min={1}
+          required
+          defaultValue={volunteerCertificateHoursThreshold}
+          className="w-24 rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+        />
+        <p className="text-xs text-muted">
+          Hours of credited attendance a volunteer needs before they&apos;ve earned a certificate. Shown on the
+          Volunteers register and on a volunteer&apos;s own class link.
         </p>
       </div>
 

@@ -199,6 +199,9 @@ export interface Database {
           application_low_availability_threshold: number;
           admissions_email: string | null;
           chat_retention_days: number;
+          // migration 0146 -- was a plain 160 constant ("the spec's own
+          // illustrative figure... no centre setting for this yet").
+          volunteer_certificate_hours_threshold: number;
           // migration 0114 -- working days by which the centre promises to
           // respond to an application. The acknowledgement email turns this
           // into a real date.
