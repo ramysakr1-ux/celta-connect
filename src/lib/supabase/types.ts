@@ -198,6 +198,15 @@ export interface Database {
           admissions_stale_threshold_days: number;
           application_low_availability_threshold: number;
           admissions_email: string | null;
+          // migration 0155 -- Centre Settings' Profile & Drive tab.
+          // primary_contact_email is distinct from admissions_email
+          // (applicant-facing reply-to only); currency "applies to every
+          // course unless a course overrides it" -- courses.fee_currency
+          // is that override.
+          address: string | null;
+          primary_contact_email: string | null;
+          time_zone: string | null;
+          currency: string | null;
           // migration 0146 -- was a plain 160 constant ("the spec's own
           // illustrative figure... no centre setting for this yet").
           volunteer_certificate_hours_threshold: number;

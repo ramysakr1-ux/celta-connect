@@ -70,7 +70,7 @@ export default async function CentreLayout({ children }: { children: React.React
       {can(ctx.roles, "centre.settings.edit") ? (
         <div className="container pb-6">
           <Link
-            href="/dashboard/admin/settings"
+            href="/centre/settings"
             className="flex items-center justify-between gap-4 rounded-[10px] border border-border bg-card px-[22px] py-[18px] hover:border-primary"
           >
             <div className="flex flex-col gap-[3px]">

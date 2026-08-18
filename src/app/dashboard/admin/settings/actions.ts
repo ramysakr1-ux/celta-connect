@@ -99,6 +99,8 @@ export async function disconnectGoogleDrive(): Promise<void> {
   const admin = createAdminClient();
   await admin.from("center_google_connections").delete().eq("center_id", profile.center_id);
   revalidatePath("/dashboard/admin/settings");
+  // Also reachable from the new Centre Settings hub's Profile & Drive tab.
+  revalidatePath("/centre/settings");
 }
 
 export async function addStyleExample(
