@@ -96,34 +96,9 @@ export function CloseOutCard({
               </a>
             ) : null}
           </div>
-          <form action={receiptAction} className="flex flex-wrap items-end gap-3 rounded-[6px] border border-border p-3">
-            <input type="hidden" name="course_id" value={courseId} />
-            <div className="flex flex-1 flex-col gap-1.5">
-              <label htmlFor="signed_name" className="text-xs text-muted">
-                Confirm receipt -- type your name
-              </label>
-              <input
-                id="signed_name"
-                name="signed_name"
-                type="text"
-                required
-                className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={receiptPending}
-              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
-            >
-              {receiptPending ? "Confirming..." : "Confirm receipt"}
-            </button>
-          </form>
-          {receiptState.error ? <p className="text-sm text-destructive">{receiptState.error}</p> : null}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
           {blockingReasons.length > 0 ? (
             <div className="flex flex-col gap-1.5 rounded-[6px] border border-destructive/30 bg-destructive/5 p-3">
+              <p className="text-sm font-medium text-ink">Confirming receipt is held until this clears:</p>
               {blockingReasons.map((r) => (
                 <p key={r.code} className="text-sm text-ink">
                   {r.message}
@@ -131,54 +106,95 @@ export function CloseOutCard({
               ))}
             </div>
           ) : (
-            <>
-              {status === "verify_failed" && closeOut?.verification_report ? (
-                <div className="flex flex-col gap-1.5 rounded-[6px] border border-gold/30 bg-gold/10 p-3">
-                  <p className="text-sm text-ink">
-                    {closeOut.verification_report.issues.length} issue{closeOut.verification_report.issues.length === 1 ? "" : "s"} found
-                    across {closeOut.verification_report.candidateCount} candidate
-                    {closeOut.verification_report.candidateCount === 1 ? "" : "s"}:
-                  </p>
-                  <ul className="flex flex-col gap-1">
-                    {closeOut.verification_report.issues.map((issue, i) => (
-                      <li key={i} className="text-xs text-ink">
-                        <span className="font-semibold">{issue.traineeName}</span> -- {issue.artifact}: {issue.problem}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              {status === "export_failed" && closeOut?.export_error ? (
-                <p className="text-sm text-destructive">{closeOut.export_error}</p>
-              ) : null}
-
-              {status === "ready_to_export" ? (
-                <form action={exportAction}>
-                  <input type="hidden" name="course_id" value={courseId} />
-                  <button
-                    type="submit"
-                    disabled={exportPending}
-                    className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
-                  >
-                    {exportPending ? "Exporting... (this can take a while)" : "Export to Drive"}
-                  </button>
-                </form>
-              ) : (
-                <form action={verifyAction}>
-                  <input type="hidden" name="course_id" value={courseId} />
-                  <button
-                    type="submit"
-                    disabled={verifyPending}
-                    className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
-                  >
-                    {verifyPending ? "Checking..." : status === "verify_failed" ? "Re-check" : "Run verification"}
-                  </button>
-                </form>
-              )}
-              {exportState.error ? <p className="text-sm text-destructive">{exportState.error}</p> : null}
-            </>
+            <form action={receiptAction} className="flex flex-wrap items-end gap-3 rounded-[6px] border border-border p-3">
+              <input type="hidden" name="course_id" value={courseId} />
+              <div className="flex flex-1 flex-col gap-1.5">
+                <label htmlFor="signed_name" className="text-xs text-muted">
+                  Confirm receipt -- type your name
+                </label>
+                <input
+                  id="signed_name"
+                  name="signed_name"
+                  type="text"
+                  required
+                  className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={receiptPending}
+                className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+              >
+                {receiptPending ? "Confirming..." : "Confirm receipt"}
+              </button>
+            </form>
           )}
+          {receiptState.error ? <p className="text-sm text-destructive">{receiptState.error}</p> : null}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {/* build-spec.md: "Hold the erasure, not the export" -- these
+              reasons only block confirming receipt (see the awaiting_receipt
+              branch above), never verification or export, so this banner is
+              informational here, not a gate. */}
+          {blockingReasons.length > 0 ? (
+            <div className="flex flex-col gap-1.5 rounded-[6px] border border-gold/30 bg-gold/10 p-3">
+              <p className="text-sm font-medium text-ink">
+                Export is fine to run now, but the final clear-out will wait on:
+              </p>
+              {blockingReasons.map((r) => (
+                <p key={r.code} className="text-sm text-ink">
+                  {r.message}
+                </p>
+              ))}
+            </div>
+          ) : null}
+
+          {status === "verify_failed" && closeOut?.verification_report ? (
+            <div className="flex flex-col gap-1.5 rounded-[6px] border border-gold/30 bg-gold/10 p-3">
+              <p className="text-sm text-ink">
+                {closeOut.verification_report.issues.length} issue{closeOut.verification_report.issues.length === 1 ? "" : "s"} found
+                across {closeOut.verification_report.candidateCount} candidate
+                {closeOut.verification_report.candidateCount === 1 ? "" : "s"}:
+              </p>
+              <ul className="flex flex-col gap-1">
+                {closeOut.verification_report.issues.map((issue, i) => (
+                  <li key={i} className="text-xs text-ink">
+                    <span className="font-semibold">{issue.traineeName}</span> -- {issue.artifact}: {issue.problem}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {status === "export_failed" && closeOut?.export_error ? (
+            <p className="text-sm text-destructive">{closeOut.export_error}</p>
+          ) : null}
+
+          {status === "ready_to_export" ? (
+            <form action={exportAction}>
+              <input type="hidden" name="course_id" value={courseId} />
+              <button
+                type="submit"
+                disabled={exportPending}
+                className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+              >
+                {exportPending ? "Exporting... (this can take a while)" : "Export to Drive"}
+              </button>
+            </form>
+          ) : (
+            <form action={verifyAction}>
+              <input type="hidden" name="course_id" value={courseId} />
+              <button
+                type="submit"
+                disabled={verifyPending}
+                className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+              >
+                {verifyPending ? "Checking..." : status === "verify_failed" ? "Re-check" : "Run verification"}
+              </button>
+            </form>
+          )}
+          {exportState.error ? <p className="text-sm text-destructive">{exportState.error}</p> : null}
           {verifyState.error ? <p className="text-sm text-destructive">{verifyState.error}</p> : null}
         </div>
       )}

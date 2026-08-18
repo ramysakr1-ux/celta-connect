@@ -50,11 +50,12 @@ async function loadOwnedCourse(courseId: string, centerId: string) {
   return course;
 }
 
-// Runs the blocking-rule check again server-side (never trust the button
-// being disabled client-side as the real authorization) and, if clear,
-// creates/resets the course's close_out row and runs the technical
-// verification pass synchronously. One admin click; the whole check-and-
-// verify round trip is fast (DB reads only, no Drive calls yet).
+// build-spec.md's blocking rules ("Hold the erasure, not the export") only
+// cover the actual destructive step -- verification and export are read-
+// only against the source data and stay available regardless, so a centre
+// isn't stuck without even an export while, say, an extension resolves
+// itself. The blocking check lives on confirmCloseOutReceipt instead,
+// since that's the actual trigger for the wipe (see its own comment).
 export async function initiateCloseOut(_prevState: FormState, formData: FormData): Promise<FormState> {
   const admin = await requireRole("admin");
   const courseId = formData.get("course_id");
@@ -64,11 +65,6 @@ export async function initiateCloseOut(_prevState: FormState, formData: FormData
 
   const course = await loadOwnedCourse(courseId, admin.center_id);
   if (!course) return { error: "Course not found." };
-
-  const blockingReasons = await getCloseOutBlockingReasons(courseId);
-  if (blockingReasons.length > 0) {
-    return { error: blockingReasons.map((r) => r.message).join(" ") };
-  }
 
   const adminClient = createAdminClient();
   const { data: existing } = await adminClient
@@ -113,6 +109,12 @@ export async function initiateCloseOut(_prevState: FormState, formData: FormData
 // name, the app timestamps it. Moves straight to grace_period rather than
 // lingering in a separate signed-but-not-yet-in-grace state, since
 // receipt_signed_at/name are themselves the audit trail.
+//
+// This is where build-spec.md's blocking rules actually apply: signing
+// receipt starts the grace-period clock toward the irreversible wipe, so
+// this -- not verification or export -- is "close-out" in the sense the
+// rules mean. Re-checked here server-side, never trusted from the UI's
+// disabled state.
 export async function confirmCloseOutReceipt(_prevState: FormState, formData: FormData): Promise<FormState> {
   const admin = await requireRole("admin");
   const courseId = formData.get("course_id");
@@ -126,6 +128,11 @@ export async function confirmCloseOutReceipt(_prevState: FormState, formData: Fo
 
   const course = await loadOwnedCourse(courseId, admin.center_id);
   if (!course) return { error: "Course not found." };
+
+  const blockingReasons = await getCloseOutBlockingReasons(courseId);
+  if (blockingReasons.length > 0) {
+    return { error: blockingReasons.map((r) => r.message).join(" ") };
+  }
 
   const adminClient = createAdminClient();
   const { data: closeOut } = await adminClient.from("course_close_outs").select("status").eq("course_id", courseId).maybeSingle();
