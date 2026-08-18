@@ -634,3 +634,33 @@ export function computeStrengthsAndActionPoints(
 
   return result;
 }
+
+export interface StageFlagSuggestion {
+  section: string;
+  title: string;
+  nCount: number;
+}
+
+// for-claude-code-tp-cycle-decisions.md: "the criteria-evidenced tally may
+// auto-suggest a Stage 1 or Stage 3 judgement -- never Stage 2 (mandatory
+// for everyone regardless of standing, nothing to suggest)." Suggestion
+// only -- surfaced as a heads-up a tutor can act on or ignore, never
+// auto-triggering a tutorial or a record. Tallies tutor_status_stage2
+// (the one ongoing 41-criteria rating column populated from TP1 onward --
+// tutor_status_stage3 only starts filling in once Stage 3 is already
+// triggered, so using it here would be circular). "Don't invent a new
+// scoring rubric" -- this counts existing ratings, nothing else. Threshold
+// of 3 matches the evidence bar used elsewhere in this app (FOL's "three
+// examples of the same problem").
+const STAGE_FLAG_THRESHOLD = 3;
+
+export function computeStageFlagSuggestions(
+  ratingsByCode: Record<string, "S+" | "S" | "N" | "X" | null | undefined>
+): StageFlagSuggestion[] {
+  const suggestions: StageFlagSuggestion[] = [];
+  for (const { section, title, codes } of CELTA_CRITERIA_SECTIONS) {
+    const nCount = codes.filter((code) => ratingsByCode[code] === "N").length;
+    if (nCount >= STAGE_FLAG_THRESHOLD) suggestions.push({ section, title, nCount });
+  }
+  return suggestions;
+}

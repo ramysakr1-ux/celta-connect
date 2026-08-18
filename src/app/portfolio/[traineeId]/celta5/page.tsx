@@ -10,6 +10,7 @@ import {
   CELTA_CRITERIA_CODES,
   computeCriteriaSuggestion,
   computeTrajectoryByDimension,
+  computeStageFlagSuggestions,
   addTpFeedbackCriteriaTags,
 } from "@/lib/celta-criteria";
 import { TrajectoryGradientBars } from "@/components/trajectory-gradient-bar";
@@ -597,6 +598,7 @@ export default async function PortfolioCelta5Page({
     ratingsByCode[code] = matrixByCode.get(code)?.tutor_status_stage2 ?? suggestions[code] ?? null;
   }
   const trajectoryByDimension = computeTrajectoryByDimension(ratingsByCode);
+  const stageFlagSuggestions = computeStageFlagSuggestions(ratingsByCode);
 
   const headerBlock = (
     <div>
@@ -912,6 +914,23 @@ export default async function PortfolioCelta5Page({
 
       <AssignmentsSummary traineeId={traineeId} assignments={assignments ?? []} />
       <TpFeedbackSummary traineeId={traineeId} feedbackRows={tpFeedbackRows ?? []} />
+
+      {stageFlagSuggestions.length > 0 && (!record.stage1_completed_at || !record.stage3_required) ? (
+        <div className="sheet-accent-alert flex flex-col gap-1.5">
+          <p className="text-sm font-semibold text-ink">Worth a look for Stage 1 or Stage 3</p>
+          <p className="text-xs text-muted">
+            A pattern in the ratings so far, not a decision -- criteria tallies never trigger anything on their own.
+          </p>
+          <ul className="mt-1 flex flex-col gap-0.5">
+            {stageFlagSuggestions.map((s) => (
+              <li key={s.section} className="text-sm text-ink">
+                {s.nCount} of {CELTA_CRITERIA_SECTIONS.find((sec) => sec.section === s.section)?.codes.length} criteria rated N in
+                Topic {s.section} -- {s.title}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <Stage1Form key={`stage1-${record.updated_at}`} record={record} />
 
