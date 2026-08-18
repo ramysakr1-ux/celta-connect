@@ -43,6 +43,36 @@ export default async function TrainerRotationPage() {
   const nameByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.full_name]));
   const courseStatusByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.course_status]));
 
+  // Handbook 2.4: "TP must be split evenly between the two tutors." Real
+  // signal is who actually GAVE feedback (tp_feedback.trainer_id), not
+  // course_tp_groups.tutor_profile_id -- a group's named tutor and who
+  // ends up submitting a given round's feedback can differ in practice
+  // (covering for a colleague, a TinT's supervisor stepping in). Advisory
+  // only, same pattern as the double-booking warning on Course Admin.
+  const { data: feedbackRows } = (roster ?? []).length
+    ? await supabase
+        .from("tp_feedback")
+        .select("trainer_id")
+        .in("trainee_id", (roster ?? []).map((r) => r.id))
+        .not("trainer_id", "is", null)
+        .not("submitted_at", "is", null)
+    : { data: [] };
+  const feedbackCountByTrainer = new Map<string, number>();
+  for (const row of feedbackRows ?? []) {
+    if (!row.trainer_id) continue;
+    feedbackCountByTrainer.set(row.trainer_id, (feedbackCountByTrainer.get(row.trainer_id) ?? 0) + 1);
+  }
+  const { data: courseTrainers } =
+    feedbackCountByTrainer.size > 0
+      ? await supabase.from("profiles").select("id, full_name").in("id", [...feedbackCountByTrainer.keys()])
+      : { data: [] };
+  const trainerNameById = new Map((courseTrainers ?? []).map((t) => [t.id, t.full_name]));
+  const tpDistribution = [...feedbackCountByTrainer.entries()]
+    .map(([trainerId, count]) => ({ name: trainerNameById.get(trainerId) ?? "Unknown", count }))
+    .sort((a, b) => b.count - a.count);
+  const tpDistributionUneven =
+    tpDistribution.length >= 2 && tpDistribution[0].count - tpDistribution[tpDistribution.length - 1].count >= 3;
+
   const { data: coursebooks } = await supabase
     .from("tp_coursebooks")
     .select("id, title, level")
@@ -105,6 +135,23 @@ export default async function TrainerRotationPage() {
           Manual override →
         </Link>
       </div>
+
+      {tpDistribution.length >= 2 ? (
+        <div className="sheet p-6">
+          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">TP feedback given, per tutor</p>
+          <p className="mt-1 text-xs text-muted">Handbook 2.4: TP should be split evenly between the two tutors.</p>
+          <div className="mt-2 flex flex-wrap gap-4">
+            {tpDistribution.map((t) => (
+              <span key={t.name} className="text-sm text-ink">
+                {t.name}: <span className="font-semibold tabular-nums">{t.count}</span>
+              </span>
+            ))}
+          </div>
+          {tpDistributionUneven ? (
+            <p className="mt-2 text-xs text-status-warning-text">Uneven so far -- worth a look before the round ends.</p>
+          ) : null}
+        </div>
+      ) : null}
 
       {(subgroups ?? []).length === 0 ? (
         <div className="sheet p-6">
