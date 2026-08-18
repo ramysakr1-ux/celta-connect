@@ -1776,6 +1776,10 @@ export interface Database {
           visible_to_subgroup_id: string | null;
           visible_to_trainee_id: string | null;
           source_key: string | null;
+          // migration 0147 -- "hold anything before it fires." Distinct
+          // from sent_at is-null: this is a still-pending row deliberately
+          // paused, so the cron must skip it, not just anything unsent.
+          held_at: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["course_broadcasts"]["Row"]> & {
           course_id: string;

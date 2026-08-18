@@ -22,6 +22,7 @@ export async function runAnnouncementsFireCron(): Promise<{ fired: number }> {
     .from("course_broadcasts")
     .select("id, anchor_event_id, anchor_offset_days")
     .is("sent_at", null)
+    .is("held_at", null)
     .not("anchor_event_id", "is", null);
 
   const anchorEventIds = [...new Set((pending ?? []).map((p) => p.anchor_event_id).filter((id): id is string => !!id))];

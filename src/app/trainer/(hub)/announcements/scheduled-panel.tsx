@@ -1,7 +1,14 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { deleteBroadcast, editBroadcast, postBroadcastNow, type FormState } from "@/app/portfolio/[traineeId]/stream-actions";
+import {
+  deleteBroadcast,
+  editBroadcast,
+  postBroadcastNow,
+  holdBroadcast,
+  resumeBroadcast,
+  type FormState,
+} from "@/app/portfolio/[traineeId]/stream-actions";
 
 const initialState: FormState = { error: null };
 
@@ -22,6 +29,7 @@ export interface ScheduledRowData {
   anchorEventTitle: string;
   anchorOffsetDays: number;
   fireDate: string | null;
+  heldAt: string | null;
 }
 
 // Announcements Scheduled panel's Edit action -- fully spec'd by Ramy:
@@ -78,12 +86,20 @@ export function ScheduledPanel({
 }
 
 function ReadRow({ row, justSaved, onEdit }: { row: ScheduledRowData; justSaved: boolean; onEdit: () => void }) {
+  const held = Boolean(row.heldAt);
   return (
-    <div className="flex flex-col gap-1.5 px-4 py-3">
-      <p className="text-sm font-semibold text-ink">{row.title}</p>
+    <div className={`flex flex-col gap-1.5 px-4 py-3 ${held ? "bg-surface-muted/40" : ""}`}>
+      <div className="flex items-center gap-2">
+        <p className="text-sm font-semibold text-ink">{row.title}</p>
+        {held ? <span className="pill pill-neutral">Held</span> : null}
+      </div>
       <p className="text-xs text-muted">
-        {row.fireDate ? `Sends ${row.fireDate}` : "Sends when triggered"} — {row.anchorOffsetDays} day(s) relative to
-        &quot;{row.anchorEventTitle}&quot;
+        {held
+          ? "Won't send until resumed"
+          : row.fireDate
+            ? `Sends ${row.fireDate}`
+            : "Sends when triggered"}{" "}
+        — {row.anchorOffsetDays} day(s) relative to &quot;{row.anchorEventTitle}&quot;
       </p>
       {justSaved ? (
         <span className="pill pill-neutral w-fit">Saved</span>
@@ -95,6 +111,22 @@ function ReadRow({ row, justSaved, onEdit }: { row: ScheduledRowData; justSaved:
               Post now
             </button>
           </form>
+          <span className="text-border">|</span>
+          {held ? (
+            <form action={resumeBroadcast}>
+              <input type="hidden" name="broadcast_id" value={row.id} />
+              <button type="submit" className="text-xs font-semibold text-primary hover:underline">
+                Resume
+              </button>
+            </form>
+          ) : (
+            <form action={holdBroadcast}>
+              <input type="hidden" name="broadcast_id" value={row.id} />
+              <button type="submit" className="text-xs font-semibold text-primary hover:underline">
+                Hold
+              </button>
+            </form>
+          )}
           <span className="text-border">|</span>
           <button type="button" onClick={onEdit} className="text-xs font-semibold text-primary hover:underline">
             Edit

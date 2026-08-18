@@ -142,6 +142,40 @@ export async function postBroadcastNow(formData: FormData): Promise<void> {
   revalidateBroadcastPages();
 }
 
+// for-claude-code-announcements.md's second safeguard: "hold anything
+// before it fires." The cron skips a held row entirely (announcements-
+// cron.ts), so it just sits in Scheduled until someone resumes or edits it.
+export async function holdBroadcast(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const broadcastId = formData.get("broadcast_id");
+  if (typeof broadcastId !== "string") return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("course_broadcasts")
+    .update({ held_at: new Date().toISOString() })
+    .eq("id", broadcastId)
+    .eq("course_id", trainer.course_id ?? "")
+    .is("sent_at", null);
+
+  revalidateBroadcastPages();
+}
+
+export async function resumeBroadcast(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const broadcastId = formData.get("broadcast_id");
+  if (typeof broadcastId !== "string") return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("course_broadcasts")
+    .update({ held_at: null })
+    .eq("id", broadcastId)
+    .eq("course_id", trainer.course_id ?? "");
+
+  revalidateBroadcastPages();
+}
+
 // Edit, Scheduled panel -- "editable at any point before it fires." Scoped
 // with .is("sent_at", null) same as postBroadcastNow: a Scheduled row is by
 // definition not yet sent, so there's never a partially-delivered cohort to

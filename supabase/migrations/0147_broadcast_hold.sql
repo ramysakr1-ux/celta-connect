@@ -1,0 +1,12 @@
+-- for-claude-code-announcements.md's second safeguard: "A tutor can see
+-- what's queued for the next few days and hold anything before it fires --
+-- the first time an automated reminder says something untrue, the whole
+-- stream loses credibility." sent_at (null vs set) can't express this on
+-- its own -- it can't distinguish "queued normally" from "queued but
+-- paused," which is exactly what the cron needs to tell apart.
+--
+-- The pacing cap in the same spec section ("one routine message a day")
+-- is deliberately NOT built here -- the spec itself flags it as unresolved:
+-- "needs a real prioritization rule for which reminder wins when several
+-- land the same day -- not yet decided."
+alter table public.course_broadcasts add column held_at timestamptz;

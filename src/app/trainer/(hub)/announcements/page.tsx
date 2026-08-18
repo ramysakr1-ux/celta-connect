@@ -119,6 +119,7 @@ export default async function AnnouncementsPage() {
       anchorEventTitle: anchor?.title ?? "Unknown event",
       anchorOffsetDays: b.anchor_offset_days ?? 0,
       fireDate,
+      heldAt: b.held_at,
     };
   });
 
@@ -127,7 +128,7 @@ export default async function AnnouncementsPage() {
       <div>
         <h1 className="font-serif text-2xl text-ink">Announcements</h1>
         <p className="mt-1 text-sm text-muted">
-          The only way to reach the whole cohort at once -- there's no cohort chat channel. Candidates see these on
+          The only way to reach the whole cohort at once -- there&apos;s no cohort chat channel. Candidates see these on
           their home screen, above their to-do list.
         </p>
       </div>
