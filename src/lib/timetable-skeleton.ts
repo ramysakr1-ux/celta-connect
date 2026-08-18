@@ -435,9 +435,33 @@ function partTimePos(slot: number): number {
   return slot / 23; // 24 sessions, slots 0-23
 }
 
+// 2026-08-19, the deferred follow-up now done: the 22 named input sessions
+// (STANDARD_CELTA_SKELETON's own list, criteria tags included) placed onto
+// part-time's 24-slot structure. No source document names which session
+// goes on which part-time week -- PART_TIME's own text abbreviates weeks
+// 3-9 as "same pattern" -- so this is a deliberate interpolation, not a
+// transcription: Ramy's original full-time ORDER is preserved exactly
+// (pre-TP1 content first, then one session tracking each TP round in
+// sequence, the two Week-3+ reinforcing passes and the closing sessions
+// last), compressed from full-time's 2-3-per-day density to one new
+// session per part-time week, since a week here plays the role a single
+// full-time day does. Every session keeps the exact criteria array it
+// carries in STANDARD_CELTA_SKELETON, including "Focus on the Learner" and
+// the renamed "Classroom management" opener, which the old placeholder
+// version of this file carried NO criteria for at all -- criteriaForTpDate
+// silently had nothing to gate on for any part-time course before this.
 export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
   { type: "milestone", title: "Course begins -- orientation", position: partTimePos(0), time: "10:00", tag: "whole_group" },
-  { type: "input_session", title: "Introduction to CELTA & Learner Needs", position: partTimePos(0), time: "10:00", tag: "whole_group" },
+  {
+    // Full-time's own day-0 split of the old single placeholder (see
+    // STANDARD_CELTA_SKELETON above) -- same fix applied here.
+    type: "input_session",
+    title: "Classroom management",
+    position: partTimePos(0),
+    time: "10:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["5b", "5d", "5f", "5i", "5j", "5k", "4g", "1d"],
+  },
   { type: "milestone", title: "Demo lesson (trainer-led)", position: partTimePos(0), time: "13:45", tag: "whole_group" },
 
   { type: "milestone", title: "Unassessed teaching -- all six meet the learners", position: partTimePos(1), time: "10:00", tag: "whole_group" },
@@ -448,17 +472,69 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     time: "13:45",
     tag: "whole_group",
     linkedAssignmentType: "Focus on Learner",
+    inputSessionCriteria: ["1a", "1b", "1c"],
+  },
+  {
+    // Full-time's day-0 order has this LAST, after Focus on the Learner --
+    // kept in that same relative order here, on the last shared day before
+    // groups split for TP1.
+    type: "input_session",
+    title: "Classroom arrangements and material use",
+    position: partTimePos(1),
+    time: "15:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["5a", "5e", "4d"],
   },
 
   { type: "tp", title: "TP1 -- Group ABC", position: partTimePos(2), time: "10:00", tag: "individual", linkedTpNumber: 1 },
   { type: "milestone", title: "Language Skills Related Tasks released", position: partTimePos(2), time: "17:00", tag: "whole_group" },
+  {
+    type: "input_session",
+    title: "Lesson planning input",
+    position: partTimePos(2),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["4a", "4b", "4e", "4f", "4h", "4j", "4k", "4m", "4n"],
+  },
   { type: "tp", title: "TP1 -- Group DEF", position: partTimePos(3), time: "10:00", tag: "individual", linkedTpNumber: 1 },
+  {
+    type: "input_session",
+    title: "Receptive skills",
+    position: partTimePos(3),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["3a", "4l"],
+  },
 
   { type: "tp", title: "TP2 -- Group ABC", position: partTimePos(4), time: "10:00", tag: "individual", linkedTpNumber: 2 },
+  {
+    type: "input_session",
+    title: "Eliciting and concept checking",
+    position: partTimePos(4),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["5g", "2c", "2e"],
+  },
   { type: "tp", title: "TP2 -- Group DEF", position: partTimePos(5), time: "10:00", tag: "individual", linkedTpNumber: 2 },
   { type: "milestone", title: "Filmed observation 1", position: partTimePos(5), time: "17:00", tag: "individual" },
+  {
+    type: "input_session",
+    title: "Teaching vocabulary",
+    position: partTimePos(5),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["2a", "2c"],
+  },
 
   { type: "tp", title: "TP3 -- Group ABC", position: partTimePos(6), time: "10:00", tag: "individual", linkedTpNumber: 3 },
+  {
+    type: "input_session",
+    title: "PPP",
+    position: partTimePos(6),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["5c", "4b", "4f", "2c"],
+  },
   { type: "tp", title: "TP3 -- Group DEF", position: partTimePos(7), time: "10:00", tag: "individual", linkedTpNumber: 3 },
   {
     type: "assignment_due",
@@ -467,6 +543,14 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     time: "09:00",
     tag: "individual",
     linkedAssignmentType: "Skills",
+  },
+  {
+    type: "input_session",
+    title: "Text-based teaching",
+    position: partTimePos(7),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["3a", "3b", "4c"],
   },
 
   { type: "tp", title: "TP4 -- Group ABC", position: partTimePos(8), time: "10:00", tag: "individual", linkedTpNumber: 4 },
@@ -478,12 +562,41 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     tag: "individual",
     linkedAssignmentType: "Skills",
   },
+  {
+    // "overlaps with Language analysis 1 on 4i" (Ramy, full-time) -- same
+    // overlap carried over here, resolved the same way there: whichever
+    // session actually runs later that week wins via criteriaForTpDate().
+    type: "input_session",
+    title: "Sounds",
+    position: partTimePos(8),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["2e", "4i"],
+  },
   { type: "tp", title: "TP4 -- Group DEF", position: partTimePos(9), time: "10:00", tag: "individual", linkedTpNumber: 4 },
   { type: "milestone", title: "Filmed observation 2", position: partTimePos(9), time: "17:00", tag: "individual" },
   { type: "milestone", title: "Language Related Tasks released", position: partTimePos(9), time: "17:00", tag: "whole_group" },
+  {
+    type: "input_session",
+    title: "Language analysis 1",
+    position: partTimePos(9),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["4i", "2b", "2f"],
+  },
 
   // No TP this week -- level change, mirroring every other shape's own gap.
   { type: "milestone", title: "Demo lesson 2 -- new level", position: partTimePos(10), time: "10:00", tag: "whole_group" },
+  {
+    // Same pairing as full-time's own day-9: this session sits right
+    // alongside the new-level demo lesson, before FOL divergence.
+    type: "input_session",
+    title: "Teaching a new level -- needs analysis",
+    position: partTimePos(10),
+    time: "11:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["1a", "1c"],
+  },
   { type: "milestone", title: "FOL divergence session", position: partTimePos(10), time: "13:45", tag: "whole_group" },
   {
     type: "assignment_due",
@@ -496,6 +609,14 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
 
   { type: "tp", title: "TP5 -- Group ABC", position: partTimePos(12), time: "10:00", tag: "individual", linkedTpNumber: 5 },
   { type: "milestone", title: "Stage 1 tutorials begin", position: partTimePos(12), time: "13:45", tag: "individual" },
+  {
+    type: "input_session",
+    title: "Giving feedback on tasks",
+    position: partTimePos(12),
+    time: "15:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["5h"],
+  },
   { type: "tp", title: "TP5 -- Group DEF", position: partTimePos(13), time: "10:00", tag: "individual", linkedTpNumber: 5 },
   {
     type: "assignment_due",
@@ -505,11 +626,38 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     linkedAssignmentType: "Focus on Learner",
   },
+  {
+    type: "input_session",
+    title: "Providing models -- drilling",
+    position: partTimePos(13),
+    time: "13:45",
+    tag: "whole_group",
+    // "This is the ONLY session touching 2d's session-taught aspects --
+    // 2d itself is also a standing baseline requirement from day one, not
+    // purely session-gated" (Ramy, full-time -- same note applies here).
+    inputSessionCriteria: ["2d"],
+  },
 
   { type: "tp", title: "TP6 -- Group ABC", position: partTimePos(14), time: "10:00", tag: "individual", linkedTpNumber: 6 },
   { type: "milestone", title: "Stage 2 tutorials begin", position: partTimePos(14), time: "13:45", tag: "individual" },
+  {
+    type: "input_session",
+    title: "Staging controlled practice",
+    position: partTimePos(14),
+    time: "15:00",
+    tag: "whole_group",
+    inputSessionCriteria: ["2g"],
+  },
   { type: "tp", title: "TP6 -- Group DEF", position: partTimePos(15), time: "10:00", tag: "individual", linkedTpNumber: 6 },
   { type: "milestone", title: "Filmed observation 3", position: partTimePos(15), time: "17:00", tag: "individual" },
+  {
+    type: "input_session",
+    title: "Portfolio and record-keeping",
+    position: partTimePos(15),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["5l"],
+  },
 
   { type: "tp", title: "TP7 -- Group ABC", position: partTimePos(16), time: "10:00", tag: "individual", linkedTpNumber: 7 },
   {
@@ -520,12 +668,42 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     linkedAssignmentType: "Skills",
   },
+  {
+    type: "input_session",
+    title: "Self-evaluation and responding to feedback",
+    position: partTimePos(16),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["5m", "5n"],
+  },
   { type: "tp", title: "TP7 -- Group DEF", position: partTimePos(17), time: "10:00", tag: "individual", linkedTpNumber: 7 },
   { type: "milestone", title: "Lessons from the Classroom released", position: partTimePos(17), time: "17:00", tag: "whole_group" },
+  {
+    // Second pass -- 4c already introduced in Text-based teaching above,
+    // same reinforcing-pass reasoning as full-time.
+    type: "input_session",
+    title: "Adapting materials for level",
+    position: partTimePos(17),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["4c"],
+  },
 
   // TP8 -- the final assessed lesson for each group.
   { type: "tp", title: "TP8 -- Group ABC, final assessed", position: partTimePos(18), time: "10:00", tag: "individual", linkedTpNumber: 8 },
   { type: "milestone", title: "Filmed observation 4", position: partTimePos(18), time: "17:00", tag: "individual" },
+  {
+    // No exact week given for either of the two Week-3+ reinforcing
+    // passes in the original mapping (full-time placed them as a
+    // reasonable estimate too) -- kept alongside the final TP round here,
+    // the same relative position full-time uses.
+    type: "input_session",
+    title: "Teaching speaking",
+    position: partTimePos(18),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["3b"],
+  },
   { type: "tp", title: "TP8 -- Group DEF", position: partTimePos(19), time: "10:00", tag: "individual", linkedTpNumber: 8 },
   {
     type: "assignment_due",
@@ -534,6 +712,14 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     time: "09:00",
     tag: "individual",
     linkedAssignmentType: "LfC",
+  },
+  {
+    type: "input_session",
+    title: "Productive skills -- writing",
+    position: partTimePos(19),
+    time: "13:45",
+    tag: "whole_group",
+    inputSessionCriteria: ["3b"],
   },
 
   { type: "milestone", title: "Resubmission clinic", position: partTimePos(20), time: "10:00", tag: "whole_group" },
@@ -545,6 +731,7 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     tag: "individual",
     linkedAssignmentType: "LfC",
   },
+  { type: "input_session", title: "Syllabus planning", position: partTimePos(20), time: "13:45", tag: "whole_group" },
 
   { type: "milestone", title: "Final tutorials", position: partTimePos(21), time: "10:00", tag: "individual" },
   {
@@ -562,6 +749,13 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     time: "09:00",
     tag: "whole_group",
     linkedAssignmentType: "LfC",
+  },
+  {
+    type: "input_session",
+    title: "Reflective Practice & Professional Development",
+    position: partTimePos(21),
+    time: "13:45",
+    tag: "whole_group",
   },
 
   { type: "milestone", title: "Portfolio completion", position: partTimePos(22), time: "10:00", tag: "whole_group" },
