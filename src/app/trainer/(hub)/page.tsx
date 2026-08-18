@@ -9,6 +9,8 @@ import { CATEGORY_ACCENT } from "@/app/trainer/(hub)/timetable/event-cell";
 import { computeWeekOf } from "@/lib/course-progress";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { DesignerCredit } from "@/components/designer-credit";
+import { getFeedbackAssistState } from "@/lib/feedback-assist";
+import { FeedbackAssistCard } from "@/app/trainer/(hub)/feedback-assist-card";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -32,13 +34,23 @@ export default async function TodayPage() {
 
   const today = toLocalIso(new Date());
 
+  // Feedback assist (design_handoff_feedback_assist, 2026-08-17) is a
+  // trainer's own tool, not a course-admin one -- "whoever runs course admin
+  // may not be the person writing feedback" -- so admins previewing /trainer
+  // don't get the card at all.
+  const feedbackAssist = trainer!.role === "trainer" ? await getFeedbackAssistState(courseId, trainer!.id) : null;
+
   const rows = await fetchRosterRows(supabase, courseId);
   const nameById = new Map(rows.map((r) => [r.id, r.name]));
   const traineeIds = rows.map((r) => r.id);
 
   const [{ data: course }, { data: todayEvents }, { data: lessons }, { data: feedbackRows }, { data: dueAssignments }] =
     await Promise.all([
-      supabase.from("courses").select("name, start_date, end_date, assessor_visit_date").eq("id", courseId).maybeSingle(),
+      supabase
+        .from("courses")
+        .select("name, start_date, end_date, assessor_visit_date, provisional_grades_due_at")
+        .eq("id", courseId)
+        .maybeSingle(),
       supabase
         .from("course_timetable_events")
         .select("*")
@@ -352,6 +364,14 @@ export default async function TodayPage() {
           </div>
         </div>
       </div>
+
+      {feedbackAssist ? (
+        <FeedbackAssistCard
+          initialEnabled={feedbackAssist.enabled}
+          initialDirect={feedbackAssist.direct}
+          initialSupportive={feedbackAssist.supportive}
+        />
+      ) : null}
 
       <DesignerCredit />
     </div>

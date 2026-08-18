@@ -1311,6 +1311,38 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["feedback_style_examples"]["Row"]>;
         Relationships: [];
       };
+      feedback_assist_settings: {
+        Row: {
+          course_id: string;
+          profile_id: string;
+          enabled: boolean;
+          customized_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["feedback_assist_settings"]["Row"]> & {
+          course_id: string;
+          profile_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["feedback_assist_settings"]["Row"]>;
+        Relationships: [];
+      };
+      feedback_assist_examples: {
+        Row: {
+          id: string;
+          course_id: string;
+          profile_id: string;
+          tone: FeedbackTone;
+          example_text: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["feedback_assist_examples"]["Row"]> & {
+          course_id: string;
+          profile_id: string;
+          tone: FeedbackTone;
+          example_text: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["feedback_assist_examples"]["Row"]>;
+        Relationships: [];
+      };
       tp_points: {
         Row: {
           id: string;

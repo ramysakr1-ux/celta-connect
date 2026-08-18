@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { matchCriteriaCodes } from "@/lib/criteria-glossary";
 import { emptyFeedbackPoint, type FeedbackPoint } from "@/lib/tp-plan-content";
+import { cleanupFeedbackToneForCourse } from "@/app/dashboard/trainer/tone-cleanup-actions";
+import type { FeedbackTone } from "@/lib/supabase/types";
 
 const PLANNING_SECTIONS = ["4"];
 const TEACHING_SECTIONS = ["1", "2", "3", "5"];
@@ -16,6 +18,7 @@ export function FeedbackPointEditor({
   scope,
   starable,
   autoTagEnabled,
+  toneAssistEnabled = false,
 }: {
   label: string;
   guide: string;
@@ -24,6 +27,7 @@ export function FeedbackPointEditor({
   scope: "planning" | "teaching";
   starable: boolean;
   autoTagEnabled: boolean;
+  toneAssistEnabled?: boolean;
 }) {
   const sections = CELTA_CRITERIA_SECTIONS.filter((s) =>
     (scope === "planning" ? PLANNING_SECTIONS : TEACHING_SECTIONS).includes(s.section)
@@ -41,6 +45,7 @@ export function FeedbackPointEditor({
             sections={sections}
             starable={starable}
             autoTagEnabled={autoTagEnabled}
+            toneAssistEnabled={toneAssistEnabled}
             onChange={(patch) => onChange(points.map((p, x) => (x === i ? { ...p, ...patch } : p)))}
             onRemove={() => onChange(points.filter((_, x) => x !== i))}
           />
@@ -62,6 +67,7 @@ function PointRow({
   sections,
   starable,
   autoTagEnabled,
+  toneAssistEnabled,
   onChange,
   onRemove,
 }: {
@@ -69,10 +75,37 @@ function PointRow({
   sections: typeof CELTA_CRITERIA_SECTIONS extends readonly (infer T)[] ? T[] : never;
   starable: boolean;
   autoTagEnabled: boolean;
+  toneAssistEnabled: boolean;
   onChange: (patch: Partial<FeedbackPoint>) => void;
   onRemove: () => void;
 }) {
   const [panelOpen, setPanelOpen] = useState(false);
+  // Feedback Assist (design_handoff_feedback_assist) -- local only, never
+  // saved with the point. null means "not yet rewritten", so the pill shows
+  // a neutral label rather than falsely claiming the trainer's own freeform
+  // text already matches one tone.
+  const [tone, setTone] = useState<FeedbackTone | null>(null);
+  const [isRewriting, startRewrite] = useTransition();
+  const [toneError, setToneError] = useState<string | null>(null);
+
+  function toggleTone() {
+    const nextTone: FeedbackTone = tone === "direct" ? "supportive" : "direct";
+    const text = point.text.trim();
+    if (!text) {
+      setToneError("Write a point first.");
+      return;
+    }
+    setToneError(null);
+    startRewrite(async () => {
+      const result = await cleanupFeedbackToneForCourse(text, nextTone);
+      if (result.error) {
+        setToneError(result.error);
+        return;
+      }
+      setTone(nextTone);
+      if (result.text) onChange({ text: result.text });
+    });
+  }
 
   // project_grading_feedback_trainer_awareness.md §2 -- "as the trainer
   // types a bullet, the matching criterion code silently appends... no
@@ -109,6 +142,27 @@ function PointRow({
           placeholder="Write one point -- then tag it"
           className="flex-1 rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
+        {toneAssistEnabled ? (
+          <button
+            type="button"
+            title="Rewrite tone"
+            disabled={isRewriting}
+            onClick={toggleTone}
+            className="flex h-7 shrink-0 items-center gap-1.5 rounded-[6px] border border-border px-2.5 text-[11.5px] font-semibold disabled:opacity-60"
+            style={
+              tone === "supportive"
+                ? { background: "color-mix(in srgb, oklch(58% 0.1 145) 12%, white)", color: "oklch(58% 0.1 145)" }
+                : tone === "direct"
+                  ? { background: "color-mix(in srgb, var(--color-primary) 12%, white)", color: "var(--color-primary)" }
+                  : undefined
+            }
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M12 2v20M2 12h20" />
+            </svg>
+            {isRewriting ? "Rewriting…" : tone === "supportive" ? "Encouraging" : tone === "direct" ? "Direct" : "Tone"}
+          </button>
+        ) : null}
         {starable ? (
           <button
             type="button"
@@ -132,6 +186,7 @@ function PointRow({
           ✕
         </button>
       </div>
+      {toneError ? <p className="mt-1 text-xs text-destructive">{toneError}</p> : null}
 
       {point.criteria_codes.length > 0 ? (
         <p className="mt-1 flex flex-wrap gap-1">

@@ -5,7 +5,7 @@ import { saveFeedbackDraft, submitFeedback, type FormState } from "@/app/dashboa
 import { FeedbackPointEditor } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/feedback-point-editor";
 import { deleteCaptureNote } from "@/app/trainer/(hub)/capture/actions";
 import { FormSubmitBar } from "@/components/form-submit-bar";
-import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
+import { TutorToneTextarea } from "@/components/tutor-tone-textarea";
 import { STANDARD_RATING_OPTIONS, CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { StandardRatingPill } from "@/lib/status-pill";
 import type { FeedbackPoint } from "@/lib/tp-plan-content";
@@ -32,6 +32,7 @@ export function FeedbackForm({
   feedback,
   selfEvaluation,
   autoTagEnabled = true,
+  toneAssistEnabled = false,
   captureNotes = [],
 }: {
   planId: string;
@@ -40,6 +41,7 @@ export function FeedbackForm({
   feedback: TpFeedback | null;
   selfEvaluation?: SelfEvaluation | null;
   autoTagEnabled?: boolean;
+  toneAssistEnabled?: boolean;
   captureNotes?: CaptureNote[];
 }) {
   const locked = Boolean(feedback?.submitted_at);
@@ -184,6 +186,7 @@ export function FeedbackForm({
             scope="planning"
             starable={false}
             autoTagEnabled={autoTagEnabled}
+            toneAssistEnabled={toneAssistEnabled}
           />
           <FeedbackPointEditor
             label="Action points in planning"
@@ -193,6 +196,7 @@ export function FeedbackForm({
             scope="planning"
             starable
             autoTagEnabled={autoTagEnabled}
+            toneAssistEnabled={toneAssistEnabled}
           />
         </div>
         <div className="flex flex-col gap-4">
@@ -205,6 +209,7 @@ export function FeedbackForm({
             scope="teaching"
             starable={false}
             autoTagEnabled={autoTagEnabled}
+            toneAssistEnabled={toneAssistEnabled}
           />
           <FeedbackPointEditor
             label="Action points in teaching"
@@ -214,13 +219,14 @@ export function FeedbackForm({
             scope="teaching"
             starable
             autoTagEnabled={autoTagEnabled}
+            toneAssistEnabled={toneAssistEnabled}
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Overall comment</label>
-        <TrainerFeedbackTextarea name="overall_comment" rows={4} defaultValue={feedback?.overall_comment ?? ""} className={inputClass} />
+        <TutorToneTextarea enabled={toneAssistEnabled} name="overall_comment" rows={4} defaultValue={feedback?.overall_comment ?? ""} className={inputClass} />
       </div>
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Your comment on their self-evaluation</label>
@@ -239,7 +245,7 @@ export function FeedbackForm({
             })}
           </div>
         ) : null}
-        <TrainerFeedbackTextarea name="self_eval_comment" rows={3} defaultValue={feedback?.self_eval_comment ?? ""} className={inputClass} />
+        <TutorToneTextarea enabled={toneAssistEnabled} name="self_eval_comment" rows={3} defaultValue={feedback?.self_eval_comment ?? ""} className={inputClass} />
       </div>
 
       <FormSubmitBar

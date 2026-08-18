@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { FeedbackForm } from "@/app/dashboard/trainer/trainees/[id]/tp/[tpNumber]/feedback-form";
+import { getFeedbackAssistState } from "@/lib/feedback-assist";
 
 export default async function TrainerTpCardPage({
   params,
@@ -51,6 +52,8 @@ export default async function TrainerTpCardPage({
       </div>
     );
   }
+
+  const feedbackAssist = trainer.course_id ? await getFeedbackAssistState(trainer.course_id, trainer.id) : null;
 
   const [{ data: languageAnalysis }, { data: materials }, { data: selfEvaluation }, { data: feedback }, { data: captureNotes }] =
     await Promise.all([
@@ -197,6 +200,7 @@ export default async function TrainerTpCardPage({
         tpNumber={tpNumber}
         feedback={feedback ?? null}
         autoTagEnabled={center?.auto_tag_criteria_enabled ?? true}
+        toneAssistEnabled={feedbackAssist?.enabled ?? false}
         captureNotes={captureNotes ?? []}
       />
 

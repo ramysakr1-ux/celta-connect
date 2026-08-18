@@ -3,6 +3,7 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { createAnthropicClient, getAnthropicModel } from "@/lib/anthropic/client";
+import { getFeedbackAssistState } from "@/lib/feedback-assist";
 import type { FeedbackTone } from "@/lib/supabase/types";
 
 export interface CleanupResult {
@@ -44,6 +45,51 @@ export async function cleanupFeedbackTone(
       model: getAnthropicModel(),
       max_tokens: 1024,
       system: buildSystemPrompt(tone, examples?.map((e) => e.example_text) ?? []),
+      messages: [{ role: "user", content: text }],
+    });
+
+    const block = response.content.find((b) => b.type === "text");
+    if (!block || block.type !== "text" || !block.text.trim()) {
+      return { text: null, error: GENERIC_ERROR };
+    }
+    return { text: block.text.trim(), error: null };
+  } catch {
+    return { text: null, error: GENERIC_ERROR };
+  }
+}
+
+// Feedback Assist (design_handoff_feedback_assist, 2026-08-17) -- TP feedback's
+// own tone tool, per-tutor rather than centre-wide. Deliberately a sibling to
+// cleanupFeedbackTone above, not a replacement: assignment feedback keeps
+// reading the centre-wide feedback_style_examples untouched, since the
+// handoff only covers TP feedback (see its README's Screens list).
+export async function cleanupFeedbackToneForCourse(
+  rawText: string,
+  tone: FeedbackTone
+): Promise<CleanupResult> {
+  const profile = await requireRole("trainer");
+
+  if (tone !== "direct" && tone !== "supportive") {
+    return { text: null, error: "Invalid tone." };
+  }
+  const text = rawText.trim();
+  if (!text) return { text: null, error: "Nothing to rewrite yet." };
+  if (text.length > MAX_INPUT_LENGTH) {
+    return { text: null, error: "That's too long to rewrite in one go." };
+  }
+  if (!profile.course_id) {
+    return { text: null, error: GENERIC_ERROR };
+  }
+
+  const state = await getFeedbackAssistState(profile.course_id, profile.id);
+  const examples = (tone === "direct" ? state.direct : state.supportive).filter(Boolean);
+
+  try {
+    const anthropic = createAnthropicClient();
+    const response = await anthropic.messages.create({
+      model: getAnthropicModel(),
+      max_tokens: 1024,
+      system: buildSystemPrompt(tone, examples),
       messages: [{ role: "user", content: text }],
     });
 
