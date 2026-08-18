@@ -2458,6 +2458,20 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["volunteer_attendance"]["Row"]>;
         Relationships: [];
       };
+      volunteer_declines: {
+        Row: {
+          id: string;
+          volunteer_student_id: string;
+          timetable_event_id: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["volunteer_declines"]["Row"]> & {
+          volunteer_student_id: string;
+          timetable_event_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["volunteer_declines"]["Row"]>;
+        Relationships: [];
+      };
       pre_course_task_sections: {
         Row: {
           id: string;
