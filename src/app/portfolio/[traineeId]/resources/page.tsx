@@ -14,6 +14,7 @@ import {
   RESOURCE_TYPE_LABELS,
   TRAINER_ONLY_CATEGORIES,
 } from "@/lib/resource-info";
+import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { ResourceComposer } from "@/app/portfolio/[traineeId]/resources/resource-composer";
 import { deleteResource } from "@/app/portfolio/[traineeId]/resources/actions";
 import { ResourceContentLink } from "@/components/resource-content-link";
@@ -21,6 +22,7 @@ import { CoursebooksSection } from "@/app/portfolio/[traineeId]/resources/course
 import { MultimediaSection } from "@/app/portfolio/[traineeId]/resources/multimedia-section";
 import { AssignmentBriefsSection } from "@/app/portfolio/[traineeId]/resources/assignment-briefs-section";
 import { SectionsRail } from "@/app/trainer/(hub)/resource-hub/sections-rail";
+import { ResourceHubSearch, type ResourceHubSearchItem } from "@/components/resource-hub-search";
 
 // §5 -- Resource Hub, a genuinely new feature (the pre-existing `resources`
 // table had zero UI anywhere). Starts empty by design -- no seeded content,
@@ -142,7 +144,39 @@ export default async function ResourceHubPage({
   }
   const formResources = byCategory.get("forms") ?? [];
 
+  const coursebookSearchItems: ResourceHubSearchItem[] = (coursebooks ?? []).map((c) => ({
+    id: `cb-${c.id}`,
+    title: c.title,
+    subtitle: c.level ? `Coursebook -- ${c.level}` : "Coursebook",
+    href: "#coursebooks",
+  }));
+  const briefSearchItems: ResourceHubSearchItem[] = (briefs ?? []).map((b) => ({
+    id: `br-${b.id}`,
+    title: ASSIGNMENT_INFO[b.assignment_type]?.title ?? b.assignment_type,
+    subtitle: "Assignment briefs",
+    href: "#assignment-briefs",
+  }));
+
   if (showTraineeLayout) {
+    const audioSearchItems: ResourceHubSearchItem[] = [...new Set((audioTracks ?? []).map((t) => t.coursebook_title))].map((title) => ({
+      id: `au-${title}`,
+      title,
+      subtitle: "Multimedia",
+      href: "#multimedia",
+    }));
+    // This-week-only, matching what actually renders under "Input
+    // sessions" in this layout -- every other item below points to a
+    // section that's fully rendered, so a result here should be too.
+    const inputSessionSearchItems: ResourceHubSearchItem[] = thisWeekSessions.flatMap((s) =>
+      s.materials.map((m) => ({ id: `is-${m.id}`, title: m.title, subtitle: "Input sessions -- this week", href: "#input-sessions" }))
+    );
+    const formSearchItems: ResourceHubSearchItem[] = formResources.map((r) => ({
+      id: `fm-${r.id}`,
+      title: r.title,
+      subtitle: "Forms and documents",
+      href: "#forms-and-documents",
+    }));
+    const searchItems = [...inputSessionSearchItems, ...coursebookSearchItems, ...audioSearchItems, ...briefSearchItems, ...formSearchItems];
     const railSections = [
       { href: "#input-sessions", label: "Input sessions", count: byCategory.get("input_sessions")?.length ?? 0 },
       { href: "#coursebooks", label: "Coursebooks", count: coursebooks?.length ?? 0 },
@@ -153,8 +187,11 @@ export default async function ResourceHubPage({
 
     return (
       <div className="flex flex-col gap-4">
-        <div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <h2 className="font-serif text-xl text-ink">Everything the centre has given you</h2>
+          <div className="w-full sm:max-w-xs">
+            <ResourceHubSearch items={searchItems} />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[210px_1fr_1fr] lg:items-start">
@@ -243,18 +280,35 @@ export default async function ResourceHubPage({
     );
   }
 
+  const resourceSearchItems: ResourceHubSearchItem[] = resources.map((r) => ({
+    id: `res-${r.id}`,
+    title: r.title,
+    subtitle: RESOURCE_CATEGORY_LABELS[r.category],
+    href: `#${r.category}`,
+  }));
+  const staffSearchItems = [...resourceSearchItems, ...coursebookSearchItems, ...briefSearchItems];
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <h2 className="font-serif text-xl text-ink">Resource Hub</h2>
-        <p className="text-xs text-muted">{resources.length} items</p>
+        <div className="w-full sm:max-w-xs">
+          <ResourceHubSearch items={staffSearchItems} />
+        </div>
+        <p className="shrink-0 text-xs text-muted">{resources.length} items</p>
       </div>
 
       {isEditableStaff ? <ResourceComposer traineeId={traineeId} centerId={trainee.center_id} /> : null}
 
-      <CoursebooksSection coursebooks={coursebooks ?? []} isEditableStaff={isEditableStaff} />
-      <MultimediaSection tracks={audioTracks ?? []} />
-      <AssignmentBriefsSection briefs={briefs ?? []} />
+      <div id="coursebooks">
+        <CoursebooksSection coursebooks={coursebooks ?? []} isEditableStaff={isEditableStaff} />
+      </div>
+      <div id="multimedia">
+        <MultimediaSection tracks={audioTracks ?? []} />
+      </div>
+      <div id="assignment-briefs">
+        <AssignmentBriefsSection briefs={briefs ?? []} />
+      </div>
 
       {resources.length === 0 && !isEditableStaff ? (
         <p className="sheet text-sm text-muted">No resources yet.</p>
@@ -267,7 +321,7 @@ export default async function ResourceHubPage({
         // broken/missing content to them, not "not filled in yet".
         (isEditableStaff ? RESOURCE_CATEGORY_ORDER : RESOURCE_CATEGORY_ORDER.filter((category) => byCategory.has(category))).map(
           (category) => (
-          <div key={category}>
+          <div key={category} id={category} className="scroll-mt-4">
             {/* Traced live off the Lovable reference 5 Aug 2026: group
                 headings are Newsreader (serif), not the app's default
                 Karla -- easy to miss since every other overline label in

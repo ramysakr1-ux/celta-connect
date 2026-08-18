@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ResourceCategoryManager } from "@/app/trainer/(hub)/resource-hub/resource-category-manager";
 import { CoursebooksSection } from "@/app/portfolio/[traineeId]/resources/coursebooks-section";
 import { SectionsRail } from "@/app/trainer/(hub)/resource-hub/sections-rail";
+import { ResourceHubSearch, type ResourceHubSearchItem } from "@/components/resource-hub-search";
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 
 // specs/build-spec.md "Replace the Audio Library tab with a Resource hub
@@ -107,6 +108,18 @@ export default async function TrainerResourceHubPage() {
     usageCount: usageByPointId.get(p.id) ?? 0,
   }));
 
+  const searchItems: ResourceHubSearchItem[] = [
+    { id: "link-tp-points-library", title: "TP points library", subtitle: "Full centre-wide library", href: "/trainer/coursebooks" },
+    { id: "link-multimedia", title: "Multimedia", subtitle: "Coursebook audio tracks", href: "/trainer/audio" },
+    { id: "link-assignment-briefs", title: "Assignment briefs", subtitle: "Upload and publish briefs", href: "/dashboard/trainer/assignment-briefs" },
+    { id: "link-marking-guidance", title: "Marking guidance", subtitle: "Centre standardisation reference", href: "/dashboard/trainer/marking-guidance" },
+    ...tpPointRows.map((p) => ({ id: `tp-${p.id}`, title: p.title, subtitle: `TP points -- ${p.source}`, href: "#tp-points" })),
+    ...(coursebooks ?? []).map((c) => ({ id: `cb-${c.id}`, title: c.title, subtitle: c.level ? `Coursebook -- ${c.level}` : "Coursebook", href: "#coursebooks" })),
+    ...(inputSessionResources ?? []).map((r) => ({ id: `is-${r.id}`, title: r.title, subtitle: "Input sessions", href: "#input-sessions" })),
+    ...(formResources ?? []).map((r) => ({ id: `fm-${r.id}`, title: r.title, subtitle: "Forms and documents", href: "#forms-and-documents" })),
+    ...(centreDocResources ?? []).map((r) => ({ id: `cd-${r.id}`, title: r.title, subtitle: "Centre documents", href: "#centre-documents" })),
+  ];
+
   const sectionCounts = {
     tpPoints: publishedPointCount ?? 0,
     coursebooks: coursebookIds.length,
@@ -140,6 +153,9 @@ export default async function TrainerResourceHubPage() {
           Everything a candidate or tutor needs to find during the course, in one place. Trainees see a filtered
           version of this from their own portfolio.
         </p>
+        <div className="mt-4 max-w-sm">
+          <ResourceHubSearch items={searchItems} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -157,7 +173,7 @@ export default async function TrainerResourceHubPage() {
         </Link>
         <Link href="/dashboard/trainer/marking-guidance" className="sheet flex flex-col gap-1 p-5 hover:border-primary/40">
           <p className="font-serif text-lg text-ink">Marking guidance →</p>
-          <p className="text-xs text-muted">Where this centre's line sits per criterion. Tutors and the assessor only -- never trainees.</p>
+          <p className="text-xs text-muted">Where this centre&apos;s line sits per criterion. Tutors and the assessor only -- never trainees.</p>
         </Link>
       </div>
 
