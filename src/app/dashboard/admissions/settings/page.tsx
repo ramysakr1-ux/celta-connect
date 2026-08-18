@@ -1,7 +1,14 @@
 import Link from "next/link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
-import { addWritingPrompt, togglePromptActive, addInterviewQuestion, toggleQuestionActive } from "@/app/dashboard/admissions/actions";
+import {
+  addWritingPrompt,
+  togglePromptActive,
+  addSpeakingPrompt,
+  toggleSpeakingPromptActive,
+  addInterviewQuestion,
+  toggleQuestionActive,
+} from "@/app/dashboard/admissions/actions";
 
 const COVERAGE_AREAS = [
   "motivation_suitability",
@@ -26,8 +33,9 @@ export default async function AdmissionsSettingsPage() {
   const staff = await requireAdmissionsHandler();
   const supabase = await createClient();
 
-  const [{ data: prompts }, { data: questions }] = await Promise.all([
+  const [{ data: prompts }, { data: speakingPrompts }, { data: questions }] = await Promise.all([
     supabase.from("application_writing_prompts").select("*").eq("center_id", staff.center_id).order("prompt_type"),
+    supabase.from("speaking_task_prompts").select("*").eq("center_id", staff.center_id).order("created_at"),
     supabase.from("interview_questions").select("*").eq("center_id", staff.center_id).order("coverage_area"),
   ]);
 
@@ -87,6 +95,45 @@ export default async function AdmissionsSettingsPage() {
               Prompt
             </label>
             <input id="prompt_text" name="prompt_text" type="text" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink" />
+          </div>
+          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+            Add prompt
+          </button>
+        </form>
+      </div>
+
+      <div className="card flex flex-col gap-4 p-6">
+        <h2 className="font-serif text-lg text-ink">Speaking task prompts</h2>
+        <p className="text-sm text-muted">
+          Short, everyday topics -- a commute, cooking something familiar, explaining something to someone. The point
+          is fluency and clarity, not content difficulty. Match the writing task&apos;s count (three or four).
+        </p>
+        <ul className="flex flex-col gap-2">
+          {(speakingPrompts ?? []).map((p) => (
+            <li key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3">
+              <p className="text-sm text-ink">{p.prompt_text}</p>
+              <form action={toggleSpeakingPromptActive}>
+                <input type="hidden" name="prompt_id" value={p.id} />
+                <input type="hidden" name="active" value={String(p.active)} />
+                <button type="submit" className="text-xs text-muted hover:text-ink">
+                  {p.active ? "Deactivate" : "Activate"}
+                </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+        <form action={addSpeakingPrompt} className="flex flex-wrap items-end gap-3 border-t border-border pt-4">
+          <div className="flex flex-1 flex-col gap-1.5">
+            <label htmlFor="speaking_prompt_text" className="text-xs text-muted">
+              Prompt
+            </label>
+            <input
+              id="speaking_prompt_text"
+              name="prompt_text"
+              type="text"
+              required
+              className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink"
+            />
           </div>
           <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
             Add prompt

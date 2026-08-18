@@ -26,11 +26,21 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
   const { data: applicant } = await supabase.from("applicants").select("*").eq("id", id).maybeSingle();
   if (!applicant || applicant.center_id !== staff.center_id) notFound();
 
-  const [{ data: intake }, { data: prompt }, { data: bookedSlot }, { data: openSlots }, { data: questions }, { data: interviewRecord }] =
-    await Promise.all([
+  const [
+    { data: intake },
+    { data: prompt },
+    { data: speakingPrompt },
+    { data: bookedSlot },
+    { data: openSlots },
+    { data: questions },
+    { data: interviewRecord },
+  ] = await Promise.all([
       supabase.from("courses").select("name, delivery_mode").eq("id", applicant.intake_course_id).maybeSingle(),
       applicant.writing_task_prompt_id
         ? supabase.from("application_writing_prompts").select("prompt_type, prompt_text").eq("id", applicant.writing_task_prompt_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      applicant.speaking_task_prompt_id
+        ? supabase.from("speaking_task_prompts").select("prompt_text").eq("id", applicant.speaking_task_prompt_id).maybeSingle()
         : Promise.resolve({ data: null }),
       supabase.from("interview_slots").select("*").eq("booked_applicant_id", id).maybeSingle(),
       supabase
@@ -43,6 +53,10 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       supabase.from("interview_questions").select("id, question_text, coverage_area").eq("center_id", staff.center_id).eq("active", true),
       supabase.from("interview_records").select("*").eq("applicant_id", id).maybeSingle(),
     ]);
+
+  const speakingAudioSignedUrl = applicant.speaking_task_audio_url
+    ? (await supabase.storage.from("applicant-speaking-task-audio").createSignedUrl(applicant.speaking_task_audio_url, 3600)).data?.signedUrl ?? null
+    : null;
 
   const { data: paymentPlan } = await supabase.from("payment_plans").select("id, total_amount").eq("applicant_id", id).maybeSingle();
   const { data: payments } = paymentPlan
@@ -167,6 +181,19 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             <p className="whitespace-pre-wrap text-sm text-ink">{qa.answer}</p>
           </div>
         ))}
+
+        {speakingPrompt || speakingAudioSignedUrl ? (
+          <>
+            <h3 className="mt-2 text-sm font-semibold text-ink">Speaking task</h3>
+            {speakingPrompt ? <p className="text-xs text-muted">{speakingPrompt.prompt_text}</p> : null}
+            {speakingAudioSignedUrl ? (
+              // eslint-disable-next-line jsx-a11y/media-has-caption
+              <audio src={speakingAudioSignedUrl} controls className="w-full" />
+            ) : (
+              <p className="text-sm text-muted">No recording submitted.</p>
+            )}
+          </>
+        ) : null}
       </div>
 
       <MarkingForm applicant={applicant} />

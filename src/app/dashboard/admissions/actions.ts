@@ -65,6 +65,28 @@ export async function togglePromptActive(formData: FormData): Promise<void> {
   revalidatePath("/dashboard/admissions/settings");
 }
 
+// design_handoff_pre_interview_speaking -- same shape as the writing
+// prompts above, minus the fixed narrative/descriptive/argumentative type:
+// the speaking task's prompts are all one kind (short, everyday, spoken).
+export async function addSpeakingPrompt(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  const promptText = formData.get("prompt_text");
+  if (typeof promptText !== "string" || !promptText.trim()) return;
+  const supabase = await createClient();
+  await supabase.from("speaking_task_prompts").insert({ center_id: staff.center_id, prompt_text: promptText.trim() });
+  revalidatePath("/dashboard/admissions/settings");
+}
+
+export async function toggleSpeakingPromptActive(formData: FormData): Promise<void> {
+  const staff = await requireAdmissionsHandler();
+  const promptId = formData.get("prompt_id");
+  const active = formData.get("active") === "true";
+  if (typeof promptId !== "string") return;
+  const supabase = await createClient();
+  await supabase.from("speaking_task_prompts").update({ active: !active }).eq("id", promptId).eq("center_id", staff.center_id);
+  revalidatePath("/dashboard/admissions/settings");
+}
+
 const COVERAGE_AREAS = [
   "motivation_suitability",
   "language_awareness",
