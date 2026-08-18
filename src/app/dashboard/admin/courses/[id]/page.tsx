@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { JoinLinksCard } from "@/components/join-links-card";
@@ -210,7 +211,15 @@ export default async function CourseRosterPage({
           </p>
           <h1 className="mt-0.5 font-serif text-xl text-ink">{course.name}</h1>
         </div>
-        <DuplicateCourseForm courseId={course.id} suggestedName={`${course.name} (copy)`} />
+        <div className="flex shrink-0 items-center gap-2">
+          <DuplicateCourseForm courseId={course.id} suggestedName={`${course.name} (copy)`} />
+          <Link
+            href="#invite"
+            className="flex h-9 items-center rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground"
+          >
+            Invite people
+          </Link>
+        </div>
       </div>
 
       <DeliveryModeCard courseId={course.id} savedMode={course.delivery_mode} />
@@ -690,19 +699,25 @@ export default async function CourseRosterPage({
           </div>
         </div>
 
-        <InvitationsPanel
-          courseId={course.id}
-          pending={pendingInvites}
-          joinedCounts={{
-            trainees: (roster ?? []).filter((m) => m.role === "trainee").length,
-            trainers: (roster ?? []).filter((m) => m.role === "trainer").length,
-          }}
-        />
+        <div id="invite" className="scroll-mt-6">
+          <InvitationsPanel
+            courseId={course.id}
+            pending={pendingInvites}
+            joinedCounts={{
+              trainees: (roster ?? []).filter((m) => m.role === "trainee").length,
+              trainers: (roster ?? []).filter((m) => m.role === "trainer").length,
+            }}
+          />
+        </div>
 
         <JoinLinksCard
           courseId={course.id}
           traineeLink={`${process.env.SITE_URL ?? ""}/join/${course.trainee_join_token}`}
           trainerLink={`${process.env.SITE_URL ?? ""}/join/${course.trainer_join_token}`}
+          joinedCounts={{
+            trainees: (roster ?? []).filter((m) => m.role === "trainee").length,
+            trainers: (roster ?? []).filter((m) => m.role === "trainer").length,
+          }}
         />
 
         <WhatChangedPanel changes={await getRecentCentreChanges(course.center_id)} />

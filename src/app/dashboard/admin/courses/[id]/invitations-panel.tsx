@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { inviteToCourse, revokeInvitation, type InviteState } from "./invitation-actions";
 import { TUTOR_ROLE_LABEL, DEFAULT_INVITE_TUTOR_ROLE, tutorRoleLabel } from "@/lib/tutor-roles";
 
@@ -35,9 +35,15 @@ export function InvitationsPanel({
 }) {
   const [state, action, sending] = useActionState(inviteToCourse, initial);
   const [revokeState, revokeAction, revoking] = useActionState(revokeInvitation, initial);
+  const [role, setRole] = useState<"trainer" | "trainee">("trainer");
+  const [tutorRole, setTutorRole] = useState<string>(DEFAULT_INVITE_TUTOR_ROLE);
 
   const invitedTutors = pending.filter((p) => p.role === "trainer").length;
   const invitedCandidates = pending.filter((p) => p.role === "trainee").length;
+
+  // Course Admin.dc.html: "Send invite as {{ inviteRole }}" -- the button
+  // names the role being invited rather than a generic "Send invitation".
+  const inviteRoleLabel = role === "trainee" ? "Candidate" : tutorRole ? tutorRoleLabel(tutorRole) : "Tutor";
 
   return (
     <div className="card p-6">
@@ -71,7 +77,8 @@ export function InvitationsPanel({
           <label className="text-[11px] font-medium text-muted">Joining as</label>
           <select
             name="role"
-            defaultValue="trainer"
+            value={role}
+            onChange={(e) => setRole(e.target.value as "trainer" | "trainee")}
             className="h-9 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
           >
             <option value="trainer">Tutor</option>
@@ -82,7 +89,8 @@ export function InvitationsPanel({
           <label className="text-[11px] font-medium text-muted">Tutor role</label>
           <select
             name="tutor_role"
-            defaultValue={DEFAULT_INVITE_TUTOR_ROLE}
+            value={tutorRole}
+            onChange={(e) => setTutorRole(e.target.value)}
             className="h-9 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Not set yet</option>
@@ -98,7 +106,7 @@ export function InvitationsPanel({
           disabled={sending}
           className="h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
         >
-          {sending ? "Sending…" : "Send invitation"}
+          {sending ? "Sending…" : `Send invite as ${inviteRoleLabel}`}
         </button>
       </form>
 

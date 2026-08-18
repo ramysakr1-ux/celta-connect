@@ -40,11 +40,13 @@ function LinkRow({
   link,
   courseId,
   role,
+  joinedCount,
 }: {
   label: string;
   link: string;
   courseId: string;
   role: "trainee" | "trainer";
+  joinedCount: number;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -56,7 +58,9 @@ function LinkRow({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-sm text-muted">{label}</label>
+      <label className="text-sm text-muted">
+        {label} <span className="text-ink">&middot; {joinedCount} joined</span>
+      </label>
       <div className="flex items-center gap-2">
         <code className="flex-1 truncate rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink">
           {link}
@@ -85,10 +89,12 @@ export function JoinLinksCard({
   courseId,
   traineeLink,
   trainerLink,
+  joinedCounts,
 }: {
   courseId: string;
   traineeLink: string;
   trainerLink: string;
+  joinedCounts: { trainees: number; trainers: number };
 }) {
   return (
     <div className="card flex flex-col gap-4 p-6">
@@ -101,8 +107,8 @@ export function JoinLinksCard({
           the old one.
         </p>
       </div>
-      <LinkRow label="Trainee join link" link={traineeLink} courseId={courseId} role="trainee" />
-      <LinkRow label="Trainer join link" link={trainerLink} courseId={courseId} role="trainer" />
+      <LinkRow label="Trainee join link" link={traineeLink} courseId={courseId} role="trainee" joinedCount={joinedCounts.trainees} />
+      <LinkRow label="Trainer join link" link={trainerLink} courseId={courseId} role="trainer" joinedCount={joinedCounts.trainers} />
     </div>
   );
 }
