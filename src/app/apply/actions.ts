@@ -2,6 +2,7 @@
 
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { inferCourseCommitmentsMode, buildCourseCommitments, courseCommitmentsToPlainText } from "@/lib/course-commitments";
 
 // Working days, not calendar days -- a centre promising "10 days" and meaning
 // two working weeks would otherwise miss its own deadline every time an
@@ -48,7 +49,8 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
   if (
     !formData.get("ack_no_guarantee") ||
     !formData.get("ack_no_exemptions") ||
-    !formData.get("ack_writing_task")
+    !formData.get("ack_writing_task") ||
+    !formData.get("ack_commitments")
   ) {
     return { error: "You need to agree to all the acknowledgements to apply.", submitted: false };
   }
@@ -57,7 +59,7 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
 
   const { data: course } = await admin
     .from("courses")
-    .select("id, name, center_id, accepting_applications, delivery_mode")
+    .select("id, name, center_id, accepting_applications, delivery_mode, start_date, end_date")
     .eq("id", intakeCourseId)
     .maybeSingle();
   if (!course || course.center_id !== centerId || !course.accepting_applications) {
@@ -67,6 +69,14 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
   if (course.delivery_mode === "mixed" && !formData.get("ack_mixed_mode")) {
     return { error: "You need to acknowledge the mixed-mode teaching practice demand to apply.", submitted: false };
   }
+
+  // Recomputed server-side from the real course dates rather than trusted
+  // from the client's hidden field -- what an applicant is recorded as
+  // having accepted shouldn't depend on an unauthenticated form post being
+  // honest about it.
+  const commitmentsSnapshot = courseCommitmentsToPlainText(
+    buildCourseCommitments(inferCourseCommitmentsMode(course.start_date, course.end_date))
+  );
 
   const writingTaskPromptId = (formData.get("writing_task_prompt_id") as string | null) || null;
   const writingTaskSubmission = (formData.get("writing_task_submission") as string | null)?.trim() || null;
@@ -91,6 +101,8 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
       acknowledged_no_guarantee_at: new Date().toISOString(),
       acknowledged_no_exemptions_at: new Date().toISOString(),
       acknowledged_mixed_mode_demand_at: course.delivery_mode === "mixed" ? new Date().toISOString() : null,
+      commitments_accepted_at: new Date().toISOString(),
+      commitments_snapshot: commitmentsSnapshot,
       writing_task_prompt_id: writingTaskPromptId,
       writing_task_submission: writingTaskSubmission,
       speaking_task_prompt_id: speakingTaskPromptId,

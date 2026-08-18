@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { submitApplication, type ApplyFormState } from "@/app/apply/actions";
 import { AudioRecorder } from "@/components/audio-recorder";
+import { inferCourseCommitmentsMode, buildCourseCommitments } from "@/lib/course-commitments";
 
 interface Intake {
   id: string;
@@ -46,6 +47,9 @@ export function ApplicationForm({
   const [selectedPromptId, setSelectedPromptId] = useState(prompts[0]?.id ?? "");
   const [selectedSpeakingPromptId, setSelectedSpeakingPromptId] = useState(speakingPrompts[0]?.id ?? "");
   const selectedIntake = intakes.find((i) => i.id === selectedIntakeId);
+  const commitments = selectedIntake
+    ? buildCourseCommitments(inferCourseCommitmentsMode(selectedIntake.startDate, selectedIntake.endDate))
+    : null;
 
   if (state.submitted) {
     return (
@@ -222,6 +226,38 @@ export function ApplicationForm({
         </label>
         <textarea id="language_awareness_answer" name="language_awareness_answer" rows={3} required className={inputClass} />
       </div>
+
+      {commitments ? (
+        <div className="flex flex-col gap-2 border-t border-border pt-4">
+          <p className="text-sm font-semibold text-ink">Course commitments and code of conduct</p>
+          <div className="max-h-56 overflow-y-auto rounded-[6px] border border-border bg-card p-3 text-xs leading-relaxed text-muted">
+            <p className="mb-2 text-ink">{commitments.intro}</p>
+            {commitments.sections.map((section) => (
+              <div key={section.heading} className="mb-3">
+                <p className="mb-1 font-semibold text-ink">{section.heading}</p>
+                {section.paragraphs.map((para, i) => (
+                  <p key={i} className="mb-1.5">
+                    {para}
+                  </p>
+                ))}
+                {section.list ? (
+                  <ul className="list-disc pl-4">
+                    {section.list.map((item, i) => (
+                      <li key={i} className="mb-1">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ))}
+          </div>
+          <label className="flex items-start gap-2 text-sm text-ink">
+            <input type="checkbox" name="ack_commitments" required className="mt-0.5" />
+            I have read and accept the course commitments and code of conduct above.
+          </label>
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-2 border-t border-border pt-4 text-sm text-ink">
         <label className="flex items-start gap-2">

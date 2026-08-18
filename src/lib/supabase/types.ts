@@ -429,6 +429,11 @@ export interface Database {
           acknowledged_no_guarantee_at: string | null;
           acknowledged_no_exemptions_at: string | null;
           acknowledged_mixed_mode_demand_at: string | null;
+          // migration 0139 -- the exact assembled text shown at accept time,
+          // not re-derived later (a subsequent centre revision must never
+          // retroactively change what an existing applicant accepted).
+          commitments_accepted_at: string | null;
+          commitments_snapshot: string | null;
           writing_task_prompt_id: string | null;
           writing_task_submission: string | null;
           // migration 0132 -- third pre-interview component. No transcript

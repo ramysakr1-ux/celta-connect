@@ -196,6 +196,27 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         ) : null}
       </div>
 
+      <div className="card flex flex-col gap-2 p-6">
+        <h2 className="font-serif text-lg text-ink">Course commitments and code of conduct</h2>
+        {applicant.commitments_accepted_at ? (
+          <>
+            <p className="text-sm text-ink">
+              Accepted {new Date(applicant.commitments_accepted_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+            </p>
+            {applicant.commitments_snapshot ? (
+              <details className="mt-1">
+                <summary className="cursor-pointer text-xs font-semibold text-primary hover:underline">View the exact text they accepted</summary>
+                <pre className="mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap rounded-[6px] bg-surface-muted/40 p-3 font-sans text-xs leading-relaxed text-muted">
+                  {applicant.commitments_snapshot}
+                </pre>
+              </details>
+            ) : null}
+          </>
+        ) : (
+          <p className="text-sm text-muted">Not yet accepted -- this applicant predates the commitments requirement.</p>
+        )}
+      </div>
+
       <MarkingForm applicant={applicant} />
 
       <div className="card flex flex-col gap-4 p-6">
