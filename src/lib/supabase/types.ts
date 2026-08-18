@@ -2147,12 +2147,30 @@ export interface Database {
           signup_written_answers: unknown | null;
           signup_audio_url: string | null;
           signup_completed_at: string | null;
+          // migration 0125 -- links this course-scoped row to a centre-wide
+          // identity so hours can be totalled across every course they've
+          // volunteered on. Null until auto-matched (by email) or manually
+          // linked by an admin.
+          volunteer_person_id: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["volunteer_students"]["Row"]> & {
           course_id: string;
           name: string;
         };
         Update: Partial<Database["public"]["Tables"]["volunteer_students"]["Row"]>;
+        Relationships: [];
+      };
+      volunteer_people: {
+        Row: {
+          id: string;
+          center_id: string;
+          email: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["volunteer_people"]["Row"]> & {
+          center_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["volunteer_people"]["Row"]>;
         Relationships: [];
       };
       volunteer_signup_profiles: {

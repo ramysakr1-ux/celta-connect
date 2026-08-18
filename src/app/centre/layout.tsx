@@ -63,9 +63,26 @@ export default async function CentreLayout({ children }: { children: React.React
 
       <main className="container w-full flex-1 pt-8 pb-6">{children}</main>
 
-      {/* Centre settings used to sit here as a full-width bar under every tab.
-          Centre Admin.dc.html puts it at the foot of the Overview's right
-          column instead, so it moved there. */}
+      {/* Centre Admin.dc.html: a full-width bar under every tab (Overview,
+          Roles, and Import alike), not scoped to any one tab's content --
+          it sits after the closing of all three tab blocks in the design's
+          own markup. */}
+      {can(ctx.roles, "centre.settings.edit") ? (
+        <div className="container pb-6">
+          <Link
+            href="/dashboard/admin/settings"
+            className="flex items-center justify-between gap-4 rounded-[10px] border border-border bg-card px-[22px] py-[18px] hover:border-primary"
+          >
+            <div className="flex flex-col gap-[3px]">
+              <span className="font-serif text-[15px] font-semibold text-ink">Centre settings</span>
+              <span className="text-[11.5px] text-muted">
+                Centre profile, Google Drive connection, payment providers, admin roles
+              </span>
+            </div>
+            <span className="shrink-0 text-sm font-medium text-primary">Open settings &rarr;</span>
+          </Link>
+        </div>
+      ) : null}
 
       <div className="container pb-10">
         <DesignerCredit />

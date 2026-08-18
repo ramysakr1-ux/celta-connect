@@ -4,6 +4,9 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, canView } from "@/lib/auth/centre-permissions";
+import { computeSessionTicks } from "@/lib/volunteer-attendance";
+import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
+import { VolunteerPoolRow } from "@/app/centre/volunteer-pool-row";
 
 // Centre Admin's Overview.
 //
@@ -58,8 +61,48 @@ export default async function CentreOverviewPage({
   const courseIds = (courses ?? []).map((c) => c.id);
   const { data: volunteers } =
     canView(ctx.roles, "volunteers.view") && courseIds.length > 0
-      ? await admin.from("volunteer_students").select("id, course_id").in("course_id", courseIds)
+      ? await admin.from("volunteer_students").select("id, course_id, name, volunteer_person_id").in("course_id", courseIds)
       : { data: [] };
+
+  // Hours across every course a volunteer's linked records span (migration
+  // 0125) -- same computeSessionTicks math the per-course register uses,
+  // just fed every TP event and attendance row across the whole centre
+  // rather than one course's worth.
+  const volunteerIds = (volunteers ?? []).map((v) => v.id);
+  const [{ data: tpEvents }, { data: attendanceRows }] = await Promise.all([
+    courseIds.length > 0
+      ? admin.from("course_timetable_events").select("id, event_date, course_id").in("course_id", courseIds).eq("type", "tp")
+      : Promise.resolve({ data: [] }),
+    volunteerIds.length > 0
+      ? admin.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  // Group by volunteer_person_id when linked; an unlinked volunteer is its
+  // own group of one, keyed by its own row id so it still totals correctly.
+  const courseNameById = new Map((courses ?? []).map((c) => [c.id, c.name]));
+  const groups = new Map<
+    string,
+    { name: string; members: { id: string; courseId: string }[]; personId: string | null }
+  >();
+  for (const v of volunteers ?? []) {
+    const key = v.volunteer_person_id ?? v.id;
+    const existing = groups.get(key);
+    const member = { id: v.id, courseId: v.course_id };
+    if (existing) existing.members.push(member);
+    else groups.set(key, { name: v.name, members: [member], personId: v.volunteer_person_id });
+  }
+  const volunteerGroups = [...groups.values()]
+    .map((g) => {
+      const ids = g.members.map((m) => m.id);
+      const attendedEventIds = new Set(
+        (attendanceRows ?? []).filter((a) => ids.includes(a.volunteer_student_id)).map((a) => a.timetable_event_id)
+      );
+      const sessions = computeSessionTicks(tpEvents ?? [], attendedEventIds, TP_LESSON_LENGTH_MINUTES);
+      const hours = sessions.reduce((sum, s) => sum + s.creditedMinutes, 0) / 60;
+      return { ...g, hours };
+    })
+    .sort((a, b) => b.hours - a.hours);
 
   // "Only 'bounced' creates a task -- on the admissions screen, scoped to the
   // candidate." Surfaced here too because a bounced workspace invitation to a
@@ -344,34 +387,33 @@ export default async function CentreOverviewPage({
             <div className="rounded-[10px] border border-border bg-card">
               <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
                 <h2 className="font-serif text-base text-ink">Volunteer pool</h2>
-                <span className="text-xs text-muted">{(volunteers ?? []).length} registered</span>
+                <span className="text-xs text-muted">
+                  {volunteerGroups.length} {volunteerGroups.length === 1 ? "person" : "people"} &middot;{" "}
+                  {(volunteers ?? []).length} registrations
+                </span>
               </div>
-              <p className="px-5 py-3 text-xs text-muted">
-                Hours toward certificates are tracked per course. A total across courses needs a way to recognise the
-                same volunteer twice, which the records don&apos;t carry.
+              {volunteerGroups.length === 0 ? (
+                <p className="px-5 py-3 text-xs text-muted">Nobody registered yet.</p>
+              ) : (
+                <div className="flex flex-col">
+                  {volunteerGroups.map((g) => (
+                    <VolunteerPoolRow
+                      key={g.members[0].id}
+                      name={g.name}
+                      hours={g.hours}
+                      members={g.members.map((m) => ({ id: m.id, courseName: courseNameById.get(m.courseId) ?? "Unknown course" }))}
+                      canEdit={can(ctx.roles, "centre.settings.edit")}
+                      linkOptions={volunteerGroups
+                        .filter((o) => o.members[0].id !== g.members[0].id)
+                        .map((o) => ({ id: o.members[0].id, name: o.name }))}
+                    />
+                  ))}
+                </div>
+              )}
+              <p className="border-t border-border-faint px-5 py-2.5 text-[11px] text-muted">
+                Linked automatically when a signup&apos;s email matches one already on file; otherwise link them
+                yourself above -- never guessed from name alone.
               </p>
-            </div>
-          ) : null}
-
-          {/* Last in the stack, per the design. It used to sit in the layout as
-              a full-width bar under every tab; the design puts it here, at the
-              foot of the Overview's right column. */}
-          {can(ctx.roles, "centre.settings.edit") ? (
-            <div className="rounded-[10px] border border-border bg-card">
-              <div className="border-b border-border px-5 py-3.5">
-                <h2 className="font-serif text-base text-ink">Centre settings</h2>
-              </div>
-              <div className="flex flex-col gap-2 px-5 py-3.5">
-                <Link href="/dashboard/admin/settings" className="text-sm font-medium text-primary hover:underline">
-                  Centre details and branding →
-                </Link>
-                <Link href="/centre/payments" className="text-sm font-medium text-primary hover:underline">
-                  Payment providers →
-                </Link>
-                <Link href="/dashboard/admin/email-preview" className="text-sm font-medium text-primary hover:underline">
-                  What your centre sends →
-                </Link>
-              </div>
             </div>
           ) : null}
         </div>

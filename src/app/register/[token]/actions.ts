@@ -3,6 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { linkVolunteerByEmail } from "@/lib/volunteer-identity";
 
 export interface FormState {
   error: string | null;
@@ -59,6 +60,8 @@ export async function addVolunteerStudentViaRegister(_prevState: FormState, form
       .eq("id", accessToken.course_id)
       .maybeSingle();
     if (course) {
+      await linkVolunteerByEmail(admin, { volunteerStudentId: volunteer.id, centerId: course.center_id, email });
+
       const { data: center } = await admin
         .from("centers")
         .select("name, admissions_email")
