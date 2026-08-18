@@ -1,7 +1,7 @@
 interface VolunteerSession {
   id: string;
   name: string;
-  today: { minutesAttended: number; ticked: boolean } | null;
+  today: { minutesAttended: number; ticked: boolean; tier: "absent" | "partial" | "present" } | null;
   certificateHours: number;
 }
 
@@ -35,8 +35,11 @@ export function VolunteerSessionPanels({
                   <span className="text-xs tabular-nums text-muted">
                     {v.today ? `${v.today.minutesAttended} min` : "Not in today"}
                   </span>
-                  <span className={`pill ${v.today?.ticked ? "pill-success" : "pill-neutral"}`}>
-                    {v.today?.ticked ? "✓ Tick" : "No tick"}
+                  <span
+                    className={`pill ${v.today?.tier === "present" ? "pill-success" : v.today?.tier === "partial" ? "pill-warning" : "pill-neutral"}`}
+                    title={v.today?.tier === "partial" ? "45-89 minutes -- recorded, but credits no hours toward the certificate" : undefined}
+                  >
+                    {v.today?.tier === "present" ? "✓ Tick" : v.today?.tier === "partial" ? "Partial" : "No tick"}
                   </span>
                 </div>
               </div>

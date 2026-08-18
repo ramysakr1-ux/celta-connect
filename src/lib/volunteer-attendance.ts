@@ -12,10 +12,21 @@
 // behaviour without inventing attendance data that was never captured.
 export const TICK_THRESHOLD_MINUTES = 90;
 
+// build-spec.md's volunteer hours model, third tier: "45 to 89 minutes -> one
+// lesson. Recorded on the register as a distinct mark, but credits no hours
+// toward the certificate. It exists because a tutor seeing someone who
+// repeatedly arrives for one lesson has a different problem from someone who
+// never comes, and the register should show the difference." Under this is
+// "absent"; TICK_THRESHOLD_MINUTES and above is "present" (unchanged, still
+// the only tier that credits hours -- "nothing part-credits").
+export const PARTIAL_THRESHOLD_MINUTES = 45;
+
 export interface AttendanceEventLite {
   id: string;
   event_date: string;
 }
+
+export type AttendanceTier = "absent" | "partial" | "present";
 
 export interface SessionTick {
   date: string;
@@ -23,6 +34,7 @@ export interface SessionTick {
   totalBlocks: number;
   minutesAttended: number;
   ticked: boolean;
+  tier: AttendanceTier;
   creditedMinutes: number;
 }
 
@@ -45,12 +57,14 @@ export function computeSessionTicks(
       const totalBlocks = dayEvents.length;
       const minutesAttended = attendedBlocks * lessonLengthMinutes;
       const ticked = minutesAttended >= TICK_THRESHOLD_MINUTES;
+      const tier: AttendanceTier = ticked ? "present" : minutesAttended >= PARTIAL_THRESHOLD_MINUTES ? "partial" : "absent";
       return {
         date,
         attendedBlocks,
         totalBlocks,
         minutesAttended,
         ticked,
+        tier,
         creditedMinutes: ticked ? totalBlocks * lessonLengthMinutes : 0,
       };
     });
