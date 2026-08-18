@@ -16,6 +16,9 @@ export interface AssessorReadiness {
   portfoliosCompleteCount: number;
   hoursAssessedTotal: number;
   gradesEnteredCount: number;
+  // Grade Pipeline handoff: what actually gates sending to the assessor is
+  // MCT approval, not just a tutor having proposed a value.
+  gradesApprovedCount: number;
 }
 
 // for-claude-code-assessor-interface.md: "before it runs, it must check the
@@ -41,7 +44,7 @@ export async function computeAssessorReadiness(
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
   if (traineeIds.length === 0) {
-    return { ready: true, issues: [], totalCandidates: 0, portfoliosCompleteCount: 0, hoursAssessedTotal: 0, gradesEnteredCount: 0 };
+    return { ready: true, issues: [], totalCandidates: 0, portfoliosCompleteCount: 0, hoursAssessedTotal: 0, gradesEnteredCount: 0, gradesApprovedCount: 0 };
   }
 
   const [{ data: records }, { data: assignments }, { data: planAssignments }] = await Promise.all([
@@ -61,6 +64,7 @@ export async function computeAssessorReadiness(
   let portfoliosCompleteCount = 0;
   let hoursAssessedTotal = 0;
   let gradesEnteredCount = 0;
+  let gradesApprovedCount = 0;
 
   for (const trainee of trainees ?? []) {
     const record = recordByTrainee.get(trainee.id);
@@ -69,6 +73,7 @@ export async function computeAssessorReadiness(
     const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
     hoursAssessedTotal += assessedTp.hoursAssessed;
     if (record?.provisional_grade) gradesEnteredCount += 1;
+    if (record?.provisional_approved_at) gradesApprovedCount += 1;
 
     let complete = true;
 
@@ -106,6 +111,7 @@ export async function computeAssessorReadiness(
     portfoliosCompleteCount,
     hoursAssessedTotal,
     gradesEnteredCount,
+    gradesApprovedCount,
   };
 }
 

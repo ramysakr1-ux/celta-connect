@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ASSESSOR_COOKIE, getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus } from "@/lib/auth/portfolio-access";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
+import { hasMarkingGuidance } from "@/lib/marking-guidance";
 import { renderAssessorPackBuffer } from "@/lib/assessor-pack-pdf/document";
 
 // The "Download whole pack" button, and the centre's end-of-course PDF.
@@ -23,6 +24,10 @@ export async function GET() {
   if (!cookieStore.get(ASSESSOR_COOKIE)?.value) {
     return NextResponse.json({ error: "This link is not valid." }, { status: 401 });
   }
+  const termsStatus = await getAssessorTermsStatus();
+  if (!termsStatus?.accepted) {
+    return NextResponse.json({ error: "Accept the terms of access first." }, { status: 401 });
+  }
   const courseId = await getAssessorCourseId();
   if (!courseId) {
     return NextResponse.json({ error: "This link has expired." }, { status: 401 });
@@ -30,15 +35,20 @@ export async function GET() {
 
   const admin = createAdminClient();
   const [{ data: course }, readiness, candidates] = await Promise.all([
-    admin.from("courses").select("name, start_date, end_date, center_id, assessor_visit_date").eq("id", courseId).maybeSingle(),
+    admin
+      .from("courses")
+      .select("name, start_date, end_date, center_id, assessor_visit_date, provisional_grades_due_at")
+      .eq("id", courseId)
+      .maybeSingle(),
     computeAssessorReadiness(admin, courseId),
     buildCandidateCards(admin, courseId),
   ]);
   if (!course) return NextResponse.json({ error: "Course not found." }, { status: 404 });
 
-  const [{ data: centre }, { data: uploadedDocs }] = await Promise.all([
+  const [{ data: centre }, { data: uploadedDocs }, markingGuidancePresent] = await Promise.all([
     admin.from("centers").select("name, center_number").eq("id", course.center_id).maybeSingle(),
     admin.from("resources").select("title").eq("center_id", course.center_id).eq("category", "centre_documents"),
+    hasMarkingGuidance(admin, course.center_id),
   ]);
 
   const uploadedTitles = new Set((uploadedDocs ?? []).map((d) => d.title.trim().toLowerCase()));
@@ -47,11 +57,8 @@ export async function GET() {
     new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   const fmtShort = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 
-  // Same two-day rule the screen uses -- the pack is due before the visit, not
-  // on it.
-  const sendBy = course.assessor_visit_date
-    ? new Date(new Date(`${course.assessor_visit_date}T00:00:00`).getTime() - 2 * 86400000).toISOString().slice(0, 10)
-    : null;
+  // MCT-set, not computed from assessor_visit_date -- see migration 0127.
+  const sendBy = course.provisional_grades_due_at ? course.provisional_grades_due_at.slice(0, 10) : null;
 
   const buffer = await renderAssessorPackBuffer({
     centreName: centre?.name ?? "Centre",
@@ -66,12 +73,12 @@ export async function GET() {
     hoursAssessed: readiness.hoursAssessedTotal,
     // build-spec.md: "6 hours of assessed teaching per candidate".
     hoursRequired: readiness.totalCandidates * 6,
-    gradesEntered: readiness.gradesEnteredCount,
+    gradesEntered: readiness.gradesApprovedCount,
     candidates,
     cohortDocuments: [...COHORT_DOCUMENTS],
     centreDocuments: CENTRE_DOCUMENTS.map((d) => ({
       ...d,
-      present: uploadedTitles.has(d.name.toLowerCase()),
+      present: d.name === "Marking guidance" ? markingGuidancePresent : uploadedTitles.has(d.name.toLowerCase()),
     })),
     generatedAt: new Date().toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" }),
   });

@@ -85,7 +85,7 @@ export async function renderAssessorPackBuffer(input: AssessorPackInput): Promis
 
         <View style={styles.figuresRow}>
           <View style={styles.figure}>
-            <Text style={styles.figureLabel}>Send by</Text>
+            <Text style={styles.figureLabel}>Provisional grades due</Text>
             <Text style={[styles.figureValue, { color: GOLD }]}>{input.sendByDate ?? "Not set"}</Text>
           </View>
           <View style={styles.figure}>
@@ -106,9 +106,9 @@ export async function renderAssessorPackBuffer(input: AssessorPackInput): Promis
             </Text>
           </View>
           <View style={styles.figure}>
-            <Text style={styles.figureLabel}>Grades entered</Text>
+            <Text style={styles.figureLabel}>Provisional grades</Text>
             <Text style={[styles.figureValue, { color: input.gradesEntered >= input.totalCandidates ? GREEN : AMBER }]}>
-              {input.gradesEntered} of {input.totalCandidates}
+              {input.gradesEntered} of {input.totalCandidates} MCT-approved
             </Text>
           </View>
         </View>

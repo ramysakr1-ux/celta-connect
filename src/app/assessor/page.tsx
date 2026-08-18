@@ -2,18 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ASSESSOR_COOKIE, getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus } from "@/lib/auth/portfolio-access";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
+import { hasMarkingGuidance } from "@/lib/marking-guidance";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { DesignerCredit } from "@/components/designer-credit";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
-
-function addDays(iso: string, days: number): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  const date = new Date(Date.UTC(y, m - 1, d));
-  date.setUTCDate(date.getUTCDate() + days);
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
-}
 
 // The design file's own palette, so status colour is not re-invented here.
 const GOLD = "oklch(60% 0.11 70)";
@@ -64,6 +58,9 @@ export default async function AssessorPage({
   const { candidate: openCandidateId } = await searchParams;
   const cookieStore = await cookies();
   if (!cookieStore.get(ASSESSOR_COOKIE)?.value) redirect("/login");
+  const termsStatus = await getAssessorTermsStatus();
+  if (!termsStatus) redirect("/login?error=assessor_link_invalid");
+  if (!termsStatus.accepted) redirect("/assessor/gate");
   const courseId = await getAssessorCourseId();
   if (!courseId) redirect("/login?error=assessor_link_invalid");
 
@@ -76,12 +73,14 @@ export default async function AssessorPage({
     computeAssessorReadiness(admin, courseId),
     buildCandidateCards(admin, courseId),
   ]);
+  const markingGuidancePresent = course ? await hasMarkingGuidance(admin, course.center_id) : false;
 
   if (!course) redirect("/login?error=assessor_link_invalid");
 
   const center = course.centers as unknown as { name: string; center_number: string } | null;
 
-  const sendByDate = course.assessor_visit_date ? addDays(course.assessor_visit_date, -2) : null;
+  // MCT-set, not computed from assessor_visit_date -- see migration 0127.
+  const sendByDate = course.provisional_grades_due_at ? course.provisional_grades_due_at.slice(0, 10) : null;
   const daysOut = sendByDate ? Math.ceil((new Date(`${sendByDate}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000) : null;
 
   const [{ data: tutorRows }, { data: onDayEvents }, { data: centreDocs }] = await Promise.all([
@@ -266,7 +265,7 @@ export default async function AssessorPage({
               </h1>
             </div>
             <div style={{ display: "flex", gap: 34 }}>
-              <Figure label="Send by" value={sendByDate ? shortDate(sendByDate) : "Not set"} ink={GOLD} />
+              <Figure label="Provisional grades due" value={sendByDate ? shortDate(sendByDate) : "Not set"} ink={GOLD} />
               <Figure
                 label="Portfolios complete"
                 value={`${readiness.portfoliosCompleteCount} of ${readiness.totalCandidates}`}
@@ -278,9 +277,9 @@ export default async function AssessorPage({
                 ink={readiness.hoursAssessedTotal >= hoursRequired ? GREEN : AMBER}
               />
               <Figure
-                label="Grades entered"
-                value={`${readiness.gradesEnteredCount} of ${readiness.totalCandidates}`}
-                ink={readiness.gradesEnteredCount >= readiness.totalCandidates ? GREEN : AMBER}
+                label="Provisional grades"
+                value={`${readiness.gradesApprovedCount} of ${readiness.totalCandidates} MCT-approved`}
+                ink={readiness.gradesApprovedCount >= readiness.totalCandidates ? GREEN : AMBER}
               />
             </div>
           </div>
@@ -295,13 +294,13 @@ export default async function AssessorPage({
             }}
           >
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD }}>
-              {sendByDate ? `Send the pack by ${longDate(sendByDate)}` : "No visit date set"}
+              {sendByDate ? `Provisional grades due: ${longDate(sendByDate)} EOD` : "No provisional grades deadline set"}
               {daysOut !== null ? ` · ${daysOut} day${daysOut === 1 ? "" : "s"} out` : ""}
             </span>
             <span style={{ fontSize: 12, color: INK }}>
               {sendByDate
-                ? "Everything below must be complete by that date, not the visit date."
-                : "Set the assessor visit date on the course to fix the send-by deadline."}
+                ? "Each TP tutor proposes for their own group, the MCT proposes for theirs, then the MCT approves all before it's sent and recorded here."
+                : "The MCT hasn't set a provisional grades deadline for this course yet."}
             </span>
           </div>
         )}
@@ -468,7 +467,15 @@ export default async function AssessorPage({
 
             <Panel title="Centre documents">
               {CENTRE_DOCUMENTS.map((doc) => {
-                const uploaded = (centreDocs ?? []).find((d) => d.title.trim().toLowerCase() === doc.name.toLowerCase());
+                // "Marking guidance" is the one line item that now lives in
+                // the app itself, not the resources upload table -- see
+                // marking-guidance.ts's hasMarkingGuidance.
+                const isMarkingGuidance = doc.name === "Marking guidance";
+                const uploaded = isMarkingGuidance
+                  ? null
+                  : (centreDocs ?? []).find((d) => d.title.trim().toLowerCase() === doc.name.toLowerCase());
+                const present = isMarkingGuidance ? markingGuidancePresent : Boolean(uploaded?.file_url);
+                const href = isMarkingGuidance ? "/assessor/marking-guidance" : uploaded?.file_url;
                 return (
                   <div
                     key={doc.name}
@@ -481,12 +488,14 @@ export default async function AssessorPage({
                       <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{doc.name}</p>
                       <p style={{ fontSize: 10.5, color: MUTED }}>{doc.meta}</p>
                     </div>
-                    {uploaded?.file_url ? (
-                      <a href={uploaded.file_url} style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}>
+                    {present && href ? (
+                      <a href={href} style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}>
                         Open →
                       </a>
                     ) : (
-                      <span style={{ fontSize: 11, fontWeight: 600, color: AMBER, flex: "none" }}>Not uploaded</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: AMBER, flex: "none" }}>
+                        {isMarkingGuidance ? "Not written yet" : "Not uploaded"}
+                      </span>
                     )}
                   </div>
                 );
