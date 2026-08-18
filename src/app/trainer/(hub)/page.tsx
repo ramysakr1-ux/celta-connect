@@ -95,6 +95,69 @@ export default async function TodayPage() {
   type Alert = { title: string; meta: string; href: string; destructive?: boolean };
   const alerts: Alert[] = [];
 
+  // Grade Pipeline handoff: reminder is MCT-specific (only they can act on
+  // it) and computed from the deadline the MCT set themselves, not a fixed
+  // offset from the assessor visit date. 4 days is a starting judgment call,
+  // not a rule from the spec -- reasonable to retune later.
+  const isMct = trainer!.tutor_role === "main_course_tutor";
+  if (isMct && course?.provisional_grades_due_at) {
+    const { data: records } =
+      traineeIds.length > 0
+        ? await supabase.from("celta5_records").select("provisional_grade, provisional_approved_at").in("trainee_id", traineeIds)
+        : { data: [] };
+    const withProvisional = (records ?? []).filter((r) => r.provisional_grade);
+    const approvedCount = withProvisional.filter((r) => r.provisional_approved_at).length;
+    const dueDate = course.provisional_grades_due_at.slice(0, 10);
+    const daysOut = Math.ceil((new Date(`${dueDate}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000);
+    const REMINDER_WINDOW_DAYS = 4;
+    if (daysOut <= REMINDER_WINDOW_DAYS && approvedCount < traineeIds.length) {
+      alerts.push({
+        title: `Provisional grades due ${daysOut <= 0 ? "today" : `in ${daysOut} day${daysOut === 1 ? "" : "s"}`}`,
+        meta: `${approvedCount} of ${traineeIds.length} MCT-approved`,
+        href: "/trainer/grades-report",
+        destructive: daysOut <= 0,
+      });
+    }
+  }
+
+  // Grade Pipeline handoff, "Decided": "Final-grade reminder timing is tied
+  // to the last TP day, not the last calendar day of the course... the same
+  // way the provisional-grade reminder is tied to the assessor visit date
+  // -- not a fixed course-end date." No MCT-set deadline here (unlike
+  // provisionals) -- the trigger is the last TP day itself, always known
+  // from the real timetable, so there's nothing for the MCT to set.
+  if (isMct) {
+    // Anchored to whichever TP number is the final one on THIS course (its
+    // own linked_tp_number, not just whichever event happens to carry the
+    // latest date) -- Ramy, 2026-08-17: "the final TP on the course rather
+    // than TP eight," since not every course is guaranteed to run exactly 8.
+    const { data: tpEvents } = await supabase
+      .from("course_timetable_events")
+      .select("event_date, linked_tp_number")
+      .eq("course_id", courseId)
+      .eq("type", "tp")
+      .not("linked_tp_number", "is", null)
+      .order("linked_tp_number", { ascending: false })
+      .limit(1);
+    const lastTpDate = tpEvents?.[0]?.event_date ?? null;
+    if (lastTpDate && lastTpDate <= today) {
+      const { data: finalRecords } =
+        traineeIds.length > 0
+          ? await supabase.from("celta5_records").select("final_recommended_grade").in("trainee_id", traineeIds)
+          : { data: [] };
+      const finalizedCount = (finalRecords ?? []).filter((r) => r.final_recommended_grade).length;
+      if (finalizedCount < traineeIds.length) {
+        const daysSince = Math.ceil((new Date(`${today}T00:00:00`).getTime() - new Date(`${lastTpDate}T00:00:00`).getTime()) / 86400000);
+        alerts.push({
+          title: `Final grades -- ${daysSince <= 0 ? "last TP day" : `${daysSince} day${daysSince === 1 ? "" : "s"} since the last TP`}`,
+          meta: `${finalizedCount} of ${traineeIds.length} recommended`,
+          href: "/trainer/grades-report",
+          destructive: daysSince > 3,
+        });
+      }
+    }
+  }
+
   const unsentByTrainee = new Map<string, string>(); // trainee_id -> most recent taught date
   for (const lesson of lessons ?? []) {
     const hasFeedback = (feedbackRows ?? []).some(
