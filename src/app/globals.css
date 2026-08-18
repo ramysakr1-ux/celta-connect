@@ -469,3 +469,13 @@ h6 {
     }
   }
 }
+
+/* Input sessions' printable answer-key handouts (design_handoff_input_
+   sessions_batch, matching PPP Input Session.dc.html's own print
+   stylesheet) -- interactive-only chrome (reveal buttons, hide/print
+   controls) never belongs on a printed page. */
+@media print {
+  [data-print-hide] {
+    display: none !important;
+  }
+}

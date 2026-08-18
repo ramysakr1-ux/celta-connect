@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -161,7 +162,12 @@ export default async function ResourceHubPage({
 
           <div className="flex flex-col gap-6">
             <div id="input-sessions" className="scroll-mt-4">
-              <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Input sessions -- this week</h3>
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Input sessions -- this week</h3>
+                <Link href="/input-sessions" className="shrink-0 text-xs font-semibold text-primary">
+                  Open session library →
+                </Link>
+              </div>
               {thisWeekSessions.length === 0 ? (
                 <p className="mt-3 sheet border-dashed text-sm text-muted">Nothing scheduled this week.</p>
               ) : (

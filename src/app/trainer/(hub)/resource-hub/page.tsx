@@ -33,6 +33,7 @@ export default async function TrainerResourceHubPage() {
     { count: publishedPointCount },
     { count: multimediaCount },
     { count: assignmentBriefCount },
+    { count: markingGuidanceCount },
     { data: schedule },
   ] = await Promise.all([
     coursebookIds.length > 0
@@ -62,6 +63,7 @@ export default async function TrainerResourceHubPage() {
     supabase.from("tp_points").select("id", { count: "exact", head: true }).eq("status", "published").eq("center_id", trainer.center_id),
     supabase.from("tp_audio_library").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
     supabase.from("assignment_templates").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
+    supabase.from("marking_guidance_entries").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
     courseId ? supabase.from("course_tp_schedule").select("tp_number, tp_coursebook_id") : Promise.resolve({ data: [] }),
   ]);
 
@@ -110,6 +112,7 @@ export default async function TrainerResourceHubPage() {
     coursebooks: coursebookIds.length,
     multimedia: multimediaCount ?? 0,
     assignmentBriefs: assignmentBriefCount ?? 0,
+    markingGuidance: markingGuidanceCount ?? 0,
     inputSessions: (inputSessionResources ?? []).length,
     centreDocuments: (centreDocResources ?? []).length,
     forms: (formResources ?? []).length,
@@ -123,6 +126,7 @@ export default async function TrainerResourceHubPage() {
           { href: "#coursebooks", label: "Coursebooks", count: sectionCounts.coursebooks },
           { href: "/trainer/audio", label: "Multimedia", count: sectionCounts.multimedia },
           { href: "/dashboard/trainer/assignment-briefs", label: "Assignment briefs", count: sectionCounts.assignmentBriefs },
+          { href: "/dashboard/trainer/marking-guidance", label: "Marking guidance", count: sectionCounts.markingGuidance },
           { href: "#input-sessions", label: "Input sessions", count: sectionCounts.inputSessions },
           { href: "#forms-and-documents", label: "Forms and documents", count: sectionCounts.forms },
           { href: "#centre-documents", label: "Centre documents", count: sectionCounts.centreDocuments },
@@ -138,7 +142,7 @@ export default async function TrainerResourceHubPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/trainer/coursebooks" className="sheet flex flex-col gap-1 p-5 hover:border-primary/40">
           <p className="font-serif text-lg text-ink">TP points library →</p>
           <p className="text-xs text-muted">The staged point-by-point content. Trainer-only -- never shown to trainees.</p>
@@ -150,6 +154,10 @@ export default async function TrainerResourceHubPage() {
         <Link href="/dashboard/trainer/assignment-briefs" className="sheet flex flex-col gap-1 p-5 hover:border-primary/40">
           <p className="font-serif text-lg text-ink">Assignment briefs →</p>
           <p className="text-xs text-muted">Upload and publish briefs. Trainees browse published sections from their portfolio.</p>
+        </Link>
+        <Link href="/dashboard/trainer/marking-guidance" className="sheet flex flex-col gap-1 p-5 hover:border-primary/40">
+          <p className="font-serif text-lg text-ink">Marking guidance →</p>
+          <p className="text-xs text-muted">Where this centre's line sits per criterion. Tutors and the assessor only -- never trainees.</p>
         </Link>
       </div>
 
@@ -221,6 +229,18 @@ export default async function TrainerResourceHubPage() {
         <p className="mt-1 text-sm text-muted">
           Materials for each input session -- a link, a file, or a self-contained interactive .html shown live.
         </p>
+        <div className="mt-3 sheet flex items-center justify-between gap-3 p-4">
+          <p className="text-sm text-ink">
+            The built-in library of interactive input sessions (lead-in, exercises, trainer notes) lives on its own
+            page.
+          </p>
+          <Link
+            href="/input-sessions"
+            className="flex h-8 shrink-0 items-center rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground"
+          >
+            Open input sessions →
+          </Link>
+        </div>
         <div className="mt-3">
           <ResourceCategoryManager category="input_sessions" centerId={trainer.center_id} resources={inputSessionResources ?? []} />
         </div>
