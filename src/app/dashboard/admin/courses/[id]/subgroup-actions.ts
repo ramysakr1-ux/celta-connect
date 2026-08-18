@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
+import { syncAssignmentDueDates } from "@/lib/assignment-due-dates";
 
 export interface FormState {
   error: string | null;
@@ -151,6 +152,12 @@ export async function pairSubgroups(_prevState: FormState, formData: FormData): 
     return { error: error.message };
   }
 
+  // Pairing determines which calendar date is "the other half's TP day" --
+  // design_handoff_timetable_decisions' group-split due dates (Skills, LfC)
+  // read straight off this, so a pairing change has to re-resolve them.
+  // Harmless no-op if the timetable isn't generated yet.
+  await syncAssignmentDueDates(supabase, courseId);
+
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
   return { error: null };
 }
@@ -170,6 +177,7 @@ export async function unpairTpGroup(formData: FormData): Promise<void> {
   await supabase.from("course_tp_groups").delete().eq("id", tpGroupId);
 
   if (typeof courseId === "string") {
+    await syncAssignmentDueDates(supabase, courseId);
     revalidatePath(`/dashboard/admin/courses/${courseId}`);
   }
 }

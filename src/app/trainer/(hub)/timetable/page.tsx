@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { setTimetableLock } from "@/app/trainer/(hub)/timetable/actions";
+import { setTimetableLock, recomputeAssignmentDueDates } from "@/app/trainer/(hub)/timetable/actions";
 import { AddEventForm } from "@/app/trainer/(hub)/timetable/add-event-form";
 import { GenerateSkeletonForm } from "@/app/trainer/(hub)/timetable/generate-skeleton-form";
 import { DragBoard } from "@/app/trainer/(hub)/timetable/drag-board";
@@ -143,20 +143,33 @@ export default async function TrainerTimetablePage({
             dates all read from this.
           </p>
         </div>
-        <form action={setTimetableLock} className="hidden md:block">
-          <input type="hidden" name="lock" value={(!locked).toString()} />
-          <button
-            type="submit"
-            className={`flex items-center gap-2 rounded-[6px] border px-4 py-2 text-sm font-medium ${
-              locked
-                ? "border-border text-ink hover:border-primary"
-                : "border-primary bg-primary text-primary-foreground"
-            }`}
-          >
-            {locked ? <span className="size-[5px] shrink-0 rounded-full bg-gold" /> : null}
-            {locked ? "Unlock timetable" : "Lock timetable"}
-          </button>
-        </form>
+        <div className="hidden items-center gap-2 md:flex">
+          {locked ? (
+            <form action={recomputeAssignmentDueDates}>
+              <button
+                type="submit"
+                title="Re-resolve Skills/LfC due dates against the current TP rotation and group pairing"
+                className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
+              >
+                Recompute due dates
+              </button>
+            </form>
+          ) : null}
+          <form action={setTimetableLock}>
+            <input type="hidden" name="lock" value={(!locked).toString()} />
+            <button
+              type="submit"
+              className={`flex items-center gap-2 rounded-[6px] border px-4 py-2 text-sm font-medium ${
+                locked
+                  ? "border-border text-ink hover:border-primary"
+                  : "border-primary bg-primary text-primary-foreground"
+              }`}
+            >
+              {locked ? <span className="size-[5px] shrink-0 rounded-full bg-gold" /> : null}
+              {locked ? "Unlock timetable" : "Lock timetable"}
+            </button>
+          </form>
+        </div>
       </div>
 
       {locked ? (

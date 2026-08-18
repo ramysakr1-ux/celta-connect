@@ -8,6 +8,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { buildSkeletonEvents, DEFAULT_TEACHING_DAYS, PART_TIME_SKELETON } from "@/lib/timetable-skeleton";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { generateStandardAnnouncements } from "@/lib/announcements-catalog";
+import { syncAssignmentDueDates } from "@/lib/assignment-due-dates";
 import type { TimeBand } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -325,6 +326,15 @@ export async function setTimetableLock(formData: FormData): Promise<void> {
     .update({ timetable_locked_at: lock ? new Date().toISOString() : null })
     .eq("id", trainer.course_id);
 
+  // design_handoff_timetable_decisions: due dates are resolved from the
+  // real TP rotation, not a fixed weekday -- locking is the natural point
+  // to fix them, same moment the comment below already treats "assignment
+  // due dates etc." as settled. Runs before the announcements below, which
+  // reference these dates.
+  if (lock) {
+    await syncAssignmentDueDates(supabase, trainer.course_id);
+  }
+
   // for-claude-code-announcements-list.md table A: the standard reminder
   // set fires "the moment the timetable is published" -- generated here,
   // once, idempotently (source_key) rather than re-derived by a cron every
@@ -336,4 +346,18 @@ export async function setTimetableLock(formData: FormData): Promise<void> {
 
   revalidatePath("/trainer/timetable");
   revalidatePath("/trainer/announcements");
+}
+
+// Manual safety net alongside the automatic lock/pairing-change hooks
+// (syncAssignmentDueDates' other two call sites) -- covers any edge case
+// those don't, e.g. a course whose timetable was locked before this
+// feature existed.
+export async function recomputeAssignmentDueDates(): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return;
+
+  const supabase = await createClient();
+  await syncAssignmentDueDates(supabase, trainer.course_id);
+  revalidatePath("/trainer/timetable");
+  revalidatePath("/trainer/roster");
 }
