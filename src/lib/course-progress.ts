@@ -131,6 +131,28 @@ export interface AssessedTpStats {
   levels: string[]; // distinct, in first-taught order
 }
 
+// assessment-model.md link 3 needs "which TP round has the cohort reached"
+// as a cohort-wide, calendar fact -- not a per-trainee count of lessons
+// actually delivered, since scope entry is about whether the WHOLE COHORT
+// has had the input session yet, true regardless of any one candidate's
+// own pace. Each TP round has two timetable rows (one per half/group,
+// same linked_tp_number, different dates); a round only counts as reached
+// once its LATER date has passed, so isCriterionLiveAtTp() never treats a
+// round as done while one half is still mid-way through it.
+export function computeCurrentTpRound(events: Pick<TimetableEvent, "type" | "event_date" | "linked_tp_number">[], today: string): number {
+  const latestDateByTp = new Map<number, string>();
+  for (const e of events) {
+    if (e.type !== "tp" || e.linked_tp_number == null) continue;
+    const current = latestDateByTp.get(e.linked_tp_number);
+    if (!current || e.event_date > current) latestDateByTp.set(e.linked_tp_number, e.event_date);
+  }
+  let currentRound = 0;
+  for (const [tpNumber, latestDate] of latestDateByTp) {
+    if (latestDate <= today && tpNumber > currentRound) currentRound = tpNumber;
+  }
+  return currentRound;
+}
+
 export function computeAssessedTpStats(input: {
   taughtAssignments: { tp_point_id: string | null }[]; // plan_assignments rows already filtered to taught_at is not null
   tpPointCoursebookById: Map<string, string>; // tp_points.id -> tp_coursebook_id

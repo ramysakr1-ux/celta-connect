@@ -8,6 +8,8 @@ import {
   addTpFeedbackCriteriaTags,
   CELTA_CRITERIA_CODES,
 } from "@/lib/celta-criteria";
+import { computeCurrentTpRound } from "@/lib/course-progress";
+import { toLocalIso } from "@/lib/timetable-grid";
 import { AssignmentsSummary, TpFeedbackSummary } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
 import { Stage1Form } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-form";
 import { StageRatingsForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage-ratings-form";
@@ -59,6 +61,7 @@ export default async function Celta5RecordPage({
     { data: lessons },
     { data: assignments },
     { data: tpFeedbackRows },
+    { data: tpEvents },
   ] = await Promise.all([
     supabase.from("courses").select("*").eq("id", trainer.course_id ?? "").maybeSingle(),
     supabase.from("centers").select("*").eq("id", trainer.center_id).maybeSingle(),
@@ -69,7 +72,16 @@ export default async function Celta5RecordPage({
     supabase.from("tp_lessons").select("id").eq("trainee_id", id),
     supabase.from("assignments").select("*").eq("trainee_id", id),
     supabase.from("tp_feedback").select("*").eq("trainee_id", id),
+    supabase
+      .from("course_timetable_events")
+      .select("type, event_date, linked_tp_number")
+      .eq("course_id", trainer.course_id ?? "")
+      .eq("type", "tp"),
   ]);
+
+  // assessment-model.md link 3: which TP round the COHORT has reached,
+  // not this one trainee's own pace -- see computeCurrentTpRound().
+  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], toLocalIso(new Date()));
 
   const lessonIds = (lessons ?? []).map((l) => l.id);
   const { data: criteriaTags } =
@@ -210,6 +222,7 @@ export default async function Celta5RecordPage({
             traineeId={id}
             rows={matrixRows}
             suggestions={suggestions}
+            currentTpRound={currentTpRound}
           />
         </div>
       </div>
@@ -219,7 +232,7 @@ export default async function Celta5RecordPage({
       <div>
         <h2 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h2>
         <div className="mt-3">
-          <StageRatingsForm key={`s3-${matrixKey}`} stage={3} traineeId={id} rows={matrixRows} />
+          <StageRatingsForm key={`s3-${matrixKey}`} stage={3} traineeId={id} rows={matrixRows} currentTpRound={currentTpRound} />
         </div>
       </div>
 

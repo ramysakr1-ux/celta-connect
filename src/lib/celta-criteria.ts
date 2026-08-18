@@ -299,6 +299,127 @@ export const CRITERIA_GUIDANCE: Record<string, string[]> = {
   ],
 };
 
+// specs/assessment-model.md's four-link model, unblocked 2026-08-19 by
+// Ramy's `Criteria-by-Input-Session.md` (source: Criteria by Stage.dc.html
+// CRITERIA array) -- link 3, "a [criterion] is live from the TP that
+// follows its session." `entersAt` is that file's own already-resolved
+// TP number (1-8) per code, transcribed verbatim, not re-derived from the
+// input-session timetable tags above -- those feed a DIFFERENT feature
+// (peer-observation's criteriaForTpDate, "this week's focus criterion"),
+// not this one, and the two are allowed to diverge (see PPP/Sounds/
+// Teaching vocabulary, which reinforce codes here without being where
+// those codes formally enter scope).
+//
+// "Once entered, a criterion stays watched for every subsequent TP --
+// nothing drops out" -- isCriterionLiveAtTp() below is the whole rule.
+// This is the ENTRY point only; it says nothing about whether a rating is
+// good or bad, matching "credit above stage, never penalise": a not-yet-
+// live criterion can still be rated (early evidence), it's just not yet
+// EXPECTED, which is a UI hint, not a gate.
+export const CRITERIA_ENTERS_AT_TP: Record<string, number> = {
+  "1a": 3,
+  "1b": 3,
+  "1c": 3,
+  "1d": 1,
+
+  "2a": 1,
+  "2b": 4,
+  "2c": 1,
+  "2d": 1,
+  "2e": 4,
+  "2f": 5,
+  "2g": 5,
+
+  "3a": 1,
+  "3b": 5,
+
+  "4a": 1,
+  "4b": 1,
+  "4c": 1,
+  "4d": 1,
+  "4e": 1,
+  "4f": 1,
+  "4g": 1,
+  "4h": 7,
+  "4i": 3,
+  "4j": 3,
+  "4k": 3,
+  "4l": 3,
+  "4m": 7,
+  "4n": 3,
+
+  "5a": 1,
+  "5b": 1,
+  "5c": 3,
+  "5d": 1,
+  "5e": 1,
+  "5f": 1,
+  "5g": 2,
+  "5h": 4,
+  "5i": 1,
+  "5j": 1,
+  "5k": 1,
+  "5l": 3,
+  "5m": 3,
+  "5n": 3,
+};
+
+// One-sentence, observable descriptions from the same source -- what a
+// suggestion or a "not yet taught" hint should actually be citing, rather
+// than just the bare code.
+export const CRITERIA_SCOPE_DESCRIPTION: Record<string, string> = {
+  "1a": "Shows awareness of learners' needs, goals and motivations, and how these affect their learning.",
+  "1b": "Shows awareness of the social, cultural and educational backgrounds learners bring to the classroom.",
+  "1c": "Shows awareness of learners' previous language learning experience and how it shapes expectations.",
+  "1d": "Establishes and maintains rapport with learners, creating a supportive, non-threatening atmosphere.",
+
+  "2a": "Grades own language and uses teacher talk appropriately for the level being taught.",
+  "2b": "Corrects learner errors appropriately, choosing when and how to intervene without undermining fluency.",
+  "2c": "Selects and creates contexts that make the meaning of target language clear and memorable.",
+  "2d": "Provides accurate spoken and written models of target language for learners to work from.",
+  "2e": "Clarifies meaning, form and pronunciation of language accurately, using CCQs rather than definitions.",
+  "2f": "Shows awareness of register and appropriacy: when a phrase is formal, informal, or situation-specific.",
+  "2g": "Designs practice activities that move learners from controlled accuracy work to freer fluency work.",
+
+  "3a": "Develops learners' receptive skills through staged reading or listening tasks, gist before detail.",
+  "3b": "Develops learners' speaking and writing skills through tasks that prioritise communication over accuracy.",
+
+  "4a": "States clear, achievable lesson aims that are learner-focused, not just teacher-focused.",
+  "4b": "Structures the lesson in a logical sequence of stages that build towards the aims.",
+  "4c": "Designs or adapts materials that are appropriate to the aims, level and the learners in the room.",
+  "4d": "Prepares materials to a professional standard: clear, correctly formatted, ready to use.",
+  "4e": "Writes a clear procedure describing what the teacher and learners will actually do at each stage.",
+  "4f": "Plans a variety of interaction patterns (whole class, pairs, groups, individual) matched to each stage.",
+  "4g": "Balances the lesson across skills and systems work rather than over-weighting one area.",
+  "4h": "Allocates realistic timing to each stage and plans contingencies if stages run short or long.",
+  "4i": "Analyses the target language's meaning, form and pronunciation accurately in the written plan.",
+  "4j": "Anticipates problems learners may have with the language or the task before the lesson happens.",
+  "4k": "Plans practical solutions in advance for the problems anticipated.",
+  "4l": "Uses correct pedagogical terminology accurately and consistently in the written lesson plan.",
+  "4m": "Works constructively with peers during joint planning and supervision sessions.",
+  "4n": "Reflects critically on their own plan, identifying what worked and what they would change.",
+
+  "5a": "Arranges the physical classroom appropriately for the activity and interaction pattern.",
+  "5b": "Groups learners appropriately and manages the transitions between groupings smoothly.",
+  "5c": "Uses a range of teaching techniques appropriately for the stage and aim of the lesson.",
+  "5d": "Achieves the stated lesson aims by the end of the lesson, adapting where needed.",
+  "5e": "Uses teaching materials and aids effectively in the live lesson, not just on paper.",
+  "5f": "Gives clear, concise instructions and checks understanding before setting learners off on a task.",
+  "5g": 'Elicits language and checks concepts using CCQs rather than telling or asking "do you understand?"',
+  "5h": "Gives learners feedback on their performance in a task that is specific and useful.",
+  "5i": "Maintains an appropriate pace, adjusting it in response to how the class is responding.",
+  "5j": "Monitors learners purposefully during tasks, without over-monitoring pairs that don't need it.",
+  "5k": "Manages timing in the live lesson so that stages don't overrun at the expense of later ones.",
+  "5l": "Maintains a complete, organised portfolio of lesson plans, materials and reflections.",
+  "5m": "Reflects honestly and specifically on their own teaching in self-evaluations after each lesson.",
+  "5n": "Participates constructively in peer feedback sessions, both giving and receiving feedback well.",
+};
+
+export function isCriterionLiveAtTp(code: string, currentTpRound: number): boolean {
+  const entersAt = CRITERIA_ENTERS_AT_TP[code] ?? 1;
+  return currentTpRound >= entersAt;
+}
+
 export const CRITERIA_RATING_OPTIONS = [
   { value: "S+", label: "S+ (Above the standard)" },
   { value: "S", label: "S (Meets the standard)" },

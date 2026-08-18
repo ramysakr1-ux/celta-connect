@@ -16,8 +16,9 @@ import {
 import { TrajectoryGradientBars } from "@/components/trajectory-gradient-bar";
 import { AssignmentsSummary, TpFeedbackSummary, AssessedTpStatsBadge } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
 import { CriteriaRatingPill, StandardRatingPill } from "@/lib/status-pill";
-import { computeProgressIssues, computeAssessedTpStats } from "@/lib/course-progress";
+import { computeProgressIssues, computeAssessedTpStats, computeCurrentTpRound } from "@/lib/course-progress";
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
+import { toLocalIso } from "@/lib/timetable-grid";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
@@ -679,6 +680,7 @@ export default async function PortfolioCelta5Page({
     { data: assignments },
     { data: tpFeedbackRows },
     { data: planAssignments },
+    { data: tpEvents },
   ] = await Promise.all([
     supabase.from("courses").select("*").eq("id", trainee.course_id ?? "").maybeSingle(),
     supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
@@ -690,7 +692,16 @@ export default async function PortfolioCelta5Page({
     supabase.from("assignments").select("*").eq("trainee_id", traineeId),
     supabase.from("tp_feedback").select("*").eq("trainee_id", traineeId),
     supabase.from("plan_assignments").select("tp_point_id, taught_at").eq("trainee_id", traineeId),
+    supabase
+      .from("course_timetable_events")
+      .select("type, event_date, linked_tp_number")
+      .eq("course_id", trainee.course_id ?? "")
+      .eq("type", "tp"),
   ]);
+
+  // assessment-model.md link 3: which TP round the COHORT has reached,
+  // not this one trainee's own pace -- see computeCurrentTpRound().
+  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], toLocalIso(new Date()));
 
   // remaining-compliance.md item 4: CELTA 5 front matter (candidate name,
   // centre number, tutors) populated from real data, never typed by hand.
@@ -1110,7 +1121,14 @@ export default async function PortfolioCelta5Page({
       <div>
         <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h3>
         <div className="mt-3">
-          <StageRatingsForm key={`s2-${matrixKey}`} stage={2} traineeId={traineeId} rows={matrixRows} suggestions={suggestions} />
+          <StageRatingsForm
+            key={`s2-${matrixKey}`}
+            stage={2}
+            traineeId={traineeId}
+            rows={matrixRows}
+            suggestions={suggestions}
+            currentTpRound={currentTpRound}
+          />
         </div>
       </div>
 
@@ -1119,7 +1137,7 @@ export default async function PortfolioCelta5Page({
       <div>
         <h3 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h3>
         <div className="mt-3">
-          <StageRatingsForm key={`s3-${matrixKey}`} stage={3} traineeId={traineeId} rows={matrixRows} />
+          <StageRatingsForm key={`s3-${matrixKey}`} stage={3} traineeId={traineeId} rows={matrixRows} currentTpRound={currentTpRound} />
         </div>
       </div>
 
