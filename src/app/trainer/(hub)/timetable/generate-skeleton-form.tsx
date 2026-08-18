@@ -24,9 +24,25 @@ const DAYS = [
 const PART_TIME_DEFAULT_DAYS = 24;
 const PART_TIME_DEFAULT_MEETING_DAYS = [6, 3]; // Sat, Wed
 
+// Ramy, 2026-08-18: the default full-time course is five weeks, not four
+// -- the same 20 contact days (DEFAULT_TEACHING_DAYS, unchanged) spread
+// over one day off per week rather than a straight Mon-Fri run. Two named
+// five-week variants exist (Friday off, Wednesday off); the four-week
+// Mon-Fri run is "the intensive alternative," not the default. All three
+// use the same STANDARD_CELTA_SKELETON content -- this only changes which
+// meeting days are pre-checked, same mechanism buildSkeletonEvents already
+// stretches correctly for any day pattern.
+const STANDARD_VARIANTS = {
+  five_week_friday_off: { label: "Five weeks -- Friday off", meetingDays: [1, 2, 3, 4] },
+  five_week_wednesday_off: { label: "Five weeks -- Wednesday off", meetingDays: [1, 2, 4, 5] },
+  four_week: { label: "Four weeks -- the intensive alternative, Mon-Fri", meetingDays: DEFAULT_MEETING_DAYS as number[] },
+} as const;
+type StandardVariant = keyof typeof STANDARD_VARIANTS;
+
 export function GenerateSkeletonForm() {
   const [state, formAction, pending] = useActionState(generateTimetableSkeleton, initialState);
   const [shape, setShape] = useState<"standard" | "part_time">("standard");
+  const [standardVariant, setStandardVariant] = useState<StandardVariant>("five_week_friday_off");
 
   return (
     <form action={formAction} className="mt-4 flex flex-col gap-4">
@@ -34,12 +50,20 @@ export function GenerateSkeletonForm() {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Course shape</label>
-        <div className="flex gap-3">
-          <label className="flex items-center gap-1.5 text-sm text-ink">
-            <input type="radio" checked={shape === "standard"} onChange={() => setShape("standard")} />
-            Standard -- one group split into two daily-alternating halves (4-week, 5-week, or any
-            custom day pattern)
-          </label>
+        <div className="flex flex-col gap-2">
+          {(Object.keys(STANDARD_VARIANTS) as StandardVariant[]).map((variant) => (
+            <label key={variant} className="flex items-center gap-1.5 text-sm text-ink">
+              <input
+                type="radio"
+                checked={shape === "standard" && standardVariant === variant}
+                onChange={() => {
+                  setShape("standard");
+                  setStandardVariant(variant);
+                }}
+              />
+              {STANDARD_VARIANTS[variant].label}
+            </label>
+          ))}
           <label className="flex items-center gap-1.5 text-sm text-ink">
             <input type="radio" checked={shape === "part_time"} onChange={() => setShape("part_time")} />
             Part-time -- two independent groups, each on its own fixed weekday
@@ -76,18 +100,18 @@ export function GenerateSkeletonForm() {
         <label className="text-sm text-muted">
           {shape === "part_time"
             ? "Which days does the course meet? -- Saturday and Wednesday is the reference pattern; pick your centre's actual two days if different."
-            : "Which days does the course meet? -- 20 days Mon-Fri is a standard 4-week full-time course; pick more days for a 5-week course, or fewer days per week for an evenings-and-weekends one."}
+            : "Which days does the course meet? -- same contact days either way; this is just the calendar spread. Edit freely before generating."}
         </label>
         <div className="flex flex-wrap gap-3">
           {DAYS.map((day) => (
-            <label key={`${shape}-${day.value}`} className="flex items-center gap-1.5 text-sm text-ink">
+            <label key={`${shape}-${standardVariant}-${day.value}`} className="flex items-center gap-1.5 text-sm text-ink">
               <input
                 type="checkbox"
                 name="meeting_day"
                 value={day.value}
-                defaultChecked={(shape === "part_time" ? PART_TIME_DEFAULT_MEETING_DAYS : (DEFAULT_MEETING_DAYS as number[])).includes(
-                  day.value
-                )}
+                defaultChecked={(
+                  shape === "part_time" ? PART_TIME_DEFAULT_MEETING_DAYS : (STANDARD_VARIANTS[standardVariant].meetingDays as number[])
+                ).includes(day.value)}
               />
               {day.label}
             </label>
