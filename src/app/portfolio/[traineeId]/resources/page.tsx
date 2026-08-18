@@ -23,6 +23,8 @@ import { MultimediaSection } from "@/app/portfolio/[traineeId]/resources/multime
 import { AssignmentBriefsSection } from "@/app/portfolio/[traineeId]/resources/assignment-briefs-section";
 import { SectionsRail } from "@/app/trainer/(hub)/resource-hub/sections-rail";
 import { ResourceHubSearch, type ResourceHubSearchItem } from "@/components/resource-hub-search";
+import { getCambridgeDocuments } from "@/lib/cambridge-documents";
+import { CambridgeDocumentsShelf } from "@/app/trainer/(hub)/resource-hub/cambridge-documents-shelf";
 
 // §5 -- Resource Hub, a genuinely new feature (the pre-existing `resources`
 // table had zero UI anywhere). Starts empty by design -- no seeded content,
@@ -53,6 +55,19 @@ export default async function ResourceHubPage({
   const { data: trainee } = await supabase.from("profiles").select("center_id, course_id").eq("id", traineeId).maybeSingle();
   if (!trainee) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
+
+  // remaining-compliance.md §5 -- "visible to candidates, tutors, admins
+  // and the assessor alike," read-only here (uploading lives on the
+  // trainer Resource Hub only, so there's one edit surface, not two).
+  const cambridgeAdmin = createAdminClient();
+  const { data: cambridgeCentre } = await cambridgeAdmin.from("centers").select("organisation_id").eq("id", trainee.center_id).maybeSingle();
+  const cambridgeDocsRaw = await getCambridgeDocuments(cambridgeAdmin, trainee.center_id, cambridgeCentre?.organisation_id ?? null);
+  const cambridgeDocs = await Promise.all(
+    cambridgeDocsRaw.map(async (doc) => ({
+      ...doc,
+      signedUrl: doc.storagePath ? (await cambridgeAdmin.storage.from("resource-hub-files").createSignedUrl(doc.storagePath, 3600)).data?.signedUrl ?? null : null,
+    }))
+  );
 
   const query = supabase
     .from("resources")
@@ -183,6 +198,7 @@ export default async function ResourceHubPage({
       { href: "#multimedia", label: "Multimedia", count: audioTracks?.length ?? 0 },
       { href: "#assignment-briefs", label: "Assignment briefs", count: briefs?.length ?? 0 },
       { href: "#forms-and-documents", label: "Forms and documents", count: formResources.length },
+      { href: "#cambridge-documents", label: "Cambridge documents", count: cambridgeDocs.filter((d) => d.url || d.storagePath).length },
     ];
 
     return (
@@ -275,6 +291,14 @@ export default async function ResourceHubPage({
               </ul>
             )}
           </div>
+
+          <div id="cambridge-documents" className="scroll-mt-4">
+            <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Cambridge documents</h3>
+            <p className="mt-1 text-xs text-muted">The syllabus, the administration handbook, and the appeals procedure.</p>
+            <div className="mt-3">
+              <CambridgeDocumentsShelf docs={cambridgeDocs} editable={false} />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -308,6 +332,15 @@ export default async function ResourceHubPage({
       </div>
       <div id="assignment-briefs">
         <AssignmentBriefsSection briefs={briefs ?? []} />
+      </div>
+      <div id="cambridge-documents">
+        <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Cambridge documents</h3>
+        <p className="mt-1 text-xs text-muted">
+          The syllabus, the administration handbook and the appeals procedure -- one copy, read by every course.
+        </p>
+        <div className="mt-3">
+          <CambridgeDocumentsShelf docs={cambridgeDocs} editable={false} />
+        </div>
       </div>
 
       {resources.length === 0 && !isEditableStaff ? (

@@ -2189,6 +2189,23 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["organisation_roles"]["Row"]>;
         Relationships: [];
       };
+      cambridge_documents: {
+        Row: {
+          id: string;
+          organisation_id: string | null;
+          center_id: string | null;
+          doc_type: "syllabus" | "admin_handbook" | "appeals_procedure" | "authorisation_certificate";
+          file_url: string | null;
+          storage_path: string | null;
+          uploaded_by: string | null;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["cambridge_documents"]["Row"]> & {
+          doc_type: "syllabus" | "admin_handbook" | "appeals_procedure" | "authorisation_certificate";
+        };
+        Update: Partial<Database["public"]["Tables"]["cambridge_documents"]["Row"]>;
+        Relationships: [];
+      };
       email_bounce_tasks: {
         Row: {
           id: string;

@@ -6,6 +6,11 @@ import { CoursebooksSection } from "@/app/portfolio/[traineeId]/resources/course
 import { SectionsRail } from "@/app/trainer/(hub)/resource-hub/sections-rail";
 import { ResourceHubSearch, type ResourceHubSearchItem } from "@/components/resource-hub-search";
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
+import { getCambridgeDocuments } from "@/lib/cambridge-documents";
+import { CambridgeDocumentsShelf } from "@/app/trainer/(hub)/resource-hub/cambridge-documents-shelf";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { can } from "@/lib/auth/centre-permissions";
 
 // specs/build-spec.md "Replace the Audio Library tab with a Resource hub
 // tab... six sections: TP points, coursebooks, multimedia, assignment
@@ -20,6 +25,21 @@ export default async function TrainerResourceHubPage() {
   const trainer = await requireRole(["trainer", "admin"]);
   const supabase = await createClient();
   const courseId = trainer.course_id;
+
+  // remaining-compliance.md §5 -- readable by everyone, editable only by
+  // whoever can already edit centre settings (a trainer has no centre-role
+  // context at all, so this is false for them regardless).
+  const centreRoleCtx = trainer.role === "admin" ? await getCentreRoleContext(trainer) : null;
+  const cambridgeEditable = centreRoleCtx ? can(centreRoleCtx.roles, "centre.settings.edit") : false;
+  const cambridgeAdmin = createAdminClient();
+  const { data: cambridgeCentre } = await cambridgeAdmin.from("centers").select("organisation_id").eq("id", trainer.center_id).maybeSingle();
+  const cambridgeDocsRaw = await getCambridgeDocuments(cambridgeAdmin, trainer.center_id, cambridgeCentre?.organisation_id ?? null);
+  const cambridgeDocs = await Promise.all(
+    cambridgeDocsRaw.map(async (doc) => ({
+      ...doc,
+      signedUrl: doc.storagePath ? (await cambridgeAdmin.storage.from("resource-hub-files").createSignedUrl(doc.storagePath, 3600)).data?.signedUrl ?? null : null,
+    }))
+  );
 
   const { data: scheduledCoursebookIds } = courseId
     ? await supabase.from("course_tp_schedule").select("tp_coursebook_id").eq("course_id", courseId)
@@ -118,6 +138,7 @@ export default async function TrainerResourceHubPage() {
     ...(inputSessionResources ?? []).map((r) => ({ id: `is-${r.id}`, title: r.title, subtitle: "Input sessions", href: "#input-sessions" })),
     ...(formResources ?? []).map((r) => ({ id: `fm-${r.id}`, title: r.title, subtitle: "Forms and documents", href: "#forms-and-documents" })),
     ...(centreDocResources ?? []).map((r) => ({ id: `cd-${r.id}`, title: r.title, subtitle: "Centre documents", href: "#centre-documents" })),
+    ...cambridgeDocs.filter((d) => d.url || d.storagePath).map((d) => ({ id: `cam-${d.docType}`, title: d.label, subtitle: "Cambridge documents", href: "#cambridge-documents" })),
   ];
 
   const sectionCounts = {
@@ -143,6 +164,7 @@ export default async function TrainerResourceHubPage() {
           { href: "#input-sessions", label: "Input sessions", count: sectionCounts.inputSessions },
           { href: "#forms-and-documents", label: "Forms and documents", count: sectionCounts.forms },
           { href: "#centre-documents", label: "Centre documents", count: sectionCounts.centreDocuments },
+          { href: "#cambridge-documents", label: "Cambridge documents", count: cambridgeDocs.filter((d) => d.url || d.storagePath).length },
         ]}
       />
 
@@ -265,9 +287,13 @@ export default async function TrainerResourceHubPage() {
       <div id="forms-and-documents">
         <h2 className="font-serif text-lg text-ink">Forms and documents</h2>
         <p className="mt-1 text-sm text-muted">
-          Blank PDFs of the built-in forms -- lesson plan template, self-evaluation form, syllabus, appeals
-          procedure -- for when the platform is down or paper is preferred. Shown on every candidate&apos;s own
-          Resources tab.
+          Blank PDFs of the built-in forms -- lesson plan template, self-evaluation form -- for when the platform is
+          down or paper is preferred. Shown on every candidate&apos;s own Resources tab. Cambridge&apos;s own
+          documents (syllabus, appeals procedure) live in{" "}
+          <a href="#cambridge-documents" className="text-primary">
+            Cambridge documents
+          </a>{" "}
+          below.
         </p>
         <div className="mt-3">
           <ResourceCategoryManager category="forms" centerId={trainer.center_id} resources={formResources ?? []} />
@@ -278,14 +304,26 @@ export default async function TrainerResourceHubPage() {
         <h2 className="font-serif text-lg text-ink">Centre documents</h2>
         <p className="mt-1 text-sm text-muted">
           Policies and internal paperwork -- staff-only, never shown on a candidate&apos;s Resources tab regardless
-          of the visible-to-trainee setting below. Public-facing documents like the appeals procedure belong in{" "}
-          <a href="#forms-and-documents" className="text-primary">
-            Forms and documents
+          of the visible-to-trainee setting below. Cambridge&apos;s own documents live in{" "}
+          <a href="#cambridge-documents" className="text-primary">
+            Cambridge documents
           </a>{" "}
           instead.
         </p>
         <div className="mt-3">
           <ResourceCategoryManager category="centre_documents" centerId={trainer.center_id} resources={centreDocResources ?? []} />
+        </div>
+      </div>
+
+      <div id="cambridge-documents">
+        <h2 className="font-serif text-lg text-ink">Cambridge documents</h2>
+        <p className="mt-1 text-sm text-muted">
+          The CELTA Syllabus, Administration Handbook and Appeals Procedure -- one copy, read by every course
+          {cambridgeCentre?.organisation_id ? " across the organisation" : ""}. The Centre Authorisation Certificate
+          is this centre&apos;s own. Visible to candidates, tutors, admins and the assessor alike.
+        </p>
+        <div className="mt-3">
+          <CambridgeDocumentsShelf docs={cambridgeDocs} editable={cambridgeEditable} />
         </div>
       </div>
       </div>
