@@ -22,11 +22,15 @@ type Mode = "none" | "withdraw" | "extension" | "restart" | "deferral";
 export function CandidateStatusCard({
   traineeId,
   specialConsideration,
+  specialConsiderationArrangements,
+  specialConsiderationEvidenceUrl,
   hoursAttended,
   totalHours,
 }: {
   traineeId: string;
   specialConsideration: string | null;
+  specialConsiderationArrangements?: string[];
+  specialConsiderationEvidenceUrl?: string | null;
   hoursAttended: number;
   totalHours: number;
 }) {
@@ -96,10 +100,22 @@ export function CandidateStatusCard({
             For special consideration. The portfolio stays fully active &mdash; this only flags that
             they&apos;ll complete after the official end date, and close-out should wait for them.
           </p>
-          {specialConsideration ? (
-            <p className="text-xs text-ink">
-              Special consideration on file: <span className="italic">&ldquo;{specialConsideration}&rdquo;</span>
-            </p>
+          {specialConsideration || (specialConsiderationArrangements ?? []).length > 0 ? (
+            <div className="flex flex-col gap-1 text-xs text-ink">
+              {(specialConsiderationArrangements ?? []).length > 0 ? (
+                <p>Arrangements: {specialConsiderationArrangements!.join(", ")}</p>
+              ) : null}
+              {specialConsideration ? (
+                <p>
+                  On file: <span className="italic">&ldquo;{specialConsideration}&rdquo;</span>
+                </p>
+              ) : null}
+              {specialConsiderationEvidenceUrl ? (
+                <a href={specialConsiderationEvidenceUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
+                  View supporting evidence →
+                </a>
+              ) : null}
+            </div>
           ) : (
             <p className="text-xs text-status-warning-text">No special consideration is on file for this candidate yet.</p>
           )}

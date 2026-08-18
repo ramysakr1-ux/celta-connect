@@ -296,6 +296,10 @@ export interface Database {
           tutor_role: string | null;
           terms_accepted_at: string | null;
           special_consideration: string | null;
+          // migration 0141 -- "what would help" chips + optional evidence,
+          // alongside the existing free-text field above.
+          special_consideration_arrangements: string[];
+          special_consideration_evidence_url: string | null;
           uln: string | null;
           connect_hub_link: string | null;
           course_status: CourseStatus;

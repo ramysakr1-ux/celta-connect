@@ -60,7 +60,7 @@ export default async function CourseStreamPage({
   const { data: trainee } = await supabase
     .from("profiles")
     .select(
-      "course_id, course_status, course_status_set_at, course_status_note, withdrawal_reportable, extension_completes_by, special_consideration"
+      "course_id, course_status, course_status_set_at, course_status_note, withdrawal_reportable, extension_completes_by, special_consideration, special_consideration_arrangements, special_consideration_evidence_url"
     )
     .eq("id", traineeId)
     .maybeSingle();
@@ -365,6 +365,13 @@ export default async function CourseStreamPage({
             <CandidateStatusCard
               traineeId={traineeId}
               specialConsideration={trainee.special_consideration}
+              specialConsiderationArrangements={trainee.special_consideration_arrangements}
+              specialConsiderationEvidenceUrl={
+                trainee.special_consideration_evidence_url
+                  ? (await supabase.storage.from("special-consideration-evidence").createSignedUrl(trainee.special_consideration_evidence_url, 3600)).data
+                      ?.signedUrl ?? null
+                  : null
+              }
               hoursAttended={hoursAttended}
               totalHours={totalHours}
             />

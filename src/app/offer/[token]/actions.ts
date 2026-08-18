@@ -58,6 +58,8 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
 
   const uln = (formData.get("uln") as string | null)?.trim() || null;
   const specialConsideration = (formData.get("special_consideration") as string | null)?.trim() || null;
+  const specialConsiderationArrangements = formData.getAll("special_consideration_arrangements") as string[];
+  const specialConsiderationEvidence = formData.get("special_consideration_evidence");
 
   const { data: created, error: createError } = await admin.auth.admin.createUser({
     email: applicant.email,
@@ -73,6 +75,18 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
     return { error: createError?.message ?? "Could not create your account. Try again." };
   }
 
+  // Uploaded after the account exists, keyed off the new profile's own id --
+  // same reasoning as volunteer-signup-audio (0089): no session to sign a
+  // direct browser->Storage write until this point.
+  let specialConsiderationEvidenceUrl: string | null = null;
+  if (specialConsiderationEvidence instanceof File && specialConsiderationEvidence.size > 0) {
+    const path = `${applicant.center_id}/${created.user.id}-${Date.now()}.${specialConsiderationEvidence.name.split(".").pop() ?? "pdf"}`;
+    const { error: uploadError } = await admin.storage
+      .from("special-consideration-evidence")
+      .upload(path, specialConsiderationEvidence, { contentType: specialConsiderationEvidence.type || "application/octet-stream" });
+    if (!uploadError) specialConsiderationEvidenceUrl = path;
+  }
+
   const { error: profileError } = await admin.from("profiles").insert({
     id: created.user.id,
     email: applicant.email,
@@ -81,6 +95,8 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
     center_id: applicant.center_id,
     course_id: applicant.intake_course_id,
     special_consideration: specialConsideration,
+    special_consideration_arrangements: specialConsiderationArrangements,
+    special_consideration_evidence_url: specialConsiderationEvidenceUrl,
     uln,
     terms_accepted_at: new Date().toISOString(),
   });

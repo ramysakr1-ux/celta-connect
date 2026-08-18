@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { acceptOffer, type AcceptOfferState } from "@/app/offer/[token]/actions";
+import { SpecialConsiderationFields } from "@/components/special-consideration-fields";
 
 const initialState: AcceptOfferState = { error: null };
 const inputClass = "h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary";
@@ -53,22 +54,7 @@ export function OfferAcceptForm({
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="special_consideration" className="text-sm text-muted">
-          Special consideration to declare (optional)
-        </label>
-        <p className="text-xs text-muted">
-          Carried over from your application. A disability, learning difference, or health condition that may affect
-          your course -- edit if anything&apos;s changed.
-        </p>
-        <textarea
-          id="special_consideration"
-          name="special_consideration"
-          rows={2}
-          defaultValue={defaultSpecialConsideration ?? ""}
-          className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
-        />
-      </div>
+      <SpecialConsiderationFields defaultText={defaultSpecialConsideration} />
 
       <div className="mt-2 flex flex-col gap-3 border-t border-border pt-4">
         <p className="text-xs text-muted">

@@ -90,6 +90,8 @@ export async function joinCourse(
   }
   const specialConsideration =
     role === "trainee" ? (formData.get("special_consideration") as string | null)?.trim() || null : null;
+  const specialConsiderationArrangements = role === "trainee" ? (formData.getAll("special_consideration_arrangements") as string[]) : [];
+  const specialConsiderationEvidence = role === "trainee" ? formData.get("special_consideration_evidence") : null;
   const uln = role === "trainee" ? (formData.get("uln") as string | null)?.trim() || null : null;
 
   const tutorRoleInput = formData.get("tutor_role");
@@ -116,6 +118,15 @@ export async function joinCourse(
     return { error: createError?.message ?? "Could not create your account. Try again." };
   }
 
+  let specialConsiderationEvidenceUrl: string | null = null;
+  if (specialConsiderationEvidence instanceof File && specialConsiderationEvidence.size > 0) {
+    const path = `${course.center_id}/${created.user.id}-${Date.now()}.${specialConsiderationEvidence.name.split(".").pop() ?? "pdf"}`;
+    const { error: uploadError } = await adminClient.storage
+      .from("special-consideration-evidence")
+      .upload(path, specialConsiderationEvidence, { contentType: specialConsiderationEvidence.type || "application/octet-stream" });
+    if (!uploadError) specialConsiderationEvidenceUrl = path;
+  }
+
   const { error: profileError } = await adminClient.from("profiles").insert({
     id: created.user.id,
     email,
@@ -125,6 +136,8 @@ export async function joinCourse(
     course_id: course.id,
     tutor_role: tutorRole,
     special_consideration: specialConsideration,
+    special_consideration_arrangements: specialConsiderationArrangements,
+    special_consideration_evidence_url: specialConsiderationEvidenceUrl,
     uln,
     terms_accepted_at: new Date().toISOString(),
   });
