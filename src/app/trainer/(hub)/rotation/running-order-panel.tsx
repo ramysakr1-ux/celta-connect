@@ -95,7 +95,10 @@ export function RunningOrderPanel({
                     {position}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-ink">{m.fullName}</p>
+                    <p className="truncate text-sm text-ink">
+                      {m.fullName}
+                      {m.courseStatus === "extension" ? <span className="pill pill-info ml-2">Extension</span> : null}
+                    </p>
                     {plan?.mainLessonAim ? <p className="truncate text-xs text-muted">{plan.mainLessonAim}</p> : null}
                   </div>
                   {plan?.aimType ? (

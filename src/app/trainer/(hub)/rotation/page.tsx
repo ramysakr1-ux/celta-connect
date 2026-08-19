@@ -385,7 +385,10 @@ function UnpairedSubgroupBoard({
               <tbody>
                 {members.map((member) => (
                   <tr key={member.traineeId}>
-                    <td className="text-ink">{member.fullName}</td>
+                    <td className="text-ink">
+                      {member.fullName}
+                      {member.courseStatus === "extension" ? <span className="pill pill-info ml-2">Extension</span> : null}
+                    </td>
                     {TP_NUMBERS.map((tpNumber) => {
                       const plan = planByTraineeAndTp.get(`${member.traineeId}-${tpNumber}`);
                       if (isCourseStatusReadOnly(member.courseStatus)) {
