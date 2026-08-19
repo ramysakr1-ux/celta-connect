@@ -135,6 +135,35 @@ export default async function CourseRosterPage({
     (m) => m.role === "trainee" && !assignedTraineeIds.has(m.id)
   );
 
+  // build-spec.md compliance-audit item 4 (Handbook 8.1.4): "TP must be
+  // split evenly between the two tutors." tp_feedback.trainer_id already
+  // records who actually marked each TP (migration 0022) -- real events,
+  // not just the static per-group tutor assignment above, which only says
+  // who's SUPPOSED to cover a group and can't see a tutor stepping in.
+  // Same tone as the class-average rule elsewhere in this audit ("derive
+  // it, show it as a live figure, do not warn and do not block") -- a
+  // centre may have a real reason for an uneven split, and the honest
+  // answer to an assessor is the marking log itself, not a computed
+  // judgement of it.
+  const traineeIdsForTpSplit = (roster ?? []).filter((m) => m.role === "trainee").map((m) => m.id);
+  const { data: tpFeedbackForSplit } =
+    traineeIdsForTpSplit.length > 0
+      ? await supabase
+          .from("tp_feedback")
+          .select("trainer_id")
+          .in("trainee_id", traineeIdsForTpSplit)
+          .not("submitted_at", "is", null)
+          .not("trainer_id", "is", null)
+      : { data: [] };
+  const tpMarkingCounts = new Map<string, number>();
+  for (const f of tpFeedbackForSplit ?? []) {
+    if (!f.trainer_id) continue;
+    tpMarkingCounts.set(f.trainer_id, (tpMarkingCounts.get(f.trainer_id) ?? 0) + 1);
+  }
+  const tpMarkingSplit = [...tpMarkingCounts.entries()]
+    .map(([trainerId, count]) => ({ name: nameByTraineeId.get(trainerId) ?? "Unknown", count }))
+    .sort((a, b) => b.count - a.count);
+
   // Read-only for admin -- the invite-link/add/remove management stays
   // trainer-owned (see /trainer/volunteers); admin just needs visibility
   // into attendance across any course at their center, not only "their
@@ -661,6 +690,12 @@ export default async function CourseRosterPage({
                   );
                 })}
               </div>
+            ) : null}
+            {tpMarkingSplit.length > 0 ? (
+              <p className="mt-3 text-xs text-muted">
+                TP marking so far -- {tpMarkingSplit.map((t) => `${t.name} ${t.count}`).join(" · ")} (Handbook 8.1.4:
+                split evenly between the two tutors)
+              </p>
             ) : null}
             <p className="mt-1 text-sm text-muted">
               Trainees are split into fixed subgroups by teaching day; membership stays fixed for the
