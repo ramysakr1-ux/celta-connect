@@ -12,17 +12,27 @@ export interface JoinCourseState {
 }
 
 async function resolveCourseAndRole(token: string) {
+  // Was a single .or() query with `token` -- fully attacker-controlled,
+  // straight from the URL/a form field -- interpolated directly into the
+  // filter string. PostgREST's .or() syntax treats commas/periods as
+  // structural delimiters, so a token containing them could inject an
+  // additional clause (e.g. matching on `id.not.is.null` instead of the
+  // real token) and make this resolve to an ARBITRARY course. Worse, the
+  // role assignment below had no rejection path at all -- any non-matching
+  // result silently became "trainer" rather than failing closed. Two plain
+  // .eq() lookups instead: no string built from user input, so nothing to
+  // inject, and each branch only assigns a role when that exact field
+  // actually matched.
   const admin = createAdminClient();
-  const { data: course } = await admin
-    .from("courses")
-    .select("id, center_id, trainee_join_token, trainer_join_token")
-    .or(`trainee_join_token.eq.${token},trainer_join_token.eq.${token}`)
-    .maybeSingle();
+  const columns = "id, center_id, trainee_join_token, trainer_join_token";
 
-  if (!course) return null;
+  const { data: asTrainee } = await admin.from("courses").select(columns).eq("trainee_join_token", token).maybeSingle();
+  if (asTrainee) return { course: asTrainee, role: "trainee" as UserRole };
 
-  const role: UserRole = course.trainee_join_token === token ? "trainee" : "trainer";
-  return { course, role };
+  const { data: asTrainer } = await admin.from("courses").select(columns).eq("trainer_join_token", token).maybeSingle();
+  if (asTrainer) return { course: asTrainer, role: "trainer" as UserRole };
+
+  return null;
 }
 
 export async function joinCourse(

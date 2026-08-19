@@ -14,12 +14,17 @@ export default async function JoinPage({
 }) {
   const { token } = await params;
 
+  // Two plain .eq() lookups rather than one .or() with `token` interpolated
+  // into the filter string -- see the matching comment in actions.ts's
+  // resolveCourseAndRole for why that was a real injection risk (token is
+  // fully attacker-controlled, straight from the URL).
   const admin = createAdminClient();
-  const { data: course } = await admin
-    .from("courses")
-    .select("id, name, center_id, trainee_join_token, trainer_join_token")
-    .or(`trainee_join_token.eq.${token},trainer_join_token.eq.${token}`)
-    .maybeSingle();
+  const columns = "id, name, center_id, trainee_join_token, trainer_join_token";
+  const { data: asTrainee } = await admin.from("courses").select(columns).eq("trainee_join_token", token).maybeSingle();
+  const { data: asTrainer } = asTrainee
+    ? { data: null }
+    : await admin.from("courses").select(columns).eq("trainer_join_token", token).maybeSingle();
+  const course = asTrainee ?? asTrainer;
 
   // A course's row (and its join tokens) survive close-out -- only the
   // trainee-owned working data gets wiped (src/lib/course-close-out/wipe.ts)
