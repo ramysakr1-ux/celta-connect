@@ -677,6 +677,28 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["interview_records"]["Row"]>;
         Relationships: [];
       };
+      branch_referral_requests: {
+        Row: {
+          id: string;
+          applicant_id: string;
+          from_center_id: string;
+          to_center_id: string;
+          requested_by: string | null;
+          requested_at: string;
+          status: "pending" | "accepted" | "declined";
+          decided_by: string | null;
+          decided_at: string | null;
+          decline_reason: string | null;
+          resulting_applicant_id: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["branch_referral_requests"]["Row"]> & {
+          applicant_id: string;
+          from_center_id: string;
+          to_center_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["branch_referral_requests"]["Row"]>;
+        Relationships: [];
+      };
       admissions_notifications: {
         Row: {
           id: string;
@@ -689,7 +711,8 @@ export interface Database {
             | "stale_no_decision"
             | "place_offered"
             | "clear_problems"
-            | "no_interview_slots";
+            | "no_interview_slots"
+            | "referral_request";
           message: string;
           read_at: string | null;
           created_at: string;
@@ -2095,7 +2118,8 @@ export interface Database {
             | "reading_flagged"
             | "assessor_pack"
             | "volunteer_signed_up"
-            | "volunteer_class_starting";
+            | "volunteer_class_starting"
+            | "referral";
           to_email: string;
           // Six of the nineteen go to staff, assessors or volunteers, who have
           // no applicant row to take a name from.

@@ -83,6 +83,16 @@ export default async function AdmissionsPage() {
     cutoffHours: center?.interview_cutoff_hours ?? 24,
   };
 
+  // "The area owner is notified... a statement, so they are not told by a
+  // candidate." A count here is that statement for referral requests -- the
+  // dedicated page (referral-requests/page.tsx) is where they're actually
+  // decided.
+  const { count: pendingReferralCount } = await supabase
+    .from("branch_referral_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("to_center_id", staff.center_id)
+    .eq("status", "pending");
+
   // Waiting-list counts per intake -- fetched independent of the
   // "accepting_applications" intakes above, since a course can still have
   // a waiting list after being closed to new applications.
@@ -121,6 +131,17 @@ export default async function AdmissionsPage() {
         <div className="flex items-center gap-4">
           <Link href="/dashboard/admissions/pipeline" className="text-sm font-semibold text-primary hover:underline">
             Pipeline →
+          </Link>
+          <Link href="/dashboard/admissions/this-week" className="text-sm text-muted hover:text-ink">
+            This week&apos;s interviews
+          </Link>
+          <Link href="/dashboard/admissions/referral-requests" className="text-sm text-muted hover:text-ink">
+            Referral requests
+            {pendingReferralCount ? (
+              <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                {pendingReferralCount}
+              </span>
+            ) : null}
           </Link>
           <Link href="/dashboard/admissions/settings" className="text-sm text-muted hover:text-ink">
             Settings

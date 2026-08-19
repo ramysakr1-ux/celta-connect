@@ -33,7 +33,9 @@ export type ApplicantEmailType =
   | "assessor_pack"
   // Volunteers
   | "volunteer_signed_up"
-  | "volunteer_class_starting";
+  | "volunteer_class_starting"
+  // Branches
+  | "referral";
 
 /**
  * Who a reply reaches. All Emails.dc.html gives every email exactly one of
@@ -71,6 +73,7 @@ export const EMAIL_REPLY_TO: Record<ApplicantEmailType, EmailReplyTo> = {
   assessor_pack: "admissions",
   volunteer_signed_up: "noreply",
   volunteer_class_starting: "admissions",
+  referral: "admissions",
 };
 
 export async function sendApplicantEmail(input: {
@@ -279,6 +282,28 @@ export function welcomeEmailHtml(input: {
     cta: { label: "Set up your account", url: input.setupUrl },
     footnote:
       "The link is yours alone and expires when the course ends. You will be asked to agree to the candidate terms as you set up -- it takes a minute.",
+  });
+}
+
+// build-spec.md §14: "The candidate gets one email that asks them for
+// nothing and never uses the words referred or transferred. Their next
+// action is unchanged: wait for an offer." Sent once, from the same
+// successful referApplicant() call whichever path reached it -- a direct
+// referral or an accepted request -- naming only the branch they're now
+// with, never the one they came from.
+export function referralEmailHtml(input: {
+  candidateName: string;
+  centreName: string;
+}): string {
+  const body =
+    rawP(
+      `${esc(input.candidateName)} &mdash; thank you for your patience. Your application for ${esc(input.centreName)} is still being reviewed, and we'll be in touch as soon as we have news.`
+    ) + rawP("There's nothing you need to do right now.");
+
+  return emailShell({
+    heading: "Your application is still with us",
+    tone: "muted",
+    body,
   });
 }
 

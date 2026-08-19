@@ -19,6 +19,7 @@ import { AreaAction } from "@/components/area-action";
 import { WaiverForm } from "@/app/dashboard/admissions/[id]/waiver-form";
 import { WaitingListForm } from "@/app/dashboard/admissions/[id]/waiting-list-form";
 import { ReferForm, type ReferDestination } from "@/app/dashboard/admissions/[id]/refer-form";
+import { RequestReferralForm } from "@/app/dashboard/admissions/[id]/request-referral-form";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function ApplicantDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -102,7 +103,21 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
   // admissions (centre_administrator or centre_owner) at a sibling branch
   // in the same organisation. Nothing here is trusted by the action itself
   // (referApplicantAction re-checks), this only decides what's shown.
+  //
+  // "One person holding admissions at both branches refers in a single
+  // action. Where nobody spans the two, it becomes a request the receiving
+  // branch accepts." requestDestinations names the sibling branches the
+  // viewer does NOT already qualify for direct referral to -- those get the
+  // request form (RequestReferralForm) instead of the instant one.
   let referDestinations: ReferDestination[] = [];
+  let requestDestinations: { centerId: string; centerName: string }[] = [];
+  let existingRequest: {
+    id: string;
+    status: string;
+    toCenterName: string;
+    requestedAt: string;
+    declineReason: string | null;
+  } | null = null;
   if (staff.role === "admin" && !applicant.referred_to_center_id) {
     const admin = createAdminClient();
     const { data: ownCentre } = await admin.from("centers").select("organisation_id").eq("id", staff.center_id).maybeSingle();
@@ -127,6 +142,25 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           courseId: c.id,
           courseName: c.name,
         }));
+      }
+
+      const { data: existing } = await admin
+        .from("branch_referral_requests")
+        .select("id, status, to_center_id, requested_at, decline_reason")
+        .eq("applicant_id", applicant.id)
+        .maybeSingle();
+      if (existing) {
+        existingRequest = {
+          id: existing.id,
+          status: existing.status,
+          toCenterName: siblingNameById.get(existing.to_center_id) ?? "another branch",
+          requestedAt: existing.requested_at,
+          declineReason: existing.decline_reason,
+        };
+      } else {
+        requestDestinations = (siblingCentres ?? [])
+          .filter((c) => !qualifyingCenterIds.includes(c.id))
+          .map((c) => ({ centerId: c.id, centerName: c.name }));
       }
     }
   }
@@ -459,6 +493,23 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           <WaitingListForm applicantId={applicant.id} />
           <RejectForm applicantId={applicant.id} />
           <ReferForm applicantId={applicant.id} destinations={referDestinations} />
+          {existingRequest ? (
+            <div className="card flex flex-col gap-1 p-6">
+              <h2 className="font-serif text-lg text-ink">Referral request</h2>
+              <p className="text-sm text-ink">
+                {existingRequest.status === "pending"
+                  ? `Waiting on ${existingRequest.toCenterName} to accept or decline.`
+                  : existingRequest.status === "accepted"
+                    ? `${existingRequest.toCenterName} accepted this request.`
+                    : `${existingRequest.toCenterName} declined this request${existingRequest.declineReason ? `: ${existingRequest.declineReason}` : "."}`}
+              </p>
+              <p className="text-xs text-muted">
+                Sent {new Date(existingRequest.requestedAt).toLocaleString("en-GB")}
+              </p>
+            </div>
+          ) : (
+            <RequestReferralForm applicantId={applicant.id} destinations={requestDestinations} />
+          )}
         </>
       ) : null}
     </div>

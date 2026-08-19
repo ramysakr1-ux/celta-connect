@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendApplicantEmail, referralEmailHtml } from "@/lib/admissions-email";
 
 // build-spec.md §14. "A referral is **not a re-application**. Everything the
 // candidate has done moves with them."
@@ -77,7 +78,7 @@ export async function referApplicant(input: {
   // could send a candidate's file to any centre in the system.
   const { data: centres } = await admin
     .from("centers")
-    .select("id, name, organisation_id")
+    .select("id, name, organisation_id, admissions_email")
     .in("id", [input.fromCenterId, input.toCenterId]);
   const from = (centres ?? []).find((c) => c.id === input.fromCenterId);
   const to = (centres ?? []).find((c) => c.id === input.toCenterId);
@@ -128,5 +129,176 @@ export async function referApplicant(input: {
     .eq("id", applicant.id);
   if (markError) return { error: "Referred, but the originating record could not be marked." };
 
+  // "The candidate gets one email that asks them for nothing and never uses
+  // the words referred or transferred." Sent here, not by each caller, so
+  // the direct-referral path and the accepted-request path can't diverge.
+  // Best-effort: a failed send shouldn't undo a referral that already
+  // succeeded -- same tolerance sendApplicantEmail's own callers show
+  // elsewhere in this app.
+  await sendApplicantEmail({
+    centerName: to.name,
+    centerAdmissionsEmail: to.admissions_email ?? null,
+    to: applicant.email,
+    subject: "your application",
+    centerId: input.toCenterId,
+    applicantId: created.id,
+    type: "referral",
+    sentBy: input.byProfileId,
+    recipientName: applicant.full_name,
+    html: referralEmailHtml({ candidateName: applicant.full_name, centreName: to.name }),
+  });
+
   return { newApplicantId: created.id };
+}
+
+export interface ReferralRequestResult {
+  error?: string;
+  requestId?: string;
+}
+
+/**
+ * "Where nobody spans the two, it becomes a request the receiving branch
+ * accepts." Unlike referApplicant(), this moves nothing yet -- it just asks.
+ * The destination course is chosen by whoever ACCEPTS, not the requester,
+ * since the requester typically has no visibility into the destination
+ * branch's own intakes.
+ */
+export async function requestBranchReferral(input: {
+  applicantId: string;
+  fromCenterId: string;
+  toCenterId: string;
+  byProfileId: string;
+}): Promise<ReferralRequestResult> {
+  const admin = createAdminClient();
+
+  const { data: applicant } = await admin
+    .from("applicants")
+    .select("id, full_name, referred_to_center_id")
+    .eq("id", input.applicantId)
+    .eq("center_id", input.fromCenterId)
+    .maybeSingle();
+  if (!applicant) return { error: "That applicant isn't at this branch." };
+  if (applicant.referred_to_center_id) return { error: "This candidate has already been referred." };
+
+  const { data: existing } = await admin
+    .from("branch_referral_requests")
+    .select("id, status")
+    .eq("applicant_id", input.applicantId)
+    .maybeSingle();
+  if (existing) return { error: `A referral request for this candidate already exists (${existing.status}).` };
+
+  const { data: centres } = await admin
+    .from("centers")
+    .select("id, name, organisation_id")
+    .in("id", [input.fromCenterId, input.toCenterId]);
+  const from = (centres ?? []).find((c) => c.id === input.fromCenterId);
+  const to = (centres ?? []).find((c) => c.id === input.toCenterId);
+  if (!from || !to) return { error: "Could not find both branches." };
+  if (!from.organisation_id || from.organisation_id !== to.organisation_id) {
+    return { error: "Those branches aren't part of the same organisation." };
+  }
+
+  const { data: created, error: insertError } = await admin
+    .from("branch_referral_requests")
+    .insert({
+      applicant_id: input.applicantId,
+      from_center_id: input.fromCenterId,
+      to_center_id: input.toCenterId,
+      requested_by: input.byProfileId,
+    } as never)
+    .select("id")
+    .single();
+  if (insertError || !created) return { error: `Could not send the request: ${insertError?.message ?? "unknown"}` };
+
+  // "The area owner is notified. Not a request for permission -- a
+  // statement" -- same reasoning applied to a receiving branch that hasn't
+  // asked for this candidate but needs to know one is waiting.
+  await admin.from("admissions_notifications").insert({
+    center_id: input.toCenterId,
+    applicant_id: input.applicantId,
+    type: "referral_request",
+    message: `${from.name} is asking to refer ${applicant.full_name} to your branch.`,
+  } as never);
+
+  return { requestId: created.id };
+}
+
+export interface AcceptReferralResult {
+  error?: string;
+  newApplicantId?: string;
+}
+
+export async function acceptBranchReferralRequest(input: {
+  requestId: string;
+  toCourseId: string;
+  byProfileId: string;
+}): Promise<AcceptReferralResult> {
+  const admin = createAdminClient();
+
+  const { data: request } = await admin
+    .from("branch_referral_requests")
+    .select("*")
+    .eq("id", input.requestId)
+    .maybeSingle();
+  if (!request) return { error: "That referral request no longer exists." };
+  if (request.status !== "pending") return { error: `That request has already been ${request.status}.` };
+
+  const result = await referApplicant({
+    applicantId: request.applicant_id,
+    fromCenterId: request.from_center_id,
+    toCenterId: request.to_center_id,
+    toCourseId: input.toCourseId,
+    byProfileId: input.byProfileId,
+  });
+  if (result.error) return { error: result.error };
+
+  const { error: updateError } = await admin
+    .from("branch_referral_requests")
+    .update({
+      status: "accepted",
+      decided_by: input.byProfileId,
+      decided_at: new Date().toISOString(),
+      resulting_applicant_id: result.newApplicantId,
+    })
+    .eq("id", request.id);
+  if (updateError) return { error: "Referred, but the request record could not be updated." };
+
+  return { newApplicantId: result.newApplicantId };
+}
+
+export async function declineBranchReferralRequest(input: {
+  requestId: string;
+  byProfileId: string;
+  reason?: string | null;
+}): Promise<{ error?: string }> {
+  const admin = createAdminClient();
+
+  const { data: request } = await admin
+    .from("branch_referral_requests")
+    .select("id, status, from_center_id, to_center_id, applicant_id")
+    .eq("id", input.requestId)
+    .maybeSingle();
+  if (!request) return { error: "That referral request no longer exists." };
+  if (request.status !== "pending") return { error: `That request has already been ${request.status}.` };
+
+  const { error: updateError } = await admin
+    .from("branch_referral_requests")
+    .update({
+      status: "declined",
+      decided_by: input.byProfileId,
+      decided_at: new Date().toISOString(),
+      decline_reason: input.reason ?? null,
+    })
+    .eq("id", request.id);
+  if (updateError) return { error: "Could not decline the request." };
+
+  const { data: to } = await admin.from("centers").select("name").eq("id", request.to_center_id).maybeSingle();
+  await admin.from("admissions_notifications").insert({
+    center_id: request.from_center_id,
+    applicant_id: request.applicant_id,
+    type: "referral_request",
+    message: `${to?.name ?? "The branch"} declined your referral request.`,
+  } as never);
+
+  return {};
 }

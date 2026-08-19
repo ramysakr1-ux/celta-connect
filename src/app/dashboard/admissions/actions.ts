@@ -657,12 +657,12 @@ export interface ReferFormState {
 
 // build-spec.md §14 "Sharing between branches": "One person holding
 // admissions at both branches refers in a single action. Where nobody
-// spans the two, it becomes a request the receiving branch accepts." Only
-// the single-action case is built here -- the request/accept workflow for
-// the "nobody spans both" case is a separate, larger feature, left unbuilt
-// rather than half-built. The UI (refer-form.tsx) only ever offers
+// spans the two, it becomes a request the receiving branch accepts." This
+// is the single-action case. The UI (refer-form.tsx) only ever offers
 // destination centres this same check would pass, but the check is
-// re-run here server-side rather than trusted from the form.
+// re-run here server-side rather than trusted from the form. The request/
+// accept workflow for "nobody spans both" is below (requestReferralAction /
+// acceptReferralRequestAction / declineReferralRequestAction).
 export async function referApplicantAction(_prevState: ReferFormState, formData: FormData): Promise<ReferFormState> {
   const staff = await requireAdmissionsHandler();
   const applicantId = formData.get("applicant_id");
@@ -704,6 +704,121 @@ export async function referApplicantAction(_prevState: ReferFormState, formData:
   if (result.error) return { error: result.error };
 
   revalidatePath(`/dashboard/admissions/${applicantId}`);
+  return { error: null };
+}
+
+// "Where nobody spans the two, it becomes a request the receiving branch
+// accepts." Any centre admin at the destination branch is offered as a
+// possible target -- not access-filtered like referApplicantAction's
+// destinations, since the whole point is the requester doesn't hold
+// anything there.
+export async function requestReferralAction(_prevState: ReferFormState, formData: FormData): Promise<ReferFormState> {
+  const staff = await requireAdmissionsHandler();
+  const applicantId = formData.get("applicant_id");
+  const toCenterId = formData.get("to_center_id");
+  if (typeof applicantId !== "string" || !applicantId || typeof toCenterId !== "string" || !toCenterId) {
+    return { error: "Pick a branch to send the request to." };
+  }
+  if (staff.role !== "admin") {
+    return { error: "Only a centre admin can request a referral." };
+  }
+
+  const { requestBranchReferral } = await import("@/lib/admissions-referral");
+  const result = await requestBranchReferral({
+    applicantId,
+    fromCenterId: staff.center_id,
+    toCenterId,
+    byProfileId: staff.id,
+  });
+  if (result.error) return { error: result.error };
+
+  revalidatePath(`/dashboard/admissions/${applicantId}`);
+  return { error: null };
+}
+
+export interface ReferralDecisionState {
+  error: string | null;
+}
+
+// Re-checks the viewer actually holds admissions at the request's
+// destination branch server-side -- the page only shows this form to
+// someone it already believes qualifies, but that belief isn't trusted here.
+async function requireReceivingBranchAdmin(toCenterId: string) {
+  const staff = await requireAdmissionsHandler();
+  if (staff.role !== "admin") throw new Error("Only a centre admin can decide a referral request.");
+  if (staff.center_id === toCenterId) return staff;
+
+  const admin = createAdminClient();
+  const { data: grant } = await admin
+    .from("centre_roles")
+    .select("role")
+    .eq("profile_id", staff.id)
+    .eq("center_id", toCenterId)
+    .is("revoked_at", null)
+    .in("role", ["centre_administrator", "centre_owner"])
+    .maybeSingle();
+  if (!grant) throw new Error("You don't hold admissions at that branch.");
+  return staff;
+}
+
+export async function acceptReferralRequestAction(
+  _prevState: ReferralDecisionState,
+  formData: FormData
+): Promise<ReferralDecisionState> {
+  const requestId = formData.get("request_id");
+  const toCenterId = formData.get("to_center_id");
+  const toCourseId = formData.get("to_course_id");
+  if (
+    typeof requestId !== "string" || !requestId ||
+    typeof toCenterId !== "string" || !toCenterId ||
+    typeof toCourseId !== "string" || !toCourseId
+  ) {
+    return { error: "Pick which intake to place them into." };
+  }
+
+  let staff;
+  try {
+    staff = await requireReceivingBranchAdmin(toCenterId);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Not authorised." };
+  }
+
+  const { acceptBranchReferralRequest } = await import("@/lib/admissions-referral");
+  const result = await acceptBranchReferralRequest({ requestId, toCourseId, byProfileId: staff.id });
+  if (result.error) return { error: result.error };
+
+  revalidatePath("/dashboard/admissions/referral-requests");
+  if (result.newApplicantId) revalidatePath(`/dashboard/admissions/${result.newApplicantId}`);
+  return { error: null };
+}
+
+export async function declineReferralRequestAction(
+  _prevState: ReferralDecisionState,
+  formData: FormData
+): Promise<ReferralDecisionState> {
+  const requestId = formData.get("request_id");
+  const toCenterId = formData.get("to_center_id");
+  const reason = formData.get("reason");
+  if (typeof requestId !== "string" || !requestId || typeof toCenterId !== "string" || !toCenterId) {
+    return { error: "Missing request." };
+  }
+
+  let staff;
+  try {
+    staff = await requireReceivingBranchAdmin(toCenterId);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Not authorised." };
+  }
+
+  const { declineBranchReferralRequest } = await import("@/lib/admissions-referral");
+  const result = await declineBranchReferralRequest({
+    requestId,
+    byProfileId: staff.id,
+    reason: typeof reason === "string" && reason.trim() ? reason.trim() : null,
+  });
+  if (result.error) return { error: result.error };
+
+  revalidatePath("/dashboard/admissions/referral-requests");
   return { error: null };
 }
 
