@@ -1,5 +1,22 @@
+import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+// Resend delivers webhooks signed the Svix way: svix-id/svix-timestamp/
+// svix-signature headers, secret shaped "whsec_<base64>". Verifying only
+// that a svix-signature header was PRESENT (as this route used to do) lets
+// anyone forge one with any junk value -- the HMAC below is the actual
+// check. https://docs.svix.com/receiving/verifying-payloads/how-manual
+function verifySvixSignature(secret: string, id: string, timestamp: string, body: string, signatureHeader: string) {
+  const secretBytes = Buffer.from(secret.replace(/^whsec_/, ""), "base64");
+  const expected = createHmac("sha256", secretBytes).update(`${id}.${timestamp}.${body}`).digest();
+  return signatureHeader.split(" ").some((part) => {
+    const [version, sig] = part.split(",");
+    if (version !== "v1" || !sig) return false;
+    const candidate = Buffer.from(sig, "base64");
+    return candidate.length === expected.length && timingSafeEqual(candidate, expected);
+  });
+}
 
 // Delivery events from the mail provider. for-claude-code-email-inventory.md:
 // "delivery is tracked via the provider's webhook (sent / delivered / opened /
@@ -28,16 +45,24 @@ const EVENT_STATUS: Record<string, "delivered" | "opened" | "bounced"> = {
 
 export async function POST(request: Request) {
   const secret = process.env.RESEND_WEBHOOK_SECRET;
-  const signature = request.headers.get("svix-signature") ?? request.headers.get("resend-signature");
+  const svixId = request.headers.get("svix-id");
+  const svixTimestamp = request.headers.get("svix-timestamp");
+  const signature = request.headers.get("svix-signature");
 
   const raw = await request.text();
 
-  // Refuse unsigned events when a secret is configured. Without a secret the
-  // route stays open in development, but an unverified delivery event must
-  // never be able to clear a bounce task in production -- that would let anyone
-  // re-enable sending to a dead address.
-  if (secret && !signature) {
-    return NextResponse.json({ error: "Missing signature." }, { status: 400 });
+  // Refuse unsigned/unverifiable events when a secret is configured. Without
+  // a secret the route stays open in development, but an unverified delivery
+  // event must never be able to clear a bounce task in production -- that
+  // would let anyone forge a "delivered" event and re-enable sending to a
+  // dead address.
+  if (secret) {
+    if (!svixId || !svixTimestamp || !signature) {
+      return NextResponse.json({ error: "Missing signature." }, { status: 400 });
+    }
+    if (!verifySvixSignature(secret, svixId, svixTimestamp, raw, signature)) {
+      return NextResponse.json({ error: "Invalid signature." }, { status: 400 });
+    }
   }
 
   let event: ResendEvent;
