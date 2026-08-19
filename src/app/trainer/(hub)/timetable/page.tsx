@@ -19,10 +19,10 @@ import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 export default async function TrainerTimetablePage({
   searchParams,
 }: {
-  searchParams: Promise<{ lock_error?: string }>;
+  searchParams: Promise<{ lock_error?: string; date?: string; half?: string }>;
 }) {
   const trainer = await requireRole(["trainer", "admin"]);
-  const { lock_error } = await searchParams;
+  const { lock_error, date: lockErrorDate, half: lockErrorHalf } = await searchParams;
   const supabase = await createClient();
 
   if (!trainer.course_id) {
@@ -182,6 +182,21 @@ export default async function TrainerTimetablePage({
         <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
           Can&apos;t lock -- an asynchronous input session has no linked live follow-up slot (Handbook
           2.2). Add the link on that session, or add the live slot first.
+        </div>
+      ) : null}
+
+      {lock_error === "tp_double_booked" ? (
+        <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+          Can&apos;t lock -- two TP rounds are scheduled on {lockErrorDate ?? "the same date"}, which means a
+          candidate would be teaching twice in one day (Handbook 8.1.4). Move one of the rounds to a different date.
+        </div>
+      ) : null}
+
+      {lock_error === "mode_not_blocked" ? (
+        <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+          Can&apos;t lock -- {lockErrorHalf ? `group ${lockErrorHalf}'s` : "a group's"} TP rounds switch between
+          face-to-face and online more than once (Handbook 2.2.3). Each half teaches one mode, then the other --
+          not a mix. Check each TP round&apos;s mode in its detail panel.
         </div>
       ) : null}
 

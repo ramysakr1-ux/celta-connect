@@ -9,6 +9,7 @@ import { buildSkeletonEvents, DEFAULT_TEACHING_DAYS, PART_TIME_SKELETON } from "
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { generateStandardAnnouncements } from "@/lib/announcements-catalog";
 import { syncAssignmentDueDates } from "@/lib/assignment-due-dates";
+import { halfTpDates } from "@/lib/rotation";
 import type { TimeBand } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -318,6 +319,57 @@ export async function setTimetableLock(formData: FormData): Promise<void> {
       .limit(1);
     if (unlinkedAsync && unlinkedAsync.length > 0) {
       redirect("/trainer/timetable?lock_error=async_missing_link");
+    }
+
+    // build-spec.md compliance-audit item 1 (Handbook 8.1.4): "A candidate
+    // cannot teach twice in one day." Under correct rotation (rotation.ts'
+    // distinctTpDates/halfTpDates), one calendar date hosts exactly one TP
+    // round -- one half teaching, the other not. That invariant can only be
+    // broken by a manual override landing two different TP rounds on the
+    // same date, which is exactly the case rotation.ts' own deduplicated
+    // date list can't see (a Set silently merges same-date rows) -- so this
+    // checks the RAW events directly rather than through that helper. Two
+    // tp events sharing a date means whichever half owns both is being
+    // asked to teach twice that day.
+    const { data: tpEvents } = await supabase
+      .from("course_timetable_events")
+      .select("event_date, mode")
+      .eq("course_id", trainer.course_id)
+      .eq("type", "tp");
+    const tpDateCounts = new Map<string, number>();
+    for (const e of tpEvents ?? []) {
+      tpDateCounts.set(e.event_date, (tpDateCounts.get(e.event_date) ?? 0) + 1);
+    }
+    const doubleBookedDate = [...tpDateCounts.entries()].find(([, count]) => count > 1)?.[0];
+    if (doubleBookedDate) {
+      redirect(`/trainer/timetable?lock_error=tp_double_booked&date=${doubleBookedDate}`);
+    }
+
+    // course-modes.md §1 (Handbook 2.2.3), the last piece of delivery-
+    // mode.ts's "not yet built" list: "A TP group teaches in only one mode
+    // at a time... never a mix inside one group at one stage." Checked per
+    // half (each half's own ordered TP rounds, via rotation.ts'
+    // halfTpDates) rather than across the whole course, since the two
+    // halves run their own independent f2f/online split. Only the rounds
+    // someone has actually tagged a mode on are checked -- an untagged
+    // round can't yet violate anything, and requiring every round tagged
+    // before ANY course can lock would block courses that aren't
+    // mixed-mode at all. More than one switch means the block isn't clean.
+    const { data: courseForMode } = await supabase.from("courses").select("delivery_mode").eq("id", trainer.course_id).maybeSingle();
+    if (courseForMode?.delivery_mode === "mixed") {
+      const modeByDate = new Map((tpEvents ?? []).map((e) => [e.event_date, e.mode]));
+      for (const halfOrder of [1, 2] as const) {
+        const modes = halfTpDates(tpEvents ?? [], halfOrder)
+          .map((d) => modeByDate.get(d))
+          .filter((m): m is "f2f" | "online" => m === "f2f" || m === "online");
+        let switches = 0;
+        for (let i = 1; i < modes.length; i += 1) {
+          if (modes[i] !== modes[i - 1]) switches += 1;
+        }
+        if (switches > 1) {
+          redirect(`/trainer/timetable?lock_error=mode_not_blocked&half=${halfOrder}`);
+        }
+      }
     }
   }
 
