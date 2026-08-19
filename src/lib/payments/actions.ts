@@ -5,6 +5,9 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-access";
 import { getActivePaymentProvider } from "@/lib/payments/provider";
+import { getCurrentProfile } from "@/lib/auth/get-profile";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { can } from "@/lib/auth/centre-permissions";
 import type { Database } from "@/lib/supabase/types";
 
 export interface PaymentFormState {
@@ -165,4 +168,29 @@ export async function createProviderCheckoutLink(_prevState: PaymentFormState, f
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Could not create the payment link." };
   }
+}
+
+// payment_notifications (runMissedInstalmentsCron, src/lib/payments-cron.ts)
+// has been writing "instalment overdue" rows -- read_at included -- since
+// before this session, with nothing anywhere reading them back. First
+// reader: the panel on /centre/payments. Dismiss just sets read_at; the
+// row stays for the record, it just stops surfacing as outstanding.
+export async function markPaymentNotificationRead(formData: FormData): Promise<void> {
+  const session = await getCurrentProfile();
+  if (!session?.profile) return;
+  const ctx = await getCentreRoleContext(session.profile);
+  if (!can(ctx.roles, "payments.edit")) return;
+
+  const notificationId = formData.get("notification_id");
+  if (typeof notificationId !== "string") return;
+
+  const centerId = ctx.activeCenterId ?? session.profile.center_id;
+  const supabase = await createClient();
+  await supabase
+    .from("payment_notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("id", notificationId)
+    .eq("center_id", centerId);
+
+  revalidatePath("/centre/payments");
 }

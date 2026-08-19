@@ -7,6 +7,7 @@ import { can } from "@/lib/auth/centre-permissions";
 import { ProviderList } from "@/app/centre/payments/provider-list";
 import type { PaymentProviderKey } from "@/lib/payments/providers";
 import { RefundsPanel, type RefundRow } from "@/app/centre/payments/refunds-panel";
+import { PaymentNotificationsPanel } from "@/app/centre/payments/payment-notifications-panel";
 
 // Centre settings > payment providers (spec 2026-08-16, Payments.dc.html 1c).
 // Reached from the "payment providers" link in Centre Admin's settings bar.
@@ -62,6 +63,16 @@ export default async function PaymentProvidersPage() {
     applicantName: r.applicant_id ? (refundName.get(r.applicant_id) ?? null) : null,
   }));
 
+  // runMissedInstalmentsCron (src/lib/payments-cron.ts) has been writing
+  // these on every overdue instalment with nothing anywhere reading them
+  // back -- first reader.
+  const { data: paymentNotifications } = await supabase
+    .from("payment_notifications")
+    .select("id, message, created_at")
+    .eq("center_id", centerId)
+    .is("read_at", null)
+    .order("created_at", { ascending: false });
+
   return (
     <div className="flex max-w-[720px] flex-col gap-5">
       <div>
@@ -79,6 +90,11 @@ export default async function PaymentProvidersPage() {
         connectedKey={(center?.payment_provider ?? null) as PaymentProviderKey | null}
         connectedAt={center?.payment_provider_connected_at ?? null}
         credentialsPresent={credentialsPresent}
+      />
+
+      <PaymentNotificationsPanel
+        notifications={(paymentNotifications ?? []).map((n) => ({ id: n.id, message: n.message, createdAt: n.created_at }))}
+        canEdit={can(ctx.roles, "payments.edit")}
       />
 
       <RefundsPanel refunds={refundRows} canEdit={can(ctx.roles, "payments.edit")} />
