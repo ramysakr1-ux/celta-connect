@@ -17,7 +17,7 @@ export const CELTA_CRITERIA_SECTIONS = [
   {
     section: "3",
     title: "Language Skills: Reading, Listening, Speaking and Writing",
-    codes: ["3a", "3b"],
+    codes: ["3a", "3b", "3c"],
   },
   {
     section: "4",
@@ -56,20 +56,17 @@ export const CRITERIA_LABELS: Record<string, string> = {
   "2f": "showing awareness of differences in style and register",
   "2g": "providing appropriate practice of language items",
 
+  // Corrected 2026-08-19: 3a/3b/3c are all three genuine Cambridge codes --
+  // confirmed against the official CELTA Syllabus and Assessment Guidelines
+  // PDF (cambridgeenglish.org), which lists all three under "Component One:
+  // Planning and teaching." An earlier pass in this same session (2026-08-18)
+  // wrongly concluded 3c wasn't official; that was a misread, not a real
+  // finding -- the earlier "3c"/"3d" split treated as session-mapping-only
+  // is retired along with this comment. Reading and listening are NOT split
+  // into separate codes -- 3a covers both together, same as always.
   "3a": "helping learners to understand reading and listening texts",
   "3b": "helping learners to produce oral and written language",
-
-  // "3c"/"3d" are NOT official Cambridge codes -- the certified CELTA 5
-  // has only 3a and 3b (Appendix 1), and celta5_matrix, CRITERIA_ENTERS_AT_TP
-  // and the booklet PDF only ever use those two. These are session-mapping
-  // labels, same status as "3c" introduced 2026-08-19 for criteriaForTpDate()
-  // ("this week's focus criterion" for peer observation): 3b splits into
-  // speaking (stays "3b") / writing ("3c"), and by the same logic 3a splits
-  // into reading (stays "3a", taught by "Receptive skills") / listening
-  // ("3d", taught by the "Listening" input session once it has a timetable
-  // slot -- see the note on "Receptive skills" in timetable-skeleton.ts).
-  "3c": "helping learners to produce written language",
-  "3d": "helping learners to understand listening texts",
+  "3c": "helping learners to develop writing skills",
 
   "4a": "identifying and stating appropriate aims/outcomes for individual lessons",
   "4b": "ordering activities so that they achieve lesson aims",
@@ -179,6 +176,8 @@ export const CRITERIA_GUIDANCE: Record<string, string[]> = {
     "follow teaching procedures you have learnt on the course for a speaking skills-based lesson",
     "ensure an appropriate focus on developing speaking skills and subskills",
     "ensure a communicative focus in speaking activities",
+  ],
+  "3c": [
     "provide learners with opportunities to practise writing in language-focused and skills lessons",
     "ensure an appropriate focus on practising writing skills and subskills",
   ],
@@ -344,6 +343,13 @@ export const CRITERIA_ENTERS_AT_TP: Record<string, number> = {
 
   "3a": 1,
   "3b": 5,
+  // Not in Ramy's Criteria-by-Input-Session.md, which only listed 3a/3b --
+  // 3c's own existence as a genuine code was only confirmed 2026-08-19
+  // (see the note on CRITERIA_LABELS above). Set to match 3b's entry TP,
+  // per Ramy's explicit call: the "Productive skills -- writing" session
+  // is already placed right alongside the TP5 speaking session on the
+  // timetable skeleton, so this doesn't move anything else.
+  "3c": 5,
 
   "4a": 1,
   "4b": 1,
@@ -394,7 +400,8 @@ export const CRITERIA_SCOPE_DESCRIPTION: Record<string, string> = {
   "2g": "Designs practice activities that move learners from controlled accuracy work to freer fluency work.",
 
   "3a": "Develops learners' receptive skills through staged reading or listening tasks, gist before detail.",
-  "3b": "Develops learners' speaking and writing skills through tasks that prioritise communication over accuracy.",
+  "3b": "Develops learners' speaking skills through tasks that prioritise communication over accuracy.",
+  "3c": "Develops learners' writing skills through staged, purposeful writing tasks appropriate to the learners.",
 
   "4a": "States clear, achievable lesson aims that are learner-focused, not just teacher-focused.",
   "4b": "Structures the lesson in a logical sequence of stages that build towards the aims.",
@@ -688,7 +695,7 @@ export function computeAttentionFlags(
 
 export type Trajectory = "Pass A" | "Pass B" | "Pass" | "Fail" | "not_enough_data";
 
-const TRAJECTORY_MIN_RATED = 10; // out of 41 criteria
+const TRAJECTORY_MIN_RATED = 10; // out of 42 criteria
 
 function trajectoryFromRated(rated: ("S+" | "S" | "N")[], minRated: number): Trajectory {
   if (rated.length < minRated) return "not_enough_data";
@@ -711,7 +718,7 @@ export function computeTrajectory(
 
 // Shared by the roster table, the Today dashboard's cohort card, and the
 // portfolio sidebar/TP Hub -- extracted so all four call sites can't
-// silently drift on what "criteria %" means (same achieved-count-over-41
+// silently drift on what "criteria %" means (same achieved-count-over-42
 // calc every one of them used to compute independently).
 export function computeCriteriaPct(matrixByCode: Map<string, string | null | undefined>): number {
   const achievedCount = CELTA_CRITERIA_CODES.filter((code) => {
@@ -726,7 +733,7 @@ export function computeCriteriaPct(matrixByCode: Map<string, string | null | und
 // (project_grading_feedback_trainer_awareness.md) shows Planning / Teaching
 // / Awareness of learners / Reflection / Overall as five INDEPENDENT bars,
 // matching GRADE_DESCRIPTORS' five dimensions above. computeTrajectory()
-// only ever produces one number from all 41 codes, so it can't drive that
+// only ever produces one number from all 42 codes, so it can't drive that
 // alone. The full spec ties each bar's movement to a per-TP step function
 // driven by an auto-tagging engine that doesn't exist yet -- but a real,
 // non-fabricated interim version IS possible today: score each dimension
@@ -768,7 +775,7 @@ export function computeTrajectoryByDimension(
     const rated = codes
       .map((code) => ratingsByCode[code])
       .filter((r): r is "S+" | "S" | "N" => r != null && r !== "X");
-    // Overall keeps its original, larger fixed threshold (out of 41); the
+    // Overall keeps its original, larger fixed threshold (out of 42); the
     // much smaller per-dimension groups (as few as 3 codes for Reflection)
     // need a threshold scaled to their own size instead, or they'd never
     // leave "not_enough_data" in practice.
@@ -802,9 +809,8 @@ export const SHORT_CRITERIA_LABELS: Record<string, string> = {
   "2g": "language practice",
 
   "3a": "reading/listening",
-  "3b": "productive skills",
+  "3b": "speaking",
   "3c": "writing",
-  "3d": "listening",
 
   "4a": "stating aims",
   "4b": "staging",
@@ -893,7 +899,7 @@ export interface StageFlagSuggestion {
 // for everyone regardless of standing, nothing to suggest)." Suggestion
 // only -- surfaced as a heads-up a tutor can act on or ignore, never
 // auto-triggering a tutorial or a record. Tallies tutor_status_stage2
-// (the one ongoing 41-criteria rating column populated from TP1 onward --
+// (the one ongoing 42-criteria rating column populated from TP1 onward --
 // tutor_status_stage3 only starts filling in once Stage 3 is already
 // triggered, so using it here would be circular). "Don't invent a new
 // scoring rubric" -- this counts existing ratings, nothing else. Threshold

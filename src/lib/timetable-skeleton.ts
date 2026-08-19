@@ -104,13 +104,11 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     inputSessionCriteria: ["4a", "4b", "4e", "4f", "4h", "4j", "4k", "4m", "4n"],
   },
   {
-    // Reading half of the 3a/3d split (Ramy, 2026-08-19) -- session-mapping
-    // only, same status as the 3b/3c speaking/writing split above. Stays
-    // tagged "3a" (unchanged) because that's what this session actually
-    // teaches -- reading. When the "Listening" input session gets its own
-    // timetable slot, tag it inputSessionCriteria: ["3d"] to complete the
-    // split; until then criteriaForTpDate() has no listening-specific
-    // session to pick up, which is expected, not a bug.
+    // Corrected 2026-08-19: 3a covers reading AND listening together, one
+    // Cambridge code, not two -- there's no split to complete here. Tagged
+    // "3a" because that's what this session teaches -- reading. If a
+    // "Listening" input session ever gets its own timetable slot, it also
+    // gets tagged "3a", the same code, not a separate one.
     type: "input_session",
     title: "Receptive skills",
     position: pos(1),
@@ -303,24 +301,15 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   { type: "tp", title: "TP5 -- Half A", position: pos(10), time: "10:00", tag: "individual", linkedTpNumber: 5 },
   { type: "milestone", title: "Stage 2 tutorials begin", position: pos(10), time: "14:30", tag: "individual" },
   {
-    // Ramy, 2026-08-18: no "3c" on the certified CELTA 5 -- speaking and
-    // writing are one combined Cambridge criterion, 3b ("helping learners
-    // to produce oral and written language", Appendix 1), confirmed again
-    // 2026-08-19 by reading the actual PDF text directly. That stays true
-    // everywhere the OFFICIAL criteria set is used -- celta5_matrix,
-    // CRITERIA_LABELS, CRITERIA_ENTERS_AT_TP, the booklet PDF -- none of
-    // that has a 3c and none of it should.
-    //
-    // "3c" below is session-mapping-only, per Ramy 2026-08-19: this array
-    // is consumed by criteriaForTpDate() for peer-observation's "this
-    // week's focus criterion", a separate feature from official grading,
-    // so distinguishing which of the two reinforcing passes a session is
-    // for (oral vs written) is useful here even though Cambridge doesn't
-    // split it. 3b is FIRST introduced in Text-based teaching (day 4
-    // above), which is where the OFFICIAL 3b still gates live from --
-    // untouched. No exact day was given for either reinforcing pass --
-    // placed here, alongside the existing new-level TP5 cluster, as a
-    // reasonable estimate that doesn't change the gate either way.
+    // Corrected 2026-08-19: 3c IS a genuine Cambridge code (confirmed
+    // against the official CELTA Syllabus and Assessment Guidelines PDF,
+    // cambridgeenglish.org) -- an earlier pass in this same session
+    // (2026-08-18/19) wrongly concluded otherwise; that was a misread, not
+    // a real finding. 3b is FIRST introduced in Text-based teaching (day 4
+    // above), which is where 3b's gate still lives from -- untouched. No
+    // exact day was given for this reinforcing pass -- placed here,
+    // alongside the existing new-level TP5 cluster, as a reasonable
+    // estimate that doesn't change the gate either way.
     type: "input_session",
     title: "Teaching speaking",
     position: pos(10),
@@ -330,6 +319,8 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   },
   { type: "tp", title: "TP5 -- Half B", position: pos(11), time: "10:00", tag: "individual", linkedTpNumber: 5 },
   {
+    // 3c gates live from TP5 (CRITERIA_ENTERS_AT_TP) -- matched to this
+    // session's placement, per Ramy's explicit call 2026-08-19.
     type: "input_session",
     title: "Productive skills -- writing",
     position: pos(11),
@@ -515,8 +506,8 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
   },
   { type: "tp", title: "TP1 -- Group DEF", position: partTimePos(3), time: "10:00", tag: "individual", linkedTpNumber: 1 },
   {
-    // Reading half of the 3a/3d split -- see the matching comment on
-    // "Receptive skills" in the full-time skeleton above.
+    // See the matching comment on "Receptive skills" in the full-time
+    // skeleton above -- 3a covers reading and listening together.
     type: "input_session",
     title: "Receptive skills",
     position: partTimePos(3),
@@ -733,9 +724,8 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     linkedAssignmentType: "LfC",
   },
   {
-    // "3c" is session-mapping-only (Ramy, 2026-08-19) -- see the matching
-    // comment on Teaching speaking above. Official grading (celta5_matrix,
-    // CRITERIA_LABELS, CRITERIA_ENTERS_AT_TP) has no 3c and stays 3b-only.
+    // 3c gates live from TP5 -- see the matching comment on the full-time
+    // skeleton's "Productive skills -- writing" session above.
     type: "input_session",
     title: "Productive skills -- writing",
     position: partTimePos(19),

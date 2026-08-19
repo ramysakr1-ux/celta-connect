@@ -6,7 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { getTpCardStatus, TP_LESSON_LENGTH_MINUTES, type TpCardStatus } from "@/lib/tp-plan-content";
-import { computeCriteriaPct } from "@/lib/celta-criteria";
+import { computeCriteriaPct, CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_STATUS_LABEL } from "@/lib/assignment-info";
 import { TpRow } from "@/app/portfolio/[traineeId]/tp/tp-row";
 import type { Database } from "@/lib/supabase/types";
@@ -127,7 +127,11 @@ export default async function TpHubPage({
     const matrixByCode = new Map((matrix ?? []).map((m) => [m.criteria_code, m.tutor_status_stage2]));
     criteriaPct = computeCriteriaPct(matrixByCode);
   }
-  const achievedCount = criteriaPct !== null ? Math.round((criteriaPct / 100) * 41) : 0;
+  // Was a hardcoded 41 -- silently wrong the moment the criteria set's size
+  // changed (it did, 2026-08-19: 3c turned out to be a real Cambridge code,
+  // taking the total to 42). Derived from the same source of truth
+  // computeCriteriaPct itself uses, so it can't drift out of sync again.
+  const achievedCount = criteriaPct !== null ? Math.round((criteriaPct / 100) * CELTA_CRITERIA_CODES.length) : 0;
 
   // "Write TP feedback" needs a real destination -- the earliest TP whose
   // self-evaluation is in but feedback isn't yet, matching the exact same
