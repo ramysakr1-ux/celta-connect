@@ -91,12 +91,12 @@ export const DELIVERY_MODE_IMPACT: Record<DeliveryMode, ModeImpact> = {
       {
         what: "One mode per block",
         tone: "danger",
-        text: "A TP group teaches in only one mode at a time. Each candidate teaches one level face-to-face and the other online -- never a mix inside one group at one stage. The timetable should enforce this, not just warn (not yet built).",
+        text: "A TP group teaches in only one mode at a time. Each candidate teaches one level face-to-face and the other online -- never a mix inside one group at one stage. The timetable enforces this: locking refuses if a group's tagged rounds switch mode more than once.",
       },
       {
         what: "Two hours minimum",
         tone: "danger",
-        text: "At least two of the six assessed hours in each mode; 3 / 3 is what Cambridge calls desirable. The hours counter should split in two (not yet built).",
+        text: "At least two of the six assessed hours in each mode; 3 / 3 is what Cambridge calls desirable. The hours counter splits in two on each candidate's CELTA5 record, with a warning until both sides clear the floor.",
       },
       {
         what: "Block order",
@@ -106,7 +106,7 @@ export const DELIVERY_MODE_IMPACT: Record<DeliveryMode, ModeImpact> = {
       {
         what: "Observations",
         tone: "default",
-        text: "Experienced-teacher observation must cover both modes, so the observation log should gain a mode field (not yet built).",
+        text: "Experienced-teacher observation must cover both modes -- the observation log has a mode field, asked whenever the course is mixed-mode.",
       },
       {
         what: "Length",
