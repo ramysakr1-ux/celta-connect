@@ -148,6 +148,12 @@ export default async function TrainerRosterPage() {
               {name} -- {count}
             </span>
           ))}
+          {/* specs/for-claude-code-fol-spot-check.md -- the fuller
+              grammar/pronunciation-split, last-logged, status-pill view
+              this compact row doesn't have room for. */}
+          <Link href="/trainer/fol-spot-check" className="text-xs font-medium text-primary hover:underline">
+            Full spot-check view →
+          </Link>
         </div>
       ) : null}
 
