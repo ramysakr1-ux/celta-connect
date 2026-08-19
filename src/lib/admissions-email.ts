@@ -825,13 +825,18 @@ export function tutorAddedEmailHtml(input: {
   roleFact: string;
   centreName: string;
   inviteUrl: string;
+  gettingStartedUrl: string;
 }): string {
   return emailShell({
     heading: "You have been added as a tutor",
     tone: "teal",
-    body: p(
-      `${input.tutorFirstName} — ${input.addedByName} has added you to ${input.courseName} at ${input.centreName} as a ${input.roleFact}. Your groups and teaching practice will appear once the course is set up.`
-    ),
+    body:
+      p(
+        `${input.tutorFirstName} — ${input.addedByName} has added you to ${input.courseName} at ${input.centreName} as a ${input.roleFact}. Your groups and teaching practice will appear once the course is set up.`
+      ) +
+      rawP(
+        `Worth a skim before you start: <a href="${esc(input.gettingStartedUrl)}" style="color:${EMAIL_TONE.teal};">a short guide to how Connect works</a>, no account needed to read it.`
+      ),
     facts: [
       { label: "Course", value: input.courseFact },
       { label: "Your role", value: input.roleFact },

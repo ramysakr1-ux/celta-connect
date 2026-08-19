@@ -122,6 +122,7 @@ export async function inviteToCourse(_prev: InviteState, formData: FormData): Pr
         roleFact: readableRole,
         centreName: centre?.name ?? "the centre",
         inviteUrl,
+        gettingStartedUrl: `${base}/getting-started`,
       }),
     });
     if (sendError) {
