@@ -70,6 +70,12 @@ export async function proxy(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/student/") ||
     request.nextUrl.pathname.startsWith("/register/") ||
     request.nextUrl.pathname.startsWith("/assessor/") ||
+    // Platform support access (for-claude-code-platform-support-access.md)
+    // -- support@ has no standing Supabase login at all, same reasoning as
+    // the three tokenized links above. The token itself, checked live
+    // against the grant's real expiry in resolveActiveGrantByToken, is the
+    // only gate.
+    request.nextUrl.pathname.startsWith("/support/") ||
     // Vercel Cron invokes this with no session cookie at all, just its own
     // Authorization: Bearer $CRON_SECRET header -- the route checks that
     // itself. Found live: without this, the redirect below fired before the

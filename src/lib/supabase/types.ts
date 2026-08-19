@@ -691,6 +691,47 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["auth_ip_attempts"]["Row"]>;
         Relationships: [];
       };
+      platform_support_grants: {
+        Row: {
+          id: string;
+          token: string;
+          center_id: string;
+          course_id: string | null;
+          scope: "course" | "billing";
+          chat_included: boolean;
+          reason: string;
+          duration_hours: 6 | 24 | 72;
+          granted_by: string;
+          granted_at: string;
+          expires_at: string;
+          revoked_at: string | null;
+          revoked_by: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["platform_support_grants"]["Row"]> & {
+          center_id: string;
+          scope: "course" | "billing";
+          reason: string;
+          duration_hours: 6 | 24 | 72;
+          granted_by: string;
+          expires_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["platform_support_grants"]["Row"]>;
+        Relationships: [];
+      };
+      platform_support_grant_activity: {
+        Row: {
+          id: string;
+          grant_id: string;
+          page: string;
+          opened_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["platform_support_grant_activity"]["Row"]> & {
+          grant_id: string;
+          page: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["platform_support_grant_activity"]["Row"]>;
+        Relationships: [];
+      };
       apply_ip_attempts: {
         Row: {
           id: string;

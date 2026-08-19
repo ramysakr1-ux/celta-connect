@@ -7,6 +7,7 @@ const TABS = [
   { key: "profile", label: "Profile & Drive" },
   { key: "payments", label: "Payment providers" },
   { key: "people", label: "Admin roster" },
+  { key: "support", label: "Support access" },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"] | "danger";
 
@@ -19,17 +20,20 @@ export function SettingsTabs({
   profile,
   payments,
   people,
+  support,
   danger,
 }: {
   profile: ReactNode;
   payments: ReactNode;
   people: ReactNode;
+  support: ReactNode;
   danger: ReactNode | null;
 }) {
   const [section, setSection] = useState<TabKey>("profile");
   const allTabs = danger ? [...TABS, { key: "danger" as const, label: "Danger zone" }] : TABS;
 
-  const content = section === "profile" ? profile : section === "payments" ? payments : section === "people" ? people : danger;
+  const content =
+    section === "profile" ? profile : section === "payments" ? payments : section === "people" ? people : section === "support" ? support : danger;
 
   return (
     <div className="flex flex-col gap-5">

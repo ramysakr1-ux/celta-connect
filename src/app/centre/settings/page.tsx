@@ -9,9 +9,11 @@ import { ProfileDriveForm } from "@/app/centre/settings/profile-drive-form";
 import { AdminRoster, type RosterRow } from "@/app/centre/settings/admin-roster";
 import { TransferOwnershipCard, DeleteCentreCard } from "@/app/centre/settings/danger-zone";
 import { SettingsTabs } from "@/app/centre/settings/settings-tabs";
+import { SupportAccessTab, type SupportGrantRow } from "@/app/centre/settings/support-access-tab";
 import { ProviderList } from "@/app/centre/payments/provider-list";
 import type { PaymentProviderKey } from "@/lib/payments/providers";
 import type { CentreRole } from "@/lib/auth/centre-permissions";
+import { computeGrantStatus } from "@/lib/platform-support";
 
 // for-claude-code-centre-settings.md: the real Centre Settings hub,
 // replacing the old placeholder link from Centre Admin's "Open settings"
@@ -32,7 +34,7 @@ export default async function CentreSettingsPage() {
   const isOwner = ctx.roles.includes("centre_owner");
 
   const admin = createAdminClient();
-  const [{ data: center }, { data: driveConnection }, { data: grants }, { data: invites }] = await Promise.all([
+  const [{ data: center }, { data: driveConnection }, { data: grants }, { data: invites }, { data: supportGrants }] = await Promise.all([
     admin
       .from("centers")
       .select(
@@ -51,6 +53,7 @@ export default async function CentreSettingsPage() {
           .is("revoked_at", null)
           .order("created_at", { ascending: false })
       : Promise.resolve({ data: [] }),
+    admin.from("platform_support_grants").select("*").eq("center_id", centerId).order("granted_at", { ascending: false }),
   ]);
 
   if (!center) redirect("/centre");
@@ -82,6 +85,28 @@ export default async function CentreSettingsPage() {
       scope: g.role === "course_administrator" && person?.course_id ? (courseNameById.get(person.course_id) ?? "A course") : "Whole centre",
     };
   });
+
+  const supportGranterIds = [...new Set((supportGrants ?? []).map((g) => g.granted_by))];
+  const supportCourseIds = [...new Set((supportGrants ?? []).map((g) => g.course_id).filter((id): id is string => !!id))];
+  const [{ data: supportGranters }, { data: supportCourses }] = await Promise.all([
+    supportGranterIds.length ? admin.from("profiles").select("id, full_name").in("id", supportGranterIds) : Promise.resolve({ data: [] }),
+    supportCourseIds.length ? admin.from("courses").select("id, name").in("id", supportCourseIds) : Promise.resolve({ data: [] }),
+  ]);
+  const granterNameById = new Map((supportGranters ?? []).map((p) => [p.id, p.full_name]));
+  const supportCourseNameById = new Map((supportCourses ?? []).map((c) => [c.id, c.name]));
+
+  const supportGrantRows: SupportGrantRow[] = (supportGrants ?? []).map((g) => ({
+    id: g.id,
+    scope: g.scope,
+    courseName: g.course_id ? (supportCourseNameById.get(g.course_id) ?? null) : null,
+    reason: g.reason,
+    grantedByName: granterNameById.get(g.granted_by) ?? "Unknown",
+    grantedAt: g.granted_at,
+    durationHours: g.duration_hours,
+    status: computeGrantStatus(g),
+    chatIncluded: g.chat_included,
+  }));
+  const canGrantBilling = ctx.roles.includes("centre_administrator") || ctx.roles.includes("centre_owner");
 
   return (
     <div className="flex flex-col gap-6">
@@ -136,6 +161,7 @@ export default async function CentreSettingsPage() {
           )
         }
         people={<AdminRoster rows={rosterRows} invites={(invites ?? []) as { id: string; role: CentreRole; created_at: string }[]} mayAppoint={mayAppoint} />}
+        support={<SupportAccessTab canGrantBilling={canGrantBilling} grants={supportGrantRows} />}
         danger={
           isOwner ? (
             <div className="flex flex-col gap-4">
