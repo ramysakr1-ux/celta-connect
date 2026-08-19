@@ -2082,6 +2082,7 @@ export interface Database {
           input_session_criteria: string[];
           tp_group_scope_id: string | null;
           register_submitted_at: string | null;
+          mode: "f2f" | "online" | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;

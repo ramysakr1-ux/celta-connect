@@ -6,7 +6,7 @@ import {
   ASSIGNMENT_STATUS_PILL_CLASS,
 } from "@/lib/assignment-info";
 import { StandardRatingPill } from "@/lib/status-pill";
-import { MIN_LEVELS_REQUIRED, type AssessedTpStats } from "@/lib/course-progress";
+import { MIN_LEVELS_REQUIRED, type AssessedTpStats, type AssessedHoursByMode } from "@/lib/course-progress";
 import type { Database } from "@/lib/supabase/types";
 
 type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
@@ -16,7 +16,7 @@ type TpFeedbackRow = Database["public"]["Tables"]["tp_feedback"]["Row"];
 // build-spec.md calls out specifically ("at least two levels", not just
 // hours). Sits above TpFeedbackSummary in both the trainee-own and staff
 // views since both already render that list from the same taught-TP data.
-export function AssessedTpStatsBadge({ stats }: { stats: AssessedTpStats }) {
+export function AssessedTpStatsBadge({ stats, byMode }: { stats: AssessedTpStats; byMode?: AssessedHoursByMode | null }) {
   const levelsOk = stats.levels.length >= MIN_LEVELS_REQUIRED;
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -31,6 +31,17 @@ export function AssessedTpStatsBadge({ stats }: { stats: AssessedTpStats }) {
         Levels taught: {stats.levels.length > 0 ? stats.levels.join(", ") : "none yet"} ({stats.levels.length} of{" "}
         {MIN_LEVELS_REQUIRED} required)
       </span>
+      {byMode ? (
+        // course-modes.md §2 (Handbook 8.1.2): "at least two of the six
+        // assessed hours in each mode" -- mixed-mode courses only.
+        <span
+          className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${
+            byMode.meetsFloor ? "bg-accent text-ink" : "border border-dashed border-gold text-gold"
+          }`}
+        >
+          Face-to-face {byMode.f2fHours.toFixed(1)} hrs · Online {byMode.onlineHours.toFixed(1)} hrs (2 hr minimum each)
+        </span>
+      ) : null}
     </div>
   );
 }

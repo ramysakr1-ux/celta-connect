@@ -1,5 +1,6 @@
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
+import { halfTpDates } from "@/lib/rotation";
 import type { Database, SubmissionStatus } from "@/lib/supabase/types";
 
 type AssignmentType = Database["public"]["Tables"]["assignments"]["Row"]["assignment_type"];
@@ -171,4 +172,45 @@ export function computeAssessedTpStats(input: {
     tpsTaught: taughtAssignments.length,
     levels,
   };
+}
+
+export interface AssessedHoursByMode {
+  f2fHours: number;
+  onlineHours: number;
+  meetsFloor: boolean; // both modes have reached the 2-hour minimum (Handbook 8.1.2)
+}
+
+const MODE_HOURS_FLOOR = 2;
+
+// specs/course-modes.md §2 (Handbook 8.1.2): "At least two of the six
+// assessed hours in each mode." Only meaningful on a mixed-mode course --
+// resolves each taught TP's calendar date from the trainee's own half
+// (rotation.ts' halfTpDates, tp_number is 1-based into that ordered list,
+// same bridge assignment-due-dates.ts already uses) and reads that date's
+// TP event mode (course_timetable_events.mode, migration 0161). A trainee
+// with no subgroup/half yet, or a TP round whose event has no mode set,
+// simply doesn't count toward either side -- never guessed.
+export function computeAssessedHoursByMode(input: {
+  taughtAssignments: { tp_number: number }[];
+  halfOrder: 1 | 2 | null;
+  tpEvents: { event_date: string; mode: "f2f" | "online" | null }[];
+}): AssessedHoursByMode | null {
+  const { taughtAssignments, halfOrder, tpEvents } = input;
+  if (!halfOrder) return null;
+
+  const halfDates = halfTpDates(tpEvents, halfOrder);
+  const modeByDate = new Map(tpEvents.map((e) => [e.event_date, e.mode]));
+
+  let f2fMinutes = 0;
+  let onlineMinutes = 0;
+  for (const a of taughtAssignments) {
+    const date = halfDates[a.tp_number - 1];
+    const mode = date ? modeByDate.get(date) : null;
+    if (mode === "f2f") f2fMinutes += TP_LESSON_LENGTH_MINUTES;
+    else if (mode === "online") onlineMinutes += TP_LESSON_LENGTH_MINUTES;
+  }
+
+  const f2fHours = f2fMinutes / 60;
+  const onlineHours = onlineMinutes / 60;
+  return { f2fHours, onlineHours, meetsFloor: f2fHours >= MODE_HOURS_FLOOR && onlineHours >= MODE_HOURS_FLOOR };
 }

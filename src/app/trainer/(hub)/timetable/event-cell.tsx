@@ -1,5 +1,5 @@
 import { categorize, isEventLive, type TimetableEvent } from "@/lib/timetable-grid";
-import { deleteTimetableEvent, setAttendance, setInputSessionCriteria } from "@/app/trainer/(hub)/timetable/actions";
+import { deleteTimetableEvent, setAttendance, setInputSessionCriteria, setTpEventMode } from "@/app/trainer/(hub)/timetable/actions";
 
 export type Volunteer = { id: string; name: string };
 
@@ -65,6 +65,7 @@ function EventRow({
   volunteers,
   attendedIds,
   divider,
+  mixedMode,
 }: {
   event: TimetableEvent;
   locked: boolean;
@@ -73,6 +74,7 @@ function EventRow({
   volunteers: Volunteer[];
   attendedIds: Set<string>;
   divider: boolean;
+  mixedMode: boolean;
 }) {
   const category = categorize(event);
   return (
@@ -112,6 +114,28 @@ function EventRow({
               placeholder="4c, 5f"
               className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
             />
+            <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 hover:border-primary">
+              Save
+            </button>
+          </form>
+        </details>
+      ) : null}
+      {event.type === "tp" && mixedMode ? (
+        <details className="mt-1">
+          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
+            {event.mode ? `Mode: ${event.mode === "f2f" ? "Face-to-face" : "Online"}` : "Set mode"}
+          </summary>
+          <form action={setTpEventMode} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">
+            <input type="hidden" name="event_id" value={event.id} />
+            <select
+              name="mode"
+              defaultValue={event.mode ?? ""}
+              className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+            >
+              <option value="">Not set</option>
+              <option value="f2f">Face-to-face</option>
+              <option value="online">Online</option>
+            </select>
             <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 hover:border-primary">
               Save
             </button>
@@ -165,6 +189,7 @@ export function EventCell({
   showTime,
   volunteers,
   attendedByEvent,
+  mixedMode,
 }: {
   events: TimetableEvent[];
   locked: boolean;
@@ -172,6 +197,7 @@ export function EventCell({
   showTime: (event: TimetableEvent) => boolean;
   volunteers: Volunteer[];
   attendedByEvent: Map<string, Set<string>>;
+  mixedMode: boolean;
 }) {
   if (events.length === 0) return null;
   const category = categorize(events[0]);
@@ -194,6 +220,7 @@ export function EventCell({
           volunteers={volunteers}
           attendedIds={attendedByEvent.get(event.id) ?? emptySet}
           divider={i > 0}
+          mixedMode={mixedMode}
         />
       ))}
     </div>

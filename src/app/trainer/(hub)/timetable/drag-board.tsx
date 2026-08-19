@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { categorize, toLocalIso, type TimetableEvent } from "@/lib/timetable-grid";
-import { moveTimetableEvent, deleteTimetableEvent, setAttendance, setInputSessionCriteria } from "@/app/trainer/(hub)/timetable/actions";
+import { moveTimetableEvent, deleteTimetableEvent, setAttendance, setInputSessionCriteria, setTpEventMode } from "@/app/trainer/(hub)/timetable/actions";
 import type { Volunteer } from "@/app/trainer/(hub)/timetable/event-cell";
 
 // for-claude-code-timetable-drag.md -- replaces the time-band grid
@@ -110,11 +110,13 @@ export function DragBoard({
   locked,
   volunteers,
   attendedByEvent,
+  mixedMode,
 }: {
   events: TimetableEvent[];
   locked: boolean;
   volunteers: Volunteer[];
   attendedByEvent: Map<string, Set<string>>;
+  mixedMode: boolean;
 }) {
   const weeks = buildWeeks(events);
   const today = toLocalIso(new Date());
@@ -247,6 +249,7 @@ export function DragBoard({
           volunteers={volunteers}
           attendedIds={attendedByEvent.get(selectedEvent.id) ?? new Set()}
           onClose={() => setSelectedEvent(null)}
+          mixedMode={mixedMode}
         />
       ) : null}
 
@@ -261,12 +264,14 @@ function DetailPanel({
   volunteers,
   attendedIds,
   onClose,
+  mixedMode,
 }: {
   event: TimetableEvent;
   locked: boolean;
   volunteers: Volunteer[];
   attendedIds: Set<string>;
   onClose: () => void;
+  mixedMode: boolean;
 }) {
   const rows: { label: string; value: string }[] = [
     { label: "Type", value: event.type.replace(/_/g, " ") },
@@ -316,6 +321,29 @@ function DetailPanel({
               placeholder="4c, 5f"
               className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
             />
+            <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs hover:border-primary">
+              Save
+            </button>
+          </form>
+        </details>
+      ) : null}
+
+      {event.type === "tp" && mixedMode ? (
+        <details className="mt-1" open>
+          <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
+            {event.mode ? `Mode: ${event.mode === "f2f" ? "Face-to-face" : "Online"}` : "Set mode"}
+          </summary>
+          <form action={setTpEventMode} className="mt-2 flex flex-col gap-1.5">
+            <input type="hidden" name="event_id" value={event.id} />
+            <select
+              name="mode"
+              defaultValue={event.mode ?? ""}
+              className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+            >
+              <option value="">Not set</option>
+              <option value="f2f">Face-to-face</option>
+              <option value="online">Online</option>
+            </select>
             <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs hover:border-primary">
               Save
             </button>

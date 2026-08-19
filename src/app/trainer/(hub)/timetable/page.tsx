@@ -32,7 +32,7 @@ export default async function TrainerTimetablePage({
   }
 
   const [{ data: course }, { data: events }, { data: volunteers }] = await Promise.all([
-    supabase.from("courses").select("timetable_locked_at, time_bands").eq("id", trainer.course_id).maybeSingle(),
+    supabase.from("courses").select("timetable_locked_at, time_bands, delivery_mode").eq("id", trainer.course_id).maybeSingle(),
     supabase
       .from("course_timetable_events")
       .select("*")
@@ -246,7 +246,13 @@ export default async function TrainerTimetablePage({
 
       {events && events.length > 0 ? (
         <div className="sheet">
-          <DragBoard events={events} locked={locked} volunteers={volunteers ?? []} attendedByEvent={attendedByEvent} />
+          <DragBoard
+            events={events}
+            locked={locked}
+            volunteers={volunteers ?? []}
+            attendedByEvent={attendedByEvent}
+            mixedMode={course?.delivery_mode === "mixed"}
+          />
         </div>
       ) : (
         <div className="sheet text-sm text-muted">No events yet.</div>

@@ -17,7 +17,7 @@ import {
 import { TrajectoryGradientBars } from "@/components/trajectory-gradient-bar";
 import { AssignmentsSummary, TpFeedbackSummary, AssessedTpStatsBadge } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
 import { CriteriaRatingPill, StandardRatingPill } from "@/lib/status-pill";
-import { computeProgressIssues, computeAssessedTpStats, computeCurrentTpRound } from "@/lib/course-progress";
+import { computeProgressIssues, computeAssessedTpStats, computeAssessedHoursByMode, computeCurrentTpRound } from "@/lib/course-progress";
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
@@ -109,6 +109,7 @@ export default async function PortfolioCelta5Page({
       { data: observations },
       { data: timetableEvents },
       { data: plans },
+      { data: subgroupMember },
       { data: assignments },
       { data: course },
       { data: center },
@@ -124,11 +125,12 @@ export default async function PortfolioCelta5Page({
       viewer?.course_id
         ? supabase
             .from("course_timetable_events")
-            .select("type, event_date, linked_tp_number, linked_assignment_type, title")
+            .select("type, event_date, linked_tp_number, linked_assignment_type, title, mode")
             .eq("course_id", viewer.course_id)
             .in("type", ["tp", "assignment_due", "resubmission_due"])
         : Promise.resolve({ data: [] }),
       supabase.from("plan_assignments").select("tp_number, tp_point_id, taught_at").eq("trainee_id", traineeId),
+      supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle(),
       supabase.from("assignments").select("assignment_type, first_status, resubmission_status").eq("trainee_id", traineeId),
       viewer?.course_id
         ? supabase.from("courses").select("name, start_date, end_date, delivery_mode").eq("id", viewer.course_id).maybeSingle()
@@ -169,6 +171,19 @@ export default async function PortfolioCelta5Page({
       tpPointCoursebookById: new Map((tpPointsForLevels ?? []).map((p) => [p.id, p.tp_coursebook_id])),
       coursebookLevelById: new Map((coursebooksForLevels ?? []).map((c) => [c.id, c.level])),
     });
+
+    // course-modes.md §2 (Handbook 8.1.2) -- mixed-mode only.
+    const { data: subgroupForMode } = subgroupMember?.subgroup_id
+      ? await supabase.from("course_subgroups").select("half_order").eq("id", subgroupMember.subgroup_id).maybeSingle()
+      : { data: null };
+    const assessedHoursByMode =
+      course?.delivery_mode === "mixed"
+        ? computeAssessedHoursByMode({
+            taughtAssignments,
+            halfOrder: subgroupForMode?.half_order === 1 || subgroupForMode?.half_order === 2 ? subgroupForMode.half_order : null,
+            tpEvents: (timetableEvents ?? []).filter((e) => e.type === "tp"),
+          })
+        : null;
 
     const byCode = new Map((matrix ?? []).map((m) => [m.criteria_code, m]));
     const candidateRatedCount = CELTA_CRITERIA_CODES.filter((c) => byCode.get(c)?.candidate_status).length;
@@ -597,7 +612,7 @@ export default async function PortfolioCelta5Page({
         <div className="sheet">
           <p className="text-sm text-muted">Teaching practice</p>
           <div className="mt-2">
-            <AssessedTpStatsBadge stats={assessedTpStats} />
+            <AssessedTpStatsBadge stats={assessedTpStats} byMode={assessedHoursByMode} />
           </div>
         </div>
 
@@ -682,6 +697,7 @@ export default async function PortfolioCelta5Page({
     { data: tpFeedbackRows },
     { data: planAssignments },
     { data: tpEvents },
+    { data: subgroupMember },
   ] = await Promise.all([
     supabase.from("courses").select("*").eq("id", trainee.course_id ?? "").maybeSingle(),
     supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
@@ -692,12 +708,13 @@ export default async function PortfolioCelta5Page({
     supabase.from("tp_lessons").select("id").eq("trainee_id", traineeId),
     supabase.from("assignments").select("*").eq("trainee_id", traineeId),
     supabase.from("tp_feedback").select("*").eq("trainee_id", traineeId),
-    supabase.from("plan_assignments").select("tp_point_id, taught_at").eq("trainee_id", traineeId),
+    supabase.from("plan_assignments").select("tp_number, tp_point_id, taught_at").eq("trainee_id", traineeId),
     supabase
       .from("course_timetable_events")
-      .select("type, event_date, linked_tp_number")
+      .select("type, event_date, linked_tp_number, mode")
       .eq("course_id", trainee.course_id ?? "")
       .eq("type", "tp"),
+    supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle(),
   ]);
 
   // assessment-model.md link 3: which TP round the COHORT has reached,
@@ -745,6 +762,19 @@ export default async function PortfolioCelta5Page({
     tpPointCoursebookById: new Map((tpPointsForLevels ?? []).map((p) => [p.id, p.tp_coursebook_id])),
     coursebookLevelById: new Map((coursebooksForLevels ?? []).map((c) => [c.id, c.level])),
   });
+
+  // course-modes.md §2 (Handbook 8.1.2) -- mixed-mode only.
+  const { data: subgroupForMode } = subgroupMember?.subgroup_id
+    ? await supabase.from("course_subgroups").select("half_order").eq("id", subgroupMember.subgroup_id).maybeSingle()
+    : { data: null };
+  const assessedHoursByMode =
+    course?.delivery_mode === "mixed"
+      ? computeAssessedHoursByMode({
+          taughtAssignments,
+          halfOrder: subgroupForMode?.half_order === 1 || subgroupForMode?.half_order === 2 ? subgroupForMode.half_order : null,
+          tpEvents: tpEvents ?? [],
+        })
+      : null;
 
   const tagsByCriteria = new Map<string, { tag_type: "strength" | "action_point"; created_at: string }[]>();
   for (const tag of criteriaTags ?? []) {
@@ -931,7 +961,7 @@ export default async function PortfolioCelta5Page({
 
         {observationsBlock}
 
-        <AssessedTpStatsBadge stats={assessedTpStats} />
+        <AssessedTpStatsBadge stats={assessedTpStats} byMode={assessedHoursByMode} />
 
         <AssignmentsSummary traineeId={traineeId} assignments={assignments ?? []} />
         <TpFeedbackSummary traineeId={traineeId} feedbackRows={tpFeedbackRows ?? []} />
@@ -1099,7 +1129,7 @@ export default async function PortfolioCelta5Page({
 
       {observationsBlock}
 
-      <AssessedTpStatsBadge stats={assessedTpStats} />
+      <AssessedTpStatsBadge stats={assessedTpStats} byMode={assessedHoursByMode} />
 
       <AssignmentsSummary traineeId={traineeId} assignments={assignments ?? []} />
       <TpFeedbackSummary traineeId={traineeId} feedbackRows={tpFeedbackRows ?? []} />

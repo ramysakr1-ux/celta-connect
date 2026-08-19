@@ -119,6 +119,35 @@ export async function setInputSessionCriteria(formData: FormData): Promise<void>
   revalidatePath("/trainer/timetable");
 }
 
+// specs/course-modes.md §2/§4, mixed-mode delivery: which mode this TP
+// round is in. Manual per-round tag (Ramy, 2026-08-19) -- only meaningful
+// on a mixed-mode course, but not enforced here since a course changing
+// delivery_mode after rounds are tagged shouldn't silently wipe data.
+export async function setTpEventMode(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return;
+
+  const eventId = formData.get("event_id");
+  const mode = formData.get("mode");
+  if (typeof eventId !== "string") return;
+  if (mode !== "f2f" && mode !== "online" && mode !== "") return;
+
+  const supabase = await createClient();
+  const { data: event } = await supabase
+    .from("course_timetable_events")
+    .select("id, course_id, type")
+    .eq("id", eventId)
+    .maybeSingle();
+  if (!event || event.course_id !== trainer.course_id || event.type !== "tp") return;
+
+  await supabase
+    .from("course_timetable_events")
+    .update({ mode: mode === "" ? null : mode })
+    .eq("id", eventId);
+
+  revalidatePath("/trainer/timetable");
+}
+
 // §1.1a-skel -- "nobody builds a course from a blank grid." Only offered
 // (see page.tsx) when the timetable is empty, so this never silently piles
 // duplicate events on top of a trainer's real edits -- to regenerate,
