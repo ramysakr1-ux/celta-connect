@@ -104,6 +104,13 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     inputSessionCriteria: ["4a", "4b", "4e", "4f", "4h", "4j", "4k", "4m", "4n"],
   },
   {
+    // Reading half of the 3a/3d split (Ramy, 2026-08-19) -- session-mapping
+    // only, same status as the 3b/3c speaking/writing split above. Stays
+    // tagged "3a" (unchanged) because that's what this session actually
+    // teaches -- reading. When the "Listening" input session gets its own
+    // timetable slot, tag it inputSessionCriteria: ["3d"] to complete the
+    // split; until then criteriaForTpDate() has no listening-specific
+    // session to pick up, which is expected, not a bug.
     type: "input_session",
     title: "Receptive skills",
     position: pos(1),
@@ -508,6 +515,8 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
   },
   { type: "tp", title: "TP1 -- Group DEF", position: partTimePos(3), time: "10:00", tag: "individual", linkedTpNumber: 1 },
   {
+    // Reading half of the 3a/3d split -- see the matching comment on
+    // "Receptive skills" in the full-time skeleton above.
     type: "input_session",
     title: "Receptive skills",
     position: partTimePos(3),

@@ -59,6 +59,18 @@ export const CRITERIA_LABELS: Record<string, string> = {
   "3a": "helping learners to understand reading and listening texts",
   "3b": "helping learners to produce oral and written language",
 
+  // "3c"/"3d" are NOT official Cambridge codes -- the certified CELTA 5
+  // has only 3a and 3b (Appendix 1), and celta5_matrix, CRITERIA_ENTERS_AT_TP
+  // and the booklet PDF only ever use those two. These are session-mapping
+  // labels, same status as "3c" introduced 2026-08-19 for criteriaForTpDate()
+  // ("this week's focus criterion" for peer observation): 3b splits into
+  // speaking (stays "3b") / writing ("3c"), and by the same logic 3a splits
+  // into reading (stays "3a", taught by "Receptive skills") / listening
+  // ("3d", taught by the "Listening" input session once it has a timetable
+  // slot -- see the note on "Receptive skills" in timetable-skeleton.ts).
+  "3c": "helping learners to produce written language",
+  "3d": "helping learners to understand listening texts",
+
   "4a": "identifying and stating appropriate aims/outcomes for individual lessons",
   "4b": "ordering activities so that they achieve lesson aims",
   "4c": "selecting, adapting or designing materials, activities, resources and technical aids appropriate for the lesson",
@@ -679,6 +691,8 @@ export const SHORT_CRITERIA_LABELS: Record<string, string> = {
 
   "3a": "reading/listening",
   "3b": "productive skills",
+  "3c": "writing",
+  "3d": "listening",
 
   "4a": "stating aims",
   "4b": "staging",
