@@ -1521,6 +1521,9 @@ export interface Database {
           final_checklist_all_records: boolean;
           grade_review_tutor_comments: string | null;
           final_report_released_at: string | null;
+          certificate_grade: "Pass" | "Pass B" | "Pass A" | "Fail" | null;
+          certificate_recorded_at: string | null;
+          certificate_recorded_by: string | null;
           updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["celta5_records"]["Row"]> & {

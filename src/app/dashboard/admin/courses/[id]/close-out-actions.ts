@@ -39,6 +39,48 @@ export async function toggleCambridgeGradesConfirmed(formData: FormData): Promis
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
 }
 
+// build-spec.md compliance-audit item 10 (Handbook 10.5): "Certificates
+// checked against the recommended grades on arrival; Cambridge contacted
+// immediately on an error." The mismatch itself isn't computed here --
+// CertificateCheckCard reads final_recommended_grade vs certificate_grade
+// directly and shows the callout -- this action only records what arrived.
+// An empty grade clears the record (the certificate arriving later, or a
+// correction to what was typed).
+const CERTIFICATE_GRADES = ["Pass", "Pass B", "Pass A", "Fail"] as const;
+type CertificateGrade = (typeof CERTIFICATE_GRADES)[number];
+
+export async function recordCertificateGrade(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const admin = await requireRole("admin");
+  const courseId = formData.get("course_id");
+  const traineeId = formData.get("trainee_id");
+  const gradeRaw = formData.get("certificate_grade");
+  if (typeof courseId !== "string" || typeof traineeId !== "string") {
+    return { error: "Missing candidate." };
+  }
+  if (gradeRaw !== null && typeof gradeRaw !== "string") return { error: "Invalid grade." };
+  const grade: CertificateGrade | null =
+    gradeRaw && (CERTIFICATE_GRADES as readonly string[]).includes(gradeRaw) ? (gradeRaw as CertificateGrade) : null;
+  if (gradeRaw && !grade) return { error: "Invalid grade." };
+
+  const course = await loadOwnedCourse(courseId, admin.center_id);
+  if (!course) return { error: "Course not found." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("celta5_records")
+    .update(
+      grade
+        ? { certificate_grade: grade, certificate_recorded_at: new Date().toISOString(), certificate_recorded_by: admin.id }
+        : { certificate_grade: null, certificate_recorded_at: null, certificate_recorded_by: null }
+    )
+    .eq("course_id", courseId)
+    .eq("trainee_id", traineeId);
+  if (error) return { error: "Could not record the certificate grade." };
+
+  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  return { error: null };
+}
+
 async function loadOwnedCourse(courseId: string, centerId: string) {
   const supabase = await createClient();
   const { data: course } = await supabase

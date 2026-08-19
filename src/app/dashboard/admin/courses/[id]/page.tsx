@@ -22,6 +22,7 @@ import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicat
 import { DeliveryModeCard } from "@/app/dashboard/admin/courses/[id]/delivery-mode-card";
 import { ChatRetentionForm } from "@/app/dashboard/admin/courses/[id]/chat-retention-form";
 import { CloseOutCard } from "@/app/dashboard/admin/courses/[id]/close-out-card";
+import { CertificateCheckCard } from "@/app/dashboard/admin/courses/[id]/certificate-check-card";
 import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rules";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
@@ -206,10 +207,21 @@ export default async function CourseRosterPage({
   const deferralTraineeNameById = new Map((deferralSourceTrainees ?? []).map((t) => [t.id, t.full_name]));
   const deferralCourseById = new Map((deferralSourceCourses ?? []).map((c) => [c.id, c]));
 
-  const [{ data: closeOut }, blockingReasons] = await Promise.all([
+  const [{ data: closeOut }, blockingReasons, { data: certificateRecords }] = await Promise.all([
     supabase.from("course_close_outs").select("*").eq("course_id", id).maybeSingle(),
     getCloseOutBlockingReasons(id),
+    supabase
+      .from("celta5_records")
+      .select("trainee_id, final_recommended_grade, certificate_grade")
+      .eq("course_id", id)
+      .not("final_recommended_grade", "is", null),
   ]);
+  const certificateCandidates = (certificateRecords ?? []).map((r) => ({
+    traineeId: r.trainee_id,
+    fullName: nameByTraineeId.get(r.trainee_id) ?? "Unknown",
+    recommendedGrade: r.final_recommended_grade,
+    certificateGrade: r.certificate_grade,
+  }));
 
   const today = toLocalIso(new Date());
   const courseState = computeCourseState(course.start_date, course.end_date, today);
@@ -805,6 +817,8 @@ export default async function CourseRosterPage({
           </table>
         </div>
       </div>
+
+      <CertificateCheckCard courseId={course.id} candidates={certificateCandidates} />
 
       <CloseOutCard
         courseId={course.id}
