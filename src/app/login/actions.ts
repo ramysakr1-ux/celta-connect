@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { centerInfoForUserId, joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
+import { isAuthRateLimited } from "@/lib/auth-rate-limit";
 
 export interface SignInState {
   error: string | null;
@@ -33,6 +34,14 @@ export async function sendSignInLink(_prevState: SignInLinkState, formData: Form
   }
 
   const admin = createAdminClient();
+
+  // Public, unauthenticated, and generateLink() below is real Supabase Auth
+  // work even before any email goes out -- rate-limited the same way /apply
+  // is (see src/lib/auth-rate-limit.ts).
+  if (await isAuthRateLimited(admin, "sign_in_link")) {
+    return { error: "Too many attempts. Try again in an hour.", sent: false };
+  }
+
   const { data, error: generateError } = await admin.auth.admin.generateLink({ type: "magiclink", email });
 
   // Same wording regardless of whether the email has an account -- standard
@@ -82,6 +91,12 @@ export async function signIn(
 
   if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
     return { error: "Enter your email and password." };
+  }
+
+  // Public, unauthenticated password-guessing surface -- same rate limit as
+  // the passwordless flows above (see src/lib/auth-rate-limit.ts).
+  if (await isAuthRateLimited(createAdminClient(), "sign_in_password")) {
+    return { error: "Too many attempts. Try again in an hour." };
   }
 
   const supabase = await createClient();

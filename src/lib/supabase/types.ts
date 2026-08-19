@@ -677,6 +677,20 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["interview_records"]["Row"]>;
         Relationships: [];
       };
+      auth_ip_attempts: {
+        Row: {
+          id: string;
+          kind: "sign_in_link" | "password_reset" | "sign_in_password";
+          ip_address: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["auth_ip_attempts"]["Row"]> & {
+          kind: "sign_in_link" | "password_reset" | "sign_in_password";
+          ip_address: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["auth_ip_attempts"]["Row"]>;
+        Relationships: [];
+      };
       apply_ip_attempts: {
         Row: {
           id: string;

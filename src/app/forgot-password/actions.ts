@@ -3,6 +3,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { centerInfoForUserId, joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
+import { isAuthRateLimited } from "@/lib/auth-rate-limit";
 
 export interface ForgotPasswordState {
   error: string | null;
@@ -30,6 +31,14 @@ export async function requestPasswordReset(
   // This sidesteps the whole fragment/stale-session ambiguity that broke the
   // old flow (see project_password_reset_session_bug memory).
   const adminClient = createAdminClient();
+
+  // Public, unauthenticated, and generateLink() below is real Supabase Auth
+  // work even before any email goes out -- rate-limited the same way /apply
+  // is (see src/lib/auth-rate-limit.ts).
+  if (await isAuthRateLimited(adminClient, "password_reset")) {
+    return { error: "Too many attempts. Try again in an hour.", sent: false };
+  }
+
   const { data, error: generateError } = await adminClient.auth.admin.generateLink({
     type: "recovery",
     email,
