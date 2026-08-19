@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
-import { createResendClient, joinLinkSender } from "@/lib/resend/client";
+import { joinLinkSender } from "@/lib/resend/client";
+import { sendApplicantEmail } from "@/lib/admissions-email";
 import type { DeliveryMode } from "@/lib/delivery-mode";
 
 const VALID_DELIVERY_MODES: DeliveryMode[] = ["f2f", "online", "mixed"];
@@ -208,29 +209,38 @@ export async function sendJoinLinkEmail(
   const { data: center } = await supabase.from("centers").select("name").eq("id", staff.center_id).maybeSingle();
   const centerName = center?.name ?? "Your centre";
 
-  try {
-    const resend = createResendClient();
-    const { error } = await resend.emails.send({
-      from: joinLinkSender(centerName),
-      to: toEmail,
-      subject: `${centerName} · your CELTA workspace is ready`,
-      html: buildJoinEmailHtml({
-        centerName,
-        courseName: course.name,
-        startDate: course.start_date,
-        endDate: course.end_date,
-        role,
-        joinUrl,
-      }),
-    });
+  // for-claude-code-email-delivery-tracking.md -- was a raw resend.emails.
+  // send() call, completely untracked despite being the spec's own
+  // highest-stakes case ("a person with no way into the course they've paid
+  // for"). Routed through sendApplicantEmail for the same tracking/
+  // two-strike-bounce-gate every other email already has; applicantId is
+  // null (a join invite often has no applicant row at all, trainer invites
+  // never do) and the invites@ sending identity is preserved via `from`
+  // rather than silently collapsing to sendApplicantEmail's noreply@ default.
+  const { error } = await sendApplicantEmail({
+    centerName,
+    centerAdmissionsEmail: null,
+    to: toEmail,
+    subject: "your CELTA workspace is ready",
+    html: buildJoinEmailHtml({
+      centerName,
+      courseName: course.name,
+      startDate: course.start_date,
+      endDate: course.end_date,
+      role,
+      joinUrl,
+    }),
+    centerId: course.center_id,
+    applicantId: null,
+    type: "workspace_invitation",
+    sentBy: staff.id,
+    from: joinLinkSender(centerName),
+  });
 
-    if (error) {
-      return { error: "Could not send the email. Try copying the link instead.", sent: false };
-    }
-    return { error: null, sent: true };
-  } catch {
+  if (error) {
     return { error: "Could not send the email. Try copying the link instead.", sent: false };
   }
+  return { error: null, sent: true };
 }
 
 function buildJoinEmailHtml({

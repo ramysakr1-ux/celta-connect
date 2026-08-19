@@ -35,7 +35,10 @@ export type ApplicantEmailType =
   | "volunteer_signed_up"
   | "volunteer_class_starting"
   // Branches
-  | "referral";
+  | "referral"
+  // Course join links (roster-actions.ts) -- staff-facing, same as
+  // tutor_added/centre_created, no applicant row required.
+  | "workspace_invitation";
 
 /**
  * Who a reply reaches. All Emails.dc.html gives every email exactly one of
@@ -74,6 +77,7 @@ export const EMAIL_REPLY_TO: Record<ApplicantEmailType, EmailReplyTo> = {
   volunteer_signed_up: "noreply",
   volunteer_class_starting: "admissions",
   referral: "admissions",
+  workspace_invitation: "noreply",
 };
 
 export async function sendApplicantEmail(input: {
@@ -98,6 +102,11 @@ export async function sendApplicantEmail(input: {
   tutorEmail?: string | null;
   /** For staff and volunteer emails, which have no applicant row to name. */
   recipientName?: string | null;
+  // Defaults to noreply@ (the other nineteen). Join links send from their
+  // own invites@ address instead (joinLinkSender) -- a deliberate, separate
+  // sending identity that predates this function, not something to collapse
+  // silently just by routing through here.
+  from?: string;
 }): Promise<{ error: string | null }> {
   // "After **two consecutive bounces** to the same address, Connect stops
   // sending and requires a new address." Checked before sending rather than
@@ -157,7 +166,7 @@ export async function sendApplicantEmail(input: {
   try {
     const resend = createResendClient();
     const { data, error } = await resend.emails.send({
-      from: `${input.centerName} <noreply@celtaconnect.com>`,
+      from: input.from ?? `${input.centerName} <noreply@celtaconnect.com>`,
       to: input.to,
       replyTo,
       subject,

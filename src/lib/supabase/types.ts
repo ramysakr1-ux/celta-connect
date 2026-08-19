@@ -2135,7 +2135,8 @@ export interface Database {
             | "assessor_pack"
             | "volunteer_signed_up"
             | "volunteer_class_starting"
-            | "referral";
+            | "referral"
+            | "workspace_invitation";
           to_email: string;
           // Six of the nineteen go to staff, assessors or volunteers, who have
           // no applicant row to take a name from.
