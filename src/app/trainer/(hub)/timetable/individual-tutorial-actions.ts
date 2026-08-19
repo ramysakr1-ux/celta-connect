@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { sendPushToOwners } from "@/lib/push/send";
 
 export interface FormState {
   error: string | null;
@@ -109,6 +110,14 @@ export async function createOrUpdateIndividualTutorialInvite(_prevState: FormSta
 
 // Removing the timetable event cascades to the invite row (on delete
 // cascade, migration 0129) -- one delete undoes both.
+//
+// build-spec.md §? / for-claude-code-announcements.md: "Push notification
+// only for cancellation, room change, or something already late." Of the
+// three, this is the only one with a real feature to hook a push onto --
+// there's no general "cancel a TP" anywhere in the app, and no room field
+// to change, so this is deliberately scoped to individual tutorial
+// cancellation specifically (confirmed with Ramy 2026-08-19), not a
+// general timetable-cancellation push.
 export async function cancelIndividualTutorialInvite(formData: FormData): Promise<void> {
   const trainer = await requireRole(["trainer", "admin"]);
   const inviteId = formData.get("invite_id");
@@ -117,13 +126,29 @@ export async function cancelIndividualTutorialInvite(formData: FormData): Promis
   const supabase = await createClient();
   const { data: invite } = await supabase
     .from("individual_tutorial_invites")
-    .select("timetable_event_id, trainee_id")
+    .select("timetable_event_id, trainee_id, stage")
     .eq("id", inviteId)
     .eq("course_id", trainer.course_id ?? "")
     .maybeSingle();
   if (!invite) return;
 
+  const { data: event } = await supabase
+    .from("course_timetable_events")
+    .select("event_date")
+    .eq("id", invite.timetable_event_id)
+    .maybeSingle();
+
   await supabase.from("course_timetable_events").delete().eq("id", invite.timetable_event_id);
+
+  const label = STAGE_LABEL[invite.stage as "stage1" | "stage3"] ?? "tutorial";
+  await sendPushToOwners(
+    { profileIds: [invite.trainee_id] },
+    {
+      title: `${label} tutorial cancelled`,
+      body: event?.event_date ? `Your ${event.event_date} slot has been cancelled -- your tutor will set a new time.` : "Your tutor will set a new time.",
+      url: `/portfolio/${invite.trainee_id}`,
+    }
+  );
 
   revalidatePath("/trainer/timetable");
   revalidatePath("/trainer/roster");
