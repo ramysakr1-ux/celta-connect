@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
+import { esc } from "@/lib/email-layout";
 import type { DeliveryMode } from "@/lib/delivery-mode";
 
 const VALID_DELIVERY_MODES: DeliveryMode[] = ["f2f", "online", "mixed"];
@@ -261,9 +262,9 @@ function buildJoinEmailHtml({
   // Opens with the centre and course, not the platform -- Connect only
   // appears via the sender name, not in the body copy (rename-to-connect.md).
   return `
-    <h2>${centerName} has invited you to join ${courseName}</h2>
+    <h2>${esc(centerName)} has invited you to join ${esc(courseName)}</h2>
     <p>
-      You've been invited to join <strong>${courseName}</strong>
+      You've been invited to join <strong>${esc(courseName)}</strong>
       (${startDate} &rarr; ${endDate}) as a <strong>${role}</strong>.
     </p>
     <p><a href="${joinUrl}">Join the course &rarr;</a></p>

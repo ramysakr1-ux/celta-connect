@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { esc } from "@/lib/email-layout";
 
 export interface ClaimSlotState {
   error: string | null;
@@ -124,7 +125,7 @@ async function notifyStaffOfPickerBooking(
         applicantId: input.applicantId,
         type: "interview_booked",
         recipientName: person.full_name,
-        html: `<p>${applicant.full_name} booked themselves in for ${when}.</p>`,
+        html: `<p>${esc(applicant.full_name)} booked themselves in for ${esc(when)}.</p>`,
       });
     }
   } catch {

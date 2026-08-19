@@ -4,6 +4,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
+import { esc } from "@/lib/email-layout";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -151,7 +152,7 @@ export async function requestCentreDeleteCode(_prevState: RequestDeleteCodeState
     centerAdmissionsEmail: null,
     to: profile.email,
     subject: "confirm deleting this centre",
-    html: `<p>Someone -- hopefully you -- asked to permanently delete ${center.name} on Connect.</p><p>Confirmation code: <strong style="font-size:20px;letter-spacing:2px;">${code}</strong></p><p>This code expires in 15 minutes and works once. If you didn't request this, ignore this email -- nothing happens without the code.</p>`,
+    html: `<p>Someone -- hopefully you -- asked to permanently delete ${esc(center.name)} on Connect.</p><p>Confirmation code: <strong style="font-size:20px;letter-spacing:2px;">${code}</strong></p><p>This code expires in 15 minutes and works once. If you didn't request this, ignore this email -- nothing happens without the code.</p>`,
     centerId,
     applicantId: null,
     type: "centre_delete_code",

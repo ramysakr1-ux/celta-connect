@@ -238,10 +238,14 @@ export function acknowledgementEmailHtml(input: {
   courseName: string;
   hearBy: string;
 }): string {
+  // applicantName is whatever an unauthenticated visitor typed into /apply
+  // -- escaped here (this function predates the p()/emailShell helpers that
+  // escape automatically, see the note on this file's other four old-style
+  // raw-HTML functions).
   return `
-    <p>Dear ${input.applicantName},</p>
-    <p>Thank you for applying to ${input.courseName}. This is just to confirm your application reached us.</p>
-    <p>We'll be in touch by <strong>${input.hearBy}</strong>. If you don't hear from us by then, please do chase us.</p>
+    <p>Dear ${esc(input.applicantName)},</p>
+    <p>Thank you for applying to ${esc(input.courseName)}. This is just to confirm your application reached us.</p>
+    <p>We'll be in touch by <strong>${esc(input.hearBy)}</strong>. If you don't hear from us by then, please do chase us.</p>
     <p>This message is automatic -- there's nothing you need to do in reply.</p>
   `;
 }
@@ -354,8 +358,8 @@ export function taskWaitingEmailHtml(input: {
   taskUrl: string;
 }): string {
   return `
-    <p>Dear ${input.applicantName},</p>
-    <p>Your pre-interview task for ${input.courseName} is ready.</p>
+    <p>Dear ${esc(input.applicantName)},</p>
+    <p>Your pre-interview task for ${esc(input.courseName)} is ready.</p>
     <p><a href="${input.taskUrl}">${input.taskUrl}</a></p>
     <p>It saves as you type, so you can stop and come back to it. There's no time limit once you start.</p>
   `;
@@ -376,9 +380,9 @@ export function interviewBookedEmailHtml(input: {
   markedTaskUrl: string;
 }): string {
   return `
-    <p>Dear ${input.recipientName},</p>
-    <p>An interview has been booked with <strong>${input.applicantName}</strong> for ${input.courseName}.</p>
-    <p><strong>When:</strong> ${input.when}</p>
+    <p>Dear ${esc(input.recipientName)},</p>
+    <p>An interview has been booked with <strong>${esc(input.applicantName)}</strong> for ${esc(input.courseName)}.</p>
+    <p><strong>When:</strong> ${esc(input.when)}</p>
     <p>Their marked task is here: <a href="${input.markedTaskUrl}">${input.markedTaskUrl}</a></p>
     <p>This is an automatic notification -- the booking is already in Connect, so there's nothing to confirm.</p>
   `;
@@ -395,9 +399,9 @@ export function readingFlaggedEmailHtml(input: {
   reviewUrl: string;
 }): string {
   return `
-    <p>Dear ${input.tutorName},</p>
-    <p>An application for ${input.courseName} needs a person to look at it -- <strong>${input.applicantName}</strong>.</p>
-    ${input.flags.length ? `<p><strong>What was flagged:</strong></p><ul>${input.flags.map((f) => `<li>${f}</li>`).join("")}</ul>` : ""}
+    <p>Dear ${esc(input.tutorName)},</p>
+    <p>An application for ${esc(input.courseName)} needs a person to look at it -- <strong>${esc(input.applicantName)}</strong>.</p>
+    ${input.flags.length ? `<p><strong>What was flagged:</strong></p><ul>${input.flags.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
     <p><a href="${input.reviewUrl}">${input.reviewUrl}</a></p>
     <p><strong>Nothing has been sent to the applicant.</strong> They're waiting to hear, and no email goes to them until you decide -- a rejection is never written by the app.</p>
   `;
@@ -412,8 +416,8 @@ export function volunteerSignedUpEmailHtml(input: {
   centreName: string;
 }): string {
   return `
-    <p>Dear ${input.volunteerName},</p>
-    <p>Thank you for signing up for free English classes with ${input.centreName}. We have your details.</p>
+    <p>Dear ${esc(input.volunteerName)},</p>
+    <p>Thank you for signing up for free English classes with ${esc(input.centreName)}. We have your details.</p>
     <p>To be straight with you about timing: these classes run alongside our teacher-training courses, which means every few months rather than continuously. It may be a little while before we're in touch with dates -- that's normal, and it isn't us forgetting you.</p>
     <p>There's no account to set up and nothing further you need to do.</p>
   `;

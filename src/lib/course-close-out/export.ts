@@ -20,6 +20,7 @@ import { renderGradesReportBuffer, type GradesReportCandidate } from "./grades-r
 import { renderObservationsLogBuffer } from "./observations-log-pdf";
 import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
+import { esc } from "@/lib/email-layout";
 import type { CriteriaRating, Database } from "@/lib/supabase/types";
 
 type Admin = ReturnType<typeof createAdminClient>;
@@ -129,7 +130,7 @@ async function sendReceiptRequestEmail(input: {
   // admin's address actually bounced) rather than one opaque batched send,
   // and doesn't touch a function nineteen+ other callers already depend on.
   const html = `
-      <p>${courseName} has been exported to your centre's Google Drive.</p>
+      <p>${esc(courseName)} has been exported to your centre's Google Drive.</p>
       <p><a href="${driveFolderUrl}">Open the folder</a> and have a look whenever suits.</p>
       <p>Once you're happy everything's there, confirm receipt here so we can start the usual
       week-long grace hold before the working copy in Connect is cleared:</p>
