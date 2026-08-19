@@ -8,6 +8,7 @@ import { ProviderList } from "@/app/centre/payments/provider-list";
 import type { PaymentProviderKey } from "@/lib/payments/providers";
 import { RefundsPanel, type RefundRow } from "@/app/centre/payments/refunds-panel";
 import { PaymentNotificationsPanel } from "@/app/centre/payments/payment-notifications-panel";
+import { TransactionsPanel } from "@/app/centre/payments/transactions-panel";
 
 // Centre settings > payment providers (spec 2026-08-16, Payments.dc.html 1c).
 // Reached from the "payment providers" link in Centre Admin's settings bar.
@@ -73,6 +74,15 @@ export default async function PaymentProvidersPage() {
     .is("read_at", null)
     .order("created_at", { ascending: false });
 
+  // payment_provider_transactions logs every Stripe webhook event purely
+  // for idempotency (migration 0087) -- nothing anywhere read it back.
+  const { data: transactions } = await supabase
+    .from("payment_provider_transactions")
+    .select("id, provider, event_type, amount, currency, received_at")
+    .eq("center_id", centerId)
+    .order("received_at", { ascending: false })
+    .limit(30);
+
   return (
     <div className="flex max-w-[720px] flex-col gap-5">
       <div>
@@ -98,6 +108,17 @@ export default async function PaymentProvidersPage() {
       />
 
       <RefundsPanel refunds={refundRows} canEdit={can(ctx.roles, "payments.edit")} />
+
+      <TransactionsPanel
+        transactions={(transactions ?? []).map((t) => ({
+          id: t.id,
+          provider: t.provider,
+          eventType: t.event_type,
+          amount: t.amount != null ? Number(t.amount) : null,
+          currency: t.currency,
+          receivedAt: t.received_at,
+        }))}
+      />
 
       <p className="text-xs leading-relaxed text-muted">
         One currency per course, set by the centre. Card is one of four accepted methods and is never required. Card
