@@ -4,7 +4,14 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
+import {
+  DENSITY_TIER_LABELS,
+  ABBREVIATIONS_GLOSSARY,
+  PLANNING_TIPS,
+  TEACHING_TIPS,
+  showsAbbreviationsGlossary,
+  showsTips,
+} from "@/lib/tp-density";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import {
   TP_LESSON_LENGTH_MINUTES,
@@ -355,6 +362,47 @@ export default async function TpDetailPage({
               </div>
             ) : null}
           </div>
+
+          {showsAbbreviationsGlossary(tier) || showsTips(tier) ? (
+            <div className="mt-5 flex flex-col gap-4 border-t border-border-faint pt-4">
+              {showsAbbreviationsGlossary(tier) ? (
+                <div>
+                  <p className="text-xs font-semibold tracking-[0.06em] text-muted uppercase">Abbreviations</p>
+                  <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
+                    {ABBREVIATIONS_GLOSSARY.map((a) => (
+                      <span key={a.abbr} className="text-xs text-muted">
+                        <span className="font-semibold text-ink">{a.abbr}</span> -- {a.meaning}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {showsTips(tier) ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <p className="text-xs font-semibold tracking-[0.06em] text-muted uppercase">Planning tips</p>
+                    <ul className="mt-1.5 flex flex-col gap-1">
+                      {PLANNING_TIPS.map((tip) => (
+                        <li key={tip} className="text-xs text-muted">
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold tracking-[0.06em] text-muted uppercase">Teaching tips</p>
+                    <ul className="mt-1.5 flex flex-col gap-1">
+                      {TEACHING_TIPS.map((tip) => (
+                        <li key={tip} className="text-xs text-muted">
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         {isStaff ? (
