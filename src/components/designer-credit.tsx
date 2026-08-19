@@ -1,8 +1,11 @@
 import { Wordmark } from "@/components/wordmark";
 
-// specs/rename-to-connect.md: "[mark, 20px] Connect · designed and built by
-// Ramy". Not gold -- gold would make the credit the brightest thing on the
-// page.
+// Corrected 2026-08-20 per Centre-Admin-Complete-Spec.md's explicit
+// "Branding" section: "[mark icon only] designed and built by Ramy (no
+// 'Connect' word at the bottom)" -- supersedes specs/rename-to-connect.md's
+// older "Connect · designed and built by Ramy" wording, which is what this
+// used to render. Not gold -- gold would make the credit the brightest
+// thing on the page.
 //
 // History worth knowing before moving this again: on 2026-08-15 it was moved
 // off the Centre Admin and sign-in footers onto the public landing page only
@@ -22,7 +25,7 @@ export function DesignerCredit({ className = "" }: { className?: string }) {
       <span className="inline-flex items-center gap-1.5 text-[11px] text-muted">
         <Wordmark size="icon" iconSizePx={20} />
         <span>
-          Connect &middot; designed and built by <span className="text-ink">Ramy</span>
+          designed and built by <span className="text-ink">Ramy</span>
         </span>
       </span>
     </div>
