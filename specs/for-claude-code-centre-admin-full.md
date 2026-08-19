@@ -32,7 +32,7 @@ Full access to everything inside this centre, nothing outside it. Meant for the 
 ### Cross-cutting rules
 - **Course chat is closed to every admin role, including the owner.** Tutors write candidly in a course channel because they know exactly who reads it; one admin exception ends that permanently.
 - **Seeing a course you don't teach on is a trainer-to-trainer grant, never self-service.** E.g. a Centre owner who isn't an approved trainer never gets into feedback, tutorials, or CELTA 5 records — those need an approved-trainer grant from someone who already holds it (ultimately tracing back to the course's main tutor). Whoever opens a record this way leaves a trace: who looked, at what, when — and the grant itself (who gave it, on what basis) is on the record too.
-- **Nobody at Connect (the platform) holds a key to any centre's data.** The owner's reach stops at the centre boundary; there's no cross-centre role. Platform support only gets in when a centre explicitly invites them, for a stated period, logged.
+- **Nobody at Connect (the platform) holds a key to any centre's data.** The owner's reach stops at the centre boundary; there's no cross-centre role. Platform support only gets in when a centre explicitly invites them, for a stated period, logged. See `for-claude-code-platform-support-access.md` for the full grant flow.
 
 ## Import tab (`1b`) — bringing in an existing spreadsheet
 Four-step flow, tabs at the top, one working panel below:

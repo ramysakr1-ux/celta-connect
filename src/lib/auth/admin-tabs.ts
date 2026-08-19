@@ -26,13 +26,17 @@ export function visibleAdminTabs(roles: CentreRole[]): AdminTab[] {
   // Course Admin's screen and the shared centre material. A Centre manager may
   // read the course admin screen but not act on it, so the tab stays.
   if (canView(roles, "courseAdmin.view")) tabs.push({ href: "/admin", label: "Course admin" });
-  if (canView(roles, "admissions.view")) tabs.push({ href: "/admissions", label: "Admissions" });
   if (canView(roles, "courseAdmin.view")) tabs.push({ href: "/admin/coursebooks", label: "TP Points Library" });
-  // What the centre sends in its own name. Gated on admissions visibility
-  // rather than settings: the people who write to candidates are the ones who
-  // need to see what those emails actually look like.
-  if (canView(roles, "admissions.view")) tabs.push({ href: "/admin/email-preview", label: "Emails" });
   if (can(roles, "centre.settings.edit")) tabs.push({ href: "/admin/settings", label: "Settings" });
+
+  // Corrected 2026-08-20: Admissions and Emails (candidate-communication
+  // preview) were showing here too, both gated on the same admissions.view
+  // capability -- but for-claude-code-course-admin.md is explicit: "Not
+  // covered here -- separate spec needed: Centre Admin proper: ...
+  // admissions pipeline oversight... Do not build these into Course Admin."
+  // Admissions already has its own real home (Centre Admin's Overview links
+  // to /dashboard/admissions as a card) -- it doesn't need a second,
+  // competing entry point inside Course Admin's own chrome.
 
   return tabs;
 }
