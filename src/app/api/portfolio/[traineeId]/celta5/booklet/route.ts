@@ -11,9 +11,12 @@ import { renderCelta5BookletBuffer } from "@/lib/celta5-booklet-pdf/document";
 import type { CriteriaRating } from "@/lib/supabase/types";
 
 // Same three-way viewer resolution as every other /portfolio/[traineeId]/*
-// export route this session. Staff/assessor only -- a candidate downloads
-// their own copy through the (not yet built) close-out flow, same boundary
-// as the final report's "trainee gets a separate, later release" pattern.
+// export route this session. Staff/assessor only. Close-out (export +
+// erase) is built, but its export is a centre-Drive archive, not a
+// candidate-facing download -- a trainee has no self-serve path to their
+// own booklet PDF through any flow today. Left that way deliberately
+// rather than opening this route to them without being asked; if that's
+// wanted, it's an access-control decision, not a wiring fix.
 export async function GET(_request: Request, { params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
   const session = await getCurrentProfile();

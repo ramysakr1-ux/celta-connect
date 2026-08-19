@@ -14,8 +14,7 @@ export function OfferForm({ applicantId, hasDeposit }: { applicantId: string; ha
       <input type="hidden" name="applicant_id" value={applicantId} />
       <h2 className="font-serif text-lg text-ink">Offer</h2>
       <p className="text-sm text-muted">
-        States the fee and an accept-by date. Records the offer here -- actually sending it to the applicant is a
-        follow-up piece not built yet, so let them know directly for now.
+        States the fee and an accept-by date, records the offer, and emails the applicant automatically.
       </p>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="flex flex-col gap-1.5">

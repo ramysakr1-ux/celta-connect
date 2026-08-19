@@ -116,10 +116,11 @@ export function computeThisWeekRange(startDate: string, today: string): { weekSt
 
 export type CourseState = "running" | "upcoming" | "closed";
 
-// Purely date-derived -- Close-out (build-spec item 20, not built yet) will
-// eventually be the real "this course is done" signal (export + erase).
-// Until then "closed" just means the end date has passed; the UI must not
-// imply an export happened that never did.
+// Purely date-derived -- a lightweight "past its dates" signal, distinct
+// from course_close_outs' own state machine (export + erase, built
+// separately). "Closed" here just means the end date has passed; it says
+// nothing about whether the course has actually been exported or wiped,
+// and the UI must not imply that it has.
 export function computeCourseState(startDate: string, endDate: string, today: string): CourseState {
   if (today < startDate) return "upcoming";
   if (today > endDate) return "closed";
