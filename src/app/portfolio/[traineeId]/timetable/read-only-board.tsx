@@ -173,11 +173,7 @@ export function ReadOnlyTimetableBoard({
             <span className="size-2 shrink-0 animate-pulse rounded-full bg-gold" />
             <span className="text-[11px] font-semibold tracking-[0.08em] uppercase">Live now</span>
             <span className="text-sm font-medium">{liveEvent.title}</span>
-            {liveEvent.event_time ? (
-              <span className="text-xs opacity-80">
-                {liveEvent.event_time.slice(0, 5)} · opened {liveEvent.event_time.slice(0, 5)}
-              </span>
-            ) : null}
+            {liveEvent.event_time ? <span className="text-xs opacity-80">{liveEvent.event_time.slice(0, 5)}</span> : null}
           </div>
           {liveEvent.zoom_url ? (
             <a
