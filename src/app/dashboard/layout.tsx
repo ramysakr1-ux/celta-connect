@@ -7,8 +7,6 @@ import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
 import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
-import { AdminTabs } from "@/app/dashboard/admin/admin-tabs";
-import { visibleAdminTabs } from "@/lib/auth/admin-tabs";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 
 export default async function DashboardLayout({
@@ -24,13 +22,12 @@ export default async function DashboardLayout({
   const staffChat =
     profile && profile.role !== "trainee" && profile.role !== "admin" ? await getInitialStaffChatData(profile.id) : null;
 
-  // The nav is built from what this person can actually do, not from
-  // role === "admin". The spec's read-only role is defined by absence -- "the
-  // buttons simply are not there" -- and a tab is a button: a Centre manager
-  // must not see Import at all, since an import creates people.
+  // Corrected 2026-08-20: this used to also compute a persistent AdminTabs
+  // nav (visibleAdminTabs) rendered in the header below -- removed, it
+  // never matched the actual design (see the note on dashboard/admin/
+  // page.tsx). centreCtx itself stays -- adminChatRooms below still needs
+  // its availableCenterIds.
   const centreCtx = profile?.role === "admin" ? await getCentreRoleContext(profile) : null;
-  const centreRoles = centreCtx?.roles ?? [];
-  const tabs = profile?.role === "admin" ? visibleAdminTabs(centreRoles) : [];
 
   // §12: one room per centre, not per course. Membership follows the role
   // grants, so this covers every branch the person administers.
@@ -61,7 +58,6 @@ export default async function DashboardLayout({
               </span>
             ) : null}
           </Link>
-          {tabs.length > 0 ? <AdminTabs tabs={tabs} /> : null}
           <div className="flex shrink-0 items-center gap-4 text-sm text-muted">
             <span>{profile?.full_name ?? email}</span>
             <form action={signOut}>

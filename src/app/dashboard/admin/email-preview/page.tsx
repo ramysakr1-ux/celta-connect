@@ -210,6 +210,13 @@ export default async function EmailPreviewPage({
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Reached from Admissions now (dashboard/admissions/page.tsx), not a
+          Course Admin tab -- this is candidate-email preview, which
+          for-claude-code-course-admin.md explicitly excludes from Course
+          Admin. */}
+      <Link href="/dashboard/admissions" className="text-sm text-muted hover:text-ink">
+        ← Admissions
+      </Link>
       <div>
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Connect · emails</p>
         <h1 className="mt-1 font-serif text-[26px] text-ink">What your centre sends</h1>

@@ -146,6 +146,14 @@ export default async function AdmissionsPage() {
           <Link href="/dashboard/admissions/settings" className="text-sm text-muted hover:text-ink">
             Settings
           </Link>
+          {/* Was a Course Admin tab (dashboard/layout.tsx) -- moved here
+              2026-08-20: it's candidate-email preview, which
+              for-claude-code-course-admin.md explicitly excludes from
+              Course Admin ("Do not build these into Course Admin"). This
+              is its real home. */}
+          <Link href="/dashboard/admin/email-preview" className="text-sm text-muted hover:text-ink">
+            Emails
+          </Link>
         </div>
       </div>
 

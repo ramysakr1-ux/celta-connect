@@ -45,11 +45,11 @@ export default async function AdminDashboardPage() {
   ]);
 
   const centreMaterial = [
-    { label: "TP points library", count: tpPoints.count ?? 0, suffix: "points" },
-    { label: "Assignment briefs", count: briefs.count ?? 0, suffix: "" },
-    { label: "Resource hub", count: resources.count ?? 0, suffix: "items" },
-    { label: "Feedback style examples", count: styleExamples.count ?? 0, suffix: "" },
-    { label: "Coursebooks", count: coursebooks.count ?? 0, suffix: "" },
+    { label: "TP points library", count: tpPoints.count ?? 0, suffix: "points", href: "/dashboard/admin/coursebooks" },
+    { label: "Assignment briefs", count: briefs.count ?? 0, suffix: "", href: "/dashboard/admin/assignment-briefs" },
+    { label: "Resource hub", count: resources.count ?? 0, suffix: "items", href: "/trainer/resource-hub" },
+    { label: "Feedback style examples", count: styleExamples.count ?? 0, suffix: "", href: "/dashboard/admin/settings#feedback-style" },
+    { label: "Coursebooks", count: coursebooks.count ?? 0, suffix: "", href: "/dashboard/admin/coursebooks" },
   ];
 
   const recentChanges = await getRecentCentreChanges(profile.center_id);
@@ -90,10 +90,13 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Admissions/TP Points Library/Settings used to live only here --
-          moved to a persistent AdminTabs nav in dashboard/layout.tsx so they
-          don't disappear the moment you click into one (Ramy, live-testing
-          2026-08-15: no way back except the browser's own back button). */}
+      {/* Corrected 2026-08-20: a persistent AdminTabs nav was added here on
+          2026-08-15 after Admissions/TP Points Library/Settings had no way
+          back except the browser button -- but checked against the actual
+          design (Course Admin (standalone).html) that nav never matched it;
+          1a's header is just "Connect" + the "COURSE ADMIN" pill. Removed --
+          see the Centre material panel below for the real entry points, and
+          the "Settings" link beside it, so nothing is a dead end again. */}
       {/* for-claude-code-course-admin.md, screen 1a: "Title: centre name +
           Cambridge centre number", with "New course" as the primary action.
           It used to read "Welcome, <name>", which tells the person something
@@ -200,15 +203,28 @@ export default async function AdminDashboardPage() {
           </div>
           <div className="flex flex-col">
             {centreMaterial.map((m) => (
-              <div key={m.label} className="flex items-center justify-between gap-3 border-b border-border-faint py-2 last:border-none">
-                <span className="text-xs text-ink">{m.label}</span>
+              <Link
+                key={m.label}
+                href={m.href}
+                className="flex items-center justify-between gap-3 border-b border-border-faint py-2 last:border-none hover:text-primary"
+              >
+                <span className="text-xs text-ink hover:text-primary">{m.label}</span>
                 <span className="text-xs tabular-nums text-muted">
                   {m.count}
                   {m.suffix ? ` ${m.suffix}` : ""}
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
+          {/* Corrected 2026-08-20: the real design (Course Admin (standalone).html,
+              screen 1a) has no persistent top tab bar at all -- just "Connect" +
+              the "COURSE ADMIN" pill. "Centre material sits beside the courses,
+              so it reads as the shared shell rather than a link in the header."
+              This panel's own rows are the real entry points now, per that note
+              -- and Settings needs a way in too, since nothing else here reaches it. */}
+          <Link href="/dashboard/admin/settings" className="text-xs font-medium text-primary hover:underline">
+            Settings →
+          </Link>
         </div>
 
         <WhatChangedPanel changes={recentChanges} />

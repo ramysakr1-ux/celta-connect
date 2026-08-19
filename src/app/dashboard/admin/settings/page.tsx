@@ -130,6 +130,12 @@ export default async function AdminSettingsPage({
   return (
     <LaptopOnlyGate task="Centre setup">
     <div className="flex flex-col gap-6">
+      {/* Only reached from the Centre material panel now (the persistent
+          AdminTabs nav that used to link here is gone -- see dashboard/
+          admin/page.tsx). A real way back, so this can't be a dead end. */}
+      <Link href="/dashboard/admin" className="text-sm text-muted hover:text-ink">
+        ← Courses
+      </Link>
       <div className="card p-6">
         <h1 className="font-serif text-xl text-ink">Settings</h1>
         <p className="mt-2 text-muted">Centre-level integrations and configuration.</p>

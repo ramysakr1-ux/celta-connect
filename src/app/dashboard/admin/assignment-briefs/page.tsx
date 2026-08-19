@@ -23,6 +23,12 @@ export default async function AdminAssignmentBriefsPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Reachable from Settings' own nav, and directly from the Centre
+          material panel now too (dashboard/admin/page.tsx) -- a real way
+          back either way. */}
+      <Link href="/dashboard/admin" className="text-sm text-muted hover:text-ink">
+        ← Courses
+      </Link>
       <div className="card p-6">
         <h1 className="font-serif text-xl text-ink">Assignment Briefs</h1>
         <p className="mt-2 text-muted">
