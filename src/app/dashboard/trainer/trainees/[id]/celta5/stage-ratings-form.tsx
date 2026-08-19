@@ -6,7 +6,13 @@ import {
   updateStage3Ratings,
   type FormState,
 } from "@/app/dashboard/trainer/celta5-actions";
-import { CELTA_CRITERIA_SECTIONS, CRITERIA_LABELS, CRITERIA_GUIDANCE, isCriterionLiveAtTp } from "@/lib/celta-criteria";
+import {
+  CELTA_CRITERIA_SECTIONS,
+  CRITERIA_LABELS,
+  CRITERIA_GUIDANCE,
+  isCriterionLiveAtTp,
+  type AttentionFlag,
+} from "@/lib/celta-criteria";
 import { CriteriaRatingPill } from "@/lib/status-pill";
 import { CriteriaRatingPills } from "@/components/criteria-rating-pills";
 import type { Database } from "@/lib/supabase/types";
@@ -22,12 +28,17 @@ export function StageRatingsForm({
   traineeId,
   rows,
   suggestions = {},
+  attentionFlags = {},
   currentTpRound,
 }: {
   stage: 2 | 3;
   traineeId: string;
   rows: MatrixRow[];
   suggestions?: Record<string, "S+" | "S" | "N">;
+  /** assessment-model.md "where a suggestion comes from" -- evidence-cited
+   *  flags from computeAttentionFlags(), not a rating suggestion. Shown as
+   *  a badge naming which pattern triggered it; never auto-applied. */
+  attentionFlags?: Record<string, AttentionFlag[]>;
   /** assessment-model.md link 3 -- which TP round the cohort has reached,
    *  from computeCurrentTpRound(). A criterion that hasn't entered scope
    *  yet still shows and is still fully ratable ("credit above stage,
@@ -96,6 +107,7 @@ export function StageRatingsForm({
             const showSuggestion = !!suggestion && !value;
             const disagrees = !!candidateStatus && !!value && candidateStatus !== value;
             const notYetTaught = !isCriterionLiveAtTp(code, currentTpRound);
+            const flags = attentionFlags[code] ?? [];
 
             return (
               <div key={code} className="border-b border-border-faint pb-4 last:border-none">
@@ -114,6 +126,14 @@ export function StageRatingsForm({
                         title="Not yet formally in scope for this course's progress -- a blank rating here isn't a gap. Any rating given still counts as early evidence."
                       >
                         Not yet taught
+                      </span>
+                    ) : null}
+                    {flags.length > 0 ? (
+                      <span
+                        className="ml-2 rounded-[5px] border border-dashed border-gold px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.04em] text-gold uppercase"
+                        title={flags.map((f) => f.detail).join(" · ")}
+                      >
+                        Worth a look
                       </span>
                     ) : null}
                   </span>

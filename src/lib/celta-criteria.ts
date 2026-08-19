@@ -501,6 +501,13 @@ export type CriteriaTagType = "strength" | "action_point";
 export interface CriteriaTag {
   tag_type: CriteriaTagType;
   created_at: string;
+  // Only ever set for tags sourced from tp_feedback, which records both
+  // natively -- tp_lesson_criteria_tags (the older per-lesson quick tags)
+  // has neither without an extra join through tp_lessons, so those entries
+  // leave these undefined and are simply excluded from anything that needs
+  // per-TP or per-tutor grouping (computeAttentionFlags below).
+  tp_number?: number;
+  trainer_id?: string | null;
 }
 
 // Merges criteria tags from the TP card feedback system (`tp_feedback`,
@@ -513,6 +520,8 @@ export interface CriteriaTag {
 // submitted) feedback is excluded: it isn't locked-in evidence yet.
 export interface TpFeedbackForCriteriaTags {
   submitted_at: string | null;
+  tp_number: number;
+  trainer_id: string | null;
   strengths_planning: { criteria_codes: string[] }[] | null;
   action_points_planning: { criteria_codes: string[] }[] | null;
   strengths_teaching: { criteria_codes: string[] }[] | null;
@@ -535,7 +544,12 @@ export function addTpFeedbackCriteriaTags(
       for (const point of points ?? []) {
         for (const code of point.criteria_codes) {
           const list = tagsByCriteria.get(code) ?? [];
-          list.push({ tag_type, created_at: fb.submitted_at });
+          list.push({
+            tag_type,
+            created_at: fb.submitted_at,
+            tp_number: fb.tp_number,
+            trainer_id: fb.trainer_id,
+          });
           tagsByCriteria.set(code, list);
         }
       }
@@ -565,6 +579,104 @@ export function computeCriteriaSuggestion(
 
   const strengthCount = sorted.filter((t) => t.tag_type === "strength").length;
   return strengthCount >= 2 ? "S+" : "S"; // S+ needs a consistent pattern, not one good lesson
+}
+
+// ============================================================
+// assessment-model.md "Where a suggestion comes from" -- three of the
+// four named patterns, each required to cite the evidence it came from
+// ("a suggestion that cannot name its evidence is not shown"). Built from
+// data that already exists (entersAt, TP-tagged strength/action-point
+// evidence, per-tutor authorship on tp_feedback) -- nothing fabricated.
+// The fourth named pattern, "plans still needing substantial input in
+// week four," has no data behind it anywhere in the schema (no field
+// records how much tutor input a plan needed) and isn't attempted here.
+// ============================================================
+
+export type AttentionFlagKind = "not_yet_met" | "consistent_strength" | "tutor_disagreement";
+
+export interface AttentionFlag {
+  kind: AttentionFlagKind;
+  detail: string;
+}
+
+const ATTENTION_STREAK_THRESHOLD = 3; // matches the evidence bar used elsewhere (STAGE_FLAG_THRESHOLD, FOL's "three examples")
+
+export function computeAttentionFlags(
+  code: string,
+  tags: CriteriaTag[],
+  currentTpRound: number
+): AttentionFlag[] {
+  const flags: AttentionFlag[] = [];
+
+  // "a sub-criterion live for three TPs and never yet met"
+  const entersAt = CRITERIA_ENTERS_AT_TP[code];
+  if (entersAt != null) {
+    const tpsSinceEntry = currentTpRound - entersAt + 1;
+    const everMet = tags.some((t) => t.tag_type === "strength");
+    if (tpsSinceEntry >= ATTENTION_STREAK_THRESHOLD && !everMet) {
+      flags.push({
+        kind: "not_yet_met",
+        detail: `Live since TP${entersAt}, through TP${currentTpRound} (${tpsSinceEntry} TPs) with no strength evidence yet.`,
+      });
+    }
+  }
+
+  // "a sub-criterion met above standard in three consecutive TPs" -- a TP
+  // only counts as a clean "met above standard" pass when every tag
+  // recorded for this code at that TP is a strength, none alongside an
+  // action point. The streak resets both on a dirty TP AND on a genuine
+  // gap in TP numbers -- TP1/TP3/TP5 clean with TP2/TP4 unevidenced is
+  // NOT "three consecutive TPs", just three clean ones with holes between.
+  const tagTypesByTp = new Map<number, CriteriaTagType[]>();
+  for (const t of tags) {
+    if (t.tp_number == null) continue;
+    const list = tagTypesByTp.get(t.tp_number) ?? [];
+    list.push(t.tag_type);
+    tagTypesByTp.set(t.tp_number, list);
+  }
+  const evidencedTps = [...tagTypesByTp.keys()].sort((a, b) => a - b);
+  let streak: number[] = [];
+  for (const tp of evidencedTps) {
+    const clean = tagTypesByTp.get(tp)!.every((t) => t === "strength");
+    if (!clean) {
+      streak = [];
+      continue;
+    }
+    const prev = streak[streak.length - 1];
+    streak = prev != null && tp === prev + 1 ? [...streak, tp] : [tp];
+  }
+  if (streak.length >= ATTENTION_STREAK_THRESHOLD) {
+    const last = streak.slice(-ATTENTION_STREAK_THRESHOLD);
+    flags.push({
+      kind: "consistent_strength",
+      detail: `Met above standard in ${last.length} consecutive evidenced TPs (TP${last.join(", TP")}) -- Pass B evidence in the descriptor's own words.`,
+    });
+  }
+
+  // "a criterion where two tutors have marked the same candidate
+  // differently" -- celta5_matrix only ever holds one current tutor
+  // rating (whoever saved last wins), so this reads it off tp_feedback's
+  // per-tutor authorship instead: different trainers' TP feedback on this
+  // code disagreeing. A trainer who ever raised an action point on this
+  // code reads as "not yet met" from them even if they also logged a
+  // strength elsewhere -- ties go to the more cautious read.
+  const verdictByTrainer = new Map<string, CriteriaTagType>();
+  for (const t of tags) {
+    if (!t.trainer_id) continue;
+    if (t.tag_type === "action_point" || !verdictByTrainer.has(t.trainer_id)) {
+      const existing = verdictByTrainer.get(t.trainer_id);
+      if (existing !== "action_point") verdictByTrainer.set(t.trainer_id, t.tag_type);
+    }
+  }
+  const distinctVerdicts = new Set(verdictByTrainer.values());
+  if (verdictByTrainer.size >= 2 && distinctVerdicts.size >= 2) {
+    flags.push({
+      kind: "tutor_disagreement",
+      detail: `${verdictByTrainer.size} tutors have given TP feedback on this code and don't agree -- some read it as a strength, others as an action point.`,
+    });
+  }
+
+  return flags;
 }
 
 // ============================================================

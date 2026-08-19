@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import {
   computeCriteriaSuggestion,
+  computeAttentionFlags,
   computeTrajectory,
   addTpFeedbackCriteriaTags,
   CELTA_CRITERIA_CODES,
@@ -102,9 +103,13 @@ export default async function Celta5RecordPage({
   addTpFeedbackCriteriaTags(tagsByCriteria, tpFeedbackRows ?? []);
 
   const suggestions: Record<string, "S+" | "S" | "N"> = {};
+  const attentionFlags: Record<string, ReturnType<typeof computeAttentionFlags>> = {};
   for (const code of CELTA_CRITERIA_CODES) {
-    const suggestion = computeCriteriaSuggestion(tagsByCriteria.get(code) ?? []);
+    const tags = tagsByCriteria.get(code) ?? [];
+    const suggestion = computeCriteriaSuggestion(tags);
     if (suggestion) suggestions[code] = suggestion;
+    const flags = computeAttentionFlags(code, tags, currentTpRound);
+    if (flags.length > 0) attentionFlags[code] = flags;
   }
 
   if (!record) {
@@ -222,6 +227,7 @@ export default async function Celta5RecordPage({
             traineeId={id}
             rows={matrixRows}
             suggestions={suggestions}
+            attentionFlags={attentionFlags}
             currentTpRound={currentTpRound}
           />
         </div>
@@ -232,7 +238,14 @@ export default async function Celta5RecordPage({
       <div>
         <h2 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h2>
         <div className="mt-3">
-          <StageRatingsForm key={`s3-${matrixKey}`} stage={3} traineeId={id} rows={matrixRows} currentTpRound={currentTpRound} />
+          <StageRatingsForm
+            key={`s3-${matrixKey}`}
+            stage={3}
+            traineeId={id}
+            rows={matrixRows}
+            attentionFlags={attentionFlags}
+            currentTpRound={currentTpRound}
+          />
         </div>
       </div>
 
