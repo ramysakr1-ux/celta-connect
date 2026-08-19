@@ -10,18 +10,25 @@ import { usePathname } from "next/navigation";
 // record(), migration 0034) -- what actually lives under this tab is
 // required certification workflow (Stage 2 self-assessment/sign-off,
 // observation-hours logging), not a grade display, so it keeps a real tab
-// rather than being buried in links only. Route path stays /celta5
-// (unchanged, avoids a link-rot churn); only the visible label changes.
-// Shared with trainee-mobile-nav.tsx's bottom tab bar -- same 6
-// destinations, two different chrome shapes (desktop top tabs vs. mobile
-// bottom bar), one list.
+// rather than being buried in links only. Shared with trainee-mobile-
+// nav.tsx's bottom tab bar -- same 6 destinations, two different chrome
+// shapes (desktop top tabs vs. mobile bottom bar), one list.
+//
+// Route repointed 2026-08-19 (for-claude-code-progress-tab-build.md) from
+// /celta5 to the new, dedicated /progress -- the original "avoids a
+// link-rot churn" reason for staying on /celta5 no longer applies now that
+// a real page exists matching what this tab is actually labeled. /celta5
+// still holds real actions /progress doesn't duplicate (the sign-off
+// button once the matrix is released, Stage 3's tutor assessment, the
+// final report download) -- /progress links there rather than losing
+// access to them.
 export const TRAINEE_NAV_TABS = [
   { href: "", label: "Today" },
   { href: "/timetable", label: "Timetable" },
   { href: "/tp", label: "My teaching" },
   { href: "/assignments", label: "Assignments" },
   { href: "/resources", label: "Resources" },
-  { href: "/celta5", label: "Progress" },
+  { href: "/progress", label: "Progress" },
 ] as const;
 
 export function isTraineeTabActive(pathname: string, base: string, tabHref: string): boolean {

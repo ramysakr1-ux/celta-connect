@@ -10,6 +10,12 @@ const TABS = [
   { href: "/tp", label: "Teaching Practice", metaKey: "tp" },
   { href: "/assignments", label: "Written Assignments", metaKey: "assignments" },
   { href: "/celta5", label: "CELTA 5", metaKey: "celta5" },
+  // for-claude-code-progress-tab.md's decision: its own persistent tab, not
+  // folded into CELTA 5 or Teaching Practice -- self-assessment, sign-off,
+  // and observation hours need to be reliably findable, not buried behind
+  // "waiting on you" links. Last position, per for-claude-code-progress-tab-
+  // build.md's tab order.
+  { href: "/progress", label: "Progress", metaKey: "progress" },
 ] as const;
 
 export interface PortfolioSidebarMeta {
@@ -22,6 +28,7 @@ export interface PortfolioSidebarMeta {
   tp: string;
   assignments: string;
   celta5: string;
+  progress: string;
 }
 
 // Was a horizontal top tab bar; checkpoint 2 (App Redesign.dc.html 1d)
