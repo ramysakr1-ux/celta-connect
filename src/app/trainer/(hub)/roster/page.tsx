@@ -28,6 +28,24 @@ export default async function TrainerRosterPage() {
   const rows = await fetchRosterRows(supabase, courseId);
   const isMct = trainer?.tutor_role === "main_course_tutor";
 
+  // for-claude-code-fol-pooled-evidence.md, "Trainer UX / Days 2-9": "a
+  // spot-check view showing per-class log counts (flagging classes with
+  // ~0 entries) is useful but not required for v1." roster.ts already
+  // tallies class_error_log per CANDIDATE (folEntriesLogged); this is the
+  // per-CLASS view named separately in the spec -- which class isn't
+  // logging, not which candidate. tp_class is free text at the point of
+  // logging (fol/actions.ts), not a foreign key, so every real class name
+  // comes from course_subgroups -- classes with zero log rows still need
+  // to show, which a plain group-by on class_error_log alone would miss.
+  const [{ data: subgroupsForFol }, { data: classErrorRows }] = await Promise.all([
+    supabase.from("course_subgroups").select("name").eq("course_id", courseId),
+    supabase.from("class_error_log").select("tp_class").eq("course_id", courseId),
+  ]);
+  const folCountByClass = new Map<string, number>();
+  for (const s of subgroupsForFol ?? []) folCountByClass.set(s.name, 0);
+  for (const r of classErrorRows ?? []) folCountByClass.set(r.tp_class, (folCountByClass.get(r.tp_class) ?? 0) + 1);
+  const folByClass = [...folCountByClass.entries()].sort(([a], [b]) => a.localeCompare(b));
+
   // build-spec.md §18 -- "Visibility follows the chat rule: tutors
   // registered on that course, nobody else. No admin exception." An admin
   // scoped to this same course still sees the roster, just not the contact
@@ -115,6 +133,23 @@ export default async function TrainerRosterPage() {
           {trainer ? <AddCandidateButton courseId={courseId} joinUrl={joinUrl} /> : null}
         </div>
       </div>
+
+      {folByClass.length > 0 ? (
+        <div className="sheet flex flex-wrap items-center gap-3 p-4">
+          <span className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">FOL pool, by class</span>
+          {folByClass.map(([name, count]) => (
+            <span
+              key={name}
+              className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${
+                count === 0 ? "border border-dashed border-gold text-gold" : "bg-accent text-ink"
+              }`}
+              title={count === 0 ? `${name} hasn't logged any observations yet` : `${count} observation${count === 1 ? "" : "s"} logged`}
+            >
+              {name} -- {count}
+            </span>
+          ))}
+        </div>
+      ) : null}
 
       <div className="sheet overflow-x-auto !p-0">
         <table className="table-plain w-full">
