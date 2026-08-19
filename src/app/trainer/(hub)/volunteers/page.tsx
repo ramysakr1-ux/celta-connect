@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { removeVolunteerStudent, saveVolunteerTranscript } from "@/app/trainer/(hub)/volunteers/actions";
 import { AddVolunteerForm } from "@/app/trainer/(hub)/volunteers/add-volunteer-form";
 import { CopyLinkButton } from "@/app/trainer/(hub)/volunteers/copy-link-button";
+import { SendStartingEmailButton } from "@/app/trainer/(hub)/volunteers/send-starting-email-button";
 import { RegisterLinkButton } from "@/app/trainer/(hub)/volunteers/register-link-button";
 import { AttendanceRegisterGrid } from "@/components/attendance-register-grid";
 import { VolunteerSessionPanels } from "@/app/trainer/(hub)/volunteers/session-panels";
@@ -136,6 +137,7 @@ export default async function VolunteersPage() {
                     </p>
                     <div className="flex items-center gap-3">
                       {token ? <CopyLinkButton token={token} /> : null}
+                      {token && volunteer.email ? <SendStartingEmailButton volunteerId={volunteer.id} /> : null}
                       <form action={removeVolunteerStudent}>
                         <input type="hidden" name="volunteer_id" value={volunteer.id} />
                         <button type="submit" className="text-xs text-destructive hover:underline">

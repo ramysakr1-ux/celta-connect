@@ -3,7 +3,9 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
+import { sendVolunteerClassStartingEmail } from "@/lib/volunteer-class-starting";
 
 export interface FormState {
   error: string | null;
@@ -100,6 +102,41 @@ export async function saveVolunteerTranscript(formData: FormData): Promise<void>
     .eq("course_id", trainer.course_id);
 
   revalidatePath("/trainer/volunteers");
+}
+
+export interface SendStartingEmailState {
+  error: string | null;
+  sent: boolean;
+}
+
+// Ramy, 2026-08-19: the volunteer's join link is only ever copyable
+// (CopyLinkButton) -- nothing ever emails it to them, and
+// "volunteer_signed_up" is just a holding acknowledgement sent at signup,
+// not the actual link. This is the manual send, alongside the automatic
+// one (volunteer-class-starting-cron.ts, ~7 days before the course starts)
+// for when a trainer wants it sent on their own timing instead.
+export async function sendVolunteerStartingEmailNow(
+  _prevState: SendStartingEmailState,
+  formData: FormData
+): Promise<SendStartingEmailState> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const volunteerId = formData.get("volunteer_id");
+  if (typeof volunteerId !== "string" || !trainer.course_id) return { error: "Something went wrong.", sent: false };
+
+  const admin = createAdminClient();
+  const { data: volunteer } = await admin
+    .from("volunteer_students")
+    .select("id, name, email, level, course_id")
+    .eq("id", volunteerId)
+    .eq("course_id", trainer.course_id)
+    .maybeSingle();
+  if (!volunteer) return { error: "Volunteer not found.", sent: false };
+
+  // A deliberate manual send is allowed to resend even if the automatic
+  // cron already went out -- skipIfAlreadySent is only the automatic
+  // sweep's own protection against sending itself twice.
+  const result = await sendVolunteerClassStartingEmail(admin, volunteer, { skipIfAlreadySent: false });
+  return result.sent ? { error: null, sent: true } : { error: result.reason ?? "Could not send the email.", sent: false };
 }
 
 export async function removeVolunteerStudent(formData: FormData): Promise<void> {
