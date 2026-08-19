@@ -9,6 +9,7 @@ import { InterviewRecordForm } from "@/app/dashboard/admissions/[id]/interview-r
 import { RejectForm } from "@/app/dashboard/admissions/[id]/reject-form";
 import { OfferForm } from "@/app/dashboard/admissions/[id]/offer-form";
 import { PaymentsPanel } from "@/app/dashboard/admissions/[id]/payments-panel";
+import { EmailHistoryPanel } from "@/app/dashboard/admissions/[id]/email-history-panel";
 import { DepositForm } from "@/app/dashboard/admissions/[id]/deposit-form";
 import { ReleaseWorkspaceForm } from "@/app/dashboard/admissions/[id]/release-workspace-form";
 import { computeApplicantPaymentState } from "@/lib/payments/applicant-payment-state";
@@ -66,6 +67,15 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
   const { data: payments } = paymentPlan
     ? await supabase.from("payments").select("*").eq("payment_plan_id", paymentPlan.id)
     : { data: [] };
+
+  // All Emails.dc.html: applicant_emails already tracks all 19 email types
+  // with real delivery state (migration 0108/0113, populated by the Resend
+  // webhook) -- nothing on this page read it. First real surface for it.
+  const { data: emailHistory } = await supabase
+    .from("applicant_emails")
+    .select("*")
+    .eq("applicant_id", id)
+    .order("created_at", { ascending: false });
 
   // The four states: not paid / deposit paid / paying instalments / paid in
   // full. Derived from the deposit plus the plan, never stored -- a stored
@@ -460,6 +470,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             </div>
           </div>
           <PaymentsPanel applicant={applicant} payments={payments ?? []} />
+          <EmailHistoryPanel emails={emailHistory ?? []} />
           {/* The green light sits with the money, because that is what informs
               it -- but it is a separate decision, which is the whole point of
               the gate. */}
