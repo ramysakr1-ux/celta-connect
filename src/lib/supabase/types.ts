@@ -677,6 +677,18 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["interview_records"]["Row"]>;
         Relationships: [];
       };
+      apply_ip_attempts: {
+        Row: {
+          id: string;
+          ip_address: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["apply_ip_attempts"]["Row"]> & {
+          ip_address: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["apply_ip_attempts"]["Row"]>;
+        Relationships: [];
+      };
       branch_referral_requests: {
         Row: {
           id: string;

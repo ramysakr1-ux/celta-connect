@@ -1,8 +1,24 @@
 "use server";
 
 import "server-only";
+import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { inferCourseCommitmentsMode, buildCourseCommitments, courseCommitmentsToPlainText } from "@/lib/course-commitments";
+
+// Public, unauthenticated, and every submission triggers a real AI triage
+// call plus a real email to an attacker-controlled address -- 5 per hour
+// per IP is generous for a genuine applicant (one course, one submission)
+// while making scripted abuse expensive to sustain.
+const RATE_LIMIT_MAX_ATTEMPTS = 5;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+
+async function clientIp(): Promise<string> {
+  const h = await headers();
+  // Vercel sets x-forwarded-for with the real client IP first in the list.
+  const forwardedFor = h.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0].trim();
+  return h.get("x-real-ip") ?? "unknown";
+}
 
 // Working days, not calendar days -- a centre promising "10 days" and meaning
 // two working weeks would otherwise miss its own deadline every time an
@@ -56,6 +72,17 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
   }
 
   const admin = createAdminClient();
+
+  const ip = await clientIp();
+  const { count: recentAttempts } = await admin
+    .from("apply_ip_attempts")
+    .select("*", { count: "exact", head: true })
+    .eq("ip_address", ip)
+    .gte("created_at", new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString());
+  if ((recentAttempts ?? 0) >= RATE_LIMIT_MAX_ATTEMPTS) {
+    return { error: "Too many attempts. Try again in an hour.", submitted: false };
+  }
+  await admin.from("apply_ip_attempts").insert({ ip_address: ip });
 
   const { data: course } = await admin
     .from("courses")
