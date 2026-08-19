@@ -83,13 +83,42 @@ export default async function AssessorPage({
   const sendByDate = course.provisional_grades_due_at ? course.provisional_grades_due_at.slice(0, 10) : null;
   const daysOut = sendByDate ? Math.ceil((new Date(`${sendByDate}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000) : null;
 
-  const [{ data: tutorRows }, { data: onDayEvents }, { data: centreDocs }] = await Promise.all([
+  const [{ data: tutorRows }, { data: onDayEvents }, { data: centreDocs }, { data: asyncEvents }] = await Promise.all([
     admin.from("course_tutors").select("profile_id, tutor_role").eq("course_id", courseId).is("left_at", null),
     course.assessor_visit_date
       ? admin.from("course_timetable_events").select("*").eq("course_id", courseId).eq("event_date", course.assessor_visit_date).order("event_time")
       : Promise.resolve({ data: [] }),
     admin.from("resources").select("id, title, file_url").eq("center_id", course.center_id).eq("category", "centre_documents"),
+    // course-modes.md §7 (Handbook 2.2.2): "Moodle content ... must be
+    // augmented with centre-delivered online input. Assessors must be given
+    // a schedule showing which Moodle sections candidates were asked to
+    // complete and what input the centre provided ... nothing generates it
+    // today." Real schedule, not a static document -- built from the same
+    // is_asynchronous/linked_live_session_event_id pair remaining-
+    // compliance.md item 3 already gates locking on, not a new field.
+    course.delivery_mode !== "f2f"
+      ? admin
+          .from("course_timetable_events")
+          .select("id, title, event_date, linked_live_session_event_id")
+          .eq("course_id", courseId)
+          .eq("type", "input_session")
+          .eq("is_asynchronous", true)
+          .order("event_date")
+      : Promise.resolve({ data: [] }),
   ]);
+
+  const liveFollowUpIds = (asyncEvents ?? []).map((e) => e.linked_live_session_event_id).filter((id): id is string => Boolean(id));
+  const { data: liveFollowUpEvents } =
+    liveFollowUpIds.length > 0
+      ? await admin.from("course_timetable_events").select("id, title, event_date").in("id", liveFollowUpIds)
+      : { data: [] };
+  const liveFollowUpById = new Map((liveFollowUpEvents ?? []).map((e) => [e.id, e]));
+  const moodleSchedule = (asyncEvents ?? []).map((e) => ({
+    id: e.id,
+    title: e.title,
+    date: e.event_date,
+    liveFollowUp: e.linked_live_session_event_id ? (liveFollowUpById.get(e.linked_live_session_event_id) ?? null) : null,
+  }));
 
   // "A count of candidates who requested to speak with the assessor" -- a
   // count, never the names. Read head-only so the identities never even leave
@@ -404,6 +433,36 @@ export default async function AssessorPage({
                 <DocRow key={name} label={name} href={COHORT_DOC_HREF(name, firstCandidateId)} status="Live" />
               ))}
             </Panel>
+
+            {moodleSchedule.length > 0 ? (
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD, marginBottom: 8 }}>
+                  Moodle schedule
+                </p>
+                <div
+                  style={{
+                    background: CARD, border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent)",
+                    borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10,
+                  }}
+                >
+                  <p style={{ fontSize: 11.5, color: MUTED }}>
+                    Which Moodle sections candidates were asked to complete, and the centre-delivered input that
+                    augmented each one (Handbook 2.2.2).
+                  </p>
+                  {moodleSchedule.map((s) => (
+                    <div key={s.id} style={{ fontSize: 12.5 }}>
+                      <span style={{ fontWeight: 600, color: "oklch(23.5% 0.017 65)" }}>{s.title}</span>
+                      <span style={{ color: MUTED }}> -- {s.date}</span>
+                      <div style={{ fontSize: 11, color: s.liveFollowUp ? MUTED : "oklch(52% 0.11 75)" }}>
+                        {s.liveFollowUp
+                          ? `Augmented by "${s.liveFollowUp.title}" -- ${s.liveFollowUp.event_date}`
+                          : "No live follow-up linked yet"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD, marginBottom: 8 }}>
