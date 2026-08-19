@@ -18,7 +18,8 @@ import { renderAttendanceRegisterBuffer } from "./attendance-register-pdf";
 import { renderTimetableAsTaughtBuffer } from "./timetable-pdf";
 import { renderGradesReportBuffer, type GradesReportCandidate } from "./grades-report-pdf";
 import { renderObservationsLogBuffer } from "./observations-log-pdf";
-import { createResendClient, joinLinkSender } from "@/lib/resend/client";
+import { joinLinkSender } from "@/lib/resend/client";
+import { sendApplicantEmail } from "@/lib/admissions-email";
 import type { CriteriaRating, Database } from "@/lib/supabase/types";
 
 type Admin = ReturnType<typeof createAdminClient>;
@@ -121,19 +122,32 @@ async function sendReceiptRequestEmail(input: {
   const { data: admins } = await admin.from("profiles").select("email").eq("center_id", centerId).eq("role", "admin");
   if (!admins || admins.length === 0) return;
 
-  const resend = createResendClient();
-  await resend.emails.send({
-    from: joinLinkSender(centerName),
-    to: admins.map((a) => a.email),
-    subject: `${courseName} is packed up and ready in your Drive`,
-    html: `
+  // for-claude-code-email-delivery-tracking.md -- was one raw resend.
+  // emails.send() call to all admins at once, untracked. Routed through
+  // sendApplicantEmail per-admin instead of widening its `to` param to
+  // accept an array -- gives per-recipient delivery/bounce tracking (which
+  // admin's address actually bounced) rather than one opaque batched send,
+  // and doesn't touch a function nineteen+ other callers already depend on.
+  const html = `
       <p>${courseName} has been exported to your centre's Google Drive.</p>
       <p><a href="${driveFolderUrl}">Open the folder</a> and have a look whenever suits.</p>
       <p>Once you're happy everything's there, confirm receipt here so we can start the usual
       week-long grace hold before the working copy in Connect is cleared:</p>
       <p><a href="${siteUrl}/dashboard/admin/courses/${courseId}">Confirm receipt</a></p>
-    `,
-  });
+    `;
+  for (const a of admins) {
+    await sendApplicantEmail({
+      centerName,
+      centerAdmissionsEmail: null,
+      to: a.email,
+      subject: `${courseName} is packed up and ready in your Drive`,
+      html,
+      centerId,
+      applicantId: null,
+      type: "close_out_receipt",
+      from: joinLinkSender(centerName),
+    });
+  }
 }
 
 export async function exportCourseToDrive(courseId: string, exportedBy: string): Promise<void> {

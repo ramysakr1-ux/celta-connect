@@ -36,3 +36,17 @@ export async function centerNameForUserId(admin: SupabaseClient<Database>, userI
   const { data: center } = await admin.from("centers").select("name").eq("id", profile.center_id).maybeSingle();
   return center?.name ?? null;
 }
+
+// Same lookup as centerNameForUserId, but also returns the id -- needed by
+// sendApplicantEmail's centerId param so sign-in-link/password-reset sends
+// can be tracked (for-claude-code-email-delivery-tracking.md) the same way
+// every other email already is.
+export async function centerInfoForUserId(
+  admin: SupabaseClient<Database>,
+  userId: string
+): Promise<{ id: string; name: string | null } | null> {
+  const { data: profile } = await admin.from("profiles").select("center_id").eq("id", userId).maybeSingle();
+  if (!profile) return null;
+  const { data: center } = await admin.from("centers").select("name").eq("id", profile.center_id).maybeSingle();
+  return { id: profile.center_id, name: center?.name ?? null };
+}

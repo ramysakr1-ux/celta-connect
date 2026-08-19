@@ -38,7 +38,14 @@ export type ApplicantEmailType =
   | "referral"
   // Course join links (roster-actions.ts) -- staff-facing, same as
   // tutor_added/centre_created, no applicant row required.
-  | "workspace_invitation";
+  | "workspace_invitation"
+  // for-claude-code-email-delivery-tracking.md's remaining untracked sends
+  // -- account/security flows with no applicant row, same "" applicantId
+  // treatment as workspace_invitation above.
+  | "password_reset"
+  | "sign_in_link"
+  | "centre_delete_code"
+  | "close_out_receipt";
 
 /**
  * Who a reply reaches. All Emails.dc.html gives every email exactly one of
@@ -78,6 +85,10 @@ export const EMAIL_REPLY_TO: Record<ApplicantEmailType, EmailReplyTo> = {
   volunteer_class_starting: "admissions",
   referral: "admissions",
   workspace_invitation: "noreply",
+  password_reset: "noreply",
+  sign_in_link: "noreply",
+  centre_delete_code: "noreply",
+  close_out_receipt: "noreply",
 };
 
 export async function sendApplicantEmail(input: {

@@ -4,7 +4,8 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
-import { createResendClient, joinLinkSender } from "@/lib/resend/client";
+import { joinLinkSender } from "@/lib/resend/client";
+import { sendApplicantEmail } from "@/lib/admissions-email";
 import { buildAssessorInviteEmailHtml } from "@/lib/assessor-invite-email";
 
 export interface AssessorTokenResult {
@@ -96,7 +97,7 @@ export async function sendAssessorInviteEmail(
   const supabase = await createClient();
   const [{ data: course }, { data: center }, readiness, candidates] = await Promise.all([
     supabase.from("courses").select("name, end_date, assessor_visit_date").eq("id", trainer.course_id).maybeSingle(),
-    supabase.from("centers").select("name").eq("id", trainer.center_id).maybeSingle(),
+    supabase.from("centers").select("name, admissions_email").eq("id", trainer.center_id).maybeSingle(),
     computeAssessorReadiness(supabase, trainer.course_id),
     buildCandidateCards(supabase, trainer.course_id),
   ]);
@@ -109,26 +110,31 @@ export async function sendAssessorInviteEmail(
     : null;
   const accessEndsLabel = `When the course closes, ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`;
 
-  try {
-    const resend = createResendClient();
-    const { error } = await resend.emails.send({
-      from: joinLinkSender(centerName),
-      to: toEmail,
-      subject: `${centerName} · assessment visit pack for ${course.name}`,
-      html: buildAssessorInviteEmailHtml({
-        centerName,
-        courseName: course.name,
-        visitDateLabel,
-        totalCandidates: readiness.totalCandidates,
-        potentialFails,
-        accessEndsLabel,
-        packUrl: `${siteUrl}/assessor/${token}`,
-      }),
-    });
-    if (error) return { error: "Could not send the email. Try copying the link instead.", sent: false };
-  } catch {
-    return { error: "Could not send the email. Try copying the link instead.", sent: false };
-  }
+  // for-claude-code-email-delivery-tracking.md -- was a raw resend.emails.
+  // send() call, untracked. Routed through sendApplicantEmail as
+  // "assessor_pack" -- a type already declared in ApplicantEmailType/the
+  // reply-to map per the original 19-email inventory, but never actually
+  // wired to a real sender until now.
+  const { error } = await sendApplicantEmail({
+    centerName,
+    centerAdmissionsEmail: center?.admissions_email ?? null,
+    to: toEmail,
+    subject: `assessment visit pack for ${course.name}`,
+    html: buildAssessorInviteEmailHtml({
+      centerName,
+      courseName: course.name,
+      visitDateLabel,
+      totalCandidates: readiness.totalCandidates,
+      potentialFails,
+      accessEndsLabel,
+      packUrl: `${siteUrl}/assessor/${token}`,
+    }),
+    centerId: trainer.center_id,
+    applicantId: null,
+    type: "assessor_pack",
+    from: joinLinkSender(centerName),
+  });
+  if (error) return { error: "Could not send the email. Try copying the link instead.", sent: false };
 
   return { error: null, sent: true };
 }

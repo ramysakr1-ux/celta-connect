@@ -1,7 +1,8 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createResendClient, centerNameForUserId, joinLinkSender } from "@/lib/resend/client";
+import { centerInfoForUserId, joinLinkSender } from "@/lib/resend/client";
+import { sendApplicantEmail } from "@/lib/admissions-email";
 
 export interface ForgotPasswordState {
   error: string | null;
@@ -42,19 +43,28 @@ export async function requestPasswordReset(
 
   const confirmUrl = `${siteUrl}/auth/confirm?token_hash=${data.properties.hashed_token}&type=recovery&next=/auth/set-password`;
 
+  // for-claude-code-email-delivery-tracking.md -- was a raw resend.emails.
+  // send() call, untracked. Routed through sendApplicantEmail; failures are
+  // swallowed here same as before (the outer response stays the same
+  // wording regardless of outcome, so as not to leak which emails have
+  // accounts), but the send itself is now recorded either way.
   try {
-    const centerName = data.user ? await centerNameForUserId(adminClient, data.user.id) : null;
-    const resend = createResendClient();
-    await resend.emails.send({
-      from: joinLinkSender(centerName),
+    const centerInfo = data.user ? await centerInfoForUserId(adminClient, data.user.id) : null;
+    await sendApplicantEmail({
+      centerName: centerInfo?.name ?? "Connect",
+      centerAdmissionsEmail: null,
       to: email,
-      subject: "Reset your Connect password",
+      subject: "reset your password",
       html: `
         <h2>Reset your password</h2>
         <p>Someone requested a password reset for your Connect account.</p>
         <p><a href="${confirmUrl}">Reset your password &rarr;</a></p>
         <p style="color:#888;font-size:13px">If you didn't request this, you can safely ignore this email.</p>
       `,
+      centerId: centerInfo?.id,
+      applicantId: null,
+      type: "password_reset",
+      from: joinLinkSender(centerInfo?.name ?? null),
     });
   } catch {
     // Swallow -- still report generic success either way.

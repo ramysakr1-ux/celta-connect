@@ -7,7 +7,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createResendClient } from "@/lib/resend/client";
+import { sendApplicantEmail } from "@/lib/admissions-email";
 import { signOut } from "@/app/login/actions";
 import { ensureCourseArchived } from "@/lib/course-close-out/export";
 
@@ -142,15 +142,21 @@ export async function requestCentreDeleteCode(_prevState: RequestDeleteCodeState
     .insert({ center_id: centerId, requested_by: profile.id, code, expires_at: expiresAt });
   if (insertError) return { error: "Could not send a code. Try again.", sent: false };
 
-  try {
-    const resend = createResendClient();
-    await resend.emails.send({
-      from: `Connect <noreply@celtaconnect.com>`,
-      to: profile.email,
-      subject: `Confirm deleting ${center.name}`,
-      html: `<p>Someone -- hopefully you -- asked to permanently delete ${center.name} on Connect.</p><p>Confirmation code: <strong style="font-size:20px;letter-spacing:2px;">${code}</strong></p><p>This code expires in 15 minutes and works once. If you didn't request this, ignore this email -- nothing happens without the code.</p>`,
-    });
-  } catch {
+  // for-claude-code-email-delivery-tracking.md -- was a raw resend.emails.
+  // send() call, untracked. Routed through sendApplicantEmail; this one
+  // keeps its own error surfaced to the caller (unlike the account-recovery
+  // flows above, there's no privacy reason to hide a failure here).
+  const { error: sendError } = await sendApplicantEmail({
+    centerName: center.name,
+    centerAdmissionsEmail: null,
+    to: profile.email,
+    subject: "confirm deleting this centre",
+    html: `<p>Someone -- hopefully you -- asked to permanently delete ${center.name} on Connect.</p><p>Confirmation code: <strong style="font-size:20px;letter-spacing:2px;">${code}</strong></p><p>This code expires in 15 minutes and works once. If you didn't request this, ignore this email -- nothing happens without the code.</p>`,
+    centerId,
+    applicantId: null,
+    type: "centre_delete_code",
+  });
+  if (sendError) {
     return { error: "Could not send the email. Try again.", sent: false };
   }
 

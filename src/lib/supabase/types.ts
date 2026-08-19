@@ -2136,7 +2136,11 @@ export interface Database {
             | "volunteer_signed_up"
             | "volunteer_class_starting"
             | "referral"
-            | "workspace_invitation";
+            | "workspace_invitation"
+            | "password_reset"
+            | "sign_in_link"
+            | "centre_delete_code"
+            | "close_out_receipt";
           to_email: string;
           // Six of the nineteen go to staff, assessors or volunteers, who have
           // no applicant row to take a name from.
