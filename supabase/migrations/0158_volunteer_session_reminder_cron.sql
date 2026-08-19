@@ -3,7 +3,7 @@
 -- as migration 0152's admissions-auto-book) needs to know which
 -- volunteer+event pairs it has already reminded, or a volunteer would get
 -- the same push repeated every sweep until the event starts.
-create table public.volunteer_session_reminders_sent (
+create table if not exists public.volunteer_session_reminders_sent (
   id uuid primary key default gen_random_uuid(),
   volunteer_student_id uuid not null references public.volunteer_students (id) on delete cascade,
   timetable_event_id uuid not null references public.course_timetable_events (id) on delete cascade,

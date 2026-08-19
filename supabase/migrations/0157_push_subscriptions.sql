@@ -10,7 +10,7 @@
 -- reused on every visit to /student/[token], which is the natural anchor
 -- for their subscription instead of a session. Assessors are read-only
 -- and never a push audience per the spec, so no third owner column.
-create table public.push_subscriptions (
+create table if not exists public.push_subscriptions (
   id uuid primary key default gen_random_uuid(),
   profile_id uuid references public.profiles (id) on delete cascade,
   volunteer_student_id uuid references public.volunteer_students (id) on delete cascade,
