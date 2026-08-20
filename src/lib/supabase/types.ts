@@ -248,6 +248,9 @@ export interface Database {
           // invitation, and can only be on while shadow mode is too.
           admissions_ai_shadow_mode_enabled: boolean;
           admissions_ai_autobook_enabled: boolean;
+          // migration 0173 -- specs/admissions-and-close-out.md §10: filming
+          // consent is "only used if a centre films" at all.
+          films_tp_sessions: boolean;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {
@@ -345,6 +348,10 @@ export interface Database {
           // what was typed at the moment of signing.
           ai_disclaimer_signed_at: string | null;
           ai_disclaimer_signed_name: string | null;
+          // migration 0173 -- the signature itself is on paper (the class
+          // register); this just tracks that the trainer has collected it.
+          filming_consent_confirmed_at: string | null;
+          filming_consent_confirmed_by: string | null;
           uln: string | null;
           connect_hub_link: string | null;
           course_status: CourseStatus;

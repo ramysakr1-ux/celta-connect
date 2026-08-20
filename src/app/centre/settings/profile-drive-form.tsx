@@ -14,6 +14,7 @@ export function ProfileDriveForm({
   primaryContactEmail,
   timeZone,
   currency,
+  filmsTpSessions,
   driveConnection,
 }: {
   name: string;
@@ -22,6 +23,7 @@ export function ProfileDriveForm({
   primaryContactEmail: string | null;
   timeZone: string | null;
   currency: string | null;
+  filmsTpSessions: boolean;
   driveConnection: { connected_at: string; template_doc_id: string | null; output_folder_id: string | null } | null;
 }) {
   const [state, action, pending] = useActionState(updateCentreProfile, initialState);
@@ -110,6 +112,22 @@ export function ProfileDriveForm({
             className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
           />
           <p className="text-xs text-muted">Applies to every course unless a course overrides it.</p>
+        </div>
+
+        <div className="flex items-start gap-2.5 sm:col-span-2">
+          <input
+            id="cs_films"
+            name="films_tp_sessions"
+            type="checkbox"
+            defaultChecked={filmsTpSessions}
+            className="mt-0.5 size-4 rounded border-border"
+          />
+          <label htmlFor="cs_films" className="text-sm text-ink">
+            This centre films teaching practice sessions
+            <span className="block text-xs text-muted">
+              Turns on filming consent tracking on every course roster. Off by default -- most centres don&apos;t film.
+            </span>
+          </label>
         </div>
 
         <div className="sm:col-span-2">

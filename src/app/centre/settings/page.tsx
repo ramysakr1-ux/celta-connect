@@ -38,7 +38,7 @@ export default async function CentreSettingsPage() {
     admin
       .from("centers")
       .select(
-        "name, center_number, address, primary_contact_email, time_zone, currency, payment_provider, payment_provider_connected_at"
+        "name, center_number, address, primary_contact_email, time_zone, currency, payment_provider, payment_provider_connected_at, films_tp_sessions"
       )
       .eq("id", centerId)
       .maybeSingle(),
@@ -133,6 +133,7 @@ export default async function CentreSettingsPage() {
               primaryContactEmail={center.primary_contact_email}
               timeZone={center.time_zone}
               currency={center.currency}
+              filmsTpSessions={center.films_tp_sessions}
               driveConnection={driveConnection}
             />
           ) : (

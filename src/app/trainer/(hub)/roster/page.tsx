@@ -8,6 +8,7 @@ import { fetchRosterRows } from "@/lib/roster";
 import { RosterRowView } from "@/app/trainer/(hub)/roster/roster-row";
 import { AddCandidateButton } from "@/app/trainer/(hub)/roster/add-candidate-button";
 import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
+import { toggleFilmingConsent } from "@/app/trainer/(hub)/roster/filming-consent-actions";
 
 // The detailed operational roster. Row computation lives in lib/roster.ts,
 // shared with the CSV export route below so the two can't drift on what a
@@ -27,6 +28,24 @@ export default async function TrainerRosterPage() {
 
   const rows = await fetchRosterRows(supabase, courseId);
   const isMct = trainer?.tutor_role === "main_course_tutor";
+
+  // specs/admissions-and-close-out.md §10 -- "only used if a centre films."
+  // A second query rather than folding into fetchRosterRows/RosterRow:
+  // every other caller of that shared function (the CSV export) has no use
+  // for this, and it's centre-conditional besides.
+  const { data: filmingCentre } = await supabase.from("centers").select("films_tp_sessions").eq("id", trainer?.center_id ?? "").maybeSingle();
+  const filmsTpSessions = filmingCentre?.films_tp_sessions ?? false;
+  const { data: consentRows } =
+    filmsTpSessions && rows.length > 0
+      ? await supabase
+          .from("profiles")
+          .select("id, filming_consent_confirmed_at")
+          .in(
+            "id",
+            rows.map((r) => r.id)
+          )
+      : { data: [] };
+  const consentConfirmedById = new Map((consentRows ?? []).map((r) => [r.id, !!r.filming_consent_confirmed_at]));
 
   // for-claude-code-fol-pooled-evidence.md, "Trainer UX / Days 2-9": "a
   // spot-check view showing per-class log counts (flagging classes with
@@ -154,6 +173,34 @@ export default async function TrainerRosterPage() {
           <Link href="/trainer/fol-spot-check" className="text-xs font-medium text-primary hover:underline">
             Full spot-check view →
           </Link>
+        </div>
+      ) : null}
+
+      {filmsTpSessions ? (
+        <div className="sheet flex flex-wrap items-center gap-3 p-4">
+          <span className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">Filming consent</span>
+          <span className="text-xs text-muted">Signed forms are on paper, kept with the class register -- this just tracks who&apos;s handed one in.</span>
+          <a href="/api/filming-consent.pdf" className="text-xs font-medium text-primary hover:underline">
+            Download blank form →
+          </a>
+          {rows.map((r) => {
+            const confirmed = consentConfirmedById.get(r.id) ?? false;
+            return (
+              <form key={r.id} action={toggleFilmingConsent}>
+                <input type="hidden" name="trainee_id" value={r.id} />
+                <input type="hidden" name="confirmed" value={confirmed ? "false" : "true"} />
+                <button
+                  type="submit"
+                  className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${
+                    confirmed ? "bg-accent text-ink" : "border border-dashed border-gold text-gold"
+                  }`}
+                  title={confirmed ? "Click to mark as not yet collected" : "Click to mark as collected"}
+                >
+                  {r.name} -- {confirmed ? "Signed" : "Not yet"}
+                </button>
+              </form>
+            );
+          })}
         </div>
       ) : null}
 
