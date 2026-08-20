@@ -12,6 +12,11 @@ import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 // "everything that has a deadline on the timetable or set by the MCT,
 // regardless of the role they are playing." Three triggers, one daily
 // sweep (migration 0178) -- all date-level facts, not minute-level ones.
+//
+// connect-spec-corrections-for-claude-code.md item 4: "URGENT:" prefix
+// only once the deadline has actually passed, never on the original
+// due-date reminder -- every push this cron sends already meets that bar
+// by construction (it only ever fires after the fact), so all three get it.
 export async function runLatePushCron(): Promise<{
   firstSubmissionsPushed: number;
   resubmissionsPushed: number;
@@ -40,7 +45,7 @@ export async function runLatePushCron(): Promise<{
     const { sent } = await sendPushToOwners(
       { profileIds: [assignment.trainee_id] },
       {
-        title: `${title} is now overdue`,
+        title: `URGENT: ${title} is now overdue`,
         body: "It hasn't been submitted and the deadline has passed.",
         url: `/portfolio/${assignment.trainee_id}/assignments`,
       }
@@ -77,7 +82,7 @@ export async function runLatePushCron(): Promise<{
       const { sent } = await sendPushToOwners(
         { profileIds: [assignment.trainee_id] },
         {
-          title: `${title} resubmission is now overdue`,
+          title: `URGENT: ${title} resubmission is now overdue`,
           body: "It hasn't been resubmitted and the deadline has passed.",
           url: `/portfolio/${assignment.trainee_id}/assignments`,
         }
@@ -125,7 +130,7 @@ export async function runLatePushCron(): Promise<{
 
     const { sent } = await sendPushToOwners(
       { profileIds: [mct.profile_id] },
-      { title: "Provisional grades are overdue", body: `${course.name} -- enter them in Appian when you can.`, url: "/trainer/grades-report" }
+      { title: "URGENT: Provisional grades are overdue", body: `${course.name} -- enter them in Appian when you can.`, url: "/trainer/grades-report" }
     );
     if (sent > 0) trainersPushed += 1;
   }
