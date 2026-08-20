@@ -3,8 +3,9 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { categorize, toLocalIso, type TimetableEvent } from "@/lib/timetable-grid";
-import { moveTimetableEvent, deleteTimetableEvent, setAttendance, setInputSessionCriteria, setTpEventMode } from "@/app/trainer/(hub)/timetable/actions";
+import { moveTimetableEvent, setAttendance, setInputSessionCriteria, setTpEventMode } from "@/app/trainer/(hub)/timetable/actions";
 import type { Volunteer } from "@/app/trainer/(hub)/timetable/event-cell";
+import { DeleteEventButton } from "@/app/trainer/(hub)/timetable/delete-event-button";
 
 // for-claude-code-timetable-drag.md -- replaces the time-band grid
 // (timetable-grid.tsx) with the day-stack drag-and-drop board. Per Ramy's
@@ -371,14 +372,7 @@ function DetailPanel({
         </details>
       ) : null}
 
-      {!locked ? (
-        <form action={deleteTimetableEvent} className="mt-1">
-          <input type="hidden" name="event_id" value={event.id} />
-          <button type="submit" className="text-xs text-destructive hover:underline">
-            Delete this event
-          </button>
-        </form>
-      ) : null}
+      {!locked ? <DeleteEventButton eventId={event.id} compact={false} /> : null}
     </div>
   );
 }

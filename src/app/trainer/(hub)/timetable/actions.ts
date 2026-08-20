@@ -10,6 +10,7 @@ import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { generateStandardAnnouncements } from "@/lib/announcements-catalog";
 import { syncAssignmentDueDates } from "@/lib/assignment-due-dates";
 import { halfTpDates } from "@/lib/rotation";
+import { sendPushToOwners } from "@/lib/push/send";
 import type { TimeBand } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -235,6 +236,73 @@ export async function deleteTimetableEvent(formData: FormData): Promise<void> {
     .delete()
     .eq("id", eventId)
     .eq("course_id", trainer.course_id ?? "");
+
+  revalidatePath("/trainer/timetable");
+}
+
+const CANCEL_EVENT_TYPE_LABEL: Record<(typeof EVENT_TYPES)[number], string> = {
+  input_session: "Input session",
+  tp: "TP",
+  assignment_due: "Assignment deadline",
+  resubmission_due: "Resubmission deadline",
+  milestone: "Session",
+  supervised_session: "Supervised session",
+};
+
+// individual-tutorial-actions.ts's cancelIndividualTutorialInvite left this
+// deliberately unbuilt (2026-08-19): "there's no general 'cancel a TP'
+// anywhere in the app... deliberately scoped to individual tutorial
+// cancellation specifically, not a general timetable-cancellation push."
+// The missing piece was a real cancel action distinct from delete -- plain
+// deleteTimetableEvent has no confirm step and is also how a trainer fixes
+// a typo (delete + re-add, since there's no generic edit), so hanging a
+// push off every delete would push "cancelled" on ordinary corrections too.
+// This is that missing real feature: a separate, explicit action a trainer
+// chooses only when they mean it, per for-claude-code-announcements.md's
+// "push notification only for cancellation, room change, or something
+// already late." Cohort-wide (not group-scoped) because tp-type timetable
+// events carry no subgroup column -- only assignment_due rows ever get
+// tp_group_scope_id (see addTimetableEvent above).
+export async function cancelTimetableEvent(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const eventId = formData.get("event_id");
+  if (typeof eventId !== "string") return;
+
+  const supabase = await createClient();
+  const { data: event } = await supabase
+    .from("course_timetable_events")
+    .select("id, title, type, event_date, event_time")
+    .eq("id", eventId)
+    .eq("course_id", trainer.course_id ?? "")
+    .maybeSingle();
+  if (!event) return;
+
+  await supabase
+    .from("course_timetable_events")
+    .delete()
+    .eq("id", eventId)
+    .eq("course_id", trainer.course_id ?? "");
+
+  const { data: cohort } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("course_id", trainer.course_id ?? "")
+    .eq("role", "trainee")
+    .eq("course_status", "active");
+
+  const profileIds = (cohort ?? []).map((p) => p.id);
+  if (profileIds.length > 0) {
+    const label = CANCEL_EVENT_TYPE_LABEL[event.type as (typeof EVENT_TYPES)[number]] ?? "Session";
+    const dateLabel = new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" });
+    await sendPushToOwners(
+      { profileIds },
+      {
+        title: `${label} cancelled`,
+        body: `"${event.title}" on ${dateLabel} has been cancelled.`,
+        url: "/dashboard",
+      }
+    );
+  }
 
   revalidatePath("/trainer/timetable");
 }

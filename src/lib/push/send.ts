@@ -41,8 +41,20 @@ export async function sendPushToOwners(
   const volunteerStudentIds = owners.volunteerStudentIds ?? [];
   if (profileIds.length === 0 && volunteerStudentIds.length === 0) return { sent: 0, removed: 0 };
 
-  const { publicKey, privateKey, subject } = getVapidDetails();
-  webpush.setVapidDetails(subject, publicKey, privateKey);
+  // Every call site so far (cancellation, individual-tutorial cancellation,
+  // the volunteer 30-min reminder) runs AFTER its own real work already
+  // committed -- a missing/broken VAPID setup shouldn't turn "the thing
+  // happened" into an uncaught 500 for something that's purely a courtesy
+  // notification. Caught here, once, instead of asking every caller to
+  // remember to guard it.
+  let vapid: { publicKey: string; privateKey: string; subject: string };
+  try {
+    vapid = getVapidDetails();
+  } catch (err) {
+    console.error("sendPushToOwners: VAPID not configured, skipping push", err);
+    return { sent: 0, removed: 0 };
+  }
+  webpush.setVapidDetails(vapid.subject, vapid.publicKey, vapid.privateKey);
 
   const admin = createAdminClient();
   const orFilter = [

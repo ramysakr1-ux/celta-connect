@@ -1,5 +1,6 @@
 import { categorize, isEventLive, type TimetableEvent } from "@/lib/timetable-grid";
-import { deleteTimetableEvent, setAttendance, setInputSessionCriteria, setTpEventMode } from "@/app/trainer/(hub)/timetable/actions";
+import { setAttendance, setInputSessionCriteria, setTpEventMode } from "@/app/trainer/(hub)/timetable/actions";
+import { DeleteEventButton } from "@/app/trainer/(hub)/timetable/delete-event-button";
 
 export type Volunteer = { id: string; name: string };
 
@@ -81,17 +82,7 @@ function EventRow({
     <div className={divider ? "mt-1.5 border-t border-border-faint pt-1.5" : ""}>
       <div className="flex items-start justify-between gap-1">
         <span className="text-[12px] font-medium text-ink">{event.title}</span>
-        {!locked ? (
-          <form action={deleteTimetableEvent}>
-            <input type="hidden" name="event_id" value={event.id} />
-            <button
-              type="submit"
-              className="shrink-0 text-[10px] text-muted opacity-0 group-hover:opacity-100 hover:text-destructive focus-visible:opacity-100"
-            >
-              ×
-            </button>
-          </form>
-        ) : null}
+        {!locked ? <DeleteEventButton eventId={event.id} compact /> : null}
       </div>
       {showTime(event) && event.event_time ? (
         <span className="mt-0.5 block text-[10px] text-muted">{event.event_time.slice(0, 5)}</span>
