@@ -1,6 +1,7 @@
 import { type NextRequest } from "next/server";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 // Server-side token_hash verification -- deliberately NOT the fragment-based
 // client-side flow. verifyOtp() explicitly creates the session for the
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
-  const next = searchParams.get("next") ?? "/dashboard";
+  const next = safeRedirectPath(searchParams.get("next"), "/dashboard");
 
   if (tokenHash && (type === "recovery" || type === "magiclink" || type === "email")) {
     const supabase = await createClient();

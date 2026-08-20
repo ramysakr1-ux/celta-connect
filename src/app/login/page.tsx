@@ -4,9 +4,9 @@ import { Wordmark } from "@/components/wordmark";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, next } = await searchParams;
 
   return (
     <div className="entry-ground flex flex-1 flex-col">
@@ -35,7 +35,7 @@ export default async function LoginPage({
               <p className="text-sm text-ink">That assessor link is invalid or has expired. Ask the centre for a new one.</p>
             </div>
           ) : null}
-          <LoginForm />
+          <LoginForm next={next} />
         </div>
       </div>
     </div>

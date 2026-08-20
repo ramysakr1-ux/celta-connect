@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { centerInfoForUserId, joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
 import { isAuthRateLimited } from "@/lib/auth-rate-limit";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export interface SignInState {
   error: string | null;
@@ -50,7 +51,8 @@ export async function sendSignInLink(_prevState: SignInLinkState, formData: Form
     return { error: null, sent: true };
   }
 
-  const confirmUrl = `${siteUrl}/auth/confirm?token_hash=${data.properties.hashed_token}&type=magiclink&next=/dashboard`;
+  const next = safeRedirectPath(formData.get("next") as string | null, "/dashboard");
+  const confirmUrl = `${siteUrl}/auth/confirm?token_hash=${data.properties.hashed_token}&type=magiclink&next=${encodeURIComponent(next)}`;
 
   // for-claude-code-email-delivery-tracking.md -- was a raw resend.emails.
   // send() call, untracked. Routed through sendApplicantEmail; failures are
@@ -106,7 +108,7 @@ export async function signIn(
     return { error: "Incorrect email or password." };
   }
 
-  redirect("/dashboard");
+  redirect(safeRedirectPath(formData.get("next") as string | null, "/dashboard"));
 }
 
 export async function signOut() {

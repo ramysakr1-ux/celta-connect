@@ -6,12 +6,13 @@ import { SignInLinkForm } from "@/app/login/sign-in-link-form";
 
 const initialState: SignInState = { error: null };
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(signIn, initialState);
 
   return (
     <div className="mt-6 flex flex-col gap-4">
       <form action={action} className="flex flex-col gap-4">
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="email" className="text-sm text-muted">
             Email
@@ -63,7 +64,7 @@ export function LoginForm() {
         <div className="h-px flex-1 bg-border" />
       </div>
 
-      <SignInLinkForm />
+      <SignInLinkForm next={next} />
     </div>
   );
 }

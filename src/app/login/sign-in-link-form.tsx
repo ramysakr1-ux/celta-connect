@@ -15,7 +15,7 @@ const initialState: SignInLinkState = { error: null, sent: false };
 // `confirmed` from state.sent and dismissed during render (comparing state
 // by reference to detect a fresh action result) rather than syncing via
 // an effect.
-export function SignInLinkForm() {
+export function SignInLinkForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(sendSignInLink, initialState);
   const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -61,6 +61,7 @@ export function SignInLinkForm() {
 
   return (
     <form action={action} className="flex flex-col gap-2">
+      {next ? <input type="hidden" name="next" value={next} /> : null}
       <input
         name="email"
         type="email"

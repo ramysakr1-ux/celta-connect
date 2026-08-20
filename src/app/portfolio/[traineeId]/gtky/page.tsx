@@ -9,9 +9,13 @@ import { GtkyPickForm } from "@/app/portfolio/[traineeId]/gtky/pick-form";
 // RLS-enforced ("gtky_assignments: trainee reads their own"), same
 // pattern as the Stage 1/3 individual tutorial page.
 export default async function GtkyChoicePage({ params }: { params: Promise<{ traineeId: string }> }) {
-  const session = await getCurrentProfile();
-  if (!session?.profile) redirect("/login");
   const { traineeId } = await params;
+  const session = await getCurrentProfile();
+  // for-claude-code-course-emails.md / review-notes.md: the welcome email's
+  // activities link must still work for a candidate who hasn't set up their
+  // account yet -- send them to sign up/in first, then land back here,
+  // instead of dropping them on the generic post-login /dashboard.
+  if (!session?.profile) redirect(`/login?next=${encodeURIComponent(`/portfolio/${traineeId}/gtky`)}`);
   const supabase = await createClient();
 
   const { data: assignment } = await supabase
