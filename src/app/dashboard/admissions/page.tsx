@@ -154,6 +154,9 @@ export default async function AdmissionsPage() {
           <Link href="/dashboard/admin/email-preview" className="text-sm text-muted hover:text-ink">
             Emails
           </Link>
+          <Link href="/dashboard/admissions/emails" className="text-sm text-muted hover:text-ink">
+            Delivery
+          </Link>
         </div>
       </div>
 
