@@ -242,3 +242,44 @@ export async function deleteStyleExample(formData: FormData): Promise<void> {
     .eq("center_id", profile.center_id);
   revalidatePath("/dashboard/admin/settings");
 }
+
+// for-claude-code-malpractice-outcomes.md: the centre's own malpractice
+// policy, not a list Connect invents (Handbook 8.2.4). No update action --
+// these are short, occasionally-set policy lines; deleting and re-adding
+// covers a correction without needing a second form.
+export async function addMalpracticeOutcomeOption(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const profile = await requireRole("admin");
+
+  const label = (formData.get("label") as string | null)?.trim();
+  if (!label) return { error: "Enter the outcome as your policy names it." };
+
+  const admin = createAdminClient();
+  const { error } = await admin.from("malpractice_outcome_options").insert({
+    center_id: profile.center_id,
+    label,
+    fails_assignment: formData.get("fails_assignment") === "on",
+    flagged_for_referral: formData.get("flagged_for_referral") === "on",
+  });
+
+  if (error) return { error: "Could not save. Try again." };
+
+  revalidatePath("/dashboard/admin/settings");
+  return { error: null };
+}
+
+export async function deleteMalpracticeOutcomeOption(formData: FormData): Promise<void> {
+  const profile = await requireRole("admin");
+  const id = formData.get("id") as string | null;
+  if (!id) return;
+
+  const admin = createAdminClient();
+  await admin
+    .from("malpractice_outcome_options")
+    .delete()
+    .eq("id", id)
+    .eq("center_id", profile.center_id);
+  revalidatePath("/dashboard/admin/settings");
+}

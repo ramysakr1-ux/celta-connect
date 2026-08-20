@@ -83,22 +83,51 @@ export async function recordCandidateAccount(_prevState: FormState, formData: Fo
   return { error: null };
 }
 
-// The one place an upheld decision has any effect beyond this table:
-// the linked assignment is forced through its one resubmission chance (or
-// hard-failed if plagiarism was found ON the resubmission, since that
-// chance is already spent), and a Plagiarism Reflection assignment is
-// created. A not-upheld decision touches nothing else at all -- that
+// for-claude-code-malpractice-outcomes.md: the outcome comes from the
+// centre's own configured list (malpractice_outcome_options) when one
+// exists, never a hardcoded pair -- Handbook 8.2.4. Falls back to the
+// original binary upheld/not_upheld when a centre hasn't configured any
+// outcomes yet. Either way, the only real effects beyond this table are
+// driven by the resolved fails_assignment flag: fail the linked assignment
+// through its one resubmission chance (or hard-fail if that chance is
+// already spent) and create a Plagiarism Reflection assignment. An outcome
+// that doesn't fail the assignment touches nothing else at all -- that
 // asymmetry is deliberate, see the migration's own comment.
 export async function decideCase(_prevState: FormState, formData: FormData): Promise<FormState> {
   const trainer = await requireRole("trainer");
   const caseId = formData.get("case_id");
-  const outcome = formData.get("outcome");
+  const outcomeOptionId = formData.get("outcome_option_id");
+  const fallbackOutcome = formData.get("outcome");
   const notes = formData.get("decision_notes");
-  if (typeof caseId !== "string" || (outcome !== "upheld" && outcome !== "not_upheld")) {
-    return { error: "Invalid request." };
-  }
+  if (typeof caseId !== "string") return { error: "Invalid request." };
 
   const supabase = await createClient();
+
+  let label: string;
+  let failsAssignment: boolean;
+  let flaggedForReferral: boolean;
+  let resolvedOptionId: string | null = null;
+
+  if (typeof outcomeOptionId === "string" && outcomeOptionId) {
+    const { data: option } = await supabase
+      .from("malpractice_outcome_options")
+      .select("id, label, fails_assignment, flagged_for_referral")
+      .eq("id", outcomeOptionId)
+      .eq("center_id", trainer.center_id)
+      .maybeSingle();
+    if (!option) return { error: "That outcome no longer exists. Refresh and pick again." };
+    label = option.label;
+    failsAssignment = option.fails_assignment;
+    flaggedForReferral = option.flagged_for_referral;
+    resolvedOptionId = option.id;
+  } else if (fallbackOutcome === "upheld" || fallbackOutcome === "not_upheld") {
+    label = fallbackOutcome === "upheld" ? "Upheld" : "Not upheld";
+    failsAssignment = fallbackOutcome === "upheld";
+    flaggedForReferral = false;
+  } else {
+    return { error: "Choose an outcome." };
+  }
+
   const { data: openCaseRow } = await supabase
     .from("malpractice_cases")
     .select("*")
@@ -113,7 +142,7 @@ export async function decideCase(_prevState: FormState, formData: FormData): Pro
   const decidedAt = new Date().toISOString();
   let reflectionAssignmentId: string | null = null;
 
-  if (outcome === "upheld") {
+  if (failsAssignment) {
     const { data: assignment } = await supabase
       .from("assignments")
       .select("first_status, resubmission_status")
@@ -185,8 +214,9 @@ export async function decideCase(_prevState: FormState, formData: FormData): Pro
     if (reflectionError || !reflection) return { error: "Case was decided, but the reflection assignment could not be created." };
     reflectionAssignmentId = reflection.id;
   } else {
-    // not_upheld -- clear the pause and touch nothing else. This is the
-    // whole point: the common outcome must leave no other trace.
+    // Doesn't fail the assignment -- clear the pause and touch nothing
+    // else. This is the whole point: an outcome with no penalty must leave
+    // no other trace.
     await supabase.from("assignments").update({ open_case_id: null }).eq("id", openCaseRow.assignment_id);
   }
 
@@ -194,7 +224,10 @@ export async function decideCase(_prevState: FormState, formData: FormData): Pro
     .from("malpractice_cases")
     .update({
       status: "decided",
-      outcome,
+      outcome: label,
+      outcome_option_id: resolvedOptionId,
+      fails_assignment: failsAssignment,
+      flagged_for_referral: flaggedForReferral,
       decision_notes: typeof notes === "string" ? notes.trim() || null : null,
       decided_by: trainer.id,
       decided_at: decidedAt,

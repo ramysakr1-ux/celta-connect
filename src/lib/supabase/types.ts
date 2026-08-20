@@ -1411,7 +1411,13 @@ export interface Database {
           candidate_account: string | null;
           candidate_account_recorded_at: string | null;
           status: "open" | "decided";
-          outcome: "upheld" | "not_upheld" | null;
+          // Free text since 0170 -- a centre's own outcome label, not a
+          // fixed pair. fails_assignment/flagged_for_referral are the
+          // consequence a centre's chosen outcome carried at decide-time.
+          outcome: string | null;
+          outcome_option_id: string | null;
+          fails_assignment: boolean | null;
+          flagged_for_referral: boolean | null;
           decision_notes: string | null;
           decided_by: string | null;
           decided_at: string | null;
@@ -1427,6 +1433,22 @@ export interface Database {
           opened_by: string;
         };
         Update: Partial<Database["public"]["Tables"]["malpractice_cases"]["Row"]>;
+        Relationships: [];
+      };
+      malpractice_outcome_options: {
+        Row: {
+          id: string;
+          center_id: string;
+          label: string;
+          fails_assignment: boolean;
+          flagged_for_referral: boolean;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["malpractice_outcome_options"]["Row"]> & {
+          center_id: string;
+          label: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["malpractice_outcome_options"]["Row"]>;
         Relationships: [];
       };
       plagiarism_scanner_findings: {

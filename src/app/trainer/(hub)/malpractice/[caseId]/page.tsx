@@ -18,7 +18,7 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
     .maybeSingle();
   if (!caseRow) notFound();
 
-  const [{ data: trainee }, { data: assignment }, { data: openedBy }, { data: decidedBy }, { data: reflection }] =
+  const [{ data: trainee }, { data: assignment }, { data: openedBy }, { data: decidedBy }, { data: reflection }, { data: outcomeOptions }] =
     await Promise.all([
       supabase.from("profiles").select("full_name").eq("id", caseRow.trainee_id).maybeSingle(),
       supabase.from("assignments").select("assignment_type, due_date").eq("id", caseRow.assignment_id).maybeSingle(),
@@ -29,6 +29,7 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
       caseRow.reflection_assignment_id
         ? supabase.from("assignments").select("id, first_status").eq("id", caseRow.reflection_assignment_id).maybeSingle()
         : Promise.resolve({ data: null }),
+      supabase.from("malpractice_outcome_options").select("*").eq("center_id", trainer.center_id ?? "").order("created_at", { ascending: true }),
     ]);
 
   return (
@@ -41,7 +42,7 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-serif text-xl text-ink">Malpractice case</h1>
           <span className={`pill ${caseRow.status === "open" ? "pill-warning" : "pill-neutral"}`}>
-            {caseRow.status === "open" ? "Open — marking paused" : `Decided — ${caseRow.outcome === "upheld" ? "Upheld" : "Not upheld"}`}
+            {caseRow.status === "open" ? "Open — marking paused" : `Decided — ${caseRow.outcome}`}
           </span>
         </div>
         <p className="text-sm text-muted">
@@ -63,15 +64,20 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
         <CandidateAccountForm caseId={caseRow.id} />
       ) : null}
 
-      {caseRow.status === "open" && caseRow.candidate_account ? <DecisionForm caseId={caseRow.id} /> : null}
+      {caseRow.status === "open" && caseRow.candidate_account ? (
+        <DecisionForm caseId={caseRow.id} outcomeOptions={outcomeOptions ?? []} />
+      ) : null}
 
       {caseRow.status === "decided" ? (
         <div className="sheet flex flex-col gap-2">
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Decision</p>
           <p className="text-sm text-ink">
-            {caseRow.outcome === "upheld" ? "Upheld" : "Not upheld"} · {decidedBy?.full_name ?? "—"} ·{" "}
+            {caseRow.outcome} · {decidedBy?.full_name ?? "—"} ·{" "}
             {caseRow.decided_at ? new Date(caseRow.decided_at).toLocaleString() : ""}
           </p>
+          {caseRow.flagged_for_referral ? (
+            <p className="text-xs font-semibold text-gold">Referred to the centre&apos;s malpractice procedure</p>
+          ) : null}
           {caseRow.decision_notes ? <p className="whitespace-pre-wrap text-sm text-muted">{caseRow.decision_notes}</p> : null}
           {reflection ? (
             <Link

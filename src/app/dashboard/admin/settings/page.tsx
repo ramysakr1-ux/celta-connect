@@ -6,6 +6,7 @@ import { CenterProfileForm } from "@/app/dashboard/admin/settings/center-profile
 import { GoogleDriveTargetsForm } from "@/app/dashboard/admin/settings/targets-form";
 import { FeedbackStyleExamplesManager } from "@/components/feedback-style-examples/manager";
 import { TutorsPanel, type TutorsCourseGroup } from "@/app/dashboard/admin/settings/tutors-panel";
+import { MalpracticeOutcomesManager } from "@/app/dashboard/admin/settings/malpractice-outcomes-manager";
 import { SettingsNav } from "@/app/dashboard/admin/settings/settings-nav";
 import type { DeliveryMode } from "@/lib/delivery-mode";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
@@ -17,6 +18,7 @@ const SETTINGS_NAV_BASE = [
   { href: "/dashboard/admin/assignment-briefs", label: "Assignment briefs", external: true },
   { href: "#feedback-style", label: "Feedback style" },
   { href: "#tutors", label: "Tutors" },
+  { href: "#malpractice-outcomes", label: "Malpractice outcomes" },
 ] as const;
 
 const GOOGLE_ERROR_MESSAGES: Record<string, string> = {
@@ -61,6 +63,12 @@ export default async function AdminSettingsPage({
     .select("*")
     .eq("center_id", profile.center_id)
     .order("created_at", { ascending: false });
+
+  const { data: malpracticeOutcomes } = await admin
+    .from("malpractice_outcome_options")
+    .select("*")
+    .eq("center_id", profile.center_id)
+    .order("created_at", { ascending: true });
 
   // Tutors panel -- real per-course tutor management over course_tutors
   // (0051), previously zero app code touched this table at all. Grouped by
@@ -243,6 +251,19 @@ export default async function AdminSettingsPage({
             </p>
             <div className="mt-4">
               <TutorsPanel groups={tutorGroups} supervisorOptions={supervisorOptions} />
+            </div>
+          </div>
+
+          <div id="malpractice-outcomes" className="card scroll-mt-6 p-6">
+            <h2 className="font-serif text-lg text-ink">Malpractice outcomes</h2>
+            <p className="mt-2 text-muted">
+              Handbook 8.2.4 requires your own internal policy on plagiarism/malpractice penalties --
+              Connect never invents one. Add each outcome your policy names, and whether it fails the
+              assignment and/or refers the case to your own procedure. A tutor deciding a case picks
+              from this list. Leave it empty to keep the plain Upheld / Not upheld decision.
+            </p>
+            <div className="mt-4">
+              <MalpracticeOutcomesManager options={malpracticeOutcomes ?? []} />
             </div>
           </div>
         </div>

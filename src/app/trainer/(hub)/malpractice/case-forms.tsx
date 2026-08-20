@@ -2,6 +2,9 @@
 
 import { useActionState, useState } from "react";
 import { recordCandidateAccount, decideCase, type FormState } from "@/app/trainer/(hub)/malpractice/actions";
+import type { Database } from "@/lib/supabase/types";
+
+type OutcomeOption = Database["public"]["Tables"]["malpractice_outcome_options"]["Row"];
 
 const initialState: FormState = { error: null };
 
@@ -34,46 +37,80 @@ export function CandidateAccountForm({ caseId }: { caseId: string }) {
   );
 }
 
-export function DecisionForm({ caseId }: { caseId: string }) {
+// for-claude-code-malpractice-outcomes.md: picks from the centre's own
+// configured outcome list (Handbook 8.2.4 -- Connect never invents a
+// penalty) when one exists; falls back to the original plain Upheld / Not
+// upheld pair when a centre hasn't configured any outcomes yet.
+export function DecisionForm({ caseId, outcomeOptions }: { caseId: string; outcomeOptions: OutcomeOption[] }) {
   const [state, action, pending] = useActionState(decideCase, initialState);
-  const [outcome, setOutcome] = useState<"upheld" | "not_upheld" | "">("");
+  const [selected, setSelected] = useState("");
+
+  const hasOptions = outcomeOptions.length > 0;
+  const selectedOption = hasOptions ? outcomeOptions.find((o) => o.id === selected) : undefined;
+  const isDestructive = hasOptions ? Boolean(selectedOption?.fails_assignment) : selected === "upheld";
 
   return (
     <form action={action} className="sheet flex flex-col gap-3">
       <input type="hidden" name="case_id" value={caseId} />
-      <input type="hidden" name="outcome" value={outcome} />
+      <input type="hidden" name={hasOptions ? "outcome_option_id" : "outcome"} value={selected} />
       <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Decision</p>
       <p className="text-xs text-muted">
         The decision comes from your own malpractice policy -- Connect never invents a penalty.
       </p>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => setOutcome("not_upheld")}
-          className={`rounded-[6px] border p-3 text-left text-sm font-medium ${
-            outcome === "not_upheld" ? "border-primary bg-accent/30 text-ink" : "border-border text-ink hover:border-primary/50"
-          }`}
-        >
-          Not upheld
-          <span className="mt-1 block text-xs font-normal text-muted">
-            Leaves no other mark -- marking resumes normally on the original submission.
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setOutcome("upheld")}
-          className={`rounded-[6px] border p-3 text-left text-sm font-medium ${
-            outcome === "upheld" ? "border-destructive bg-destructive/10 text-ink" : "border-border text-ink hover:border-primary/50"
-          }`}
-        >
-          Upheld
-          <span className="mt-1 block text-xs font-normal text-muted">
-            Fails the assignment (their one resubmission chance, or a hard fail if already spent) and creates the
-            Plagiarism Reflection task.
-          </span>
-        </button>
-      </div>
+      {hasOptions ? (
+        <div className="grid grid-cols-1 gap-2">
+          {outcomeOptions.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => setSelected(option.id)}
+              className={`rounded-[6px] border p-3 text-left text-sm font-medium ${
+                selected === option.id
+                  ? option.fails_assignment
+                    ? "border-destructive bg-destructive/10 text-ink"
+                    : "border-primary bg-accent/30 text-ink"
+                  : "border-border text-ink hover:border-primary/50"
+              }`}
+            >
+              {option.label}
+              <span className="mt-1 block text-xs font-normal text-muted">
+                {[option.fails_assignment ? "Fails the assignment" : null, option.flagged_for_referral ? "referred to your procedure" : null]
+                  .filter(Boolean)
+                  .join(", ") || "No automatic consequence"}
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => setSelected("not_upheld")}
+            className={`rounded-[6px] border p-3 text-left text-sm font-medium ${
+              selected === "not_upheld" ? "border-primary bg-accent/30 text-ink" : "border-border text-ink hover:border-primary/50"
+            }`}
+          >
+            Not upheld
+            <span className="mt-1 block text-xs font-normal text-muted">
+              Leaves no other mark -- marking resumes normally on the original submission.
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelected("upheld")}
+            className={`rounded-[6px] border p-3 text-left text-sm font-medium ${
+              selected === "upheld" ? "border-destructive bg-destructive/10 text-ink" : "border-border text-ink hover:border-primary/50"
+            }`}
+          >
+            Upheld
+            <span className="mt-1 block text-xs font-normal text-muted">
+              Fails the assignment (their one resubmission chance, or a hard fail if already spent) and creates the
+              Plagiarism Reflection task.
+            </span>
+          </button>
+        </div>
+      )}
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Decision notes</label>
@@ -88,9 +125,9 @@ export function DecisionForm({ caseId }: { caseId: string }) {
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       <button
         type="submit"
-        disabled={pending || !outcome}
+        disabled={pending || !selected}
         className={`self-start rounded-[6px] px-4 py-2 text-sm font-medium text-card disabled:opacity-60 ${
-          outcome === "upheld" ? "bg-destructive" : "bg-primary"
+          isDestructive ? "bg-destructive" : "bg-primary"
         }`}
       >
         {pending ? "Recording…" : "Record decision"}
