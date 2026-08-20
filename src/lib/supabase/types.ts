@@ -308,6 +308,9 @@ export interface Database {
           launched_at: string | null;
           // migration 0127 -- MCT-set, not computed from assessor_visit_date.
           provisional_grades_due_at: string | null;
+          // migration 0178 -- "already late" push idempotency guard, one
+          // push per course, not re-sent on every daily sweep.
+          provisional_grades_late_push_sent_at: string | null;
           accepting_applications: boolean;
           created_at: string;
           // migration 0172 -- for-claude-code-concurrent-course-checks.md:
@@ -1134,6 +1137,12 @@ export interface Database {
           resubmission_own_work_confirmed: boolean;
           final_grade: string | null;
           due_date: string | null;
+          // migration 0178 -- "something already late" push idempotency
+          // guards. Two, not one: the first-submission deadline and the
+          // resubmission deadline are genuinely different events on the
+          // same row.
+          first_late_push_sent_at: string | null;
+          resubmission_late_push_sent_at: string | null;
           tutor_feedback: string | null;
           // Which open malpractice case (if any) is pausing this
           // assignment's marking, and which case (if any) this row IS the
