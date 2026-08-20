@@ -5,18 +5,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { computeStrengthsAndActionPoints } from "@/lib/celta-criteria";
 import { computeAssessedTpStats } from "@/lib/course-progress";
-import { computeSignatureLedger, isBookletExportReady } from "@/lib/celta5-signatures";
 import { mapTpFeedbackToGlyphRow } from "@/lib/tp-grades";
-import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
+import { computeCohortRows } from "@/lib/grades-report";
 import { ProvisionalGradeForm } from "@/app/trainer/(hub)/grades-report/provisional-grade-form";
 import { UpgradeConditionsForm } from "@/app/trainer/(hub)/grades-report/upgrade-conditions-form";
-import { CohortSheet, type CohortSheetRow } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
+import { CohortSheet } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
 import { FinalGradeForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/final-grade-form";
 import { StandardRatingGlyph } from "@/lib/status-pill";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
-import type { CriteriaRating, Database } from "@/lib/supabase/types";
-
-type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
+import type { CriteriaRating } from "@/lib/supabase/types";
 
 // Assessor-facing compiled Grades Report -- the whole cohort in one
 // continuous document, matching the shape of a real center's actual
@@ -37,11 +34,8 @@ export default async function GradesReportPage() {
     return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
   }
 
-  const { data: course } = await supabase
-    .from("courses")
-    .select("name, provisional_grades_due_at")
-    .eq("id", courseId)
-    .maybeSingle();
+  // Shared with the CSV export (export/route.ts) -- one computation, not two.
+  const { courseName, provisionalDueAt, rows: cohortRows } = await computeCohortRows(supabase, courseId);
 
   const { data: trainees } = await supabase
     .from("profiles")
@@ -95,74 +89,15 @@ export default async function GradesReportPage() {
     matrixByTrainee.set(row.trainee_id, ratings);
   }
 
-  function provisionalLabel(record: Celta5Record | null | undefined): string {
-    if (!record?.provisional_grade) return "Not set";
-    return record.provisional_grade_upper ? `${record.provisional_grade} / ${record.provisional_grade_upper}` : record.provisional_grade;
-  }
-
-  const cohortRows: CohortSheetRow[] = (trainees ?? []).map((trainee) => {
-    const record = recordByTrainee.get(trainee.id) ?? null;
-    const traineeAssignments = (assignments ?? []).filter((a) => a.trainee_id === trainee.id);
-    const traineeFeedback = (tpFeedbackRows ?? []).filter((f) => f.trainee_id === trainee.id);
-
-    let outstanding = "";
-    if (!record) {
-      outstanding = "No CELTA 5 record";
-    } else if (record.stage3_required && !record.stage3_finalized_at) {
-      outstanding = "Stage 3 record open";
-    } else {
-      const unresolved = traineeAssignments.find((a) => {
-        const isResubmissionRound = a.first_status === "resubmission_required" || a.resubmission_status !== "not_submitted";
-        const status = isResubmissionRound ? a.resubmission_status : a.first_status;
-        return status !== "approved";
-      });
-      if (unresolved) {
-        outstanding = `${ASSIGNMENT_INFO[unresolved.assignment_type]?.title ?? unresolved.assignment_type} unresolved`;
-      } else {
-        const ledger = computeSignatureLedger(record, traineeAssignments);
-        if (!isBookletExportReady(ledger)) {
-          const outstandingCount = ledger.filter((r) => r.state !== "signed").length;
-          outstanding = `${outstandingCount} signature${outstandingCount === 1 ? "" : "s"} outstanding`;
-        }
-      }
-    }
-
-    const taughtForTrainee = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at).length;
-
-    return {
-      traineeId: trainee.id,
-      name: trainee.full_name,
-      tpGlyphs: mapTpFeedbackToGlyphRow(traineeFeedback),
-      provisionalLabel: provisionalLabel(record),
-      recommendedGrade: record?.final_recommended_grade ?? null,
-      outstanding,
-      // for-claude-code-trainer-remaining-screens.md's "Undecided/Settled"
-      // split: undecided = slashed provisional with no justification typed
-      // yet (same wasSlashed/overall_notes pairing the per-candidate detail
-      // below already uses for its red warning text).
-      wasSlashed: Boolean(record?.provisional_grade_upper),
-      justified: Boolean(record?.overall_notes),
-      stage3Status: !record?.stage3_required ? "not_required" : record.stage3_finalized_at ? "given" : "not_given",
-      // TPs still to teach -- the closest real signal to the spec's "a Fail
-      // letter must be issued with at least two lessons left to teach."
-      // There's no letter-issuing feature in the app (confirmed absent, see
-      // grade-query-reply build) so this stays informational context, not
-      // an enforced gate.
-      tpsRemaining: Math.max(8 - taughtForTrainee, 0),
-      hasProvisional: Boolean(record?.provisional_grade),
-      provisionalApproved: Boolean(record?.provisional_approved_at),
-    };
-  });
-
   return (
     <LaptopOnlyGate task="The Grades Report" skip={!trainer}>
     <div className="flex flex-col gap-6">
       <CohortSheet
         courseId={courseId}
-        courseName={course?.name ?? "Course"}
+        courseName={courseName}
         rows={cohortRows}
         canRelease={Boolean(trainer)}
-        provisionalDueAt={course?.provisional_grades_due_at ?? null}
+        provisionalDueAt={provisionalDueAt}
         isMct={isMct}
       />
 

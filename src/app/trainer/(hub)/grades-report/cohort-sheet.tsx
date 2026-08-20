@@ -92,19 +92,27 @@ export function CohortSheet({
           </p>
           <h2 className="font-serif text-xl text-ink">Grades report</h2>
         </div>
-        {canRelease ? (
-          <form action={action}>
-            <input type="hidden" name="course_id" value={courseId} />
-            <button
-              type="submit"
-              disabled={pending}
-              className="flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
-            >
-              <span className="size-[5px] rounded-full bg-gold" />
-              {pending ? "Releasing..." : "Release final reports"}
-            </button>
-          </form>
-        ) : null}
+        <div className="flex items-center gap-2">
+          <a
+            href="/trainer/grades-report/export"
+            className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
+          >
+            Export report
+          </a>
+          {canRelease ? (
+            <form action={action}>
+              <input type="hidden" name="course_id" value={courseId} />
+              <button
+                type="submit"
+                disabled={pending}
+                className="flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+              >
+                <span className="size-[5px] rounded-full bg-gold" />
+                {pending ? "Releasing..." : "Release final reports"}
+              </button>
+            </form>
+          ) : null}
+        </div>
       </div>
       {canRelease && state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 
@@ -145,6 +153,12 @@ export function CohortSheet({
               ))}
             </div>
           )}
+          {undecidedRows.length > 0 ? (
+            <p className="border-t border-border-faint px-4 py-2.5 text-[11px] leading-relaxed text-muted">
+              Admin Handbook 9.2: a fail-risk letter must be issued with at least two assessed lessons still to
+              teach -- issued from each candidate&apos;s own CELTA 5 page, not from here.
+            </p>
+          ) : null}
         </div>
 
         {/* Settled */}
