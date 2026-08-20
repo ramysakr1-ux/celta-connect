@@ -295,7 +295,7 @@ export default async function TpHubPage({
             <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Criteria — stage 2</p>
             <div className="flex items-baseline gap-2.5">
               <span className="font-serif text-[32px] leading-none text-ink">{criteriaPct}%</span>
-              <span className="text-xs text-muted">{achievedCount} of 41 met</span>
+              <span className="text-xs text-muted">{achievedCount} of {CELTA_CRITERIA_CODES.length} met</span>
             </div>
             <div className="h-1 w-full overflow-hidden rounded-full bg-surface-muted">
               <div className="h-1 rounded-full bg-primary" style={{ width: `${criteriaPct}%` }} />

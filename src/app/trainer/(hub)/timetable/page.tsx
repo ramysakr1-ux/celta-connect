@@ -165,7 +165,7 @@ export default async function TrainerTimetablePage({
                   : "border-primary bg-primary text-primary-foreground"
               }`}
             >
-              {locked ? <span className="size-[5px] shrink-0 rounded-full bg-gold" /> : null}
+              {!locked ? <span className="size-[5px] shrink-0 rounded-full bg-gold" /> : null}
               {locked ? "Unlock timetable" : "Lock timetable"}
             </button>
           </form>
