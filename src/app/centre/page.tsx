@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, canView } from "@/lib/auth/centre-permissions";
+import { computeAssessorCentreHistory } from "@/lib/assessor-course-history";
 
 // Centre Admin's Overview.
 //
@@ -40,7 +41,7 @@ export default async function CentreOverviewPage({
     admin.from("centers").select("id, name, center_number").in("id", mine),
     admin
       .from("courses")
-      .select("id, name, center_id, start_date, end_date, delivery_mode")
+      .select("id, name, center_id, start_date, end_date, delivery_mode, course_code")
       .in("center_id", scope)
       .order("start_date", { ascending: false }),
     canView(ctx.roles, "admissions.view")
@@ -60,6 +61,27 @@ export default async function CentreOverviewPage({
     canView(ctx.roles, "volunteers.view") && courseIds.length > 0
       ? await admin.from("volunteer_students").select("id, volunteer_person_id").in("course_id", courseIds)
       : { data: [] };
+
+  // for-claude-code-concurrent-course-checks.md: "keep the assessor history
+  // per centre so it can be seen." course_tutors is the real per-course
+  // assessor link (assignExistingTutor's insert path); reused here purely
+  // for visibility, nothing here blocks anything.
+  const { data: assessorLinkRows } =
+    canView(ctx.roles, "courseAdmin.view") && courseIds.length > 0
+      ? await admin.from("course_tutors").select("course_id, profile_id").eq("tutor_role", "external_assessor").in("course_id", courseIds)
+      : { data: [] };
+  const assessorProfileIds = [...new Set((assessorLinkRows ?? []).map((r) => r.profile_id))];
+  const { data: assessorProfiles } =
+    assessorProfileIds.length > 0 ? await admin.from("profiles").select("id, full_name").in("id", assessorProfileIds) : { data: [] };
+  const assessorNameById = new Map((assessorProfiles ?? []).map((p) => [p.id, p.full_name]));
+  const assessorHistory = computeAssessorCentreHistory(
+    (courses ?? []).map((c) => ({ id: c.id, label: c.course_code ?? c.name, start_date: c.start_date, end_date: c.end_date })),
+    (assessorLinkRows ?? []).map((r) => ({
+      profileId: r.profile_id,
+      name: assessorNameById.get(r.profile_id) ?? "Unknown",
+      courseId: r.course_id,
+    }))
+  );
 
   // Overview only ever shows the count -- per-row detail (course, level,
   // hours, link/unlink) moved to its own screen, /centre/volunteers
@@ -359,6 +381,22 @@ export default async function CentreOverviewPage({
                 <span className="text-xs text-muted">
                   {volunteerPersonCount} {volunteerPersonCount === 1 ? "person" : "people"} &middot;{" "}
                   {(volunteers ?? []).length} registrations
+                </span>
+              </div>
+              <span className="text-xs font-semibold text-primary">See all →</span>
+            </Link>
+          ) : null}
+
+          {canView(ctx.roles, "courseAdmin.view") && assessorHistory.length > 0 ? (
+            <Link
+              href="/centre/assessor-history"
+              className="flex items-center justify-between gap-3 rounded-[10px] border border-border bg-card px-5 py-3.5 hover:border-primary"
+            >
+              <div className="flex flex-col gap-0.5">
+                <h2 className="font-serif text-base text-ink">Assessor history</h2>
+                <span className="text-xs text-muted">
+                  {assessorHistory.length} {assessorHistory.length === 1 ? "assessor" : "assessors"}
+                  {assessorHistory.some((a) => a.peakConcurrent > 2) ? " · one over the concurrent-two guideline" : ""}
                 </span>
               </div>
               <span className="text-xs font-semibold text-primary">See all →</span>
