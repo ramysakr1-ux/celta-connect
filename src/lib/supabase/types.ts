@@ -1963,6 +1963,9 @@ export interface Database {
           joined_at: string;
           left_at: string | null;
           created_at: string;
+          // migration 0179 -- which assignment types this tutor owns for
+          // marking, MCT-set, separate from their TP group assignment.
+          owned_assignment_types: string[];
         };
         Insert: Partial<Database["public"]["Tables"]["course_tutors"]["Row"]> & {
           course_id: string;

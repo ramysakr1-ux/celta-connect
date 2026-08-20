@@ -208,3 +208,26 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
   return { error: null };
 }
+
+const ASSIGNMENT_TYPES = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
+
+// connect-spec-corrections-for-claude-code.md item 7: "not a system-fixed
+// rule. The MCT assigns which tutor owns which assignments... manually...
+// a tutor's TP group and their assignment-marking ownership are separate
+// fields." Visibility only -- marking itself stays open to any trainer on
+// the course, same as today; this doesn't gate who's allowed to mark.
+export async function updateOwnedAssignmentTypes(formData: FormData): Promise<void> {
+  const profile = await requireRole("admin");
+  const courseTutorId = formData.get("course_tutor_id");
+  const courseId = formData.get("course_id");
+  if (typeof courseTutorId !== "string" || typeof courseId !== "string") return;
+
+  const owned = formData.getAll("owned_assignment_types").filter((v): v is string => typeof v === "string" && (ASSIGNMENT_TYPES as readonly string[]).includes(v));
+
+  const admin = createAdminClient();
+  const { data: course } = await admin.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
+  if (!course || course.center_id !== profile.center_id) return;
+
+  await admin.from("course_tutors").update({ owned_assignment_types: owned }).eq("id", courseTutorId).eq("course_id", courseId);
+  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+}

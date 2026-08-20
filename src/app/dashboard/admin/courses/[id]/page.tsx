@@ -31,6 +31,7 @@ import { InvitationsPanel } from "@/app/dashboard/admin/courses/[id]/invitations
 import { AssignTutorPanel } from "@/app/dashboard/admin/courses/[id]/assign-tutor-panel";
 import { leaveSecondaryCourse } from "@/app/dashboard/admin/courses/[id]/assign-tutor-actions";
 import { TutorRoleControl } from "@/app/dashboard/admin/courses/[id]/tutor-role-control";
+import { OwnedAssignmentsControl } from "@/app/dashboard/admin/courses/[id]/owned-assignments-control";
 import { GroupTutorForm } from "@/app/dashboard/admin/courses/[id]/group-tutor-form";
 import { getRecentCentreChanges } from "@/lib/what-changed";
 import { WhatChangedPanel } from "@/components/what-changed-panel";
@@ -66,7 +67,7 @@ export default async function CourseRosterPage({
   // needs both, keyed by profile.
   const { data: courseTutors } = await supabase
     .from("course_tutors")
-    .select("id, profile_id, tutor_role")
+    .select("id, profile_id, tutor_role, owned_assignment_types")
     .eq("course_id", id)
     .is("left_at", null);
   const tutorRowByProfile = new Map((courseTutors ?? []).map((t) => [t.profile_id, t]));
@@ -594,6 +595,13 @@ export default async function CourseRosterPage({
                                 courseTutorId={tutorRowByProfile.get(member.id)!.id}
                                 courseId={course.id}
                                 current={tutorRowByProfile.get(member.id)!.tutor_role}
+                              />
+                            ) : null}
+                            {member.role === "trainer" && tutorRowByProfile.get(member.id) ? (
+                              <OwnedAssignmentsControl
+                                courseTutorId={tutorRowByProfile.get(member.id)!.id}
+                                courseId={course.id}
+                                owned={tutorRowByProfile.get(member.id)!.owned_assignment_types}
                               />
                             ) : null}
                           </div>
