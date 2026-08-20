@@ -14,6 +14,7 @@ import { FolPanel } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]
 import { FolCrossCheck } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/fol-cross-check";
 import { isCourseDayReached } from "@/lib/course-day";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
+import { checkAiCitationShape, AI_CITATION_MISMATCH_LABEL } from "@/lib/ai-declaration-check";
 
 // §8 detail -- trainee viewers get the real editable pipeline
 // (AssignmentAuthoringForm, exactly as built for
@@ -169,6 +170,14 @@ export default async function AssignmentDetailPage({
   const roundStatus = round === "resubmission" ? assignment.resubmission_status : assignment.first_status;
   const canExportCoverSheet = assignment.first_status === "approved" || assignment.first_status === "resubmission_required";
 
+  // connect-spec-corrections-for-claude-code.md item 8, soft flags 4-5.
+  const aiDeclared = round === "resubmission" ? assignment.resubmission_ai_declared : assignment.first_ai_declared;
+  const aiConversationUrl = round === "resubmission" ? assignment.resubmission_ai_conversation_url : assignment.first_ai_conversation_url;
+  const fullSubmittedText = (responses ?? [])
+    .map((r) => (round === "resubmission" ? r.resubmission_response : r.first_response) ?? "")
+    .join("\n\n");
+  const aiCitationMismatch = checkAiCitationShape(fullSubmittedText, aiDeclared);
+
   return (
     <div className="flex flex-col gap-4">
       <Link href={`/portfolio/${traineeId}/assignments`} className="text-sm text-muted hover:text-primary">
@@ -253,6 +262,20 @@ export default async function AssignmentDetailPage({
           </div>
         ) : (
           <div className="flex flex-col gap-3">
+            <div className="sheet flex flex-col gap-1">
+              <p className="text-sm text-ink">
+                AI declaration: {aiDeclared ? "used" : "not used"}
+                {aiDeclared && aiConversationUrl ? (
+                  <>
+                    {" -- "}
+                    <a href={aiConversationUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                      conversation link
+                    </a>
+                  </>
+                ) : null}
+              </p>
+              {aiCitationMismatch ? <p className="text-sm text-gold">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p> : null}
+            </div>
             {isFol && folData ? <FolCrossCheck claims={folData.allClaimsForCrossCheck} poolEntries={folData.poolEntries} /> : null}
             <FindingsBand findings={findings} assignmentId={assignmentId} round={round} traineeId={traineeId} />
             <AssignmentReviewForm

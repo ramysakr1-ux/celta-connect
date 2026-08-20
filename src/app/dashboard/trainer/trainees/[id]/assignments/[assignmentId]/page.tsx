@@ -7,6 +7,7 @@ import { AssignmentReviewForm } from "@/app/dashboard/trainer/trainees/[id]/assi
 import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
 import { isAssignmentWarningTriggered, buildAssignmentWarningDraft } from "@/lib/letters/assignment-warning";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
+import { checkAiCitationShape, AI_CITATION_MISMATCH_LABEL } from "@/lib/ai-declaration-check";
 import { AssignmentWarningLetterSection } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/assignment-warning-letter-section";
 
 export default async function TrainerAssignmentReviewPage({
@@ -56,6 +57,16 @@ export default async function TrainerAssignmentReviewPage({
   const round: "first" | "resubmission" = assignment.first_status === "resubmission_required" ? "resubmission" : "first";
   const roundStatus = round === "resubmission" ? assignment.resubmission_status : assignment.first_status;
 
+  // connect-spec-corrections-for-claude-code.md item 8, soft flags 4-5:
+  // advisory only, computed at marking time from the round actually being
+  // reviewed -- never blocks, never auto-fails, never auto-passes.
+  const aiDeclared = round === "resubmission" ? assignment.resubmission_ai_declared : assignment.first_ai_declared;
+  const aiConversationUrl = round === "resubmission" ? assignment.resubmission_ai_conversation_url : assignment.first_ai_conversation_url;
+  const fullSubmittedText = (responses ?? [])
+    .map((r) => (round === "resubmission" ? r.resubmission_response : r.first_response) ?? "")
+    .join("\n\n");
+  const aiCitationMismatch = checkAiCitationShape(fullSubmittedText, aiDeclared);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="card flex items-center justify-between p-6">
@@ -104,6 +115,25 @@ export default async function TrainerAssignmentReviewPage({
             ).data ?? []
           }
         />
+      ) : null}
+
+      {roundStatus === "submitted" ? (
+        <div className="card flex flex-col gap-1 p-4">
+          <p className="text-sm text-ink">
+            AI declaration: {aiDeclared ? "used" : "not used"}
+            {aiDeclared && aiConversationUrl ? (
+              <>
+                {" -- "}
+                <a href={aiConversationUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  conversation link
+                </a>
+              </>
+            ) : null}
+          </p>
+          {aiCitationMismatch ? (
+            <p className="text-sm text-gold">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p>
+          ) : null}
+        </div>
       ) : null}
 
       {!template ? (
