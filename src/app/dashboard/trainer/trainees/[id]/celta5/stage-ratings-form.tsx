@@ -66,6 +66,27 @@ export function StageRatingsForm({
   const ratedCount = Object.values(ratings).filter(Boolean).length;
   const unacceptedSuggestions = Object.keys(suggestions).filter((code) => !ratings[code]);
 
+  // for-claude-code-suggestion-engine-placement.md (2026-08-20, resolving
+  // assessment-model.md's open placement question): inline on the
+  // criterion row, a dot that expands in place under that row -- no side
+  // panel, no separate report. Independent per row, several can be open at
+  // once.
+  const [expandedFlags, setExpandedFlags] = useState<Set<string>>(new Set());
+  function toggleFlags(code: string) {
+    setExpandedFlags((prev) => {
+      const next = new Set(prev);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
+      return next;
+    });
+  }
+
+  const FLAG_LABEL: Record<AttentionFlag["kind"], string> = {
+    not_yet_met: "Not yet met",
+    consistent_strength: "Consistent strength",
+    tutor_disagreement: "Tutor disagreement",
+  };
+
   function acceptAllSuggestions() {
     setRatings((prev) => {
       const next = { ...prev };
@@ -129,12 +150,13 @@ export function StageRatingsForm({
                       </span>
                     ) : null}
                     {flags.length > 0 ? (
-                      <span
-                        className="ml-2 rounded-[5px] border border-dashed border-gold px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.04em] text-gold uppercase"
-                        title={flags.map((f) => f.detail).join(" · ")}
-                      >
-                        Worth a look
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => toggleFlags(code)}
+                        title="A suggestion has evidence here -- click to see it"
+                        aria-label="Show suggestion"
+                        className="ml-2 inline-flex size-2.5 shrink-0 rounded-full bg-gold align-middle"
+                      />
                     ) : null}
                   </span>
                   <div className="flex shrink-0 items-center gap-2">
@@ -142,6 +164,15 @@ export function StageRatingsForm({
                     <CriteriaRatingPill rating={candidateStatus} />
                   </div>
                 </div>
+                {expandedFlags.has(code) && flags.length > 0 ? (
+                  <div className="mt-2 flex flex-col gap-1.5 rounded-[6px] border border-dashed border-gold bg-gold/5 p-2.5">
+                    {flags.map((flag, i) => (
+                      <p key={i} className="text-xs leading-relaxed text-ink">
+                        <span className="font-semibold text-gold">{FLAG_LABEL[flag.kind]}:</span> {flag.detail}
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <input type="hidden" name={`status__${code}`} value={value} />
                   <span className="text-xs text-muted">Your rating:</span>
