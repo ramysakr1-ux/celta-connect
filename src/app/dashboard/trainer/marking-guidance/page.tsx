@@ -2,7 +2,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { getMarkingGuidance } from "@/lib/marking-guidance";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
-import { ASSIGNMENT_CRITERIA } from "@/lib/assignment-criteria";
+import { getAllAssignmentCriteria } from "@/lib/assignment-criteria";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 import { MarkingGuidanceTabs, type SerializedGuidance } from "@/app/dashboard/trainer/marking-guidance/tabs";
 
@@ -24,6 +24,7 @@ export default async function MarkingGuidancePage({
   const { type } = await searchParams;
 
   const guidanceMap = await getMarkingGuidance(supabase, trainer.center_id);
+  const allCriteria = await getAllAssignmentCriteria(supabase, trainer.center_id);
   const guidance: SerializedGuidance = {};
   for (const [assignmentType, byKey] of guidanceMap) {
     guidance[assignmentType] = {};
@@ -39,7 +40,7 @@ export default async function MarkingGuidancePage({
   const assignments = TAB_ORDER.map((t) => ({
     type: t,
     title: ASSIGNMENT_INFO[t].title,
-    criteria: ASSIGNMENT_CRITERIA[t],
+    criteria: allCriteria[t],
   }));
 
   const initialType = type && (TAB_ORDER as string[]).includes(type) ? type : TAB_ORDER[0];

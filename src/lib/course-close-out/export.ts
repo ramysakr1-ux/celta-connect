@@ -8,7 +8,7 @@ import { computeSignatureLedger, isBookletExportReady } from "@/lib/celta5-signa
 import { computeAssessedTpStats } from "@/lib/course-progress";
 import { mapTpFeedbackToGlyphRow } from "@/lib/tp-grades";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
-import { ASSIGNMENT_CRITERIA } from "@/lib/assignment-criteria";
+import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { renderCelta5BookletBuffer } from "@/lib/celta5-booklet-pdf/document";
 import { renderFinalReportBuffer } from "@/lib/final-report-pdf/document";
 import { renderAssignmentCoverSheetBuffer } from "@/lib/assignment-cover-sheet-pdf/document";
@@ -507,7 +507,7 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
 
         const sections = (template?.sections ?? []) as { key: string; title: string }[];
         const responseByKey = new Map((responses ?? []).map((r) => [r.section_key, r]));
-        const criteria = ASSIGNMENT_CRITERIA[assignment.assignment_type];
+        const criteria = await getAssignmentCriteria(admin, closeOut.center_id, assignment.assignment_type);
         const firstMarks = assignment.first_criteria_marks as Record<string, boolean>;
         const resubMarks = assignment.resubmission_criteria_marks as Record<string, boolean>;
 

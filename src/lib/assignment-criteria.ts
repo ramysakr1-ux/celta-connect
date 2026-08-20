@@ -1,13 +1,22 @@
 // Assessment criteria per written assignment, verbatim from each 2024
 // brief's own cover sheet (captured directly from the Assignment
 // Review.dc.html design reference, which itself lifted them "verbatim").
-// Hardcoded canonical source, same pattern as celta-criteria.ts -- these
-// are Cambridge's own standardised criteria, not something a centre edits,
-// so they live in code rather than a DB table a centre could diverge on.
-// Each criterion gets a stable `key` (the source text carries none) used
-// to key assignments.first_criteria_marks / resubmission_criteria_marks,
-// so marks survive even if the wording here is later corrected.
+//
+// Confirmed with Ramy 2026-08-20: this is the "centre judgment" category
+// (as opposed to the fixed assignment instructions/word counts) -- the
+// grey area where centres and tutors reasonably differ -- so it's centre-
+// editable now (migration 0177, centre_assignment_criteria), seeded from
+// this exact list as the default. ASSIGNMENT_CRITERIA below stays as the
+// fallback for a centre with no rows yet (shouldn't happen post-backfill,
+// but a table read failing shouldn't blank the marking form) and as the
+// seed source. Each criterion keeps a stable `key` (the source text
+// carries none) used to key assignments.first_criteria_marks /
+// resubmission_criteria_marks, which is also why a centre "removing" one
+// deactivates the row rather than deleting it.
+import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
+import type { Database } from "@/lib/supabase/types";
 
 export interface AssignmentCriterion {
   key: string;
@@ -111,3 +120,47 @@ export const ASSIGNMENT_CRITERIA: Record<AssignmentTypeValue, AssignmentCriterio
 };
 
 export type CriteriaMarks = Record<string, boolean>;
+
+/** Active criteria for one assignment type, at the viewer's own centre. */
+export async function getAssignmentCriteria(
+  supabase: SupabaseClient<Database>,
+  centerId: string,
+  assignmentType: AssignmentTypeValue
+): Promise<AssignmentCriterion[]> {
+  const { data } = await supabase
+    .from("centre_assignment_criteria")
+    .select("key, criterion_text")
+    .eq("center_id", centerId)
+    .eq("assignment_type", assignmentType)
+    .eq("active", true)
+    .order("sort_order");
+  if (!data || data.length === 0) return ASSIGNMENT_CRITERIA[assignmentType] ?? [];
+  return data.map((r) => ({ key: r.key, text: r.criterion_text }));
+}
+
+/** All five assignment types at once, for screens that show every type together. */
+export async function getAllAssignmentCriteria(
+  supabase: SupabaseClient<Database>,
+  centerId: string
+): Promise<Record<AssignmentTypeValue, AssignmentCriterion[]>> {
+  const { data } = await supabase
+    .from("centre_assignment_criteria")
+    .select("assignment_type, key, criterion_text")
+    .eq("center_id", centerId)
+    .eq("active", true)
+    .order("sort_order");
+
+  const byType = new Map<AssignmentTypeValue, AssignmentCriterion[]>();
+  for (const row of data ?? []) {
+    const type = row.assignment_type as AssignmentTypeValue;
+    const list = byType.get(type) ?? [];
+    list.push({ key: row.key, text: row.criterion_text });
+    byType.set(type, list);
+  }
+
+  const result = {} as Record<AssignmentTypeValue, AssignmentCriterion[]>;
+  for (const type of Object.keys(ASSIGNMENT_CRITERIA) as AssignmentTypeValue[]) {
+    result[type] = byType.get(type) ?? ASSIGNMENT_CRITERIA[type];
+  }
+  return result;
+}

@@ -283,3 +283,64 @@ export async function deleteMalpracticeOutcomeOption(formData: FormData): Promis
     .eq("center_id", profile.center_id);
   revalidatePath("/dashboard/admin/settings");
 }
+
+const ASSIGNMENT_TYPES = ["Focus on Learner", "LRT", "Skills", "LfC", "Plagiarism Reflection"] as const;
+
+// build-spec.md: assignment criteria are "centre settings imported at
+// setup, with defaults supplied" -- the "centre judgment" grey area,
+// confirmed with Ramy 2026-08-20. Deactivate rather than delete
+// (toggleAssignmentCriterionActive below): assignments.first_criteria_marks
+// / resubmission_criteria_marks are keyed by `key`, so a trainee's already-
+// recorded marks must never point at a row that no longer exists.
+export async function addAssignmentCriterion(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const profile = await requireRole("admin");
+  const assignmentType = formData.get("assignment_type") as string | null;
+  const text = (formData.get("criterion_text") as string | null)?.trim();
+  if (!assignmentType || !ASSIGNMENT_TYPES.includes(assignmentType as (typeof ASSIGNMENT_TYPES)[number])) {
+    return { error: "Choose which assignment this criterion belongs to." };
+  }
+  if (!text) return { error: "Enter the criterion." };
+  const validatedType = assignmentType as (typeof ASSIGNMENT_TYPES)[number];
+
+  const admin = createAdminClient();
+  const { data: existing } = await admin
+    .from("centre_assignment_criteria")
+    .select("sort_order")
+    .eq("center_id", profile.center_id)
+    .eq("assignment_type", validatedType)
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextOrder = (existing?.sort_order ?? -1) + 1;
+  // No stable source text to key off (unlike the shipped defaults), so a
+  // fresh uuid segment keeps this collision-proof against another add on
+  // the same type/centre.
+  const key = `custom_${crypto.randomUUID().slice(0, 8)}`;
+
+  const { error } = await admin.from("centre_assignment_criteria").insert({
+    center_id: profile.center_id,
+    assignment_type: validatedType,
+    key,
+    criterion_text: text,
+    sort_order: nextOrder,
+  });
+  if (error) return { error: "Could not save. Try again." };
+
+  revalidatePath("/dashboard/admin/settings");
+  return { error: null };
+}
+
+export async function toggleAssignmentCriterionActive(formData: FormData): Promise<void> {
+  const profile = await requireRole("admin");
+  const id = formData.get("id") as string | null;
+  const active = formData.get("active") === "true";
+  if (!id) return;
+
+  const admin = createAdminClient();
+  await admin
+    .from("centre_assignment_criteria")
+    .update({ active: !active })
+    .eq("id", id)
+    .eq("center_id", profile.center_id);
+  revalidatePath("/dashboard/admin/settings");
+}

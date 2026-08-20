@@ -3,7 +3,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ASSIGNMENT_CRITERIA } from "@/lib/assignment-criteria";
+import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { renderAssignmentCoverSheetBuffer } from "@/lib/assignment-cover-sheet-pdf/document";
 
@@ -88,7 +88,7 @@ export async function GET(
 
   const sections = template?.sections ?? [];
   const responseByKey = new Map((responses ?? []).map((r) => [r.section_key, r]));
-  const criteria = ASSIGNMENT_CRITERIA[assignment.assignment_type];
+  const criteria = await getAssignmentCriteria(supabase, trainee.center_id, assignment.assignment_type);
   const firstMarks = assignment.first_criteria_marks as Record<string, boolean>;
   const resubMarks = assignment.resubmission_criteria_marks as Record<string, boolean>;
 

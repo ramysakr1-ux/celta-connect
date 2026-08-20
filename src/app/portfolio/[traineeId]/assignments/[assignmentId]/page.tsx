@@ -13,6 +13,7 @@ import { FindingsBand } from "@/app/trainer/(hub)/malpractice/findings-band";
 import { FolPanel } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/fol-panel";
 import { FolCrossCheck } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/fol-cross-check";
 import { isCourseDayReached } from "@/lib/course-day";
+import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 
 // §8 detail -- trainee viewers get the real editable pipeline
 // (AssignmentAuthoringForm, exactly as built for
@@ -47,6 +48,8 @@ export default async function AssignmentDetailPage({
 
   const { data: assignment } = await supabase.from("assignments").select("*").eq("id", assignmentId).maybeSingle();
   if (!assignment || assignment.trainee_id !== traineeId) notFound();
+
+  const criteria = await getAssignmentCriteria(supabase, trainee.center_id, assignment.assignment_type);
 
   const { data: template } = await supabase
     .from("assignment_templates")
@@ -259,6 +262,7 @@ export default async function AssignmentDetailPage({
               responses={responses ?? []}
               round={round}
               criteriaMarks={(round === "resubmission" ? assignment.resubmission_criteria_marks : assignment.first_criteria_marks) ?? {}}
+              criteria={criteria}
               secondMarkerOptions={secondMarkerRows ?? []}
             />
             {assignment.assignment_type !== "Plagiarism Reflection" ? (

@@ -7,6 +7,7 @@ import { GoogleDriveTargetsForm } from "@/app/dashboard/admin/settings/targets-f
 import { FeedbackStyleExamplesManager } from "@/components/feedback-style-examples/manager";
 import { TutorsPanel, type TutorsCourseGroup } from "@/app/dashboard/admin/settings/tutors-panel";
 import { MalpracticeOutcomesManager } from "@/app/dashboard/admin/settings/malpractice-outcomes-manager";
+import { AssignmentCriteriaManager } from "@/app/dashboard/admin/settings/assignment-criteria-manager";
 import { SettingsNav } from "@/app/dashboard/admin/settings/settings-nav";
 import type { DeliveryMode } from "@/lib/delivery-mode";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
@@ -69,6 +70,12 @@ export default async function AdminSettingsPage({
     .select("*")
     .eq("center_id", profile.center_id)
     .order("created_at", { ascending: true });
+
+  const { data: assignmentCriteria } = await admin
+    .from("centre_assignment_criteria")
+    .select("*")
+    .eq("center_id", profile.center_id)
+    .order("sort_order", { ascending: true });
 
   // Tutors panel -- real per-course tutor management over course_tutors
   // (0051), previously zero app code touched this table at all. Grouped by
@@ -264,6 +271,19 @@ export default async function AdminSettingsPage({
             </p>
             <div className="mt-4">
               <MalpracticeOutcomesManager options={malpracticeOutcomes ?? []} />
+            </div>
+          </div>
+
+          <div id="assignment-criteria" className="card scroll-mt-6 p-6">
+            <h2 className="font-serif text-lg text-ink">Assignment marking criteria</h2>
+            <p className="mt-2 text-muted">
+              The fixed brief and word count stay as they are -- this is the grey area, where centres and tutors
+              reasonably differ on what counts. Shipped with Cambridge's own defaults; add or deactivate to match
+              your own standardisation. Deactivating keeps it on any record it's already part of, it just stops
+              being offered for new marking.
+            </p>
+            <div className="mt-4">
+              <AssignmentCriteriaManager criteria={assignmentCriteria ?? []} />
             </div>
           </div>
         </div>

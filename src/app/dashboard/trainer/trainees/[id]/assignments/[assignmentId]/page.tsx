@@ -6,6 +6,7 @@ import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { AssignmentReviewForm } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/review-form";
 import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
 import { isAssignmentWarningTriggered, buildAssignmentWarningDraft } from "@/lib/letters/assignment-warning";
+import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { AssignmentWarningLetterSection } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/assignment-warning-letter-section";
 
 export default async function TrainerAssignmentReviewPage({
@@ -26,6 +27,8 @@ export default async function TrainerAssignmentReviewPage({
   if (!assignment || assignment.trainee_id !== id) {
     notFound();
   }
+
+  const criteria = await getAssignmentCriteria(supabase, trainer.center_id, assignment.assignment_type);
 
   const { data: template } = await supabase
     .from("assignment_templates")
@@ -121,6 +124,7 @@ export default async function TrainerAssignmentReviewPage({
           responses={responses ?? []}
           round={round}
           criteriaMarks={(round === "resubmission" ? assignment.resubmission_criteria_marks : assignment.first_criteria_marks) ?? {}}
+          criteria={criteria}
           secondMarkerOptions={secondMarkerRows ?? []}
         />
       )}

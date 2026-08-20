@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
-import { ASSIGNMENT_CRITERIA } from "@/lib/assignment-criteria";
+import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
 
@@ -52,7 +52,7 @@ export async function buildAssignmentWarningDraft(
   const failed = (allAssignments ?? []).filter((a) => a.resubmission_outcome === "fail").length;
   const remaining = (allAssignments ?? []).filter((a) => a.first_status === "approved" || a.resubmission_outcome === "pass" || a.resubmission_outcome === "fail" ? false : true);
 
-  const criteria = ASSIGNMENT_CRITERIA[assignment.assignment_type] ?? [];
+  const criteria = await getAssignmentCriteria(supabase, course.center_id, assignment.assignment_type);
   const marks = (assignment.resubmission_criteria_marks as Record<string, boolean>) ?? {};
   const notMet = criteria.filter((c) => marks[c.key] !== true).map((c) => c.text);
 

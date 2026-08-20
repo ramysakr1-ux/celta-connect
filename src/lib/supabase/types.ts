@@ -1469,6 +1469,26 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["malpractice_outcome_options"]["Row"]>;
         Relationships: [];
       };
+      centre_assignment_criteria: {
+        Row: {
+          id: string;
+          center_id: string;
+          assignment_type: "Focus on Learner" | "LRT" | "Skills" | "LfC" | "Plagiarism Reflection";
+          key: string;
+          criterion_text: string;
+          sort_order: number;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_assignment_criteria"]["Row"]> & {
+          center_id: string;
+          assignment_type: "Focus on Learner" | "LRT" | "Skills" | "LfC" | "Plagiarism Reflection";
+          key: string;
+          criterion_text: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_assignment_criteria"]["Row"]>;
+        Relationships: [];
+      };
       plagiarism_scanner_findings: {
         Row: {
           id: string;

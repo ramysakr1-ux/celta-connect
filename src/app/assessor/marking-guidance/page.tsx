@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus } from "@/lib/auth/portfolio-access";
 import { getMarkingGuidance } from "@/lib/marking-guidance";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
-import { ASSIGNMENT_CRITERIA } from "@/lib/assignment-criteria";
+import { getAllAssignmentCriteria } from "@/lib/assignment-criteria";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 
 const TAB_ORDER: AssignmentTypeValue[] = [...ASSIGNMENT_ORDER, "Plagiarism Reflection"];
@@ -29,6 +29,7 @@ export default async function AssessorMarkingGuidancePage() {
   if (!course) redirect("/login?error=assessor_link_invalid");
 
   const guidanceMap = await getMarkingGuidance(admin, course.center_id);
+  const allCriteria = await getAllAssignmentCriteria(admin, course.center_id);
   const updatedByIds = [...new Set([...guidanceMap.values()].flatMap((byKey) => [...byKey.values()].map((r) => r.updated_by).filter((id): id is string => Boolean(id))))];
   const { data: updaters } = updatedByIds.length > 0 ? await admin.from("profiles").select("id, full_name").in("id", updatedByIds) : { data: [] };
   const updaterNameById = new Map((updaters ?? []).map((u) => [u.id, u.full_name]));
@@ -47,7 +48,7 @@ export default async function AssessorMarkingGuidancePage() {
       </p>
 
       {TAB_ORDER.map((type) => {
-        const criteria = ASSIGNMENT_CRITERIA[type];
+        const criteria = allCriteria[type];
         const byKey = guidanceMap.get(type);
         return (
           <div key={type} style={{ marginTop: 32 }}>

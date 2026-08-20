@@ -8,7 +8,7 @@ import {
   type FormState,
 } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
 import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
-import { ASSIGNMENT_CRITERIA, type CriteriaMarks } from "@/lib/assignment-criteria";
+import type { AssignmentCriterion, CriteriaMarks } from "@/lib/assignment-criteria";
 import type { AssignmentTypeValue, TemplateSection } from "@/lib/assignment-templates/content";
 
 const initialState: FormState = { error: null };
@@ -33,6 +33,7 @@ export function AssignmentReviewForm({
   responses,
   round,
   criteriaMarks,
+  criteria,
   secondMarkerOptions,
 }: {
   assignmentId: string;
@@ -41,10 +42,10 @@ export function AssignmentReviewForm({
   responses: SectionResponse[];
   round: "first" | "resubmission";
   criteriaMarks: CriteriaMarks;
+  criteria: AssignmentCriterion[];
   secondMarkerOptions: { id: string; full_name: string }[];
 }) {
   const responseByKey = new Map(responses.map((r) => [r.section_key, r]));
-  const criteria = ASSIGNMENT_CRITERIA[assignmentType];
   const isResubmission = round === "resubmission";
   // build-spec.md "Assignment 5": one chance, pass or fail -- no
   // resubmission round for this type, so a fail is available immediately
