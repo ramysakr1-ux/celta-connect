@@ -174,3 +174,69 @@ export async function assignTpRound(
   revalidatePath("/trainer/announcements");
   return { error: null };
 }
+
+// connect-spec-corrections-for-claude-code.md item 10 (Admin Handbook): at
+// most one of a candidate's 6 assessed TP lessons may be 1-to-1/small
+// group, planned as such in advance, never TP7/TP8. TP1-6 only (mirrors
+// the override page's own TP_NUMBERS) -- migration 0182's check constraint
+// would reject 7/8 anyway, this just keeps the error message specific
+// instead of falling through to the generic DB one. Same "can't edit after
+// taught" gate as overrideTpPoint, for the same reason: the record of what
+// was actually taught shouldn't change retroactively.
+export async function setClassGrouping(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const trainer = await requireRole(["trainer", "admin"]);
+
+  const traineeId = formData.get("trainee_id");
+  const tpNumber = formData.get("tp_number");
+  const classGrouping = formData.get("class_grouping");
+  if (typeof traineeId !== "string" || typeof tpNumber !== "string" || typeof classGrouping !== "string" || !traineeId || !tpNumber) {
+    return { error: "Pick a trainee and a TP number first." };
+  }
+  if (classGrouping !== "whole_class" && classGrouping !== "one_to_one_or_small_group") {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+  const tpNum = Number(tpNumber);
+  if (!Number.isInteger(tpNum) || tpNum < 1 || tpNum > 6) {
+    return { error: "Only TP1-6 can be marked -- the final two (TP7/TP8) can never be 1-to-1 or small group." };
+  }
+
+  const supabase = await createClient();
+
+  const { data: trainee } = await supabase
+    .from("profiles")
+    .select("id, course_id")
+    .eq("id", traineeId)
+    .eq("role", "trainee")
+    .maybeSingle();
+  if (!trainee || trainee.course_id !== trainer.course_id) {
+    return { error: "That trainee isn't on your course." };
+  }
+
+  const { data: existing } = await supabase
+    .from("plan_assignments")
+    .select("taught_at")
+    .eq("trainee_id", traineeId)
+    .eq("tp_number", tpNum)
+    .maybeSingle();
+  if (!existing) {
+    return { error: "This TP hasn't been assigned yet -- assign it first." };
+  }
+  if (existing.taught_at) {
+    return { error: "This TP has already been taught -- its grouping can't be changed after the fact." };
+  }
+
+  const { error } = await supabase
+    .from("plan_assignments")
+    .update({ class_grouping: classGrouping })
+    .eq("trainee_id", traineeId)
+    .eq("tp_number", tpNum);
+
+  if (error) {
+    return error.code === "23505"
+      ? { error: "This trainee already has a different TP marked 1-to-1/small group -- only one is allowed across the course." }
+      : { error: "Could not save. Try again." };
+  }
+
+  revalidatePath("/trainer/rotation");
+  return { error: null };
+}

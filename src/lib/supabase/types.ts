@@ -2690,6 +2690,11 @@ export interface Database {
           assigned_by: string | null;
           taught_at: string | null;
           updated_at: string;
+          // connect-spec-corrections-for-claude-code.md item 10: at most one
+          // of the 6 assessed TP lessons per candidate may be 1-to-1/small
+          // group, never TP7/TP8 -- both enforced in migration 0182, not
+          // just in the app.
+          class_grouping: "whole_class" | "one_to_one_or_small_group";
         };
         Insert: Partial<Database["public"]["Tables"]["plan_assignments"]["Row"]> & {
           course_id: string;

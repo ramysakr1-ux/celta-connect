@@ -20,6 +20,7 @@ export interface RunningOrderPlan {
   rotationPositionUsed: number | null;
   mainLessonAim: string | null;
   aimType: AimType | null;
+  classGrouping: "whole_class" | "one_to_one_or_small_group";
 }
 
 // checkpoint 3 (Rotation.dc.html 1b) -- the half owning the next real TP
@@ -108,6 +109,9 @@ export function RunningOrderPanel({
                     >
                       {AIM_TYPE_LABELS[plan.aimType]}
                     </span>
+                  ) : null}
+                  {plan?.classGrouping === "one_to_one_or_small_group" ? (
+                    <span className="pill pill-info shrink-0 text-[10px]">1-to-1 / small group</span>
                   ) : null}
                   <span className={`shrink-0 text-xs font-semibold ${status.cls}`}>{status.label}</span>
                   {!plan && hasSchedule && !withdrawn ? <AssignButton subgroupId={subgroupId} tpNumber={tpNumber} /> : null}

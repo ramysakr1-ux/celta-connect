@@ -9,6 +9,7 @@ import { AssignButton } from "@/app/trainer/(hub)/rotation/assign-button";
 import { TpGroupBoard } from "@/app/trainer/(hub)/rotation/tp-group-board";
 import { RunningOrderPanel } from "@/app/trainer/(hub)/rotation/running-order-panel";
 import { RevealPeerNotesForm } from "@/app/trainer/(hub)/rotation/reveal-peer-notes-form";
+import { ClassGroupingForm } from "@/app/trainer/(hub)/rotation/class-grouping-form";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CourseStatus } from "@/lib/supabase/types";
@@ -88,8 +89,14 @@ export default async function TrainerRotationPage() {
 
   const { data: plans } = await supabase
     .from("plan_assignments")
-    .select("id, trainee_id, tp_number, taught_at, rotation_position_used, main_lesson_aim, aim_type")
+    .select("id, trainee_id, tp_number, taught_at, rotation_position_used, main_lesson_aim, aim_type, class_grouping")
     .eq("course_id", courseId);
+
+  // connect-spec-corrections-for-claude-code.md item 10: whichever trainee
+  // (if any) already carries this course's one allowed 1-to-1/small-group
+  // TP, for the read-only tag below -- migration 0182's partial unique
+  // index is the real cap, this is just surfacing it.
+  const oneToOnePlan = (plans ?? []).find((p) => p.class_grouping === "one_to_one_or_small_group");
 
   const planByTraineeAndTp = new Map((plans ?? []).map((p) => [`${p.trainee_id}-${p.tp_number}`, p]));
 
@@ -264,6 +271,7 @@ export default async function TrainerRotationPage() {
                     rotationPositionUsed: p.rotation_position_used,
                     mainLessonAim: p.main_lesson_aim,
                     aimType: p.aim_type,
+                    classGrouping: p.class_grouping,
                   }))}
               />
             ) : (
@@ -294,6 +302,26 @@ export default async function TrainerRotationPage() {
         </p>
         <div className="mt-3">
           <RevealPeerNotesForm subgroups={(subgroups ?? []).map((g) => ({ id: g.id, name: g.name }))} />
+        </div>
+      </div>
+
+      <div className="sheet p-6">
+        <h2 className="font-serif text-lg text-ink">1-to-1 / small-group TP</h2>
+        <p className="mt-1 text-sm text-muted">
+          Handbook: one of the six assessed TP lessons may be given to a single or paired student instead of the
+          whole class, planned in advance -- never the final two (TP7/TP8), and only one per candidate for the
+          course.
+        </p>
+        {oneToOnePlan ? (
+          <p className="mt-3 text-sm text-ink">
+            Currently: <span className="font-semibold">{nameByTraineeId.get(oneToOnePlan.trainee_id) ?? "Unknown"}</span>,{" "}
+            TP{oneToOnePlan.tp_number}.
+          </p>
+        ) : (
+          <p className="mt-3 text-sm text-muted">No trainee has a 1-to-1/small-group TP set yet.</p>
+        )}
+        <div className="mt-4">
+          <ClassGroupingForm trainees={roster ?? []} />
         </div>
       </div>
 
@@ -330,7 +358,7 @@ function UnpairedSubgroupBoard({
   subgroupId: string;
   name: string;
   members: { traineeId: string; fullName: string; baseSlot: number; courseStatus: CourseStatus }[];
-  planByTraineeAndTp: Map<string, { taught_at: string | null }>;
+  planByTraineeAndTp: Map<string, { taught_at: string | null; class_grouping: "whole_class" | "one_to_one_or_small_group" }>;
 }) {
   const size = members.length;
 
@@ -426,16 +454,22 @@ function UnpairedSubgroupBoard({
                           </td>
                         );
                       }
+                      const oneToOneTag =
+                        plan.class_grouping === "one_to_one_or_small_group" ? (
+                          <span className="pill pill-info ml-1.5 text-[10px]">1-to-1</span>
+                        ) : null;
                       if (plan.taught_at) {
                         return (
                           <td key={tpNumber}>
                             <span className="status-pill status-pill-on-track">Taught</span>
+                            {oneToOneTag}
                           </td>
                         );
                       }
                       return (
                         <td key={tpNumber} className="text-sm text-muted">
                           Awaiting lesson log
+                          {oneToOneTag}
                         </td>
                       );
                     })}
