@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
+import type { AimType } from "@/lib/aim-type";
 
 export interface FormState {
   error: string | null;
@@ -239,4 +240,31 @@ export async function setClassGrouping(_prevState: FormState, formData: FormData
 
   revalidatePath("/trainer/rotation");
   return { error: null };
+}
+
+const VALID_AIM_TYPES: AimType[] = ["grammar", "lexis", "function", "reading", "listening", "speaking", "writing"];
+
+// connect-spec-corrections-for-claude-code.md item 13: "the MCT defines
+// which main-aim types are allowed or required for TP7 and TP8, as part of
+// setting up the Syllabus Planning Grid -- a constraint field per TP slot.
+// This is the rule the rest of this feature must never override." An empty
+// selection means unconstrained (every type offered), not "nothing
+// allowed" -- there's no UI path to lock a slot out entirely, by design.
+export async function setTp78AimConstraints(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return;
+
+  const tp7Types = formData.getAll("tp7_aim_types").filter((v): v is AimType => typeof v === "string" && VALID_AIM_TYPES.includes(v as AimType));
+  const tp8Types = formData.getAll("tp8_aim_types").filter((v): v is AimType => typeof v === "string" && VALID_AIM_TYPES.includes(v as AimType));
+
+  const supabase = await createClient();
+  await supabase
+    .from("courses")
+    .update({
+      tp7_allowed_aim_types: tp7Types.length > 0 ? tp7Types : null,
+      tp8_allowed_aim_types: tp8Types.length > 0 ? tp8Types : null,
+    })
+    .eq("id", trainer.course_id);
+
+  revalidatePath("/trainer/rotation");
 }

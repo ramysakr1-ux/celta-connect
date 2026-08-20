@@ -20,6 +20,7 @@ export async function saveSyllabusPlanningEntry(
   const mainAim = (formData.get("main_aim") as string | null)?.trim();
   const subAim = (formData.get("sub_aim") as string | null)?.trim() || null;
   const material = (formData.get("material") as string | null)?.trim();
+  const aimType = (formData.get("aim_type") as string | null)?.trim() || null;
 
   if (tpNumber !== 7 && tpNumber !== 8) {
     return { error: "Invalid TP number." };
@@ -27,12 +28,16 @@ export async function saveSyllabusPlanningEntry(
   if (!mainAim || !material) {
     return { error: "Main aim and material are required." };
   }
+  if (!aimType) {
+    return { error: "Aim type is required." };
+  }
 
   const { error } = await supabase.rpc("save_syllabus_planning_entry", {
     p_tp_number: tpNumber,
     p_main_aim: mainAim,
     p_sub_aim: subAim,
     p_material: material,
+    p_aim_type: aimType,
   });
 
   if (error) return { error: error.message };

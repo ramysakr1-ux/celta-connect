@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { saveSyllabusPlanningEntry, type FormState } from "@/app/dashboard/trainee/plan/syllabus-grid/actions";
+import { AIM_TYPES, AIM_TYPE_LABELS, type AimType } from "@/lib/aim-type";
 
 const initialState: FormState = { error: null };
 
@@ -10,14 +11,20 @@ export function SyllabusEntryForm({
   mainAim,
   subAim,
   material,
+  aimType,
+  allowedAimTypes,
   locked,
 }: {
   tpNumber: 7 | 8;
   mainAim: string | null;
   subAim: string | null;
   material: string | null;
+  aimType: AimType | null;
+  /** MCT's per-slot constraint -- null/empty means every type is offered. */
+  allowedAimTypes: AimType[] | null;
   locked: boolean;
 }) {
+  const options = allowedAimTypes && allowedAimTypes.length > 0 ? allowedAimTypes : AIM_TYPES;
   const [state, formAction, pending] = useActionState(saveSyllabusPlanningEntry, initialState);
 
   if (locked) {
@@ -40,6 +47,27 @@ export function SyllabusEntryForm({
           required
           className="rounded-[6px] border border-border bg-card px-2 py-1.5 text-sm text-ink outline-none focus:border-primary"
         />
+      </div>
+      <div className="flex flex-col gap-1">
+        <label className="text-xs text-muted">Aim type</label>
+        <select
+          name="aim_type"
+          defaultValue={aimType ?? ""}
+          required
+          className="rounded-[6px] border border-border bg-card px-2 py-1.5 text-sm text-ink outline-none focus:border-primary"
+        >
+          <option value="" disabled>
+            — choose —
+          </option>
+          {options.map((t) => (
+            <option key={t} value={t}>
+              {AIM_TYPE_LABELS[t]}
+            </option>
+          ))}
+        </select>
+        {allowedAimTypes && allowedAimTypes.length > 0 ? (
+          <p className="text-[11px] text-muted">Your trainer has restricted this TP to these types.</p>
+        ) : null}
       </div>
       <div className="flex flex-col gap-1">
         <label className="text-xs text-muted">Sub aim (optional)</label>

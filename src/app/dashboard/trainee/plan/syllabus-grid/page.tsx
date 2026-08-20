@@ -3,6 +3,8 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { rotationPosition } from "@/lib/rotation";
 import { SyllabusEntryForm } from "@/app/dashboard/trainee/plan/syllabus-grid/entry-form";
+import { computeSyllabusSuggestions } from "@/lib/syllabus-planning-suggestions";
+import { AIM_TYPE_LABELS } from "@/lib/aim-type";
 
 const TP_NUMBERS = [7, 8] as const;
 
@@ -63,6 +65,25 @@ export default async function SyllabusPlanningGridPage() {
   const lockedByTp = new Map((myPlans ?? []).map((p) => [p.tp_number, Boolean(p.submitted_at)]));
   const entryByKey = new Map((entries ?? []).map((e) => [`${e.trainee_id}-${e.tp_number}`, e]));
 
+  // connect-spec-corrections-for-claude-code.md item 13 -- advisory
+  // suggestions for my own still-unpicked TP7/8 slot(s), built from my
+  // TP1-6 aim types + which of those (in the second half) I failed, and
+  // the MCT's own per-slot constraint.
+  const [{ data: myTp16Plans }, { data: myTp16Feedback }, { data: courseForSuggestions }] = await Promise.all([
+    supabase.from("plan_assignments").select("tp_number, aim_type").eq("trainee_id", trainee.id).in("tp_number", [1, 2, 3, 4, 5, 6]),
+    supabase.from("tp_feedback").select("tp_number, grade").eq("trainee_id", trainee.id).in("tp_number", [1, 2, 3, 4, 5, 6]),
+    trainee.course_id
+      ? supabase.from("courses").select("tp7_allowed_aim_types, tp8_allowed_aim_types").eq("id", trainee.course_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  const gradeByTpNumber = new Map((myTp16Feedback ?? []).map((f) => [f.tp_number, f.grade]));
+  const suggestions = computeSyllabusSuggestions(
+    (myTp16Plans ?? []).map((p) => ({ tpNumber: p.tp_number, aimType: p.aim_type, grade: gradeByTpNumber.get(p.tp_number) ?? null })),
+    TP_NUMBERS.map((tpNumber) => ({ tpNumber, aimType: entryByKey.get(`${trainee.id}-${tpNumber}`)?.aim_type ?? null })),
+    { 7: courseForSuggestions?.tp7_allowed_aim_types ?? null, 8: courseForSuggestions?.tp8_allowed_aim_types ?? null }
+  );
+  const suggestionByTp = new Map(suggestions.map((s) => [s.tpNumber, s]));
+
   // Soft-conflict detection: same non-empty material text (case/space
   // insensitive) picked by more than one trainee for the same TP.
   const clashingKeys = new Set<string>();
@@ -121,17 +142,29 @@ export default async function SyllabusPlanningGridPage() {
 
                       {isMe ? (
                         <div className="mt-2">
+                          {!entry?.aim_type && suggestionByTp.get(tpNumber) ? (
+                            <p className="mb-2 text-xs text-status-pending-text">
+                              {suggestionByTp.get(tpNumber)!.reason === "remediation"
+                                ? `Worth another go at ${AIM_TYPE_LABELS[suggestionByTp.get(tpNumber)!.aimType]} -- that's where TP4-6 didn't go to standard.`
+                                : `You haven't taught ${AIM_TYPE_LABELS[suggestionByTp.get(tpNumber)!.aimType]} yet -- worth covering it here.`}
+                            </p>
+                          ) : null}
                           <SyllabusEntryForm
                             tpNumber={tpNumber}
                             mainAim={entry?.main_aim ?? null}
                             subAim={entry?.sub_aim ?? null}
                             material={entry?.material ?? null}
+                            aimType={entry?.aim_type ?? null}
+                            allowedAimTypes={(tpNumber === 7 ? courseForSuggestions?.tp7_allowed_aim_types : courseForSuggestions?.tp8_allowed_aim_types) ?? null}
                             locked={lockedByTp.get(tpNumber) ?? false}
                           />
                         </div>
                       ) : entry ? (
                         <div className="mt-2 flex flex-col gap-1 text-sm">
-                          <p className="text-ink">{entry.main_aim}</p>
+                          <p className="text-ink">
+                            {entry.main_aim}
+                            {entry.aim_type ? <span className="ml-1.5 text-xs text-muted">({AIM_TYPE_LABELS[entry.aim_type]})</span> : null}
+                          </p>
                           {entry.sub_aim ? <p className="text-muted">{entry.sub_aim}</p> : null}
                           <p className="text-muted">Material: {entry.material}</p>
                         </div>

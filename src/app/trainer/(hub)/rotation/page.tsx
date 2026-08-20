@@ -10,6 +10,7 @@ import { TpGroupBoard } from "@/app/trainer/(hub)/rotation/tp-group-board";
 import { RunningOrderPanel } from "@/app/trainer/(hub)/rotation/running-order-panel";
 import { RevealPeerNotesForm } from "@/app/trainer/(hub)/rotation/reveal-peer-notes-form";
 import { ClassGroupingForm } from "@/app/trainer/(hub)/rotation/class-grouping-form";
+import { AimConstraintsForm } from "@/app/trainer/(hub)/rotation/aim-constraints-form";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CourseStatus } from "@/lib/supabase/types";
@@ -121,8 +122,12 @@ export default async function TrainerRotationPage() {
 
   // connect-spec-corrections-for-claude-code.md item 2: "a TP block should
   // not end on the course's final day" -- flagged, not blocked.
-  const { data: courseForFinalDay } = await supabase.from("courses").select("end_date").eq("id", courseId).maybeSingle();
-  const endsOnFinalDay = tpBlockEndsOnFinalDay(distinctTpDates(tpEventRows), courseForFinalDay?.end_date ?? null);
+  const { data: courseSettings } = await supabase
+    .from("courses")
+    .select("end_date, tp7_allowed_aim_types, tp8_allowed_aim_types")
+    .eq("id", courseId)
+    .maybeSingle();
+  const endsOnFinalDay = tpBlockEndsOnFinalDay(distinctTpDates(tpEventRows), courseSettings?.end_date ?? null);
 
   const buildMembers = (subgroupId: string) =>
     (members ?? [])
@@ -322,6 +327,21 @@ export default async function TrainerRotationPage() {
         )}
         <div className="mt-4">
           <ClassGroupingForm trainees={roster ?? []} />
+        </div>
+      </div>
+
+      <div className="sheet p-6">
+        <h2 className="font-serif text-lg text-ink">TP7/8 aim-type constraints</h2>
+        <p className="mt-1 text-sm text-muted">
+          TP7 and TP8 aren&apos;t rotation-assigned -- trainees pick their own topic. Restrict which main-aim types
+          are on offer for each slot, if you want to. Coverage and remediation suggestions shown to trainees always
+          stay inside whatever you set here.
+        </p>
+        <div className="mt-4">
+          <AimConstraintsForm
+            tp7AllowedAimTypes={courseSettings?.tp7_allowed_aim_types ?? null}
+            tp8AllowedAimTypes={courseSettings?.tp8_allowed_aim_types ?? null}
+          />
         </div>
       </div>
 

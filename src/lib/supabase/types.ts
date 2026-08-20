@@ -278,6 +278,12 @@ export interface Database {
           // 0183): whether TP7/TP8 draw from the separate material pool at
           // all -- some centres keep using the main coursebook instead.
           tp_material_pool_enabled: boolean;
+          // connect-spec-corrections-for-claude-code.md item 13 (migration
+          // 0184): the MCT's per-slot constraint on which main-aim types
+          // TP7/TP8 may use. Null/empty = unconstrained; a single-element
+          // array reads as "required", multi-element as "allowed".
+          tp7_allowed_aim_types: AimType[] | null;
+          tp8_allowed_aim_types: AimType[] | null;
           assessor_visit_date: string | null;
           entry_form_sent_at: string | null;
           cambridge_grades_confirmed_at: string | null;
@@ -2837,6 +2843,10 @@ export interface Database {
           material: string;
           created_at: string;
           updated_at: string;
+          // connect-spec-corrections-for-claude-code.md item 13 (migration
+          // 0184): structured, unlike free-text main_aim -- what the
+          // suggestion engine and the MCT's per-slot constraint both read.
+          aim_type: AimType | null;
         };
         Insert: Partial<Database["public"]["Tables"]["syllabus_planning_entries"]["Row"]> & {
           course_id: string;
@@ -3261,6 +3271,7 @@ export interface Database {
           p_main_aim: string;
           p_sub_aim: string | null;
           p_material: string;
+          p_aim_type: string | null;
         };
         Returns: void;
       };
