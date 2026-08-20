@@ -56,6 +56,23 @@ export async function buildAssignmentWarningDraft(
   const marks = (assignment.resubmission_criteria_marks as Record<string, boolean>) ?? {};
   const notMet = criteria.filter((c) => marks[c.key] !== true).map((c) => c.text);
 
+  // connect-spec-corrections-for-claude-code.md item 9: when a decided
+  // malpractice case is the reason this specific submission failed, quote
+  // its own finding -- not just "criteria not met." Pulled verbatim from
+  // the case record (same auto-fill pattern as everything else in this
+  // letter) so the letter and the case can never diverge. Scoped tightly
+  // to THIS assignment's THIS round, and only a case that actually carried
+  // the fail consequence -- a decided-but-not-failing case (e.g. upheld
+  // with only a referral) isn't why this letter exists.
+  const { data: malpracticeCase } = await supabase
+    .from("malpractice_cases")
+    .select("outcome, decision_notes")
+    .eq("assignment_id", assignmentId)
+    .eq("assignment_round", "resubmission")
+    .eq("status", "decided")
+    .eq("fails_assignment", true)
+    .maybeSingle();
+
   const today = new Date().toISOString().slice(0, 10);
   const assignmentTitle = ASSIGNMENT_INFO[assignment.assignment_type]?.title ?? assignment.assignment_type;
 
@@ -76,6 +93,13 @@ export async function buildAssignmentWarningDraft(
     body: [
       `Dear ${trainee.full_name.split(" ")[0]},`,
       `Your resubmission of ${assignment.assignment_type}, ${assignmentTitle}, has not met the assessment criteria. As you have already used the one resubmission available for that assignment, it is recorded as a Fail.`,
+      ...(malpracticeCase
+        ? [
+            `This outcome follows a decided malpractice case${malpracticeCase.outcome ? ` (${malpracticeCase.outcome})` : ""}${
+              malpracticeCase.decision_notes ? `: ${malpracticeCase.decision_notes}` : "."
+            }`,
+          ]
+        : []),
       `A candidate must pass three of the four written assignments to be eligible for a Pass on this course. You have passed ${passed}${failed > 0 ? ` and failed ${failed}` : ""}, with ${remaining.length} still to submit. This means you cannot fail another assignment.`,
     ],
     list: { title: "Criteria not met on the resubmission", items: notMet },
