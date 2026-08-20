@@ -127,10 +127,10 @@ export default async function TpHubPage({
     const matrixByCode = new Map((matrix ?? []).map((m) => [m.criteria_code, m.tutor_status_stage2]));
     criteriaPct = computeCriteriaPct(matrixByCode);
   }
-  // Was a hardcoded 41 -- silently wrong the moment the criteria set's size
-  // changed (it did, 2026-08-19: 3c turned out to be a real Cambridge code,
-  // taking the total to 42). Derived from the same source of truth
-  // computeCriteriaPct itself uses, so it can't drift out of sync again.
+  // Was a hardcoded "41" in the label below -- fixed 2026-08-20 to derive
+  // from the same source of truth computeCriteriaPct itself uses (41 real
+  // codes; a fabricated "3c" briefly took this to 42 between 2026-08-19 and
+  // 2026-08-20, see celta-criteria.ts), so it can't drift out of sync again.
   const achievedCount = criteriaPct !== null ? Math.round((criteriaPct / 100) * CELTA_CRITERIA_CODES.length) : 0;
 
   // "Write TP feedback" needs a real destination -- the earliest TP whose

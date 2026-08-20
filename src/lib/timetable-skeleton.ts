@@ -301,15 +301,11 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   { type: "tp", title: "TP5 -- Half A", position: pos(10), time: "10:00", tag: "individual", linkedTpNumber: 5 },
   { type: "milestone", title: "Stage 2 tutorials begin", position: pos(10), time: "14:30", tag: "individual" },
   {
-    // Corrected 2026-08-19: 3c IS a genuine Cambridge code (confirmed
-    // against the official CELTA Syllabus and Assessment Guidelines PDF,
-    // cambridgeenglish.org) -- an earlier pass in this same session
-    // (2026-08-18/19) wrongly concluded otherwise; that was a misread, not
-    // a real finding. 3b is FIRST introduced in Text-based teaching (day 4
-    // above), which is where 3b's gate still lives from -- untouched. No
-    // exact day was given for this reinforcing pass -- placed here,
-    // alongside the existing new-level TP5 cluster, as a reasonable
-    // estimate that doesn't change the gate either way.
+    // 3b is FIRST introduced in Text-based teaching (day 4 above), which is
+    // where 3b's gate lives from -- untouched. No exact day was given for
+    // this reinforcing pass -- placed here, alongside the existing
+    // new-level TP5 cluster, as a reasonable estimate that doesn't change
+    // the gate either way.
     type: "input_session",
     title: "Teaching speaking",
     position: pos(10),
@@ -319,14 +315,16 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   },
   { type: "tp", title: "TP5 -- Half B", position: pos(11), time: "10:00", tag: "individual", linkedTpNumber: 5 },
   {
-    // 3c gates live from TP5 (CRITERIA_ENTERS_AT_TP) -- matched to this
-    // session's placement, per Ramy's explicit call 2026-08-19.
+    // Both this session and "Teaching speaking" above tag 3b -- 3b covers
+    // BOTH oral and written production in one code (no separate "writing"
+    // criterion exists; see celta-criteria.ts's header comment). Two
+    // reinforcing passes on the same code, not two different codes.
     type: "input_session",
     title: "Productive skills -- writing",
     position: pos(11),
     time: "14:30",
     tag: "whole_group",
-    inputSessionCriteria: ["3c"],
+    inputSessionCriteria: ["3b"],
   },
   {
     type: "assignment_due",
@@ -724,14 +722,14 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     linkedAssignmentType: "LfC",
   },
   {
-    // 3c gates live from TP5 -- see the matching comment on the full-time
-    // skeleton's "Productive skills -- writing" session above.
+    // 3b (not a separate "3c") -- see the matching comment on the
+    // full-time skeleton's "Productive skills -- writing" session.
     type: "input_session",
     title: "Productive skills -- writing",
     position: partTimePos(19),
     time: "13:45",
     tag: "whole_group",
-    inputSessionCriteria: ["3c"],
+    inputSessionCriteria: ["3b"],
   },
 
   { type: "milestone", title: "Resubmission clinic", position: partTimePos(20), time: "10:00", tag: "whole_group" },

@@ -26,7 +26,7 @@ A reference course is published with its timetable, so duplicating a course inhe
 
 > **[proposed]** The principle is agreed. Which session teaches which sub-criterion is a design inference throughout and has never been reviewed by a tutor. Every mapping below is a starting point for that review.
 
-The 42 criteria break into **113 sub-criteria** (Appendix 1 of the CELTA 5, Cambridge's own bullet-level wording). Each sub-criterion is taught by a named session and comes into scope at the first teaching practice after it. Scope only accumulates.
+The 41 criteria break into **113 sub-criteria** (Appendix 1 of the CELTA 5, Cambridge's own bullet-level wording -- corrected 2026-08-20 against the actual booklet PDF: Section 3 is 3a/3b only, no 3c). Each sub-criterion is taught by a named session and comes into scope at the first teaching practice after it. Scope only accumulates.
 
 Several criteria are **split across sessions** because their bullets genuinely are: 4i across language analysis, concept checking and phonology; 2b split so written correction waits for the writing session. A criterion is complete only when its last bullet opens.
 

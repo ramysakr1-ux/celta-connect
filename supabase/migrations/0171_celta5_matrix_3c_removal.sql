@@ -1,0 +1,17 @@
+-- Reverses migration 0164. "3c" was never a real Cambridge CELTA criterion
+-- -- confirmed 2026-08-20 by reading the actual CELTA 5 (May 2023) booklet
+-- page by page: Section 3 has exactly two codes, 3a and 3b, everywhere it
+-- appears (Stage Two Progress Record, Stage Three Progress Record, and
+-- Appendix 1 guidance). 0164's claimed confirmation against a "syllabus
+-- PDF" doesn't hold up against the actual booklet. src/lib/celta-criteria.ts
+-- no longer lists 3c, so celta5_matrix.insert stops creating new 3c rows
+-- on its own; this cleans up the ones 0164 already backfilled.
+--
+-- Any 3c row that a tutor actually rated (tutor_status_stage2/stage3 not
+-- null) is deleted along with the unrated ones -- there is no way to
+-- "keep" a rating against a criterion that was never real. If this matters
+-- for a specific candidate, that rating's substance (if genuine writing-
+-- skill evidence) belongs on 3b instead, which already covers written
+-- production -- a manual per-candidate decision, not something this
+-- migration can safely automate.
+delete from public.celta5_matrix where criteria_code = '3c';

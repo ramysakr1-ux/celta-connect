@@ -74,6 +74,8 @@ Which is an argument for the guidance being visible while marking, not filed som
 
 ---
 
-## What is still needed
+## Status, updated 2026-08-20
 
-The sub-criteria themselves, from the back of the CELTA 5 — the full breakdown under each of the 42. With those, the four links above are data entry. Without them, this model has nothing to run on.
+- **The sub-criteria themselves** — no longer missing. The full 113-item breakdown under each of the 41 codes (not 42 — Section 3 is 3a/3b only, corrected 2026-08-20 against the actual booklet PDF), transcribed verbatim from the CELTA 5's Appendix 1, is in `CRITERIA_GUIDANCE` (`src/lib/celta-criteria.ts`), populated since 2026-08-04. Don't re-flag this as needed — re-check that file directly if it ever looks missing again.
+- **Links 1-3** — built (confirmed same session as the sub-criteria).
+- **Link 4, the suggestion engine** — its placement question is now resolved (`for-claude-code-suggestion-engine-placement.md`, Desktop, 2026-08-20: inline gold dot on the criterion row, expand-in-place, trainer-only, evidence-must-cite-or-not-show, against the four trigger conditions above), but the engine itself is **not yet built** — this is the one real remaining piece of this model.
