@@ -9,7 +9,7 @@ import { buildSkeletonEvents, DEFAULT_TEACHING_DAYS, PART_TIME_SKELETON } from "
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { generateStandardAnnouncements } from "@/lib/announcements-catalog";
 import { syncAssignmentDueDates } from "@/lib/assignment-due-dates";
-import { halfTpDates } from "@/lib/rotation";
+import { halfTpDates, distinctTpDates, checkIntensiveTpBreaks } from "@/lib/rotation";
 import { sendPushToOwners } from "@/lib/push/send";
 import type { TimeBand } from "@/lib/supabase/types";
 
@@ -472,6 +472,16 @@ export async function setTimetableLock(formData: FormData): Promise<void> {
           redirect(`/trainer/timetable?lock_error=mode_not_blocked&half=${halfOrder}`);
         }
       }
+    }
+
+    // connect-spec-corrections-for-claude-code.md item 2 (Handbook 8.1.4):
+    // "no more than 6 consecutive days of TP before the break" -- refuse,
+    // not just the rotation page's existing advisory display
+    // (checkIntensiveTpBreaks was already computing this, just never
+    // gated locking on it).
+    const breakCheck = checkIntensiveTpBreaks(distinctTpDates(tpEvents ?? []));
+    if (breakCheck.exceedsMaxConsecutive) {
+      redirect(`/trainer/timetable?lock_error=intensive_no_break&run=${breakCheck.longestConsecutiveRun}`);
     }
   }
 

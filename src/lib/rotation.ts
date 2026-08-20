@@ -63,12 +63,13 @@ export interface IntensiveTpBreakCheck {
 }
 
 // Handbook 8.1.4: "two-day minimum break midway, no more than six
-// consecutive TP days." Advisory only, same pattern as the tutor
-// double-booking warning -- computed straight from the real timetable
-// (course_timetable_events, type='tp'), never a stored setting. The
-// spec's third clause ("the block should not end on the final day") isn't
-// checked here: "final day" is ambiguous between the TP block's own end
-// and the whole course's, and this is advisory, not worth guessing at.
+// consecutive TP days." Computed straight from the real timetable
+// (course_timetable_events, type='tp'), never a stored setting.
+// connect-spec-corrections-for-claude-code.md item 2 upgraded
+// exceedsMaxConsecutive from advisory-only (rotation.ts's own display) to
+// a hard refuse at timetable-lock time (setTimetableLock, timetable/
+// actions.ts) -- kept as one function either way, callers decide whether
+// to just show it or also block on it.
 export function checkIntensiveTpBreaks(tpDates: string[]): IntensiveTpBreakCheck {
   const MAX_CONSECUTIVE = 6;
   const MIN_BREAK_DAYS = 2;
@@ -93,4 +94,13 @@ export function checkIntensiveTpBreaks(tpDates: string[]): IntensiveTpBreakCheck
     exceedsMaxConsecutive: longestRun > MAX_CONSECUTIVE,
     hasTwoDayBreak,
   };
+}
+
+// connect-spec-corrections-for-claude-code.md item 2, resolving the
+// ambiguity checkIntensiveTpBreaks' own earlier comment flagged: "final
+// day" means the whole course's end_date, not a TP block's own end.
+// Flag only -- "don't silently allow", not "refuse".
+export function tpBlockEndsOnFinalDay(tpDates: string[], courseEndDate: string | null): boolean {
+  if (!courseEndDate || tpDates.length === 0) return false;
+  return tpDates[tpDates.length - 1] === courseEndDate;
 }

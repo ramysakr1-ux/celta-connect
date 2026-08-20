@@ -19,10 +19,10 @@ import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 export default async function TrainerTimetablePage({
   searchParams,
 }: {
-  searchParams: Promise<{ lock_error?: string; date?: string; half?: string }>;
+  searchParams: Promise<{ lock_error?: string; date?: string; half?: string; run?: string }>;
 }) {
   const trainer = await requireRole(["trainer", "admin"]);
-  const { lock_error, date: lockErrorDate, half: lockErrorHalf } = await searchParams;
+  const { lock_error, date: lockErrorDate, half: lockErrorHalf, run: lockErrorRun } = await searchParams;
   const supabase = await createClient();
 
   if (!trainer.course_id) {
@@ -197,6 +197,13 @@ export default async function TrainerTimetablePage({
           Can&apos;t lock -- {lockErrorHalf ? `group ${lockErrorHalf}'s` : "a group's"} TP rounds switch between
           face-to-face and online more than once (Handbook 2.2.3). Each half teaches one mode, then the other --
           not a mix. Check each TP round&apos;s mode in its detail panel.
+        </div>
+      ) : null}
+
+      {lock_error === "intensive_no_break" ? (
+        <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+          Can&apos;t lock -- {lockErrorRun ?? "several"} TP days in a row with no break (Handbook 8.1.4). No more
+          than 6 consecutive TP days without a two-day break in the middle. Move a session to open a gap.
         </div>
       ) : null}
 

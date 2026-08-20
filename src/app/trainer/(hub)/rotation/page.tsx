@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { rotationPosition, distinctTpDates, halfOwningDate, checkIntensiveTpBreaks } from "@/lib/rotation";
+import { rotationPosition, distinctTpDates, halfOwningDate, checkIntensiveTpBreaks, tpBlockEndsOnFinalDay } from "@/lib/rotation";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { ReorderForm } from "@/app/trainer/(hub)/rotation/reorder-form";
 import { ScheduleForm } from "@/app/trainer/(hub)/rotation/schedule-form";
@@ -112,6 +112,11 @@ export default async function TrainerRotationPage() {
   const intensiveCheck = checkIntensiveTpBreaks(distinctTpDates(tpEventRows));
   const looksIntensive = intensiveCheck.longestConsecutiveRun >= 4;
 
+  // connect-spec-corrections-for-claude-code.md item 2: "a TP block should
+  // not end on the course's final day" -- flagged, not blocked.
+  const { data: courseForFinalDay } = await supabase.from("courses").select("end_date").eq("id", courseId).maybeSingle();
+  const endsOnFinalDay = tpBlockEndsOnFinalDay(distinctTpDates(tpEventRows), courseForFinalDay?.end_date ?? null);
+
   const buildMembers = (subgroupId: string) =>
     (members ?? [])
       .filter((m) => m.subgroup_id === subgroupId)
@@ -155,6 +160,18 @@ export default async function TrainerRotationPage() {
           {!intensiveCheck.hasTwoDayBreak ? (
             <p className="mt-1 text-xs text-status-warning-text">No two-day break anywhere in the schedule yet.</p>
           ) : null}
+        </div>
+      ) : null}
+
+      {endsOnFinalDay ? (
+        <div className="sheet bg-status-warning-bg p-6">
+          <p className="text-[11px] font-semibold tracking-[0.08em] text-status-warning-text uppercase">
+            TP block ends on the final day
+          </p>
+          <p className="mt-1 text-sm text-status-warning-text">
+            The last scheduled TP day lands on the course&apos;s own final day (Handbook 8.1.4). Worth moving it
+            earlier so the final day isn&apos;t also someone&apos;s last assessed lesson.
+          </p>
         </div>
       ) : null}
 
