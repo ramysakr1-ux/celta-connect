@@ -49,7 +49,7 @@ export default async function TraineeTimetablePage({
     supabase.from("course_subgroup_members").select("subgroup_id, base_slot").eq("trainee_id", traineeId).maybeSingle(),
     supabase
       .from("supervised_session_completions")
-      .select("timetable_event_id, time_spent_seconds, response, submitted_at, checked_at")
+      .select("timetable_event_id, time_spent_seconds, response, submitted_at, checked_at, quiz_topic, score, question_count")
       .eq("trainee_id", traineeId),
   ]);
 

@@ -2568,6 +2568,10 @@ export interface Database {
           submitted_at: string | null;
           checked_at: string | null;
           checked_by: string | null;
+          // migration 0175 -- Supervised Review Quiz.dc.html.
+          quiz_topic: "language" | "phonology" | "classroom" | null;
+          score: number | null;
+          question_count: number | null;
         };
         Insert: Partial<Database["public"]["Tables"]["supervised_session_completions"]["Row"]> & {
           timetable_event_id: string;

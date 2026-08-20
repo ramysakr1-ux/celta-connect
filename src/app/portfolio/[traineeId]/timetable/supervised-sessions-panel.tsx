@@ -1,4 +1,5 @@
 import { checkSupervisedSession } from "@/app/portfolio/[traineeId]/supervised/[eventId]/actions";
+import { SUPERVISED_QUIZ_TOPICS, type QuizTopicKey } from "@/lib/supervised-quiz-content";
 
 interface SupervisedEventRow {
   id: string;
@@ -12,6 +13,9 @@ interface SupervisedCompletionRow {
   response: string | null;
   submitted_at: string | null;
   checked_at: string | null;
+  quiz_topic: QuizTopicKey | null;
+  score: number | null;
+  question_count: number | null;
 }
 
 function formatDuration(totalSeconds: number): string {
@@ -57,6 +61,11 @@ export function SupervisedSessionsPanel({
                   <p className="text-xs text-muted">{event.event_date}</p>
                 </div>
                 <div className="flex items-center gap-3">
+                  {submitted && completion?.score != null && completion?.question_count != null ? (
+                    <span className="text-xs font-semibold text-ink">
+                      {SUPERVISED_QUIZ_TOPICS[completion.quiz_topic!]?.title ?? "Quiz"} — {completion.score}/{completion.question_count}
+                    </span>
+                  ) : null}
                   {submitted ? (
                     <span className="text-xs text-muted">{formatDuration(completion!.time_spent_seconds)} spent</span>
                   ) : null}
