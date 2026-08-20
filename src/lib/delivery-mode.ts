@@ -1,3 +1,5 @@
+import { halfTpDates } from "@/lib/rotation";
+
 // Centre Admin.dc.html 2a -- delivery mode is asked once at course setup.
 // Text below is lifted verbatim from that reference (Handbook 2.2.1/2.2.2
 // paraphrase already vetted by Ramy's design pass), not reworded here.
@@ -116,3 +118,50 @@ export const DELIVERY_MODE_IMPACT: Record<DeliveryMode, ModeImpact> = {
     ],
   },
 };
+
+export interface Stage3ModeLockCheck {
+  lastTwoTpNumbers: [number, number];
+  modes: (("f2f" | "online") | null)[];
+  mismatched: boolean;
+}
+
+// connect-spec-corrections-for-claude-code.md item 1 (Handbook 9.2): "the
+// final two assessed TP lessons must be in the same mode of delivery," for
+// a mixed-mode candidate who both gets a Stage 3 tutorial and is borderline
+// Pass/Fail (the VALID_SLASH_PAIRS "Fail/Pass" slash, celta5-actions.ts).
+// TP mode lives on course_timetable_events, shared by a whole TP round, not
+// per-trainee -- there's no per-candidate override to write, so this stays
+// advisory: resolve what the timetable currently says for this candidate's
+// last two assessed rounds (same half -> halfTpDates -> event.mode bridge
+// computeAssessedHoursByMode already uses) and flag it when they disagree.
+// A trainer acts on the flag by re-tagging the round's mode, the same
+// existing control every other TP round mode already goes through.
+export function computeStage3MixedModeLock(input: {
+  deliveryMode: DeliveryMode | null;
+  stage3Required: boolean;
+  stage3FinalizedAt: string | null;
+  provisionalGrade: string | null;
+  provisionalGradeUpper: string | null;
+  totalAssessedTpCount: number;
+  halfOrder: 1 | 2 | null;
+  tpEvents: { event_date: string; mode: "f2f" | "online" | null }[];
+}): Stage3ModeLockCheck | null {
+  const triggered =
+    input.deliveryMode === "mixed" &&
+    input.stage3Required &&
+    Boolean(input.stage3FinalizedAt) &&
+    input.provisionalGrade === "Fail" &&
+    input.provisionalGradeUpper === "Pass";
+  if (!triggered || input.totalAssessedTpCount < 2 || !input.halfOrder) return null;
+
+  const halfDates = halfTpDates(input.tpEvents, input.halfOrder);
+  const modeByDate = new Map(input.tpEvents.map((e) => [e.event_date, e.mode]));
+  const lastTwoTpNumbers: [number, number] = [input.totalAssessedTpCount - 1, input.totalAssessedTpCount];
+  const modes = lastTwoTpNumbers.map((n) => {
+    const date = halfDates[n - 1];
+    return date ? (modeByDate.get(date) ?? null) : null;
+  });
+  const mismatched = modes[0] !== null && modes[1] !== null && modes[0] !== modes[1];
+
+  return { lastTwoTpNumbers, modes, mismatched };
+}

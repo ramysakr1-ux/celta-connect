@@ -24,6 +24,7 @@ import { AdminGrantForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/adm
 import { FinalizeRecordForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/finalize-record-form";
 import { isFailRiskTriggered, buildFailRiskDraft } from "@/lib/letters/fail-risk";
 import { FailRiskLetterSection } from "@/app/dashboard/trainer/trainees/[id]/celta5/fail-risk-letter-section";
+import { computeStage3MixedModeLock } from "@/lib/delivery-mode";
 
 const TRAJECTORY_LABEL: Record<string, string> = {
   "Pass A": "Pass A",
@@ -75,10 +76,22 @@ export default async function Celta5RecordPage({
     supabase.from("tp_feedback").select("*").eq("trainee_id", id),
     supabase
       .from("course_timetable_events")
-      .select("type, event_date, linked_tp_number")
+      .select("type, event_date, linked_tp_number, mode")
       .eq("course_id", trainer.course_id ?? "")
       .eq("type", "tp"),
   ]);
+
+  // connect-spec-corrections-for-claude-code.md item 1 (Handbook 9.2):
+  // mixed-mode + Stage 3 given + borderline Fail/Pass -- the final two
+  // assessed TP lessons must share one mode. Same half -> halfTpDates ->
+  // event.mode bridge computeAssessedHoursByMode already uses elsewhere.
+  const [{ data: subgroupMember }, { data: planAssignments }] = await Promise.all([
+    supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", id).maybeSingle(),
+    supabase.from("plan_assignments").select("tp_number").eq("trainee_id", id),
+  ]);
+  const { data: subgroupForMode } = subgroupMember?.subgroup_id
+    ? await supabase.from("course_subgroups").select("half_order").eq("id", subgroupMember.subgroup_id).maybeSingle()
+    : { data: null };
 
   // assessment-model.md link 3: which TP round the COHORT has reached,
   // not this one trainee's own pace -- see computeCurrentTpRound().
@@ -123,6 +136,17 @@ export default async function Celta5RecordPage({
       </div>
     );
   }
+
+  const stage3MixedModeLock = computeStage3MixedModeLock({
+    deliveryMode: course?.delivery_mode ?? null,
+    stage3Required: record.stage3_required,
+    stage3FinalizedAt: record.stage3_finalized_at,
+    provisionalGrade: record.provisional_grade,
+    provisionalGradeUpper: record.provisional_grade_upper,
+    totalAssessedTpCount: (planAssignments ?? []).length,
+    halfOrder: subgroupForMode?.half_order === 1 || subgroupForMode?.half_order === 2 ? subgroupForMode.half_order : null,
+    tpEvents: tpEvents ?? [],
+  });
 
   const matrixRows = matrix ?? [];
   const matrixKey = matrixRows.map((m) => m.updated_at).join(",");
@@ -250,6 +274,23 @@ export default async function Celta5RecordPage({
       </div>
 
       <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} />
+
+      {stage3MixedModeLock ? (
+        <div className={`card p-4 ${stage3MixedModeLock.mismatched ? "border-destructive" : "border-gold"}`}>
+          <p className={`text-sm font-semibold ${stage3MixedModeLock.mismatched ? "text-destructive" : "text-gold"}`}>
+            Handbook 9.2 -- borderline Pass/Fail on a mixed-mode course
+          </p>
+          <p className="mt-1 text-sm text-muted">
+            The final two assessed lessons (TP{stage3MixedModeLock.lastTwoTpNumbers[0]} and TP
+            {stage3MixedModeLock.lastTwoTpNumbers[1]}) must both be in the same mode.{" "}
+            {stage3MixedModeLock.mismatched
+              ? `The timetable currently has them in different modes (${stage3MixedModeLock.modes.join(" / ")}) -- re-tag one round before they're taught.`
+              : stage3MixedModeLock.modes.every((m) => m)
+                ? `The timetable already has both in ${stage3MixedModeLock.modes[0]} -- no change needed.`
+                : "One or both rounds aren't tagged with a mode yet -- set it on the timetable before they're taught."}
+          </p>
+        </div>
+      ) : null}
 
       {record.stage3_required ? (
         <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
