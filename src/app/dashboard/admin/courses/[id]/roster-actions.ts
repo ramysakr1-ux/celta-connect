@@ -32,6 +32,25 @@ export async function updateDeliveryMode(formData: FormData): Promise<void> {
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
 }
 
+// connect-spec-corrections-for-claude-code.md item 6: the TP7/8 material
+// pool is centre/course-optional, not universal -- some centres keep using
+// the main coursebook for TP7/8 instead. Gates both the trainer resource
+// hub's shelf and the candidate's claim section (see their page.tsx files).
+export async function updateTpMaterialPoolEnabled(formData: FormData): Promise<void> {
+  const admin = await requireRole("admin");
+
+  const courseId = formData.get("course_id");
+  const enabled = formData.get("enabled");
+  if (typeof courseId !== "string" || (enabled !== "true" && enabled !== "false")) return;
+
+  const supabase = await createClient();
+  const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
+  if (!course || course.center_id !== admin.center_id) return;
+
+  await supabase.from("courses").update({ tp_material_pool_enabled: enabled === "true" }).eq("id", courseId);
+  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+}
+
 // "The intake dropdown shows real availability" -- a course must be
 // explicitly opened for applications with a real cap before /apply will
 // list it. Off/null by default (migration 0082) so nothing is exposed

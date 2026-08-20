@@ -47,16 +47,25 @@ export default async function TrainerResourceHubPage() {
     : { data: [] };
   const coursebookIds = [...new Set((scheduledCoursebookIds ?? []).map((s) => s.tp_coursebook_id))];
 
-  // connect-spec-corrections-for-claude-code.md item 6 -- baseline library
-  // (center_id null) plus this centre's own added scans.
-  const { data: materialItemsRaw } = await cambridgeAdmin
-    .from("tp_material_pool_items")
-    .select("*")
-    .or(`center_id.is.null,center_id.eq.${trainer.center_id}`)
-    .order("created_at", { ascending: false });
-  const { data: materialClaims } = courseId
-    ? await cambridgeAdmin.from("tp_material_pool_claims").select("material_item_id, trainee_id, tp_number").eq("course_id", courseId)
+  // connect-spec-corrections-for-claude-code.md item 6 -- the pool is
+  // centre/course-optional; skip the queries entirely when this course
+  // doesn't use it (some centres keep the main coursebook for TP7/8).
+  const { data: courseForMaterialPool } = courseId
+    ? await supabase.from("courses").select("tp_material_pool_enabled").eq("id", courseId).maybeSingle()
+    : { data: null };
+  const materialPoolEnabled = courseForMaterialPool?.tp_material_pool_enabled ?? false;
+
+  const { data: materialItemsRaw } = materialPoolEnabled
+    ? await cambridgeAdmin
+        .from("tp_material_pool_items")
+        .select("*")
+        .or(`center_id.is.null,center_id.eq.${trainer.center_id}`)
+        .order("created_at", { ascending: false })
     : { data: [] };
+  const { data: materialClaims } =
+    materialPoolEnabled && courseId
+      ? await cambridgeAdmin.from("tp_material_pool_claims").select("material_item_id, trainee_id, tp_number").eq("course_id", courseId)
+      : { data: [] };
   const claimedTraineeIds = [...new Set((materialClaims ?? []).map((c) => c.trainee_id))];
   const { data: claimants } =
     claimedTraineeIds.length > 0 ? await cambridgeAdmin.from("profiles").select("id, full_name").in("id", claimedTraineeIds) : { data: [] };
@@ -373,12 +382,14 @@ export default async function TrainerResourceHubPage() {
         </div>
       </div>
 
-      <div id="tp-material-pool">
-        <h2 className="font-serif text-lg text-ink">TP7/8 material pool</h2>
-        <div className="mt-3">
-          <MaterialPoolShelf items={materialItems} />
+      {materialPoolEnabled ? (
+        <div id="tp-material-pool">
+          <h2 className="font-serif text-lg text-ink">TP7/8 material pool</h2>
+          <div className="mt-3">
+            <MaterialPoolShelf items={materialItems} />
+          </div>
         </div>
-      </div>
+      ) : null}
       </div>
     </div>
   );

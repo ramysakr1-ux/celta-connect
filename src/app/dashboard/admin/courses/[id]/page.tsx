@@ -20,6 +20,7 @@ import { linkRestartTransfer } from "@/app/dashboard/admin/courses/[id]/restart-
 import { linkDeferralTransfer } from "@/app/dashboard/admin/courses/[id]/deferral-actions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { DeliveryModeCard } from "@/app/dashboard/admin/courses/[id]/delivery-mode-card";
+import { MaterialPoolToggleCard } from "@/app/dashboard/admin/courses/[id]/material-pool-toggle-card";
 import { ChatRetentionForm } from "@/app/dashboard/admin/courses/[id]/chat-retention-form";
 import { CloseOutCard } from "@/app/dashboard/admin/courses/[id]/close-out-card";
 import { CertificateCheckCard } from "@/app/dashboard/admin/courses/[id]/certificate-check-card";
@@ -321,6 +322,8 @@ export default async function CourseRosterPage({
       </div>
 
       <DeliveryModeCard courseId={course.id} savedMode={course.delivery_mode} />
+
+      <MaterialPoolToggleCard courseId={course.id} enabled={course.tp_material_pool_enabled} />
 
       <form action={updateApplicationSettings} className="card flex items-center justify-between gap-4 p-6">
         <div>

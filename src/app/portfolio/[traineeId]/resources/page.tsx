@@ -113,7 +113,9 @@ export default async function ResourceHubPage({
       .select("id, assignment_type, sections, published_at")
       .eq("center_id", trainee.center_id)
       .not("published_at", "is", null),
-    trainee.course_id ? supabase.from("courses").select("start_date").eq("id", trainee.course_id).maybeSingle() : Promise.resolve({ data: null }),
+    trainee.course_id
+      ? supabase.from("courses").select("start_date, tp_material_pool_enabled").eq("id", trainee.course_id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
 
   // for-claude-code-trainee-interface.md §5: "Fewer sections than the
@@ -178,16 +180,19 @@ export default async function ResourceHubPage({
     // candidate viewing their own page can claim (never staff previewing,
     // never the assessor).
     const canClaimMaterial = viewer?.role === "trainee" && viewer.id === traineeId;
-    const { data: materialItemsRaw } = await supabase
-      .from("tp_material_pool_items")
-      .select("*")
-      .or(`center_id.is.null,center_id.eq.${trainee.center_id}`)
-      .order("created_at", { ascending: false });
-    const { data: mySubgroupMember } = await supabase
-      .from("course_subgroup_members")
-      .select("subgroup_id")
-      .eq("trainee_id", traineeId)
-      .maybeSingle();
+    // connect-spec-corrections-for-claude-code.md item 6 -- centre/course-
+    // optional; skip the queries when this course doesn't use the pool.
+    const materialPoolEnabled = course?.tp_material_pool_enabled ?? false;
+    const { data: materialItemsRaw } = materialPoolEnabled
+      ? await supabase
+          .from("tp_material_pool_items")
+          .select("*")
+          .or(`center_id.is.null,center_id.eq.${trainee.center_id}`)
+          .order("created_at", { ascending: false })
+      : { data: [] };
+    const { data: mySubgroupMember } = materialPoolEnabled
+      ? await supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle()
+      : { data: null };
     const { data: mySubgroup } = mySubgroupMember?.subgroup_id
       ? await supabase.from("course_subgroups").select("tp_group_id").eq("id", mySubgroupMember.subgroup_id).maybeSingle()
       : { data: null };
@@ -299,9 +304,11 @@ export default async function ResourceHubPage({
               <CoursebooksSection coursebooks={coursebooks ?? []} isEditableStaff={false} />
             </div>
 
-            <div id="tp-material-pool" className="scroll-mt-4">
-              <MaterialPoolSection items={materialItems} canClaim={canClaimMaterial} />
-            </div>
+            {materialPoolEnabled ? (
+              <div id="tp-material-pool" className="scroll-mt-4">
+                <MaterialPoolSection items={materialItems} canClaim={canClaimMaterial} />
+              </div>
+            ) : null}
 
             <div id="multimedia" className="scroll-mt-4">
               <MultimediaSection tracks={audioTracks ?? []} />

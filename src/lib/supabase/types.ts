@@ -274,6 +274,10 @@ export interface Database {
           timetable_locked_at: string | null;
           time_bands: TimeBand[] | null;
           delivery_mode: "f2f" | "online" | "mixed";
+          // connect-spec-corrections-for-claude-code.md item 6 (migration
+          // 0183): whether TP7/TP8 draw from the separate material pool at
+          // all -- some centres keep using the main coursebook instead.
+          tp_material_pool_enabled: boolean;
           assessor_visit_date: string | null;
           entry_form_sent_at: string | null;
           cambridge_grades_confirmed_at: string | null;
