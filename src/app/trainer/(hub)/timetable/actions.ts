@@ -198,6 +198,11 @@ export async function generateTimetableSkeleton(_prevState: FormState, formData:
   const { error } = await supabase.from("course_timetable_events").insert(events);
   if (error) return { error: "Could not generate the skeleton. It may already be locked." };
 
+  // The one point in the app where full-time vs part-time is ever actually
+  // chosen -- persisted here so it survives past this one form (see
+  // migration 0172's own comment for why this didn't already exist).
+  await supabase.from("courses").update({ is_part_time: shape === "part_time" }).eq("id", trainer.course_id);
+
   revalidatePath("/trainer/timetable");
   return { error: null };
 }

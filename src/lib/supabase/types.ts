@@ -301,6 +301,11 @@ export interface Database {
           provisional_grades_due_at: string | null;
           accepting_applications: boolean;
           created_at: string;
+          // migration 0172 -- for-claude-code-concurrent-course-checks.md:
+          // whether the FT/FT-blocked, FT/PT-allowed tutor rule applies.
+          // Set once, at timetable-skeleton generation (the only place this
+          // shape choice is made).
+          is_part_time: boolean;
         };
         Insert: Partial<Database["public"]["Tables"]["courses"]["Row"]> & {
           center_id: string;
