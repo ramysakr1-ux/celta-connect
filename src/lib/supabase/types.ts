@@ -297,6 +297,12 @@ export interface Database {
           // same as every channel already fell back to before this setting
           // existed.
           chat_retention_days: number | null;
+          // migration 0174 -- the third position build-spec.md's chat
+          // retention section names, which a plain day count can't express:
+          // "retain for the course... cleared at close-out with everything
+          // else." "days" (default) is the existing nightly/set-period
+          // behaviour, governed by chat_retention_days above.
+          chat_retention_mode: "days" | "course";
           deposit_due_days: number | null;
           // Null = launched, so courses predating the wizard stay live.
           launched_at: string | null;

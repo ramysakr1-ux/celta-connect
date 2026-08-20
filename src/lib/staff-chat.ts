@@ -44,12 +44,18 @@ async function deleteStaleStaffMessages(centerId: string): Promise<void> {
 
   const courseIds = [...new Set(channels.map((c) => c.course_id).filter((id): id is string => !!id))];
   const { data: courses } =
-    courseIds.length > 0 ? await admin.from("courses").select("id, chat_retention_days").in("id", courseIds) : { data: [] };
-  const retentionByCourseId = new Map((courses ?? []).map((c) => [c.id, c.chat_retention_days ?? 1]));
+    courseIds.length > 0
+      ? await admin.from("courses").select("id, chat_retention_days, chat_retention_mode").in("id", courseIds)
+      : { data: [] };
+  const retentionByCourseId = new Map((courses ?? []).map((c) => [c.id, c]));
 
+  // "course" mode (migration 0174) has no rolling cutoff at all -- it's
+  // cleared at close-out instead (course-close-out/wipe.ts), not swept here.
   const channelIdsByRetention = new Map<number, string[]>();
   for (const channel of channels) {
-    const days = channel.course_id ? (retentionByCourseId.get(channel.course_id) ?? 1) : 1;
+    const course = channel.course_id ? retentionByCourseId.get(channel.course_id) : null;
+    if (course?.chat_retention_mode === "course") continue;
+    const days = course?.chat_retention_days ?? 1;
     const list = channelIdsByRetention.get(days) ?? [];
     list.push(channel.id);
     channelIdsByRetention.set(days, list);
@@ -61,8 +67,17 @@ async function deleteStaleStaffMessages(centerId: string): Promise<void> {
   }
 }
 
-function resolveRetentionDays(courseId: string | null, retentionByCourseId: Map<string, number>): number {
-  return courseId ? (retentionByCourseId.get(courseId) ?? 1) : 1;
+export type RetentionLabel = "nightly" | "days" | "course" | "permanent";
+
+function resolveRetention(
+  courseId: string | null,
+  retentionByCourseId: Map<string, { chat_retention_days: number | null; chat_retention_mode: string }>
+): { days: number | null; label: RetentionLabel } {
+  if (!courseId) return { days: 1, label: "nightly" };
+  const course = retentionByCourseId.get(courseId);
+  if (course?.chat_retention_mode === "course") return { days: null, label: "course" };
+  const days = course?.chat_retention_days ?? 1;
+  return { days, label: days === 1 ? "nightly" : "days" };
 }
 
 export interface ChannelSummary {
@@ -70,8 +85,11 @@ export interface ChannelSummary {
   type: "center_trainers" | "all_staff" | "tp_group" | "dm" | "course_admin" | "centre_admin";
   name: string;
   // Resolved per channel from its own course (migration 0154) -- a
-  // centre-wide channel (no course_id) always reads 1.
-  retentionDays: number;
+  // centre-wide channel (no course_id) always reads 1. null only for
+  // "course" mode (migration 0174), where there's no rolling cutoff to
+  // report -- retentionLabel is what the bar should actually say.
+  retentionDays: number | null;
+  retentionLabel: RetentionLabel;
 }
 
 export interface Coworker {
@@ -125,8 +143,10 @@ export async function getInitialStaffChatData(
 
   const channelCourseIds = [...new Set((channels ?? []).map((c) => c.course_id).filter((id): id is string => !!id))];
   const { data: channelCourses } =
-    channelCourseIds.length > 0 ? await supabase.from("courses").select("id, chat_retention_days").in("id", channelCourseIds) : { data: [] };
-  const retentionByCourseId = new Map((channelCourses ?? []).map((c) => [c.id, c.chat_retention_days ?? 1]));
+    channelCourseIds.length > 0
+      ? await supabase.from("courses").select("id, chat_retention_days, chat_retention_mode").in("id", channelCourseIds)
+      : { data: [] };
+  const retentionByCourseId = new Map((channelCourses ?? []).map((c) => [c.id, c]));
 
   const dmChannelIds = (channels ?? []).filter((c) => c.type === "dm").map((c) => c.id);
 
@@ -152,12 +172,16 @@ export async function getInitialStaffChatData(
   );
 
   const summaries: ChannelSummary[] = (channels ?? [])
-    .map((c) => ({
-      id: c.id,
-      type: c.type,
-      name: c.type === "dm" ? (dmNameByChannelId.get(c.id) ?? "Direct message") : (c.name ?? ""),
-      retentionDays: resolveRetentionDays(c.course_id, retentionByCourseId),
-    }))
+    .map((c) => {
+      const retention = resolveRetention(c.course_id, retentionByCourseId);
+      return {
+        id: c.id,
+        type: c.type,
+        name: c.type === "dm" ? (dmNameByChannelId.get(c.id) ?? "Direct message") : (c.name ?? ""),
+        retentionDays: retention.days,
+        retentionLabel: retention.label,
+      };
+    })
     .sort((a, b) => {
       // course_admin never actually appears here in practice -- admins are
       // never added to trainer-only channels and vice versa (see

@@ -58,6 +58,8 @@ export async function updateApplicationSettings(formData: FormData): Promise<voi
 export async function updateChatRetentionDays(formData: FormData): Promise<void> {
   const staff = await requireRole("admin");
   const courseId = formData.get("course_id");
+  const modeRaw = formData.get("chat_retention_mode");
+  const mode = modeRaw === "course" ? "course" : "days";
   const chatRetentionRaw = formData.get("chat_retention_days");
   const chatRetentionDays = typeof chatRetentionRaw === "string" && chatRetentionRaw ? Number(chatRetentionRaw) : 1;
   if (typeof courseId !== "string") return;
@@ -67,7 +69,10 @@ export async function updateChatRetentionDays(formData: FormData): Promise<void>
   const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
   if (!course || course.center_id !== staff.center_id) return;
 
-  await supabase.from("courses").update({ chat_retention_days: chatRetentionDays }).eq("id", courseId);
+  await supabase
+    .from("courses")
+    .update({ chat_retention_days: chatRetentionDays, chat_retention_mode: mode })
+    .eq("id", courseId);
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
 }
 

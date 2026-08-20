@@ -24,7 +24,19 @@ async function wipeOneCourse(admin: ReturnType<typeof createAdminClient>, course
 
   // "What does not carry: chat, links, workspace URL" -- volunteer/assessor/
   // register-viewer links for this course stop working, and volunteer
-  // student records (name-only, not real accounts) go with them.
+  // student records (name-only, not real accounts) go with them. Chat is
+  // the one course-scoped thing "retain for the course" mode (migration
+  // 0174) never clears on its own -- there's no rolling cutoff to sweep it,
+  // this wipe IS its clear point. Deleting here unconditionally (not just
+  // for that mode) also matches ordinary courses correctly: by wipe time
+  // the nightly/day-based sweep has already cleared everything under any
+  // sane retention setting, so this is a genuine no-op for them, not a
+  // behaviour change.
+  const { data: courseChannels } = await admin.from("staff_channels").select("id").eq("course_id", courseId);
+  const channelIds = (courseChannels ?? []).map((c) => c.id);
+  if (channelIds.length > 0) {
+    await admin.from("staff_messages").delete().in("channel_id", channelIds);
+  }
   await admin.from("course_access_tokens").delete().eq("course_id", courseId);
   await admin.from("volunteer_students").delete().eq("course_id", courseId);
 

@@ -417,7 +417,11 @@ export default async function CourseRosterPage({
             clears nightly.
           </p>
         </div>
-        <ChatRetentionForm courseId={course.id} chatRetentionDays={course.chat_retention_days ?? 1} />
+        <ChatRetentionForm
+          courseId={course.id}
+          chatRetentionDays={course.chat_retention_days ?? 1}
+          chatRetentionMode={course.chat_retention_mode}
+        />
       </div>
 
       {(pendingRestarts ?? []).length > 0 ? (

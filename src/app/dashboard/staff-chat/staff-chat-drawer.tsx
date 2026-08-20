@@ -99,6 +99,7 @@ export function StaffChatDrawer({
   // outcome is a bar promising a midnight clear on a centre [course] that
   // retains," so this must track whichever channel is actually open.
   const retentionDays = selected?.retentionDays ?? 1;
+  const retentionLabel = selected?.retentionLabel ?? "nightly";
 
   useEffect(() => {
     threadOpenRef.current = threadOpen;
@@ -133,12 +134,22 @@ export function StaffChatDrawer({
   // shared boundary), so it gets static "resets on the course's schedule"
   // copy instead.
   useEffect(() => {
-    if (retentionDays !== 1) return;
+    if (retentionLabel !== "nightly") return;
     const update = () => setMsLeft(msUntilLocalMidnight());
     update();
     const id = setInterval(update, 30_000);
     return () => clearInterval(id);
-  }, [retentionDays]);
+  }, [retentionLabel]);
+
+  // "The one unacceptable outcome is a bar promising a midnight clear on a
+  // centre [course] that retains" -- each mode gets its own accurate copy,
+  // never the nightly wording as a generic fallback.
+  const retentionCopy =
+    retentionLabel === "nightly"
+      ? "clears at midnight"
+      : retentionLabel === "course"
+        ? "cleared when this course closes"
+        : "resets on the course's schedule";
 
   useEffect(() => {
     if (channels.length === 0) return;
@@ -178,7 +189,7 @@ export function StaffChatDrawer({
         ? prev
         // A DM has no course_id -- always the fixed 1-day default, same
         // as every other centre-wide channel.
-        : [...prev, { id: channelId, type: "dm", name: coworker.full_name, retentionDays: 1 }]
+        : [...prev, { id: channelId, type: "dm", name: coworker.full_name, retentionDays: 1, retentionLabel: "nightly" }]
     );
     setSelectedId(channelId);
   }
@@ -344,11 +355,7 @@ export function StaffChatDrawer({
                   handleSend();
                 }
               }}
-              placeholder={
-                selected
-                  ? `Message ${selected.name} -- ${retentionDays === 1 ? "clears at midnight" : "resets on the course's schedule"}`
-                  : "Pick who to message"
-              }
+              placeholder={selected ? `Message ${selected.name} -- ${retentionCopy}` : "Pick who to message"}
               disabled={!selected}
               className="max-h-24 min-w-0 flex-1 resize-none border-0 bg-transparent text-sm text-ink outline-none placeholder:text-muted/70 disabled:opacity-60"
             />
@@ -357,7 +364,9 @@ export function StaffChatDrawer({
           <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
             <span className="size-[5px] shrink-0 rounded-full bg-gold" aria-hidden="true" />
             <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted">
-              {retentionDays === 1 ? formatCountdown(msLeft) : "Resets on the course's schedule"}
+              {retentionLabel === "nightly"
+                ? formatCountdown(msLeft)
+                : retentionCopy.charAt(0).toUpperCase() + retentionCopy.slice(1)}
             </span>
           </div>
 
