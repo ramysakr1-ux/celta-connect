@@ -6,10 +6,21 @@ function formatDate(iso: string): string {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 }
 
-// "Accepting is what creates the account." The public offer-acceptance
-// page -- looks up by offer_token (public.applicants.offer_token, minted
-// when a decider records an offer, src/app/dashboard/admissions/actions.ts
-// sendOffer). Same unified sheet-gold entry-moment look as /join/[token].
+// "Accepting is what creates the account" -- but only once the centre has
+// actually released the workspace (releaseWorkspace, admissions/actions.ts,
+// normally triggered by the deposit clearing). Both the offer email
+// (acceptancePlaceEmailHtml, asks for the deposit) and the later workspace
+// email (welcomeEmailHtml) point at this SAME /offer/[token] link -- before
+// release, this used to show the account-creation form regardless, which
+// meant clicking the very first email's link created a full account with
+// no deposit ever checked. Gated on workspace_released_at now: the same
+// token becomes the real account-creation link only once release has
+// happened, exactly matching what the two emails actually promise.
+//
+// The public offer-acceptance page -- looks up by offer_token
+// (public.applicants.offer_token, minted when a decider records an offer,
+// src/app/dashboard/admissions/actions.ts sendOffer). Same unified
+// sheet-gold entry-moment look as /join/[token].
 export default async function OfferPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const admin = createAdminClient();
@@ -69,12 +80,19 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
             UTC. After that, it goes to the next person on the waiting list.
           </p>
         ) : null}
-        <OfferAcceptForm
-          token={token}
-          isUkCentre={center?.is_uk_centre ?? false}
-          defaultSpecialConsideration={applicant.special_requirements}
-          fullName={applicant.full_name}
-        />
+        {applicant.workspace_released_at ? (
+          <OfferAcceptForm
+            token={token}
+            isUkCentre={center?.is_uk_centre ?? false}
+            defaultSpecialConsideration={applicant.special_requirements}
+            fullName={applicant.full_name}
+          />
+        ) : (
+          <p className="mt-4 text-sm text-muted">
+            Once your deposit is recorded, you&apos;ll get an email with the same link, ready to set up your
+            account. Nothing to do here yet.
+          </p>
+        )}
       </div>
     </div>
   );

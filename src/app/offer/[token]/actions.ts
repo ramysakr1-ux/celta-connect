@@ -55,6 +55,13 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
   if (!applicant || applicant.stage !== "offer_sent") {
     return { error: "This offer link is invalid or has already been used." };
   }
+  // page.tsx hides the form until this is set -- checked again here since a
+  // hidden form is a UI convenience, not the actual gate. Without this, the
+  // token from the very first (deposit-ask) email would let the account get
+  // created straight away, the exact bug this whole change fixes.
+  if (!applicant.workspace_released_at) {
+    return { error: "Your workspace hasn't been released yet. You'll get an email once it is." };
+  }
   if (applicant.offer_accept_by && applicant.offer_accept_by < new Date().toISOString().slice(0, 10)) {
     return { error: "This offer has expired. Contact the centre." };
   }

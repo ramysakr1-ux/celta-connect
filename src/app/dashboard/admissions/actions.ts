@@ -8,7 +8,7 @@ import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-
 import { referApplicant } from "@/lib/admissions-referral";
 import {
   sendApplicantEmail,
-  offerEmailHtml,
+  acceptancePlaceEmailHtml,
   rejectionEmailHtml,
   rejectionAfterInterviewEmailHtml,
   waitingListEmailHtml,
@@ -978,10 +978,30 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
   const siteUrl = process.env.SITE_URL;
   let emailError: string | null = null;
   if (siteUrl) {
-    const [{ data: course }, { data: center }] = await Promise.all([
-      supabase.from("courses").select("name, start_date, end_date").eq("id", applicant.intake_course_id).maybeSingle(),
+    const [{ data: course }, { data: center }, { data: mct }] = await Promise.all([
+      supabase
+        .from("courses")
+        .select("name, start_date, end_date, deposit_amount, fee_currency")
+        .eq("id", applicant.intake_course_id)
+        .maybeSingle(),
       supabase.from("centers").select("name, admissions_email").eq("id", staff.center_id).maybeSingle(),
+      supabase
+        .from("course_tutors")
+        .select("profiles(full_name)")
+        .eq("course_id", applicant.intake_course_id)
+        .eq("tutor_role", "main_course_tutor")
+        .is("left_at", null)
+        .maybeSingle(),
     ]);
+    const currency = (typeof feeCurrency === "string" && feeCurrency ? feeCurrency.trim().toUpperCase() : course?.fee_currency) || "";
+    const fmtDate = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+    const mctName = (mct?.profiles as { full_name?: string } | null)?.full_name ?? null;
+
+    // Ramy, 2026-08-16: "the Connect account will only be set up after they
+    // pay a deposit; they will be sent a different email after that" -- this
+    // is the deposit ask, not an account-creation link. releaseWorkspace()
+    // sends the second email (welcomeEmailHtml) once a deposit is actually
+    // recorded, and only then does /offer/[token] let the account get made.
     const { error: sendError } = await sendApplicantEmail({
       centerName: center?.name ?? "Your centre",
       centerAdmissionsEmail: center?.admissions_email ?? null,
@@ -991,25 +1011,26 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
       applicantId: applicantId,
       type: "offer",
       sentBy: staff.id,
-      html: offerEmailHtml({
-        applicantName: applicant.full_name,
+      html: acceptancePlaceEmailHtml({
+        candidateName: applicant.full_name,
         courseName: course?.name ?? "the course",
         courseDates:
           course?.start_date && course?.end_date
-            ? `${new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} to ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`
+            ? `${fmtDate(course.start_date)} to ${fmtDate(course.end_date)}`
             : "the dates confirmed with you",
-        interviewDate: null,
-        // The tutor's own paragraph, written at marking. Omitted rather than
-        // invented when nobody has written one.
-        taskFeedback: applicant.task_feedback ?? null,
-        feeLine:
+        centreLocation: center?.name ?? "the centre",
+        feeAmount:
           typeof feeAmount === "string" && feeAmount
-            ? `The course fee is ${Number(feeAmount).toLocaleString("en-GB")} ${typeof feeCurrency === "string" && feeCurrency ? feeCurrency.trim().toUpperCase() : ""}.`.replace(/ \./, ".")
-            : "The course fee is as discussed with you.",
+            ? `${Number(feeAmount).toLocaleString("en-GB")} ${currency}`.trim()
+            : "as discussed with you",
+        depositAmount: course?.deposit_amount ? `${Number(course.deposit_amount).toLocaleString("en-GB")} ${currency}`.trim() : "a deposit to be confirmed with you",
+        depositBy: fmtDate(acceptBy),
+        balanceBy: course?.start_date ? fmtDate(course.start_date) : "before the course starts",
+        payUrl: null,
         officeContact: center?.admissions_email ?? "the centre office",
-        offerUrl: `${siteUrl}/offer/${offerToken}`,
-        acceptWithinDays: 14,
-        holdUntil: acceptBy,
+        depositAlreadyPaid: Boolean(applicant.deposit_paid_at),
+        directorName: mctName ?? "Your course tutor",
+        directorRole: "Course Director",
       }),
     });
     emailError = sendError;

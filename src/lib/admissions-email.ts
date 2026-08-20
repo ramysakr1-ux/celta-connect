@@ -653,7 +653,18 @@ export function acceptancePlaceEmailHtml(input: {
   depositAmount: string;
   depositBy: string;
   balanceBy: string;
-  payUrl: string;
+  // Null until a real per-centre checkout-link flow exists (staff generates
+  // one manually today, per payment row -- nothing to embed automatically at
+  // send time, and not every centre even takes cards). Falls back to the
+  // same "contact the office" wording offerEmailHtml already used.
+  payUrl: string | null;
+  officeContact: string;
+  // sendOffer's own deposit check runs before this email sends -- many
+  // centres already have the deposit recorded (taken by bank transfer/cash
+  // ahead of time) by the moment an offer goes out, and asking someone to
+  // pay a deposit they've already paid is worse than saying nothing about
+  // payment method at all.
+  depositAlreadyPaid: boolean;
   directorName: string;
   directorRole: string;
 }): string {
@@ -665,14 +676,24 @@ export function acceptancePlaceEmailHtml(input: {
       p(
         `We are pleased to offer you a place on ${input.courseName}, running from ${input.courseDates} at ${input.centreLocation}.`
       ) +
-      p(
-        `The course fee is ${input.feeAmount}. To secure the place we need a deposit of ${input.depositAmount} by ${input.depositBy}. After that date the place is offered to the next applicant — we will not chase you for it, so please treat this part as the deadline it is.`
-      ) +
-      inlineButton({
-        label: "Pay the deposit",
-        url: input.payUrl,
-        sub: `A receipt is sent automatically. The balance is due by ${input.balanceBy}.`,
-      }) +
+      (input.depositAlreadyPaid
+        ? p(
+            `The course fee is ${input.feeAmount}. We already have your deposit of ${input.depositAmount} — thank you. The balance is due by ${input.balanceBy}.`
+          )
+        : p(
+            `The course fee is ${input.feeAmount}. To secure the place we need a deposit of ${input.depositAmount} by ${input.depositBy}. After that date the place is offered to the next applicant — we will not chase you for it, so please treat this part as the deadline it is.`
+          )) +
+      (input.depositAlreadyPaid
+        ? ""
+        : input.payUrl
+          ? inlineButton({
+              label: "Pay the deposit",
+              url: input.payUrl,
+              sub: `A receipt is sent automatically. The balance is due by ${input.balanceBy}.`,
+            })
+          : p(
+              `For payment options, including instalments, contact the centre office on ${input.officeContact} or reply to this email. The balance is due by ${input.balanceBy}.`
+            )) +
       p("Once the deposit clears, there are two more things to do, and neither is urgent.") +
       // Course Emails.dc.html puts a live "Set up your Connect account" button
       // here. It cannot stay: Ramy, 2026-08-16 -- "the Connect account will
