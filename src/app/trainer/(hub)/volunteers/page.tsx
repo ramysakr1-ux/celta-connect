@@ -8,6 +8,7 @@ import { AddVolunteerForm } from "@/app/trainer/(hub)/volunteers/add-volunteer-f
 import { CopyLinkButton } from "@/app/trainer/(hub)/volunteers/copy-link-button";
 import { SendStartingEmailButton } from "@/app/trainer/(hub)/volunteers/send-starting-email-button";
 import { RegisterLinkButton } from "@/app/trainer/(hub)/volunteers/register-link-button";
+import { SendAllLinksButton } from "@/app/trainer/(hub)/volunteers/send-all-links-button";
 import { AttendanceRegisterGrid } from "@/components/attendance-register-grid";
 import { VolunteerSessionPanels } from "@/app/trainer/(hub)/volunteers/session-panels";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
@@ -114,12 +115,21 @@ export default async function VolunteersPage() {
             Filming consent form ↓
           </a>
           <RegisterLinkButton />
+          <SendAllLinksButton />
+          <a
+            href="#add-volunteer"
+            className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+          >
+            Add volunteer
+          </a>
         </div>
       </div>
 
       <VolunteerSessionPanels sessions={volunteerSessions} certificateHoursThreshold={certificateHoursThreshold} />
 
-      <AddVolunteerForm />
+      <div id="add-volunteer" className="scroll-mt-6">
+        <AddVolunteerForm />
+      </div>
 
       <div className="sheet !p-0 overflow-hidden">
         {volunteers && volunteers.length > 0 ? (

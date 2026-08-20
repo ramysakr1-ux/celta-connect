@@ -36,16 +36,43 @@ export default async function Stage2BlockPage({ params }: { params: Promise<{ bl
         </p>
       </div>
 
-      <div className="sheet">
-        <h2 className="font-serif text-lg text-ink">Positions</h2>
-        <div className="mt-3 flex flex-col">
-          {(slots ?? []).map((s, i) => (
-            <div key={s.id} className={`flex items-center justify-between py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-              <span className="text-sm text-ink">{ordinal(s.position)}</span>
-              <span className="text-sm text-muted">{s.trainee_id ? nameById.get(s.trainee_id) ?? "Unknown" : "Open"}</span>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="sheet">
+          <h2 className="font-serif text-lg text-ink">Positions</h2>
+          <p className="mt-1 text-xs text-muted">No time picker -- booking claims the next open position in order.</p>
+          <div className="mt-3 flex flex-col">
+            {(slots ?? []).map((s, i) => (
+              <div key={s.id} className={`flex items-center justify-between py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+                <span className="text-sm font-medium text-ink">{ordinal(s.position)}</span>
+                <span className={`status-pill ${s.trainee_id ? "status-pill-on-track" : "status-pill-pending"}`}>
+                  {s.trainee_id ? nameById.get(s.trainee_id) ?? "Unknown" : "Open"}
+                </span>
+              </div>
+            ))}
+            {(slots ?? []).length === 0 ? <p className="py-2 text-sm text-muted">No positions yet.</p> : null}
+          </div>
+        </div>
+
+        <div className="sheet flex flex-col gap-3">
+          <h2 className="font-serif text-lg text-ink">How this works</h2>
+          <div className="flex flex-col gap-3">
+            <div>
+              <p className="text-sm font-semibold text-ink">The sheet is the source of truth</p>
+              <p className="text-xs text-muted">No message fires per booking -- check here to see what&apos;s left, same as Consultation.</p>
             </div>
-          ))}
-          {(slots ?? []).length === 0 ? <p className="py-2 text-sm text-muted">No positions yet.</p> : null}
+            <div>
+              <p className="text-sm font-semibold text-ink">One booking per trainee</p>
+              <p className="text-xs text-muted">Can release a slot back to open, not swap directly into another&apos;s.</p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-ink">Only this group sees this sheet</p>
+              <p className="text-xs text-muted">Another group has its own block, its own sheet, possibly a different day.</p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-ink">One announcement only</p>
+              <p className="text-xs text-muted">Fired once, when this block was added -- not per booking.</p>
+            </div>
+          </div>
         </div>
       </div>
 

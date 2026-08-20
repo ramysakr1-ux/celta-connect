@@ -170,11 +170,26 @@ export default async function TrainerResourceHubPage() {
 
       <div className="flex flex-col gap-8">
       <div className="sheet p-6">
-        <h1 className="font-serif text-xl text-ink">Resource hub</h1>
-        <p className="mt-2 text-muted">
-          Everything a candidate or tutor needs to find during the course, in one place. Trainees see a filtered
-          version of this from their own portfolio.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-xl text-ink">Resource hub</h1>
+            <p className="mt-2 text-muted">
+              Everything a candidate or tutor needs to find during the course, in one place. Trainees see a
+              filtered version of this from their own portfolio.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <a href="#input-sessions" className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary">
+              Upload
+            </a>
+            <Link
+              href="/trainer/coursebooks"
+              className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
+            >
+              New TP point
+            </Link>
+          </div>
+        </div>
         <div className="mt-4 max-w-sm">
           <ResourceHubSearch items={searchItems} />
         </div>

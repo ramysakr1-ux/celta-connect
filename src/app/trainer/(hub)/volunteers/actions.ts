@@ -139,6 +139,38 @@ export async function sendVolunteerStartingEmailNow(
   return result.sent ? { error: null, sent: true } : { error: result.reason ?? "Could not send the email.", sent: false };
 }
 
+export interface SendAllLinksState {
+  error: string | null;
+  sentCount: number | null;
+}
+
+// Volunteers.dc.html's "Send links" header action -- the bulk form of
+// sendVolunteerStartingEmailNow above, same deliberate-manual-resend
+// behaviour (skipIfAlreadySent: false), just for everyone with an email on
+// file at once instead of one at a time down the list.
+export async function sendAllVolunteerStartingEmails(
+  _prevState: SendAllLinksState,
+  _formData: FormData
+): Promise<SendAllLinksState> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return { error: "No course assigned.", sentCount: null };
+
+  const admin = createAdminClient();
+  const { data: volunteers } = await admin
+    .from("volunteer_students")
+    .select("id, name, email, level, course_id")
+    .eq("course_id", trainer.course_id)
+    .not("email", "is", null);
+
+  let sentCount = 0;
+  for (const volunteer of volunteers ?? []) {
+    const result = await sendVolunteerClassStartingEmail(admin, volunteer, { skipIfAlreadySent: false });
+    if (result.sent) sentCount += 1;
+  }
+
+  return { error: null, sentCount };
+}
+
 export async function removeVolunteerStudent(formData: FormData): Promise<void> {
   const trainer = await requireRole(["trainer", "admin"]);
   const volunteerId = formData.get("volunteer_id");
