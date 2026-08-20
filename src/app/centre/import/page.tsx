@@ -40,7 +40,7 @@ export default async function ImportPage() {
           <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Centre admin</p>
           <h1 className="font-serif text-2xl text-ink">Import from a spreadsheet</h1>
         </div>
-        <Link href="/dashboard/admin" className="text-sm text-muted hover:text-ink">
+        <Link href="/centre" className="text-sm text-muted hover:text-ink">
           Back to centre admin
         </Link>
       </div>
