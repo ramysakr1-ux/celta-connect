@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
-import { TUTOR_ROLES } from "@/lib/tutor-roles";
+import { TUTOR_ROLES, type TutorRole } from "@/lib/tutor-roles";
 import type { UserRole } from "@/lib/supabase/types";
 
 export interface JoinCourseState {
@@ -160,6 +160,21 @@ export async function joinCourse(
 
   if (profileError) {
     return { error: "Could not finish setting up your account. Try again." };
+  }
+
+  if (role === "trainer") {
+    // migration 0051's own comment flagged this as the gap: the one-off
+    // backfill covered every trainer who already existed, but nothing kept
+    // filling course_tutors for trainers joining after it. Without this row
+    // a trainer's very first course would be invisible to the concurrent-
+    // course check and the course switcher (for-claude-code-course-switcher.md),
+    // both of which read course_tutors, not profiles.course_id, as the list
+    // of a trainer's course links.
+    await adminClient.from("course_tutors").insert({
+      course_id: course.id,
+      profile_id: created.user.id,
+      tutor_role: tutorRole as TutorRole | null,
+    });
   }
 
   if (role === "trainee") {

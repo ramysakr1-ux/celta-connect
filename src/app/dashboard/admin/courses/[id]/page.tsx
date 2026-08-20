@@ -28,6 +28,8 @@ import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { InvitationsPanel } from "@/app/dashboard/admin/courses/[id]/invitations-panel";
+import { AssignTutorPanel } from "@/app/dashboard/admin/courses/[id]/assign-tutor-panel";
+import { leaveSecondaryCourse } from "@/app/dashboard/admin/courses/[id]/assign-tutor-actions";
 import { TutorRoleControl } from "@/app/dashboard/admin/courses/[id]/tutor-role-control";
 import { GroupTutorForm } from "@/app/dashboard/admin/courses/[id]/group-tutor-form";
 import { getRecentCentreChanges } from "@/lib/what-changed";
@@ -53,7 +55,7 @@ export default async function CourseRosterPage({
     notFound();
   }
 
-  const { data: roster } = await supabase
+  const { data: homeRoster } = await supabase
     .from("profiles")
     .select("*")
     .eq("course_id", id)
@@ -68,6 +70,44 @@ export default async function CourseRosterPage({
     .eq("course_id", id)
     .is("left_at", null);
   const tutorRowByProfile = new Map((courseTutors ?? []).map((t) => [t.profile_id, t]));
+
+  // for-claude-code-course-switcher.md: a tutor can be actively linked to
+  // this course without it being their home course (profiles.course_id
+  // pointing elsewhere) -- assignExistingTutor adds via course_tutors alone,
+  // deliberately never touching profiles.course_id. Merge those in so they
+  // actually show up here rather than being invisible on the course they
+  // were just added to.
+  const homeRosterIds = new Set((homeRoster ?? []).map((m) => m.id));
+  const secondaryTutorIds = (courseTutors ?? []).map((t) => t.profile_id).filter((pid) => !homeRosterIds.has(pid));
+  const { data: secondaryTutors } =
+    secondaryTutorIds.length > 0 ? await supabase.from("profiles").select("*").in("id", secondaryTutorIds) : { data: [] };
+  const secondaryTutorIdSet = new Set(secondaryTutorIds);
+  const roster = [...(homeRoster ?? []), ...(secondaryTutors ?? [])];
+
+  // Existing trainers at this centre not already active on this course --
+  // the pool "Add an existing tutor" below can pick from.
+  const activeTutorProfileIds = new Set((courseTutors ?? []).map((t) => t.profile_id));
+  const { data: centreTrainers } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, course_id")
+    .eq("center_id", admin.center_id)
+    .eq("role", "trainer")
+    .order("full_name");
+  const assignableTrainerRows = (centreTrainers ?? []).filter((t) => !activeTutorProfileIds.has(t.id));
+  const assignableTrainerCourseIds = [
+    ...new Set(assignableTrainerRows.map((t) => t.course_id).filter((v): v is string => !!v)),
+  ];
+  const { data: assignableTrainerCourses } =
+    assignableTrainerCourseIds.length > 0
+      ? await supabase.from("courses").select("id, course_code, name").in("id", assignableTrainerCourseIds)
+      : { data: [] };
+  const courseLabelById = new Map((assignableTrainerCourses ?? []).map((c) => [c.id, c.course_code ?? c.name]));
+  const assignableTrainers = assignableTrainerRows.map((t) => ({
+    id: t.id,
+    name: t.full_name,
+    email: t.email,
+    currentCourseLabel: t.course_id ? (courseLabelById.get(t.course_id) ?? null) : null,
+  }));
 
   // Named invitations that haven't been taken up. Withdrawn ones are excluded
   // but not deleted -- who was invited and never came is worth keeping.
@@ -564,15 +604,30 @@ export default async function CourseRosterPage({
                               {COURSE_STATUS_LABEL[member.course_status]}
                             </span>
                           ) : null}
+                          {secondaryTutorIdSet.has(member.id) ? (
+                            <span className="pill pill-info" title="Their home course is elsewhere -- this is an added assignment">
+                              Also here
+                            </span>
+                          ) : null}
                         </td>
                         <td>
-                          <form action={removeRosterMember}>
-                            <input type="hidden" name="member_id" value={member.id} />
-                            <input type="hidden" name="course_id" value={course.id} />
-                            <button type="submit" className="text-sm text-destructive underline">
-                              Remove
-                            </button>
-                          </form>
+                          {secondaryTutorIdSet.has(member.id) ? (
+                            <form action={leaveSecondaryCourse}>
+                              <input type="hidden" name="profile_id" value={member.id} />
+                              <input type="hidden" name="course_id" value={course.id} />
+                              <button type="submit" className="text-sm text-destructive underline">
+                                Remove from this course
+                              </button>
+                            </form>
+                          ) : (
+                            <form action={removeRosterMember}>
+                              <input type="hidden" name="member_id" value={member.id} />
+                              <input type="hidden" name="course_id" value={course.id} />
+                              <button type="submit" className="text-sm text-destructive underline">
+                                Remove
+                              </button>
+                            </form>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -794,7 +849,7 @@ export default async function CourseRosterPage({
           </div>
         </div>
 
-        <div id="invite" className="scroll-mt-6">
+        <div id="invite" className="scroll-mt-6 flex flex-col gap-4">
           <InvitationsPanel
             courseId={course.id}
             pending={pendingInvites}
@@ -803,6 +858,7 @@ export default async function CourseRosterPage({
               trainers: (roster ?? []).filter((m) => m.role === "trainer").length,
             }}
           />
+          <AssignTutorPanel courseId={course.id} trainers={assignableTrainers} />
         </div>
 
         <JoinLinksCard
