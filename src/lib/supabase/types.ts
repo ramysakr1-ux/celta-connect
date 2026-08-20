@@ -2419,6 +2419,44 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["cambridge_documents"]["Row"]>;
         Relationships: [];
       };
+      tp_material_pool_items: {
+        Row: {
+          id: string;
+          center_id: string | null;
+          book_title: string;
+          level: string | null;
+          description: string | null;
+          storage_path: string;
+          added_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_material_pool_items"]["Row"]> & {
+          book_title: string;
+          storage_path: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_material_pool_items"]["Row"]>;
+        Relationships: [];
+      };
+      tp_material_pool_claims: {
+        Row: {
+          id: string;
+          material_item_id: string;
+          tp_group_id: string;
+          course_id: string;
+          tp_number: number;
+          trainee_id: string;
+          claimed_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_material_pool_claims"]["Row"]> & {
+          material_item_id: string;
+          tp_group_id: string;
+          course_id: string;
+          tp_number: number;
+          trainee_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_material_pool_claims"]["Row"]>;
+        Relationships: [];
+      };
       email_bounce_tasks: {
         Row: {
           id: string;

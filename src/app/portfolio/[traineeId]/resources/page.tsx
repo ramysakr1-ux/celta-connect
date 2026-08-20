@@ -19,6 +19,7 @@ import { ResourceComposer } from "@/app/portfolio/[traineeId]/resources/resource
 import { deleteResource } from "@/app/portfolio/[traineeId]/resources/actions";
 import { ResourceContentLink } from "@/components/resource-content-link";
 import { CoursebooksSection } from "@/app/portfolio/[traineeId]/resources/coursebooks-section";
+import { MaterialPoolSection } from "@/app/portfolio/[traineeId]/resources/material-pool-section";
 import { MultimediaSection } from "@/app/portfolio/[traineeId]/resources/multimedia-section";
 import { AssignmentBriefsSection } from "@/app/portfolio/[traineeId]/resources/assignment-briefs-section";
 import { SectionsRail } from "@/app/trainer/(hub)/resource-hub/sections-rail";
@@ -173,6 +174,43 @@ export default async function ResourceHubPage({
   }));
 
   if (showTraineeLayout) {
+    // connect-spec-corrections-for-claude-code.md item 6 -- only the real
+    // candidate viewing their own page can claim (never staff previewing,
+    // never the assessor).
+    const canClaimMaterial = viewer?.role === "trainee" && viewer.id === traineeId;
+    const { data: materialItemsRaw } = await supabase
+      .from("tp_material_pool_items")
+      .select("*")
+      .or(`center_id.is.null,center_id.eq.${trainee.center_id}`)
+      .order("created_at", { ascending: false });
+    const { data: mySubgroupMember } = await supabase
+      .from("course_subgroup_members")
+      .select("subgroup_id")
+      .eq("trainee_id", traineeId)
+      .maybeSingle();
+    const { data: mySubgroup } = mySubgroupMember?.subgroup_id
+      ? await supabase.from("course_subgroups").select("tp_group_id").eq("id", mySubgroupMember.subgroup_id).maybeSingle()
+      : { data: null };
+    const { data: groupClaims } = mySubgroup?.tp_group_id
+      ? await supabase.from("tp_material_pool_claims").select("id, material_item_id, trainee_id, tp_number").eq("tp_group_id", mySubgroup.tp_group_id)
+      : { data: [] };
+    const claimByItemId = new Map((groupClaims ?? []).map((c) => [c.material_item_id, c]));
+    const materialItems = await Promise.all(
+      (materialItemsRaw ?? []).map(async (item) => {
+        const claim = claimByItemId.get(item.id);
+        return {
+          id: item.id,
+          bookTitle: item.book_title,
+          level: item.level,
+          description: item.description,
+          isBaseline: item.center_id === null,
+          signedUrl: (await supabase.storage.from("resource-hub-files").createSignedUrl(item.storage_path, 3600)).data?.signedUrl ?? null,
+          claimedByOther: Boolean(claim && claim.trainee_id !== traineeId),
+          claimedByMe: claim && claim.trainee_id === traineeId ? { id: claim.id, tpNumber: claim.tp_number as 7 | 8 } : null,
+        };
+      })
+    );
+
     const audioSearchItems: ResourceHubSearchItem[] = [...new Set((audioTracks ?? []).map((t) => t.coursebook_title))].map((title) => ({
       id: `au-${title}`,
       title,
@@ -259,6 +297,10 @@ export default async function ResourceHubPage({
 
             <div id="coursebooks" className="scroll-mt-4">
               <CoursebooksSection coursebooks={coursebooks ?? []} isEditableStaff={false} />
+            </div>
+
+            <div id="tp-material-pool" className="scroll-mt-4">
+              <MaterialPoolSection items={materialItems} canClaim={canClaimMaterial} />
             </div>
 
             <div id="multimedia" className="scroll-mt-4">

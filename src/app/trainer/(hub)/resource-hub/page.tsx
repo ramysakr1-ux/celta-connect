@@ -8,6 +8,7 @@ import { ResourceHubSearch, type ResourceHubSearchItem } from "@/components/reso
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { getCambridgeDocuments } from "@/lib/cambridge-documents";
 import { CambridgeDocumentsShelf } from "@/app/trainer/(hub)/resource-hub/cambridge-documents-shelf";
+import { MaterialPoolShelf } from "@/app/trainer/(hub)/resource-hub/material-pool-shelf";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
@@ -45,6 +46,36 @@ export default async function TrainerResourceHubPage() {
     ? await supabase.from("course_tp_schedule").select("tp_coursebook_id").eq("course_id", courseId)
     : { data: [] };
   const coursebookIds = [...new Set((scheduledCoursebookIds ?? []).map((s) => s.tp_coursebook_id))];
+
+  // connect-spec-corrections-for-claude-code.md item 6 -- baseline library
+  // (center_id null) plus this centre's own added scans.
+  const { data: materialItemsRaw } = await cambridgeAdmin
+    .from("tp_material_pool_items")
+    .select("*")
+    .or(`center_id.is.null,center_id.eq.${trainer.center_id}`)
+    .order("created_at", { ascending: false });
+  const { data: materialClaims } = courseId
+    ? await cambridgeAdmin.from("tp_material_pool_claims").select("material_item_id, trainee_id, tp_number").eq("course_id", courseId)
+    : { data: [] };
+  const claimedTraineeIds = [...new Set((materialClaims ?? []).map((c) => c.trainee_id))];
+  const { data: claimants } =
+    claimedTraineeIds.length > 0 ? await cambridgeAdmin.from("profiles").select("id, full_name").in("id", claimedTraineeIds) : { data: [] };
+  const claimantNameById = new Map((claimants ?? []).map((p) => [p.id, p.full_name]));
+  const claimByItemId = new Map((materialClaims ?? []).map((c) => [c.material_item_id, c]));
+  const materialItems = await Promise.all(
+    (materialItemsRaw ?? []).map(async (item) => {
+      const claim = claimByItemId.get(item.id);
+      return {
+        id: item.id,
+        bookTitle: item.book_title,
+        level: item.level,
+        description: item.description,
+        isBaseline: item.center_id === null,
+        signedUrl: (await cambridgeAdmin.storage.from("resource-hub-files").createSignedUrl(item.storage_path, 3600)).data?.signedUrl ?? null,
+        claimedByLabel: claim ? `${claimantNameById.get(claim.trainee_id) ?? "Someone"}, TP${claim.tp_number}` : null,
+      };
+    })
+  );
 
   const [
     { data: coursebooks },
@@ -339,6 +370,13 @@ export default async function TrainerResourceHubPage() {
         </p>
         <div className="mt-3">
           <CambridgeDocumentsShelf docs={cambridgeDocs} editable={cambridgeEditable} />
+        </div>
+      </div>
+
+      <div id="tp-material-pool">
+        <h2 className="font-serif text-lg text-ink">TP7/8 material pool</h2>
+        <div className="mt-3">
+          <MaterialPoolShelf items={materialItems} />
         </div>
       </div>
       </div>
