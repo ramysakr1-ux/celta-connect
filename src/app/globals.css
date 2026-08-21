@@ -50,9 +50,14 @@
      three variants every existing status-pill usage already consumes;
      warning/info/neutral are new variants for screens built from the plan
      (Under Review, Draft, Not Yet Assessed, etc.) that don't map onto the
-     old three 1:1. */
-  --color-status-on-track-bg: oklch(93% 0.045 155);
-  --color-status-on-track-text: oklch(38% 0.085 155);
+     old three 1:1.
+
+     on-track was hue 155 (green) here; re-pointed to teal's hue (195) per
+     the 2026-08-21 color-legend decision -- "positive/met" is teal now,
+     not green, so the token itself moves rather than just the class that
+     reads it (see .status-pill-on-track / .pill-success below). */
+  --color-status-on-track-bg: oklch(93% 0.019 195);
+  --color-status-on-track-text: oklch(37.5% 0.058 195);
   --color-status-at-risk-bg: oklch(94% 0.043 25);
   --color-status-at-risk-text: oklch(45% 0.15 27);
   --color-status-pending-bg: oklch(94.5% 0.065 85);
@@ -196,13 +201,16 @@ h6 {
     font-weight: 500;
   }
 
-  /* Green is gone as a success signal (specs/green.md) -- "on-track" now
-     reads as ink on the neutral tint, not green. The --color-status-on-
-     track-* tokens stay defined in :root/unused, deliberately, so this is
-     reversible without a second design pass. */
+  /* Reversed 2026-08-21: green's earlier retirement into plain neutral
+     (specs/green.md) was the easy default at the time, not a considered
+     call -- it collapsed "done/positive" and "no news yet" onto the same
+     gray. The finalized color legend makes teal "positive/met/primary
+     action," so on-track reads as teal now, same tint+text pattern
+     .status-pill-pending already uses, via the --color-status-on-track-*
+     tokens (now teal-valued, see :root above). */
   .status-pill-on-track {
-    background-color: var(--color-status-neutral-bg);
-    color: var(--color-ink);
+    background-color: var(--color-status-on-track-bg);
+    color: var(--color-status-on-track-text);
   }
 
   .status-pill-at-risk {
@@ -411,8 +419,8 @@ h6 {
   /* Green is gone as a success signal (specs/green.md) -- the ::before dot
      above inherits currentColor, so this alone also turns the dot ink. */
   .pill-success {
-    background-color: var(--color-status-neutral-bg);
-    color: var(--color-ink);
+    background-color: var(--color-status-on-track-bg);
+    color: var(--color-status-on-track-text);
   }
 
   .pill-warning {
