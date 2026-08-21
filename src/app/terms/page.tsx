@@ -7,6 +7,12 @@ import { Wordmark } from "@/components/wordmark";
 // substance, the four checkboxes in join-form.tsx / offer-accept-form.tsx
 // -- edit both places together if the agreement itself ever changes, this
 // page and those checkboxes must keep saying the same thing.
+//
+// Section 5 does the same job for join-centre-form.tsx's three checkboxes
+// (agree_data/agree_ip/agree_export) -- added when the centre-admin
+// self-serve invite flow (/join-centre/[token]) turned out to already be
+// built but pointing its "full terms" link at a page that never actually
+// covered what those checkboxes assert.
 export default function TermsPage() {
   return (
     <div className="flex min-h-screen flex-1 justify-center p-8">
@@ -16,9 +22,10 @@ export default function TermsPage() {
         </Link>
         <h1 className="mt-6 font-serif text-2xl text-ink">Candidate Agreement &amp; Terms</h1>
         <p className="mt-2 text-sm text-muted">
-          This is what you&apos;re agreeing to when you check the boxes on the sign-up or offer-acceptance
-          page. It applies to trainees, trainers, and anyone else who creates a Connect account through a
-          centre&apos;s course.
+          This is what you&apos;re agreeing to when you check the boxes on the sign-up, offer-acceptance, or
+          centre-admin invite page. Sections 1-4 apply to trainees, trainers, and anyone else who creates a
+          Connect account through a centre&apos;s course. Section 5 applies specifically to centre
+          administrators, who join through their centre rather than through a course.
         </p>
 
         <div className="mt-6 flex flex-col gap-6 text-sm text-ink">
@@ -79,6 +86,39 @@ export default function TermsPage() {
                 wording -- this section summarises it, and the uploaded document takes precedence if the
                 two ever differ.
               </p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="font-semibold text-ink">5. If you&apos;re a centre administrator</h2>
+            <p className="mt-1.5 text-muted">
+              This section applies when you create a Connect account through a centre invite rather than a
+              course invite. It sets out what your centre is agreeing to, on top of sections 1-3 above.
+            </p>
+            <div className="mt-2 flex flex-col gap-2">
+              <div>
+                <p className="font-medium text-ink">Responsibility for centre data</p>
+                <p className="mt-1 text-muted">
+                  Your centre is responsible for the candidate and applicant data it holds in Connect, and
+                  for what its own staff do with it -- who they grant access to, and how that access is used.
+                </p>
+              </div>
+              <div>
+                <p className="font-medium text-ink">No copying or reverse-engineering</p>
+                <p className="mt-1 text-muted">
+                  Your centre will not copy, reproduce, or reverse-engineer the platform, its templates, or
+                  its structure.
+                </p>
+              </div>
+              <div>
+                <p className="font-medium text-ink">Export and retention at close-out</p>
+                <p className="mt-1 text-muted">
+                  When a course closes, its record is exported to your centre&apos;s own Google Drive and then
+                  removed from Connect -- your centre keeps its own retained copies from that point on.
+                  Connect is the workspace while a course runs; your centre&apos;s Drive is the long-term
+                  record, same as section 2 describes for an individual course.
+                </p>
+              </div>
             </div>
           </section>
 
