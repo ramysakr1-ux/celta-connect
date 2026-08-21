@@ -247,8 +247,8 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
             <div className="flex items-center justify-between gap-3 border-t border-border-faint pt-3">
               <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
               <PushSubscribeButton
-                subscribe={(input) => subscribeVolunteerPush(token, input)}
-                unsubscribe={(endpoint) => unsubscribeVolunteerPush(token, endpoint)}
+                subscribe={subscribeVolunteerPush.bind(null, token)}
+                unsubscribe={unsubscribeVolunteerPush.bind(null, token)}
               />
             </div>
           </div>

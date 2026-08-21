@@ -46,9 +46,14 @@ export async function proxy(request: NextRequest) {
     // /join/[token] is the self-serve course join link -- inherently
     // unauthenticated, that's the whole point.
     request.nextUrl.pathname.startsWith("/join/") ||
-    // /demo mints a fresh session for the seeded demo trainer and redirects
-    // through /auth/confirm -- inherently unauthenticated, same reasoning.
+    // /demo is the five-entry-point landing page; /demo/<role> mints a
+    // fresh session for a seeded demo account and redirects through
+    // /auth/confirm (or, for the volunteer, straight to a token link) --
+    // inherently unauthenticated, same reasoning. Prefix match, not an
+    // exact one, now that /demo has more than one route under it
+    // (connect-multi-role-demo-spec-2026-08-22.md).
     request.nextUrl.pathname === "/demo" ||
+    request.nextUrl.pathname.startsWith("/demo/") ||
     // /apply is the public, centre-branded admissions application page --
     // inherently unauthenticated, same reasoning as /join/[token].
     request.nextUrl.pathname === "/apply" ||
