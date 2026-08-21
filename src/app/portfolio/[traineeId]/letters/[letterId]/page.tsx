@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { AcknowledgeButton } from "@/app/portfolio/[traineeId]/letters/[letterId]/acknowledge-button";
+import { SignDeferralButton } from "@/app/portfolio/[traineeId]/letters/[letterId]/sign-deferral-button";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
 
 const LETTER_TITLE: Record<string, string> = {
@@ -64,8 +65,13 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
         <div className="border-t border-border-faint pt-3">
           {letter.acknowledged_at ? (
             <p className="text-sm font-semibold text-primary">
-              Acknowledged {new Date(letter.acknowledged_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+              {letter.letter_type === "deferral" && letter.candidate_signature_name
+                ? `Signed by ${letter.candidate_signature_name} on `
+                : "Acknowledged "}
+              {new Date(letter.acknowledged_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
             </p>
+          ) : letter.letter_type === "deferral" ? (
+            <SignDeferralButton letterId={letterId} signatureName={session.profile.signature_name} fullName={session.profile.full_name} />
           ) : (
             <AcknowledgeButton letterId={letterId} />
           )}

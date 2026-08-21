@@ -1275,6 +1275,10 @@ export interface Database {
           issued_at: string;
           issued_by: string;
           acknowledged_at: string | null;
+          // migration 0188 -- real signature for deferral letters
+          // specifically (an agreement, not a notice); other letter types
+          // never populate this, their acknowledged_at alone is correct.
+          candidate_signature_name: string | null;
           related_assignment_id: string | null;
           related_deferral_transfer_id: string | null;
           created_at: string;
