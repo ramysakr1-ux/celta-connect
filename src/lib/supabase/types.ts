@@ -1817,6 +1817,25 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["tp_audio_library"]["Row"]>;
         Relationships: [];
       };
+      tp_video_library: {
+        Row: {
+          id: string;
+          center_id: string;
+          title: string;
+          description: string | null;
+          video_url: string;
+          added_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tp_video_library"]["Row"]> & {
+          center_id: string;
+          title: string;
+          video_url: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tp_video_library"]["Row"]>;
+        Relationships: [];
+      };
       feedback_style_examples: {
         Row: {
           id: string;

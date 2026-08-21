@@ -93,6 +93,7 @@ export default async function TrainerResourceHubPage() {
     { data: formResources },
     { count: publishedPointCount },
     { count: multimediaCount },
+    { count: videoCount },
     { count: assignmentBriefCount },
     { count: markingGuidanceCount },
     { data: schedule },
@@ -123,6 +124,7 @@ export default async function TrainerResourceHubPage() {
       .order("created_at", { ascending: false }),
     supabase.from("tp_points").select("id", { count: "exact", head: true }).eq("status", "published").eq("center_id", trainer.center_id),
     supabase.from("tp_audio_library").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
+    supabase.from("tp_video_library").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
     supabase.from("assignment_templates").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
     supabase.from("marking_guidance_entries").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
     courseId ? supabase.from("course_tp_schedule").select("tp_number, tp_coursebook_id") : Promise.resolve({ data: [] }),
@@ -171,6 +173,7 @@ export default async function TrainerResourceHubPage() {
   const searchItems: ResourceHubSearchItem[] = [
     { id: "link-tp-points-library", title: "TP points library", subtitle: "Full centre-wide library", href: "/trainer/coursebooks" },
     { id: "link-multimedia", title: "Multimedia", subtitle: "Coursebook audio tracks", href: "/trainer/audio" },
+    { id: "link-video-library", title: "Video Library", subtitle: "Training and observation videos", href: "/trainer/video" },
     { id: "link-assignment-briefs", title: "Assignment briefs", subtitle: "Upload and publish briefs", href: "/dashboard/trainer/assignment-briefs" },
     { id: "link-marking-guidance", title: "Marking guidance", subtitle: "Centre standardisation reference", href: "/dashboard/trainer/marking-guidance" },
     ...tpPointRows.map((p) => ({ id: `tp-${p.id}`, title: p.title, subtitle: `TP points -- ${p.source}`, href: "#tp-points" })),
@@ -185,6 +188,7 @@ export default async function TrainerResourceHubPage() {
     tpPoints: publishedPointCount ?? 0,
     coursebooks: coursebookIds.length,
     multimedia: multimediaCount ?? 0,
+    videoLibrary: videoCount ?? 0,
     assignmentBriefs: assignmentBriefCount ?? 0,
     markingGuidance: markingGuidanceCount ?? 0,
     inputSessions: (inputSessionResources ?? []).length,
@@ -199,6 +203,7 @@ export default async function TrainerResourceHubPage() {
           { href: "/trainer/coursebooks", label: "TP points", count: sectionCounts.tpPoints },
           { href: "#coursebooks", label: "Coursebooks", count: sectionCounts.coursebooks },
           { href: "/trainer/audio", label: "Multimedia", count: sectionCounts.multimedia },
+          { href: "/trainer/video", label: "Video Library", count: sectionCounts.videoLibrary },
           { href: "/dashboard/trainer/assignment-briefs", label: "Assignment briefs", count: sectionCounts.assignmentBriefs },
           { href: "/dashboard/trainer/marking-guidance", label: "Marking guidance", count: sectionCounts.markingGuidance },
           { href: "#input-sessions", label: "Input sessions", count: sectionCounts.inputSessions },
@@ -243,6 +248,10 @@ export default async function TrainerResourceHubPage() {
         <Link href="/trainer/audio" className="sheet flex flex-col gap-1 p-5 hover:border-primary/40">
           <p className="font-serif text-lg text-ink">Multimedia →</p>
           <p className="text-xs text-muted">Coursebook audio tracks. Manage uploads here; trainees can play them from their portfolio.</p>
+        </Link>
+        <Link href="/trainer/video" className="sheet flex flex-col gap-1 p-5 hover:border-primary/40">
+          <p className="font-serif text-lg text-ink">Video Library →</p>
+          <p className="text-xs text-muted">Training and observation videos, linked not uploaded. Trainees can watch from their portfolio.</p>
         </Link>
         <Link href="/dashboard/trainer/assignment-briefs" className="sheet flex flex-col gap-1 p-5 hover:border-primary/40">
           <p className="font-serif text-lg text-ink">Assignment briefs →</p>

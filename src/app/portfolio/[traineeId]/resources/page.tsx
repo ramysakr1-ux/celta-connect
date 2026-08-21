@@ -21,6 +21,7 @@ import { ResourceContentLink } from "@/components/resource-content-link";
 import { CoursebooksSection } from "@/app/portfolio/[traineeId]/resources/coursebooks-section";
 import { MaterialPoolSection } from "@/app/portfolio/[traineeId]/resources/material-pool-section";
 import { MultimediaSection } from "@/app/portfolio/[traineeId]/resources/multimedia-section";
+import { VideoLibrarySection } from "@/app/portfolio/[traineeId]/resources/video-library-section";
 import { AssignmentBriefsSection } from "@/app/portfolio/[traineeId]/resources/assignment-briefs-section";
 import { SectionsRail } from "@/app/trainer/(hub)/resource-hub/sections-rail";
 import { ResourceHubSearch, type ResourceHubSearchItem } from "@/components/resource-hub-search";
@@ -103,11 +104,12 @@ export default async function ResourceHubPage({
     : { data: [] };
   const coursebookIds = [...new Set((scheduledCoursebookIds ?? []).map((s) => s.tp_coursebook_id))];
 
-  const [{ data: coursebooks }, { data: audioTracks }, { data: briefs }, { data: course }] = await Promise.all([
+  const [{ data: coursebooks }, { data: audioTracks }, { data: videos }, { data: briefs }, { data: course }] = await Promise.all([
     coursebookIds.length > 0
       ? supabase.from("tp_coursebooks").select("id, title, level, access_notes").in("id", coursebookIds).order("title")
       : Promise.resolve({ data: [] }),
     supabase.from("tp_audio_library").select("*").eq("center_id", trainee.center_id).order("coursebook_title"),
+    supabase.from("tp_video_library").select("*").eq("center_id", trainee.center_id).order("created_at", { ascending: false }),
     supabase
       .from("assignment_templates")
       .select("id, assignment_type, sections, published_at")
@@ -234,11 +236,25 @@ export default async function ResourceHubPage({
       subtitle: "Forms and documents",
       href: "#forms-and-documents",
     }));
-    const searchItems = [...inputSessionSearchItems, ...coursebookSearchItems, ...audioSearchItems, ...briefSearchItems, ...formSearchItems];
+    const videoSearchItems: ResourceHubSearchItem[] = (videos ?? []).map((v) => ({
+      id: `vi-${v.id}`,
+      title: v.title,
+      subtitle: "Video library",
+      href: "#video-library",
+    }));
+    const searchItems = [
+      ...inputSessionSearchItems,
+      ...coursebookSearchItems,
+      ...audioSearchItems,
+      ...videoSearchItems,
+      ...briefSearchItems,
+      ...formSearchItems,
+    ];
     const railSections = [
       { href: "#input-sessions", label: "Input sessions", count: byCategory.get("input_sessions")?.length ?? 0 },
       { href: "#coursebooks", label: "Coursebooks", count: coursebooks?.length ?? 0 },
       { href: "#multimedia", label: "Multimedia", count: audioTracks?.length ?? 0 },
+      { href: "#video-library", label: "Video library", count: videos?.length ?? 0 },
       { href: "#assignment-briefs", label: "Assignment briefs", count: briefs?.length ?? 0 },
       { href: "#forms-and-documents", label: "Forms and documents", count: formResources.length },
       { href: "#cambridge-documents", label: "Cambridge documents", count: cambridgeDocs.filter((d) => d.url || d.storagePath).length },
@@ -314,6 +330,12 @@ export default async function ResourceHubPage({
               <MultimediaSection tracks={audioTracks ?? []} />
             </div>
 
+            {(videos ?? []).length > 0 ? (
+              <div id="video-library" className="scroll-mt-4">
+                <VideoLibrarySection videos={videos ?? []} />
+              </div>
+            ) : null}
+
             <div id="assignment-briefs" className="scroll-mt-4">
               <AssignmentBriefsSection briefs={briefs ?? []} />
             </div>
@@ -378,6 +400,9 @@ export default async function ResourceHubPage({
       </div>
       <div id="multimedia">
         <MultimediaSection tracks={audioTracks ?? []} />
+      </div>
+      <div id="video-library">
+        <VideoLibrarySection videos={videos ?? []} />
       </div>
       <div id="assignment-briefs">
         <AssignmentBriefsSection briefs={briefs ?? []} />
