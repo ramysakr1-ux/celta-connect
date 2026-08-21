@@ -108,7 +108,7 @@ function MatchTerms() {
                 onClick={() => pickTerm(i)}
                 className={`rounded-[6px] border-[1.5px] px-3.5 py-2.5 text-left text-[12.5px] font-bold ${
                   isSolved
-                    ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                    ? "border-primary bg-primary/10 text-primary"
                     : isSel
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border bg-card text-ink"
@@ -131,7 +131,7 @@ function MatchTerms() {
                 onClick={() => pickDef(i)}
                 className={`rounded-[6px] border-[1.5px] px-3.5 py-2.5 text-left text-[12px] leading-snug ${
                   isSolved
-                    ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                    ? "border-primary bg-primary/10 text-primary"
                     : isWrong
                       ? "border-destructive bg-destructive/10 text-destructive"
                       : "border-border bg-card text-ink"
@@ -185,7 +185,7 @@ function ClapGame({ voiceIdx }: { voiceIdx: number }) {
               type="button"
               data-print-hide
               onClick={() => replay(i)}
-              className="flex size-8 flex-none items-center justify-center rounded-full bg-gold text-white"
+              className="flex size-8 flex-none items-center justify-center rounded-full bg-muted text-white"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M8 5v14l11-7z" />
@@ -207,7 +207,7 @@ function ClapGame({ voiceIdx }: { voiceIdx: number }) {
                     }}
                     className={`flex-1 rounded-full border-2 px-2.5 py-3 text-center font-serif text-sm font-bold ${
                       show && isRight
-                        ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                        ? "border-primary bg-primary/10 text-primary"
                         : show && isPicked
                           ? "border-destructive bg-destructive/10 text-destructive"
                           : "border-border bg-card text-ink"
@@ -218,7 +218,7 @@ function ClapGame({ voiceIdx }: { voiceIdx: number }) {
                 );
               })}
             </div>
-            <p className={`w-16 flex-none text-right text-[11px] font-semibold ${picked === "correct" ? "text-status-on-track-text" : "text-destructive"}`}>
+            <p className={`w-16 flex-none text-right text-[11px] font-semibold ${picked === "correct" ? "text-primary" : "text-destructive"}`}>
               {picked ? (picked === "correct" ? "Correct" : "Try again") : ""}
             </p>
           </div>
@@ -260,7 +260,7 @@ function Dictation({ voiceIdx }: { voiceIdx: number }) {
                     onClick={() => setPicks((s) => ({ ...s, [di]: opt }))}
                     className={`rounded-full border-[1.5px] px-3 py-1.5 text-[11.5px] font-semibold ${
                       isCorrectPick
-                        ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                        ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
                           ? "border-destructive bg-destructive/10 text-destructive"
                           : "border-border bg-card text-ink"
@@ -286,7 +286,7 @@ function TrainerScript() {
         type="button"
         onClick={() => setOpen(true)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -331,10 +331,10 @@ export default function SoundsSession() {
       title="Sounds."
       intro="Every phoneme and minimal pair on this page is spoken aloud, not just written as a symbol. Click any word or symbol to hear it."
       agenda={[
-        { time: "0–2", spine: "var(--color-gold)", title: "Lead-in" },
+        { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "2–10", spine: "var(--color-primary)", title: "The phonemic chart, spoken" },
         { time: "10–25", spine: "var(--color-destructive)", title: "Minimal pairs" },
-        { time: "25–38", spine: "var(--color-status-on-track-text)", title: "Dictation" },
+        { time: "25–38", spine: "var(--color-primary)", title: "Dictation" },
         { time: "38–45", spine: "var(--color-destructive)", title: "Trainer notes" },
       ]}
     >
@@ -430,7 +430,7 @@ export default function SoundsSession() {
           of these four sounds on the real IPA chart and watch the video, then write down what you actually see —
           tongue, lips, teeth — before checking it against the summary underneath.
         </p>
-        <div className="flex items-center gap-2.5 rounded-[8px] border border-gold/25 bg-gold/10 px-3.5 py-2.5">
+        <div className="flex items-center gap-2.5 rounded-[8px] border border-muted/25 bg-muted/10 px-3.5 py-2.5">
           <p className="flex-1 text-xs leading-relaxed text-ink">
             Show the real thing rather than a diagram — <strong className="font-semibold">Seeing Speech</strong> is a
             clickable IPA chart with real ultrasound, MRI and animated vocal-tract video for every sound, free.
@@ -439,7 +439,7 @@ export default function SoundsSession() {
             href="https://www.seeingspeech.ac.uk/ipa-charts/"
             target="_blank"
             rel="noreferrer"
-            className="flex h-8 flex-none items-center rounded-[6px] bg-gold px-3.5 text-xs font-bold text-ink"
+            className="flex h-8 flex-none items-center rounded-[6px] bg-muted px-3.5 text-xs font-bold text-ink"
           >
             seeingspeech.ac.uk
           </a>
@@ -469,7 +469,7 @@ export default function SoundsSession() {
           <div key={s.pair} className="flex flex-col gap-1 rounded-[8px] border border-border bg-card p-3.5">
             <div className="flex items-baseline gap-2.5">
               <p className="font-serif text-sm font-semibold text-ink">{s.pair}</p>
-              <p className="text-[10.5px] font-bold uppercase tracking-[0.04em] text-gold">{s.who}</p>
+              <p className="text-[10.5px] font-bold uppercase tracking-[0.04em] text-muted">{s.who}</p>
             </div>
             <p className="text-xs leading-relaxed text-muted">{s.note}</p>
           </div>

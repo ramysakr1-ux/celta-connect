@@ -22,7 +22,7 @@ export function ChoiceScenarioCard({ scenario }: { scenario: ChoiceScenario }) {
   return (
     <div
       className={`flex flex-col gap-2 rounded-[8px] border p-3.5 ${
-        !answered ? "border-border bg-card" : correct ? "border-status-on-track-text/40 bg-status-on-track-bg" : "border-destructive/40 bg-destructive/5"
+        !answered ? "border-border bg-card" : correct ? "border-primary/40 bg-primary/10" : "border-destructive/40 bg-destructive/5"
       }`}
     >
       <p className="text-[12.5px] leading-relaxed text-ink">{scenario.text}</p>
@@ -40,7 +40,7 @@ export function ChoiceScenarioCard({ scenario }: { scenario: ChoiceScenario }) {
           ))}
         </div>
       ) : (
-        <p className={`text-[11.5px] leading-relaxed ${correct ? "text-status-on-track-text" : "text-destructive"}`}>
+        <p className={`text-[11.5px] leading-relaxed ${correct ? "text-primary" : "text-destructive"}`}>
           {correct ? "✓ " : "✗ "}
           {scenario.feedback}
         </p>

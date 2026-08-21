@@ -28,9 +28,14 @@ export const metadata: Metadata = {
 // This is a read, not a tool." So this is a server component with no client
 // bundle at all.
 
+// Re-pointed 2026-08-21 per the color audit: these are categorical guide-
+// section accents, not status. GOLD (reserved for brand/top-achievement
+// use only) moved to a muted warm-neutral. GREEN moved to TEAL directly --
+// each guide is a full, well-separated block on this page with no
+// color-coded index that would put them side by side, so there's nothing
+// for an identical tone to be confused with.
 const TEAL = "oklch(38% 0.072 195)";
-const GOLD = "oklch(60% 0.11 70)";
-const GREEN = "oklch(48% 0.09 150)";
+const MUTED = "oklch(51% 0.017 70)";
 
 interface Step {
   title: string;
@@ -69,7 +74,7 @@ const GUIDES: Guide[] = [
   {
     title: "Taking an application through to enrolment",
     when: "Continuously, from the day applications open",
-    tone: GOLD,
+    tone: MUTED,
     steps: [
       {
         title: "Application arrives",
@@ -119,7 +124,7 @@ const GUIDES: Guide[] = [
   {
     title: "Importing existing records",
     when: "Once, when a centre first moves to Connect",
-    tone: GOLD,
+    tone: MUTED,
     steps: [
       {
         title: "Connect the sheet",
@@ -159,7 +164,7 @@ const GUIDES: Guide[] = [
   {
     title: "Preparing for the assessor visit",
     when: "Once the visit date is confirmed — how much notice you get varies",
-    tone: GOLD,
+    tone: MUTED,
     steps: [
       {
         title: "Confirm the date and session",
@@ -182,7 +187,7 @@ const GUIDES: Guide[] = [
   {
     title: "Closing a course",
     when: "The final week, and the week after",
-    tone: GREEN,
+    tone: TEAL,
     steps: [
       { title: "Check all submissions are in", text: "including resubmissions." },
       { title: "Complete the portfolios", text: "assembled as the course ran, not at the end." },

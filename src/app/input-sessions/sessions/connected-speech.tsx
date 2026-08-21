@@ -32,7 +32,7 @@ const SECTIONS: Section[] = [
   },
   {
     title: "Linking",
-    tone: "var(--color-gold)",
+    tone: "var(--color-muted)",
     def: "a final consonant joins onto the next word's vowel",
     examples: [
       { label: '"an egg"', full: "an egg", options: ["Said as two separate words", 'The /n/ joins onto "egg"'], correct: 1, answer: '/əˈneg/ — the final /n/ of "an" links onto the vowel that starts "egg," so the words run together.' },
@@ -52,7 +52,7 @@ const SECTIONS: Section[] = [
   },
   {
     title: "Assimilation",
-    tone: "var(--color-status-on-track-text)",
+    tone: "var(--color-primary)",
     def: "a sound changes to match the sound that follows it",
     examples: [
       { label: '"ten bikes"', full: "ten bikes", options: ["/n/ stays /n/", "/n/ becomes /m/"], correct: 1, answer: '/n/ becomes /m/ before the /b/ that follows — "tem bikes." The tongue is already anticipating the lips closing for /b/.' },
@@ -154,7 +154,7 @@ function FeatureExample({ ex, tone, voiceIdx }: { ex: Example; tone: string; voi
               }}
               className={`rounded-[6px] border-[1.5px] px-3.5 py-1.5 text-xs font-semibold ${
                 show && isRight
-                  ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                  ? "border-primary bg-primary/10 text-primary"
                   : show && isPicked
                     ? "border-destructive bg-destructive/10 text-destructive"
                     : "border-border bg-card text-ink"
@@ -182,7 +182,7 @@ function TrainerScript() {
         type="button"
         onClick={() => setOpen(true)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -227,12 +227,12 @@ export default function ConnectedSpeechSession() {
       title="Connected speech."
       intro="Five features, one example each: strong and weak forms, linking, intrusion, assimilation, elision."
       agenda={[
-        { time: "0–3", spine: "var(--color-gold)", title: "Lead-in" },
+        { time: "0–3", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "3–7", spine: "var(--color-muted)", title: "Terminology match" },
         { time: "7–14", spine: "var(--color-primary)", title: "Strong/weak forms · 3 items" },
-        { time: "14–22", spine: "var(--color-gold)", title: "Linking · 3 items" },
+        { time: "14–22", spine: "var(--color-muted)", title: "Linking · 3 items" },
         { time: "22–30", spine: "var(--color-destructive)", title: "Intrusion · 3 items" },
-        { time: "30–39", spine: "var(--color-status-on-track-text)", title: "Assimilation · 3 items" },
+        { time: "30–39", spine: "var(--color-primary)", title: "Assimilation · 3 items" },
         { time: "39–47", spine: "var(--color-ink)", title: "Elision · 3 items" },
         { time: "47–50", spine: "var(--color-destructive)", title: "Close" },
       ]}

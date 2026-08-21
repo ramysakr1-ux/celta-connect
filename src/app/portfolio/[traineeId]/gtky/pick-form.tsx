@@ -30,7 +30,7 @@ export function GtkyPickForm({ activities, chosenSlug }: { activities: GtkyActiv
               ))}
             </ol>
             {a.onlineNote ? (
-              <p className="rounded-[6px] border border-gold/30 bg-gold/10 p-2.5 text-xs text-ink">
+              <p className="rounded-[6px] border border-border bg-surface-muted p-2.5 text-xs text-ink">
                 <span className="font-semibold">Online: </span>
                 {a.onlineNote}
               </p>

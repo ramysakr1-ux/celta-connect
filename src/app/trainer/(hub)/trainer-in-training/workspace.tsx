@@ -369,7 +369,7 @@ export async function TitWorkspace({
       {/* Extra assessor day */}
       {requiresAssessorDay ? (
         <section>
-          <h3 className="text-[11px] font-semibold tracking-[0.08em] text-gold uppercase">Extra assessor day -- external scheme</h3>
+          <h3 className="text-[11px] font-semibold tracking-[0.08em] text-status-warning-text uppercase">Extra assessor day -- external scheme</h3>
           <div className="mt-2">
             <AssessorDayCard titRecordId={titRecord.id} bookedAt={titRecord.assessor_day_booked_at} completedAt={titRecord.assessor_day_completed_at} />
           </div>

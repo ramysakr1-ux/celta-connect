@@ -43,9 +43,9 @@ const DETAIL: Record<CentreRole, RoleDetail> = {
     who: "wants the numbers, changes nothing",
     summary:
       "Read-only across the whole centre. Built for the person who asks how many are enrolled and whether the January course will fill — so they can look instead of asking.",
-    tone: "text-gold",
-    spine: "bg-gold",
-    band: "bg-gold/10 border-gold/30",
+    tone: "text-muted",
+    spine: "bg-border",
+    band: "bg-surface-muted border-border",
     perms: [
       { grant: "read", text: "Every course and its state" },
       { grant: "read", text: "The admissions pipeline" },
@@ -99,7 +99,7 @@ const DETAIL: Record<CentreRole, RoleDetail> = {
 };
 
 function Mark({ grant }: { grant: Grant }) {
-  if (grant === "yes") return <span className="text-[oklch(48%_0.09_150)]">✓</span>;
+  if (grant === "yes") return <span className="text-primary">✓</span>;
   if (grant === "read") return <span className="text-muted">◑</span>;
   return <span className="text-muted">—</span>;
 }

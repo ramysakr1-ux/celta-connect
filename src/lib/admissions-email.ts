@@ -550,7 +550,7 @@ export function waitingListEmailHtml(input: {
 }): string {
   return emailShell({
     heading: `You are ${input.positionWord} on the waiting list`,
-    tone: "gold",
+    tone: "amber",
     body:
       p(`Dear ${input.applicantName},`) +
       p(
@@ -607,7 +607,7 @@ export function placeFreedEmailHtml(input: {
 }): string {
   return emailShell({
     heading: "A place has come free — it is yours if you want it",
-    tone: "gold",
+    tone: "amber",
     body:
       p(`Dear ${input.applicantName},`) +
       p(
@@ -739,7 +739,7 @@ export function startsMondayEmailHtml(input: {
 }): string {
   return emailShell({
     heading: `${input.courseName} starts ${input.startDay}`,
-    tone: "gold",
+    tone: "amber",
     body:
       p(`Dear ${input.candidateName},`) +
       p(
@@ -755,7 +755,7 @@ export function startsMondayEmailHtml(input: {
         label: "See your three activities",
         url: input.activitiesUrl,
         sub: "Two minutes. Choose one, and that is genuinely all the preparation Monday needs.",
-        tone: "gold",
+        tone: "amber",
       }) +
       p("Everything else on Monday is watching and listening. There is nothing else to prepare.") +
       p(
@@ -841,7 +841,7 @@ export function accountNotSetUpEmailHtml(input: {
 }): string {
   return emailShell({
     heading: `${input.courseName} starts ${input.startDay}`,
-    tone: "gold",
+    tone: "amber",
     body:
       p(`Dear ${input.candidateName},`) +
       p(`We start at ${input.startTime} on ${input.startDay}. You have not set up your Connect account yet — do that first.`) +
@@ -924,7 +924,7 @@ export function assessorPackEmailHtml(input: {
 }): string {
   return emailShell({
     heading: "Your assessment pack is ready",
-    tone: "gold",
+    tone: "amber",
     body: p(
       `The pack for ${input.courseName} at ${input.centreName} is prepared and read-only: portfolios, the timetable, teaching practice arrangements for the day, written assignment titles, the application file and the attendance registers.`
     ),
@@ -947,7 +947,8 @@ export function volunteerClassStartingEmailHtml(input: {
 }): string {
   return emailShell({
     heading: "Your free English classes start Monday",
-    // Confirmation. Brass, like everything else in the palette now.
+    // Confirmation -- green is retired from the palette and now equals
+    // teal (see EMAIL_TONE), so this renders as the app's real teal.
     tone: "green",
     body: p(
       `Thank you for volunteering. You will be in the ${input.levelName} class, taught by teachers training to become qualified English teachers, with an experienced tutor watching every lesson.`

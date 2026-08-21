@@ -16,17 +16,17 @@ import { DeleteEventButton } from "@/app/trainer/(hub)/timetable/delete-event-bu
 // state is wired but never fires yet, since no concrete blocking rule has
 // been specified -- flagged rather than invented.
 
-type TileCategory = "ink" | "gold" | "muted";
+type TileCategory = "ink" | "teal" | "muted";
 
 const TILE_COLOR: Record<TileCategory, string> = {
   ink: "oklch(30% 0.042 58)",
-  gold: "oklch(60% 0.11 70)",
+  teal: "oklch(37.5% 0.058 195)",
   muted: "oklch(51% 0.017 70)",
 };
 
 const LEGEND: { category: TileCategory; label: string }[] = [
   { category: "ink", label: "TP / room-based teaching sessions" },
-  { category: "gold", label: "Whole-group Zoom input sessions" },
+  { category: "teal", label: "Whole-group Zoom input sessions" },
   { category: "muted", label: "Individual / bookable -- consultations, tutorials, late starts" },
 ];
 
@@ -35,7 +35,7 @@ const LEGEND: { category: TileCategory; label: string }[] = [
 // session), same kind of fold the read-only board makes for `cs`.
 function tileCategory(event: TimetableEvent): TileCategory {
   const cat = categorize(event);
-  if (cat === "wg") return "gold";
+  if (cat === "wg") return "teal";
   if (cat === "rm" || cat === "cs") return "ink";
   return "muted";
 }

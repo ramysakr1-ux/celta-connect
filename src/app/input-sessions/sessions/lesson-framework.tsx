@@ -6,9 +6,9 @@ import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/tr
 
 const SHAPES = [
   { name: "PPP", spine: "var(--color-primary)", stages: "Lead-in → Present (meaning, form, pronunciation) → Practice (accuracy) → Production (fluency) → Error correction" },
-  { name: "Test-Teach-Test", spine: "var(--color-gold)", stages: "Lead-in → First test (diagnostic) → Teach (clarify gaps) → Second test → Feedback" },
-  { name: "Text-Based", spine: "var(--color-status-on-track-text)", stages: "Lead-in → Reading/listening task → Highlight target language → Clarify → Practice → Feedback" },
-  { name: "Language Practice", spine: "var(--color-gold)", stages: "Lead-in (optional) → Set up → Controlled practice → Freer practice → Feedback" },
+  { name: "Test-Teach-Test", spine: "var(--color-muted)", stages: "Lead-in → First test (diagnostic) → Teach (clarify gaps) → Second test → Feedback" },
+  { name: "Text-Based", spine: "var(--color-primary)", stages: "Lead-in → Reading/listening task → Highlight target language → Clarify → Practice → Feedback" },
+  { name: "Language Practice", spine: "var(--color-muted)", stages: "Lead-in (optional) → Set up → Controlled practice → Freer practice → Feedback" },
   { name: "Receptive Skills", spine: "var(--color-destructive)", stages: "Lead-in → (Prediction) → Pre-teach vocab → Gist → Detail → Specific info → Post-task response" },
   { name: "Productive Skills", spine: "oklch(48% 0.11 300)", stages: "Lead-in → Preparing to write/speak → Useful language (optional) → Task → Feedback" },
 ];
@@ -57,9 +57,9 @@ function DecisionTree() {
           <p className="text-center text-xs text-muted">Does the target language arise from a text?</p>
           <div className="flex w-full gap-2">
             <div className="flex-1 rounded-[6px] border border-primary/25 bg-primary/5 p-2 text-center text-[11.5px] font-semibold text-primary">No → PPP / TTT</div>
-            <div className="flex-1 rounded-[6px] border border-status-on-track-text/25 bg-status-on-track-bg p-2 text-center text-[11.5px] font-semibold text-status-on-track-text">Yes → Text-Based</div>
+            <div className="flex-1 rounded-[6px] border border-primary/25 bg-primary/10 p-2 text-center text-[11.5px] font-semibold text-primary">Yes → Text-Based</div>
           </div>
-          <div className="w-full rounded-[6px] border border-gold/25 bg-gold/10 p-2 text-center text-[11.5px] font-semibold text-gold">Practice only → Language Practice</div>
+          <div className="w-full rounded-[6px] border border-muted/25 bg-muted/10 p-2 text-center text-[11.5px] font-semibold text-muted">Practice only → Language Practice</div>
         </div>
         <div className="flex flex-col items-center gap-2">
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-destructive">Skills</p>
@@ -124,11 +124,11 @@ function CardSort() {
               type="button"
               onClick={() => pickZone(name)}
               className={`flex min-h-[70px] flex-col items-center justify-center gap-1.5 rounded-[8px] border-[1.5px] border-dashed p-2.5 ${
-                filled ? "border-status-on-track-text bg-status-on-track-bg" : "border-border bg-accent"
+                filled ? "border-primary bg-primary/10" : "border-border bg-accent"
               }`}
             >
               <p className="font-serif text-[12.5px] font-semibold text-ink">{name}</p>
-              {filled ? <p className="text-center text-[10.5px] font-semibold text-status-on-track-text">{STAGES[Number(filledIdx)].text}</p> : null}
+              {filled ? <p className="text-center text-[10.5px] font-semibold text-primary">{STAGES[Number(filledIdx)].text}</p> : null}
             </button>
           );
         })}
@@ -211,12 +211,12 @@ function BuildSequence() {
               type="button"
               onClick={() => removeSlot(i)}
               className={`flex items-center gap-2.5 rounded-[6px] border-[1.5px] px-3 py-2 text-left ${
-                bad ? "border-destructive bg-destructive/10" : isCorrect ? "border-status-on-track-text bg-status-on-track-bg" : "border-border bg-card"
+                bad ? "border-destructive bg-destructive/10" : isCorrect ? "border-primary bg-primary/10" : "border-border bg-card"
               }`}
             >
               <span
                 className={`flex size-[18px] flex-none items-center justify-center rounded-full text-[10px] font-bold ${
-                  bad ? "bg-destructive text-white" : isCorrect ? "bg-status-on-track-text text-white" : "bg-accent text-muted"
+                  bad ? "bg-destructive text-white" : isCorrect ? "bg-primary text-white" : "bg-accent text-muted"
                 }`}
               >
                 {i + 1}
@@ -253,7 +253,7 @@ function NameThatFramework() {
                     if (opt === s.correct) setSolved((sv) => ({ ...sv, [si]: true }));
                   }}
                   className={`rounded-full border-[1.5px] px-2.5 py-1 text-[11.5px] font-semibold ${
-                    show ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text" : "border-border bg-card text-ink"
+                    show ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-ink"
                   }`}
                 >
                   {opt}
@@ -271,7 +271,7 @@ function StageTimer() {
   const [pacing, setPacing] = useState([0, 0, 0]);
   const [revealed, setRevealed] = useState(false);
   const total = pacing.reduce((a, b) => a + b, 0);
-  const totalCls = total === 45 ? "bg-status-on-track-bg text-status-on-track-text" : total > 45 ? "bg-destructive/10 text-destructive" : "bg-accent text-ink";
+  const totalCls = total === 45 ? "bg-primary/10 text-primary" : total > 45 ? "bg-destructive/10 text-destructive" : "bg-accent text-ink";
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -318,7 +318,7 @@ function StageTimer() {
           Reveal the answer
         </button>
         {revealed ? (
-          <div className="rounded-[4px] border-l-[3px] border-status-on-track-text bg-status-on-track-bg px-3.5 py-2.5">
+          <div className="rounded-[4px] border-l-[3px] border-primary bg-primary/10 px-3.5 py-2.5">
             <p className="text-xs leading-relaxed text-ink">
               Trim <strong className="font-semibold">Controlled Practice &amp; Feedback</strong>, not Clarification.
               Clarification (meaning, form, pronunciation) is where the actual learning happens — cutting it short
@@ -339,13 +339,13 @@ export default function LessonFrameworkSession() {
       title="Lesson framework — finding your shape."
       intro="A map of the six lesson shapes trainees will meet across the course, and the one question that decides between them: is the main aim language or skills?"
       agenda={[
-        { time: "0–2", spine: "var(--color-gold)", title: "Lead-in" },
+        { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "2–7", spine: "var(--color-primary)", title: "The decision tree" },
         { time: "7–12", spine: "var(--color-primary)", title: "The six shapes" },
-        { time: "12–22", spine: "var(--color-status-on-track-text)", title: "Card sort" },
-        { time: "22–30", spine: "var(--color-status-on-track-text)", title: "Build the sequence" },
+        { time: "12–22", spine: "var(--color-primary)", title: "Card sort" },
+        { time: "22–30", spine: "var(--color-primary)", title: "Build the sequence" },
         { time: "30–38", spine: "var(--color-destructive)", title: "Name that framework" },
-        { time: "38–43", spine: "var(--color-gold)", title: "Stage timer" },
+        { time: "38–43", spine: "var(--color-muted)", title: "Stage timer" },
         { time: "43–45", spine: "var(--color-destructive)", title: "Trainer notes" },
       ]}
     >

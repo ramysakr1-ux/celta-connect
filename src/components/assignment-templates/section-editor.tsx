@@ -63,7 +63,7 @@ export function SectionEditor({
           <p className="text-xs text-muted">
             The syllabus requires exactly two of the four assignments to be continuous prose.
           </p>
-          {formatWarning ? <p className="text-xs text-gold">{formatWarning}</p> : null}
+          {formatWarning ? <p className="text-xs text-status-warning-text">{formatWarning}</p> : null}
         </div>
 
         {sections.map((section, i) => (

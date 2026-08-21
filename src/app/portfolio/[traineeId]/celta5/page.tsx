@@ -491,7 +491,7 @@ export default async function PortfolioCelta5Page({
                               {code}
                               {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
                               {disagrees ? (
-                                <span className="ml-2 text-sm font-semibold text-gold" title="You and your tutor rated this differently">
+                                <span className="ml-2 text-sm font-semibold text-status-warning-text" title="You and your tutor rated this differently">
                                   &ne;
                                 </span>
                               ) : null}
@@ -1004,7 +1004,7 @@ export default async function PortfolioCelta5Page({
                           {code}
                           {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
                           {disagrees ? (
-                            <span className="ml-2 text-sm font-semibold text-gold" title="Candidate and tutor ratings differ">
+                            <span className="ml-2 text-sm font-semibold text-status-warning-text" title="Candidate and tutor ratings differ">
                               &ne;
                             </span>
                           ) : null}

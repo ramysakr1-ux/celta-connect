@@ -119,7 +119,7 @@ export function PreCourseTaskForm({
         sections={supplementSections}
         responseTextBySection={responseTextBySection}
         isEditable={isEditable}
-        accentClass="border-l-gold"
+        accentClass="border-l-border"
       />
     </>
   );
@@ -130,7 +130,7 @@ export function PreCourseTaskForm({
 
   const steps: WizardStep[] = [
     ...buildSteps("Cambridge's Pre-Course Task", "border-l-primary", cambridgeSections, responseTextBySection),
-    ...buildSteps("Your centre's supplement", "border-l-gold", supplementSections, responseTextBySection),
+    ...buildSteps("Your centre's supplement", "border-l-border", supplementSections, responseTextBySection),
   ];
 
   return (

@@ -64,7 +64,7 @@ export const SUPERVISED_QUIZ_TOPICS: Record<QuizTopicKey, QuizTopic> = {
     key: "phonology",
     title: "Phonology",
     covers: "Connected speech, stress and intonation, phonemic script, sentence stress",
-    spineClass: "border-l-gold",
+    spineClass: "border-l-border",
     notes: [
       { h: "Connected speech", b: "Sounds link, elide, or blend across word boundaries in natural speech — linking, elision, assimilation." },
       { h: "Word stress", b: "One syllable in a multi-syllable word carries the primary stress; mismarking it is a common, high-impact error." },

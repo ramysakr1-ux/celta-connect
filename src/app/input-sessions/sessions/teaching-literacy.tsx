@@ -93,11 +93,11 @@ function TechniqueRow({ technique, week1, note }: { technique: string; week1: bo
     <button
       type="button"
       onClick={() => setOpen((o) => !o)}
-      className={`grid grid-cols-[1fr_1.3fr] items-center gap-3 rounded-[6px] border px-3.5 py-2.5 text-left ${open ? "border-status-on-track-text/30 bg-status-on-track-bg" : "border-border bg-card"}`}
+      className={`grid grid-cols-[1fr_1.3fr] items-center gap-3 rounded-[6px] border px-3.5 py-2.5 text-left ${open ? "border-primary/30 bg-primary/10" : "border-border bg-card"}`}
     >
       <span className="text-xs font-semibold text-ink">{technique}</span>
       {open ? (
-        <span className="text-[11.5px] text-status-on-track-text">{(week1 ? "Week one. " : "Once basic decoding is established. ") + note}</span>
+        <span className="text-[11.5px] text-primary">{(week1 ? "Week one. " : "Once basic decoding is established. ") + note}</span>
       ) : (
         <span className="text-[10.5px] font-semibold text-muted">Click to reveal</span>
       )}
@@ -131,11 +131,11 @@ function AdaptHandout() {
             type="button"
             onClick={() => setChoice(i)}
             className={`flex flex-col gap-1 rounded-[8px] border px-3.5 py-3 text-left ${
-              picked ? (o.good ? "border-status-on-track-text/40 bg-status-on-track-bg" : "border-destructive/40 bg-destructive/5") : "border-border bg-card"
+              picked ? (o.good ? "border-primary/40 bg-primary/10" : "border-destructive/40 bg-destructive/5") : "border-border bg-card"
             }`}
           >
             <p className="text-[13px] leading-relaxed text-ink">{o.text}</p>
-            {picked ? <p className={`text-[11.5px] leading-relaxed ${o.good ? "text-status-on-track-text" : "text-destructive"}`}>{o.note}</p> : null}
+            {picked ? <p className={`text-[11.5px] leading-relaxed ${o.good ? "text-primary" : "text-destructive"}`}>{o.note}</p> : null}
           </button>
         );
       })}
@@ -162,11 +162,11 @@ export default function TeachingLiteracySession() {
       title="Teaching literacy — when the barrier isn't the language."
       intro="Some learners can't yet read or write fluently in ANY script, including their own. This session is about noticing that, and adapting — not about ESOL methodology in general, which the rest of this course already covers."
       agenda={[
-        { time: "0–3", spine: "var(--color-gold)", title: "Lead-in" },
-        { time: "3–13", spine: "var(--color-gold)", title: "What literacy covers" },
+        { time: "0–3", spine: "var(--color-muted)", title: "Lead-in" },
+        { time: "3–13", spine: "var(--color-muted)", title: "What literacy covers" },
         { time: "13–20", spine: "var(--color-primary)", title: "Spot the barrier" },
         { time: "20–28", spine: "var(--color-destructive)", title: "Adapt the handout" },
-        { time: "28–45", spine: "var(--color-status-on-track-text)", title: "Techniques + wrap-up" },
+        { time: "28–45", spine: "var(--color-primary)", title: "Techniques + wrap-up" },
       ]}
     >
       <RunningThisSession>

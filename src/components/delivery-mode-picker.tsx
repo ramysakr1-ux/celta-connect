@@ -4,7 +4,7 @@ import { DELIVERY_MODE_OPTIONS, DELIVERY_MODE_IMPACT, type DeliveryMode } from "
 
 const TONE_CLASS: Record<"default" | "warning" | "danger", string> = {
   default: "text-ink",
-  warning: "text-gold",
+  warning: "text-status-warning-text",
   danger: "text-destructive",
 };
 
@@ -52,10 +52,10 @@ export function DeliveryModePicker({
 
       <div
         className={`flex flex-col gap-2 rounded-[6px] border px-4 py-3 ${
-          impact.tone === "warning" ? "border-gold/40 bg-gold/10" : "border-primary/30 bg-primary/5"
+          impact.tone === "warning" ? "border-status-warning-text/40 bg-status-warning-bg" : "border-primary/30 bg-primary/5"
         }`}
       >
-        <p className={`text-[11px] font-semibold uppercase tracking-[0.09em] ${impact.tone === "warning" ? "text-gold" : "text-primary"}`}>
+        <p className={`text-[11px] font-semibold uppercase tracking-[0.09em] ${impact.tone === "warning" ? "text-status-warning-text" : "text-primary"}`}>
           {impact.heading}
         </p>
         <div className="flex flex-col gap-1.5">

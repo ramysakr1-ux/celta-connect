@@ -18,7 +18,7 @@ export function TrainerNotes({ notes, runningNote }: { notes: TrainerNote[]; run
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -53,13 +53,13 @@ export function TrainerNotes({ notes, runningNote }: { notes: TrainerNote[]; run
   );
 }
 
-// The gold "Running this session" box near the top -- separate from the
+// The "Running this session" box near the top -- separate from the
 // end-of-session trainer notes since it's meant to be read before
 // starting, not toggled/hidden.
 export function RunningThisSession({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5 rounded-[8px] border border-gold/25 bg-gold/10 p-4">
-      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-gold">
+    <div className="flex flex-col gap-1.5 rounded-[8px] border border-border bg-muted/10 p-4">
+      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted">
         <span className="size-1.5 rounded-full bg-current" />
         Running this session
       </p>

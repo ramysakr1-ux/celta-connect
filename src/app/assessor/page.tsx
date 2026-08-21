@@ -10,8 +10,13 @@ import { DesignerCredit } from "@/components/designer-credit";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
 
 // The design file's own palette, so status colour is not re-invented here.
-const GOLD = "oklch(60% 0.11 70)";
-const GREEN = "oklch(48% 0.09 150)";
+// Re-pointed 2026-08-21 per the color audit: gold is reserved for the Pass
+// A grade tint only (GOLD_TINT below), never a generic deadline/section
+// accent -- those uses move to AMBER or MUTED. Green is fully retired as a
+// status color -- TEAL takes over every "met/complete" use GREEN used to
+// have (readiness dots, hours logged, document status).
+const MUTED_ACCENT = "oklch(51% 0.017 70)";
+const TEAL = "oklch(37.5% 0.058 195)";
 const AMBER = "oklch(44% 0.1 68)";
 
 
@@ -180,7 +185,7 @@ export default async function AssessorPage({
             ? "All criteria rated, tutor comments complete"
             : "Criteria or tutor comments still outstanding",
           state: openCandidate.celta5Complete ? "Complete" : "Incomplete",
-          ink: openCandidate.celta5Complete ? GREEN : AMBER,
+          ink: openCandidate.celta5Complete ? TEAL : AMBER,
         },
         {
           label: "Teaching practice",
@@ -188,13 +193,13 @@ export default async function AssessorPage({
             openCandidate.levels.length > 0 ? ` · ${openCandidate.levels.join(", ")}` : ""
           }`,
           state: openCandidate.tpsComplete ? "Complete" : "Incomplete",
-          ink: openCandidate.tpsComplete ? GREEN : AMBER,
+          ink: openCandidate.tpsComplete ? TEAL : AMBER,
         },
         {
           label: "Assignments",
           value: "Four assignments, criteria and marks recorded",
           state: openCandidate.assignmentsComplete ? "Complete" : (openCandidate.flaggedIssue ?? "Incomplete"),
-          ink: openCandidate.assignmentsComplete ? GREEN : AMBER,
+          ink: openCandidate.assignmentsComplete ? TEAL : AMBER,
         },
         {
           label: "Attendance",
@@ -257,8 +262,8 @@ export default async function AssessorPage({
           <span
             style={{
               fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-              color: "oklch(60% 0.11 70)", background: "color-mix(in oklab, oklch(60% 0.11 70) 10%, oklch(99.2% 0.005 90))",
-              border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent)",
+              color: "oklch(51% 0.017 70)", background: "color-mix(in oklab, oklch(51% 0.017 70) 10%, oklch(99.2% 0.005 90))",
+              border: "1px solid color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
               borderRadius: 99, padding: "4px 10px",
             }}
           >
@@ -294,21 +299,21 @@ export default async function AssessorPage({
               </h1>
             </div>
             <div style={{ display: "flex", gap: 34 }}>
-              <Figure label="Provisional grades due" value={sendByDate ? shortDate(sendByDate) : "Not set"} ink={GOLD} />
+              <Figure label="Provisional grades due" value={sendByDate ? shortDate(sendByDate) : "Not set"} ink={AMBER} />
               <Figure
                 label="Portfolios complete"
                 value={`${readiness.portfoliosCompleteCount} of ${readiness.totalCandidates}`}
-                ink={readiness.portfoliosCompleteCount >= readiness.totalCandidates ? GREEN : AMBER}
+                ink={readiness.portfoliosCompleteCount >= readiness.totalCandidates ? TEAL : AMBER}
               />
               <Figure
                 label="Hours logged"
                 value={`${readiness.hoursAssessedTotal.toFixed(readiness.hoursAssessedTotal % 1 === 0 ? 0 : 1)} of ${hoursRequired}`}
-                ink={readiness.hoursAssessedTotal >= hoursRequired ? GREEN : AMBER}
+                ink={readiness.hoursAssessedTotal >= hoursRequired ? TEAL : AMBER}
               />
               <Figure
                 label="Provisional grades"
                 value={`${readiness.gradesApprovedCount} of ${readiness.totalCandidates} MCT-approved`}
-                ink={readiness.gradesApprovedCount >= readiness.totalCandidates ? GREEN : AMBER}
+                ink={readiness.gradesApprovedCount >= readiness.totalCandidates ? TEAL : AMBER}
               />
             </div>
           </div>
@@ -318,11 +323,11 @@ export default async function AssessorPage({
           <div
             style={{
               display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 7,
-              background: "color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90))",
-              border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent)",
+              background: "color-mix(in oklab, oklch(44% 0.1 68) 8%, oklch(99.2% 0.005 90))",
+              border: "1px solid color-mix(in oklab, oklch(44% 0.1 68) 26%, transparent)",
             }}
           >
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: AMBER }}>
               {sendByDate ? `Provisional grades due: ${longDate(sendByDate)} EOD` : "No provisional grades deadline set"}
               {daysOut !== null ? ` · ${daysOut} day${daysOut === 1 ? "" : "s"} out` : ""}
             </span>
@@ -436,12 +441,12 @@ export default async function AssessorPage({
 
             {moodleSchedule.length > 0 ? (
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD, marginBottom: 8 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED_ACCENT, marginBottom: 8 }}>
                   Moodle schedule
                 </p>
                 <div
                   style={{
-                    background: CARD, border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent)",
+                    background: CARD, border: "1px solid color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
                     borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10,
                   }}
                 >
@@ -465,12 +470,12 @@ export default async function AssessorPage({
             ) : null}
 
             <div>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD, marginBottom: 8 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED_ACCENT, marginBottom: 8 }}>
                 On the day
               </p>
               <div
                 style={{
-                  background: CARD, border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent)",
+                  background: CARD, border: "1px solid color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
                   borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
                 }}
               >
@@ -634,7 +639,7 @@ function Figure({ label, value, ink }: { label: string; value: string; ink?: str
 function Dot({ ok, label }: { ok: boolean; label: string }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: ok ? GREEN : AMBER }} />
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: ok ? TEAL : AMBER }} />
       <span style={{ fontSize: 10.5, color: "oklch(51% 0.017 70)" }}>{label}</span>
     </span>
   );
@@ -663,7 +668,7 @@ function DocRow({ label, href, status }: { label: string; href: string; status: 
     >
       <div>
         <p style={{ fontSize: 12.5, fontWeight: 600, color: "oklch(23.5% 0.017 65)" }}>{label}</p>
-        <p style={{ fontSize: 10.5, color: GREEN }}>{status}</p>
+        <p style={{ fontSize: 10.5, color: TEAL }}>{status}</p>
       </div>
       <a href={href} style={{ fontSize: 11, fontWeight: 600, color: "oklch(38% 0.072 195)", flex: "none", textDecoration: "none" }}>
         Open →

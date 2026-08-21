@@ -56,8 +56,8 @@ export function ProviderList({
                   fail, so "selected" is never mistaken for "working". */}
               {p.key === connectedKey ? (
                 live && credentialsPresent ? (
-                  <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-semibold text-[oklch(48%_0.09_150)]">
-                    <span className="size-2 rounded-full bg-[oklch(48%_0.09_150)]" aria-hidden="true" />
+                  <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-semibold text-primary">
+                    <span className="size-2 rounded-full bg-primary" aria-hidden="true" />
                     Working
                   </span>
                 ) : (

@@ -63,7 +63,7 @@ export function RunningOrderPanel({
               </p>
               <h4 className="font-serif text-lg text-ink">Running order</h4>
             </div>
-            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gold/16 px-3 py-1 text-xs font-semibold text-gold">
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-status-warning-bg px-3 py-1 text-xs font-semibold text-status-warning-text">
               <span className="size-1.5 rounded-full bg-current" />
               Next TP day
             </span>

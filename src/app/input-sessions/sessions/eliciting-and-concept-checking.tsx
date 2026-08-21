@@ -105,7 +105,7 @@ function ElicitOrTell() {
           <div
             key={s.text}
             className={`flex flex-col gap-2 rounded-[8px] border p-3.5 ${
-              pick === undefined ? "border-border bg-card" : correct ? "border-status-on-track-text/30 bg-status-on-track-bg" : "border-destructive/30 bg-destructive/5"
+              pick === undefined ? "border-border bg-card" : correct ? "border-primary/30 bg-primary/10" : "border-destructive/30 bg-destructive/5"
             }`}
           >
             <p className="text-[12.5px] leading-relaxed text-ink">{s.text}</p>
@@ -119,7 +119,7 @@ function ElicitOrTell() {
                 </button>
               </div>
             ) : (
-              <p className={`text-[11.5px] leading-relaxed ${correct ? "text-status-on-track-text" : "text-destructive"}`}>
+              <p className={`text-[11.5px] leading-relaxed ${correct ? "text-primary" : "text-destructive"}`}>
                 {correct ? "✓ " : "✗ "}
                 {s.feedback}
               </p>
@@ -150,12 +150,12 @@ function SpotBadCcq() {
             type="button"
             onClick={() => setPicked(i)}
             className={`flex items-center justify-between gap-3 rounded-[8px] border px-4 py-3 text-left ${
-              show ? (c.bad ? "border-status-on-track-text bg-status-on-track-bg" : "border-destructive bg-destructive/5") : "border-border bg-card"
+              show ? (c.bad ? "border-primary bg-primary/10" : "border-destructive bg-destructive/5") : "border-border bg-card"
             }`}
           >
             <p className="text-[12.5px] text-ink">{c.text}</p>
             {show ? (
-              <p className={`flex-none text-[10.5px] font-bold ${c.bad ? "text-status-on-track-text" : "text-destructive"}`}>
+              <p className={`flex-none text-[10.5px] font-bold ${c.bad ? "text-primary" : "text-destructive"}`}>
                 {c.bad ? "Bad CCQ" : "Actually fine"}
               </p>
             ) : null}
@@ -163,7 +163,7 @@ function SpotBadCcq() {
         );
       })}
       {picked !== null ? (
-        <div className="rounded-[4px] border-l-[3px] border-status-on-track-text bg-status-on-track-bg px-3.5 py-2.5">
+        <div className="rounded-[4px] border-l-[3px] border-primary bg-primary/10 px-3.5 py-2.5">
           <p className="text-xs leading-relaxed text-ink">
             {CCQ_ITEMS[picked].why || "This one is a genuinely good CCQ — simple, doesn't contain the target language, and checks meaning directly."}
           </p>
@@ -217,12 +217,12 @@ function BeyondCcqs() {
           type="button"
           onClick={() => setOpen((o) => ({ ...o, [i]: !o[i] }))}
           className={`grid grid-cols-1 items-start gap-1.5 rounded-[6px] border px-3.5 py-2.5 text-left sm:grid-cols-2 sm:items-center sm:gap-3 ${
-            open[i] ? "border-status-on-track-text/40 bg-status-on-track-bg" : "border-border bg-card"
+            open[i] ? "border-primary/40 bg-primary/10" : "border-border bg-card"
           }`}
         >
           <p className="text-xs font-semibold text-ink">{t.technique}</p>
           {open[i] ? (
-            <p className="text-[11.5px] text-status-on-track-text">{t.use}</p>
+            <p className="text-[11.5px] text-primary">{t.use}</p>
           ) : (
             <p className="text-[10.5px] font-semibold text-muted">When would you use this? Click to reveal</p>
           )}
@@ -240,7 +240,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -329,13 +329,13 @@ export default function ElicitingAndConceptCheckingSession() {
       title="Eliciting and concept checking."
       intro="Two related skills: drawing language out of learners instead of just giving it to them, and checking they've actually understood it once it's there. &quot;Do you understand?&quot; tells you nothing — this session works through better tools for both."
       agenda={[
-        { time: "0–2", spine: "var(--color-gold)", title: "Lead-in" },
+        { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "2–12", spine: "var(--color-primary)", title: "Eliciting techniques" },
         { time: "12–20", spine: "var(--color-destructive)", title: "Elicit or tell?" },
         { time: "20–29", spine: "var(--color-destructive)", title: "Spot the bad CCQ" },
         { time: "29–43", spine: "var(--color-primary)", title: "Write your own CCQs" },
-        { time: "43–54", spine: "var(--color-status-on-track-text)", title: "Beyond CCQs" },
-        { time: "54–60", spine: "var(--color-gold)", title: "Near misses" },
+        { time: "43–54", spine: "var(--color-primary)", title: "Beyond CCQs" },
+        { time: "54–60", spine: "var(--color-muted)", title: "Near misses" },
       ]}
     >
       <RunningThisSession>

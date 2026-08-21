@@ -167,7 +167,7 @@ export const MessageThread = forwardRef<
                 <div key={m.id} className="flex items-start gap-2.5">
                   <div
                     className={`flex size-6 shrink-0 items-center justify-center rounded-[8px] text-[9px] font-semibold ${
-                      mine ? "bg-gold text-gold-foreground" : "bg-accent text-accent-foreground"
+                      mine ? "bg-surface-muted text-ink" : "bg-accent text-accent-foreground"
                     }`}
                   >
                     {(mine ? "Me" : (nameById.get(m.sender_id) ?? "?")).slice(0, 2).toUpperCase()}

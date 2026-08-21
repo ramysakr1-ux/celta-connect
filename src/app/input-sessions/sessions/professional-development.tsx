@@ -96,7 +96,7 @@ export default function ProfessionalDevelopmentSession() {
               onClick={() => setIdx(i)}
               className={`flex flex-col gap-1 rounded-[8px] border px-3.5 py-3 text-left ${i === idx ? "border-primary bg-card" : "border-border bg-transparent"}`}
             >
-              <p className={`text-[9.5px] font-bold uppercase tracking-[0.06em] ${c.accent ? "text-destructive" : "text-gold"}`}>{c.tag}</p>
+              <p className={`text-[9.5px] font-bold uppercase tracking-[0.06em] ${c.accent ? "text-destructive" : "text-muted"}`}>{c.tag}</p>
               <p className="text-[12.5px] font-semibold leading-tight text-ink">{c.title}</p>
             </button>
           ))}
@@ -118,7 +118,7 @@ export default function ProfessionalDevelopmentSession() {
           ))}
         </div>
         <div className="flex flex-col gap-0.5 border-t border-border pt-1">
-          <p className="text-[11px] font-bold text-gold">Bring back to the room</p>
+          <p className="text-[11px] font-bold text-muted">Bring back to the room</p>
           <p className="text-xs text-ink">{active.prompt}</p>
         </div>
         <div className="flex gap-2 pt-1">

@@ -164,16 +164,16 @@ function AfterCard({ question, answer, note }: { question: string; answer: strin
       type="button"
       onClick={() => setOpen((o) => !o)}
       className={`flex min-h-[150px] flex-col gap-3 rounded-[10px] border border-t-[3px] p-5 text-left transition-colors ${
-        open ? "border-gold/30 border-t-gold bg-gold/5" : "border-border border-t-gold bg-card"
+        open ? "border-muted/30 border-t-muted bg-muted/5" : "border-border border-t-muted bg-card"
       }`}
     >
       {open ? (
         <>
           <div className="flex items-center gap-2 border-b border-border pb-2.5">
-            <span className="size-1.5 flex-none rounded-full bg-gold" />
+            <span className="size-1.5 flex-none rounded-full bg-muted" />
             <p className="font-serif text-sm font-semibold text-ink">{question}</p>
           </div>
-          <p className="font-serif text-xl font-semibold text-gold">{answer}</p>
+          <p className="font-serif text-xl font-semibold text-muted">{answer}</p>
           <p className="text-[11.5px] leading-relaxed text-muted">{note}</p>
         </>
       ) : (
@@ -181,7 +181,7 @@ function AfterCard({ question, answer, note }: { question: string; answer: strin
           <div className="flex flex-1 items-center justify-center px-1 py-1.5 text-center">
             <p className="font-serif text-lg font-semibold leading-tight text-ink">{question}</p>
           </div>
-          <p className="text-center text-[10.5px] font-semibold text-gold">Click to reveal ▾</p>
+          <p className="text-center text-[10.5px] font-semibold text-muted">Click to reveal ▾</p>
         </>
       )}
     </button>
@@ -270,7 +270,7 @@ function JargonMatch() {
                 }}
                 className={`flex min-h-[42px] items-center rounded-[6px] border-[1.5px] px-3.5 font-serif text-sm font-semibold ${
                   isMatched
-                    ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text cursor-default"
+                    ? "border-primary bg-primary/10 text-primary cursor-default"
                     : isSel
                       ? "border-primary bg-primary/10 text-ink"
                       : isShake
@@ -299,7 +299,7 @@ function JargonMatch() {
                 }}
                 className={`flex min-h-[42px] items-center rounded-[6px] border-[1.5px] px-3.5 text-left text-xs leading-snug ${
                   isMatched
-                    ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text cursor-default"
+                    ? "border-primary bg-primary/10 text-primary cursor-default"
                     : isSel
                       ? "border-primary bg-primary/10 text-ink"
                       : isShake
@@ -336,7 +336,7 @@ function JargonMatch() {
           type="button"
           data-print-hide
           onClick={() => setRevealed(true)}
-          className="self-start mt-1 flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+          className="self-start mt-1 flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <circle cx="7.5" cy="15.5" r="5.5" />
@@ -399,7 +399,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -540,12 +540,12 @@ export default function LessonPlanningSession() {
       title="Lesson planning, start to finish, in one input session."
       intro="Warm up on why a plan exists and who reads it, clear the jargon, then draft the real thing on the real TP2 point. Everything a trainee needs for this session lives on this one page."
       agenda={[
-        { time: "0–5", spine: "var(--color-gold)", title: "Warm-up: why plan?" },
-        { time: "5–10", spine: "var(--color-gold)", title: "Jargon match" },
+        { time: "0–5", spine: "var(--color-muted)", title: "Warm-up: why plan?" },
+        { time: "5–10", spine: "var(--color-muted)", title: "Jargon match" },
         { time: "10–15", spine: "var(--color-primary)", title: "Your TP2 point" },
         { time: "15–20", spine: "var(--color-primary)", title: "Aims" },
         { time: "20–27", spine: "var(--color-destructive)", title: "Problems & solutions" },
-        { time: "27–40", spine: "var(--color-status-on-track-text)", title: "Procedure" },
+        { time: "27–40", spine: "var(--color-primary)", title: "Procedure" },
         { time: "40–45", spine: "var(--color-primary)", title: "Wrap-up: save and next steps" },
       ]}
     >

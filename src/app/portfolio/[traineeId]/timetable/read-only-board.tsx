@@ -170,7 +170,7 @@ export function ReadOnlyTimetableBoard({
       {liveEvent ? (
         <div className="flex items-center justify-between gap-3 rounded-[10px] px-4 py-3 text-primary-foreground" style={{ background: "oklch(38% 0.072 195)" }}>
           <div className="flex items-center gap-3">
-            <span className="size-2 shrink-0 animate-pulse rounded-full bg-gold" />
+            <span className="size-2 shrink-0 animate-pulse rounded-full bg-muted" />
             <span className="text-[11px] font-semibold tracking-[0.08em] uppercase">Live now</span>
             <span className="text-sm font-medium">{liveEvent.title}</span>
             {liveEvent.event_time ? <span className="text-xs opacity-80">{liveEvent.event_time.slice(0, 5)}</span> : null}
@@ -180,7 +180,7 @@ export function ReadOnlyTimetableBoard({
               href={liveEvent.zoom_url}
               target="_blank"
               rel="noreferrer"
-              className="shrink-0 rounded-full bg-gold px-3 py-1 text-xs font-semibold text-gold-foreground"
+              className="shrink-0 rounded-full bg-card px-3 py-1 text-xs font-semibold text-ink"
             >
               Join
             </a>
@@ -347,7 +347,7 @@ function SessionTile({
           {letters ? ` · ${letters}` : ""}
         </span>
       ) : null}
-      {youTeach ? <span className="pill pill-gold text-[9px]">You teach</span> : null}
+      {youTeach ? <span className="pill pill-neutral text-[9px]">You teach</span> : null}
       {showCamera ? <CameraChip event={event} live={live} mine={mine} /> : null}
     </button>
   );

@@ -17,15 +17,26 @@ export const CEFR_LEVELS = [
 export const LEVEL_OPTIONS = CEFR_LEVELS.map((l) => l.code);
 
 // Corrected 2026-08-20 against the real Volunteer Pool.dc.html handoff
-// (Desktop/Connect.zip) -- a fixed 4-color map (A1 teal / A2 gold / B1
-// green / B2 red), reusing Connect's own existing brand tokens rather than
-// an invented rainbow spread across all 7 CEFR codes. A2+/C1/C2 have no
-// assigned color in the design and fall back to muted/grey, same as
-// levelPillClass already did for an unrecognized code.
+// (Desktop/Connect.zip) -- a fixed 4-color map, reusing Connect's own
+// existing brand tokens rather than an invented rainbow spread across all 7
+// CEFR codes. A2+/C1/C2 have no assigned color in the design and fall back
+// to muted/grey, same as levelPillClass already did for an unrecognized
+// code.
+//
+// Re-pointed 2026-08-21 per the color audit: gold is reserved for
+// brand/top-achievement use only, so A2 moves off it. Simply swapping A2 to
+// amber and B1 to teal (an earlier pass here did exactly that) collides B1
+// with A1, since both would land on the same hue -- this map needs 4
+// visually distinct colors, not 4 legend-compliant ones. Resolved the same
+// way Observation Tasks.dc.html solves an identical problem (a category
+// axis, not a status axis, needing a hue outside the 5-color legend): A2
+// takes amber (status-warning ink, since it's already established
+// elsewhere), B1 takes blue (status-info ink) rather than colliding with
+// A1's teal. B2 stays red.
 const LEVEL_PILL_CLASS: Partial<Record<(typeof CEFR_LEVELS)[number]["code"], string>> = {
   A1: "bg-[color-mix(in_oklab,oklch(38%_0.072_195)_14%,transparent)] text-[oklch(38%_0.072_195)]",
-  A2: "bg-[color-mix(in_oklab,oklch(60%_0.11_70)_14%,transparent)] text-[oklch(60%_0.11_70)]",
-  B1: "bg-[color-mix(in_oklab,oklch(48%_0.09_150)_14%,transparent)] text-[oklch(48%_0.09_150)]",
+  A2: "bg-[color-mix(in_oklab,oklch(44%_0.095_68)_14%,transparent)] text-[oklch(44%_0.095_68)]",
+  B1: "bg-[color-mix(in_oklab,oklch(42%_0.095_250)_14%,transparent)] text-[oklch(42%_0.095_250)]",
   B2: "bg-[color-mix(in_oklab,oklch(45%_0.16_27)_14%,transparent)] text-[oklch(45%_0.16_27)]",
 };
 

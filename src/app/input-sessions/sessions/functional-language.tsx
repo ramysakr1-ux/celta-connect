@@ -59,7 +59,7 @@ function RankByFormality() {
           <div
             key={item}
             className={`flex h-[38px] items-center rounded-[6px] border-[1.5px] px-3.5 text-[12.5px] font-semibold text-ink ${
-              wrong ? "border-destructive bg-destructive/10" : "border-status-on-track-text bg-status-on-track-bg"
+              wrong ? "border-destructive bg-destructive/10" : "border-primary bg-primary/10"
             }`}
           >
             {i + 1}. {item}
@@ -96,7 +96,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -136,11 +136,11 @@ export default function FunctionalLanguageSession() {
       title="Functional language — taught the way you'll teach it."
       intro="Functional language isn't one grammar structure — it's a set of phrases that all do the same social job. This session is staged the way a functional lesson is staged. Do the tasks first — naming what happened is what the debrief is for."
       agenda={[
-        { time: "0–2", spine: "var(--color-gold)", title: "Lead-in" },
+        { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "2–5", spine: "var(--color-primary)", title: "What is functional language?" },
         { time: "5–10", spine: "var(--color-primary)", title: "Match the terms" },
         { time: "10–23", spine: "var(--color-primary)", title: "Predict, read the text, detail check" },
-        { time: "23–33", spine: "var(--color-status-on-track-text)", title: "Rank by formality" },
+        { time: "23–33", spine: "var(--color-primary)", title: "Rank by formality" },
         { time: "33–45", spine: "var(--color-destructive)", title: "Debrief + trainer notes" },
       ]}
     >

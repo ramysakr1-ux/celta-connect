@@ -242,8 +242,8 @@ export function AssignmentAuthoringForm({
       {isResubmission ? (
         <>
           {!locked ? (
-            <div className="flex items-start gap-3 rounded-[6px] border border-gold/40 bg-gold/10 p-3">
-              <span className="mt-1 size-1.5 shrink-0 rounded-full bg-gold" />
+            <div className="flex items-start gap-3 rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg p-3">
+              <span className="mt-1 size-1.5 shrink-0 rounded-full bg-status-warning-text" />
               <p className="text-sm text-ink">
                 Use the boxes on the right for your second submission -- the boxes on the left and your tutor&apos;s comments stay
                 exactly as they were. Whether you pass on first or second submission does not affect your certificate grade, but you

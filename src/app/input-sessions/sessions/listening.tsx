@@ -211,7 +211,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -251,12 +251,12 @@ export default function ListeningSession() {
       title="Listening — taught the way you'll teach it."
       intro="This session is staged exactly like the lesson it teaches: pre-taught vocab, a discussion of how listening should be taught, then listening to a dialogue to check those ideas. Do the tasks first — the debrief afterward is where it gets named."
       agenda={[
-        { time: "0–2", spine: "var(--color-gold)", title: "Lead-in" },
+        { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "2–8", spine: "var(--color-primary)", title: "Pre-teach vocab" },
         { time: "8–11", spine: "var(--color-primary)", title: "Predict the staging" },
         { time: "11–25", spine: "var(--color-primary)", title: "Listen to the dialogue, check ideas" },
         { time: "25–33", spine: "var(--color-destructive)", title: "Detail task + discuss" },
-        { time: "33–45", spine: "var(--color-status-on-track-text)", title: "Debrief + trainer notes" },
+        { time: "33–45", spine: "var(--color-primary)", title: "Debrief + trainer notes" },
       ]}
     >
       <RunningThisSession>

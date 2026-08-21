@@ -258,7 +258,7 @@ export default async function CourseStreamPage({
                     </div>
                   </div>
                   {b.pinned ? (
-                    <span className="pill pill-gold ml-auto">Pinned</span>
+                    <span className="pill pill-neutral ml-auto">Pinned</span>
                   ) : null}
                 </div>
 

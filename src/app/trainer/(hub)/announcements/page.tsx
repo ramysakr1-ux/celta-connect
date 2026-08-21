@@ -156,7 +156,7 @@ export default async function AnnouncementsPage() {
                 <div key={b.id} className="flex flex-col gap-1 px-4 py-3">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-ink">{b.title}</p>
-                    {b.pinned ? <span className="pill pill-gold">Pinned</span> : null}
+                    {b.pinned ? <span className="pill pill-neutral">Pinned</span> : null}
                   </div>
                   <p className="text-xs text-muted">
                     {authorNameById.get(b.author_id) ?? "Unknown"} · {(b.sent_at ?? b.created_at).slice(0, 10)}

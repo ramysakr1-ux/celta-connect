@@ -36,7 +36,7 @@ export default async function AdminAssignmentBriefsPage() {
           into sections you can review and edit before publishing it to trainees.
         </p>
         {formatWarning ? (
-          <p className="mt-3 rounded-[6px] border border-gold/40 bg-gold/10 px-3 py-2 text-sm text-gold">
+          <p className="mt-3 rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg px-3 py-2 text-sm text-status-warning-text">
             {formatWarning}
           </p>
         ) : null}

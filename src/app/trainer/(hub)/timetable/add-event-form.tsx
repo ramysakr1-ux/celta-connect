@@ -128,7 +128,7 @@ export function AddEventForm({
       ) : null}
       {type === "supervised_session" ? (
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <p className="rounded-[6px] border border-dashed border-gold bg-gold/5 p-3 text-xs text-ink">
+          <p className="rounded-[6px] border border-dashed border-border bg-surface-muted p-3 text-xs text-ink">
             Never call this &quot;Self-study&quot; -- name it &quot;Supervised review -- [topic]&quot; (reviewing a
             prior input session) or &quot;[Assignment] writing&quot; (time set aside to write one). It only counts as
             contact time because the trainee submits something here and you check it -- see the task each trainee

@@ -23,7 +23,7 @@ const MARKER_POSITION: Record<Trajectory, number> = {
 const MARKER_COLOR: Record<Trajectory, string> = {
   not_enough_data: "var(--color-muted)",
   Fail: "var(--color-destructive)",
-  Pass: "var(--color-status-on-track-text)",
+  Pass: "var(--color-primary)",
   "Pass B": "oklch(65% 0.008 90)", // silver
   "Pass A": "var(--color-gold)",
 };
@@ -35,8 +35,8 @@ function trackBackground(value: Trajectory): string {
   if (value === "not_enough_data") {
     return "var(--color-surface-muted)";
   }
-  // green (Pass) -> silver (Pass B) -> gold (Pass A), per the grading spec.
-  return "linear-gradient(to right, var(--color-status-on-track-text), oklch(65% 0.008 90), var(--color-gold))";
+  // teal (Pass) -> silver (Pass B) -> gold (Pass A), per the grading spec.
+  return "linear-gradient(to right, var(--color-primary), oklch(65% 0.008 90), var(--color-gold))";
 }
 
 function Marker({ value }: { value: Trajectory }) {

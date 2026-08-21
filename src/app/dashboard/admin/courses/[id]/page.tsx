@@ -532,7 +532,7 @@ export default async function CourseRosterPage({
                     </button>
                   </div>
                   {modeChanged ? (
-                    <div className="flex flex-col gap-2 rounded-[6px] border border-gold/30 bg-gold/10 p-3">
+                    <div className="flex flex-col gap-2 rounded-[6px] border border-border bg-surface-muted p-3">
                       <p className="text-xs text-ink">
                         This course&apos;s delivery mode ({course.delivery_mode}) differs from{" "}
                         {sourceCourse?.name ?? "the original course"}&apos;s ({sourceCourse?.delivery_mode}). Handbook 6.9
@@ -692,8 +692,8 @@ export default async function CourseRosterPage({
                 text." So it sits directly above the groups, not in a help
                 panel and not at the top of the page. */}
             {unassignedTrainees.length > 0 ? (
-              <div className="mt-3 rounded-[8px] border border-[color-mix(in_oklab,oklch(60%_0.11_70)_30%,transparent)] bg-[color-mix(in_oklab,oklch(60%_0.11_70)_9%,transparent)] px-4 py-3">
-                <p className="text-sm font-semibold text-[oklch(52%_0.1_70)]">
+              <div className="mt-3 rounded-[8px] border border-destructive/30 bg-destructive/10 px-4 py-3">
+                <p className="text-sm font-semibold text-destructive">
                   {unassignedTrainees.length} candidate{unassignedTrainees.length === 1 ? " is" : "s are"} not in a group
                 </p>
                 <p className="mt-0.5 text-xs text-ink">
@@ -772,8 +772,8 @@ export default async function CourseRosterPage({
               course. Trainers manage rotation order from their own Rotation page.
             </p>
             {unassignedTrainees.length > 0 ? (
-              <div className="mt-3 flex items-start gap-2.5 rounded-[6px] border border-gold/30 bg-gold/10 px-4 py-3">
-                <span className="mt-1 size-1.5 shrink-0 rounded-full bg-gold" />
+              <div className="mt-3 flex items-start gap-2.5 rounded-[6px] border border-border bg-surface-muted px-4 py-3">
+                <span className="mt-1 size-1.5 shrink-0 rounded-full bg-muted" />
                 <p className="text-sm text-ink">
                   {unassignedTrainees.length} candidate{unassignedTrainees.length === 1 ? "" : "s"} aren&apos;t in a
                   group yet. The rotation can&apos;t be released until every candidate is placed.

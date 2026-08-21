@@ -72,12 +72,12 @@ function ReceptiveOrderAndKey() {
                   if (!isDone && isCorrectNext) setPicked((p) => [...p, key]);
                 }}
                 className={`flex items-center gap-3 rounded-[7px] border-2 px-3.5 py-2.5 text-left ${
-                  isDone ? "border-status-on-track-text bg-status-on-track-bg cursor-default" : "border-border bg-card cursor-pointer"
+                  isDone ? "border-primary bg-primary/10 cursor-default" : "border-border bg-card cursor-pointer"
                 }`}
               >
                 <span
                   className={`flex size-5 flex-none items-center justify-center rounded-full text-[10.5px] font-bold ${
-                    isDone ? "bg-status-on-track-text text-white" : "bg-accent text-muted"
+                    isDone ? "bg-primary text-white" : "bg-accent text-muted"
                   }`}
                 >
                   {isDone ? idx + 1 : "?"}
@@ -97,7 +97,7 @@ function ReceptiveOrderAndKey() {
           type="button"
           onClick={() => setRevealed(true)}
           data-print-hide
-          className="self-start flex h-9 items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+          className="self-start flex h-9 items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <circle cx="7.5" cy="15.5" r="5.5" />
@@ -175,13 +175,13 @@ export default function ReceptiveSkillsSession() {
       title="Receptive skills — taught the way you'll teach it."
       intro="This session is staged exactly like the lesson it teaches: pre-taught vocab, a discussion of how the skill should be taught, reading the text to check those ideas, then detail questions. Do the tasks first — the debrief afterward is where it gets named."
       agenda={[
-        { time: "0–2", spine: "var(--color-gold)", title: "Lead-in" },
+        { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "2–5", spine: "var(--color-primary)", title: "What are receptive skills?" },
         { time: "5–10", spine: "var(--color-primary)", title: "Pre-teach vocab" },
         { time: "10–13", spine: "var(--color-primary)", title: "Predict the staging" },
         { time: "13–25", spine: "var(--color-primary)", title: "Read the text, check ideas" },
         { time: "25–35", spine: "var(--color-primary)", title: "Detail questions + peer check" },
-        { time: "35–43", spine: "var(--color-status-on-track-text)", title: "Debrief: order the stages" },
+        { time: "35–43", spine: "var(--color-primary)", title: "Debrief: order the stages" },
         { time: "43–45", spine: "var(--color-destructive)", title: "Trainer notes" },
       ]}
     >

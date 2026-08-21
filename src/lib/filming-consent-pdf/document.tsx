@@ -29,7 +29,7 @@ const COLOR = {
   calloutText: "#5c5040", // oklch(45% 0.04 70)
   muted: "#7c7368", // oklch(51% 0.017 70)
   mutedLight: "#8a8175", // oklch(56% 0.017 70)
-  gold: "#b08a4a", // oklch(63% 0.096 72)
+  gold: "#a97a2f", // oklch(63% 0.096 72)
   border: "#ded7c9", // oklch(84% 0.016 82)
   calloutBg: "#f7f2e6", // oklch(96.5% 0.018 85)
 };

@@ -19,8 +19,8 @@ import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-p
 const INK = "#241d16";
 const MUTED = "#6d655c";
 const BORDER = "#e0dcd4";
-const GOLD = "#ad7f43";
-const GREEN = "#346c42";
+const GOLD = "#a97a2f";
+const TEAL = "#1f5a5c";
 const AMBER = "#6b4f1f";
 
 const styles = StyleSheet.create({
@@ -93,7 +93,7 @@ export async function renderAssessorPackBuffer(input: AssessorPackInput): Promis
             <Text
               style={[
                 styles.figureValue,
-                { color: input.portfoliosComplete >= input.totalCandidates ? GREEN : AMBER },
+                { color: input.portfoliosComplete >= input.totalCandidates ? TEAL : AMBER },
               ]}
             >
               {input.portfoliosComplete} of {input.totalCandidates}
@@ -101,13 +101,13 @@ export async function renderAssessorPackBuffer(input: AssessorPackInput): Promis
           </View>
           <View style={styles.figure}>
             <Text style={styles.figureLabel}>Hours logged</Text>
-            <Text style={[styles.figureValue, { color: input.hoursAssessed >= input.hoursRequired ? GREEN : AMBER }]}>
+            <Text style={[styles.figureValue, { color: input.hoursAssessed >= input.hoursRequired ? TEAL : AMBER }]}>
               {input.hoursAssessed.toFixed(1)} of {input.hoursRequired}
             </Text>
           </View>
           <View style={styles.figure}>
             <Text style={styles.figureLabel}>Provisional grades</Text>
-            <Text style={[styles.figureValue, { color: input.gradesEntered >= input.totalCandidates ? GREEN : AMBER }]}>
+            <Text style={[styles.figureValue, { color: input.gradesEntered >= input.totalCandidates ? TEAL : AMBER }]}>
               {input.gradesEntered} of {input.totalCandidates} MCT-approved
             </Text>
           </View>
@@ -128,7 +128,7 @@ export async function renderAssessorPackBuffer(input: AssessorPackInput): Promis
             <Text
               style={[
                 styles.cellState,
-                { color: c.celta5Complete && c.tpsComplete && c.assignmentsComplete ? GREEN : AMBER },
+                { color: c.celta5Complete && c.tpsComplete && c.assignmentsComplete ? TEAL : AMBER },
               ]}
             >
               {c.celta5Complete && c.tpsComplete && c.assignmentsComplete ? "Complete" : "Incomplete"}
@@ -142,7 +142,7 @@ export async function renderAssessorPackBuffer(input: AssessorPackInput): Promis
           <View key={d} style={styles.row} wrap={false}>
             <Text style={styles.cellName}>{d}</Text>
             <Text style={styles.cellMeta} />
-            <Text style={[styles.cellState, { color: GREEN }]}>Live</Text>
+            <Text style={[styles.cellState, { color: TEAL }]}>Live</Text>
           </View>
         ))}
 
@@ -151,7 +151,7 @@ export async function renderAssessorPackBuffer(input: AssessorPackInput): Promis
           <View key={d.name} style={styles.row} wrap={false}>
             <Text style={styles.cellName}>{d.name}</Text>
             <Text style={styles.cellMeta}>{d.meta}</Text>
-            <Text style={[styles.cellState, { color: d.present ? GREEN : AMBER }]}>
+            <Text style={[styles.cellState, { color: d.present ? TEAL : AMBER }]}>
               {d.present ? "On file" : "Not uploaded"}
             </Text>
           </View>

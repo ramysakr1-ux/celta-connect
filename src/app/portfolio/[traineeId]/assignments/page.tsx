@@ -69,7 +69,7 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
 
       {reflectionAssignments.length > 0 ? (
         <div className="flex flex-col gap-3">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-gold uppercase">
+          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
             Plagiarism reflection -- a centre sanction, not a Cambridge assignment
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:auto-rows-fr">
@@ -79,7 +79,7 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
                 traineeId={traineeId}
                 assignment={a}
                 eyebrow="Plagiarism case"
-                accentClass="border-gold/40"
+                accentClass="border-border"
               />
             ))}
           </div>

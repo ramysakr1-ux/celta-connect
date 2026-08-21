@@ -311,7 +311,7 @@ export function StaffChatDrawer({
         ) : null}
 
         {quietHoursNote && !readOnly ? (
-          <p className="rounded-full bg-gold/10 px-3 py-1 text-center text-[11px] text-gold">{quietHoursNote}</p>
+          <p className="rounded-full bg-status-warning-bg px-3 py-1 text-center text-[11px] text-status-warning-text">{quietHoursNote}</p>
         ) : null}
 
         <div className="flex h-14 items-center gap-1.5 rounded-[28px] border border-border bg-card pl-2 pr-2.5 shadow-lg sm:gap-3">
@@ -362,7 +362,7 @@ export function StaffChatDrawer({
           )}
 
           <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
-            <span className="size-[5px] shrink-0 rounded-full bg-gold" aria-hidden="true" />
+            <span className="size-[5px] shrink-0 rounded-full bg-muted" aria-hidden="true" />
             <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted">
               {retentionLabel === "nightly"
                 ? formatCountdown(msLeft)
@@ -378,7 +378,7 @@ export function StaffChatDrawer({
           >
             {threadOpen ? "Hide" : "Thread"}
             {!threadOpen && unreadCount > 0 ? (
-              <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gold px-1.5 text-[10px] font-semibold text-gold-foreground">
+              <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink px-1.5 text-[10px] font-semibold text-card">
                 {unreadCount}
               </span>
             ) : null}
@@ -389,7 +389,7 @@ export function StaffChatDrawer({
             onClick={handleSend}
             disabled={readOnly || !selected || !body.trim()}
             aria-label="Send"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-card hover:bg-gold disabled:opacity-60"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-card hover:bg-primary disabled:opacity-60"
           >
             <ArrowUp className="size-4" aria-hidden="true" />
           </button>

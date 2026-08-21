@@ -26,7 +26,7 @@ const COLOR = {
   muted: "#8a6a2f",
   border: "#eddfc4",
   frame: "#c9a04a",
-  gold: "#b3892f",
+  gold: "#a97a2f",
 };
 
 const styles = StyleSheet.create({

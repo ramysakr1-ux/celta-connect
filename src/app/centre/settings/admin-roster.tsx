@@ -17,7 +17,7 @@ const ROLE_PILL_CLASS: Record<CentreRole, string> = {
   centre_owner: "bg-destructive/10 text-destructive border-destructive/30",
   centre_administrator: "bg-primary/10 text-primary border-primary/30",
   course_administrator: "bg-surface-muted text-muted border-border",
-  centre_manager: "bg-gold/10 text-gold border-gold/30",
+  centre_manager: "bg-surface-muted text-muted border-border",
 };
 
 // for-claude-code-centre-settings.md, "3. Admin roster": "this screen only

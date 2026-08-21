@@ -33,12 +33,19 @@ export const AIM_TYPE_OPTIONS: { value: AimType; label: string }[] = AIM_TYPES.m
 // for "Receptive"/"Productive" -- reading+listening now share its green,
 // speaking+writing now share its muted-gray, so the same 5-color palette
 // just covers 7 values instead of 5.
+//
+// Re-pointed 2026-08-21 per the color audit: this is decorative category
+// coloring, not status, but gold is reserved for brand/top-achievement use
+// only -- lexis had a clean gold value, so it moved to the same muted-gray
+// speaking/writing already use. reading+listening moved off the green/
+// on-track hue onto teal (same hue as the app's primary teal), keeping the
+// existing bg/ink/dot lightness-and-chroma structure, just re-hued.
 export const AIM_TYPE_STYLE: Record<AimType, { bg: string; ink: string; dot: string }> = {
   grammar: { bg: "oklch(38% 0.072 195 / 12%)", ink: "oklch(38% 0.072 195)", dot: "oklch(38% 0.072 195)" },
-  lexis: { bg: "oklch(60% 0.11 70 / 15%)", ink: "oklch(60% 0.11 70)", dot: "oklch(60% 0.11 70)" },
+  lexis: { bg: "oklch(93.5% 0.012 85)", ink: "oklch(51% 0.017 70)", dot: "oklch(51% 0.017 70)" },
   function: { bg: "oklch(93% 0.045 235)", ink: "oklch(42% 0.095 250)", dot: "oklch(42% 0.095 250)" },
-  reading: { bg: "oklch(92% 0.06 155)", ink: "oklch(38% 0.09 155)", dot: "oklch(38% 0.09 155)" },
-  listening: { bg: "oklch(92% 0.06 155)", ink: "oklch(38% 0.09 155)", dot: "oklch(38% 0.09 155)" },
+  reading: { bg: "oklch(93% 0.019 190)", ink: "oklch(37.5% 0.058 195)", dot: "oklch(37.5% 0.058 195)" },
+  listening: { bg: "oklch(93% 0.019 190)", ink: "oklch(37.5% 0.058 195)", dot: "oklch(37.5% 0.058 195)" },
   speaking: { bg: "oklch(93.5% 0.012 85)", ink: "oklch(51% 0.017 70)", dot: "oklch(51% 0.017 70)" },
   writing: { bg: "oklch(93.5% 0.012 85)", ink: "oklch(51% 0.017 70)", dot: "oklch(51% 0.017 70)" },
 };

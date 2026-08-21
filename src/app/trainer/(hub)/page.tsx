@@ -338,7 +338,7 @@ export default async function TodayPage() {
               prominent in this row for that reason. */}
           <Link
             href="/trainer/capture"
-            className="rounded-[6px] border border-gold bg-gold/10 px-3.5 py-2 text-sm font-medium text-gold hover:bg-gold/20"
+            className="rounded-[6px] border border-primary bg-transparent px-3.5 py-2 text-sm font-medium text-primary hover:bg-primary/10"
           >
             Capture a point
           </Link>
@@ -392,22 +392,15 @@ export default async function TodayPage() {
                           already here, only its label and weight change. */}
                       <p className={`text-sm text-ink ${live ? "font-semibold" : ""}`}>{event.title}</p>
                       {live ? (
-                        event.zoom_url ? (
-                          <a
-                            href={event.zoom_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold tracking-[0.06em] text-primary-foreground uppercase"
-                          >
-                            <span className="size-[5px] shrink-0 rounded-full bg-gold" />
-                            Live · join
-                          </a>
-                        ) : (
-                          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold tracking-[0.06em] text-primary-foreground uppercase">
-                            <span className="size-[5px] shrink-0 rounded-full bg-gold" />
-                            Live
-                          </span>
-                        )
+                        <a
+                          href={event.zoom_url ?? undefined}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-primary-foreground"
+                        >
+                          <span className="size-[5px] shrink-0 rounded-full bg-muted" />
+                          Join now
+                        </a>
                       ) : null}
                     </div>
                   </div>
@@ -418,8 +411,8 @@ export default async function TodayPage() {
         </div>
 
         {/* Needs you */}
-        <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-gold">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-gold uppercase">Needs you · {alerts.length}</p>
+        <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-status-warning-text">
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">Needs you · {alerts.length}</p>
           <div className="flex flex-col">
             {visibleAlerts.length === 0 ? (
               <p className="py-2 text-sm text-muted">Nothing needs you right now.</p>

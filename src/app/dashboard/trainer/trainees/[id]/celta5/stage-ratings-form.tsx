@@ -108,7 +108,7 @@ export function StageRatingsForm({
           <button
             type="button"
             onClick={acceptAllSuggestions}
-            className="rounded-[6px] border border-dashed border-gold px-3 py-1.5 text-xs font-medium text-gold hover:bg-gold/10"
+            className="rounded-[6px] border border-dashed border-status-warning-text px-3 py-1.5 text-xs font-medium text-status-warning-text hover:bg-status-warning-bg"
           >
             Accept all suggestions ({unacceptedSuggestions.length})
           </button>
@@ -137,7 +137,7 @@ export function StageRatingsForm({
                     {code}
                     {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
                     {disagrees ? (
-                      <span className="ml-2 text-sm font-semibold text-gold" title="Candidate and tutor ratings differ">
+                      <span className="ml-2 text-sm font-semibold text-status-warning-text" title="Candidate and tutor ratings differ">
                         &ne;
                       </span>
                     ) : null}
@@ -181,7 +181,7 @@ export function StageRatingsForm({
                     <button
                       type="button"
                       onClick={() => setRatings((prev) => ({ ...prev, [code]: suggestion }))}
-                      className="rounded-[6px] border border-dashed border-gold px-2 py-1 text-xs font-medium text-gold hover:bg-gold/10"
+                      className="rounded-[6px] border border-dashed border-status-warning-text px-2 py-1 text-xs font-medium text-status-warning-text hover:bg-status-warning-bg"
                       title="Suggested from TP notes -- click to accept as your rating"
                     >
                       Suggested: {suggestion}

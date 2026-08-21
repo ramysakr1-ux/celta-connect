@@ -203,7 +203,7 @@ export default async function AdmissionsSettingsPage() {
           reading flagged.
         </p>
         {missingAreas.length > 0 ? (
-          <div className="rounded-[6px] border border-gold/30 bg-gold/10 p-3 text-sm text-ink">
+          <div className="rounded-[6px] border border-border bg-surface-muted p-3 text-sm text-ink">
             No active question covers: {missingAreas.map((a) => COVERAGE_LABEL[a]).join(", ")}.
           </div>
         ) : null}

@@ -17,17 +17,17 @@ interface Drill {
 const DRILLS: Drill[] = [
   { name: "Choral drill", hint: "Whole class, together", accent: "var(--color-primary)", desc: "The whole group repeats together. Always go first — nobody can be heard failing alone, so it's safe, and it gets the sound into the room.", example: 'T: "I\'d rather not." → Class (all together): "I\'d rather not."' },
   { name: "Individual drill", hint: "One learner at a time", accent: "var(--color-primary)", desc: "Same phrase, one learner at a time after the choral round. The only drill that tells you honestly who's actually got it versus who was hiding in the chorus. Keep it fast — don't let it become a spotlight.", example: 'T: "I\'d rather not." → S1 (alone): "I\'d rather not." → S2 (alone): "I\'d rather not."' },
-  { name: "Back-chaining", hint: "Build from the end", accent: "var(--color-gold)", desc: "For long or awkward phrases. Start at the last word or syllable, then add backwards toward the front, one piece at a time — each addition is easier than saying the whole thing cold.", example: '"...that\'s all right" → "...if that\'s all right" → "I\'d rather not, if that\'s all right"' },
-  { name: "Substitution drill", hint: "Swap one part", accent: "var(--color-gold)", desc: "Keep the frame, swap one slot. Turns a single memorised chunk into a usable, flexible pattern — this is the step most teachers skip, and it's the one that actually builds fluency, not just recall.", example: 'T: "I\'d rather not go to the party." (cue: "the gym") → S: "I\'d rather not go to the gym."' },
+  { name: "Back-chaining", hint: "Build from the end", accent: "var(--color-muted)", desc: "For long or awkward phrases. Start at the last word or syllable, then add backwards toward the front, one piece at a time — each addition is easier than saying the whole thing cold.", example: '"...that\'s all right" → "...if that\'s all right" → "I\'d rather not, if that\'s all right"' },
+  { name: "Substitution drill", hint: "Swap one part", accent: "var(--color-muted)", desc: "Keep the frame, swap one slot. Turns a single memorised chunk into a usable, flexible pattern — this is the step most teachers skip, and it's the one that actually builds fluency, not just recall.", example: 'T: "I\'d rather not go to the party." (cue: "the gym") → S: "I\'d rather not go to the gym."' },
   { name: "Transformation drill", hint: "Change the grammar", accent: "var(--color-destructive)", desc: "Same core content, but the learner has to change the grammatical form — statement to negative, active to passive, statement to question.", example: 'T: "She works on Fridays." (cue: question) → S: "Does she work on Fridays?"' },
-  { name: "Mumble / silent drill", hint: "Quiet, own pace", accent: "var(--color-status-on-track-text)", desc: "Learners repeat under their breath, at their own pace, rather than aloud on cue. Useful for shyer learners, or as a private rehearsal step right before an individual drill.", example: "T models once aloud → learners each mutter it to themselves a few times before anyone speaks up." },
+  { name: "Mumble / silent drill", hint: "Quiet, own pace", accent: "var(--color-primary)", desc: "Learners repeat under their breath, at their own pace, rather than aloud on cue. Useful for shyer learners, or as a private rehearsal step right before an individual drill.", example: "T models once aloud → learners each mutter it to themselves a few times before anyone speaks up." },
 ];
 
 const DRILLS_2: Drill[] = [
   { name: "Forward (build-up) chaining", hint: "Grows from the front", accent: "var(--color-primary)", desc: "The opposite direction from back-chaining — start with a short core phrase and add a piece each round, building forward instead of backward. Useful when the front of a phrase is the easy, anchoring part.", example: '"I get up early" → "I get up early every day" → "Ayşe gets up early every day"' },
-  { name: "Guessing drill", hint: "Meaningful, not mechanical", accent: "var(--color-gold)", desc: "A meaningful drill, not a mechanical one — the teacher thinks of something real (a favourite sport, an imaginary move abroad), and learners take turns asking yes/no questions to find out what it is. Slower, and the teacher can't be as strict about 100% correct form, but the language is genuinely purposeful.", example: 'L: "Is it a team sport?" T: "No." L: "Do you need special equipment?" T: "Yes." ...' },
+  { name: "Guessing drill", hint: "Meaningful, not mechanical", accent: "var(--color-muted)", desc: "A meaningful drill, not a mechanical one — the teacher thinks of something real (a favourite sport, an imaginary move abroad), and learners take turns asking yes/no questions to find out what it is. Slower, and the teacher can't be as strict about 100% correct form, but the language is genuinely purposeful.", example: 'L: "Is it a team sport?" T: "No." L: "Do you need special equipment?" T: "Yes." ...' },
   { name: "Finger counting & gesture", hint: "Visual, not verbal, cue", accent: "var(--color-destructive)", desc: 'Count syllables or words on your fingers as learners say them, or use a hand shape to show sentence stress and intonation instead of saying "listen to the stress again." Non-verbal cueing keeps the drill moving without extra teacher talk.', example: 'Hold up one finger per word as the class says "I\'d — rather — not," raising the "not" finger higher to show the stressed word.' },
-  { name: "Jazz chant", hint: "Rhythmic, set to a beat", accent: "var(--color-status-on-track-text)", desc: "A short exchange drilled to a fixed rhythm rather than natural speech pace — makes repetitive drilling genuinely fun and memorable, and naturally reinforces stress and intonation because the beat forces it.", example: '"How\'s Jack?" / "He\'s sick." / "Oh no!" — chanted with a steady clap or beat under it, repeated faster each round.' },
+  { name: "Jazz chant", hint: "Rhythmic, set to a beat", accent: "var(--color-primary)", desc: "A short exchange drilled to a fixed rhythm rather than natural speech pace — makes repetitive drilling genuinely fun and memorable, and naturally reinforces stress and intonation because the beat forces it.", example: '"How\'s Jack?" / "He\'s sick." / "Oh no!" — chanted with a steady clap or beat under it, repeated faster each round.' },
 ];
 
 const SCENARIOS: ChoiceScenario[] = [
@@ -89,12 +89,12 @@ export default function DrillingTechniquesSession() {
       title="Drilling techniques — getting the mouth to say it right."
       intro="Drilling is mechanical, controlled repetition — no message to communicate, just getting a form or sound out correctly and fluently. Do this session before Language Practice: drilling is the first, most controlled step; the next session moves from there toward learners actually using the language."
       agenda={[
-        { time: "0–5", spine: "var(--color-gold)", title: "Warmer video" },
-        { time: "5–10", spine: "var(--color-gold)", title: "Discuss first" },
+        { time: "0–5", spine: "var(--color-muted)", title: "Warmer video" },
+        { time: "5–10", spine: "var(--color-muted)", title: "Discuss first" },
         { time: "10–30", spine: "var(--color-primary)", title: "Six drill types" },
-        { time: "30–45", spine: "var(--color-gold)", title: "Four more techniques" },
+        { time: "30–45", spine: "var(--color-muted)", title: "Four more techniques" },
         { time: "45–55", spine: "var(--color-destructive)", title: "Match to the problem" },
-        { time: "55–65", spine: "var(--color-status-on-track-text)", title: "Unknown-language game + wrap-up" },
+        { time: "55–65", spine: "var(--color-primary)", title: "Unknown-language game + wrap-up" },
       ]}
     >
       <RunningThisSession>

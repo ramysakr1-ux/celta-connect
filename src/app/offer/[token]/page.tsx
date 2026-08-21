@@ -20,7 +20,7 @@ function formatDate(iso: string): string {
 // The public offer-acceptance page -- looks up by offer_token
 // (public.applicants.offer_token, minted when a decider records an offer,
 // src/app/dashboard/admissions/actions.ts sendOffer). Same unified
-// sheet-gold entry-moment look as /join/[token].
+// sheet-entry entry-moment look as /join/[token].
 export default async function OfferPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const admin = createAdminClient();
@@ -36,7 +36,7 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
   if (invalid) {
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="sheet-gold w-full max-w-sm p-8">
+        <div className="sheet-entry w-full max-w-sm p-8">
           <Wordmark size="hero" />
           <p className="mt-4 text-sm text-destructive">
             This offer link is invalid, expired, or has already been used. Contact the centre if you believe this is
@@ -54,7 +54,7 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
 
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-      <div className="sheet-gold w-full max-w-sm p-8">
+      <div className="sheet-entry w-full max-w-sm p-8">
         <Wordmark size="hero" />
         <p className="mt-1 text-sm text-ink">
           {applicant.full_name}, you&apos;re offered a place on <strong>{course?.name}</strong>

@@ -15,21 +15,21 @@ interface Stage {
 
 const STAGES: Stage[] = [
   { name: "Controlled practice", control: "One right answer", accent: "var(--color-primary)", desc: "Learners produce the target form with little to no choice in what they say — the answer is fixed, the focus is accuracy.", example: 'Gap-fill: "___ we get pizza tonight?" (Why don\'t) — only one correct completion, everyone produces the identical structure.' },
-  { name: "Semi-controlled practice", control: "Structure fixed, content theirs", accent: "var(--color-gold)", desc: "The frame or task is set by the teacher, but learners supply their own real content within it — some genuine choice, some constraint.", example: 'Roleplay cards: "Suggest doing something this weekend to your partner, using \'Why don\'t we...\' or \'How about...\'" — structure is cued, but what they suggest is up to them.' },
+  { name: "Semi-controlled practice", control: "Structure fixed, content theirs", accent: "var(--color-muted)", desc: "The frame or task is set by the teacher, but learners supply their own real content within it — some genuine choice, some constraint.", example: 'Roleplay cards: "Suggest doing something this weekend to your partner, using \'Why don\'t we...\' or \'How about...\'" — structure is cued, but what they suggest is up to them.' },
   { name: "Free practice", control: "No constraint at all", accent: "var(--color-destructive)", desc: "Learners communicate freely to achieve a real goal — no required structure, no correct answer, language choice entirely their own.", example: "The class has to actually agree, as a group, where to go on a real end-of-course outing — the target language may come up naturally, or it may not; nothing forces it." },
 ];
 
 const MORE_EXAMPLES: Stage[] = [
   { name: "Controlled", control: "One right answer", accent: "var(--color-primary)", desc: "", example: 'Sentence transformation: "I finish work at six." → "I ___ finish work at six." (\'m going to\') — one correct form, no content choice.' },
-  { name: "Semi-controlled", control: "Structure fixed, content theirs", accent: "var(--color-gold)", desc: "", example: 'Diary cards: learners fill in three real plans for next weekend, then tell a partner using "I\'m going to..." — the structure is fixed, the plans are genuinely theirs.' },
+  { name: "Semi-controlled", control: "Structure fixed, content theirs", accent: "var(--color-muted)", desc: "", example: 'Diary cards: learners fill in three real plans for next weekend, then tell a partner using "I\'m going to..." — the structure is fixed, the plans are genuinely theirs.' },
   { name: "Free", control: "No constraint at all", accent: "var(--color-destructive)", desc: "", example: 'Groups plan a real class trip together, deciding where, when, and how — "going to" may surface naturally in the planning, or may not; nothing requires it.' },
 ];
 
 const LOOPS = [
   { name: "Controlled loop", tag: "Same answer for everyone", accent: "var(--color-primary)", task: 'Ten quick prompts, one word each, chorally answered as a class: teacher says a habit that\'s now stopped ("smoke", "live in Paris"), trainees respond in unison "I used to ___." One right answer each time — done in under a minute, moving fast.' },
-  { name: "Semi-controlled loop", tag: "Structure fixed, content real", accent: "var(--color-gold)", task: 'In pairs, ask and answer: "What did you use to do as a child that you don\'t do now?" — the frame is fixed, but the actual habit each person names is their own. Swap partners once, repeat with a new person.' },
+  { name: "Semi-controlled loop", tag: "Structure fixed, content real", accent: "var(--color-muted)", task: 'In pairs, ask and answer: "What did you use to do as a child that you don\'t do now?" — the frame is fixed, but the actual habit each person names is their own. Swap partners once, repeat with a new person.' },
   { name: "Free loop", tag: "No constraint", accent: "var(--color-destructive)", task: 'Groups of three: "Tell the group one thing about your life five years ago that\'s completely different now." No structure required — "used to" may come up naturally, or a learner might say it a different way entirely. That\'s fine.' },
-  { name: "Whole-class free loop", tag: "No constraint, bigger stakes", accent: "var(--color-status-on-track-text)", task: 'The whole "class" (the trainee group) has to agree on one thing they all used to believe as children that turned out to be false, and vote on the best one. Genuinely free — the goal is the vote, not the grammar.' },
+  { name: "Whole-class free loop", tag: "No constraint, bigger stakes", accent: "var(--color-primary)", task: 'The whole "class" (the trainee group) has to agree on one thing they all used to believe as children that turned out to be false, and vote on the best one. Genuinely free — the goal is the vote, not the grammar.' },
 ];
 
 const SORT_ITEMS: ChoiceScenario[] = [
@@ -117,14 +117,14 @@ export default function LanguagePracticeSession() {
       title="Language practice — from controlled to free."
       intro="Drilling gets the form right with no real message. This session is about what comes after: three stages of practice activity that gradually hand control from teacher to learner, ending in a loop task that runs all three stages back to back on the same structure."
       agenda={[
-        { time: "0–5", spine: "var(--color-gold)", title: "Lead-in" },
+        { time: "0–5", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "5–30", spine: "var(--color-primary)", title: "Three stages" },
         { time: "30–38", spine: "var(--color-primary)", title: "More worked examples" },
         { time: "38–46", spine: "var(--color-destructive)", title: "Sort the activity" },
-        { time: "46–58", spine: "var(--color-gold)", title: "Loop task, all 3 stages" },
+        { time: "46–58", spine: "var(--color-muted)", title: "Loop task, all 3 stages" },
         { time: "58–64", spine: "var(--color-destructive)", title: "Spot the mismatch" },
-        { time: "64–69", spine: "var(--color-status-on-track-text)", title: "Design your own" },
-        { time: "69–72", spine: "var(--color-status-on-track-text)", title: "Wrap-up" },
+        { time: "64–69", spine: "var(--color-primary)", title: "Design your own" },
+        { time: "69–72", spine: "var(--color-primary)", title: "Wrap-up" },
       ]}
     >
       <RunningThisSession>

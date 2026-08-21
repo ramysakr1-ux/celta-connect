@@ -70,7 +70,7 @@ function ChooseTechnique() {
                     onClick={() => setPicked((p) => ({ ...p, [ci]: opt }))}
                     className={`rounded-full border-[1.5px] px-3 py-1.5 text-[11.5px] font-semibold ${
                       isCorrectPick
-                        ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                        ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
                           ? "border-destructive bg-destructive/10 text-destructive"
                           : "border-border bg-card text-ink"
@@ -122,7 +122,7 @@ function CollocationGroup({ verb, base, correctSet }: { verb: string; base: stri
               className={`rounded-[6px] border-[1.5px] px-2.5 py-1 text-[11.5px] font-semibold ${
                 isPicked
                   ? isCorrect
-                    ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                    ? "border-primary bg-primary/10 text-primary"
                     : "border-destructive bg-destructive/10 text-destructive"
                   : "border-border bg-card text-ink"
               }`}
@@ -143,11 +143,11 @@ export default function TeachingVocabularySession() {
       title="Teaching vocabulary and lexis."
       intro="A word isn't one fact to give — it's several: meaning, form, pronunciation, and how it combines with other words. This session works through a real item using techniques you'll use in your own teaching."
       agenda={[
-        { time: "0–2", spine: "var(--color-gold)", title: "Lead-in" },
+        { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "2–12", spine: "var(--color-primary)", title: "Match the terms" },
         { time: "12–25", spine: "var(--color-destructive)", title: "Choose a technique" },
-        { time: "25–35", spine: "var(--color-status-on-track-text)", title: "Build the collocations" },
-        { time: "35–40", spine: "var(--color-gold)", title: "Discuss: your own examples" },
+        { time: "25–35", spine: "var(--color-primary)", title: "Build the collocations" },
+        { time: "35–40", spine: "var(--color-muted)", title: "Discuss: your own examples" },
         { time: "40–45", spine: "var(--color-destructive)", title: "Trainer notes" },
       ]}
     >
@@ -215,7 +215,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />

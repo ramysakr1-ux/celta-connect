@@ -107,7 +107,7 @@ export function CohortSheet({
                 disabled={pending}
                 className="flex items-center gap-2 rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
               >
-                <span className="size-[5px] rounded-full bg-gold" />
+                <span className="size-[5px] rounded-full bg-muted" />
                 {pending ? "Releasing..." : "Release final reports"}
               </button>
             </form>
@@ -126,7 +126,7 @@ export function CohortSheet({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
         {/* Undecided -- needs justification */}
         <div className="rounded-[6px] border border-border">
-          <p className="border-b border-border bg-gold/10 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-gold">
+          <p className="border-b border-border bg-status-warning-bg px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-status-warning-text">
             Undecided — needs justification · {undecidedRows.length}
           </p>
           {undecidedRows.length === 0 ? (
@@ -194,7 +194,7 @@ export function CohortSheet({
                 </th>
               ))}
               <th className="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Provisional</th>
-              <th className="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-gold">Recommended</th>
+              <th className="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-status-warning-text">Recommended</th>
               <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Outstanding</th>
             </tr>
           </thead>

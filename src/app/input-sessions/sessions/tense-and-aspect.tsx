@@ -73,7 +73,7 @@ function ChooseAspect() {
                     onClick={() => setPicked((p) => ({ ...p, [ci]: opt }))}
                     className={`rounded-full border-[1.5px] px-3 py-1.5 text-[11.5px] font-semibold ${
                       isCorrectPick
-                        ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                        ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
                           ? "border-destructive bg-destructive/10 text-destructive"
                           : "border-border bg-card text-ink"
@@ -126,7 +126,7 @@ function SortByAspect() {
                 className={`rounded-[6px] border-[1.5px] px-2.5 py-1.5 text-left text-[11.5px] ${
                   shown
                     ? isCorrect
-                      ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                      ? "border-primary bg-primary/10 text-primary"
                       : "border-destructive bg-destructive/10 text-destructive"
                     : "border-border bg-card text-ink"
                 }`}
@@ -162,7 +162,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -196,11 +196,11 @@ export default function TenseAndAspectSession() {
       title="Tense and aspect."
       intro="Tense marks when. Aspect marks how the speaker views the action — complete, ongoing, or connected to another point in time. Most language-analysis errors trace back to confusing the two."
       agenda={[
-        { time: "0–2", spine: "var(--color-gold)", title: "Lead-in" },
+        { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "2–12", spine: "var(--color-primary)", title: "Match the terms" },
         { time: "12–25", spine: "var(--color-destructive)", title: "Choose the aspect" },
-        { time: "25–33", spine: "var(--color-status-on-track-text)", title: "Sort by aspect" },
-        { time: "33–42", spine: "var(--color-gold)", title: "Discuss: given pairs" },
+        { time: "25–33", spine: "var(--color-primary)", title: "Sort by aspect" },
+        { time: "33–42", spine: "var(--color-muted)", title: "Discuss: given pairs" },
         { time: "42–45", spine: "var(--color-destructive)", title: "Trainer notes" },
       ]}
     >

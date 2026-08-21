@@ -43,7 +43,7 @@ export function FormSubmitBar({
       }`}
     >
       <div className="flex items-center gap-2">
-        <span className="size-1.5 shrink-0 rounded-full bg-gold" />
+        <span className="size-1.5 shrink-0 rounded-full bg-status-warning-text" />
         <p className="text-xs text-muted">{warning}</p>
       </div>
       <div className="flex items-center gap-3">

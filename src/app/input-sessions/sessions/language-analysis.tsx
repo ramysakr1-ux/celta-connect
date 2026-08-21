@@ -135,7 +135,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -169,11 +169,11 @@ export default function LanguageAnalysisSession() {
       title="Language analysis, start to finish, on the real sheet."
       intro="Warm up on why analysis exists, clear the jargon, then draft the analysis for your own next TP point on the real form — the one that feeds straight into your lesson plan."
       agenda={[
-        { time: "0–2", spine: "var(--color-gold)", title: "Lead-in" },
-        { time: "2–8", spine: "var(--color-gold)", title: "Why analyse it first?" },
-        { time: "8–15", spine: "var(--color-gold)", title: "Jargon match" },
+        { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
+        { time: "2–8", spine: "var(--color-muted)", title: "Why analyse it first?" },
+        { time: "8–15", spine: "var(--color-muted)", title: "Jargon match" },
         { time: "15–18", spine: "var(--color-primary)", title: "Choose grammar or vocab" },
-        { time: "18–38", spine: "var(--color-status-on-track-text)", title: "Live draft, own TP point" },
+        { time: "18–38", spine: "var(--color-primary)", title: "Live draft, own TP point" },
         { time: "38–45", spine: "var(--color-destructive)", title: "Trainer notes + questions" },
       ]}
     >

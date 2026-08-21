@@ -82,7 +82,7 @@ function ItemCard({ item, canClaim }: { item: MaterialPoolItemForTrainee; canCla
           <button
             type="submit"
             disabled={pending}
-            className="h-7 rounded-[6px] border border-dashed border-gold px-2.5 text-xs font-medium text-gold hover:bg-gold/10 disabled:opacity-60"
+            className="h-7 rounded-[6px] border border-dashed border-status-warning-text px-2.5 text-xs font-medium text-status-warning-text hover:bg-status-warning-bg disabled:opacity-60"
           >
             {pending ? "Claiming…" : "Claim"}
           </button>

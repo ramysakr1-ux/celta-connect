@@ -119,7 +119,7 @@ function IntonationSection({ voiceIdx }: { voiceIdx: number }) {
           </button>
           <p className="flex-1 text-[13px] text-ink">&quot;{it.text}&quot;</p>
           {revealed[i] ? (
-            <p className={`text-[11.5px] font-semibold ${it.rising ? "text-primary" : "text-gold"}`}>{it.answer}</p>
+            <p className={`text-[11.5px] font-semibold ${it.rising ? "text-primary" : "text-muted"}`}>{it.answer}</p>
           ) : (
             <button type="button" data-print-hide onClick={() => setRevealed((r) => ({ ...r, [i]: true }))} className="text-[11px] font-semibold text-primary">
               Reveal
@@ -149,7 +149,7 @@ function MarkingStress({ voiceIdx }: { voiceIdx: number }) {
               type="button"
               data-print-hide
               onClick={() => speakSyllablesAt(w.syllables, w.stressed, voiceIdx)}
-              className="flex size-8 flex-none items-center justify-center rounded-full bg-gold text-white"
+              className="flex size-8 flex-none items-center justify-center rounded-full bg-muted text-white"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M8 5v14l11-7z" />
@@ -170,7 +170,7 @@ function MarkingStress({ voiceIdx }: { voiceIdx: number }) {
                     }}
                     className={`rounded-[6px] border-[1.5px] px-3 py-1.5 font-serif text-sm ${isStressed ? "font-bold" : "font-normal"} ${
                       show && isStressed
-                        ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                        ? "border-primary bg-primary/10 text-primary"
                         : show && isPicked
                           ? "border-destructive bg-destructive/10 text-destructive"
                           : "border-border bg-card text-ink"
@@ -181,7 +181,7 @@ function MarkingStress({ voiceIdx }: { voiceIdx: number }) {
                 );
               })}
             </div>
-            <p className={`w-16 flex-none text-right text-[11px] font-semibold ${picked === w.stressed ? "text-status-on-track-text" : "text-destructive"}`}>
+            <p className={`w-16 flex-none text-right text-[11px] font-semibold ${picked === w.stressed ? "text-primary" : "text-destructive"}`}>
               {picked !== undefined ? (picked === w.stressed ? "Correct" : "Try again") : ""}
             </p>
           </div>
@@ -237,7 +237,7 @@ function DoubleStress({ voiceIdx }: { voiceIdx: number }) {
                       return { ...p, [wi]: next };
                     });
                   }}
-                  className={`rounded-full border-[1.5px] ${done ? "border-status-on-track-text bg-status-on-track-bg" : isRevealed ? "border-gold bg-gold/15" : "border-border bg-card"}`}
+                  className={`rounded-full border-[1.5px] ${done ? "border-primary bg-primary/10" : isRevealed ? "border-muted bg-muted/15" : "border-border bg-card"}`}
                   style={{ width: SIZE[shown[si]], height: SIZE[shown[si]] }}
                 />
               ))}
@@ -249,7 +249,7 @@ function DoubleStress({ voiceIdx }: { voiceIdx: number }) {
                 if (done) return;
                 setRevealed((r) => ({ ...r, [wi]: !r[wi] }));
               }}
-              className={`w-16 flex-none text-right text-[11px] font-semibold ${done ? "text-status-on-track-text" : isRevealed ? "text-muted" : "text-primary"}`}
+              className={`w-16 flex-none text-right text-[11px] font-semibold ${done ? "text-primary" : isRevealed ? "text-muted" : "text-primary"}`}
             >
               {done ? "Correct" : isRevealed ? "Hide" : "Reveal"}
             </button>
@@ -316,7 +316,7 @@ function TrainerScript() {
         type="button"
         onClick={() => setOpen(true)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <circle cx="7.5" cy="15.5" r="5.5" />
@@ -362,10 +362,10 @@ export default function StressAndIntonationSession() {
       intro="Word stress and sentence tune, both spoken aloud, both worth a mark on FOL and LRT. Click any word or line to hear it."
       agenda={[
         { time: "0–8", spine: "var(--color-primary)", title: "Intonation: question or statement" },
-        { time: "8–20", spine: "var(--color-gold)", title: "Marking stress for LRT" },
+        { time: "8–20", spine: "var(--color-muted)", title: "Marking stress for LRT" },
         { time: "20–30", spine: "var(--color-primary)", title: "Primary and secondary stress" },
         { time: "30–40", spine: "var(--color-destructive)", title: "Connect to FOL" },
-        { time: "40–45", spine: "var(--color-status-on-track-text)", title: "Close" },
+        { time: "40–45", spine: "var(--color-primary)", title: "Close" },
       ]}
     >
       <div className="flex flex-col gap-1.5 rounded-[8px] border border-primary/25 bg-primary/5 p-4">

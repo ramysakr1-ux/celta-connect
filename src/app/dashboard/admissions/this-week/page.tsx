@@ -119,7 +119,7 @@ export default async function ThisWeeksInterviewsPage() {
                           {nameByProfileId.get(s.interviewer_id) ?? "Unknown interviewer"}
                         </div>
                         {s.panel ? (
-                          <div className="text-[10px] font-bold text-gold">
+                          <div className="text-[10px] font-bold text-muted">
                             Panel -- 2 interviewers
                             {s.second_interviewer_id ? ` (${nameByProfileId.get(s.second_interviewer_id) ?? "second"})` : ""}
                           </div>

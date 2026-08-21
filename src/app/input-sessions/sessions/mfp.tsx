@@ -6,9 +6,9 @@ import { RunningThisSession, TrainerNotes } from "@/components/input-sessions/tr
 
 const PILLARS = [
   { label: "Meaning", color: "var(--color-primary)", text: "What the item means, checked with CCQs — not the definition, the concept." },
-  { label: "Form", color: "var(--color-status-on-track-text)", text: "How it's built and how it changes — spelling, word order, morphology." },
+  { label: "Form", color: "var(--color-primary)", text: "How it's built and how it changes — spelling, word order, morphology." },
   { label: "Pronunciation", color: "var(--color-destructive)", text: "How it sounds — stress, individual sounds, weak forms, connected speech." },
-  { label: "Appropriacy", color: "var(--color-gold)", text: "When it's the right choice — register, formality, who says it to whom." },
+  { label: "Appropriacy", color: "var(--color-muted)", text: "When it's the right choice — register, formality, who says it to whom." },
 ];
 
 const CCQ_ITEMS = [
@@ -61,7 +61,7 @@ const FLAWS = [
 
 const EXAMPLE_ROWS = [
   { label: "Meaning", color: "var(--color-primary)", text: 'CCQs against a timeline: "Did I do this once, or many times? Do I do it now?"' },
-  { label: "Form", color: "var(--color-status-on-track-text)", text: "Board: subject + used to + base verb. Highlight it never changes for person or number." },
+  { label: "Form", color: "var(--color-primary)", text: "Board: subject + used to + base verb. Highlight it never changes for person or number." },
   { label: "Pronunciation", color: "var(--color-destructive)", text: "Drill the weak, run-together sound: /ˈjuːstə/, not /juːzd tuː/. Mark the schwa." },
 ];
 
@@ -117,8 +117,8 @@ function AnalyseForm() {
                 const isPicked = pi === picked;
                 const isTrap = pi === fm.trap;
                 let cls = "text-ink bg-transparent";
-                if (answered && isPicked) cls = pi === fm.trap ? "text-status-on-track-text bg-status-on-track-bg" : "text-destructive bg-destructive/10";
-                else if (answered && isTrap) cls = "text-status-on-track-text bg-status-on-track-bg";
+                if (answered && isPicked) cls = pi === fm.trap ? "text-primary bg-primary/10" : "text-destructive bg-destructive/10";
+                else if (answered && isTrap) cls = "text-primary bg-primary/10";
                 return (
                   <button
                     key={pi}
@@ -170,7 +170,7 @@ function QuickFire() {
                     onClick={() => setPicks((p) => ({ ...p, [i]: opt }))}
                     className={`rounded-full border-[1.5px] px-2.5 py-1.5 text-[11px] font-semibold ${
                       isCorrectPick
-                        ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                        ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
                           ? "border-destructive bg-destructive/10 text-destructive"
                           : "border-border bg-card text-ink"
@@ -210,7 +210,7 @@ function WeakForms() {
                     onClick={() => setPicks((p) => ({ ...p, [i]: oi }))}
                     className={`rounded-full border-[1.5px] px-2.5 py-1.5 text-[11.5px] font-semibold ${
                       isCorrectPick
-                        ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                        ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
                           ? "border-destructive bg-destructive/10 text-destructive"
                           : "border-border bg-card text-ink"
@@ -244,8 +244,8 @@ function MarkStress() {
                 const isPicked = wi === picked;
                 const isCorrect = wi === item.stressed;
                 let cls = "text-ink bg-transparent font-normal";
-                if (answered && isPicked) cls = isCorrect ? "text-status-on-track-text bg-status-on-track-bg font-bold" : "text-destructive bg-destructive/10 font-bold";
-                else if (answered && isCorrect) cls = "text-status-on-track-text bg-status-on-track-bg font-bold";
+                if (answered && isPicked) cls = isCorrect ? "text-primary bg-primary/10 font-bold" : "text-destructive bg-destructive/10 font-bold";
+                else if (answered && isCorrect) cls = "text-primary bg-primary/10 font-bold";
                 return (
                   <button
                     key={wi}
@@ -290,7 +290,7 @@ function Appropriacy() {
                     onClick={() => setPicks((p) => ({ ...p, [ai]: oi }))}
                     className={`rounded-full border-[1.5px] px-2.5 py-1.5 text-[11px] font-semibold ${
                       isCorrectPick
-                        ? "border-status-on-track-text bg-status-on-track-bg text-status-on-track-text"
+                        ? "border-primary bg-primary/10 text-primary"
                         : isWrongPick
                           ? "border-destructive bg-destructive/10 text-destructive"
                           : "border-border bg-card text-ink"
@@ -327,7 +327,7 @@ function SpotTheFlaw() {
             {open[i] ? "Hide the fix" : "What's missing?"}
           </button>
           {open[i] ? (
-            <div className="rounded-[4px] border-l-[3px] border-status-on-track-text bg-status-on-track-bg px-3.5 py-2.5">
+            <div className="rounded-[4px] border-l-[3px] border-primary bg-primary/10 px-3.5 py-2.5">
               <p className="text-xs leading-relaxed text-ink">{f.fix}</p>
             </div>
           ) : null}
@@ -400,7 +400,7 @@ function StagingExample() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         data-print-hide
-        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-gold/45 bg-gold/10 px-4 text-xs font-semibold text-gold"
+        className="self-start flex h-[34px] items-center gap-1.5 rounded-full border border-border bg-muted/10 px-4 text-xs font-semibold text-muted"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -438,15 +438,15 @@ export default function MfpSession() {
       title="MFPA — meaning, form, pronunciation, appropriacy."
       intro="Every target item needs all four covered before it's ready to teach. This session gives each real weight — writing CCQs that isolate meaning, analysing form precisely, not skipping pronunciation, and checking when a form is actually the right choice."
       agenda={[
-        { time: "0–2", spine: "var(--color-gold)", title: "Lead-in" },
+        { time: "0–2", spine: "var(--color-muted)", title: "Lead-in" },
         { time: "2–5", spine: "var(--color-primary)", title: "Meaning, form, pronunciation defined" },
         { time: "5–11", spine: "var(--color-primary)", title: "Write a CCQ" },
-        { time: "11–16", spine: "var(--color-status-on-track-text)", title: "Analyse the form" },
+        { time: "11–16", spine: "var(--color-primary)", title: "Analyse the form" },
         { time: "16–22", spine: "var(--color-destructive)", title: "Transcribe the weak forms" },
         { time: "22–28", spine: "var(--color-destructive)", title: "Mark the stress" },
-        { time: "28–33", spine: "var(--color-gold)", title: "Which register?" },
+        { time: "28–33", spine: "var(--color-muted)", title: "Which register?" },
         { time: "33–39", spine: "var(--color-primary)", title: "Meaning, form, pron, or appropriacy?" },
-        { time: "39–45", spine: "var(--color-gold)", title: "Spot the flaw + trainer notes" },
+        { time: "39–45", spine: "var(--color-muted)", title: "Spot the flaw + trainer notes" },
       ]}
     >
       <RunningThisSession>

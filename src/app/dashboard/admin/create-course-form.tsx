@@ -206,9 +206,9 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
           ))}
         </div>
 
-        {/* The design's gold callout: confirming generates the tiles. */}
-        <div className="rounded-[6px] border border-[color-mix(in_oklab,oklch(60%_0.11_70)_30%,transparent)] bg-[color-mix(in_oklab,oklch(60%_0.11_70)_9%,var(--color-card))] px-[15px] py-[13px]">
-          <p className="text-[13px] font-semibold text-[oklch(45%_0.1_70)]">Tiles, not a blank calendar</p>
+        {/* Informational notice, not urgent -- muted per the colour legend. */}
+        <div className="rounded-[6px] border border-border bg-surface-muted px-[15px] py-[13px]">
+          <p className="text-[13px] font-semibold text-muted">Tiles, not a blank calendar</p>
           <p className="mt-0.5 text-xs leading-relaxed text-ink">
             Confirming here generates the timetable tiles automatically. Tiles can be moved individually
             afterwards without altering the pattern.

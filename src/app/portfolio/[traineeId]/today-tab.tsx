@@ -327,13 +327,13 @@ export async function TodayTab({
 
         {/* Announcements */}
         <div className="sheet flex flex-col gap-3">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-gold uppercase">Announcements</p>
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">Announcements</p>
           {(broadcasts ?? []).length === 0 ? (
             <p className="text-sm text-muted">Nothing posted yet.</p>
           ) : (
             <div className="flex flex-col">
               {(broadcasts ?? []).map((b, i) => (
-                <div key={b.id} className={`flex flex-col gap-1 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""} ${b.pinned ? "border-l-2 border-gold pl-2.5" : ""}`}>
+                <div key={b.id} className={`flex flex-col gap-1 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""} ${b.pinned ? "border-l-2 border-status-warning-text pl-2.5" : ""}`}>
                   <p className={`text-sm ${b.pinned ? "font-bold text-ink" : "font-semibold text-ink"}`}>{b.title}</p>
                   {b.body ? (
                     <div className="flex flex-col gap-2 text-sm whitespace-pre-line text-ink">{b.body}</div>

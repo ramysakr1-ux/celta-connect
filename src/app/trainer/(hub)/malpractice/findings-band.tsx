@@ -34,7 +34,7 @@ export function FindingsBand({
   return (
     <div className="flex flex-col gap-3">
       {unreviewed.map((f) => (
-        <div key={f.id} className="rounded-[6px] border border-gold/40 bg-gold/10 p-4">
+        <div key={f.id} className="rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg p-4">
           <p className="text-sm font-semibold text-ink">
             Scanner match in &quot;{f.sectionKey}&quot; -- {f.matchLength} words,{" "}
             {f.sourceType === "same_course"

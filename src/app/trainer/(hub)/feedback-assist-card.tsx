@@ -13,7 +13,13 @@ const initialState: FeedbackAssistFormState = { error: null };
 // primary/teal (matches the design's Direct color exactly); Encouraging has
 // no existing app-wide token, so its oklch is inline per the design's own
 // tokens list rather than inventing a new global one for a single card.
-const ENCOURAGING_INK = "oklch(58% 0.1 145)";
+//
+// Re-pointed 2026-08-21 per the color audit: the original green collided
+// with "positive/primary" meaning reserved for teal. Kept in the teal
+// family (same hue as --color-primary, 195) but lighter and less saturated
+// than Direct's dark teal, so the two tone examples stay visually distinct
+// rather than reading as identical.
+const ENCOURAGING_INK = "oklch(58% 0.1 195)";
 
 export function FeedbackAssistCard({
   initialEnabled,

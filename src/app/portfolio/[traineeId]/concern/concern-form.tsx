@@ -35,7 +35,7 @@ export function ConcernForm({ traineeId }: { traineeId: string }) {
           <label
             key={r.value}
             className={`flex cursor-pointer items-start gap-2.5 rounded-[6px] border p-3 ${
-              route === r.value ? (r.value === "manager" ? "border-gold bg-gold/5" : "border-primary bg-primary/5") : "border-border"
+              route === r.value ? (r.value === "manager" ? "border-status-warning-text bg-status-warning-bg" : "border-primary bg-primary/5") : "border-border"
             }`}
           >
             <input type="radio" name="route_radio" checked={route === r.value} onChange={() => setRoute(r.value)} className="mt-0.5" />

@@ -76,7 +76,7 @@ export function CloseOutCard({
           entirely on your centre&apos;s Drive.
         </p>
       ) : status === "grace_period" ? (
-        <div className="rounded-[6px] border border-gold/30 bg-gold/10 p-3">
+        <div className="rounded-[6px] border border-status-warning-text/30 bg-status-warning-bg p-3">
           <p className="text-sm text-ink">
             Receipt signed by {closeOut?.receipt_signed_name} on{" "}
             {closeOut?.receipt_signed_at ? formatDateTime(closeOut.receipt_signed_at) : ""}.
@@ -138,7 +138,7 @@ export function CloseOutCard({
               branch above), never verification or export, so this banner is
               informational here, not a gate. */}
           {blockingReasons.length > 0 ? (
-            <div className="flex flex-col gap-1.5 rounded-[6px] border border-gold/30 bg-gold/10 p-3">
+            <div className="flex flex-col gap-1.5 rounded-[6px] border border-status-warning-text/30 bg-status-warning-bg p-3">
               <p className="text-sm font-medium text-ink">
                 Export is fine to run now, but the final clear-out will wait on:
               </p>
@@ -151,7 +151,7 @@ export function CloseOutCard({
           ) : null}
 
           {status === "verify_failed" && closeOut?.verification_report ? (
-            <div className="flex flex-col gap-1.5 rounded-[6px] border border-gold/30 bg-gold/10 p-3">
+            <div className="flex flex-col gap-1.5 rounded-[6px] border border-destructive/30 bg-destructive/10 p-3">
               <p className="text-sm text-ink">
                 {closeOut.verification_report.issues.length} issue{closeOut.verification_report.issues.length === 1 ? "" : "s"} found
                 across {closeOut.verification_report.candidateCount} candidate

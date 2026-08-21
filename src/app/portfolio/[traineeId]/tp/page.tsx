@@ -274,14 +274,14 @@ export default async function TpHubPage({
 
       {!isStaff && carriedForward.length > 0 ? (
         <div className="sheet flex flex-col gap-2.5">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-gold uppercase">Carried forward</p>
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">Carried forward</p>
           <p className="text-xs text-muted">
             Starred action points from TP{mostRecentFeedbackTp} feedback, already folded into your next lesson plan
             as personal aims.
           </p>
           <ul className="flex flex-col gap-1.5">
             {carriedForward.map((point, i) => (
-              <li key={i} className="border-l-2 border-gold pl-2.5 text-sm text-ink">
+              <li key={i} className="border-l-2 border-status-warning-text pl-2.5 text-sm text-ink">
                 {point}
               </li>
             ))}

@@ -20,7 +20,7 @@ export default async function JoinCentrePage({ params }: { params: Promise<{ tok
   if (!invite || invite.used_at || invite.revoked_at) {
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="sheet-gold w-full max-w-sm p-8">
+        <div className="sheet-entry w-full max-w-sm p-8">
           <Wordmark size="hero" />
           <p className="mt-4 text-sm text-destructive">
             This invite link is invalid or has already been used. Ask the centre owner for a new one.
@@ -35,7 +35,7 @@ export default async function JoinCentrePage({ params }: { params: Promise<{ tok
 
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-      <div className="sheet-gold w-full max-w-sm p-8">
+      <div className="sheet-entry w-full max-w-sm p-8">
         <Wordmark size="hero" />
         <p className="mt-1 text-sm text-muted">
           You&apos;re joining {center?.name ?? "your centre"} as a {roleLabel}. You do not need to be on a course —

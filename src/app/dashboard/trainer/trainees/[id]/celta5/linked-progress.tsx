@@ -25,7 +25,7 @@ export function AssessedTpStatsBadge({ stats, byMode }: { stats: AssessedTpStats
       </span>
       <span
         className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${
-          levelsOk ? "bg-accent text-ink" : "border border-dashed border-gold text-gold"
+          levelsOk ? "bg-accent text-ink" : "border border-dashed border-status-warning-text text-status-warning-text"
         }`}
       >
         Levels taught: {stats.levels.length > 0 ? stats.levels.join(", ") : "none yet"} ({stats.levels.length} of{" "}

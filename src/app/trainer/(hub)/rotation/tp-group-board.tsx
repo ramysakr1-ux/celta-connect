@@ -73,10 +73,10 @@ export function TpGroupBoard({
                   <th
                     key={date}
                     className={`min-w-[64px] border-b border-l border-border-faint p-1.5 text-left ${
-                      isNext ? "bg-gold/10" : ""
+                      isNext ? "bg-status-warning-bg" : ""
                     }`}
                   >
-                    <span className={`block text-[10px] font-semibold ${isNext ? "text-gold" : "text-ink"}`}>
+                    <span className={`block text-[10px] font-semibold ${isNext ? "text-status-warning-text" : "text-ink"}`}>
                       {new Date(`${date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                     </span>
                     <span className="block text-[9px] font-semibold uppercase tracking-[0.06em] text-muted">
@@ -128,14 +128,14 @@ export function TpGroupBoard({
                             const chipClass = taught
                               ? "bg-ink text-card"
                               : isNextCol
-                                ? "bg-gold text-gold-foreground"
+                                ? "bg-status-warning-text text-status-warning-bg"
                                 : "bg-surface-muted text-muted";
                             return (
                               <div key={m.traineeId} className="flex flex-col items-center gap-0.5">
                                 <span className={`flex size-[22px] items-center justify-center rounded-[6px] text-xs font-bold ${chipClass}`}>
                                   {position}
                                 </span>
-                                <span className={`text-[9px] font-semibold ${isNextCol ? "text-gold" : "text-muted"}`}>
+                                <span className={`text-[9px] font-semibold ${isNextCol ? "text-status-warning-text" : "text-muted"}`}>
                                   TP{tpNumber}
                                 </span>
                               </div>
@@ -158,7 +158,7 @@ export function TpGroupBoard({
           <span className="text-[11px] text-muted">Taught</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="size-3.5 rounded-[4px] bg-gold" />
+          <span className="size-3.5 rounded-[4px] bg-status-warning-text" />
           <span className="text-[11px] text-muted">Next TP day</span>
         </div>
         <div className="flex items-center gap-2">

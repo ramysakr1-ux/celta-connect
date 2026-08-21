@@ -7,7 +7,7 @@ export type Volunteer = { id: string; name: string };
 // apply-to-app.md §2.4 -- category is now a 3px left rule + dot, not a
 // background fill. `lu` (lunch) gets no rule at all, it should recede.
 export const CATEGORY_ACCENT: Record<string, string> = {
-  admin: "var(--color-gold)",
+  admin: "var(--color-status-warning-text)",
   wg: "var(--color-primary)",
   rm: "var(--color-ink)",
   iw: "var(--color-muted)",

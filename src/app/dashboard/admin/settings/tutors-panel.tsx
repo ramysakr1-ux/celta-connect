@@ -70,7 +70,7 @@ function TutorRow({
         <td className="py-2.5 text-muted">
           {row.isTrainerInTraining ? (
             <span className="inline-flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-gold" />
+              <span className="size-1.5 rounded-full bg-muted" />
               Training{supervisorName ? ` · supervised by ${supervisorName}` : ""}
             </span>
           ) : (

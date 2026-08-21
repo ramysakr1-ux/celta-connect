@@ -22,29 +22,42 @@ import "server-only";
 
 export const EMAIL_TONE = {
   /**
-   * Setup and informational.
+   * Setup and informational, and the app's actual accent colour -- teal.
    *
-   * Brass, not the handoff's teal. oklch(37.5% 0.058 195) converts to #0f4a4b,
-   * which on screen reads as a dark green -- and green is out of the palette
-   * (Ramy, 2026-08-16, twice: the first pass changed the token literally named
-   * "green", which no email used, so nothing visibly changed).
+   * Fixed on the 2026-08-21 colour-legend pass: `teal`, `gold`, and `green`
+   * had all silently pointed at gold's own hex (#ad7f43) since 2026-08-16,
+   * a workaround for the fact that the handoff's teal oklch(37.5% 0.058 195)
+   * converts to #0f4a4b, which reads as dark green on screen in most mail
+   * clients -- and green was ruled out of the palette that day. Rather than
+   * leave every "teal" email actually rendering gold, this uses a distinct,
+   * clearly-teal (not green) mid-dark shade instead.
    *
    * This is the colour on the spine and the buttons of the interview
    * invitation, the offer, the acceptance and the workspace invitation, so it
    * is the one that was actually being looked at.
    */
-  teal: "#ad7f43",
-  /** Waiting, time-limited, warm. */
-  gold: "#ad7f43",
+  teal: "#1a5c5e",
+  /** Waiting, time-limited, warm. Gold is otherwise reserved for the brand
+   * mark and top-achievement grade markers -- this is the canonical gold hex
+   * already used by this codebase's PDF generators, kept distinct from
+   * `teal` and `amber` below. */
+  gold: "#a97a2f",
   /** Rejection, flag. */
   red: "#972622",
   /**
-   * Confirmation, positive. Brass, not green (Ramy, 2026-08-16) -- the green
-   * is out of the palette, here as everywhere else. Same value as gold; kept
-   * as its own name so an email can still say "this is a confirmation" rather
-   * than "this is time-limited", even though they now look alike.
+   * Confirmation, positive. Green is fully retired from this project's
+   * colour legend, so a `green`-toned email now means the same thing as
+   * `teal` -- same hex, kept as its own name only so call sites can still
+   * say "this is a confirmation" rather than "this is teal/positive".
    */
-  green: "#ad7f43",
+  green: "#1a5c5e",
+  /**
+   * Advisory / pending -- waiting-list emails. Split out from `gold` on the
+   * 2026-08-21 pass: those emails are semantically amber (needs-attention),
+   * not gold (which is reserved), so they get their own print/email-safe
+   * amber hex distinct from both `teal` and `gold`.
+   */
+  amber: "#8a6116",
   /** Plain acknowledgements, nothing to signal. */
   muted: "#6d655c",
   /**

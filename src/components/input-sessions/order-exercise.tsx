@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 // "Debrief — put the stages back in order." Shown shuffled; clicking the
-// correct next stage locks it in place (numbered, green); clicking any
+// correct next stage locks it in place (numbered, teal); clicking any
 // other stage is a silent no-op -- no penalty, just doesn't advance,
 // matching the source's own "no wrong answer" framing for this exercise.
 export function OrderExercise({ correctOrder, shuffled }: { correctOrder: string[]; shuffled: string[] }) {
@@ -32,12 +32,12 @@ export function OrderExercise({ correctOrder, shuffled }: { correctOrder: string
                 if (!isDone && isCorrectNext) setPicked((p) => [...p, label]);
               }}
               className={`flex items-center gap-3 rounded-[7px] border-2 px-3.5 py-2.5 text-left ${
-                isDone ? "border-status-on-track-text bg-status-on-track-bg cursor-default" : "border-border bg-card cursor-pointer"
+                isDone ? "border-primary bg-primary/10 cursor-default" : "border-border bg-card cursor-pointer"
               }`}
             >
               <span
                 className={`flex size-5 flex-none items-center justify-center rounded-full text-[10.5px] font-bold ${
-                  isDone ? "bg-status-on-track-text text-white" : "bg-accent text-muted"
+                  isDone ? "bg-primary text-white" : "bg-accent text-muted"
                 }`}
               >
                 {isDone ? idx + 1 : "?"}

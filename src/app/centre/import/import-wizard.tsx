@@ -277,7 +277,7 @@ export function ImportWizard({
 
           {statusValues.length > 0 ? (
             <div className="flex flex-col gap-2 border-t border-border-faint pt-4">
-              <p className="text-[11px] font-semibold tracking-[0.12em] text-gold uppercase">
+              <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">
                 Your status words &middot; {statusValues.length}
               </p>
               <p className="text-sm text-muted">
@@ -344,8 +344,8 @@ export function ImportWizard({
 
           <div className="flex flex-wrap gap-10 rounded-[8px] border border-border bg-surface-muted/50 px-5 py-4">
             {[
-              { k: "Will import", v: analysis.tallies.willImport, cls: "text-[oklch(48%_0.09_150)]" },
-              { k: "Duplicates", v: analysis.tallies.duplicates, cls: "text-gold" },
+              { k: "Will import", v: analysis.tallies.willImport, cls: "text-primary" },
+              { k: "Duplicates", v: analysis.tallies.duplicates, cls: "text-status-warning-text" },
               { k: "Missing email", v: analysis.tallies.missingEmail, cls: "text-destructive" },
               { k: "Skipped by you", v: analysis.tallies.skipped, cls: "text-muted" },
             ].map((t) => (
@@ -362,11 +362,11 @@ export function ImportWizard({
                 key={r.rowNumber}
                 className={`mb-1 flex items-center gap-3 rounded-[6px] border-l-[3px] bg-surface-muted/40 py-2 pr-3 pl-3 ${
                   r.verdict === "import"
-                    ? "border-l-[oklch(48%_0.09_150)]"
+                    ? "border-l-primary"
                     : r.verdict === "missing_email"
                       ? "border-l-destructive"
                       : r.verdict === "duplicate"
-                        ? "border-l-gold"
+                        ? "border-l-status-warning-text"
                         : "border-l-border"
                 }`}
               >
@@ -438,7 +438,7 @@ export function ImportWizard({
               {
                 t: "The import can be undone for seven days",
                 d: "One button removes everything it created, provided nobody has been invited or paid since.",
-                c: "border-l-gold",
+                c: "border-l-status-warning-text",
               },
               {
                 t: "It can be run again",

@@ -79,7 +79,7 @@ export function AimCoverageMatrix({ members, plans }: { members: CoverageMember[
                       </td>
                     );
                   })}
-                  <td className={`p-2 text-right text-xs font-semibold ${spread.distinct >= 3 ? "text-muted" : "text-gold"}`}>
+                  <td className={`p-2 text-right text-xs font-semibold ${spread.distinct >= 3 ? "text-muted" : "text-status-warning-text"}`}>
                     {spread.distinct} of {spread.total} kinds
                   </td>
                 </tr>

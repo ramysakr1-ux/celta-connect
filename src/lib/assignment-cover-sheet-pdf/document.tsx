@@ -25,7 +25,6 @@ const COLOR = {
   border: "#e2ded5",
   teal: "#1c4e52",
   gold: "#a97a2f",
-  green: "#2f6b3f",
   amber: "#8a5a12",
   cream: "#f8f3e8",
 };
@@ -63,7 +62,7 @@ const styles = StyleSheet.create({
   tableRow: { padding: 6, borderBottomWidth: 0.5, borderBottomColor: COLOR.border },
   criterionText: { fontSize: 8.5, lineHeight: 1.4, marginBottom: 3 },
   criterionMarks: { fontSize: 8, color: COLOR.muted },
-  criterionMarkMet: { color: COLOR.green },
+  criterionMarkMet: { color: COLOR.teal },
   criterionMarkNotMet: { color: COLOR.amber },
 
   outcomeGrid: { marginBottom: 12 },
@@ -147,7 +146,7 @@ function markText(met: boolean | undefined): string {
 
 function markColor(met: boolean | undefined): string {
   if (met === undefined) return COLOR.muted;
-  return met ? COLOR.green : COLOR.amber;
+  return met ? COLOR.teal : COLOR.amber;
 }
 
 const OUTCOME_OPTIONS: { key: AssignmentCoverSheetInput["outcome"]; label: string }[] = [

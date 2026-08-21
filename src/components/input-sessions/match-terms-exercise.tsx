@@ -9,7 +9,7 @@ export interface MatchTerm {
 
 // "Stage 1 · Match each term to its meaning" -- click a term on the left,
 // then its definition on the right (either order). Auto-checks on the
-// second click: matched pairs lock green, a wrong pair briefly shakes red
+// second click: matched pairs lock teal, a wrong pair briefly shakes red
 // then clears both selections. Right column order is reversed (not
 // randomized -- matches every source .dc.html's own `reverse()`, and
 // keeps this deterministic so server and client render the same order).
@@ -51,7 +51,7 @@ export function MatchTermsExercise({ terms }: { terms: MatchTerm[] }) {
     const isMatched = matched.has(id);
     const isSel = sel === id;
     const isShake = shake.includes(id);
-    if (isMatched) return "border-2 border-status-on-track-text bg-status-on-track-bg text-status-on-track-text cursor-default";
+    if (isMatched) return "border-2 border-primary bg-primary/10 text-primary cursor-default";
     if (isSel) return "border-2 border-primary bg-primary/10 text-ink cursor-pointer";
     if (isShake) return "border-2 border-destructive bg-card text-ink cursor-pointer";
     return "border border-border bg-card text-ink cursor-pointer";

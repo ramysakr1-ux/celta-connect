@@ -337,14 +337,37 @@ h6 {
   }
 
   /* Entry.dc.html doesn't give every gate the same card. Sign-in is plain
-     paper; the join card and the reset / dead-link gates are gold-tinted; the
-     "check your email" confirmation is red-tinted (.sheet-accent-alert).
-     Values are lifted from Entry.dc.html literally rather than rebuilt from
-     the app's --color-gold, which is a slightly different gold
-     (oklch(63% 0.096 72) vs the 60% 0.11 70 the entry screens use). */
+     paper; the join card and the reset / dead-link gates get this warm
+     "brand entry moment" tint; the "check your email" confirmation is
+     red-tinted (.sheet-accent-alert).
+
+     Renamed from .sheet-gold to .sheet-entry on the 2026-08 colour-legend
+     pass: gold is reserved app-wide for the brand mark and top-achievement
+     grade markers (above_standard / Pass A) only, and this card isn't
+     either of those -- it's the shared entry-flow surface for
+     join/join-centre/offer/interview/support/forgot-password. Rather than
+     flattening it to plain muted gray (which would lose the deliberate
+     "brand entry moment" feel these six gates share), the tint now mixes in
+     --color-bronze -- the app's third accent, already documented as
+     "distinct from primary/gold/ink" -- instead of the old literal gold
+     hue, so the warm branded feel survives without touching the
+     gold-reserved token. .sheet-gold is kept below as a deprecated alias
+     in case anything still references it; all six call sites were moved to
+     .sheet-entry. */
+  .sheet-entry {
+    background-color: color-mix(in oklab, var(--color-bronze) 8%, oklch(99.2% 0.005 90));
+    border: 1px solid color-mix(in oklab, var(--color-bronze) 26%, transparent);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    box-shadow: none;
+  }
+
+  /* Deprecated alias -- prefer .sheet-entry. Kept so any stray reference
+     still renders the current (bronze-tinted) entry card rather than
+     silently losing its styling. */
   .sheet-gold {
-    background-color: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90));
-    border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent);
+    background-color: color-mix(in oklab, var(--color-bronze) 8%, oklch(99.2% 0.005 90));
+    border: 1px solid color-mix(in oklab, var(--color-bronze) 26%, transparent);
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;

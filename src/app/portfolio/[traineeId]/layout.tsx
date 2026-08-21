@@ -271,7 +271,7 @@ export default async function PortfolioLayout({
               ) : null}
               {trajectory ? (
                 <HideDuringPreview>
-                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gold/16 px-2.5 py-0.5 text-[11px] font-semibold text-gold">
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-status-warning-bg px-2.5 py-0.5 text-[11px] font-semibold text-status-warning-text">
                     <span className="size-1.5 shrink-0 rounded-full bg-current" />
                     Tracking {STANDING_LABEL[trajectory]}
                   </span>
