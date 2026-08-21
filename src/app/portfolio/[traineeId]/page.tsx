@@ -137,13 +137,24 @@ export default async function CourseStreamPage({
   // it to the centre's discretion either way).
   let hoursAttended = 0;
   let totalHours = 120;
+  let pendingWithdrawalRequest = null;
   if (isStaff && trainee.course_status === "active") {
-    const [{ data: celta5Record }, { data: course }] = await Promise.all([
+    const [{ data: celta5Record }, { data: course }, { data: pendingRequest }] = await Promise.all([
       supabase.from("celta5_records").select("hours_attended").eq("trainee_id", traineeId).maybeSingle(),
       supabase.from("courses").select("total_hours").eq("id", trainee.course_id).maybeSingle(),
+      // connect-withdrawal-precourse-scope-spec-2026-08-21.md item 2 -- the
+      // candidate's own self-serve request, surfaced for the trainer to
+      // action (not auto-executed).
+      supabase
+        .from("withdrawal_requests")
+        .select("id, kind, reason_tag, note, effective_date, still_attending, confirmations, signed_name, signed_at")
+        .eq("trainee_id", traineeId)
+        .eq("status", "pending")
+        .maybeSingle(),
     ]);
     hoursAttended = celta5Record?.hours_attended ?? 0;
     totalHours = course?.total_hours ?? 120;
+    pendingWithdrawalRequest = pendingRequest ?? null;
   }
 
   // §3 -- once deferred, the frozen transfer record itself is the fuller
@@ -406,6 +417,7 @@ export default async function CourseStreamPage({
               }
               hoursAttended={hoursAttended}
               totalHours={totalHours}
+              pendingRequest={pendingWithdrawalRequest}
             />
           ) : isStaff && trainee.course_status !== "active" ? (
             <div className="sheet-accent h-fit">

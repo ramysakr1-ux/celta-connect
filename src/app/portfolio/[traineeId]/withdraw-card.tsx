@@ -19,6 +19,18 @@ const initialDeferralState: DeferralFormState = { error: null };
 
 type Mode = "none" | "withdraw" | "extension" | "restart" | "deferral";
 
+export interface PendingWithdrawalRequest {
+  id: string;
+  kind: "withdraw" | "defer";
+  reason_tag: string | null;
+  note: string | null;
+  effective_date: string | null;
+  still_attending: boolean | null;
+  confirmations: string[];
+  signed_name: string;
+  signed_at: string;
+}
+
 export function CandidateStatusCard({
   traineeId,
   specialConsideration,
@@ -26,6 +38,7 @@ export function CandidateStatusCard({
   specialConsiderationEvidenceUrl,
   hoursAttended,
   totalHours,
+  pendingRequest,
 }: {
   traineeId: string;
   specialConsideration: string | null;
@@ -33,8 +46,12 @@ export function CandidateStatusCard({
   specialConsiderationEvidenceUrl?: string | null;
   hoursAttended: number;
   totalHours: number;
+  pendingRequest: PendingWithdrawalRequest | null;
 }) {
   const [mode, setMode] = useState<Mode>("none");
+  const requestNoteStarter = pendingRequest
+    ? [pendingRequest.reason_tag, pendingRequest.note].filter(Boolean).join(": ")
+    : "";
   const [withdrawState, withdrawAction, withdrawPending] = useActionState(withdrawTrainee, initialWithdrawState);
   const [extensionState, extensionAction, extensionPending] = useActionState(grantExtension, initialExtensionState);
   const [restartState, restartAction, restartPending] = useActionState(markForRestart, initialRestartState);
@@ -46,6 +63,35 @@ export function CandidateStatusCard({
   return (
     <div className="sheet-accent h-fit">
       <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
+
+      {pendingRequest ? (
+        <div className="mt-3 flex flex-col gap-1.5 rounded-[6px] border border-primary/30 bg-primary/5 p-3">
+          <p className="text-xs font-semibold text-primary">
+            Requested to {pendingRequest.kind === "withdraw" ? "withdraw" : "defer"}
+            {pendingRequest.reason_tag ? ` -- ${pendingRequest.reason_tag}` : ""}
+          </p>
+          {pendingRequest.note ? <p className="text-xs text-ink">&ldquo;{pendingRequest.note}&rdquo;</p> : null}
+          {pendingRequest.effective_date ? (
+            <p className="text-xs text-muted">Last day: {new Date(`${pendingRequest.effective_date}T00:00:00`).toLocaleDateString("en-GB")}</p>
+          ) : null}
+          {pendingRequest.kind === "withdraw" && pendingRequest.still_attending !== null ? (
+            <p className="text-xs text-muted">{pendingRequest.still_attending ? "Would like to keep attending as an observer." : "This would be their last day."}</p>
+          ) : null}
+          <p className="text-xs text-muted">
+            Signed {pendingRequest.signed_name} · {new Date(pendingRequest.signed_at).toLocaleString()} · {pendingRequest.confirmations.length}{" "}
+            confirmation{pendingRequest.confirmations.length === 1 ? "" : "s"} ticked
+          </p>
+          {mode === "none" ? (
+            <button
+              type="button"
+              onClick={() => setMode(pendingRequest.kind === "withdraw" ? "withdraw" : "deferral")}
+              className="mt-1 self-start text-xs font-semibold text-primary hover:underline"
+            >
+              Review and action →
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       {mode === "none" ? (
         <div className="mt-3 flex flex-col gap-1.5">
@@ -67,6 +113,7 @@ export function CandidateStatusCard({
       {mode === "withdraw" ? (
         <form action={withdrawAction} className="mt-3 flex flex-col gap-2.5">
           <input type="hidden" name="trainee_id" value={traineeId} />
+          {pendingRequest?.kind === "withdraw" ? <input type="hidden" name="request_id" value={pendingRequest.id} /> : null}
           <p className="text-xs text-muted">
             Formal and final &mdash; there is no reversal. Their portfolio becomes read-only but is
             kept, not erased, and their next Teaching Practice slot is simply left empty.
@@ -74,6 +121,7 @@ export function CandidateStatusCard({
           <textarea
             name="note"
             rows={2}
+            defaultValue={pendingRequest?.kind === "withdraw" ? requestNoteStarter : undefined}
             placeholder="Reason (optional, kept on the record)"
             className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
@@ -183,6 +231,7 @@ export function CandidateStatusCard({
       {mode === "deferral" ? (
         <form action={deferralAction} className="mt-3 flex flex-col gap-2.5">
           <input type="hidden" name="trainee_id" value={traineeId} />
+          {pendingRequest?.kind === "defer" ? <input type="hidden" name="request_id" value={pendingRequest.id} /> : null}
           <p className="text-xs text-muted">
             Only if more than half the course is completed, in exceptional circumstances. Everything
             freezes as it stands &mdash; TPs taught, assignments (even mid-marking), CELTA5 criteria and
@@ -202,6 +251,7 @@ export function CandidateStatusCard({
               name="reasons"
               rows={2}
               required
+              defaultValue={pendingRequest?.kind === "defer" ? requestNoteStarter : undefined}
               placeholder="Full details, for the Appian deferral form"
               className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
@@ -212,6 +262,7 @@ export function CandidateStatusCard({
             <textarea
               name="reintegration_arrangements"
               rows={2}
+              defaultValue={pendingRequest?.kind === "defer" && pendingRequest.note ? pendingRequest.note : undefined}
               className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>

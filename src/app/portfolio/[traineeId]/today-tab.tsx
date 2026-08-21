@@ -368,6 +368,10 @@ export async function TodayTab({
         <Link href={`/portfolio/${traineeId}/concern`} className="text-primary hover:underline">
           Raise a concern
         </Link>
+        {" · "}
+        <Link href={`/portfolio/${traineeId}/withdrawal-request`} className="text-primary hover:underline">
+          Request to withdraw or defer
+        </Link>
       </p>
     </div>
   );

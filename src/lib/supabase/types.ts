@@ -1318,6 +1318,33 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["concerns"]["Row"]>;
         Relationships: [];
       };
+      withdrawal_requests: {
+        Row: {
+          id: string;
+          trainee_id: string;
+          course_id: string;
+          kind: "withdraw" | "defer";
+          reason_tag: string | null;
+          note: string | null;
+          effective_date: string | null;
+          still_attending: boolean | null;
+          confirmations: string[];
+          signed_name: string;
+          signed_at: string;
+          status: "pending" | "actioned";
+          actioned_by: string | null;
+          actioned_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["withdrawal_requests"]["Row"]> & {
+          trainee_id: string;
+          course_id: string;
+          kind: "withdraw" | "defer";
+          signed_name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["withdrawal_requests"]["Row"]>;
+        Relationships: [];
+      };
       deferral_transfers: {
         Row: {
           id: string;

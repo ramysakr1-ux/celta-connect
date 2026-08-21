@@ -48,6 +48,7 @@ export default async function TrainerPreCourseTaskPage() {
   const answeredSet = new Set(
     (responses ?? []).filter((r) => r.response && r.response.trim() !== "").map((r) => `${r.trainee_id}:${r.section_id}`)
   );
+  const nameById = new Map((trainees ?? []).map((t) => [t.id, t.full_name]));
 
   const cambridgeSections = (sections ?? []).filter((s) => s.source === "cambridge");
   const supplementSections = (sections ?? []).filter((s) => s.source === "centre_supplement");
@@ -120,6 +121,54 @@ export default async function TrainerPreCourseTaskPage() {
         <span>C = Cambridge&apos;s Pre-Course Task</span>
         <span>S = your centre&apos;s supplement</span>
       </div>
+
+      {/* connect-withdrawal-precourse-scope-spec-2026-08-21.md item 1: the
+          tutor aggregate view, additive to the completion table above.
+          Every section here is free text (pre_course_task_sections has no
+          task-type/answer-key column), so there's no correct/incorrect to
+          score against -- this is the "read-aloud-friendly summary" branch
+          for every section, not the design's worked example of a scored
+          sentence-correction task, which would need structured response
+          data this schema doesn't have. */}
+      {orderedSections.length > 0 && (trainees ?? []).length > 0 ? (
+        <div className="flex flex-col gap-3">
+          <div>
+            <h2 className="font-serif text-lg text-ink">What the cohort said</h2>
+            <p className="mt-1 text-sm text-muted">Skim, not scored -- every answer is free text. Open a section to read them.</p>
+          </div>
+          {orderedSections.map((s) => {
+            const sectionResponses = (responses ?? [])
+              .filter((r) => r.section_id === s.id && r.response && r.response.trim() !== "")
+              .map((r) => ({ traineeId: r.trainee_id, text: r.response as string }))
+              .sort((a, b) => (nameById.get(a.traineeId) ?? "").localeCompare(nameById.get(b.traineeId) ?? ""));
+            return (
+              <details key={s.id} className="sheet">
+                <summary className="flex cursor-pointer items-center justify-between gap-3">
+                  <span className="text-sm font-semibold text-ink">
+                    {s.source === "cambridge" ? "C" : "S"}
+                    {s.sequence_index} · {s.title}
+                  </span>
+                  <span className="text-xs text-muted">
+                    {sectionResponses.length} of {(trainees ?? []).length} answered
+                  </span>
+                </summary>
+                <div className="mt-3 flex flex-col divide-y divide-border-faint">
+                  {sectionResponses.length === 0 ? (
+                    <p className="py-2 text-sm text-muted first:pt-2">Nobody has answered this yet.</p>
+                  ) : (
+                    sectionResponses.map((r) => (
+                      <div key={r.traineeId} className="flex flex-col gap-1 py-3 first:pt-2">
+                        <p className="text-xs font-medium text-muted">{nameById.get(r.traineeId) ?? "Unknown"}</p>
+                        <p className="whitespace-pre-wrap text-sm text-ink">{r.text}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }

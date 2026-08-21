@@ -28,6 +28,7 @@ export async function withdrawTrainee(
   const staff = await requireRole(["trainer", "admin"]);
   const traineeId = formData.get("trainee_id");
   const note = ((formData.get("note") as string | null) ?? "").trim() || null;
+  const requestId = (formData.get("request_id") as string | null) || null;
   if (typeof traineeId !== "string") {
     return { error: "Missing candidate." };
   }
@@ -72,6 +73,17 @@ export async function withdrawTrainee(
     .eq("id", traineeId);
   if (error) {
     return { error: "Could not withdraw this candidate. Try again." };
+  }
+
+  // Marks the candidate's own self-serve request (if this withdrawal
+  // actioned one) as done -- best-effort, never blocks the withdrawal
+  // itself on this row existing or updating cleanly.
+  if (requestId) {
+    await admin
+      .from("withdrawal_requests")
+      .update({ status: "actioned", actioned_by: staff.id, actioned_at: now })
+      .eq("id", requestId)
+      .eq("trainee_id", traineeId);
   }
 
   revalidatePath(`/portfolio/${traineeId}`);
@@ -192,6 +204,7 @@ export async function markForDeferral(
   const hoursCarriedRaw = formData.get("hours_carried");
   const hoursCarriedNote = ((formData.get("hours_carried_note") as string | null) ?? "").trim() || null;
   const reintegrationDeadline = (formData.get("reintegration_deadline") as string | null) || null;
+  const requestId = (formData.get("request_id") as string | null) || null;
 
   if (typeof traineeId !== "string") {
     return { error: "Missing candidate." };
@@ -336,6 +349,14 @@ export async function markForDeferral(
   ]);
   if (transferError || statusError) {
     return { error: "Could not record the deferral. Try again." };
+  }
+
+  if (requestId) {
+    await admin
+      .from("withdrawal_requests")
+      .update({ status: "actioned", actioned_by: staff.id, actioned_at: now })
+      .eq("id", requestId)
+      .eq("trainee_id", traineeId);
   }
 
   revalidatePath(`/portfolio/${traineeId}`);
