@@ -29,7 +29,7 @@
      the entry pages earlier the same day left the rest of the product
      inconsistent with its own specs. */
   --color-background: oklch(92.5% 0.012 85); /* warm beige page ground */
-  --color-card: oklch(99.5% 0.004 90); /* card / paper */
+  --color-card: oklch(93% 0.024 80); /* card / paper -- beige, restored 2026-08-22 per connect-beige-cards-teal-restore-spec */
   --color-border: oklch(89.5% 0.012 82); /* hairline neutral */
   --color-ink: oklch(23.5% 0.017 65); /* near-black warm ink (body text) */
   --color-primary: oklch(37.5% 0.058 195); /* teal */
@@ -337,7 +337,7 @@ h6 {
        This class is the shared entry look -- login, join, offer, register,
        student and forgot-password all use it, which is why unifying it here
        is one edit rather than seven. */
-    background-color: oklch(99.2% 0.005 90);
+    background-color: var(--color-card);
     border: 1px solid oklch(88.8% 0.013 82);
     border-radius: var(--radius-card);
     padding: 16px;
@@ -363,7 +363,7 @@ h6 {
      in case anything still references it; all six call sites were moved to
      .sheet-entry. */
   .sheet-entry {
-    background-color: color-mix(in oklab, var(--color-bronze) 8%, oklch(99.2% 0.005 90));
+    background-color: color-mix(in oklab, var(--color-bronze) 8%, var(--color-card));
     border: 1px solid color-mix(in oklab, var(--color-bronze) 26%, transparent);
     border-radius: var(--radius-card);
     padding: 16px;
@@ -374,7 +374,7 @@ h6 {
      still renders the current (bronze-tinted) entry card rather than
      silently losing its styling. */
   .sheet-gold {
-    background-color: color-mix(in oklab, var(--color-bronze) 8%, oklch(99.2% 0.005 90));
+    background-color: color-mix(in oklab, var(--color-bronze) 8%, var(--color-card));
     border: 1px solid color-mix(in oklab, var(--color-bronze) 26%, transparent);
     border-radius: var(--radius-card);
     padding: 16px;

@@ -28,9 +28,9 @@ const AMBER = "oklch(44% 0.1 68)";
 //
 // Green in this design means complete/good as a STATUS (a met dot, hours
 // logged), never a grade. Keeping the two apart is the point.
-const GOLD_TINT = "color-mix(in oklab, oklch(60% 0.11 70) 18%, oklch(99.2% 0.005 90))";
-const SILVER_TINT = "color-mix(in oklab, oklch(65% 0.008 90) 30%, oklch(99.2% 0.005 90))";
-const RED_TINT = "color-mix(in oklab, oklch(45% 0.16 27) 14%, oklch(99.2% 0.005 90))";
+const GOLD_TINT = "color-mix(in oklab, oklch(60% 0.11 70) 18%, var(--color-card))";
+const SILVER_TINT = "color-mix(in oklab, oklch(65% 0.008 90) 30%, var(--color-card))";
+const RED_TINT = "color-mix(in oklab, oklch(45% 0.16 27) 14%, var(--color-card))";
 
 const GRADE: Record<string, { bg: string; ink: string }> = {
   "Pass A": { bg: GOLD_TINT, ink: "oklch(40% 0.09 68)" },
@@ -163,7 +163,7 @@ export default async function AssessorPage({
   const shortDate = (iso: string) =>
     new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 
-  const CARD = "oklch(99.2% 0.005 90)";
+  const CARD = "var(--color-card)";
   const BORDER = "oklch(88% 0.016 82)";
   const INK = "oklch(23.5% 0.017 65)";
   const MUTED = "oklch(51% 0.017 70)";
@@ -262,7 +262,7 @@ export default async function AssessorPage({
           <span
             style={{
               fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-              color: "oklch(51% 0.017 70)", background: "color-mix(in oklab, oklch(51% 0.017 70) 10%, oklch(99.2% 0.005 90))",
+              color: "oklch(51% 0.017 70)", background: "color-mix(in oklab, oklch(51% 0.017 70) 10%, var(--color-card))",
               border: "1px solid color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
               borderRadius: 99, padding: "4px 10px",
             }}
@@ -323,7 +323,7 @@ export default async function AssessorPage({
           <div
             style={{
               display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 7,
-              background: "color-mix(in oklab, oklch(44% 0.1 68) 8%, oklch(99.2% 0.005 90))",
+              background: "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))",
               border: "1px solid color-mix(in oklab, oklch(44% 0.1 68) 26%, transparent)",
             }}
           >
@@ -387,7 +387,7 @@ export default async function AssessorPage({
                 key={c.traineeId}
                 href={`/assessor?candidate=${c.traineeId}`}
                 style={{
-                  background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, oklch(99.2% 0.005 90))" : CARD,
+                  background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))" : CARD,
                   border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 35%, transparent)" : BORDER}`,
                   borderRadius: 8, padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10,
                   textDecoration: "none",
@@ -420,7 +420,7 @@ export default async function AssessorPage({
                   <span
                     style={{
                       fontSize: 11, lineHeight: 1.4, color: AMBER, borderRadius: 5, padding: "6px 9px",
-                      background: "color-mix(in oklab, oklch(44% 0.1 68) 10%, oklch(99.2% 0.005 90))",
+                      background: "color-mix(in oklab, oklch(44% 0.1 68) 10%, var(--color-card))",
                     }}
                   >
                     {c.flaggedIssue}
@@ -651,7 +651,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
       <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(51% 0.017 70)", marginBottom: 8 }}>
         {title}
       </p>
-      <div style={{ background: "oklch(99.2% 0.005 90)", border: "1px solid oklch(88% 0.016 82)", borderRadius: 7, overflow: "hidden" }}>
+      <div style={{ background: "var(--color-card)", border: "1px solid oklch(88% 0.016 82)", borderRadius: 7, overflow: "hidden" }}>
         {children}
       </div>
     </div>

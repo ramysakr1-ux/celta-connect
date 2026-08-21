@@ -151,7 +151,7 @@ function PointRow({
             className="flex h-7 shrink-0 items-center gap-1.5 rounded-[6px] border border-border px-2.5 text-[11.5px] font-semibold disabled:opacity-60"
             style={
               tone === "supportive"
-                ? { background: "color-mix(in srgb, oklch(58% 0.1 145) 12%, white)", color: "oklch(58% 0.1 145)" }
+                ? { background: "color-mix(in srgb, oklch(58% 0.1 195) 12%, white)", color: "oklch(58% 0.1 195)" }
                 : tone === "direct"
                   ? { background: "color-mix(in srgb, var(--color-primary) 12%, white)", color: "var(--color-primary)" }
                   : undefined

@@ -61,7 +61,7 @@ export default async function AssessorMarkingGuidancePage() {
                   <div
                     key={c.key}
                     style={{
-                      background: "#fdfcfa",
+                      background: "var(--color-card)",
                       border: "1px solid #e0dcd4",
                       borderLeft: "3px solid #a89e8f",
                       borderRadius: 6,

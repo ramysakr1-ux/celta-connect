@@ -79,7 +79,7 @@ export const EMAIL_TONE = {
 export type EmailTone = keyof typeof EMAIL_TONE;
 
 const GROUND = "#eae6dd";
-const CARD = "#fefcf9";
+const CARD = "#f0e7d6";
 const INK = "#241d16";
 const MUTED = "#6d655c";
 const BORDER = "#e0dcd4";
