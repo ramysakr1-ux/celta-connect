@@ -76,7 +76,7 @@ export default async function FolSpotCheckPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="sheet flex flex-col gap-2 p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gold">Focus on the Learner · Days 2–9</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Focus on the Learner · Days 2–9</p>
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h1 className="font-serif text-xl text-ink">Error log — spot check</h1>
           <p className="text-sm text-muted">

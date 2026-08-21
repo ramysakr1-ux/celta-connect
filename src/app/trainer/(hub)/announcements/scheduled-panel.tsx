@@ -56,7 +56,7 @@ export function ScheduledPanel({
 
   return (
     <div className="rounded-[6px] border border-border">
-      <p className="border-b border-border bg-gold/10 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-gold">
+      <p className="border-b border-border bg-muted/10 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
         Scheduled · {scheduled.length}
       </p>
       {scheduled.length === 0 ? (

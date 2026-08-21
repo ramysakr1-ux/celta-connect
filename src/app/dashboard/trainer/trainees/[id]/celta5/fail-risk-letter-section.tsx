@@ -16,8 +16,8 @@ export function FailRiskLetterSection({
   const [showForm, setShowForm] = useState(existingLetters.length === 0);
 
   return (
-    <div className="card border-gold p-6">
-      <p className="text-[11px] font-semibold tracking-[0.1em] text-gold uppercase">Formal notice · potential fail</p>
+    <div className="card border-status-warning-text p-6">
+      <p className="text-[11px] font-semibold tracking-[0.1em] text-status-warning-text uppercase">Formal notice · potential fail</p>
       <h2 className="mt-1 font-serif text-lg text-ink">Fail-risk letter</h2>
       <p className="mt-1 text-sm text-muted">
         Admin Handbook 9.2 requires this with at least two assessed lessons still to teach. It&apos;s a formal

@@ -229,12 +229,12 @@ export function RosterRowView({ row, isMct, showContact, courseCode }: { row: Ro
         {isMct ? (
           <div className="mt-1 flex flex-col items-end gap-1">
             {row.stage2MovedEarlierReason ? (
-              <p className="text-[11px] text-gold">Stage 2 moved earlier — {row.stage2MovedEarlierReason}</p>
+              <p className="text-[11px] text-status-warning-text">Stage 2 moved earlier — {row.stage2MovedEarlierReason}</p>
             ) : row.stage2CanMoveEarlier ? (
               <MoveEarlierControl traineeId={row.id} stage="stage2" />
             ) : null}
             {row.stage3MovedEarlierReason ? (
-              <p className="text-[11px] text-gold">Stage 3 moved earlier — {row.stage3MovedEarlierReason}</p>
+              <p className="text-[11px] text-status-warning-text">Stage 3 moved earlier — {row.stage3MovedEarlierReason}</p>
             ) : row.stage3CanMoveEarlier ? (
               <MoveEarlierControl traineeId={row.id} stage="stage3" />
             ) : null}

@@ -131,7 +131,7 @@ export default async function TrainerAssignmentReviewPage({
             ) : null}
           </p>
           {aiCitationMismatch ? (
-            <p className="text-sm text-gold">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p>
+            <p className="text-sm text-status-warning-text">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p>
           ) : null}
         </div>
       ) : null}

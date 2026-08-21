@@ -9,7 +9,7 @@ import { VolunteerRecorder } from "@/app/student/[token]/volunteer-recorder";
 const initialState: VolunteerSignupState = { error: null };
 
 const inputClass =
-  "rounded-lg border border-[#eddfc4] bg-white px-3 py-2 text-sm text-[#3a2e18] outline-none focus:border-[#b3892f]";
+  "rounded-lg border border-[#eddfc4] bg-white px-3 py-2 text-sm text-[#3a2e18] outline-none focus:border-[#1a5c5e]";
 
 type Step = "language" | "consent" | "questions" | "recording";
 const STEPS: Step[] = ["language", "consent", "questions", "recording"];
@@ -46,7 +46,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
         {STEPS.map((s, i) => (
           <div
             key={s}
-            className={`h-1 flex-1 rounded-full ${i <= stepIndex ? "bg-[#b3892f]" : "bg-[#eddfc4]"}`}
+            className={`h-1 flex-1 rounded-full ${i <= stepIndex ? "bg-[#1a5c5e]" : "bg-[#eddfc4]"}`}
           />
         ))}
       </div>
@@ -64,14 +64,14 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
                 type="button"
                 onClick={() => setLang(l.code)}
                 className={`flex items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left ${
-                  lang === l.code ? "border-[#b3892f] bg-[#fbf3e3]" : "border-[#eddfc4] bg-white"
+                  lang === l.code ? "border-[#1a5c5e] bg-[#fbf3e3]" : "border-[#eddfc4] bg-white"
                 }`}
               >
                 <div>
                   <p className="text-sm font-semibold text-[#3a2e18]">{l.native}</p>
                   <p className="text-xs text-[#8a6a2f]">{l.english}</p>
                 </div>
-                {lang === l.code ? <span className="text-[#b3892f]">✓</span> : null}
+                {lang === l.code ? <span className="text-[#1a5c5e]">✓</span> : null}
               </button>
             ))}
           </div>
@@ -80,7 +80,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
             type="button"
             onClick={goNext}
             disabled={!lang}
-            className="self-start rounded-lg bg-[#b3892f] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             {t?.continueLabel ?? "Continue"}
           </button>
@@ -96,7 +96,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
           <div className="flex flex-col gap-2.5">
             {t.consentLines.map((line, i) => (
               <div key={i} className="flex items-start gap-2.5 rounded-lg border border-[#eddfc4] bg-[#fbf3e3] p-3.5">
-                <span className="mt-0.5 flex size-4 flex-none items-center justify-center rounded bg-[#b3892f] text-[10px] text-white">
+                <span className="mt-0.5 flex size-4 flex-none items-center justify-center rounded bg-[#1a5c5e] text-[10px] text-white">
                   ✓
                 </span>
                 <p className="text-sm leading-relaxed text-[#3a2e18]">{line}</p>
@@ -109,7 +109,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
               setConsented(true);
               goNext();
             }}
-            className="self-start rounded-lg bg-[#b3892f] px-5 py-2.5 text-sm font-semibold text-white"
+            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
           >
             {t.agreeLabel}
           </button>
@@ -136,7 +136,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
           <button
             type="button"
             onClick={goNext}
-            className="self-start rounded-lg bg-[#b3892f] px-5 py-2.5 text-sm font-semibold text-white"
+            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
           >
             Next
           </button>

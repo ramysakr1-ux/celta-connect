@@ -35,9 +35,11 @@ const CATEGORY_STYLE: Record<DisplayCategory, { accent: string; tintFrom: string
     titleWeight: 600,
   },
   admin: {
-    accent: "oklch(60% 0.11 70)",
-    tintFrom: "oklch(96% 0.045 80 / 0.75)",
-    tintTo: "oklch(96% 0.045 80 / 0.35)",
+    // Re-pointed off gold per the color audit (2026-08-21) -- deadlines are
+    // amber, matching the same category's fix on the trainer-side event-cell.tsx.
+    accent: "oklch(44% 0.095 68)",
+    tintFrom: "oklch(94.5% 0.065 85 / 0.75)",
+    tintTo: "oklch(94.5% 0.065 85 / 0.35)",
     label: "Admin & deadlines",
     titleWeight: 500,
   },

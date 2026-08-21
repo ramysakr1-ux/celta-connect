@@ -155,7 +155,7 @@ export function StageRatingsForm({
                         onClick={() => toggleFlags(code)}
                         title="A suggestion has evidence here -- click to see it"
                         aria-label="Show suggestion"
-                        className="ml-2 inline-flex size-2.5 shrink-0 rounded-full bg-gold align-middle"
+                        className="ml-2 inline-flex size-2.5 shrink-0 rounded-full bg-status-warning-text align-middle"
                       />
                     ) : null}
                   </span>
@@ -165,10 +165,10 @@ export function StageRatingsForm({
                   </div>
                 </div>
                 {expandedFlags.has(code) && flags.length > 0 ? (
-                  <div className="mt-2 flex flex-col gap-1.5 rounded-[6px] border border-dashed border-gold bg-gold/5 p-2.5">
+                  <div className="mt-2 flex flex-col gap-1.5 rounded-[6px] border border-dashed border-status-warning-text bg-status-warning-bg p-2.5">
                     {flags.map((flag, i) => (
                       <p key={i} className="text-xs leading-relaxed text-ink">
-                        <span className="font-semibold text-gold">{FLAG_LABEL[flag.kind]}:</span> {flag.detail}
+                        <span className="font-semibold text-status-warning-text">{FLAG_LABEL[flag.kind]}:</span> {flag.detail}
                       </p>
                     ))}
                   </div>

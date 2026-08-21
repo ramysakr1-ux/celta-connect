@@ -36,7 +36,7 @@ export function AssessedTpStatsBadge({ stats, byMode }: { stats: AssessedTpStats
         // assessed hours in each mode" -- mixed-mode courses only.
         <span
           className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${
-            byMode.meetsFloor ? "bg-accent text-ink" : "border border-dashed border-gold text-gold"
+            byMode.meetsFloor ? "bg-accent text-ink" : "border border-dashed border-status-warning-text text-status-warning-text"
           }`}
         >
           Face-to-face {byMode.f2fHours.toFixed(1)} hrs · Online {byMode.onlineHours.toFixed(1)} hrs (2 hr minimum each)

@@ -39,7 +39,7 @@ export default async function SupportScopedViewPage({ params }: { params: Promis
             {grant.scope === "course" ? "Course access" : "Billing access"} · {center?.name ?? "Centre"}
           </p>
           <p className="mt-1 text-sm text-ink">{grant.reason}</p>
-          {grant.chat_included ? <p className="mt-1 text-xs text-gold">Course chat is included in this grant.</p> : null}
+          {grant.chat_included ? <p className="mt-1 text-xs text-muted">Course chat is included in this grant.</p> : null}
         </div>
         <CountdownBadge expiresAt={grant.expires_at} />
       </div>

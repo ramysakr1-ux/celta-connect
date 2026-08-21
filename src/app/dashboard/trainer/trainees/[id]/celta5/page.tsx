@@ -276,8 +276,8 @@ export default async function Celta5RecordPage({
       <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} />
 
       {stage3MixedModeLock ? (
-        <div className={`card p-4 ${stage3MixedModeLock.mismatched ? "border-destructive" : "border-gold"}`}>
-          <p className={`text-sm font-semibold ${stage3MixedModeLock.mismatched ? "text-destructive" : "text-gold"}`}>
+        <div className={`card p-4 ${stage3MixedModeLock.mismatched ? "border-destructive" : "border-status-warning-text"}`}>
+          <p className={`text-sm font-semibold ${stage3MixedModeLock.mismatched ? "text-destructive" : "text-status-warning-text"}`}>
             Handbook 9.2 -- borderline Pass/Fail on a mixed-mode course
           </p>
           <p className="mt-1 text-sm text-muted">

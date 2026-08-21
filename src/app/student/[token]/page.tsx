@@ -89,7 +89,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
       <div className="min-h-screen bg-background">
         <div className="mx-auto flex max-w-xl flex-col gap-6 p-6 sm:p-10">
           <div>
-            <p className="text-sm font-medium text-gold uppercase tracking-wide">{course?.name ?? "Your course"}</p>
+            <p className="text-sm font-medium text-muted uppercase tracking-wide">{course?.name ?? "Your course"}</p>
             <h1 className="mt-1 font-serif text-3xl text-ink">Welcome, {volunteer.name}!</h1>
             <p className="mt-2 text-sm text-muted">
               Before your first class, tell us a bit about yourself -- this helps your teachers get to know you.
@@ -210,7 +210,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         </div>
 
         <div>
-          <p className="text-sm font-medium text-gold uppercase tracking-wide">{course?.name ?? "Your course"}</p>
+          <p className="text-sm font-medium text-muted uppercase tracking-wide">{course?.name ?? "Your course"}</p>
           <h1 className="mt-1 font-serif text-2xl text-ink sm:text-3xl">
             {nextClass ? `Your next class is ${formatEventDate(nextClass.eventDate).split(",")[0].toLowerCase()}` : "No classes scheduled yet"}
           </h1>

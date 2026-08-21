@@ -81,7 +81,7 @@ export function AssignTutorPanel({ courseId, trainers }: { courseId: string; tra
       </form>
 
       {state.error ? <p className="mt-2 text-sm text-destructive">{state.error}</p> : null}
-      {!state.error && state.warning ? <p className="mt-2 text-sm text-gold">{state.warning}</p> : null}
+      {!state.error && state.warning ? <p className="mt-2 text-sm text-status-warning-text">{state.warning}</p> : null}
       {!state.error && !state.warning && state.assigned ? (
         <p className="mt-2 text-sm text-primary">{state.assigned} added to this course.</p>
       ) : null}

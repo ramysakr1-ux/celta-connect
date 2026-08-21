@@ -63,7 +63,7 @@ export default async function AssessorMarkingGuidancePage() {
                     style={{
                       background: "#fdfcfa",
                       border: "1px solid #e0dcd4",
-                      borderLeft: "3px solid #ad7f43",
+                      borderLeft: "3px solid #a89e8f",
                       borderRadius: 6,
                       padding: "16px 18px",
                     }}

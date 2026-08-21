@@ -82,7 +82,7 @@ export function ProvisionalGradeForm({
                 });
               }}
               className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold disabled:cursor-default ${
-                approved ? "bg-primary/10 text-primary" : "bg-gold/15 text-gold hover:bg-gold/25"
+                approved ? "bg-primary/10 text-primary" : "bg-status-warning-bg text-status-warning-text hover:bg-status-warning-bg/80"
               }`}
             >
               <span className="size-1.5 rounded-full bg-current" />
@@ -91,7 +91,7 @@ export function ProvisionalGradeForm({
           ) : (
             <span
               className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                approved ? "bg-primary/10 text-primary" : "bg-gold/15 text-gold"
+                approved ? "bg-primary/10 text-primary" : "bg-status-warning-bg text-status-warning-text"
               }`}
             >
               <span className="size-1.5 rounded-full bg-current" />

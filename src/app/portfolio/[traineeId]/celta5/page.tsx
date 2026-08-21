@@ -318,7 +318,7 @@ export default async function PortfolioCelta5Page({
           <div className="sheet flex flex-col gap-3">
             <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">CELTA 5 self-assessment</p>
             <div className="flex flex-col gap-1">
-              <p className={`text-sm font-semibold ${bothSigned ? "text-ink" : stage2Submitted ? "text-primary" : "text-gold"}`}>
+              <p className={`text-sm font-semibold ${bothSigned ? "text-ink" : stage2Submitted ? "text-primary" : "text-status-warning-text"}`}>
                 {bothSigned ? "Both signed" : stage2Submitted ? "Candidate signed" : "Not started"}
               </p>
               <p className="text-xs text-muted">
@@ -654,7 +654,7 @@ export default async function PortfolioCelta5Page({
                 const hasOnline = (observations ?? []).some((o) => o.mode === "online");
                 const covered = hasF2f && hasOnline;
                 return (
-                  <p className={`mt-1 text-sm ${covered ? "text-primary" : "text-gold"}`}>
+                  <p className={`mt-1 text-sm ${covered ? "text-primary" : "text-status-warning-text"}`}>
                     Mixed-mode course: your observations should cover both face-to-face and online teaching.{" "}
                     {covered
                       ? "Both modes logged."
@@ -899,7 +899,11 @@ export default async function PortfolioCelta5Page({
         </p>
         <div className="mt-1.5 flex h-1.5 w-full overflow-hidden rounded-full bg-accent">
           <div className="h-full bg-primary" style={{ width: `${observationLivePct}%` }} />
-          <div className="h-full bg-gold" style={{ width: `${observationFilmedPct}%` }} />
+          {/* Filmed is a category, not a status -- gold is reserved, so this
+              reuses Observation Tasks.dc.html's own decorative "Filmed" hue
+              (plum) rather than inventing a third treatment for the same
+              concept. */}
+          <div className="h-full bg-[oklch(46%_0.09_320)]" style={{ width: `${observationFilmedPct}%` }} />
         </div>
       </div>
       <div className="sheet mt-3 overflow-hidden !p-0">

@@ -104,7 +104,7 @@ function ItemCard({ item, removable }: { item: MaterialPoolItemView; removable: 
             {item.level ? <span className="ml-1.5 text-xs font-normal text-muted">{item.level}</span> : null}
           </p>
           {item.description ? <p className="mt-0.5 text-xs text-muted">{item.description}</p> : null}
-          {item.claimedByLabel ? <p className="mt-1 text-xs text-gold">Claimed -- {item.claimedByLabel}</p> : null}
+          {item.claimedByLabel ? <p className="mt-1 text-xs text-status-warning-text">Claimed -- {item.claimedByLabel}</p> : null}
         </div>
         {item.signedUrl ? (
           <a href={item.signedUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 text-xs font-semibold text-primary hover:underline">

@@ -172,7 +172,7 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
         <div className="sheet flex flex-col gap-3">
           <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">CELTA 5 self-assessment</p>
           <div className="flex flex-col gap-1">
-            <p className={`text-sm font-semibold ${bothSigned ? "text-ink" : stage2Submitted ? "text-primary" : "text-gold"}`}>
+            <p className={`text-sm font-semibold ${bothSigned ? "text-ink" : stage2Submitted ? "text-primary" : "text-status-warning-text"}`}>
               {bothSigned ? "Both signed" : stage2Submitted ? "Candidate signed" : "Not started"}
             </p>
             <p className="text-xs text-muted">
@@ -276,7 +276,7 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
               const hasOnline = (observations ?? []).some((o) => o.mode === "online");
               const covered = hasF2f && hasOnline;
               return (
-                <p className={`mt-1 text-sm ${covered ? "text-primary" : "text-gold"}`}>
+                <p className={`mt-1 text-sm ${covered ? "text-primary" : "text-status-warning-text"}`}>
                   Mixed-mode course: your observations should cover both face-to-face and online teaching.{" "}
                   {covered
                     ? "Both modes logged."

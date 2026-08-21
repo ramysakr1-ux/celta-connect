@@ -169,7 +169,7 @@ function PointRow({
             onClick={() => onChange({ starred: !point.starred })}
             title="Prioritise this in the next TP"
             className={`shrink-0 rounded-full border px-2 py-1 text-sm ${
-              point.starred ? "border-gold bg-gold text-ink" : "border-border-faint text-muted"
+              point.starred ? "border-status-warning-text bg-status-warning-text text-ink" : "border-border-faint text-muted"
             }`}
           >
             ★

@@ -29,10 +29,12 @@ function CameraIcon() {
 function JoinChip({ event, now }: { event: TimetableEvent; now: Date }) {
   if (!event.zoom_url) return null;
   const live = isEventLive(event, now);
-  // apply-to-app.md §2.5 -- live gets a real pill (with a leading gold dot
-  // so it catches the eye across a busy grid); not-live is icon-only, no
+  // apply-to-app.md §2.5 -- live gets a real pill (with a leading dot so it
+  // catches the eye across a busy grid); not-live is icon-only, no
   // pill/border/label, so a whole column of un-joinable Zoom links doesn't
-  // read as the loudest thing on the page.
+  // read as the loudest thing on the page. Dot re-pointed off gold per the
+  // color audit (2026-08-21) -- muted, matching the identical "Live · join"
+  // dot on the trainer home page rather than inventing a second treatment.
   if (!live) {
     return (
       <span
@@ -51,7 +53,7 @@ function JoinChip({ event, now }: { event: TimetableEvent; now: Date }) {
       rel="noreferrer"
       className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-primary-foreground"
     >
-      <span className="size-[5px] shrink-0 rounded-full bg-gold" />
+      <span className="size-[5px] shrink-0 rounded-full bg-muted" />
       <CameraIcon />
       Join
     </a>

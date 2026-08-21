@@ -274,7 +274,7 @@ export default async function AssignmentDetailPage({
                   </>
                 ) : null}
               </p>
-              {aiCitationMismatch ? <p className="text-sm text-gold">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p> : null}
+              {aiCitationMismatch ? <p className="text-sm text-status-warning-text">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p> : null}
             </div>
             {isFol && folData ? <FolCrossCheck claims={folData.allClaimsForCrossCheck} poolEntries={folData.poolEntries} /> : null}
             <FindingsBand findings={findings} assignmentId={assignmentId} round={round} traineeId={traineeId} />

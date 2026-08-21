@@ -81,7 +81,7 @@ export function TpNumberTabs({
           <div className="flex items-center gap-2.5">
             <span
               className={`size-1.5 shrink-0 rounded-full ${
-                !fullyClassified ? "bg-muted" : spreadOk ? "bg-ink" : "bg-gold"
+                !fullyClassified ? "bg-muted" : spreadOk ? "bg-ink" : "bg-destructive"
               }`}
             />
             <span className="text-ink">

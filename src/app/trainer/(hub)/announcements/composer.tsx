@@ -67,7 +67,7 @@ export function AnnouncementComposer({
             setTitle(ASSESSOR_VISIT_TEMPLATE.title);
             setBody(ASSESSOR_VISIT_TEMPLATE.body);
           }}
-          className="self-start rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-medium text-gold hover:bg-gold/20"
+          className="self-start rounded-full border border-border bg-muted/10 px-3 py-1 text-xs font-medium text-muted hover:bg-muted/20"
         >
           Use assessor-visit template
         </button>

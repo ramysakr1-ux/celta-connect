@@ -80,7 +80,7 @@ export function CourseSupportAccessForm({ courseName, grants }: { courseName: st
                   <div>
                     <p className="text-sm text-ink">
                       Course access
-                      {g.chatIncluded ? <span className="ml-2 text-xs text-gold">+ course chat</span> : null}
+                      {g.chatIncluded ? <span className="ml-2 text-xs text-muted">+ course chat</span> : null}
                     </p>
                     <p className="mt-0.5 text-xs text-muted">{g.reason}</p>
                     <p className="mt-1 text-[11px] text-muted">

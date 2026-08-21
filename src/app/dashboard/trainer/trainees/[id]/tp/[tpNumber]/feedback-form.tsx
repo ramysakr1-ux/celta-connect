@@ -122,8 +122,8 @@ export function FeedbackForm({
       </div>
 
       {notes.length > 0 ? (
-        <div className="rounded-[6px] border border-dashed border-gold bg-gold/5 p-4">
-          <p className="text-xs font-semibold tracking-[0.08em] text-gold uppercase">Captured during the lesson</p>
+        <div className="rounded-[6px] border border-dashed border-border bg-muted/10 p-4">
+          <p className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">Captured during the lesson</p>
           <p className="mt-1 text-xs text-muted">Pulling one in removes it from here and drops it, already tagged, into the section you choose.</p>
           <ul className="mt-3 flex flex-col gap-3">
             {notes.map((note) => (

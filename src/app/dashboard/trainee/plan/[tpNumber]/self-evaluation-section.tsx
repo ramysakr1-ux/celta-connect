@@ -123,7 +123,7 @@ function ActionPointsReadOnly({ points }: { points: SelfEvalActionPoint[] }) {
             {withContent.map((point, i) => (
               <tr key={i}>
                 <td className="border-b border-border-faint p-2 align-top text-ink">
-                  {point.carried ? <span className="mr-1 text-xs text-gold">★</span> : null}
+                  {point.carried ? <span className="mr-1 text-xs text-status-warning-text">★</span> : null}
                   {point.previous_point}
                 </td>
                 <td className="border-b border-border-faint p-2 align-top text-ink">{point.what_i_did}</td>

@@ -19,14 +19,14 @@ export function PaymentNotificationsPanel({ notifications, canEdit }: { notifica
   const day = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 
   return (
-    <div className="rounded-[10px] border border-gold/40 bg-gold/5">
-      <div className="border-b border-gold/30 px-5 py-3">
+    <div className="rounded-[10px] border border-status-warning-text/40 bg-status-warning-bg">
+      <div className="border-b border-status-warning-text/30 px-5 py-3">
         <h2 className="font-serif text-base text-ink">Overdue instalments</h2>
         <p className="mt-0.5 text-xs text-muted">{notifications.length} flagged by the missed-instalment sweep.</p>
       </div>
       <ul className="flex flex-col">
         {notifications.map((n) => (
-          <li key={n.id} className="flex items-center justify-between gap-3 border-b border-gold/20 px-5 py-3 last:border-none">
+          <li key={n.id} className="flex items-center justify-between gap-3 border-b border-status-warning-text/20 px-5 py-3 last:border-none">
             <div>
               <p className="text-sm text-ink">{n.message}</p>
               <p className="mt-0.5 text-xs text-muted">{day(n.createdAt)}</p>

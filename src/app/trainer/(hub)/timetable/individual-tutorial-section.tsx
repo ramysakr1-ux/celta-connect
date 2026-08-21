@@ -66,7 +66,7 @@ export function IndividualTutorialSection({
               </span>
               <span
                 className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                  i.confirmed ? "bg-primary/10 text-primary" : "bg-gold/15 text-gold"
+                  i.confirmed ? "bg-primary/10 text-primary" : "bg-status-warning-bg text-status-warning-text"
                 }`}
               >
                 {i.confirmed ? "Confirmed" : "Awaiting confirmation"}

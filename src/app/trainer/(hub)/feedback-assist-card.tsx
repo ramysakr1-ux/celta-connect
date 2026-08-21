@@ -57,7 +57,7 @@ export function FeedbackAssistCard({
     <div className="flex flex-col gap-4 rounded-[8px] border border-border border-t-[3px] border-t-gold bg-card px-[22px] py-5">
       <div className="flex items-baseline justify-between gap-3">
         <div className="flex flex-col gap-[3px]">
-          <p className="text-[11px] font-bold tracking-[0.12em] text-gold uppercase">Feedback assist — yours</p>
+          <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Feedback assist — yours</p>
           <p className="text-xs leading-[1.5] text-muted text-pretty">
             Starts from the course default the MCT set, then it&apos;s yours — edit it or turn it off, on your own
             feedback only.

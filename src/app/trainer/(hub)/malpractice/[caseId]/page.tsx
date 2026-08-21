@@ -76,7 +76,7 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
             {caseRow.decided_at ? new Date(caseRow.decided_at).toLocaleString() : ""}
           </p>
           {caseRow.flagged_for_referral ? (
-            <p className="text-xs font-semibold text-gold">Referred to the centre&apos;s malpractice procedure</p>
+            <p className="text-xs font-semibold text-destructive">Referred to the centre&apos;s malpractice procedure</p>
           ) : null}
           {caseRow.decision_notes ? <p className="whitespace-pre-wrap text-sm text-muted">{caseRow.decision_notes}</p> : null}
           {reflection ? (

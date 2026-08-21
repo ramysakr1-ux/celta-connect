@@ -90,7 +90,7 @@ function CriterionCard({
 
       <div className="grid grid-cols-1 gap-3.5 md:grid-cols-3">
         <Field label="Enough to meet it" name="met_text" defaultValue={row?.met_text ?? ""} accent="text-primary" />
-        <Field label="Centre judgement" name="grey_text" defaultValue={row?.grey_text ?? ""} accent="text-gold" />
+        <Field label="Centre judgement" name="grey_text" defaultValue={row?.grey_text ?? ""} accent="text-status-warning-text" />
         <Field label="Not yet" name="not_text" defaultValue={row?.not_text ?? ""} accent="text-destructive" />
       </div>
 

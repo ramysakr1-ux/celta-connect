@@ -252,9 +252,9 @@ export function LessonPlanForm({
               <button
                 type="button"
                 onClick={useCarriedPersonalAim}
-                className="flex items-start gap-2 rounded-[6px] border border-gold/40 bg-gold/10 p-2.5 text-left"
+                className="flex items-start gap-2 rounded-[6px] border border-status-warning-text/40 bg-status-warning-bg p-2.5 text-left"
               >
-                <span className="mt-0.5 shrink-0 text-xs text-gold">★</span>
+                <span className="mt-0.5 shrink-0 text-xs text-status-warning-text">★</span>
                 <span className="text-xs leading-relaxed text-ink">
                   From TP{tpNumber - 1}: {previousPlanningActionPoint}
                   <span className="ml-1.5 font-semibold text-primary">Tap to use it.</span>

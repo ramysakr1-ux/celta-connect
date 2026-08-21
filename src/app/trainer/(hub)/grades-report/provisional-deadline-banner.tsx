@@ -18,7 +18,7 @@ export function ProvisionalDeadlineBanner({ dueAt, isMct, approvedCount, totalCo
   const [editing, setEditing] = useState(false);
 
   return (
-    <div className="flex flex-col gap-1.5 rounded-[6px] border border-gold/30 bg-gold/10 px-4 py-3">
+    <div className="flex flex-col gap-1.5 rounded-[6px] border border-status-warning-text/30 bg-status-warning-bg px-4 py-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-[13px] font-semibold text-ink">
           {dueAt ? `Provisional grades due to the assessor — ${formatDue(dueAt)}` : "Provisional grades due date not set yet"}

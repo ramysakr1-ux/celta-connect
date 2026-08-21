@@ -121,7 +121,7 @@ export function SelfEvaluationForm({
                     <td className="border-b border-border-faint p-2 align-top">
                       {point.carried ? (
                         <p className="flex items-start gap-1.5 text-sm text-ink">
-                          <span className="mt-0.5 shrink-0 text-xs text-gold">★</span>
+                          <span className="mt-0.5 shrink-0 text-xs text-status-warning-text">★</span>
                           {point.previous_point}
                         </p>
                       ) : (

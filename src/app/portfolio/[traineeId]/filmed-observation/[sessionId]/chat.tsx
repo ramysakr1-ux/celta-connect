@@ -81,7 +81,7 @@ export function FilmedObservationChat({
                 <div key={m.id} className="flex items-start gap-2">
                   <div
                     className={`flex size-5 shrink-0 items-center justify-center rounded-[7px] text-[8px] font-semibold ${
-                      mine ? "bg-gold text-gold-foreground" : "bg-accent text-accent-foreground"
+                      mine ? "bg-surface-muted text-ink" : "bg-accent text-accent-foreground"
                     }`}
                   >
                     {(mine ? "Me" : (nameById.get(m.author_id) ?? "?")).slice(0, 2).toUpperCase()}

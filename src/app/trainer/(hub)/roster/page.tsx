@@ -160,7 +160,7 @@ export default async function TrainerRosterPage() {
             <span
               key={name}
               className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${
-                count === 0 ? "border border-dashed border-gold text-gold" : "bg-accent text-ink"
+                count === 0 ? "border border-dashed border-status-warning-text text-status-warning-text" : "bg-accent text-ink"
               }`}
               title={count === 0 ? `${name} hasn't logged any observations yet` : `${count} observation${count === 1 ? "" : "s"} logged`}
             >
@@ -192,7 +192,7 @@ export default async function TrainerRosterPage() {
                 <button
                   type="submit"
                   className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${
-                    confirmed ? "bg-accent text-ink" : "border border-dashed border-gold text-gold"
+                    confirmed ? "bg-accent text-ink" : "border border-dashed border-status-warning-text text-status-warning-text"
                   }`}
                   title={confirmed ? "Click to mark as not yet collected" : "Click to mark as collected"}
                 >

@@ -91,7 +91,7 @@ export default async function AssessorHistoryPage({
                 ) : null}
               </div>
               <div className="flex gap-4 text-xs">
-                <span className={a.peakConcurrent > 2 ? "font-semibold text-gold" : "text-muted"}>
+                <span className={a.peakConcurrent > 2 ? "font-semibold text-status-warning-text" : "text-muted"}>
                   {a.peakConcurrent} concurrent at peak
                   {a.peakConcurrent > 2 ? " (over the guideline)" : ""}
                 </span>

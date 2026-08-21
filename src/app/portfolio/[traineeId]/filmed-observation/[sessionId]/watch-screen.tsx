@@ -180,7 +180,7 @@ export function FilmedObservationWatchScreen({
                 Break {activeBreak.break_number} of {breaks.length}
               </p>
               <p className="max-w-md text-base leading-relaxed">{activeBreak.prompt}</p>
-              <p className="text-2xl font-semibold tabular-nums text-gold">{formatClock(countdown)}</p>
+              <p className="text-2xl font-semibold tabular-nums text-status-warning-text">{formatClock(countdown)}</p>
               <button
                 type="button"
                 onClick={resumePlayback}

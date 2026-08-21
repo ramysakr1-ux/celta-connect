@@ -11,7 +11,7 @@ export interface PipelinePerson {
 
 const ALERT_TONE_CLASS: Record<FunnelAlert["tone"], string> = {
   urgent: "border-l-destructive text-destructive",
-  warning: "border-l-gold text-gold",
+  warning: "border-l-status-warning-text text-status-warning-text",
   info: "border-l-primary text-primary",
 };
 

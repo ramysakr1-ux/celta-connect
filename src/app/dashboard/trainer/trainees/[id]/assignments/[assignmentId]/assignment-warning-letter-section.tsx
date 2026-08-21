@@ -18,8 +18,8 @@ export function AssignmentWarningLetterSection({
   const [showForm, setShowForm] = useState(existingLetters.length === 0);
 
   return (
-    <div className="card border-gold p-6">
-      <p className="text-[11px] font-semibold tracking-[0.1em] text-gold uppercase">Formal notice · written assignments</p>
+    <div className="card border-status-warning-text p-6">
+      <p className="text-[11px] font-semibold tracking-[0.1em] text-status-warning-text uppercase">Formal notice · written assignments</p>
       <h2 className="mt-1 font-serif text-lg text-ink">Assignment warning letter</h2>
       <p className="mt-1 text-sm text-muted">
         A candidate must pass three of the four written assignments. Failing this one after its one resubmission
