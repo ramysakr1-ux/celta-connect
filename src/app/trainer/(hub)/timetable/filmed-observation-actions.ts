@@ -25,6 +25,9 @@ export async function saveFilmedObservationSession(_prevState: FormState, formDa
   const level = (formData.get("level") as string | null)?.trim() || null;
   const learnerCountRaw = formData.get("learner_count") as string | null;
   const learnerCount = learnerCountRaw ? Number(learnerCountRaw) : null;
+  const teacherName = (formData.get("teacher_name") as string | null)?.trim() || null;
+  const mainAim = (formData.get("main_aim") as string | null)?.trim() || null;
+  const subAim = (formData.get("sub_aim") as string | null)?.trim() || null;
   if (typeof eventId !== "string" || !eventId) return { error: "Something went wrong. Refresh and try again." };
   if (lengthMinutes !== null && (Number.isNaN(lengthMinutes) || lengthMinutes <= 0)) {
     return { error: "Length must be a positive number of minutes." };
@@ -51,6 +54,9 @@ export async function saveFilmedObservationSession(_prevState: FormState, formDa
       length_minutes: lengthMinutes,
       level,
       learner_count: learnerCount,
+      teacher_name: teacherName,
+      main_aim: mainAim,
+      sub_aim: subAim,
       created_by: trainer.id,
     },
     { onConflict: "timetable_event_id" }

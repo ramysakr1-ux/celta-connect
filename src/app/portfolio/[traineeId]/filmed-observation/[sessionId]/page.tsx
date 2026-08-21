@@ -27,7 +27,7 @@ export default async function FilmedObservationWatchPage({
 
   const { data: fSession } = await supabase
     .from("filmed_observation_sessions")
-    .select("id, course_id, lesson_title, recording_url, timetable_event_id")
+    .select("id, course_id, lesson_title, recording_url, timetable_event_id, level, learner_count, teacher_name, main_aim, sub_aim")
     .eq("id", sessionId)
     .maybeSingle();
   if (!fSession) notFound();
@@ -90,6 +90,11 @@ export default async function FilmedObservationWatchPage({
         myProfileId={session.profile.id}
         myName={session.profile.full_name}
         recordingUrl={fSession.recording_url}
+        level={fSession.level}
+        learnerCount={fSession.learner_count}
+        teacherName={fSession.teacher_name}
+        mainAim={fSession.main_aim}
+        subAim={fSession.sub_aim}
         breaks={breaks ?? []}
         taskId={task?.id ?? null}
         criteriaLine={criteriaLine}

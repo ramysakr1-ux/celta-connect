@@ -1013,6 +1013,9 @@ export interface Database {
           length_minutes: number | null;
           level: string | null;
           learner_count: number | null;
+          teacher_name: string | null;
+          main_aim: string | null;
+          sub_aim: string | null;
           created_by: string | null;
           created_at: string;
         };

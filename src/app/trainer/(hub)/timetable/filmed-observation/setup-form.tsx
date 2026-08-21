@@ -13,6 +13,9 @@ export function FilmedObservationSetupForm({
   lengthMinutes,
   level,
   learnerCount,
+  teacherName,
+  mainAim,
+  subAim,
 }: {
   eventId: string;
   lessonTitle: string | null;
@@ -20,6 +23,9 @@ export function FilmedObservationSetupForm({
   lengthMinutes: number | null;
   level: string | null;
   learnerCount: number | null;
+  teacherName: string | null;
+  mainAim: string | null;
+  subAim: string | null;
 }) {
   const [state, action, pending] = useActionState(saveFilmedObservationSession, initialState);
 
@@ -52,6 +58,44 @@ export function FilmedObservationSetupForm({
           className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
         />
         <p className="text-[11px] text-muted">A link to a recording you hold rights to, or an internally-hosted file. Never fetched automatically.</p>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="teacher_name" className="text-xs text-muted">
+          Teacher
+        </label>
+        <input
+          id="teacher_name"
+          name="teacher_name"
+          type="text"
+          defaultValue={teacherName ?? ""}
+          placeholder="Who's teaching in the recording"
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+        />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="main_aim" className="text-xs text-muted">
+          Main aim
+        </label>
+        <input
+          id="main_aim"
+          name="main_aim"
+          type="text"
+          defaultValue={mainAim ?? ""}
+          placeholder="What the lesson is aiming to teach"
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+        />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="sub_aim" className="text-xs text-muted">
+          Sub aim (optional)
+        </label>
+        <input
+          id="sub_aim"
+          name="sub_aim"
+          type="text"
+          defaultValue={subAim ?? ""}
+          className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+        />
       </div>
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1.5">

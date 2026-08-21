@@ -24,7 +24,7 @@ export default async function FilmedObservationSetupPage({ params }: { params: P
 
   const { data: session } = await supabase
     .from("filmed_observation_sessions")
-    .select("id, lesson_title, recording_url, length_minutes, level, learner_count")
+    .select("id, lesson_title, recording_url, length_minutes, level, learner_count, teacher_name, main_aim, sub_aim")
     .eq("timetable_event_id", eventId)
     .maybeSingle();
 
@@ -72,6 +72,9 @@ export default async function FilmedObservationSetupPage({ params }: { params: P
             lengthMinutes={session?.length_minutes ?? null}
             level={session?.level ?? null}
             learnerCount={session?.learner_count ?? null}
+            teacherName={session?.teacher_name ?? null}
+            mainAim={session?.main_aim ?? null}
+            subAim={session?.sub_aim ?? null}
           />
         </div>
       </div>

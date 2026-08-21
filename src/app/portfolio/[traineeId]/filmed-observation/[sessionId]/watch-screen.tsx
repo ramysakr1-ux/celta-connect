@@ -22,6 +22,11 @@ export function FilmedObservationWatchScreen({
   myProfileId,
   myName,
   recordingUrl,
+  level,
+  learnerCount,
+  teacherName,
+  mainAim,
+  subAim,
   breaks,
   taskId,
   criteriaLine,
@@ -35,6 +40,11 @@ export function FilmedObservationWatchScreen({
   myProfileId: string;
   myName: string;
   recordingUrl: string | null;
+  level: string | null;
+  learnerCount: number | null;
+  teacherName: string | null;
+  mainAim: string | null;
+  subAim: string | null;
   breaks: Break[];
   taskId: string | null;
   criteriaLine: string | null;
@@ -157,6 +167,45 @@ export function FilmedObservationWatchScreen({
             {present.length} joined{present.length > 6 ? ` (+${present.length - 6} more)` : ""}
           </span>
         </div>
+
+        {teacherName || level || learnerCount !== null || mainAim || subAim ? (
+          <div className="rounded-[10px] border border-border bg-card p-4">
+            {teacherName || level || learnerCount !== null ? (
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink">
+                {teacherName ? (
+                  <span>
+                    <span className="text-muted">Teacher</span> · {teacherName}
+                  </span>
+                ) : null}
+                {level ? (
+                  <span>
+                    <span className="text-muted">Level</span> · {level}
+                  </span>
+                ) : null}
+                {learnerCount !== null ? (
+                  <span>
+                    <span className="text-muted">Learners</span> · {learnerCount}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+            {mainAim ? (
+              <p className={`text-sm text-ink ${teacherName || level || learnerCount !== null ? "mt-2" : ""}`}>
+                <span className="text-muted">Main aim</span> · {mainAim}
+              </p>
+            ) : null}
+            {subAim ? (
+              <p className="mt-1 text-sm text-ink">
+                <span className="text-muted">Sub aim</span> · {subAim}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        <p className="text-xs text-muted">
+          This recording can run past 45 minutes. Use the player&apos;s own seek bar to fast-forward — you&apos;re not
+          expected to watch every second, just enough to answer the task.
+        </p>
 
         <div className="relative overflow-hidden rounded-[10px] border border-border bg-ink">
           {recordingUrl ? (
