@@ -1,0 +1,77 @@
+import { requireRole } from "@/lib/auth/require-role";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { CreateCentreForm, ChangeRoleForm } from "@/app/platform/platform-forms";
+
+// connect-platform-owner-role-spec-2026-08-22.md's "keep it minimal": the
+// immediate need is the role existing and one real account able to
+// bootstrap the first centre/course, not a full cross-centre admin
+// rebuild. Reads through the service-role admin client throughout (not
+// createClient()) since this is the one screen meant to see across every
+// centre at once -- RLS stays centre-scoped everywhere else, per that same
+// spec's scope note deferring true cross-centre RLS to a follow-up.
+export default async function PlatformPage() {
+  await requireRole("platform_owner");
+  const admin = createAdminClient();
+
+  const [{ data: centers }, { data: courses }] = await Promise.all([
+    admin.from("centers").select("id, name, center_number, is_demo, created_at").order("created_at", { ascending: false }),
+    admin.from("courses").select("id, center_id"),
+  ]);
+
+  const courseCountByCenter = new Map<string, number>();
+  for (const c of courses ?? []) {
+    courseCountByCenter.set(c.center_id, (courseCountByCenter.get(c.center_id) ?? 0) + 1);
+  }
+
+  return (
+    <div className="container flex flex-col gap-6 py-8">
+      <div>
+        <h1 className="font-serif text-2xl text-ink">Platform</h1>
+        <p className="mt-1 text-sm text-muted">Every centre, at a glance -- and the two things only a platform owner can do.</p>
+      </div>
+
+      <div className="card p-5">
+        <h2 className="font-serif text-lg text-ink">Create a centre</h2>
+        <p className="mt-1 text-sm text-muted">
+          Sets up the centre and a one-time join link for its first centre owner -- they create their own account and
+          password through it, same as any other centre-admin invite.
+        </p>
+        <div className="mt-4">
+          <CreateCentreForm />
+        </div>
+      </div>
+
+      <div className="card p-5">
+        <h2 className="font-serif text-lg text-ink">Change a user's role</h2>
+        <p className="mt-1 text-sm text-muted">Looks someone up by email and sets their account-level role directly.</p>
+        <div className="mt-4">
+          <ChangeRoleForm />
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="border-b border-border-faint px-5 py-3.5">
+          <h2 className="font-serif text-lg text-ink">Every centre ({(centers ?? []).length})</h2>
+        </div>
+        {(centers ?? []).length === 0 ? (
+          <p className="px-5 py-4 text-sm text-muted">No centres yet.</p>
+        ) : (
+          (centers ?? []).map((c) => (
+            <div key={c.id} className="list-row flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-sm font-medium text-ink">
+                  {c.name}
+                  {c.is_demo ? <span className="ml-2 text-xs font-normal text-muted">(demo)</span> : null}
+                </span>
+                <span className="text-xs text-muted">Centre {c.center_number}</span>
+              </div>
+              <span className="text-sm text-muted">
+                {courseCountByCenter.get(c.id) ?? 0} course{(courseCountByCenter.get(c.id) ?? 0) === 1 ? "" : "s"}
+              </span>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}

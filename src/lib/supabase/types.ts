@@ -16,7 +16,7 @@ import type {
 import type { AssignmentTypeValue, TemplateSection } from "@/lib/assignment-templates/content";
 import type { GradeQueryEvidenceSnapshot } from "@/lib/grade-query-reply";
 
-export type UserRole = "trainee" | "trainer" | "admin" | "admissions";
+export type UserRole = "trainee" | "trainer" | "admin" | "admissions" | "platform_owner";
 export type SubmissionStatus =
   | "not_submitted"
   | "pending"

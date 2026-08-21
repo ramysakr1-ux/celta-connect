@@ -31,6 +31,9 @@ export default async function DashboardIndexPage() {
   // it predated the SS13 rebuild.
   if (profile.role === "trainer") redirect("/trainer");
   if (profile.role === "trainee") redirect(`/portfolio/${profile.id}`);
+  // Sits above every centre -- its own landing, not a centre/course one
+  // (connect-platform-owner-role-spec-2026-08-22.md).
+  if (profile.role === "platform_owner") redirect("/platform");
 
   // Centre Admin and Course Admin are two separate roles with two separate
   // landing screens -- "never merge these two builds". Until now one flat
