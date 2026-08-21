@@ -58,6 +58,29 @@ export async function signOffStage2(): Promise<void> {
   const supabase = await createClient();
   await supabase.rpc("trainee_sign_off_stage2");
   revalidatePath("/dashboard/trainee/celta5");
+  revalidatePath("/portfolio", "layout");
+}
+
+// connect-build-specs-5-gaps-2026-08-21.md item 4: Stage 1 and Stage 3 had
+// no candidate signature at all before migration 0186. Same shape as
+// signOffStage2 -- the page only ever renders these once the tutor's own
+// side is complete AND the candidate has a signature set, so the RPC's
+// "set your signature first" exception is a defensive guard, not
+// something a normal user path can actually hit.
+export async function signOffStage1(): Promise<void> {
+  await requireRole("trainee");
+  const supabase = await createClient();
+  await supabase.rpc("trainee_sign_off_stage1");
+  revalidatePath("/dashboard/trainee/celta5");
+  revalidatePath("/portfolio", "layout");
+}
+
+export async function signOffStage3(): Promise<void> {
+  await requireRole("trainee");
+  const supabase = await createClient();
+  await supabase.rpc("trainee_sign_off_stage3");
+  revalidatePath("/dashboard/trainee/celta5");
+  revalidatePath("/portfolio", "layout");
 }
 
 export async function signOffFinal(_prevState: FormState, formData: FormData): Promise<FormState> {

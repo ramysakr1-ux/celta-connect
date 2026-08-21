@@ -199,3 +199,42 @@ export async function fileGradeQueryReply(
   revalidatePath(`/trainer/grade-query-reply/${traineeId}`);
   return { error: null };
 }
+
+// connect-build-specs-5-gaps-2026-08-21.md item 5: the formal Cambridge
+// appeal itself happens entirely outside Connect, so this is a manual
+// flag a trainer/admin sets when they learn (out of band) that a filed
+// reply has gone to a formal appeal -- not a live tracker. Close-out
+// checks it (blocking-rules.ts).
+export async function markAppealRaised(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const replyId = formData.get("reply_id");
+  const traineeId = formData.get("trainee_id");
+  if (typeof replyId !== "string" || typeof traineeId !== "string") return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("grade_query_replies")
+    .update({ appeal_raised_at: new Date().toISOString(), appeal_raised_by: trainer.id, appeal_resolved_at: null, appeal_resolved_by: null })
+    .eq("id", replyId)
+    .eq("course_id", trainer.course_id ?? "")
+    .not("filed_at", "is", null);
+
+  revalidatePath(`/trainer/grade-query-reply/${traineeId}/${replyId}`);
+}
+
+export async function markAppealResolved(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const replyId = formData.get("reply_id");
+  const traineeId = formData.get("trainee_id");
+  if (typeof replyId !== "string" || typeof traineeId !== "string") return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("grade_query_replies")
+    .update({ appeal_resolved_at: new Date().toISOString(), appeal_resolved_by: trainer.id })
+    .eq("id", replyId)
+    .eq("course_id", trainer.course_id ?? "")
+    .not("appeal_raised_at", "is", null);
+
+  revalidatePath(`/trainer/grade-query-reply/${traineeId}/${replyId}`);
+}

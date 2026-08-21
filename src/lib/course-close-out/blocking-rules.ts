@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 // admin UI, and re-checked server-side in initiateCloseOut before any
 // state changes, since a UI check alone is never enough authorization.
 export interface CloseOutBlockingReason {
-  code: "deferred_without_destination" | "extension_outstanding" | "cambridge_not_confirmed";
+  code: "deferred_without_destination" | "extension_outstanding" | "cambridge_not_confirmed" | "grade_appeal_open";
   message: string;
 }
 
@@ -16,7 +16,7 @@ export async function getCloseOutBlockingReasons(courseId: string): Promise<Clos
   const supabase = await createClient();
   const reasons: CloseOutBlockingReason[] = [];
 
-  const [{ data: course }, { data: unlinkedDeferrals }, { data: extensionTrainees }] = await Promise.all([
+  const [{ data: course }, { data: unlinkedDeferrals }, { data: extensionTrainees }, { data: openAppeals }] = await Promise.all([
     supabase.from("courses").select("cambridge_grades_confirmed_at").eq("id", courseId).maybeSingle(),
     supabase
       .from("deferral_transfers")
@@ -25,6 +25,14 @@ export async function getCloseOutBlockingReasons(courseId: string): Promise<Clos
       .is("destination_course_id", null)
       .eq("hold_at_centre", false),
     supabase.from("profiles").select("id").eq("course_id", courseId).eq("course_status", "extension"),
+    // connect-build-specs-5-gaps-2026-08-21.md item 5: close-out blocks
+    // while a filed reply has a raised-but-not-yet-resolved appeal flag.
+    supabase
+      .from("grade_query_replies")
+      .select("id")
+      .eq("course_id", courseId)
+      .not("appeal_raised_at", "is", null)
+      .is("appeal_resolved_at", null),
   ]);
 
   if (!course?.cambridge_grades_confirmed_at) {
@@ -49,6 +57,13 @@ export async function getCloseOutBlockingReasons(courseId: string): Promise<Clos
       message: `${extensionTrainees.length} candidate${extensionTrainees.length === 1 ? "" : "s"} still ${
         extensionTrainees.length === 1 ? "has" : "have"
       } an extension outstanding.`,
+    });
+  }
+
+  if (openAppeals && openAppeals.length > 0) {
+    reasons.push({
+      code: "grade_appeal_open",
+      message: `${openAppeals.length} grade appeal${openAppeals.length === 1 ? " is" : "s are"} still open.`,
     });
   }
 

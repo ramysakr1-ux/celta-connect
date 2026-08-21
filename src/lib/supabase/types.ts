@@ -367,6 +367,10 @@ export interface Database {
           // what was typed at the moment of signing.
           ai_disclaimer_signed_at: string | null;
           ai_disclaimer_signed_name: string | null;
+          // migration 0186 -- the reusable "sign once, reuse everywhere"
+          // signature, any role. Fixed once set -- see set_my_signature().
+          signature_name: string | null;
+          signature_set_at: string | null;
           // migration 0173 -- the signature itself is on paper (the class
           // register); this just tracks that the trainer has collected it.
           filming_consent_confirmed_at: string | null;
@@ -1614,6 +1618,10 @@ export interface Database {
           stage1_strengths: string | null;
           stage1_action_plan: string | null;
           stage1_completed_at: string | null;
+          // connect-build-specs-5-gaps-2026-08-21.md item 4 (migration
+          // 0186): Stage 1 had no candidate signature column at all before this.
+          stage1_candidate_signature_name: string | null;
+          stage1_candidate_signed_at: string | null;
           stage2_tutorial_given: boolean;
           stage2_hours_taught: number | null;
           stage2_candidate_submitted_at: string | null;
@@ -1626,6 +1634,9 @@ export interface Database {
           stage2_tutor_written_assignments_notes: string | null;
           stage2_tutor_other_notes: string | null;
           stage2_completed_at: string | null;
+          // migration 0186 -- Stage 2's existing sign-off upgraded to the
+          // same reusable-signature shape as Stage 1/3.
+          stage2_candidate_signature_name: string | null;
           // migration 0131 -- "moved earlier" for a standing concern, before
           // the stage's own standard checkpoint. No Stage 1 equivalent --
           // Stage 1 timing is fixed.
@@ -1640,6 +1651,10 @@ export interface Database {
           stage3_tutor_written_assignments_notes: string | null;
           stage3_tutor_other_notes: string | null;
           stage3_finalized_at: string | null;
+          // connect-build-specs-5-gaps-2026-08-21.md item 4 (migration
+          // 0186): Stage 3 had no candidate signature column at all before this.
+          stage3_candidate_signature_name: string | null;
+          stage3_candidate_signed_at: string | null;
           stage3_moved_earlier_at: string | null;
           stage3_moved_earlier_reason: string | null;
           stage3_moved_earlier_by: string | null;
@@ -1665,6 +1680,9 @@ export interface Database {
           final_checklist_assignments: boolean;
           final_checklist_own_work: boolean;
           final_checklist_all_records: boolean;
+          // migration 0186 -- captured at sign-off time, same pattern as
+          // the other three stages.
+          final_candidate_signature_name: string | null;
           grade_review_tutor_comments: string | null;
           final_report_released_at: string | null;
           certificate_grade: "Pass" | "Pass B" | "Pass A" | "Fail" | null;
@@ -1692,6 +1710,13 @@ export interface Database {
           filed_at: string | null;
           filed_by: string | null;
           updated_at: string;
+          // connect-build-specs-5-gaps-2026-08-21.md item 5 (migration
+          // 0185): manual flag, set out-of-band -- the formal Cambridge
+          // appeal itself happens entirely outside Connect.
+          appeal_raised_at: string | null;
+          appeal_raised_by: string | null;
+          appeal_resolved_at: string | null;
+          appeal_resolved_by: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["grade_query_replies"]["Row"]> & {
           course_id: string;
@@ -3231,6 +3256,18 @@ export interface Database {
       };
       trainee_sign_off_stage2: {
         Args: Record<string, never>;
+        Returns: void;
+      };
+      trainee_sign_off_stage1: {
+        Args: Record<string, never>;
+        Returns: void;
+      };
+      trainee_sign_off_stage3: {
+        Args: Record<string, never>;
+        Returns: void;
+      };
+      set_my_signature: {
+        Args: { p_name: string };
         Returns: void;
       };
       trainee_sign_off_final: {

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { sendPushToOwners } from "@/lib/push/send";
+import { distinctTpDates, halfTpDates } from "@/lib/rotation";
 
 export interface FormState {
   error: string | null;
@@ -38,6 +39,25 @@ export async function createOrUpdateIndividualTutorialInvite(_prevState: FormSta
   const supabase = await createClient();
   const courseId = trainer.course_id;
   const label = STAGE_LABEL[stage];
+
+  // connect-build-specs-5-gaps-2026-08-21.md item 3: parity with the
+  // tutor-side same-day check (timetable/actions.ts's tp_double_booked
+  // hard block at lock time) -- a candidate can't teach a TP lesson and
+  // sit an individual tutorial on the same day. Real date-resolution off
+  // the actual timetable, same as the tutor-side check, not a stored
+  // weekday setting.
+  const [{ data: subgroupMember }, { data: tpEvents }] = await Promise.all([
+    supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle(),
+    supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).eq("type", "tp"),
+  ]);
+  const { data: subgroup } = subgroupMember?.subgroup_id
+    ? await supabase.from("course_subgroups").select("half_order").eq("id", subgroupMember.subgroup_id).maybeSingle()
+    : { data: null };
+  const halfOrder = subgroup?.half_order === 1 || subgroup?.half_order === 2 ? subgroup.half_order : null;
+  const traineesTpDates = halfOrder ? halfTpDates(tpEvents ?? [], halfOrder) : distinctTpDates(tpEvents ?? []);
+  if (traineesTpDates.includes(eventDate)) {
+    return { error: `${traineeName} is teaching a TP lesson on ${eventDate} -- a candidate can't teach twice in one day (Handbook 8.1.4). Pick a different date.` };
+  }
 
   const { data: existing } = await supabase
     .from("individual_tutorial_invites")

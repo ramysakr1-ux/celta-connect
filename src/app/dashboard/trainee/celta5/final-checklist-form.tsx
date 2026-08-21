@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { signOffFinal, type FormState } from "@/app/dashboard/trainee/actions";
+import { SetSignatureForm } from "@/components/set-signature-form";
 
 const initialState: FormState = { error: null };
 
@@ -21,10 +22,14 @@ const CHECKLIST_ITEMS = [
   { key: "checklist_all_records", label: "I have completed all records." },
 ] as const;
 
-export function FinalChecklistForm() {
+export function FinalChecklistForm({ signatureName, fullName }: { signatureName: string | null; fullName: string }) {
   const [state, action, pending] = useActionState(signOffFinal, initialState);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const allChecked = CHECKLIST_ITEMS.every((item) => checked[item.key]);
+
+  if (!signatureName) {
+    return <SetSignatureForm fullName={fullName} />;
+  }
 
   return (
     <form action={action} className="flex flex-col gap-4">
@@ -62,7 +67,7 @@ export function FinalChecklistForm() {
         disabled={!allChecked || pending}
         className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
       >
-        {pending ? "Signing..." : "Candidate's signature -- confirm and sign off"}
+        {pending ? "Signing..." : `Sign as ${signatureName}`}
       </button>
     </form>
   );

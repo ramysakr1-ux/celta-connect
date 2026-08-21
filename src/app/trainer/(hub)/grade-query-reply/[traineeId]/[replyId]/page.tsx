@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { ReplyEditor } from "@/app/trainer/(hub)/grade-query-reply/reply-editor";
+import { markAppealRaised, markAppealResolved } from "@/app/trainer/(hub)/grade-query-reply/actions";
 import type { GradeQueryEvidenceSnapshot } from "@/lib/grade-query-reply";
 import type { SubmissionStatus, StandardRating } from "@/lib/supabase/types";
 import { StandardRatingPill, SubmissionStatusPill } from "@/lib/status-pill";
@@ -279,14 +280,57 @@ export default async function GradeQueryReplyDetailPage({
             <p className="mt-1 whitespace-pre-wrap text-sm text-muted">{reply.what_happens_next}</p>
           </div>
         </div>
-      ) : (
+      ) : null}
+
+      {/* ---- Formal appeal flag -- connect-build-specs-5-gaps-2026-08-21.md
+          item 5. The appeal itself happens outside Connect; this is just a
+          manual record of whether one's open, which close-out blocks on. */}
+      {reply.filed_at ? (
+        <div className="sheet flex flex-col gap-3 p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-serif text-lg text-ink">Formal appeal</h2>
+            <span className={`pill ${reply.appeal_raised_at && !reply.appeal_resolved_at ? "pill-warning" : "pill-neutral"}`}>
+              {reply.appeal_raised_at && !reply.appeal_resolved_at ? "Open -- blocks close-out" : reply.appeal_resolved_at ? "Resolved" : "None on record"}
+            </span>
+          </div>
+          <p className="text-sm text-muted">
+            Cambridge&apos;s formal appeal process happens entirely outside Connect -- this just records whether the
+            candidate has taken this reply to a formal appeal, so close-out knows to wait.
+          </p>
+          {reply.appeal_raised_at ? (
+            <p className="text-xs text-muted">
+              Raised {new Date(reply.appeal_raised_at).toLocaleDateString()}
+              {reply.appeal_resolved_at ? ` · resolved ${new Date(reply.appeal_resolved_at).toLocaleDateString()}` : ""}
+            </p>
+          ) : null}
+          {reply.appeal_raised_at && !reply.appeal_resolved_at ? (
+            <form action={markAppealResolved}>
+              <input type="hidden" name="reply_id" value={reply.id} />
+              <input type="hidden" name="trainee_id" value={traineeId} />
+              <button type="submit" className="self-start rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary">
+                Mark appeal resolved
+              </button>
+            </form>
+          ) : (
+            <form action={markAppealRaised}>
+              <input type="hidden" name="reply_id" value={reply.id} />
+              <input type="hidden" name="trainee_id" value={traineeId} />
+              <button type="submit" className="self-start rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary">
+                Mark a formal appeal raised
+              </button>
+            </form>
+          )}
+        </div>
+      ) : null}
+
+      {!reply.filed_at ? (
         <ReplyEditor
           replyId={reply.id}
           traineeId={traineeId}
           initialWhatWouldHaveMadeTheDifference={reply.what_would_have_made_the_difference ?? ""}
           initialWhatHappensNext={reply.what_happens_next ?? ""}
         />
-      )}
+      ) : null}
     </div>
   );
 }

@@ -25,7 +25,8 @@ import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessme
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
 import { ObservationTaskForm } from "@/app/portfolio/[traineeId]/celta5/observation-task-form";
 import { FinalChecklistForm } from "@/app/dashboard/trainee/celta5/final-checklist-form";
-import { signOffStage2 } from "@/app/dashboard/trainee/actions";
+import { signOffStage1, signOffStage2, signOffStage3 } from "@/app/dashboard/trainee/actions";
+import { SetSignatureForm } from "@/components/set-signature-form";
 import { Stage1Form } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-form";
 import { StageRatingsForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage-ratings-form";
 import { Stage2OverallForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage2-overall-form";
@@ -429,7 +430,7 @@ export default async function PortfolioCelta5Page({
           </div>
         ) : (
           <>
-            {record.stage1_strengths || record.stage1_action_plan ? (
+            {record.stage1_completed_at ? (
               <div className="sheet">
                 <h3 className="font-serif text-lg text-ink">Progress Record — Stage 1</h3>
                 {record.stage1_strengths ? (
@@ -444,6 +445,22 @@ export default async function PortfolioCelta5Page({
                     <p className="text-ink">{record.stage1_action_plan}</p>
                   </div>
                 ) : null}
+                <div className="mt-3 border-t border-border-faint pt-3">
+                  {record.stage1_candidate_signed_at ? (
+                    <p className="text-sm text-muted">
+                      Signed by {record.stage1_candidate_signature_name} on {new Date(record.stage1_candidate_signed_at).toLocaleString()}.
+                    </p>
+                  ) : !viewer?.signature_name ? (
+                    <SetSignatureForm fullName={viewer?.full_name ?? ""} />
+                  ) : (
+                    <form action={signOffStage1}>
+                      <p className="mb-2 text-sm text-ink">I have read and agree with the summarising comments above.</p>
+                      <button type="submit" className="rounded-[6px] bg-primary px-4 py-2 font-medium text-primary-foreground">
+                        Sign as {viewer.signature_name}
+                      </button>
+                    </form>
+                  )}
+                </div>
               </div>
             ) : null}
 
@@ -528,12 +545,15 @@ export default async function PortfolioCelta5Page({
                 <div className="list-row">
                   {record.trainee_signoff_stage2_at ? (
                     <p className="text-sm text-muted">
-                      You signed off on this on {new Date(record.trainee_signoff_stage2_at).toLocaleString()}.
+                      Signed by {record.stage2_candidate_signature_name ?? "you"} on {new Date(record.trainee_signoff_stage2_at).toLocaleString()}.
                     </p>
+                  ) : !viewer?.signature_name ? (
+                    <SetSignatureForm fullName={viewer?.full_name ?? ""} />
                   ) : (
                     <form action={signOffStage2}>
+                      <p className="mb-2 text-sm text-ink">I have read and agree with the summarising comments above.</p>
                       <button type="submit" className="rounded-[6px] bg-primary px-4 py-2 font-medium text-primary-foreground">
-                        I&apos;ve reviewed this and sign off
+                        Sign as {viewer.signature_name}
                       </button>
                     </form>
                   )}
@@ -556,6 +576,24 @@ export default async function PortfolioCelta5Page({
                   <div className="mt-3">
                     <p className="text-sm text-muted">Summary and action points</p>
                     <p className="text-ink">{record.stage3_tutor_notes}</p>
+                  </div>
+                ) : null}
+                {record.stage3_finalized_at ? (
+                  <div className="mt-3 border-t border-border-faint pt-3">
+                    {record.stage3_candidate_signed_at ? (
+                      <p className="text-sm text-muted">
+                        Signed by {record.stage3_candidate_signature_name} on {new Date(record.stage3_candidate_signed_at).toLocaleString()}.
+                      </p>
+                    ) : !viewer?.signature_name ? (
+                      <SetSignatureForm fullName={viewer?.full_name ?? ""} />
+                    ) : (
+                      <form action={signOffStage3}>
+                        <p className="mb-2 text-sm text-ink">I have read and agree with the summarising comments above.</p>
+                        <button type="submit" className="rounded-[6px] bg-primary px-4 py-2 font-medium text-primary-foreground">
+                          Sign as {viewer.signature_name}
+                        </button>
+                      </form>
+                    )}
                   </div>
                 ) : null}
               </div>
@@ -600,10 +638,10 @@ export default async function PortfolioCelta5Page({
             <div className="sheet">
               {record.trainee_signoff_final_at ? (
                 <p className="text-sm text-muted">
-                  You signed off on this on {new Date(record.trainee_signoff_final_at).toLocaleString()}.
+                  Signed by {record.final_candidate_signature_name ?? "you"} on {new Date(record.trainee_signoff_final_at).toLocaleString()}.
                 </p>
               ) : (
-                <FinalChecklistForm />
+                <FinalChecklistForm signatureName={viewer?.signature_name ?? null} fullName={viewer?.full_name ?? ""} />
               )}
             </div>
           </>
