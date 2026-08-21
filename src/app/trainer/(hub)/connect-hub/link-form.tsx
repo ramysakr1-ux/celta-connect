@@ -14,7 +14,7 @@ export function ConnectHubLinkForm({ defaultValue }: { defaultValue: string }) {
         type="url"
         name="connect_hub_link"
         defaultValue={defaultValue}
-        placeholder="https://script.google.com/macros/s/.../exec?tutor=..."
+        placeholder="https://.../?tutor=..."
         required
         className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
       />

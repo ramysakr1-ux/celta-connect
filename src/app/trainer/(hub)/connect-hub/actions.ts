@@ -21,8 +21,19 @@ export async function saveConnectHubLink(_prevState: FormState, formData: FormDa
     return { error: "Paste your Connect Hub tutor link first." };
   }
   const trimmed = link.trim();
-  if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\?tutor=.+/.test(trimmed)) {
-    return { error: "That doesn't look like a Connect Hub tutor link (should start with https://script.google.com/macros/s/... and include ?tutor=)." };
+  // Accepts the raw Apps Script exec URL or a wrapper in front of it (e.g.
+  // celta-hub-wrapper on GitHub Pages, which just forwards the query string
+  // through to script.google.com) -- either is a real Connect Hub link, so
+  // this only checks for a well-formed https URL carrying a tutor token,
+  // not one specific domain.
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    return { error: "That doesn't look like a valid link." };
+  }
+  if (parsed.protocol !== "https:" || !parsed.searchParams.has("tutor")) {
+    return { error: "That doesn't look like a Connect Hub tutor link -- it should be an https:// link with ?tutor=... in it." };
   }
 
   const supabase = await createClient();

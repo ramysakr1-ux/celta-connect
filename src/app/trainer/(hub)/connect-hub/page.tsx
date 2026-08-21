@@ -41,7 +41,8 @@ export default async function ConnectHubSetupPage() {
         </p>
         <p className="text-xs text-muted">
           Find it in Connect Hub itself, under the tutor dashboard&apos;s &quot;Tutors&quot; tab -- it
-          looks like https://script.google.com/macros/s/.../exec?tutor=...
+          looks like https://.../?tutor=... (either the raw script.google.com link, or the
+          shorter ramysakr1-ux.github.io/celta-hub-wrapper/ one in front of it -- both work).
         </p>
         <ConnectHubLinkForm defaultValue={data?.connect_hub_link ?? ""} />
       </div>
