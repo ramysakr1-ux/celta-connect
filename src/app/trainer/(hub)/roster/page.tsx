@@ -113,6 +113,12 @@ export default async function TrainerRosterPage() {
             Observation tasks →
           </a>
           <a
+            href="/trainer/observation-hours"
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Observation hours →
+          </a>
+          <a
             href="/trainer/gtky"
             className="text-xs font-semibold text-primary hover:underline"
           >
