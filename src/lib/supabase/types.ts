@@ -1157,6 +1157,12 @@ export interface Database {
           // same row.
           first_late_push_sent_at: string | null;
           resubmission_late_push_sent_at: string | null;
+          // migration 0187 -- language pre-check, a model-read register
+          // judgment run right after submission. Null = not flagged
+          // (nothing worth a look, or the check never ran/failed -- same
+          // meaning to a tutor either way). Advisory only.
+          first_register_note: string | null;
+          resubmission_register_note: string | null;
           tutor_feedback: string | null;
           // Which open malpractice case (if any) is pausing this
           // assignment's marking, and which case (if any) this row IS the

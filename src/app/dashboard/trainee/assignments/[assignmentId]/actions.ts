@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import type { Database } from "@/lib/supabase/types";
 import { runPlagiarismScan } from "@/lib/plagiarism/scan";
+import { runLanguagePrecheck } from "@/lib/language-precheck";
 
 type SectionResponseInsert = Database["public"]["Tables"]["assignment_section_responses"]["Insert"];
 
@@ -105,6 +106,15 @@ export async function submitAssignment(_prevState: FormState, formData: FormData
     await runPlagiarismScan(assignmentId, round === "resubmission" ? "resubmission" : "first");
   } catch (scanError) {
     console.error("Plagiarism scan failed for assignment", assignmentId, scanError);
+  }
+
+  // connect-decision-language-precheck.md: same non-blocking shape as the
+  // plagiarism scan above -- advisory only, never holds up a submission
+  // that already succeeded.
+  try {
+    await runLanguagePrecheck(assignmentId, round === "resubmission" ? "resubmission" : "first");
+  } catch (precheckError) {
+    console.error("Language pre-check failed for assignment", assignmentId, precheckError);
   }
 
   revalidatePath(`/portfolio/${trainee.id}/assignments/${assignmentId}`);

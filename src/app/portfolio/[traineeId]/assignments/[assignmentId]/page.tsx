@@ -177,6 +177,7 @@ export default async function AssignmentDetailPage({
     .map((r) => (round === "resubmission" ? r.resubmission_response : r.first_response) ?? "")
     .join("\n\n");
   const aiCitationMismatch = checkAiCitationShape(fullSubmittedText, aiDeclared);
+  const registerNote = round === "resubmission" ? assignment.resubmission_register_note : assignment.first_register_note;
 
   return (
     <div className="flex flex-col gap-4">
@@ -275,6 +276,7 @@ export default async function AssignmentDetailPage({
                 ) : null}
               </p>
               {aiCitationMismatch ? <p className="text-sm text-status-warning-text">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p> : null}
+              {registerNote ? <p className="text-sm text-status-warning-text">Language pre-check: {registerNote}</p> : null}
             </div>
             {isFol && folData ? <FolCrossCheck claims={folData.allClaimsForCrossCheck} poolEntries={folData.poolEntries} /> : null}
             <FindingsBand findings={findings} assignmentId={assignmentId} round={round} traineeId={traineeId} />

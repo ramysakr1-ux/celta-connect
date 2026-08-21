@@ -66,6 +66,7 @@ export default async function TrainerAssignmentReviewPage({
     .map((r) => (round === "resubmission" ? r.resubmission_response : r.first_response) ?? "")
     .join("\n\n");
   const aiCitationMismatch = checkAiCitationShape(fullSubmittedText, aiDeclared);
+  const registerNote = round === "resubmission" ? assignment.resubmission_register_note : assignment.first_register_note;
 
   return (
     <div className="flex flex-col gap-6">
@@ -133,6 +134,7 @@ export default async function TrainerAssignmentReviewPage({
           {aiCitationMismatch ? (
             <p className="text-sm text-status-warning-text">{AI_CITATION_MISMATCH_LABEL[aiCitationMismatch]}</p>
           ) : null}
+          {registerNote ? <p className="text-sm text-status-warning-text">Language pre-check: {registerNote}</p> : null}
         </div>
       ) : null}
 
