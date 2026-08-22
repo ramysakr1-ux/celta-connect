@@ -31,6 +31,11 @@ const ENTRIES: { href: string; role: string; blurb: string }[] = [
     role: "Volunteer student",
     blurb: "No login -- a token-based view of upcoming classes, shared materials and hours toward a certificate.",
   },
+  {
+    href: "/demo/assessor",
+    role: "Assessor",
+    blurb: "No login -- a token-based, read-only view of the visit pack: candidate readiness, CELTA5 records and marking guidance.",
+  },
 ];
 
 export default function DemoLandingPage() {
