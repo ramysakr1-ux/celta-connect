@@ -314,7 +314,7 @@ export function StaffChatDrawer({
           <p className="rounded-full bg-status-warning-bg px-3 py-1 text-center text-[11px] text-status-warning-text">{quietHoursNote}</p>
         ) : null}
 
-        <div className="flex h-14 items-center gap-1.5 rounded-[28px] border border-border bg-card pl-2 pr-2.5 shadow-lg sm:gap-3">
+        <div className="flex min-h-14 items-center gap-1.5 rounded-[28px] border border-border bg-card pl-2 pr-2.5 shadow-lg sm:gap-3">
           <button
             type="button"
             onClick={() => setPickerOpen((v) => !v)}
