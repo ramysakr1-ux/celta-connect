@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateCentreForm, ChangeRoleForm } from "@/app/platform/platform-forms";
@@ -25,9 +26,17 @@ export default async function PlatformPage() {
 
   return (
     <div className="container flex flex-col gap-6 py-8">
-      <div>
-        <h1 className="font-serif text-2xl text-ink">Platform</h1>
-        <p className="mt-1 text-sm text-muted">Every centre, at a glance -- and the two things only a platform owner can do.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-2xl text-ink">Platform</h1>
+          <p className="mt-1 text-sm text-muted">Every centre, at a glance -- and the two things only a platform owner can do.</p>
+        </div>
+        <Link
+          href="/platform/command-center"
+          className="h-10 shrink-0 rounded-[6px] border border-primary/40 px-4 text-sm font-semibold leading-10 text-primary hover:bg-primary/5"
+        >
+          Command center
+        </Link>
       </div>
 
       <div className="card p-5">

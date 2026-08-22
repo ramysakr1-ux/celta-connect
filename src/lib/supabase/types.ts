@@ -3273,6 +3273,51 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["finances"]["Row"]>;
         Relationships: [];
       };
+      centre_subscriptions: {
+        Row: {
+          id: string;
+          center_id: string;
+          plan_name: string;
+          monthly_amount: number;
+          currency: string;
+          status: "trial" | "active" | "past_due" | "cancelled";
+          renewal_date: string | null;
+          notes: string | null;
+          marked_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_subscriptions"]["Row"]> & {
+          center_id: string;
+          plan_name: string;
+          monthly_amount: number;
+          currency: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_subscriptions"]["Row"]>;
+        Relationships: [];
+      };
+      centre_invoices: {
+        Row: {
+          id: string;
+          center_id: string;
+          centre_subscription_id: string | null;
+          amount: number;
+          currency: string;
+          due_date: string | null;
+          status: "outstanding" | "paid" | "void";
+          note: string | null;
+          marked_by: string | null;
+          paid_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_invoices"]["Row"]> & {
+          center_id: string;
+          amount: number;
+          currency: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_invoices"]["Row"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
