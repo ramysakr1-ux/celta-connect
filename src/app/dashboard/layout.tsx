@@ -36,8 +36,22 @@ export default async function DashboardLayout({
 
 
 
+  // for-claude-code-role-tinted-backgrounds-v2-final.md: this layout is
+  // shared by admin (Course Admin -- Centre Admin role holders never route
+  // through here, they land at /centre with its own layout/tint instead),
+  // admissions (not one of the spec's four named areas, left untinted --
+  // ask before assuming which room it belongs in), and the superseded
+  // /dashboard/trainee /dashboard/trainer stubs (kept on the in-course tint
+  // for consistency in case an old link still reaches them).
+  const roleTintClass =
+    profile?.role === "admin"
+      ? "bg-tint-course-admin"
+      : profile?.role === "trainee" || profile?.role === "trainer"
+        ? "bg-tint-in-course"
+        : "";
+
   return (
-    <div className="flex min-h-full flex-1 flex-col">
+    <div className={`flex min-h-full flex-1 flex-col ${roleTintClass}`}>
       <header className="border-b border-border">
         <div className="container flex h-14 items-center justify-between gap-6">
           {/* The logo keeps you in Course Admin. It used to link to /dashboard,

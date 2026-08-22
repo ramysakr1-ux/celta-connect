@@ -28,16 +28,13 @@
      Changed app-wide on 2026-08-16 rather than per-surface: a scoped fix on
      the entry pages earlier the same day left the rest of the product
      inconsistent with its own specs. */
-  --color-background: oklch(92.5% 0.012 85); /* warm beige page ground */
-  /* card / paper -- beige hue kept from the 2026-08-22 restore
-     (connect-beige-cards-teal-restore-spec wanted beige, not near-white),
-     but that restore only checked hue and collapsed the lightness gap back
-     to ~0.5% -- invisible on dense pages (command center, Course Admin),
-     per for-claude-code-systemic-contrast-fix.md, screenshotted same day.
-     Lightness raised from 93% to 97% -- keeps the beige hue/chroma, restores
-     a real ~4.5% gap from the ground, same principle as the comment above:
-     the gap IS the design, a token-level fix so every page inherits it. */
-  --color-card: oklch(97% 0.018 80);
+  --color-background: oklch(92.5% 0.012 85); /* warm beige page ground -- default/fallback for areas outside the four role tints below (auth, /platform, marketing) */
+  /* card / paper, all four role areas share this one value --
+     for-claude-code-role-tinted-backgrounds-v2-final.md: confirmed by live
+     side-by-side comparison against all four background tints below, not
+     a guess. Supersedes the systemic-contrast-fix's 97%/0.018/80 (that one
+     only checked against the single old flat background). */
+  --color-card: oklch(97.8% 0.014 85);
   --color-border: oklch(89.5% 0.012 82); /* hairline neutral */
   --color-ink: oklch(23.5% 0.017 65); /* near-black warm ink (body text) */
   --color-primary: oklch(37.5% 0.058 195); /* teal */
@@ -53,6 +50,18 @@
   --color-accent: oklch(93% 0.019 190); /* pale teal-green, the "green hover" wash */
   --color-accent-foreground: oklch(32% 0.05 195);
   --color-ring: oklch(37.5% 0.058 195);
+
+  /* Role-tinted page backgrounds -- for-claude-code-role-tinted-backgrounds-v2-final.md.
+     Card/border/status colors are unchanged and identical across all four;
+     only the page ground varies, so it reads as "which room you're in"
+     without touching what any color already means (teal/gold/amber/red).
+     Applied per role area at each area's own layout boundary, not here --
+     --color-background above stays the default for anything outside the
+     four (auth, /platform itself, marketing/apply pages). */
+  --color-tint-in-course: oklch(85% 0.045 75); /* golden sand -- trainee/trainer/TP/assignments + Assessor: same content, same background */
+  --color-tint-centre-admin: oklch(82% 0.025 235); /* slate-blue -- Centre Admin, and Command Centre (platform owner uses the Centre Admin tint) */
+  --color-tint-course-admin: oklch(80% 0.03 108); /* warm olive -- Course Admin (the MCT's own course setup/roster, a separate role from Centre Admin) */
+  --color-tint-volunteer: oklch(80% 0.03 335); /* dusty plum -- Volunteer/Student, the tokenized /student/[token] view */
 
   /* status (tint bg + matching text) -- on-track/at-risk/pending are the
      three variants every existing status-pill usage already consumes;
@@ -90,6 +99,10 @@
   --color-background: var(--color-background);
   --color-card: var(--color-card);
   --color-border: var(--color-border);
+  --color-tint-in-course: var(--color-tint-in-course);
+  --color-tint-centre-admin: var(--color-tint-centre-admin);
+  --color-tint-course-admin: var(--color-tint-course-admin);
+  --color-tint-volunteer: var(--color-tint-volunteer);
   --color-ink: var(--color-ink);
   --color-primary: var(--color-primary);
   --color-primary-foreground: var(--color-primary-foreground);

@@ -86,7 +86,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // candidates only from the course's Day-10 divergence session on.
   if (!volunteer.signup_completed_at) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-tint-volunteer">
         <div className="mx-auto flex max-w-xl flex-col gap-6 p-6 sm:p-10">
           <div>
             <p className="text-sm font-medium text-muted uppercase tracking-wide">{course?.name ?? "Your course"}</p>
@@ -201,7 +201,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   const milestones = milestonesFor(certificateHoursThreshold);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-tint-volunteer">
       <div className="mx-auto flex max-w-3xl flex-col gap-6 p-6 sm:p-10">
         {/* Header */}
         <div className="flex items-center justify-between gap-4">

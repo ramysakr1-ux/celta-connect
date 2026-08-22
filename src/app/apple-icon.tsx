@@ -5,7 +5,7 @@ import { ImageResponse } from "next/og";
 // automatically, same reasoning as the maskable icon-512.png.tsx route.
 const INK_WARM = "#3e2818";
 const LIFTED_GOLD = "#cc9140";
-const CARD = "#fcf4e8"; // --color-card, oklch(97% 0.018 80)
+const CARD = "#fcf7ed"; // --color-card, oklch(97.8% 0.014 85)
 
 export const contentType = "image/png";
 export const size = { width: 180, height: 180 };

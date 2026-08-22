@@ -9,7 +9,7 @@ import { ImageResponse } from "next/og";
 // standard OKLCH->sRGB conversion), not var(--color-*) references.
 const INK_WARM = "#3e2818"; // --color-ink-warm, oklch(30% 0.042 58)
 const LIFTED_GOLD = "#cc9140"; // bespoke lifted gold, oklch(70% 0.12 72)
-const CARD = "#fcf4e8"; // --color-card, oklch(97% 0.018 80)
+const CARD = "#fcf7ed"; // --color-card, oklch(97.8% 0.014 85)
 
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";

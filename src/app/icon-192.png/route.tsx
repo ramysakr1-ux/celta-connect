@@ -8,7 +8,7 @@ import { ImageResponse } from "next/og";
 // values -- see manifest.ts's comment.
 const INK_WARM = "#3e2818";
 const LIFTED_GOLD = "#cc9140";
-const CARD = "#fcf4e8"; // --color-card, oklch(97% 0.018 80)
+const CARD = "#fcf7ed"; // --color-card, oklch(97.8% 0.014 85)
 
 const size = { width: 192, height: 192 };
 

@@ -67,7 +67,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   }
 
   return (
-    <>
+    <div className="flex min-h-full flex-1 flex-col bg-tint-in-course">
       {isDemo ? <DemoModeBanner /> : null}
       <header className="border-b border-border bg-card">
         <div className="container flex h-14 items-stretch justify-between gap-6">
@@ -95,6 +95,6 @@ export default async function TrainerHubLayout({ children }: { children: React.R
       {profile && staffChat ? (
         <StaffChatDrawer profileId={profile.id} initialChannels={staffChat.channels} coworkers={staffChat.coworkers} />
       ) : null}
-    </>
+    </div>
   );
 }

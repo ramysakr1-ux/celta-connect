@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { computeCourseState } from "@/lib/course-progress";
+import { toLocalIso } from "@/lib/timetable-grid";
 import { SubscriptionForm, InvoiceForm, InvoiceRowActions } from "@/app/platform/command-center/command-center-forms";
 
 // specs/for-claude-code-command-center-belongs-in-connect.md: this is Connect's
@@ -22,16 +24,17 @@ function groupByCurrency(rows: { amount: number; currency: string }[]) {
 }
 
 export default async function CommandCenterPage() {
-  await requireRole("platform_owner");
+  const profile = await requireRole("platform_owner");
   const admin = createAdminClient();
 
-  const [{ data: centers }, { data: subscriptions }, { data: invoices }] = await Promise.all([
+  const [{ data: centers }, { data: subscriptions }, { data: invoices }, { data: courses }] = await Promise.all([
     admin.from("centers").select("id, name, center_number, is_demo, created_at").order("name", { ascending: true }),
     admin.from("centre_subscriptions").select("*"),
     admin
       .from("centre_invoices")
       .select("*")
       .order("created_at", { ascending: false }),
+    admin.from("courses").select("center_id, start_date, end_date"),
   ]);
 
   const centresList = centers ?? [];
@@ -51,8 +54,32 @@ export default async function CommandCenterPage() {
   in30Days.setDate(in30Days.getDate() + 30);
   const renewalsDue = activeSubs.filter((s) => s.renewal_date && new Date(s.renewal_date) <= in30Days);
 
+  const in7Days = new Date();
+  in7Days.setDate(in7Days.getDate() + 7);
+  const renewalsDueThisWeek = activeSubs.filter((s) => s.renewal_date && new Date(s.renewal_date) <= in7Days);
+
   const outstanding = invoicesList.filter((i) => i.status === "outstanding");
   const outstandingByCurrency = groupByCurrency(outstanding.map((i) => ({ amount: i.amount, currency: i.currency })));
+
+  // Personal greeting recap (for-claude-code-role-tinted-backgrounds-v2-final.md
+  // item 1) -- "centres running" reuses the same computeCourseState the
+  // rest of the app groups courses by (running/upcoming/closed), not a
+  // separate ad-hoc definition.
+  const today = toLocalIso(new Date());
+  const runningCentreIds = new Set(
+    (courses ?? [])
+      .filter((c) => computeCourseState(c.start_date, c.end_date, today) === "running")
+      .map((c) => c.center_id)
+  );
+  const firstName = profile.full_name?.split(" ")[0] || "there";
+  const hour = new Date().getHours();
+  const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+  const dateEyebrow = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }).toUpperCase();
+  const recapParts = [
+    `${runningCentreIds.size} centre${runningCentreIds.size === 1 ? "" : "s"} running`,
+    `${renewalsDueThisWeek.length} renewal${renewalsDueThisWeek.length === 1 ? "" : "s"} due this week`,
+    outstanding.length ? `${outstanding.length} outstanding invoice${outstanding.length === 1 ? "" : "s"}` : "nothing needs you right now",
+  ];
 
   type ActivityItem = { at: string; label: string };
   const activity: ActivityItem[] = [
@@ -70,13 +97,17 @@ export default async function CommandCenterPage() {
     .slice(0, 15);
 
   return (
-    <div className="container flex flex-col gap-6 py-8">
+    <div className="min-h-full bg-tint-centre-admin">
+      <div className="container flex flex-col gap-6 py-8">
       <div>
         <Link href="/platform" className="text-sm font-semibold text-primary hover:underline">
           ← Platform
         </Link>
-        <h1 className="mt-2 font-serif text-2xl text-ink">Command center</h1>
-        <p className="mt-1 text-sm text-muted">Revenue and accounts across every centre — platform-owner only.</p>
+        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted">{dateEyebrow}</p>
+        <h1 className="mt-1 font-serif text-2xl text-ink">
+          Good {timeOfDay}, {firstName}
+        </h1>
+        <p className="mt-1 text-sm text-muted">{recapParts.join(", ")}.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -200,6 +231,7 @@ export default async function CommandCenterPage() {
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );
