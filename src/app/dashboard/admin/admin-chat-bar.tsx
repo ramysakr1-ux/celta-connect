@@ -53,6 +53,13 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
     setAwake(true);
   }
 
+  function resizeTextarea() {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 96)}px`;
+  }
+
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
       setPickerOpen(false);
@@ -64,6 +71,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
     const trimmed = body.trim();
     if (!trimmed || !selected) return;
     setBody("");
+    requestAnimationFrame(resizeTextarea);
     await messageThreadRef.current?.send(trimmed);
   }
 
@@ -150,7 +158,10 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
             ref={textareaRef}
             rows={1}
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={(e) => {
+              setBody(e.target.value);
+              resizeTextarea();
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
