@@ -29,7 +29,15 @@
      the entry pages earlier the same day left the rest of the product
      inconsistent with its own specs. */
   --color-background: oklch(92.5% 0.012 85); /* warm beige page ground */
-  --color-card: oklch(93% 0.024 80); /* card / paper -- beige, restored 2026-08-22 per connect-beige-cards-teal-restore-spec */
+  /* card / paper -- beige hue kept from the 2026-08-22 restore
+     (connect-beige-cards-teal-restore-spec wanted beige, not near-white),
+     but that restore only checked hue and collapsed the lightness gap back
+     to ~0.5% -- invisible on dense pages (command center, Course Admin),
+     per for-claude-code-systemic-contrast-fix.md, screenshotted same day.
+     Lightness raised from 93% to 97% -- keeps the beige hue/chroma, restores
+     a real ~4.5% gap from the ground, same principle as the comment above:
+     the gap IS the design, a token-level fix so every page inherits it. */
+  --color-card: oklch(97% 0.018 80);
   --color-border: oklch(89.5% 0.012 82); /* hairline neutral */
   --color-ink: oklch(23.5% 0.017 65); /* near-black warm ink (body text) */
   --color-primary: oklch(37.5% 0.058 195); /* teal */

@@ -21,16 +21,6 @@ function groupByCurrency(rows: { amount: number; currency: string }[]) {
   return [...totals.entries()].map(([currency, amount]) => ({ currency, amount }));
 }
 
-// specs/for-claude-code-command-center-visual-fix.md: --color-card sits only
-// ~0.5% lighter than --color-background (deliberately restored close on
-// 2026-08-16, see globals.css's own note on that) -- fine for sparse pages,
-// but this page is dense with panels and read as one flat beige field.
-// Rather than touch that global token (a recent, deliberate site-wide
-// choice), this page uses a locally stronger surface: --color-surface-muted
-// (further from the ground) plus a full-strength border instead of the
-// faint one -- still no shadow, "no box-shadows anywhere" stays a hard rule.
-const panel = "rounded-[6px] border border-border bg-surface-muted";
-
 export default async function CommandCenterPage() {
   await requireRole("platform_owner");
   const admin = createAdminClient();
@@ -90,21 +80,21 @@ export default async function CommandCenterPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className={`${panel} p-4`}>
+        <div className="card p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Active centres</p>
           <p className="mt-1.5 text-2xl font-bold text-ink">{centresList.length}</p>
         </div>
-        <div className={`${panel} p-4`}>
+        <div className="card p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">MRR</p>
           <p className="mt-1.5 text-2xl font-bold text-ink">
             {mrrByCurrency.length ? mrrByCurrency.map((m) => money(m.amount, m.currency)).join(" · ") : "—"}
           </p>
         </div>
-        <div className={`${panel} p-4`}>
+        <div className="card p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Renewals due (30d)</p>
           <p className="mt-1.5 text-2xl font-bold text-ink">{renewalsDue.length}</p>
         </div>
-        <div className={`${panel} p-4`}>
+        <div className="card p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Outstanding invoices</p>
           <p className="mt-1.5 text-2xl font-bold text-ink">
             {outstanding.length} {outstandingByCurrency.length ? `(${outstandingByCurrency.map((m) => money(m.amount, m.currency)).join(" · ")})` : ""}
@@ -113,24 +103,24 @@ export default async function CommandCenterPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className={`${panel} border-t-4 border-t-primary p-4`}>
+        <div className="card border-t-4 border-t-primary p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">Connect</p>
           <p className="mt-1.5 text-xl font-bold text-ink">{centresList.length} centres</p>
           <p className="mt-1 text-sm text-muted">{mrrByCurrency.length ? mrrByCurrency.map((m) => money(m.amount, m.currency)).join(" · ") : "£0"}/mo</p>
         </div>
-        <div className={`${panel} border-t-4 border-t-gold p-4 opacity-60`}>
+        <div className="card border-t-4 border-t-gold p-4 opacity-60">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Connect Hub</p>
           <p className="mt-1.5 text-xl font-bold text-ink">Illustrative</p>
           <p className="mt-1 text-sm text-muted">No usage/billing reporting wired yet — separate piece of work.</p>
         </div>
-        <div className={`${panel} border-t-4 border-t-bronze p-4 opacity-60`}>
+        <div className="card border-t-4 border-t-bronze p-4 opacity-60">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Affina</p>
           <p className="mt-1.5 text-xl font-bold text-ink">Illustrative</p>
           <p className="mt-1 text-sm text-muted">No usage/billing reporting wired yet — separate piece of work.</p>
         </div>
       </div>
 
-      <div className={panel}>
+      <div className="card">
         <div className="border-b border-border-faint px-5 py-3.5">
           <h2 className="font-serif text-lg text-ink">Accounts ({centresList.length})</h2>
         </div>
@@ -170,7 +160,7 @@ export default async function CommandCenterPage() {
         )}
       </div>
 
-      <div className={`${panel} p-5`}>
+      <div className="card p-5">
         <h2 className="font-serif text-lg text-ink">Set a centre&apos;s subscription</h2>
         <p className="mt-1 text-sm text-muted">Hand-entered — no payment provider connected yet. One active plan per centre; saving again updates it.</p>
         <div className="mt-4">
@@ -178,14 +168,14 @@ export default async function CommandCenterPage() {
         </div>
       </div>
 
-      <div className={`${panel} p-5`}>
+      <div className="card p-5">
         <h2 className="font-serif text-lg text-ink">Record an invoice</h2>
         <div className="mt-4">
           <InvoiceForm centres={centresList} />
         </div>
       </div>
 
-      <div className={`${panel} p-5`}>
+      <div className="card p-5">
         <h2 className="font-serif text-lg text-ink">Payments</h2>
         <p className="mt-1 text-sm text-muted">
           No payment provider is connected for centre subscriptions. Wiring one (Stripe or equivalent — webhooks, checkout, invoice automation) is its
@@ -196,7 +186,7 @@ export default async function CommandCenterPage() {
         </button>
       </div>
 
-      <div className={panel}>
+      <div className="card">
         <div className="border-b border-border-faint px-5 py-3.5">
           <h2 className="font-serif text-lg text-ink">Activity</h2>
         </div>
