@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getPlatformOwnerGreeting } from "@/lib/platform-owner-greeting";
 import { CreateCentreForm, ChangeRoleForm } from "@/app/platform/platform-forms";
 
 // connect-platform-owner-role-spec-2026-08-22.md's "keep it minimal": the
@@ -10,13 +11,19 @@ import { CreateCentreForm, ChangeRoleForm } from "@/app/platform/platform-forms"
 // createClient()) since this is the one screen meant to see across every
 // centre at once -- RLS stays centre-scoped everywhere else, per that same
 // spec's scope note deferring true cross-centre RLS to a follow-up.
+//
+// The personal greeting (for-claude-code-role-tinted-backgrounds-v2-final.md)
+// lives here, not on /platform/command-center -- this is the actual landing
+// page right after login (Ramy, 22 Aug 2026, catching that the spec had
+// scoped it one click too deep).
 export default async function PlatformPage() {
-  await requireRole("platform_owner");
+  const profile = await requireRole("platform_owner");
   const admin = createAdminClient();
 
-  const [{ data: centers }, { data: courses }] = await Promise.all([
+  const [{ data: centers }, { data: courses }, greeting] = await Promise.all([
     admin.from("centers").select("id, name, center_number, is_demo, created_at").order("created_at", { ascending: false }),
     admin.from("courses").select("id, center_id"),
+    getPlatformOwnerGreeting(profile.full_name),
   ]);
 
   const courseCountByCenter = new Map<string, number>();
@@ -28,8 +35,11 @@ export default async function PlatformPage() {
     <div className="container flex flex-col gap-6 py-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl text-ink">Platform</h1>
-          <p className="mt-1 text-sm text-muted">Every centre, at a glance -- and the two things only a platform owner can do.</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">{greeting.dateEyebrow}</p>
+          <h1 className="mt-1 font-serif text-2xl text-ink">
+            Good {greeting.timeOfDay}, {greeting.firstName}
+          </h1>
+          <p className="mt-1 text-sm text-muted">{greeting.recap}</p>
         </div>
         <Link
           href="/platform/command-center"
