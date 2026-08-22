@@ -28,14 +28,15 @@
      Changed app-wide on 2026-08-16 rather than per-surface: a scoped fix on
      the entry pages earlier the same day left the rest of the product
      inconsistent with its own specs. */
-  --color-background: oklch(92.5% 0.012 85); /* warm beige page ground -- default/fallback for areas outside the four role tints below (auth, /platform, marketing) */
-  /* card / paper, all four role areas share this one value --
-     for-claude-code-role-tinted-backgrounds-v2-final.md: confirmed by live
-     side-by-side comparison against all four background tints below, not
-     a guess. Supersedes the systemic-contrast-fix's 97%/0.018/80 (that one
-     only checked against the single old flat background). */
-  --color-card: oklch(97.8% 0.014 85);
-  --color-border: oklch(89.5% 0.012 82); /* hairline neutral */
+  /* Universal layering system -- for-claude-code-universal-layering-final.md
+     (23 Aug 2026), supersedes role-tinted-backgrounds-v2-final.md: ONE
+     background everywhere (no more per-role tint), depth read through
+     alternating light/dark levels instead -- page (sand) -> outer frame
+     (light) -> card (darker) -> innermost element (light again). */
+  --color-background: oklch(92.5% 0.012 85); /* level 1: page ground, universal */
+  --color-frame: oklch(96.4% 0.014 85); /* level 2 (outer frame/board) and level 4 (innermost element) -- same value, alternating depth is what reads as layered rather than one flat wash */
+  --color-card: oklch(93% 0.024 80); /* level 3: cards/panels sitting inside the frame -- darker than the frame around them, on purpose */
+  --color-border: oklch(88% 0.016 82); /* hairline neutral, all four levels */
   --color-ink: oklch(23.5% 0.017 65); /* near-black warm ink (body text) */
   --color-primary: oklch(37.5% 0.058 195); /* teal */
   --color-primary-foreground: oklch(98.5% 0.006 90);
@@ -51,17 +52,13 @@
   --color-accent-foreground: oklch(32% 0.05 195);
   --color-ring: oklch(37.5% 0.058 195);
 
-  /* Role-tinted page backgrounds -- for-claude-code-role-tinted-backgrounds-v2-final.md.
-     Card/border/status colors are unchanged and identical across all four;
-     only the page ground varies, so it reads as "which room you're in"
-     without touching what any color already means (teal/gold/amber/red).
-     Applied per role area at each area's own layout boundary, not here --
-     --color-background above stays the default for anything outside the
-     four (auth, /platform itself, marketing/apply pages). */
-  --color-tint-in-course: oklch(85% 0.045 75); /* golden sand -- trainee/trainer/TP/assignments + Assessor: same content, same background */
-  --color-tint-centre-admin: oklch(82% 0.025 235); /* slate-blue -- Centre Admin, and Command Centre (platform owner uses the Centre Admin tint) */
-  --color-tint-course-admin: oklch(80% 0.03 108); /* warm olive -- Course Admin (the MCT's own course setup/roster, a separate role from Centre Admin) */
-  --color-tint-volunteer: oklch(80% 0.03 335); /* dusty plum -- Volunteer/Student, the tokenized /student/[token] view */
+  /* for-claude-code-universal-layering-final.md's one explicit exception:
+     "Only the background/layering values above skip Volunteer/Student,
+     which keeps its own current background treatment; its cards still get
+     the colored top rule like everywhere else." The other three role tints
+     (in-course, Centre Admin, Course Admin) are retired -- removed from
+     each area's layout boundary, not just unused here. */
+  --color-tint-volunteer: oklch(80% 0.03 335); /* dusty plum -- Volunteer/Student only, kept by explicit exception */
 
   /* status (tint bg + matching text) -- on-track/at-risk/pending are the
      three variants every existing status-pill usage already consumes;
@@ -97,11 +94,9 @@
 
 @theme inline {
   --color-background: var(--color-background);
+  --color-frame: var(--color-frame);
   --color-card: var(--color-card);
   --color-border: var(--color-border);
-  --color-tint-in-course: var(--color-tint-in-course);
-  --color-tint-centre-admin: var(--color-tint-centre-admin);
-  --color-tint-course-admin: var(--color-tint-course-admin);
   --color-tint-volunteer: var(--color-tint-volunteer);
   --color-ink: var(--color-ink);
   --color-primary: var(--color-primary);
@@ -152,21 +147,39 @@ h6 {
 }
 
 /*
-  Structural discipline (see build plan "VISUAL SYSTEM" section):
-  no box-shadows anywhere, cards are a single hairline border + 6px radius,
-  no colored accent bars. Reach for `.card` instead of ad-hoc shadow/border
-  utilities so this doesn't drift page by page.
+  Structural discipline (see build plan "VISUAL SYSTEM" section): no
+  box-shadows anywhere, 6px radius, hairline borders. Updated 23 Aug 2026
+  per for-claude-code-universal-layering-final.md: cards now DO carry a
+  3px colored top rule (was "no colored accent bars" -- that rule is
+  retired, this file replaces it) -- teal by default (positive/primary),
+  override with .card-gold/.card-amber/.card-red where a specific card's
+  meaning calls for it (flagged/system-rule, needs-attention, blocking).
+  Reach for `.card`/`.frame` instead of ad-hoc shadow/border utilities so
+  this doesn't drift page by page.
 */
 @layer components {
+  /* Level 2 (outer frame/board) and level 4 (innermost element, e.g. a
+     text box inside a card) -- same token, same class, alternating depth
+     against whatever level surrounds it is what reads as layered. */
+  .frame {
+    background-color: var(--color-frame);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  /* Level 3: cards/panels sitting inside a .frame, darker than it on
+     purpose. Every card gets a colored top rule -- teal unless overridden. */
   .card {
     background-color: var(--color-card);
-    border: 1px solid var(--color-border-faint);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
     border-radius: var(--radius-card);
   }
 
   .card-interactive {
     background-color: var(--color-card);
-    border: 1px solid var(--color-border-faint);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
     border-radius: var(--radius-card);
     transition:
       background-color 150ms ease,
@@ -174,8 +187,22 @@ h6 {
   }
 
   .card-interactive:hover {
-    background-color: color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%);
-    border-color: color-mix(in srgb, var(--color-border) 50%, var(--color-primary) 50%);
+    background-color: color-mix(in oklab, var(--color-primary) 10%, var(--color-card));
+  }
+
+  .card-interactive.is-active {
+    background-color: color-mix(in oklab, var(--color-primary) 16%, var(--color-card));
+    font-weight: 600;
+  }
+
+  .card-gold {
+    border-top-color: var(--color-gold);
+  }
+  .card-amber {
+    border-top-color: var(--color-status-warning-text);
+  }
+  .card-red {
+    border-top-color: var(--color-destructive);
   }
 
   /* Hairline-divided rows living inside ONE .card wrapper, for document-like
@@ -199,7 +226,22 @@ h6 {
   }
 
   .list-row-interactive:hover {
-    background-color: color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%);
+    background-color: color-mix(in oklab, var(--color-primary) 10%, var(--color-card));
+  }
+
+  .list-row-interactive.is-active {
+    background-color: color-mix(in oklab, var(--color-primary) 16%, var(--color-card));
+    font-weight: 600;
+  }
+
+  /* Callout/accent rows -- for-claude-code-universal-layering-final.md:
+     "never a flat accent fill," a light color-mix of the accent into the
+     card level instead. */
+  .callout-gold {
+    background-color: color-mix(in oklab, oklch(60% 0.11 70) 10%, var(--color-card));
+  }
+  .callout-teal {
+    background-color: color-mix(in oklab, var(--color-primary) 8%, var(--color-card));
   }
 
   .badge-solid {
@@ -299,6 +341,7 @@ h6 {
   .sheet {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
@@ -310,6 +353,7 @@ h6 {
   .sheet-interactive {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;

@@ -67,7 +67,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-tint-in-course">
+    <div className="flex min-h-full flex-1 flex-col">
       {isDemo ? <DemoModeBanner /> : null}
       <header className="border-b border-border bg-card">
         <div className="container flex h-14 items-stretch justify-between gap-6">

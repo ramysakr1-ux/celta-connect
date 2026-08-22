@@ -219,7 +219,7 @@ export default async function AssessorPage({
 
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--color-tint-in-course)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--color-background)" }}>
       <div
         style={{
           background: WARM, color: CREAM, padding: "10px 32px", display: "flex",

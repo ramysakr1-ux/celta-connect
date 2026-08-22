@@ -46,7 +46,7 @@ export default async function CentreLayout({ children }: { children: React.React
       : [];
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-tint-centre-admin">
+    <div className="flex min-h-full flex-1 flex-col">
       {/* Header: 32px mark + wordmark, a hairline divider, then the pill. */}
       <div className="container flex items-center justify-between gap-6 pt-10">
         <div className="flex items-center gap-3.5">

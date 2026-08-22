@@ -70,8 +70,8 @@ export default async function CommandCenterPage() {
     .slice(0, 15);
 
   return (
-    <div className="min-h-full bg-tint-centre-admin">
-      <div className="container flex flex-col gap-6 py-8">
+    <div className="container py-8">
+      <div className="frame flex flex-col gap-6 p-6">
       <div>
         <Link href="/platform" className="text-sm font-semibold text-primary hover:underline">
           ← Platform
@@ -91,11 +91,11 @@ export default async function CommandCenterPage() {
             {mrrByCurrency.length ? mrrByCurrency.map((m) => money(m.amount, m.currency)).join(" · ") : "—"}
           </p>
         </div>
-        <div className="card p-4">
+        <div className={`card p-4${renewalsDue.length ? " card-amber" : ""}`}>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Renewals due (30d)</p>
           <p className="mt-1.5 text-2xl font-bold text-ink">{renewalsDue.length}</p>
         </div>
-        <div className="card p-4">
+        <div className={`card p-4${outstanding.length ? " card-red" : ""}`}>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Outstanding invoices</p>
           <p className="mt-1.5 text-2xl font-bold text-ink">
             {outstanding.length} {outstandingByCurrency.length ? `(${outstandingByCurrency.map((m) => money(m.amount, m.currency)).join(" · ")})` : ""}
@@ -104,17 +104,17 @@ export default async function CommandCenterPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="card border-t-4 border-t-primary p-4">
+        <div className="card p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">Connect</p>
           <p className="mt-1.5 text-xl font-bold text-ink">{centresList.length} centres</p>
           <p className="mt-1 text-sm text-muted">{mrrByCurrency.length ? mrrByCurrency.map((m) => money(m.amount, m.currency)).join(" · ") : "£0"}/mo</p>
         </div>
-        <div className="card border-t-4 border-t-gold p-4 opacity-60">
+        <div className="card card-gold p-4 opacity-60">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Connect Hub</p>
           <p className="mt-1.5 text-xl font-bold text-ink">Illustrative</p>
           <p className="mt-1 text-sm text-muted">No usage/billing reporting wired yet — separate piece of work.</p>
         </div>
-        <div className="card border-t-4 border-t-bronze p-4 opacity-60">
+        <div className="card card-amber p-4 opacity-60">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Affina</p>
           <p className="mt-1.5 text-xl font-bold text-ink">Illustrative</p>
           <p className="mt-1 text-sm text-muted">No usage/billing reporting wired yet — separate piece of work.</p>
