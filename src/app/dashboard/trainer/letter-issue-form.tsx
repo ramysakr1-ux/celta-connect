@@ -19,13 +19,14 @@ export function LetterIssueForm({
   onIssued,
 }: {
   traineeId: string;
-  letterType: "fail_risk" | "assignment_warning" | "deferral";
+  letterType: "fail_risk" | "assignment_warning" | "deferral" | "reference";
   draft: FormalLetterInput;
   relatedAssignmentId?: string;
   relatedDeferralTransferId?: string;
   onIssued?: (letterId: string) => void;
 }) {
   const [state, formAction, pending] = useActionState(issueFormalLetter, initialState);
+  const [body, setBody] = useState(draft.body.join("\n\n"));
   const [listItems, setListItems] = useState((draft.list?.items ?? []).join("\n"));
   const [closing, setClosing] = useState(draft.closing ?? "");
 
@@ -46,6 +47,7 @@ export function LetterIssueForm({
       action={(fd) => {
         const finalDraft: FormalLetterInput = {
           ...draft,
+          body: body.split("\n\n").map((s) => s.trim()).filter(Boolean),
           list: draft.list ? { ...draft.list, items: listItems.split("\n").map((s) => s.trim()).filter(Boolean) } : undefined,
           closing: closing.trim() || undefined,
         };
@@ -69,6 +71,16 @@ export function LetterIssueForm({
             </div>
           ))}
         </dl>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs text-muted">Letter body -- one blank line between paragraphs</label>
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          rows={8}
+          className="rounded-[6px] border border-border bg-card px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
+        />
       </div>
 
       {draft.list ? (

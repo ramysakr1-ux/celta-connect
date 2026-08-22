@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { MARKETING_SOURCE_OPTIONS } from "@/lib/marketing-source";
 import { submitApplication, type ApplyFormState } from "@/app/apply/actions";
 import { AudioRecorder } from "@/components/audio-recorder";
 import { inferCourseCommitmentsMode, buildCourseCommitments } from "@/lib/course-commitments";
@@ -44,6 +45,7 @@ export function ApplicationForm({
 }) {
   const [state, action, pending] = useActionState(submitApplication, initialState);
   const [selectedIntakeId, setSelectedIntakeId] = useState(intakes[0]?.id ?? "");
+  const [marketingSource, setMarketingSource] = useState("");
   const [selectedPromptId, setSelectedPromptId] = useState(prompts[0]?.id ?? "");
   const [selectedSpeakingPromptId, setSelectedSpeakingPromptId] = useState(speakingPrompts[0]?.id ?? "");
   const selectedIntake = intakes.find((i) => i.id === selectedIntakeId);
@@ -120,6 +122,38 @@ export function ApplicationForm({
           </label>
           <input id="date_of_birth" name="date_of_birth" type="date" required className={inputClass} />
         </div>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="marketing_source" className="text-sm text-muted">
+          How did you hear about us?
+        </label>
+        <select
+          id="marketing_source"
+          name="marketing_source"
+          required
+          value={marketingSource}
+          onChange={(e) => setMarketingSource(e.target.value)}
+          className={inputClass}
+        >
+          <option value="" disabled>
+            Choose one
+          </option>
+          {MARKETING_SOURCE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        {marketingSource === "other" ? (
+          <input
+            name="marketing_source_other"
+            type="text"
+            required
+            placeholder="Tell us more"
+            className={inputClass}
+          />
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-1.5">

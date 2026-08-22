@@ -11,6 +11,7 @@ import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { renderCelta5BookletBuffer } from "@/lib/celta5-booklet-pdf/document";
 import { renderFinalReportBuffer } from "@/lib/final-report-pdf/document";
+import { renderFormalLetterBuffer, type FormalLetterInput } from "@/lib/formal-letter-pdf/document";
 import { renderAssignmentCoverSheetBuffer } from "@/lib/assignment-cover-sheet-pdf/document";
 import { renderTpPdfBuffer } from "@/lib/tp-pdf/document";
 import { renderTutorListBuffer } from "./tutor-list-pdf";
@@ -473,6 +474,25 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
           });
           await uploadPdf(accessToken, traineeFolder.id, `Final report - ${safeName(trainee.full_name)}.pdf`, buffer);
         }
+      }
+
+      // Reference letter -- optional per-candidate (for-claude-code-
+      // reference-letter.md: "not required for every candidate... a tool
+      // the centre can use when they choose to"), so only included when one
+      // was actually issued. Renders the stored snapshot, same reasoning as
+      // /api/formal-letter/[letterId]/route.ts: a filed written record, not
+      // regenerated from live data at export time.
+      const { data: referenceLetter } = await admin
+        .from("formal_letters")
+        .select("snapshot")
+        .eq("trainee_id", trainee.id)
+        .eq("letter_type", "reference")
+        .order("issued_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (referenceLetter) {
+        const buffer = await renderFormalLetterBuffer(referenceLetter.snapshot as unknown as FormalLetterInput);
+        await uploadPdf(accessToken, traineeFolder.id, `Reference letter - ${safeName(trainee.full_name)}.pdf`, buffer);
       }
 
       // Assignment cover sheets

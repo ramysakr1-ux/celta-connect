@@ -4,6 +4,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { inferCourseCommitmentsMode, buildCourseCommitments, courseCommitmentsToPlainText } from "@/lib/course-commitments";
+import { MARKETING_SOURCES, type MarketingSource } from "@/lib/marketing-source";
 
 // Public, unauthenticated, and every submission triggers a real AI triage
 // call plus a real email to an attacker-controlled address -- 5 per hour
@@ -105,6 +106,17 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
     buildCourseCommitments(inferCourseCommitmentsMode(course.start_date, course.end_date))
   );
 
+  const marketingSourceRaw = formData.get("marketing_source");
+  const marketingSource: MarketingSource | null =
+    typeof marketingSourceRaw === "string" && (MARKETING_SOURCES as readonly string[]).includes(marketingSourceRaw)
+      ? (marketingSourceRaw as MarketingSource)
+      : null;
+  if (!marketingSource) {
+    return { error: "Let us know how you heard about us.", submitted: false };
+  }
+  const marketingSourceOther =
+    marketingSource === "other" ? ((formData.get("marketing_source_other") as string | null)?.trim() || null) : null;
+
   const writingTaskPromptId = (formData.get("writing_task_prompt_id") as string | null) || null;
   const writingTaskSubmission = (formData.get("writing_task_submission") as string | null)?.trim() || null;
   const languageAwarenessAnswer = (formData.get("language_awareness_answer") as string | null)?.trim() || null;
@@ -124,6 +136,8 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
       elt_experience_summary: (formData.get("elt_experience_summary") as string | null)?.trim() || null,
       special_requirements: (formData.get("special_requirements") as string | null)?.trim() || null,
       cannot_attend_note: (formData.get("cannot_attend_note") as string | null)?.trim() || null,
+      marketing_source: marketingSource,
+      marketing_source_other: marketingSourceOther,
       anything_else: (formData.get("anything_else") as string | null)?.trim() || null,
       acknowledged_no_guarantee_at: new Date().toISOString(),
       acknowledged_no_exemptions_at: new Date().toISOString(),

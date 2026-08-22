@@ -24,6 +24,8 @@ import { AdminGrantForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/adm
 import { FinalizeRecordForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/finalize-record-form";
 import { isFailRiskTriggered, buildFailRiskDraft } from "@/lib/letters/fail-risk";
 import { FailRiskLetterSection } from "@/app/dashboard/trainer/trainees/[id]/celta5/fail-risk-letter-section";
+import { isReferenceLetterEligible, buildReferenceLetterDraft } from "@/lib/letters/reference";
+import { ReferenceLetterSection } from "@/app/dashboard/trainer/trainees/[id]/celta5/reference-letter-section";
 import { computeStage3MixedModeLock } from "@/lib/delivery-mode";
 
 const TRAJECTORY_LABEL: Record<string, string> = {
@@ -319,6 +321,24 @@ export default async function Celta5RecordPage({
 
       {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
         <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} />
+      ) : null}
+
+      {isReferenceLetterEligible(record) ? (
+        <ReferenceLetterSection
+          traineeId={id}
+          draft={(await buildReferenceLetterDraft(supabase, trainer.course_id ?? "", id, trainer.full_name))?.input ?? null}
+          canGenerate={trainer.role === "admin" || trainer.tutor_role === "main_course_tutor"}
+          existingLetters={
+            (
+              await supabase
+                .from("formal_letters")
+                .select("id, issued_at")
+                .eq("trainee_id", id)
+                .eq("letter_type", "reference")
+                .order("issued_at", { ascending: false })
+            ).data ?? []
+          }
+        />
       ) : null}
 
       <AdminGrantForm key={`admin-grant-${record.updated_at}`} record={record} />

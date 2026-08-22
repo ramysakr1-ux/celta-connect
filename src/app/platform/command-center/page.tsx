@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SubscriptionForm, InvoiceForm, InvoiceRowActions } from "@/app/platform/command-center/command-center-forms";
+import { tutorRoleLabel } from "@/lib/tutor-roles";
 
 // specs/for-claude-code-command-center-belongs-in-connect.md: this is Connect's
 // own revenue/accounts view for the platform owner, not a Connect Hub screen --
@@ -25,13 +26,22 @@ export default async function CommandCenterPage() {
   await requireRole("platform_owner");
   const admin = createAdminClient();
 
-  const [{ data: centers }, { data: subscriptions }, { data: invoices }] = await Promise.all([
+  const [{ data: centers }, { data: subscriptions }, { data: invoices }, { data: tutorLinks }] = await Promise.all([
     admin.from("centers").select("id, name, center_number, is_demo, created_at").order("name", { ascending: true }),
     admin.from("centre_subscriptions").select("*"),
     admin
       .from("centre_invoices")
       .select("*")
       .order("created_at", { ascending: false }),
+    // for-claude-code-command-center-trainer-roster.md: "sourced from the
+    // same tutor-to-course relational link already needed for the
+    // concurrent-course checks" -- reuses course_tutors (migration 0051)
+    // rather than a new model, same table src/lib/concurrent-course-check.ts
+    // reads from.
+    admin
+      .from("course_tutors")
+      .select("profile_id, tutor_role, joined_at, left_at, course_id")
+      .order("joined_at", { ascending: false }),
   ]);
 
   const centresList = centers ?? [];
@@ -53,6 +63,52 @@ export default async function CommandCenterPage() {
 
   const outstanding = invoicesList.filter((i) => i.status === "outstanding");
   const outstandingByCurrency = groupByCurrency(outstanding.map((i) => ({ amount: i.amount, currency: i.currency })));
+
+  const tutorLinksList = tutorLinks ?? [];
+  const tutorProfileIds = [...new Set(tutorLinksList.map((t) => t.profile_id))];
+  const tutorCourseIds = [...new Set(tutorLinksList.map((t) => t.course_id))];
+  const { data: tutorProfiles } =
+    tutorProfileIds.length > 0 ? await admin.from("profiles").select("id, full_name").in("id", tutorProfileIds) : { data: [] };
+  const { data: tutorCourses } =
+    tutorCourseIds.length > 0
+      ? await admin.from("courses").select("id, name, course_code, start_date, end_date, center_id").in("id", tutorCourseIds)
+      : { data: [] };
+  const tutorNameById = new Map((tutorProfiles ?? []).map((p) => [p.id, p.full_name]));
+  const tutorCourseById = new Map((tutorCourses ?? []).map((c) => [c.id, c]));
+  const centerNameById = new Map(centresList.map((c) => [c.id, c.name]));
+
+  interface TrainerAssignment {
+    courseLabel: string;
+    centerName: string;
+    role: string;
+    startDate: string;
+    endDate: string;
+  }
+  interface TrainerRow {
+    name: string;
+    current: TrainerAssignment[];
+    history: TrainerAssignment[];
+  }
+  const trainerByProfileId = new Map<string, TrainerRow>();
+  for (const link of tutorLinksList) {
+    const course = tutorCourseById.get(link.course_id);
+    if (!course) continue;
+    const row = trainerByProfileId.get(link.profile_id) ?? {
+      name: tutorNameById.get(link.profile_id) ?? "Unknown",
+      current: [],
+      history: [],
+    };
+    const assignment: TrainerAssignment = {
+      courseLabel: course.course_code || course.name,
+      centerName: centerNameById.get(course.center_id) ?? "Unknown centre",
+      role: tutorRoleLabel(link.tutor_role),
+      startDate: course.start_date,
+      endDate: course.end_date,
+    };
+    (link.left_at === null ? row.current : row.history).push(assignment);
+    trainerByProfileId.set(link.profile_id, row);
+  }
+  const trainerRows = [...trainerByProfileId.values()].sort((a, b) => a.name.localeCompare(b.name));
 
   type ActivityItem = { at: string; label: string };
   const activity: ActivityItem[] = [
@@ -158,6 +214,43 @@ export default async function CommandCenterPage() {
               </div>
             );
           })
+        )}
+      </div>
+
+      <div className="card">
+        <div className="border-b border-border-faint px-5 py-3.5">
+          <h2 className="font-serif text-lg text-ink">Trainers ({trainerRows.length})</h2>
+          <p className="mt-0.5 text-xs text-muted">Who&apos;s working where, across every centre — owner-only.</p>
+        </div>
+        {trainerRows.length === 0 ? (
+          <p className="px-5 py-4 text-sm text-muted">No trainers on record yet.</p>
+        ) : (
+          trainerRows.map((t) => (
+            <div key={t.name} className="list-row flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-ink">{t.name}</span>
+              {t.current.length > 0 ? (
+                <div className="flex flex-col gap-0.5">
+                  {t.current.map((a, i) => (
+                    <span key={i} className="text-xs text-ink">
+                      {a.centerName} · {a.courseLabel} — {a.role}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-xs text-muted">Not currently active on a course</span>
+              )}
+              {t.history.length > 0 ? (
+                <div className="mt-1 flex flex-col gap-0.5 border-t border-border-faint pt-1.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">History</span>
+                  {t.history.map((a, i) => (
+                    <span key={i} className="text-xs text-muted">
+                      {a.centerName} · {a.courseLabel} — {a.role} ({a.startDate}–{a.endDate})
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ))
         )}
       </div>
 

@@ -605,6 +605,12 @@ export interface Database {
           place_offer_expires_at: string | null;
           resulting_trainee_id: string | null;
           notification_opt_outs: string[];
+          // migration 0196 -- centre's own marketing signal, never part of
+          // the academic record and deliberately excluded from the
+          // close-out export (export.ts uses an explicit column list that
+          // doesn't include this).
+          marketing_source: "search_engine" | "social_media" | "friend_recommendation" | "past_graduate" | "other" | null;
+          marketing_source_other: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -1272,7 +1278,7 @@ export interface Database {
           id: string;
           course_id: string;
           trainee_id: string;
-          letter_type: "fail_risk" | "assignment_warning" | "deferral";
+          letter_type: "fail_risk" | "assignment_warning" | "deferral" | "reference";
           snapshot: Record<string, unknown>;
           issued_at: string;
           issued_by: string;
@@ -1288,7 +1294,7 @@ export interface Database {
         Insert: Partial<Database["public"]["Tables"]["formal_letters"]["Row"]> & {
           course_id: string;
           trainee_id: string;
-          letter_type: "fail_risk" | "assignment_warning" | "deferral";
+          letter_type: "fail_risk" | "assignment_warning" | "deferral" | "reference";
           snapshot: Record<string, unknown>;
           issued_by: string;
         };

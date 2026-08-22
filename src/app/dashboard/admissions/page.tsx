@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createInterviewSlot } from "@/app/dashboard/admissions/actions";
 import { OfferNextPlaceForm } from "@/app/dashboard/admissions/offer-next-place-form";
 import { InterviewAvailabilityPanel, type PatternRow, type BlockRow } from "@/app/dashboard/admissions/interview-availability-panel";
+import { MARKETING_SOURCE_LABEL, type MarketingSource } from "@/lib/marketing-source";
 
 const STAGE_LABEL: Record<string, string> = {
   submitted: "Submitted",
@@ -30,7 +31,7 @@ export default async function AdmissionsPage() {
     await Promise.all([
       supabase
         .from("applicants")
-        .select("id, full_name, email, stage, intake_course_id, created_at, deposit_amount, deposit_paid_at, ai_reading_lane")
+        .select("id, full_name, email, stage, intake_course_id, created_at, deposit_amount, deposit_paid_at, ai_reading_lane, marketing_source")
         .eq("center_id", staff.center_id)
         .order("created_at", { ascending: false }),
       supabase
@@ -115,6 +116,31 @@ export default async function AdmissionsPage() {
       name: waitingIntakeNameById.get(a.intake_course_id) ?? "--",
       count: (existing?.count ?? 0) + 1,
     });
+  }
+
+  // for-claude-code-marketing-source-question.md: "a simple per-course
+  // breakdown (count/percentage per source)" for the centre's own
+  // marketing, across every applicant regardless of stage -- not just the
+  // currently-accepting intakes intakeNameById covers, so this looks up
+  // course names for every course any applicant is actually linked to.
+  const marketingCourseIds = Array.from(new Set((applicants ?? []).map((a) => a.intake_course_id)));
+  const { data: marketingCourses } =
+    marketingCourseIds.length > 0
+      ? await supabase.from("courses").select("id, name").in("id", marketingCourseIds)
+      : { data: [] as { id: string; name: string }[] };
+  const marketingCourseNameById = new Map((marketingCourses ?? []).map((c) => [c.id, c.name]));
+  const marketingByCourse = new Map<string, { name: string; total: number; counts: Partial<Record<MarketingSource, number>> }>();
+  for (const a of applicants ?? []) {
+    if (!a.marketing_source) continue;
+    const entry = marketingByCourse.get(a.intake_course_id) ?? {
+      name: marketingCourseNameById.get(a.intake_course_id) ?? "--",
+      total: 0,
+      counts: {},
+    };
+    entry.total += 1;
+    const source = a.marketing_source as MarketingSource;
+    entry.counts[source] = (entry.counts[source] ?? 0) + 1;
+    marketingByCourse.set(a.intake_course_id, entry);
   }
 
   const stale = (applicants ?? []).filter(
@@ -282,6 +308,34 @@ export default async function AdmissionsPage() {
           <p className="text-xs text-muted">Open a course for applications first (from its admin page) to book interview slots.</p>
         )}
       </div>
+
+      {marketingByCourse.size > 0 ? (
+        <div className="card flex flex-col gap-4 p-6">
+          <h2 className="font-serif text-lg text-ink">How they heard about us</h2>
+          <p className="text-sm text-muted">Centre marketing only -- not part of any candidate's academic record.</p>
+          <ul className="flex flex-col gap-4">
+            {Array.from(marketingByCourse.entries()).map(([courseId, { name, total, counts }]) => (
+              <li key={courseId} className="border-t border-border pt-3">
+                <p className="text-sm font-medium text-ink">
+                  {name} <span className="font-normal text-muted">({total})</span>
+                </p>
+                <ul className="mt-1.5 flex flex-col gap-1">
+                  {(Object.entries(counts) as [MarketingSource, number][])
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([source, count]) => (
+                      <li key={source} className="flex items-center justify-between text-xs text-muted">
+                        <span>{MARKETING_SOURCE_LABEL[source]}</span>
+                        <span>
+                          {count} ({Math.round((count / total) * 100)}%)
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {waitingByIntake.size > 0 ? (
         <div className="card flex flex-col gap-4 p-6">

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
+import { isReferenceLetterEligible } from "@/lib/letters/reference";
 
 export interface FormState {
   error: string | null;
@@ -33,10 +34,18 @@ export async function issueFormalLetter(_prevState: FormState, formData: FormDat
     typeof traineeId !== "string" ||
     !traineeId ||
     typeof letterType !== "string" ||
-    !["fail_risk", "assignment_warning", "deferral"].includes(letterType) ||
+    !["fail_risk", "assignment_warning", "deferral", "reference"].includes(letterType) ||
     typeof snapshotRaw !== "string"
   ) {
     return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  // for-claude-code-reference-letter.md: "MCT or Centre Admin generates
+  // it" -- the other three letter types are deliberately any-trainer (see
+  // this function's own comment below), so this check is scoped to
+  // letterType === "reference" only, not widened onto the existing types.
+  if (letterType === "reference" && trainer.role === "trainer" && trainer.tutor_role !== "main_course_tutor") {
+    return { error: "Only the main course tutor or a centre admin can issue a reference letter." };
   }
 
   let snapshot: FormalLetterInput;
@@ -50,12 +59,23 @@ export async function issueFormalLetter(_prevState: FormState, formData: FormDat
   const { data: trainee } = await supabase.from("profiles").select("id, course_id").eq("id", traineeId).maybeSingle();
   if (!trainee || trainee.course_id !== trainer.course_id) return { error: "Could not find that candidate." };
 
+  if (letterType === "reference") {
+    const { data: record } = await supabase
+      .from("celta5_records")
+      .select("final_recommended_grade, trainer_signoff_final_at")
+      .eq("trainee_id", traineeId)
+      .maybeSingle();
+    if (!record || !isReferenceLetterEligible(record)) {
+      return { error: "This candidate doesn't have a finalized grade yet." };
+    }
+  }
+
   const { data: letter, error } = await supabase
     .from("formal_letters")
     .insert({
       course_id: trainer.course_id,
       trainee_id: traineeId,
-      letter_type: letterType as "fail_risk" | "assignment_warning" | "deferral",
+      letter_type: letterType as "fail_risk" | "assignment_warning" | "deferral" | "reference",
       snapshot: snapshot as unknown as Record<string, unknown>,
       issued_by: trainer.id,
       related_assignment_id: relatedAssignmentId,
