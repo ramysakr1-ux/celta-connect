@@ -7,7 +7,7 @@ import { ImageResponse } from "next/og";
 // inside the ~80% "safe zone" so a circular crop never clips it.
 const INK_WARM = "#3e2818";
 const LIFTED_GOLD = "#cc9140";
-const CARD = "#f0e7d6"; // --color-card, oklch(93% 0.024 80)
+const CARD = "#fcf4e8"; // --color-card, oklch(97% 0.018 80)
 
 const size = { width: 512, height: 512 };
 
