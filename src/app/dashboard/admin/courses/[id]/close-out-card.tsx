@@ -5,6 +5,7 @@ import {
   initiateCloseOut,
   exportCloseOut,
   confirmCloseOutReceipt,
+  extendGracePeriod,
   toggleCambridgeGradesConfirmed,
   type FormState,
 } from "@/app/dashboard/admin/courses/[id]/close-out-actions";
@@ -40,6 +41,7 @@ export function CloseOutCard({
   const [verifyState, verifyAction, verifyPending] = useActionState(initiateCloseOut, initialState);
   const [exportState, exportAction, exportPending] = useActionState(exportCloseOut, initialState);
   const [receiptState, receiptAction, receiptPending] = useActionState(confirmCloseOutReceipt, initialState);
+  const [extendState, extendAction, extendPending] = useActionState(extendGracePeriod, initialState);
 
   const status = closeOut?.status ?? "not_started";
 
@@ -85,6 +87,30 @@ export function CloseOutCard({
             The working copy clears automatically on{" "}
             {closeOut?.grace_period_ends_at ? formatDateTime(closeOut.grace_period_ends_at) : "--"}.
           </p>
+          <form action={extendAction} className="mt-3 flex flex-wrap items-end gap-3">
+            <input type="hidden" name="course_id" value={courseId} />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="new_deletion_date" className="text-xs text-muted">
+                Still in dispute? Push out the deletion date
+              </label>
+              <input
+                id="new_deletion_date"
+                name="new_deletion_date"
+                type="date"
+                required
+                min={closeOut?.grace_period_ends_at ? closeOut.grace_period_ends_at.slice(0, 10) : undefined}
+                className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={extendPending}
+              className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+            >
+              {extendPending ? "Saving..." : "Extend deletion date"}
+            </button>
+          </form>
+          {extendState.error ? <p className="mt-1 text-sm text-destructive">{extendState.error}</p> : null}
         </div>
       ) : status === "awaiting_receipt" ? (
         <div className="flex flex-col gap-3">

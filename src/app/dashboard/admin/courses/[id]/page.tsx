@@ -38,6 +38,23 @@ import { getRecentCentreChanges } from "@/lib/what-changed";
 import { WhatChangedPanel } from "@/components/what-changed-panel";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 
+// Same vocabulary as email-history-panel.tsx (admissions), a compact form
+// for a roster row rather than a full history list.
+const DELIVERY_LABEL: Record<"sent" | "delivered" | "opened" | "bounced" | "failed", string> = {
+  sent: "Pending",
+  delivered: "Delivered",
+  opened: "Delivered",
+  bounced: "Bounced",
+  failed: "Failed",
+};
+const DELIVERY_PILL_CLASS: Record<"sent" | "delivered" | "opened" | "bounced" | "failed", string> = {
+  sent: "status-pill-pending",
+  delivered: "status-pill-on-track",
+  opened: "status-pill-on-track",
+  bounced: "status-pill-at-risk",
+  failed: "status-pill-at-risk",
+};
+
 export default async function CourseRosterPage({
   params,
 }: {
@@ -120,6 +137,32 @@ export default async function CourseRosterPage({
     .is("accepted_at", null)
     .is("revoked_at", null)
     .order("invited_at", { ascending: false });
+  // for-claude-code-email-delivery-tracking-visible.md: so an admin inviting
+  // someone can tell if the email actually landed, not just that it sent.
+  // applicant_emails already tracks this (Resend webhook, migration 0112) --
+  // join on to_email since course_invitations carries no provider_message_id
+  // of its own. Re-invites/resends create new applicant_emails rows with no
+  // dedup, so this keeps only the newest per address.
+  const inviteEmails = [...new Set((invitations ?? []).map((i) => i.email.toLowerCase()))];
+  const { data: inviteDeliveries } =
+    inviteEmails.length > 0
+      ? await supabase
+          .from("applicant_emails")
+          .select("to_email, status, created_at")
+          .eq("center_id", course.center_id)
+          .in("type", ["workspace_invitation", "tutor_added"])
+          .in(
+            "to_email",
+            inviteEmails
+          )
+          .order("created_at", { ascending: false })
+      : { data: [] };
+  const deliveryStatusByEmail = new Map<string, "sent" | "delivered" | "opened" | "bounced" | "failed">();
+  for (const row of inviteDeliveries ?? []) {
+    const key = row.to_email.toLowerCase();
+    if (!deliveryStatusByEmail.has(key)) deliveryStatusByEmail.set(key, row.status);
+  }
+
   const pendingInvites = (invitations ?? []).map((i) => ({
     id: i.id,
     email: i.email,
@@ -127,6 +170,7 @@ export default async function CourseRosterPage({
     role: i.role,
     tutorRole: i.tutor_role,
     invitedAt: i.invited_at,
+    deliveryStatus: deliveryStatusByEmail.get(i.email.toLowerCase()) ?? null,
   }));
 
   const { data: subgroups } = await supabase
@@ -666,6 +710,11 @@ export default async function CourseRosterPage({
                       </td>
                       <td>
                         <span className="pill pill-neutral">Invited</span>
+                        {inv.deliveryStatus ? (
+                          <span className={`ml-1.5 status-pill ${DELIVERY_PILL_CLASS[inv.deliveryStatus]}`}>
+                            {DELIVERY_LABEL[inv.deliveryStatus]}
+                          </span>
+                        ) : null}
                       </td>
                       <td />
                     </tr>

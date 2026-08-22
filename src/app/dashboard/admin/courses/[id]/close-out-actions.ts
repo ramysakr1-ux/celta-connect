@@ -201,6 +201,68 @@ export async function confirmCloseOutReceipt(_prevState: FormState, formData: Fo
   return { error: null };
 }
 
+// for-claude-code-six-month-deletion-override.md: a manual override so a
+// centre still in active dispute past the normal window can hold off the
+// automatic wipe. Pushes grace_period_ends_at out rather than gating the
+// wipe behind a fresh confirmation prompt -- the existing model is "trust
+// the clock once receipt is signed," so this stays a delay action on that
+// same clock rather than a second state machine. Logged to
+// centre_owner_actions, the app's one generic append-only audit log (see
+// src/app/centre/roles/actions.ts's logOwnerAction for the precedent) --
+// service-role only, so the log entry can't be forged or suppressed by the
+// admin who triggered it.
+export async function extendGracePeriod(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const admin = await requireRole("admin");
+  const courseId = formData.get("course_id");
+  const newDateRaw = formData.get("new_deletion_date");
+  if (typeof courseId !== "string" || !courseId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+  if (typeof newDateRaw !== "string" || !newDateRaw) {
+    return { error: "Pick a new deletion date." };
+  }
+
+  const course = await loadOwnedCourse(courseId, admin.center_id);
+  if (!course) return { error: "Course not found." };
+
+  const adminClient = createAdminClient();
+  const { data: closeOut } = await adminClient
+    .from("course_close_outs")
+    .select("id, status, grace_period_ends_at")
+    .eq("course_id", courseId)
+    .maybeSingle();
+  if (!closeOut || closeOut.status !== "grace_period") {
+    return { error: "This course isn't in the deletion countdown right now." };
+  }
+
+  const newDate = new Date(`${newDateRaw}T00:00:00Z`);
+  const currentEnds = closeOut.grace_period_ends_at ? new Date(closeOut.grace_period_ends_at) : new Date();
+  if (Number.isNaN(newDate.getTime()) || newDate <= currentEnds) {
+    return { error: "The new date must be after the current deletion date." };
+  }
+
+  await adminClient
+    .from("course_close_outs")
+    .update({ grace_period_ends_at: newDate.toISOString(), updated_at: new Date().toISOString() })
+    .eq("id", closeOut.id);
+
+  await adminClient.from("centre_owner_actions").insert({
+    center_id: admin.center_id,
+    actor_profile_id: admin.id,
+    action: "close_out.deletion_delayed",
+    target_table: "course_close_outs",
+    target_id: closeOut.id,
+    detail: {
+      course_id: courseId,
+      previous_deletion_date: closeOut.grace_period_ends_at,
+      new_deletion_date: newDate.toISOString(),
+    },
+  });
+
+  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  return { error: null };
+}
+
 // Writes the whole course to the centre's Drive. Only reachable once
 // verification has passed (status='ready_to_export') -- re-checked here,
 // not just trusted from the UI's disabled state.
