@@ -139,14 +139,6 @@ export default async function TrainerRosterPage() {
               Email all candidates
             </a>
           ) : null}
-          {trainer ? (
-            <Link
-              href="/trainer/connect-hub"
-              className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary"
-            >
-              {trainer.connect_hub_link ? "Connect Hub" : "Set up Connect Hub"}
-            </Link>
-          ) : null}
           {trainer ? <AssessorLinkButton /> : null}
           {/* The overnight session moved ViewSwitcherPill here out of the
               header; Ramy then confirmed (2026-08-16, against design-files.md

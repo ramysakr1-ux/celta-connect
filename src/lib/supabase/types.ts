@@ -376,7 +376,6 @@ export interface Database {
           filming_consent_confirmed_at: string | null;
           filming_consent_confirmed_by: string | null;
           uln: string | null;
-          connect_hub_link: string | null;
           course_status: CourseStatus;
           course_status_set_at: string | null;
           course_status_set_by: string | null;
