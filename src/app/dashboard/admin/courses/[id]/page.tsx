@@ -37,23 +37,7 @@ import { GroupTutorForm } from "@/app/dashboard/admin/courses/[id]/group-tutor-f
 import { getRecentCentreChanges } from "@/lib/what-changed";
 import { WhatChangedPanel } from "@/components/what-changed-panel";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
-
-// Same vocabulary as email-history-panel.tsx (admissions), a compact form
-// for a roster row rather than a full history list.
-const DELIVERY_LABEL: Record<"sent" | "delivered" | "opened" | "bounced" | "failed", string> = {
-  sent: "Pending",
-  delivered: "Delivered",
-  opened: "Delivered",
-  bounced: "Bounced",
-  failed: "Failed",
-};
-const DELIVERY_PILL_CLASS: Record<"sent" | "delivered" | "opened" | "bounced" | "failed", string> = {
-  sent: "status-pill-pending",
-  delivered: "status-pill-on-track",
-  opened: "status-pill-on-track",
-  bounced: "status-pill-at-risk",
-  failed: "status-pill-at-risk",
-};
+import { DELIVERY_LABEL, DELIVERY_PILL_CLASS } from "@/lib/email-delivery-status";
 
 export default async function CourseRosterPage({
   params,

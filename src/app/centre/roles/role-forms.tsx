@@ -44,12 +44,21 @@ export function CreateInviteForm() {
           ))}
         </select>
       </label>
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm text-muted">Email (optional -- sends the invite for you)</span>
+        <input
+          name="email"
+          type="email"
+          placeholder="their.email@example.com"
+          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+        />
+      </label>
       <button
         type="submit"
         disabled={pending}
         className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
       >
-        {pending ? "Creating link..." : "Create invite link"}
+        {pending ? "Creating..." : "Create invite"}
       </button>
       {state.error ? <p className="w-full text-sm text-destructive">{state.error}</p> : null}
       {link ? (

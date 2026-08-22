@@ -45,7 +45,11 @@ export type ApplicantEmailType =
   | "password_reset"
   | "sign_in_link"
   | "centre_delete_code"
-  | "close_out_receipt";
+  | "close_out_receipt"
+  // for-claude-code-email-delivery-tracking-visible.md follow-up: the
+  // Centre Admin role-invite flow (centre_admin_invites) gets a real,
+  // tracked, optional email send alongside its existing bare-link path.
+  | "centre_admin_invite";
 
 /**
  * Who a reply reaches. All Emails.dc.html gives every email exactly one of
@@ -89,6 +93,7 @@ export const EMAIL_REPLY_TO: Record<ApplicantEmailType, EmailReplyTo> = {
   sign_in_link: "noreply",
   centre_delete_code: "noreply",
   close_out_receipt: "noreply",
+  centre_admin_invite: "noreply",
 };
 
 export async function sendApplicantEmail(input: {

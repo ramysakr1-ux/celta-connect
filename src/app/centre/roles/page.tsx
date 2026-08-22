@@ -9,6 +9,7 @@ import { GrantRoleForm, RevokeRoleButton, AssignAreaForm, CreateInviteForm, Revo
 import { CENTRE_ROLE_LABELS } from "@/lib/auth/centre-permissions";
 import { AREAS, AREA_LABELS } from "@/lib/auth/areas";
 import { getAreaHolders } from "@/lib/auth/area-holders";
+import { DELIVERY_LABEL, DELIVERY_PILL_CLASS, type EmailDeliveryStatus } from "@/lib/email-delivery-status";
 
 // Centre Admin's Roles tab. Layout per the 2026-08-16 visual spec: a headline
 // and subhead, then the four-segment selector strip, then the selected role's
@@ -42,13 +43,34 @@ export default async function CentreRolesPage() {
     mayAppoint
       ? admin
           .from("centre_admin_invites")
-          .select("id, role, created_at")
+          .select("id, role, created_at, email")
           .eq("center_id", centerId)
           .is("used_at", null)
           .is("revoked_at", null)
           .order("created_at", { ascending: false })
       : Promise.resolve({ data: [] }),
   ]);
+
+  // for-claude-code-email-delivery-tracking-visible.md follow-up: same join
+  // as the Course Admin roster (dashboard/admin/courses/[id]/page.tsx) --
+  // to_email since centre_admin_invites has no provider_message_id of its
+  // own, newest row per address kept.
+  const inviteEmails = [...new Set((invites ?? []).map((i) => i.email).filter((e): e is string => !!e).map((e) => e.toLowerCase()))];
+  const { data: inviteDeliveries } =
+    inviteEmails.length > 0
+      ? await admin
+          .from("applicant_emails")
+          .select("to_email, status, created_at")
+          .eq("center_id", centerId)
+          .eq("type", "centre_admin_invite")
+          .in("to_email", inviteEmails)
+          .order("created_at", { ascending: false })
+      : { data: [] };
+  const deliveryStatusByEmail = new Map<string, EmailDeliveryStatus>();
+  for (const row of inviteDeliveries ?? []) {
+    const key = row.to_email.toLowerCase();
+    if (!deliveryStatusByEmail.has(key)) deliveryStatusByEmail.set(key, row.status as EmailDeliveryStatus);
+  }
 
   const ids = [...new Set([...(grants ?? []).map((g) => g.profile_id), ...(log ?? []).map((l) => l.actor_profile_id)])];
   const { data: people } = ids.length
@@ -169,14 +191,21 @@ export default async function CentreRolesPage() {
             <div className="mt-4 border-t border-border-faint pt-3">
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Pending invites</p>
               <div className="mt-2 flex flex-col gap-1.5">
-                {(invites ?? []).map((inv) => (
-                  <div key={inv.id} className="flex items-center justify-between gap-3">
-                    <span className="text-xs text-ink">
-                      {CENTRE_ROLE_LABELS[inv.role]} <span className="text-muted">· not yet accepted</span>
-                    </span>
-                    <RevokeInviteButton inviteId={inv.id} />
-                  </div>
-                ))}
+                {(invites ?? []).map((inv) => {
+                  const deliveryStatus = inv.email ? deliveryStatusByEmail.get(inv.email.toLowerCase()) : null;
+                  return (
+                    <div key={inv.id} className="flex items-center justify-between gap-3">
+                      <span className="text-xs text-ink">
+                        {CENTRE_ROLE_LABELS[inv.role]}
+                        {inv.email ? <span className="text-muted"> · {inv.email}</span> : <span className="text-muted"> · not yet accepted</span>}
+                        {deliveryStatus ? (
+                          <span className={`ml-1.5 status-pill ${DELIVERY_PILL_CLASS[deliveryStatus]}`}>{DELIVERY_LABEL[deliveryStatus]}</span>
+                        ) : null}
+                      </span>
+                      <RevokeInviteButton inviteId={inv.id} />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ) : null}

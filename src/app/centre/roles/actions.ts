@@ -101,17 +101,48 @@ export async function createCentreAdminInvite(_prev: CreateInviteState, formData
 
   const role = formData.get("role") as CentreRole | null;
   if (!role || !CENTRE_ROLES.includes(role)) return { error: "Pick a role." };
+  // for-claude-code-email-delivery-tracking-visible.md follow-up: optional
+  // -- the bare shareable link stays the default, this just also sends a
+  // real, tracked email when an address is given.
+  const email = (formData.get("email") as string | null)?.trim().toLowerCase() || null;
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
   const admin = createAdminClient();
   const { data: invite, error } = await admin
     .from("centre_admin_invites")
-    .insert({ center_id: centerId, role, created_by: profile.id })
-    .select("token")
+    .insert({ center_id: centerId, role, created_by: profile.id, email })
+    .select("id, token")
     .single();
   if (error || !invite) return { error: "Could not create the invite. Try again." };
 
-  await logOwnerAction(centerId, profile.id, "roles.invite", { role });
+  await logOwnerAction(centerId, profile.id, "roles.invite", { role, email });
+
+  if (email) {
+    const { data: center } = await admin.from("centers").select("name").eq("id", centerId).maybeSingle();
+    const centerName = center?.name ?? "Your centre";
+    const siteUrl = process.env.SITE_URL;
+    if (siteUrl) {
+      const { sendApplicantEmail } = await import("@/lib/admissions-email");
+      const { esc } = await import("@/lib/email-layout");
+      const joinUrl = `${siteUrl}/join-centre/${invite.token}`;
+      await sendApplicantEmail({
+        centerName,
+        centerAdmissionsEmail: null,
+        to: email,
+        subject: `you're invited to help run ${centerName} on Connect`,
+        html: `
+          <h2>${esc(centerName)} has invited you as ${esc(CENTRE_ROLE_LABELS[role])}</h2>
+          <p>You've been invited to join <strong>${esc(centerName)}</strong> on Connect as a <strong>${esc(CENTRE_ROLE_LABELS[role])}</strong>.</p>
+          <p><a href="${joinUrl}">Accept the invitation &rarr;</a></p>
+          <p style="color:#888;font-size:13px">If you weren't expecting this, you can safely ignore this email.</p>
+        `,
+        centerId,
+        applicantId: null,
+        type: "centre_admin_invite",
+        sentBy: profile.id,
+      });
+    }
+  }
 
   revalidatePath("/centre/roles");
   return { createdToken: invite.token };

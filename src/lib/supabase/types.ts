@@ -2366,7 +2366,8 @@ export interface Database {
             | "password_reset"
             | "sign_in_link"
             | "centre_delete_code"
-            | "close_out_receipt";
+            | "close_out_receipt"
+            | "centre_admin_invite";
           to_email: string;
           // Six of the nineteen go to staff, assessors or volunteers, who have
           // no applicant row to take a name from.
@@ -2657,6 +2658,9 @@ export interface Database {
           used_at: string | null;
           used_by: string | null;
           revoked_at: string | null;
+          // migration 0198 -- optional, only set when the owner chose to
+          // send a real invite email instead of copying the bare link.
+          email: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["centre_admin_invites"]["Row"]> & {
           center_id: string;
