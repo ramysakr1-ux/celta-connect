@@ -129,7 +129,7 @@ export async function createCentreAdminInvite(_prev: CreateInviteState, formData
         centerName,
         centerAdmissionsEmail: null,
         to: email,
-        subject: `you're invited to help run ${centerName} on Connect`,
+        subject: `you're invited to help run this centre on Connect`,
         html: `
           <h2>${esc(centerName)} has invited you as ${esc(CENTRE_ROLE_LABELS[role])}</h2>
           <p>You've been invited to join <strong>${esc(centerName)}</strong> on Connect as a <strong>${esc(CENTRE_ROLE_LABELS[role])}</strong>.</p>
