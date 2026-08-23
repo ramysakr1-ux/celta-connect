@@ -392,67 +392,58 @@ h6 {
     background-color: var(--color-background);
   }
 
+  /* Unified onto the same universal layering as the rest of the app, 23
+     Aug 2026 (Ramy: "apply the new changes to the login pages as well" --
+     reversing the same-day earlier call to leave these alone). Entry.dc.html
+     used to give sign-in plain paper and six other gates a warm bronze
+     "brand entry moment" tint (.sheet-entry/.sheet-gold) -- that split, and
+     the bronze accent itself, contradicted "no per-area color variation,
+     no new colors" once the rest of the platform moved onto the four
+     sanctioned colors. All entry cards now render as a plain .card would:
+     --color-card background, the standard teal top rule, sitting directly
+     on --color-background (.entry-ground, unchanged) -- no extra .frame
+     layer, since these are single small centered cards, not content-heavy
+     pages with something to nest inside. */
   .sheet-accent {
-    /* The green wash is gone (Ramy, 16 Aug 2026): "we're not going with that
-       anymore" -- every entry surface now sits on the same warm paper as the
-       rest of the product, with teal kept as a hairline accent rather than a
-       fill. --color-accent (the pale teal-green) is no longer used here; it
-       stays defined because hover states elsewhere still read it.
-
-       This class is the shared entry look -- login, join, offer, register,
-       student and forgot-password all use it, which is why unifying it here
-       is one edit rather than seven. */
     background-color: var(--color-card);
-    border: 1px solid oklch(88.8% 0.013 82);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
   }
 
-  /* Entry.dc.html doesn't give every gate the same card. Sign-in is plain
-     paper; the join card and the reset / dead-link gates get this warm
-     "brand entry moment" tint; the "check your email" confirmation is
-     red-tinted (.sheet-accent-alert).
-
-     Renamed from .sheet-gold to .sheet-entry on the 2026-08 colour-legend
-     pass: gold is reserved app-wide for the brand mark and top-achievement
-     grade markers (above_standard / Pass A) only, and this card isn't
-     either of those -- it's the shared entry-flow surface for
-     join/join-centre/offer/interview/support/forgot-password. Rather than
-     flattening it to plain muted gray (which would lose the deliberate
-     "brand entry moment" feel these six gates share), the tint now mixes in
-     --color-bronze -- the app's third accent, already documented as
-     "distinct from primary/gold/ink" -- instead of the old literal gold
-     hue, so the warm branded feel survives without touching the
-     gold-reserved token. .sheet-gold is kept below as a deprecated alias
-     in case anything still references it; all six call sites were moved to
-     .sheet-entry. */
+  /* Kept as separate classes (not merged into one) only because call sites
+     still reference three different names -- all three now render
+     identically. */
   .sheet-entry {
-    background-color: color-mix(in oklab, var(--color-bronze) 8%, var(--color-card));
-    border: 1px solid color-mix(in oklab, var(--color-bronze) 26%, transparent);
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
   }
 
-  /* Deprecated alias -- prefer .sheet-entry. Kept so any stray reference
-     still renders the current (bronze-tinted) entry card rather than
-     silently losing its styling. */
+  /* Deprecated alias -- prefer .sheet-entry. */
   .sheet-gold {
-    background-color: color-mix(in oklab, var(--color-bronze) 8%, var(--color-card));
-    border: 1px solid color-mix(in oklab, var(--color-bronze) 26%, transparent);
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
   }
 
-  /* Red-tint confirmation card ("check your email" after a magic-link or
-     reset-link send) -- same oklab-mixing rule as .sheet-accent above, same
-     reason: oklch's polar space hits an undefined-hue edge case mixing two
-     near-achromatic colors. Per Entry.dc.html's exact formula. */
+  /* "Check your email" confirmation (magic-link/reset-link sent) -- the one
+     entry card that keeps a deliberate accent, since red here isn't
+     decoration: it's the same "needs your attention" meaning red carries
+     everywhere else in the app, not the pale-red mid-flow wash it used to
+     be paired with a neutral border. Top rule instead of a tinted border. */
   .sheet-accent-alert {
-    background-color: color-mix(in oklab, var(--color-destructive) 6%, var(--color-card));
-    border: 1px solid color-mix(in oklab, var(--color-destructive) 20%, transparent);
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-destructive);
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
