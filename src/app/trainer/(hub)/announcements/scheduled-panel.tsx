@@ -41,9 +41,15 @@ export interface ScheduledRowData {
 export function ScheduledPanel({
   scheduled,
   timetableEvents,
+  canManage,
 }: {
   scheduled: ScheduledRowData[];
   timetableEvents: TimetableEventOption[];
+  // for-claude-code-mct-only-announcements.md: Post now/Hold/Resume/Edit/
+  // Skip are all MCT-gated server-side now too -- hide them for anyone the
+  // server would reject, rather than let a click round-trip into a silent
+  // no-op.
+  canManage: boolean;
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
@@ -76,7 +82,13 @@ export function ScheduledPanel({
                 }}
               />
             ) : (
-              <ReadRow key={row.id} row={row} justSaved={savedId === row.id} onEdit={() => setEditingId(row.id)} />
+              <ReadRow
+                key={row.id}
+                row={row}
+                justSaved={savedId === row.id}
+                canManage={canManage}
+                onEdit={() => setEditingId(row.id)}
+              />
             )
           )}
         </div>
@@ -85,7 +97,17 @@ export function ScheduledPanel({
   );
 }
 
-function ReadRow({ row, justSaved, onEdit }: { row: ScheduledRowData; justSaved: boolean; onEdit: () => void }) {
+function ReadRow({
+  row,
+  justSaved,
+  canManage,
+  onEdit,
+}: {
+  row: ScheduledRowData;
+  justSaved: boolean;
+  canManage: boolean;
+  onEdit: () => void;
+}) {
   const held = Boolean(row.heldAt);
   return (
     <div className={`flex flex-col gap-1.5 px-4 py-3 ${held ? "bg-surface-muted/40" : ""}`}>
@@ -101,7 +123,7 @@ function ReadRow({ row, justSaved, onEdit }: { row: ScheduledRowData; justSaved:
             : "Sends when triggered"}{" "}
         — {row.anchorOffsetDays} day(s) relative to &quot;{row.anchorEventTitle}&quot;
       </p>
-      {justSaved ? (
+      {!canManage ? null : justSaved ? (
         <span className="pill pill-neutral w-fit">Saved</span>
       ) : (
         <div className="flex items-center gap-2.5">

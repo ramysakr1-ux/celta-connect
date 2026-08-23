@@ -18,6 +18,25 @@ function revalidateBroadcastPages(): void {
   revalidatePath("/portfolio/[traineeId]", "layout");
 }
 
+// for-claude-code-mct-only-announcements.md: managing an announcement
+// (edit/delete/hold/resume/post-now) is gated the same as creating one --
+// a non-MCT trainer who could no longer compose shouldn't be able to touch
+// an existing row either. Same fail-open-if-unassigned rule as postBroadcast.
+async function requireMctForBroadcastManagement(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  trainer: { role: string; id: string; course_id: string | null }
+): Promise<boolean> {
+  if (trainer.role !== "trainer" || !trainer.course_id) return true;
+  const { data: mct } = await supabase
+    .from("course_tutors")
+    .select("profile_id")
+    .eq("course_id", trainer.course_id)
+    .eq("tutor_role", "main_course_tutor")
+    .is("left_at", null)
+    .maybeSingle();
+  return !mct || mct.profile_id === trainer.id;
+}
+
 export async function postBroadcast(_prevState: FormState, formData: FormData): Promise<FormState> {
   const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) return { error: "No course assigned." };
@@ -49,36 +68,28 @@ export async function postBroadcast(_prevState: FormState, formData: FormData): 
 
   const supabase = await createClient();
 
-  // for-claude-code-announcements-list.md table D: two different senders
-  // for two different reaches. D1, course-wide: MCT only, failing OPEN if
-  // no MCT is assigned yet (tutor_role is frequently null on real courses)
-  // so the course is never left unable to broadcast; admin is never
-  // blocked. D2, group-scoped: "any tutor attached to that group" --
-  // course_tp_groups.tutor_profile_id (migration 0121) is that attachment,
-  // already built for the Rotation admin screen, reused here rather than a
-  // new ownership table.
+  // for-claude-code-mct-only-announcements.md, superseding this file's
+  // older D1/D2 split (for-claude-code-announcements-list.md table D, which
+  // let "any tutor attached to that group" send a group-scoped one): Ramy,
+  // 23 Aug 2026 -- a trainee's own real-time TP-group chat pill (informal,
+  // resets on schedule, build-spec.md's "Trainee -- their own TP group, and
+  // DMs to their own tutors") already covers day-to-day ACT<->group
+  // communication. Announcements is the heavier, permanent, to-do-list
+  // broadcast tool -- MCT only regardless of reach (whole cohort or one
+  // group). Still fails OPEN if no MCT is assigned yet (tutor_role is
+  // frequently null on real courses), so the course is never left unable to
+  // broadcast; admin is never blocked.
+  if (!(await requireMctForBroadcastManagement(supabase, trainer))) {
+    return { error: "Announcements are sent by the main course tutor." };
+  }
   if (groupScopeId) {
     const { data: group } = await supabase
       .from("course_tp_groups")
-      .select("tutor_profile_id")
+      .select("id")
       .eq("id", groupScopeId)
       .eq("course_id", trainer.course_id)
       .maybeSingle();
     if (!group) return { error: "That group could not be found." };
-    if (trainer.role === "trainer" && group.tutor_profile_id && group.tutor_profile_id !== trainer.id) {
-      return { error: "Group messages are sent by a tutor attached to that group." };
-    }
-  } else if (trainer.role === "trainer") {
-    const { data: mct } = await supabase
-      .from("course_tutors")
-      .select("profile_id")
-      .eq("course_id", trainer.course_id)
-      .eq("tutor_role", "main_course_tutor")
-      .is("left_at", null)
-      .maybeSingle();
-    if (mct && mct.profile_id !== trainer.id) {
-      return { error: "Course-wide announcements are sent by the main course tutor." };
-    }
   }
 
   const { error } = await supabase.from("course_broadcasts").insert({
@@ -116,6 +127,7 @@ export async function deleteBroadcast(formData: FormData): Promise<void> {
   if (typeof broadcastId !== "string") return;
 
   const supabase = await createClient();
+  if (!(await requireMctForBroadcastManagement(supabase, trainer))) return;
   await supabase
     .from("course_broadcasts")
     .delete()
@@ -132,6 +144,7 @@ export async function postBroadcastNow(formData: FormData): Promise<void> {
   if (typeof broadcastId !== "string") return;
 
   const supabase = await createClient();
+  if (!(await requireMctForBroadcastManagement(supabase, trainer))) return;
   await supabase
     .from("course_broadcasts")
     .update({ sent_at: new Date().toISOString() })
@@ -151,6 +164,7 @@ export async function holdBroadcast(formData: FormData): Promise<void> {
   if (typeof broadcastId !== "string") return;
 
   const supabase = await createClient();
+  if (!(await requireMctForBroadcastManagement(supabase, trainer))) return;
   await supabase
     .from("course_broadcasts")
     .update({ held_at: new Date().toISOString() })
@@ -167,6 +181,7 @@ export async function resumeBroadcast(formData: FormData): Promise<void> {
   if (typeof broadcastId !== "string") return;
 
   const supabase = await createClient();
+  if (!(await requireMctForBroadcastManagement(supabase, trainer))) return;
   await supabase
     .from("course_broadcasts")
     .update({ held_at: null })
@@ -202,6 +217,9 @@ export async function editBroadcast(_prevState: FormState, formData: FormData): 
   }
 
   const supabase = await createClient();
+  if (!(await requireMctForBroadcastManagement(supabase, trainer))) {
+    return { error: "Announcements are managed by the main course tutor." };
+  }
   const { error, count } = await supabase
     .from("course_broadcasts")
     .update(

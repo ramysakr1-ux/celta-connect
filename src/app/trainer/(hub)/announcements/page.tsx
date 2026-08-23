@@ -56,6 +56,23 @@ export default async function AnnouncementsPage() {
     supabase.from("course_tp_groups").select("id, name").eq("course_id", courseId),
     supabase.from("course_subgroups").select("id, tp_group_id").eq("course_id", courseId),
   ]);
+
+  // for-claude-code-mct-only-announcements.md: mirrors postBroadcast's own
+  // gate (stream-actions.ts) exactly -- MCT (or admin) only, full stop,
+  // now that a trainee's real-time TP-group chat pill covers the informal
+  // day-to-day channel a non-MCT tutor used to reach for here.
+  const isAdmin = trainer.role === "admin";
+  let isMct = isAdmin;
+  if (!isAdmin) {
+    const { data: mct } = await supabase
+      .from("course_tutors")
+      .select("profile_id")
+      .eq("course_id", courseId)
+      .eq("tutor_role", "main_course_tutor")
+      .is("left_at", null)
+      .maybeSingle();
+    isMct = !mct || mct.profile_id === trainer.id;
+  }
   const subgroupIdsByTpGroup = new Map<string, string[]>();
   for (const s of subgroups ?? []) {
     if (!s.tp_group_id) continue;
@@ -134,15 +151,25 @@ export default async function AnnouncementsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <AnnouncementComposer
-          timetableEvents={upcomingEvents ?? []}
-          showAssessorTemplate={showAssessorTemplate}
-          traineeCount={traineeCount ?? 0}
-          trainerCount={trainerCount ?? 0}
-          groups={composerGroups}
-        />
+        {isMct ? (
+          <AnnouncementComposer
+            timetableEvents={upcomingEvents ?? []}
+            showAssessorTemplate={showAssessorTemplate}
+            traineeCount={traineeCount ?? 0}
+            trainerCount={trainerCount ?? 0}
+            groups={composerGroups}
+          />
+        ) : (
+          <div className="sheet flex flex-col gap-2">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Write an announcement</p>
+            <p className="text-sm text-muted">
+              Announcements are sent by the main course tutor. To reach your own TP group informally, use the chat
+              pill instead.
+            </p>
+          </div>
+        )}
 
-        <ScheduledPanel scheduled={scheduledRows} timetableEvents={editPickerEvents} />
+        <ScheduledPanel scheduled={scheduledRows} timetableEvents={editPickerEvents} canManage={isMct} />
 
         <div className="rounded-[6px] border border-border">
           <p className="border-b border-border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">

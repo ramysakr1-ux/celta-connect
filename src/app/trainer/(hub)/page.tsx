@@ -342,12 +342,19 @@ export default async function TodayPage() {
           >
             Capture a point
           </Link>
-          <Link
-            href="/trainer/announcements"
-            className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
-          >
-            Post announcement
-          </Link>
+          {/* for-claude-code-mct-only-announcements.md: hidden, not just
+              disabled, for a non-MCT trainer -- announcements/page.tsx
+              itself is now MCT-only too (the real gate), this just keeps
+              the quick link from pointing an ACT at a page with nothing
+              they can do. */}
+          {isMct ? (
+            <Link
+              href="/trainer/announcements"
+              className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
+            >
+              Post announcement
+            </Link>
+          ) : null}
           <Link
             href="/trainer/roster"
             className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"

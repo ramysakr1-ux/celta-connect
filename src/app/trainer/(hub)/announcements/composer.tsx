@@ -34,6 +34,9 @@ interface GroupOption {
   memberCount: number;
 }
 
+// for-claude-code-mct-only-announcements.md: this only ever renders for the
+// MCT (or admin) now -- page.tsx gates it -- so "Whole cohort" is always a
+// valid send option; there's no non-MCT/no-group case left to handle here.
 export function AnnouncementComposer({
   timetableEvents,
   showAssessorTemplate,
