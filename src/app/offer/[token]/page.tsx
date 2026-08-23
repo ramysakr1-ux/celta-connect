@@ -36,12 +36,14 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
   if (invalid) {
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="sheet-entry w-full max-w-sm p-8">
+        <div className="frame w-full max-w-sm p-3">
+        <div className="sheet-entry p-8">
           <Wordmark size="hero" />
           <p className="mt-4 text-sm text-destructive">
             This offer link is invalid, expired, or has already been used. Contact the centre if you believe this is
             a mistake.
           </p>
+        </div>
         </div>
       </div>
     );
@@ -54,7 +56,8 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
 
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-      <div className="sheet-entry w-full max-w-sm p-8">
+      <div className="frame w-full max-w-sm p-3">
+      <div className="sheet-entry p-8">
         <Wordmark size="hero" />
         <p className="mt-1 text-sm text-ink">
           {applicant.full_name}, you&apos;re offered a place on <strong>{course?.name}</strong>
@@ -93,6 +96,7 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
             account. Nothing to do here yet.
           </p>
         )}
+      </div>
       </div>
     </div>
   );

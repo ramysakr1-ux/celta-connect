@@ -100,9 +100,11 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-      <div className="sheet-entry w-full max-w-sm p-8">
+      <div className="frame w-full max-w-sm p-3">
+      <div className="sheet-entry p-8">
         <Wordmark size="hero" />
         {children}
+      </div>
       </div>
     </div>
   );

@@ -30,8 +30,10 @@ export default async function ApplyPage() {
   if (!center) {
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="sheet-accent w-full max-w-sm p-8 text-center">
+        <div className="frame w-full max-w-sm p-3">
+        <div className="sheet-accent p-8 text-center">
           <p className="text-sm text-muted">Applications aren&apos;t open right now.</p>
+        </div>
         </div>
       </div>
     );
@@ -98,7 +100,8 @@ export default async function ApplyPage() {
 
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-      <div className="sheet-accent w-full max-w-xl p-8">
+      <div className="frame w-full max-w-xl p-3">
+      <div className="sheet-accent p-8">
         {center.logo_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={center.logo_url} alt={center.name} className="mb-4 h-12 object-contain" />
@@ -113,6 +116,7 @@ export default async function ApplyPage() {
           <span className="text-[10px] text-muted">Powered by</span>
           <Wordmark size="header" />
         </div>
+      </div>
       </div>
     </div>
   );

@@ -18,10 +18,12 @@ export default async function SupportScopedViewPage({ params }: { params: Promis
 
   if (!grant) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-8">
-        <div className="sheet-entry max-w-sm p-8 text-center">
+      <div className="entry-ground flex min-h-screen items-center justify-center p-8">
+        <div className="frame w-full max-w-sm p-3">
+        <div className="sheet-entry p-8 text-center">
           <h1 className="font-serif text-xl text-ink">This link is not valid</h1>
           <p className="mt-2 text-sm text-muted">The grant has expired, been revoked, or never existed.</p>
+        </div>
         </div>
       </div>
     );

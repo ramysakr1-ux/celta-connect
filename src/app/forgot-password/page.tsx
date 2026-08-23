@@ -7,12 +7,14 @@ import { Wordmark } from "@/components/wordmark";
 export default function ForgotPasswordPage() {
   return (
     <div className="entry-ground flex flex-1 items-center justify-center p-8">
-      <div className="sheet-entry w-full max-w-sm p-8">
+      <div className="frame w-full max-w-sm p-3">
+      <div className="sheet-entry p-8">
         <Wordmark size="hero" />
         <h1 className="mt-4 font-serif text-2xl text-ink">Reset your password</h1>
         <p className="mt-1 text-sm text-muted">Enter your email and we&apos;ll send you a reset link.</p>
         <p className="mt-2 text-xs text-muted">Only staff accounts have passwords. If you hold a workspace or assessor link, use that instead.</p>
         <ForgotPasswordForm />
+      </div>
       </div>
     </div>
   );

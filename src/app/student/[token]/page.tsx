@@ -50,11 +50,13 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   if (!accessToken || !accessToken.volunteer_student_id || new Date(accessToken.expires_at) < new Date()) {
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="sheet-accent w-full max-w-sm p-8 text-center">
+        <div className="frame w-full max-w-sm p-3">
+        <div className="sheet-accent p-8 text-center">
           <Wordmark size="hero" />
           <p className="mt-4 text-sm text-destructive">
             This link has expired or isn&apos;t valid. Ask your teacher for a new one.
           </p>
+        </div>
         </div>
       </div>
     );
@@ -73,9 +75,11 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   if (!volunteer) {
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="sheet-accent w-full max-w-sm p-8 text-center">
+        <div className="frame w-full max-w-sm p-3">
+        <div className="sheet-accent p-8 text-center">
           <Wordmark size="hero" />
           <p className="mt-4 text-sm text-destructive">This link isn&apos;t valid. Ask your teacher for a new one.</p>
+        </div>
         </div>
       </div>
     );

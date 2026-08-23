@@ -39,7 +39,8 @@ export default async function JoinPage({
     const { data: center } = await admin.from("centers").select("name, admissions_email").eq("id", course.center_id).maybeSingle();
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="sheet-entry w-full max-w-sm p-8">
+        <div className="frame w-full max-w-sm p-3">
+        <div className="sheet-entry p-8">
           <Wordmark size="hero" />
           <h1 className="mt-4 font-serif text-xl text-ink">The course has closed</h1>
           <p className="mt-2 text-sm text-muted">
@@ -62,6 +63,7 @@ export default async function JoinPage({
             </p>
           )}
         </div>
+        </div>
       </div>
     );
   }
@@ -69,11 +71,13 @@ export default async function JoinPage({
   if (!course) {
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-        <div className="sheet-entry w-full max-w-sm p-8">
+        <div className="frame w-full max-w-sm p-3">
+        <div className="sheet-entry p-8">
           <Wordmark size="hero" />
           <p className="mt-4 text-sm text-destructive">
             This join link is invalid or has expired. Ask your centre admin for a new one.
           </p>
+        </div>
         </div>
       </div>
     );
@@ -84,13 +88,15 @@ export default async function JoinPage({
 
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
-      <div className="sheet-entry w-full max-w-sm p-8">
+      <div className="frame w-full max-w-sm p-3">
+      <div className="sheet-entry p-8">
         <Wordmark size="hero" />
         <p className="mt-1 text-sm text-muted">
           You&apos;re joining {course.name} as a <span className="capitalize">{role}</span>. Your workspace opens as
           soon as you accept.
         </p>
         <JoinForm token={token} role={role} isUkCentre={center?.is_uk_centre ?? false} />
+      </div>
       </div>
     </div>
   );
