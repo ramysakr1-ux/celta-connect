@@ -30,9 +30,13 @@ import { Wordmark } from "@/components/wordmark";
 // no single shared place to sit "under Connect" without restructuring six
 // different headers) and the chat pill's whole bottom band, so neither
 // collision can happen again regardless of viewport width.
+// Ramy, 23 Aug 2026 (third pass): top-3 sat right on top of the header's
+// own name/sign-out text on Course Admin (h-14, 56px tall). Dropped to
+// top-16 (64px) so it clears every header in the app instead of layering
+// over it -- still the top-right corner, just under the header band.
 export function DesignerCredit({ className = "" }: { className?: string }) {
   return (
-    <div className={`pointer-events-none fixed top-3 right-3 z-20 ${className}`}>
+    <div className={`pointer-events-none fixed top-16 right-3 z-20 ${className}`}>
       <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/85 px-2 py-1 text-[11px] text-muted backdrop-blur-sm">
         <Wordmark size="icon" iconSizePx={16} />
         <span>

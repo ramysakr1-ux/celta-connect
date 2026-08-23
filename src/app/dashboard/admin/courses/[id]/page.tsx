@@ -353,7 +353,7 @@ export default async function CourseRosterPage({
 
       <MaterialPoolToggleCard courseId={course.id} enabled={course.tp_material_pool_enabled} />
 
-      <form action={updateApplicationSettings} className="card flex items-center justify-between gap-4 p-6">
+      <form action={updateApplicationSettings} className="card card-gold flex items-center justify-between gap-4 p-6">
         <div>
           <h2 className="font-serif text-lg text-ink">Open for applications</h2>
           <p className="mt-1 text-sm text-muted">
@@ -418,7 +418,7 @@ export default async function CourseRosterPage({
         </form>
       </div>
 
-      <div className="card flex items-center justify-between gap-4 p-6">
+      <div className="card card-gold flex items-center justify-between gap-4 p-6">
         <div>
           <h2 className="font-serif text-lg text-ink">Assessor visit date</h2>
           <p className="mt-1 text-sm text-muted">
@@ -457,7 +457,7 @@ export default async function CourseRosterPage({
       </div>
 
       {(pendingRestarts ?? []).length > 0 ? (
-        <div className="card flex flex-col gap-4 p-6">
+        <div className="card card-gold flex flex-col gap-4 p-6">
           <div>
             <h2 className="font-serif text-lg text-ink">Pending fee-free restarts</h2>
             <p className="mt-1 text-sm text-muted">

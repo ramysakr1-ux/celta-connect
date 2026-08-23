@@ -160,7 +160,7 @@ export default async function AdminSettingsPage({
         <SettingsNav items={settingsNavItems} />
 
         <div className="flex flex-col gap-5">
-          <div id="centre-profile" className="card scroll-mt-6 p-6">
+          <div id="centre-profile" className="card card-gold scroll-mt-6 p-6">
             <h2 className="font-serif text-lg text-ink">Centre profile</h2>
             <p className="mt-2 text-muted">
               Your centre&apos;s name and Cambridge-assigned centre number -- shown on every course,
@@ -195,7 +195,7 @@ export default async function AdminSettingsPage({
             </form>
           </div>
 
-          <div id="google-drive" className="card scroll-mt-6 p-6">
+          <div id="google-drive" className="card card-gold scroll-mt-6 p-6">
             <h2 className="font-serif text-lg text-ink">Google Drive</h2>
             <p className="mt-2 text-muted">
               Connect your centre&apos;s Google Drive so CELTA5 records can be kept in sync with your
@@ -250,7 +250,7 @@ export default async function AdminSettingsPage({
             </div>
           </div>
 
-          <div id="tutors" className="card scroll-mt-6 p-6">
+          <div id="tutors" className="card card-gold scroll-mt-6 p-6">
             <h2 className="font-serif text-lg text-ink">Tutors</h2>
             <p className="mt-2 text-muted">
               Who&apos;s teaching each course at this centre, their role, trainer-in-training status, and
@@ -274,7 +274,7 @@ export default async function AdminSettingsPage({
             </div>
           </div>
 
-          <div id="assignment-criteria" className="card scroll-mt-6 p-6">
+          <div id="assignment-criteria" className="card card-gold scroll-mt-6 p-6">
             <h2 className="font-serif text-lg text-ink">Assignment marking criteria</h2>
             <p className="mt-2 text-muted">
               The fixed brief and word count stay as they are -- this is the grey area, where centres and tutors

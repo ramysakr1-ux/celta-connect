@@ -11,7 +11,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
 
   if (!editing) {
     return (
-      <div className="card flex items-center justify-between gap-4 p-6">
+      <div className="card card-gold flex items-center justify-between gap-4 p-6">
         <div>
           <h2 className="font-serif text-lg text-ink">Delivery mode</h2>
           <p className="mt-1 text-muted">{DELIVERY_MODE_LABEL[savedMode]}</p>
@@ -28,7 +28,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
   }
 
   return (
-    <form action={updateDeliveryMode} className="card flex flex-col gap-4 p-6">
+    <form action={updateDeliveryMode} className="card card-gold flex flex-col gap-4 p-6">
       <div>
         <h2 className="font-serif text-lg text-ink">Delivery mode</h2>
         <p className="mt-1 text-sm text-muted">
