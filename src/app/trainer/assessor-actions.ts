@@ -10,6 +10,25 @@ import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
 import { buildAssessorInviteEmailHtml } from "@/lib/assessor-invite-email";
 
+// for-claude-code-assessor-pack-decisions.md §1: "Centres need a way to
+// mark which candidates are 'selected for this visit'... a simple toggle."
+// One candidate per submit, same auto-submit-on-change pattern as the
+// Entry Form's "Mark as sent" checkbox -- no separate save step, each
+// toggle is its own real write.
+export async function toggleAssessorSelection(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const traineeId = formData.get("trainee_id");
+  const selected = formData.get("selected") === "true";
+  if (typeof traineeId !== "string") return;
+
+  const supabase = await createClient();
+  const { data: trainee } = await supabase.from("profiles").select("id, course_id").eq("id", traineeId).maybeSingle();
+  if (!trainee || trainee.course_id !== trainer.course_id) return;
+
+  await supabase.from("profiles").update({ selected_for_assessor_visit: selected }).eq("id", traineeId);
+  revalidatePath("/trainer/roster");
+}
+
 export interface AssessorTokenResult {
   token: string | null;
   error: string | null;

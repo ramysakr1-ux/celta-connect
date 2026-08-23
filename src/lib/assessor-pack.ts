@@ -126,6 +126,8 @@ export interface CandidateCardData {
   tpsComplete: boolean;
   assignmentsComplete: boolean;
   flaggedIssue: string | null;
+  // for-claude-code-assessor-pack-decisions.md §1
+  selectedForAssessorVisit: boolean;
 }
 
 // The card grid's own per-candidate status dots -- same three dimensions
@@ -137,7 +139,7 @@ export async function buildCandidateCards(
 ): Promise<CandidateCardData[]> {
   const { data: trainees } = await supabase
     .from("profiles")
-    .select("id, full_name, course_status")
+    .select("id, full_name, course_status, selected_for_assessor_visit")
     .eq("course_id", courseId)
     .eq("role", "trainee")
     .order("full_name");
@@ -198,6 +200,7 @@ export async function buildCandidateCards(
       tpsComplete,
       assignmentsComplete,
       flaggedIssue,
+      selectedForAssessorVisit: trainee.selected_for_assessor_visit,
     };
   });
 }

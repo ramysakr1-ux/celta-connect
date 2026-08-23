@@ -47,21 +47,24 @@ const GRADE: Record<string, { bg: string; ink: string }> = {
 // no tabs, nothing editable: everything here reads via the admin client,
 // scoped only by the course_id the token resolves to.
 //
-// Three of the spec's own "ask, don't invent" questions are deliberately
-// NOT resolved here -- see the memory note this build left behind:
-// (1) whether the centre nominates a subset of candidates to show (this
-// shows all active candidates), (2) live TP joining links for the
-// assessor beyond the existing "Observable" status, (3) the exact centre-
-// document list. For (3), this reuses the real `resources` table's
-// existing `category = 'centre_documents'` rows (already a working
-// concept on the trainer Resource Hub) rather than inventing a document
-// taxonomy -- whatever the centre has actually uploaded shows here, no more.
+// Three of the spec's own "ask, don't invent" questions were left open
+// here, resolved 2026-08-23 by for-claude-code-assessor-pack-decisions.md:
+// (1) the landing page defaults to the centre-selected subset
+// (profiles.selected_for_assessor_visit, roster's "Select for assessor
+// visit" panel), with an always-reachable "View full cohort" link -- never
+// a restriction; (2) online TPs during the visit window get a real,
+// clickable Zoom join link, the same one students/tutors use; (3) the
+// centre document list stays the 8 compiled-in defaults, plus any extra
+// file a centre uploads under Resource Hub's existing "Centre documents"
+// uploader (`resources`, `category = 'centre_documents'`) now also shows
+// here even when its title doesn't match one of the 8 -- previously
+// silently dropped.
 export default async function AssessorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ candidate?: string }>;
+  searchParams: Promise<{ candidate?: string; cohort?: string }>;
 }) {
-  const { candidate: openCandidateId } = await searchParams;
+  const { candidate: openCandidateId, cohort } = await searchParams;
   const cookieStore = await cookies();
   if (!cookieStore.get(ASSESSOR_COOKIE)?.value) redirect("/login");
   const termsStatus = await getAssessorTermsStatus();
@@ -146,6 +149,17 @@ export default async function AssessorPage({
   // since briefs are identical for the whole cohort.
   const firstCandidateId = candidates[0]?.traineeId ?? null;
 
+  // for-claude-code-assessor-pack-decisions.md §3: "don't hardcode the
+  // list -- let the centre add/remove supplementary documents." Resource
+  // Hub's "Centre documents" uploader (resources, category = 'centre_
+  // documents') already lets a centre freely add or remove any titled
+  // file -- this was the missing half: any upload whose title doesn't
+  // match one of the 8 defaults now shows as its own row instead of being
+  // silently dropped.
+  const extraCentreDocs = (centreDocs ?? []).filter(
+    (d) => !CENTRE_DOCUMENTS.some((doc) => doc.name.toLowerCase() === d.title.trim().toLowerCase())
+  );
+
   const courseDates =
     course.start_date && course.end_date
       ? `${new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} \u2013 ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
@@ -177,6 +191,16 @@ export default async function AssessorPage({
   // rather than borrowing the design file's sample text -- an assessor reading
   // "120 of 120 contact hours" that nothing computed would be worse than a row
   // admitting the figure isn't tracked.
+  // for-claude-code-assessor-pack-decisions.md §1: "default to showing the
+  // candidates the centre has selected... not a restriction -- the
+  // assessor can freely browse into the complete cohort... at any time."
+  // isNarrowed is false for an untouched course (everyone still defaults
+  // to selected=true), so the link only appears once a centre has actually
+  // narrowed something down.
+  const isNarrowed = candidates.some((c) => !c.selectedForAssessorVisit);
+  const wantsFullCohort = cohort === "full";
+  const visibleCandidates = isNarrowed && !wantsFullCohort ? candidates.filter((c) => c.selectedForAssessorVisit) : candidates;
+
   const openCandidate = openCandidateId ? candidates.find((c) => c.traineeId === openCandidateId) ?? null : null;
   const drawerRows: { label: string; value: string; state: string; ink: string }[] = openCandidate
     ? [
@@ -385,8 +409,22 @@ export default async function AssessorPage({
               ))}
             </div>
           ) : (
+          <>
+          {isNarrowed ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+              <span style={{ fontSize: 11.5, color: MUTED }}>
+                Showing {visibleCandidates.length} of {candidates.length} candidates -- the centre&apos;s selection for this visit.
+              </span>
+              <Link
+                href={wantsFullCohort ? "/assessor" : "/assessor?cohort=full"}
+                style={{ fontSize: 11.5, fontWeight: 600, color: TEAL, textDecoration: "none" }}
+              >
+                {wantsFullCohort ? "← Back to selected" : `View full cohort (${candidates.length}) →`}
+              </Link>
+            </div>
+          ) : null}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-            {candidates.map((c) => (
+            {visibleCandidates.map((c) => (
               <Link
                 key={c.traineeId}
                 href={`/assessor?candidate=${c.traineeId}`}
@@ -434,8 +472,9 @@ export default async function AssessorPage({
                 ) : null}
               </Link>
             ))}
-            {candidates.length === 0 ? <p style={{ fontSize: 12.5, color: MUTED }}>No candidates on this course.</p> : null}
+            {visibleCandidates.length === 0 ? <p style={{ fontSize: 12.5, color: MUTED }}>No candidates on this course.</p> : null}
           </div>
+          </>
           )}
 
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -493,20 +532,36 @@ export default async function AssessorPage({
                   </span>
                 ) : (
                   (onDayEvents ?? []).map((e) => (
-                    <div key={e.id} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                      <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none", fontVariantNumeric: "tabular-nums" }}>
-                        {e.event_time?.slice(0, 5) ?? ""}
-                      </span>
-                      <span>
-                        <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>{e.title}</span>
-                        {/* "which TPs are observable and when (with Zoom link
-                            timing for online ones)". An assessor needs to know
-                            whether to be in a room or at a screen. */}
-                        <span style={{ fontSize: 11, color: MUTED }}>
-                          {e.type === "tp" ? "Observable · " : ""}
-                          {e.zoom_url ? "Online — joining link opens 10 minutes before" : "In person at the centre"}
+                    <div key={e.id} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                        <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none", fontVariantNumeric: "tabular-nums" }}>
+                          {e.event_time?.slice(0, 5) ?? ""}
                         </span>
-                      </span>
+                        <span>
+                          <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>{e.title}</span>
+                          {/* for-claude-code-assessor-pack-decisions.md §2: "a
+                              real, clickable join link... not just a static
+                              'Observable' label. An assessor who can't click
+                              into the session isn't meaningfully observing
+                              it." Same zoom_url students/tutors use -- the
+                              real join window is Zoom's own waiting room, not
+                              something this page enforces. */}
+                          <span style={{ fontSize: 11, color: MUTED }}>
+                            {e.type === "tp" ? "Observable · " : ""}
+                            {e.zoom_url ? "Online — joining link opens 10 minutes before" : "In person at the centre"}
+                          </span>
+                        </span>
+                      </div>
+                      {e.zoom_url ? (
+                        <a
+                          href={e.zoom_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}
+                        >
+                          Join →
+                        </a>
+                      ) : null}
                     </div>
                   ))
                 )}
@@ -572,6 +627,23 @@ export default async function AssessorPage({
                   </div>
                 );
               })}
+              {extraCentreDocs.map((d) => (
+                <div
+                  key={d.id}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                    padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
+                  }}
+                >
+                  <div>
+                    <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{d.title}</p>
+                    <p style={{ fontSize: 10.5, color: MUTED }}>Added by the centre</p>
+                  </div>
+                  <a href={d.file_url ?? "#"} style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}>
+                    Open →
+                  </a>
+                </div>
+              ))}
               {tutorNameById.size > 0 ? (
                 <div id="tutor-list" style={{ padding: "11px 15px" }}>
                   <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>Tutor list</p>

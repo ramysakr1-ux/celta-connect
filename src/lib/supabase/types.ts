@@ -362,6 +362,10 @@ export interface Database {
           // centre_roles grant backs it, so it's a preference, never authority.
           active_center_id: string | null;
           course_id: string | null;
+          // for-claude-code-assessor-pack-decisions.md §1: which candidates
+          // the centre has selected to feature for the assessor visit --
+          // default true, narrowing is opt-in.
+          selected_for_assessor_visit: boolean;
           tutor_role: string | null;
           terms_accepted_at: string | null;
           special_consideration: string | null;

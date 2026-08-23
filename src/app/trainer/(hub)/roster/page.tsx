@@ -8,6 +8,7 @@ import { fetchRosterRows } from "@/lib/roster";
 import { RosterTable } from "@/app/trainer/(hub)/roster/roster-table";
 import { AddCandidateButton } from "@/app/trainer/(hub)/roster/add-candidate-button";
 import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
+import { AssessorSelectionButton } from "@/app/trainer/(hub)/roster/assessor-selection-button";
 import { toggleFilmingConsent } from "@/app/trainer/(hub)/roster/filming-consent-actions";
 
 // The detailed operational roster. Row computation lives in lib/roster.ts,
@@ -91,6 +92,22 @@ export default async function TrainerRosterPage() {
     ? `mailto:?bcc=${rows.map((r) => encodeURIComponent(r.email)).join(",")}&subject=${encodeURIComponent(courseCode)}`
     : null;
 
+  // for-claude-code-assessor-pack-decisions.md §1: a second query rather
+  // than folding into fetchRosterRows/RosterRow, same reasoning as
+  // filmsTpSessions above -- only the assessor-selection panel needs this,
+  // not the CSV export or the assessor's own read of this same page.
+  let selectedForAssessorById = new Map<string, boolean>();
+  if (trainer && rows.length > 0) {
+    const { data: selectionRows } = await supabase
+      .from("profiles")
+      .select("id, selected_for_assessor_visit")
+      .in(
+        "id",
+        rows.map((r) => r.id)
+      );
+    selectedForAssessorById = new Map((selectionRows ?? []).map((r) => [r.id, r.selected_for_assessor_visit]));
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-end justify-between gap-4">
@@ -124,6 +141,11 @@ export default async function TrainerRosterPage() {
             </a>
           ) : null}
           {trainer ? <AssessorLinkButton /> : null}
+          {trainer ? (
+            <AssessorSelectionButton
+              candidates={rows.map((r) => ({ id: r.id, name: r.name, selected: selectedForAssessorById.get(r.id) ?? true }))}
+            />
+          ) : null}
           {/* The overnight session moved ViewSwitcherPill here out of the
               header; Ramy then confirmed (2026-08-16, against design-files.md
               and the remaining-screens spec) that the switcher is retired

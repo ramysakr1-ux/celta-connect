@@ -1,0 +1,13 @@
+-- for-claude-code-assessor-pack-decisions.md §1: which candidates the
+-- centre has selected to feature for a given assessor visit. Default true
+-- so an untouched course still shows its whole cohort -- narrowing is an
+-- explicit, opt-in act, not the default.
+--
+-- §3 (centre-editable document list) needed no schema change: Resource
+-- Hub's "Centre documents" section (resources, category = 'centre_
+-- documents') already lets a centre freely upload/remove any titled
+-- document -- src/app/assessor/page.tsx was just silently ignoring any
+-- upload whose title didn't exactly match one of the 8 hardcoded default
+-- names. Fixed in that file instead of building a second, parallel
+-- document-list table alongside a mechanism that already does this.
+alter table public.profiles add column if not exists selected_for_assessor_visit boolean not null default true;
