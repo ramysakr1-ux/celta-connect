@@ -11,6 +11,7 @@ import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { DesignerCredit } from "@/components/designer-credit";
 import { getFeedbackAssistState } from "@/lib/feedback-assist";
 import { FeedbackAssistCard } from "@/app/trainer/(hub)/feedback-assist-card";
+import { AssessorCard } from "@/app/trainer/(hub)/assessor-card";
 import { findMaterialsOverlaps } from "@/lib/materials-overlap";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
@@ -49,7 +50,7 @@ export default async function TodayPage() {
     await Promise.all([
       supabase
         .from("courses")
-        .select("name, start_date, end_date, assessor_visit_date, provisional_grades_due_at")
+        .select("name, start_date, end_date, assessor_visit_date, provisional_grades_due_at, assessor_name, assessor_email, assessor_notified_at")
         .eq("id", courseId)
         .maybeSingle(),
       supabase
@@ -141,6 +142,21 @@ export default async function TodayPage() {
         destructive: daysOut <= 0,
       });
     }
+  }
+
+  // for-claude-code-course-admin-landing-and-admissions.md §4: "When [the
+  // assessor is] set, the MCT should get notified... with the assessor's
+  // name and contact info." Same "computed fresh, no persisted dismiss
+  // state" pattern as every other alert here -- this one resolves itself
+  // once the MCT has actually set a visit date (assessor_visit_date),
+  // which is the real next step once they know who it is, rather than a
+  // separate notified_at flag to track and clear.
+  if (isMct && course?.assessor_name && !course.assessor_visit_date) {
+    alerts.push({
+      title: `Assessor named -- ${course.assessor_name}`,
+      meta: course.assessor_email ?? "No email on file",
+      href: "/trainer",
+    });
   }
 
   // Grade Pipeline handoff, "Decided": "Final-grade reminder timing is tied
@@ -493,6 +509,14 @@ export default async function TodayPage() {
           initialEnabled={feedbackAssist.enabled}
           initialDirect={feedbackAssist.direct}
           initialSupportive={feedbackAssist.supportive}
+        />
+      ) : null}
+
+      {isMct ? (
+        <AssessorCard
+          initialName={course?.assessor_name ?? null}
+          initialEmail={course?.assessor_email ?? null}
+          initialVisitDate={course?.assessor_visit_date ?? null}
         />
       ) : null}
 

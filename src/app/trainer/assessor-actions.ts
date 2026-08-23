@@ -1,8 +1,10 @@
 "use server";
 
 import "server-only";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { isMctOnCourse } from "@/lib/course-mct";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
 import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
@@ -137,4 +139,39 @@ export async function sendAssessorInviteEmail(
   if (error) return { error: "Could not send the email. Try copying the link instead.", sent: false };
 
   return { error: null, sent: true };
+}
+
+export interface AssessorContactState {
+  error: string | null;
+}
+
+// for-claude-code-course-admin-landing-and-admissions.md §4: "a single
+// field on the course record, writable by both the Course Administrator...
+// and the MCT... whichever side sets it first is what the other side
+// sees." This is the MCT-side write path -- same columns Course Admin's
+// own Assessor card writes (dashboard/admin/courses/[id]/roster-actions.ts's
+// updateAssessor/updateAssessorVisitDate), just reachable from inside the
+// course once it's running, MCT-only (structural, course-level -- same
+// reasoning as the rest of this session's MCT-only timetable gates).
+export async function updateAssessorContact(_prevState: AssessorContactState, formData: FormData): Promise<AssessorContactState> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return { error: "No course assigned." };
+
+  const supabase = await createClient();
+  if (trainer.role === "trainer" && !(await isMctOnCourse(supabase, trainer.course_id, trainer.id))) {
+    return { error: "Only the main course tutor can set this." };
+  }
+
+  const assessorName = (formData.get("assessor_name") as string | null)?.trim() || null;
+  const assessorEmail = (formData.get("assessor_email") as string | null)?.trim().toLowerCase() || null;
+  const assessorVisitDate = (formData.get("assessor_visit_date") as string | null) || null;
+
+  const { error } = await supabase
+    .from("courses")
+    .update({ assessor_name: assessorName, assessor_email: assessorEmail, assessor_visit_date: assessorVisitDate })
+    .eq("id", trainer.course_id);
+  if (error) return { error: "Could not save. Try again." };
+
+  revalidatePath("/trainer");
+  return { error: null };
 }
