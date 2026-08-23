@@ -39,7 +39,7 @@ export function RefundsPanel({ refunds, canEdit }: { refunds: RefundRow[]; canEd
   const day = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 
   return (
-    <div className="rounded-[10px] border border-border bg-card">
+    <div className="card card-gold">
       <div className="border-b border-border px-5 py-3">
         <h2 className="font-serif text-base text-ink">Refunds</h2>
         <p className="mt-0.5 text-xs text-muted">

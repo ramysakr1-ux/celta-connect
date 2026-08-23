@@ -169,7 +169,7 @@ export function FilmedObservationWatchScreen({
         </div>
 
         {teacherName || level || learnerCount !== null || mainAim || subAim ? (
-          <div className="rounded-[10px] border border-border bg-card p-4">
+          <div className="card p-4">
             {teacherName || level || learnerCount !== null ? (
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink">
                 {teacherName ? (
@@ -248,7 +248,7 @@ export function FilmedObservationWatchScreen({
         ) : null}
 
         {taskId ? (
-          <div className="rounded-[10px] border border-border bg-card p-4">
+          <div className="card p-4">
             <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Observation task</p>
             {criteriaLine ? <p className="mt-1 text-sm text-ink">{criteriaLine}</p> : null}
             {taskCompletedAt ? (

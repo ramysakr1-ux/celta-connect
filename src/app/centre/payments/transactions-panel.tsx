@@ -32,7 +32,7 @@ export function TransactionsPanel({ transactions }: { transactions: TransactionR
   const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="rounded-[10px] border border-border bg-card">
+    <div className="card">
       <div className="border-b border-border px-5 py-3">
         <h2 className="font-serif text-base text-ink">Recent provider activity</h2>
         <p className="mt-0.5 text-xs text-muted">Every Stripe event received, most recent first.</p>

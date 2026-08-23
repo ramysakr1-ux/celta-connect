@@ -30,7 +30,7 @@ export function ProviderList({
   const isConnected = connectedKey === selected && Boolean(connectedAt);
 
   return (
-    <div className="rounded-[10px] border border-border bg-card p-5">
+    <div className="card p-5">
       <div className="flex flex-col gap-2">
         {PAYMENT_PROVIDERS.map((p) => {
           const active = p.key === selected;

@@ -44,7 +44,7 @@ export function AdminRoster({ rows, invites, mayAppoint }: { rows: RosterRow[]; 
       </div>
 
       {mayAppoint && showInvite ? (
-        <div className="flex flex-col gap-4 rounded-[10px] border border-border bg-card px-[22px] py-5">
+        <div className="flex flex-col gap-4 card px-[22px] py-5">
           <div>
             <h3 className="font-serif text-sm text-ink">Appoint someone with an account already</h3>
             <GrantRoleForm />
@@ -56,7 +56,7 @@ export function AdminRoster({ rows, invites, mayAppoint }: { rows: RosterRow[]; 
         </div>
       ) : null}
 
-      <div className="rounded-[10px] border border-border bg-card">
+      <div className="card">
         {rows.map((row, i) => (
           <div
             key={row.grantId}

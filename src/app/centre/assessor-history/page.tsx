@@ -77,12 +77,12 @@ export default async function AssessorHistoryPage({
       </div>
 
       {history.length === 0 ? (
-        <div className="rounded-[10px] border border-border bg-card px-5 py-4">
+        <div className="card px-5 py-4">
           <p className="text-sm text-muted">No assessor has been linked to a course at this centre yet.</p>
         </div>
       ) : (
-        history.map((a) => (
-          <div key={a.profileId} className="rounded-[10px] border border-border bg-card">
+        history.map((a, i) => (
+          <div key={a.profileId} className={`card ${a.peakConcurrent > 2 ? "card-amber" : i % 2 === 1 ? "card-gold" : ""}`}>
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border px-5 py-4">
               <div>
                 <h2 className="font-serif text-base text-ink">{a.name}</h2>

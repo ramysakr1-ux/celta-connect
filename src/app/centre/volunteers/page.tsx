@@ -89,7 +89,7 @@ export default async function CentreVolunteersPage({
         </Link>
       </div>
 
-      <div className="rounded-[10px] border border-border bg-card">
+      <div className="card">
         <div className="flex items-baseline justify-between border-b border-border px-5 py-4">
           <h2 className="font-serif text-base text-ink">
             {volunteerGroups.length} {volunteerGroups.length === 1 ? "person" : "people"}

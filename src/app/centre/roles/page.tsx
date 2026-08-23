@@ -101,7 +101,7 @@ export default async function CentreRolesPage() {
 
       <RoleStrip holders={holders} />
 
-      <div className="rounded-[10px] border border-border bg-card px-5 py-4">
+      <div className="card px-5 py-4">
         <h2 className="font-serif text-base text-ink">Areas of responsibility</h2>
         <p className="mt-1 text-xs text-muted">
           A role says what someone is capable of; an area says what is actually their job. Everyone sees every area —
@@ -145,7 +145,7 @@ export default async function CentreRolesPage() {
 
       {/* Absent, not disabled, for anyone who isn't an owner. */}
       {mayAppoint ? (
-        <div className="rounded-[10px] border border-border bg-card px-5 py-4">
+        <div className="card card-gold px-5 py-4">
           <h2 className="font-serif text-base text-ink">Appoint someone</h2>
           <p className="mt-1 text-xs text-muted">
             Roles are appointed, never chosen — nobody promotes their own account. They need an account in this
@@ -176,7 +176,7 @@ export default async function CentreRolesPage() {
       ) : null}
 
       {mayAppoint ? (
-        <div className="rounded-[10px] border border-border bg-card px-5 py-4">
+        <div className="card px-5 py-4">
           <h2 className="font-serif text-base text-ink">Invite a new admin</h2>
           <p className="mt-1 text-xs text-muted">
             For someone who has no account here at all. The link opens the centre, not a course — they set up their

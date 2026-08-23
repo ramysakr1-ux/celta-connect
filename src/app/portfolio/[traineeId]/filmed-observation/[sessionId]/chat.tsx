@@ -68,7 +68,7 @@ export function FilmedObservationChat({
   }
 
   return (
-    <div className="flex h-full flex-col rounded-[10px] border border-border bg-card">
+    <div className="flex h-full flex-col card">
       <p className="border-b border-border px-3.5 py-2.5 text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Group chat</p>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3.5 py-2.5" role="log" aria-live="polite">
         {messages.length === 0 ? (

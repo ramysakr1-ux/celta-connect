@@ -140,7 +140,7 @@ export function RoleStrip({ holders }: { holders: Record<string, { id: string; n
         })}
       </div>
 
-      <div className="rounded-[10px] border border-border bg-card px-5 py-4">
+      <div className="card px-5 py-4">
         <p className="text-sm text-ink">{detail.summary}</p>
 
         <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1.5 sm:grid-cols-2">
