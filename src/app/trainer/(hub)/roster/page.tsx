@@ -10,6 +10,8 @@ import { AddCandidateButton } from "@/app/trainer/(hub)/roster/add-candidate-but
 import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 import { AssessorSelectionButton } from "@/app/trainer/(hub)/roster/assessor-selection-button";
 import { toggleFilmingConsent } from "@/app/trainer/(hub)/roster/filming-consent-actions";
+import { ManageTutorsCard } from "@/app/trainer/(hub)/roster/manage-tutors-card";
+import { AssignTutorPanel, type AssignableTrainer } from "@/app/dashboard/admin/courses/[id]/assign-tutor-panel";
 
 // The detailed operational roster. Row computation lives in lib/roster.ts,
 // shared with the CSV export route below so the two can't drift on what a
@@ -106,6 +108,76 @@ export default async function TrainerRosterPage() {
         rows.map((r) => r.id)
       );
     selectedForAssessorById = new Map((selectionRows ?? []).map((r) => [r.id, r.selected_for_assessor_visit]));
+  }
+
+  // for-claude-code-course-admin.md's "Course workspace -- invitations and
+  // roster": already live for Course Admin (dashboard/admin/courses/[id]);
+  // the MCT gets the same tools here, since Course Admin isn't necessarily
+  // still watching once a course is running. isMct-only -- an ACT can see
+  // the roster but not manage who's on it (§18's own admin-exception
+  // reasoning, applied the same way to the MCT here).
+  let rosterTutors: import("./manage-tutors-card").RosterTutorRow[] = [];
+  let pendingTutorInvites: import("./manage-tutors-card").PendingTutorInvite[] = [];
+  let assignableTrainers: AssignableTrainer[] = [];
+  if (isMct && trainer) {
+    const adminClient = createAdminClient();
+    const [{ data: tutorRows }, { data: invitationRows }] = await Promise.all([
+      adminClient
+        .from("course_tutors")
+        .select("id, profile_id, tutor_role, verified_at, owned_assignment_types")
+        .eq("course_id", courseId)
+        .is("left_at", null),
+      adminClient
+        .from("course_invitations")
+        .select("id, email, full_name, tutor_role")
+        .eq("course_id", courseId)
+        .eq("role", "trainer")
+        .is("revoked_at", null)
+        .is("accepted_at", null),
+    ]);
+
+    const tutorProfileIds = (tutorRows ?? []).map((t) => t.profile_id);
+    const { data: tutorProfiles } = tutorProfileIds.length
+      ? await adminClient.from("profiles").select("id, full_name, email, course_id").in("id", tutorProfileIds)
+      : { data: [] };
+    const profileById = new Map((tutorProfiles ?? []).map((p) => [p.id, p]));
+    rosterTutors = (tutorRows ?? []).map((t) => ({
+      courseTutorId: t.id,
+      profileId: t.profile_id,
+      name: profileById.get(t.profile_id)?.full_name ?? "Unknown",
+      email: profileById.get(t.profile_id)?.email ?? "",
+      role: t.tutor_role,
+      joined: Boolean(t.verified_at),
+      ownedAssignmentTypes: t.owned_assignment_types ?? [],
+      isSecondary: profileById.get(t.profile_id)?.course_id !== courseId,
+    }));
+    pendingTutorInvites = (invitationRows ?? []).map((inv) => ({
+      id: inv.id,
+      email: inv.email,
+      fullName: inv.full_name,
+      tutorRole: inv.tutor_role,
+    }));
+
+    // Same-centre tutors not already on this course -- assign-tutor-actions.ts's
+    // own comment: "adding a trainer to a second course adds to their
+    // assignments -- it does not remove them from the first."
+    const { data: centreTrainers } = await adminClient
+      .from("profiles")
+      .select("id, full_name, email, course_id")
+      .eq("role", "trainer")
+      .eq("center_id", trainer.center_id);
+    const otherTrainers = (centreTrainers ?? []).filter((p) => !tutorProfileIds.includes(p.id));
+    const homeCourseIds = [...new Set(otherTrainers.map((p) => p.course_id).filter((id): id is string => Boolean(id)))];
+    const { data: homeCourses } = homeCourseIds.length
+      ? await adminClient.from("courses").select("id, name").in("id", homeCourseIds)
+      : { data: [] };
+    const courseNameById = new Map((homeCourses ?? []).map((c) => [c.id, c.name]));
+    assignableTrainers = otherTrainers.map((p) => ({
+      id: p.id,
+      name: p.full_name,
+      email: p.email,
+      currentCourseLabel: p.course_id ? (courseNameById.get(p.course_id) ?? null) : null,
+    }));
   }
 
   return (
@@ -209,6 +281,13 @@ export default async function TrainerRosterPage() {
       ) : null}
 
       <RosterTable rows={rows} isMct={isMct} showContact={isRegisteredTutor} courseCode={courseCode} />
+
+      {isMct ? (
+        <>
+          <ManageTutorsCard courseId={courseId} tutors={rosterTutors} pendingInvites={pendingTutorInvites} />
+          {assignableTrainers.length > 0 ? <AssignTutorPanel courseId={courseId} trainers={assignableTrainers} /> : null}
+        </>
+      ) : null}
     </div>
   );
 }

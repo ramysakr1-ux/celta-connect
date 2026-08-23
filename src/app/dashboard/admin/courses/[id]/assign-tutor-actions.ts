@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
+import { isMctOnCourse } from "@/lib/course-mct";
 import { TUTOR_ROLES, type TutorRole } from "@/lib/tutor-roles";
 import { checkConcurrentCourseAssignment, type CourseWindow } from "@/lib/concurrent-course-check";
 
@@ -20,7 +21,7 @@ export interface AssignTutorState {
 }
 
 export async function assignExistingTutor(_prev: AssignTutorState, formData: FormData): Promise<AssignTutorState> {
-  const admin = await requireRole("admin");
+  const admin = await requireRole(["admin", "trainer"]);
   const courseId = formData.get("course_id");
   const profileId = formData.get("profile_id");
   const tutorRoleRaw = formData.get("tutor_role");
@@ -39,6 +40,9 @@ export async function assignExistingTutor(_prev: AssignTutorState, formData: For
     .eq("id", courseId)
     .maybeSingle();
   if (!targetCourse || targetCourse.center_id !== admin.center_id) return { error: "Course not found." };
+  if (admin.role === "trainer" && !(await isMctOnCourse(adminClient, courseId, admin.id))) {
+    return { error: "Only the main course tutor can do this." };
+  }
 
   // Same centre only -- both Handbook rules this check exists for (2.4 and
   // 12.3) are scoped that way, per for-claude-code-concurrent-course-checks.md.
@@ -126,7 +130,7 @@ export async function assignExistingTutor(_prev: AssignTutorState, formData: For
  * untouched.
  */
 export async function leaveSecondaryCourse(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const admin = await requireRole(["admin", "trainer"]);
   const courseId = formData.get("course_id");
   const profileId = formData.get("profile_id");
   if (typeof courseId !== "string" || typeof profileId !== "string") return;
@@ -134,6 +138,7 @@ export async function leaveSecondaryCourse(formData: FormData): Promise<void> {
   const adminClient = createAdminClient();
   const { data: course } = await adminClient.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
   if (!course || course.center_id !== admin.center_id) return;
+  if (admin.role === "trainer" && !(await isMctOnCourse(adminClient, courseId, admin.id))) return;
 
   await adminClient
     .from("course_tutors")

@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
+import { isMctOnCourse } from "@/lib/course-mct";
 
 // Named invitations, and the tutor role that travels with them.
 //
@@ -27,7 +28,7 @@ const TUTOR_ROLES = [
 type TutorRole = (typeof TUTOR_ROLES)[number];
 
 export async function inviteToCourse(_prev: InviteState, formData: FormData): Promise<InviteState> {
-  const profile = await requireRole("admin");
+  const profile = await requireRole(["admin", "trainer"]);
 
   const courseId = formData.get("course_id");
   const email = (formData.get("email") as string | null)?.trim().toLowerCase();
@@ -45,6 +46,12 @@ export async function inviteToCourse(_prev: InviteState, formData: FormData): Pr
   const admin = createAdminClient();
   const { data: course } = await admin.from("courses").select("id, center_id, name").eq("id", courseId).maybeSingle();
   if (!course || course.center_id !== profile.center_id) return { error: "Course not found." };
+  // Once a course is running, Course Admin isn't necessarily still watching
+  // -- the MCT can invite/reassign their own tutors the same way, same
+  // isMctOnCourse gate as every other MCT-only write this session.
+  if (profile.role === "trainer" && !(await isMctOnCourse(admin, courseId, profile.id))) {
+    return { error: "Only the main course tutor can do this." };
+  }
 
   // Only one main course tutor at a time. The database enforces this on
   // course_tutors; catching it here means the person inviting is told who
@@ -116,7 +123,7 @@ export async function inviteToCourse(_prev: InviteState, formData: FormData): Pr
       html: tutorAddedEmailHtml({
         tutorFirstName: (fullName ?? email).split(" ")[0],
         addedByName: profile.full_name,
-        addedByRole: "course administrator",
+        addedByRole: profile.role === "trainer" ? "main course tutor" : "course administrator",
         courseName: course.name,
         courseFact: course.name,
         roleFact: readableRole,
@@ -138,12 +145,15 @@ export async function inviteToCourse(_prev: InviteState, formData: FormData): Pr
 
 /** Withdraw an invitation that hasn't been taken up. */
 export async function revokeInvitation(_prev: InviteState, formData: FormData): Promise<InviteState> {
-  const profile = await requireRole("admin");
+  const profile = await requireRole(["admin", "trainer"]);
   const id = formData.get("invitation_id");
   const courseId = formData.get("course_id");
   if (typeof id !== "string" || typeof courseId !== "string") return { error: "Something went wrong." };
 
   const admin = createAdminClient();
+  if (profile.role === "trainer" && !(await isMctOnCourse(admin, courseId, profile.id))) {
+    return { error: "Only the main course tutor can do this." };
+  }
   // Revoked, never deleted: who was invited and never came is worth seeing.
   const { error } = await admin
     .from("course_invitations")
@@ -171,7 +181,7 @@ export async function revokeInvitation(_prev: InviteState, formData: FormData): 
  * to every tutor, because that check fails open.
  */
 export async function changeTutorRole(_prev: InviteState, formData: FormData): Promise<InviteState> {
-  const profile = await requireRole("admin");
+  const profile = await requireRole(["admin", "trainer"]);
   const courseTutorId = formData.get("course_tutor_id");
   const courseId = formData.get("course_id");
   const nextRoleRaw = (formData.get("tutor_role") as string | null) || null;
@@ -183,6 +193,9 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
   const admin = createAdminClient();
   const { data: course } = await admin.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
   if (!course || course.center_id !== profile.center_id) return { error: "Course not found." };
+  if (profile.role === "trainer" && !(await isMctOnCourse(admin, courseId, profile.id))) {
+    return { error: "Only the main course tutor can do this." };
+  }
 
   if (nextRole === "main_course_tutor") {
     // Step the current MCT down to assistant course tutor rather than to
@@ -217,7 +230,7 @@ const ASSIGNMENT_TYPES = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
 // fields." Visibility only -- marking itself stays open to any trainer on
 // the course, same as today; this doesn't gate who's allowed to mark.
 export async function updateOwnedAssignmentTypes(formData: FormData): Promise<void> {
-  const profile = await requireRole("admin");
+  const profile = await requireRole(["admin", "trainer"]);
   const courseTutorId = formData.get("course_tutor_id");
   const courseId = formData.get("course_id");
   if (typeof courseTutorId !== "string" || typeof courseId !== "string") return;
@@ -227,6 +240,7 @@ export async function updateOwnedAssignmentTypes(formData: FormData): Promise<vo
   const admin = createAdminClient();
   const { data: course } = await admin.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
   if (!course || course.center_id !== profile.center_id) return;
+  if (profile.role === "trainer" && !(await isMctOnCourse(admin, courseId, profile.id))) return;
 
   await admin.from("course_tutors").update({ owned_assignment_types: owned }).eq("id", courseTutorId).eq("course_id", courseId);
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
