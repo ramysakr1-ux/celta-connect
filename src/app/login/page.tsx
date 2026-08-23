@@ -11,7 +11,8 @@ export default async function LoginPage({
   return (
     <div className="entry-ground flex flex-1 flex-col">
       <div className="flex flex-1 items-center justify-center p-8">
-        <div className="sheet-accent w-full max-w-sm p-8">
+        <div className="frame w-full max-w-sm p-3">
+        <div className="sheet-accent p-8">
           <Wordmark size="hero" />
           <p className="mt-3 text-sm text-muted">Sign in to your centre.</p>
           <p className="mt-2 text-xs text-muted">
@@ -36,6 +37,7 @@ export default async function LoginPage({
             </div>
           ) : null}
           <LoginForm next={next} />
+        </div>
         </div>
       </div>
     </div>
