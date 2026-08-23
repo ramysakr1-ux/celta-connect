@@ -111,25 +111,59 @@ export default async function TrainerTimetablePage({
   // own paired-tp-group / unpaired-subgroup enumeration exactly, and blocks
   // aren't gated by timetable_locked_at: tutorials get scheduled as the
   // course actually progresses, well after the base shape is locked.
-  const [{ data: subgroups }, { data: tpGroups }, { data: blocks }] = await Promise.all([
+  const [{ data: subgroups }, { data: tpGroups }, { data: blocks }, { data: subgroupMembers }] = await Promise.all([
     supabase.from("course_subgroups").select("id, name, tp_group_id, half_order").eq("course_id", courseId).order("created_at"),
     supabase.from("course_tp_groups").select("id, name, tutor_profile_id").eq("course_id", courseId),
     supabase
       .from("stage2_tutorial_blocks")
       .select("id, tp_group_id, subgroup_id, timetable_event_id")
       .eq("course_id", courseId),
+    supabase.from("course_subgroup_members").select("subgroup_id, trainee_id"),
   ]);
+
+  // for-claude-code-timetable-page-priority.md (revised): "Stage 2 group
+  // tutorial booking and Stage 1/3 individual invites: per-TP-tutor, not
+  // MCT-only -- each TP tutor runs tutorials with their own group, so they
+  // own booking for their own group's sheet." Admin keeps full visibility
+  // (not a TP tutor, same bypass every other gate on this page already
+  // gives it). An unpaired subgroup has no tutor_profile_id anywhere in the
+  // schema to test against -- left visible to every trainer rather than
+  // guessed at, flagged here rather than silently hidden.
+  const isAdmin = trainer.role === "admin";
+  const ownedGroupIds = new Set((tpGroups ?? []).filter((g) => g.tutor_profile_id === trainer.id).map((g) => g.id));
   const pairedTpGroupIds = new Set((subgroups ?? []).filter((s) => s.tp_group_id).map((s) => s.tp_group_id));
   const stage2Groups = [
-    ...(tpGroups ?? []).filter((g) => pairedTpGroupIds.has(g.id)).map((g) => ({ kind: "tpgroup" as const, id: g.id, name: g.name })),
+    ...(tpGroups ?? [])
+      .filter((g) => pairedTpGroupIds.has(g.id) && (isAdmin || ownedGroupIds.has(g.id)))
+      .map((g) => ({ kind: "tpgroup" as const, id: g.id, name: g.name })),
     ...(subgroups ?? []).filter((s) => !s.tp_group_id).map((s) => ({ kind: "subgroup" as const, id: s.id, name: s.name })),
   ];
+  const visibleGroupIds = new Set(stage2Groups.map((g) => g.id));
   const blockEventById = new Map(allEvents.map((e) => [e.id, e]));
-  const stage2Blocks = (blocks ?? []).map((b) => {
-    const event = blockEventById.get(b.timetable_event_id);
-    const group = stage2Groups.find((g) => (b.tp_group_id ? g.id === b.tp_group_id : g.id === b.subgroup_id));
-    return { id: b.id, groupName: group?.name ?? "Unknown group", eventDate: event?.event_date ?? "" };
-  });
+  const stage2Blocks = (blocks ?? [])
+    .filter((b) => (b.tp_group_id ? visibleGroupIds.has(b.tp_group_id) : visibleGroupIds.has(b.subgroup_id ?? "")))
+    .map((b) => {
+      const event = blockEventById.get(b.timetable_event_id);
+      const group = stage2Groups.find((g) => (b.tp_group_id ? g.id === b.tp_group_id : g.id === b.subgroup_id));
+      return { id: b.id, groupName: group?.name ?? "Unknown group", eventDate: event?.event_date ?? "" };
+    });
+
+  // Same per-tutor scoping for Stage 1/3: a candidate is "the trainer's own"
+  // if they're a member of a subgroup belonging to a TP group the trainer
+  // tutors. A trainee in an unpaired subgroup has no owning tutor to test
+  // against (same gap as above) -- left visible to every trainer. And
+  // before any subgroup exists at all (course not yet organized into TP
+  // groups -- true of every course early on), there's nothing to scope by
+  // full stop; fails open rather than showing an empty "no candidates" for
+  // a course that just hasn't set up groups yet.
+  const noSubgroupStructureYet = (subgroups ?? []).length === 0;
+  const ownedSubgroupIds = new Set((subgroups ?? []).filter((s) => s.tp_group_id && ownedGroupIds.has(s.tp_group_id)).map((s) => s.id));
+  const unpairedSubgroupIds = new Set((subgroups ?? []).filter((s) => !s.tp_group_id).map((s) => s.id));
+  const ownTraineeIds = new Set(
+    (subgroupMembers ?? [])
+      .filter((m) => isAdmin || ownedSubgroupIds.has(m.subgroup_id) || unpairedSubgroupIds.has(m.subgroup_id))
+      .map((m) => m.trainee_id)
+  );
 
   // Stage 1 / Stage 3 individualized invites -- one candidate, one time,
   // unlike Stage 2's group sheet above. Stage 3 only offers candidates the
@@ -151,7 +185,9 @@ export default async function TrainerTimetablePage({
   ]);
   const traineeNameById = new Map((activeTrainees ?? []).map((t) => [t.id, t.full_name]));
   const stage3EligibleIds = new Set((stage3Records ?? []).filter((r) => r.stage3_required).map((r) => r.trainee_id));
-  const allCandidates = (activeTrainees ?? []).map((t) => ({ id: t.id, name: t.full_name }));
+  const allCandidates = (activeTrainees ?? [])
+    .filter((t) => noSubgroupStructureYet || ownTraineeIds.has(t.id))
+    .map((t) => ({ id: t.id, name: t.full_name }));
   const stage3Candidates = allCandidates.filter((t) => stage3EligibleIds.has(t.id));
 
   const inviteSummaries = (invites ?? []).map((i) => {
@@ -180,7 +216,8 @@ export default async function TrainerTimetablePage({
   // modes, same treatment untagged whole-cohort sessions already get. No
   // "You teach" gold tag either -- that's the spec's trainee-only marker for
   // their own personal teaching slot, which doesn't apply to a trainer.
-  const ownedGroupIds = new Set((tpGroups ?? []).filter((g) => g.tutor_profile_id === trainer.id).map((g) => g.id));
+  // (ownedGroupIds itself is computed above, reused from the Stage 2/1/3
+  // per-tutor scoping.)
   const ownedHalfOrders = new Set<1 | 2>();
   for (const s of subgroups ?? []) {
     if (s.tp_group_id && ownedGroupIds.has(s.tp_group_id) && (s.half_order === 1 || s.half_order === 2)) {

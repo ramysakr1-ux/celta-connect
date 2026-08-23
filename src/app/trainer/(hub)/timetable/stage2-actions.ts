@@ -36,6 +36,19 @@ export async function createStage2Block(_prevState: FormState, formData: FormDat
   const supabase = await createClient();
   const courseId = trainer.course_id;
 
+  // for-claude-code-timetable-page-priority.md (revised): "each TP tutor
+  // runs tutorials with their own group" -- a paired TP group has a real
+  // owner (course_tp_groups.tutor_profile_id) to check; an unpaired
+  // subgroup has no owner anywhere in the schema, same gap the UI's own
+  // filtering already flags, left ungated here too rather than guessed at.
+  if (scopeKind === "tpgroup" && trainer.role === "trainer") {
+    const { data: group } = await supabase.from("course_tp_groups").select("tutor_profile_id").eq("id", scopeId).eq("course_id", courseId).maybeSingle();
+    if (!group) return { error: "That group could not be found." };
+    if (group.tutor_profile_id && group.tutor_profile_id !== trainer.id) {
+      return { error: "Stage 2 tutorials are booked by the tutor attached to that group." };
+    }
+  }
+
   const { data: event, error: eventError } = await supabase
     .from("course_timetable_events")
     .insert({

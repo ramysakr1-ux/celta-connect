@@ -51,8 +51,21 @@ export async function createOrUpdateIndividualTutorialInvite(_prevState: FormSta
     supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).eq("type", "tp"),
   ]);
   const { data: subgroup } = subgroupMember?.subgroup_id
-    ? await supabase.from("course_subgroups").select("half_order").eq("id", subgroupMember.subgroup_id).maybeSingle()
+    ? await supabase.from("course_subgroups").select("half_order, tp_group_id").eq("id", subgroupMember.subgroup_id).maybeSingle()
     : { data: null };
+
+  // for-claude-code-timetable-page-priority.md (revised): "each TP tutor
+  // runs tutorials with their own group" -- same ownership check as Stage 2
+  // (stage2-actions.ts), applied here since Stage 1/3 invites are per-tutor
+  // too. A trainee in an unpaired subgroup has no owning tutor to check
+  // against (course_subgroups carries no tutor of its own) -- same gap,
+  // left ungated rather than guessed at.
+  if (subgroup?.tp_group_id && trainer.role === "trainer") {
+    const { data: group } = await supabase.from("course_tp_groups").select("tutor_profile_id").eq("id", subgroup.tp_group_id).maybeSingle();
+    if (group?.tutor_profile_id && group.tutor_profile_id !== trainer.id) {
+      return { error: `${traineeName} is in a TP group tutored by someone else -- Stage 1/3 tutorials are booked by that candidate's own tutor.` };
+    }
+  }
   const halfOrder = subgroup?.half_order === 1 || subgroup?.half_order === 2 ? subgroup.half_order : null;
   const traineesTpDates = halfOrder ? halfTpDates(tpEvents ?? [], halfOrder) : distinctTpDates(tpEvents ?? []);
   if (traineesTpDates.includes(eventDate)) {
