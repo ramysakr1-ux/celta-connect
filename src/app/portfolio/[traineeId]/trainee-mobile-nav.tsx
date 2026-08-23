@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { TRAINEE_NAV_TABS, isTraineeTabActive } from "@/app/portfolio/[traineeId]/trainee-top-nav";
+import { TRAINEE_NAV_TABS, isTraineeTabActive } from "@/app/portfolio/[traineeId]/trainee-mobile-nav-tabs";
 
 // specs/build-spec.md §7: the trainee is the one role using this daily for
 // five weeks, some "have no laptop" -- the six-tab TraineeTopNav (built for

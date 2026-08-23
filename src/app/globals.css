@@ -387,19 +387,22 @@ h6 {
     box-shadow: var(--hub-row-shadow);
   }
 
-  /* for-claude-code-trainee-assessor-card-system.md: the trainee's own
-     accent (plum) and hover-shadow, same mechanism as .trainer-hover --
-     used on Course Stream, Assignments, Feedback Form, Lesson Plan, and
-     every other trainee-facing screen, not just the walkthrough. */
+  /* for-claude-code-trainee-assessor-card-system.md + Trainee Walkthrough.dc.html
+     (the actual mockup, not the doc's own paraphrase of it -- corrected
+     2026-08-23 after building the wrong plum and a tinted-wash header off
+     the doc's prose alone): the trainee's own accent and hover-shadow, same
+     mechanism as .trainer-hover -- used on Course Stream, Assignments,
+     Feedback Form, Lesson Plan, and every other trainee-facing screen. */
   :root {
-    --trainee-plum: oklch(52% 0.1 322);
-    /* Same formula as --color-accent's own "pale teal-green wash", hue
-       swapped to plum -- the spec's own reference point for this tint. */
-    --trainee-wash: oklch(93% 0.019 322);
+    --trainee-plum: oklch(42% 0.045 340);
   }
+  /* Near-white, same as every other card -- NOT a tinted wash. The
+     mockup's own header is oklch(99.5% 0.004 90) with a plain bottom
+     border and a 4px plum rule on the left edge only. */
   .trainee-header {
-    background: var(--trainee-wash);
-    border-bottom: 1px solid color-mix(in oklab, var(--trainee-plum) 30%, transparent);
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    border-left: 4px solid var(--trainee-plum);
   }
   .trainee-hover {
     transition: box-shadow 150ms ease;

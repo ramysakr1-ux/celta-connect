@@ -7,7 +7,7 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { Eye } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
-import { TraineeTopNav } from "@/app/portfolio/[traineeId]/trainee-top-nav";
+import { TraineeSidebarNav } from "@/app/portfolio/[traineeId]/trainee-sidebar-nav";
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
 import { InstallPrompt } from "@/components/install-prompt";
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
@@ -233,25 +233,24 @@ export default async function PortfolioLayout({
 
       <div className={showTraineeNav ? "trainee-header" : "border-b border-border bg-card"}>
         {showTraineeNav ? (
-          // for-claude-code-trainee-interface.md's header: wordmark left, nav
-          // center, "Day N of 20" + initials avatar right.
-          // for-claude-code-trainee-assessor-card-system.md: light plum wash
-          // + soft plum border (.trainee-header, globals.css) -- calmer than
-          // MCT/ACT's solid ink/garnet bands, matching the trainee's
-          // generally lighter tone.
+          // Trainee Walkthrough.dc.html's actual header: near-white bar (not
+          // a tinted wash -- see .trainee-header, globals.css), 4px plum
+          // rule on the left edge only. Nav moved out of this bar entirely --
+          // TraineeSidebarNav is its own left rail below, not a center row
+          // here. "Day N of 20" + a teal-tinted initials chip on the right,
+          // matching the mockup's own avatar treatment exactly (not plum).
           <div className="container flex h-14 items-center justify-between gap-4">
             <Link href={`/portfolio/${trainee.id}`} className="shrink-0 block">
               <Wordmark size="header" />
             </Link>
-            <TraineeTopNav traineeId={trainee.id} />
             <div className="flex shrink-0 items-center gap-3">
               {courseDayProgress ? (
                 <span className="text-xs font-medium text-muted">
                   Day {courseDayProgress.currentDay} of {courseDayProgress.totalDays}
                 </span>
               ) : null}
-              <div className="flex size-[26px] shrink-0 items-center justify-center rounded-full" style={{ background: "var(--trainee-wash)" }}>
-                <span className="text-[10px] font-semibold" style={{ color: "var(--trainee-plum)" }}>{traineeInitials}</span>
+              <div className="flex size-[26px] shrink-0 items-center justify-center rounded-[8px]" style={{ background: "oklch(93% 0.019 190)" }}>
+                <span className="text-[9px] font-bold" style={{ color: "oklch(32% 0.05 195)" }}>{traineeInitials}</span>
               </div>
             </div>
           </div>
@@ -335,8 +334,8 @@ export default async function PortfolioLayout({
 
       <PreviewBanner traineeId={trainee.id} traineeName={trainee.full_name} />
 
-      <div className="container flex flex-1 gap-8 py-8">
-        {showTraineeNav ? null : <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />}
+      <div className={`container flex flex-1 ${showTraineeNav ? "gap-6 py-6" : "gap-8 py-8"}`}>
+        {showTraineeNav ? <TraineeSidebarNav traineeId={trainee.id} /> : <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />}
         <div className="frame min-w-0 flex-1 p-6">{children}</div>
       </div>
 
