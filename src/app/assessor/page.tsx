@@ -18,6 +18,7 @@ import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents
 const MUTED_ACCENT = "oklch(51% 0.017 70)";
 const TEAL = "oklch(37.5% 0.058 195)";
 const AMBER = "oklch(44% 0.1 68)";
+const GOLD = "oklch(63% 0.096 72)";
 
 
 // Verbatim from Assessor Visit.dc.html's own GRADE table. These are not
@@ -452,7 +453,7 @@ export default async function AssessorPage({
                 <div
                   style={{
                     background: CARD, border: "1px solid color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
-                    borderTop: `3px solid ${TEAL}`,
+                    borderTop: `3px solid ${GOLD}`,
                     borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10,
                   }}
                 >
@@ -536,7 +537,7 @@ export default async function AssessorPage({
               </div>
             </div>
 
-            <Panel title="Centre documents">
+            <Panel title="Centre documents" accent="gold">
               {CENTRE_DOCUMENTS.map((doc) => {
                 // "Marking guidance" is the one line item that now lives in
                 // the app itself, not the resources upload table -- see
@@ -657,7 +658,7 @@ function Dot({ ok, label }: { ok: boolean; label: string }) {
   );
 }
 
-function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+function Panel({ title, children, accent = "teal" }: { title: string; children: React.ReactNode; accent?: "teal" | "gold" }) {
   return (
     <div>
       <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(51% 0.017 70)", marginBottom: 8 }}>
@@ -665,7 +666,8 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
       </p>
       <div
         style={{
-          background: "var(--color-card)", border: "1px solid oklch(88% 0.016 82)", borderTop: "3px solid oklch(37.5% 0.058 195)",
+          background: "var(--color-card)", border: "1px solid oklch(88% 0.016 82)",
+          borderTop: `3px solid ${accent === "gold" ? "oklch(63% 0.096 72)" : "oklch(37.5% 0.058 195)"}`,
           borderRadius: 7, overflow: "hidden",
         }}
       >

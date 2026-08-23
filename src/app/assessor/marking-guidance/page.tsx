@@ -35,72 +35,76 @@ export default async function AssessorMarkingGuidancePage() {
   const updaterNameById = new Map((updaters ?? []).map((u) => [u.id, u.full_name]));
 
   return (
-    <div style={{ maxWidth: 980, margin: "0 auto", padding: "34px 24px 60px", fontFamily: "Helvetica, Arial, sans-serif", color: "#241d16" }}>
-      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6d655c" }}>
-        Assessor access — read-only · marking guidance
-      </p>
-      <h1 style={{ fontFamily: "Georgia, serif", fontSize: 26, fontWeight: 600, marginTop: 6 }}>
-        This centre&apos;s standardisation evidence
-      </h1>
-      <p style={{ fontSize: 13, color: "#6d655c", marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
-        Written by this centre&apos;s own tutors at standardisation meetings, not by Cambridge or by Connect. Kept
-        beside each criterion while marking.
-      </p>
+    <div style={{ minHeight: "100vh", background: "var(--color-background)" }}>
+      <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
+        <div style={{ background: "var(--color-frame)", border: "1px solid oklch(88% 0.016 82)", borderRadius: 6, padding: 24 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "oklch(51% 0.017 70)" }}>
+            Assessor access — read-only · marking guidance
+          </p>
+          <h1 style={{ fontFamily: "Georgia, serif", fontSize: 26, fontWeight: 600, marginTop: 6, color: "oklch(23.5% 0.017 65)" }}>
+            This centre&apos;s standardisation evidence
+          </h1>
+          <p style={{ fontSize: 13, color: "oklch(51% 0.017 70)", marginTop: 8, maxWidth: 720, lineHeight: 1.6 }}>
+            Written by this centre&apos;s own tutors at standardisation meetings, not by Cambridge or by Connect. Kept
+            beside each criterion while marking.
+          </p>
 
-      {TAB_ORDER.map((type) => {
-        const criteria = allCriteria[type];
-        const byKey = guidanceMap.get(type);
-        return (
-          <div key={type} style={{ marginTop: 32 }}>
-            <h2 style={{ fontFamily: "Georgia, serif", fontSize: 19, fontWeight: 600 }}>{ASSIGNMENT_INFO[type].title}</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 12 }}>
-              {criteria.map((c) => {
-                const row = byKey?.get(c.key);
-                const hasContent = row && (row.met_text || row.grey_text || row.not_text || row.agreed_text);
-                return (
-                  <div
-                    key={c.key}
-                    style={{
-                      background: "var(--color-card)",
-                      border: "1px solid #e0dcd4",
-                      borderLeft: "3px solid #a89e8f",
-                      borderRadius: 6,
-                      padding: "16px 18px",
-                    }}
-                  >
-                    <p style={{ fontSize: 13.5, fontWeight: 600, marginBottom: hasContent ? 12 : 0 }}>{c.text}</p>
-                    {hasContent ? (
-                      <>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-                          <GuidanceColumn label="Enough to meet it" text={row?.met_text} />
-                          <GuidanceColumn label="Centre judgement" text={row?.grey_text} />
-                          <GuidanceColumn label="Not yet" text={row?.not_text} />
-                        </div>
-                        {row?.agreed_text ? (
-                          <div style={{ marginTop: 12, background: "#f4f1eb", borderRadius: 5, padding: "10px 13px" }}>
-                            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#6d655c" }}>
-                              Agreed
-                            </p>
-                            <p style={{ fontSize: 12, color: "#6d655c", marginTop: 3, lineHeight: 1.5 }}>{row.agreed_text}</p>
-                          </div>
-                        ) : null}
-                        {row?.updated_at ? (
-                          <p style={{ fontSize: 10.5, color: "#a39b8f", marginTop: 8 }}>
-                            {row.updated_by && updaterNameById.get(row.updated_by) ? `${updaterNameById.get(row.updated_by)} · ` : ""}
-                            {new Date(row.updated_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                          </p>
-                        ) : null}
-                      </>
-                    ) : (
-                      <p style={{ fontSize: 12, color: "#a39b8f" }}>Not written yet.</p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
+          {TAB_ORDER.map((type) => {
+            const criteria = allCriteria[type];
+            const byKey = guidanceMap.get(type);
+            return (
+              <div key={type} style={{ marginTop: 32 }}>
+                <h2 style={{ fontFamily: "Georgia, serif", fontSize: 19, fontWeight: 600, color: "oklch(23.5% 0.017 65)" }}>{ASSIGNMENT_INFO[type].title}</h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 12 }}>
+                  {criteria.map((c) => {
+                    const row = byKey?.get(c.key);
+                    const hasContent = row && (row.met_text || row.grey_text || row.not_text || row.agreed_text);
+                    return (
+                      <div
+                        key={c.key}
+                        style={{
+                          background: "var(--color-card)",
+                          border: "1px solid oklch(88% 0.016 82)",
+                          borderTop: "3px solid oklch(37.5% 0.058 195)",
+                          borderRadius: 6,
+                          padding: "16px 18px",
+                        }}
+                      >
+                        <p style={{ fontSize: 13.5, fontWeight: 600, marginBottom: hasContent ? 12 : 0, color: "oklch(23.5% 0.017 65)" }}>{c.text}</p>
+                        {hasContent ? (
+                          <>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+                              <GuidanceColumn label="Enough to meet it" text={row?.met_text} />
+                              <GuidanceColumn label="Centre judgement" text={row?.grey_text} />
+                              <GuidanceColumn label="Not yet" text={row?.not_text} />
+                            </div>
+                            {row?.agreed_text ? (
+                              <div style={{ marginTop: 12, background: "var(--color-frame)", borderRadius: 5, padding: "10px 13px" }}>
+                                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(51% 0.017 70)" }}>
+                                  Agreed
+                                </p>
+                                <p style={{ fontSize: 12, color: "oklch(51% 0.017 70)", marginTop: 3, lineHeight: 1.5 }}>{row.agreed_text}</p>
+                              </div>
+                            ) : null}
+                            {row?.updated_at ? (
+                              <p style={{ fontSize: 10.5, color: "oklch(63% 0.012 82)", marginTop: 8 }}>
+                                {row.updated_by && updaterNameById.get(row.updated_by) ? `${updaterNameById.get(row.updated_by)} · ` : ""}
+                                {new Date(row.updated_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                              </p>
+                            ) : null}
+                          </>
+                        ) : (
+                          <p style={{ fontSize: 12, color: "oklch(63% 0.012 82)" }}>Not written yet.</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -109,10 +113,10 @@ function GuidanceColumn({ label, text }: { label: string; text: string | null | 
   if (!text) return <div />;
   return (
     <div>
-      <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#6d655c" }}>{label}</p>
+      <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(51% 0.017 70)" }}>{label}</p>
       <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 5 }}>
         {text.split("\n").filter(Boolean).map((line, i) => (
-          <p key={i} style={{ fontSize: 11.5, color: "#38352f", lineHeight: 1.5 }}>
+          <p key={i} style={{ fontSize: 11.5, color: "oklch(30% 0.017 65)", lineHeight: 1.5 }}>
             {line}
           </p>
         ))}
