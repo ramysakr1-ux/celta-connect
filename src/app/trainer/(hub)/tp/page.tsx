@@ -80,7 +80,7 @@ export default async function TeachingPracticeQueuePage() {
         <div className="flex shrink-0 items-center gap-2">
           <Link
             href="/trainer/coursebooks"
-            className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
+            className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink trainer-hover"
           >
             TP points library
           </Link>

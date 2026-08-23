@@ -45,7 +45,22 @@ const ATTENDANCE_REGISTER_TAB = { href: "/volunteers", label: "Attendance regist
 // and Trainer-in-Training aren't in that list on purpose -- they were never
 // widened to accept an assessor session, and a tour tab that dead-ends at
 // a login redirect would be worse than one that's just not there.
-export function TrainerTabs({ rosterOnly = false, tourMode = false }: { rosterOnly?: boolean; tourMode?: boolean }) {
+export function TrainerTabs({
+  rosterOnly = false,
+  tourMode = false,
+  dark = false,
+}: {
+  rosterOnly?: boolean;
+  tourMode?: boolean;
+  // for-claude-code-trainer-role-color-system-final.md: active tab is full-
+  // opacity white + white underline, inactive ~65% opacity white, hover
+  // reads --hub-hover-accent (set per-role by the (hub) layout) -- only for
+  // the real MCT/ACT header, which is now a dark ink/garnet band. An
+  // assessor session's header stays the plain light one this component
+  // already rendered before that change, so it keeps the old primary/muted
+  // treatment untouched.
+  dark?: boolean;
+}) {
   const pathname = usePathname();
   const tabs = rosterOnly
     ? [TABS[0], ATTENDANCE_REGISTER_TAB, GRADES_REPORT_TAB]
@@ -74,9 +89,15 @@ export function TrainerTabs({ rosterOnly = false, tourMode = false }: { rosterOn
           <Link
             key={tab.href}
             href={href}
-            className={`flex h-full items-center border-b-2 text-sm font-medium transition-colors duration-150 ${
-              active ? "border-primary text-primary" : "border-transparent text-muted hover:border-primary/40 hover:text-primary"
-            }`}
+            className={
+              dark
+                ? `flex h-full items-center border-b-2 text-sm font-medium transition-colors duration-150 hover:text-[var(--hub-hover-accent)] hover:border-[var(--hub-hover-accent)] ${
+                    active ? "border-white text-white" : "border-transparent text-[color-mix(in_oklab,white_65%,transparent)]"
+                  }`
+                : `flex h-full items-center border-b-2 text-sm font-medium transition-colors duration-150 ${
+                    active ? "border-primary text-primary" : "border-transparent text-muted hover:border-primary/40 hover:text-primary"
+                  }`
+            }
           >
             {tab.label}
           </Link>

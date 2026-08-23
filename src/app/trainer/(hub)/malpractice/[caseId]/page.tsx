@@ -82,7 +82,7 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
           {reflection ? (
             <Link
               href={`/portfolio/${caseRow.trainee_id}/assignments/${reflection.id}`}
-              className="mt-1 self-start rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary"
+              className="mt-1 self-start rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink trainer-hover"
             >
               Open the Plagiarism Reflection assignment →
             </Link>

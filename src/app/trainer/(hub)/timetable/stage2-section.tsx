@@ -40,7 +40,7 @@ export function Stage2Section({ groups, blocks }: { groups: Group[]; blocks: Blo
             <Link
               key={b.id}
               href={`/trainer/timetable/stage2/${b.id}`}
-              className="flex items-center justify-between rounded-[6px] border border-border-faint px-3 py-2 text-sm text-ink hover:border-primary"
+              className="flex items-center justify-between rounded-[6px] border border-border-faint px-3 py-2 text-sm text-ink trainer-hover"
             >
               <span>{b.groupName}</span>
               <span className="text-xs text-muted">{b.eventDate}</span>

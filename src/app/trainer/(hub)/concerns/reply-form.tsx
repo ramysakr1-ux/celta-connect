@@ -22,7 +22,7 @@ export function ConcernReplyForm({ concernId }: { concernId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60"
+        className="self-start rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink trainer-hover disabled:opacity-60"
       >
         {pending ? "Sending…" : "Reply"}
       </button>

@@ -87,7 +87,7 @@ export function FeedbackAssistCard({
                 }
                 setEditing((v) => !v);
               }}
-              className="h-8 rounded-[6px] border border-border bg-card px-3.5 text-[12.5px] font-medium text-ink"
+              className="trainer-hover h-8 rounded-[6px] border border-border bg-card px-3.5 text-[12.5px] font-medium text-ink"
             >
               {editing ? "Cancel" : "Edit"}
             </button>
@@ -115,7 +115,7 @@ export function FeedbackAssistCard({
                 <button
                   type="submit"
                   disabled={savePending}
-                  className="h-[30px] rounded-[6px] bg-primary px-3.5 text-[12.5px] font-semibold text-primary-foreground disabled:opacity-60"
+                  className="trainer-hover h-[30px] rounded-[6px] bg-primary px-3.5 text-[12.5px] font-semibold text-primary-foreground disabled:opacity-60"
                 >
                   {savePending ? "Saving…" : "Save"}
                 </button>

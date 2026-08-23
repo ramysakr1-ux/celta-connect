@@ -95,7 +95,7 @@ export function CohortSheet({
         <div className="flex items-center gap-2">
           <a
             href="/trainer/grades-report/export"
-            className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
+            className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover"
           >
             Export report
           </a>

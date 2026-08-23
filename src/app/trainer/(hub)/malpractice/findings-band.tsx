@@ -52,7 +52,7 @@ export function FindingsBand({
               <input type="hidden" name="trainee_id" value={traineeId} />
               <button
                 type="submit"
-                className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary"
+                className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink trainer-hover"
               >
                 Mark reviewed -- not a concern
               </button>

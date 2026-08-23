@@ -252,7 +252,7 @@ function EditRow({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-medium text-ink hover:border-primary"
+          className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-medium text-ink trainer-hover"
         >
           Cancel
         </button>

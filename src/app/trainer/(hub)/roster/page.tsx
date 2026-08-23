@@ -199,7 +199,7 @@ export default async function TrainerRosterPage() {
           <p className="text-xs text-muted">Click a row to open a portfolio</p>
           <a
             href="/trainer/roster/export"
-            className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary"
+            className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink trainer-hover"
           >
             Export CSV
           </a>
@@ -207,7 +207,7 @@ export default async function TrainerRosterPage() {
             <a
               href={bccMailto}
               title="Outside Connect -- urgent only. Opens your mail client with every candidate BCC'd."
-              className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary"
+              className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink trainer-hover"
             >
               Email all candidates
             </a>

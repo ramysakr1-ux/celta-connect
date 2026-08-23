@@ -365,6 +365,28 @@ h6 {
     background-color: color-mix(in oklch, var(--color-accent) 40%, transparent);
   }
 
+  /* for-claude-code-trainer-role-color-system-final.md: the one hover-shadow
+     treatment used for every button and clickable row across the trainer
+     hub (Today/Roster/Timetable/Volunteers/Teaching Practice/Resource
+     hub/Grades Report), not just the homepage. --hub-row-shadow is set per
+     role by the (hub) layout (garnet ring for the MCT, teal ring for
+     everyone else on the course); the ACT-shaped value here is only the
+     fallback for a session the layout doesn't override (e.g. an assessor
+     tour), never seen for a real trainer session. */
+  :root {
+    --hub-row-shadow: inset 0 0 0 1px var(--color-primary), 0 3px 8px -3px color-mix(in oklab, var(--color-primary) 45%, transparent);
+  }
+  .trainer-header {
+    background: var(--hub-header-bg);
+    border-bottom: 3px solid var(--hub-header-underline);
+  }
+  .trainer-hover {
+    transition: box-shadow 150ms ease;
+  }
+  .trainer-hover:hover {
+    box-shadow: var(--hub-row-shadow);
+  }
+
   /* Shared "entry moment" card -- pale tinted teal-green background + soft
      primary border, the same combination the Course Stream Zoom card uses
      (bg-accent/50 over a card backdrop, border-primary/25). Baked into a

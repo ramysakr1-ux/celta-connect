@@ -129,7 +129,7 @@ export function RosterRowView({
   // stale numbers next to the others' live ones.
   if (isCourseStatusReadOnly(row.courseStatus)) {
     return (
-      <tr className="cursor-pointer opacity-70" onClick={() => router.push(`/portfolio/${row.id}`)}>
+      <tr className="trainer-hover cursor-pointer opacity-70" onClick={() => router.push(`/portfolio/${row.id}`)}>
         <td>
           <Link href={`/portfolio/${row.id}`} className="text-ink hover:text-primary">
             {row.name}
@@ -144,7 +144,7 @@ export function RosterRowView({
   }
 
   return (
-    <tr className="cursor-pointer" onClick={() => router.push(`/portfolio/${row.id}`)}>
+    <tr className="trainer-hover cursor-pointer" onClick={() => router.push(`/portfolio/${row.id}`)}>
       <td>
         <Link href={`/portfolio/${row.id}`} className="text-ink hover:text-primary">
           {row.name}

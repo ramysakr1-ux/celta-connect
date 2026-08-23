@@ -91,7 +91,7 @@ export default async function Stage2BlockPage({ params }: { params: Promise<{ bl
             defaultValue={currentDuration}
             className="h-10 w-32 rounded-[6px] border border-border bg-card px-3 text-sm text-ink outline-none focus:border-primary"
           />
-          <button type="submit" className="rounded-[6px] border border-border px-3 py-2 text-sm text-ink hover:border-primary">
+          <button type="submit" className="rounded-[6px] border border-border px-3 py-2 text-sm text-ink trainer-hover">
             Update
           </button>
         </form>

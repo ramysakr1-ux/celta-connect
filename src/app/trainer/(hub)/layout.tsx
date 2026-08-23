@@ -33,6 +33,37 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // "you cannot be on the course unless registered as a trainer" rule.
   const staffChat = profile?.role === "trainer" ? await getInitialStaffChatData(profile.id) : null;
 
+  // for-claude-code-trainer-role-color-system-final.md: every trainer-hub
+  // page gets a role-colored header band -- ink for the MCT (whole-cohort
+  // view), garnet for everyone else on the course (ACT, TP tutor, input
+  // tutor -- the doc's own "MCT vs ACT" framing collapses to this one
+  // binary). Admin counts as MCT-side, matching every other MCT-equivalent
+  // gate this session (trainer.role === "admin" || isMctOnCourse(...)).
+  // Assessor/tour sessions are untouched -- this spec is about the real
+  // trainer's own session, and the assessor already has its own read-only
+  // banner; forcing it into MCT/ACT coloring isn't asked for here.
+  // Not isRealStaff-gated -- these vars are set on the whole shell (below),
+  // reaching assessor/tour sessions too, since .trainer-hover (globals.css)
+  // is used unconditionally by hub pages regardless of session type. Its
+  // ACT-shaped default there is a fine, unobtrusive fallback for a session
+  // this spec never asked us to re-skin; only the header/tabs/logo
+  // themselves stay isRealStaff-gated below, at their own point of use.
+  const isMct = Boolean(profile && (profile.role === "admin" || profile.tutor_role === "main_course_tutor"));
+  const HUB_INK = "oklch(23.5% 0.017 65)"; // = --color-ink
+  const HUB_TEAL = "oklch(37.5% 0.058 195)"; // = --color-primary, written literally so this doesn't drift if that token ever does
+  const HUB_GARNET = "oklch(42% 0.13 27)";
+  const HUB_GARNET_BRIGHT = "oklch(70% 0.16 27)"; // MCT-side hover accent -- brighter than the header's own garnet underline, so it reads against both the dark header and light card rows
+  const headerInk = isMct ? "oklch(96% 0.008 85)" : "oklch(97% 0.006 85)";
+  const hubVars = {
+    "--hub-header-bg": isMct ? HUB_INK : HUB_GARNET,
+    "--hub-header-underline": isMct ? HUB_GARNET : HUB_TEAL,
+    "--hub-hover-accent": isMct ? HUB_GARNET_BRIGHT : HUB_TEAL,
+    "--hub-row-shadow": isMct
+      ? `inset 0 0 0 1px ${HUB_GARNET_BRIGHT}, 0 3px 8px -3px oklch(70% 0.16 27 / 0.35)`
+      : `inset 0 0 0 1px ${HUB_TEAL}, 0 3px 8px -3px color-mix(in oklab, ${HUB_TEAL} 45%, transparent)`,
+    "--hub-tile-bg": `color-mix(in oklab, ${headerInk} 22%, transparent)`,
+  } as React.CSSProperties;
+
   let isDemo = false;
   // Spec's header carries the course code as a teal pill ("C2/2024") -- that's
   // courses.name, which is already stored in exactly that form.
@@ -73,9 +104,9 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col">
+    <div className="flex min-h-full flex-1 flex-col" style={hubVars}>
       {isDemo ? <DemoModeBanner /> : null}
-      <header className="border-b border-border bg-card">
+      <header className={isRealStaff ? "trainer-header" : "border-b border-border bg-card"}>
         <div className="container flex h-14 items-stretch justify-between gap-6">
           <div className="flex items-center gap-6">
             {/* Bug Ramy caught 2026-08-23: an assessor who clicked into
@@ -86,9 +117,9 @@ export default async function TrainerHubLayout({ children }: { children: React.R
                 /assessor. Cookie-based session, so the bare path is enough
                 -- no token needed in the URL. */}
             <Link href={isAssessor ? "/assessor" : "/trainer"} className="block shrink-0">
-              <Wordmark size="header" />
+              <Wordmark size="header" onDark={isRealStaff} tileBg={isRealStaff ? "var(--hub-tile-bg)" : undefined} />
             </Link>
-            <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} />
+            <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} dark={isRealStaff} />
           </div>
           <div className="flex shrink-0 items-center gap-3">
             {switcherCourses.length > 1 && profile?.course_id ? (
@@ -98,7 +129,9 @@ export default async function TrainerHubLayout({ children }: { children: React.R
                 {courseCode}
               </span>
             ) : null}
-            <span className="text-sm text-muted">{profile?.full_name ?? session?.email}</span>
+            <span className={`text-sm ${isRealStaff ? "text-[color-mix(in_oklab,white_85%,transparent)]" : "text-muted"}`}>
+              {profile?.full_name ?? session?.email}
+            </span>
           </div>
         </div>
       </header>

@@ -99,6 +99,7 @@ const SIZE_CONFIG: Record<WordmarkSize, { tile: number; word: number | null; des
 export function Wordmark({
   size = "hero",
   onDark = false,
+  tileBg: tileBgOverride,
   className = "",
   iconSizePx,
   spin = true,
@@ -110,11 +111,13 @@ export function Wordmark({
   spin?: boolean;
   /** Only used with size="icon" -- overrides the tile's default 32px (spec's icon range is 22-48px, context-dependent, e.g. the 20px designer-credit mark). */
   iconSizePx?: number;
+  /** Overrides the tile's background -- e.g. a translucent tint of a colored header's own text color, where a fixed dark tile would blend into the header instead of contrasting against it. Falls back to the plain onDark/light default when omitted. */
+  tileBg?: string;
 }) {
   const cfg = SIZE_CONFIG[size];
   const tilePx = size === "icon" && iconSizePx ? iconSizePx : cfg.tile;
   const tileRadius = Math.round(tilePx * 0.22);
-  const tileBg = onDark ? "oklch(30% 0.02 65)" : "var(--color-ink-warm)";
+  const tileBg = tileBgOverride ?? (onDark ? "oklch(30% 0.02 65)" : "var(--color-ink-warm)");
   const wordColor = onDark ? LIFTED_GOLD : "var(--color-gold)";
 
   const tile = (
