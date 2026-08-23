@@ -41,7 +41,7 @@ export function MaterialsCard({ materials }: { materials: Material[] }) {
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") setExpanded((v) => !v);
       }}
-      className="w-full cursor-pointer rounded-xl border border-[color-mix(in_oklab,var(--color-primary)_20%,var(--color-card))] bg-[color-mix(in_oklab,var(--color-primary)_8%,var(--color-card))] p-6 text-left transition-colors hover:bg-[color-mix(in_oklab,var(--color-primary)_14%,var(--color-card))]"
+      className="w-full cursor-pointer rounded-xl border border-[color-mix(in_oklab,var(--color-primary)_20%,var(--color-card))] bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-card))] p-6 text-left transition-colors hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">

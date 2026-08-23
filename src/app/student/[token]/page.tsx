@@ -5,6 +5,7 @@ import { DeclineButton } from "@/app/student/[token]/decline-button";
 import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
 import { DesignerCredit } from "@/components/designer-credit";
+import { Greeting } from "@/app/student/[token]/greeting";
 import { getVolunteerIdentityData, TICK_THRESHOLD_MINUTES, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-cross-course";
 import { PushSubscribeButton } from "@/components/push-subscribe-button";
 import { subscribeVolunteerPush, unsubscribeVolunteerPush } from "@/lib/push/actions";
@@ -216,7 +217,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
           the top left of the page rather than just being in the middle"). */}
       <div className="container flex items-center justify-between gap-4 py-6">
         <Wordmark size="header" />
-        <p className="text-sm font-medium text-ink">{volunteer.name} · volunteer student</p>
+        <Greeting name={volunteer.name} />
       </div>
 
       <div className="container pb-16">
@@ -228,9 +229,12 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
           </h1>
         </div>
 
-        {/* Next class card */}
+        {/* Next class card -- richer tinted-border "colour family" (matching
+            MaterialsCard) rather than the plain neutral .card the rest of
+            the app uses, per Ramy's "this page should be more colourful
+            than the rest of the platform." */}
         {nextClass ? (
-          <div className="card flex flex-col gap-3 p-6">
+          <div className="flex flex-col gap-3 rounded-xl border border-[color-mix(in_oklab,var(--color-primary)_20%,var(--color-card))] bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-card))] p-6">
             <p className="text-sm font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
               {nextClass.eventTime ? <span>{nextClass.eventTime.slice(0, 5)}</span> : null}
@@ -275,8 +279,9 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
             (none of these carry a warning/error meaning, so alternation is
             the whole rule here). */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {/* Your classes */}
-          <div className="card p-6">
+          {/* Your classes -- gold family, alternating against the teal
+              Next class card above and Materials card beside it. */}
+          <div className="rounded-xl border border-[color-mix(in_oklab,var(--color-gold)_20%,var(--color-card))] bg-[color-mix(in_oklab,var(--color-gold)_10%,var(--color-card))] p-6">
             <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Your classes</p>
             {classes.length === 0 ? (
               <p className="mt-2 text-sm text-muted">No classes scheduled yet.</p>
@@ -302,8 +307,8 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
           <MaterialsCard materials={materials} />
 
           <div className="flex flex-col gap-6">
-            {/* Your hours */}
-            <div className="card card-gold p-6">
+            {/* Your hours -- same gold family as "Your classes." */}
+            <div className="rounded-xl border border-[color-mix(in_oklab,var(--color-gold)_20%,var(--color-card))] bg-[color-mix(in_oklab,var(--color-gold)_10%,var(--color-card))] p-6">
               <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Your hours</p>
               <p className="mt-1 font-serif text-3xl text-ink">{hoursCredited.toFixed(1)}h</p>
               <p className="mt-1 text-sm text-muted">
@@ -324,8 +329,9 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
               </div>
             </div>
 
-            {/* This course */}
-            <div className="card p-6">
+            {/* This course -- teal family, alternates against Your hours
+                (gold) directly above it in the same column. */}
+            <div className="rounded-xl border border-[color-mix(in_oklab,var(--color-primary)_20%,var(--color-card))] bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-card))] p-6">
               <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">This course</p>
               <p className="mt-1 text-sm text-ink">
                 {thisCourseAttended} of {thisCourseClasses.length} classes attended
@@ -360,7 +366,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
       </div>
       </div>
 
-      <DesignerCredit />
+      <DesignerCredit corner="bottom-right" />
     </div>
   );
 }

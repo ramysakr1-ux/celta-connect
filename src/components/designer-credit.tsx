@@ -55,7 +55,24 @@ import { Wordmark } from "@/components/wordmark";
 // a real slot for it now); `pinned` (the default) keeps the old fixed
 // behavior for the pages that only ever call this with no wrapping slot
 // to sit in.
-export function DesignerCredit({ className = "", pinned = true }: { className?: string; pinned?: boolean }) {
+//
+// Ramy, 23 Aug 2026 (seventh pass, volunteer/student landing only): the
+// original move to bottom-right (first pass, above) was reverted everywhere
+// because StaffChatDrawer/AdminChatBar's centered chat pill sits on that
+// same band -- but the volunteer/student view has no chat at all (token-based
+// viewers, no real account, no StaffChat/AdminChat mount), so that collision
+// never applies here. `corner="bottom-right"` opts back into the original
+// placement just for this one page; every other `pinned` caller keeps the
+// top-right default.
+export function DesignerCredit({
+  className = "",
+  pinned = true,
+  corner = "top-right",
+}: {
+  className?: string;
+  pinned?: boolean;
+  corner?: "top-right" | "bottom-right";
+}) {
   const pill = (
     <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/85 px-2 py-1 text-[11px] text-muted backdrop-blur-sm">
       <Wordmark size="icon" iconSizePx={16} />
@@ -67,7 +84,8 @@ export function DesignerCredit({ className = "", pinned = true }: { className?: 
 
   if (!pinned) return <div className={className}>{pill}</div>;
 
-  return <div className={`pointer-events-none fixed top-3 right-3 z-20 ${className}`}>{pill}</div>;
+  const cornerClass = corner === "bottom-right" ? "bottom-3 right-3" : "top-3 right-3";
+  return <div className={`pointer-events-none fixed z-20 ${cornerClass} ${className}`}>{pill}</div>;
 }
 
 // For a layout's own header row (centre/layout.tsx, dashboard/layout.tsx):
