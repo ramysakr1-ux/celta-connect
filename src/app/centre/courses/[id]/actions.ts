@@ -21,7 +21,10 @@ export async function updateCoursePricing(_prevState: FormState, formData: FormD
   const profile = session?.profile;
   if (!profile) return { error: "Not signed in." };
   const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "course.editRecord")) return { error: "You can't edit course records." };
+  // for-claude-code-centre-role-rename-and-payments-fix.md §2: payments.edit,
+  // not course.editRecord -- this writes fee/deposit fields, and Course
+  // administrator holds course.editRecord without any payments access.
+  if (!can(ctx.roles, "payments.edit")) return { error: "You can't edit payments." };
 
   const courseId = formData.get("course_id");
   if (typeof courseId !== "string") return { error: "Missing course." };

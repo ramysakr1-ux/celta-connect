@@ -10,8 +10,8 @@ import { AREA_VERB, type AreaVerdict } from "@/lib/auth/areas";
  * have.**"
  *
  * Deliberately the opposite of the read-only role's treatment, where the
- * button is absent. A Centre manager can't act at all and doesn't need to know
- * who can; a colleague outside an area is asking exactly that question.
+ * button is absent. A Centre observer can't act at all and doesn't need to
+ * know who can; a colleague outside an area is asking exactly that question.
  *
  * The one case that renders nothing is no_capability -- their role can't do
  * this regardless of areas, so naming a holder would imply the job could pass

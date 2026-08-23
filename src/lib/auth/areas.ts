@@ -93,7 +93,7 @@ export function areaVerdict(input: {
 /**
  * The full check: the role must allow it AND the area must not belong to
  * someone else. A role that can't do something at all never reaches the area
- * question -- a Centre manager sees no button, not "Selin handles offers",
+ * question -- a Centre observer sees no button, not "Selin handles offers",
  * because they couldn't act even if Selin were on leave.
  */
 export function canActInArea(input: {

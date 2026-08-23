@@ -67,10 +67,11 @@ export interface CommitImportState {
  */
 export async function commitImport(_prev: CommitImportState, formData: FormData): Promise<CommitImportState> {
   const profile = await requireRole("admin");
-  // requireRole only proves flat `admin`, which a Centre manager also is. An
-  // import creates people, which is squarely "edit anything at all" -- the one
-  // thing that role may never do. The nav already omits the tab; this is the
-  // check that matters if someone reaches the URL directly.
+  // requireRole only proves flat `admin`, which a Centre observer (the
+  // centre_manager slug) also is. An import creates people, which is
+  // squarely "edit anything at all" -- the one thing that role may never
+  // do. The nav already omits the tab; this is the check that matters if
+  // someone reaches the URL directly.
   const ctx = await getCentreRoleContext(profile);
   if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) {
     return { error: "Your role can't import people." };

@@ -916,7 +916,7 @@ export function centreCreatedEmailHtml(input: {
     ),
     facts: [
       { label: "Centre", value: input.centreFact },
-      { label: "Your role", value: "Centre administrator" },
+      { label: "Your role", value: "Centre manager" },
       { label: "To do first", value: "Connect Drive, then import your briefs" },
     ],
     cta: { label: "Set up your account", url: input.inviteUrl },

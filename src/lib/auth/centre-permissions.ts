@@ -24,9 +24,16 @@ export const CENTRE_ROLES = [
 ] as const;
 export type CentreRole = (typeof CENTRE_ROLES)[number];
 
+// for-claude-code-centre-role-rename-and-payments-fix.md: display labels
+// only -- the underlying slugs (centre_administrator, centre_manager) are
+// unchanged, since renaming them would mean an enum/DB migration touching
+// every RLS policy and call site that references them, for a change the
+// spec itself says is negotiable. Anywhere in this codebase you see the
+// slug `centre_administrator` in code or comments, it now displays as
+// "Centre manager"; `centre_manager` now displays as "Centre observer".
 export const CENTRE_ROLE_LABELS: Record<CentreRole, string> = {
-  centre_administrator: "Centre administrator",
-  centre_manager: "Centre manager",
+  centre_administrator: "Centre manager",
+  centre_manager: "Centre observer",
   course_administrator: "Course administrator",
   centre_owner: "Centre owner",
 };
@@ -144,8 +151,14 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
   // So the approval lives on the person, not on their presence in the cohort.
   course_administrator: {
     "course.editRecord": true,
-    "payments.view": true,
-    "payments.edit": true,
+    // for-claude-code-centre-role-rename-and-payments-fix.md §2: money is
+    // exclusively the Centre manager's domain. Removed 2026-08-23 -- was
+    // "payments.view": true, "payments.edit": true. No fallback path
+    // should grant this role payments visibility; canOnCourse() is
+    // currently unused anywhere in the app, so the only other place that
+    // could leak this was /centre/courses/[id]'s pricing form, which
+    // gated on course.editRecord instead of payments.edit -- fixed
+    // alongside this.
     "admissions.view": true,
     "admissions.manage": true,
     "volunteers.view": true,

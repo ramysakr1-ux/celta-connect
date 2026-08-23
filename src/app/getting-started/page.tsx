@@ -222,7 +222,7 @@ export default function GettingStartedPage() {
       <div className="mt-7 space-y-4 text-[1.0625rem] leading-relaxed" style={{ color: "var(--color-ink)" }}>
         <p>Hi, and welcome —</p>
         <p>
-          You&apos;ve just been invited to Connect as a <strong>Centre administrator</strong>. Before you log in, I
+          You&apos;ve just been invited to Connect as a <strong>Centre manager</strong>. Before you log in, I
           wanted to send you the seven things that come up most while running a course — set up, admissions,
           invitations, imports, timetabling, the assessor visit, and closing a course out.
         </p>
@@ -324,7 +324,7 @@ export default function GettingStartedPage() {
         </p>
 
         <p className="mt-8 text-[0.8125rem] leading-relaxed" style={{ color: "var(--color-muted)" }}>
-          This letter is addressed to a Centre administrator. Course administrators and Centre owners receive the same
+          This letter is addressed to a Centre manager. Course administrators and Centre owners receive the same
           seven guides with the wording adjusted to their role&apos;s scope.
         </p>
       </footer>

@@ -72,10 +72,11 @@ export async function getAdminChatRooms(profileId: string, centerIds: string[]):
 /**
  * Whether this person may post in the admin room.
  *
- * Everyone in the admin family can, including the Centre manager -- §12:
- * "The centre manager can post here, despite being read-only everywhere else.
- * Being unable to ask a question is a strange kind of read-only." That is the
- * one deliberate exception to their absent-buttons treatment.
+ * Everyone in the admin family can, including the Centre observer (the
+ * centre_manager slug, renamed 2026-08-23) -- §12: "The centre manager can
+ * post here, despite being read-only everywhere else. Being unable to ask a
+ * question is a strange kind of read-only." That is the one deliberate
+ * exception to their absent-buttons treatment.
  */
 export function canPostInAdminChat(roleCount: number): boolean {
   return roleCount > 0;

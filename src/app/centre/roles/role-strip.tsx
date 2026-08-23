@@ -37,7 +37,7 @@ const DETAIL: Record<CentreRole, RoleDetail> = {
       { grant: "no", text: "Grade or mark anything" },
       { grant: "no", text: "See lesson feedback or CELTA 5 records" },
     ],
-    rule: "A centre administrator who is also a registered tutor on a course gets that course's chat and grading — as a tutor, on that course. The two roles never merge into one set of powers.",
+    rule: "A centre manager who is also a registered tutor on a course gets that course's chat and grading — as a tutor, on that course. The two roles never merge into one set of powers.",
   },
   centre_manager: {
     who: "wants the numbers, changes nothing",
@@ -61,14 +61,14 @@ const DETAIL: Record<CentreRole, RoleDetail> = {
   course_administrator: {
     who: "one or two courses, not the centre",
     summary:
-      "Everything a centre administrator can do, scoped to named courses. Cambridge-approved — in practice the main course tutor or the course coordinator.",
+      "Everything a centre manager can do except payments, scoped to named courses. Cambridge-approved — in practice the main course tutor or the course coordinator.",
     tone: "text-muted",
     spine: "bg-border",
     band: "bg-surface-muted border-border",
     perms: [
       { grant: "yes", text: "Edit their own courses" },
       { grant: "yes", text: "Invite people to their own courses" },
-      { grant: "yes", text: "Chase payment on their own courses" },
+      { grant: "no", text: "See or chase payments", note: "Centre manager and owner only" },
       { grant: "read", text: "Other courses, in outline only" },
       { grant: "no", text: "Create a new course" },
       { grant: "no", text: "Change centre settings" },

@@ -22,14 +22,16 @@ function parseDuration(formData: FormData): PlatformSupportDurationHours | null 
 // granted by a Centre administrator or the Centre owner." Checked directly
 // against those two centre_roles, not the capability matrix -- this is a
 // new, distinct decision from anything already in Capability, not a
-// rewording of one of the existing ones.
+// rewording of one of the existing ones. "Centre administrator" here is the
+// centre_administrator slug, displayed as "Centre manager" since the
+// 2026-08-23 rename -- the check itself is unchanged.
 export async function grantBillingSupportAccess(_prevState: SupportGrantFormState, formData: FormData): Promise<SupportGrantFormState> {
   const session = await getCurrentProfile();
   const profile = session?.profile;
   if (!profile) return { error: "Not signed in." };
   const ctx = await getCentreRoleContext(profile);
   if (!ctx.roles.includes("centre_administrator") && !ctx.roles.includes("centre_owner")) {
-    return { error: "Only a Centre administrator or the Centre owner can grant billing access." };
+    return { error: "Only a Centre manager or the Centre owner can grant billing access." };
   }
 
   const reason = (formData.get("reason") as string | null) ?? "";

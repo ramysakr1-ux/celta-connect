@@ -125,8 +125,14 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
 
       {/* for-claude-code-course-admin-scope-reduction.md: "Capacity and
           pricing... belongs to Centre Admin, not Course Admin." The one
-          write surface on this otherwise read-only page. */}
-      {can(ctx.roles, "course.editRecord") ? (
+          write surface on this otherwise read-only page.
+          for-claude-code-centre-role-rename-and-payments-fix.md §2: gated
+          on payments.edit, not course.editRecord -- pricing is fees and
+          deposits, i.e. payments, and Course administrator has course.
+          editRecord without having any payments access at all. Gating on
+          the wrong capability here would have quietly kept this form
+          visible to that role even after removing its payments grants. */}
+      {can(ctx.roles, "payments.edit") ? (
         <PricingForm
           courseId={course.id}
           feeAmount={course.fee_amount}

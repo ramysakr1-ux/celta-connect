@@ -13,8 +13,9 @@ import { UNDO_WINDOW_DAYS, isWithinUndoWindow, undoDeadline } from "@/lib/spread
 // money-and-oversight role's screen, not a tutor's.
 export default async function ImportPage() {
   const profile = await requireRole("admin");
-  // A Centre manager is also a flat `admin`, and must not reach this screen at
-  // all -- the nav omits the tab, and this stops the direct URL.
+  // A Centre observer (the centre_manager slug) is also a flat `admin`, and
+  // must not reach this screen at all -- the nav omits the tab, and this
+  // stops the direct URL.
   const ctx = await getCentreRoleContext(profile);
   if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) redirect("/centre");
   const supabase = await createClient();
