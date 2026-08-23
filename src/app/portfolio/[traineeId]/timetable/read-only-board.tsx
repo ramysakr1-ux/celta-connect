@@ -250,7 +250,7 @@ export function ReadOnlyTimetableBoard({
             type="button"
             onClick={() => setWeekIndex(i)}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold ${
-              i === weekIndex ? "bg-primary text-primary-foreground" : "border border-border text-muted hover:border-primary"
+              i === weekIndex ? "bg-primary text-primary-foreground" : "border border-border text-muted trainee-hover"
             }`}
           >
             Week {i + 1}

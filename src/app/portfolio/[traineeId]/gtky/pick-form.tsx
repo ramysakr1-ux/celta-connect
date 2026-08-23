@@ -46,7 +46,7 @@ export function GtkyPickForm({ activities, chosenSlug }: { activities: GtkyActiv
                 <input type="hidden" name="slug" value={a.slug} />
                 <button
                   type="submit"
-                  className="w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm font-medium text-ink hover:border-primary"
+                  className="w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm font-medium text-ink trainee-hover"
                 >
                   Choose this one
                 </button>

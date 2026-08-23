@@ -29,7 +29,7 @@ export function SelfEvaluationSection({
 
   if (!taught) {
     return (
-      <div className="card p-6">
+      <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
         <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
         <p className="mt-2 text-sm text-muted">
           Unlocks once your trainer has logged this lesson as taught.
@@ -51,7 +51,7 @@ export function SelfEvaluationSection({
 
   return (
     <>
-      <div className="card p-6">
+      <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
           <span className="status-pill status-pill-on-track">Submitted -- locked</span>
@@ -67,7 +67,7 @@ export function SelfEvaluationSection({
       </div>
 
       {feedback?.submitted_at ? (
-        <div className="card p-6">
+        <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-serif text-lg text-ink">Tutor feedback</h2>
             {feedback.grade ? <StandardRatingPill rating={feedback.grade} /> : null}
@@ -82,7 +82,7 @@ export function SelfEvaluationSection({
           </div>
         </div>
       ) : (
-        <div className="card p-6">
+        <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
           <h2 className="font-serif text-lg text-ink">Tutor feedback</h2>
           <p className="mt-2 text-sm text-muted">Not yet released by your trainer.</p>
         </div>

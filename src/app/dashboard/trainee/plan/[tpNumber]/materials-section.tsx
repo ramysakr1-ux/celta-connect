@@ -95,7 +95,7 @@ export function MaterialsSection({
   }
 
   return (
-    <div className="card p-6">
+    <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
       <h2 className="font-serif text-lg text-ink">Materials</h2>
       <p className="mt-1 text-sm text-muted">
         Handouts, worksheets, or slides. Upload a PDF/image{hasGoogleConnection ? ", or attach a file directly from your centre's Drive" : ""}.

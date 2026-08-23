@@ -265,7 +265,7 @@ export function FilmedObservationWatchScreen({
                   <button
                     type="button"
                     onClick={addNoteAtCurrentTime}
-                    className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary"
+                    className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink trainee-hover"
                   >
                     {noteSaved ? "Saved" : "Add note"}
                   </button>

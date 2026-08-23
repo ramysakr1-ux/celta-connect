@@ -175,7 +175,7 @@ export function SelfEvaluationForm({
   ];
 
   return (
-    <form action={draftAction} className="card flex flex-col gap-4 p-6">
+    <form action={draftAction} className="card rounded-[9px] border-t-[var(--trainee-plum)] flex flex-col gap-4 p-6">
       <h2 className="font-serif text-lg text-ink">Self-evaluation</h2>
       <p className="text-sm text-muted">
         Write this before you read your tutor&apos;s feedback -- that&apos;s the point of it.

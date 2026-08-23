@@ -123,7 +123,7 @@ export function LessonPlanForm({
 
   if (locked) {
     return (
-      <div className="card p-6">
+      <div className="card rounded-[9px] p-6">
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-lg text-ink">Your lesson plan</h2>
           <span className="status-pill status-pill-on-track">Submitted -- locked</span>
@@ -219,7 +219,7 @@ export function LessonPlanForm({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[360px_1fr] lg:items-start">
         {/* Left: written once */}
         <div className="flex flex-col gap-4">
-          <div className="card flex flex-col gap-4 p-5">
+          <div className="card rounded-[9px] flex flex-col gap-4 p-5">
             <Field label="Main Aims" hint="What the learners will be able to do by the end.">
               <VoiceTextarea
                 name="main_aims"
@@ -263,7 +263,7 @@ export function LessonPlanForm({
             ) : null}
           </div>
 
-          <div className="card p-5">
+          <div className="card rounded-[9px] p-5">
             <label className="text-sm text-muted">Anticipated Problems &amp; Solutions</label>
             <p className="text-xs italic text-muted">
               Problems with tasks and materials, technology, classroom management, interaction patterns (NOT
@@ -296,7 +296,7 @@ export function LessonPlanForm({
             </div>
           </div>
 
-          <div className="card flex flex-col gap-4 p-5">
+          <div className="card rounded-[9px] flex flex-col gap-4 p-5">
             <Field label="Class Profile" hint="Who you are teaching -- two or three lines is enough.">
               <VoiceTextarea
                 name="class_profile"
@@ -318,7 +318,7 @@ export function LessonPlanForm({
 
         {/* Right: worked on for hours */}
         <div className="flex min-w-0 flex-col gap-4">
-          <div className="card flex flex-wrap items-center justify-between gap-3 p-4">
+          <div className="card rounded-[9px] flex flex-wrap items-center justify-between gap-3 p-4">
             <div>
               <h3 className="font-serif text-base text-ink">Lesson shape</h3>
               <p className="text-xs text-muted">Choosing a framework fills the Stage column with that shape&apos;s usual stages.</p>
@@ -331,21 +331,21 @@ export function LessonPlanForm({
               <button
                 type="button"
                 onClick={applyFramework}
-                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
               >
                 Fill in the stages
               </button>
               <button
                 type="button"
                 onClick={() => setProcedure(procedure.map((row) => ({ ...row, stage: "", aim: "" })))}
-                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted hover:border-primary"
+                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted trainee-hover"
               >
                 Clear
               </button>
             </div>
           </div>
 
-          <div className="card p-5">
+          <div className="card rounded-[9px] p-5">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <h2 className="font-serif text-lg text-ink">Lesson Procedure</h2>
@@ -445,7 +445,7 @@ export function LessonPlanForm({
               <button
                 type="button"
                 onClick={() => setProcedure([...procedure, emptyProcedureRow()])}
-                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
               >
                 + Add stage
               </button>

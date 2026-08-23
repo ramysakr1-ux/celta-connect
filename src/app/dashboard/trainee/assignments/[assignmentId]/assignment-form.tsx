@@ -183,7 +183,7 @@ export function AssignmentAuthoringForm({
   );
 
   const aiDeclarationBlock = (
-    <div className="card flex flex-col gap-3 p-4">
+    <div className="card rounded-[9px] flex flex-col gap-3 p-4">
       <label className="flex items-center gap-2 text-sm text-ink">
         <input
           type="checkbox"
@@ -213,7 +213,7 @@ export function AssignmentAuthoringForm({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card flex items-center justify-between p-4">
+      <div className="card rounded-[9px] flex items-center justify-between p-4">
         {isResubmission ? (
           <p className="text-sm font-medium text-ink">Resubmission -- one opportunity only</p>
         ) : (
@@ -258,7 +258,7 @@ export function AssignmentAuthoringForm({
               const existing = responseByKey.get(s.key);
               const carriedOver = !existing?.first_comments;
               return (
-                <div key={s.key} className="card flex flex-col gap-3 p-6">
+                <div key={s.key} className="card rounded-[9px] flex flex-col gap-3 p-6">
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-serif text-lg text-ink">{s.title}</h3>
                     {carriedOver ? (
@@ -331,7 +331,7 @@ export function AssignmentAuthoringForm({
           </form>
         </>
       ) : mode === "review" ? (
-        <div className="card p-6">
+        <div className="card rounded-[9px] p-6">
           <h2 className="font-serif text-lg text-ink">Full review</h2>
           <p className="text-sm text-muted">Read-only -- switch to Focus mode to edit.</p>
           <div className="mt-4 flex flex-col gap-4">
@@ -354,7 +354,7 @@ export function AssignmentAuthoringForm({
         <FormOrDiv asForm={!locked} action={draftAction} className="grid grid-cols-1 gap-4 lg:grid-cols-[248px_1fr] lg:items-start">
           {!locked ? hiddenFields : null}
 
-          <nav className="card flex flex-col gap-1 p-2 lg:sticky lg:top-6">
+          <nav className="card rounded-[9px] flex flex-col gap-1 p-2 lg:sticky lg:top-6">
             {sections.map((s) => {
               const words = wordCount(texts[s.key] ?? "");
               return (
@@ -379,7 +379,7 @@ export function AssignmentAuthoringForm({
               .map((s) => {
                 const existing = responseByKey.get(s.key);
                 return (
-                  <div key={s.key} className="card p-6">
+                  <div key={s.key} className="card rounded-[9px] p-6">
                     <h3 className="font-serif text-lg text-ink">{s.title}</h3>
                     <p className="mt-1 whitespace-pre-line text-sm text-muted">{s.instruction}</p>
 

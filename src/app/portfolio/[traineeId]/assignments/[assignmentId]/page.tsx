@@ -199,7 +199,7 @@ export default async function AssignmentDetailPage({
         {canExportCoverSheet ? (
           <a
             href={`/api/portfolio/${traineeId}/assignments/${assignmentId}/cover-sheet`}
-            className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+            className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink trainee-hover"
           >
             Export cover sheet + assignment PDF
           </a>
@@ -226,7 +226,7 @@ export default async function AssignmentDetailPage({
                 className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
               />
             </div>
-            <button type="submit" className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary">
+            <button type="submit" className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink trainee-hover">
               Save deadline
             </button>
           </form>
@@ -251,7 +251,7 @@ export default async function AssignmentDetailPage({
           </p>
           <Link
             href={`/trainer/malpractice/${assignment.open_case_id}`}
-            className="mt-1 self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+            className="mt-1 self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
           >
             Open the case →
           </Link>

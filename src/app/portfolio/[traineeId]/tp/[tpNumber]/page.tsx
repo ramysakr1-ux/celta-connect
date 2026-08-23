@@ -285,7 +285,7 @@ export default async function TpDetailPage({
               return exportReady ? (
                 <a
                   href={`/api/tp-plans/${plan!.id}/pdf`}
-                  className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+                  className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
                 >
                   Export TP PDF
                 </a>
@@ -534,7 +534,7 @@ export default async function TpDetailPage({
                               className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
                                 shared
                                   ? "border-border bg-status-neutral-bg text-ink"
-                                  : "border-border text-muted hover:border-primary hover:text-primary"
+                                  : "border-border text-muted trainee-hover hover:text-primary"
                               }`}
                             >
                               {shared ? "Shared with students ✓" : "Share with students"}
@@ -603,7 +603,7 @@ export default async function TpDetailPage({
                   hasGoogleConnection={hasGoogleConnection}
                 />
               ) : (
-                <div className="sheet p-6">
+                <div className="sheet rounded-[9px] border-t-[var(--trainee-plum)] p-6">
                   <h2 className="font-serif text-lg text-ink">Materials</h2>
                   <p className="mt-2 text-sm text-muted">Save your lesson plan first -- materials attach to it once it exists.</p>
                 </div>

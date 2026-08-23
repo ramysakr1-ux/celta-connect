@@ -279,7 +279,7 @@ export function LanguageAnalysisEditor({
                 <button
                   type="button"
                   onClick={() => onBlocksChange([...blocks, emptyAnalysisBlock()])}
-                  className="self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+                  className="self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
                 >
                   + Add another {sheet!.blockName.toLowerCase()}
                 </button>
@@ -375,7 +375,7 @@ function VocabTable({
           <button
             type="button"
             onClick={() => onChange([...rows, emptyVocabRow()])}
-            className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+            className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
           >
             + Add item
           </button>
