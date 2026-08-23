@@ -104,7 +104,7 @@ function AssignmentCard({
   return (
     <Link
       href={`/portfolio/${traineeId}/assignments/${a.id}`}
-      className={`sheet group flex h-full flex-col p-5 transition-colors hover:border-primary/40 hover:bg-accent/30 ${accentClass ?? ""}`}
+      className={`sheet trainee-hover group flex h-full flex-col rounded-[9px] border-t-[3px] p-5 ${accentClass ?? "border-t-[var(--trainee-plum)]"}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>

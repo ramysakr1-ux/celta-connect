@@ -185,6 +185,10 @@ export default async function AssessorPage({
   const WARM = "oklch(30% 0.042 58)";
   const TEAL = "oklch(38% 0.072 195)";
   const CREAM = "oklch(97% 0.008 88)";
+  // for-claude-code-trainee-assessor-card-system.md's header underline --
+  // = --color-gold, distinct from the page's own GOLD const above (that
+  // one's tuned for the Pass A tint/dot, a different job).
+  const GOLD_UNDERLINE = "oklch(60% 0.11 70)";
 
   // The six rows the design names, in its order. Values come from real
   // records, so where the app genuinely doesn't hold something the row says so
@@ -262,34 +266,40 @@ export default async function AssessorPage({
         ) : null}
       </div>
 
+      {/* for-claude-code-trainee-assessor-card-system.md: dark ink-brown
+          header, 3px gold bottom border -- opposite-pairing, same logic as
+          every other role header this app now uses. The logo tile, wordmark,
+          pill, and download button below were built for a light header
+          (CARD background) and are corrected here to translucent light
+          treatments so they read against this darker one instead. */}
       <header
         style={{
-          height: 60, background: CARD, borderBottom: `1px solid ${BORDER}`, display: "flex",
+          height: 60, background: WARM, borderBottom: `3px solid ${GOLD_UNDERLINE}`, display: "flex",
           alignItems: "center", justifyContent: "space-between", padding: "0 32px",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span
             style={{
-              width: 30, height: 30, borderRadius: 7, background: WARM, display: "flex",
-              alignItems: "center", justifyContent: "center", flex: "none",
+              width: 30, height: 30, borderRadius: 7, background: "color-mix(in oklab, oklch(97% 0.008 88) 22%, transparent)",
+              display: "flex", alignItems: "center", justifyContent: "center", flex: "none",
             }}
           >
             <svg viewBox="8 30 104 60" width={19} height={11} fill="none" aria-label="Connect" role="img">
               <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" strokeWidth={15} strokeLinecap="round" />
-              <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke={CARD} strokeWidth={15} strokeLinecap="round" />
+              <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" strokeWidth={15} strokeLinecap="round" />
             </svg>
           </span>
-          <span style={{ fontFamily: "var(--font-instrument-serif), Newsreader, Georgia, serif", fontStyle: "italic", fontSize: 18, color: INK }}>
+          <span style={{ fontFamily: "var(--font-instrument-serif), Newsreader, Georgia, serif", fontStyle: "italic", fontSize: 18, color: "oklch(70% 0.12 72)" }}>
             Connect
           </span>
-          <span style={{ width: 1, height: 20, background: BORDER }} aria-hidden />
+          <span style={{ width: 1, height: 16, background: "color-mix(in oklab, oklch(97% 0.008 88) 25%, transparent)" }} aria-hidden />
           <span
             style={{
               fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-              color: "oklch(51% 0.017 70)", background: "color-mix(in oklab, oklch(51% 0.017 70) 10%, var(--color-card))",
-              border: "1px solid color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
-              borderRadius: 99, padding: "4px 10px",
+              color: "oklch(97% 0.008 88)", background: "color-mix(in oklab, oklch(97% 0.008 88) 14%, transparent)",
+              border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
+              borderRadius: 5, padding: "4px 10px",
             }}
           >
             Assessor · read-only
@@ -298,8 +308,10 @@ export default async function AssessorPage({
         <a
           href="/assessor/pack.pdf"
           style={{
-            height: 34, padding: "0 15px", borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD,
-            color: INK, fontSize: 12.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
+            height: 34, padding: "0 15px", borderRadius: 6,
+            border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
+            background: "color-mix(in oklab, oklch(97% 0.008 88) 12%, transparent)",
+            color: "oklch(97% 0.008 88)", fontSize: 12.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
             textDecoration: "none",
           }}
         >
@@ -369,7 +381,7 @@ export default async function AssessorPage({
 
         <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 20, alignItems: "start" }}>
           {openCandidate ? (
-            <div style={{ background: CARD, border: "1px solid color-mix(in oklab, oklch(38% 0.072 195) 32%, transparent)", borderTop: `3px solid ${TEAL}`, borderRadius: 8, overflow: "hidden" }}>
+            <div style={{ background: CARD, border: "1px solid color-mix(in oklab, oklch(38% 0.072 195) 32%, transparent)", borderTop: `3px solid ${TEAL}`, borderRadius: 9, overflow: "hidden" }}>
               <div
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
@@ -432,8 +444,8 @@ export default async function AssessorPage({
                 style={{
                   background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))" : CARD,
                   border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 35%, transparent)" : BORDER}`,
-                  borderTop: `3px solid ${c.flaggedIssue ? AMBER : TEAL}`,
-                  borderRadius: 8, padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10,
+                  borderLeft: `3px solid ${c.flaggedIssue ? AMBER : TEAL}`,
+                  borderRadius: 9, padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10,
                   textDecoration: "none",
                 }}
               >
@@ -516,14 +528,14 @@ export default async function AssessorPage({
             ) : null}
 
             <div>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED_ACCENT, marginBottom: 8 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD_UNDERLINE, marginBottom: 8 }}>
                 On the day
               </p>
               <div
                 style={{
-                  background: CARD, border: "1px solid color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
-                  borderTop: `3px solid ${TEAL}`,
-                  borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
+                  background: CARD, border: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 26%, transparent)`,
+                  borderTop: `3px solid ${GOLD_UNDERLINE}`,
+                  borderRadius: 9, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
                 }}
               >
                 {(onDayEvents ?? []).length === 0 ? (
@@ -592,7 +604,7 @@ export default async function AssessorPage({
               </div>
             </div>
 
-            <Panel title="Centre documents" accent="gold">
+            <Panel title="Centre documents">
               {CENTRE_DOCUMENTS.map((doc) => {
                 // "Marking guidance" is the one line item that now lives in
                 // the app itself, not the resources upload table -- see
@@ -663,8 +675,8 @@ export default async function AssessorPage({
               </p>
               <div
                 style={{
-                  background: "var(--color-frame)", border: `1px solid ${BORDER}`, borderTop: `3px solid ${TEAL}`,
-                  borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
+                  background: "var(--color-frame)", border: `1px solid ${BORDER}`, borderTop: `3px solid ${MUTED}`,
+                  borderRadius: 9, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
                 }}
               >
                 {[
@@ -766,8 +778,8 @@ function Panel({ title, children, accent = "teal" }: { title: string; children: 
       <div
         style={{
           background: "var(--color-card)", border: "1px solid oklch(88% 0.016 82)",
-          borderTop: `3px solid ${accent === "gold" ? "oklch(63% 0.096 72)" : "oklch(37.5% 0.058 195)"}`,
-          borderRadius: 7, overflow: "hidden",
+          borderTop: `3px solid ${accent === "gold" ? "oklch(60% 0.11 70)" : "oklch(37.5% 0.058 195)"}`,
+          borderRadius: 9, overflow: "hidden",
         }}
       >
         {children}

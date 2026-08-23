@@ -277,6 +277,19 @@ export async function TodayTab({
   }
   const waitingCapped = waiting.slice(0, 3);
 
+  // for-claude-code-trainee-assessor-card-system.md's card-edge rule: small
+  // cards in a 3-column layout get a left border, large/wide cards in a
+  // 1-2 column layout get a top border instead -- this grid switches
+  // between the two depending on whether there's a "you teach today" card,
+  // so which edge these three cards use switches with it. Full literal
+  // class strings (not string-built) so Tailwind's static scanner can see
+  // them -- a template-built `border-l-${color}` would never be generated.
+  const CARD_EDGE: Record<"status-warning-text" | "gold" | "primary", { left: string; top: string }> = {
+    "status-warning-text": { left: "border-l-[3px] border-l-status-warning-text border-t-0", top: "border-t-[3px] border-t-status-warning-text border-l-0" },
+    gold: { left: "border-l-[3px] border-l-gold border-t-0", top: "border-t-[3px] border-t-gold border-l-0" },
+    primary: { left: "border-l-[3px] border-l-primary border-t-0", top: "border-t-[3px] border-t-primary border-l-0" },
+  };
+  const cardEdge = (color: keyof typeof CARD_EDGE) => (teachingToday ? CARD_EDGE[color].left : CARD_EDGE[color].top);
   const weekOf = course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
   const eyebrow = [courseName, weekOf].filter(Boolean).join(" · ");
   const todayHeading = new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
@@ -290,11 +303,11 @@ export async function TodayTab({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <PushSubscribeButton subscribe={subscribeSessionPush} unsubscribe={unsubscribeSessionPush} />
-          <Link href={`/portfolio/${traineeId}/timetable`} className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary">
+          <Link href={`/portfolio/${traineeId}/timetable`} className="trainee-hover rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
             My timetable
           </Link>
           {teachingToday ? (
-            <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
+            <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="trainee-hover rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
               Open TP{teachingToday.tpNumber} plan
             </Link>
           ) : null}
@@ -303,7 +316,7 @@ export async function TodayTab({
 
       <div className={`grid grid-cols-1 gap-5 ${teachingToday ? "lg:grid-cols-[1.2fr_1fr_1fr]" : "lg:grid-cols-2"}`}>
         {teachingToday ? (
-          <div className="sheet-accent flex flex-col gap-3">
+          <div className={`sheet-accent trainee-hover flex flex-col gap-3 rounded-[9px] ${cardEdge("primary")}`}>
             <p className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">You teach today</p>
             <p className="font-serif text-xl text-ink">
               TP{teachingToday.tpNumber} — {teachingToday.title}
@@ -314,21 +327,22 @@ export async function TodayTab({
             </p>
             <div className="flex items-center gap-2">
               {teachingToday.zoomUrl ? (
-                <a href={teachingToday.zoomUrl} target="_blank" rel="noreferrer" className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
+                <a href={teachingToday.zoomUrl} target="_blank" rel="noreferrer" className="trainee-hover rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
                   Join the room
                 </a>
               ) : null}
-              <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink hover:border-primary">
+              <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="trainee-hover rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
                 Open your plan
               </Link>
             </div>
           </div>
         ) : null}
 
-        {/* Announcements -- amber top rule to match its already-amber label
-            and its real semantic role (flagged/urgent posts), not just the
-            default teal every .sheet gets. */}
-        <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-status-warning-text">
+        {/* Announcements -- amber rule to match its already-amber label and
+            its real semantic role (flagged/urgent posts), not just the
+            default teal every .sheet gets. Edge side (left vs top) follows
+            cardEdge -- see its own comment above. */}
+        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("status-warning-text")}`}>
           <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">Announcements</p>
           {(broadcasts ?? []).length === 0 ? (
             <p className="text-sm text-muted">Nothing posted yet.</p>
@@ -349,14 +363,14 @@ export async function TodayTab({
 
         {/* Waiting on you -- gold, alternating against "You teach today"
             (teal) and "Announcements" (amber) on either side. */}
-        <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-gold">
+        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("gold")}`}>
           <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Waiting on you</p>
           {waitingCapped.length === 0 ? (
             <p className="text-sm text-muted">Nothing waiting on you right now.</p>
           ) : (
             <div className="flex flex-col">
               {waitingCapped.map((w, i) => (
-                <Link key={i} href={w.href} className={`flex flex-col gap-0.5 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+                <Link key={i} href={w.href} className={`trainee-hover -mx-2 flex flex-col gap-0.5 rounded-[6px] px-2 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                   <p className="text-sm font-semibold text-ink">{w.label}</p>
                   <p className="text-xs text-muted">{w.detail}</p>
                 </Link>

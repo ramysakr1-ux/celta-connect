@@ -231,10 +231,14 @@ export default async function PortfolioLayout({
           roster table and Today's "Needs you" alerts. */}
       {showTraineeNav ? <InstallPrompt /> : null}
 
-      <div className="border-b border-border bg-card">
+      <div className={showTraineeNav ? "trainee-header" : "border-b border-border bg-card"}>
         {showTraineeNav ? (
           // for-claude-code-trainee-interface.md's header: wordmark left, nav
           // center, "Day N of 20" + initials avatar right.
+          // for-claude-code-trainee-assessor-card-system.md: light plum wash
+          // + soft plum border (.trainee-header, globals.css) -- calmer than
+          // MCT/ACT's solid ink/garnet bands, matching the trainee's
+          // generally lighter tone.
           <div className="container flex h-14 items-center justify-between gap-4">
             <Link href={`/portfolio/${trainee.id}`} className="shrink-0 block">
               <Wordmark size="header" />
@@ -246,8 +250,8 @@ export default async function PortfolioLayout({
                   Day {courseDayProgress.currentDay} of {courseDayProgress.totalDays}
                 </span>
               ) : null}
-              <div className="flex size-[26px] shrink-0 items-center justify-center rounded-full bg-accent">
-                <span className="text-[10px] font-semibold text-primary">{traineeInitials}</span>
+              <div className="flex size-[26px] shrink-0 items-center justify-center rounded-full" style={{ background: "var(--trainee-wash)" }}>
+                <span className="text-[10px] font-semibold" style={{ color: "var(--trainee-plum)" }}>{traineeInitials}</span>
               </div>
             </div>
           </div>

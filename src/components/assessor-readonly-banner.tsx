@@ -60,15 +60,21 @@ export function AssessorReadOnlyBanner({ subject }: { subject?: string }) {
     ? `You're viewing ${subject}'s ${pageLabel.toLowerCase()} as part of the assessor pack.`
     : `You're viewing the trainer's ${pageLabel.toLowerCase()} as part of the assessor pack.`;
 
+  // for-claude-code-trainee-assessor-card-system.md: the assessor's own
+  // header (Assessor Visit.dc.html) moved from a generic ink header to a
+  // dedicated ink-brown + gold identity, distinct from MCT's cooler ink --
+  // this banner is the same session, so it follows.
+  const WARM = "oklch(30% 0.042 58)";
+  const GOLD = "oklch(60% 0.11 70)";
   return (
     <div
       className="sticky top-0 z-30 flex items-center justify-between gap-4 px-5 py-2.5"
-      style={{ background: "oklch(23.5% 0.017 65)" }}
+      style={{ background: WARM }}
     >
       <div className="flex min-w-0 items-center gap-2.5">
         <span
           className="shrink-0 rounded px-2.5 py-0.5 text-[10.5px] font-bold tracking-[0.08em] uppercase"
-          style={{ color: "oklch(85% 0.02 195)", background: "color-mix(in oklab, oklch(38% 0.072 195) 40%, oklch(23.5% 0.017 65))" }}
+          style={{ color: WARM, background: `color-mix(in oklab, ${GOLD} 75%, transparent)` }}
         >
           Read-only
         </span>
@@ -78,8 +84,12 @@ export function AssessorReadOnlyBanner({ subject }: { subject?: string }) {
       </div>
       <Link
         href="/assessor"
-        className="flex shrink-0 items-center gap-1.5 rounded-md px-3.5 py-1.5 text-[12.5px] font-semibold text-white no-underline"
-        style={{ background: "color-mix(in oklab, oklch(38% 0.072 195) 55%, oklch(23.5% 0.017 65))" }}
+        className="flex shrink-0 items-center gap-1.5 rounded-md px-3.5 py-1.5 text-[12.5px] font-semibold no-underline"
+        style={{
+          color: "oklch(97% 0.008 88)",
+          background: "color-mix(in oklab, oklch(97% 0.008 88) 12%, transparent)",
+          border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
+        }}
       >
         ← Back to assessor pack
       </Link>

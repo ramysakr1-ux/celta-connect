@@ -387,6 +387,27 @@ h6 {
     box-shadow: var(--hub-row-shadow);
   }
 
+  /* for-claude-code-trainee-assessor-card-system.md: the trainee's own
+     accent (plum) and hover-shadow, same mechanism as .trainer-hover --
+     used on Course Stream, Assignments, Feedback Form, Lesson Plan, and
+     every other trainee-facing screen, not just the walkthrough. */
+  :root {
+    --trainee-plum: oklch(52% 0.1 322);
+    /* Same formula as --color-accent's own "pale teal-green wash", hue
+       swapped to plum -- the spec's own reference point for this tint. */
+    --trainee-wash: oklch(93% 0.019 322);
+  }
+  .trainee-header {
+    background: var(--trainee-wash);
+    border-bottom: 1px solid color-mix(in oklab, var(--trainee-plum) 30%, transparent);
+  }
+  .trainee-hover {
+    transition: box-shadow 150ms ease;
+  }
+  .trainee-hover:hover {
+    box-shadow: inset 0 0 0 1px var(--trainee-plum), 0 3px 8px -3px color-mix(in oklab, var(--trainee-plum) 45%, transparent);
+  }
+
   /* Shared "entry moment" card -- pale tinted teal-green background + soft
      primary border, the same combination the Course Stream Zoom card uses
      (bg-accent/50 over a card backdrop, border-primary/25). Baked into a
