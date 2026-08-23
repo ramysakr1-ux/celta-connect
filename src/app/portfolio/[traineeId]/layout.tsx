@@ -10,6 +10,7 @@ import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
 import { TraineeTopNav } from "@/app/portfolio/[traineeId]/trainee-top-nav";
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
 import { InstallPrompt } from "@/components/install-prompt";
+import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { computeCourseDayProgress } from "@/lib/course-day";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
 import {
@@ -253,14 +254,8 @@ export default async function PortfolioLayout({
         ) : (
           <div className="container flex h-14 items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              {/* Same bug as (hub)/layout.tsx's logo link, same fix: an
-                  assessor who reached this portfolio via the "Assignment
-                  titles" cohort document had no direct way back to the
-                  pack overview -- this always pointed at /trainer/roster,
-                  a page a token-only assessor session can still open (it's
-                  in their trimmed tab set) but isn't where they came from. */}
-              <Link href={assessorCourseId ? "/assessor" : "/trainer/roster"} className="shrink-0 text-sm text-primary">
-                {assessorCourseId ? "← Assessor pack" : "← Roster"}
+              <Link href="/trainer/roster" className="shrink-0 text-sm text-primary">
+                ← Roster
               </Link>
               <span className="h-5 w-px shrink-0 bg-border" />
               <h1 className="truncate font-serif text-[17px] text-ink">{trainee.full_name}</h1>
@@ -318,6 +313,12 @@ export default async function PortfolioLayout({
           </div>
         )}
       </div>
+
+      {/* for-claude-code-assessor-readonly-banner.md: persistent, not the
+          "← Assessor pack" link the earlier fix put in the header row
+          above -- stays visible however far the assessor scrolls this
+          candidate's portfolio. */}
+      {assessorCourseId ? <AssessorReadOnlyBanner subject={trainee.full_name} /> : null}
 
       {isCourseStatusReadOnly(trainee.course_status) ? (
         <div className="bg-destructive/8 border-b border-destructive/20">

@@ -3,6 +3,7 @@ import { Wordmark } from "@/components/wordmark";
 import { TrainerTabs } from "@/app/trainer/trainer-tabs";
 import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
+import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
@@ -82,11 +83,6 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             <Link href={isAssessor ? "/assessor" : "/trainer"} className="block shrink-0">
               <Wordmark size="header" />
             </Link>
-            {isAssessor ? (
-              <Link href="/assessor" className="text-sm font-medium text-primary hover:underline">
-                ← Assessor pack
-              </Link>
-            ) : null}
             <TrainerTabs rosterOnly={isAssessor} />
           </div>
           <div className="flex shrink-0 items-center gap-3">
@@ -101,6 +97,11 @@ export default async function TrainerHubLayout({ children }: { children: React.R
           </div>
         </div>
       </header>
+
+      {/* for-claude-code-assessor-readonly-banner.md: persistent, not the
+          bare top-of-page link the earlier fix used -- stays visible
+          however far the assessor scrolls into a long report. */}
+      {isAssessor ? <AssessorReadOnlyBanner /> : null}
 
       {/* for-claude-code-staff-chat-overlap-fix.md: StaffChatDrawer is
           `fixed bottom-6`, not part of this flow, so the page's own content
