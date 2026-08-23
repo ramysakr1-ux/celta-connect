@@ -1,6 +1,9 @@
 import Link from "next/link";
-import { requireRole } from "@/lib/auth/require-role";
+import { redirect } from "next/navigation";
+import { getCurrentProfile } from "@/lib/auth/get-profile";
+import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isMctOnCourse } from "@/lib/course-mct";
 import { setTimetableLock, recomputeAssignmentDueDates } from "@/app/trainer/(hub)/timetable/actions";
 import { AddEventForm } from "@/app/trainer/(hub)/timetable/add-event-form";
@@ -26,16 +29,27 @@ export default async function TrainerTimetablePage({
 }: {
   searchParams: Promise<{ lock_error?: string; date?: string; half?: string; run?: string; mode?: string }>;
 }) {
-  const trainer = await requireRole(["trainer", "admin"]);
-  const { lock_error, date: lockErrorDate, half: lockErrorHalf, run: lockErrorRun, mode } = await searchParams;
-  const supabase = await createClient();
+  // for-claude-code-assessor-tour-mode.md: same widening pattern as
+  // roster/page.tsx and resource-hub/page.tsx -- a real session first,
+  // fall back to a touring assessor's course, everyone else turned away.
+  // Edit mode (below) stays MCT-only either way -- isMct is structurally
+  // false with no trainer, so editMode can never be true for an assessor
+  // regardless of the ?mode=edit query param.
+  const session = await getCurrentProfile();
+  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
+  const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
+  const tourMode = assessorCourseId ? await isAssessorTourMode() : false;
+  if (!trainer && !tourMode) redirect("/login");
 
-  if (!trainer.course_id) {
+  const { lock_error, date: lockErrorDate, half: lockErrorHalf, run: lockErrorRun, mode } = await searchParams;
+  const supabase = trainer ? await createClient() : createAdminClient();
+
+  const courseId = trainer?.course_id ?? assessorCourseId;
+  if (!courseId) {
     return (
       <div className="sheet text-sm text-muted">No course assigned.</div>
     );
   }
-  const courseId = trainer.course_id;
 
   const [{ data: course }, { data: events }, { data: volunteers }] = await Promise.all([
     supabase.from("courses").select("timetable_locked_at, time_bands, delivery_mode").eq("id", courseId).maybeSingle(),
@@ -53,7 +67,7 @@ export default async function TrainerTimetablePage({
   // need to see those options -- mirrors actions.ts' requireTimetableEditAccess
   // exactly (same isMctOnCourse() check, admin bypass), so the UI never
   // offers a control the server would then reject.
-  const isMct = trainer.role === "admin" || (await isMctOnCourse(supabase, courseId, trainer.id));
+  const isMct = Boolean(trainer) && (trainer!.role === "admin" || (await isMctOnCourse(supabase, courseId, trainer!.id)));
   // Non-MCT trying to force ?mode=edit just falls back to the view -- there
   // is no separate "disabled" edit mode to render, and nothing to explain.
   const editMode = mode === "edit" && isMct;
@@ -129,8 +143,8 @@ export default async function TrainerTimetablePage({
   // gives it). An unpaired subgroup has no tutor_profile_id anywhere in the
   // schema to test against -- left visible to every trainer rather than
   // guessed at, flagged here rather than silently hidden.
-  const isAdmin = trainer.role === "admin";
-  const ownedGroupIds = new Set((tpGroups ?? []).filter((g) => g.tutor_profile_id === trainer.id).map((g) => g.id));
+  const isAdmin = trainer?.role === "admin";
+  const ownedGroupIds = new Set((tpGroups ?? []).filter((g) => trainer && g.tutor_profile_id === trainer.id).map((g) => g.id));
   const pairedTpGroupIds = new Set((subgroups ?? []).filter((s) => s.tp_group_id).map((s) => s.tp_group_id));
   const stage2Groups = [
     ...(tpGroups ?? [])
@@ -402,7 +416,7 @@ export default async function TrainerTimetablePage({
               events={allEvents}
               eventMeta={eventMeta}
               timeBands={timeBands}
-              viewerName={trainer.full_name ?? "You"}
+              viewerName={trainer?.full_name ?? "Assessor"}
               viewerGroupLabel={viewerGroupLabel}
               today={today}
               nowIso={new Date().toISOString()}
@@ -415,12 +429,17 @@ export default async function TrainerTimetablePage({
           MCT status -- booking a candidate's tutorial slot is day-to-day
           tutor work, not a structure-editing action (open question flagged
           separately: for-claude-code-timetable-page-priority.md asked
-          whether this should be MCT-only too; left open here). */}
+          whether this should be MCT-only too; left open here). Still hidden
+          for a touring assessor (for-claude-code-assessor-tour-mode.md) --
+          these are booking forms, not something to invite a view-only
+          visitor to click. */}
+      {trainer ? (
       <LaptopOnlyGate task="Stage 2 group booking and Stage 1/3 individual invites">
       <Stage2Section groups={stage2Groups} blocks={stage2Blocks} />
       <IndividualTutorialSection stage="stage1" candidates={allCandidates} invites={stage1Invites} />
       <IndividualTutorialSection stage="stage3" candidates={stage3Candidates} invites={stage3Invites} />
       </LaptopOnlyGate>
+      ) : null}
     </div>
   );
 }

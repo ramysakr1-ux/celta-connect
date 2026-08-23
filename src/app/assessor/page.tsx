@@ -679,6 +679,33 @@ export default async function AssessorPage({
                 ))}
               </div>
             </div>
+
+            {/* for-claude-code-assessor-tour-mode.md: "small, colorful...
+                so it stands out as an inviting extra rather than blending
+                into the informational list." Deliberately the one warm,
+                saturated element on an otherwise muted/informational page --
+                the same GOLD this page already reserves for Pass A, not a
+                new accent invented for this. */}
+            {/* Plain <a>, not <Link> -- /assessor/tour is a route handler
+                (sets the tour cookie, then redirects), not a page. Next's
+                Link prefetch could otherwise trigger that GET, and the
+                cookie it sets, before the assessor actually clicks. */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+            <a
+              href="/assessor/tour"
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                background: GOLD, color: "oklch(23.5% 0.017 65)", fontSize: 13, fontWeight: 700,
+                borderRadius: 999, padding: "12px 20px", textDecoration: "none",
+              }}
+            >
+              Take a tour of the platform →
+            </a>
+            <p style={{ fontSize: 11, lineHeight: 1.5, color: MUTED, marginTop: -4 }}>
+              Browse the wider platform read-only -- the trainer dashboard, a candidate&apos;s full portfolio, the
+              timetable, the resource hub. Nothing here is required reading; it&apos;s just here if you&apos;re
+              curious how the platform works day to day.
+            </p>
           </div>
         </div>
       </div>

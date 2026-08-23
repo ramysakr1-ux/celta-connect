@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { requireRole } from "@/lib/auth/require-role";
+import { redirect } from "next/navigation";
+import { getCurrentProfile } from "@/lib/auth/get-profile";
+import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
 import { ResourceCategoryManager } from "@/app/trainer/(hub)/resource-hub/resource-category-manager";
 import { CoursebooksSection } from "@/app/portfolio/[traineeId]/resources/coursebooks-section";
@@ -23,18 +25,38 @@ import { can } from "@/lib/auth/centre-permissions";
 // resources-table-backed sections (upload, incl. live HTML for input
 // sessions, per-item trainee visibility).
 export default async function TrainerResourceHubPage() {
-  const trainer = await requireRole(["trainer", "admin"]);
-  const supabase = await createClient();
-  const courseId = trainer.course_id;
+  // for-claude-code-assessor-tour-mode.md: this page was trainer/admin-only
+  // (requireRole threw for a cookie-only assessor session). A touring
+  // assessor gets read access the same way roster/page.tsx and the other
+  // widened pages already do -- try a real session first, fall back to the
+  // assessor course, and only a plain (non-touring) assessor cookie is
+  // still turned away, since resource-hub was never part of the base pack.
+  const session = await getCurrentProfile();
+  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
+  const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
+  const tourMode = assessorCourseId ? await isAssessorTourMode() : false;
+  if (!trainer && !tourMode) redirect("/login");
+
+  const supabase = trainer ? await createClient() : createAdminClient();
+  const courseId = trainer?.course_id ?? assessorCourseId;
+
+  const cambridgeAdmin = createAdminClient();
+  // A trainer/admin session already carries center_id on their profile; an
+  // assessor's cookie only ever resolves to a course_id (getAssessorCourseId),
+  // so touring needs one extra lookup to get from there to the centre.
+  const centerId =
+    trainer?.center_id ?? (courseId ? (await cambridgeAdmin.from("courses").select("center_id").eq("id", courseId).maybeSingle()).data?.center_id : null) ?? null;
+  if (!centerId) {
+    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+  }
 
   // remaining-compliance.md §5 -- readable by everyone, editable only by
   // whoever can already edit centre settings (a trainer has no centre-role
   // context at all, so this is false for them regardless).
-  const centreRoleCtx = trainer.role === "admin" ? await getCentreRoleContext(trainer) : null;
+  const centreRoleCtx = trainer?.role === "admin" ? await getCentreRoleContext(trainer) : null;
   const cambridgeEditable = centreRoleCtx ? can(centreRoleCtx.roles, "centre.settings.edit") : false;
-  const cambridgeAdmin = createAdminClient();
-  const { data: cambridgeCentre } = await cambridgeAdmin.from("centers").select("organisation_id").eq("id", trainer.center_id).maybeSingle();
-  const cambridgeDocsRaw = await getCambridgeDocuments(cambridgeAdmin, trainer.center_id, cambridgeCentre?.organisation_id ?? null);
+  const { data: cambridgeCentre } = await cambridgeAdmin.from("centers").select("organisation_id").eq("id", centerId).maybeSingle();
+  const cambridgeDocsRaw = await getCambridgeDocuments(cambridgeAdmin, centerId, cambridgeCentre?.organisation_id ?? null);
   const cambridgeDocs = await Promise.all(
     cambridgeDocsRaw.map(async (doc) => ({
       ...doc,
@@ -59,7 +81,7 @@ export default async function TrainerResourceHubPage() {
     ? await cambridgeAdmin
         .from("tp_material_pool_items")
         .select("*")
-        .or(`center_id.is.null,center_id.eq.${trainer.center_id}`)
+        .or(`center_id.is.null,center_id.eq.${centerId}`)
         .order("created_at", { ascending: false })
     : { data: [] };
   const { data: materialClaims } =
@@ -104,29 +126,29 @@ export default async function TrainerResourceHubPage() {
     supabase
       .from("resources")
       .select("*")
-      .eq("center_id", trainer.center_id)
+      .eq("center_id", centerId)
       .eq("category", "input_sessions")
       .or(courseId ? `course_id.eq.${courseId},course_id.is.null` : "course_id.is.null")
       .order("created_at", { ascending: false }),
     supabase
       .from("resources")
       .select("*")
-      .eq("center_id", trainer.center_id)
+      .eq("center_id", centerId)
       .eq("category", "centre_documents")
       .or(courseId ? `course_id.eq.${courseId},course_id.is.null` : "course_id.is.null")
       .order("created_at", { ascending: false }),
     supabase
       .from("resources")
       .select("*")
-      .eq("center_id", trainer.center_id)
+      .eq("center_id", centerId)
       .eq("category", "forms")
       .or(courseId ? `course_id.eq.${courseId},course_id.is.null` : "course_id.is.null")
       .order("created_at", { ascending: false }),
-    supabase.from("tp_points").select("id", { count: "exact", head: true }).eq("status", "published").eq("center_id", trainer.center_id),
-    supabase.from("tp_audio_library").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
-    supabase.from("tp_video_library").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
-    supabase.from("assignment_templates").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
-    supabase.from("marking_guidance_entries").select("id", { count: "exact", head: true }).eq("center_id", trainer.center_id),
+    supabase.from("tp_points").select("id", { count: "exact", head: true }).eq("status", "published").eq("center_id", centerId),
+    supabase.from("tp_audio_library").select("id", { count: "exact", head: true }).eq("center_id", centerId),
+    supabase.from("tp_video_library").select("id", { count: "exact", head: true }).eq("center_id", centerId),
+    supabase.from("assignment_templates").select("id", { count: "exact", head: true }).eq("center_id", centerId),
+    supabase.from("marking_guidance_entries").select("id", { count: "exact", head: true }).eq("center_id", centerId),
     courseId ? supabase.from("course_tp_schedule").select("tp_number, tp_coursebook_id") : Promise.resolve({ data: [] }),
   ]);
 
@@ -223,6 +245,10 @@ export default async function TrainerResourceHubPage() {
               filtered version of this from their own portfolio.
             </p>
           </div>
+          {/* for-claude-code-assessor-tour-mode.md: "no functional purpose
+              beyond letting them see" -- both of these are write entry
+              points a touring assessor shouldn't be invited to click. */}
+          {trainer ? (
           <div className="flex shrink-0 items-center gap-2">
             <a href="#input-sessions" className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary">
               Upload
@@ -234,6 +260,7 @@ export default async function TrainerResourceHubPage() {
               New TP point
             </Link>
           </div>
+          ) : null}
         </div>
         <div className="mt-4 max-w-sm">
           <ResourceHubSearch items={searchItems} />
@@ -311,7 +338,7 @@ export default async function TrainerResourceHubPage() {
 
       <div id="coursebooks">
         {(coursebooks ?? []).length > 0 ? (
-          <CoursebooksSection coursebooks={coursebooks ?? []} isEditableStaff />
+          <CoursebooksSection coursebooks={coursebooks ?? []} isEditableStaff={Boolean(trainer)} />
         ) : (
           <div className="sheet p-6">
             <h3 className="font-serif text-lg text-ink">Coursebooks</h3>
@@ -344,7 +371,7 @@ export default async function TrainerResourceHubPage() {
           </Link>
         </div>
         <div className="mt-3">
-          <ResourceCategoryManager category="input_sessions" centerId={trainer.center_id} resources={inputSessionResources ?? []} />
+          <ResourceCategoryManager category="input_sessions" centerId={centerId} resources={inputSessionResources ?? []} readOnly={!trainer} />
         </div>
       </div>
 
@@ -360,7 +387,7 @@ export default async function TrainerResourceHubPage() {
           below.
         </p>
         <div className="mt-3">
-          <ResourceCategoryManager category="forms" centerId={trainer.center_id} resources={formResources ?? []} />
+          <ResourceCategoryManager category="forms" centerId={centerId} resources={formResources ?? []} readOnly={!trainer} />
         </div>
       </div>
 
@@ -375,7 +402,7 @@ export default async function TrainerResourceHubPage() {
           instead.
         </p>
         <div className="mt-3">
-          <ResourceCategoryManager category="centre_documents" centerId={trainer.center_id} resources={centreDocResources ?? []} />
+          <ResourceCategoryManager category="centre_documents" centerId={centerId} resources={centreDocResources ?? []} readOnly={!trainer} />
         </div>
       </div>
 
@@ -395,7 +422,7 @@ export default async function TrainerResourceHubPage() {
         <div id="tp-material-pool">
           <h2 className="font-serif text-lg text-ink">TP7/8 material pool</h2>
           <div className="mt-3">
-            <MaterialPoolShelf items={materialItems} />
+            <MaterialPoolShelf items={materialItems} readOnly={!trainer} />
           </div>
         </div>
       ) : null}

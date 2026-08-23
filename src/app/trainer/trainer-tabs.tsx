@@ -38,9 +38,20 @@ const GRADES_REPORT_TAB = { href: "/grades-report", label: "Grades Report" } as 
 // identical URL rather than reusing TABS[2]'s.
 const ATTENDANCE_REGISTER_TAB = { href: "/volunteers", label: "Attendance register" } as const;
 
-export function TrainerTabs({ rosterOnly = false }: { rosterOnly?: boolean }) {
+// for-claude-code-assessor-tour-mode.md: a touring assessor gets the real
+// trainer tab set, not the pack's own trimmed one -- but only for the
+// areas actually widened for an assessor session (Today, Roster,
+// Timetable, Volunteers, Resource hub, Grades Report). Teaching Practice
+// and Trainer-in-Training aren't in that list on purpose -- they were never
+// widened to accept an assessor session, and a tour tab that dead-ends at
+// a login redirect would be worse than one that's just not there.
+export function TrainerTabs({ rosterOnly = false, tourMode = false }: { rosterOnly?: boolean; tourMode?: boolean }) {
   const pathname = usePathname();
-  const tabs = rosterOnly ? [TABS[0], ATTENDANCE_REGISTER_TAB, GRADES_REPORT_TAB] : [TODAY_TAB, ...TABS, GRADES_REPORT_TAB];
+  const tabs = rosterOnly
+    ? [TABS[0], ATTENDANCE_REGISTER_TAB, GRADES_REPORT_TAB]
+    : tourMode
+      ? [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[4], GRADES_REPORT_TAB]
+      : [TODAY_TAB, ...TABS, GRADES_REPORT_TAB];
 
   // No wrapper bar of its own any more -- this is now inlined directly into
   // the (hub) shell's single header (see (hub)/layout.tsx), which supplies

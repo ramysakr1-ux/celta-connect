@@ -4,6 +4,22 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const ASSESSOR_COOKIE = "assessor_token";
 
+// for-claude-code-assessor-tour-mode.md: a second, deliberately separate
+// cookie rather than a query param -- a query param would need threading
+// through every link the tour opens (trainer dashboard, portfolio,
+// timetable, resource hub, and everything each of those link to in turn),
+// while a cookie just rides along automatically the same way
+// ASSESSOR_COOKIE already does. Plain "on/off", no expiry of its own: it's
+// meaningless without a valid, still-live assessor token backing it (every
+// caller checks isAssessorTourMode() alongside getAssessorCourseId(), never
+// instead of it), so it can't outlive or substitute for the real session.
+export const ASSESSOR_TOUR_COOKIE = "assessor_tour_mode";
+
+export async function isAssessorTourMode(): Promise<boolean> {
+  const cookieStore = await cookies();
+  return cookieStore.get(ASSESSOR_TOUR_COOKIE)?.value === "1";
+}
+
 // §11 -- an assessor never gets a real Supabase Auth session (same
 // tokenized/course-scoped/auto-expiring link mechanism as volunteer
 // students, see migration 0030's course_access_tokens). After the token is

@@ -16,14 +16,20 @@ export function ResourceCategoryManager({
   category,
   centerId,
   resources,
+  readOnly = false,
 }: {
   category: ResourceCategory;
   centerId: string;
   resources: Resource[];
+  // for-claude-code-assessor-tour-mode.md: a touring assessor sees the same
+  // list, just without the upload form or a Remove button that would fail
+  // closed anyway (deleteResource still gates on requireRole()) -- offering
+  // either would just be a dead end.
+  readOnly?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <ResourceComposer traineeId={null} centerId={centerId} fixedCategory={category} />
+      {readOnly ? null : <ResourceComposer traineeId={null} centerId={centerId} fixedCategory={category} />}
       {resources.length === 0 ? (
         <p className="sheet border-dashed text-sm text-muted">Nothing here yet.</p>
       ) : (
@@ -56,12 +62,14 @@ export function ResourceCategoryManager({
                     </div>
                   </div>
                 </div>
-                <form action={deleteResource}>
-                  <input type="hidden" name="resource_id" value={r.id} />
-                  <button type="submit" className="text-xs text-destructive hover:underline">
-                    Remove
-                  </button>
-                </form>
+                {readOnly ? null : (
+                  <form action={deleteResource}>
+                    <input type="hidden" name="resource_id" value={r.id} />
+                    <button type="submit" className="text-xs text-destructive hover:underline">
+                      Remove
+                    </button>
+                  </form>
+                )}
               </li>
             );
           })}

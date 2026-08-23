@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchRosterRows } from "@/lib/roster";
 import { categorize, isEventLive, toLocalIso } from "@/lib/timetable-grid";
 import { CATEGORY_ACCENT } from "@/app/trainer/(hub)/timetable/event-cell";
@@ -25,11 +26,15 @@ export default async function TodayPage() {
   if (!trainer && !assessorCourseId) redirect("/login");
   // Today is trainer-only operational material (write actions, cohort-wide
   // alerts) -- assessors stay on the roster, same boundary trainer-tabs.tsx
-  // already draws for everything except Grades Report.
-  if (assessorCourseId && !trainer) redirect("/trainer/roster");
+  // already draws for everything except Grades Report. for-claude-code-
+  // assessor-tour-mode.md: unless they've explicitly opted into the tour,
+  // which is the one place this boundary deliberately opens -- read-only
+  // still, every write action below stays gated on Boolean(trainer).
+  const tourMode = assessorCourseId ? await isAssessorTourMode() : false;
+  if (assessorCourseId && !trainer && !tourMode) redirect("/trainer/roster");
 
-  const supabase = await createClient();
-  const courseId = trainer!.course_id;
+  const supabase = trainer ? await createClient() : createAdminClient();
+  const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
     return <div className="sheet text-sm text-muted">No course assigned.</div>;
   }
@@ -40,7 +45,7 @@ export default async function TodayPage() {
   // trainer's own tool, not a course-admin one -- "whoever runs course admin
   // may not be the person writing feedback" -- so admins previewing /trainer
   // don't get the card at all.
-  const feedbackAssist = trainer!.role === "trainer" ? await getFeedbackAssistState(courseId, trainer!.id) : null;
+  const feedbackAssist = trainer?.role === "trainer" ? await getFeedbackAssistState(courseId, trainer.id) : null;
 
   const rows = await fetchRosterRows(supabase, courseId);
   const nameById = new Map(rows.map((r) => [r.id, r.name]));
@@ -123,7 +128,7 @@ export default async function TodayPage() {
   // it) and computed from the deadline the MCT set themselves, not a fixed
   // offset from the assessor visit date. 4 days is a starting judgment call,
   // not a rule from the spec -- reasonable to retune later.
-  const isMct = trainer!.tutor_role === "main_course_tutor";
+  const isMct = trainer?.tutor_role === "main_course_tutor";
   if (isMct && course?.provisional_grades_due_at) {
     const { data: records } =
       traineeIds.length > 0
@@ -348,6 +353,14 @@ export default async function TodayPage() {
           <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">{overline}</p>
           <h1 className="font-serif text-3xl text-ink">{todayHeading}</h1>
         </div>
+        {/* for-claude-code-assessor-tour-mode.md: a tour is view-only, "no
+            functional purpose beyond letting them see" -- these are staff
+            write actions, not something a touring assessor should be
+            invited to click (every one of them would fail closed anyway,
+            since requireRole() never authorizes a cookie-only session, but
+            offering a button that always fails is a worse look than
+            omitting it). */}
+        {trainer ? (
         <div className="flex flex-wrap items-center gap-2">
           {/* specs/build-spec.md §7: the one trainer surface meant to be
               genuinely usable on a phone mid-lesson -- kept first/most
@@ -378,6 +391,7 @@ export default async function TodayPage() {
             Write TP feedback
           </Link>
         </div>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.15fr_1fr_1.1fr]">

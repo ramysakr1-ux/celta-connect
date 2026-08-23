@@ -19,7 +19,10 @@ export interface MaterialPoolItemView {
 // (platform-provided) alongside whatever this centre has added itself.
 // Trainer-facing -- upload/remove the centre's own scans; candidates claim
 // from the read-only mirror of this same pool on their Resources tab.
-export function MaterialPoolShelf({ items }: { items: MaterialPoolItemView[] }) {
+// for-claude-code-assessor-tour-mode.md: readOnly hides the upload form and
+// every Remove button -- same "don't offer a control that fails closed"
+// reasoning as ResourceCategoryManager's own readOnly prop.
+export function MaterialPoolShelf({ items, readOnly = false }: { items: MaterialPoolItemView[]; readOnly?: boolean }) {
   const [state, action, pending] = useActionState(uploadMaterialPoolItem, initial);
   const baseline = items.filter((i) => i.isBaseline);
   const own = items.filter((i) => !i.isBaseline);
@@ -47,7 +50,7 @@ export function MaterialPoolShelf({ items }: { items: MaterialPoolItemView[] }) 
         {own.length > 0 ? (
           <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {own.map((item) => (
-              <ItemCard key={item.id} item={item} removable />
+              <ItemCard key={item.id} item={item} removable={!readOnly} />
             ))}
           </div>
         ) : (
@@ -55,6 +58,7 @@ export function MaterialPoolShelf({ items }: { items: MaterialPoolItemView[] }) 
         )}
       </div>
 
+      {readOnly ? null : (
       <form action={action} className="flex flex-col gap-2 rounded-[6px] border border-border p-3">
         <label className="text-sm text-muted">Add a scan</label>
         <div className="flex flex-wrap items-center gap-2">
@@ -90,6 +94,7 @@ export function MaterialPoolShelf({ items }: { items: MaterialPoolItemView[] }) 
         </div>
         {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
       </form>
+      )}
     </div>
   );
 }

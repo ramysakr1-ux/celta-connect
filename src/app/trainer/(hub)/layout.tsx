@@ -5,7 +5,7 @@ import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -23,6 +23,11 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   const profile = session?.profile ?? null;
   const isRealStaff = profile?.role === "trainer" || profile?.role === "admin";
   const isAssessor = !isRealStaff && Boolean(await getAssessorCourseId());
+  // for-claude-code-assessor-tour-mode.md: the trimmed 3-tab set is the
+  // pack's own boundary (Roster/Attendance register/Grades Report only) --
+  // a touring assessor gets the real trainer tab set instead, since the
+  // whole point is letting them see how the platform actually works.
+  const tourMode = isAssessor && (await isAssessorTourMode());
 
   // Chat is trainer-only, no admin exception -- see migration 0039's
   // "you cannot be on the course unless registered as a trainer" rule.
@@ -83,7 +88,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             <Link href={isAssessor ? "/assessor" : "/trainer"} className="block shrink-0">
               <Wordmark size="header" />
             </Link>
-            <TrainerTabs rosterOnly={isAssessor} />
+            <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} />
           </div>
           <div className="flex shrink-0 items-center gap-3">
             {switcherCourses.length > 1 && profile?.course_id ? (
