@@ -10,6 +10,7 @@ import { BranchFilter } from "@/app/centre/branch-filter";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
+import { HeaderDesignerCredit } from "@/components/designer-credit";
 
 // Centre Admin has its own chrome, deliberately outside /dashboard: the layout
 // spec gives it a header with a "Centre admin" pill and exactly THREE tabs
@@ -61,6 +62,7 @@ export default async function CentreLayout({ children }: { children: React.React
             Centre admin
           </span>
         </div>
+        <HeaderDesignerCredit landingPath="/centre" />
       </div>
       <div className="container flex items-center justify-end gap-4 pt-2 text-[13px] text-muted">
         <BranchFilter branches={switchable} />

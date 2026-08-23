@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { Wordmark } from "@/components/wordmark";
 
 // Corrected 2026-08-20 per Centre-Admin-Complete-Spec.md's explicit
@@ -44,15 +47,37 @@ import { Wordmark } from "@/components/wordmark";
 // row themselves, so top-3 (aligned with the ~56px logo row) is correct
 // again -- back from top-16, which was only ever a workaround for name/
 // sign-out still sharing row 1.
-export function DesignerCredit({ className = "" }: { className?: string }) {
-  return (
-    <div className={`pointer-events-none fixed top-3 right-3 z-20 ${className}`}>
-      <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/85 px-2 py-1 text-[11px] text-muted backdrop-blur-sm">
-        <Wordmark size="icon" iconSizePx={16} />
-        <span>
-          designed and built by <span className="text-ink">Ramy</span>
-        </span>
+// Ramy, 23 Aug 2026 (sixth pass): "doesn't need to travel with me when I
+// scroll down" -- `fixed` pins it to the viewport, so it stayed visible
+// the whole time you scrolled instead of scrolling away with the header
+// like everything else up there. `pinned={false}` renders it as a normal
+// in-flow element instead (used by the two-row headers above, which have
+// a real slot for it now); `pinned` (the default) keeps the old fixed
+// behavior for the pages that only ever call this with no wrapping slot
+// to sit in.
+export function DesignerCredit({ className = "", pinned = true }: { className?: string; pinned?: boolean }) {
+  const pill = (
+    <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/85 px-2 py-1 text-[11px] text-muted backdrop-blur-sm">
+      <Wordmark size="icon" iconSizePx={16} />
+      <span>
+        designed and built by <span className="text-ink">Ramy</span>
       </span>
-    </div>
+    </span>
   );
+
+  if (!pinned) return <div className={className}>{pill}</div>;
+
+  return <div className={`pointer-events-none fixed top-3 right-3 z-20 ${className}`}>{pill}</div>;
+}
+
+// For a layout's own header row (centre/layout.tsx, dashboard/layout.tsx):
+// the layout wraps every sub-route (Roles/Import/Settings under Centre
+// Admin; every /dashboard/* page under Course Admin's shared layout), but
+// the credit is landing-page-only. A layout has no page-level prop to key
+// off, so this checks the live pathname client-side instead -- renders
+// nothing at all on any route except the one landing path given.
+export function HeaderDesignerCredit({ landingPath }: { landingPath: string }) {
+  const pathname = usePathname();
+  if (pathname !== landingPath) return null;
+  return <DesignerCredit pinned={false} />;
 }

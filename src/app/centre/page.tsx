@@ -5,7 +5,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, canView } from "@/lib/auth/centre-permissions";
 import { computeAssessorCentreHistory } from "@/lib/assessor-course-history";
-import { DesignerCredit } from "@/components/designer-credit";
 
 // Centre Admin's Overview.
 //
@@ -417,7 +416,6 @@ export default async function CentreOverviewPage({
         </div>
       ) : null}
 
-      <DesignerCredit />
     </div>
   );
 }

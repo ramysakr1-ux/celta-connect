@@ -8,6 +8,7 @@ import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { HeaderDesignerCredit } from "@/components/designer-credit";
 
 export default async function DashboardLayout({
   children,
@@ -39,12 +40,13 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-border">
-        {/* Two rows on the right (Ramy, 23 Aug 2026): row 1 has empty
-            headroom for the fixed DesignerCredit badge (rendered from the
-            landing page itself, not here -- it must stay page-scoped so it
-            doesn't leak onto every /dashboard/* route); row 2 carries name
-            + sign out, which used to collide with the credit when both sat
-            on the same line. */}
+        {/* Two rows on the right (Ramy, 23 Aug 2026): row 1 carries the
+            credit via HeaderDesignerCredit, which checks the live pathname
+            itself and renders nothing off /dashboard/admin -- landing-only,
+            without leaking onto every /dashboard/* route this layout wraps.
+            No longer `fixed`: it scrolls away with the header now instead of
+            staying pinned to the viewport. Row 2 carries name + sign out,
+            which used to collide with the credit when both sat on one line. */}
         <div className="container flex h-14 items-center justify-between gap-6">
           {/* The logo keeps you in Course Admin. It used to link to /dashboard,
               whose landing preference sends anyone holding a centre role to
@@ -64,6 +66,7 @@ export default async function DashboardLayout({
               </span>
             ) : null}
           </Link>
+          <HeaderDesignerCredit landingPath="/dashboard/admin" />
         </div>
         <div className="container flex items-center justify-end gap-4 pb-2.5 text-sm text-muted">
           <span>{profile?.full_name ?? email}</span>
