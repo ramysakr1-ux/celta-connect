@@ -375,7 +375,7 @@ export default async function CentreOverviewPage({
           {canView(ctx.roles, "volunteers.view") ? (
             <Link
               href="/centre/volunteers"
-              className="flex items-center justify-between gap-3 rounded-[10px] border border-border bg-card px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_18%,var(--color-card))]"
+              className="flex items-center justify-between gap-3 rounded-[10px] border border-border bg-card px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
             >
               <div className="flex flex-col gap-0.5">
                 <h2 className="font-serif text-base text-ink">Volunteer pool</h2>
@@ -391,7 +391,7 @@ export default async function CentreOverviewPage({
           {canView(ctx.roles, "courseAdmin.view") && assessorHistory.length > 0 ? (
             <Link
               href="/centre/assessor-history"
-              className="flex items-center justify-between gap-3 rounded-[10px] border border-border bg-card px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_18%,var(--color-card))]"
+              className="flex items-center justify-between gap-3 rounded-[10px] border border-border bg-card px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
             >
               <div className="flex flex-col gap-0.5">
                 <h2 className="font-serif text-base text-ink">Assessor history</h2>

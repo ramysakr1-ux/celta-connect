@@ -46,8 +46,8 @@ export function PipelineFunnel({
               style={{ flex: 1 + s.count / Math.max(maxCount, 1) }}
               className={`flex min-w-0 flex-col gap-1.5 rounded-[6px] border-t-[3px] px-3.5 py-3 text-left transition-colors ${
                 on
-                  ? "border-t-primary bg-[color-mix(in_oklab,var(--color-primary)_26%,var(--color-card))] border border-primary/30"
-                  : "border-t-border-faint border border-border bg-transparent hover:bg-[color-mix(in_oklab,var(--color-primary)_18%,var(--color-card))]"
+                  ? "border-t-primary bg-[color-mix(in_oklab,var(--color-primary)_42%,var(--color-card))] border border-primary/30"
+                  : "border-t-border-faint border border-border bg-transparent hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
               }`}
             >
               <div className="flex items-baseline justify-between gap-2">

@@ -90,17 +90,22 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // candidates only from the course's Day-10 divergence session on.
   if (!volunteer.signup_completed_at) {
     return (
-      <div className="min-h-screen bg-tint-volunteer">
-        <div className="mx-auto flex max-w-xl flex-col gap-6 p-6 sm:p-10">
-          <div>
-            <p className="text-sm font-medium text-muted uppercase tracking-wide">{course?.name ?? "Your course"}</p>
-            <h1 className="mt-1 font-serif text-3xl text-ink">Welcome, {volunteer.name}!</h1>
-            <p className="mt-2 text-sm text-muted">
-              Before your first class, tell us a bit about yourself -- this helps your teachers get to know you.
-            </p>
-          </div>
-          <div className="card p-6">
-            <VolunteerSignupForm token={token} questions={SIGNUP_QUESTIONS} />
+      <div className="min-h-screen bg-background">
+        <div className="container flex items-center gap-4 py-6">
+          <Wordmark size="header" />
+        </div>
+        <div className="container pb-16">
+          <div className="frame mx-auto flex max-w-xl flex-col gap-6 p-6">
+            <div>
+              <p className="text-sm font-medium text-muted uppercase tracking-wide">{course?.name ?? "Your course"}</p>
+              <h1 className="mt-1 font-serif text-3xl text-ink">Welcome, {volunteer.name}!</h1>
+              <p className="mt-2 text-sm text-muted">
+                Before your first class, tell us a bit about yourself -- this helps your teachers get to know you.
+              </p>
+            </div>
+            <div className="card p-6">
+              <VolunteerSignupForm token={token} questions={SIGNUP_QUESTIONS} />
+            </div>
           </div>
         </div>
       </div>
@@ -205,14 +210,17 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   const milestones = milestonesFor(certificateHoursThreshold);
 
   return (
-    <div className="min-h-screen bg-tint-volunteer">
-      <div className="mx-auto flex max-w-3xl flex-col gap-6 p-6 sm:p-10">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4">
-          <Wordmark size="header" />
-          <p className="text-sm font-medium text-ink">{volunteer.name} · volunteer student</p>
-        </div>
+    <div className="min-h-screen bg-background">
+      {/* Header -- full container width, mark pinned left, not buried in a
+          narrow centered column (Ramy, 23 Aug: "the logo will also move to
+          the top left of the page rather than just being in the middle"). */}
+      <div className="container flex items-center justify-between gap-4 py-6">
+        <Wordmark size="header" />
+        <p className="text-sm font-medium text-ink">{volunteer.name} · volunteer student</p>
+      </div>
 
+      <div className="container pb-16">
+      <div className="frame flex flex-col gap-6 p-6">
         <div>
           <p className="text-sm font-medium text-muted uppercase tracking-wide">{course?.name ?? "Your course"}</p>
           <h1 className="mt-1 font-serif text-2xl text-ink sm:text-3xl">
@@ -258,38 +266,44 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
           </div>
         ) : null}
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-[1.3fr_1fr]">
-          <div className="flex flex-col gap-6">
-            {/* Your classes */}
-            <div className="card p-6">
-              <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Your classes</p>
-              {classes.length === 0 ? (
-                <p className="mt-2 text-sm text-muted">No classes scheduled yet.</p>
-              ) : (
-                <div className="mt-2 flex flex-col">
-                  {classes.slice(0, 12).map((c, i) => (
-                    <div key={c.eventId} className={`flex items-center justify-between gap-3 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                      <div>
-                        <p className="text-sm text-ink">{formatEventDate(c.eventDate)}</p>
-                        <p className="text-xs text-muted">{c.courseName}</p>
-                      </div>
-                      <span
-                        className={`pill ${c.attended === null ? "pill-info" : c.attended ? "pill-success" : "pill-warning"}`}
-                      >
-                        {c.attended === null ? "Upcoming" : c.attended ? "Attended" : "Missed"}
-                      </span>
+        {/* Ramy, 23 Aug: "those cards could live next to each other instead
+            of one on top of the other... the full page will be used" --
+            three columns at desktop width instead of a 2-col split nested
+            inside a max-w-3xl column, so Materials/Hours/This-course sit
+            beside Your classes rather than stacking under it. Top rules
+            alternate teal/gold so no two touching cards share a color
+            (none of these carry a warning/error meaning, so alternation is
+            the whole rule here). */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Your classes */}
+          <div className="card p-6">
+            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Your classes</p>
+            {classes.length === 0 ? (
+              <p className="mt-2 text-sm text-muted">No classes scheduled yet.</p>
+            ) : (
+              <div className="mt-2 flex flex-col">
+                {classes.slice(0, 12).map((c, i) => (
+                  <div key={c.eventId} className={`flex items-center justify-between gap-3 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+                    <div>
+                      <p className="text-sm text-ink">{formatEventDate(c.eventDate)}</p>
+                      <p className="text-xs text-muted">{c.courseName}</p>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <MaterialsCard materials={materials} />
+                    <span
+                      className={`pill ${c.attended === null ? "pill-info" : c.attended ? "pill-success" : "pill-warning"}`}
+                    >
+                      {c.attended === null ? "Upcoming" : c.attended ? "Attended" : "Missed"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
+          <MaterialsCard materials={materials} />
 
           <div className="flex flex-col gap-6">
             {/* Your hours */}
-            <div className="card p-6">
+            <div className="card card-gold p-6">
               <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Your hours</p>
               <p className="mt-1 font-serif text-3xl text-ink">{hoursCredited.toFixed(1)}h</p>
               <p className="mt-1 text-sm text-muted">
@@ -343,6 +357,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
             </p>
           ) : null}
         </div>
+      </div>
       </div>
 
       <DesignerCredit />

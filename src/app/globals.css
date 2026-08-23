@@ -52,13 +52,12 @@
   --color-accent-foreground: oklch(32% 0.05 195);
   --color-ring: oklch(37.5% 0.058 195);
 
-  /* for-claude-code-universal-layering-final.md's one explicit exception:
-     "Only the background/layering values above skip Volunteer/Student,
-     which keeps its own current background treatment; its cards still get
-     the colored top rule like everywhere else." The other three role tints
-     (in-course, Centre Admin, Course Admin) are retired -- removed from
-     each area's layout boundary, not just unused here. */
-  --color-tint-volunteer: oklch(80% 0.03 335); /* dusty plum -- Volunteer/Student only, kept by explicit exception */
+  /* Volunteer/Student's background exception (for-claude-code-universal-
+     layering-final.md) was retired 23 Aug 2026 (Ramy: "fully unify it,"
+     dropping the last named exception) -- it now uses the exact same
+     background/frame/card levels as every other screen, no per-role tint
+     anywhere in the app any more. --color-tint-volunteer itself removed;
+     if you're looking for it, it's gone on purpose. */
 
   /* status (tint bg + matching text) -- on-track/at-risk/pending are the
      three variants every existing status-pill usage already consumes;
@@ -97,7 +96,6 @@
   --color-frame: var(--color-frame);
   --color-card: var(--color-card);
   --color-border: var(--color-border);
-  --color-tint-volunteer: var(--color-tint-volunteer);
   --color-ink: var(--color-ink);
   --color-primary: var(--color-primary);
   --color-primary-foreground: var(--color-primary-foreground);
@@ -187,11 +185,11 @@ h6 {
   }
 
   .card-interactive:hover {
-    background-color: color-mix(in oklab, var(--color-primary) 18%, var(--color-card));
+    background-color: color-mix(in oklab, var(--color-primary) 30%, var(--color-card));
   }
 
   .card-interactive.is-active {
-    background-color: color-mix(in oklab, var(--color-primary) 26%, var(--color-card));
+    background-color: color-mix(in oklab, var(--color-primary) 42%, var(--color-card));
     font-weight: 600;
   }
 
@@ -226,11 +224,11 @@ h6 {
   }
 
   .list-row-interactive:hover {
-    background-color: color-mix(in oklab, var(--color-primary) 18%, var(--color-card));
+    background-color: color-mix(in oklab, var(--color-primary) 30%, var(--color-card));
   }
 
   .list-row-interactive.is-active {
-    background-color: color-mix(in oklab, var(--color-primary) 26%, var(--color-card));
+    background-color: color-mix(in oklab, var(--color-primary) 42%, var(--color-card));
     font-weight: 600;
   }
 

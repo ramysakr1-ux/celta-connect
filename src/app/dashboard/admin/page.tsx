@@ -167,7 +167,7 @@ export default async function AdminDashboardPage() {
                     <Link
                       key={row.course.id}
                       href={`/dashboard/admin/courses/${row.course.id}`}
-                      className="flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_18%,var(--color-card))]"
+                      className="flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
                     >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-ink">{row.course.name}</p>
@@ -206,7 +206,7 @@ export default async function AdminDashboardPage() {
               <Link
                 key={m.label}
                 href={m.href}
-                className="-mx-2 flex items-center justify-between gap-3 border-b border-border-faint px-2 py-2 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_18%,var(--color-card))]"
+                className="-mx-2 flex items-center justify-between gap-3 border-b border-border-faint px-2 py-2 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
               >
                 <span className="text-xs text-ink">{m.label}</span>
                 <span className="text-xs tabular-nums text-muted">
