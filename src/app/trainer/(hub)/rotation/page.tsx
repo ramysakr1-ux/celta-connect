@@ -11,6 +11,7 @@ import { RunningOrderPanel } from "@/app/trainer/(hub)/rotation/running-order-pa
 import { RevealPeerNotesForm } from "@/app/trainer/(hub)/rotation/reveal-peer-notes-form";
 import { ClassGroupingForm } from "@/app/trainer/(hub)/rotation/class-grouping-form";
 import { AimConstraintsForm } from "@/app/trainer/(hub)/rotation/aim-constraints-form";
+import { RotationTabs } from "@/app/trainer/(hub)/rotation/rotation-tabs";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CourseStatus } from "@/lib/supabase/types";
@@ -142,25 +143,8 @@ export default async function TrainerRotationPage() {
   const paired = (subgroups ?? []).filter((g) => g.tp_group_id);
   const unpaired = (subgroups ?? []).filter((g) => !g.tp_group_id);
 
-  return (
-    <LaptopOnlyGate task="Teaching Practice rotation">
-    <div className="flex flex-col gap-6">
-      <div className="sheet flex items-start justify-between gap-4 p-6">
-        <div>
-          <h1 className="font-serif text-xl text-ink">Teaching Practice rotation</h1>
-          <p className="mt-2 text-muted">
-            Manage each subgroup&apos;s rotation order, schedule which coursebook feeds each TP
-            number, and assign a round once library content is published.
-          </p>
-        </div>
-        <Link
-          href="/trainer/rotation/override"
-          className="shrink-0 rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
-        >
-          Manual override →
-        </Link>
-      </div>
-
+  const complianceWarnings = (
+    <>
       {looksIntensive ? (
         <div className="sheet p-6">
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Intensive TP block</p>
@@ -203,7 +187,11 @@ export default async function TrainerRotationPage() {
           ) : null}
         </div>
       ) : null}
+    </>
+  );
 
+  const boardSection = (
+    <>
       {(subgroups ?? []).length === 0 ? (
         <div className="sheet p-6">
           <p className="text-muted">
@@ -298,69 +286,108 @@ export default async function TrainerRotationPage() {
           planByTraineeAndTp={planByTraineeAndTp}
         />
       ))}
+    </>
+  );
 
-      <div className="sheet p-6">
-        <h2 className="font-serif text-lg text-ink">Peer observation notes</h2>
-        <p className="mt-1 text-sm text-muted">
-          Reveal a TP day&apos;s peer notes for everyone at once -- notes stay private until you do.
-          Nothing to reveal for a lesson nobody has noted yet.
-        </p>
-        <div className="mt-3">
-          <RevealPeerNotesForm subgroups={(subgroups ?? []).map((g) => ({ id: g.id, name: g.name }))} />
-        </div>
+  const peerNotesSection = (
+    <div className="sheet p-6">
+      <h2 className="font-serif text-lg text-ink">Peer observation notes</h2>
+      <p className="mt-1 text-sm text-muted">
+        Reveal a TP day&apos;s peer notes for everyone at once -- notes stay private until you do.
+        Nothing to reveal for a lesson nobody has noted yet.
+      </p>
+      <div className="mt-3">
+        <RevealPeerNotesForm subgroups={(subgroups ?? []).map((g) => ({ id: g.id, name: g.name }))} />
       </div>
+    </div>
+  );
 
-      <div className="sheet p-6">
-        <h2 className="font-serif text-lg text-ink">1-to-1 / small-group TP</h2>
-        <p className="mt-1 text-sm text-muted">
-          Handbook: one of the six assessed TP lessons may be given to a single or paired student instead of the
-          whole class, planned in advance -- never the final two (TP7/TP8), and only one per candidate for the
-          course.
+  const oneToOneSection = (
+    <div className="sheet p-6">
+      <h2 className="font-serif text-lg text-ink">1-to-1 / small-group TP</h2>
+      <p className="mt-1 text-sm text-muted">
+        Handbook: one of the six assessed TP lessons may be given to a single or paired student instead of the
+        whole class, planned in advance -- never the final two (TP7/TP8), and only one per candidate for the
+        course.
+      </p>
+      {oneToOnePlan ? (
+        <p className="mt-3 text-sm text-ink">
+          Currently: <span className="font-semibold">{nameByTraineeId.get(oneToOnePlan.trainee_id) ?? "Unknown"}</span>,{" "}
+          TP{oneToOnePlan.tp_number}.
         </p>
-        {oneToOnePlan ? (
-          <p className="mt-3 text-sm text-ink">
-            Currently: <span className="font-semibold">{nameByTraineeId.get(oneToOnePlan.trainee_id) ?? "Unknown"}</span>,{" "}
-            TP{oneToOnePlan.tp_number}.
-          </p>
-        ) : (
-          <p className="mt-3 text-sm text-muted">No trainee has a 1-to-1/small-group TP set yet.</p>
-        )}
-        <div className="mt-4">
-          <ClassGroupingForm trainees={roster ?? []} />
-        </div>
+      ) : (
+        <p className="mt-3 text-sm text-muted">No trainee has a 1-to-1/small-group TP set yet.</p>
+      )}
+      <div className="mt-4">
+        <ClassGroupingForm trainees={roster ?? []} />
       </div>
+    </div>
+  );
 
-      <div className="sheet p-6">
-        <h2 className="font-serif text-lg text-ink">TP7/8 aim-type constraints</h2>
-        <p className="mt-1 text-sm text-muted">
-          TP7 and TP8 aren&apos;t rotation-assigned -- trainees pick their own topic. Restrict which main-aim types
-          are on offer for each slot, if you want to. Coverage and remediation suggestions shown to trainees always
-          stay inside whatever you set here.
-        </p>
-        <div className="mt-4">
-          <AimConstraintsForm
-            tp7AllowedAimTypes={courseSettings?.tp7_allowed_aim_types ?? null}
-            tp8AllowedAimTypes={courseSettings?.tp8_allowed_aim_types ?? null}
+  const aimConstraintsSection = (
+    <div className="sheet p-6">
+      <h2 className="font-serif text-lg text-ink">TP7/8 aim-type constraints</h2>
+      <p className="mt-1 text-sm text-muted">
+        TP7 and TP8 aren&apos;t rotation-assigned -- trainees pick their own topic. Restrict which main-aim types
+        are on offer for each slot, if you want to. Coverage and remediation suggestions shown to trainees always
+        stay inside whatever you set here.
+      </p>
+      <div className="mt-4">
+        <AimConstraintsForm
+          tp7AllowedAimTypes={courseSettings?.tp7_allowed_aim_types ?? null}
+          tp8AllowedAimTypes={courseSettings?.tp8_allowed_aim_types ?? null}
+        />
+      </div>
+    </div>
+  );
+
+  const coursebookSection = (
+    <div className="sheet p-6">
+      <h2 className="font-serif text-lg text-ink">Coursebook schedule</h2>
+      <p className="mt-1 text-sm text-muted">
+        Which coursebook&apos;s TP Points Library feeds each TP number.
+      </p>
+      <div className="mt-3 flex flex-col gap-3">
+        {TP_NUMBERS.map((tpNumber) => (
+          <ScheduleForm
+            key={tpNumber}
+            tpNumber={tpNumber}
+            coursebooks={coursebooks ?? []}
+            currentCoursebookId={coursebookByTpNumber.get(tpNumber) ?? null}
           />
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <LaptopOnlyGate task="Teaching Practice rotation">
+    <div className="flex flex-col gap-6">
+      <div className="sheet flex items-start justify-between gap-4 p-6">
+        <div>
+          <h1 className="font-serif text-xl text-ink">Teaching Practice rotation</h1>
+          <p className="mt-2 text-muted">
+            Manage each subgroup&apos;s rotation order, schedule which coursebook feeds each TP
+            number, and assign a round once library content is published.
+          </p>
         </div>
+        <Link
+          href="/trainer/rotation/override"
+          className="shrink-0 rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
+        >
+          Manual override →
+        </Link>
       </div>
 
-      <div className="sheet p-6">
-        <h2 className="font-serif text-lg text-ink">Coursebook schedule</h2>
-        <p className="mt-1 text-sm text-muted">
-          Which coursebook&apos;s TP Points Library feeds each TP number.
-        </p>
-        <div className="mt-3 flex flex-col gap-3">
-          {TP_NUMBERS.map((tpNumber) => (
-            <ScheduleForm
-              key={tpNumber}
-              tpNumber={tpNumber}
-              coursebooks={coursebooks ?? []}
-              currentCoursebookId={coursebookByTpNumber.get(tpNumber) ?? null}
-            />
-          ))}
-        </div>
-      </div>
+      {complianceWarnings}
+
+      <RotationTabs
+        board={boardSection}
+        peerNotes={peerNotesSection}
+        oneToOne={oneToOneSection}
+        aimConstraints={aimConstraintsSection}
+        coursebooks={coursebookSection}
+      />
     </div>
     </LaptopOnlyGate>
   );
