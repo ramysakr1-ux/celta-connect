@@ -26,8 +26,8 @@ export function CentreTabs() {
           <Link
             key={tab.href}
             href={tab.href}
-            className={`-mb-[3px] border-b-2 px-3 pb-2 text-sm font-medium ${
-              active ? "border-primary text-primary" : "border-transparent text-muted hover:text-ink"
+            className={`-mb-[3px] border-b-2 px-3 pb-2 text-sm font-medium transition-colors duration-150 ${
+              active ? "border-primary text-primary" : "border-transparent text-muted hover:border-primary/40 hover:text-primary"
             }`}
           >
             {tab.label}

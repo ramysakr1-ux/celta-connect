@@ -187,11 +187,11 @@ h6 {
   }
 
   .card-interactive:hover {
-    background-color: color-mix(in oklab, var(--color-primary) 10%, var(--color-card));
+    background-color: color-mix(in oklab, var(--color-primary) 18%, var(--color-card));
   }
 
   .card-interactive.is-active {
-    background-color: color-mix(in oklab, var(--color-primary) 16%, var(--color-card));
+    background-color: color-mix(in oklab, var(--color-primary) 26%, var(--color-card));
     font-weight: 600;
   }
 
@@ -226,11 +226,11 @@ h6 {
   }
 
   .list-row-interactive:hover {
-    background-color: color-mix(in oklab, var(--color-primary) 10%, var(--color-card));
+    background-color: color-mix(in oklab, var(--color-primary) 18%, var(--color-card));
   }
 
   .list-row-interactive.is-active {
-    background-color: color-mix(in oklab, var(--color-primary) 16%, var(--color-card));
+    background-color: color-mix(in oklab, var(--color-primary) 26%, var(--color-card));
     font-weight: 600;
   }
 

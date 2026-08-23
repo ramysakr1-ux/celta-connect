@@ -8,7 +8,6 @@ import { can } from "@/lib/auth/centre-permissions";
 import { CentreTabs } from "@/app/centre/centre-tabs";
 import { BranchFilter } from "@/app/centre/branch-filter";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { DesignerCredit } from "@/components/designer-credit";
 import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 
@@ -97,10 +96,6 @@ export default async function CentreLayout({ children }: { children: React.React
           </Link>
         </div>
       ) : null}
-
-      <div className="container pb-10">
-        <DesignerCredit />
-      </div>
 
       {adminChatRooms.length > 0 ? <AdminChatBar profileId={profile.id} rooms={adminChatRooms} /> : null}
     </div>

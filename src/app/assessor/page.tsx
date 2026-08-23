@@ -389,7 +389,7 @@ export default async function AssessorPage({
               <Link
                 key={c.traineeId}
                 href={`/assessor?candidate=${c.traineeId}`}
-                className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-card))]"
+                className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_18%,var(--color-card))]"
                 style={{
                   background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))" : CARD,
                   border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 35%, transparent)" : BORDER}`,

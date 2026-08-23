@@ -63,8 +63,8 @@ export function TrainerTabs({ rosterOnly = false }: { rosterOnly?: boolean }) {
           <Link
             key={tab.href}
             href={href}
-            className={`flex h-full items-center border-b-2 text-sm font-medium ${
-              active ? "border-primary text-primary" : "border-transparent text-muted hover:text-ink"
+            className={`flex h-full items-center border-b-2 text-sm font-medium transition-colors duration-150 ${
+              active ? "border-primary text-primary" : "border-transparent text-muted hover:border-primary/40 hover:text-primary"
             }`}
           >
             {tab.label}
