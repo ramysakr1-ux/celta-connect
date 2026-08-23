@@ -286,7 +286,10 @@ export default async function AssessorPage({
         </a>
       </header>
 
-      <div style={{ padding: "28px 32px 44px", display: "flex", flexDirection: "column", gap: 22 }}>
+      <div
+        className="frame"
+        style={{ margin: "24px 32px 44px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: 22 }}
+      >
         <div>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 20 }}>
             <div>
@@ -341,7 +344,7 @@ export default async function AssessorPage({
 
         <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 20, alignItems: "start" }}>
           {openCandidate ? (
-            <div style={{ background: CARD, border: "1px solid color-mix(in oklab, oklch(38% 0.072 195) 32%, transparent)", borderRadius: 8, overflow: "hidden" }}>
+            <div style={{ background: CARD, border: "1px solid color-mix(in oklab, oklch(38% 0.072 195) 32%, transparent)", borderTop: `3px solid ${TEAL}`, borderRadius: 8, overflow: "hidden" }}>
               <div
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
@@ -386,9 +389,11 @@ export default async function AssessorPage({
               <Link
                 key={c.traineeId}
                 href={`/assessor?candidate=${c.traineeId}`}
+                className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-card))]"
                 style={{
                   background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))" : CARD,
                   border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 35%, transparent)" : BORDER}`,
+                  borderTop: `3px solid ${c.flaggedIssue ? AMBER : TEAL}`,
                   borderRadius: 8, padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10,
                   textDecoration: "none",
                 }}
@@ -447,6 +452,7 @@ export default async function AssessorPage({
                 <div
                   style={{
                     background: CARD, border: "1px solid color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
+                    borderTop: `3px solid ${TEAL}`,
                     borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10,
                   }}
                 >
@@ -476,6 +482,7 @@ export default async function AssessorPage({
               <div
                 style={{
                   background: CARD, border: "1px solid color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
+                  borderTop: `3px solid ${TEAL}`,
                   borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
                 }}
               >
@@ -581,7 +588,12 @@ export default async function AssessorPage({
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>
                 Not in this pack
               </p>
-              <div style={{ background: "oklch(96.4% 0.014 85)", border: `1px solid ${BORDER}`, borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9 }}>
+              <div
+                style={{
+                  background: "var(--color-frame)", border: `1px solid ${BORDER}`, borderTop: `3px solid ${TEAL}`,
+                  borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
+                }}
+              >
                 {[
                   { title: "The assessor's own report", why: "Goes to Cambridge's own secure system, not here." },
                   { title: "Staff chat", why: "Trainer-only, resets on the centre's schedule." },
@@ -651,7 +663,12 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
       <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(51% 0.017 70)", marginBottom: 8 }}>
         {title}
       </p>
-      <div style={{ background: "var(--color-card)", border: "1px solid oklch(88% 0.016 82)", borderRadius: 7, overflow: "hidden" }}>
+      <div
+        style={{
+          background: "var(--color-card)", border: "1px solid oklch(88% 0.016 82)", borderTop: "3px solid oklch(37.5% 0.058 195)",
+          borderRadius: 7, overflow: "hidden",
+        }}
+      >
         {children}
       </div>
     </div>

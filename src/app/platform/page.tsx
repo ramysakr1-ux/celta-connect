@@ -32,7 +32,8 @@ export default async function PlatformPage() {
   }
 
   return (
-    <div className="container flex flex-col gap-6 py-8">
+    <div className="container py-8">
+      <div className="frame flex flex-col gap-6 p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">{greeting.dateEyebrow}</p>
@@ -90,6 +91,7 @@ export default async function PlatformPage() {
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );

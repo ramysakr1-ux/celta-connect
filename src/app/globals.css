@@ -34,7 +34,7 @@
      alternating light/dark levels instead -- page (sand) -> outer frame
      (light) -> card (darker) -> innermost element (light again). */
   --color-background: oklch(92.5% 0.012 85); /* level 1: page ground, universal */
-  --color-frame: oklch(96.4% 0.014 85); /* level 2 (outer frame/board) and level 4 (innermost element) -- same value, alternating depth is what reads as layered rather than one flat wash */
+  --color-frame: oklch(98% 0.008 85); /* level 2 (outer frame/board) and level 4 (innermost element) -- same value, alternating depth is what reads as layered rather than one flat wash. Brightened 23 Aug 2026 per Ramy, live-previewed against oklch(96.4% 0.014 85) first. */
   --color-card: oklch(93% 0.024 80); /* level 3: cards/panels sitting inside the frame -- darker than the frame around them, on purpose */
   --color-border: oklch(88% 0.016 82); /* hairline neutral, all four levels */
   --color-ink: oklch(23.5% 0.017 65); /* near-black warm ink (body text) */
