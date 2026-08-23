@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { centerInfoForUserId, joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
+import { authEmailShell, p } from "@/lib/email-layout";
 import { isAuthRateLimited } from "@/lib/auth-rate-limit";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 
@@ -61,17 +62,19 @@ export async function sendSignInLink(_prevState: SignInLinkState, formData: Form
   // accounts), but the send itself is now recorded either way.
   try {
     const centerInfo = data.user ? await centerInfoForUserId(admin, data.user.id) : null;
+    const centerName = centerInfo?.name ?? "Connect";
     await sendApplicantEmail({
-      centerName: centerInfo?.name ?? "Connect",
+      centerName,
       centerAdmissionsEmail: null,
       to: email,
       subject: "your sign-in link",
-      html: `
-        <h2>Sign in to Connect</h2>
-        <p>Click below to sign in -- no password needed.</p>
-        <p><a href="${confirmUrl}">Sign in &rarr;</a></p>
-        <p style="color:#888;font-size:13px">If you didn't request this, you can safely ignore this email.</p>
-      `,
+      html: authEmailShell({
+        centerName,
+        heading: "Sign in to Connect",
+        body: p("Click below to sign in -- no password needed."),
+        cta: { label: "Sign in", url: confirmUrl },
+        footnote: "If you didn't request this, you can safely ignore this email.",
+      }),
       centerId: centerInfo?.id,
       applicantId: null,
       type: "sign_in_link",

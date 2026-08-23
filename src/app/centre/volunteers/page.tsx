@@ -7,6 +7,8 @@ import { can, canView } from "@/lib/auth/centre-permissions";
 import { computeSessionTicks } from "@/lib/volunteer-attendance";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { VolunteerPoolRow } from "@/app/centre/volunteer-pool-row";
+import { Wordmark } from "@/components/wordmark";
+import { toLocalIso } from "@/lib/timetable-grid";
 
 // Dedicated screen per Volunteer Pool.dc.html (Desktop/Connect.zip handoff,
 // 2026-08-20): "reached from the 'Volunteer pool' card on the Centre Admin
@@ -33,9 +35,11 @@ export default async function CentreVolunteersPage({
   const scope = branch && mine.includes(branch) ? [branch] : mine;
 
   const admin = createAdminClient();
-  const { data: courses } = await admin.from("courses").select("id, name, center_id").in("center_id", scope);
+  const { data: courses } = await admin.from("courses").select("id, name, center_id, end_date").in("center_id", scope);
   const courseIds = (courses ?? []).map((c) => c.id);
   const courseNameById = new Map((courses ?? []).map((c) => [c.id, c.name]));
+  const courseEndById = new Map((courses ?? []).map((c) => [c.id, c.end_date]));
+  const today = toLocalIso(new Date());
 
   const { data: volunteers } =
     courseIds.length > 0
@@ -71,55 +75,94 @@ export default async function CentreVolunteersPage({
       );
       const sessions = computeSessionTicks(tpEvents ?? [], attendedEventIds, TP_LESSON_LENGTH_MINUTES);
       const hours = sessions.reduce((sum, s) => sum + s.creditedMinutes, 0) / 60;
-      return { ...g, hours };
+      // for-claude-code-volunteer-pool-header.md: "sage green for active
+      // volunteers, muted grey once a volunteer's course has ended" -- a
+      // volunteer linked across several courses reads as active as long as
+      // at least one of them hasn't ended yet.
+      const active = g.members.some((m) => {
+        const end = courseEndById.get(m.courseId);
+        return !end || end >= today;
+      });
+      return { ...g, hours, active };
     })
     .sort((a, b) => b.hours - a.hours);
 
   const canEdit = can(ctx.roles, "centre.settings.edit", ctx.overrides);
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Centre overview &middot; volunteers</p>
-          <h1 className="font-serif text-2xl text-ink">Volunteer pool</h1>
+    <div className="volunteer-surface -m-6 flex flex-col">
+      {/* for-claude-code-volunteer-pool-header.md: a dedicated sage/coral
+          header, same full-bleed break-out (-m-6 cancelling the shared
+          centre/layout.tsx frame's own p-6) as /centre/owner's dark header
+          -- the shared Centre Admin header/tabs above stay exactly as they
+          are; this is this one page's own band, not a layout-wide change. */}
+      <div className="volunteer-header flex h-[60px] shrink-0 items-center justify-between px-8">
+        <div className="flex items-center gap-3">
+          <Wordmark size="header" onDark tileBg="color-mix(in oklab, oklch(97% 0.008 88) 22%, transparent)" />
+          <span className="h-4 w-px" style={{ background: "color-mix(in oklab, oklch(97% 0.008 88) 25%, transparent)" }} aria-hidden="true" />
+          <span
+            className="rounded-[5px] px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] uppercase"
+            style={{
+              color: "oklch(97% 0.008 88)",
+              background: "color-mix(in oklab, oklch(97% 0.008 88) 14%, transparent)",
+              border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
+            }}
+          >
+            Centre Administrator
+          </span>
         </div>
-        <Link href="/centre" className="text-sm font-semibold text-muted hover:text-ink">
+        <Link href="/centre" className="text-[12.5px] font-semibold no-underline" style={{ color: "oklch(97% 0.008 88)", opacity: 0.8 }}>
           ← Overview
         </Link>
       </div>
 
-      <div className="card">
-        <div className="flex items-baseline justify-between border-b border-border px-5 py-4">
-          <h2 className="font-serif text-base text-ink">
-            {volunteerGroups.length} {volunteerGroups.length === 1 ? "person" : "people"}
-          </h2>
-          <span className="text-xs text-muted">{(volunteers ?? []).length} registrations across the centre</span>
+      <div className="flex flex-col gap-5 p-8">
+        <div className="flex flex-col gap-[3px]">
+          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Centre overview &middot; volunteers</p>
+          <h1 className="font-serif text-2xl text-ink">Volunteer pool</h1>
         </div>
-        {volunteerGroups.length === 0 ? (
-          <p className="px-5 py-3 text-xs text-muted">Nobody registered yet.</p>
-        ) : (
-          <div className="flex flex-col">
-            {volunteerGroups.map((g) => (
-              <VolunteerPoolRow
-                key={g.members[0].id}
-                name={g.name}
-                hours={g.hours}
-                members={g.members.map((m) => ({ id: m.id, courseName: courseNameById.get(m.courseId) ?? "Unknown course", level: m.level }))}
-                canEdit={canEdit}
-                linkOptions={volunteerGroups
-                  .filter((o) => o.members[0].id !== g.members[0].id)
-                  .map((o) => ({ id: o.members[0].id, name: o.name }))}
-              />
-            ))}
+
+        <div className="card rounded-[9px] border-t-[var(--vol-sage)]">
+          <div className="flex items-baseline justify-between border-b border-border px-5 py-4">
+            <h2 className="font-serif text-base text-ink">
+              {volunteerGroups.length} {volunteerGroups.length === 1 ? "person" : "people"}
+            </h2>
+            <span className="text-xs text-muted">{(volunteers ?? []).length} registrations across the centre</span>
           </div>
-        )}
-        <p className="border-t border-border-faint px-5 py-2.5 text-[11px] leading-[1.5] text-muted">
-          Linked automatically when a signup&apos;s email matches one already on file; otherwise link them
-          yourself above -- never guessed from name alone. Hours accumulate across every course a
-          volunteer&apos;s linked records span.
-        </p>
+          {volunteerGroups.length === 0 ? (
+            <p className="px-5 py-3 text-xs text-muted">Nobody registered yet.</p>
+          ) : (
+            <div className="flex flex-col">
+              {volunteerGroups.map((g) => (
+                <VolunteerPoolRow
+                  key={g.members[0].id}
+                  name={g.name}
+                  hours={g.hours}
+                  active={g.active}
+                  members={g.members.map((m) => ({ id: m.id, courseName: courseNameById.get(m.courseId) ?? "Unknown course", level: m.level }))}
+                  canEdit={canEdit}
+                  linkOptions={volunteerGroups
+                    .filter((o) => o.members[0].id !== g.members[0].id)
+                    .map((o) => ({ id: o.members[0].id, name: o.name }))}
+                />
+              ))}
+            </div>
+          )}
+          <p className="border-t border-border-faint px-5 py-2.5 text-[11px] leading-[1.5] text-muted">
+            Linked automatically when a signup&apos;s email matches one already on file; otherwise link them
+            yourself above -- never guessed from name alone. Hours accumulate across every course a
+            volunteer&apos;s linked records span.
+          </p>
+        </div>
       </div>
+
+      <style>{`
+        .volunteer-surface {
+          --vol-sage: oklch(35% 0.075 155);
+          --vol-coral: oklch(58% 0.14 25);
+        }
+        .volunteer-header { background: var(--vol-sage); border-bottom: 3px solid var(--vol-coral); }
+      `}</style>
     </div>
   );
 }

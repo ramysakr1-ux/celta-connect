@@ -3,6 +3,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { centerInfoForUserId, joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
+import { authEmailShell, p } from "@/lib/email-layout";
 import { isAuthRateLimited } from "@/lib/auth-rate-limit";
 
 export interface ForgotPasswordState {
@@ -59,17 +60,19 @@ export async function requestPasswordReset(
   // accounts), but the send itself is now recorded either way.
   try {
     const centerInfo = data.user ? await centerInfoForUserId(adminClient, data.user.id) : null;
+    const centerName = centerInfo?.name ?? "Connect";
     await sendApplicantEmail({
-      centerName: centerInfo?.name ?? "Connect",
+      centerName,
       centerAdmissionsEmail: null,
       to: email,
       subject: "reset your password",
-      html: `
-        <h2>Reset your password</h2>
-        <p>Someone requested a password reset for your Connect account.</p>
-        <p><a href="${confirmUrl}">Reset your password &rarr;</a></p>
-        <p style="color:#888;font-size:13px">If you didn't request this, you can safely ignore this email.</p>
-      `,
+      html: authEmailShell({
+        centerName,
+        heading: "Reset your password",
+        body: p("Someone requested a password reset for your Connect account."),
+        cta: { label: "Reset your password", url: confirmUrl },
+        footnote: "If you didn't request this, you can safely ignore this email.",
+      }),
       centerId: centerInfo?.id,
       applicantId: null,
       type: "password_reset",

@@ -100,7 +100,7 @@ export function ApplicationForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="full_name" className="text-sm text-muted">
-            Full name
+            Full name -- as on your passport
           </label>
           <input id="full_name" name="full_name" type="text" required className={inputClass} />
         </div>

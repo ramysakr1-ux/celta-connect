@@ -8,12 +8,16 @@ import { extractLevelCode, levelPillClass } from "@/lib/levels";
 export function VolunteerPoolRow({
   name,
   hours,
+  active,
   members,
   canEdit,
   linkOptions,
 }: {
   name: string;
   hours: number;
+  // for-claude-code-volunteer-pool-header.md: sage green while at least one
+  // linked course is still running, muted grey once every one has ended.
+  active: boolean;
   members: { id: string; courseName: string; level: string | null }[];
   canEdit: boolean;
   linkOptions: { id: string; name: string }[];
@@ -40,7 +44,12 @@ export function VolunteerPoolRow({
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-3.5">
-          <span className="text-xs text-muted tabular-nums">{hours.toFixed(1)} hrs</span>
+          <span
+            className="text-xs font-semibold tabular-nums"
+            style={{ color: active ? "oklch(35% 0.075 155)" : "var(--color-muted)" }}
+          >
+            {hours.toFixed(1)} hrs
+          </span>
           {canEdit && members.length === 1 ? (
             <LinkVolunteerControl volunteerStudentId={members[0].id} options={linkOptions} />
           ) : null}

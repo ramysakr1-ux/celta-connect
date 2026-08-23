@@ -1,9 +1,13 @@
 import "server-only";
-import { emailShell, p } from "@/lib/email-layout";
+import { authEmailShell, p } from "@/lib/email-layout";
 
 // Email #18, "Assessor visit pack" (design_handoff_all_emails,
 // full-email-specs.md). Copy is exact product copy from the spec, not
-// paraphrased -- only the facts are filled in.
+// paraphrased -- only the facts are filled in. for-claude-code-signin-
+// and-email-branding.md: this is the "assessor link" email named in that
+// spec's shared-shell list, so it moved off emailShell()'s spine system
+// onto authEmailShell()'s centre-branded header, same as sign-in link,
+// tutor invite, and password reset.
 export function buildAssessorInviteEmailHtml(input: {
   centerName: string;
   courseName: string;
@@ -18,9 +22,9 @@ export function buildAssessorInviteEmailHtml(input: {
       ? `${input.totalCandidates} -- including ${input.potentialFails} potential fail${input.potentialFails === 1 ? "" : "s"}`
       : `${input.totalCandidates}`;
 
-  return emailShell({
+  return authEmailShell({
+    centerName: input.centerName,
     heading: "Your assessment pack is ready",
-    tone: "teal",
     body:
       p(
         `The pack for ${input.courseName} at ${input.centerName} is prepared and read-only: portfolios, the timetable, teaching practice arrangements for the day, written assignment titles, the application file and the attendance registers.`

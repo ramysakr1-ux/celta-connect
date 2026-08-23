@@ -1,6 +1,6 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend/client";
-import { emailShell, rawP, p, list, inlineButton, signature, esc, EMAIL_TONE } from "@/lib/email-layout";
+import { emailShell, authEmailShell, rawP, p, list, inlineButton, signature, esc, EMAIL_TONE } from "@/lib/email-layout";
 
 // "Every email is from the centre... sender is the centre's name, reply-to
 // is a centre address. Connect never appears in anyone's inbox." The
@@ -882,15 +882,15 @@ export function tutorAddedEmailHtml(input: {
   inviteUrl: string;
   gettingStartedUrl: string;
 }): string {
-  return emailShell({
+  return authEmailShell({
+    centerName: input.centreName,
     heading: "You have been added as a tutor",
-    tone: "teal",
     body:
       p(
         `${input.tutorFirstName} — ${input.addedByName} has added you to ${input.courseName} at ${input.centreName} as a ${input.roleFact}. Your groups and teaching practice will appear once the course is set up.`
       ) +
       rawP(
-        `Worth a skim before you start: <a href="${esc(input.gettingStartedUrl)}" style="color:${EMAIL_TONE.teal};">a short guide to how Connect works</a>, no account needed to read it.`
+        `Worth a skim before you start: <a href="${esc(input.gettingStartedUrl)}" style="color:#3e2818;">a short guide to how Connect works</a>, no account needed to read it.`
       ),
     facts: [
       { label: "Course", value: input.courseFact },

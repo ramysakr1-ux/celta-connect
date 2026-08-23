@@ -231,3 +231,78 @@ export function emailShell(input: EmailShellInput): string {
   </table>
 </body></html>`;
 }
+
+// for-claude-code-signin-and-email-branding.md: the shared shell for
+// Connect's own auth-adjacent emails (sign-in link, trainee/tutor invite,
+// assessor link, password reset) -- distinct from emailShell()'s spine
+// system above, which is the wider admissions/course email family (offer,
+// acceptance, rejection, etc.) this spec doesn't touch. Centre-branded
+// header (ink-brown bar, centre name in gold italic serif) matching the
+// in-app header treatment, rather than a coloured top spine.
+//
+// Hex values are computed conversions of Sign-in Cards and Emails.dc.html's
+// own oklch (canvas 2D rasterization, not eyeballed) -- same rule
+// emailShell() above follows for its own palette.
+const AUTH_INK_BROWN = "#3e2818"; // oklch(30% 0.042 58)
+const AUTH_GOLD = "#aa732b"; // oklch(60% 0.11 70)
+
+export interface AuthEmailShellInput {
+  centerName: string;
+  heading: string;
+  /** Already-escaped HTML paragraphs -- same convention as emailShell(). */
+  body: string;
+  facts?: EmailFact[];
+  cta: { label: string; url: string; note?: string };
+  footnote?: string;
+}
+
+export function authEmailShell(input: AuthEmailShellInput): string {
+  const facts = input.facts?.length
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+              style="margin:4px 0 18px;border-top:1px solid ${BORDER};">
+         ${input.facts
+           .map(
+             (f) => `<tr>
+               <td style="padding:9px 12px 9px 0;font-size:11px;font-weight:700;letter-spacing:0.06em;
+                          text-transform:uppercase;color:${MUTED};white-space:nowrap;vertical-align:top;
+                          border-bottom:1px solid ${BORDER};">${esc(f.label)}</td>
+               <td style="padding:9px 0;font-size:13.5px;line-height:1.5;color:${INK};
+                          border-bottom:1px solid ${BORDER};">${esc(f.value)}</td>
+             </tr>`
+           )
+           .join("")}
+       </table>`
+    : "";
+
+  return `<!doctype html>
+<html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /></head>
+<body style="margin:0;padding:0;background:${GROUND};">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${GROUND};">
+    <tr><td align="center" style="padding:28px 14px 40px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+             style="max-width:520px;background:#ffffff;border-radius:8px;overflow:hidden;">
+        <tr><td style="background:${AUTH_INK_BROWN};padding:18px 26px;">
+          <div style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:19px;color:${AUTH_GOLD};">${esc(input.centerName)}</div>
+        </td></tr>
+        <tr><td style="padding:28px 26px;">
+          <h2 style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:19px;font-weight:600;color:${INK};">${esc(input.heading)}</h2>
+          ${input.body}
+          ${facts}
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 6px;">
+            <tr><td style="border-radius:6px;background:${AUTH_INK_BROWN};">
+              <a href="${input.cta.url}" style="display:inline-block;padding:11px 22px;font-size:13px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:6px;">${esc(input.cta.label)} &rarr;</a>
+            </td></tr>
+          </table>
+          ${input.cta.note ? `<p style="margin:8px 0 0;font-size:11.5px;line-height:1.5;color:${MUTED};">${esc(input.cta.note)}</p>` : ""}
+          <p style="margin:14px 0 0;font-size:11.5px;line-height:1.5;color:${MUTED};">
+            If the button doesn't work, use this address:<br />
+            <a href="${input.cta.url}" style="color:${AUTH_INK_BROWN};">${esc(input.cta.url)}</a>
+          </p>
+          ${input.footnote ? `<p style="margin:18px 0 0;font-size:11px;line-height:1.55;color:${MUTED};">${esc(input.footnote)}</p>` : ""}
+        </td></tr>
+      </table>
+      <p style="margin:8px 4px 0;max-width:520px;font-size:11px;color:${MUTED};">Sent from ${esc(input.centerName)}'s own address, not a generic Connect no-reply.</p>
+    </td></tr>
+  </table>
+</body></html>`;
+}
