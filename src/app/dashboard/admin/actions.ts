@@ -171,7 +171,7 @@ export async function duplicateCourse(
     admin = { id: profile.id, center_id: profile.center_id };
   } else {
     const ctx = await getCentreRoleContext(profile);
-    if (!can(ctx.roles, "course.create")) redirect(`/dashboard/${profile.role}`);
+    if (!can(ctx.roles, "course.create", ctx.overrides)) redirect(`/dashboard/${profile.role}`);
     admin = { id: profile.id, center_id: ctx.activeCenterId ?? profile.center_id };
   }
 

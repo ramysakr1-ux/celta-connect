@@ -88,6 +88,41 @@ export const NEVER_FOR_ADMIN_ROLES = ["courseChat", "grading", "candidateWork"] 
  */
 type Grant = true | "read" | false;
 
+// for-claude-code-centre-owner-role-customizer.md: the Centre Owner's
+// override layer speaks "Full/View/None" (the customizer screen's own
+// vocabulary, matching Centre Owner Landing.dc.html's cycling pills) --
+// these two just translate between that and the internal Grant type
+// nothing else in this file needs to change to know about.
+export type GrantLevel = "full" | "view" | "none";
+
+export function grantLevelToGrant(level: GrantLevel): Grant {
+  if (level === "full") return true;
+  if (level === "view") return "read";
+  return false;
+}
+
+export function grantToGrantLevel(grant: Grant): GrantLevel {
+  if (grant === true) return "full";
+  if (grant === "read") return "view";
+  return "none";
+}
+
+/**
+ * A centre owner's per-centre override on top of MATRIX -- role key (built-in
+ * CentreRole or a centre_custom_roles.role_key) to capability key (built-in
+ * Capability or a centre_custom_capabilities.capability_key) to the level set.
+ * An entry here always wins over MATRIX for that role+capability, including
+ * down to "none" -- the owner can tighten a built-in role's default, not just
+ * loosen it.
+ *
+ * Course chat, grading, lesson feedback and CELTA 5 records are structurally
+ * excluded, not filtered here -- those are gated entirely by separate code
+ * (tutor/trainee status, course_tutors rows) that never reads this matrix at
+ * all, so there is nothing an override could grant even if someone typed a
+ * custom capability with one of those names.
+ */
+export type OverrideMatrix = Record<string, Partial<Record<string, GrantLevel>>>;
+
 const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
   // "Create and edit courses / Invite tutors, candidates, volunteers / See and
   //  edit fees, deposits, payments / Form groups and publish timetables /
@@ -267,11 +302,23 @@ export const LOGGED_FOR_OWNER: Capability[] = [
  * A `true` from any role beats a "read" from another, which is what makes the
  * union safe: holding the read-only role alongside a working one never
  * downgrades you.
+ *
+ * `roles` is `string[]`, not `CentreRole[]` -- a person can hold a centre
+ * owner-defined custom role, which has no MATRIX entry at all (its baseline
+ * is "none" until the owner sets overrides for it). `capability` is likewise
+ * `string` so a custom capability can be checked the same way; every existing
+ * call site keeps passing a literal `Capability`, which is always a valid
+ * `string`, so nothing about the ~20 call sites already in the app changes.
+ * `overrides`, when passed, is this role's centre's resolved
+ * OverrideMatrix (from getCentreRoleContext) -- omitting it (every call site
+ * from before 2026-08-23) is identical to a centre with no overrides set.
  */
-export function grantFor(roles: CentreRole[], capability: Capability): Grant {
+export function grantFor(roles: string[], capability: string, overrides?: OverrideMatrix): Grant {
   let best: Grant = false;
   for (const role of roles) {
-    const g = MATRIX[role]?.[capability];
+    const overrideLevel = overrides?.[role]?.[capability];
+    const g: Grant =
+      overrideLevel !== undefined ? grantLevelToGrant(overrideLevel) : (MATRIX[role as CentreRole]?.[capability as Capability] ?? false);
     if (g === true) return true;
     if (g === "read") best = "read";
   }
@@ -279,13 +326,13 @@ export function grantFor(roles: CentreRole[], capability: Capability): Grant {
 }
 
 /** Can act. Use for rendering a control at all. */
-export function can(roles: CentreRole[], capability: Capability): boolean {
-  return grantFor(roles, capability) === true;
+export function can(roles: string[], capability: string, overrides?: OverrideMatrix): boolean {
+  return grantFor(roles, capability, overrides) === true;
 }
 
 /** Can see, whether or not they can act. Use for rendering the data. */
-export function canView(roles: CentreRole[], capability: Capability): boolean {
-  return grantFor(roles, capability) !== false;
+export function canView(roles: string[], capability: string, overrides?: OverrideMatrix): boolean {
+  return grantFor(roles, capability, overrides) !== false;
 }
 
 /**
@@ -295,16 +342,17 @@ export function canView(roles: CentreRole[], capability: Capability): boolean {
  * doesn't depend on which course.
  */
 export function canOnCourse(
-  roles: CentreRole[],
-  capability: Capability,
+  roles: string[],
+  capability: string,
   courseId: string,
-  scopedCourseIds: string[]
+  scopedCourseIds: string[],
+  overrides?: OverrideMatrix
 ): boolean {
   const others = roles.filter((r) => r !== "course_administrator");
-  if (can(others, capability)) return true;
+  if (can(others, capability, overrides)) return true;
   if (!roles.includes("course_administrator")) return false;
   if (!scopedCourseIds.includes(courseId)) return false;
-  return can(["course_administrator"], capability);
+  return can(["course_administrator"], capability, overrides);
 }
 
 /**
@@ -312,11 +360,82 @@ export function canOnCourse(
  * Admin and Course Admin are separate places -- "never merge these two builds"
  * -- and one flat `admin` landing on a course-shaped screen is the bug this
  * whole model exists to fix.
+ *
+ * A custom role defaults to the centre-admin landing: every example in
+ * for-claude-code-centre-owner-role-customizer.md ("Centre Director",
+ * "Across-course Administrator") is a centre-wide variant, structurally
+ * alongside Centre manager/observer/owner, not course-scoped the way
+ * Course administrator is.
  */
-export function landingFor(roles: CentreRole[]): "centre-admin" | "course-admin" | null {
-  if (roles.some((r) => r === "centre_administrator" || r === "centre_manager" || r === "centre_owner")) {
-    return "centre-admin";
+export function landingFor(roles: string[]): "centre-admin" | "course-admin" | null {
+  if (roles.length === 0) return null;
+  if (roles.every((r) => r === "course_administrator")) return "course-admin";
+  return "centre-admin";
+}
+
+/** Display label for a role, built-in or owner-defined custom. */
+export function roleLabel(roleKey: string, customRoles: { role_key: string; label: string }[] = []): string {
+  if (roleKey in CENTRE_ROLE_LABELS) return CENTRE_ROLE_LABELS[roleKey as CentreRole];
+  return customRoles.find((r) => r.role_key === roleKey)?.label ?? roleKey;
+}
+
+/** Display label for a capability, built-in or owner-defined custom. */
+export function capabilityLabel(capabilityKey: string, customCapabilities: { capability_key: string; label: string }[] = []): string {
+  const builtIn = CAPABILITY_LABELS[capabilityKey as Capability];
+  if (builtIn) return builtIn;
+  return customCapabilities.find((c) => c.capability_key === capabilityKey)?.label ?? capabilityKey;
+}
+
+// Plain-language row labels for the customizer table -- Centre Owner
+// Landing.dc.html's own transcription of Capability, one row each.
+export const CAPABILITY_LABELS: Record<Capability, string> = {
+  "course.create": "Create courses",
+  "course.editRecord": "Edit course record",
+  "course.restoreDeleted": "Restore a deleted course",
+  "course.reassignUnowned": "Reassign an unowned course",
+  "roles.grant": "Invite / grant centre roles",
+  "centre.settings.edit": "Centre settings & Drive",
+  "payments.view": "View payments",
+  "payments.edit": "Edit payments",
+  "admissions.view": "View admissions",
+  "admissions.manage": "Manage admissions",
+  "volunteers.view": "View volunteers",
+  "volunteers.manage": "Manage volunteers",
+  "enrolment.view": "Enrolment & completion figures",
+  "import.run": "Import candidates",
+  "assessorPack.export": "Export assessor pack",
+  "courseAdmin.view": "View course admin screens",
+  "courseAdmin.invite": "Invite people to a course",
+  "courseAdmin.groups": "Form TP groups",
+  "courseAdmin.settings": "Course-level settings",
+  "timetable.publish": "Publish timetable",
+};
+
+/**
+ * The plain-language description shown on the Roles tab (role-strip) and in
+ * the customizer's live preview -- generated from the exact same resolved
+ * grant state both places read, so the two can never drift out of sync.
+ * Mirrors Centre Owner Landing.dc.html's own describeRole().
+ */
+export function describeRoleCapabilities(
+  roleKey: string,
+  overrides: OverrideMatrix | undefined,
+  customCapabilities: { capability_key: string; label: string }[] = []
+): string {
+  const allCaps: { key: string; label: string }[] = [
+    ...(Object.keys(CAPABILITY_LABELS) as Capability[]).map((key) => ({ key, label: CAPABILITY_LABELS[key] })),
+    ...customCapabilities.map((c) => ({ key: c.capability_key, label: c.label })),
+  ];
+  const fulls: string[] = [];
+  const views: string[] = [];
+  for (const cap of allCaps) {
+    const grant = grantFor([roleKey], cap.key, overrides);
+    if (grant === true) fulls.push(cap.label);
+    else if (grant === "read") views.push(cap.label);
   }
-  if (roles.includes("course_administrator")) return "course-admin";
-  return null;
+  if (fulls.length === 0 && views.length === 0) return "No access to anything on this list.";
+  let text = "";
+  if (fulls.length) text += `Full access: ${fulls.join(", ")}. `;
+  if (views.length) text += `View only: ${views.join(", ")}.`;
+  return text.trim();
 }

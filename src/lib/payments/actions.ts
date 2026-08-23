@@ -179,7 +179,7 @@ export async function markPaymentNotificationRead(formData: FormData): Promise<v
   const session = await getCurrentProfile();
   if (!session?.profile) return;
   const ctx = await getCentreRoleContext(session.profile);
-  if (!can(ctx.roles, "payments.edit")) return;
+  if (!can(ctx.roles, "payments.edit", ctx.overrides)) return;
 
   const notificationId = formData.get("notification_id");
   if (typeof notificationId !== "string") return;

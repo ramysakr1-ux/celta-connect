@@ -24,7 +24,7 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
   const profile = session.profile;
 
   const ctx = await getCentreRoleContext(profile);
-  if (!canView(ctx.roles, "courseAdmin.view")) redirect("/centre");
+  if (!canView(ctx.roles, "courseAdmin.view", ctx.overrides)) redirect("/centre");
 
   const admin = createAdminClient();
   const { data: course } = await admin
@@ -132,7 +132,7 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
           editRecord without having any payments access at all. Gating on
           the wrong capability here would have quietly kept this form
           visible to that role even after removing its payments grants. */}
-      {can(ctx.roles, "payments.edit") ? (
+      {can(ctx.roles, "payments.edit", ctx.overrides) ? (
         <PricingForm
           courseId={course.id}
           feeAmount={course.fee_amount}

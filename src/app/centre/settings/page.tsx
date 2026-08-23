@@ -13,7 +13,6 @@ import { SettingsTabs } from "@/app/centre/settings/settings-tabs";
 import { SupportAccessTab, type SupportGrantRow } from "@/app/centre/settings/support-access-tab";
 import { ProviderList } from "@/app/centre/payments/provider-list";
 import type { PaymentProviderKey } from "@/lib/payments/providers";
-import type { CentreRole } from "@/lib/auth/centre-permissions";
 import { computeGrantStatus } from "@/lib/platform-support";
 
 // for-claude-code-centre-settings.md: the real Centre Settings hub,
@@ -35,8 +34,8 @@ export default async function CentreSettingsPage({
   if (ctx.roles.length === 0) redirect("/dashboard");
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
-  const canEdit = can(ctx.roles, "centre.settings.edit");
-  const mayAppoint = can(ctx.roles, "roles.grant");
+  const canEdit = can(ctx.roles, "centre.settings.edit", ctx.overrides);
+  const mayAppoint = can(ctx.roles, "roles.grant", ctx.overrides);
   const isOwner = ctx.roles.includes("centre_owner");
 
   const admin = createAdminClient();
@@ -62,6 +61,7 @@ export default async function CentreSettingsPage({
       : Promise.resolve({ data: [] }),
     admin.from("platform_support_grants").select("*").eq("center_id", centerId).order("granted_at", { ascending: false }),
   ]);
+  const { data: customRoles } = await admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId);
 
   if (!center) redirect("/centre");
 
@@ -88,7 +88,7 @@ export default async function CentreSettingsPage({
       grantId: g.id,
       name: person?.full_name ?? "Unknown",
       email: person?.email ?? "",
-      role: g.role as CentreRole,
+      role: g.role,
       scope: g.role === "course_administrator" && person?.course_id ? (courseNameById.get(person.course_id) ?? "A course") : "Whole centre",
     };
   });
@@ -172,7 +172,14 @@ export default async function CentreSettingsPage({
             <p className="text-sm text-muted">You don&apos;t hold a role that can manage payment providers.</p>
           )
         }
-        people={<AdminRoster rows={rosterRows} invites={(invites ?? []) as { id: string; role: CentreRole; created_at: string }[]} mayAppoint={mayAppoint} />}
+        people={
+          <AdminRoster
+            rows={rosterRows}
+            invites={(invites ?? []) as { id: string; role: string; created_at: string }[]}
+            mayAppoint={mayAppoint}
+            customRoles={customRoles ?? []}
+          />
+        }
         support={<SupportAccessTab canGrantBilling={canGrantBilling} grants={supportGrantRows} />}
         danger={
           isOwner ? (

@@ -10,7 +10,7 @@ import { linkVolunteerPeople, unlinkVolunteer } from "@/lib/volunteer-identity";
 export async function linkVolunteerAction(formData: FormData): Promise<void> {
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "centre.settings.edit")) return;
+  if (!can(ctx.roles, "centre.settings.edit", ctx.overrides)) return;
 
   const volunteerStudentIdA = formData.get("volunteer_student_id_a");
   const volunteerStudentIdB = formData.get("volunteer_student_id_b");
@@ -38,7 +38,7 @@ export async function linkVolunteerAction(formData: FormData): Promise<void> {
 export async function unlinkVolunteerAction(formData: FormData): Promise<void> {
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "centre.settings.edit")) return;
+  if (!can(ctx.roles, "centre.settings.edit", ctx.overrides)) return;
 
   const volunteerStudentId = formData.get("volunteer_student_id");
   if (typeof volunteerStudentId !== "string") return;

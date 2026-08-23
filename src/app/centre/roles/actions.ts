@@ -5,8 +5,18 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
-import { can, CENTRE_ROLES, CENTRE_ROLE_LABELS, type CentreRole } from "@/lib/auth/centre-permissions";
+import { can, CENTRE_ROLES, roleLabel, type CentreRole } from "@/lib/auth/centre-permissions";
 import { AREAS, AREA_LABELS, type Area } from "@/lib/auth/areas";
+
+// A role is valid to grant/invite either as one of the four built-in slugs,
+// or as a custom role the owner has already defined for this centre --
+// checked against centre_custom_roles rather than trusting the client, since
+// the <select> options are just a UI convenience, not the actual gate.
+async function isValidRoleForCentre(admin: ReturnType<typeof createAdminClient>, role: string, centerId: string): Promise<boolean> {
+  if (CENTRE_ROLES.includes(role as CentreRole)) return true;
+  const { data } = await admin.from("centre_custom_roles").select("id").eq("center_id", centerId).eq("role_key", role).maybeSingle();
+  return Boolean(data);
+}
 
 export interface GrantRoleState {
   error?: string;
@@ -26,16 +36,18 @@ export interface GrantRoleState {
 export async function grantCentreRole(_prev: GrantRoleState, formData: FormData): Promise<GrantRoleState> {
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "roles.grant")) {
+  if (!can(ctx.roles, "roles.grant", ctx.overrides)) {
     return { error: "Only a Centre owner can appoint administrators." };
   }
 
   const targetEmail = (formData.get("email") as string | null)?.trim().toLowerCase();
-  const role = formData.get("role") as CentreRole | null;
+  const role = formData.get("role") as string | null;
   if (!targetEmail) return { error: "Who is this for?" };
-  if (!role || !CENTRE_ROLES.includes(role)) return { error: "Pick a role." };
+  if (!role) return { error: "Pick a role." };
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
+  const admin = createAdminClient();
+  if (!(await isValidRoleForCentre(admin, role, centerId))) return { error: "Pick a role." };
   const supabase = await createClient();
 
   // The person must already have an account in this centre. Creating one from
@@ -51,7 +63,6 @@ export async function grantCentreRole(_prev: GrantRoleState, formData: FormData)
     return { error: "That account belongs to a different centre." };
   }
 
-  const admin = createAdminClient();
   // Re-granting a revoked role reactivates it rather than failing on the
   // unique constraint -- someone coming back from leave shouldn't need a
   // different row, and the granted_by/granted_at on it should be the new one.
@@ -76,7 +87,8 @@ export async function grantCentreRole(_prev: GrantRoleState, formData: FormData)
   });
 
   revalidatePath("/centre/roles");
-  return { granted: `${CENTRE_ROLE_LABELS[role]} granted to ${target.full_name}` };
+  const { data: customRolesHere } = await admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId);
+  return { granted: `${roleLabel(role, customRolesHere ?? [])} granted to ${target.full_name}` };
 }
 
 export interface CreateInviteState {
@@ -95,12 +107,12 @@ export interface CreateInviteState {
 export async function createCentreAdminInvite(_prev: CreateInviteState, formData: FormData): Promise<CreateInviteState> {
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "roles.grant")) {
+  if (!can(ctx.roles, "roles.grant", ctx.overrides)) {
     return { error: "Only a Centre owner can invite administrators." };
   }
 
-  const role = formData.get("role") as CentreRole | null;
-  if (!role || !CENTRE_ROLES.includes(role)) return { error: "Pick a role." };
+  const role = formData.get("role") as string | null;
+  if (!role) return { error: "Pick a role." };
   // for-claude-code-email-delivery-tracking-visible.md follow-up: optional
   // -- the bare shareable link stays the default, this just also sends a
   // real, tracked email when an address is given.
@@ -108,6 +120,7 @@ export async function createCentreAdminInvite(_prev: CreateInviteState, formData
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
   const admin = createAdminClient();
+  if (!(await isValidRoleForCentre(admin, role, centerId))) return { error: "Pick a role." };
   const { data: invite, error } = await admin
     .from("centre_admin_invites")
     .insert({ center_id: centerId, role, created_by: profile.id, email })
@@ -122,6 +135,8 @@ export async function createCentreAdminInvite(_prev: CreateInviteState, formData
     const centerName = center?.name ?? "Your centre";
     const siteUrl = process.env.SITE_URL;
     if (siteUrl) {
+      const { data: customRolesHere } = await admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId);
+      const invitedRoleLabel = roleLabel(role, customRolesHere ?? []);
       const { sendApplicantEmail } = await import("@/lib/admissions-email");
       const { esc } = await import("@/lib/email-layout");
       const joinUrl = `${siteUrl}/join-centre/${invite.token}`;
@@ -131,8 +146,8 @@ export async function createCentreAdminInvite(_prev: CreateInviteState, formData
         to: email,
         subject: `you're invited to help run this centre on Connect`,
         html: `
-          <h2>${esc(centerName)} has invited you as ${esc(CENTRE_ROLE_LABELS[role])}</h2>
-          <p>You've been invited to join <strong>${esc(centerName)}</strong> on Connect as a <strong>${esc(CENTRE_ROLE_LABELS[role])}</strong>.</p>
+          <h2>${esc(centerName)} has invited you as ${esc(invitedRoleLabel)}</h2>
+          <p>You've been invited to join <strong>${esc(centerName)}</strong> on Connect as a <strong>${esc(invitedRoleLabel)}</strong>.</p>
           <p><a href="${joinUrl}">Accept the invitation &rarr;</a></p>
           <p style="color:#888;font-size:13px">If you weren't expecting this, you can safely ignore this email.</p>
         `,
@@ -156,7 +171,7 @@ export interface RevokeInviteState {
 export async function revokeCentreAdminInvite(_prev: RevokeInviteState, formData: FormData): Promise<RevokeInviteState> {
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "roles.grant")) {
+  if (!can(ctx.roles, "roles.grant", ctx.overrides)) {
     return { error: "Only a Centre owner can withdraw an invite." };
   }
 
@@ -190,7 +205,7 @@ export interface RevokeRoleState {
 export async function revokeCentreRole(_prev: RevokeRoleState, formData: FormData): Promise<RevokeRoleState> {
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "roles.grant")) {
+  if (!can(ctx.roles, "roles.grant", ctx.overrides)) {
     return { error: "Only a Centre owner can remove administrators." };
   }
 
@@ -281,7 +296,7 @@ export interface AssignAreaState {
 export async function assignArea(_prev: AssignAreaState, formData: FormData): Promise<AssignAreaState> {
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "roles.grant")) {
+  if (!can(ctx.roles, "roles.grant", ctx.overrides)) {
     return { error: "Only a Centre owner can assign areas of responsibility." };
   }
 

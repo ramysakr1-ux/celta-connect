@@ -26,7 +26,7 @@ export default async function CentreVolunteersPage({
 
   const ctx = await getCentreRoleContext(profile);
   if (ctx.roles.length === 0) redirect("/dashboard");
-  if (!canView(ctx.roles, "volunteers.view")) redirect("/centre");
+  if (!canView(ctx.roles, "volunteers.view", ctx.overrides)) redirect("/centre");
 
   const { branch } = await searchParams;
   const mine = ctx.availableCenterIds;
@@ -75,7 +75,7 @@ export default async function CentreVolunteersPage({
     })
     .sort((a, b) => b.hours - a.hours);
 
-  const canEdit = can(ctx.roles, "centre.settings.edit");
+  const canEdit = can(ctx.roles, "centre.settings.edit", ctx.overrides);
 
   return (
     <div className="flex flex-col gap-5">

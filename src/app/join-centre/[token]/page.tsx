@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { JoinCentreForm } from "@/app/join-centre/[token]/join-centre-form";
 import { Wordmark } from "@/components/wordmark";
-import { CENTRE_ROLE_LABELS, type CentreRole } from "@/lib/auth/centre-permissions";
+import { roleLabel as resolveRoleLabel } from "@/lib/auth/centre-permissions";
 
 // Invitations.dc.html 1c: "account + centre agreement, once per centre."
 // Unlike the trainee/trainer /join/[token] flow this opens the centre, not
@@ -32,8 +32,11 @@ export default async function JoinCentrePage({ params }: { params: Promise<{ tok
     );
   }
 
-  const { data: center } = await admin.from("centers").select("name").eq("id", invite.center_id).maybeSingle();
-  const roleLabel = CENTRE_ROLE_LABELS[invite.role as CentreRole];
+  const [{ data: center }, { data: customRoles }] = await Promise.all([
+    admin.from("centers").select("name").eq("id", invite.center_id).maybeSingle(),
+    admin.from("centre_custom_roles").select("role_key, label").eq("center_id", invite.center_id),
+  ]);
+  const roleLabel = resolveRoleLabel(invite.role, customRoles ?? []);
 
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">

@@ -29,7 +29,7 @@ export async function connectProvider(_prev: ConnectProviderState, formData: For
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
   // Choosing who takes the centre's money is squarely a settings change.
-  if (!can(ctx.roles, "centre.settings.edit")) {
+  if (!can(ctx.roles, "centre.settings.edit", ctx.overrides)) {
     return { error: "Your role can't change payment settings." };
   }
 
@@ -70,7 +70,7 @@ export async function connectProvider(_prev: ConnectProviderState, formData: For
 export async function disconnectProvider(_prev: ConnectProviderState, formData: FormData): Promise<ConnectProviderState> {
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "centre.settings.edit")) {
+  if (!can(ctx.roles, "centre.settings.edit", ctx.overrides)) {
     return { error: "Your role can't change payment settings." };
   }
   void formData;

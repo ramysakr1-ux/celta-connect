@@ -22,7 +22,7 @@ export default async function AssessorHistoryPage({
 
   const ctx = await getCentreRoleContext(profile);
   if (ctx.roles.length === 0) redirect("/dashboard");
-  if (!canView(ctx.roles, "courseAdmin.view")) redirect("/centre");
+  if (!canView(ctx.roles, "courseAdmin.view", ctx.overrides)) redirect("/centre");
 
   const { branch } = await searchParams;
   const mine = ctx.availableCenterIds;

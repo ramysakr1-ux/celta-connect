@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   const session = await getCurrentProfile();
   if (!session?.profile) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   const ctx = await getCentreRoleContext(session.profile);
-  if (!can(ctx.roles, "payments.view")) {
+  if (!can(ctx.roles, "payments.view", ctx.overrides)) {
     return NextResponse.json({ error: "You can't export financials." }, { status: 403 });
   }
 

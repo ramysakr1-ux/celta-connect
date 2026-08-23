@@ -45,10 +45,10 @@ export default async function CentreOverviewPage({
       .select("id, name, center_id, start_date, end_date, delivery_mode, course_code")
       .in("center_id", scope)
       .order("start_date", { ascending: false }),
-    canView(ctx.roles, "admissions.view")
+    canView(ctx.roles, "admissions.view", ctx.overrides)
       ? admin.from("applicants").select("stage, center_id, deposit_amount, deposit_paid_at").in("center_id", scope)
       : Promise.resolve({ data: [] }),
-    canView(ctx.roles, "payments.view")
+    canView(ctx.roles, "payments.view", ctx.overrides)
       ? admin.from("payments").select("amount, currency, status, due_date, paid_at, payment_plan_id, center_id").in("center_id", scope)
       : Promise.resolve({ data: [] }),
   ]);
@@ -59,7 +59,7 @@ export default async function CentreOverviewPage({
 
   const courseIds = (courses ?? []).map((c) => c.id);
   const { data: volunteers } =
-    canView(ctx.roles, "volunteers.view") && courseIds.length > 0
+    canView(ctx.roles, "volunteers.view", ctx.overrides) && courseIds.length > 0
       ? await admin.from("volunteer_students").select("id, volunteer_person_id").in("course_id", courseIds)
       : { data: [] };
 
@@ -68,7 +68,7 @@ export default async function CentreOverviewPage({
   // assessor link (assignExistingTutor's insert path); reused here purely
   // for visibility, nothing here blocks anything.
   const { data: assessorLinkRows } =
-    canView(ctx.roles, "courseAdmin.view") && courseIds.length > 0
+    canView(ctx.roles, "courseAdmin.view", ctx.overrides) && courseIds.length > 0
       ? await admin.from("course_tutors").select("course_id, profile_id").eq("tutor_role", "external_assessor").in("course_id", courseIds)
       : { data: [] };
   const assessorProfileIds = [...new Set((assessorLinkRows ?? []).map((r) => r.profile_id))];
@@ -96,7 +96,7 @@ export default async function CentreOverviewPage({
   // "Only 'bounced' creates a task -- on the admissions screen, scoped to the
   // candidate." Surfaced here too because a bounced workspace invitation to a
   // paid-up candidate is the one nobody can afford to miss.
-  const { data: bounces } = canView(ctx.roles, "admissions.view")
+  const { data: bounces } = canView(ctx.roles, "admissions.view", ctx.overrides)
     ? await admin
         .from("email_bounce_tasks")
         .select("id, email_address, reason, consecutive_bounces, applicant_id")
@@ -107,7 +107,7 @@ export default async function CentreOverviewPage({
     : { data: [] };
 
   const { data: plans } =
-    canView(ctx.roles, "payments.view") && courseIds.length > 0
+    canView(ctx.roles, "payments.view", ctx.overrides) && courseIds.length > 0
       ? await admin.from("payment_plans").select("id, course_id").in("course_id", courseIds)
       : { data: [] };
   const courseOfPlan = new Map((plans ?? []).map((p) => [p.id, p.course_id]));
@@ -125,7 +125,7 @@ export default async function CentreOverviewPage({
   const owing = (payments ?? []).filter((p) => p.status === "pending" || p.status === "missed");
   const outstanding = owing.reduce((sum, p) => sum + Number(p.amount), 0);
   const owingCourseCount = new Set(owing.map((p) => courseOfPlan.get(p.payment_plan_id)).filter(Boolean)).size;
-  const { data: pendingRefundRows } = canView(ctx.roles, "payments.view")
+  const { data: pendingRefundRows } = canView(ctx.roles, "payments.view", ctx.overrides)
     ? await admin.from("refunds").select("id, amount").in("center_id", scope).eq("status", "pending")
     : { data: [] };
   const pendingRefunds = pendingRefundRows ?? [];
@@ -216,7 +216,7 @@ export default async function CentreOverviewPage({
           <h1 className="mt-1 font-serif text-[26px] text-ink">{heading}</h1>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          {can(ctx.roles, "payments.view") ? (
+          {can(ctx.roles, "payments.view", ctx.overrides) ? (
             <a
               href={`/centre/financials.csv${branch ? `?branch=${branch}` : ""}`}
               className="rounded-[6px] border border-border px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
@@ -224,7 +224,7 @@ export default async function CentreOverviewPage({
               Export financials
             </a>
           ) : null}
-          {can(ctx.roles, "roles.grant") ? (
+          {can(ctx.roles, "roles.grant", ctx.overrides) ? (
             <Link
               href="/centre/roles"
               className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
@@ -235,7 +235,7 @@ export default async function CentreOverviewPage({
         </div>
       </div>
 
-      {canView(ctx.roles, "payments.view") ? (
+      {canView(ctx.roles, "payments.view", ctx.overrides) ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {metrics.map((m, i) => (
             <div key={m.label} className={`card px-5 py-4 ${m.alert ? "card-amber" : i % 2 === 0 ? "" : "card-gold"}`}>
@@ -285,7 +285,7 @@ export default async function CentreOverviewPage({
                     {c.delivery_mode ? ` · ${c.delivery_mode}` : ""}
                   </p>
                 </Link>
-                {canView(ctx.roles, "payments.view") ? (
+                {canView(ctx.roles, "payments.view", ctx.overrides) ? (
                   <span className={`w-28 shrink-0 text-sm ${owed > 0 ? "text-destructive" : "text-muted"}`}>
                     {owed > 0 ? `${money(owed)} due` : "Fully paid"}
                   </span>
@@ -293,7 +293,7 @@ export default async function CentreOverviewPage({
                 <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${state.cls}`}>{state.label}</span>
                 {/* "Duplicate-course lives on this overview (the course
                     list), not inside an individual course's detail." */}
-                {can(ctx.roles, "course.create") ? <DuplicateCourseForm courseId={c.id} suggestedName={`${c.name} (copy)`} /> : null}
+                {can(ctx.roles, "course.create", ctx.overrides) ? <DuplicateCourseForm courseId={c.id} suggestedName={`${c.name} (copy)`} /> : null}
               </div>
             );
           })
@@ -333,7 +333,7 @@ export default async function CentreOverviewPage({
         </div>
 
         <div className="flex flex-col gap-4">
-        {canView(ctx.roles, "admissions.view") ? (
+        {canView(ctx.roles, "admissions.view", ctx.overrides) ? (
           <div className="card !p-0">
             <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
               <h2 className="font-serif text-base text-ink">Admissions pipeline</h2>
@@ -366,7 +366,7 @@ export default async function CentreOverviewPage({
           </div>
         ) : null}
 
-          {canView(ctx.roles, "payments.view") ? (
+          {canView(ctx.roles, "payments.view", ctx.overrides) ? (
             <div className={`card !p-0 ${missed.length > 0 ? "card-amber" : "card-gold"}`}>
               <div className="border-b border-border px-5 py-3.5">
                 <h2 className="font-serif text-base text-ink">Payments needing attention</h2>
@@ -388,7 +388,7 @@ export default async function CentreOverviewPage({
             </div>
           ) : null}
 
-          {canView(ctx.roles, "volunteers.view") ? (
+          {canView(ctx.roles, "volunteers.view", ctx.overrides) ? (
             <Link
               href="/centre/volunteers"
               className="card flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
@@ -404,7 +404,7 @@ export default async function CentreOverviewPage({
             </Link>
           ) : null}
 
-          {canView(ctx.roles, "courseAdmin.view") && assessorHistory.length > 0 ? (
+          {canView(ctx.roles, "courseAdmin.view", ctx.overrides) && assessorHistory.length > 0 ? (
             <Link
               href="/centre/assessor-history"
               className="card card-gold flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
@@ -422,7 +422,7 @@ export default async function CentreOverviewPage({
         </div>
       </div>
 
-      {can(ctx.roles, "course.create") ? (
+      {can(ctx.roles, "course.create", ctx.overrides) ? (
         <div>
           <Link
             href="/dashboard/admin"

@@ -19,7 +19,7 @@ import {
 async function requireImportRole() {
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
-  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) {
+  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run", ctx.overrides)) {
     throw new Error("Your role can't import people.");
   }
   return profile;
@@ -73,7 +73,7 @@ export async function commitImport(_prev: CommitImportState, formData: FormData)
   // do. The nav already omits the tab; this is the check that matters if
   // someone reaches the URL directly.
   const ctx = await getCentreRoleContext(profile);
-  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) {
+  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run", ctx.overrides)) {
     return { error: "Your role can't import people." };
   }
   const supabase = await createClient();
@@ -188,7 +188,7 @@ export interface UndoImportState {
 export async function undoImport(_prev: UndoImportState, formData: FormData): Promise<UndoImportState> {
   const profile = await requireRole("admin");
   const ctx = await getCentreRoleContext(profile);
-  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) {
+  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run", ctx.overrides)) {
     return { error: "Your role can't undo an import." };
   }
   const supabase = await createClient();

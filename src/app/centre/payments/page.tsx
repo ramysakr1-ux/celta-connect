@@ -20,7 +20,7 @@ export default async function PaymentProvidersPage() {
   const ctx = await getCentreRoleContext(profile);
   // Read-only roles have no business on a screen whose only purpose is to
   // change where a centre's money goes.
-  if (!can(ctx.roles, "centre.settings.edit")) redirect("/centre");
+  if (!can(ctx.roles, "centre.settings.edit", ctx.overrides)) redirect("/centre");
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
   const supabase = await createClient();
@@ -104,10 +104,10 @@ export default async function PaymentProvidersPage() {
 
       <PaymentNotificationsPanel
         notifications={(paymentNotifications ?? []).map((n) => ({ id: n.id, message: n.message, createdAt: n.created_at }))}
-        canEdit={can(ctx.roles, "payments.edit")}
+        canEdit={can(ctx.roles, "payments.edit", ctx.overrides)}
       />
 
-      <RefundsPanel refunds={refundRows} canEdit={can(ctx.roles, "payments.edit")} />
+      <RefundsPanel refunds={refundRows} canEdit={can(ctx.roles, "payments.edit", ctx.overrides)} />
 
       <TransactionsPanel
         transactions={(transactions ?? []).map((t) => ({

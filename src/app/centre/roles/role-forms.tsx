@@ -22,7 +22,7 @@ const revokeInitial: RevokeRoleState = {};
 const createInviteInitial: CreateInviteState = {};
 const revokeInviteInitial: RevokeInviteState = {};
 
-export function CreateInviteForm() {
+export function CreateInviteForm({ customRoles = [] }: { customRoles?: { role_key: string; label: string }[] }) {
   const [state, action, pending] = useActionState(createCentreAdminInvite, createInviteInitial);
   const [copied, setCopied] = useState(false);
 
@@ -40,6 +40,11 @@ export function CreateInviteForm() {
           {CENTRE_ROLES.map((r) => (
             <option key={r} value={r}>
               {CENTRE_ROLE_LABELS[r]}
+            </option>
+          ))}
+          {customRoles.map((r) => (
+            <option key={r.role_key} value={r.role_key}>
+              {r.label}
             </option>
           ))}
         </select>
@@ -101,7 +106,7 @@ export function RevokeInviteButton({ inviteId }: { inviteId: string }) {
   );
 }
 
-export function GrantRoleForm() {
+export function GrantRoleForm({ customRoles = [] }: { customRoles?: { role_key: string; label: string }[] }) {
   const [state, action, pending] = useActionState(grantCentreRole, grantInitial);
 
   return (
@@ -126,6 +131,11 @@ export function GrantRoleForm() {
           {CENTRE_ROLES.map((r) => (
             <option key={r} value={r}>
               {CENTRE_ROLE_LABELS[r]}
+            </option>
+          ))}
+          {customRoles.map((r) => (
+            <option key={r.role_key} value={r.role_key}>
+              {r.label}
             </option>
           ))}
         </select>

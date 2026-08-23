@@ -1,4 +1,4 @@
-import { can, type CentreRole } from "@/lib/auth/centre-permissions";
+import { can } from "@/lib/auth/centre-permissions";
 
 // Pure -- no database, no server-only imports, so a client component can
 // import AREAS and the verdict logic. The DB read lives in area-holders.ts:
@@ -72,7 +72,7 @@ export type AreaVerdict =
 export function areaVerdict(input: {
   area: Area;
   viewerProfileId: string;
-  roles: CentreRole[];
+  roles: string[];
   holders: Map<Area, AreaHolder>;
 }): AreaVerdict {
   const holder = input.holders.get(input.area);
@@ -100,9 +100,10 @@ export function canActInArea(input: {
   area: Area;
   capability: Parameters<typeof can>[1];
   viewerProfileId: string;
-  roles: CentreRole[];
+  roles: string[];
   holders: Map<Area, AreaHolder>;
+  overrides?: Parameters<typeof can>[2];
 }): AreaVerdict | { kind: "no_capability" } {
-  if (!can(input.roles, input.capability)) return { kind: "no_capability" };
+  if (!can(input.roles, input.capability, input.overrides)) return { kind: "no_capability" };
   return areaVerdict(input);
 }

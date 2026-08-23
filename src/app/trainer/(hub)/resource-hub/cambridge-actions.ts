@@ -29,7 +29,7 @@ export async function uploadCambridgeDocument(_prevState: CambridgeDocState, for
   }
 
   const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "centre.settings.edit")) {
+  if (!can(ctx.roles, "centre.settings.edit", ctx.overrides)) {
     return { error: "You don't hold a role that can edit centre settings." };
   }
 

@@ -27,7 +27,7 @@ export async function updateCentreProfile(_prevState: FormState, formData: FormD
   const profile = session?.profile;
   if (!profile) return { error: "Not signed in." };
   const ctx = await getCentreRoleContext(profile);
-  if (!can(ctx.roles, "centre.settings.edit")) return { error: "You can't edit centre settings." };
+  if (!can(ctx.roles, "centre.settings.edit", ctx.overrides)) return { error: "You can't edit centre settings." };
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
   const name = (formData.get("name") as string | null)?.trim();

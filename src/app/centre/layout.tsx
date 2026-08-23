@@ -61,6 +61,19 @@ export default async function CentreLayout({ children }: { children: React.React
           <span className="rounded-[5px] border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-primary uppercase">
             Centre admin
           </span>
+          {/* for-claude-code-centre-owner-role-customizer.md: "a deliberately
+              different register... not a fifth tab that happens to look the
+              same" -- garnet, not teal, and its own destination rather than
+              a CentreTabs entry, so it never reads as just another tab. */}
+          {ctx.roles.includes("centre_owner") ? (
+            <Link
+              href="/centre/owner"
+              className="rounded-[5px] px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-white uppercase"
+              style={{ background: "oklch(42% 0.15 27)" }}
+            >
+              Centre owner
+            </Link>
+          ) : null}
         </div>
         <HeaderDesignerCredit landingPath="/centre" />
       </div>
@@ -86,7 +99,7 @@ export default async function CentreLayout({ children }: { children: React.React
           Roles, and Import alike), not scoped to any one tab's content --
           it sits after the closing of all three tab blocks in the design's
           own markup. */}
-      {can(ctx.roles, "centre.settings.edit") ? (
+      {can(ctx.roles, "centre.settings.edit", ctx.overrides) ? (
         <div className="container pb-6">
           <Link
             href="/centre/settings"

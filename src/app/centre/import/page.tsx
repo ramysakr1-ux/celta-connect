@@ -17,7 +17,7 @@ export default async function ImportPage() {
   // must not reach this screen at all -- the nav omits the tab, and this
   // stops the direct URL.
   const ctx = await getCentreRoleContext(profile);
-  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run")) redirect("/centre");
+  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run", ctx.overrides)) redirect("/centre");
   const supabase = await createClient();
 
   const [{ data: courses }, { data: applicants }, { data: imports }] = await Promise.all([

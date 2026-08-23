@@ -2616,7 +2616,10 @@ export interface Database {
           id: string;
           profile_id: string;
           center_id: string;
-          role: "centre_administrator" | "centre_manager" | "course_administrator" | "centre_owner";
+          // Widened from the fixed 4-value union 2026-08-23: the DB check
+          // constraint was dropped in favour of app-level validation, since
+          // this can now also hold a centre_custom_roles.role_key.
+          role: string;
           granted_by: string | null;
           granted_at: string;
           revoked_at: string | null;
@@ -2624,9 +2627,78 @@ export interface Database {
         Insert: Partial<Database["public"]["Tables"]["centre_roles"]["Row"]> & {
           profile_id: string;
           center_id: string;
-          role: "centre_administrator" | "centre_manager" | "course_administrator" | "centre_owner";
+          role: string;
         };
         Update: Partial<Database["public"]["Tables"]["centre_roles"]["Row"]>;
+        Relationships: [];
+      };
+      centre_branch_visibility: {
+        Row: {
+          id: string;
+          viewer_center_id: string;
+          target_center_id: string;
+          visibility: "view_only" | "blocked";
+          set_by: string | null;
+          set_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_branch_visibility"]["Row"]> & {
+          viewer_center_id: string;
+          target_center_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_branch_visibility"]["Row"]>;
+        Relationships: [];
+      };
+      centre_custom_roles: {
+        Row: {
+          id: string;
+          center_id: string;
+          role_key: string;
+          label: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_custom_roles"]["Row"]> & {
+          center_id: string;
+          role_key: string;
+          label: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_custom_roles"]["Row"]>;
+        Relationships: [];
+      };
+      centre_custom_capabilities: {
+        Row: {
+          id: string;
+          center_id: string;
+          capability_key: string;
+          label: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_custom_capabilities"]["Row"]> & {
+          center_id: string;
+          capability_key: string;
+          label: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_custom_capabilities"]["Row"]>;
+        Relationships: [];
+      };
+      centre_permission_overrides: {
+        Row: {
+          id: string;
+          center_id: string;
+          role_key: string;
+          capability_key: string;
+          granted_level: "full" | "view" | "none";
+          set_by: string | null;
+          set_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_permission_overrides"]["Row"]> & {
+          center_id: string;
+          role_key: string;
+          capability_key: string;
+          granted_level: "full" | "view" | "none";
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_permission_overrides"]["Row"]>;
         Relationships: [];
       };
       course_administrator_scope: {
@@ -2665,7 +2737,9 @@ export interface Database {
         Row: {
           id: string;
           center_id: string;
-          role: "centre_administrator" | "centre_manager" | "course_administrator" | "centre_owner";
+          // Widened 2026-08-23 alongside centre_roles.role -- can also hold
+          // a centre_custom_roles.role_key now.
+          role: string;
           token: string;
           created_by: string;
           created_at: string;
@@ -2678,7 +2752,7 @@ export interface Database {
         };
         Insert: Partial<Database["public"]["Tables"]["centre_admin_invites"]["Row"]> & {
           center_id: string;
-          role: "centre_administrator" | "centre_manager" | "course_administrator" | "centre_owner";
+          role: string;
           created_by: string;
         };
         Update: Partial<Database["public"]["Tables"]["centre_admin_invites"]["Row"]>;

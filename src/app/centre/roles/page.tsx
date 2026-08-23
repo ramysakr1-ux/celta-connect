@@ -6,7 +6,7 @@ import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { RoleStrip } from "@/app/centre/roles/role-strip";
 import { GrantRoleForm, RevokeRoleButton, AssignAreaForm, CreateInviteForm, RevokeInviteButton } from "@/app/centre/roles/role-forms";
-import { CENTRE_ROLE_LABELS } from "@/lib/auth/centre-permissions";
+import { roleLabel } from "@/lib/auth/centre-permissions";
 import { AREAS, AREA_LABELS } from "@/lib/auth/areas";
 import { getAreaHolders } from "@/lib/auth/area-holders";
 import { DELIVERY_LABEL, DELIVERY_PILL_CLASS, type EmailDeliveryStatus } from "@/lib/email-delivery-status";
@@ -23,7 +23,7 @@ export default async function CentreRolesPage() {
   if (ctx.roles.length === 0) redirect("/dashboard");
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
-  const mayAppoint = can(ctx.roles, "roles.grant");
+  const mayAppoint = can(ctx.roles, "roles.grant", ctx.overrides);
 
   // Read through the admin client so the list is complete: centre_roles' own
   // select policy is scoped to your own grants plus your centre, and joining
@@ -99,7 +99,7 @@ export default async function CentreRolesPage() {
         </p>
       </div>
 
-      <RoleStrip holders={holders} />
+      <RoleStrip holders={holders} overrides={ctx.overrides} customRoles={ctx.customRoles} customCapabilities={ctx.customCapabilities} />
 
       <div className="card px-5 py-4">
         <h2 className="font-serif text-base text-ink">Areas of responsibility</h2>
@@ -153,7 +153,7 @@ export default async function CentreRolesPage() {
             one yet is below.
           </p>
           <div className="mt-3">
-            <GrantRoleForm />
+            <GrantRoleForm customRoles={ctx.customRoles} />
           </div>
 
           {(grants ?? []).length > 0 ? (
@@ -164,7 +164,7 @@ export default async function CentreRolesPage() {
                   <div key={g.id} className="flex items-center justify-between gap-3">
                     <span className="text-xs text-ink">
                       {nameOf.get(g.profile_id) ?? "Unknown"}{" "}
-                      <span className="text-muted">{g.role.replace(/_/g, " ")}</span>
+                      <span className="text-muted">{roleLabel(g.role, ctx.customRoles)}</span>
                     </span>
                     <RevokeRoleButton grantId={g.id} />
                   </div>
@@ -184,7 +184,7 @@ export default async function CentreRolesPage() {
             runs, not just one course.
           </p>
           <div className="mt-3">
-            <CreateInviteForm />
+            <CreateInviteForm customRoles={ctx.customRoles} />
           </div>
 
           {(invites ?? []).length > 0 ? (
@@ -196,7 +196,7 @@ export default async function CentreRolesPage() {
                   return (
                     <div key={inv.id} className="flex items-center justify-between gap-3">
                       <span className="text-xs text-ink">
-                        {CENTRE_ROLE_LABELS[inv.role]}
+                        {roleLabel(inv.role, ctx.customRoles)}
                         {inv.email ? <span className="text-muted"> · {inv.email}</span> : <span className="text-muted"> · not yet accepted</span>}
                         {deliveryStatus ? (
                           <span className={`ml-1.5 status-pill ${DELIVERY_PILL_CLASS[deliveryStatus]}`}>{DELIVERY_LABEL[deliveryStatus]}</span>
