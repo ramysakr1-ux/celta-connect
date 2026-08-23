@@ -226,8 +226,8 @@ export default async function CentreOverviewPage({
 
       {canView(ctx.roles, "payments.view") ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {metrics.map((m) => (
-            <div key={m.label} className="rounded-[10px] border border-border bg-card px-5 py-4">
+          {metrics.map((m, i) => (
+            <div key={m.label} className={`card px-5 py-4 ${m.alert ? "card-amber" : i % 2 === 0 ? "" : "card-gold"}`}>
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{m.label}</p>
               <p className={`mt-1 font-serif text-[28px] ${m.alert ? "text-destructive" : "text-ink"}`}>{m.value}</p>
               <p className="mt-0.5 text-xs text-muted">{m.note}</p>
@@ -241,7 +241,7 @@ export default async function CentreOverviewPage({
           settings in that order. */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px] lg:items-start">
         <div className="flex flex-col gap-4">
-      <div className="rounded-[10px] border border-border bg-card">
+      <div className="card !p-0">
         <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
           <h2 className="font-serif text-base text-ink">All courses</h2>
           <span className="text-xs text-muted">
@@ -288,7 +288,7 @@ export default async function CentreOverviewPage({
           workspace invitation to a paid-up candidate is someone with no way
           into the course they've paid for. */}
       {(bounces ?? []).length > 0 ? (
-        <div className="rounded-[10px] border border-destructive/25 bg-destructive/5">
+        <div className="card card-red !p-0 border-destructive/25 bg-destructive/5">
           <div className="flex items-baseline justify-between border-b border-destructive/20 px-5 py-3.5">
             <h2 className="font-serif text-base text-ink">Email couldn&apos;t be delivered</h2>
             <span className="text-xs text-muted">{(bounces ?? []).length} to fix</span>
@@ -318,7 +318,7 @@ export default async function CentreOverviewPage({
 
         <div className="flex flex-col gap-4">
         {canView(ctx.roles, "admissions.view") ? (
-          <div className="rounded-[10px] border border-border bg-card">
+          <div className="card !p-0">
             <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
               <h2 className="font-serif text-base text-ink">Admissions pipeline</h2>
               <Link href="/dashboard/admissions" className="text-xs font-medium text-primary hover:underline">
@@ -351,7 +351,7 @@ export default async function CentreOverviewPage({
         ) : null}
 
           {canView(ctx.roles, "payments.view") ? (
-            <div className="rounded-[10px] border border-border bg-card">
+            <div className={`card !p-0 ${missed.length > 0 ? "card-amber" : "card-gold"}`}>
               <div className="border-b border-border px-5 py-3.5">
                 <h2 className="font-serif text-base text-ink">Payments needing attention</h2>
               </div>
@@ -375,7 +375,7 @@ export default async function CentreOverviewPage({
           {canView(ctx.roles, "volunteers.view") ? (
             <Link
               href="/centre/volunteers"
-              className="flex items-center justify-between gap-3 rounded-[10px] border border-border bg-card px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+              className="card flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
             >
               <div className="flex flex-col gap-0.5">
                 <h2 className="font-serif text-base text-ink">Volunteer pool</h2>
@@ -391,7 +391,7 @@ export default async function CentreOverviewPage({
           {canView(ctx.roles, "courseAdmin.view") && assessorHistory.length > 0 ? (
             <Link
               href="/centre/assessor-history"
-              className="flex items-center justify-between gap-3 rounded-[10px] border border-border bg-card px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+              className="card card-gold flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
             >
               <div className="flex flex-col gap-0.5">
                 <h2 className="font-serif text-base text-ink">Assessor history</h2>

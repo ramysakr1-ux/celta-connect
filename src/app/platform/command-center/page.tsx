@@ -141,7 +141,7 @@ export default async function CommandCenterPage() {
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Active centres</p>
           <p className="mt-1.5 text-2xl font-bold text-ink">{centresList.length}</p>
         </div>
-        <div className="card p-4">
+        <div className="card card-gold p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">MRR</p>
           <p className="mt-1.5 text-2xl font-bold text-ink">
             {mrrByCurrency.length ? mrrByCurrency.map((m) => money(m.amount, m.currency)).join(" · ") : "—"}

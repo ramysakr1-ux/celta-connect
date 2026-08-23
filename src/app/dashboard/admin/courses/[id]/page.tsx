@@ -741,10 +741,10 @@ export default async function CourseRosterPage({
                 on -- half_order 1 and 2 on course_subgroups. */}
             {(tpGroups ?? []).length > 0 ? (
               <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-                {(tpGroups ?? []).map((g) => {
+                {(tpGroups ?? []).map((g, gi) => {
                   const halves = (subgroups ?? []).filter((sg) => sg.tp_group_id === g.id);
                   return (
-                    <div key={g.id} className="card p-5">
+                    <div key={g.id} className={`card p-5 ${gi % 2 === 1 ? "card-gold" : ""}`}>
                       <h3 className="font-serif text-base text-ink">{g.name}</h3>
                       {/* "Nadia Farouk · odd days" -- the tutor who owns this
                           group and when it meets, editable in place.

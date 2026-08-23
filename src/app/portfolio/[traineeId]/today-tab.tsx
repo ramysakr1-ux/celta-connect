@@ -325,8 +325,10 @@ export async function TodayTab({
           </div>
         ) : null}
 
-        {/* Announcements */}
-        <div className="sheet flex flex-col gap-3">
+        {/* Announcements -- amber top rule to match its already-amber label
+            and its real semantic role (flagged/urgent posts), not just the
+            default teal every .sheet gets. */}
+        <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-status-warning-text">
           <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">Announcements</p>
           {(broadcasts ?? []).length === 0 ? (
             <p className="text-sm text-muted">Nothing posted yet.</p>
@@ -345,8 +347,9 @@ export async function TodayTab({
           )}
         </div>
 
-        {/* Waiting on you */}
-        <div className="sheet flex flex-col gap-3">
+        {/* Waiting on you -- gold, alternating against "You teach today"
+            (teal) and "Announcements" (amber) on either side. */}
+        <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-gold">
           <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Waiting on you</p>
           {waitingCapped.length === 0 ? (
             <p className="text-sm text-muted">Nothing waiting on you right now.</p>

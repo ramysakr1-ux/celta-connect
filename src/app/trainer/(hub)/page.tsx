@@ -448,7 +448,7 @@ export default async function TodayPage() {
         </div>
 
         {/* Cohort */}
-        <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-ink-warm">
+        <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-gold">
           <div className="flex items-baseline justify-between">
             <p className="text-[11px] font-semibold tracking-[0.12em] text-ink-warm uppercase">Cohort · {rows.length}</p>
             <Link href="/trainer/roster" className="text-[11px] text-primary">
