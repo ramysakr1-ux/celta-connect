@@ -72,9 +72,21 @@ export default async function TrainerHubLayout({ children }: { children: React.R
       <header className="border-b border-border bg-card">
         <div className="container flex h-14 items-stretch justify-between gap-6">
           <div className="flex items-center gap-6">
-            <Link href="/trainer" className="block shrink-0">
+            {/* Bug Ramy caught 2026-08-23: an assessor who clicked into
+                Grades Report (or Roster, or the attendance register) had no
+                way back -- the logo pointed at /trainer, which isn't a real
+                assessor session's page and just bounces them right back to
+                /trainer/roster, not to the actual pack overview at
+                /assessor. Cookie-based session, so the bare path is enough
+                -- no token needed in the URL. */}
+            <Link href={isAssessor ? "/assessor" : "/trainer"} className="block shrink-0">
               <Wordmark size="header" />
             </Link>
+            {isAssessor ? (
+              <Link href="/assessor" className="text-sm font-medium text-primary hover:underline">
+                ← Assessor pack
+              </Link>
+            ) : null}
             <TrainerTabs rosterOnly={isAssessor} />
           </div>
           <div className="flex shrink-0 items-center gap-3">

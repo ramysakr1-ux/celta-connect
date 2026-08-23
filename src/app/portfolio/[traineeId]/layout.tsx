@@ -253,8 +253,14 @@ export default async function PortfolioLayout({
         ) : (
           <div className="container flex h-14 items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <Link href="/trainer/roster" className="shrink-0 text-sm text-primary">
-                ← Roster
+              {/* Same bug as (hub)/layout.tsx's logo link, same fix: an
+                  assessor who reached this portfolio via the "Assignment
+                  titles" cohort document had no direct way back to the
+                  pack overview -- this always pointed at /trainer/roster,
+                  a page a token-only assessor session can still open (it's
+                  in their trimmed tab set) but isn't where they came from. */}
+              <Link href={assessorCourseId ? "/assessor" : "/trainer/roster"} className="shrink-0 text-sm text-primary">
+                {assessorCourseId ? "← Assessor pack" : "← Roster"}
               </Link>
               <span className="h-5 w-px shrink-0 bg-border" />
               <h1 className="truncate font-serif text-[17px] text-ink">{trainee.full_name}</h1>

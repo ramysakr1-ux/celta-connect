@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -38,7 +39,14 @@ export default async function AssessorMarkingGuidancePage() {
     <div style={{ minHeight: "100vh", background: "var(--color-background)" }}>
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
         <div style={{ background: "var(--color-frame)", border: "1px solid oklch(88% 0.016 82)", borderRadius: 6, padding: 24 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "oklch(51% 0.017 70)" }}>
+          {/* Bug Ramy caught 2026-08-23: this page (and the two trainer-hub
+              layouts an assessor can also reach) had no way back to the
+              pack overview at all -- a standalone page with no nav of its
+              own. Cookie-based session, so the bare path is enough. */}
+          <Link href="/assessor" style={{ fontSize: 12.5, fontWeight: 600, color: "oklch(38% 0.072 195)", textDecoration: "none" }}>
+            ← Assessor pack
+          </Link>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "oklch(51% 0.017 70)", marginTop: 14 }}>
             Assessor access — read-only · marking guidance
           </p>
           <h1 style={{ fontFamily: "Georgia, serif", fontSize: 26, fontWeight: 600, marginTop: 6, color: "oklch(23.5% 0.017 65)" }}>
