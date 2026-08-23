@@ -4,24 +4,28 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { updateAssessorVisitDate, updateEntryFormSentAt, updateAssessor } from "@/app/dashboard/admin/courses/[id]/roster-actions";
+import { ApplicationSettingsForm } from "@/app/dashboard/admin/courses/[id]/application-settings-form";
 import { TutorRoleControl } from "@/app/dashboard/admin/courses/[id]/tutor-role-control";
 import { TutorInviteForm } from "@/app/dashboard/admin/courses/[id]/tutor-invite-form";
 import { EntryFormSentCheckbox } from "@/app/dashboard/admin/courses/[id]/entry-form-sent-checkbox";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
+import { computeApplicantCounts, MIN_CANDIDATES } from "@/lib/admissions-counts";
 
 // for-claude-code-course-admin-landing-and-admissions.md §2 +
 // for-claude-code-course-admin-page-not-rebuilt.md: the old kitchen-sink
 // page (roster editing, TP subgroups, restarts/deferrals, close-out,
-// certificate-check, chat retention, material pool, delivery mode,
-// applications toggle) is gone from here -- all of that is MCT-owned,
-// inside the course, once it's running (see the footnote below). This
-// page is exactly 4 panels: Admissions pipeline, Entry form, Tutors,
-// Assessor -- the things that are genuinely Course Admin's job for as
-// long as the course is still filling up.
-const TERMINAL_NEGATIVE_STAGES = ["rejected_before_interview", "rejected_after_interview", "not_this_time", "withdrawn_application"] as const;
-const MIN_CANDIDATES = 4;
+// certificate-check, chat retention, material pool, delivery mode) is
+// gone from here -- all of that is MCT-owned, inside the course, once
+// it's running (see the footnote below). This page is exactly 4 panels:
+// Admissions pipeline, Entry form, Tutors, Assessor -- the things that
+// are genuinely Course Admin's job for as long as the course is still
+// filling up. The applications-open toggle stays on the Admissions
+// pipeline card (restored 2026-08-23): the new landing list's
+// "Interviewing now" vs "Launching soon" grouping reads directly off
+// accepting_applications, so it needs a real control somewhere, and this
+// is the same admissions cycle it already describes.
 
 export default async function CourseAdminDetailPage({
   params,
@@ -38,7 +42,7 @@ export default async function CourseAdminDetailPage({
   const [{ data: center }, { data: tutorRows }, { data: applicants }] = await Promise.all([
     supabase.from("centers").select("appian_url").eq("id", admin.center_id).maybeSingle(),
     supabase.from("course_tutors").select("id, profile_id, tutor_role, verified_at").eq("course_id", id).is("left_at", null),
-    supabase.from("applicants").select("id, stage").eq("intake_course_id", id),
+    supabase.from("applicants").select("id, stage, special_requirements").eq("intake_course_id", id),
   ]);
 
   const tutorProfileIds = (tutorRows ?? []).map((t) => t.profile_id);
@@ -55,10 +59,7 @@ export default async function CourseAdminDetailPage({
     joined: Boolean(t.verified_at),
   }));
 
-  const acceptedCount = (applicants ?? []).filter((a) => a.stage === "accepted").length;
-  const stillInPipelineCount = (applicants ?? []).filter(
-    (a) => !TERMINAL_NEGATIVE_STAGES.includes(a.stage as (typeof TERMINAL_NEGATIVE_STAGES)[number]) && a.stage !== "accepted"
-  ).length;
+  const { accepted: acceptedCount, pending: stillInPipelineCount } = computeApplicantCounts(applicants ?? []);
 
   const today = toLocalIso(new Date());
   const courseState = computeCourseState(course.start_date, course.end_date, today);
@@ -114,6 +115,11 @@ export default async function CourseAdminDetailPage({
             this doesn&apos;t change before the start date.
           </p>
         ) : null}
+        <ApplicationSettingsForm
+          courseId={course.id}
+          accepting={course.accepting_applications}
+          applicationCap={course.application_cap}
+        />
       </div>
 
       {/* Entry form -- link out to Appian, not a submit action. There is no

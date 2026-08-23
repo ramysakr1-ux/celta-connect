@@ -69,6 +69,7 @@ export async function updateApplicationSettings(formData: FormData): Promise<voi
 
   await supabase.from("courses").update({ accepting_applications: accepting, application_cap: cap }).eq("id", courseId);
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/dashboard/admin");
 }
 
 // Ramy, 2026-08-18: "chat retention lives in Course Admin, configured by

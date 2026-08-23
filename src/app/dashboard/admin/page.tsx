@@ -1,24 +1,37 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { computeWeekOf, computeCourseState, type CourseState } from "@/lib/course-progress";
+import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { getRecentCentreChanges } from "@/lib/what-changed";
 import { WhatChangedPanel } from "@/components/what-changed-panel";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
+import { computeApplicantCounts } from "@/lib/admissions-counts";
+import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 
-// Centre Admin.dc.html 1a -- courses group by state instead of a flat
-// date-sorted list. State is purely date-derived (see computeCourseState's
-// comment): Close-out (build-spec item 20) isn't built yet, so "closed"
-// here just means the end date has passed, not that a real export/erase
-// happened -- the progress text below must stay honest about that.
-const STATE_LABEL: Record<CourseState, string> = { running: "Running", upcoming: "Upcoming", closed: "Closed" };
-const STATE_ORDER: CourseState[] = ["running", "upcoming", "closed"];
-const STATE_PILL_CLASS: Record<CourseState, string> = {
-  running: "status-pill status-pill-on-track",
-  upcoming: "status-pill bg-primary/10 text-primary",
-  closed: "status-pill bg-surface-muted text-muted",
+// for-claude-code-course-admin-landing-and-admissions.md §1: date-derived
+// "upcoming" alone doesn't tell Course Admin what's actually next for a
+// course -- still filling seats, or done with admissions and just
+// waiting for the start date. Split by accepting_applications (the same
+// flag the /apply intake dropdown reads) into two groups with different
+// jobs: Interviewing now needs pipeline attention; Launching soon needs
+// the entry form. Running is deliberately de-emphasized -- it's the
+// MCT's day-to-day now, not Course Admin's. Closed collapses to one link
+// rather than a full list, since there's nothing left to do with any of
+// them individually from here.
+type LandingGroup = "interviewing" | "launching" | "running";
+const GROUP_LABEL: Record<LandingGroup, string> = {
+  interviewing: "Interviewing now",
+  launching: "Launching soon",
+  running: "Running",
 };
+const GROUP_ORDER: LandingGroup[] = ["interviewing", "launching", "running"];
+const GROUP_PILL_CLASS: Record<LandingGroup, string> = {
+  interviewing: "status-pill bg-primary/10 text-primary",
+  launching: "status-pill bg-primary/10 text-primary",
+  running: "status-pill bg-surface-muted text-muted",
+};
+const ENTRY_FORM_WARNING_WINDOW_DAYS = 14;
 
 export default async function AdminDashboardPage() {
   const profile = await requireRole("admin");
@@ -31,6 +44,11 @@ export default async function AdminDashboardPage() {
     supabase.from("profiles").select("course_id, role").eq("center_id", profile.center_id).not("course_id", "is", null),
     supabase.from("course_timetable_events").select("course_id, event_date"),
   ]);
+
+  const courseIds = (courses ?? []).map((c) => c.id);
+  const { data: applicants } = courseIds.length
+    ? await supabase.from("applicants").select("intake_course_id, stage, special_requirements").in("intake_course_id", courseIds)
+    : { data: [] };
 
   // Centre material -- shared by every course at this centre, built once
   // and carried forward (mirrors the design's own framing: "the centre
@@ -60,31 +78,50 @@ export default async function AdminDashboardPage() {
     eventDatesByCourse.set(e.course_id, list);
   }
 
-  const groups = STATE_ORDER.map((state) => {
-    const stateCourses = (courses ?? [])
+  const closedCourses = (courses ?? []).filter((c) => computeCourseState(c.start_date, c.end_date, today) === "closed");
+
+  const groups = GROUP_ORDER.map((group) => {
+    const groupCourses = (courses ?? [])
+      .filter((course) => {
+        const state = computeCourseState(course.start_date, course.end_date, today);
+        if (group === "running") return state === "running";
+        if (state !== "upcoming") return false;
+        return group === "interviewing" ? course.accepting_applications : !course.accepting_applications;
+      })
       .map((course) => {
         const tutors = (people ?? []).filter((p) => p.course_id === course.id && (p.role === "trainer" || p.role === "admin")).length;
         const candidates = (people ?? []).filter((p) => p.course_id === course.id && p.role === "trainee").length;
         const hasEvents = (eventDatesByCourse.get(course.id) ?? []).length > 0;
 
         let progress: string;
-        if (state === "running") {
+        if (group === "running") {
           progress = computeWeekOf(course.start_date, course.end_date, today).replace(/^w/, "W");
-        } else if (state === "upcoming") {
-          progress = course.timetable_locked_at ? "Timetable locked" : hasEvents ? "Timetable draft" : "Not set up";
         } else {
-          progress = `Ended ${course.end_date}`;
+          progress = course.timetable_locked_at ? "Timetable locked" : hasEvents ? "Timetable draft" : "Not set up";
+        }
+
+        const applicantRows = (applicants ?? []).filter((a) => a.intake_course_id === course.id);
+        const counts = group === "interviewing" ? computeApplicantCounts(applicantRows) : null;
+
+        let entryFormLabel: { text: string; overdue: boolean } | null = null;
+        if (group === "launching" && !course.entry_form_sent_at) {
+          const deadline = computeEntryFormDeadline(course.start_date, course.delivery_mode);
+          const daysOut = Math.ceil((new Date(`${deadline}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000);
+          if (daysOut <= ENTRY_FORM_WARNING_WINDOW_DAYS) {
+            entryFormLabel = daysOut <= 0 ? { text: "Entry form overdue", overdue: true } : { text: `Entry form due in ${daysOut}d`, overdue: false };
+          }
         }
 
         return {
           course,
           people: tutors + candidates > 0 ? `${candidates} candidates · ${tutors} tutors` : "No one yet",
           progress,
+          counts,
+          entryFormLabel,
         };
-      })
-      .filter((row) => computeCourseState(row.course.start_date, row.course.end_date, today) === state);
+      });
 
-    return { state, courses: stateCourses };
+    return { group, courses: groupCourses };
   }).filter((g) => g.courses.length > 0);
 
   return (
@@ -152,36 +189,69 @@ export default async function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
         <div className="flex flex-col gap-5">
-          {groups.length > 0 ? (
-            groups.map((group) => (
-              <div key={group.state} className="flex flex-col gap-2">
-                <div className="flex items-baseline gap-2.5">
-                  <p className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">{STATE_LABEL[group.state]}</p>
-                  <p className="text-xs text-muted">
-                    {group.courses.length} course{group.courses.length === 1 ? "" : "s"}
-                  </p>
+          {groups.length > 0 || closedCourses.length > 0 ? (
+            <>
+              {groups.map((group) => (
+                <div key={group.group} className="flex flex-col gap-2">
+                  <div className="flex items-baseline gap-2.5">
+                    <p className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">{GROUP_LABEL[group.group]}</p>
+                    <p className="text-xs text-muted">
+                      {group.courses.length} course{group.courses.length === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  <div className={`card overflow-hidden !p-0 ${group.group === "running" ? "opacity-80" : ""}`}>
+                    {group.courses.map((row) => (
+                      <Link
+                        key={row.course.id}
+                        href={`/dashboard/admin/courses/${row.course.id}`}
+                        className="flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-ink">{row.course.name}</p>
+                          <p className="mt-0.5 text-xs text-muted">
+                            {row.course.start_date} &rarr; {row.course.end_date}
+                          </p>
+                        </div>
+                        {row.counts ? (
+                          <span className="hidden shrink-0 text-xs text-muted sm:inline">
+                            {row.counts.accepted} accepted
+                            {row.counts.flagged > 0 ? ` · ${row.counts.flagged} flagged` : ""} · {row.counts.pending} pending
+                          </span>
+                        ) : (
+                          <span className="hidden shrink-0 text-xs text-muted sm:inline">{row.people}</span>
+                        )}
+                        {row.entryFormLabel ? (
+                          <span className={`hidden shrink-0 text-xs sm:inline ${row.entryFormLabel.overdue ? "font-semibold text-destructive" : "text-status-warning-text"}`}>
+                            {row.entryFormLabel.text}
+                          </span>
+                        ) : (
+                          <span className="hidden shrink-0 text-xs text-muted sm:inline">{row.progress}</span>
+                        )}
+                        {group.group === "running" ? (
+                          <span className="hidden shrink-0 text-xs text-muted sm:inline">Nothing needed from you</span>
+                        ) : null}
+                        <span className={GROUP_PILL_CLASS[group.group]}>{GROUP_LABEL[group.group]}</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-                <div className="card overflow-hidden !p-0">
-                  {group.courses.map((row) => (
-                    <Link
-                      key={row.course.id}
-                      href={`/dashboard/admin/courses/${row.course.id}`}
-                      className="flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-ink">{row.course.name}</p>
-                        <p className="mt-0.5 text-xs text-muted">
-                          {row.course.start_date} &rarr; {row.course.end_date}
-                        </p>
-                      </div>
-                      <span className="hidden shrink-0 text-xs text-muted sm:inline">{row.people}</span>
-                      <span className="hidden shrink-0 text-xs text-muted sm:inline">{row.progress}</span>
-                      <span className={STATE_PILL_CLASS[group.state]}>{STATE_LABEL[group.state]}</span>
-                    </Link>
-                  ))}
+              ))}
+
+              {closedCourses.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  <p className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Closed</p>
+                  <Link
+                    href="/dashboard/admin/courses/closed"
+                    className="card flex items-center justify-between gap-4 px-5 py-3.5 transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+                  >
+                    <span className="text-sm text-ink">
+                      {closedCourses.length} closed course{closedCourses.length === 1 ? "" : "s"}
+                    </span>
+                    <span className="text-xs font-medium text-primary">View history &rarr;</span>
+                  </Link>
                 </div>
-              </div>
-            ))
+              ) : null}
+            </>
           ) : (
             <p className="text-muted">No courses yet.</p>
           )}
