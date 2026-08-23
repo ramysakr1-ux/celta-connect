@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
+import { defaultMarkerIdsForCourse } from "@/lib/assignment-ownership";
 
 export interface AcceptOfferState {
   error: string | null;
@@ -119,11 +120,13 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
   if (profileError) return { error: "Could not finish setting up your account. Try again." };
 
   const assignmentTypes = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
+  const defaultMarkers = await defaultMarkerIdsForCourse(admin, applicant.intake_course_id);
   await admin.from("assignments").insert(
     assignmentTypes.map((assignment_type) => ({
       course_id: applicant.intake_course_id,
       trainee_id: created.user.id,
       assignment_type,
+      marker_id: defaultMarkers[assignment_type] ?? null,
     }))
   );
   await admin.from("celta5_matrix").insert(

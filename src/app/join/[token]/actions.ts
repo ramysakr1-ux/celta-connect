@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { TUTOR_ROLES, type TutorRole } from "@/lib/tutor-roles";
+import { defaultMarkerIdsForCourse } from "@/lib/assignment-ownership";
 import type { UserRole } from "@/lib/supabase/types";
 
 export interface JoinCourseState {
@@ -179,11 +180,13 @@ export async function joinCourse(
 
   if (role === "trainee") {
     const assignmentTypes = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
+    const defaultMarkers = await defaultMarkerIdsForCourse(adminClient, course.id);
     await adminClient.from("assignments").insert(
       assignmentTypes.map((assignment_type) => ({
         course_id: course.id,
         trainee_id: created.user.id,
         assignment_type,
+        marker_id: defaultMarkers[assignment_type] ?? null,
       }))
     );
 
