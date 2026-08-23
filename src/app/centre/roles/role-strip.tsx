@@ -119,8 +119,10 @@ export function RoleStrip({ holders }: { holders: Record<string, { id: string; n
               key={role}
               type="button"
               onClick={() => setSelected(role)}
-              className={`relative px-5 py-4 text-left ${i < CENTRE_ROLES.length - 1 ? "lg:border-r lg:border-border" : ""} ${
-                active ? "bg-card" : "bg-surface-muted/40 hover:bg-card"
+              className={`relative px-5 py-4 text-left transition-colors duration-150 ${i < CENTRE_ROLES.length - 1 ? "lg:border-r lg:border-border" : ""} ${
+                active
+                  ? "bg-[color-mix(in_oklab,var(--color-primary)_16%,var(--color-card))]"
+                  : "bg-surface-muted/40 hover:bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-card))]"
               }`}
             >
               <span className={`absolute inset-x-0 top-0 h-[3px] ${active ? d.spine : "bg-transparent"}`} aria-hidden="true" />

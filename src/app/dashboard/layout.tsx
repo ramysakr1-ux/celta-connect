@@ -69,7 +69,9 @@ export default async function DashboardLayout({
         </div>
       </header>
 
-      <main className="container w-full flex-1 py-8">{children}</main>
+      <main className="container w-full flex-1 py-8">
+        <div className="frame p-6">{children}</div>
+      </main>
 
       {profile && staffChat ? (
         <StaffChatDrawer profileId={profile.id} initialChannels={staffChat.channels} coworkers={staffChat.coworkers} />

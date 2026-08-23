@@ -90,7 +90,9 @@ export default async function TrainerHubLayout({ children }: { children: React.R
         </div>
       </header>
 
-      <div className="container flex-1 py-8">{children}</div>
+      <div className="container flex-1 py-8">
+        <div className="frame p-6">{children}</div>
+      </div>
 
       {profile && staffChat ? (
         <StaffChatDrawer profileId={profile.id} initialChannels={staffChat.channels} coworkers={staffChat.coworkers} />

@@ -73,7 +73,9 @@ export default async function CentreLayout({ children }: { children: React.React
         <CentreTabs />
       </div>
 
-      <main className="container w-full flex-1 pt-8 pb-6">{children}</main>
+      <main className="container w-full flex-1 pt-8 pb-6">
+        <div className="frame p-6">{children}</div>
+      </main>
 
       {/* Centre Admin.dc.html: a full-width bar under every tab (Overview,
           Roles, and Import alike), not scoped to any one tab's content --

@@ -326,7 +326,7 @@ export default async function PortfolioLayout({
 
       <div className="container flex flex-1 gap-8 py-8">
         {showTraineeNav ? null : <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />}
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="frame min-w-0 flex-1 p-6">{children}</div>
       </div>
 
       <footer className={`mt-auto py-8 text-center text-xs text-muted ${showTraineeNav ? "pb-20 md:pb-8" : ""}`}>

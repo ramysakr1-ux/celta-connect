@@ -19,10 +19,17 @@ import { Wordmark } from "@/components/wordmark";
 // and the volunteer student view. Deliberately still NOT on internal working
 // screens beyond those, and never on an exported or Cambridge-facing
 // document.
+//
+// Ramy, 23 Aug 2026: was centered in normal page flow, so the centered
+// chat pill (StaffChatDrawer/AdminChatBar, both `fixed bottom-6 ... flex
+// justify-center`) sits directly on top of it on every one of these six
+// screens. Pinned to the bottom-right corner instead -- fixed, same tier
+// as the pill, clear of its centered max-w-840px column -- so the two
+// never collide regardless of viewport width.
 export function DesignerCredit({ className = "" }: { className?: string }) {
   return (
-    <div className={`flex justify-center pt-2 ${className}`}>
-      <span className="inline-flex items-center gap-1.5 text-[11px] text-muted">
+    <div className={`pointer-events-none fixed inset-x-0 bottom-6 z-20 flex justify-end px-3 ${className}`}>
+      <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2 py-1 text-[11px] text-muted backdrop-blur-sm">
         <Wordmark size="icon" iconSizePx={20} />
         <span>
           designed and built by <span className="text-ink">Ramy</span>
