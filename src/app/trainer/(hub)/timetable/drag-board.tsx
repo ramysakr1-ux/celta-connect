@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { categorize, toLocalIso, type TimetableEvent } from "@/lib/timetable-grid";
+import { categorize, isEventLive, toLocalIso, type TimetableEvent } from "@/lib/timetable-grid";
 import { moveTimetableEvent, setAttendance, setInputSessionCriteria, setTpEventMode } from "@/app/trainer/(hub)/timetable/actions";
 import type { Volunteer } from "@/app/trainer/(hub)/timetable/event-cell";
 import { DeleteEventButton } from "@/app/trainer/(hub)/timetable/delete-event-button";
@@ -121,6 +121,17 @@ export function DragBoard({
 }) {
   const weeks = buildWeeks(events);
   const today = toLocalIso(new Date());
+  // for-claude-code-timetable-dragboard-fidelity.md: the day-stack redesign
+  // (cd673c0, an approved replacement of the old time-band grid) never
+  // carried over live-Zoom-join capability -- event-cell.tsx's JoinChip
+  // exists and is correct, DragBoard just never used it. Ticks every 30s so
+  // a tile can flip from dormant camera icon to a clickable Join pill
+  // without a full page reload while a session is actually live.
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(id);
+  }, []);
   const [draggingEventId, setDraggingEventId] = useState<string | null>(null);
   const [draggingOriginDate, setDraggingOriginDate] = useState<string | null>(null);
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
@@ -195,6 +206,7 @@ export function DragBoard({
                       {day.events.map((event) => {
                         const cat = tileCategory(event);
                         const spine = TILE_COLOR[cat];
+                        const live = isEventLive(event, now);
                         return (
                           <div
                             key={event.id}
@@ -222,6 +234,18 @@ export function DragBoard({
                               <span className="truncate text-[11px] font-medium text-ink">{event.title}</span>
                             </div>
                             {event.event_time ? <span className="text-[9px] text-muted">{event.event_time.slice(0, 5)}</span> : null}
+                            {live ? (
+                              <a
+                                href={event.zoom_url ?? undefined}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="mt-1 inline-flex items-center gap-1 self-start rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-primary-foreground"
+                              >
+                                <span className="size-[4px] shrink-0 rounded-full bg-primary-foreground" />
+                                Join
+                              </a>
+                            ) : null}
                           </div>
                         );
                       })}
@@ -251,6 +275,7 @@ export function DragBoard({
           attendedIds={attendedByEvent.get(selectedEvent.id) ?? new Set()}
           onClose={() => setSelectedEvent(null)}
           mixedMode={mixedMode}
+          now={now}
         />
       ) : null}
 
@@ -266,6 +291,7 @@ function DetailPanel({
   attendedIds,
   onClose,
   mixedMode,
+  now,
 }: {
   event: TimetableEvent;
   locked: boolean;
@@ -273,6 +299,7 @@ function DetailPanel({
   attendedIds: Set<string>;
   onClose: () => void;
   mixedMode: boolean;
+  now: Date;
 }) {
   const rows: { label: string; value: string }[] = [
     { label: "Type", value: event.type.replace(/_/g, " ") },
@@ -280,9 +307,9 @@ function DetailPanel({
   ];
   if (event.event_time) rows.push({ label: "Time", value: event.event_time.slice(0, 5) });
   if (event.tag) rows.push({ label: "Tag", value: event.tag });
-  if (event.zoom_url) rows.push({ label: "Zoom link", value: event.zoom_url });
   if (event.linked_tp_number) rows.push({ label: "TP number", value: `TP${event.linked_tp_number}` });
   if (event.linked_assignment_type) rows.push({ label: "Assignment", value: event.linked_assignment_type });
+  const live = isEventLive(event, now);
 
   return (
     <div className="sheet flex flex-col gap-3">
@@ -300,7 +327,33 @@ function DetailPanel({
             <span className="text-ink">{r.value}</span>
           </div>
         ))}
+        {event.zoom_url ? (
+          <div className="contents">
+            <span className="text-muted">Zoom link</span>
+            <span>
+              <a href={event.zoom_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                Open Zoom link →
+              </a>
+            </span>
+          </div>
+        ) : null}
       </div>
+
+      {event.zoom_url ? (
+        live ? (
+          <a
+            href={event.zoom_url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 self-start rounded-full bg-primary px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] text-primary-foreground"
+          >
+            <span className="size-[5px] shrink-0 rounded-full bg-primary-foreground" />
+            Join now
+          </a>
+        ) : (
+          <p className="text-xs text-muted">Opens 10 minutes before the session.</p>
+        )
+      ) : null}
 
       {event.type === "milestone" && event.title.startsWith("Filmed observation") ? (
         <Link href={`/trainer/timetable/filmed-observation/${event.id}`} className="text-sm font-medium text-primary hover:underline">
