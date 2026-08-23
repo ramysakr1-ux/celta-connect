@@ -42,3 +42,56 @@ export function computeApplicantCounts(applicants: ApplicantCountRow[]): Applica
   }
   return { accepted, pending, flagged };
 }
+
+const STAGE_LABEL: Partial<Record<ApplicantStage, string>> = {
+  submitted: "Applied",
+  task_returned: "Task returned",
+  interview_booked: "Interview booked",
+  interview_completed: "Interviewed",
+  offer_sent: "Offer sent",
+  accepted: "Interviewed",
+  waiting_list: "Waiting list",
+};
+
+export interface ApplicantSummaryRow {
+  id: string;
+  fullName: string;
+  stageLabel: string;
+  flagged: boolean;
+  accepted: boolean;
+  statusLabel: string;
+}
+
+export interface ApplicantSummaryInput {
+  id: string;
+  full_name: string;
+  stage: ApplicantStage;
+  special_requirements: string | null;
+}
+
+// Course Administrator Landing.dc.html, Screen 2: individual candidate
+// rows on the per-course page itself, not just the landing list's
+// aggregate counts. Terminal-negative stages (rejected/withdrawn/not this
+// time) are dropped -- they're no longer "in the pipeline" this card is
+// summarizing. Sorted flagged-first, since that's the one that needs a
+// look before any decision gets made (§5b).
+export function summarizeApplicantsForCard(applicants: ApplicantSummaryInput[]): ApplicantSummaryRow[] {
+  return applicants
+    .filter((a) => !TERMINAL_NEGATIVE_STAGES.includes(a.stage as (typeof TERMINAL_NEGATIVE_STAGES)[number]))
+    .map((a) => {
+      const accepted = a.stage === "accepted";
+      const flagged = !accepted && Boolean(a.special_requirements);
+      return {
+        id: a.id,
+        fullName: a.full_name,
+        stageLabel: STAGE_LABEL[a.stage] ?? a.stage,
+        flagged,
+        accepted,
+        statusLabel: accepted ? "Accepted" : flagged ? "Reviewing" : "Pending",
+      };
+    })
+    .sort((a, b) => {
+      const rank = (r: ApplicantSummaryRow) => (r.flagged ? 0 : r.accepted ? 1 : 2);
+      return rank(a) - rank(b);
+    });
+}

@@ -300,6 +300,55 @@ export default async function AdminDashboardPage() {
         </div>
         </LaptopOnlyGate>
       </div>
+
+      {/* Course Administrator Landing.dc.html: "give a course a starting
+          set of material before the MCT even logs in." Two tiles, not the
+          mockup's three -- Ramy confirmed 2026-08-23 dropping the third
+          ("Duplicate from a previous course") on purpose: TP points and
+          assignment briefs are one shared set per centre (no course_id on
+          either table), so there's nothing to duplicate between courses.
+          DuplicateCourseForm already covers the one thing that IS real
+          per-course material (Resource Hub files) as part of duplicating
+          the whole course -- see its own copy ("Your centre-wide TP
+          Points Library and assignment briefs are already shared
+          automatically, nothing to copy there"). */}
+      <LaptopOnlyGate task="Course material">
+        <div className="card flex flex-col gap-3 border-t-[3px] border-t-primary p-6">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="font-serif text-lg text-ink">Course material</h2>
+            <span className="rounded-[5px] bg-primary/10 px-2 py-0.5 text-[10.5px] font-bold tracking-[0.08em] text-primary uppercase">
+              Optional head start
+            </span>
+          </div>
+          <p className="max-w-[700px] text-sm text-muted">
+            Give any course a starting set of assignment briefs, TP points, and coursebooks from the centre&apos;s
+            shared library -- before the MCT even logs in.
+          </p>
+          <div className="mt-1 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Link
+              href="/dashboard/admin/coursebooks"
+              className="flex flex-col gap-1.5 rounded-[7px] border border-border p-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+            >
+              <span className="text-[12.5px] font-semibold text-ink">Build from the shared library</span>
+              <span className="text-[11px] leading-relaxed text-muted">
+                Browse the centre&apos;s TP points, briefs, resources, and coursebooks.
+              </span>
+              <span className="mt-1 text-[11.5px] font-medium text-primary">Open library &rarr;</span>
+            </Link>
+            <div className="flex flex-col gap-1.5 rounded-[7px] border border-border p-3.5">
+              <span className="text-[12.5px] font-semibold text-ink">Leave for the MCT</span>
+              <span className="text-[11px] leading-relaxed text-muted">
+                The default. The MCT sets material up themselves once the course begins.
+              </span>
+            </div>
+          </div>
+          <p className="mt-1 text-xs text-muted">
+            Want a head start closer to a specific past course? Use &quot;Duplicate this course&quot; from that
+            course&apos;s own page -- it copies the timetable and any course-specific Resource Hub files. TP points
+            and assignment briefs are already shared centre-wide, so there&apos;s nothing to duplicate there.
+          </p>
+        </div>
+      </LaptopOnlyGate>
     </div>
   );
 }

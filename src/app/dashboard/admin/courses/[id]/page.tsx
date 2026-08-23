@@ -11,7 +11,7 @@ import { EntryFormSentCheckbox } from "@/app/dashboard/admin/courses/[id]/entry-
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
-import { computeApplicantCounts, MIN_CANDIDATES } from "@/lib/admissions-counts";
+import { computeApplicantCounts, summarizeApplicantsForCard, MIN_CANDIDATES } from "@/lib/admissions-counts";
 
 // for-claude-code-course-admin-landing-and-admissions.md §2 +
 // for-claude-code-course-admin-page-not-rebuilt.md: the old kitchen-sink
@@ -42,7 +42,7 @@ export default async function CourseAdminDetailPage({
   const [{ data: center }, { data: tutorRows }, { data: applicants }] = await Promise.all([
     supabase.from("centers").select("appian_url").eq("id", admin.center_id).maybeSingle(),
     supabase.from("course_tutors").select("id, profile_id, tutor_role, verified_at").eq("course_id", id).is("left_at", null),
-    supabase.from("applicants").select("id, stage, special_requirements").eq("intake_course_id", id),
+    supabase.from("applicants").select("id, full_name, stage, special_requirements").eq("intake_course_id", id),
   ]);
 
   const tutorProfileIds = (tutorRows ?? []).map((t) => t.profile_id);
@@ -59,7 +59,11 @@ export default async function CourseAdminDetailPage({
     joined: Boolean(t.verified_at),
   }));
 
-  const { accepted: acceptedCount, pending: stillInPipelineCount } = computeApplicantCounts(applicants ?? []);
+  const { accepted: acceptedCount } = computeApplicantCounts(applicants ?? []);
+  const candidateRows = summarizeApplicantsForCard(applicants ?? []);
+  const CANDIDATE_ROW_LIMIT = 5;
+  const visibleCandidateRows = candidateRows.slice(0, CANDIDATE_ROW_LIMIT);
+  const hiddenCandidateCount = candidateRows.length - visibleCandidateRows.length;
 
   const today = toLocalIso(new Date());
   const courseState = computeCourseState(course.start_date, course.end_date, today);
@@ -96,19 +100,48 @@ export default async function CourseAdminDetailPage({
             </p>
           </div>
           <Link href={`/dashboard/admissions/pipeline?course=${course.id}`} className="shrink-0 text-sm font-medium text-primary hover:underline">
-            Open full pipeline &rarr;
+            Full applications view &rarr;
           </Link>
         </div>
-        <div className="flex flex-wrap gap-6">
-          <div>
-            <p className="font-serif text-2xl text-ink">{acceptedCount}</p>
-            <p className="text-xs text-muted">Accepted</p>
+
+        {/* Course Administrator Landing.dc.html, Screen 2: individual
+            candidates, not just the landing list's aggregate counts --
+            flagged first, since that's the one needing a look before any
+            decision (§5b). Read-only here; actual decisions (accept,
+            interview, offer) stay on each candidate's own admissions page,
+            not duplicated inline -- that's where the real workflow already
+            lives, not something to rebuild a second time here. */}
+        {candidateRows.length > 0 ? (
+          <div className="flex flex-col border-t border-border-faint">
+            {visibleCandidateRows.map((row) => (
+              <Link
+                key={row.id}
+                href={`/dashboard/admissions/${row.id}`}
+                className="grid grid-cols-[1fr_auto_auto] items-center gap-3 border-b border-border-faint py-2.5 transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+              >
+                <span className="truncate text-sm font-medium text-ink">{row.fullName}</span>
+                <span className="text-xs text-muted">{row.stageLabel}</span>
+                {row.flagged ? (
+                  <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">Flagged</span>
+                ) : row.accepted ? (
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">Accepted</span>
+                ) : (
+                  <span className="text-xs text-muted">{row.statusLabel}</span>
+                )}
+              </Link>
+            ))}
+            {hiddenCandidateCount > 0 ? (
+              <p className="pt-2 text-xs text-muted">
+                +{hiddenCandidateCount} more --{" "}
+                <Link href={`/dashboard/admissions/pipeline?course=${course.id}`} className="text-primary hover:underline">
+                  full applications view
+                </Link>
+              </p>
+            ) : null}
           </div>
-          <div>
-            <p className="font-serif text-2xl text-ink">{stillInPipelineCount}</p>
-            <p className="text-xs text-muted">Still in the pipeline</p>
-          </div>
-        </div>
+        ) : (
+          <p className="text-sm text-muted">No applicants yet.</p>
+        )}
         {belowMinimum ? (
           <p className="text-sm text-status-warning-text">
             {acceptedCount} accepted -- below the minimum of {MIN_CANDIDATES} (Handbook §6). Contact Cambridge (JCA) if
