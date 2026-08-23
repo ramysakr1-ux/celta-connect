@@ -34,18 +34,24 @@ import { Wordmark } from "@/components/wordmark";
 // own name/sign-out text on Course Admin (h-14, 56px tall). Dropped to
 // top-16 (64px) so it clears every header in the app instead of layering
 // over it -- still the top-right corner, just under the header band.
-// Ramy, 23 Aug 2026 (fourth pass): asked for the mark to sit outside the
-// pill rather than inside it, and the pill itself to try the brass/gold
-// fill -- reversing the 2026-08-20 "not gold, gold would make it the
-// brightest thing on the page" call. It's a small fixed badge now, not a
-// page element competing for attention, so a solid gold pill reads fine
-// here even though it wouldn't as a page-level accent.
+// Ramy, 23 Aug 2026 (fourth pass, reverted): tried the mark outside the
+// pill with a solid gold fill -- "ugly," reverted back to the translucent
+// pill with the mark inside.
+// Ramy, 23 Aug 2026 (fifth pass): wants this aligned with the logo row
+// specifically, with name/sign-out dropped to their own second row below
+// it rather than fighting this badge for the same line. Layouts that show
+// this (dashboard/layout.tsx, centre/layout.tsx) now reserve that second
+// row themselves, so top-3 (aligned with the ~56px logo row) is correct
+// again -- back from top-16, which was only ever a workaround for name/
+// sign-out still sharing row 1.
 export function DesignerCredit({ className = "" }: { className?: string }) {
   return (
-    <div className={`pointer-events-none fixed top-16 right-3 z-20 flex items-center gap-1.5 ${className}`}>
-      <Wordmark size="icon" iconSizePx={20} />
-      <span className="pointer-events-auto rounded-full bg-gold px-2.5 py-1 text-[11px] text-gold-foreground">
-        designed and built by <span className="font-semibold">Ramy</span>
+    <div className={`pointer-events-none fixed top-3 right-3 z-20 ${className}`}>
+      <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/85 px-2 py-1 text-[11px] text-muted backdrop-blur-sm">
+        <Wordmark size="icon" iconSizePx={16} />
+        <span>
+          designed and built by <span className="text-ink">Ramy</span>
+        </span>
       </span>
     </div>
   );

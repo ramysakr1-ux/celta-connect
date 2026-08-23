@@ -39,6 +39,12 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-border">
+        {/* Two rows on the right (Ramy, 23 Aug 2026): row 1 has empty
+            headroom for the fixed DesignerCredit badge (rendered from the
+            landing page itself, not here -- it must stay page-scoped so it
+            doesn't leak onto every /dashboard/* route); row 2 carries name
+            + sign out, which used to collide with the credit when both sat
+            on the same line. */}
         <div className="container flex h-14 items-center justify-between gap-6">
           {/* The logo keeps you in Course Admin. It used to link to /dashboard,
               whose landing preference sends anyone holding a centre role to
@@ -58,14 +64,14 @@ export default async function DashboardLayout({
               </span>
             ) : null}
           </Link>
-          <div className="flex shrink-0 items-center gap-4 text-sm text-muted">
-            <span>{profile?.full_name ?? email}</span>
-            <form action={signOut}>
-              <button type="submit" className="hover:text-ink">
-                Sign out
-              </button>
-            </form>
-          </div>
+        </div>
+        <div className="container flex items-center justify-end gap-4 pb-2.5 text-sm text-muted">
+          <span>{profile?.full_name ?? email}</span>
+          <form action={signOut}>
+            <button type="submit" className="hover:text-ink">
+              Sign out
+            </button>
+          </form>
         </div>
       </header>
 

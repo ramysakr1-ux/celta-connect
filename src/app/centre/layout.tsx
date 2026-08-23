@@ -46,7 +46,11 @@ export default async function CentreLayout({ children }: { children: React.React
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      {/* Header: 32px mark + wordmark, a hairline divider, then the pill. */}
+      {/* Header: 32px mark + wordmark, a hairline divider, then the pill.
+          Two rows on the right (Ramy, 23 Aug 2026): row 1 leaves headroom
+          for the fixed DesignerCredit badge (rendered from centre/page.tsx
+          itself, landing-page-only); row 2 carries the branch filter, name
+          and sign out, which used to collide with the credit on one line. */}
       <div className="container flex items-center justify-between gap-6 pt-10">
         <div className="flex items-center gap-3.5">
           <Link href="/centre" className="shrink-0 hover:opacity-80">
@@ -57,15 +61,15 @@ export default async function CentreLayout({ children }: { children: React.React
             Centre admin
           </span>
         </div>
-        <div className="flex shrink-0 items-center gap-4 text-[13px] text-muted">
-          <BranchFilter branches={switchable} />
-          <span>{profile.full_name}</span>
-          <form action={signOut}>
-            <button type="submit" className="hover:text-ink">
-              Sign out
-            </button>
-          </form>
-        </div>
+      </div>
+      <div className="container flex items-center justify-end gap-4 pt-2 text-[13px] text-muted">
+        <BranchFilter branches={switchable} />
+        <span>{profile.full_name}</span>
+        <form action={signOut}>
+          <button type="submit" className="hover:text-ink">
+            Sign out
+          </button>
+        </form>
       </div>
 
       <div className="container pt-5">
