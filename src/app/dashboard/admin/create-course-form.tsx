@@ -20,24 +20,33 @@ const MODE_LABEL: Record<DeliveryMode, string> = {
 };
 
 /**
- * The new-course wizard, all six steps (Course Admin.dc.html).
+ * The new-course wizard -- exactly 5 steps
+ * (for-claude-code-course-admin-final-scope.md): course details, delivery
+ * mode, confirm dates/pattern, assign your first tutor (+ optionally name
+ * an assessor), review and launch.
  *
- * One <form>, six panels. Every field stays mounted while other steps show, so
- * moving back and forth never loses anything and the whole course is created
- * in a single submit at step 6 — "Launch course" is the submit, and launching
- * is what opens the course to invites.
+ * "Capacity and pricing" (the old step 4) is cut entirely -- pricing is a
+ * centre-level concern per that spec, not something set per course while
+ * setting one up. courses.fee_amount etc. still exist and still feed the
+ * offer email, but they're now set from Centre Admin's own per-course view
+ * (see src/app/centre/courses/[id]/pricing-form.tsx), not gathered here.
  *
- * The design's own escape hatches are kept: tutors can be skipped at step 5,
- * and pricing fields are optional. Only step 1's name and dates are required,
- * because a course record without them is not a course.
+ * One <form>, five panels. Every field stays mounted while other steps show,
+ * so moving back and forth never loses anything and the whole course is
+ * created in a single submit at step 5 — "Launch course" is the submit, and
+ * launching is what opens the course to invites.
+ *
+ * The design's own escape hatches are kept: tutors (and the assessor) can
+ * be skipped at step 4. Only step 1's name and dates are required, because
+ * a course record without them is not a course.
  */
 export function CreateCourseForm({ centerNumber }: { centerNumber?: string | null }) {
   const [state, action, pending] = useActionState(createCourse, initialState);
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("f2f");
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [daysOff, setDaysOff] = useState<string[]>([]);
 
-  // Step 6's review reads live field values without controlled inputs
+  // Step 5's review reads live field values without controlled inputs
   // everywhere: cheap summary state, set as the user leaves each step.
   const [summary, setSummary] = useState<Record<string, string>>({});
 
@@ -49,10 +58,8 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
       name: g("name"),
       dates: g("start_date") && g("end_date") ? `${g("start_date")} – ${g("end_date")}` : "",
       cohort: g("cohort_size"),
-      fee: g("fee_amount"),
-      deposit: g("deposit_amount"),
-      currency: g("fee_currency"),
       inviteEmail: g("invite_email"),
+      assessorName: g("assessor_name"),
     });
   }
 
@@ -64,14 +71,14 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
   const stepHeader = (n: number, title: string, blurb: string) => (
     <div className="flex flex-col gap-1.5">
       <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
-        {eyebrow} · step {n} of 6
+        {eyebrow} · step {n} of 5
       </p>
       <h3 className="font-serif text-[22px] font-semibold text-ink">{title}</h3>
       <p className="max-w-[62ch] text-[12.5px] leading-relaxed text-muted">{blurb}</p>
     </div>
   );
 
-  const nav = (next: 1 | 2 | 3 | 4 | 5 | 6, label: string) => (
+  const nav = (next: 1 | 2 | 3 | 4 | 5, label: string) => (
     <button
       type="button"
       onClick={(e) => {
@@ -84,7 +91,7 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
     </button>
   );
 
-  const back = (prev: 1 | 2 | 3 | 4 | 5) => (
+  const back = (prev: 1 | 2 | 3 | 4) => (
     <button type="button" onClick={() => setStep(prev)} className="text-sm text-muted underline">
       Back
     </button>
@@ -216,66 +223,14 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
         </div>
 
         <div className="flex items-center gap-3">
-          {nav(4, "Continue to capacity and pricing")}
+          {nav(4, "Continue to tutors")}
           {back(2)}
         </div>
       </div>
 
-      {/* Step 4 — capacity and pricing */}
+      {/* Step 4 — assign tutors + optionally name an assessor */}
       <div className={step === 4 ? "flex flex-col gap-4" : "hidden"}>
-        {stepHeader(4, "Capacity and pricing", "The fee and deposit print on the offer email; the deposit-due window is what the acceptance email promises.")}
-
-        <div className="grid grid-cols-2 gap-[14px]">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="fee_amount" className="text-[13px] font-semibold text-ink">
-              Course fee
-            </label>
-            <input id="fee_amount" name="fee_amount" type="number" min="0" step="0.01" placeholder="1395" className={field} />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="deposit_amount" className="text-[13px] font-semibold text-ink">
-              Deposit
-            </label>
-            <input id="deposit_amount" name="deposit_amount" type="number" min="0" step="0.01" placeholder="250" className={field} />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-[14px]">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="fee_currency" className="text-[13px] font-semibold text-ink">
-              Currency
-            </label>
-            <input id="fee_currency" name="fee_currency" type="text" maxLength={3} placeholder="GBP" className={`${field} uppercase`} />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="deposit_due_days" className="text-[13px] font-semibold text-ink">
-              Deposit due
-            </label>
-            <div className="flex items-center gap-2">
-              <input id="deposit_due_days" name="deposit_due_days" type="number" min="1" placeholder="7" className={`${field} w-24`} />
-              <span className="text-sm text-muted">days after offer</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <span className="text-[13px] font-semibold text-ink">Payment provider</span>
-          <p className="text-sm text-ink">Uses the centre&apos;s connected provider</p>
-          <p className="text-xs text-muted">
-            Set once in Centre Admin → Payment providers, not per course. Card is one of four accepted methods
-            and is never required.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {nav(5, "Continue to tutors")}
-          {back(3)}
-        </div>
-      </div>
-
-      {/* Step 5 — assign tutors */}
-      <div className={step === 5 ? "flex flex-col gap-4" : "hidden"}>
-        {stepHeader(5, "Assign your first tutor", "Every course needs a Main Course Tutor before it can launch. Add more tutors any time afterwards from the roster.")}
+        {stepHeader(4, "Assign your first tutor", "Every course needs a Main Course Tutor before it can launch. Add more tutors any time afterwards from the roster.")}
 
         <div className="grid grid-cols-[1fr_auto] gap-[14px]">
           <div className="flex flex-col gap-1">
@@ -299,8 +254,29 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
         </div>
         <p className="text-xs text-muted">Same role picker as the roster — the role travels with the invitation.</p>
 
+        {/* for-claude-code-course-admin-refinements.md: "name the assessor
+            now, or decide later." Never a hard requirement -- nobody really
+            knows the assessment date this early anyway. If named, the MCT
+            gets notified with this contact info once they're actually on
+            the course. */}
+        <div className="grid grid-cols-2 gap-[14px] border-t border-border-faint pt-4">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="assessor_name" className="text-[13px] font-semibold text-ink">
+              Assessor (optional)
+            </label>
+            <input id="assessor_name" name="assessor_name" type="text" placeholder="Name" className={field} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="assessor_email" className="text-[13px] font-semibold text-ink">
+              Assessor email
+            </label>
+            <input id="assessor_email" name="assessor_email" type="email" placeholder="assessor@cambridge.org" className={field} />
+          </div>
+        </div>
+        <p className="text-xs text-muted">Leave blank to decide later -- the MCT can set this themselves once known.</p>
+
         <div className="flex items-center gap-3">
-          {nav(6, "Continue to review")}
+          {nav(5, "Continue to review")}
           <button
             type="button"
             onClick={(e) => {
@@ -308,32 +284,28 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
               const el = form?.elements.namedItem("invite_email") as HTMLInputElement | null;
               if (el) el.value = "";
               captureStep(form);
-              setStep(6);
+              setStep(5);
             }}
             className="text-sm text-muted underline"
           >
             Skip — I&apos;ll assign a tutor later
           </button>
-          {back(4)}
+          {back(3)}
         </div>
       </div>
 
-      {/* Step 6 — review and launch */}
-      <div className={step === 6 ? "flex flex-col gap-4" : "hidden"}>
-        {stepHeader(6, "Review before launch", "Launch opens the course to invites. Once launched, this course moves to Centre home and its Invitations panel becomes active.")}
+      {/* Step 5 — review and launch */}
+      <div className={step === 5 ? "flex flex-col gap-4" : "hidden"}>
+        {stepHeader(5, "Review before launch", "Launch opens the course to invites. Once launched, this course moves to Centre home and its Invitations panel becomes active.")}
 
         <div className="overflow-hidden rounded-[6px] border border-border">
           {[
             ["Course", [centerNumber, summary.code, summary.name].filter(Boolean).join(" · ") || "—"],
             ["Dates", summary.dates || "—"],
             ["Delivery", MODE_LABEL[deliveryMode]],
-            [
-              "Capacity",
-              summary.cohort
-                ? `${summary.cohort} candidates${summary.fee ? ` · ${summary.currency || ""}${summary.fee} fee${summary.deposit ? `, ${summary.currency || ""}${summary.deposit} deposit` : ""}` : ""}`
-                : "—",
-            ],
+            ["Capacity", summary.cohort ? `${summary.cohort} candidates` : "—"],
             ["Tutors", summary.inviteEmail ? `${summary.inviteEmail} — invited at launch` : "None yet — assign from the roster"],
+            ["Assessor", summary.assessorName || "Not named yet -- the MCT can set this later"],
           ].map(([label, value]) => (
             <div key={label} className="grid grid-cols-[128px_1fr] gap-3 border-b border-border-faint px-4 py-3 text-sm last:border-none">
               <span className="font-semibold text-muted">{label}</span>

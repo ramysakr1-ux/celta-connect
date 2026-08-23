@@ -129,6 +129,26 @@ export async function updateEntryFormSentAt(formData: FormData): Promise<void> {
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
 }
 
+// for-claude-code-course-admin-landing-and-admissions.md §4: "a single
+// field on the course record, writable by both the Course Administrator...
+// and the MCT... whichever side sets it first is what the other side
+// sees." This is the Course-Admin-side write path; the MCT-side one
+// (inside the course, once running) reuses the same two columns.
+export async function updateAssessor(formData: FormData): Promise<void> {
+  const admin = await requireRole("admin");
+  const courseId = formData.get("course_id");
+  const assessorName = (formData.get("assessor_name") as string | null)?.trim() || null;
+  const assessorEmail = (formData.get("assessor_email") as string | null)?.trim().toLowerCase() || null;
+  if (typeof courseId !== "string") return;
+
+  const supabase = await createClient();
+  const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
+  if (!course || course.center_id !== admin.center_id) return;
+
+  await supabase.from("courses").update({ assessor_name: assessorName, assessor_email: assessorEmail }).eq("id", courseId);
+  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+}
+
 export async function regenerateJoinLink(formData: FormData): Promise<void> {
   const admin = await requireRole("admin");
 

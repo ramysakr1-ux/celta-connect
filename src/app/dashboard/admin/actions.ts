@@ -4,6 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { getCurrentProfile } from "@/lib/auth/get-profile";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { can } from "@/lib/auth/centre-permissions";
 import type { DeliveryMode } from "@/lib/delivery-mode";
 
 export interface FormState {
@@ -26,20 +29,24 @@ export async function createCourse(
   // number; cohort size is "Maximum cohort size".
   const courseCode = (formData.get("course_code") as string | null)?.trim() || null;
   const cohortRaw = (formData.get("cohort_size") as string | null) || null;
-  // Steps 3-6 (Course Admin.dc.html). All optional at creation: the design's
-  // sidebar says what can be deferred, and only step 6's launch gates invites.
+  // Steps 3-5 (for-claude-code-course-admin-final-scope.md). All optional at
+  // creation: the design's sidebar says what can be deferred, and only step
+  // 5's launch gates invites. Pricing (fee/deposit/currency) is deliberately
+  // NOT collected here any more -- cut from the wizard per that spec
+  // ("a centre-level concern"); those columns are now set from Centre
+  // Admin's own per-course view instead (src/app/centre/courses/[id]/).
   const inputStart = (formData.get("input_start_time") as string | null)?.trim() || null;
   const tpStart = (formData.get("tp_start_time") as string | null)?.trim() || null;
   const daysOff = (formData.getAll("days_off") as string[]).filter(Boolean);
-  const feeRaw = (formData.get("fee_amount") as string | null) || null;
-  const depositRaw = (formData.get("deposit_amount") as string | null) || null;
-  const feeCurrency = (formData.get("fee_currency") as string | null)?.trim().toUpperCase() || null;
-  const depositDueRaw = (formData.get("deposit_due_days") as string | null) || null;
   const launch = formData.get("launch") === "1";
-  // Step 5's tutor. Optional -- "Skip, I'll assign a tutor later" is a real
+  // Step 4's tutor. Optional -- "Skip, I'll assign a tutor later" is a real
   // path -- but when given, the invitation is created and emailed at launch.
   const inviteEmail = (formData.get("invite_email") as string | null)?.trim().toLowerCase() || null;
   const inviteRole = (formData.get("invite_tutor_role") as string | null) || null;
+  // Optional assessor, named now or left for the MCT to set later
+  // (for-claude-code-course-admin-refinements.md).
+  const assessorName = (formData.get("assessor_name") as string | null)?.trim() || null;
+  const assessorEmail = (formData.get("assessor_email") as string | null)?.trim().toLowerCase() || null;
 
   if (
     typeof name !== "string" ||
@@ -64,15 +71,6 @@ export async function createCourse(
   if (cohortSize !== null && (!Number.isInteger(cohortSize) || cohortSize <= 0)) {
     return { error: "Maximum cohort size should be a whole number." };
   }
-  const feeAmount = feeRaw ? Number(feeRaw) : null;
-  const depositAmount = depositRaw ? Number(depositRaw) : null;
-  const depositDueDays = depositDueRaw ? Number(depositDueRaw) : null;
-  if ((feeAmount !== null && !(feeAmount >= 0)) || (depositAmount !== null && !(depositAmount >= 0))) {
-    return { error: "Fee and deposit should be amounts." };
-  }
-  if (depositDueDays !== null && (!Number.isInteger(depositDueDays) || depositDueDays <= 0)) {
-    return { error: "Deposit due should be a number of days." };
-  }
 
   const supabase = await createClient();
   const { error } = await supabase.from("courses").insert({
@@ -83,10 +81,8 @@ export async function createCourse(
     input_start_time: inputStart,
     tp_start_time: tpStart,
     days_off: daysOff.length ? daysOff : null,
-    fee_amount: feeAmount,
-    deposit_amount: depositAmount,
-    fee_currency: feeCurrency,
-    deposit_due_days: depositDueDays,
+    assessor_name: assessorName,
+    assessor_email: assessorEmail,
     // "Launch opens the course to invites." Created from the wizard without
     // launching = a draft.
     launched_at: launch ? new Date().toISOString() : null,
@@ -160,7 +156,24 @@ export async function duplicateCourse(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const admin = await requireRole("admin");
+  // for-claude-code-course-admin-final-scope.md: "Duplicate-course lives on
+  // this overview (the course list), not inside an individual course's
+  // detail." Reached from two different places now -- the old Course Admin
+  // detail page (profile.role === "admin") and the new Centre Admin course
+  // list (a centre_roles grant with course.create, e.g. centre_administrator
+  // or centre_owner) -- so this accepts either, resolving whichever one
+  // actually applies rather than assuming the admin-role path.
+  const session = await getCurrentProfile();
+  const profile = session?.profile;
+  if (!profile) redirect("/login");
+  let admin: { id: string; center_id: string };
+  if (profile.role === "admin") {
+    admin = { id: profile.id, center_id: profile.center_id };
+  } else {
+    const ctx = await getCentreRoleContext(profile);
+    if (!can(ctx.roles, "course.create")) redirect(`/dashboard/${profile.role}`);
+    admin = { id: profile.id, center_id: ctx.activeCenterId ?? profile.center_id };
+  }
 
   const sourceCourseId = formData.get("source_course_id");
   const name = formData.get("name");

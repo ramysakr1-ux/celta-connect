@@ -206,6 +206,9 @@ export interface Database {
           address: string | null;
           primary_contact_email: string | null;
           time_zone: string | null;
+          // migration 0203 -- Cambridge gives every centre the same Appian
+          // sign-in URL; Entry Form's "Open Appian" link reads this.
+          appian_url: string | null;
           currency: string | null;
           // migration 0146 -- was a plain 160 constant ("the spec's own
           // illustrative figure... no centre setting for this yet").
@@ -285,6 +288,11 @@ export interface Database {
           tp7_allowed_aim_types: AimType[] | null;
           tp8_allowed_aim_types: AimType[] | null;
           assessor_visit_date: string | null;
+          // migration 0202 -- optional at wizard time, notifies the MCT
+          // once one is actually on the course.
+          assessor_name: string | null;
+          assessor_email: string | null;
+          assessor_notified_at: string | null;
           entry_form_sent_at: string | null;
           cambridge_grades_confirmed_at: string | null;
           cambridge_grades_confirmed_by: string | null;

@@ -59,8 +59,8 @@ export default async function NewCoursePage() {
           <div className="card card-gold p-5">
             <h2 className="font-serif text-base text-ink">What comes next</h2>
             <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">
-              Six steps in all. These two settle what the course is and how teaching practice is delivered; the
-              rest — levels, groups, the timetable — follow once the course exists.
+              Five steps in all. These two settle what the course is and how teaching practice is delivered; the
+              rest — assigning a first tutor and reviewing before launch — follow once the course exists.
             </p>
           </div>
         </div>

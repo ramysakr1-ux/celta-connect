@@ -14,6 +14,7 @@ export function ProfileDriveForm({
   primaryContactEmail,
   timeZone,
   currency,
+  appianUrl,
   filmsTpSessions,
   driveConnection,
 }: {
@@ -23,6 +24,7 @@ export function ProfileDriveForm({
   primaryContactEmail: string | null;
   timeZone: string | null;
   currency: string | null;
+  appianUrl: string | null;
   filmsTpSessions: boolean;
   driveConnection: { connected_at: string; template_doc_id: string | null; output_folder_id: string | null } | null;
 }) {
@@ -112,6 +114,24 @@ export function ProfileDriveForm({
             className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
           />
           <p className="text-xs text-muted">Applies to every course unless a course overrides it.</p>
+        </div>
+
+        <div className="flex flex-col gap-1.5 sm:col-span-2">
+          <label htmlFor="cs_appian_url" className="text-sm text-muted">
+            Appian sign-in URL
+          </label>
+          <input
+            id="cs_appian_url"
+            name="appian_url"
+            type="url"
+            placeholder="https://celta.appiancloud.com"
+            defaultValue={appianUrl ?? ""}
+            className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          />
+          <p className="text-xs text-muted">
+            Cambridge gives every centre the same sign-in link -- Course Admin&apos;s Entry Form card opens this,
+            not a per-course link.
+          </p>
         </div>
 
         <div className="flex items-start gap-2.5 sm:col-span-2">

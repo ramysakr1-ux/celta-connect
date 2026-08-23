@@ -35,6 +35,7 @@ export async function updateCentreProfile(_prevState: FormState, formData: FormD
   const primaryContactEmail = (formData.get("primary_contact_email") as string | null)?.trim() || null;
   const timeZone = (formData.get("time_zone") as string | null)?.trim() || null;
   const currency = (formData.get("currency") as string | null)?.trim() || null;
+  const appianUrl = (formData.get("appian_url") as string | null)?.trim() || null;
   const filmsTpSessions = formData.get("films_tp_sessions") === "on";
   if (!name) return { error: "Enter the centre name." };
 
@@ -47,6 +48,7 @@ export async function updateCentreProfile(_prevState: FormState, formData: FormD
       primary_contact_email: primaryContactEmail,
       time_zone: timeZone,
       currency,
+      appian_url: appianUrl,
       films_tp_sessions: filmsTpSessions,
     })
     .eq("id", centerId);

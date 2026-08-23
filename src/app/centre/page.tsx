@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, canView } from "@/lib/auth/centre-permissions";
 import { computeAssessorCentreHistory } from "@/lib/assessor-course-history";
+import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 
 // Centre Admin's Overview.
 //
@@ -165,6 +166,17 @@ export default async function CentreOverviewPage({
     return { label: "Running", cls: "bg-[color-mix(in_oklab,oklch(38%_0.072_195)_12%,transparent)] text-primary" };
   };
 
+  const courseStateCounts = (courses ?? []).reduce(
+    (acc, c) => {
+      const label = courseState(c.start_date, c.end_date).label;
+      if (label === "Upcoming") acc.upcoming += 1;
+      else if (label === "Closed") acc.closed += 1;
+      else acc.running += 1;
+      return acc;
+    },
+    { running: 0, upcoming: 0, closed: 0 }
+  );
+
   const metrics = [
     { label: "Collected this month", value: money(collectedThisMonth), note: `${paid.length} confirmed payment${paid.length === 1 ? "" : "s"}`, alert: false },
     { label: "Outstanding balance", value: money(outstanding), note: owingCourseCount > 0 ? `across ${owingCourseCount} course${owingCourseCount === 1 ? "" : "s"}` : "nothing owed", alert: outstanding > 0 },
@@ -241,10 +253,12 @@ export default async function CentreOverviewPage({
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px] lg:items-start">
         <div className="flex flex-col gap-4">
       <div className="card !p-0">
-        <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border px-5 py-3.5">
           <h2 className="font-serif text-base text-ink">All courses</h2>
           <span className="text-xs text-muted">
-            {(courses ?? []).length} {multiBranch && !branch ? "across your branches" : "across the centre"}
+            {/* for-claude-code-course-admin-final-scope.md: "how many, their
+                status." A per-status breakdown, not just a flat total. */}
+            {courseStateCounts.running} running · {courseStateCounts.upcoming} upcoming · {courseStateCounts.closed} closed
           </span>
         </div>
         {(courses ?? []).length === 0 ? (
@@ -255,7 +269,7 @@ export default async function CentreOverviewPage({
             const owed = owedByCourse.get(c.id) ?? 0;
             return (
               <div key={c.id} className={`flex flex-wrap items-center gap-4 px-5 py-3.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                <div className="min-w-[13rem] flex-1">
+                <Link href={`/centre/courses/${c.id}`} className="min-w-[13rem] flex-1 hover:text-primary">
                   <p className="text-sm font-semibold text-ink">
                     {c.name}
                     {/* "The branch always travels with the course code" -- a code
@@ -270,13 +284,16 @@ export default async function CentreOverviewPage({
                     {dateRange(c.start_date, c.end_date)}
                     {c.delivery_mode ? ` · ${c.delivery_mode}` : ""}
                   </p>
-                </div>
+                </Link>
                 {canView(ctx.roles, "payments.view") ? (
                   <span className={`w-28 shrink-0 text-sm ${owed > 0 ? "text-destructive" : "text-muted"}`}>
                     {owed > 0 ? `${money(owed)} due` : "Fully paid"}
                   </span>
                 ) : null}
                 <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${state.cls}`}>{state.label}</span>
+                {/* "Duplicate-course lives on this overview (the course
+                    list), not inside an individual course's detail." */}
+                {can(ctx.roles, "course.create") ? <DuplicateCourseForm courseId={c.id} suggestedName={`${c.name} (copy)`} /> : null}
               </div>
             );
           })
