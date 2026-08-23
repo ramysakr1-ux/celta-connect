@@ -5,12 +5,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { isMctOnCourse } from "@/lib/course-mct";
 import { buildSkeletonEvents, DEFAULT_TEACHING_DAYS, PART_TIME_SKELETON } from "@/lib/timetable-skeleton";
 import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { generateStandardAnnouncements } from "@/lib/announcements-catalog";
 import { syncAssignmentDueDates } from "@/lib/assignment-due-dates";
 import { halfTpDates, distinctTpDates, checkIntensiveTpBreaks } from "@/lib/rotation";
 import { sendPushToOwners } from "@/lib/push/send";
+import { extractZoomMeetingId } from "@/lib/zoom/meeting-id";
 import type { TimeBand } from "@/lib/supabase/types";
 
 export interface FormState {
@@ -31,9 +33,25 @@ function parseCriteriaCodes(raw: string | null): string[] {
   return [...new Set(codes.filter((c) => (CELTA_CRITERIA_CODES as readonly string[]).includes(c)))];
 }
 
+// Ramy, 2026-08-23: "ACT... doesn't need to make changes to the timetable
+// so they don't need to see those options" -- MCT-only editing, mirroring
+// the celta5-actions.ts grade-approval gates' isMctOnCourse() pattern.
+// Admins keep full access, same as every other role check in this file.
+const NOT_MCT_ERROR = "Only the main course tutor can edit the timetable.";
+
+async function requireTimetableEditAccess(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  trainer: { role: string; id: string; course_id: string | null }
+): Promise<boolean> {
+  if (trainer.role === "admin" || !trainer.course_id) return true;
+  return isMctOnCourse(supabase, trainer.course_id, trainer.id);
+}
+
 export async function addTimetableEvent(_prevState: FormState, formData: FormData): Promise<FormState> {
   const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) return { error: "No course assigned." };
+  const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
 
   const type = formData.get("type");
   const title = (formData.get("title") as string | null)?.trim();
@@ -66,7 +84,6 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
   }
   if (typeof eventDate !== "string" || !eventDate) return { error: "Date is required." };
 
-  const supabase = await createClient();
   const { error } = await supabase.from("course_timetable_events").insert({
     course_id: trainer.course_id,
     type: type as (typeof EVENT_TYPES)[number],
@@ -75,6 +92,7 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
     event_time: eventTime,
     tag,
     zoom_url: zoomUrl,
+    zoom_meeting_id: extractZoomMeetingId(zoomUrl),
     linked_assignment_type: linkedAssignmentType,
     linked_tp_number: linkedTpNumber && linkedTpNumber >= 1 && linkedTpNumber <= 8 ? linkedTpNumber : null,
     // Only meaningful on input_session rows -- Handbook 2.2: async input
@@ -107,6 +125,7 @@ export async function setInputSessionCriteria(formData: FormData): Promise<void>
   if (typeof eventId !== "string") return;
 
   const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return;
   const { data: event } = await supabase
     .from("course_timetable_events")
     .select("id, course_id, type")
@@ -134,6 +153,7 @@ export async function setTpEventMode(formData: FormData): Promise<void> {
   if (mode !== "f2f" && mode !== "online" && mode !== "") return;
 
   const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return;
   const { data: event } = await supabase
     .from("course_timetable_events")
     .select("id, course_id, type")
@@ -156,6 +176,8 @@ export async function setTpEventMode(formData: FormData): Promise<void> {
 export async function generateTimetableSkeleton(_prevState: FormState, formData: FormData): Promise<FormState> {
   const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) return { error: "No course assigned." };
+  const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
 
   const startDate = formData.get("start_date");
   if (typeof startDate !== "string" || !startDate) return { error: "Start date is required." };
@@ -178,8 +200,6 @@ export async function generateTimetableSkeleton(_prevState: FormState, formData:
   // just a different day count/pattern on the standard one.
   const shape = formData.get("shape");
   const skeletonDrafts = shape === "part_time" ? PART_TIME_SKELETON : undefined;
-
-  const supabase = await createClient();
 
   const { count } = await supabase
     .from("course_timetable_events")
@@ -218,6 +238,7 @@ export async function moveTimetableEvent(eventId: string, newDate: string): Prom
   if (!trainer.course_id) return { error: "No course assigned." };
 
   const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
   const { error } = await supabase
     .from("course_timetable_events")
     .update({ event_date: newDate })
@@ -236,6 +257,7 @@ export async function deleteTimetableEvent(formData: FormData): Promise<void> {
   if (typeof eventId !== "string") return;
 
   const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return;
   await supabase
     .from("course_timetable_events")
     .delete()
@@ -274,6 +296,7 @@ export async function cancelTimetableEvent(formData: FormData): Promise<void> {
   if (typeof eventId !== "string") return;
 
   const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return;
   const { data: event } = await supabase
     .from("course_timetable_events")
     .select("id, title, type, event_date, event_time")
@@ -362,6 +385,8 @@ const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 export async function setTimeBands(_prevState: FormState, formData: FormData): Promise<FormState> {
   const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) return { error: "No course assigned." };
+  const accessCheckClient = await createClient();
+  if (!(await requireTimetableEditAccess(accessCheckClient, trainer))) return { error: NOT_MCT_ERROR };
 
   const starts = formData.getAll("band_start").map(String);
   const ends = formData.getAll("band_end").map(String);
@@ -382,8 +407,7 @@ export async function setTimeBands(_prevState: FormState, formData: FormData): P
     bands.push({ start, end, label: `${start}–${end}` });
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.from("courses").update({ time_bands: bands }).eq("id", trainer.course_id);
+  const { error } = await accessCheckClient.from("courses").update({ time_bands: bands }).eq("id", trainer.course_id);
   if (error) return { error: "Could not save the time bands." };
 
   revalidatePath("/trainer/timetable");
@@ -395,6 +419,7 @@ export async function resetTimeBands(): Promise<void> {
   if (!trainer.course_id) return;
 
   const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return;
   await supabase.from("courses").update({ time_bands: null }).eq("id", trainer.course_id);
   revalidatePath("/trainer/timetable");
 }
@@ -405,6 +430,7 @@ export async function setTimetableLock(formData: FormData): Promise<void> {
   const lock = formData.get("lock") === "true";
 
   const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return;
 
   // remaining-compliance.md item 3: refuse (not warn) locking the
   // timetable while an asynchronous input session has no linked live
@@ -521,7 +547,57 @@ export async function recomputeAssignmentDueDates(): Promise<void> {
   if (!trainer.course_id) return;
 
   const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return;
   await syncAssignmentDueDates(supabase, trainer.course_id);
   revalidatePath("/trainer/timetable");
   revalidatePath("/trainer/roster");
+}
+
+// zoom-auto-attendance.md §4/§5: resolving one row from the "needs review"
+// list the webhook couldn't confidently match on its own. Same access level
+// as setAttendance (not MCT-gated) -- this is still register-taking, just
+// confirming who a Zoom participant was, not a timetable edit.
+export async function resolveZoomParticipant(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const unmatchedId = formData.get("unmatched_id");
+  const volunteerStudentId = (formData.get("volunteer_student_id") as string | null) || null;
+  if (typeof unmatchedId !== "string") return;
+
+  const supabase = await createClient();
+  const { data: unmatched } = await supabase
+    .from("zoom_unmatched_participants")
+    .select("id, timetable_event_id, joined_at, left_at")
+    .eq("id", unmatchedId)
+    .maybeSingle();
+  if (!unmatched) return;
+
+  // zoom_unmatched_participants carries no course_id of its own -- confirm
+  // via the event it points at rather than trusting a client-supplied id.
+  const { data: event } = await supabase
+    .from("course_timetable_events")
+    .select("id, course_id")
+    .eq("id", unmatched.timetable_event_id)
+    .maybeSingle();
+  if (!event || event.course_id !== trainer.course_id) return;
+
+  if (volunteerStudentId) {
+    await supabase.from("volunteer_attendance").upsert(
+      {
+        volunteer_student_id: volunteerStudentId,
+        timetable_event_id: unmatched.timetable_event_id,
+        marked_by: trainer.id,
+        source: "zoom",
+        joined_at: unmatched.joined_at,
+        left_at: unmatched.left_at,
+      },
+      { onConflict: "volunteer_student_id,timetable_event_id" }
+    );
+  }
+
+  await supabase
+    .from("zoom_unmatched_participants")
+    .update({ resolved_at: new Date().toISOString(), resolved_volunteer_student_id: volunteerStudentId, resolved_by: trainer.id })
+    .eq("id", unmatchedId);
+
+  revalidatePath("/trainer/timetable");
 }

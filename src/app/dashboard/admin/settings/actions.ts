@@ -103,6 +103,18 @@ export async function disconnectGoogleDrive(): Promise<void> {
   revalidatePath("/centre/settings");
 }
 
+// zoom-auto-attendance.md §1. Deleting the row is enough -- there's no
+// separate "revoke" call to Zoom itself needed here (unlike Google, which
+// warns a stale grant can block re-issuing a refresh_token); the centre
+// can also revoke from their own Zoom App Marketplace management page if
+// they want the authorization gone on Zoom's side too.
+export async function disconnectZoom(): Promise<void> {
+  const profile = await requireRole("admin");
+  const admin = createAdminClient();
+  await admin.from("centre_zoom_connections").delete().eq("center_id", profile.center_id);
+  revalidatePath("/centre/settings");
+}
+
 export async function addStyleExample(
   _prevState: FormState,
   formData: FormData

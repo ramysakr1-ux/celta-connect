@@ -3,9 +3,27 @@
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { categorize, isEventLive, toLocalIso, type TimetableEvent } from "@/lib/timetable-grid";
-import { moveTimetableEvent, setAttendance, setInputSessionCriteria, setTpEventMode } from "@/app/trainer/(hub)/timetable/actions";
+import {
+  moveTimetableEvent,
+  setAttendance,
+  setInputSessionCriteria,
+  setTpEventMode,
+  resolveZoomParticipant,
+} from "@/app/trainer/(hub)/timetable/actions";
 import type { Volunteer } from "@/app/trainer/(hub)/timetable/event-cell";
 import { DeleteEventButton } from "@/app/trainer/(hub)/timetable/delete-event-button";
+
+// zoom-auto-attendance.md §4 -- a Zoom participant the webhook couldn't
+// confidently match to a volunteer_student, shown in the Attendance panel
+// for the trainer to resolve.
+export interface UnmatchedParticipant {
+  id: string;
+  timetable_event_id: string;
+  zoom_email: string | null;
+  zoom_display_name: string;
+  suggested_volunteer_student_id: string | null;
+  joined_at: string;
+}
 
 // for-claude-code-timetable-drag.md -- replaces the time-band grid
 // (timetable-grid.tsx) with the day-stack drag-and-drop board. Per Ramy's
@@ -111,13 +129,23 @@ export function DragBoard({
   locked,
   volunteers,
   attendedByEvent,
+  attendanceSourceByEvent,
+  unmatchedByEvent,
   mixedMode,
+  canEdit,
 }: {
   events: TimetableEvent[];
   locked: boolean;
   volunteers: Volunteer[];
   attendedByEvent: Map<string, Set<string>>;
+  attendanceSourceByEvent: Map<string, Map<string, "manual" | "zoom">>;
+  unmatchedByEvent: Map<string, UnmatchedParticipant[]>;
   mixedMode: boolean;
+  // Ramy, 2026-08-23: ACT doesn't make changes to the timetable -- drag-move,
+  // criteria/mode edits, and delete all need the MCT (or admin). Attendance
+  // isn't gated: taking the register is a day-of teaching task, not a
+  // timetable edit, and actions.ts' setAttendance was deliberately left open.
+  canEdit: boolean;
 }) {
   const weeks = buildWeeks(events);
   const today = toLocalIso(new Date());
@@ -210,7 +238,7 @@ export function DragBoard({
                         return (
                           <div
                             key={event.id}
-                            draggable={!locked}
+                            draggable={!locked && canEdit}
                             onDragStart={(e) => {
                               setDraggingEventId(event.id);
                               setDraggingOriginDate(event.event_date);
@@ -273,9 +301,12 @@ export function DragBoard({
           locked={locked}
           volunteers={volunteers}
           attendedIds={attendedByEvent.get(selectedEvent.id) ?? new Set()}
+          attendanceSource={attendanceSourceByEvent.get(selectedEvent.id) ?? new Map()}
+          unmatched={unmatchedByEvent.get(selectedEvent.id) ?? []}
           onClose={() => setSelectedEvent(null)}
           mixedMode={mixedMode}
           now={now}
+          canEdit={canEdit}
         />
       ) : null}
 
@@ -289,17 +320,23 @@ function DetailPanel({
   locked,
   volunteers,
   attendedIds,
+  attendanceSource,
+  unmatched,
   onClose,
   mixedMode,
   now,
+  canEdit,
 }: {
   event: TimetableEvent;
   locked: boolean;
   volunteers: Volunteer[];
   attendedIds: Set<string>;
+  attendanceSource: Map<string, "manual" | "zoom">;
+  unmatched: UnmatchedParticipant[];
   onClose: () => void;
   mixedMode: boolean;
   now: Date;
+  canEdit: boolean;
 }) {
   const rows: { label: string; value: string }[] = [
     { label: "Type", value: event.type.replace(/_/g, " ") },
@@ -362,47 +399,59 @@ function DetailPanel({
       ) : null}
 
       {event.type === "input_session" ? (
-        <details className="mt-1" open>
-          <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
-            {event.input_session_criteria.length > 0 ? `Criteria: ${event.input_session_criteria.join(", ")}` : "Set criteria"}
-          </summary>
-          <form action={setInputSessionCriteria} className="mt-2 flex flex-col gap-1.5">
-            <input type="hidden" name="event_id" value={event.id} />
-            <input
-              name="input_session_criteria"
-              type="text"
-              defaultValue={event.input_session_criteria.join(", ")}
-              placeholder="4c, 5f"
-              className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
-            />
-            <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs hover:border-primary">
-              Save
-            </button>
-          </form>
-        </details>
+        canEdit ? (
+          <details className="mt-1" open>
+            <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
+              {event.input_session_criteria.length > 0 ? `Criteria: ${event.input_session_criteria.join(", ")}` : "Set criteria"}
+            </summary>
+            <form action={setInputSessionCriteria} className="mt-2 flex flex-col gap-1.5">
+              <input type="hidden" name="event_id" value={event.id} />
+              <input
+                name="input_session_criteria"
+                type="text"
+                defaultValue={event.input_session_criteria.join(", ")}
+                placeholder="4c, 5f"
+                className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+              />
+              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs hover:border-primary">
+                Save
+              </button>
+            </form>
+          </details>
+        ) : event.input_session_criteria.length > 0 ? (
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
+            Criteria: {event.input_session_criteria.join(", ")}
+          </p>
+        ) : null
       ) : null}
 
       {event.type === "tp" && mixedMode ? (
-        <details className="mt-1" open>
-          <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
-            {event.mode ? `Mode: ${event.mode === "f2f" ? "Face-to-face" : "Online"}` : "Set mode"}
-          </summary>
-          <form action={setTpEventMode} className="mt-2 flex flex-col gap-1.5">
-            <input type="hidden" name="event_id" value={event.id} />
-            <select
-              name="mode"
-              defaultValue={event.mode ?? ""}
-              className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
-            >
-              <option value="">Not set</option>
-              <option value="f2f">Face-to-face</option>
-              <option value="online">Online</option>
-            </select>
-            <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs hover:border-primary">
-              Save
-            </button>
-          </form>
-        </details>
+        canEdit ? (
+          <details className="mt-1" open>
+            <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink">
+              {event.mode ? `Mode: ${event.mode === "f2f" ? "Face-to-face" : "Online"}` : "Set mode"}
+            </summary>
+            <form action={setTpEventMode} className="mt-2 flex flex-col gap-1.5">
+              <input type="hidden" name="event_id" value={event.id} />
+              <select
+                name="mode"
+                defaultValue={event.mode ?? ""}
+                className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+              >
+                <option value="">Not set</option>
+                <option value="f2f">Face-to-face</option>
+                <option value="online">Online</option>
+              </select>
+              <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs hover:border-primary">
+                Save
+              </button>
+            </form>
+          </details>
+        ) : event.mode ? (
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
+            Mode: {event.mode === "f2f" ? "Face-to-face" : "Online"}
+          </p>
+        ) : null
       ) : null}
 
       {event.type === "tp" && volunteers.length > 0 ? (
@@ -416,6 +465,9 @@ function DetailPanel({
               <label key={v.id} className="flex items-center gap-1.5 text-sm">
                 <input type="checkbox" name="attended_volunteer_id" value={v.id} defaultChecked={attendedIds.has(v.id)} />
                 {v.name}
+                {attendanceSource.get(v.id) === "zoom" ? (
+                  <span className="pill pill-neutral text-[9px]">via Zoom</span>
+                ) : null}
               </label>
             ))}
             <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs hover:border-primary">
@@ -425,7 +477,45 @@ function DetailPanel({
         </details>
       ) : null}
 
-      {!locked ? <DeleteEventButton eventId={event.id} compact={false} /> : null}
+      {event.type === "tp" && unmatched.length > 0 ? (
+        <details className="mt-1" open>
+          <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.1em] text-status-warning-text hover:text-ink">
+            Needs review {unmatched.length}
+          </summary>
+          <p className="mt-1 text-xs text-muted">
+            Zoom saw these join but couldn&apos;t match them to anyone on the register -- pick who each one was, or
+            leave as &quot;not one of ours&quot; to dismiss.
+          </p>
+          <div className="mt-2 flex flex-col gap-2">
+            {unmatched.map((u) => (
+              <form key={u.id} action={resolveZoomParticipant} className="flex flex-col gap-1 rounded-[6px] border border-border-faint p-2">
+                <input type="hidden" name="unmatched_id" value={u.id} />
+                <p className="text-sm text-ink">
+                  {u.zoom_display_name}
+                  {u.zoom_email ? <span className="text-muted"> · {u.zoom_email}</span> : null}
+                </p>
+                <select
+                  name="volunteer_student_id"
+                  defaultValue={u.suggested_volunteer_student_id ?? ""}
+                  className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+                >
+                  <option value="">Not one of ours</option>
+                  {volunteers.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.name}
+                    </option>
+                  ))}
+                </select>
+                <button type="submit" className="self-start rounded-[6px] border border-border px-2 py-1 text-xs hover:border-primary">
+                  Confirm
+                </button>
+              </form>
+            ))}
+          </div>
+        </details>
+      ) : null}
+
+      {!locked && canEdit ? <DeleteEventButton eventId={event.id} compact={false} /> : null}
     </div>
   );
 }

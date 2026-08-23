@@ -1,28 +1,33 @@
+import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
+import { isMctOnCourse } from "@/lib/course-mct";
 import { setTimetableLock, recomputeAssignmentDueDates } from "@/app/trainer/(hub)/timetable/actions";
 import { AddEventForm } from "@/app/trainer/(hub)/timetable/add-event-form";
 import { GenerateSkeletonForm } from "@/app/trainer/(hub)/timetable/generate-skeleton-form";
-import { DragBoard } from "@/app/trainer/(hub)/timetable/drag-board";
+import { DragBoard, type UnmatchedParticipant } from "@/app/trainer/(hub)/timetable/drag-board";
 import { TimeBandsForm } from "@/app/trainer/(hub)/timetable/time-bands-form";
-import { resolveTimeBands } from "@/lib/timetable-grid";
+import { resolveTimeBands, toLocalIso, type TimetableEvent } from "@/lib/timetable-grid";
+import { halfOwningDate, type TpTimetableEvent } from "@/lib/rotation";
+import { ReadOnlyTimetableBoard, type EventMeta } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
 import { Stage2Section } from "@/app/trainer/(hub)/timetable/stage2-section";
 import { IndividualTutorialSection } from "@/app/trainer/(hub)/timetable/individual-tutorial-section";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 
-// §1.1a v2 -- the course timetable is the single source of truth for the
-// whole course clock (This Week panel, due/overdue states, TP dates).
-// Transposed grid orientation, settled 5 Aug 2026: days as rows, time bands
-// as columns, admin & deadlines as the leading column, sticky floating time
-// band. See CELTA-Connect-timetable-handoff-for-code.md and the sanctioned
-// reference C14-timetable-A-floating.html.
+// for-claude-code-timetable-edit-vs-view.md: DragBoard (editing) and the
+// glass-card view (for-claude-code-timetable-view.md) are two different
+// tools, not competing designs -- this page now defaults to the view (the
+// day-to-day glance/join screen, ?mode isn't "edit"), with DragBoard and
+// the rest of course setup moved to a secondary MCT-only "Edit timetable"
+// mode. See read-only-board.tsx (already built for the trainee/portfolio
+// side) -- reused as-is here, just fed trainer-shaped viewer data.
 export default async function TrainerTimetablePage({
   searchParams,
 }: {
-  searchParams: Promise<{ lock_error?: string; date?: string; half?: string; run?: string }>;
+  searchParams: Promise<{ lock_error?: string; date?: string; half?: string; run?: string; mode?: string }>;
 }) {
   const trainer = await requireRole(["trainer", "admin"]);
-  const { lock_error, date: lockErrorDate, half: lockErrorHalf, run: lockErrorRun } = await searchParams;
+  const { lock_error, date: lockErrorDate, half: lockErrorHalf, run: lockErrorRun, mode } = await searchParams;
   const supabase = await createClient();
 
   if (!trainer.course_id) {
@@ -30,27 +35,39 @@ export default async function TrainerTimetablePage({
       <div className="sheet text-sm text-muted">No course assigned.</div>
     );
   }
+  const courseId = trainer.course_id;
 
   const [{ data: course }, { data: events }, { data: volunteers }] = await Promise.all([
-    supabase.from("courses").select("timetable_locked_at, time_bands, delivery_mode").eq("id", trainer.course_id).maybeSingle(),
+    supabase.from("courses").select("timetable_locked_at, time_bands, delivery_mode").eq("id", courseId).maybeSingle(),
     supabase
       .from("course_timetable_events")
       .select("*")
-      .eq("course_id", trainer.course_id)
+      .eq("course_id", courseId)
       .order("event_date")
       .order("event_time"),
-    supabase.from("volunteer_students").select("id, name").eq("course_id", trainer.course_id).is("removed_at", null).order("name"),
+    supabase.from("volunteer_students").select("id, name").eq("course_id", courseId).is("removed_at", null).order("name"),
   ]);
+  const allEvents: TimetableEvent[] = events ?? [];
+
+  // Ramy, 2026-08-23: ACT doesn't make changes to the timetable, so doesn't
+  // need to see those options -- mirrors actions.ts' requireTimetableEditAccess
+  // exactly (same isMctOnCourse() check, admin bypass), so the UI never
+  // offers a control the server would then reject.
+  const isMct = trainer.role === "admin" || (await isMctOnCourse(supabase, courseId, trainer.id));
+  // Non-MCT trying to force ?mode=edit just falls back to the view -- there
+  // is no separate "disabled" edit mode to render, and nothing to explain.
+  const editMode = mode === "edit" && isMct;
 
   const locked = Boolean(course?.timetable_locked_at);
   const timeBands = resolveTimeBands(course?.time_bands ?? null);
   const isCustomTimeBands = Boolean(course?.time_bands && course.time_bands.length > 0);
+  const today = toLocalIso(new Date());
 
   // The grid no longer prints a strong week header of its own (apply-to-app.md
-  // §2.7), so the page header carries the overall date range instead.
+  // §2.7), so the edit-mode header carries the overall date range instead.
   const weekRange = (() => {
-    if (!events || events.length === 0) return null;
-    const dates = [...events].map((e) => e.event_date).sort();
+    if (allEvents.length === 0) return null;
+    const dates = [...allEvents].map((e) => e.event_date).sort();
     const fmt = (iso: string) =>
       new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
     const first = dates[0];
@@ -58,16 +75,36 @@ export default async function TrainerTimetablePage({
     return first === last ? fmt(first) : `${fmt(first)} – ${fmt(last)}`;
   })();
 
-  const tpEventIds = (events ?? []).filter((e) => e.type === "tp").map((e) => e.id);
-  const { data: attendanceRows } =
+  const tpEventIds = allEvents.filter((e) => e.type === "tp").map((e) => e.id);
+  const [{ data: attendanceRows }, { data: unmatchedRows }] = await Promise.all([
     tpEventIds.length > 0
-      ? await supabase.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("timetable_event_id", tpEventIds)
-      : { data: [] };
+      ? supabase.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id, source").in("timetable_event_id", tpEventIds)
+      : Promise.resolve({ data: [] }),
+    // zoom-auto-attendance.md §4 -- participants the webhook couldn't
+    // confidently match, waiting on the trainer to resolve.
+    tpEventIds.length > 0
+      ? supabase
+          .from("zoom_unmatched_participants")
+          .select("id, timetable_event_id, zoom_email, zoom_display_name, suggested_volunteer_student_id, joined_at")
+          .in("timetable_event_id", tpEventIds)
+          .is("resolved_at", null)
+      : Promise.resolve({ data: [] }),
+  ]);
   const attendedByEvent = new Map<string, Set<string>>();
+  const attendanceSourceByEvent = new Map<string, Map<string, "manual" | "zoom">>();
   for (const row of attendanceRows ?? []) {
     const set = attendedByEvent.get(row.timetable_event_id) ?? new Set<string>();
     set.add(row.volunteer_student_id);
     attendedByEvent.set(row.timetable_event_id, set);
+    const sourceMap = attendanceSourceByEvent.get(row.timetable_event_id) ?? new Map<string, "manual" | "zoom">();
+    sourceMap.set(row.volunteer_student_id, row.source);
+    attendanceSourceByEvent.set(row.timetable_event_id, sourceMap);
+  }
+  const unmatchedByEvent = new Map<string, UnmatchedParticipant[]>();
+  for (const row of unmatchedRows ?? []) {
+    const list = unmatchedByEvent.get(row.timetable_event_id) ?? [];
+    list.push(row);
+    unmatchedByEvent.set(row.timetable_event_id, list);
   }
 
   // Stage 2 tutorial booking sheet (3a) -- groups list matches Rotation's
@@ -75,19 +112,19 @@ export default async function TrainerTimetablePage({
   // aren't gated by timetable_locked_at: tutorials get scheduled as the
   // course actually progresses, well after the base shape is locked.
   const [{ data: subgroups }, { data: tpGroups }, { data: blocks }] = await Promise.all([
-    supabase.from("course_subgroups").select("id, name, tp_group_id").eq("course_id", trainer.course_id).order("created_at"),
-    supabase.from("course_tp_groups").select("id, name").eq("course_id", trainer.course_id),
+    supabase.from("course_subgroups").select("id, name, tp_group_id, half_order").eq("course_id", courseId).order("created_at"),
+    supabase.from("course_tp_groups").select("id, name, tutor_profile_id").eq("course_id", courseId),
     supabase
       .from("stage2_tutorial_blocks")
       .select("id, tp_group_id, subgroup_id, timetable_event_id")
-      .eq("course_id", trainer.course_id),
+      .eq("course_id", courseId),
   ]);
   const pairedTpGroupIds = new Set((subgroups ?? []).filter((s) => s.tp_group_id).map((s) => s.tp_group_id));
   const stage2Groups = [
     ...(tpGroups ?? []).filter((g) => pairedTpGroupIds.has(g.id)).map((g) => ({ kind: "tpgroup" as const, id: g.id, name: g.name })),
     ...(subgroups ?? []).filter((s) => !s.tp_group_id).map((s) => ({ kind: "subgroup" as const, id: s.id, name: s.name })),
   ];
-  const blockEventById = new Map((events ?? []).map((e) => [e.id, e]));
+  const blockEventById = new Map(allEvents.map((e) => [e.id, e]));
   const stage2Blocks = (blocks ?? []).map((b) => {
     const event = blockEventById.get(b.timetable_event_id);
     const group = stage2Groups.find((g) => (b.tp_group_id ? g.id === b.tp_group_id : g.id === b.subgroup_id));
@@ -102,15 +139,15 @@ export default async function TrainerTimetablePage({
     supabase
       .from("profiles")
       .select("id, full_name")
-      .eq("course_id", trainer.course_id)
+      .eq("course_id", courseId)
       .eq("role", "trainee")
       .eq("course_status", "active")
       .order("full_name"),
-    supabase.from("celta5_records").select("trainee_id, stage3_required").eq("course_id", trainer.course_id),
+    supabase.from("celta5_records").select("trainee_id, stage3_required").eq("course_id", courseId),
     supabase
       .from("individual_tutorial_invites")
       .select("id, trainee_id, stage, timetable_event_id, confirmed_at")
-      .eq("course_id", trainer.course_id),
+      .eq("course_id", courseId),
   ]);
   const traineeNameById = new Map((activeTrainees ?? []).map((t) => [t.id, t.full_name]));
   const stage3EligibleIds = new Set((stage3Records ?? []).filter((r) => r.stage3_required).map((r) => r.trainee_id));
@@ -132,138 +169,221 @@ export default async function TrainerTimetablePage({
   const stage1Invites = inviteSummaries.filter((i) => i.stage === "stage1");
   const stage3Invites = inviteSummaries.filter((i) => i.stage === "stage3");
 
+  // Glass-card view's "Mine" involvement, trainer-shaped: read-only-board.tsx
+  // was built for a TRAINEE viewer (one specific lettered TP slot); a trainer
+  // has no such slot, so "mine" here means "a TP group I tutor"
+  // (course_tp_groups.tutor_profile_id) rather than a personal A-F code.
+  // Simplification, flagged rather than invented: non-TP events carry only a
+  // free-text tag (no group id), so there's no reliable way to test them
+  // against group ownership the way TP dates can be tested against
+  // halfOwningDate -- they're left "mine" for everyone (unfaded) in both
+  // modes, same treatment untagged whole-cohort sessions already get. No
+  // "You teach" gold tag either -- that's the spec's trainee-only marker for
+  // their own personal teaching slot, which doesn't apply to a trainer.
+  const ownedGroupIds = new Set((tpGroups ?? []).filter((g) => g.tutor_profile_id === trainer.id).map((g) => g.id));
+  const ownedHalfOrders = new Set<1 | 2>();
+  for (const s of subgroups ?? []) {
+    if (s.tp_group_id && ownedGroupIds.has(s.tp_group_id) && (s.half_order === 1 || s.half_order === 2)) {
+      ownedHalfOrders.add(s.half_order);
+    }
+  }
+  const tpEventsForRotation: TpTimetableEvent[] = allEvents.filter((e) => e.type === "tp").map((e) => ({ event_date: e.event_date }));
+  const viewerGroupLabel = (tpGroups ?? []).filter((g) => ownedGroupIds.has(g.id)).map((g) => g.name).join(" / ") || null;
+
+  const eventMeta: Record<string, EventMeta> = {};
+  for (const event of allEvents) {
+    const mine =
+      event.type !== "tp"
+        ? true
+        : ownedHalfOrders.size > 0 && (() => {
+            const owningHalf = halfOwningDate(tpEventsForRotation, event.event_date);
+            return owningHalf !== null && ownedHalfOrders.has(owningHalf);
+          })();
+    eventMeta[event.id] = { mine, ownTpSlot: false, teachingLetters: null };
+  }
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="sheet flex items-center justify-between">
-        <div>
-          <h1 className="font-serif text-xl text-ink">Course timetable</h1>
-          {weekRange ? <p className="mt-1 font-serif text-2xl text-ink">{weekRange}</p> : null}
-          <p className="mt-2 text-muted">
-            The single source of truth for the course clock -- This Week, due dates, and TP
-            dates all read from this.
-          </p>
-        </div>
-        <div className="hidden items-center gap-2 md:flex">
+      {editMode ? (
+        <>
+          <div className="sheet flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <Link href="/trainer/timetable" className="text-sm font-medium text-primary hover:underline">
+                  &larr; View timetable
+                </Link>
+              </div>
+              <h1 className="mt-1 font-serif text-xl text-ink">Edit timetable</h1>
+              {weekRange ? <p className="mt-1 font-serif text-2xl text-ink">{weekRange}</p> : null}
+              <p className="mt-2 text-muted">
+                The single source of truth for the course clock -- This Week, due dates, and TP
+                dates all read from this.
+              </p>
+            </div>
+            <div className="hidden items-center gap-2 md:flex">
+              {locked ? (
+                <form action={recomputeAssignmentDueDates}>
+                  <button
+                    type="submit"
+                    title="Re-resolve Skills/LfC due dates against the current TP rotation and group pairing"
+                    className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
+                  >
+                    Recompute due dates
+                  </button>
+                </form>
+              ) : null}
+              <form action={setTimetableLock}>
+                <input type="hidden" name="lock" value={(!locked).toString()} />
+                <button
+                  type="submit"
+                  className={`flex items-center gap-2 rounded-[6px] border px-4 py-2 text-sm font-medium ${
+                    locked
+                      ? "border-border text-ink hover:border-primary"
+                      : "border-primary bg-primary text-primary-foreground"
+                  }`}
+                >
+                  {!locked ? <span className="size-[5px] shrink-0 rounded-full bg-status-warning-text" /> : null}
+                  {locked ? "Unlock timetable" : "Lock timetable"}
+                </button>
+              </form>
+            </div>
+          </div>
+
           {locked ? (
-            <form action={recomputeAssignmentDueDates}>
-              <button
-                type="submit"
-                title="Re-resolve Skills/LfC due dates against the current TP rotation and group pairing"
-                className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
-              >
-                Recompute due dates
-              </button>
-            </form>
+            <div className="sheet border-primary/20 bg-accent/30 text-sm text-ink">
+              Locked -- the course clock now calculates off these dates. Unlock to make changes.
+            </div>
           ) : null}
-          <form action={setTimetableLock}>
-            <input type="hidden" name="lock" value={(!locked).toString()} />
-            <button
-              type="submit"
-              className={`flex items-center gap-2 rounded-[6px] border px-4 py-2 text-sm font-medium ${
-                locked
-                  ? "border-border text-ink hover:border-primary"
-                  : "border-primary bg-primary text-primary-foreground"
-              }`}
-            >
-              {!locked ? <span className="size-[5px] shrink-0 rounded-full bg-status-warning-text" /> : null}
-              {locked ? "Unlock timetable" : "Lock timetable"}
-            </button>
-          </form>
-        </div>
-      </div>
 
-      {locked ? (
-        <div className="sheet border-primary/20 bg-accent/30 text-sm text-ink">
-          Locked -- the course clock now calculates off these dates. Unlock to make changes.
-        </div>
-      ) : null}
+          {lock_error === "async_missing_link" ? (
+            <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+              Can&apos;t lock -- an asynchronous input session has no linked live follow-up slot (Handbook
+              2.2). Add the link on that session, or add the live slot first.
+            </div>
+          ) : null}
 
-      {lock_error === "async_missing_link" ? (
-        <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
-          Can&apos;t lock -- an asynchronous input session has no linked live follow-up slot (Handbook
-          2.2). Add the link on that session, or add the live slot first.
-        </div>
-      ) : null}
+          {lock_error === "tp_double_booked" ? (
+            <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+              Can&apos;t lock -- two TP rounds are scheduled on {lockErrorDate ?? "the same date"}, which means a
+              candidate would be teaching twice in one day (Handbook 8.1.4). Move one of the rounds to a different date.
+            </div>
+          ) : null}
 
-      {lock_error === "tp_double_booked" ? (
-        <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
-          Can&apos;t lock -- two TP rounds are scheduled on {lockErrorDate ?? "the same date"}, which means a
-          candidate would be teaching twice in one day (Handbook 8.1.4). Move one of the rounds to a different date.
-        </div>
-      ) : null}
+          {lock_error === "mode_not_blocked" ? (
+            <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+              Can&apos;t lock -- {lockErrorHalf ? `group ${lockErrorHalf}'s` : "a group's"} TP rounds switch between
+              face-to-face and online more than once (Handbook 2.2.3). Each half teaches one mode, then the other --
+              not a mix. Check each TP round&apos;s mode in its detail panel.
+            </div>
+          ) : null}
 
-      {lock_error === "mode_not_blocked" ? (
-        <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
-          Can&apos;t lock -- {lockErrorHalf ? `group ${lockErrorHalf}'s` : "a group's"} TP rounds switch between
-          face-to-face and online more than once (Handbook 2.2.3). Each half teaches one mode, then the other --
-          not a mix. Check each TP round&apos;s mode in its detail panel.
-        </div>
-      ) : null}
+          {lock_error === "intensive_no_break" ? (
+            <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
+              Can&apos;t lock -- {lockErrorRun ?? "several"} TP days in a row with no break (Handbook 8.1.4). No more
+              than 6 consecutive TP days without a two-day break in the middle. Move a session to open a gap.
+            </div>
+          ) : null}
 
-      {lock_error === "intensive_no_break" ? (
-        <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
-          Can&apos;t lock -- {lockErrorRun ?? "several"} TP days in a row with no break (Handbook 8.1.4). No more
-          than 6 consecutive TP days without a two-day break in the middle. Move a session to open a gap.
-        </div>
-      ) : null}
+          {allEvents.length > 0 ? (
+            <div className="sheet">
+              <DragBoard
+                events={allEvents}
+                locked={locked}
+                volunteers={volunteers ?? []}
+                attendedByEvent={attendedByEvent}
+                attendanceSourceByEvent={attendanceSourceByEvent}
+                unmatchedByEvent={unmatchedByEvent}
+                mixedMode={course?.delivery_mode === "mixed"}
+                canEdit={isMct}
+              />
+            </div>
+          ) : (
+            <div className="sheet text-sm text-muted">No events yet.</div>
+          )}
 
-      {/* Everything below is genuinely editing (add/generate/lock/book) --
-          specs/build-spec.md §7 "Laptop only: ... editing the timetable."
-          TimetableGrid further down is deliberately OUTSIDE this gate: its
-          own mobile-day-view already exists and does real work on a phone
-          (browsing the day, marking volunteer attendance) -- gating that too
-          would remove working functionality, not just shrink a cramped one. */}
-      <LaptopOnlyGate task="Adding events, generating the skeleton, time bands, and Stage 2 booking">
-      {!locked && events && events.length === 0 ? (
-        <div className="sheet border-primary/20 bg-accent/20">
-          <h2 className="font-serif text-lg text-ink">Start from the standard skeleton</h2>
-          <p className="mt-1 text-sm text-muted">
-            Generates the usual 4-week CELTA shape -- 8 teaching practices, all 4 written
-            assignments, VO1-3, Stage 1 &amp; 2 tutorials -- anchored to a real start date. Nobody
-            builds a course from a blank grid: tweak or remove anything below afterwards.
-          </p>
-          <GenerateSkeletonForm />
-        </div>
-      ) : null}
+          {/* specs/build-spec.md §7 "Laptop only: ... editing the timetable." */}
+          <LaptopOnlyGate task="Adding events, generating the skeleton, and time bands">
+          {!locked ? (
+            // Open by default only for a genuinely empty course -- otherwise a
+            // brand-new course would strand the trainer with no visible way to
+            // start (the skeleton generator is the only actionable content when
+            // there's nothing on the grid yet). Every course that already has
+            // events gets the collapsed default the spec asks for.
+            <details className="sheet" open={allEvents.length === 0}>
+              <summary className="cursor-pointer font-serif text-lg text-ink">Course setup</summary>
+              <div className="mt-4 flex flex-col gap-6">
+                {allEvents.length === 0 ? (
+                  <div>
+                    <h3 className="font-serif text-base text-ink">Start from the standard skeleton</h3>
+                    <p className="mt-1 text-sm text-muted">
+                      Generates the usual 4-week CELTA shape -- 8 teaching practices, all 4 written
+                      assignments, VO1-3, Stage 1 &amp; 2 tutorials -- anchored to a real start date. Nobody
+                      builds a course from a blank grid: tweak or remove anything below afterwards.
+                    </p>
+                    <GenerateSkeletonForm />
+                  </div>
+                ) : null}
 
-      {!locked ? (
-        <div className="sheet">
-          <TimeBandsForm timeBands={timeBands} isCustom={isCustomTimeBands} />
-        </div>
-      ) : null}
+                <div className={allEvents.length === 0 ? "border-t border-border-faint pt-6" : ""}>
+                  <TimeBandsForm timeBands={timeBands} isCustom={isCustomTimeBands} />
+                </div>
 
-      {!locked ? (
-        <div className="sheet">
-          <h2 className="font-serif text-lg text-ink">Add event</h2>
-          <p className="mt-1 text-sm text-muted">
-            Add a single dated item to the timetable below -- an input session, a TP, an
-            assignment or resubmission due date, or a milestone.
-          </p>
-          <AddEventForm
-            existingEvents={(events ?? []).map((e) => ({ id: e.id, title: e.title, event_date: e.event_date }))}
-            tpGroups={tpGroups ?? []}
-          />
-        </div>
-      ) : null}
+                <div className="border-t border-border-faint pt-6">
+                  <h3 className="font-serif text-base text-ink">Add event</h3>
+                  <p className="mt-1 text-sm text-muted">
+                    Add a single dated item to the timetable below -- an input session, a TP, an
+                    assignment or resubmission due date, or a milestone.
+                  </p>
+                  <AddEventForm
+                    existingEvents={allEvents.map((e) => ({ id: e.id, title: e.title, event_date: e.event_date }))}
+                    tpGroups={tpGroups ?? []}
+                  />
+                </div>
+              </div>
+            </details>
+          ) : null}
+          </LaptopOnlyGate>
+        </>
+      ) : (
+        <>
+          {/* for-claude-code-timetable-edit-vs-view.md: this is what a
+              trainer lands on now -- the day-to-day glance/join screen,
+              same glass-card design as the trainee's read-only board
+              (for-claude-code-timetable-view.md), reused as-is. */}
+          {isMct ? (
+            <div className="flex justify-end">
+              <Link href="/trainer/timetable?mode=edit" className="text-sm font-medium text-primary hover:underline">
+                Edit timetable &rarr;
+              </Link>
+            </div>
+          ) : null}
 
+          {allEvents.length === 0 ? (
+            <div className="sheet text-sm text-muted">No events yet.</div>
+          ) : (
+            <ReadOnlyTimetableBoard
+              events={allEvents}
+              eventMeta={eventMeta}
+              timeBands={timeBands}
+              viewerName={trainer.full_name ?? "You"}
+              viewerGroupLabel={viewerGroupLabel}
+              today={today}
+              nowIso={new Date().toISOString()}
+            />
+          )}
+        </>
+      )}
+
+      {/* Stage 2/1/3 tutorial booking stays reachable regardless of mode or
+          MCT status -- booking a candidate's tutorial slot is day-to-day
+          tutor work, not a structure-editing action (open question flagged
+          separately: for-claude-code-timetable-page-priority.md asked
+          whether this should be MCT-only too; left open here). */}
+      <LaptopOnlyGate task="Stage 2 group booking and Stage 1/3 individual invites">
       <Stage2Section groups={stage2Groups} blocks={stage2Blocks} />
       <IndividualTutorialSection stage="stage1" candidates={allCandidates} invites={stage1Invites} />
       <IndividualTutorialSection stage="stage3" candidates={stage3Candidates} invites={stage3Invites} />
       </LaptopOnlyGate>
-
-      {events && events.length > 0 ? (
-        <div className="sheet">
-          <DragBoard
-            events={events}
-            locked={locked}
-            volunteers={volunteers ?? []}
-            attendedByEvent={attendedByEvent}
-            mixedMode={course?.delivery_mode === "mixed"}
-          />
-        </div>
-      ) : (
-        <div className="sheet text-sm text-muted">No events yet.</div>
-      )}
     </div>
   );
 }

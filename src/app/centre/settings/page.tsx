@@ -6,6 +6,7 @@ import { can } from "@/lib/auth/centre-permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileDriveForm } from "@/app/centre/settings/profile-drive-form";
+import { ZoomConnectionForm } from "@/app/centre/settings/zoom-connection-form";
 import { AdminRoster, type RosterRow } from "@/app/centre/settings/admin-roster";
 import { TransferOwnershipCard, DeleteCentreCard } from "@/app/centre/settings/danger-zone";
 import { SettingsTabs } from "@/app/centre/settings/settings-tabs";
@@ -20,7 +21,12 @@ import { computeGrantStatus } from "@/lib/platform-support";
 // card. "This screen holds things true of the whole centre, across every
 // course" -- chat retention deliberately stays out (moved to Course
 // Admin, migration 0154 -- the correction this spec itself confirms).
-export default async function CentreSettingsPage() {
+export default async function CentreSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ zoom_connected?: string; zoom_error?: string }>;
+}) {
+  const { zoom_connected, zoom_error } = await searchParams;
   const session = await getCurrentProfile();
   if (!session?.profile) redirect("/login");
   const profile = session.profile;
@@ -34,7 +40,7 @@ export default async function CentreSettingsPage() {
   const isOwner = ctx.roles.includes("centre_owner");
 
   const admin = createAdminClient();
-  const [{ data: center }, { data: driveConnection }, { data: grants }, { data: invites }, { data: supportGrants }] = await Promise.all([
+  const [{ data: center }, { data: driveConnection }, { data: zoomConnection }, { data: grants }, { data: invites }, { data: supportGrants }] = await Promise.all([
     admin
       .from("centers")
       .select(
@@ -43,6 +49,7 @@ export default async function CentreSettingsPage() {
       .eq("id", centerId)
       .maybeSingle(),
     admin.from("center_google_connections").select("connected_at, template_doc_id, output_folder_id").eq("center_id", centerId).maybeSingle(),
+    admin.from("centre_zoom_connections").select("connected_at, zoom_account_email").eq("center_id", centerId).maybeSingle(),
     admin.from("centre_roles").select("id, role, profile_id").eq("center_id", centerId).is("revoked_at", null).order("granted_at"),
     mayAppoint
       ? admin
@@ -126,16 +133,19 @@ export default async function CentreSettingsPage() {
       <SettingsTabs
         profile={
           canEdit ? (
-            <ProfileDriveForm
-              name={center.name}
-              centerNumber={center.center_number}
-              address={center.address}
-              primaryContactEmail={center.primary_contact_email}
-              timeZone={center.time_zone}
-              currency={center.currency}
-              filmsTpSessions={center.films_tp_sessions}
-              driveConnection={driveConnection}
-            />
+            <div className="flex flex-col gap-6">
+              <ProfileDriveForm
+                name={center.name}
+                centerNumber={center.center_number}
+                address={center.address}
+                primaryContactEmail={center.primary_contact_email}
+                timeZone={center.time_zone}
+                currency={center.currency}
+                filmsTpSessions={center.films_tp_sessions}
+                driveConnection={driveConnection}
+              />
+              <ZoomConnectionForm connection={zoomConnection} connected={zoom_connected === "1"} error={zoom_error} />
+            </div>
           ) : (
             <p className="text-sm text-muted">You don&apos;t hold a role that can edit centre settings.</p>
           )

@@ -1,15 +1,15 @@
 // for-claude-code-trainer-remaining-screens.md's volunteer tick rule: "90
 // minutes earns a tick, and the tick credits the whole session (e.g. 2¼
-// hours) regardless of the exact time logged." There's no Zoom join/leave
-// webhook feeding this app (confirmed -- the only join/leave-shaped
-// columns anywhere are course_tutors', an unrelated roster concept), so
-// there's nothing to literally sum minutes from. This is the honest
-// approximation available from data the app actually has: each TP
-// timetable event is already a fixed-length block a volunteer is marked
-// present/absent for (setAttendance, timetable/actions.ts); grouping a
-// day's blocks into one "session" and multiplying attended-block-count by
-// the fixed block length reproduces the same threshold/whole-session-credit
-// behaviour without inventing attendance data that was never captured.
+// hours) regardless of the exact time logged." migration 0200 (zoom-auto-
+// attendance.md) added a real Zoom join/leave webhook, but it only fills in
+// the same present/absent row this always read -- volunteer_attendance's
+// new joined_at/left_at are informational display fields, not a new input
+// to this calculation. Minute-level credit was deliberately not built: each
+// TP timetable event is still just a fixed-length block a volunteer is
+// marked present/absent for; grouping a day's blocks into one "session" and
+// multiplying attended-block-count by the fixed block length reproduces the
+// same threshold/whole-session-credit behaviour without needing exact
+// per-minute attendance data.
 export const TICK_THRESHOLD_MINUTES = 90;
 
 // build-spec.md's volunteer hours model, third tier: "45 to 89 minutes -> one

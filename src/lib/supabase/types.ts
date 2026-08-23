@@ -2315,6 +2315,7 @@ export interface Database {
           linked_assignment_type: string | null;
           linked_tp_number: number | null;
           zoom_url: string | null;
+          zoom_meeting_id: string | null;
           is_asynchronous: boolean;
           linked_live_session_event_id: string | null;
           input_session_criteria: string[];
@@ -2361,6 +2362,7 @@ export interface Database {
             | "assessor_pack"
             | "volunteer_signed_up"
             | "volunteer_class_starting"
+            | "volunteer_session_reminder"
             | "referral"
             | "workspace_invitation"
             | "password_reset"
@@ -3111,12 +3113,41 @@ export interface Database {
           timetable_event_id: string;
           marked_by: string | null;
           created_at: string;
+          // migration 0200 -- zoom-auto-attendance.md. Presence is still row
+          // existence (unchanged); these are additive/informational.
+          source: "manual" | "zoom";
+          joined_at: string | null;
+          left_at: string | null;
+          zoom_participant_email: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["volunteer_attendance"]["Row"]> & {
           volunteer_student_id: string;
           timetable_event_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["volunteer_attendance"]["Row"]>;
+        Relationships: [];
+      };
+      zoom_unmatched_participants: {
+        Row: {
+          id: string;
+          timetable_event_id: string;
+          zoom_email: string | null;
+          zoom_display_name: string;
+          suggested_volunteer_student_id: string | null;
+          joined_at: string;
+          left_at: string | null;
+          resolved_at: string | null;
+          resolved_volunteer_student_id: string | null;
+          resolved_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["zoom_unmatched_participants"]["Row"]> & {
+          timetable_event_id: string;
+          zoom_display_name: string;
+          joined_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["zoom_unmatched_participants"]["Row"]>;
         Relationships: [];
       };
       volunteer_declines: {
@@ -3139,6 +3170,10 @@ export interface Database {
           volunteer_student_id: string;
           timetable_event_id: string;
           sent_at: string;
+          // migration 0201 -- push (30 min before) vs email (day before)
+          // share this table for idempotency; the unique constraint is
+          // now (volunteer_student_id, timetable_event_id, channel).
+          channel: "push" | "email";
         };
         Insert: Partial<Database["public"]["Tables"]["volunteer_session_reminders_sent"]["Row"]> & {
           volunteer_student_id: string;
@@ -3262,6 +3297,26 @@ export interface Database {
           refresh_token: string;
         };
         Update: Partial<Database["public"]["Tables"]["center_google_connections"]["Row"]>;
+        Relationships: [];
+      };
+      centre_zoom_connections: {
+        Row: {
+          center_id: string;
+          connected_by: string | null;
+          access_token: string;
+          refresh_token: string;
+          expires_at: string;
+          zoom_account_email: string | null;
+          connected_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["centre_zoom_connections"]["Row"]> & {
+          center_id: string;
+          access_token: string;
+          refresh_token: string;
+          expires_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["centre_zoom_connections"]["Row"]>;
         Relationships: [];
       };
       finances: {
