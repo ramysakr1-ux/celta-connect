@@ -20,17 +20,21 @@ import { Wordmark } from "@/components/wordmark";
 // screens beyond those, and never on an exported or Cambridge-facing
 // document.
 //
-// Ramy, 23 Aug 2026: was centered in normal page flow, so the centered
-// chat pill (StaffChatDrawer/AdminChatBar, both `fixed bottom-6 ... flex
-// justify-center`) sits directly on top of it on every one of these six
-// screens. Pinned to the bottom-right corner instead -- fixed, same tier
-// as the pill, clear of its centered max-w-840px column -- so the two
-// never collide regardless of viewport width.
+// Ramy, 23 Aug 2026 (first pass): moved from centered-in-flow to fixed
+// bottom-right, since the centered chat pill (StaffChatDrawer/AdminChatBar,
+// both `fixed bottom-6 ... flex justify-center`) sat directly on top of it.
+// Ramy, 23 Aug 2026 (second pass): still didn't like bottom-right -- "kind
+// of squashed in the middle, and squashed at the bottom." Moved to a small
+// fixed badge in the top-right instead -- clear of both the header content
+// (which lives in each area's own layout, not this component, so there's
+// no single shared place to sit "under Connect" without restructuring six
+// different headers) and the chat pill's whole bottom band, so neither
+// collision can happen again regardless of viewport width.
 export function DesignerCredit({ className = "" }: { className?: string }) {
   return (
-    <div className={`pointer-events-none fixed inset-x-0 bottom-6 z-20 flex justify-end px-3 ${className}`}>
-      <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2 py-1 text-[11px] text-muted backdrop-blur-sm">
-        <Wordmark size="icon" iconSizePx={20} />
+    <div className={`pointer-events-none fixed top-3 right-3 z-20 ${className}`}>
+      <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/85 px-2 py-1 text-[11px] text-muted backdrop-blur-sm">
+        <Wordmark size="icon" iconSizePx={16} />
         <span>
           designed and built by <span className="text-ink">Ramy</span>
         </span>

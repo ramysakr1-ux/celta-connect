@@ -421,7 +421,7 @@ export default async function TodayPage() {
                 <Link
                   key={i}
                   href={alert.href}
-                  className={`flex flex-col gap-0.5 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}
+                  className={`-mx-2 flex flex-col gap-0.5 rounded-[6px] px-2 py-2.5 transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-card))] ${i > 0 ? "border-t border-border-faint" : ""}`}
                 >
                   <p className={`text-sm font-semibold ${alert.destructive ? "text-destructive" : "text-ink"}`}>{alert.title}</p>
                   <p className="text-xs text-muted">{alert.meta}</p>
@@ -463,7 +463,7 @@ export default async function TodayPage() {
                 <Link
                   key={r.id}
                   href={`/portfolio/${r.id}`}
-                  className={`flex items-center gap-3 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}
+                  className={`-mx-2 flex items-center gap-3 rounded-[6px] px-2 py-2.5 transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-card))] ${i > 0 ? "border-t border-border-faint" : ""}`}
                 >
                   <span
                     aria-hidden="true"
