@@ -481,6 +481,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               releasedReason={applicant.workspace_released_reason}
               releasedByName={releasedByName}
               hasDeposit={Boolean(applicant.deposit_paid_at)}
+              specialRequirements={applicant.special_requirements}
             />
           </AreaAction>
           <WaiverForm applicant={applicant} />

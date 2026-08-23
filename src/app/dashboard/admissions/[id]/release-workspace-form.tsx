@@ -25,12 +25,14 @@ export function ReleaseWorkspaceForm({
   releasedReason,
   releasedByName,
   hasDeposit,
+  specialRequirements,
 }: {
   applicantId: string;
   releasedAt: string | null;
   releasedReason: string | null;
   releasedByName: string | null;
   hasDeposit: boolean;
+  specialRequirements: string | null;
 }) {
   const [state, formAction, pending] = useActionState(releaseWorkspace, initial);
 
@@ -65,6 +67,13 @@ export function ReleaseWorkspaceForm({
         They have no Connect link yet. Releasing it sends their workspace invitation, with the pre-course task and
         the reading list.
       </p>
+
+      {specialRequirements ? (
+        <p className="mt-2 rounded-[6px] border border-status-warning-text/30 bg-status-warning-text/10 px-3 py-2 text-xs text-status-warning-text">
+          They flagged a special requirement -- worth checking it&apos;s in hand before releasing access:{" "}
+          <span className="font-medium">&ldquo;{specialRequirements}&rdquo;</span>
+        </p>
+      ) : null}
 
       <form action={formAction} className="mt-3 flex flex-col gap-2">
         <input type="hidden" name="applicant_id" value={applicantId} />
