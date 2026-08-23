@@ -90,7 +90,17 @@ export default async function TrainerHubLayout({ children }: { children: React.R
         </div>
       </header>
 
-      <div className="container flex-1 py-8">
+      {/* for-claude-code-staff-chat-overlap-fix.md: StaffChatDrawer is
+          `fixed bottom-6`, not part of this flow, so the page's own content
+          never reserved room for it -- it sat on top of whatever ran to the
+          bottom of the viewport instead of the docked element it was meant
+          to be. pb-28 (112px) covers the bar's own footprint (56px bar +
+          24px offset + margin) at rest; the thread/picker panels that can
+          expand above it are a temporary, user-opened overlay, not the
+          always-present collapsed state this reserves space for. Only
+          added when the bar actually renders below, so a session with no
+          chat (assessor view) doesn't carry the extra space for nothing. */}
+      <div className={`container flex-1 pt-8 ${profile && staffChat ? "pb-28" : "pb-8"}`}>
         <div className="frame p-6">{children}</div>
       </div>
 
