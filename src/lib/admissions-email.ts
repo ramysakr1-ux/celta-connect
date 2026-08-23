@@ -34,6 +34,10 @@ export type ApplicantEmailType =
   // Volunteers
   | "volunteer_signed_up"
   | "volunteer_class_starting"
+  // Ramy, 23 Aug 2026: the day-before reminder for a specific class --
+  // email, not push (the existing 30-minutes-before reminder stays a push,
+  // src/lib/volunteer-session-reminder-cron.ts).
+  | "volunteer_session_reminder"
   // Branches
   | "referral"
   // Course join links (roster-actions.ts) -- staff-facing, same as
@@ -87,6 +91,7 @@ export const EMAIL_REPLY_TO: Record<ApplicantEmailType, EmailReplyTo> = {
   assessor_pack: "admissions",
   volunteer_signed_up: "noreply",
   volunteer_class_starting: "admissions",
+  volunteer_session_reminder: "admissions",
   referral: "admissions",
   workspace_invitation: "noreply",
   password_reset: "noreply",
@@ -964,5 +969,27 @@ export function volunteerClassStartingEmailHtml(input: {
     ],
     cta: { label: "Join here", url: input.joinUrl },
     footnote: "No account and no password. Keep this email — the same link opens your class each time.",
+  });
+}
+
+// Day-before reminder for one specific class -- distinct from the one-time
+// volunteerClassStartingEmailHtml above (which announces the whole course
+// starting) and from the 30-minutes-before push (volunteer-session-
+// reminder-cron.ts) -- email, per Ramy, 23 Aug 2026.
+export function volunteerSessionReminderEmailHtml(input: {
+  classFact: string;
+  whenFact: string;
+  joinUrl: string;
+}): string {
+  return emailShell({
+    heading: "Your class is tomorrow",
+    tone: "green",
+    body: p("A reminder for your class tomorrow."),
+    facts: [
+      { label: "Your class", value: input.classFact },
+      { label: "When", value: input.whenFact },
+    ],
+    cta: { label: "Open your class link", url: input.joinUrl },
+    footnote: "No account and no password. The same link opens your class each time.",
   });
 }

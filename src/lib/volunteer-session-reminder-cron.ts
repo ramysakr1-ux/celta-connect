@@ -54,6 +54,7 @@ export async function runVolunteerSessionReminderCron(): Promise<{ eventsChecked
         .from("volunteer_session_reminders_sent")
         .select("volunteer_student_id")
         .eq("timetable_event_id", event.id)
+        .eq("channel", "push")
         .in("volunteer_student_id", eventVolunteerIds),
     ]);
     const skip = new Set([...(declines ?? []).map((d) => d.volunteer_student_id), ...(alreadySent ?? []).map((r) => r.volunteer_student_id)]);
@@ -84,7 +85,7 @@ export async function runVolunteerSessionReminderCron(): Promise<{ eventsChecked
 
     await admin
       .from("volunteer_session_reminders_sent")
-      .insert(dueVolunteerIds.map((volunteer_student_id) => ({ volunteer_student_id, timetable_event_id: event.id })));
+      .insert(dueVolunteerIds.map((volunteer_student_id) => ({ volunteer_student_id, timetable_event_id: event.id, channel: "push" as const })));
     reminded += dueVolunteerIds.length;
   }
 
