@@ -108,7 +108,19 @@ function ContactCell({ row, courseCode }: { row: RosterRow; courseCode: string }
 // build-spec.md §8 bug 3 -- rows carried cursor-pointer but only the name
 // cell actually navigated. Whole row now pushes to the portfolio; the
 // name keeps its own <Link> too, for keyboard nav and hover color.
-export function RosterRowView({ row, isMct, showContact, courseCode }: { row: RosterRow; isMct: boolean; showContact: boolean; courseCode: string }) {
+export function RosterRowView({
+  row,
+  isMct,
+  showContact,
+  courseCode,
+  showDetail,
+}: {
+  row: RosterRow;
+  isMct: boolean;
+  showContact: boolean;
+  courseCode: string;
+  showDetail: boolean;
+}) {
   const router = useRouter();
 
   // §3 -- a withdrawn/deferred/etc. candidate is "present in the roster"
@@ -124,7 +136,7 @@ export function RosterRowView({ row, isMct, showContact, courseCode }: { row: Ro
           </Link>
         </td>
         {showContact ? <ContactCell row={row} courseCode={courseCode} /> : <td />}
-        <td colSpan={16} className="text-right">
+        <td colSpan={showDetail ? 16 : 7} className="text-right">
           <span className="pill pill-neutral">{COURSE_STATUS_LABEL[row.courseStatus]}</span>
         </td>
       </tr>
@@ -163,119 +175,8 @@ export function RosterRowView({ row, isMct, showContact, courseCode }: { row: Ro
       <td className={`text-right tabular-nums ${row.attendancePct < 80 ? "font-semibold text-destructive" : "text-ink"}`}>
         {row.attendancePct}%
       </td>
-      <td className="text-right tabular-nums">
-        {row.tpStagesTaught > 0 ? (
-          <Link
-            href={`/portfolio/${row.id}/tp`}
-            onClick={(e) => e.stopPropagation()}
-            title="Taught TPs with plan + self-evaluation + feedback all submitted"
-            className={`hover:underline ${row.tpStagesBehind > 0 ? "text-status-warning-text" : "text-ink"}`}
-          >
-            {row.tpStagesTaught - row.tpStagesBehind} / {row.tpStagesTaught}
-          </Link>
-        ) : (
-          <span className="text-muted">--</span>
-        )}
-      </td>
-      <td className="text-right tabular-nums">
-        {row.supervisedTotal > 0 ? (
-          <Link
-            href={`/portfolio/${row.id}/timetable`}
-            onClick={(e) => e.stopPropagation()}
-            title={`${formatSupervisedTime(row.supervisedSecondsSpent)} spent -- click to see per-session status on their timetable`}
-            className={`hover:underline ${row.supervisedDone < row.supervisedTotal ? "text-status-warning-text" : "text-ink"}`}
-          >
-            {row.supervisedDone} / {row.supervisedTotal}
-          </Link>
-        ) : (
-          <span className="text-muted">--</span>
-        )}
-      </td>
-      <td className="text-right tabular-nums">
-        <Link
-          href={`/portfolio/${row.id}/celta5`}
-          onClick={(e) => e.stopPropagation()}
-          className={`hover:underline ${row.observationHoursShort ? "text-status-warning-text" : "text-ink"}`}
-        >
-          {row.observationHoursCounted.toFixed(1)} / 6
-        </Link>
-      </td>
-      <td className="text-right">
-        <Link
-          href={`/portfolio/${row.id}/celta5`}
-          onClick={(e) => e.stopPropagation()}
-          className={`hover:underline ${row.stage1Filed ? "text-ink" : "text-status-warning-text"}`}
-        >
-          {row.stage1Filed ? "Filed" : "Not filed"}
-          {!row.stage1Filed && row.stage1TutorialConfirmed !== null ? (
-            <span className="ml-1 text-[11px] text-muted">({row.stage1TutorialConfirmed ? "confirmed" : "invited"})</span>
-          ) : null}
-        </Link>
-      </td>
-      <td className="text-right">
-        <Link href={`/portfolio/${row.id}/celta5`} onClick={(e) => e.stopPropagation()} className="hover:underline text-ink">
-          {row.stage2BookedPosition ? ordinal(row.stage2BookedPosition) : <span className="text-status-warning-text">Not booked</span>}
-          {" · "}
-          {row.stage3Required
-            ? row.stage3Done
-              ? "Stage 3 done"
-              : row.stage3TutorialConfirmed === null
-                ? "Stage 3 pending"
-                : row.stage3TutorialConfirmed
-                  ? "Stage 3 confirmed"
-                  : "Stage 3 invited"
-            : "Stage 3 N/A"}
-        </Link>
-        {isMct ? (
-          <div className="mt-1 flex flex-col items-end gap-1">
-            {row.stage2MovedEarlierReason ? (
-              <p className="text-[11px] text-status-warning-text">Stage 2 moved earlier — {row.stage2MovedEarlierReason}</p>
-            ) : row.stage2CanMoveEarlier ? (
-              <MoveEarlierControl traineeId={row.id} stage="stage2" />
-            ) : null}
-            {row.stage3MovedEarlierReason ? (
-              <p className="text-[11px] text-status-warning-text">Stage 3 moved earlier — {row.stage3MovedEarlierReason}</p>
-            ) : row.stage3CanMoveEarlier ? (
-              <MoveEarlierControl traineeId={row.id} stage="stage3" />
-            ) : null}
-          </div>
-        ) : null}
-      </td>
-      <td className="text-right">
-        <Link
-          href={`/portfolio/${row.id}/celta5`}
-          onClick={(e) => e.stopPropagation()}
-          className={`hover:underline ${row.celta5SignoffStatus === "both_signed" ? "text-ink" : "text-status-warning-text"}`}
-        >
-          {CELTA5_SIGNOFF_LABEL[row.celta5SignoffStatus]}
-        </Link>
-      </td>
-      <td
-        className={`text-right tabular-nums ${row.folEntriesLow ? "text-status-warning-text" : "text-ink"}`}
-        title={row.folEntriesLow ? "Below half the cohort's average -- may be under-logging" : "FOL entries logged this course"}
-      >
-        {row.folEntriesLogged}
-      </td>
-      <td className="text-right">
-        <div className="ml-auto">
-          <TrajectoryBarCompact value={row.trajectory} />
-        </div>
-      </td>
       <td className={`text-right ${row.provisionalSlashed ? "font-bold text-destructive" : "text-ink"}`}>
         {row.provisionalLabel ?? <span className="text-muted">Not set</span>}
-      </td>
-      <td className="text-right tabular-nums">
-        {row.obsTasksTotal > 0 ? (
-          <Link
-            href={`/portfolio/${row.id}/celta5`}
-            onClick={(e) => e.stopPropagation()}
-            className={`hover:underline ${row.obsTasksDone < row.obsTasksTotal ? "text-status-warning-text" : "text-ink"}`}
-          >
-            {row.obsTasksDone} / {row.obsTasksTotal}
-          </Link>
-        ) : (
-          <span className="text-muted">--</span>
-        )}
       </td>
       <td className="text-right">
         {row.atRiskReasons.length > 0 ? (
@@ -284,6 +185,121 @@ export function RosterRowView({ row, isMct, showContact, courseCode }: { row: Ro
           </span>
         ) : null}
       </td>
+      {showDetail ? (
+        <>
+          <td className="text-right tabular-nums">
+            {row.tpStagesTaught > 0 ? (
+              <Link
+                href={`/portfolio/${row.id}/tp`}
+                onClick={(e) => e.stopPropagation()}
+                title="Taught TPs with plan + self-evaluation + feedback all submitted"
+                className={`hover:underline ${row.tpStagesBehind > 0 ? "text-status-warning-text" : "text-ink"}`}
+              >
+                {row.tpStagesTaught - row.tpStagesBehind} / {row.tpStagesTaught}
+              </Link>
+            ) : (
+              <span className="text-muted">--</span>
+            )}
+          </td>
+          <td className="text-right tabular-nums">
+            {row.supervisedTotal > 0 ? (
+              <Link
+                href={`/portfolio/${row.id}/timetable`}
+                onClick={(e) => e.stopPropagation()}
+                title={`${formatSupervisedTime(row.supervisedSecondsSpent)} spent -- click to see per-session status on their timetable`}
+                className={`hover:underline ${row.supervisedDone < row.supervisedTotal ? "text-status-warning-text" : "text-ink"}`}
+              >
+                {row.supervisedDone} / {row.supervisedTotal}
+              </Link>
+            ) : (
+              <span className="text-muted">--</span>
+            )}
+          </td>
+          <td className="text-right tabular-nums">
+            <Link
+              href={`/portfolio/${row.id}/celta5`}
+              onClick={(e) => e.stopPropagation()}
+              className={`hover:underline ${row.observationHoursShort ? "text-status-warning-text" : "text-ink"}`}
+            >
+              {row.observationHoursCounted.toFixed(1)} / 6
+            </Link>
+          </td>
+          <td className="text-right">
+            <Link
+              href={`/portfolio/${row.id}/celta5`}
+              onClick={(e) => e.stopPropagation()}
+              className={`hover:underline ${row.stage1Filed ? "text-ink" : "text-status-warning-text"}`}
+            >
+              {row.stage1Filed ? "Filed" : "Not filed"}
+              {!row.stage1Filed && row.stage1TutorialConfirmed !== null ? (
+                <span className="ml-1 text-[11px] text-muted">({row.stage1TutorialConfirmed ? "confirmed" : "invited"})</span>
+              ) : null}
+            </Link>
+          </td>
+          <td className="text-right">
+            <Link href={`/portfolio/${row.id}/celta5`} onClick={(e) => e.stopPropagation()} className="hover:underline text-ink">
+              {row.stage2BookedPosition ? ordinal(row.stage2BookedPosition) : <span className="text-status-warning-text">Not booked</span>}
+              {" · "}
+              {row.stage3Required
+                ? row.stage3Done
+                  ? "Stage 3 done"
+                  : row.stage3TutorialConfirmed === null
+                    ? "Stage 3 pending"
+                    : row.stage3TutorialConfirmed
+                      ? "Stage 3 confirmed"
+                      : "Stage 3 invited"
+                : "Stage 3 N/A"}
+            </Link>
+            {isMct ? (
+              <div className="mt-1 flex flex-col items-end gap-1">
+                {row.stage2MovedEarlierReason ? (
+                  <p className="text-[11px] text-status-warning-text">Stage 2 moved earlier — {row.stage2MovedEarlierReason}</p>
+                ) : row.stage2CanMoveEarlier ? (
+                  <MoveEarlierControl traineeId={row.id} stage="stage2" />
+                ) : null}
+                {row.stage3MovedEarlierReason ? (
+                  <p className="text-[11px] text-status-warning-text">Stage 3 moved earlier — {row.stage3MovedEarlierReason}</p>
+                ) : row.stage3CanMoveEarlier ? (
+                  <MoveEarlierControl traineeId={row.id} stage="stage3" />
+                ) : null}
+              </div>
+            ) : null}
+          </td>
+          <td className="text-right">
+            <Link
+              href={`/portfolio/${row.id}/celta5`}
+              onClick={(e) => e.stopPropagation()}
+              className={`hover:underline ${row.celta5SignoffStatus === "both_signed" ? "text-ink" : "text-status-warning-text"}`}
+            >
+              {CELTA5_SIGNOFF_LABEL[row.celta5SignoffStatus]}
+            </Link>
+          </td>
+          <td
+            className={`text-right tabular-nums ${row.folEntriesLow ? "text-status-warning-text" : "text-ink"}`}
+            title={row.folEntriesLow ? "Below half the cohort's average -- may be under-logging" : "FOL entries logged this course"}
+          >
+            {row.folEntriesLogged}
+          </td>
+          <td className="text-right">
+            <div className="ml-auto">
+              <TrajectoryBarCompact value={row.trajectory} />
+            </div>
+          </td>
+          <td className="text-right tabular-nums">
+            {row.obsTasksTotal > 0 ? (
+              <Link
+                href={`/portfolio/${row.id}/celta5`}
+                onClick={(e) => e.stopPropagation()}
+                className={`hover:underline ${row.obsTasksDone < row.obsTasksTotal ? "text-status-warning-text" : "text-ink"}`}
+              >
+                {row.obsTasksDone} / {row.obsTasksTotal}
+              </Link>
+            ) : (
+              <span className="text-muted">--</span>
+            )}
+          </td>
+        </>
+      ) : null}
     </tr>
   );
 }

@@ -93,6 +93,25 @@ export default async function TeachingPracticeQueuePage() {
         </div>
       </div>
 
+      {/* for-claude-code-roster-column-crowding.md point 2: these four were
+          navigation to other pages, not roster actions -- moved here from
+          Roster's own header, same "just links, not page content" treatment
+          coursebooks/rotation already get above. */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
+        <Link href="/trainer/pre-course-task" className="text-xs font-semibold text-primary hover:underline">
+          Pre-course tasks →
+        </Link>
+        <Link href="/trainer/observation-tasks" className="text-xs font-semibold text-primary hover:underline">
+          Observation tasks →
+        </Link>
+        <Link href="/trainer/observation-hours" className="text-xs font-semibold text-primary hover:underline">
+          Observation hours →
+        </Link>
+        <Link href="/trainer/gtky" className="text-xs font-semibold text-primary hover:underline">
+          Day-one activities →
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-[1.4fr_1fr]">
         {/* Waiting on you */}
         <div className="flex flex-col gap-[13px] rounded-[6px] border border-border bg-card px-[18px] py-4">

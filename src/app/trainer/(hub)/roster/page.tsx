@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { fetchRosterRows } from "@/lib/roster";
-import { RosterRowView } from "@/app/trainer/(hub)/roster/roster-row";
+import { RosterTable } from "@/app/trainer/(hub)/roster/roster-table";
 import { AddCandidateButton } from "@/app/trainer/(hub)/roster/add-candidate-button";
 import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 import { toggleFilmingConsent } from "@/app/trainer/(hub)/roster/filming-consent-actions";
@@ -99,31 +99,15 @@ export default async function TrainerRosterPage() {
           <h1 className="font-serif text-2xl text-ink">{rows.length} candidates</h1>
         </div>
         <div className="flex items-center gap-5">
+          {/* for-claude-code-roster-column-crowding.md point 2: these four
+              were navigation to other pages, not roster actions -- moved to
+              Teaching Practice's own "More tools" row alongside the other
+              drill-down links that already live there (coursebooks/
+              rotation), per the nav spec's "Rotation, Portfolio and
+              Announcements are not tabs -- they're reached by drilling into
+              Teaching Practice." Roster's own header keeps just the four
+              actions that are actually about the roster itself. */}
           <p className="text-xs text-muted">Click a row to open a portfolio</p>
-          <a
-            href="/trainer/pre-course-task"
-            className="text-xs font-semibold text-primary hover:underline"
-          >
-            Pre-course tasks →
-          </a>
-          <a
-            href="/trainer/observation-tasks"
-            className="text-xs font-semibold text-primary hover:underline"
-          >
-            Observation tasks →
-          </a>
-          <a
-            href="/trainer/observation-hours"
-            className="text-xs font-semibold text-primary hover:underline"
-          >
-            Observation hours →
-          </a>
-          <a
-            href="/trainer/gtky"
-            className="text-xs font-semibold text-primary hover:underline"
-          >
-            Day-one activities →
-          </a>
           <a
             href="/trainer/roster/export"
             className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary"
@@ -202,45 +186,7 @@ export default async function TrainerRosterPage() {
         </div>
       ) : null}
 
-      <div className="sheet overflow-x-auto !p-0">
-        <table className="table-plain w-full">
-          <thead>
-            <tr>
-              <th className="text-sm text-muted">Candidate</th>
-              {isRegisteredTutor ? <th className="text-right text-sm text-muted">Outside Connect -- urgent only</th> : <th />}
-              <th className="text-right text-sm text-muted">Assessed hrs</th>
-              <th className="text-right text-sm text-muted">TPs passed</th>
-              <th className="text-right text-sm text-muted">Assignments</th>
-              <th className="text-right text-sm text-muted">Criteria</th>
-              <th className="text-right text-sm text-muted">Attendance</th>
-              <th className="text-right text-sm text-muted">TP stages</th>
-              <th className="text-right text-sm text-muted">Supervised review</th>
-              <th className="text-right text-sm text-muted">Observation hrs</th>
-              <th className="text-right text-sm text-muted">Stage 1 report</th>
-              <th className="text-right text-sm text-muted">Stage 2 / 3</th>
-              <th className="text-right text-sm text-muted">CELTA 5 sign-off</th>
-              <th className="text-right text-sm text-muted">FOL logged</th>
-              <th className="text-right text-sm text-muted">Standing</th>
-              <th className="text-right text-sm text-muted">Provisional</th>
-              <th className="text-right text-sm text-muted">Obs. tasks</th>
-              <th className="text-right text-sm text-muted">At risk</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length > 0 ? (
-              rows.map((row) => (
-                <RosterRowView key={row.id} row={row} isMct={isMct} showContact={isRegisteredTutor} courseCode={courseCode} />
-              ))
-            ) : (
-              <tr>
-                <td colSpan={18} className="text-muted">
-                  No trainees on this course yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <RosterTable rows={rows} isMct={isMct} showContact={isRegisteredTutor} courseCode={courseCode} />
     </div>
   );
 }
