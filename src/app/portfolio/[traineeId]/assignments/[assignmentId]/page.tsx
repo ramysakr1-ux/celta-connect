@@ -223,7 +223,7 @@ export default async function AssignmentDetailPage({
                 type="date"
                 name="due_date"
                 defaultValue={assignment.due_date ?? ""}
-                className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
               />
             </div>
             <button type="submit" className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink trainee-hover">

@@ -106,7 +106,7 @@ export function FilmedObservationChat({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="Message"
-          className="flex-1 rounded-full border border-border bg-card px-3 py-1.5 text-[13px] text-ink outline-none focus:border-primary"
+          className="flex-1 rounded-full border border-border bg-card-inset px-3 py-1.5 text-[13px] text-ink outline-none focus:border-primary"
         />
         <button type="submit" className="rounded-full bg-primary px-3.5 py-1.5 text-[13px] font-medium text-primary-foreground">
           Send

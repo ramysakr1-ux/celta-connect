@@ -49,7 +49,7 @@ function SectionGroup({
                 name={`response__${section.id}`}
                 rows={4}
                 defaultValue={responseTextBySection[section.id] ?? ""}
-                className="mt-1 rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+                className="mt-1 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
               />
             </>
           ) : (
@@ -81,7 +81,7 @@ function buildSteps(
           name={`response__${section.id}`}
           rows={4}
           defaultValue={responseTextBySection[section.id] ?? ""}
-          className="mt-1 rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="mt-1 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
     ),

@@ -8,10 +8,12 @@ import { Eye } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
 import { TraineeSidebarNav } from "@/app/portfolio/[traineeId]/trainee-sidebar-nav";
+import { TraineeNameBanner } from "@/app/portfolio/[traineeId]/trainee-name-banner";
+import { TraineeHeaderCorner } from "@/app/portfolio/[traineeId]/trainee-header-corner";
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
+import { computeWeekOf } from "@/lib/course-progress";
 import { InstallPrompt } from "@/components/install-prompt";
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
-import { computeCourseDayProgress } from "@/lib/course-day";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
 import {
   CELTA_CRITERIA_CODES,
@@ -87,13 +89,24 @@ export default async function PortfolioLayout({
   // browsing one candidate's whole record rather than a daily briefing.
   const showTraineeNav = !isStaffView;
 
-  const courseDayProgress = trainee.course_id ? await computeCourseDayProgress(supabase, trainee.course_id) : null;
   const traineeInitials = trainee.full_name
     .split(" ")
     .map((p) => p[0])
     .slice(0, 2)
     .join("")
     .toUpperCase();
+
+  // TraineeNameBanner's own "week N" -- only fetched for the showTraineeNav
+  // branch's landing page, same course_id already used above. Ramy,
+  // 2026-08-24: just the week number now, no weekday and no "of M" -- the
+  // real date already shows in Today's own heading below.
+  let bannerWeekNumber: number | null = null;
+  if (showTraineeNav && trainee.course_id) {
+    const { data: courseDates } = await supabase.from("courses").select("start_date, end_date").eq("id", trainee.course_id).maybeSingle();
+    const today = new Date().toISOString().slice(0, 10);
+    const weekOf = courseDates?.start_date && courseDates?.end_date ? computeWeekOf(courseDates.start_date, courseDates.end_date, today) : null;
+    bannerWeekNumber = weekOf ? Number(weekOf.match(/week (\d+)/)?.[1]) || null : null;
+  }
 
   // §1.1d: the "Preview as trainee" button promises a real preview
   // of what the candidate sees -- confirmed live it wasn't actually doing
@@ -221,7 +234,7 @@ export default async function PortfolioLayout({
   };
 
   return (
-    <div className="flex min-h-full flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Checkpoint 2 (App Redesign.dc.html 1d) -- collapses the old 2-block
           header (14px wordmark bar + a separate .sheet identity block with
           avatar/3 StatBars/trajectory pill) into one 56px bar: back-link +
@@ -231,30 +244,40 @@ export default async function PortfolioLayout({
           roster table and Today's "Needs you" alerts. */}
       {showTraineeNav ? <InstallPrompt /> : null}
 
-      <div className={showTraineeNav ? "trainee-header" : "border-b border-border bg-card"}>
-        {showTraineeNav ? (
-          // Trainee Walkthrough.dc.html's actual header: near-white bar (not
-          // a tinted wash -- see .trainee-header, globals.css), 4px plum
-          // rule on the left edge only. Nav moved out of this bar entirely --
-          // TraineeSidebarNav is its own left rail below, not a center row
-          // here. "Day N of 20" + a teal-tinted initials chip on the right,
-          // matching the mockup's own avatar treatment exactly (not plum).
-          <div className="container flex h-14 items-center justify-between gap-4">
-            <Link href={`/portfolio/${trainee.id}`} className="shrink-0 block">
-              <Wordmark size="header" />
-            </Link>
-            <div className="flex shrink-0 items-center gap-3">
-              {courseDayProgress ? (
-                <span className="text-xs font-medium text-muted">
-                  Day {courseDayProgress.currentDay} of {courseDayProgress.totalDays}
-                </span>
-              ) : null}
-              <div className="flex size-[26px] shrink-0 items-center justify-center rounded-[8px]" style={{ background: "oklch(93% 0.019 190)" }}>
-                <span className="text-[9px] font-bold" style={{ color: "oklch(32% 0.05 195)" }}>{traineeInitials}</span>
-              </div>
+      {showTraineeNav ? (
+        // Ramy, 2026-08-24: "think of this as one big sheet of paper... it
+        // will extend the width of the entire screen. Connect will have the
+        // same color [as the sheet], but a line between the piece of paper
+        // and Connect, and a line between Connect and the trainee's name."
+        // One full-bleed --color-frame surface holding the name banner, the
+        // Connect bar, and the sidebar+content row, divided only by hairline
+        // rules -- not three separately-colored pieces the way this used to
+        // be. The individual content cards inside {children} keep their own
+        // distinct --color-card tone; that contrast is the only place color
+        // actually changes.
+        <div className="flex min-h-0 flex-1 flex-col" style={{ background: "var(--color-frame)" }}>
+          <TraineeNameBanner traineeId={trainee.id} traineeName={trainee.full_name} weekNumber={bannerWeekNumber} />
+          <div className="border-t border-border" />
+          {/* Ramy, 2026-08-24: Connect's own band is a distinct off-white
+              ("one end to the other"), not the same tone as the sheet
+              around it -- edge-to-edge, so .container goes inside this
+              wrapper rather than carrying the background itself. */}
+          <div style={{ background: "oklch(99.5% 0.004 90)" }}>
+            <div className="container flex h-14 items-center justify-between gap-4">
+              <Link href={`/portfolio/${trainee.id}`} className="shrink-0 block">
+                <Wordmark size="header" />
+              </Link>
+              <TraineeHeaderCorner traineeId={trainee.id} traineeInitials={traineeInitials} />
             </div>
           </div>
-        ) : (
+          <div className="border-t border-border" />
+          <div className="container flex flex-1 gap-6 py-6">
+            <TraineeSidebarNav traineeId={trainee.id} />
+            <div className="min-w-0 flex-1 p-6">{children}</div>
+          </div>
+        </div>
+      ) : (
+        <div className="border-b border-border bg-card">
           <div className="container flex h-14 items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
               <Link href="/trainer/roster" className="shrink-0 text-sm text-primary">
@@ -314,8 +337,8 @@ export default async function PortfolioLayout({
               ) : null}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* for-claude-code-assessor-readonly-banner.md: persistent, not the
           "← Assessor pack" link the earlier fix put in the header row
@@ -334,10 +357,15 @@ export default async function PortfolioLayout({
 
       <PreviewBanner traineeId={trainee.id} traineeName={trainee.full_name} />
 
-      <div className={`container flex flex-1 ${showTraineeNav ? "gap-6 py-6" : "gap-8 py-8"}`}>
-        {showTraineeNav ? <TraineeSidebarNav traineeId={trainee.id} /> : <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />}
-        <div className="frame min-w-0 flex-1 p-6">{children}</div>
-      </div>
+      {/* Trainee's sidebar+content row already rendered above, inside the
+          unified sheet -- this is the staff/assessor PortfolioTabs layout
+          only now. */}
+      {showTraineeNav ? null : (
+        <div className="container flex flex-1 gap-8 py-8">
+          <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />
+          <div className="frame min-w-0 flex-1 p-6">{children}</div>
+        </div>
+      )}
 
       <footer className={`mt-auto py-8 text-center text-xs text-muted ${showTraineeNav ? "pb-20 md:pb-8" : ""}`}>
         {[center?.name, center ? `Cambridge CELTA (Centre ${center.center_number})` : null, `Workspace link ${trainee.id.slice(0, 8)}`]

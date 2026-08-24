@@ -57,7 +57,7 @@ export function ConcernForm({ traineeId }: { traineeId: string }) {
           required
           rows={4}
           placeholder="Write or dictate…"
-          className="rounded-[6px] border border-border bg-card px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
 

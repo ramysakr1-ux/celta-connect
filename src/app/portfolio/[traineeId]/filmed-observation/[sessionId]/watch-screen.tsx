@@ -260,7 +260,7 @@ export function FilmedObservationWatchScreen({
                     value={noteText}
                     onChange={(e) => setNoteText(e.target.value)}
                     placeholder="Quick note at this point in the video..."
-                    className="flex-1 rounded-[6px] border border-border bg-card px-2.5 py-1.5 text-sm text-ink outline-none focus:border-primary"
+                    className="flex-1 rounded-[6px] border border-border bg-card-inset px-2.5 py-1.5 text-sm text-ink outline-none focus:border-primary"
                   />
                   <button
                     type="button"

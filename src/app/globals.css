@@ -34,8 +34,9 @@
      alternating light/dark levels instead -- page (sand) -> outer frame
      (light) -> card (darker) -> innermost element (light again). */
   --color-background: oklch(92.5% 0.012 85); /* level 1: page ground, universal */
-  --color-frame: oklch(98% 0.008 85); /* level 2 (outer frame/board) and level 4 (innermost element) -- same value, alternating depth is what reads as layered rather than one flat wash. Brightened 23 Aug 2026 per Ramy, live-previewed against oklch(96.4% 0.014 85) first. */
-  --color-card: oklch(93% 0.024 80); /* level 3: cards/panels sitting inside the frame -- darker than the frame around them, on purpose */
+  --color-frame: oklch(97.8% 0.008 85); /* level 2 (outer frame/board) and level 4 (innermost element) -- same value, alternating depth is what reads as layered rather than one flat wash. Brightened 23 Aug 2026 per Ramy, live-previewed against oklch(96.4% 0.014 85) first; precise value (97.8%, was a rounded 98%) supplied 24 Aug 2026 from the mockup's own per-screen frame chrome. */
+  --color-card: oklch(96.4% 0.014 85); /* level 3: cards/panels sitting inside the frame -- darker than the frame around them, on purpose. Corrected 24 Aug 2026 per Ramy's exact spec (was oklch(93% 0.024 80), too close to --color-background and identical to elements nested inside cards -- that old value now lives on below as --color-card-inset instead). */
+  --color-card-inset: oklch(93% 0.024 80); /* level 4: form fields/answer boxes/pills nested INSIDE a card -- darker than the card around them, same relationship as frame->card one level up. New 24 Aug 2026: reuses --color-card's old value so cards and their own nested elements stop rendering identically. */
   --color-border: oklch(88% 0.016 82); /* hairline neutral, all four levels */
   --color-ink: oklch(23.5% 0.017 65); /* near-black warm ink (body text) */
   --color-primary: oklch(37.5% 0.058 195); /* teal */
@@ -95,6 +96,7 @@
   --color-background: var(--color-background);
   --color-frame: var(--color-frame);
   --color-card: var(--color-card);
+  --color-card-inset: var(--color-card-inset);
   --color-border: var(--color-border);
   --color-ink: var(--color-ink);
   --color-primary: var(--color-primary);

@@ -30,7 +30,7 @@ export function TraineeSidebarNav({ traineeId }: { traineeId: string }) {
   const base = `/portfolio/${traineeId}`;
 
   return (
-    <div className="hidden w-[232px] shrink-0 flex-col gap-px py-1 md:flex">
+    <div className="hidden w-[232px] shrink-0 flex-col gap-px border-r border-border py-1 pr-4 md:flex">
       <div className="px-2.5 pb-2.5 text-[10px] font-bold tracking-[0.12em] text-muted uppercase">Workspace</div>
       {SIDEBAR_TABS.map((tab) => {
         const href = `${base}${tab.href}`;

@@ -24,7 +24,7 @@ export function ObservationTaskForm({
           <input
             name="observation_date"
             type="date"
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -32,7 +32,7 @@ export function ObservationTaskForm({
           <input
             name="length_minutes"
             type="number"
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -40,7 +40,7 @@ export function ObservationTaskForm({
           <select
             name="level"
             defaultValue=""
-            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Select a level</option>
             {CEFR_LEVELS.map((l) => (
@@ -55,7 +55,7 @@ export function ObservationTaskForm({
           <input
             name="learners_present"
             type="number"
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
       </div>
@@ -72,7 +72,7 @@ export function ObservationTaskForm({
             name="mode"
             required
             defaultValue=""
-            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           >
             <option value="" disabled>
               Select a mode
@@ -89,7 +89,7 @@ export function ObservationTaskForm({
           name="response"
           rows={4}
           required
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
 

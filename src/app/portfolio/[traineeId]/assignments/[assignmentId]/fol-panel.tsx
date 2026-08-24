@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { logClassError, submitFolClaim, type FolFormState } from "@/lib/fol/actions";
 
 const initialClaimState: FolFormState = { error: null, warning: null };
-const inputClass = "rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary";
+const inputClass = "rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary";
 
 interface Learner {
   id: string;
@@ -59,7 +59,7 @@ export function FolPanel({
             <label htmlFor="learner_id" className="text-xs text-muted">
               Learner
             </label>
-            <select id="learner_id" name="learner_id" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+            <select id="learner_id" name="learner_id" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
               {learners.map((l) => (
                 <option key={l.id} value={l.id}>
                   {l.name}
@@ -77,7 +77,7 @@ export function FolPanel({
             <label htmlFor="tp_number" className="text-xs text-muted">
               TP
             </label>
-            <select id="tp_number" name="tp_number" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+            <select id="tp_number" name="tp_number" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
               {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => (
                 <option key={n} value={n}>
                   TP{n}
@@ -89,7 +89,7 @@ export function FolPanel({
             <label htmlFor="problem_type" className="text-xs text-muted">
               Type
             </label>
-            <select id="problem_type" name="problem_type" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+            <select id="problem_type" name="problem_type" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
               <option value="grammar">Grammar</option>
               <option value="pronunciation">Pronunciation</option>
             </select>
@@ -138,7 +138,7 @@ export function FolPanel({
               <label htmlFor="claim_problem_type" className="text-xs text-muted">
                 Type
               </label>
-              <select id="claim_problem_type" name="problem_type" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+              <select id="claim_problem_type" name="problem_type" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
                 <option value="grammar">Grammar</option>
                 <option value="pronunciation">Pronunciation</option>
               </select>
@@ -160,7 +160,7 @@ export function FolPanel({
               <label htmlFor="source" className="text-xs text-muted">
                 Where from
               </label>
-              <select id="source" name="source" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+              <select id="source" name="source" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
                 <option value="pooled_log">The class log</option>
                 <option value="signup_recording">Sign-up recordings</option>
               </select>

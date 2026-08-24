@@ -25,7 +25,7 @@ export function GroupFeedbackForm({
         rows={3}
         defaultValue={initialFeedback}
         placeholder="What the three of you agreed, reading the notes together"
-        className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
       />
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       <button

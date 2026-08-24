@@ -123,7 +123,7 @@ export function CandidateStatusCard({
             rows={2}
             defaultValue={pendingRequest?.kind === "withdraw" ? requestNoteStarter : undefined}
             placeholder="Reason (optional, kept on the record)"
-            className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
           {withdrawState.error ? <p className="text-xs text-destructive">{withdrawState.error}</p> : null}
           <div className="flex items-center gap-2">
@@ -172,14 +172,14 @@ export function CandidateStatusCard({
             <input
               type="date"
               name="completes_by"
-              className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
           <textarea
             name="note"
             rows={2}
             placeholder="Reason / note (optional)"
-            className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
           {extensionState.error ? <p className="text-xs text-destructive">{extensionState.error}</p> : null}
           <div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ export function CandidateStatusCard({
             name="note"
             rows={2}
             placeholder="Reason (optional, kept on the record)"
-            className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
           {restartState.error ? <p className="text-xs text-destructive">{restartState.error}</p> : null}
           <div className="flex items-center gap-2">
@@ -253,7 +253,7 @@ export function CandidateStatusCard({
               required
               defaultValue={pendingRequest?.kind === "defer" ? requestNoteStarter : undefined}
               placeholder="Full details, for the Appian deferral form"
-              className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
 
@@ -263,7 +263,7 @@ export function CandidateStatusCard({
               name="reintegration_arrangements"
               rows={2}
               defaultValue={pendingRequest?.kind === "defer" && pendingRequest.note ? pendingRequest.note : undefined}
-              className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
 
@@ -275,7 +275,7 @@ export function CandidateStatusCard({
               name="hours_carried"
               value={hoursCarried}
               onChange={(e) => setHoursCarried(e.target.value === "" ? 0 : Number(e.target.value))}
-              className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
           {hoursCarriedOverridden ? (
@@ -285,7 +285,7 @@ export function CandidateStatusCard({
                 name="hours_carried_note"
                 rows={2}
                 required
-                className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
               />
             </div>
           ) : null}
@@ -295,7 +295,7 @@ export function CandidateStatusCard({
             <input
               type="date"
               name="reintegration_deadline"
-              className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
 
@@ -303,7 +303,7 @@ export function CandidateStatusCard({
             name="note"
             rows={2}
             placeholder="Any other note (optional)"
-            className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
           {deferralState.error ? <p className="text-xs text-destructive">{deferralState.error}</p> : null}
           <div className="flex items-center gap-2">

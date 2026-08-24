@@ -284,14 +284,21 @@ export async function TodayTab({
   // so which edge these three cards use switches with it. Full literal
   // class strings (not string-built) so Tailwind's static scanner can see
   // them -- a template-built `border-l-${color}` would never be generated.
-  const CARD_EDGE: Record<"status-warning-text" | "gold" | "primary", { left: string; top: string }> = {
-    "status-warning-text": { left: "border-l-[3px] border-l-status-warning-text border-t-0", top: "border-t-[3px] border-t-status-warning-text border-l-0" },
-    gold: { left: "border-l-[3px] border-l-gold border-t-0", top: "border-t-[3px] border-t-gold border-l-0" },
+  // Ramy, 2026-08-24: plain content cards alternate green/garnet so no two
+  // neighbors (across a row or down a column) share a color -- confirmed
+  // live against a 6-card preview. "You teach today" keeps its own teal
+  // (primary) as a distinct hero callout, not folded into the alternation.
+  const CARD_EDGE: Record<"green" | "garnet" | "primary", { left: string; top: string }> = {
+    green: { left: "border-l-[3px] border-l-[oklch(38%_0.085_155)] border-t-0", top: "border-t-[3px] border-t-[oklch(38%_0.085_155)] border-l-0" },
+    garnet: { left: "border-l-[3px] border-l-[oklch(42%_0.13_27)] border-t-0", top: "border-t-[3px] border-t-[oklch(42%_0.13_27)] border-l-0" },
     primary: { left: "border-l-[3px] border-l-primary border-t-0", top: "border-t-[3px] border-t-primary border-l-0" },
   };
   const cardEdge = (color: keyof typeof CARD_EDGE) => (teachingToday ? CARD_EDGE[color].left : CARD_EDGE[color].top);
   const weekOf = course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
   const eyebrow = [courseName, weekOf].filter(Boolean).join(" · ");
+  // The trainee's name moved to TraineeNameBanner, above the Connect header
+  // itself (Ramy, 2026-08-24: "I want this to go on top") -- not repeated
+  // here too.
   const todayHeading = new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
   return (
@@ -338,12 +345,11 @@ export async function TodayTab({
           </div>
         ) : null}
 
-        {/* Announcements -- amber rule to match its already-amber label and
-            its real semantic role (flagged/urgent posts), not just the
-            default teal every .sheet gets. Edge side (left vs top) follows
-            cardEdge -- see its own comment above. */}
-        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("status-warning-text")}`}>
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">Announcements</p>
+        {/* Announcements -- green, alternating against "Waiting on you"
+            (garnet) beside it. Edge side (left vs top) follows cardEdge --
+            see its own comment above. */}
+        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("green")}`}>
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Announcements</p>
           {(broadcasts ?? []).length === 0 ? (
             <p className="text-sm text-muted">Nothing posted yet.</p>
           ) : (
@@ -361,9 +367,9 @@ export async function TodayTab({
           )}
         </div>
 
-        {/* Waiting on you -- gold, alternating against "You teach today"
-            (teal) and "Announcements" (amber) on either side. */}
-        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("gold")}`}>
+        {/* Waiting on you -- garnet, alternating against "Announcements"
+            (green) beside it. */}
+        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("garnet")}`}>
           <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Waiting on you</p>
           {waitingCapped.length === 0 ? (
             <p className="text-sm text-muted">Nothing waiting on you right now.</p>

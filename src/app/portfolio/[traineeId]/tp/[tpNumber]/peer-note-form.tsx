@@ -34,7 +34,7 @@ export function PeerNoteForm({
           maxLength={140}
           defaultValue={initialNote1}
           placeholder="One line -- a jotting, not an essay"
-          className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1">
@@ -45,7 +45,7 @@ export function PeerNoteForm({
           maxLength={140}
           defaultValue={initialNote2}
           placeholder="One line"
-          className="rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

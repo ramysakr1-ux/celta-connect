@@ -74,7 +74,7 @@ function ItemCard({ item, canClaim }: { item: MaterialPoolItemForTrainee; canCla
           <select
             name="tp_number"
             defaultValue="7"
-            className="h-7 rounded-[6px] border border-input bg-card px-1.5 text-xs text-ink outline-none focus:border-primary"
+            className="h-7 rounded-[6px] border border-input bg-card-inset px-1.5 text-xs text-ink outline-none focus:border-primary"
           >
             <option value="7">TP7</option>
             <option value="8">TP8</option>

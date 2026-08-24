@@ -224,8 +224,14 @@ export function StaffChatDrawer({
   return (
     <div
       className={`pointer-events-none fixed left-0 right-0 z-30 flex justify-center px-3 ${
-        raiseForMobileNav ? "bottom-20 md:bottom-6" : "bottom-6"
+        raiseForMobileNav ? "bottom-20 py-3 md:bottom-6" : "bottom-6"
       }`}
+      // Ramy, 2026-08-24: "the frame, the border where the pill sits" gets
+      // Connect's own off-white -- the pill itself keeps its normal bg-card
+      // fill, it's the strip behind it that changes. Trainee-only
+      // (raiseForMobileNav is true only for the real trainee's own render,
+      // see this prop's own comment above).
+      style={raiseForMobileNav ? { background: "oklch(99.5% 0.004 90)", borderTop: "1px solid var(--color-border)" } : undefined}
     >
       <div
         className={`pointer-events-auto flex w-full max-w-[840px] flex-col gap-2 transition-[opacity,transform] duration-[260ms] ease-out ${

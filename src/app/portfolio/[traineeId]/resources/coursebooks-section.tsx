@@ -50,7 +50,7 @@ function CoursebookCard({
             rows={2}
             defaultValue={book.access_notes ?? ""}
             placeholder="How candidates access this book (e.g. provided in the welcome pack, a Drive link)"
-            className="rounded-[6px] border border-input bg-card px-2 py-1.5 text-xs text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-input bg-card-inset px-2 py-1.5 text-xs text-ink outline-none focus:border-primary"
           />
           {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
           <button

@@ -116,7 +116,7 @@ export function WithdrawalRequestForm({
               ? "Write or dictate -- this appears in your letter in your own words…"
               : "When would you hope to return, and is there anything the centre should know…"
           }
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
         <p className="text-[11px] text-muted italic">
           This is read by the centre only. It does not affect your record, and nothing you write here reaches Cambridge.
@@ -132,7 +132,7 @@ export function WithdrawalRequestForm({
           name="effective_date"
           type="date"
           required
-          className="h-10 rounded-[6px] border border-border bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
 

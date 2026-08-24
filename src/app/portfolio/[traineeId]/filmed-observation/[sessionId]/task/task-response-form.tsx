@@ -74,7 +74,7 @@ export function TaskResponseForm({
           onChange={(e) => setR1(e.target.value)}
           disabled={isLocked}
           rows={3}
-          className="rounded-[6px] border border-border bg-card px-2.5 py-2 text-sm text-ink outline-none focus:border-primary disabled:opacity-70"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary disabled:opacity-70"
         />
       </div>
       <div className="flex flex-col gap-1.5">
@@ -84,7 +84,7 @@ export function TaskResponseForm({
           onChange={(e) => setR2(e.target.value)}
           disabled={isLocked}
           rows={3}
-          className="rounded-[6px] border border-border bg-card px-2.5 py-2 text-sm text-ink outline-none focus:border-primary disabled:opacity-70"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary disabled:opacity-70"
         />
       </div>
       <div className="flex flex-col gap-1.5">
@@ -94,7 +94,7 @@ export function TaskResponseForm({
           onChange={(e) => setRGeneral(e.target.value)}
           disabled={isLocked}
           rows={3}
-          className="rounded-[6px] border border-border bg-card px-2.5 py-2 text-sm text-ink outline-none focus:border-primary disabled:opacity-70"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary disabled:opacity-70"
         />
       </div>
       <div className="flex flex-col gap-1.5">
