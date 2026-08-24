@@ -65,6 +65,15 @@ export default function DemoLandingPage() {
             </a>
           ))}
         </div>
+
+        <a href="/demo/journey" className="card-interactive flex flex-col gap-1.5 p-5 text-center">
+          <span className="font-serif text-lg text-ink">The application journey</span>
+          <span className="text-sm text-muted">
+            Step by step: how a trainee applies, interviews, and gets an offer -- and how a volunteer student signs
+            up. Every form and every email, in order.
+          </span>
+          <span className="mt-2 text-sm font-semibold text-primary">See the journey &rarr;</span>
+        </a>
       </div>
     </div>
   );
