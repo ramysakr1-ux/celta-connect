@@ -197,37 +197,47 @@ export default async function CommandCenterPage() {
 
   return (
     <div style={{ fontFamily: "Karla, Helvetica, sans-serif", background: PAGE_BG, minHeight: "100vh", paddingBottom: 60 }}>
-      <div style={{ background: DARK, padding: "30px 56px 34px", display: "flex", flexDirection: "column", gap: 22, borderBottom: `3px solid ${GOLD}` }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: GOLD, display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: DARK }}>CC</span>
+      {/* Ramy, 24 Aug 2026: "align the name with the rest of the page, make
+          it a little wider" -- this band's own content used to sit at a
+          flat 56px inset with no outer cap, while the body below was
+          capped+centered at maxWidth 1400 -- at any viewport wider than
+          1400+112, the two drift apart. Same maxWidth/margin/padding
+          wrapper as the body now, so "Connect"/the greeting line up with
+          the stat cards and tables under them at any width; bumped from
+          1400 to 1560 for the "wider" half of the ask. */}
+      <div style={{ background: DARK, borderBottom: `3px solid ${GOLD}` }}>
+        <div style={{ maxWidth: 1560, margin: "0 auto", padding: "30px 56px 34px", display: "flex", flexDirection: "column", gap: 22 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: GOLD, display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: DARK }}>CC</span>
+              </div>
+              <div style={{ fontFamily: "Newsreader, Georgia, serif", fontStyle: "italic", fontSize: 19, color: CREAM }}>Connect</div>
+              <div style={{ width: 1, height: 18, background: "oklch(0.32 0.02 60)" }} />
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: GOLD }}>Command center</div>
             </div>
-            <div style={{ fontFamily: "Newsreader, Georgia, serif", fontStyle: "italic", fontSize: 19, color: CREAM }}>Connect</div>
-            <div style={{ width: 1, height: 18, background: "oklch(0.32 0.02 60)" }} />
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: GOLD }}>Command center</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: health.status === "normal" ? GREEN : health.status === "degraded" ? GOLD : RED,
+                }}
+              />
+              <span style={{ fontSize: 12, color: "oklch(0.7 0.02 75)" }}>{health.label}</span>
+            </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                background: health.status === "normal" ? GREEN : health.status === "degraded" ? GOLD : RED,
-              }}
-            />
-            <span style={{ fontSize: 12, color: "oklch(0.7 0.02 75)" }}>{health.label}</span>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+            <div style={{ fontFamily: "Newsreader, serif", fontSize: 30, fontWeight: 600, color: "oklch(0.96 0.006 90)" }}>
+              Good {greeting.timeOfDay}, {greeting.firstName}
+            </div>
+            <div style={{ fontSize: 12.5, color: "oklch(0.6 0.02 75)" }}>{greeting.dateEyebrow}</div>
           </div>
-        </div>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-          <div style={{ fontFamily: "Newsreader, serif", fontSize: 30, fontWeight: 600, color: "oklch(0.96 0.006 90)" }}>
-            Good {greeting.timeOfDay}, {greeting.firstName}
-          </div>
-          <div style={{ fontSize: 12.5, color: "oklch(0.6 0.02 75)" }}>{greeting.dateEyebrow}</div>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "32px 56px 0", display: "flex", flexDirection: "column", gap: 22 }}>
+      <div style={{ maxWidth: 1560, margin: "0 auto", padding: "32px 56px 0", display: "flex", flexDirection: "column", gap: 22 }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
           {[
             { label: "Centres live", value: centersList.length, sub: `${centersRunningNow} running a course now` },
