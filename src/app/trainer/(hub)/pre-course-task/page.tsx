@@ -11,7 +11,7 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 // portfolio page (already staff-readable via that page's role branch).
 export default async function TrainerPreCourseTaskPage() {
   const session = await getCurrentProfile();
-  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
+  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner" ? session.profile : null;
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
   if (!trainer && !assessorCourseId) redirect("/login");
 

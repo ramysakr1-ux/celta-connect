@@ -32,7 +32,7 @@ export default async function TrainerResourceHubPage() {
   // assessor course, and only a plain (non-touring) assessor cookie is
   // still turned away, since resource-hub was never part of the base pack.
   const session = await getCurrentProfile();
-  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
+  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner" ? session.profile : null;
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
   const tourMode = assessorCourseId ? await isAssessorTourMode() : false;
   if (!trainer && !tourMode) redirect("/login");

@@ -23,7 +23,7 @@ export interface SwitchCourseState {
 export async function switchActiveCourse(courseId: string): Promise<SwitchCourseState> {
   const session = await getCurrentProfile();
   const profile = session?.profile;
-  if (!profile || profile.role !== "trainer") return { error: "Not allowed." };
+  if (!profile || (profile.role !== "trainer" && profile.role !== "platform_owner")) return { error: "Not allowed." };
   if (courseId === profile.course_id) return { error: null };
 
   const admin = createAdminClient();

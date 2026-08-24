@@ -64,28 +64,34 @@ import { Wordmark } from "@/components/wordmark";
 // never applies here. `corner="bottom-right"` opts back into the original
 // placement just for this one page; every other `pinned` caller keeps the
 // top-right default.
+// Ramy, 24 Aug 2026 (eighth pass): still "too much" as a bordered pill in
+// the top-right, crowding the trainer hub's own busy header. Bottom-right,
+// no border/background -- just the small mark and faint text, low enough
+// contrast to read as a watermark rather than UI chrome. corner now
+// defaults to "bottom-right"; every existing top-right caller was the
+// thing causing the crowding, not a deliberate choice worth preserving.
 export function DesignerCredit({
   className = "",
   pinned = true,
-  corner = "top-right",
+  corner = "bottom-right",
 }: {
   className?: string;
   pinned?: boolean;
   corner?: "top-right" | "bottom-right";
 }) {
-  const pill = (
-    <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/85 px-2 py-1 text-[11px] text-muted backdrop-blur-sm">
-      <Wordmark size="icon" iconSizePx={16} />
+  const mark = (
+    <span className="pointer-events-auto inline-flex items-center gap-1.5 text-[10.5px] text-muted/70">
+      <Wordmark size="icon" iconSizePx={13} />
       <span>
-        designed and built by <span className="text-ink">Ramy</span>
+        designed and built by <span className="text-muted">Ramy</span>
       </span>
     </span>
   );
 
-  if (!pinned) return <div className={className}>{pill}</div>;
+  if (!pinned) return <div className={className}>{mark}</div>;
 
   const cornerClass = corner === "bottom-right" ? "bottom-3 right-3" : "top-3 right-3";
-  return <div className={`pointer-events-none fixed z-20 ${cornerClass} ${className}`}>{pill}</div>;
+  return <div className={`pointer-events-none fixed z-20 ${cornerClass} ${className}`}>{mark}</div>;
 }
 
 // For a layout's own header row (centre/layout.tsx, dashboard/layout.tsx):

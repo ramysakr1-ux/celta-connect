@@ -25,7 +25,7 @@ import { toLocalIso } from "@/lib/timetable-grid";
 // which stay trainer/admin-only.
 export default async function VolunteersPage() {
   const session = await getCurrentProfile();
-  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
+  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner" ? session.profile : null;
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
   if (!trainer && !assessorCourseId) redirect("/login");
 

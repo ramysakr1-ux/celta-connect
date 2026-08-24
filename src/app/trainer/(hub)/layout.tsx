@@ -38,6 +38,27 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // "you cannot be on the course unless registered as a trainer" rule.
   const staffChat = profile?.role === "trainer" ? await getInitialStaffChatData(profile.id) : null;
 
+  // profiles.tutor_role is set once at signup for a trainer's first course
+  // and never re-synced when an admin later changes their role on a
+  // specific course (changeTutorRole only touches course_tutors.tutor_role)
+  // -- and a platform_owner never goes through signup at all, so that field
+  // is always null for them regardless of which course they're actually
+  // linked into. course_tutors.tutor_role for the course they're CURRENTLY
+  // on (profile.course_id) is the one place this is never stale, so that's
+  // what decides MCT-vs-ACT coloring below, not the profiles column.
+  let currentCourseTutorRole: string | null = null;
+  if (profile?.course_id) {
+    const admin = createAdminClient();
+    const { data: link } = await admin
+      .from("course_tutors")
+      .select("tutor_role")
+      .eq("course_id", profile.course_id)
+      .eq("profile_id", profile.id)
+      .is("left_at", null)
+      .maybeSingle();
+    currentCourseTutorRole = link?.tutor_role ?? null;
+  }
+
   // for-claude-code-trainer-role-color-system-final.md: every trainer-hub
   // page gets a role-colored header band -- ink for the MCT (whole-cohort
   // view), garnet for everyone else on the course (ACT, TP tutor, input
@@ -53,7 +74,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // ACT-shaped default there is a fine, unobtrusive fallback for a session
   // this spec never asked us to re-skin; only the header/tabs/logo
   // themselves stay isRealStaff-gated below, at their own point of use.
-  const isMct = Boolean(profile && (profile.role === "admin" || profile.tutor_role === "main_course_tutor"));
+  const isMct = Boolean(profile && (profile.role === "admin" || currentCourseTutorRole === "main_course_tutor"));
   const HUB_INK = "oklch(23.5% 0.017 65)"; // = --color-ink
   const HUB_TEAL = "oklch(37.5% 0.058 195)"; // = --color-primary, written literally so this doesn't drift if that token ever does
   const HUB_GARNET = "oklch(42% 0.13 27)";
@@ -88,7 +109,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
       const { data: course } = await supabase.from("courses").select("name").eq("id", profile.course_id).maybeSingle();
       courseCode = course?.name ?? null;
     }
-    if (profile.role === "trainer") {
+    if (profile.role === "trainer" || profile.role === "platform_owner") {
       const admin = createAdminClient();
       const { data: tutorLinks } = await admin
         .from("course_tutors")
@@ -111,21 +132,51 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   return (
     <div className="flex min-h-full flex-1 flex-col" style={hubVars}>
       {isDemo ? <DemoModeBanner /> : null}
+      {/* Trainer Homepage - MCT vs ACT.dc.html: a lean logo row (just the
+          mark + a single MCT/ACT badge) with the tabs as their own second
+          row underneath, border-topped -- fixes the crowding of the old
+          single 56px row that carried the logo AND every tab AND the
+          course pill/Command center pill/name at once. Ramy, 24 Aug 2026:
+          "make the bar wider" -- full width (px-6) rather than the same
+          1280px .container the tabs used to share with the page's own
+          content sheet below; nothing about the header needs to line up
+          with that. Command center pill dropped entirely per Ramy same
+          day: for a platform_owner, the logo itself now IS that link --
+          "connect will actually connect me to my command center, but only
+          me" -- everyone else keeps its normal go-to-my-course-Today
+          behavior. */}
       <header className={isRealStaff ? "trainer-header" : "border-b border-border bg-card"}>
-        <div className="container flex h-14 items-stretch justify-between gap-6">
-          <div className="flex items-center gap-6">
-            {/* Bug Ramy caught 2026-08-23: an assessor who clicked into
-                Grades Report (or Roster, or the attendance register) had no
-                way back -- the logo pointed at /trainer, which isn't a real
-                assessor session's page and just bounces them right back to
-                /trainer/roster, not to the actual pack overview at
-                /assessor. Cookie-based session, so the bare path is enough
-                -- no token needed in the URL. */}
-            <Link href={isAssessor ? "/assessor" : "/trainer"} className="block shrink-0">
-              <Wordmark size="header" onDark={isRealStaff} tileBg={isRealStaff ? "var(--hub-tile-bg)" : undefined} />
-            </Link>
-            <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} dark={isRealStaff} />
-          </div>
+        <div className="flex h-12 items-center justify-between px-[18px]">
+          <Link
+            href={profile?.role === "platform_owner" ? "/platform/command-center" : isAssessor ? "/assessor" : "/trainer"}
+            className="block shrink-0"
+          >
+            <Wordmark
+              size="header-compact"
+              onDark={isRealStaff}
+              tileBg={isRealStaff ? "var(--hub-tile-bg)" : undefined}
+              wordColor={isRealStaff ? "oklch(60% 0.11 70)" : undefined}
+              gapPx={isRealStaff ? 9 : undefined}
+            />
+          </Link>
+          {isRealStaff ? (
+            <span
+              className="rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-[0.1em] uppercase"
+              style={{
+                color: headerInk,
+                background: isMct
+                  ? `color-mix(in oklab, ${HUB_TEAL} 55%, ${HUB_INK})`
+                  : `color-mix(in oklab, black 20%, ${HUB_GARNET})`,
+              }}
+            >
+              {isMct ? "MCT" : "ACT"}
+            </span>
+          ) : null}
+        </div>
+        <div
+          className={`flex items-stretch justify-between gap-6 border-t px-[18px] ${isRealStaff ? "border-[color-mix(in_oklab,white_15%,transparent)]" : "border-border"}`}
+        >
+          <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} dark={isRealStaff} />
           <div className="flex shrink-0 items-center gap-3">
             {switcherCourses.length > 1 && profile?.course_id ? (
               <CourseSwitcher courses={switcherCourses} activeCourseId={profile.course_id} />
@@ -133,14 +184,6 @@ export default async function TrainerHubLayout({ children }: { children: React.R
               <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground">
                 {courseCode}
               </span>
-            ) : null}
-            {profile?.role === "platform_owner" ? (
-              <Link
-                href="/platform/command-center"
-                className="rounded-full border border-current px-2.5 py-1 text-[11px] font-semibold text-[color-mix(in_oklab,white_85%,transparent)]"
-              >
-                Command center
-              </Link>
             ) : null}
             <span className={`text-sm ${isRealStaff ? "text-[color-mix(in_oklab,white_85%,transparent)]" : "text-muted"}`}>
               {profile?.full_name ?? session?.email}

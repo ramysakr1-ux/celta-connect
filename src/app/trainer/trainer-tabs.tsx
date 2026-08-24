@@ -25,6 +25,12 @@ const TABS = [
   { href: "/trainer-in-training", label: "Trainer-in-Training" },
 ] as const;
 
+// Trainer-in-Training isn't in Trainer Homepage - MCT vs ACT.dc.html's
+// 7-tab list, and got dropped over that same day (24 Aug 2026) while
+// chasing the doc's exact spec -- but the tighter tab row built for that
+// spec (11.5px, 16px gaps) turned out to have enough headroom for it
+// anyway. Ramy confirmed via a side-by-side preview and asked for it back.
+
 // Grades Report is assessor-facing material, not an operational trainer
 // tool -- unlike the rest of TABS, it stays visible for assessor sessions
 // (rosterOnly) too.
@@ -73,7 +79,7 @@ export function TrainerTabs({
   // the h-full/items-stretch row this relies on to make the active tab's
   // 2px underline land flush with the header's own bottom hairline.
   return (
-    <div className="flex h-full items-center gap-6">
+    <div className={`flex h-full items-center ${dark ? "gap-4" : "gap-6"}`}>
       {tabs.map((tab) => {
         const href = `/trainer${tab.href}`;
         const alsoMatch = "alsoMatch" in tab ? tab.alsoMatch : [];
@@ -89,10 +95,16 @@ export function TrainerTabs({
           <Link
             key={tab.href}
             href={href}
+            // Trainer Homepage - MCT vs ACT.dc.html's tab row: 11.5px,
+            // border-bottom 2px, active = bold + full color, inactive =
+            // 500 weight + 65% opacity -- tighter than the light variant's
+            // text-sm, which is what let 8 tabs crowd the old single row.
             className={
               dark
-                ? `flex h-full items-center border-b-2 text-sm font-medium transition-colors duration-150 hover:text-[var(--hub-hover-accent)] hover:border-[var(--hub-hover-accent)] ${
-                    active ? "border-white text-white" : "border-transparent text-[color-mix(in_oklab,white_65%,transparent)]"
+                ? `flex items-center pt-[11px] pb-[9px] border-b-2 text-[11.5px] transition-colors duration-150 hover:text-[var(--hub-hover-accent)] hover:border-[var(--hub-hover-accent)] ${
+                    active
+                      ? "border-white font-bold text-white"
+                      : "border-transparent font-medium text-[color-mix(in_oklab,white_65%,transparent)]"
                   }`
                 : `flex h-full items-center border-b-2 text-sm font-medium transition-colors duration-150 ${
                     active ? "border-primary text-primary" : "border-transparent text-muted hover:border-primary/40 hover:text-primary"

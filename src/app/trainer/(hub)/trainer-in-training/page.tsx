@@ -11,7 +11,7 @@ import { TitWorkspace } from "@/app/trainer/(hub)/trainer-in-training/workspace"
 // already enforces at the data layer.
 export default async function TrainerInTrainingPage() {
   const session = await getCurrentProfile();
-  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
+  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner" ? session.profile : null;
   if (!trainer) redirect("/login");
   if (!trainer.course_id) {
     return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;

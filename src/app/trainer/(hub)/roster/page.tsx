@@ -18,7 +18,7 @@ import { AssignTutorPanel, type AssignableTrainer } from "@/app/dashboard/admin/
 // column means.
 export default async function TrainerRosterPage() {
   const session = await getCurrentProfile();
-  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
+  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner" ? session.profile : null;
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
   if (!trainer && !assessorCourseId) redirect("/login");
 

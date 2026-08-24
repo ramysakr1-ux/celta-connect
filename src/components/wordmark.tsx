@@ -79,7 +79,7 @@ function Mark({ tilePx, spin = true }: { tilePx: number; spin?: boolean }) {
   );
 }
 
-export type WordmarkSize = "header" | "hero" | "stacked" | "email" | "icon";
+export type WordmarkSize = "header" | "header-compact" | "hero" | "stacked" | "email" | "icon";
 
 // Literal per-context Tile/Word pixel pairs, straight from the spec's own
 // "Sizes" table -- not re-derived from the "≈0.56 x tile" ratio it also
@@ -90,6 +90,12 @@ export type WordmarkSize = "header" | "hero" | "stacked" | "email" | "icon";
 // since (unlike the other rows) it's given as a range, not one number.
 const SIZE_CONFIG: Record<WordmarkSize, { tile: number; word: number | null; descriptor: boolean; stacked: boolean }> = {
   header: { tile: 34, word: 22, descriptor: false, stacked: false },
+  // Not in the locked table -- Trainer Homepage - MCT vs ACT.dc.html's own
+  // literal header markup (26px tile, 9px gap, 17px word), a size the
+  // trainer hub's now-tighter two-row header needs and no existing preset
+  // matches. Scoped to its own name rather than resizing "header" itself,
+  // which 8 other pages already use at 34/22.
+  "header-compact": { tile: 26, word: 17, descriptor: false, stacked: false },
   hero: { tile: 84, word: 49, descriptor: true, stacked: false },
   stacked: { tile: 54, word: 27, descriptor: true, stacked: true },
   email: { tile: 44, word: 26, descriptor: true, stacked: false },
@@ -103,6 +109,8 @@ export function Wordmark({
   className = "",
   iconSizePx,
   spin = true,
+  wordColor: wordColorOverride,
+  gapPx: gapPxOverride,
 }: {
   size?: WordmarkSize;
   onDark?: boolean;
@@ -113,12 +121,16 @@ export function Wordmark({
   iconSizePx?: number;
   /** Overrides the tile's background -- e.g. a translucent tint of a colored header's own text color, where a fixed dark tile would blend into the header instead of contrasting against it. Falls back to the plain onDark/light default when omitted. */
   tileBg?: string;
+  /** Overrides the "Connect" word's color -- e.g. trainer-homepage-mct-act-header-spec.md's exact oklch(60% 0.11 70), close to but not identical to LIFTED_GOLD. Falls back to the plain onDark/light default when omitted. */
+  wordColor?: string;
+  /** Overrides the tile-to-word gap -- the 15px-at-78px-tile ratio doesn't hold at every context's own spec (e.g. the header-compact spec's 9px at a 26px tile is proportionally wider). Falls back to the scaled default when omitted. */
+  gapPx?: number;
 }) {
   const cfg = SIZE_CONFIG[size];
   const tilePx = size === "icon" && iconSizePx ? iconSizePx : cfg.tile;
   const tileRadius = Math.round(tilePx * 0.22);
   const tileBg = tileBgOverride ?? (onDark ? "oklch(30% 0.02 65)" : "var(--color-ink-warm)");
-  const wordColor = onDark ? LIFTED_GOLD : "var(--color-gold)";
+  const wordColor = wordColorOverride ?? (onDark ? LIFTED_GOLD : "var(--color-gold)");
 
   const tile = (
     <span
@@ -144,7 +156,7 @@ export function Wordmark({
   // offset with the word."
   const paddingLeftPx = Math.round((9 * wordPx) / 44);
   // "Tile-to-text gap 15px at the 78px tile" -- scales with the tile.
-  const gapPx = Math.round((15 * tilePx) / 78);
+  const gapPx = gapPxOverride ?? Math.round((15 * tilePx) / 78);
 
   return (
     <span className={`inline-flex items-center ${className}`} style={{ gap: gapPx }}>

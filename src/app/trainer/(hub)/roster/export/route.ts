@@ -16,7 +16,7 @@ function csvCell(value: string | number): string {
 // admin/assessor can all see the roster, so all three can export it.
 export async function GET() {
   const session = await getCurrentProfile();
-  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
+  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner" ? session.profile : null;
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
   if (!trainer && !assessorCourseId) {
     return NextResponse.json({ error: "Not authorized." }, { status: 401 });

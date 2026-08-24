@@ -253,7 +253,7 @@ export default async function CommandCenterPage() {
             {myCourses.map((c) => (
               <Link
                 key={c.tutorLinkId}
-                href="/trainer"
+                href={`/platform/command-center/enter-course/${c.courseId}`}
                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderTop: `1px solid ${BORDER}`, textDecoration: "none" }}
               >
                 <span style={{ fontSize: 13, fontWeight: 600, color: INK }}>

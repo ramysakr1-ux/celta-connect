@@ -36,7 +36,7 @@ export default async function TrainerTimetablePage({
   // false with no trainer, so editMode can never be true for an assessor
   // regardless of the ?mode=edit query param.
   const session = await getCurrentProfile();
-  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
+  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner" ? session.profile : null;
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
   const tourMode = assessorCourseId ? await isAssessorTourMode() : false;
   if (!trainer && !tourMode) redirect("/login");

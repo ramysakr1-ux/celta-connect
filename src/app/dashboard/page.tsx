@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { landingFor } from "@/lib/auth/centre-permissions";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function DashboardIndexPage() {
   const session = await getCurrentProfile();
@@ -32,12 +33,26 @@ export default async function DashboardIndexPage() {
   if (profile.role === "trainer") redirect("/trainer");
   if (profile.role === "trainee") redirect(`/portfolio/${profile.id}`);
   // Sits above every centre -- its own landing, not a centre/course one
-  // (connect-platform-owner-role-spec-2026-08-22.md). Lands on the Command
-  // Center directly (for-claude-code-command-center.md, 2026-08-25: "login
-  // lands directly on /platform/command-center, not a generic Connect
-  // landing page first") -- /platform itself (create a centre, change a
-  // role) is one click away from there, not the first thing seen.
-  if (profile.role === "platform_owner") redirect("/platform/command-center");
+  // (connect-platform-owner-role-spec-2026-08-22.md). Sticky, not fixed:
+  // "I land on my landing page on that course. My landing page on the
+  // course also has access to the command center" -- login continues
+  // wherever the platform_owner last was, same as switching tabs, not
+  // switching accounts. Only lands on the Command Center itself when
+  // they're not currently linked into any course.
+  if (profile.role === "platform_owner") {
+    if (profile.course_id) {
+      const admin = createAdminClient();
+      const { data: link } = await admin
+        .from("course_tutors")
+        .select("id")
+        .eq("course_id", profile.course_id)
+        .eq("profile_id", profile.id)
+        .is("left_at", null)
+        .maybeSingle();
+      if (link) redirect("/trainer");
+    }
+    redirect("/platform/command-center");
+  }
 
   // Centre Admin and Course Admin are two separate roles with two separate
   // landing screens -- "never merge these two builds". Until now one flat

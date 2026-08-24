@@ -21,7 +21,10 @@ import { findMaterialsOverlaps } from "@/lib/materials-overlap";
 // what needs a trainer's attention right now, and the cohort at a glance.
 export default async function TodayPage() {
   const session = await getCurrentProfile();
-  const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" ? session.profile : null;
+  const trainer =
+    session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner"
+      ? session.profile
+      : null;
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
   if (!trainer && !assessorCourseId) redirect("/login");
   // Today is trainer-only operational material (write actions, cohort-wide
@@ -128,7 +131,25 @@ export default async function TodayPage() {
   // it) and computed from the deadline the MCT set themselves, not a fixed
   // offset from the assessor visit date. 4 days is a starting judgment call,
   // not a rule from the spec -- reasonable to retune later.
-  const isMct = trainer?.tutor_role === "main_course_tutor";
+  //
+  // trainer.tutor_role (profiles.tutor_role) is set once at signup for a
+  // trainer's first course and never re-synced when their role on a
+  // specific course changes later -- same staleness (hub)/layout.tsx's own
+  // isMct hit, and a platform_owner never has it set at all. course_tutors.
+  // tutor_role for the course they're actually on (courseId) is the live
+  // source both places now agree on.
+  let isMct = trainer?.role === "admin";
+  if (trainer && !isMct) {
+    const admin = createAdminClient();
+    const { data: tutorLink } = await admin
+      .from("course_tutors")
+      .select("tutor_role")
+      .eq("course_id", courseId)
+      .eq("profile_id", trainer.id)
+      .is("left_at", null)
+      .maybeSingle();
+    isMct = tutorLink?.tutor_role === "main_course_tutor";
+  }
   if (isMct && course?.provisional_grades_due_at) {
     const { data: records } =
       traineeIds.length > 0
@@ -350,8 +371,13 @@ export default async function TodayPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-end justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">{overline}</p>
-          <h1 className="font-serif text-3xl text-ink">{todayHeading}</h1>
+          <p className="text-[10.5px] font-bold tracking-[0.1em] text-muted uppercase">{overline}</p>
+          <h1
+            className="font-serif text-[24px] font-semibold"
+            style={{ color: isMct ? "oklch(30% 0.042 58)" : "oklch(42% 0.13 27)" }}
+          >
+            {todayHeading}
+          </h1>
         </div>
         {/* for-claude-code-assessor-tour-mode.md: a tour is view-only, "no
             functional purpose beyond letting them see" -- these are staff
@@ -364,10 +390,13 @@ export default async function TodayPage() {
         <div className="flex flex-wrap items-center gap-2">
           {/* specs/build-spec.md §7: the one trainer surface meant to be
               genuinely usable on a phone mid-lesson -- kept first/most
-              prominent in this row for that reason. */}
+              prominent in this row for that reason. Not in trainer-
+              homepage-mct-act-header-spec.md (postdates it) -- kept, just
+              brought to the same h-8/13px/12px dimensions as the two
+              buttons that are in spec, for consistency across the row. */}
           <Link
             href="/trainer/capture"
-            className="trainer-hover rounded-[6px] border border-primary bg-transparent px-3.5 py-2 text-sm font-medium text-primary"
+            className="trainer-hover flex h-8 items-center rounded-[6px] border border-primary bg-transparent px-[13px] text-xs font-medium text-primary"
           >
             Capture a point
           </Link>
@@ -379,14 +408,15 @@ export default async function TodayPage() {
           {isMct ? (
             <Link
               href="/trainer/announcements"
-              className="trainer-hover rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink"
+              className="trainer-hover flex h-8 items-center rounded-[6px] border border-border bg-card px-[13px] text-xs font-medium text-ink"
             >
               Post announcement
             </Link>
           ) : null}
           <Link
             href="/trainer/roster"
-            className="trainer-hover rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
+            className="trainer-hover flex h-8 items-center rounded-[6px] px-[13px] text-xs font-semibold text-primary-foreground"
+            style={{ background: isMct ? "oklch(37.5% 0.058 195)" : "oklch(42% 0.13 27)" }}
           >
             Write TP feedback
           </Link>
@@ -401,7 +431,12 @@ export default async function TodayPage() {
             (globals.css reserves gold for exactly that), ink = plain content. */}
         <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-primary">
           <div className="flex items-baseline justify-between">
-            <p className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">Today&apos;s schedule</p>
+            <p
+              className="text-[10.5px] font-bold tracking-[0.12em] uppercase"
+              style={{ color: isMct ? "oklch(37.5% 0.058 195)" : "oklch(42% 0.13 27)" }}
+            >
+              Today&apos;s schedule
+            </p>
             <p className="text-[11px] text-muted">from the timetable</p>
           </div>
           <div className="flex flex-col">
@@ -414,10 +449,10 @@ export default async function TodayPage() {
                 return (
                   <div
                     key={event.id}
-                    className={`flex gap-3.5 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}
+                    className={`flex gap-2.5 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}
                   >
                     <span
-                      className="w-11 shrink-0 border-l-[3px] pl-2 text-xs font-semibold text-muted tabular-nums"
+                      className="w-[42px] shrink-0 border-l-[3px] pl-2 text-[11.5px] font-semibold text-muted tabular-nums"
                       style={{ borderLeftColor: CATEGORY_ACCENT[category] }}
                     >
                       {event.event_time?.slice(0, 5)}
@@ -427,7 +462,7 @@ export default async function TodayPage() {
                           "Live" pill. Kept as a link when there's a Zoom URL
                           to open -- the pill is the affordance that was
                           already here, only its label and weight change. */}
-                      <p className={`text-sm text-ink ${live ? "font-semibold" : ""}`}>{event.title}</p>
+                      <p className={`text-[12.5px] text-ink ${live ? "font-semibold" : ""}`}>{event.title}</p>
                       {live ? (
                         <a
                           href={event.zoom_url ?? undefined}
@@ -449,7 +484,9 @@ export default async function TodayPage() {
 
         {/* Needs you */}
         <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-status-warning-text">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">Needs you · {alerts.length}</p>
+          <p className="text-[10.5px] font-bold tracking-[0.12em] uppercase" style={{ color: "oklch(60% 0.1 70)" }}>
+            Needs you · {alerts.length}
+          </p>
           <div className="flex flex-col">
             {visibleAlerts.length === 0 ? (
               <p className="py-2 text-sm text-muted">Nothing needs you right now.</p>
@@ -458,9 +495,9 @@ export default async function TodayPage() {
                 <Link
                   key={i}
                   href={alert.href}
-                  className={`trainer-hover -mx-2 flex flex-col gap-0.5 rounded-[6px] px-2 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}
+                  className={`trainer-hover -mx-[6px] flex flex-col gap-0.5 rounded-[5px] px-[6px] py-[7px] ${i > 0 ? "border-t border-border-faint" : ""}`}
                 >
-                  <p className={`text-sm font-semibold ${alert.destructive ? "text-destructive" : "text-ink"}`}>{alert.title}</p>
+                  <p className={`text-[12.5px] font-semibold ${alert.destructive ? "text-destructive" : "text-ink"}`}>{alert.title}</p>
                   <p className="text-xs text-muted">{alert.meta}</p>
                 </Link>
               ))
