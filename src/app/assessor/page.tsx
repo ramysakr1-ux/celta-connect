@@ -77,7 +77,7 @@ export default async function AssessorPage({
   const today = toLocalIso(new Date());
 
   const [{ data: course }, { data: accessToken }, readiness, candidates] = await Promise.all([
-    admin.from("courses").select("*, centers(name, center_number)").eq("id", courseId).maybeSingle(),
+    admin.from("courses").select("*, centers(name, center_number, appian_url)").eq("id", courseId).maybeSingle(),
     admin.from("course_access_tokens").select("expires_at").eq("course_id", courseId).eq("role", "assessor").maybeSingle(),
     computeAssessorReadiness(admin, courseId),
     buildCandidateCards(admin, courseId),
@@ -86,7 +86,7 @@ export default async function AssessorPage({
 
   if (!course) redirect("/login?error=assessor_link_invalid");
 
-  const center = course.centers as unknown as { name: string; center_number: string } | null;
+  const center = course.centers as unknown as { name: string; center_number: string; appian_url: string | null } | null;
 
   // MCT-set, not computed from assessor_visit_date -- see migration 0127.
   const sendByDate = course.provisional_grades_due_at ? course.provisional_grades_due_at.slice(0, 10) : null;
@@ -295,7 +295,7 @@ export default async function AssessorPage({
           treatments so they read against this darker one instead. */}
       <header
         style={{
-          height: 60, background: WARM, borderBottom: `3px solid ${GOLD_UNDERLINE}`, display: "flex",
+          height: 92, background: WARM, borderBottom: `3px solid ${GOLD_UNDERLINE}`, display: "flex",
           alignItems: "center", justifyContent: "space-between", padding: "0 32px",
         }}
       >
@@ -326,27 +326,58 @@ export default async function AssessorPage({
             Assessor · read-only
           </span>
         </div>
-        <a
-          href="/assessor/pack.pdf"
-          style={{
-            height: 34, padding: "0 15px", borderRadius: 6,
-            border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
-            background: "color-mix(in oklab, oklch(97% 0.008 88) 12%, transparent)",
-            color: "oklch(97% 0.008 88)", fontSize: 12.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
-            textDecoration: "none",
-          }}
-        >
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
-            <path d="M8 2v8m0 0 3-3m-3 3L5 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M2.5 11.5v1a1.5 1.5 0 0 0 1.5 1.5h8a1.5 1.5 0 0 0 1.5-1.5v-1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-          </svg>
-          Download whole pack
-        </a>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* assessor-visit-pack-full-spec.md: "Links to Appian's login page
+              only -- no deep link, no data ever flows from Connect into
+              Appian. Same link-out pattern used on Course Admin's
+              entry-form card: manual navigation, no integration." Moved
+              here from beside the readiness stats (Ramy's first verbal
+              placement) once he sent the actual spec -- this is where it's
+              drawn. */}
+          {center?.appian_url ? (
+            <a
+              href={center.appian_url}
+              target="_blank"
+              rel="noreferrer"
+              className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,oklch(60%_0.11_70)_28%,transparent)]"
+              style={{
+                height: 34, padding: "0 15px", borderRadius: 6,
+                border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 55%, transparent)",
+                background: "color-mix(in oklab, oklch(60% 0.11 70) 16%, transparent)",
+                color: "oklch(94% 0.02 82)", fontSize: 12.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
+                textDecoration: "none",
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
+                <path d="M6 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5V10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9.5 2H14v4.5M14 2 7.5 8.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Open Appian
+            </a>
+          ) : null}
+          <a
+            href="/assessor/pack.pdf"
+            className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,oklch(97%_0.008_88)_22%,transparent)]"
+            style={{
+              height: 34, padding: "0 15px", borderRadius: 6,
+              border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
+              background: "color-mix(in oklab, oklch(97% 0.008 88) 12%, transparent)",
+              color: "oklch(97% 0.008 88)", fontSize: 12.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
+              textDecoration: "none",
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
+              <path d="M8 2v8m0 0 3-3m-3 3L5 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2.5 11.5v1a1.5 1.5 0 0 0 1.5 1.5h8a1.5 1.5 0 0 0 1.5-1.5v-1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+            Download whole pack
+          </a>
+        </div>
       </header>
 
       <div
         className="frame"
-        style={{ margin: "24px 32px 44px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: 22 }}
+        style={{ margin: "40px 32px 44px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: 22 }}
       >
         <div>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 20 }}>
@@ -639,6 +670,7 @@ export default async function AssessorPage({
                 return (
                   <div
                     key={doc.name}
+                    className={present && href ? "transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_6%,transparent)]" : undefined}
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
                       padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
@@ -649,7 +681,7 @@ export default async function AssessorPage({
                       <p style={{ fontSize: 10.5, color: MUTED }}>{doc.meta}</p>
                     </div>
                     {present && href ? (
-                      <a href={href} style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}>
+                      <a href={href} className="hover:underline" style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}>
                         Open →
                       </a>
                     ) : (
@@ -663,6 +695,7 @@ export default async function AssessorPage({
               {extraCentreDocs.map((d) => (
                 <div
                   key={d.id}
+                  className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_6%,transparent)]"
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
                     padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
@@ -672,7 +705,7 @@ export default async function AssessorPage({
                     <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{d.title}</p>
                     <p style={{ fontSize: 10.5, color: MUTED }}>Added by the centre</p>
                   </div>
-                  <a href={d.file_url ?? "#"} style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}>
+                  <a href={d.file_url ?? "#"} className="hover:underline" style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}>
                     Open →
                   </a>
                 </div>
@@ -872,6 +905,7 @@ function Panel({ title, children, accent = "teal" }: { title: string; children: 
 function DocRow({ label, href, status }: { label: string; href: string; status: string }) {
   return (
     <div
+      className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_6%,transparent)]"
       style={{
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
         padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
@@ -881,7 +915,7 @@ function DocRow({ label, href, status }: { label: string; href: string; status: 
         <p style={{ fontSize: 12.5, fontWeight: 600, color: "oklch(23.5% 0.017 65)" }}>{label}</p>
         <p style={{ fontSize: 10.5, color: TEAL }}>{status}</p>
       </div>
-      <a href={href} style={{ fontSize: 11, fontWeight: 600, color: "oklch(38% 0.072 195)", flex: "none", textDecoration: "none" }}>
+      <a href={href} className="hover:underline" style={{ fontSize: 11, fontWeight: 600, color: "oklch(38% 0.072 195)", flex: "none", textDecoration: "none" }}>
         Open →
       </a>
     </div>
