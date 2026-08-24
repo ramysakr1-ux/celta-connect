@@ -108,7 +108,7 @@ export function TaskResponseForm({
               aria-pressed={rRating === opt}
               onClick={() => setRRating(opt)}
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:opacity-70 ${
-                rRating === opt ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted trainee-hover hover:text-ink"
+                rRating === opt ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted trainee-hover-fill hover:text-ink"
               }`}
             >
               {opt}

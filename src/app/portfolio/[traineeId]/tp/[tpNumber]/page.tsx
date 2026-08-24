@@ -285,7 +285,7 @@ export default async function TpDetailPage({
               return exportReady ? (
                 <a
                   href={`/api/tp-plans/${plan!.id}/pdf`}
-                  className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
+                  className="flex items-center gap-1.5 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
                 >
                   Export TP PDF
                 </a>
@@ -534,7 +534,7 @@ export default async function TpDetailPage({
                               className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
                                 shared
                                   ? "border-border bg-status-neutral-bg text-ink"
-                                  : "border-border text-muted trainee-hover hover:text-primary"
+                                  : "border-border text-muted trainee-hover-fill hover:text-primary"
                               }`}
                             >
                               {shared ? "Shared with students ✓" : "Share with students"}

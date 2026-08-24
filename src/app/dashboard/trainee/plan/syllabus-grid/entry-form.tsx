@@ -92,7 +92,7 @@ export function SyllabusEntryForm({
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-3 py-1 text-xs text-ink trainee-hover disabled:opacity-50"
+        className="self-start rounded-[6px] border border-border px-3 py-1 text-xs text-ink trainee-hover-fill disabled:opacity-50"
       >
         {pending ? "Saving…" : material ? "Update" : "Save"}
       </button>

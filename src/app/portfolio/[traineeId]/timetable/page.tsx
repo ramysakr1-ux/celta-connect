@@ -157,7 +157,7 @@ export default async function TraineeTimetablePage({
         <div className="flex justify-end">
           <a
             href={`/api/portfolio/${traineeId}/timetable.ics`}
-            className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink trainee-hover"
+            className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink trainee-hover-fill"
           >
             Add to my calendar
           </a>

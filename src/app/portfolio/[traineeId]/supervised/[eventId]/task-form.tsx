@@ -172,7 +172,7 @@ export function SupervisedTaskForm({ eventId, completion }: { eventId: string; c
           <div className="flex flex-col gap-2">
             {question.opts.map((opt, i) => {
               const isAnswered = answered !== null && answered !== undefined;
-              let cls = "border-border bg-card text-ink trainee-hover";
+              let cls = "border-border bg-card text-ink trainee-hover-fill";
               if (isAnswered) {
                 if (i === question.correct) cls = "border-primary bg-primary/10 text-primary";
                 else if (i === answered) cls = "border-destructive bg-destructive/10 text-destructive";

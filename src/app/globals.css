@@ -412,6 +412,17 @@ h6 {
   .trainee-hover:hover {
     box-shadow: inset 0 0 0 1px var(--trainee-plum), 0 3px 8px -3px color-mix(in oklab, var(--trainee-plum) 45%, transparent);
   }
+  /* Ramy, 2026-08-24: "let's establish that as a rule" -- a standalone
+     bounded control (a button, a link styled as a button, a toggle/tab
+     pill) gets a full color fill across the whole element on hover
+     instead of .trainee-hover's ring; a list row keeps the ring. Same
+     tone --color-accent already uses for hover washes elsewhere. */
+  .trainee-hover-fill {
+    transition: background-color 150ms ease;
+  }
+  .trainee-hover-fill:hover {
+    background-color: oklch(93% 0.019 190);
+  }
 
   /* Shared "entry moment" card -- pale tinted teal-green background + soft
      primary border, the same combination the Course Stream Zoom card uses

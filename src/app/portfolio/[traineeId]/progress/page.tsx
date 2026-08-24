@@ -232,7 +232,7 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
                 ? "Your tutor has released the matrix -- review it and sign off on CELTA 5."
                 : "Submitted -- your tutor is reviewing it. The released matrix will appear on CELTA 5."}
           </p>
-          <Link href={`/portfolio/${traineeId}/celta5`} className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover">
+          <Link href={`/portfolio/${traineeId}/celta5`} className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill">
             Open CELTA 5 →
           </Link>
         </div>

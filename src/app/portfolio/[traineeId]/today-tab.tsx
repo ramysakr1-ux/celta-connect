@@ -310,11 +310,11 @@ export async function TodayTab({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <PushSubscribeButton subscribe={subscribeSessionPush} unsubscribe={unsubscribeSessionPush} />
-          <Link href={`/portfolio/${traineeId}/timetable`} className="trainee-hover rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
+          <Link href={`/portfolio/${traineeId}/timetable`} className="trainee-hover-fill rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
             My timetable
           </Link>
           {teachingToday ? (
-            <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="trainee-hover rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
+            <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="trainee-hover-fill rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
               Open TP{teachingToday.tpNumber} plan
             </Link>
           ) : null}
@@ -334,11 +334,11 @@ export async function TodayTab({
             </p>
             <div className="flex items-center gap-2">
               {teachingToday.zoomUrl ? (
-                <a href={teachingToday.zoomUrl} target="_blank" rel="noreferrer" className="trainee-hover rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
+                <a href={teachingToday.zoomUrl} target="_blank" rel="noreferrer" className="trainee-hover-fill rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
                   Join the room
                 </a>
               ) : null}
-              <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="trainee-hover rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
+              <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="trainee-hover-fill rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
                 Open your plan
               </Link>
             </div>

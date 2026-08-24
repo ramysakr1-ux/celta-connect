@@ -616,7 +616,7 @@ export default async function PortfolioCelta5Page({
                   </p>
                   <a
                     href={`/api/celta5/${traineeId}/final-report`}
-                    className="mt-3 inline-flex rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
+                    className="mt-3 inline-flex rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
                   >
                     Download final report
                   </a>
@@ -1112,7 +1112,7 @@ export default async function PortfolioCelta5Page({
             {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
               <a
                 href={`/api/celta5/${traineeId}/final-report`}
-                className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
+                className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
               >
                 Download final report
               </a>
@@ -1237,7 +1237,7 @@ export default async function PortfolioCelta5Page({
           <p className="text-ink">Final report ready to download.</p>
           <a
             href={`/api/celta5/${traineeId}/final-report`}
-            className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
+            className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
           >
             Download final report
           </a>

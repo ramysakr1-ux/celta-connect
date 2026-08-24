@@ -123,7 +123,7 @@ export function ResourceComposer({
             type="button"
             onClick={() => setContentMode(mode)}
             className={`rounded-full border px-3 py-1 text-xs font-medium ${
-              contentMode === mode ? "border-primary bg-primary text-card" : "border-border text-ink trainee-hover"
+              contentMode === mode ? "border-primary bg-primary text-card" : "border-border text-ink trainee-hover-fill"
             }`}
           >
             {mode === "link" ? "Link" : mode === "file" ? "Upload file" : "Upload interactive HTML"}

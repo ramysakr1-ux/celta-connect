@@ -331,14 +331,14 @@ export function LessonPlanForm({
               <button
                 type="button"
                 onClick={applyFramework}
-                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
+                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
               >
                 Fill in the stages
               </button>
               <button
                 type="button"
                 onClick={() => setProcedure(procedure.map((row) => ({ ...row, stage: "", aim: "" })))}
-                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted trainee-hover"
+                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted trainee-hover-fill"
               >
                 Clear
               </button>
@@ -445,7 +445,7 @@ export function LessonPlanForm({
               <button
                 type="button"
                 onClick={() => setProcedure([...procedure, emptyProcedureRow()])}
-                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover"
+                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
               >
                 + Add stage
               </button>

@@ -113,7 +113,7 @@ export default async function SyllabusPlanningGridPage() {
         </div>
         <Link
           href={`/portfolio/${trainee.id}/tp`}
-          className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink trainee-hover"
+          className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink trainee-hover-fill"
         >
           Lesson plans
         </Link>
