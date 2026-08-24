@@ -120,7 +120,7 @@ export default async function CentreSettingsPage({
       <div className="card p-6">
         <div className="flex items-center gap-3">
           <Link href="/centre" className="text-sm text-muted hover:text-ink">
-            &larr; Centre Admin
+            &larr; Centre management
           </Link>
           <span className="rounded-[5px] border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-primary uppercase">
             Centre settings

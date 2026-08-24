@@ -35,7 +35,7 @@ export default async function NewCoursePage() {
           Course admin — the CELTA trainer&apos;s own credentials to run a course.
         </h1>
         <p className="max-w-[62ch] text-sm leading-relaxed text-muted text-pretty">
-          Distinct from Centre Admin — a separate role and a separate link, covering payments and volunteer
+          Distinct from Centre Management — a separate role and a separate link, covering payments and volunteer
           students (built elsewhere). This is the main course tutor&apos;s own view: setting up a course, its
           roster, groups, invitations, and course-level settings. Everything reusable — TP points, assignment
           briefs, resources, feedback examples, the Drive connection — is shared by every course this trainer runs.

@@ -108,7 +108,7 @@ export default async function CentreVolunteersPage({
               border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
             }}
           >
-            Centre Administrator
+            Centre Management
           </span>
         </div>
         <Link href="/centre" className="text-[12.5px] font-semibold no-underline" style={{ color: "oklch(97% 0.008 88)", opacity: 0.8 }}>

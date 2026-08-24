@@ -59,7 +59,7 @@ export default async function CentreLayout({ children }: { children: React.React
           </Link>
           <span className="h-[18px] w-px bg-border" aria-hidden="true" />
           <span className="rounded-[5px] border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-primary uppercase">
-            Centre admin
+            Centre management
           </span>
           {/* for-claude-code-centre-owner-role-customizer.md: "a deliberately
               different register... not a fifth tab that happens to look the

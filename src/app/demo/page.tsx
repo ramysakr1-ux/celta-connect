@@ -8,7 +8,7 @@ import { Wordmark } from "@/components/wordmark";
 const ENTRIES: { href: string; role: string; blurb: string }[] = [
   {
     href: "/demo/centre-admin",
-    role: "Centre admin",
+    role: "Centre management",
     blurb: "The centre owner's view: courses, payments, staffing and volunteers across the whole centre.",
   },
   {

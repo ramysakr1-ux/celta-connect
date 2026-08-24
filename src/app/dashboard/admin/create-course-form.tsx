@@ -107,7 +107,7 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
           <label className="text-[13px] font-semibold text-ink">Cambridge centre number</label>
           <p className="text-sm text-ink">{centerNumber ?? "Not set"}</p>
           <p className="text-xs text-muted">
-            Prefilled from the centre profile and locked here — change it in Centre Admin, not per course.
+            Prefilled from the centre profile and locked here — change it in Centre Management, not per course.
           </p>
         </div>
 
