@@ -52,43 +52,75 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
         </p>
       </div>
 
-      {caseRow.candidate_account ? (
-        <div className="sheet flex flex-col gap-2">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Candidate&apos;s account</p>
-          <p className="whitespace-pre-wrap text-sm text-ink">{caseRow.candidate_account}</p>
-          <p className="text-xs text-muted">
-            Recorded {caseRow.candidate_account_recorded_at ? new Date(caseRow.candidate_account_recorded_at).toLocaleString() : ""}
-          </p>
-        </div>
-      ) : caseRow.status === "open" ? (
-        <CandidateAccountForm caseId={caseRow.id} />
-      ) : null}
+      {/* Malpractice.dc.html "1c The case": "a record an assessor can read
+          end to end" -- a chronological timeline (opened -> candidate's
+          account -> decision), not discrete unordered blocks. The next
+          unfinished step's form renders inline, in its place in the
+          sequence, rather than the whole page reflowing around it. */}
+      <div className="sheet overflow-hidden !p-0">
+        <TimelineRow
+          date={caseRow.opened_at}
+          step="Case opened"
+          text={`Assignment marking paused${assignment ? ` on ${ASSIGNMENT_INFO[assignment.assignment_type]?.title ?? assignment.assignment_type}` : ""}.`}
+          who={openedBy?.full_name ?? "—"}
+        />
+        {caseRow.candidate_account ? (
+          <TimelineRow
+            date={caseRow.candidate_account_recorded_at ?? caseRow.opened_at}
+            step="Candidate's account"
+            text={caseRow.candidate_account}
+            who="Recorded by tutor"
+          />
+        ) : null}
+        {caseRow.status === "decided" ? (
+          <TimelineRow
+            date={caseRow.decided_at ?? caseRow.opened_at}
+            step="Decision"
+            text={
+              [
+                caseRow.outcome,
+                caseRow.flagged_for_referral ? "referred to the centre's malpractice procedure" : null,
+                caseRow.decision_notes,
+              ]
+                .filter(Boolean)
+                .join(" — ")
+            }
+            who={decidedBy?.full_name ?? "—"}
+            last={!reflection}
+          />
+        ) : null}
+        {reflection ? (
+          <div className="flex items-center justify-between gap-4 px-5 py-3.5">
+            <span className="text-xs text-muted">Plagiarism Reflection assignment created</span>
+            <Link
+              href={`/portfolio/${caseRow.trainee_id}/assignments/${reflection.id}`}
+              className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink trainer-hover"
+            >
+              Open it →
+            </Link>
+          </div>
+        ) : null}
+      </div>
 
+      {caseRow.status === "open" && !caseRow.candidate_account ? <CandidateAccountForm caseId={caseRow.id} /> : null}
       {caseRow.status === "open" && caseRow.candidate_account ? (
         <DecisionForm caseId={caseRow.id} outcomeOptions={outcomeOptions ?? []} />
       ) : null}
+    </div>
+  );
+}
 
-      {caseRow.status === "decided" ? (
-        <div className="sheet flex flex-col gap-2">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Decision</p>
-          <p className="text-sm text-ink">
-            {caseRow.outcome} · {decidedBy?.full_name ?? "—"} ·{" "}
-            {caseRow.decided_at ? new Date(caseRow.decided_at).toLocaleString() : ""}
-          </p>
-          {caseRow.flagged_for_referral ? (
-            <p className="text-xs font-semibold text-destructive">Referred to the centre&apos;s malpractice procedure</p>
-          ) : null}
-          {caseRow.decision_notes ? <p className="whitespace-pre-wrap text-sm text-muted">{caseRow.decision_notes}</p> : null}
-          {reflection ? (
-            <Link
-              href={`/portfolio/${caseRow.trainee_id}/assignments/${reflection.id}`}
-              className="mt-1 self-start rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink trainer-hover"
-            >
-              Open the Plagiarism Reflection assignment →
-            </Link>
-          ) : null}
-        </div>
-      ) : null}
+function TimelineRow({ date, step, text, who, last }: { date: string; step: string; text: string; who: string; last?: boolean }) {
+  return (
+    <div
+      className={`grid grid-cols-[110px_150px_1fr_130px] items-start gap-4 px-5 py-3.5 ${last ? "" : "border-b border-border-faint"}`}
+    >
+      <span className="text-xs text-muted" style={{ fontVariantNumeric: "tabular-nums" }}>
+        {new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+      </span>
+      <span className="text-xs font-semibold text-ink">{step}</span>
+      <span className="whitespace-pre-wrap text-sm text-ink">{text}</span>
+      <span className="text-right text-xs text-muted">{who}</span>
     </div>
   );
 }

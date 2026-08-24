@@ -92,7 +92,7 @@ export default async function AssessorPage({
   const sendByDate = course.provisional_grades_due_at ? course.provisional_grades_due_at.slice(0, 10) : null;
   const daysOut = sendByDate ? Math.ceil((new Date(`${sendByDate}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000) : null;
 
-  const [{ data: tutorRows }, { data: onDayEvents }, { data: centreDocs }, { data: asyncEvents }] = await Promise.all([
+  const [{ data: tutorRows }, { data: onDayEvents }, { data: centreDocs }, { data: asyncEvents }, { data: malpracticeCases }] = await Promise.all([
     admin.from("course_tutors").select("profile_id, tutor_role").eq("course_id", courseId).is("left_at", null),
     course.assessor_visit_date
       ? admin.from("course_timetable_events").select("*").eq("course_id", courseId).eq("event_date", course.assessor_visit_date).order("event_time")
@@ -114,7 +114,28 @@ export default async function AssessorPage({
           .eq("is_asynchronous", true)
           .order("event_date")
       : Promise.resolve({ data: [] }),
+    // for-claude-code-malpractice-outcomes.md / Malpractice.dc.html's own
+    // case note: "It goes in the assessor pack. Every case, upheld or not,
+    // with the full timeline." No case-detail route exists for a token-
+    // only assessor to click into (/trainer/malpractice/[caseId] requires
+    // a real trainer session) -- so this pack shows every field inline
+    // rather than linking out, same self-contained shape as every other
+    // section on this page.
+    admin
+      .from("malpractice_cases")
+      .select("id, trainee_id, assignment_id, status, outcome, flagged_for_referral, decision_notes, opened_at, candidate_account, candidate_account_recorded_at, decided_at")
+      .eq("course_id", courseId)
+      .order("opened_at", { ascending: false }),
   ]);
+
+  const malpracticeTraineeIds = [...new Set((malpracticeCases ?? []).map((c) => c.trainee_id))];
+  const { data: malpracticeTrainees } =
+    malpracticeTraineeIds.length > 0 ? await admin.from("profiles").select("id, full_name").in("id", malpracticeTraineeIds) : { data: [] };
+  const malpracticeTraineeNameById = new Map((malpracticeTrainees ?? []).map((t) => [t.id, t.full_name]));
+  const malpracticeAssignmentIds = [...new Set((malpracticeCases ?? []).map((c) => c.assignment_id))];
+  const { data: malpracticeAssignments } =
+    malpracticeAssignmentIds.length > 0 ? await admin.from("assignments").select("id, assignment_type").in("id", malpracticeAssignmentIds) : { data: [] };
+  const malpracticeAssignmentTypeById = new Map((malpracticeAssignments ?? []).map((a) => [a.id, a.assignment_type]));
 
   const liveFollowUpIds = (asyncEvents ?? []).map((e) => e.linked_live_session_event_id).filter((id): id is string => Boolean(id));
   const { data: liveFollowUpEvents } =
@@ -668,6 +689,66 @@ export default async function AssessorPage({
                 </div>
               ) : null}
             </Panel>
+
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED_ACCENT, marginBottom: 8 }}>
+                Malpractice cases
+              </p>
+              <div
+                style={{
+                  background: "var(--color-card)", border: "1px solid oklch(88% 0.016 82)",
+                  borderTop: `3px solid ${AMBER}`, borderRadius: 9, padding: "14px 16px",
+                  display: "flex", flexDirection: "column", gap: 14,
+                }}
+              >
+                {(malpracticeCases ?? []).length === 0 ? (
+                  <p style={{ fontSize: 12, color: MUTED }}>No plagiarism or malpractice cases have been raised on this course.</p>
+                ) : (
+                  (malpracticeCases ?? []).map((c) => (
+                    <div
+                      key={c.id}
+                      style={{ display: "flex", flexDirection: "column", gap: 6, paddingBottom: 14, borderBottom: "1px solid oklch(90% 0.012 85)" }}
+                    >
+                      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+                        <span style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>
+                          {malpracticeTraineeNameById.get(c.trainee_id) ?? "Candidate"} ·{" "}
+                          {malpracticeAssignmentTypeById.get(c.assignment_id) ?? "Assignment"}
+                        </span>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: c.status === "open" ? AMBER : MUTED }}>
+                          {c.status === "open" ? "Open" : `Closed · ${c.outcome ?? "decided"}`}
+                        </span>
+                      </div>
+                      {c.flagged_for_referral ? (
+                        <span style={{ fontSize: 11, fontWeight: 600, color: "oklch(45% 0.15 27)" }}>Referred to the centre&apos;s malpractice procedure</span>
+                      ) : null}
+                      <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 11.5, color: MUTED }}>
+                        <span>Opened {new Date(c.opened_at).toLocaleDateString()}</span>
+                        {c.candidate_account_recorded_at ? (
+                          <span>Candidate&apos;s account recorded {new Date(c.candidate_account_recorded_at).toLocaleDateString()}</span>
+                        ) : null}
+                        {c.decided_at ? <span>Decided {new Date(c.decided_at).toLocaleDateString()}</span> : null}
+                      </div>
+                      {c.candidate_account ? (
+                        <div>
+                          <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: MUTED }}>
+                            Candidate&apos;s account
+                          </p>
+                          <p style={{ fontSize: 12, color: INK, whiteSpace: "pre-wrap" }}>{c.candidate_account}</p>
+                        </div>
+                      ) : null}
+                      {c.decision_notes ? (
+                        <div>
+                          <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: MUTED }}>
+                            Decision notes
+                          </p>
+                          <p style={{ fontSize: 12, color: INK, whiteSpace: "pre-wrap" }}>{c.decision_notes}</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
 
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>
