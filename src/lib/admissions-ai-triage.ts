@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { readSelectionTask, type SelectionTaskReading } from "@/lib/openai/read-selection-task";
+import { readSpeakingTask } from "@/lib/openai/read-speaking-task";
 
 export type TriageLane = "clear" | "borderline" | "clear_problems";
 
@@ -38,7 +39,9 @@ export async function runSelectionTaskTriage(
 ): Promise<{ ran: boolean; lane: TriageLane | null }> {
   const { data: applicant } = await admin
     .from("applicants")
-    .select("id, center_id, language_awareness_submission, writing_task_submission, writing_task_prompt_id, task_feedback_ai_suggestion")
+    .select(
+      "id, center_id, language_awareness_submission, writing_task_submission, writing_task_prompt_id, task_feedback_ai_suggestion, speaking_task_transcript, speaking_task_prompt_id, speaking_task_ai_suggestion"
+    )
     .eq("id", applicantId)
     .maybeSingle();
   if (!applicant) return { ran: false, lane: null };
@@ -79,6 +82,31 @@ export async function runSelectionTaskTriage(
     // two places, never two separate generations of the same submission.
     task_feedback_ai_suggestion: applicant.task_feedback_ai_suggestion ?? reading.summary,
   };
+
+  // Speaking task: its own suggestion, generated the same shadow-mode-gated
+  // run as the writing/language-awareness reading above, but deliberately
+  // outside deriveTriageLane -- it never affects the lane, autobook, or
+  // clear-problems notification, all of which are scoped to Admin Handbook
+  // 6.3's writing/language-awareness scheme only.
+  if (applicant.speaking_task_transcript && !applicant.speaking_task_ai_suggestion) {
+    let speakingPrompt: string | null = null;
+    if (applicant.speaking_task_prompt_id) {
+      const { data: prompt } = await admin
+        .from("speaking_task_prompts")
+        .select("prompt_text")
+        .eq("id", applicant.speaking_task_prompt_id)
+        .maybeSingle();
+      speakingPrompt = prompt?.prompt_text ?? null;
+    }
+    const speakingSuggestion = await readSpeakingTask({
+      prompt: speakingPrompt,
+      transcript: applicant.speaking_task_transcript,
+    });
+    if (speakingSuggestion) {
+      update.speaking_task_ai_suggestion = speakingSuggestion;
+      update.speaking_task_ai_suggestion_generated_at = nowIso;
+    }
+  }
 
   if (lane === "clear" && center.admissions_ai_autobook_enabled) {
     const holdUntil = new Date(Date.now() + 15 * 60 * 1000);

@@ -314,6 +314,21 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             ) : (
               <p className="text-sm text-muted">No recording submitted.</p>
             )}
+            {applicant.speaking_task_transcript ? (
+              <details className="text-xs text-muted">
+                <summary className="cursor-pointer select-none">Transcript</summary>
+                <p className="mt-1 whitespace-pre-wrap">{applicant.speaking_task_transcript}</p>
+              </details>
+            ) : null}
+            {/* Standalone AI suggestion, not part of the writing/language-
+                awareness AiReadingPanel below -- never affects that panel's
+                lane or the autobook/notification it drives. */}
+            {applicant.speaking_task_ai_suggestion ? (
+              <div className="rounded-[6px] border border-dashed border-border p-3">
+                <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">AI reading -- suggested, not sent</p>
+                <p className="mt-1 text-sm text-ink">{applicant.speaking_task_ai_suggestion}</p>
+              </div>
+            ) : null}
           </>
         ) : null}
       </div>

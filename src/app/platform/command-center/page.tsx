@@ -437,6 +437,19 @@ export default async function CommandCenterPage() {
             >
               Accounts, subscriptions & invoices →
             </Link>
+
+            {/* Connect Hub is its own separate tool (project_connect_hub_new_repo.md)
+                -- static, localStorage-only, no login, no shared backend with
+                Connect itself -- so this is a plain external link, not an
+                embedded view. */}
+            <a
+              href="https://ramysakr1-ux.github.io/connect-Hub/"
+              target="_blank"
+              rel="noreferrer"
+              style={{ textAlign: "center", padding: "12px 16px", borderRadius: 10, border: `1px solid ${BORDER}`, fontSize: 12.5, fontWeight: 600, color: TEAL, textDecoration: "none" }}
+            >
+              Connect Hub ↗
+            </a>
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { inferCourseCommitmentsMode, buildCourseCommitments, courseCommitmentsToPlainText } from "@/lib/course-commitments";
 import { MARKETING_SOURCES, type MarketingSource } from "@/lib/marketing-source";
+import { transcribeAudio } from "@/lib/openai/transcribe";
 
 // Public, unauthenticated, and every submission triggers a real AI triage
 // call plus a real email to an attacker-controlled address -- 5 per hour
@@ -169,9 +170,21 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
       contentType: speakingTaskAudio.type || "audio/webm",
     });
     if (!uploadError) {
+      // Ramy, 24 Aug 2026: reversed the earlier "reviewed directly by a
+      // person, no transcript needed" call -- the actual reason this was
+      // wanted in the first place is AI suggestions on the speaking task,
+      // same as for-claude-code-speech-to-text-integration.md always said.
+      // Best-effort, same as volunteer sign-up's identical call: a missing
+      // OPENAI_API_KEY or a flaky API never blocks the application.
+      const transcript = await transcribeAudio(speakingTaskAudio, speakingTaskAudio.name);
       await admin
         .from("applicants")
-        .update({ speaking_task_audio_url: storagePath, speaking_task_submitted_at: new Date().toISOString() })
+        .update({
+          speaking_task_audio_url: storagePath,
+          speaking_task_submitted_at: new Date().toISOString(),
+          speaking_task_transcript: transcript,
+          speaking_task_transcript_generated_at: transcript ? new Date().toISOString() : null,
+        })
         .eq("id", applicant.id);
     }
     // A failed upload doesn't fail the whole application -- same

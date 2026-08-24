@@ -526,11 +526,20 @@ export interface Database {
           commitments_snapshot: string | null;
           writing_task_prompt_id: string | null;
           writing_task_submission: string | null;
-          // migration 0132 -- third pre-interview component. No transcript
-          // column by design (Ramy, 2026-08-17) -- reviewed directly by a person.
+          // migration 0132 -- third pre-interview component. migration 0209
+          // (24 Aug 2026) added the transcript pair, reversing the earlier
+          // "reviewed directly by a person, no transcript needed" call --
+          // the actual reason it's wanted is AI suggestions on this task.
           speaking_task_prompt_id: string | null;
           speaking_task_audio_url: string | null;
           speaking_task_submitted_at: string | null;
+          speaking_task_transcript: string | null;
+          speaking_task_transcript_generated_at: string | null;
+          // migration 0210 -- a standalone suggestion, never folded into
+          // ai_reading_summary/ai_reading_lane (deriveTriageLane's 5-row
+          // scheme, which drives real autobook/notification behavior).
+          speaking_task_ai_suggestion: string | null;
+          speaking_task_ai_suggestion_generated_at: string | null;
           language_awareness_submission: { question: string; answer: string }[];
           ai_reading_summary: unknown | null;
           ai_reading_generated_at: string | null;
