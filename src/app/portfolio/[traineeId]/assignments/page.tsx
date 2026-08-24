@@ -60,7 +60,13 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:auto-rows-fr">
         {standardAssignments.length > 0 ? (
           standardAssignments.map((a, i) => (
-            <AssignmentCard key={a.id} traineeId={traineeId} assignment={a} eyebrow={`Assignment ${i + 1}`} />
+            <AssignmentCard
+              key={a.id}
+              traineeId={traineeId}
+              assignment={a}
+              eyebrow={`Assignment ${i + 1}`}
+              accentClass={(Math.floor(i / 2) + (i % 2)) % 2 === 0 ? "border-t-[oklch(38%_0.085_155)]" : "border-t-[oklch(42%_0.13_27)]"}
+            />
           ))
         ) : (
           <p className="sheet text-sm text-muted">No assignments yet.</p>

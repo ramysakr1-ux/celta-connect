@@ -258,7 +258,7 @@ export default async function PortfolioCelta5Page({
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="sheet flex flex-col gap-3">
+          <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-[oklch(38%_0.085_155)]">
             <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Stage 1 / 2 / 3</p>
             <div className="flex flex-col">
               <div className="flex items-start justify-between gap-3 border-b border-border-faint py-2.5">
@@ -316,7 +316,7 @@ export default async function PortfolioCelta5Page({
             <p className="text-[11px] text-muted">Sourced from the same Standing table your tutor sees -- this is your own row, not a separate record.</p>
           </div>
 
-          <div className="sheet flex flex-col gap-3">
+          <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-[oklch(42%_0.13_27)]">
             <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">CELTA 5 self-assessment</p>
             <div className="flex flex-col gap-1">
               <p className={`text-sm font-semibold ${bothSigned ? "text-ink" : stage2Submitted ? "text-primary" : "text-status-warning-text"}`}>
@@ -336,7 +336,7 @@ export default async function PortfolioCelta5Page({
             <p className="text-[11px] text-muted">No grade lives here. This is your own reflection against the five CELTA components, not an assessment.</p>
           </div>
 
-          <div className="sheet flex flex-col gap-3">
+          <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-[oklch(38%_0.085_155)]">
             <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Observation hours</p>
             <div className="flex flex-col">
               <div className="flex items-start gap-3 border-b border-border-faint py-2.5">

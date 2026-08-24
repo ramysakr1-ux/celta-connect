@@ -291,7 +291,7 @@ export default async function TpHubPage({
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {canSeeCriteria ? (
-          <div className="sheet flex flex-col gap-3.5">
+          <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-[oklch(38%_0.085_155)]">
             <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Criteria — stage 2</p>
             <div className="flex items-baseline gap-2.5">
               <span className="font-serif text-[32px] leading-none text-ink">{criteriaPct}%</span>
@@ -303,7 +303,7 @@ export default async function TpHubPage({
           </div>
         ) : null}
 
-        <div className="sheet flex flex-col gap-3">
+        <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-[oklch(42%_0.13_27)]">
           <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Written assignments</p>
           <div className="flex flex-col">
             {ASSIGNMENT_ORDER.map((type, i) => {
