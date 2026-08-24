@@ -31,13 +31,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ centerI
     page: "/centre",
   });
 
-  // Note (flagged in the report back, not silently glossed over): this
-  // redirects into the real /centre app, but that app's own access check
-  // (getCentreRoleContext, centre-roles.ts) only recognizes centre_roles
-  // grants today -- it doesn't yet know platform_owner_invites exists, so
-  // it won't actually grant a view here without a follow-up change to that
-  // function (and the matching current_center_id() RLS function, which the
-  // app-side logic is required to agree with). The disclosure log write
-  // above is real and correct regardless; the view itself isn't wired yet.
+  // Migration 0212 + centre-roles.ts now recognize a live platform_owner_
+  // invites row (current_center_id() at the DB level, getCentreRoleContext
+  // at the app level) -- this is what points both of those at the invited
+  // centre, same mechanism switchActiveCourse already uses for course_id.
+  await admin.from("profiles").update({ active_center_id: centerId }).eq("id", profile.id);
+
   return NextResponse.redirect(new URL("/centre", siteUrl));
 }
