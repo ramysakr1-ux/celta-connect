@@ -1520,6 +1520,11 @@ export interface Database {
           decided_by: string | null;
           decided_at: string | null;
           reflection_assignment_id: string | null;
+          // 0206 -- set only when opened via RaiseConcernForm's intake;
+          // null for cases opened from a scanner finding or the old bare
+          // button, which already carry their own context elsewhere.
+          concern_kind: "unattributed_source" | "collaboration" | "undeclared_ai" | "other" | null;
+          initial_findings: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -1531,6 +1536,30 @@ export interface Database {
           opened_by: string;
         };
         Update: Partial<Database["public"]["Tables"]["malpractice_cases"]["Row"]>;
+        Relationships: [];
+      };
+      malpractice_concern_notes: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          assignment_id: string;
+          assignment_round: "first" | "resubmission";
+          kind: "unattributed_source" | "collaboration" | "undeclared_ai" | "other";
+          findings: string;
+          raised_by: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["malpractice_concern_notes"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          assignment_id: string;
+          assignment_round: "first" | "resubmission";
+          kind: "unattributed_source" | "collaboration" | "undeclared_ai" | "other";
+          findings: string;
+          raised_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["malpractice_concern_notes"]["Row"]>;
         Relationships: [];
       };
       malpractice_outcome_options: {

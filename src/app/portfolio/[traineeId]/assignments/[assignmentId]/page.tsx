@@ -8,8 +8,8 @@ import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { AssignmentAuthoringForm } from "@/app/dashboard/trainee/assignments/[assignmentId]/assignment-form";
 import { AssignmentReviewForm } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/review-form";
 import { updateAssignmentDueDate } from "@/app/dashboard/trainer/trainees/[id]/assignments/[assignmentId]/actions";
-import { OpenCaseButton } from "@/app/trainer/(hub)/malpractice/open-case-button";
 import { FindingsBand } from "@/app/trainer/(hub)/malpractice/findings-band";
+import { RaiseConcernForm } from "@/app/trainer/(hub)/malpractice/raise-concern-form";
 import { FolPanel } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/fol-panel";
 import { FolCrossCheck } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/fol-cross-check";
 import { isCourseDayReached } from "@/lib/course-day";
@@ -291,7 +291,12 @@ export default async function AssignmentDetailPage({
               secondMarkerOptions={secondMarkerRows ?? []}
             />
             {assignment.assignment_type !== "Plagiarism Reflection" ? (
-              <OpenCaseButton assignmentId={assignmentId} round={round} />
+              <RaiseConcernForm
+                assignmentId={assignmentId}
+                round={round}
+                ownSubmissionLabel={`${trainee.full_name} — ${ASSIGNMENT_INFO[assignment.assignment_type]?.title ?? assignment.assignment_type} (${round === "first" ? "1st submission" : "resubmission"})`}
+                aiDeclared={aiDeclared}
+              />
             ) : null}
           </div>
         )

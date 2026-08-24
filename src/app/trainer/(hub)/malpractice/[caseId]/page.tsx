@@ -5,6 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { CandidateAccountForm, DecisionForm } from "@/app/trainer/(hub)/malpractice/case-forms";
 
+const CONCERN_KIND_LABEL: Record<string, string> = {
+  unattributed_source: "Unattributed source",
+  collaboration: "Collaboration beyond preparation",
+  undeclared_ai: "Undeclared AI use",
+  other: "Something else",
+};
+
 export default async function MalpracticeCasePage({ params }: { params: Promise<{ caseId: string }> }) {
   const { caseId } = await params;
   const trainer = await requireRole("trainer");
@@ -61,7 +68,11 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
         <TimelineRow
           date={caseRow.opened_at}
           step="Case opened"
-          text={`Assignment marking paused${assignment ? ` on ${ASSIGNMENT_INFO[assignment.assignment_type]?.title ?? assignment.assignment_type}` : ""}.`}
+          text={
+            caseRow.initial_findings
+              ? `${CONCERN_KIND_LABEL[caseRow.concern_kind ?? ""] ?? "Concern raised"} — ${caseRow.initial_findings}`
+              : `Assignment marking paused${assignment ? ` on ${ASSIGNMENT_INFO[assignment.assignment_type]?.title ?? assignment.assignment_type}` : ""}.`
+          }
           who={openedBy?.full_name ?? "—"}
         />
         {caseRow.candidate_account ? (

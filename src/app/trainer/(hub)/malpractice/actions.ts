@@ -8,6 +8,16 @@ import { PLAGIARISM_REFLECTION_TYPE, PLAGIARISM_REFLECTION_SECTIONS } from "@/li
 
 export interface FormState {
   error: string | null;
+  // Set by saveConcernNote on success -- the shared FormState shape has no
+  // other way to distinguish "just mounted, never submitted" from
+  // "submitted successfully" (both leave error null).
+  saved?: boolean;
+}
+
+const CONCERN_KINDS = ["unattributed_source", "collaboration", "undeclared_ai", "other"] as const;
+type ConcernKind = (typeof CONCERN_KINDS)[number];
+function parseConcernKind(value: FormDataEntryValue | null): ConcernKind | null {
+  return typeof value === "string" && (CONCERN_KINDS as readonly string[]).includes(value) ? (value as ConcernKind) : null;
 }
 
 // build-spec.md "Suspected plagiarism" -- opened either from a scanner
@@ -15,11 +25,18 @@ export interface FormState {
 // pauses immediately: no outcome is recorded while a case is open.
 // Navigates to the new case's record page on success rather than
 // returning state, since there's nowhere useful to stay once it's open.
+//
+// kind/findings are optional -- set when opened via the RaiseConcernForm
+// intake (Malpractice.dc.html "1b Raising it"), left null when opened from
+// a scanner finding (which already carries its own matched-passage
+// context) or the old bare button.
 export async function openCase(_prevState: FormState, formData: FormData): Promise<FormState> {
   const trainer = await requireRole("trainer");
   const assignmentId = formData.get("assignment_id");
   const round = formData.get("round");
   const findingId = formData.get("finding_id");
+  const kind = formData.get("kind");
+  const findings = formData.get("findings");
   if (typeof assignmentId !== "string" || (round !== "first" && round !== "resubmission")) {
     return { error: "Invalid request." };
   }
@@ -41,6 +58,8 @@ export async function openCase(_prevState: FormState, formData: FormData): Promi
       assignment_id: assignmentId,
       assignment_round: round,
       opened_by: trainer.id,
+      concern_kind: parseConcernKind(kind),
+      initial_findings: typeof findings === "string" && findings.trim() ? findings.trim() : null,
     })
     .select("id")
     .single();
@@ -262,4 +281,38 @@ export async function markFindingReviewed(formData: FormData): Promise<void> {
   if (typeof traineeId === "string" && typeof assignmentId === "string") {
     revalidatePath(`/portfolio/${traineeId}/assignments/${assignmentId}`);
   }
+}
+
+// Malpractice.dc.html "1b Raising it": "Most concerns are nothing... The
+// first button saves what was noticed against the assignment without
+// opening anything." A genuinely separate, lighter-weight record from
+// malpractice_cases -- see the migration's own comment for why. Touches
+// nothing else: no pause, no candidate-visible change, no case.
+export async function saveConcernNote(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const trainer = await requireRole("trainer");
+  const assignmentId = formData.get("assignment_id");
+  const round = formData.get("round");
+  const kind = parseConcernKind(formData.get("kind"));
+  const findings = formData.get("findings");
+  if (typeof assignmentId !== "string" || (round !== "first" && round !== "resubmission") || !kind || typeof findings !== "string" || !findings.trim()) {
+    return { error: "Choose a kind of concern and say what you found." };
+  }
+
+  const supabase = await createClient();
+  const { data: assignment } = await supabase.from("assignments").select("course_id, trainee_id").eq("id", assignmentId).maybeSingle();
+  if (!assignment) return { error: "Assignment not found." };
+
+  const { error } = await supabase.from("malpractice_concern_notes").insert({
+    course_id: assignment.course_id,
+    trainee_id: assignment.trainee_id,
+    assignment_id: assignmentId,
+    assignment_round: round,
+    kind,
+    findings: findings.trim(),
+    raised_by: trainer.id,
+  });
+  if (error) return { error: "Could not save the note. Try again." };
+
+  revalidatePath(`/portfolio/${assignment.trainee_id}/assignments/${assignmentId}`);
+  return { error: null, saved: true };
 }
