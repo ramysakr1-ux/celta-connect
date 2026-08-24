@@ -11,6 +11,7 @@ import { AdminRoster, type RosterRow } from "@/app/centre/settings/admin-roster"
 import { TransferOwnershipCard, DeleteCentreCard } from "@/app/centre/settings/danger-zone";
 import { SettingsTabs } from "@/app/centre/settings/settings-tabs";
 import { SupportAccessTab, type SupportGrantRow } from "@/app/centre/settings/support-access-tab";
+import { PlatformAccessTab, type PlatformAccessRow, type AccessLogRow } from "@/app/centre/settings/platform-access-tab";
 import { ProviderList } from "@/app/centre/payments/provider-list";
 import type { PaymentProviderKey } from "@/lib/payments/providers";
 import { computeGrantStatus } from "@/lib/platform-support";
@@ -115,6 +116,16 @@ export default async function CentreSettingsPage({
   }));
   const canGrantBilling = ctx.roles.includes("centre_administrator") || ctx.roles.includes("centre_owner");
 
+  const [{ data: platformInvite }, { data: platformAccessLog }] = await Promise.all([
+    admin.from("platform_owner_invites").select("id, invited_at, note, revoked_at").eq("center_id", centerId).order("invited_at", { ascending: false }).limit(1).maybeSingle(),
+    admin.from("platform_owner_access_log").select("id, accessed_at, page").eq("center_id", centerId).order("accessed_at", { ascending: false }).limit(50),
+  ]);
+  const platformInviteRow: PlatformAccessRow | null =
+    platformInvite && !platformInvite.revoked_at
+      ? { id: platformInvite.id, invitedAt: platformInvite.invited_at, note: platformInvite.note, status: "active" }
+      : null;
+  const platformAccessLogRows: AccessLogRow[] = (platformAccessLog ?? []).map((a) => ({ id: a.id, accessedAt: a.accessed_at, page: a.page }));
+
   return (
     <div className="flex flex-col gap-6">
       <div className="card p-6">
@@ -181,6 +192,7 @@ export default async function CentreSettingsPage({
           />
         }
         support={<SupportAccessTab canGrantBilling={canGrantBilling} grants={supportGrantRows} />}
+        platform={<PlatformAccessTab invite={platformInviteRow} accessLog={platformAccessLogRows} />}
         danger={
           isOwner ? (
             <div className="flex flex-col gap-4">

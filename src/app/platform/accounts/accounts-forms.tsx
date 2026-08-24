@@ -8,7 +8,7 @@ import {
   markInvoiceVoid,
   type UpsertSubscriptionState,
   type RecordInvoiceState,
-} from "@/app/platform/command-center/actions";
+} from "@/app/platform/accounts/actions";
 
 const upsertInitial: UpsertSubscriptionState = {};
 const invoiceInitial: RecordInvoiceState = {};

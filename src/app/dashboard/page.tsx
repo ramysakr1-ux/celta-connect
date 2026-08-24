@@ -32,8 +32,12 @@ export default async function DashboardIndexPage() {
   if (profile.role === "trainer") redirect("/trainer");
   if (profile.role === "trainee") redirect(`/portfolio/${profile.id}`);
   // Sits above every centre -- its own landing, not a centre/course one
-  // (connect-platform-owner-role-spec-2026-08-22.md).
-  if (profile.role === "platform_owner") redirect("/platform");
+  // (connect-platform-owner-role-spec-2026-08-22.md). Lands on the Command
+  // Center directly (for-claude-code-command-center.md, 2026-08-25: "login
+  // lands directly on /platform/command-center, not a generic Connect
+  // landing page first") -- /platform itself (create a centre, change a
+  // role) is one click away from there, not the first thing seen.
+  if (profile.role === "platform_owner") redirect("/platform/command-center");
 
   // Centre Admin and Course Admin are two separate roles with two separate
   // landing screens -- "never merge these two builds". Until now one flat

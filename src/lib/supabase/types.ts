@@ -2787,6 +2787,58 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["centre_admin_invites"]["Row"]>;
         Relationships: [];
       };
+      platform_owner_invites: {
+        Row: {
+          id: string;
+          center_id: string;
+          invited_by: string | null;
+          invited_at: string;
+          note: string | null;
+          revoked_at: string | null;
+          revoked_by: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["platform_owner_invites"]["Row"]> & {
+          center_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["platform_owner_invites"]["Row"]>;
+        Relationships: [];
+      };
+      platform_owner_access_log: {
+        Row: {
+          id: string;
+          invite_id: string;
+          center_id: string;
+          accessed_by: string;
+          page: string;
+          accessed_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["platform_owner_access_log"]["Row"]> & {
+          invite_id: string;
+          center_id: string;
+          accessed_by: string;
+          page: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["platform_owner_access_log"]["Row"]>;
+        Relationships: [];
+      };
+      support_messages: {
+        Row: {
+          id: string;
+          from_email: string;
+          from_name: string | null;
+          center_id: string | null;
+          subject: string | null;
+          snippet: string;
+          received_at: string;
+          read_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["support_messages"]["Row"]> & {
+          from_email: string;
+          snippet: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["support_messages"]["Row"]>;
+        Relationships: [];
+      };
       centre_delete_codes: {
         Row: {
           id: string;

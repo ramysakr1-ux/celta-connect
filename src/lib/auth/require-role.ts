@@ -17,6 +17,6 @@ export async function requireRole(role: UserRole | UserRole[]) {
   // also accept platform_owner, but a platform_owner-only check is not
   // satisfied by plain admin.
   const passes = allowed.includes(actualRole) || (actualRole === "platform_owner" && allowed.includes("admin"));
-  if (!passes) redirect(actualRole === "platform_owner" ? "/platform" : `/dashboard/${actualRole}`);
+  if (!passes) redirect(actualRole === "platform_owner" ? "/platform/command-center" : `/dashboard/${actualRole}`);
   return session.profile;
 }

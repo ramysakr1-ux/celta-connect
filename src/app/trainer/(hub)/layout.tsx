@@ -21,7 +21,12 @@ import { CourseSwitcher, type SwitcherCourse } from "@/app/trainer/(hub)/course-
 export default async function TrainerHubLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentProfile();
   const profile = session?.profile ?? null;
-  const isRealStaff = profile?.role === "trainer" || profile?.role === "admin";
+  // platform_owner included per for-claude-code-command-center.md, 2026-08-25
+  // (Ramy: "I should have access into the course that I'm on, not just the
+  // centre that I own") -- a platform_owner with a real course_tutors row
+  // lands on the exact same trainer view any other tutor on that course
+  // sees, not a restricted or different one.
+  const isRealStaff = profile?.role === "trainer" || profile?.role === "admin" || profile?.role === "platform_owner";
   const isAssessor = !isRealStaff && Boolean(await getAssessorCourseId());
   // for-claude-code-assessor-tour-mode.md: the trimmed 3-tab set is the
   // pack's own boundary (Roster/Attendance register/Grades Report only) --
@@ -128,6 +133,14 @@ export default async function TrainerHubLayout({ children }: { children: React.R
               <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground">
                 {courseCode}
               </span>
+            ) : null}
+            {profile?.role === "platform_owner" ? (
+              <Link
+                href="/platform/command-center"
+                className="rounded-full border border-current px-2.5 py-1 text-[11px] font-semibold text-[color-mix(in_oklab,white_85%,transparent)]"
+              >
+                Command center
+              </Link>
             ) : null}
             <span className={`text-sm ${isRealStaff ? "text-[color-mix(in_oklab,white_85%,transparent)]" : "text-muted"}`}>
               {profile?.full_name ?? session?.email}

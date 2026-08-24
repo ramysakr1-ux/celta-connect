@@ -53,7 +53,7 @@ export async function upsertSubscription(_prev: UpsertSubscriptionState, formDat
   );
   if (error) return { error: `Could not save that subscription: ${error.message}` };
 
-  revalidatePath("/platform/command-center");
+  revalidatePath("/platform/accounts");
   return { notice: "Subscription saved." };
 }
 
@@ -89,7 +89,7 @@ export async function recordInvoice(_prev: RecordInvoiceState, formData: FormDat
   });
   if (error) return { error: `Could not record that invoice: ${error.message}` };
 
-  revalidatePath("/platform/command-center");
+  revalidatePath("/platform/accounts");
   return { notice: "Invoice recorded." };
 }
 
@@ -101,7 +101,7 @@ export async function markInvoicePaid(invoiceId: string) {
     .update({ status: "paid", paid_at: new Date().toISOString(), marked_by: profile.id })
     .eq("id", invoiceId);
   if (error) throw new Error(error.message);
-  revalidatePath("/platform/command-center");
+  revalidatePath("/platform/accounts");
 }
 
 export async function markInvoiceVoid(invoiceId: string) {
@@ -112,5 +112,5 @@ export async function markInvoiceVoid(invoiceId: string) {
     .update({ status: "void", marked_by: profile.id })
     .eq("id", invoiceId);
   if (error) throw new Error(error.message);
-  revalidatePath("/platform/command-center");
+  revalidatePath("/platform/accounts");
 }
