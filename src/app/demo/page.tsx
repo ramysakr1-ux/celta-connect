@@ -18,8 +18,13 @@ const ENTRIES: { href: string; role: string; blurb: string }[] = [
   },
   {
     href: "/demo/trainer",
-    role: "Trainer",
+    role: "Trainer (MCT)",
     blurb: "The main course tutor's view: TP feedback, grading, CELTA5 and the trainee roster.",
+  },
+  {
+    href: "/demo/trainer-act",
+    role: "Trainer (ACT)",
+    blurb: "The assistant course tutor's view of the same course -- same data, different layout from the MCT's.",
   },
   {
     href: "/demo/trainee",
