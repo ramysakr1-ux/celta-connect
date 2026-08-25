@@ -27,6 +27,12 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
   const [stepIndex, setStepIndex] = useState(0);
   const [lang, setLang] = useState<string | null>(null);
   const [consented, setConsented] = useState(false);
+  // Lifted out of the questions step's own textareas -- each step's fields
+  // unmount when you navigate away from it (see the goBack() comment
+  // below), so formData.get(`answer_${i}`) at final submit time would see
+  // nothing for these unless they're mirrored into always-mounted hidden
+  // inputs below.
+  const [answers, setAnswers] = useState<string[]>(() => questions.map(() => ""));
   const [recorderStatus, setRecorderStatus] = useState<"idle" | "requesting" | "recording" | "reviewing" | "error">("idle");
 
   const step = STEPS[stepIndex];
@@ -36,11 +42,33 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
     setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
   }
 
+  // Ramy, 25 Aug 2026: "I still can't go back... once I click on something,
+  // I can't go back." Every step only ever moved forward -- no way to fix a
+  // wrong language pick or re-read a question without abandoning the form
+  // and starting over on a fresh token visit.
+  function goBack() {
+    setStepIndex((i) => Math.max(i - 1, 0));
+  }
+
+  const backButton =
+    stepIndex > 0 ? (
+      <button
+        type="button"
+        onClick={goBack}
+        className="self-start text-sm font-medium text-[#8a6a2f] underline-offset-2 hover:underline"
+      >
+        ← Back
+      </button>
+    ) : null;
+
   return (
     <form action={action} className="flex flex-col gap-5">
       <input type="hidden" name="token" value={token} />
       <input type="hidden" name="l1_language" value={lang ?? ""} />
       <input type="hidden" name="consent_given" value={consented ? "true" : ""} />
+      {questions.map((_, i) => (
+        <input key={i} type="hidden" name={`answer_${i}`} value={answers[i] ?? ""} />
+      ))}
 
       <div className="flex items-center gap-1.5">
         {STEPS.map((s, i) => (
@@ -103,16 +131,19 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
               </div>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              setConsented(true);
-              goNext();
-            }}
-            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
-          >
-            {t.agreeLabel}
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                setConsented(true);
+                goNext();
+              }}
+              className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              {t.agreeLabel}
+            </button>
+            {backButton}
+          </div>
           <p className="text-xs text-[#8a6a2f]">You can withdraw at any time by emailing the centre.</p>
         </div>
       ) : null}
@@ -130,16 +161,25 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
               <label htmlFor={`answer_${i}`} className="text-sm text-[#8a6a2f]">
                 {question}
               </label>
-              <textarea id={`answer_${i}`} name={`answer_${i}`} rows={2} className={inputClass} />
+              <textarea
+                id={`answer_${i}`}
+                rows={2}
+                value={answers[i] ?? ""}
+                onChange={(e) => setAnswers((prev) => prev.map((a, idx) => (idx === i ? e.target.value : a)))}
+                className={inputClass}
+              />
             </div>
           ))}
-          <button
-            type="button"
-            onClick={goNext}
-            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
-          >
-            Next
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={goNext}
+              className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              Next
+            </button>
+            {backButton}
+          </div>
         </div>
       ) : null}
 
@@ -151,6 +191,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
               Eight questions. Answer out loud in English. Stop when you want -- two to three minutes altogether.
             </p>
           </div>
+          {backButton}
           <VolunteerRecorder
             prompts={RECORDING_PROMPTS}
             recordingConsentLine={t?.recordingConsentLine ?? "I separately agree to being recorded."}
