@@ -8,7 +8,7 @@ import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
 import { DesignerCredit } from "@/components/designer-credit";
 import { Greeting } from "@/app/student/[token]/greeting";
-import { getVolunteerIdentityData, TICK_THRESHOLD_MINUTES, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-cross-course";
+import { getVolunteerIdentityData, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-cross-course";
 import { PushSubscribeButton } from "@/components/push-subscribe-button";
 import { subscribeVolunteerPush, unsubscribeVolunteerPush } from "@/lib/push/actions";
 
@@ -438,7 +438,6 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   const progressPct = Math.min((hoursCredited / certificateHoursThreshold) * 100, 100);
   const milestones = milestonesFor(certificateHoursThreshold);
   const nextMilestoneIndex = milestones.findIndex((m) => hoursCredited < m);
-  const perClassHours = TICK_THRESHOLD_MINUTES / 60 + 0.75;
 
   const firstName = volunteer.name.split(" ")[0];
   const endDateLabel = course?.end_date ? new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
@@ -483,18 +482,17 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                 />
               ) : null}
               <ClassesTable rows={rows} />
-              <MaterialsPanel lessonCards={lessonCards} />
-              <div className="grid grid-cols-2 gap-5">
+              <div className="grid grid-cols-[2fr_1fr] items-start gap-5">
                 <HoursCard
                   hoursCredited={hoursCredited}
                   hoursRemaining={hoursRemaining}
-                  perClassHours={perClassHours}
                   progressPct={progressPct}
                   milestones={milestones}
                   nextMilestoneIndex={nextMilestoneIndex}
                 />
                 <ThisCourseCard thisCourseAttended={thisCourseAttended} thisCourseHeldSoFar={thisCourseHeldSoFar} thisCourseClasses={thisCourseClasses} />
               </div>
+              <MaterialsPanel lessonCards={lessonCards} />
             </div>
             <Footer endDateLabel={endDateLabel} materials={materials} token={token} />
           </div>
@@ -525,7 +523,6 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
               <HoursCard
                 hoursCredited={hoursCredited}
                 hoursRemaining={hoursRemaining}
-                perClassHours={perClassHours}
                 progressPct={progressPct}
                 milestones={milestones}
                 nextMilestoneIndex={nextMilestoneIndex}
@@ -801,14 +798,12 @@ function MaterialsPanel({
 function HoursCard({
   hoursCredited,
   hoursRemaining,
-  perClassHours,
   progressPct,
   milestones,
   nextMilestoneIndex,
 }: {
   hoursCredited: number;
   hoursRemaining: number;
-  perClassHours: number;
   progressPct: number;
   milestones: number[];
   nextMilestoneIndex: number;
@@ -828,8 +823,7 @@ function HoursCard({
         </p>
       </div>
       <p className="mt-1 text-xs text-muted">
-        {hoursRemaining > 0 ? `You are ${hoursRemaining.toFixed(1)} hours from your certificate.` : "You've reached the certificate threshold."} Every class
-        adds {perClassHours.toFixed(2).replace(/\.?0+$/, "")} hours.
+        {hoursRemaining > 0 ? `You are ${hoursRemaining.toFixed(1)} hours from your certificate.` : "You've reached the certificate threshold."}
       </p>
       <div className="mt-2.5 h-[5px] overflow-hidden rounded-full" style={{ background: "oklch(93.5% 0.012 85)" }}>
         <div className="h-full rounded-full bg-primary" style={{ width: `${progressPct}%` }} />

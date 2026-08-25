@@ -30,16 +30,32 @@ function formatCountdown(ms: number): string {
 // through the countdown out of impatience.
 export function JoinOnlineButton({ zoomUrl, activationIso, className }: { zoomUrl: string; activationIso: string | null; className: string }) {
   const activationMs = activationIso ? new Date(activationIso).getTime() : null;
-  const [now, setNow] = useState(() => Date.now());
+  // `now` starts null so the server render and the client's first render
+  // (hydration) show the exact same text either way -- Date.now() only
+  // ever gets called client-side, after mount, same fix as the
+  // no-Math.random-on-first-render rule. Until then, a gated button shows
+  // a placeholder countdown rather than the real link -- never flips to
+  // "active" purely because the clock hasn't loaded yet.
+  const [now, setNow] = useState<number | null>(null);
   const [showMessage, setShowMessage] = useState(false);
 
-  const active = activationMs == null || now >= activationMs;
+  const mounted = now != null;
+  const active = activationMs == null || (mounted && now >= activationMs);
 
   useEffect(() => {
-    if (active) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [active]);
+    if (activationMs == null) return;
+    const tick = () => {
+      const next = Date.now();
+      setNow(next);
+      if (next >= activationMs) clearInterval(id);
+    };
+    const id = setInterval(tick, 1000);
+    const firstTick = setTimeout(tick, 0);
+    return () => {
+      clearInterval(id);
+      clearTimeout(firstTick);
+    };
+  }, [activationMs]);
 
   if (active) {
     return (
@@ -58,7 +74,7 @@ export function JoinOnlineButton({ zoomUrl, activationIso, className }: { zoomUr
     <div className="relative">
       <button type="button" onClick={() => setShowMessage((v) => !v)} className={`${className} opacity-60`}>
         <VideoIcon />
-        Join in {formatCountdown(activationMs! - now)}
+        Join in {mounted ? formatCountdown(activationMs! - now) : "--:--"}
       </button>
       {showMessage ? (
         <div className="absolute top-full left-0 z-10 mt-1.5 w-56 rounded-[8px] border border-border bg-card p-2.5 text-xs text-ink shadow-lg">
