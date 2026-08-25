@@ -4,13 +4,22 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { canView } from "@/lib/auth/centre-permissions";
-import { computeAssessorCentreHistory } from "@/lib/assessor-course-history";
+import { computeAssessorCentreHistory, type Severity } from "@/lib/assessor-course-history";
 
 // Dedicated screen reached from the "Assessor history" card on Centre
 // Admin overview (centre/page.tsx) -- same pattern as /centre/volunteers:
 // the card stays a lightweight summary, this page owns the full,
-// unbounded, per-assessor detail. Handbook 12.3 / for-claude-code-
-// concurrent-course-checks.md: visible only, nothing here blocks anything.
+// unbounded, per-assessor detail. Rebuilt against the real design handoff
+// (Assessor History.dc.html / assessor-history-full-spec.md, 25 Aug 2026)
+// -- the earlier text-only-spec version was missing the consecutive-vs-
+// concurrent distinction, the severity colours, the flag explanation, and
+// the per-course overlap/status columns entirely.
+const SEVERITY_COLOR: Record<Severity, string> = {
+  fine: "var(--color-ink)",
+  "at-limit": "var(--color-status-warning-text)",
+  over: "var(--color-status-at-risk-text)",
+};
+
 export default async function AssessorHistoryPage({
   searchParams,
 }: {
@@ -29,10 +38,11 @@ export default async function AssessorHistoryPage({
   const scope = branch && mine.includes(branch) ? [branch] : mine;
 
   const admin = createAdminClient();
-  const { data: courses } = await admin
-    .from("courses")
-    .select("id, name, course_code, start_date, end_date")
-    .in("center_id", scope);
+  const [{ data: courses }, { data: centers }] = await Promise.all([
+    admin.from("courses").select("id, name, course_code, start_date, end_date").in("center_id", scope),
+    admin.from("centers").select("id, name").in("id", scope),
+  ]);
+  const centreNameLabel = (centers ?? []).map((c) => c.name).join(", ") || "This centre";
   const courseIds = (courses ?? []).map((c) => c.id);
 
   const { data: assessorLinkRows } =
@@ -60,18 +70,18 @@ export default async function AssessorHistoryPage({
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-8">
       <div className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Centre overview &middot; assessor history</p>
-          <h1 className="font-serif text-2xl text-ink">Assessor history</h1>
-          <p className="max-w-2xl text-sm text-muted">
-            Every course an external assessor has been linked to at this centre. Handbook 12.3 asks that an assessor not
-            assess more than two concurrent courses at a centre -- shown here, not enforced, since a centre doesn&apos;t
-            choose its own assessor.
+        <div className="flex max-w-[820px] flex-col gap-[13px]">
+          <p className="text-[11px] font-bold tracking-[0.14em] text-muted uppercase">{centreNameLabel} &middot; compliance &middot; visible only, not enforced</p>
+          <h1 className="font-serif text-[34px] leading-[1.14] font-semibold text-ink">Assessor history</h1>
+          <p className="text-sm leading-[1.6] text-muted text-pretty">
+            Handbook 12.3: the same assessor must not be used for more than two consecutive courses, and may not assess more than two courses
+            concurrently at one centre. A centre does not choose its assessor and repeat visits are common, so this is not enforced — it is kept
+            visible so a centre administrator can see the pattern.
           </p>
         </div>
-        <Link href="/centre" className="text-sm font-semibold text-muted hover:text-ink">
+        <Link href="/centre" className="shrink-0 text-sm font-semibold text-muted hover:text-ink">
           ← Overview
         </Link>
       </div>
@@ -81,31 +91,79 @@ export default async function AssessorHistoryPage({
           <p className="text-sm text-muted">No assessor has been linked to a course at this centre yet.</p>
         </div>
       ) : (
-        history.map((a, i) => (
-          <div key={a.profileId} className={`card ${a.peakConcurrent > 2 ? "card-amber" : i % 2 === 1 ? "card-gold" : ""}`}>
-            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border px-5 py-4">
-              <div>
-                <h2 className="font-serif text-base text-ink">{a.name}</h2>
-                {assessorEmailById.get(a.profileId) ? (
-                  <p className="text-xs text-muted">{assessorEmailById.get(a.profileId)}</p>
-                ) : null}
+        <div className="flex flex-col gap-8">
+          {history.map((a) => (
+            <div key={a.profileId} className="flex flex-col gap-4 rounded-[8px] border border-border bg-card p-[22px_24px]">
+              <div className="flex flex-wrap items-baseline justify-between gap-3.5">
+                <div className="flex flex-col gap-[3px]">
+                  <p className="font-serif text-[19px] font-semibold text-ink">{a.name}</p>
+                  <p className="text-xs text-muted">
+                    {a.courses.length} {a.courses.length === 1 ? "course" : "courses"} assessed at this centre
+                    {assessorEmailById.get(a.profileId) ? ` · ${assessorEmailById.get(a.profileId)}` : ""}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-5">
+                  <div className="flex flex-col items-end gap-0.5">
+                    <p className="font-serif text-xl font-semibold" style={{ color: SEVERITY_COLOR[a.currentStreakSeverity] }}>
+                      {a.currentStreak}
+                    </p>
+                    <p className="text-[10px] font-bold tracking-[0.08em] text-muted uppercase">Consecutive streak</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <p className="font-serif text-xl font-semibold" style={{ color: SEVERITY_COLOR[a.peakConcurrentSeverity] }}>
+                      {a.peakConcurrent}
+                    </p>
+                    <p className="text-[10px] font-bold tracking-[0.08em] text-muted uppercase">Peak concurrent</p>
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-4 text-xs">
-                <span className={a.peakConcurrent > 2 ? "font-semibold text-status-warning-text" : "text-muted"}>
-                  {a.peakConcurrent} concurrent at peak
-                  {a.peakConcurrent > 2 ? " (over the guideline)" : ""}
-                </span>
-                <span className="text-muted">{a.currentStreak} course{a.currentStreak === 1 ? "" : "s"} in a row currently</span>
+
+              {a.flag ? (
+                <div
+                  className="flex items-start gap-2.5 rounded-[6px] px-3.5 py-2.5"
+                  style={{
+                    background: "color-mix(in oklab, var(--color-status-warning-text) 10%, var(--color-card))",
+                    border: "1px solid color-mix(in oklab, var(--color-status-warning-text) 30%, transparent)",
+                  }}
+                >
+                  <span className="mt-1.5 size-[5px] shrink-0 rounded-full" style={{ background: "var(--color-status-warning-text)" }} />
+                  <p className="text-xs leading-[1.5] text-ink">{a.flagText}</p>
+                </div>
+              ) : null}
+
+              <div className="overflow-hidden rounded-[6px] border border-border">
+                <div className="grid grid-cols-[96px_1fr_minmax(0,160px)_96px] gap-2 bg-[color-mix(in_oklab,var(--color-card-inset)_60%,var(--color-card))] px-3 py-2.5 text-[10px] font-bold tracking-[0.08em] text-muted uppercase">
+                  <span>Dates</span>
+                  <span>Course</span>
+                  <span>Overlap</span>
+                  <span>Status</span>
+                </div>
+                {a.courses.map((c, i) => (
+                  <div
+                    key={c.id}
+                    className={`grid grid-cols-[96px_1fr_minmax(0,160px)_96px] items-center gap-2 px-3 py-2.5 text-[12.5px] text-ink ${i > 0 ? "border-t border-border-faint" : ""}`}
+                  >
+                    <span className="text-xs text-muted">{dateRange(c.start_date, c.end_date)}</span>
+                    <span className="font-semibold">{c.label}</span>
+                    <span className="text-xs text-muted">{c.overlap}</span>
+                    <span>
+                      <span
+                        className="inline-flex items-center rounded-full px-2.5 py-[3px] text-[11px] font-semibold"
+                        style={
+                          c.status === "Active"
+                            ? { background: "var(--color-status-on-track-bg)", color: "var(--color-status-on-track-text)" }
+                            : { background: "var(--color-card-inset)", color: "var(--color-muted)" }
+                        }
+                      >
+                        {c.status}
+                      </span>
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
-            {a.courses.map((c, i) => (
-              <div key={c.id} className={`flex items-center justify-between px-5 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                <span className="text-sm text-ink">{c.label}</span>
-                <span className="text-xs text-muted">{dateRange(c.start_date, c.end_date)}</span>
-              </div>
-            ))}
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   );

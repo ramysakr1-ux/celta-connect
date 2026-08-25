@@ -413,7 +413,9 @@ export default async function CentreOverviewPage({
                 <h2 className="font-serif text-base text-ink">Assessor history</h2>
                 <span className="text-xs text-muted">
                   {assessorHistory.length} {assessorHistory.length === 1 ? "assessor" : "assessors"}
-                  {assessorHistory.some((a) => a.peakConcurrent > 2) ? " · one over the concurrent-two guideline" : ""}
+                  {assessorHistory.some((a) => a.flag)
+                    ? ` · ${assessorHistory.filter((a) => a.flag).length} at or over a Handbook 12.3 limit`
+                    : ""}
                 </span>
               </div>
               <span className="text-xs font-semibold text-primary">See all →</span>
