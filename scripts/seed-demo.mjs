@@ -460,7 +460,11 @@ async function main() {
     { type: "tp", title: "TP4", offset: -3 },
     { type: "tp", title: "TP5", offset: 2 },
     { type: "input_session", title: "Teaching Vocabulary", offset: 5 },
-    { type: "tp", title: "TP6", offset: 7 },
+    // Real Zoom link (not test data) -- volunteer-view-full-spec.md's own
+    // mockup pairs a room with a Join online button on the featured next
+    // class, so the demo's own next TP needs one too, not just an
+    // in-person-only example.
+    { type: "tp", title: "TP6", offset: 7, zoomUrl: "https://zoom.us/j/5551234567" },
   ];
   const { data: timetableRows } = await supabase
     .from("course_timetable_events")
@@ -471,6 +475,7 @@ async function main() {
         title: e.title,
         event_date: isoDaysFromNow(e.offset),
         linked_assignment_type: e.linked ?? null,
+        zoom_url: e.zoomUrl ?? null,
         // Real trainer-facing timetable events link a TP calendar day to its
         // rotation number (course_timetable_events.linked_tp_number) so the
         // volunteer view and portfolio pages can resolve a topic/materials
