@@ -3,6 +3,7 @@ import { VolunteerSignupForm } from "@/app/student/[token]/signup-form";
 import { DeclineButton } from "@/app/student/[token]/decline-button";
 import { ClassMaterialsLink } from "@/app/student/[token]/class-materials-link";
 import { LessonMaterialsCard } from "@/app/student/[token]/lesson-materials-card";
+import { JoinOnlineButton } from "@/app/student/[token]/join-online-button";
 import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
 import { DesignerCredit } from "@/components/designer-credit";
@@ -95,17 +96,6 @@ function CalendarIcon() {
       <path d="M3 10h18" />
       <path d="M8 3v4" />
       <path d="M16 3v4" />
-    </svg>
-  );
-}
-
-// Path lifted directly from Volunteer View - standalone.html's own "Join
-// online" button markup, not redrawn from a generic icon set.
-function VideoIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 10l4.5-2.5v9L15 14" />
-      <rect x="3" y="6" width="12" height="12" rx="2" />
     </svg>
   );
 }
@@ -236,6 +226,30 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     .filter((c) => c.courseId === accessToken.course_id && c.eventDate >= today)
     .sort((a, b) => (a.eventDate < b.eventDate ? -1 : 1));
   const nextClass = upcoming[0] ?? null;
+
+  // Ramy, 25 Aug 2026: the Join-online link only activates 10 minutes
+  // before start, but ONLY for the first TP of the day -- "between
+  // lessons... it should always be active" for anyone stepping out and
+  // back in on a later same-day round. Detected by checking for any
+  // earlier-that-day TP event on this course, not by tp_number (a single
+  // calendar TP round can host several trainees' back-to-back segments
+  // under one event_time, same premise nextClassTeachers works from).
+  let joinActivationIso: string | null = null;
+  if (nextClass?.zoomUrl && nextClass.eventTime) {
+    const { data: earlierSameDay } = await admin
+      .from("course_timetable_events")
+      .select("id")
+      .eq("course_id", nextClass.courseId)
+      .eq("type", "tp")
+      .eq("event_date", nextClass.eventDate)
+      .lt("event_time", nextClass.eventTime)
+      .limit(1);
+    const isFirstTpOfDay = !earlierSameDay || earlierSameDay.length === 0;
+    if (isFirstTpOfDay) {
+      const startMs = new Date(`${nextClass.eventDate}T${nextClass.eventTime}`).getTime();
+      joinActivationIso = new Date(startMs - 10 * 60_000).toISOString();
+    }
+  }
 
   const { data: nextClassDecline } = nextClass
     ? await admin
@@ -465,6 +479,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                   teachersLabel={teachersLabel}
                   token={token}
                   nextClassDecline={nextClassDecline}
+                  joinActivationIso={joinActivationIso}
                 />
               ) : null}
               <ClassesTable rows={rows} />
@@ -503,6 +518,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                   course={course}
                   token={token}
                   nextClassDecline={nextClassDecline}
+                  joinActivationIso={joinActivationIso}
                 />
               ) : null}
               <ClassesList rows={rows} attendedCount={thisCourseAttended} />
@@ -579,6 +595,7 @@ function NextClassCard({
   course,
   token,
   nextClassDecline,
+  joinActivationIso,
 }: {
   nextClass: NextClassLike;
   whereLabel: string;
@@ -587,6 +604,7 @@ function NextClassCard({
   course: { name: string } | null;
   token: string;
   nextClassDecline: { id: string } | null;
+  joinActivationIso: string | null;
 }) {
   return (
     <div
@@ -600,15 +618,11 @@ function NextClassCard({
       <NextClassFacts whereLabel={whereLabel} topicLabel={topicLabel} teachersLabel={teachersLabel} />
       <div className="flex items-center gap-2">
         {nextClass.zoomUrl ? (
-          <a
-            href={nextClass.zoomUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <JoinOnlineButton
+            zoomUrl={nextClass.zoomUrl}
+            activationIso={joinActivationIso}
             className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[8px] bg-primary text-sm font-semibold text-primary-foreground"
-          >
-            <VideoIcon />
-            Join online
-          </a>
+          />
         ) : null}
         <a
           href={`data:text/calendar;charset=utf-8,${encodeURIComponent(
@@ -635,6 +649,7 @@ function NextClassBanner({
   teachersLabel,
   token,
   nextClassDecline,
+  joinActivationIso,
 }: {
   nextClass: NextClassLike;
   whereLabel: string;
@@ -642,6 +657,7 @@ function NextClassBanner({
   teachersLabel: string | null;
   token: string;
   nextClassDecline: { id: string } | null;
+  joinActivationIso: string | null;
 }) {
   return (
     <div
@@ -658,15 +674,11 @@ function NextClassBanner({
       <div className="flex items-center gap-3">
         <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
         {nextClass.zoomUrl ? (
-          <a
-            href={nextClass.zoomUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <JoinOnlineButton
+            zoomUrl={nextClass.zoomUrl}
+            activationIso={joinActivationIso}
             className="flex h-[38px] items-center gap-2 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground"
-          >
-            <VideoIcon />
-            Join online
-          </a>
+          />
         ) : null}
       </div>
     </div>

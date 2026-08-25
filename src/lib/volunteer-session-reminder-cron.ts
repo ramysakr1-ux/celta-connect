@@ -77,7 +77,7 @@ export async function runVolunteerSessionReminderCron(): Promise<{ eventsChecked
         { volunteerStudentIds: [volunteerId] },
         {
           title: "Your class starts in 30 minutes",
-          body: "Join here.",
+          body: "Log in early to check today's materials. The Join link opens 10 minutes before class.",
           url: token ? `/student/${token}` : "/",
         }
       );
