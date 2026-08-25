@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { createMaterialRecord, deleteMaterial } from "@/app/dashboard/trainee/plan/[tpNumber]/materials-actions";
 import { DriveAttachButtons } from "@/app/dashboard/trainee/plan/[tpNumber]/drive-attach-buttons";
-import type { Database } from "@/lib/supabase/types";
+import type { Database, TpMaterialFileType } from "@/lib/supabase/types";
 
 type TpMaterial = Database["public"]["Tables"]["tp_materials"]["Row"];
 
@@ -62,16 +62,19 @@ export function MaterialsSection({
 
     const isPdf = file.type === "application/pdf";
     const isImage = file.type.startsWith("image/");
-    if (!isPdf && !isImage) {
-      setError("Only PDF or image files are accepted.");
+    const isPptx = file.type === "application/vnd.openxmlformats-officedocument.presentationml.presentation" || file.type === "application/vnd.ms-powerpoint";
+    const isDocx = file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || file.type === "application/msword";
+    if (!isPdf && !isImage && !isPptx && !isDocx) {
+      setError("Only PDF, PowerPoint, Word, or image files are accepted.");
       return;
     }
+    const fileType: TpMaterialFileType = isPdf ? "pdf" : isPptx ? "pptx" : isDocx ? "docx" : "image";
 
     setError(null);
     setUploading(true);
     try {
       const supabase = createClient();
-      const ext = file.name.split(".").pop() || (isPdf ? "pdf" : "png");
+      const ext = file.name.split(".").pop() || fileType;
       const storagePath = `${centerId}/${traineeId}/${tpPlanId}/${crypto.randomUUID()}.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from("tp-materials")
@@ -86,7 +89,7 @@ export function MaterialsSection({
         tpPlanId,
         storagePath,
         fileName: file.name,
-        fileType: isPdf ? "pdf" : "image",
+        fileType,
       });
       if (result.error) setError(result.error);
     } finally {
@@ -98,7 +101,8 @@ export function MaterialsSection({
     <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
       <h2 className="font-serif text-lg text-ink">Materials</h2>
       <p className="mt-1 text-sm text-muted">
-        Handouts, worksheets, or slides. Upload a PDF/image{hasGoogleConnection ? ", or attach a file directly from your centre's Drive" : ""}.
+        Handouts, worksheets, or slides. Upload a PDF, PowerPoint, Word doc, or image
+        {hasGoogleConnection ? ", or attach a file directly from your centre's Drive" : ""}.
       </p>
 
       {materials.length > 0 ? (
@@ -135,7 +139,7 @@ export function MaterialsSection({
             <label className="text-sm text-muted">Attach materials</label>
             <input
               type="file"
-              accept="application/pdf,image/*"
+              accept="application/pdf,image/*,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
               disabled={uploading}
               onChange={handleFileChange}
               className="text-sm text-ink"

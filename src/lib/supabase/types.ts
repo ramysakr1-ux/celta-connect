@@ -156,7 +156,7 @@ export type TpDensityTier = "scripted" | "framework" | "coaching_prose" | "minim
 export type TpPointStatus = "pending_review" | "published" | "archived";
 export type TpGenerationSource = "ai_generated" | "manual";
 export type FeedbackTone = "direct" | "supportive";
-export type TpMaterialFileType = "pdf" | "image";
+export type TpMaterialFileType = "pdf" | "image" | "pptx" | "docx";
 export type ResourceCategory =
   | "lesson_planning"
   | "teaching_practice"
