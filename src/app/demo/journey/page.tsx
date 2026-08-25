@@ -79,7 +79,7 @@ export default async function JourneyPage() {
 
   const applicantName = "Tariq Osei";
   const courseName = "CELTA Demo Course";
-  const centreName = "Connect CELTA Demo Centre";
+  const centreName = "CELTA Demo Centre";
 
   // Every preview below goes through withConnectBranding, same as a real
   // send does in sendApplicantEmail -- otherwise this page would show the
