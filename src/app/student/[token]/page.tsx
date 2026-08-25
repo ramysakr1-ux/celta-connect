@@ -360,14 +360,6 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     richMaterials: c.courseId === accessToken.course_id && c.linkedTpNumber != null ? (richMaterialsByTpNumber.get(c.linkedTpNumber) ?? []) : [],
   }));
 
-  // volunteer-view-full-spec.md 1b: a dedicated Materials panel under the
-  // table, scoped to one class session -- not a click-to-select UI (the
-  // mockup itself is static, no interaction spec given), just the most
-  // recently HELD class that actually has materials, since that's the one
-  // a volunteer just came from and is most likely checking for handouts.
-  // `rows` is already sorted most-recent-first.
-  const featuredMaterialsClass = rows.find((c) => c.attended !== null && c.richMaterials.length > 0) ?? null;
-
   const hoursRemaining = Math.max(certificateHoursThreshold - hoursCredited, 0);
   const progressPct = Math.min((hoursCredited / certificateHoursThreshold) * 100, 100);
   const milestones = milestonesFor(certificateHoursThreshold);
@@ -416,7 +408,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                 />
               ) : null}
               <ClassesTable rows={rows} />
-              {featuredMaterialsClass ? <MaterialsPanel classRow={featuredMaterialsClass} /> : null}
+              <MaterialsPanel rows={rows} />
               <div className="grid grid-cols-2 gap-5">
                 <HoursCard
                   hoursCredited={hoursCredited}
@@ -626,6 +618,7 @@ interface ClassRow {
   eventDate: string;
   eventTime: string | null;
   zoomUrl: string | null;
+  linkedTpNumber: number | null;
   topic: string | null;
   courseName: string;
   attended: boolean | null;
@@ -716,23 +709,43 @@ function FileTypeTile({ fileType }: { fileType: string | null }) {
 // already right: "the actual material that they received, the handouts.
 // Where are they?" 3-column grid of compact file cards (icon tile + name +
 // size + a real "Get" download), not another dropdown.
-function MaterialsPanel({ classRow }: { classRow: ClassRow }) {
+// Ramy, 25 Aug 2026, after seeing one card per FILE: "every card should...
+// contain all the material for one TP. That's how I want it. So one TP, one
+// lesson... TP one lesson one, TP one lesson two, TP one lesson three."
+// One card per class that's actually happened and has something shared,
+// not just the most recent -- a volunteer should be able to get materials
+// from any past class, not only the last one. Files for that lesson stack
+// inside its own card rather than each getting its own top-level card.
+function MaterialsPanel({ rows }: { rows: ClassRow[] }) {
+  const lessons = rows.filter((c) => c.attended !== null && c.richMaterials.length > 0);
+  if (lessons.length === 0) return null;
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">
-        Materials — {classRow.topic ?? classRow.courseName} · {formatShortDate(classRow.eventDate)}
-      </p>
+      <p className="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">Materials</p>
       <div className="grid grid-cols-3 gap-2.5">
-        {classRow.richMaterials.map((m) => (
-          <div key={m.id} className="flex items-center gap-[9px] rounded-[7px] border border-border px-3 py-2.5">
-            <FileTypeTile fileType={m.fileType} />
-            <div className="flex min-w-0 flex-1 flex-col gap-px">
-              <p className="truncate text-xs font-semibold text-ink">{m.name}</p>
-              {formatFileSize(m.sizeBytes) ? <p className="text-[11px] text-muted">{formatFileSize(m.sizeBytes)}</p> : null}
+        {lessons.map((c) => (
+          <div key={c.eventId} className="flex flex-col gap-2.5 rounded-[8px] border border-border p-3">
+            <div>
+              <p className="text-[13px] font-semibold text-ink">
+                {c.linkedTpNumber != null ? `TP${c.linkedTpNumber} — ` : ""}
+                {c.topic ?? c.courseName}
+              </p>
+              <p className="text-[11px] text-muted">{formatShortDate(c.eventDate)}</p>
             </div>
-            <a href={m.url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[11.5px] font-semibold text-primary hover:underline">
-              Get
-            </a>
+            <div className="flex flex-col gap-1.5">
+              {c.richMaterials.map((m) => (
+                <div key={m.id} className="flex items-center gap-2">
+                  <FileTypeTile fileType={m.fileType} />
+                  <div className="flex min-w-0 flex-1 flex-col gap-px">
+                    <p className="truncate text-xs font-semibold text-ink">{m.name}</p>
+                    {formatFileSize(m.sizeBytes) ? <p className="text-[11px] text-muted">{formatFileSize(m.sizeBytes)}</p> : null}
+                  </div>
+                  <a href={m.url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[11.5px] font-semibold text-primary hover:underline">
+                    Get
+                  </a>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
