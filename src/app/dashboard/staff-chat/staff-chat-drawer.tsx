@@ -6,14 +6,6 @@ import { createClient } from "@/lib/supabase/client";
 import { MessageThread, type MessageThreadHandle, type Message } from "@/app/dashboard/staff-chat/message-thread";
 import type { ChannelSummary, Coworker } from "@/lib/staff-chat";
 
-// apply-to-app.md §1 -- checkpoint 1 rewrite. Was hover-to-reveal on an
-// invisible 44px strip (undiscoverable, unreachable by keyboard -- build-
-// spec.md §8 bug 2). Now always present, dimmed at rest: a genuine idle
-// timer instead of hover state, and dimming is purely visual (opacity/
-// transform) -- pointer-events and keyboard focus work identically dimmed
-// or awake, which is the actual fix for the bug this replaces.
-const IDLE_MS = 3500;
-
 function initials(name: string, isDm: boolean): string {
   if (isDm) {
     const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -82,7 +74,6 @@ export function StaffChatDrawer({
   const [selectedId, setSelectedId] = useState<string | null>(initialChannels[0]?.id ?? null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [threadOpen, setThreadOpen] = useState(false);
-  const [awake, setAwake] = useState(true);
   const [startingDm, setStartingDm] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [msLeft, setMsLeft] = useState(0);
@@ -105,21 +96,7 @@ export function StaffChatDrawer({
     threadOpenRef.current = threadOpen;
   }, [threadOpen]);
 
-  // The idle timer never runs while a panel is open (re-arms the instant
-  // both close, in addition to every explicit wake-trigger event below --
-  // see the Escape/mouseenter/focus/keydown/click handlers).
-  useEffect(() => {
-    if (pickerOpen || threadOpen) return;
-    const t = setTimeout(() => setAwake(false), IDLE_MS);
-    return () => clearTimeout(t);
-  }, [pickerOpen, threadOpen, awake]);
-
-  function wake() {
-    setAwake(true);
-  }
-
   function handleKeyDown(e: React.KeyboardEvent) {
-    wake();
     if (e.key === "Escape") {
       if (pickerOpen) setPickerOpen(false);
       else if (threadOpen) setThreadOpen(false);
@@ -233,15 +210,7 @@ export function StaffChatDrawer({
       // see this prop's own comment above).
       style={raiseForMobileNav ? { background: "oklch(99.5% 0.004 90)", borderTop: "1px solid var(--color-border)" } : undefined}
     >
-      <div
-        className={`pointer-events-auto flex w-full max-w-[840px] flex-col gap-2 transition-[opacity,transform] duration-[260ms] ease-out ${
-          awake ? "translate-y-0 opacity-100" : "translate-y-3.5 opacity-40"
-        }`}
-        onMouseEnter={wake}
-        onFocus={wake}
-        onClick={wake}
-        onKeyDown={handleKeyDown}
-      >
+      <div className="pointer-events-auto flex w-full max-w-[840px] flex-col gap-2" onKeyDown={handleKeyDown}>
         {/* Picker: a later sibling of the thread/bar (not a descendant of
             anything overflow-hidden), so it isn't clipped. */}
         {pickerOpen && !readOnly ? (
