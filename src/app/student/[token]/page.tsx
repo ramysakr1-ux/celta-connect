@@ -604,9 +604,13 @@ function ClassesList({ rows, attendedCount }: { rows: ClassRow[]; attendedCount:
 
 function ClassesTable({ rows }: { rows: ClassRow[] }) {
   return (
-    <div id="classes" className="overflow-hidden rounded-[6px] border border-border">
+    // No overflow-hidden on this wrapper -- ClassMaterialsLink's multi-file
+    // dropdown is an absolutely-positioned popup that needs to escape the
+    // table, not just the rounded corners. Rounding applied directly to the
+    // header and the last row instead.
+    <div id="classes" className="rounded-[6px] border border-border">
       <div
-        className="grid grid-cols-[96px_1fr_128px_150px] border-b border-border px-4 py-2 text-[9px] font-bold tracking-[0.06em] text-muted uppercase"
+        className="grid grid-cols-[96px_1fr_128px_150px] rounded-t-[6px] border-b border-border px-4 py-2 text-[9px] font-bold tracking-[0.06em] text-muted uppercase"
         style={{ background: "var(--color-card)" }}
       >
         <div>Date</div>
@@ -620,7 +624,7 @@ function ClassesTable({ rows }: { rows: ClassRow[] }) {
         rows.map((c, i) => (
           <div
             key={c.eventId}
-            className={`grid grid-cols-[96px_1fr_128px_150px] items-center px-4 py-2.5 text-xs text-ink ${i > 0 ? "border-t border-border-faint" : ""}`}
+            className={`grid grid-cols-[96px_1fr_128px_150px] items-center px-4 py-2.5 text-xs text-ink ${i > 0 ? "border-t border-border-faint" : ""} ${i === rows.length - 1 ? "rounded-b-[6px]" : ""}`}
           >
             <div className="text-muted">{formatShortDate(c.eventDate)}</div>
             <div className="truncate">{c.topic ?? c.courseName}</div>

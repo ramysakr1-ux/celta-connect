@@ -305,14 +305,15 @@ async function main() {
   }
 
   // Amara: strong, 4 TPs taught
-  const amaraTpPlanIds = []; // index 0 = TP1, ... -- every TP gets a shared
-  // material below, not just the first (Ramy, 25 Aug 2026: "every TP should
-  // have the material so the students can access them").
+  const amaraTpPlanIds = []; // index 0 = TP1, ... -- every TP gets several
+  // shared materials below, not one apiece (Ramy, 25 Aug 2026, pointing at
+  // Volunteer View.dc.html's own "3 handouts"/"2 handouts" rows: "I'm
+  // talking about the actual materials where they lie inside the cards").
   for (const [i, cfg] of [
-    { aim: "Present perfect for life experience", grade: "above_standard", days: 12, materialName: "Present perfect -- slides" },
-    { aim: "Reading for gist and detail: a city life article", grade: "to_standard", days: 9, materialName: "Reading for gist and detail -- handout" },
-    { aim: "Vocabulary: Air Travel", grade: "above_standard", days: 6, materialName: "Air Travel vocabulary -- flashcards" },
-    { aim: "Functional language: Making suggestions", grade: "to_standard", days: 3, materialName: "Making suggestions -- worksheet" },
+    { aim: "Present perfect for life experience", grade: "above_standard", days: 12, materialNames: ["Present perfect -- slides", "Present perfect -- gap-fill handout"] },
+    { aim: "Reading for gist and detail: a city life article", grade: "to_standard", days: 9, materialNames: ["City life reading text", "Reading for gist -- comprehension questions"] },
+    { aim: "Vocabulary: Air Travel", grade: "above_standard", days: 6, materialNames: ["Air Travel vocabulary -- flashcards", "Air Travel -- listening transcript", "Air Travel -- matching worksheet"] },
+    { aim: "Functional language: Making suggestions", grade: "to_standard", days: 3, materialNames: ["Making suggestions -- slides", "Making suggestions -- role-play cards"] },
   ].entries()) {
     const planId = await seedTaughtTp(trainees["Amara Okafor"], i + 1, {
       aim: cfg.aim,
@@ -321,7 +322,7 @@ async function main() {
       actionPoints: ["Vary interaction patterns a little more"],
       daysAgo: cfg.days,
     });
-    amaraTpPlanIds.push({ planId, materialName: cfg.materialName });
+    amaraTpPlanIds.push({ planId, materialNames: cfg.materialNames });
   }
   await supabase.from("celta5_records").insert({
     course_id: course.id,
@@ -525,26 +526,29 @@ async function main() {
   if (attendanceRows.length > 0) {
     await supabase.from("volunteer_attendance").insert(attendanceRows);
   }
-  // A shared material off every one of Amara's TPs, not just the first --
-  // volunteer-view-full-spec.md's own mockup shows a handout count on every
-  // attended/missed row, and Ramy caught the gap directly: "every TP should
-  // have the material so the students can access them."
-  for (const { planId, materialName } of amaraTpPlanIds) {
-    const { data: material } = await supabase
-      .from("tp_materials")
-      .insert({
-        tp_plan_id: planId,
-        trainee_id: trainees["Amara Okafor"],
-        file_name: materialName,
-        slides_url: "https://docs.google.com/presentation/d/demo-placeholder/edit",
-      })
-      .select("id")
-      .single();
-    await supabase.from("volunteer_shared_materials").insert({
-      course_id: course.id,
-      tp_material_id: material.id,
-      shared_by: trainerId,
-    });
+  // Several shared materials off every one of Amara's TPs, not one apiece --
+  // volunteer-view-full-spec.md's own mockup shows a real handout COUNT
+  // (2-3, not always 1) on every attended/missed row, and Ramy caught the
+  // gap directly: "every TP should have the material so the students can
+  // access them."
+  for (const { planId, materialNames } of amaraTpPlanIds) {
+    for (const materialName of materialNames) {
+      const { data: material } = await supabase
+        .from("tp_materials")
+        .insert({
+          tp_plan_id: planId,
+          trainee_id: trainees["Amara Okafor"],
+          file_name: materialName,
+          slides_url: "https://docs.google.com/presentation/d/demo-placeholder/edit",
+        })
+        .select("id")
+        .single();
+      await supabase.from("volunteer_shared_materials").insert({
+        course_id: course.id,
+        tp_material_id: material.id,
+        shared_by: trainerId,
+      });
+    }
   }
   console.log("volunteer token:", volunteerToken.token);
 
