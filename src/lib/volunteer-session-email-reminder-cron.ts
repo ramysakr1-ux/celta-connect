@@ -3,24 +3,46 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendApplicantEmail, volunteerSessionReminderEmailHtml } from "@/lib/admissions-email";
 import { toLocalIso } from "@/lib/timetable-grid";
 
-// Ramy, 23 Aug 2026: volunteers get an EMAIL, not a push, for the
-// day-before reminder -- distinct from the existing 30-minutes-before push
-// (volunteer-session-reminder-cron.ts, which stays as-is). Fires once
-// daily (migration 0201's cron.schedule), checks for TP events happening
-// tomorrow, same idempotency table as the push cron but scoped to
-// channel = 'email' so the two reminders never block each other. Also
-// skips anyone who's used the email's own unsubscribe link (migration
-// 0214, reminders_opted_out) -- same flag the new 30-minute email checks.
+const WINDOW_START_MINUTES = 20 * 60 - 15; // 19h45m before
+const WINDOW_END_MINUTES = 20 * 60 + 15; // 20h15m before
+
+// Ramy, 25 Aug 2026: "we don't know what time zone... it should be a
+// certain number of hours before class time." Used to fire once a day at a
+// fixed clock time (17:00 UTC) for anything on "tomorrow"'s calendar date,
+// so the actual lead time swung anywhere from ~15 to ~33 hours depending on
+// the class's own start time. Deliberately NOT 24 hours before: for a
+// course teaching every day at roughly the same time, 24 hours before
+// tomorrow's class lands right at today's -- "it means they will actually
+// be at class when they get the reminder." 20 hours sidesteps that without
+// needing to know anything about the course's actual daily schedule (an
+// "end of today's class + 30 minutes" anchor was considered and dropped --
+// same idea, but has to solve weekends/gaps to find "the preceding class
+// day," and a flat number sidesteps that entirely). Same shape as the
+// 30-minutes-before push/email crons just scaled up -- a 30-minute-wide
+// window swept every 15 minutes (migration 0215), so no event can fall
+// through the gap between two sweeps. Same idempotency table as the push
+// cron, scoped to channel = 'email', and skips anyone who's used either
+// reminder email's unsubscribe link (migration 0214, reminders_opted_out).
 export async function runVolunteerSessionEmailReminderCron(): Promise<{ eventsChecked: number; reminded: number }> {
   const admin = createAdminClient();
-  const tomorrow = toLocalIso(new Date(Date.now() + 24 * 60 * 60 * 1000));
+  const now = new Date();
+  const windowStart = new Date(now.getTime() + WINDOW_START_MINUTES * 60_000);
+  const windowEnd = new Date(now.getTime() + WINDOW_END_MINUTES * 60_000);
 
-  const { data: dueEvents } = await admin
+  const { data: candidateEvents } = await admin
     .from("course_timetable_events")
     .select("id, course_id, title, event_date, event_time, zoom_url")
     .eq("type", "tp")
-    .eq("event_date", tomorrow);
-  if (!dueEvents || dueEvents.length === 0) return { eventsChecked: 0, reminded: 0 };
+    .not("event_time", "is", null)
+    .gte("event_date", toLocalIso(now))
+    .lte("event_date", toLocalIso(windowEnd));
+
+  const dueEvents = (candidateEvents ?? []).filter((e) => {
+    if (!e.event_time) return false;
+    const eventDateTime = new Date(`${e.event_date}T${e.event_time}`);
+    return eventDateTime >= windowStart && eventDateTime < windowEnd;
+  });
+  if (dueEvents.length === 0) return { eventsChecked: 0, reminded: 0 };
 
   const courseIds = [...new Set(dueEvents.map((e) => e.course_id))];
   const [{ data: volunteers }, { data: courses }] = await Promise.all([
