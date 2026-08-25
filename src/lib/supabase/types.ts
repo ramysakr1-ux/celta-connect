@@ -2416,6 +2416,7 @@ export interface Database {
             | "volunteer_signed_up"
             | "volunteer_class_starting"
             | "volunteer_session_reminder"
+            | "volunteer_session_reminder_30min"
             | "referral"
             | "workspace_invitation"
             | "password_reset"
@@ -3198,6 +3199,10 @@ export interface Database {
           // volunteered on. Null until auto-matched (by email) or manually
           // linked by an admin.
           volunteer_person_id: string | null;
+          // migration 0214 -- "stop these class reminders" from either
+          // reminder email's unsubscribe link. Covers the day-before and
+          // 30-minute email; push keeps its own separate browser toggle.
+          reminders_opted_out: boolean;
         };
         Insert: Partial<Database["public"]["Tables"]["volunteer_students"]["Row"]> & {
           course_id: string;
@@ -3373,10 +3378,11 @@ export interface Database {
           volunteer_student_id: string;
           timetable_event_id: string;
           sent_at: string;
-          // migration 0201 -- push (30 min before) vs email (day before)
-          // share this table for idempotency; the unique constraint is
-          // now (volunteer_student_id, timetable_event_id, channel).
-          channel: "push" | "email";
+          // migration 0201/0214 -- push (30 min before), email (day
+          // before), and email_30min (30 min before, email) share this
+          // table for idempotency; the unique constraint is now
+          // (volunteer_student_id, timetable_event_id, channel).
+          channel: "push" | "email" | "email_30min";
         };
         Insert: Partial<Database["public"]["Tables"]["volunteer_session_reminders_sent"]["Row"]> & {
           volunteer_student_id: string;

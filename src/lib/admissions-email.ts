@@ -38,6 +38,11 @@ export type ApplicantEmailType =
   // email, not push (the existing 30-minutes-before reminder stays a push,
   // src/lib/volunteer-session-reminder-cron.ts).
   | "volunteer_session_reminder"
+  // Ramy, 25 Aug 2026: the 30-minutes-before nudge, also as an email now --
+  // "let's leave the enable notifications" (the push stays too, unchanged,
+  // src/lib/volunteer-session-reminder-cron.ts) -- this reaches volunteers
+  // who never turned push on.
+  | "volunteer_session_reminder_30min"
   // Branches
   | "referral"
   // Course join links (roster-actions.ts) -- staff-facing, same as
@@ -92,6 +97,7 @@ export const EMAIL_REPLY_TO: Record<ApplicantEmailType, EmailReplyTo> = {
   volunteer_signed_up: "noreply",
   volunteer_class_starting: "admissions",
   volunteer_session_reminder: "admissions",
+  volunteer_session_reminder_30min: "admissions",
   referral: "admissions",
   workspace_invitation: "noreply",
   password_reset: "noreply",
@@ -980,6 +986,7 @@ export function volunteerSessionReminderEmailHtml(input: {
   classFact: string;
   whenFact: string;
   joinUrl: string;
+  unsubscribeUrl: string;
 }): string {
   return emailShell({
     heading: "Your class is tomorrow",
@@ -991,5 +998,32 @@ export function volunteerSessionReminderEmailHtml(input: {
     ],
     cta: { label: "Open your class link", url: input.joinUrl },
     footnote: "No account and no password. The same link opens your class each time.",
+    unsubscribeUrl: input.unsubscribeUrl,
+  });
+}
+
+// Ramy, 25 Aug 2026: alongside the existing 30-minutes-before PUSH
+// notification, not instead of it ("let's leave the enable notifications")
+// -- browser push can never be default-on, every browser requires an
+// explicit permission prompt, so this reaches the volunteers push never
+// does. Works the same way as the day-before reminder above, just closer
+// to start time and with a nudge toward the Materials panel while they wait.
+export function volunteer30MinReminderEmailHtml(input: {
+  classFact: string;
+  whenFact: string;
+  joinUrl: string;
+  unsubscribeUrl: string;
+}): string {
+  return emailShell({
+    heading: "Your class starts in 30 minutes",
+    tone: "green",
+    body: p("Log in early to check today's materials. The Join link opens 10 minutes before class."),
+    facts: [
+      { label: "Your class", value: input.classFact },
+      { label: "When", value: input.whenFact },
+    ],
+    cta: { label: "Open your class link", url: input.joinUrl },
+    footnote: "No account and no password. The same link opens your class each time.",
+    unsubscribeUrl: input.unsubscribeUrl,
   });
 }

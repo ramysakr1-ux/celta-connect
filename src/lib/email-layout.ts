@@ -100,6 +100,10 @@ export interface EmailShellInput {
   cta?: { label: string; url: string; note?: string };
   /** Small print at the bottom, inside the card. */
   footnote?: string;
+  /** Ramy, 25 Aug 2026: a real link, not escaped text -- "if they don't
+   *  want to be notified in the email, they can just disable it in the
+   *  email itself." Renders as its own small line below the footnote. */
+  unsubscribeUrl?: string;
 }
 
 /**
@@ -209,6 +213,13 @@ export function emailShell(input: EmailShellInput): string {
                  font-size:11.5px;line-height:1.55;color:${MUTED};">${esc(input.footnote)}</p>`
     : "";
 
+  const unsubscribe = input.unsubscribeUrl
+    ? `<p style="margin:${input.footnote ? "8px" : "16px"} 0 0;${input.footnote ? "" : `padding-top:14px;border-top:1px solid ${BORDER};`}
+                 font-size:11.5px;line-height:1.55;color:${MUTED};">
+         <a href="${input.unsubscribeUrl}" style="color:${MUTED};text-decoration:underline;">Stop these class reminders</a>
+       </p>`
+    : "";
+
   return `<!doctype html>
 <html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /></head>
 <body style="margin:0;padding:0;background:${GROUND};">
@@ -225,6 +236,7 @@ export function emailShell(input: EmailShellInput): string {
           ${facts}
           ${cta}
           ${footnote}
+          ${unsubscribe}
         </td></tr>
       </table>
     </td></tr>

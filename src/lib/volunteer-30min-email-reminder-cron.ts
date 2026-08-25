@@ -1,26 +1,39 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendApplicantEmail, volunteerSessionReminderEmailHtml } from "@/lib/admissions-email";
+import { sendApplicantEmail, volunteer30MinReminderEmailHtml } from "@/lib/admissions-email";
 import { toLocalIso } from "@/lib/timetable-grid";
 
-// Ramy, 23 Aug 2026: volunteers get an EMAIL, not a push, for the
-// day-before reminder -- distinct from the existing 30-minutes-before push
-// (volunteer-session-reminder-cron.ts, which stays as-is). Fires once
-// daily (migration 0201's cron.schedule), checks for TP events happening
-// tomorrow, same idempotency table as the push cron but scoped to
-// channel = 'email' so the two reminders never block each other. Also
-// skips anyone who's used the email's own unsubscribe link (migration
-// 0214, reminders_opted_out) -- same flag the new 30-minute email checks.
-export async function runVolunteerSessionEmailReminderCron(): Promise<{ eventsChecked: number; reminded: number }> {
-  const admin = createAdminClient();
-  const tomorrow = toLocalIso(new Date(Date.now() + 24 * 60 * 60 * 1000));
+const WINDOW_START_MINUTES = 25;
+const WINDOW_END_MINUTES = 35;
 
-  const { data: dueEvents } = await admin
+// Ramy, 25 Aug 2026: "let's leave the enable notifications" -- this runs
+// alongside the existing 30-minutes-before push (volunteer-session-
+// reminder-cron.ts), same 25-35-minute window and 5-minute sweep, so
+// volunteers who never turned push on still get reminded. Shares
+// volunteer_session_reminders_sent for idempotency, scoped to its own
+// channel ('email_30min') so it never double-sends against the push or the
+// day-before email, and never skips a volunteer either of those already
+// covered.
+export async function runVolunteer30MinEmailReminderCron(): Promise<{ eventsChecked: number; reminded: number }> {
+  const admin = createAdminClient();
+  const now = new Date();
+  const windowStart = new Date(now.getTime() + WINDOW_START_MINUTES * 60_000);
+  const windowEnd = new Date(now.getTime() + WINDOW_END_MINUTES * 60_000);
+
+  const { data: candidateEvents } = await admin
     .from("course_timetable_events")
     .select("id, course_id, title, event_date, event_time, zoom_url")
     .eq("type", "tp")
-    .eq("event_date", tomorrow);
-  if (!dueEvents || dueEvents.length === 0) return { eventsChecked: 0, reminded: 0 };
+    .not("event_time", "is", null)
+    .gte("event_date", toLocalIso(now))
+    .lte("event_date", toLocalIso(windowEnd));
+
+  const dueEvents = (candidateEvents ?? []).filter((e) => {
+    if (!e.event_time) return false;
+    const eventDateTime = new Date(`${e.event_date}T${e.event_time}`);
+    return eventDateTime >= windowStart && eventDateTime < windowEnd;
+  });
+  if (dueEvents.length === 0) return { eventsChecked: 0, reminded: 0 };
 
   const courseIds = [...new Set(dueEvents.map((e) => e.course_id))];
   const [{ data: volunteers }, { data: courses }] = await Promise.all([
@@ -49,7 +62,7 @@ export async function runVolunteerSessionEmailReminderCron(): Promise<{ eventsCh
         .from("volunteer_session_reminders_sent")
         .select("volunteer_student_id")
         .eq("timetable_event_id", event.id)
-        .eq("channel", "email")
+        .eq("channel", "email_30min")
         .in("volunteer_student_id", volunteerIds),
     ]);
     const skip = new Set([...(declines ?? []).map((d) => d.volunteer_student_id), ...(alreadySent ?? []).map((r) => r.volunteer_student_id)]);
@@ -79,12 +92,12 @@ export async function runVolunteerSessionEmailReminderCron(): Promise<{ eventsCh
         centerName: center.name,
         centerAdmissionsEmail: center.admissions_email,
         to: volunteer.email,
-        subject: "your class is tomorrow",
+        subject: "your class starts in 30 minutes",
         centerId: center.id,
         applicantId: null,
-        type: "volunteer_session_reminder",
+        type: "volunteer_session_reminder_30min",
         recipientName: volunteer.name,
-        html: volunteerSessionReminderEmailHtml({
+        html: volunteer30MinReminderEmailHtml({
           classFact: course.name,
           whenFact,
           joinUrl: event.zoom_url ?? `${base}/student/${token}`,
@@ -97,7 +110,7 @@ export async function runVolunteerSessionEmailReminderCron(): Promise<{ eventsCh
     if (sentVolunteerIds.length > 0) {
       await admin
         .from("volunteer_session_reminders_sent")
-        .insert(sentVolunteerIds.map((volunteer_student_id) => ({ volunteer_student_id, timetable_event_id: event.id, channel: "email" as const })));
+        .insert(sentVolunteerIds.map((volunteer_student_id) => ({ volunteer_student_id, timetable_event_id: event.id, channel: "email_30min" as const })));
       reminded += sentVolunteerIds.length;
     }
   }
