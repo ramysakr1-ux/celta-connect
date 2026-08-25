@@ -23,11 +23,20 @@ export async function GET() {
     .maybeSingle();
   if (!course) return fallback();
 
+  // Ramy, 25 Aug 2026: this demo course now has more than one volunteer
+  // student on it -- .maybeSingle() throws (not returns null) when a query
+  // matches more than one row, and that error was silently swallowed here,
+  // so a second volunteer being added broke this entry point entirely
+  // (fell through to the "no token" fallback below, landing on /login).
+  // .order + .limit(1) picks one deterministically instead of requiring
+  // there only ever be one.
   const { data: accessToken } = await admin
     .from("course_access_tokens")
     .select("token")
     .eq("course_id", course.id)
     .eq("role", "volunteer_student")
+    .order("created_at", { ascending: true })
+    .limit(1)
     .maybeSingle();
   if (!accessToken) return fallback();
 
