@@ -68,23 +68,19 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
 
       {canApplicants && canVolunteers ? (
         <div className="flex gap-2">
+          {/* Ramy, 26 Aug 2026: "whatever you click on becomes green... it
+              doesn't need to be green permanently" -- one active-state
+              colour for either pill, not teal-for-one/green-for-other. */}
           {(["applicants", "volunteers"] as const).map((k) => {
             const isActive = kind === k;
-            // Volunteers gets the same sage green as the Volunteer pool
-            // page when selected -- applicants keeps the app's usual teal.
-            const activeStyle = isActive && k === "volunteers" ? { background: "oklch(35% 0.075 155)", color: "white" } : undefined;
             return (
               <Link
                 key={k}
                 href={`/centre/import?kind=${k}`}
                 className={`rounded-[6px] px-3 py-1.5 text-sm font-medium ${
-                  isActive
-                    ? k === "volunteers"
-                      ? ""
-                      : "bg-primary text-primary-foreground"
-                    : "border border-border text-muted hover:border-primary hover:text-primary"
+                  isActive ? "text-white" : "border border-border text-muted hover:border-primary hover:text-primary"
                 }`}
-                style={activeStyle}
+                style={isActive ? { background: "oklch(35% 0.075 155)" } : undefined}
               >
                 {k === "applicants" ? "Applicants" : "Volunteers"}
               </Link>
