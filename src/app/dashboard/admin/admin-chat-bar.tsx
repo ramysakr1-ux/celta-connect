@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowUp, ChevronDown } from "lucide-react";
 import { MessageThread, type MessageThreadHandle } from "@/app/dashboard/staff-chat/message-thread";
 import type { AdminChatRoom } from "@/lib/admin-chat";
@@ -27,31 +27,17 @@ import type { AdminChatRoom } from "@/lib/admin-chat";
 // that's genuinely different is where StaffChatDrawer shows a reset countdown
 // -- this room never resets, so that slot reads "Permanent" instead, which is
 // correct content for it, not a missing feature.
-const IDLE_MS = 3500;
 
 export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: AdminChatRoom[] }) {
   const [selectedId, setSelectedId] = useState<string | null>(rooms[0]?.channelId ?? null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [threadOpen, setThreadOpen] = useState(false);
-  const [awake, setAwake] = useState(true);
   const [body, setBody] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messageThreadRef = useRef<MessageThreadHandle>(null);
 
   const selected = rooms.find((r) => r.channelId === selectedId) ?? rooms[0] ?? null;
   const nameById = new Map<string, string>();
-
-  // Same idle-timer shape as StaffChatDrawer: never runs while a panel is
-  // open, re-arms on every wake trigger below.
-  useEffect(() => {
-    if (pickerOpen || threadOpen) return;
-    const t = setTimeout(() => setAwake(false), IDLE_MS);
-    return () => clearTimeout(t);
-  }, [pickerOpen, threadOpen, awake]);
-
-  function wake() {
-    setAwake(true);
-  }
 
   function resizeTextarea() {
     const el = textareaRef.current;
@@ -79,15 +65,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex justify-center px-3">
-      <div
-        className={`pointer-events-auto flex w-full max-w-[840px] flex-col gap-2 transition-[opacity,transform] duration-[260ms] ease-out ${
-          awake ? "translate-y-0 opacity-100" : "translate-y-3.5 opacity-40"
-        }`}
-        onMouseEnter={wake}
-        onFocus={wake}
-        onClick={wake}
-        onKeyDown={handleKeyDown}
-      >
+      <div className="pointer-events-auto flex w-full max-w-[840px] flex-col gap-2" onKeyDown={handleKeyDown}>
         {pickerOpen && rooms.length > 1 ? (
           <div className="w-[300px] self-start rounded-[16px] border border-border bg-card p-2 shadow-lg">
             <p className="px-3 pb-2 pt-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Choose a branch</p>
