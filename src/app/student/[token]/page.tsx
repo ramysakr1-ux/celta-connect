@@ -124,6 +124,13 @@ interface RichMaterial {
   sizeBytes: number | null;
 }
 
+interface LessonGroup {
+  tpNumber: number;
+  traineeId: string;
+  earliestSharedAt: string;
+  materials: RichMaterial[];
+}
+
 function formatFileSize(bytes: number | null): string | null {
   if (bytes == null) return null;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
@@ -168,7 +175,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     admin.from("courses").select("name, end_date, center_id").eq("id", accessToken.course_id).maybeSingle(),
     admin
       .from("volunteer_shared_materials")
-      .select("id, created_at, tp_materials(id, file_name, file_type, slides_url, storage_path, tp_plans(tp_number))")
+      .select("id, created_at, tp_materials(id, file_name, file_type, slides_url, storage_path, trainee_id, tp_plans(tp_number))")
       .eq("course_id", accessToken.course_id)
       .order("created_at", { ascending: false }),
   ]);
@@ -278,6 +285,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         file_type: string | null;
         slides_url: string | null;
         storage_path: string | null;
+        trainee_id: string;
         tp_plans: { tp_number: number } | null;
       } | null;
       if (!material) return null;
@@ -295,7 +303,9 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         url,
         fileType: material.file_type,
         storagePath: material.storage_path,
+        traineeId: material.trainee_id,
         tpNumber: material.tp_plans?.tp_number ?? null,
+        sharedAt: row.created_at,
       };
     })
   );
@@ -316,23 +326,43 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     })
   );
 
+  // Table's own per-row indicator stays aggregate (everyone who shared for
+  // that calendar day, merged) -- attendance is about the day, not who
+  // taught it.
   const materialsByTpNumber = new Map<number, RowMaterial[]>();
-  const richMaterialsByTpNumber = new Map<number, RichMaterial[]>();
   for (const m of materials) {
     if (m.tpNumber == null) continue;
     const list = materialsByTpNumber.get(m.tpNumber) ?? [];
     list.push({ id: m.id, name: m.name, url: m.url });
     materialsByTpNumber.set(m.tpNumber, list);
+  }
 
-    const richList = richMaterialsByTpNumber.get(m.tpNumber) ?? [];
-    richList.push({
+  // Materials panel below is scoped per TEACHER, not per calendar day --
+  // Ramy, 25 Aug 2026: "TP one a, and then TP one b, and then TP one c" --
+  // one calendar TP round can host several trainees rotating through it
+  // (same as nextClassTeachers above), and each trainee's own shared files
+  // get their own card/letter as they come in, rather than merging
+  // everyone's TP1 material into a single card. Keyed tpNumber:traineeId,
+  // letter assigned by the order each trainee FIRST shared something for
+  // that round.
+  const lessonGroupsByKey = new Map<string, LessonGroup>();
+  for (const m of materials) {
+    if (m.tpNumber == null) continue;
+    const key = `${m.tpNumber}:${m.traineeId}`;
+    const group = lessonGroupsByKey.get(key);
+    const richMaterial: RichMaterial = {
       id: m.id,
       name: m.name,
       url: m.url,
       fileType: m.fileType,
       sizeBytes: m.storagePath ? (sizeByPath.get(m.storagePath) ?? null) : null,
-    });
-    richMaterialsByTpNumber.set(m.tpNumber, richList);
+    };
+    if (group) {
+      group.materials.push(richMaterial);
+      if (m.sharedAt < group.earliestSharedAt) group.earliestSharedAt = m.sharedAt;
+    } else {
+      lessonGroupsByKey.set(key, { tpNumber: m.tpNumber, traineeId: m.traineeId, earliestSharedAt: m.sharedAt, materials: [richMaterial] });
+    }
   }
 
   // "Your classes" list/table -- volunteer-view-full-spec.md shows a Topic
@@ -344,21 +374,53 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   const tpKeysNeeded = listClasses.filter((c) => c.linkedTpNumber != null).map((c) => ({ courseId: c.courseId, tpNumber: c.linkedTpNumber as number }));
   const listCourseIds = [...new Set(tpKeysNeeded.map((k) => k.courseId))];
   const { data: listAssignments } = listCourseIds.length
-    ? await admin.from("plan_assignments").select("course_id, tp_number, short_title, main_lesson_aim").in("course_id", listCourseIds)
+    ? await admin.from("plan_assignments").select("course_id, tp_number, trainee_id, short_title, main_lesson_aim").in("course_id", listCourseIds)
     : { data: [] };
   const topicByKey = new Map<string, string>();
+  const topicByTpTrainee = new Map<string, string>();
   for (const a of listAssignments ?? []) {
     const key = `${a.course_id}:${a.tp_number}`;
     if (!topicByKey.has(key) && (a.short_title || a.main_lesson_aim)) {
       topicByKey.set(key, (a.short_title || a.main_lesson_aim) as string);
+    }
+    if (a.short_title || a.main_lesson_aim) {
+      topicByTpTrainee.set(`${a.tp_number}:${a.trainee_id}`, (a.short_title || a.main_lesson_aim) as string);
     }
   }
   const rows = listClasses.map((c) => ({
     ...c,
     topic: c.linkedTpNumber != null ? (topicByKey.get(`${c.courseId}:${c.linkedTpNumber}`) ?? null) : null,
     rowMaterials: c.courseId === accessToken.course_id && c.linkedTpNumber != null ? (materialsByTpNumber.get(c.linkedTpNumber) ?? []) : [],
-    richMaterials: c.courseId === accessToken.course_id && c.linkedTpNumber != null ? (richMaterialsByTpNumber.get(c.linkedTpNumber) ?? []) : [],
   }));
+
+  // Letter suffix per trainee within a TP round, assigned in the order they
+  // first shared something -- "TP one a, and then TP one b, and then TP one
+  // c" as materials come in, not a fixed slot per trainee.
+  const dateByTpNumber = new Map<number, string>();
+  for (const c of listClasses) {
+    if (c.courseId === accessToken.course_id && c.linkedTpNumber != null) dateByTpNumber.set(c.linkedTpNumber, c.eventDate);
+  }
+  const groupsByTpNumber = new Map<number, LessonGroup[]>();
+  for (const group of lessonGroupsByKey.values()) {
+    const list = groupsByTpNumber.get(group.tpNumber) ?? [];
+    list.push(group);
+    groupsByTpNumber.set(group.tpNumber, list);
+  }
+  const lessonCards: { key: string; label: string; eventDate: string; materials: RichMaterial[] }[] = [];
+  for (const [tpNumber, group] of groupsByTpNumber) {
+    group.sort((a, b) => (a.earliestSharedAt < b.earliestSharedAt ? -1 : 1));
+    group.forEach((g, i) => {
+      const letter = String.fromCharCode(97 + i); // a, b, c...
+      const topic = topicByTpTrainee.get(`${tpNumber}:${g.traineeId}`);
+      lessonCards.push({
+        key: `${tpNumber}:${g.traineeId}`,
+        label: `TP${tpNumber}${letter}${topic ? ` — ${topic}` : ""}`,
+        eventDate: dateByTpNumber.get(tpNumber) ?? "",
+        materials: g.materials,
+      });
+    });
+  }
+  lessonCards.sort((a, b) => (a.key < b.key ? 1 : -1));
 
   const hoursRemaining = Math.max(certificateHoursThreshold - hoursCredited, 0);
   const progressPct = Math.min((hoursCredited / certificateHoursThreshold) * 100, 100);
@@ -408,7 +470,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                 />
               ) : null}
               <ClassesTable rows={rows} />
-              <MaterialsPanel rows={rows} />
+              <MaterialsPanel lessonCards={lessonCards} />
               <div className="grid grid-cols-2 gap-5">
                 <HoursCard
                   hoursCredited={hoursCredited}
@@ -623,7 +685,6 @@ interface ClassRow {
   courseName: string;
   attended: boolean | null;
   rowMaterials: RowMaterial[];
-  richMaterials: RichMaterial[];
 }
 
 function ClassesList({ rows, attendedCount }: { rows: ClassRow[]; attendedCount: number }) {
@@ -716,24 +777,20 @@ function FileTypeTile({ fileType }: { fileType: string | null }) {
 // not just the most recent -- a volunteer should be able to get materials
 // from any past class, not only the last one. Files for that lesson stack
 // inside its own card rather than each getting its own top-level card.
-function MaterialsPanel({ rows }: { rows: ClassRow[] }) {
-  const lessons = rows.filter((c) => c.attended !== null && c.richMaterials.length > 0);
-  if (lessons.length === 0) return null;
+function MaterialsPanel({ lessonCards }: { lessonCards: { key: string; label: string; eventDate: string; materials: RichMaterial[] }[] }) {
+  if (lessonCards.length === 0) return null;
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">Materials</p>
       <div className="grid grid-cols-3 gap-2.5">
-        {lessons.map((c) => (
-          <div key={c.eventId} className="flex flex-col gap-2.5 rounded-[8px] border border-border p-3">
+        {lessonCards.map((c) => (
+          <div key={c.key} className="flex flex-col gap-2.5 rounded-[8px] border border-border p-3">
             <div>
-              <p className="text-[13px] font-semibold text-ink">
-                {c.linkedTpNumber != null ? `TP${c.linkedTpNumber} — ` : ""}
-                {c.topic ?? c.courseName}
-              </p>
+              <p className="text-[13px] font-semibold text-ink">{c.label}</p>
               <p className="text-[11px] text-muted">{formatShortDate(c.eventDate)}</p>
             </div>
             <div className="flex flex-col gap-1.5">
-              {c.richMaterials.map((m) => (
+              {c.materials.map((m) => (
                 <div key={m.id} className="flex items-center gap-2">
                   <FileTypeTile fileType={m.fileType} />
                   <div className="flex min-w-0 flex-1 flex-col gap-px">
