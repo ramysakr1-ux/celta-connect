@@ -201,9 +201,20 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
             <button
               type="submit"
               disabled={pending}
-              className="self-start rounded-lg bg-[#3a2e18] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              className="flex items-center gap-2 self-start rounded-lg bg-[#3a2e18] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
             >
-              {pending ? "Saving…" : "Finish sign-up"}
+              {pending ? (
+                <>
+                  {/* Ramy, 25 Aug 2026: "so they wouldn't just think it's
+                      finished and then leave" -- a spinner, not just static
+                      text, so a several-second save visibly reads as still
+                      working rather than stuck. */}
+                  <span className="size-3.5 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  Saving your answers…
+                </>
+              ) : (
+                "Finish sign-up"
+              )}
             </button>
           ) : null}
         </div>
