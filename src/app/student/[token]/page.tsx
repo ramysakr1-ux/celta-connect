@@ -35,12 +35,11 @@ function formatShortDate(iso: string): string {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
-// volunteer-view-full-spec.md: Attended/Missed retired the green/amber
-// semantic pills for a shared neutral ink -- only the background tint tells
-// them apart -- and Upcoming keeps its own blue. No matching token exists
-// for the two neutral tints (they're close to but not the same as
-// --color-status-neutral-bg), so these are literal, page-scoped, same as
-// the header bar's own near-white below.
+// Ramy, 25 Aug 2026: "let's go for a red sort of garnet for missed and the
+// green teal for attended" -- reverses the spec's original neutral-ink
+// treatment for this page specifically. Reuses the app's own existing
+// on-track (teal)/at-risk (garnet) status tokens rather than inventing new
+// literals, same pair used for status pills elsewhere in the app.
 function StatusPill({ attended }: { attended: boolean | null }) {
   if (attended === null) {
     return (
@@ -57,8 +56,8 @@ function StatusPill({ attended }: { attended: boolean | null }) {
     <span
       className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
       style={{
-        background: attended ? "oklch(93% 0.014 70)" : "oklch(93.5% 0.012 85)",
-        color: "oklch(51% 0.017 70)",
+        background: attended ? "var(--color-status-on-track-bg)" : "var(--color-status-at-risk-bg)",
+        color: attended ? "var(--color-status-on-track-text)" : "var(--color-status-at-risk-text)",
       }}
     >
       <span className="size-1.5 rounded-full bg-current" />
