@@ -116,6 +116,20 @@ interface RowMaterial {
   url: string;
 }
 
+interface RichMaterial {
+  id: string;
+  name: string;
+  url: string;
+  fileType: string | null;
+  sizeBytes: number | null;
+}
+
+function formatFileSize(bytes: number | null): string | null {
+  if (bytes == null) return null;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 // Volunteer View.dc.html, written 14 Aug 2026, rebuilt to
 // volunteer-view-full-spec.md 25 Aug 2026 -- two structurally different
 // layouts (phone card-in-frame, desktop table + banner), not one reflowed
@@ -154,7 +168,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     admin.from("courses").select("name, end_date, center_id").eq("id", accessToken.course_id).maybeSingle(),
     admin
       .from("volunteer_shared_materials")
-      .select("id, created_at, tp_materials(id, file_name, slides_url, storage_path, tp_plans(tp_number))")
+      .select("id, created_at, tp_materials(id, file_name, file_type, slides_url, storage_path, tp_plans(tp_number))")
       .eq("course_id", accessToken.course_id)
       .order("created_at", { ascending: false }),
   ]);
@@ -261,6 +275,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
       const material = row.tp_materials as unknown as {
         id: string;
         file_name: string | null;
+        file_type: string | null;
         slides_url: string | null;
         storage_path: string | null;
         tp_plans: { tp_number: number } | null;
@@ -274,16 +289,50 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
       }
       if (!url) return null;
 
-      return { id: material.id, name: material.file_name ?? "Material", url, tpNumber: material.tp_plans?.tp_number ?? null };
+      return {
+        id: material.id,
+        name: material.file_name ?? "Material",
+        url,
+        fileType: material.file_type,
+        storagePath: material.storage_path,
+        tpNumber: material.tp_plans?.tp_number ?? null,
+      };
     })
   );
   const materials = resolvedMaterials.filter((m): m is NonNullable<typeof m> => m !== null);
+
+  // File size isn't a column on tp_materials -- real byte size comes
+  // straight from Storage's own listing, same source
+  // course-close-out/verify.ts already trusts for this bucket, rather than
+  // inventing a number nowhere else in the app tracks.
+  const storageFolders = [...new Set(materials.filter((m) => m.storagePath).map((m) => m.storagePath!.split("/").slice(0, -1).join("/")))];
+  const sizeByPath = new Map<string, number>();
+  await Promise.all(
+    storageFolders.map(async (folder) => {
+      const { data: listing } = await admin.storage.from("tp-materials").list(folder);
+      for (const entry of listing ?? []) {
+        if (entry.metadata?.size != null) sizeByPath.set(`${folder}/${entry.name}`, entry.metadata.size);
+      }
+    })
+  );
+
   const materialsByTpNumber = new Map<number, RowMaterial[]>();
+  const richMaterialsByTpNumber = new Map<number, RichMaterial[]>();
   for (const m of materials) {
     if (m.tpNumber == null) continue;
     const list = materialsByTpNumber.get(m.tpNumber) ?? [];
     list.push({ id: m.id, name: m.name, url: m.url });
     materialsByTpNumber.set(m.tpNumber, list);
+
+    const richList = richMaterialsByTpNumber.get(m.tpNumber) ?? [];
+    richList.push({
+      id: m.id,
+      name: m.name,
+      url: m.url,
+      fileType: m.fileType,
+      sizeBytes: m.storagePath ? (sizeByPath.get(m.storagePath) ?? null) : null,
+    });
+    richMaterialsByTpNumber.set(m.tpNumber, richList);
   }
 
   // "Your classes" list/table -- volunteer-view-full-spec.md shows a Topic
@@ -308,7 +357,16 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     ...c,
     topic: c.linkedTpNumber != null ? (topicByKey.get(`${c.courseId}:${c.linkedTpNumber}`) ?? null) : null,
     rowMaterials: c.courseId === accessToken.course_id && c.linkedTpNumber != null ? (materialsByTpNumber.get(c.linkedTpNumber) ?? []) : [],
+    richMaterials: c.courseId === accessToken.course_id && c.linkedTpNumber != null ? (richMaterialsByTpNumber.get(c.linkedTpNumber) ?? []) : [],
   }));
+
+  // volunteer-view-full-spec.md 1b: a dedicated Materials panel under the
+  // table, scoped to one class session -- not a click-to-select UI (the
+  // mockup itself is static, no interaction spec given), just the most
+  // recently HELD class that actually has materials, since that's the one
+  // a volunteer just came from and is most likely checking for handouts.
+  // `rows` is already sorted most-recent-first.
+  const featuredMaterialsClass = rows.find((c) => c.attended !== null && c.richMaterials.length > 0) ?? null;
 
   const hoursRemaining = Math.max(certificateHoursThreshold - hoursCredited, 0);
   const progressPct = Math.min((hoursCredited / certificateHoursThreshold) * 100, 100);
@@ -345,22 +403,21 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
               <Greeting name={volunteer.name} suffix="volunteer student" className="text-xs text-muted" />
             </header>
 
-            <div className="grid grid-cols-[1.35fr_1fr] gap-5 p-[22px_20px]">
-              <div className="flex flex-col gap-3.5">
-                <TitleBlock course={course} endDateLabel={endDateLabel} headline={headline} desktop />
-                {nextClass ? (
-                  <NextClassBanner
-                    nextClass={nextClass}
-                    whereLabel={whereLabel}
-                    topicLabel={topicLabel}
-                    teachersLabel={teachersLabel}
-                    token={token}
-                    nextClassDecline={nextClassDecline}
-                  />
-                ) : null}
-                <ClassesTable rows={rows} />
-              </div>
-              <div className="flex flex-col gap-3.5">
+            <div className="flex flex-col gap-5 p-[22px_20px]">
+              <TitleBlock course={course} endDateLabel={endDateLabel} headline={headline} desktop />
+              {nextClass ? (
+                <NextClassBanner
+                  nextClass={nextClass}
+                  whereLabel={whereLabel}
+                  topicLabel={topicLabel}
+                  teachersLabel={teachersLabel}
+                  token={token}
+                  nextClassDecline={nextClassDecline}
+                />
+              ) : null}
+              <ClassesTable rows={rows} />
+              {featuredMaterialsClass ? <MaterialsPanel classRow={featuredMaterialsClass} /> : null}
+              <div className="grid grid-cols-2 gap-5">
                 <HoursCard
                   hoursCredited={hoursCredited}
                   hoursRemaining={hoursRemaining}
@@ -573,6 +630,7 @@ interface ClassRow {
   courseName: string;
   attended: boolean | null;
   rowMaterials: RowMaterial[];
+  richMaterials: RichMaterial[];
 }
 
 function ClassesList({ rows, attendedCount }: { rows: ClassRow[]; attendedCount: number }) {
@@ -635,6 +693,49 @@ function ClassesTable({ rows }: { rows: ClassRow[] }) {
           </div>
         ))
       )}
+    </div>
+  );
+}
+
+function FileTypeTile({ fileType }: { fileType: string | null }) {
+  const label = fileType === "pdf" ? "PDF" : fileType === "image" ? "IMG" : "FILE";
+  const isPdf = fileType !== "image";
+  const style = isPdf
+    ? { background: "color-mix(in oklab, oklch(0.38 0.072 195) 14%, oklch(0.992 0.005 90))", color: "oklch(0.38 0.072 195)" }
+    : { background: "color-mix(in oklab, oklch(0.6 0.11 70) 16%, oklch(0.992 0.005 90))", color: "oklch(0.44 0.095 68)" };
+  return (
+    <div className="flex size-[26px] shrink-0 items-center justify-center rounded-[5px] text-[8px] font-bold tracking-[0.02em]" style={style}>
+      {label}
+    </div>
+  );
+}
+
+// volunteer-view-full-spec.md 1b: a dedicated materials panel under the
+// table, scoped to one class session ("Materials -- <topic> · <date>"), not
+// just a per-row count -- Ramy, 25 Aug 2026, after the pills/counts were
+// already right: "the actual material that they received, the handouts.
+// Where are they?" 3-column grid of compact file cards (icon tile + name +
+// size + a real "Get" download), not another dropdown.
+function MaterialsPanel({ classRow }: { classRow: ClassRow }) {
+  return (
+    <div className="flex flex-col gap-2.5">
+      <p className="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">
+        Materials — {classRow.topic ?? classRow.courseName} · {formatShortDate(classRow.eventDate)}
+      </p>
+      <div className="grid grid-cols-3 gap-2.5">
+        {classRow.richMaterials.map((m) => (
+          <div key={m.id} className="flex items-center gap-[9px] rounded-[7px] border border-border px-3 py-2.5">
+            <FileTypeTile fileType={m.fileType} />
+            <div className="flex min-w-0 flex-1 flex-col gap-px">
+              <p className="truncate text-xs font-semibold text-ink">{m.name}</p>
+              {formatFileSize(m.sizeBytes) ? <p className="text-[11px] text-muted">{formatFileSize(m.sizeBytes)}</p> : null}
+            </div>
+            <a href={m.url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[11.5px] font-semibold text-primary hover:underline">
+              Get
+            </a>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
