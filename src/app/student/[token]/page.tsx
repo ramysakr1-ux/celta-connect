@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { MaterialsCard } from "@/app/student/[token]/materials-card";
 import { VolunteerSignupForm } from "@/app/student/[token]/signup-form";
 import { DeclineButton } from "@/app/student/[token]/decline-button";
+import { ClassMaterialsLink } from "@/app/student/[token]/class-materials-link";
 import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
 import { DesignerCredit } from "@/components/designer-credit";
@@ -30,13 +30,88 @@ function formatEventDate(iso: string): string {
   return dayLabel;
 }
 
-// Volunteer View.dc.html, written 14 Aug 2026: no login, no password --
+function formatShortDate(iso: string): string {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+// volunteer-view-full-spec.md: Attended/Missed retired the green/amber
+// semantic pills for a shared neutral ink -- only the background tint tells
+// them apart -- and Upcoming keeps its own blue. No matching token exists
+// for the two neutral tints (they're close to but not the same as
+// --color-status-neutral-bg), so these are literal, page-scoped, same as
+// the header bar's own near-white below.
+function StatusPill({ attended }: { attended: boolean | null }) {
+  if (attended === null) {
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+        style={{ background: "oklch(93% 0.045 235)", color: "oklch(42% 0.095 250)" }}
+      >
+        <span className="size-1.5 rounded-full bg-current" />
+        Upcoming
+      </span>
+    );
+  }
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+      style={{
+        background: attended ? "oklch(93% 0.014 70)" : "oklch(93.5% 0.012 85)",
+        color: "oklch(51% 0.017 70)",
+      }}
+    >
+      <span className="size-1.5 rounded-full bg-current" />
+      {attended ? "Attended" : "Missed"}
+    </span>
+  );
+}
+
+// volunteer-view-full-spec.md 1a/1b: 4 tiles, always the same 4 words in
+// order -- Earned (reached), Next (the one coming up), an unlabeled dash for
+// anything further out, and Certificate for the final tile always (that one
+// is a fixed identity, the threshold itself, not a state -- even a
+// volunteer who has already passed it still sees "Certificate" there, just
+// in the Earned colour treatment).
+function MilestoneTile({ hours, hoursCredited, isLast, isNext }: { hours: number; hoursCredited: number; isLast: boolean; isNext: boolean }) {
+  const earned = hoursCredited >= hours;
+  const label = isLast ? "Certificate" : earned ? "Earned" : isNext ? "Next" : "—";
+  const style = earned
+    ? { background: "color-mix(in oklab, var(--color-ink-warm) 12%, var(--color-card))", borderColor: "color-mix(in oklab, var(--color-ink-warm) 30%, transparent)", color: "var(--color-ink-warm)" }
+    : isNext
+      ? { background: "var(--color-card)", borderColor: "var(--color-border)", color: "var(--color-ink-warm)" }
+      : { background: "transparent", borderColor: "transparent", color: "var(--color-muted)" };
+  return (
+    <div className="flex flex-1 flex-col items-center gap-0.5 rounded-[6px] border px-1 py-1.5 text-center" style={style}>
+      <span className="text-xs font-bold">{hours}h</span>
+      <span className="text-[9px] font-semibold tracking-[0.06em] uppercase">{label}</span>
+    </div>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="18" height="16" rx="2.5" />
+      <path d="M3 10h18" />
+      <path d="M8 3v4" />
+      <path d="M16 3v4" />
+    </svg>
+  );
+}
+
+interface RowMaterial {
+  id: string;
+  name: string;
+  url: string;
+}
+
+// Volunteer View.dc.html, written 14 Aug 2026, rebuilt to
+// volunteer-view-full-spec.md 25 Aug 2026 -- two structurally different
+// layouts (phone card-in-frame, desktop table + banner), not one reflowed
+// tree, per the spec's own "1a/1b" framing. No login, no password --
 // resolved entirely from a tokenized, course-scoped, auto-expiring link
 // (migration 0030), every read going through the admin client with
 // explicit scoping (there is no auth.uid() session on this path at all).
-// One responsive layout rather than the source design's separate 1a/1b
-// mockups -- identical content and data either way, per the design's own
-// framing ("same data reflows into a table + sidebar on desktop").
 export default async function StudentPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const admin = createAdminClient();
@@ -68,7 +143,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     admin.from("courses").select("name, end_date, center_id").eq("id", accessToken.course_id).maybeSingle(),
     admin
       .from("volunteer_shared_materials")
-      .select("id, created_at, tp_materials(id, file_name, slides_url, storage_path, tp_plans(main_aims))")
+      .select("id, created_at, tp_materials(id, file_name, slides_url, storage_path, tp_plans(tp_number))")
       .eq("course_id", accessToken.course_id)
       .order("created_at", { ascending: false }),
   ]);
@@ -143,31 +218,22 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // VALUE against plan_assignments.tp_number (not a foreign key), and one
   // calendar TP day can host several trainees' rotation slots, so this
   // shows everyone teaching that round rather than a single "the" lesson.
-  let nextClassEvent: { linked_tp_number: number | null } | null = null;
   let nextClassTeachers: { name: string; topic: string | null }[] = [];
-  if (nextClass) {
-    const { data: eventRow } = await admin
-      .from("course_timetable_events")
-      .select("linked_tp_number")
-      .eq("id", nextClass.eventId)
-      .maybeSingle();
-    nextClassEvent = eventRow ?? null;
-    if (nextClassEvent?.linked_tp_number != null) {
-      const { data: assignments } = await admin
-        .from("plan_assignments")
-        .select("trainee_id, short_title, main_lesson_aim")
-        .eq("course_id", nextClass.courseId)
-        .eq("tp_number", nextClassEvent.linked_tp_number);
-      const traineeIds = [...new Set((assignments ?? []).map((a) => a.trainee_id))];
-      const { data: trainerProfiles } = traineeIds.length
-        ? await admin.from("profiles").select("id, full_name").in("id", traineeIds)
-        : { data: [] };
-      const nameById = new Map((trainerProfiles ?? []).map((p) => [p.id, p.full_name]));
-      nextClassTeachers = (assignments ?? []).map((a) => ({
-        name: nameById.get(a.trainee_id) ?? "Your teacher",
-        topic: a.short_title || a.main_lesson_aim || null,
-      }));
-    }
+  if (nextClass?.linkedTpNumber != null) {
+    const { data: assignments } = await admin
+      .from("plan_assignments")
+      .select("trainee_id, short_title, main_lesson_aim")
+      .eq("course_id", nextClass.courseId)
+      .eq("tp_number", nextClass.linkedTpNumber);
+    const traineeIds = [...new Set((assignments ?? []).map((a) => a.trainee_id))];
+    const { data: trainerProfiles } = traineeIds.length
+      ? await admin.from("profiles").select("id, full_name").in("id", traineeIds)
+      : { data: [] };
+    const nameById = new Map((trainerProfiles ?? []).map((p) => [p.id, p.full_name]));
+    nextClassTeachers = (assignments ?? []).map((a) => ({
+      name: nameById.get(a.trainee_id) ?? "Your teacher",
+      topic: a.short_title || a.main_lesson_aim || null,
+    }));
   }
 
   // "This course" -- deliberately narrower than the cross-course hours
@@ -177,7 +243,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
   // Resolved server-side with the admin client -- a volunteer has no
   // Supabase session at all, so a browser client could never sign a
-  // storage URL themselves the way MaterialsSection does for trainees.
+  // storage URL themselves the way a trainee's own MaterialsSection does.
   const resolvedMaterials = await Promise.all(
     (sharedMaterials ?? []).map(async (row) => {
       const material = row.tp_materials as unknown as {
@@ -185,7 +251,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         file_name: string | null;
         slides_url: string | null;
         storage_path: string | null;
-        tp_plans: { main_aims: string | null } | null;
+        tp_plans: { tp_number: number } | null;
       } | null;
       if (!material) return null;
 
@@ -196,154 +262,265 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
       }
       if (!url) return null;
 
-      return {
-        id: material.id,
-        name: material.file_name ?? "Material",
-        url,
-        topic: material.tp_plans?.main_aims ?? null,
-      };
+      return { id: material.id, name: material.file_name ?? "Material", url, tpNumber: material.tp_plans?.tp_number ?? null };
     })
   );
   const materials = resolvedMaterials.filter((m): m is NonNullable<typeof m> => m !== null);
+  const materialsByTpNumber = new Map<number, RowMaterial[]>();
+  for (const m of materials) {
+    if (m.tpNumber == null) continue;
+    const list = materialsByTpNumber.get(m.tpNumber) ?? [];
+    list.push({ id: m.id, name: m.name, url: m.url });
+    materialsByTpNumber.set(m.tpNumber, list);
+  }
+
+  // "Your classes" list/table -- volunteer-view-full-spec.md shows a Topic
+  // column per row, not just a date, so this needs the same
+  // linked_tp_number -> plan_assignments lookup nextClass gets above, just
+  // batched across every class in the list (which can span more than one
+  // course -- "hours are the unit, never levels or courses").
+  const listClasses = classes.slice(0, 12);
+  const tpKeysNeeded = listClasses.filter((c) => c.linkedTpNumber != null).map((c) => ({ courseId: c.courseId, tpNumber: c.linkedTpNumber as number }));
+  const listCourseIds = [...new Set(tpKeysNeeded.map((k) => k.courseId))];
+  const { data: listAssignments } = listCourseIds.length
+    ? await admin.from("plan_assignments").select("course_id, tp_number, short_title, main_lesson_aim").in("course_id", listCourseIds)
+    : { data: [] };
+  const topicByKey = new Map<string, string>();
+  for (const a of listAssignments ?? []) {
+    const key = `${a.course_id}:${a.tp_number}`;
+    if (!topicByKey.has(key) && (a.short_title || a.main_lesson_aim)) {
+      topicByKey.set(key, (a.short_title || a.main_lesson_aim) as string);
+    }
+  }
+  const rows = listClasses.map((c) => ({
+    ...c,
+    topic: c.linkedTpNumber != null ? (topicByKey.get(`${c.courseId}:${c.linkedTpNumber}`) ?? null) : null,
+    rowMaterials: c.courseId === accessToken.course_id && c.linkedTpNumber != null ? (materialsByTpNumber.get(c.linkedTpNumber) ?? []) : [],
+  }));
 
   const hoursRemaining = Math.max(certificateHoursThreshold - hoursCredited, 0);
   const progressPct = Math.min((hoursCredited / certificateHoursThreshold) * 100, 100);
   const milestones = milestonesFor(certificateHoursThreshold);
+  const nextMilestoneIndex = milestones.findIndex((m) => hoursCredited < m);
+  const perClassHours = TICK_THRESHOLD_MINUTES / 60 + 0.75;
+
+  const firstName = volunteer.name.split(" ")[0];
+  const endDateLabel = course?.end_date ? new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
+  const headline = nextClass ? `Your next class is ${formatEventDate(nextClass.eventDate).split(",")[0].toLowerCase()}` : "No classes scheduled yet";
+  const whereLabel = nextClass?.zoomUrl ? "Online" : "In person at the centre";
+  const topicLabel = nextClassTeachers.find((t) => t.topic)?.topic ?? null;
+  const teachersLabel = nextClassTeachers.length > 0 ? nextClassTeachers.map((t) => t.name).join(" and ") : null;
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header -- full container width, mark pinned left, not buried in a
-          narrow centered column (Ramy, 23 Aug: "the logo will also move to
-          the top left of the page rather than just being in the middle"). */}
-      <div className="container flex items-center justify-between gap-4 py-6">
-        <Wordmark size="header" />
-        <Greeting name={volunteer.name} />
-      </div>
+      {/* Header bar -- "card bg" (near-white, brighter than --color-card)
+          per the spec's own token legend, a one-off literal like the rest
+          of this page's colours rather than repointing a shared token off
+          one page's numbers. */}
+      <header
+        className="flex h-[54px] items-center justify-between border-b border-border px-4 md:h-[52px] md:px-6"
+        style={{ background: "oklch(99.2% 0.005 90)" }}
+      >
+        <Wordmark size="header-compact" />
+        <Greeting name={firstName} className="text-xs text-muted md:hidden" />
+        <Greeting name={volunteer.name} suffix="volunteer student" className="hidden text-xs text-muted md:block" />
+      </header>
 
-      <div className="container pb-16">
-      <div className="frame flex flex-col gap-6 p-6">
-        <div>
-          <p className="text-sm font-medium text-muted uppercase tracking-wide">{course?.name ?? "Your course"}</p>
-          <h1 className="mt-1 font-serif text-2xl text-ink sm:text-3xl">
-            {nextClass ? `Your next class is ${formatEventDate(nextClass.eventDate).split(",")[0].toLowerCase()}` : "No classes scheduled yet"}
-          </h1>
-        </div>
-
-        {/* Next class card -- richer tinted-border "colour family" (matching
-            MaterialsCard) rather than the plain neutral .card the rest of
-            the app uses, per Ramy's "this page should be more colourful
-            than the rest of the platform." */}
-        {nextClass ? (
-          <div className="flex flex-col gap-3 rounded-xl border border-[color-mix(in_oklab,var(--color-primary)_20%,var(--color-card))] bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-card))] p-6">
-            <p className="text-sm font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
-              {nextClass.eventTime ? <span>{nextClass.eventTime.slice(0, 5)}</span> : null}
-              <span>{nextClass.zoomUrl ? "Online" : "In person at the centre"}</span>
-              {nextClassTeachers.length > 0 ? <span>with {nextClassTeachers.map((t) => t.name).join(", ")}</span> : null}
-            </div>
-            {nextClassTeachers.some((t) => t.topic) ? (
-              <p className="text-sm text-ink">{nextClassTeachers.find((t) => t.topic)?.topic}</p>
-            ) : null}
-            <div className="flex flex-wrap items-center gap-2">
-              {nextClass.zoomUrl ? (
-                <a href={nextClass.zoomUrl} target="_blank" rel="noopener noreferrer" className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-                  Join online
-                </a>
-              ) : null}
-              <a
-                href={`data:text/calendar;charset=utf-8,${encodeURIComponent(
-                  `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${course?.name ?? "Class"}\nDTSTART:${nextClass.eventDate.replace(/-/g, "")}\nEND:VEVENT\nEND:VCALENDAR`
-                )}`}
-                download="class.ics"
-                className="rounded-[6px] border border-border px-4 py-2 text-sm font-medium text-ink hover:border-primary"
-              >
-                Add to calendar
-              </a>
-            </div>
-            <div className="flex items-center justify-between gap-3 border-t border-border-faint pt-3">
-              <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
-              <PushSubscribeButton
-                subscribe={subscribeVolunteerPush.bind(null, token)}
-                unsubscribe={unsubscribeVolunteerPush.bind(null, token)}
-              />
-            </div>
-          </div>
-        ) : null}
-
-        {/* Ramy, 23 Aug: "those cards could live next to each other instead
-            of one on top of the other... the full page will be used" --
-            three columns at desktop width instead of a 2-col split nested
-            inside a max-w-3xl column, so Materials/Hours/This-course sit
-            beside Your classes rather than stacking under it. Top rules
-            alternate teal/gold so no two touching cards share a color
-            (none of these carry a warning/error meaning, so alternation is
-            the whole rule here). */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {/* Your classes -- gold family, alternating against the teal
-              Next class card above and Materials card beside it. */}
-          <div className="rounded-xl border border-[color-mix(in_oklab,var(--color-gold)_20%,var(--color-card))] bg-[color-mix(in_oklab,var(--color-gold)_10%,var(--color-card))] p-6">
-            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Your classes</p>
-            {classes.length === 0 ? (
-              <p className="mt-2 text-sm text-muted">No classes scheduled yet.</p>
-            ) : (
-              <div className="mt-2 flex flex-col">
-                {classes.slice(0, 12).map((c, i) => (
-                  <div key={c.eventId} className={`flex items-center justify-between gap-3 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                    <div>
-                      <p className="text-sm text-ink">{formatEventDate(c.eventDate)}</p>
-                      <p className="text-xs text-muted">{c.courseName}</p>
-                    </div>
-                    <span
-                      className={`pill ${c.attended === null ? "pill-info" : c.attended ? "pill-success" : "pill-warning"}`}
-                    >
-                      {c.attended === null ? "Upcoming" : c.attended ? "Attended" : "Missed"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <MaterialsCard materials={materials} />
-
-          <div className="flex flex-col gap-6">
-            {/* Your hours -- same gold family as "Your classes." */}
-            <div className="rounded-xl border border-[color-mix(in_oklab,var(--color-gold)_20%,var(--color-card))] bg-[color-mix(in_oklab,var(--color-gold)_10%,var(--color-card))] p-6">
-              <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Your hours</p>
-              <p className="mt-1 font-serif text-3xl text-ink">{hoursCredited.toFixed(1)}h</p>
-              <p className="mt-1 text-sm text-muted">
-                {hoursRemaining > 0 ? `You are ${hoursRemaining.toFixed(1)} hours from your certificate.` : "You've reached the certificate threshold."} Every
-                class adds {(TICK_THRESHOLD_MINUTES / 60 + 0.75).toFixed(2).replace(/\.?0+$/, "")}
-                {" "}
-                hours.
+      <div className="mx-auto max-w-[420px] px-4 pt-[18px] pb-[26px] md:max-w-[1080px] md:px-6 md:pt-[22px] md:pb-10">
+        <div className="md:grid md:grid-cols-[1.35fr_1fr] md:items-start md:gap-6">
+          <div className="flex flex-col gap-4 md:gap-5">
+            {/* Title block */}
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.08em] text-muted uppercase md:text-[11px]">
+                {course?.name ?? "Your course"}
+                {endDateLabel ? <span className="hidden md:inline"> · until {endDateLabel}</span> : null}
               </p>
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-muted">
+              <h1 className="mt-1 font-serif text-[21px] font-semibold text-ink md:text-[22px]">{headline}</h1>
+            </div>
+
+            {nextClass ? (
+              <>
+                {/* Next class -- phone card */}
+                <div
+                  className="flex flex-col gap-[13px] rounded-[10px] border p-4 md:hidden"
+                  style={{ borderColor: "color-mix(in oklab, var(--color-primary) 32%, transparent)", background: "oklch(99.2% 0.005 90)" }}
+                >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="font-serif text-[19px] font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
+                    {nextClass.eventTime ? <p className="text-[13px] font-semibold text-primary tabular-nums">{nextClass.eventTime.slice(0, 5)}</p> : null}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex gap-2.5 text-[13px] text-ink">
+                      <span className="w-[62px] shrink-0 text-[10px] font-bold tracking-[0.06em] text-muted uppercase">Where</span>
+                      <span>{whereLabel}</span>
+                    </div>
+                    {topicLabel ? (
+                      <div className="flex gap-2.5 text-[13px] text-ink">
+                        <span className="w-[62px] shrink-0 text-[10px] font-bold tracking-[0.06em] text-muted uppercase">Topic</span>
+                        <span>{topicLabel}</span>
+                      </div>
+                    ) : null}
+                    {teachersLabel ? (
+                      <div className="flex gap-2.5 text-[13px] text-ink">
+                        <span className="w-[62px] shrink-0 text-[10px] font-bold tracking-[0.06em] text-muted uppercase">Teachers</span>
+                        <span>{teachersLabel}</span>
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {nextClass.zoomUrl ? (
+                      <a
+                        href={nextClass.zoomUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex h-11 flex-1 items-center justify-center rounded-[8px] bg-primary text-sm font-semibold text-primary-foreground"
+                      >
+                        Join online
+                      </a>
+                    ) : null}
+                    <a
+                      href={`data:text/calendar;charset=utf-8,${encodeURIComponent(
+                        `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${course?.name ?? "Class"}\nDTSTART:${nextClass.eventDate.replace(/-/g, "")}\nEND:VEVENT\nEND:VCALENDAR`
+                      )}`}
+                      download="class.ics"
+                      title="Add to calendar"
+                      className="admin-hover-fill flex size-11 shrink-0 items-center justify-center rounded-[8px] border border-border text-muted"
+                    >
+                      <CalendarIcon />
+                    </a>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 border-t border-border-faint pt-3">
+                    <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
+                    <PushSubscribeButton subscribe={subscribeVolunteerPush.bind(null, token)} unsubscribe={unsubscribeVolunteerPush.bind(null, token)} />
+                  </div>
+                </div>
+
+                {/* Next class -- desktop banner */}
+                <div
+                  className="hidden flex-wrap items-center justify-between gap-3 rounded-[6px] border p-4 md:flex"
+                  style={{ borderColor: "color-mix(in oklab, var(--color-primary) 30%, transparent)", background: "oklch(99.2% 0.005 90)" }}
+                >
+                  <div>
+                    <p className="font-serif text-[17px] font-semibold text-ink">
+                      {formatEventDate(nextClass.eventDate)}
+                      {nextClass.eventTime ? ` · ${nextClass.eventTime.slice(0, 5)}` : ""}
+                    </p>
+                    <p className="mt-1 text-xs text-muted">
+                      {[whereLabel, topicLabel, teachersLabel ? `with ${teachersLabel}` : null].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
+                    <PushSubscribeButton subscribe={subscribeVolunteerPush.bind(null, token)} unsubscribe={unsubscribeVolunteerPush.bind(null, token)} />
+                    {nextClass.zoomUrl ? (
+                      <a href={nextClass.zoomUrl} target="_blank" rel="noopener noreferrer" className="flex h-[38px] items-center rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground">
+                        Join online
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              </>
+            ) : null}
+
+            {/* Your classes -- phone card list */}
+            <div id="classes" className="flex flex-col gap-2 md:hidden">
+              <div className="flex items-baseline justify-between">
+                <p className="text-[10px] font-bold tracking-[0.08em] text-muted uppercase">Your classes</p>
+                <p className="text-[11px] text-muted">{thisCourseAttended} attended</p>
+              </div>
+              {rows.length === 0 ? (
+                <p className="text-sm text-muted">No classes scheduled yet.</p>
+              ) : (
+                rows.map((c) => (
+                  <div key={c.eventId} className="flex flex-col gap-2 rounded-[10px] border border-border bg-card px-3.5 py-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-semibold text-ink">{c.topic ?? c.courseName}</p>
+                      <p className="shrink-0 text-[11px] text-muted">{formatShortDate(c.eventDate)}</p>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <StatusPill attended={c.attended} />
+                      <ClassMaterialsLink materials={c.rowMaterials} />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Your classes -- desktop table */}
+            <div className="hidden overflow-hidden rounded-[6px] border border-border md:block">
+              <div
+                className="grid grid-cols-[96px_1fr_128px_150px] border-b border-border px-4 py-2 text-[9px] font-bold tracking-[0.06em] text-muted uppercase"
+                style={{ background: "var(--color-card)" }}
+              >
+                <div>Date</div>
+                <div>Topic</div>
+                <div>Attendance</div>
+                <div>Materials</div>
+              </div>
+              {rows.length === 0 ? (
+                <p className="px-4 py-6 text-sm text-muted">No classes scheduled yet.</p>
+              ) : (
+                rows.map((c, i) => (
+                  <div
+                    key={c.eventId}
+                    className={`grid grid-cols-[96px_1fr_128px_150px] items-center px-4 py-2.5 text-xs text-ink ${i > 0 ? "border-t border-border-faint" : ""}`}
+                  >
+                    <div className="text-muted">{formatShortDate(c.eventDate)}</div>
+                    <div className="truncate">{c.topic ?? c.courseName}</div>
+                    <div>
+                      <StatusPill attended={c.attended} />
+                    </div>
+                    <div>{c.rowMaterials.length > 0 ? <ClassMaterialsLink materials={c.rowMaterials} /> : <span className="text-muted">—</span>}</div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Right column: Hours + This course */}
+          <div className="mt-4 flex flex-col gap-4 md:mt-0 md:gap-5">
+            <div
+              className="rounded-[10px] border p-3.5 md:p-4"
+              style={{ borderColor: "color-mix(in oklab, var(--color-primary) 18%, transparent)", background: "color-mix(in oklab, var(--color-primary) 8%, var(--color-card))" }}
+            >
+              <p className="text-[13px] font-semibold text-ink">Your hours</p>
+              <p className="mt-0.5 flex items-baseline gap-1">
+                <span className="font-serif text-[21px] font-semibold" style={{ color: "var(--color-ink-warm)" }}>
+                  {hoursCredited.toFixed(1)}
+                </span>
+                <span className="text-[11px] text-muted">hrs</span>
+              </p>
+              <p className="mt-1 text-xs text-muted">
+                {hoursRemaining > 0 ? `You are ${hoursRemaining.toFixed(1)} hours from your certificate.` : "You've reached the certificate threshold."} Every
+                class adds {perClassHours.toFixed(2).replace(/\.?0+$/, "")} hours.
+              </p>
+              <div className="mt-2.5 h-[5px] overflow-hidden rounded-full" style={{ background: "oklch(93.5% 0.012 85)" }}>
                 <div className="h-full rounded-full bg-primary" style={{ width: `${progressPct}%` }} />
               </div>
-              <div className="mt-3 flex justify-between text-[10px] text-muted">
-                {milestones.map((m) => (
-                  <span key={m} className={hoursCredited >= m ? "font-semibold text-ink" : ""}>
-                    {m}h
-                  </span>
+              <div className="mt-2.5 flex gap-1.5">
+                {milestones.map((m, i) => (
+                  <MilestoneTile key={m} hours={m} hoursCredited={hoursCredited} isLast={i === milestones.length - 1} isNext={i === nextMilestoneIndex} />
                 ))}
               </div>
+              <p className="mt-2.5 text-[11px] text-muted">Every class counts, whichever level you are in. Stay for at least two of the three lessons and the class is yours.</p>
             </div>
 
-            {/* This course -- teal family, alternates against Your hours
-                (gold) directly above it in the same column. */}
-            <div className="rounded-xl border border-[color-mix(in_oklab,var(--color-primary)_20%,var(--color-card))] bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-card))] p-6">
-              <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">This course</p>
-              <p className="mt-1 text-sm text-ink">
-                {thisCourseAttended} of {thisCourseClasses.length} classes attended
+            <div className="rounded-[10px] border border-border bg-card p-3.5 md:p-4">
+              <p className="text-xs font-semibold text-ink">This course</p>
+              <p className="mt-1 text-xs text-muted">
+                You&apos;ve come to {thisCourseAttended} of {thisCourseClasses.length} classes held so far.
               </p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="mt-2 flex gap-1">
                 {thisCourseClasses
                   .slice()
                   .sort((a, b) => (a.eventDate < b.eventDate ? -1 : 1))
                   .map((c) => (
                     <span
                       key={c.eventId}
-                      className={`size-2.5 rounded-full ${c.attended === true ? "bg-primary" : c.attended === false ? "bg-border" : "bg-surface-muted"}`}
+                      className="h-[5px] flex-1 rounded-[3px]"
+                      style={{
+                        background: c.attended === true ? "var(--color-ink-warm)" : c.attended === false ? "var(--color-border)" : "oklch(93.5% 0.012 85)",
+                      }}
                       title={c.eventDate}
                     />
                   ))}
@@ -353,17 +530,16 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         </div>
 
         {/* Footer */}
-        <div className="flex flex-col items-center gap-1 border-t border-border-faint pt-4 text-center text-xs text-muted">
-          <p>This link is yours alone, and works until the course ends{course?.end_date ? ` on ${new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}` : ""}.</p>
+        <div className="mt-6 flex flex-col items-center gap-1 border-t border-border-faint pt-4 text-center">
+          <p className="text-[11px] leading-[1.55] text-muted">
+            This link is yours alone, and works until the course ends{endDateLabel ? ` on ${endDateLabel}` : ""}.
+          </p>
           {materials.length > 0 ? (
-            <p>
-              <a href="#materials" className="font-semibold text-primary hover:underline">
-                Download all my materials before then →
-              </a>
-            </p>
+            <a href="#classes" className="text-xs font-semibold text-primary hover:underline">
+              Download all my materials before then →
+            </a>
           ) : null}
         </div>
-      </div>
       </div>
 
       <DesignerCredit corner="bottom-right" />

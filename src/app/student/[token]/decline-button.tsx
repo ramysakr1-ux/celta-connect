@@ -14,13 +14,20 @@ export function DeclineButton({ token, eventId, alreadyDeclined }: { token: stri
   }
 
   return (
-    <form action={formAction}>
-      <input type="hidden" name="token" value={token} />
-      <input type="hidden" name="event_id" value={eventId} />
-      <button type="submit" disabled={pending} className="text-xs font-medium text-primary hover:underline disabled:opacity-60">
-        {pending ? "Sending…" : "Can't make it? → Let them know"}
-      </button>
-      {state.error ? <p className="mt-1 text-xs text-destructive">{state.error}</p> : null}
-    </form>
+    <div className="flex items-center gap-2.5">
+      <span className="text-xs text-muted">Can&apos;t make it?</span>
+      <form action={formAction}>
+        <input type="hidden" name="token" value={token} />
+        <input type="hidden" name="event_id" value={eventId} />
+        <button
+          type="submit"
+          disabled={pending}
+          className="admin-hover-fill h-8 rounded-full border border-border px-3.5 text-xs font-semibold text-ink disabled:opacity-60"
+        >
+          {pending ? "Sending…" : "Let them know"}
+        </button>
+      </form>
+      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+    </div>
   );
 }
