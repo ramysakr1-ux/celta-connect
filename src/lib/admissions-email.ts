@@ -470,7 +470,12 @@ export function interviewInvitationEmailHtml(input: {
     tone: "teal",
     body:
       p(`Dear ${input.applicantName},`) +
-      p("Thank you for the written tasks — we have read them and we would like to meet you.") +
+      // Reworded from Applications.dc.html's original "the written tasks"
+      // 26 Aug 2026 (Ramy): the pre-interview task now includes a speaking
+      // recording as well as the writing and language-awareness parts, so
+      // naming just "written" undersells what was actually reviewed --
+      // "pre-interview task" covers all of it without listing each part.
+      p("Thank you for completing the pre-interview task — we have read it and we would like to meet you.") +
       p(
         "The interview takes about 45 minutes. We will talk about your teaching, and work through some of the language from your task together. There is nothing to prepare."
       ) +

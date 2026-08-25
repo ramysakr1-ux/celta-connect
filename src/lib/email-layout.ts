@@ -333,12 +333,17 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://celtaconnect.com";
 // emailShell's plain <h1> output (never a <h2>) gets the extra eyebrow
 // line -- otherwise the name would appear twice, a few pixels apart.
 export function withConnectBranding(html: string, centerName: string): string {
+  // Ramy, 26 Aug 2026: "the Connect logo is too big for something that's
+  // supposed to be coming from the centre -- it should be the centre
+  // really, name, and Connect just a smaller logo on top." Shrunk from a
+  // 20px icon / 13px wordmark to a small signature rather than a second
+  // header competing with the centre's own eyebrow line below it.
   const logo = `
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:14px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:10px;">
       <tr><td align="center">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-          <td style="padding-right:7px;"><img src="${SITE_URL}/icon-192.png" width="20" height="20" alt="Connect" style="display:block;border-radius:4px;" /></td>
-          <td style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:13px;color:${MUTED};">Connect</td>
+          <td style="padding-right:5px;"><img src="${SITE_URL}/icon-192.png" width="13" height="13" alt="Connect" style="display:block;border-radius:3px;" /></td>
+          <td style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:10px;color:${MUTED};">Connect</td>
         </tr></table>
       </td></tr>
     </table>`;
