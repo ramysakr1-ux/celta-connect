@@ -36,18 +36,20 @@ export default async function UnsubscribePage({ params }: { params: Promise<{ to
     .select("name, reminders_opted_out")
     .eq("id", accessToken.volunteer_student_id)
     .maybeSingle();
+  const optedOut = volunteer?.reminders_opted_out ?? false;
 
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-sm p-3">
         <div className="sheet-accent p-8 text-center">
           <Wordmark size="hero" />
-          <h1 className="mt-5 font-serif text-lg text-ink">Stop class reminder emails?</h1>
+          <h1 className="mt-5 font-serif text-lg text-ink">{optedOut ? "Turn reminder emails back on?" : "Stop class reminder emails?"}</h1>
           <p className="mt-2 text-sm text-muted">
-            {volunteer?.name ? `${volunteer.name}, y` : "Y"}ou&apos;ll stop getting the day-before and 30-minute reminder emails. You can still
-            open your class link any time, and you&apos;ll still see everything on your own page.
+            {optedOut
+              ? `${volunteer?.name ? `${volunteer.name}, y` : "Y"}ou'll get the day-before and 30-minute reminder emails again for classes you haven't declined.`
+              : `${volunteer?.name ? `${volunteer.name}, y` : "Y"}ou'll stop getting the day-before and 30-minute reminder emails. You can still open your class link any time, and you'll still see everything on your own page.`}
           </p>
-          <UnsubscribeButton token={token} alreadyOptedOut={volunteer?.reminders_opted_out ?? false} />
+          <UnsubscribeButton token={token} initiallyOptedOut={optedOut} />
         </div>
       </div>
     </div>

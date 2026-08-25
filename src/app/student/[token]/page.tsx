@@ -889,6 +889,9 @@ function Footer({ endDateLabel, materials, token }: { endDateLabel: string | nul
         </a>
       ) : null}
       <PushSubscribeButton subscribe={subscribeVolunteerPush.bind(null, token)} unsubscribe={unsubscribeVolunteerPush.bind(null, token)} />
+      <a href={`/student/${token}/unsubscribe`} className="text-[11px] text-muted hover:underline">
+        Manage reminder emails
+      </a>
     </div>
   );
 }

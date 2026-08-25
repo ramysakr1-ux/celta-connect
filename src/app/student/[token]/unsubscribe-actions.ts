@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export interface UnsubscribeState {
   error: string | null;
   done?: boolean;
+  optedOut?: boolean;
 }
 
 // Ramy, 25 Aug 2026: "if they don't wanna be notified in the email, they
@@ -13,12 +14,13 @@ export interface UnsubscribeState {
 // model as declineClass (decline-actions.ts), no session on this path
 // either. Covers both class-reminder emails (day-before and 30-minute);
 // push keeps its own separate browser toggle, untouched by this.
-export async function unsubscribeReminders(_prevState: UnsubscribeState, formData: FormData): Promise<UnsubscribeState> {
-  const token = formData.get("token");
-  if (typeof token !== "string" || !token) {
-    return { error: "Something went wrong. Refresh and try again." };
-  }
-
+//
+// Ramy, 25 Aug 2026: "if they change their mind later, they can always come
+// back to the page and enable notifications" -- one action, both
+// directions, so the unsubscribe page (and the Footer link into it) can
+// always show the right button for whichever state the volunteer is
+// currently in.
+async function setRemindersOptedOut(token: string, optedOut: boolean): Promise<UnsubscribeState> {
   const admin = createAdminClient();
   const { data: accessToken } = await admin
     .from("course_access_tokens")
@@ -30,8 +32,20 @@ export async function unsubscribeReminders(_prevState: UnsubscribeState, formDat
     return { error: "This link has expired." };
   }
 
-  const { error } = await admin.from("volunteer_students").update({ reminders_opted_out: true }).eq("id", accessToken.volunteer_student_id);
+  const { error } = await admin.from("volunteer_students").update({ reminders_opted_out: optedOut }).eq("id", accessToken.volunteer_student_id);
   if (error) return { error: "Could not save. Try again." };
 
-  return { error: null, done: true };
+  return { error: null, done: true, optedOut };
+}
+
+export async function unsubscribeReminders(_prevState: UnsubscribeState, formData: FormData): Promise<UnsubscribeState> {
+  const token = formData.get("token");
+  if (typeof token !== "string" || !token) return { error: "Something went wrong. Refresh and try again." };
+  return setRemindersOptedOut(token, true);
+}
+
+export async function resubscribeReminders(_prevState: UnsubscribeState, formData: FormData): Promise<UnsubscribeState> {
+  const token = formData.get("token");
+  if (typeof token !== "string" || !token) return { error: "Something went wrong. Refresh and try again." };
+  return setRemindersOptedOut(token, false);
 }
