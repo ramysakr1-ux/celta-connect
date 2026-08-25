@@ -24,7 +24,15 @@ import { BackToTop } from "@/app/demo/journey/back-to-top";
 // /demo/journey/interview, /offer, /volunteer-signup) or an inline preview
 // of the email that stage actually sends, rendered from the same functions
 // production uses (src/lib/admissions-email.ts), not paraphrased copies.
-export const dynamic = "force-dynamic";
+//
+// Ramy, 25 Aug 2026: "it's still... quite slow." Nothing here is actually
+// per-visitor -- every email preview is built from the same fixed sample
+// data (Tariq Osei, Grace Adeyemi) every time, and the one real DB read
+// (realCenter's name) barely ever changes. force-dynamic meant a full
+// server re-render plus a DB round trip on literally every visit, with
+// zero caching. A short revalidate window fixes that without going fully
+// static (so a renamed real centre still shows up within a few minutes).
+export const revalidate = 300;
 
 function Step({
   number,
