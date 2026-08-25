@@ -76,8 +76,13 @@ function StatusPill({ attended }: { attended: boolean | null }) {
 function MilestoneTile({ hours, hoursCredited, isLast, isNext }: { hours: number; hoursCredited: number; isLast: boolean; isNext: boolean }) {
   const earned = hoursCredited >= hours;
   const label = isLast ? "Certificate" : earned ? "Earned" : isNext ? "Next" : "—";
+  // Ramy, 25 Aug 2026: "give them a little bit of color... so they can see
+  // when they're moving" -- earned milestones now use the same teal the
+  // rest of the app already uses for "good news" (the Attended pill,
+  // "Coming next class"), instead of the same muted ink-warm every other
+  // state used, so passing one actually reads as a small win.
   const style = earned
-    ? { background: "color-mix(in oklab, var(--color-ink-warm) 12%, var(--color-card))", borderColor: "color-mix(in oklab, var(--color-ink-warm) 30%, transparent)", color: "var(--color-ink-warm)" }
+    ? { background: "var(--color-status-on-track-bg)", borderColor: "color-mix(in oklab, var(--color-status-on-track-text) 35%, transparent)", color: "var(--color-status-on-track-text)" }
     : isNext
       ? { background: "var(--color-card)", borderColor: "var(--color-border)", color: "var(--color-ink-warm)" }
       : { background: "transparent", borderColor: "transparent", color: "var(--color-muted)" };
