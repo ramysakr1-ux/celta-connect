@@ -426,17 +426,84 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   for (const c of listClasses) {
     if (c.courseId === accessToken.course_id && c.linkedTpNumber != null) dateByTpNumber.set(c.linkedTpNumber, c.eventDate);
   }
-  const lessonCards: { key: string; teacherName: string; tpNumber: number; topic: string | null; eventDate: string; materials: RichMaterial[] }[] = [];
+  const lessonCards: { key: string; teacherName: string; label: string; topic: string | null; eventDate: string; materials: RichMaterial[] }[] = [];
   for (const group of lessonGroupsByKey.values()) {
     lessonCards.push({
       key: `${group.tpNumber}:${group.traineeId}`,
       teacherName: teacherNameById.get(group.traineeId) ?? "Your teacher",
-      tpNumber: group.tpNumber,
+      label: `TP${group.tpNumber}`,
       topic: topicByTpTrainee.get(`${group.tpNumber}:${group.traineeId}`) ?? null,
       eventDate: dateByTpNumber.get(group.tpNumber) ?? "",
       materials: group.materials,
     });
   }
+
+  // Ramy, 25 Aug 2026: "unassessed is the same thing as getting to know
+  // you... it's gonna read whatever is on the timetable" -- and, pushing
+  // on the trainer side too: "it would read demo lesson." Anything a
+  // trainee or trainer shared via session_materials against a non-TP
+  // event on this course, grouped the same way (one card per person per
+  // session), labelled with the event's own title rather than "TP{n}".
+  const { data: otherEvents } = await admin
+    .from("course_timetable_events")
+    .select("id, title, event_date")
+    .eq("course_id", accessToken.course_id)
+    .neq("type", "tp");
+  const otherEventIds = (otherEvents ?? []).map((e) => e.id);
+  const { data: sessionMaterialRows } =
+    otherEventIds.length > 0
+      ? await admin
+          .from("session_materials")
+          .select("id, timetable_event_id, uploaded_by, storage_path, file_name, file_type, slides_url, created_at")
+          .in("timetable_event_id", otherEventIds)
+      : { data: [] };
+
+  if (sessionMaterialRows && sessionMaterialRows.length > 0) {
+    const eventById = new Map((otherEvents ?? []).map((e) => [e.id, e]));
+    const uploaderIds = [...new Set(sessionMaterialRows.map((m) => m.uploaded_by))];
+    const { data: uploaderProfiles } = await admin.from("profiles").select("id, full_name").in("id", uploaderIds);
+    const uploaderNameById = new Map((uploaderProfiles ?? []).map((p) => [p.id, p.full_name]));
+
+    const resolvedSessionMaterials = await Promise.all(
+      sessionMaterialRows.map(async (m) => {
+        let url = m.slides_url;
+        if (!url && m.storage_path) {
+          const { data: signed } = await admin.storage.from("tp-materials").createSignedUrl(m.storage_path, 3600);
+          url = signed?.signedUrl ?? null;
+        }
+        if (!url) return null;
+        const { data: listing } = m.storage_path
+          ? await admin.storage.from("tp-materials").list(m.storage_path.split("/").slice(0, -1).join("/"))
+          : { data: [] };
+        const sizeBytes = m.storage_path ? (listing ?? []).find((e) => `${m.storage_path!.split("/").slice(0, -1).join("/")}/${e.name}` === m.storage_path)?.metadata?.size ?? null : null;
+        return { ...m, url, sizeBytes };
+      })
+    );
+
+    const sessionGroupsByKey = new Map<string, { eventId: string; uploaderId: string; materials: RichMaterial[] }>();
+    for (const m of resolvedSessionMaterials) {
+      if (!m) continue;
+      const key = `${m.timetable_event_id}:${m.uploaded_by}`;
+      const group = sessionGroupsByKey.get(key);
+      const richMaterial: RichMaterial = { id: m.id, name: m.file_name ?? "Material", url: m.url, fileType: m.file_type, sizeBytes: m.sizeBytes };
+      if (group) group.materials.push(richMaterial);
+      else sessionGroupsByKey.set(key, { eventId: m.timetable_event_id, uploaderId: m.uploaded_by, materials: [richMaterial] });
+    }
+
+    for (const group of sessionGroupsByKey.values()) {
+      const event = eventById.get(group.eventId);
+      if (!event) continue;
+      lessonCards.push({
+        key: `session:${group.eventId}:${group.uploaderId}`,
+        teacherName: uploaderNameById.get(group.uploaderId) ?? "Your tutor",
+        label: event.title,
+        topic: null,
+        eventDate: event.event_date,
+        materials: group.materials,
+      });
+    }
+  }
+
   lessonCards.sort((a, b) => (a.key < b.key ? 1 : -1));
 
   const hoursRemaining = Math.max(certificateHoursThreshold - hoursCredited, 0);
@@ -779,7 +846,7 @@ function ClassesTable({ rows }: { rows: ClassRow[] }) {
 function MaterialsPanel({
   lessonCards,
 }: {
-  lessonCards: { key: string; teacherName: string; tpNumber: number; topic: string | null; eventDate: string; materials: RichMaterial[] }[];
+  lessonCards: { key: string; teacherName: string; label: string; topic: string | null; eventDate: string; materials: RichMaterial[] }[];
 }) {
   if (lessonCards.length === 0) return null;
   return (
@@ -790,7 +857,7 @@ function MaterialsPanel({
           <LessonMaterialsCard
             key={c.key}
             teacherName={c.teacherName}
-            tpNumber={c.tpNumber}
+            label={c.label}
             topic={c.topic}
             materials={c.materials.map((m) => ({ id: m.id, name: m.name, url: m.url, sizeLabel: formatFileSize(m.sizeBytes) }))}
           />

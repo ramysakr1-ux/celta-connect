@@ -3,6 +3,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { GTKY_BANK } from "@/lib/gtky-activities";
 import { GtkyPickForm } from "@/app/portfolio/[traineeId]/gtky/pick-form";
+import { SessionMaterialsSection } from "@/components/session-materials-section";
 
 // design_handoff_open_items_batch, GTKY Activity Bank.dc.html §1c -- the
 // candidate's own handout, one page, three options. Access is
@@ -20,13 +21,33 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
 
   const { data: assignment } = await supabase
     .from("gtky_assignments")
-    .select("offered_slugs, chosen_slug")
+    .select("course_id, offered_slugs, chosen_slug")
     .eq("trainee_id", traineeId)
     .maybeSingle();
   if (!assignment) notFound();
 
   const bySlug = new Map(GTKY_BANK.map((a) => [a.slug, a]));
   const activities = assignment.offered_slugs.map((s) => bySlug.get(s)).filter((a): a is NonNullable<typeof a> => !!a);
+
+  // Ramy, 25 Aug 2026: "it's gonna read whatever is on the timetable" --
+  // materials share against the real calendar event a trainer already
+  // created for this (same "Milestone" event type/title a trainer can add
+  // via the ordinary timetable editor), matched by title since GTKY has no
+  // formal link to the calendar today. Best-effort: no matching event yet
+  // just means nothing to share against, not an error.
+  const { data: gtkyEvent } = await supabase
+    .from("course_timetable_events")
+    .select("id, title")
+    .eq("course_id", assignment.course_id)
+    .neq("type", "tp")
+    .ilike("title", "%getting to know%")
+    .order("event_date")
+    .limit(1)
+    .maybeSingle();
+
+  const { data: materials } = gtkyEvent
+    ? await supabase.from("session_materials").select("id, file_name, file_type, storage_path, slides_url, uploaded_by").eq("timetable_event_id", gtkyEvent.id).order("created_at")
+    : { data: [] };
 
   return (
     <div className="flex flex-col gap-6">
@@ -42,6 +63,26 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
       </div>
 
       <GtkyPickForm activities={activities} chosenSlug={assignment.chosen_slug} />
+
+      <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
+        <h2 className="font-serif text-lg text-ink">Materials</h2>
+        <p className="mt-1 mb-4 text-sm text-muted">
+          Anything you&apos;d like the volunteer students to see beforehand -- a handout, a slide, whatever you&apos;re using.
+        </p>
+        {gtkyEvent ? (
+          <SessionMaterialsSection
+            timetableEventId={gtkyEvent.id}
+            courseId={assignment.course_id}
+            viewerId={traineeId}
+            materials={materials ?? []}
+            revalidatePath={`/portfolio/${traineeId}/gtky`}
+          />
+        ) : (
+          <p className="text-sm text-muted">
+            Ask your tutor to add &quot;Getting to know you&quot; to the course timetable first -- materials share against that.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

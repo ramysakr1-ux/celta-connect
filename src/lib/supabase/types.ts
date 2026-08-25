@@ -2321,6 +2321,26 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["gtky_assignments"]["Row"]>;
         Relationships: [];
       };
+      session_materials: {
+        Row: {
+          id: string;
+          timetable_event_id: string;
+          course_id: string;
+          uploaded_by: string;
+          storage_path: string | null;
+          file_name: string | null;
+          file_type: TpMaterialFileType | null;
+          slides_url: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["session_materials"]["Row"]> & {
+          timetable_event_id: string;
+          course_id: string;
+          uploaded_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["session_materials"]["Row"]>;
+        Relationships: [];
+      };
       course_broadcasts: {
         Row: {
           id: string;

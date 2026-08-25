@@ -418,11 +418,16 @@ export default async function TrainerTimetablePage({
               trainer lands on now -- the day-to-day glance/join screen,
               same glass-card design as the trainee's read-only board
               (for-claude-code-timetable-view.md), reused as-is. */}
-          {isMct ? (
-            <div className="flex justify-end">
-              <Link href="/trainer/timetable?mode=edit" className="text-sm font-medium text-primary hover:underline">
-                Edit timetable &rarr;
+          {trainer ? (
+            <div className="flex justify-end gap-4">
+              <Link href="/trainer/session-materials" className="text-sm font-medium text-primary hover:underline">
+                Share session materials &rarr;
               </Link>
+              {isMct ? (
+                <Link href="/trainer/timetable?mode=edit" className="text-sm font-medium text-primary hover:underline">
+                  Edit timetable &rarr;
+                </Link>
+              ) : null}
             </div>
           ) : null}
 

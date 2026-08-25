@@ -18,12 +18,12 @@ interface Material {
 // ClassMaterialsLink already uses for the table's own per-row link.
 export function LessonMaterialsCard({
   teacherName,
-  tpNumber,
+  label,
   topic,
   materials,
 }: {
   teacherName: string;
-  tpNumber: number;
+  label: string;
   topic: string | null;
   materials: Material[];
 }) {
@@ -36,7 +36,7 @@ export function LessonMaterialsCard({
         className="admin-hover-fill flex w-full flex-col items-start gap-0.5 rounded-[10px] border border-border px-3.5 py-2.5 text-left"
       >
         <p className="text-[13px] font-semibold text-ink">
-          TP{tpNumber} — {teacherName}
+          {label} — {teacherName}
         </p>
         {topic ? <p className="truncate text-[11px] text-muted">{topic}</p> : null}
       </button>
