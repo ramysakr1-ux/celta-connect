@@ -973,7 +973,7 @@ export function volunteerClassStartingEmailHtml(input: {
     // teal (see EMAIL_TONE), so this renders as the app's real teal.
     tone: "green",
     body: p(
-      `Thank you for volunteering. You will be in the ${input.levelName} class, taught by teachers training to become qualified English teachers, with an experienced tutor watching every lesson.`
+      `Thank you for volunteering. You will be in the ${input.levelName} class, taught by teachers completing CELTA, an internationally recognised English teaching qualification -- some are new to teaching, others already have years of classroom experience. An experienced tutor watches every lesson.`
     ),
     facts: [
       { label: "Your class", value: input.classFact },
