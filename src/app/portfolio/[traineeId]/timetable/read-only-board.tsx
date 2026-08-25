@@ -88,6 +88,12 @@ export interface EventMeta {
   mine: boolean;
   ownTpSlot: boolean;
   teachingLetters: string | null;
+  // Ramy, 25 Aug 2026: "the trainers should show how many volunteers are...
+  // attending" -- aggregate count only, no names (names are a centre-admin
+  // concern, not a trainer/trainee one). Undefined/null where the course has
+  // no volunteers at all, so the row just doesn't render rather than
+  // showing "0 of 0".
+  volunteerAttendance?: { expected: number; total: number } | null;
 }
 
 export interface ReadOnlyBoardProps {
@@ -415,6 +421,7 @@ function DetailPanel({
   if (event.type === "tp") {
     if (letters) rows.push({ label: "Teaching today", value: letters });
     if (event.linked_tp_number) rows.push({ label: "TP number", value: `TP${event.linked_tp_number}` });
+    if (meta.volunteerAttendance) rows.push({ label: "Volunteers", value: `${meta.volunteerAttendance.expected} of ${meta.volunteerAttendance.total} coming` });
     if (event.zoom_url) rows.push({ label: "Zoom link", value: event.zoom_url });
   } else if (event.tag === "consultation") {
     rows.push({ label: "Format", value: event.zoom_url ? "Online" : "In person" });

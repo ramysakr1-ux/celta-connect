@@ -63,6 +63,19 @@ export default async function TrainerTimetablePage({
   ]);
   const allEvents: TimetableEvent[] = events ?? [];
 
+  // Ramy, 25 Aug 2026: "the trainers should show if they are... how many
+  // volunteers... attending" -- aggregate only, no names. Total is fixed
+  // per course; only the per-event decline count varies.
+  const volunteerIds = (volunteers ?? []).map((v) => v.id);
+  const { data: volunteerDeclines } =
+    volunteerIds.length > 0
+      ? await supabase.from("volunteer_declines").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
+      : { data: [] };
+  const declinedCountByEvent = new Map<string, number>();
+  for (const d of volunteerDeclines ?? []) {
+    declinedCountByEvent.set(d.timetable_event_id, (declinedCountByEvent.get(d.timetable_event_id) ?? 0) + 1);
+  }
+
   // Ramy, 2026-08-23: ACT doesn't make changes to the timetable, so doesn't
   // need to see those options -- mirrors actions.ts' requireTimetableEditAccess
   // exactly (same isMctOnCourse() check, admin bypass), so the UI never
@@ -250,7 +263,11 @@ export default async function TrainerTimetablePage({
             const owningHalf = halfOwningDate(tpEventsForRotation, event.event_date);
             return owningHalf !== null && ownedHalfOrders.has(owningHalf);
           })();
-    eventMeta[event.id] = { mine, ownTpSlot: false, teachingLetters: null };
+    const volunteerAttendance =
+      event.type === "tp" && volunteerIds.length > 0
+        ? { total: volunteerIds.length, expected: volunteerIds.length - (declinedCountByEvent.get(event.id) ?? 0) }
+        : null;
+    eventMeta[event.id] = { mine, ownTpSlot: false, teachingLetters: null, volunteerAttendance };
   }
 
   return (

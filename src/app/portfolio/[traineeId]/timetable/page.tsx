@@ -57,6 +57,25 @@ export default async function TraineeTimetablePage({
   const allEvents: TimetableEvent[] = events ?? [];
   const tpEvents: TpTimetableEvent[] = allEvents.filter((e) => e.type === "tp").map((e) => ({ event_date: e.event_date }));
 
+  // Ramy, 25 Aug 2026: "the trainees also should know" how many volunteers
+  // are coming -- same aggregate-only, no-names treatment as the trainer's
+  // own timetable (src/app/trainer/(hub)/timetable/page.tsx). Admin client
+  // specifically for volunteer_declines -- that table's RLS only grants
+  // trainer/admin read access (0143_volunteer_declines.sql), no trainee
+  // policy exists, so the page's own RLS-bound client would silently see
+  // zero declines and show every event as fully attended.
+  const declinesAdmin = createAdminClient();
+  const { data: volunteers } = await supabase.from("volunteer_students").select("id").eq("course_id", trainee.course_id).is("removed_at", null);
+  const volunteerIds = (volunteers ?? []).map((v) => v.id);
+  const { data: volunteerDeclines } =
+    volunteerIds.length > 0
+      ? await declinesAdmin.from("volunteer_declines").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
+      : { data: [] };
+  const declinedCountByEvent = new Map<string, number>();
+  for (const d of volunteerDeclines ?? []) {
+    declinedCountByEvent.set(d.timetable_event_id, (declinedCountByEvent.get(d.timetable_event_id) ?? 0) + 1);
+  }
+
   // "Their own TP lessons" -- only resolvable for a paired subgroup, same
   // honest limit as the trainer-side TP Marking Queue/Rotation board (see
   // src/lib/rotation.ts's own comments): an unpaired subgroup has no date
@@ -142,12 +161,19 @@ export default async function TraineeTimetablePage({
 
   // Functions can't cross the server/client component boundary -- precompute
   // per-event involvement here and pass plain data down instead.
-  const eventMeta: Record<string, { mine: boolean; ownTpSlot: boolean; teachingLetters: string | null }> = {};
+  const eventMeta: Record<
+    string,
+    { mine: boolean; ownTpSlot: boolean; teachingLetters: string | null; volunteerAttendance: { expected: number; total: number } | null }
+  > = {};
   for (const event of allEvents) {
     eventMeta[event.id] = {
       mine: isMineEvent(event),
       ownTpSlot: isOwnTpSlot(event),
       teachingLetters: teachingLettersFor(event),
+      volunteerAttendance:
+        event.type === "tp" && volunteerIds.length > 0
+          ? { total: volunteerIds.length, expected: volunteerIds.length - (declinedCountByEvent.get(event.id) ?? 0) }
+          : null,
     };
   }
 

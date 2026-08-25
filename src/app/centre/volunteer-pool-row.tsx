@@ -18,7 +18,7 @@ export function VolunteerPoolRow({
   // for-claude-code-volunteer-pool-header.md: sage green while at least one
   // linked course is still running, muted grey once every one has ended.
   active: boolean;
-  members: { id: string; courseName: string; level: string | null }[];
+  members: { id: string; courseName: string; level: string | null; nextClassStatus: "coming" | "declined" | null }[];
   canEdit: boolean;
   linkOptions: { id: string; name: string }[];
 }) {
@@ -36,7 +36,10 @@ export function VolunteerPoolRow({
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-[3px]">
           <span className="text-sm text-ink">{name}</span>
-          <LevelTag level={primary.level} courseName={primary.courseName} />
+          <div className="flex items-center gap-2">
+            <LevelTag level={primary.level} courseName={primary.courseName} />
+            <NextClassStatusTag status={primary.nextClassStatus} />
+          </div>
           {members.length > 1 ? (
             <button type="button" onClick={() => setExpanded((v) => !v)} className="text-left text-[11px] font-semibold text-primary hover:underline">
               Linked &middot; {members.length} courses {expanded ? "▲" : "▼"}
@@ -60,7 +63,10 @@ export function VolunteerPoolRow({
         <div className="mt-1.5 flex flex-col gap-1.5 pl-[34px]">
           {members.map((m) => (
             <div key={m.id} className="flex items-center justify-between gap-3">
-              <LevelTag level={m.level} courseName={m.courseName} />
+              <div className="flex items-center gap-2">
+                <LevelTag level={m.level} courseName={m.courseName} />
+                <NextClassStatusTag status={m.nextClassStatus} />
+              </div>
               {canEdit ? (
                 <button
                   type="button"
@@ -93,5 +99,21 @@ function LevelTag({ level, courseName }: { level: string | null; courseName: str
       ) : null}
       <span className="text-[11px] text-muted">{courseName}</span>
     </div>
+  );
+}
+
+// Ramy, 25 Aug 2026: "for the center, the names will be attached as well"
+// -- the only place in the app that shows a per-volunteer name next to
+// their next-class attendance status, rather than the trainer/trainee
+// aggregate-only count.
+function NextClassStatusTag({ status }: { status: "coming" | "declined" | null }) {
+  if (!status) return null;
+  return (
+    <span
+      className="text-[11px] font-semibold"
+      style={{ color: status === "coming" ? "var(--color-status-on-track-text)" : "var(--color-status-at-risk-text)" }}
+    >
+      {status === "coming" ? "Coming next class" : "Can't make next class"}
+    </span>
   );
 }

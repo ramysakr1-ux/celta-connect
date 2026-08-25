@@ -115,6 +115,34 @@ export default async function TpDetailPage({
   if (!trainee) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
+  // Ramy, 25 Aug 2026: "the trainees also should know... maybe it will show
+  // on their TP cards" -- aggregate volunteer count for the calendar round
+  // this TP number maps to. Admin client throughout: volunteer_declines'
+  // RLS has no trainee policy (0143_volunteer_declines.sql), and this page
+  // already uses `admin` for peer-observation reads above.
+  let volunteerAttendance: { expected: number; total: number } | null = null;
+  if (trainee.course_id) {
+    const { data: tpCalendarEvent } = await admin
+      .from("course_timetable_events")
+      .select("id")
+      .eq("course_id", trainee.course_id)
+      .eq("type", "tp")
+      .eq("linked_tp_number", tpNumber)
+      .maybeSingle();
+    if (tpCalendarEvent) {
+      const { data: courseVolunteers } = await admin.from("volunteer_students").select("id").eq("course_id", trainee.course_id).is("removed_at", null);
+      const courseVolunteerIds = (courseVolunteers ?? []).map((v) => v.id);
+      if (courseVolunteerIds.length > 0) {
+        const { data: declines } = await admin
+          .from("volunteer_declines")
+          .select("volunteer_student_id")
+          .eq("timetable_event_id", tpCalendarEvent.id)
+          .in("volunteer_student_id", courseVolunteerIds);
+        volunteerAttendance = { total: courseVolunteerIds.length, expected: courseVolunteerIds.length - (declines?.length ?? 0) };
+      }
+    }
+  }
+
   // specs/build-spec.md "Peer observation" -- a peer only ever sees this
   // one panel for someone else's lesson, never their plan, self-eval, or
   // tutor feedback. Returns early, before any of those get fetched.
@@ -277,7 +305,10 @@ export default async function TpDetailPage({
             <h1 className="font-serif text-2xl text-ink">
               TP{tpNumber} — {assignment.main_lesson_aim}
             </h1>
-            <p className="mt-1 text-sm text-muted">{densityLabel.name}</p>
+            <p className="mt-1 text-sm text-muted">
+              {densityLabel.name}
+              {volunteerAttendance ? ` · ${volunteerAttendance.expected} of ${volunteerAttendance.total} volunteers coming` : ""}
+            </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {(() => {

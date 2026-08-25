@@ -47,14 +47,30 @@ export default async function CentreVolunteersPage({
       : { data: [] };
 
   const volunteerIds = (volunteers ?? []).map((v) => v.id);
-  const [{ data: tpEvents }, { data: attendanceRows }] = await Promise.all([
+  const [{ data: tpEvents }, { data: attendanceRows }, { data: declineRows }] = await Promise.all([
     courseIds.length > 0
       ? admin.from("course_timetable_events").select("id, event_date, course_id").in("course_id", courseIds).eq("type", "tp")
       : Promise.resolve({ data: [] }),
     volunteerIds.length > 0
       ? admin.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
       : Promise.resolve({ data: [] }),
+    volunteerIds.length > 0
+      ? admin.from("volunteer_declines").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
+      : Promise.resolve({ data: [] }),
   ]);
+
+  // Ramy, 25 Aug 2026: "for the center, the names will be attached as well"
+  // -- unlike the trainer/trainee aggregate-only counts, the centre roster
+  // is already a per-person list, so "who's coming to the next class"
+  // shows right on that person's own row rather than as a separate summary.
+  const nextTpEventIdByCourse = new Map<string, string>();
+  for (const e of tpEvents ?? []) {
+    if (e.event_date < today) continue;
+    const current = nextTpEventIdByCourse.get(e.course_id);
+    const currentDate = current ? (tpEvents ?? []).find((x) => x.id === current)?.event_date : undefined;
+    if (!current || (currentDate && e.event_date < currentDate)) nextTpEventIdByCourse.set(e.course_id, e.id);
+  }
+  const declinedKeys = new Set((declineRows ?? []).map((d) => `${d.volunteer_student_id}:${d.timetable_event_id}`));
 
   const groups = new Map<
     string,
@@ -139,7 +155,15 @@ export default async function CentreVolunteersPage({
                   name={g.name}
                   hours={g.hours}
                   active={g.active}
-                  members={g.members.map((m) => ({ id: m.id, courseName: courseNameById.get(m.courseId) ?? "Unknown course", level: m.level }))}
+                  members={g.members.map((m) => {
+                    const nextEventId = nextTpEventIdByCourse.get(m.courseId);
+                    const nextClassStatus: "coming" | "declined" | null = !nextEventId
+                      ? null
+                      : declinedKeys.has(`${m.id}:${nextEventId}`)
+                        ? "declined"
+                        : "coming";
+                    return { id: m.id, courseName: courseNameById.get(m.courseId) ?? "Unknown course", level: m.level, nextClassStatus };
+                  })}
                   canEdit={canEdit}
                   linkOptions={volunteerGroups
                     .filter((o) => o.members[0].id !== g.members[0].id)
