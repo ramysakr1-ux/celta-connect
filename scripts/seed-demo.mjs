@@ -309,11 +309,28 @@ async function main() {
   // shared materials below, not one apiece (Ramy, 25 Aug 2026, pointing at
   // Volunteer View.dc.html's own "3 handouts"/"2 handouts" rows: "I'm
   // talking about the actual materials where they lie inside the cards").
+  // Real file per handout name, not a fake placeholder link -- Ramy, 25 Aug
+  // 2026, after the pills/counts were already right: "the actual material
+  // that they received, the handouts. Where are they? ... Where the fuck
+  // are they?" A "3 handouts" pill that opens a dead demo-placeholder Google
+  // Slides link isn't a handout, it's a lie about one. These are real,
+  // on-topic one-page PDFs checked into scripts/seed-assets/tp-materials/.
+  const HANDOUT_ASSET = {
+    "Present perfect -- slides": "present-perfect-slides.pdf",
+    "Present perfect -- gap-fill handout": "present-perfect-gap-fill.pdf",
+    "Reading for gist and detail -- handout": "reading-city-life-text.pdf",
+    "Reading for gist -- comprehension questions": "reading-comprehension-questions.pdf",
+    "Air Travel vocabulary -- flashcards": "air-travel-vocabulary-flashcards.pdf",
+    "Air Travel -- listening transcript": "air-travel-listening-transcript.pdf",
+    "Air Travel -- matching worksheet": "air-travel-matching-worksheet.pdf",
+    "Making suggestions -- worksheet": "making-suggestions-worksheet.pdf",
+    "Making suggestions -- role-play cards": "making-suggestions-role-play-cards.pdf",
+  };
   for (const [i, cfg] of [
     { aim: "Present perfect for life experience", grade: "above_standard", days: 12, materialNames: ["Present perfect -- slides", "Present perfect -- gap-fill handout"] },
-    { aim: "Reading for gist and detail: a city life article", grade: "to_standard", days: 9, materialNames: ["City life reading text", "Reading for gist -- comprehension questions"] },
+    { aim: "Reading for gist and detail: a city life article", grade: "to_standard", days: 9, materialNames: ["Reading for gist and detail -- handout", "Reading for gist -- comprehension questions"] },
     { aim: "Vocabulary: Air Travel", grade: "above_standard", days: 6, materialNames: ["Air Travel vocabulary -- flashcards", "Air Travel -- listening transcript", "Air Travel -- matching worksheet"] },
-    { aim: "Functional language: Making suggestions", grade: "to_standard", days: 3, materialNames: ["Making suggestions -- slides", "Making suggestions -- role-play cards"] },
+    { aim: "Functional language: Making suggestions", grade: "to_standard", days: 3, materialNames: ["Making suggestions -- worksheet", "Making suggestions -- role-play cards"] },
   ].entries()) {
     const planId = await seedTaughtTp(trainees["Amara Okafor"], i + 1, {
       aim: cfg.aim,
@@ -533,13 +550,22 @@ async function main() {
   // access them."
   for (const { planId, materialNames } of amaraTpPlanIds) {
     for (const materialName of materialNames) {
+      const assetFile = HANDOUT_ASSET[materialName];
+      const storagePath = `${center.id}/${trainees["Amara Okafor"]}/${planId}/${crypto.randomUUID()}.pdf`;
+      const fileBytes = fs.readFileSync(new URL(`./seed-assets/tp-materials/${assetFile}`, import.meta.url));
+      const { error: uploadErr } = await supabase.storage.from("tp-materials").upload(storagePath, fileBytes, { contentType: "application/pdf" });
+      if (uploadErr) {
+        console.log("upload failed for", materialName, uploadErr.message);
+        continue;
+      }
       const { data: material } = await supabase
         .from("tp_materials")
         .insert({
           tp_plan_id: planId,
           trainee_id: trainees["Amara Okafor"],
           file_name: materialName,
-          slides_url: "https://docs.google.com/presentation/d/demo-placeholder/edit",
+          file_type: "pdf",
+          storage_path: storagePath,
         })
         .select("id")
         .single();
