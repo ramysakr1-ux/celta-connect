@@ -99,6 +99,17 @@ function CalendarIcon() {
   );
 }
 
+// Path lifted directly from Volunteer View - standalone.html's own "Join
+// online" button markup, not redrawn from a generic icon set.
+function VideoIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 10l4.5-2.5v9L15 14" />
+      <rect x="3" y="6" width="12" height="12" rx="2" />
+    </svg>
+  );
+}
+
 interface RowMaterial {
   id: string;
   name: string;
@@ -240,6 +251,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // above: N of M classes attended, this course only, no percentage.
   const thisCourseClasses = classes.filter((c) => c.courseId === accessToken.course_id);
   const thisCourseAttended = thisCourseClasses.filter((c) => c.attended === true).length;
+  const thisCourseHeldSoFar = thisCourseClasses.filter((c) => c.attended !== null).length;
 
   // Resolved server-side with the admin client -- a volunteer has no
   // Supabase session at all, so a browser client could never sign a
@@ -312,237 +324,406 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   const teachersLabel = nextClassTeachers.length > 0 ? nextClassTeachers.map((t) => t.name).join(" and ") : null;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header bar -- "card bg" (near-white, brighter than --color-card)
-          per the spec's own token legend, a one-off literal like the rest
-          of this page's colours rather than repointing a shared token off
-          one page's numbers. */}
-      <header
-        className="flex h-[54px] items-center justify-between border-b border-border px-4 md:h-[52px] md:px-6"
-        style={{ background: "oklch(99.2% 0.005 90)" }}
-      >
-        <Wordmark size="header-compact" />
-        <Greeting name={firstName} className="text-xs text-muted md:hidden" />
-        <Greeting name={volunteer.name} suffix="volunteer student" className="hidden text-xs text-muted md:block" />
-      </header>
+    <div className="flex min-h-screen flex-col items-center bg-background px-4 py-8 md:py-12">
+      {/* volunteer-view-full-spec.md 1a/1b: the whole page -- header AND
+          body -- lives inside ONE bordered/rounded shell floating on the
+          page ground (390px/22px-radius on phone, a wider 6px-radius "mat"
+          on desktop), not a full-bleed page. Confirmed by inspecting the
+          mockup's own computed layout directly (Volunteer View -
+          standalone.html), not just its prose -- a first pass at this page
+          built the content full-width with no enclosing card at all, which
+          read as "not really a replica" once compared side by side. */}
+      <div className="w-full max-w-[390px] overflow-hidden rounded-[22px] border border-border bg-card md:max-w-[1100px] md:overflow-visible md:rounded-[6px] md:p-[22px]">
+        {/* Inner near-white panel -- inert on phone (header/body sit
+            directly on the shell above), becomes its own bordered/rounded
+            panel on desktop (the "mat" effect around a white page). */}
+        <div className="md:rounded-[6px] md:border md:border-border">
+          <div className="hidden md:block md:rounded-[6px]" style={{ background: "oklch(99.2% 0.005 90)" }}>
+            {/* Header bar */}
+            <header className="flex h-[52px] items-center justify-between border-b border-border px-5">
+              <Wordmark size="header-compact" />
+              <Greeting name={volunteer.name} suffix="volunteer student" className="text-xs text-muted" />
+            </header>
 
-      <div className="mx-auto max-w-[420px] px-4 pt-[18px] pb-[26px] md:max-w-[1080px] md:px-6 md:pt-[22px] md:pb-10">
-        <div className="md:grid md:grid-cols-[1.35fr_1fr] md:items-start md:gap-6">
-          <div className="flex flex-col gap-4 md:gap-5">
-            {/* Title block */}
-            <div>
-              <p className="text-[10px] font-bold tracking-[0.08em] text-muted uppercase md:text-[11px]">
-                {course?.name ?? "Your course"}
-                {endDateLabel ? <span className="hidden md:inline"> · until {endDateLabel}</span> : null}
-              </p>
-              <h1 className="mt-1 font-serif text-[21px] font-semibold text-ink md:text-[22px]">{headline}</h1>
-            </div>
-
-            {nextClass ? (
-              <>
-                {/* Next class -- phone card */}
-                <div
-                  className="flex flex-col gap-[13px] rounded-[10px] border p-4 md:hidden"
-                  style={{ borderColor: "color-mix(in oklab, var(--color-primary) 32%, transparent)", background: "oklch(99.2% 0.005 90)" }}
-                >
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="font-serif text-[19px] font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
-                    {nextClass.eventTime ? <p className="text-[13px] font-semibold text-primary tabular-nums">{nextClass.eventTime.slice(0, 5)}</p> : null}
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex gap-2.5 text-[13px] text-ink">
-                      <span className="w-[62px] shrink-0 text-[10px] font-bold tracking-[0.06em] text-muted uppercase">Where</span>
-                      <span>{whereLabel}</span>
-                    </div>
-                    {topicLabel ? (
-                      <div className="flex gap-2.5 text-[13px] text-ink">
-                        <span className="w-[62px] shrink-0 text-[10px] font-bold tracking-[0.06em] text-muted uppercase">Topic</span>
-                        <span>{topicLabel}</span>
-                      </div>
-                    ) : null}
-                    {teachersLabel ? (
-                      <div className="flex gap-2.5 text-[13px] text-ink">
-                        <span className="w-[62px] shrink-0 text-[10px] font-bold tracking-[0.06em] text-muted uppercase">Teachers</span>
-                        <span>{teachersLabel}</span>
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {nextClass.zoomUrl ? (
-                      <a
-                        href={nextClass.zoomUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex h-11 flex-1 items-center justify-center rounded-[8px] bg-primary text-sm font-semibold text-primary-foreground"
-                      >
-                        Join online
-                      </a>
-                    ) : null}
-                    <a
-                      href={`data:text/calendar;charset=utf-8,${encodeURIComponent(
-                        `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${course?.name ?? "Class"}\nDTSTART:${nextClass.eventDate.replace(/-/g, "")}\nEND:VEVENT\nEND:VCALENDAR`
-                      )}`}
-                      download="class.ics"
-                      title="Add to calendar"
-                      className="admin-hover-fill flex size-11 shrink-0 items-center justify-center rounded-[8px] border border-border text-muted"
-                    >
-                      <CalendarIcon />
-                    </a>
-                  </div>
-                  <div className="flex items-center justify-between gap-3 border-t border-border-faint pt-3">
-                    <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
-                    <PushSubscribeButton subscribe={subscribeVolunteerPush.bind(null, token)} unsubscribe={unsubscribeVolunteerPush.bind(null, token)} />
-                  </div>
-                </div>
-
-                {/* Next class -- desktop banner */}
-                <div
-                  className="hidden flex-wrap items-center justify-between gap-3 rounded-[6px] border p-4 md:flex"
-                  style={{ borderColor: "color-mix(in oklab, var(--color-primary) 30%, transparent)", background: "oklch(99.2% 0.005 90)" }}
-                >
-                  <div>
-                    <p className="font-serif text-[17px] font-semibold text-ink">
-                      {formatEventDate(nextClass.eventDate)}
-                      {nextClass.eventTime ? ` · ${nextClass.eventTime.slice(0, 5)}` : ""}
-                    </p>
-                    <p className="mt-1 text-xs text-muted">
-                      {[whereLabel, topicLabel, teachersLabel ? `with ${teachersLabel}` : null].filter(Boolean).join(" · ")}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
-                    <PushSubscribeButton subscribe={subscribeVolunteerPush.bind(null, token)} unsubscribe={unsubscribeVolunteerPush.bind(null, token)} />
-                    {nextClass.zoomUrl ? (
-                      <a href={nextClass.zoomUrl} target="_blank" rel="noopener noreferrer" className="flex h-[38px] items-center rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground">
-                        Join online
-                      </a>
-                    ) : null}
-                  </div>
-                </div>
-              </>
-            ) : null}
-
-            {/* Your classes -- phone card list */}
-            <div id="classes" className="flex flex-col gap-2 md:hidden">
-              <div className="flex items-baseline justify-between">
-                <p className="text-[10px] font-bold tracking-[0.08em] text-muted uppercase">Your classes</p>
-                <p className="text-[11px] text-muted">{thisCourseAttended} attended</p>
+            <div className="grid grid-cols-[1.35fr_1fr] gap-5 p-[22px_20px]">
+              <div className="flex flex-col gap-3.5">
+                <TitleBlock course={course} endDateLabel={endDateLabel} headline={headline} desktop />
+                {nextClass ? (
+                  <NextClassBanner
+                    nextClass={nextClass}
+                    whereLabel={whereLabel}
+                    topicLabel={topicLabel}
+                    teachersLabel={teachersLabel}
+                    token={token}
+                    nextClassDecline={nextClassDecline}
+                  />
+                ) : null}
+                <ClassesTable rows={rows} />
               </div>
-              {rows.length === 0 ? (
-                <p className="text-sm text-muted">No classes scheduled yet.</p>
-              ) : (
-                rows.map((c) => (
-                  <div key={c.eventId} className="flex flex-col gap-2 rounded-[10px] border border-border bg-card px-3.5 py-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-semibold text-ink">{c.topic ?? c.courseName}</p>
-                      <p className="shrink-0 text-[11px] text-muted">{formatShortDate(c.eventDate)}</p>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <StatusPill attended={c.attended} />
-                      <ClassMaterialsLink materials={c.rowMaterials} />
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Your classes -- desktop table */}
-            <div className="hidden overflow-hidden rounded-[6px] border border-border md:block">
-              <div
-                className="grid grid-cols-[96px_1fr_128px_150px] border-b border-border px-4 py-2 text-[9px] font-bold tracking-[0.06em] text-muted uppercase"
-                style={{ background: "var(--color-card)" }}
-              >
-                <div>Date</div>
-                <div>Topic</div>
-                <div>Attendance</div>
-                <div>Materials</div>
+              <div className="flex flex-col gap-3.5">
+                <HoursCard
+                  hoursCredited={hoursCredited}
+                  hoursRemaining={hoursRemaining}
+                  perClassHours={perClassHours}
+                  progressPct={progressPct}
+                  milestones={milestones}
+                  nextMilestoneIndex={nextMilestoneIndex}
+                />
+                <ThisCourseCard thisCourseAttended={thisCourseAttended} thisCourseHeldSoFar={thisCourseHeldSoFar} thisCourseClasses={thisCourseClasses} />
               </div>
-              {rows.length === 0 ? (
-                <p className="px-4 py-6 text-sm text-muted">No classes scheduled yet.</p>
-              ) : (
-                rows.map((c, i) => (
-                  <div
-                    key={c.eventId}
-                    className={`grid grid-cols-[96px_1fr_128px_150px] items-center px-4 py-2.5 text-xs text-ink ${i > 0 ? "border-t border-border-faint" : ""}`}
-                  >
-                    <div className="text-muted">{formatShortDate(c.eventDate)}</div>
-                    <div className="truncate">{c.topic ?? c.courseName}</div>
-                    <div>
-                      <StatusPill attended={c.attended} />
-                    </div>
-                    <div>{c.rowMaterials.length > 0 ? <ClassMaterialsLink materials={c.rowMaterials} /> : <span className="text-muted">—</span>}</div>
-                  </div>
-                ))
-              )}
             </div>
+            <Footer endDateLabel={endDateLabel} materials={materials} token={token} />
           </div>
 
-          {/* Right column: Hours + This course */}
-          <div className="mt-4 flex flex-col gap-4 md:mt-0 md:gap-5">
-            <div
-              className="rounded-[10px] border p-3.5 md:p-4"
-              style={{ borderColor: "color-mix(in oklab, var(--color-primary) 18%, transparent)", background: "color-mix(in oklab, var(--color-primary) 8%, var(--color-card))" }}
-            >
-              <p className="text-[13px] font-semibold text-ink">Your hours</p>
-              <p className="mt-0.5 flex items-baseline gap-1">
-                <span className="font-serif text-[21px] font-semibold" style={{ color: "var(--color-ink-warm)" }}>
-                  {hoursCredited.toFixed(1)}
-                </span>
-                <span className="text-[11px] text-muted">hrs</span>
-              </p>
-              <p className="mt-1 text-xs text-muted">
-                {hoursRemaining > 0 ? `You are ${hoursRemaining.toFixed(1)} hours from your certificate.` : "You've reached the certificate threshold."} Every
-                class adds {perClassHours.toFixed(2).replace(/\.?0+$/, "")} hours.
-              </p>
-              <div className="mt-2.5 h-[5px] overflow-hidden rounded-full" style={{ background: "oklch(93.5% 0.012 85)" }}>
-                <div className="h-full rounded-full bg-primary" style={{ width: `${progressPct}%` }} />
-              </div>
-              <div className="mt-2.5 flex gap-1.5">
-                {milestones.map((m, i) => (
-                  <MilestoneTile key={m} hours={m} hoursCredited={hoursCredited} isLast={i === milestones.length - 1} isNext={i === nextMilestoneIndex} />
-                ))}
-              </div>
-              <p className="mt-2.5 text-[11px] text-muted">Every class counts, whichever level you are in. Stay for at least two of the three lessons and the class is yours.</p>
-            </div>
+          {/* Phone -- header flush at the very top of the shell, body
+              padded 18px 16px 26px, one column. */}
+          <div className="md:hidden">
+            <header className="flex h-[54px] items-center justify-between border-b border-border px-4" style={{ background: "oklch(99.2% 0.005 90)" }}>
+              <Wordmark size="header-compact" />
+              <Greeting name={firstName} className="text-xs text-muted" />
+            </header>
 
-            <div className="rounded-[10px] border border-border bg-card p-3.5 md:p-4">
-              <p className="text-xs font-semibold text-ink">This course</p>
-              <p className="mt-1 text-xs text-muted">
-                You&apos;ve come to {thisCourseAttended} of {thisCourseClasses.length} classes held so far.
-              </p>
-              <div className="mt-2 flex gap-1">
-                {thisCourseClasses
-                  .slice()
-                  .sort((a, b) => (a.eventDate < b.eventDate ? -1 : 1))
-                  .map((c) => (
-                    <span
-                      key={c.eventId}
-                      className="h-[5px] flex-1 rounded-[3px]"
-                      style={{
-                        background: c.attended === true ? "var(--color-ink-warm)" : c.attended === false ? "var(--color-border)" : "oklch(93.5% 0.012 85)",
-                      }}
-                      title={c.eventDate}
-                    />
-                  ))}
-              </div>
+            <div className="flex flex-col gap-4 px-4 pt-[18px] pb-[26px]">
+              <TitleBlock course={course} endDateLabel={endDateLabel} headline={headline} desktop={false} />
+              {nextClass ? (
+                <NextClassCard
+                  nextClass={nextClass}
+                  whereLabel={whereLabel}
+                  topicLabel={topicLabel}
+                  teachersLabel={teachersLabel}
+                  course={course}
+                  token={token}
+                  nextClassDecline={nextClassDecline}
+                />
+              ) : null}
+              <ClassesList rows={rows} attendedCount={thisCourseAttended} />
+              <HoursCard
+                hoursCredited={hoursCredited}
+                hoursRemaining={hoursRemaining}
+                perClassHours={perClassHours}
+                progressPct={progressPct}
+                milestones={milestones}
+                nextMilestoneIndex={nextMilestoneIndex}
+              />
+              <ThisCourseCard thisCourseAttended={thisCourseAttended} thisCourseHeldSoFar={thisCourseHeldSoFar} thisCourseClasses={thisCourseClasses} />
+              <Footer endDateLabel={endDateLabel} materials={materials} token={token} />
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-6 flex flex-col items-center gap-1 border-t border-border-faint pt-4 text-center">
-          <p className="text-[11px] leading-[1.55] text-muted">
-            This link is yours alone, and works until the course ends{endDateLabel ? ` on ${endDateLabel}` : ""}.
-          </p>
-          {materials.length > 0 ? (
-            <a href="#classes" className="text-xs font-semibold text-primary hover:underline">
-              Download all my materials before then →
-            </a>
-          ) : null}
         </div>
       </div>
 
       <DesignerCredit corner="bottom-right" />
+    </div>
+  );
+}
+
+function TitleBlock({
+  course,
+  endDateLabel,
+  headline,
+  desktop,
+}: {
+  course: { name: string } | null;
+  endDateLabel: string | null;
+  headline: string;
+  desktop: boolean;
+}) {
+  return (
+    <div>
+      <p className={`font-bold text-muted uppercase ${desktop ? "text-[11px] tracking-[0.08em]" : "text-[10px] tracking-[0.08em]"}`}>
+        {course?.name ?? "Your course"}
+        {desktop && endDateLabel ? ` · until ${endDateLabel}` : ""}
+      </p>
+      <h1 className={`mt-1 font-serif font-semibold text-ink ${desktop ? "text-[22px]" : "text-[21px]"}`}>{headline}</h1>
+    </div>
+  );
+}
+
+function NextClassFacts({ whereLabel, topicLabel, teachersLabel }: { whereLabel: string; topicLabel: string | null; teachersLabel: string | null }) {
+  const facts: [string, string][] = [["Where", whereLabel]];
+  if (topicLabel) facts.push(["Topic", topicLabel]);
+  if (teachersLabel) facts.push(["Teachers", teachersLabel]);
+  return (
+    <div className="flex flex-col gap-1.5">
+      {facts.map(([label, value]) => (
+        <div key={label} className="flex gap-2.5 text-[13px] text-ink">
+          <span className="w-[62px] shrink-0 text-[10px] font-bold tracking-[0.06em] text-muted uppercase">{label}</span>
+          <span>{value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface NextClassLike {
+  eventId: string;
+  eventDate: string;
+  eventTime: string | null;
+  zoomUrl: string | null;
+}
+
+function NextClassCard({
+  nextClass,
+  whereLabel,
+  topicLabel,
+  teachersLabel,
+  course,
+  token,
+  nextClassDecline,
+}: {
+  nextClass: NextClassLike;
+  whereLabel: string;
+  topicLabel: string | null;
+  teachersLabel: string | null;
+  course: { name: string } | null;
+  token: string;
+  nextClassDecline: { id: string } | null;
+}) {
+  return (
+    <div
+      className="flex flex-col gap-[13px] rounded-[10px] border p-4"
+      style={{ borderColor: "color-mix(in oklab, var(--color-primary) 32%, transparent)", background: "oklch(99.2% 0.005 90)" }}
+    >
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="font-serif text-[19px] font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
+        {nextClass.eventTime ? <p className="text-[13px] font-semibold text-primary tabular-nums">{nextClass.eventTime.slice(0, 5)}</p> : null}
+      </div>
+      <NextClassFacts whereLabel={whereLabel} topicLabel={topicLabel} teachersLabel={teachersLabel} />
+      <div className="flex items-center gap-2">
+        {nextClass.zoomUrl ? (
+          <a
+            href={nextClass.zoomUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[8px] bg-primary text-sm font-semibold text-primary-foreground"
+          >
+            <VideoIcon />
+            Join online
+          </a>
+        ) : null}
+        <a
+          href={`data:text/calendar;charset=utf-8,${encodeURIComponent(
+            `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${course?.name ?? "Class"}\nDTSTART:${nextClass.eventDate.replace(/-/g, "")}\nEND:VEVENT\nEND:VCALENDAR`
+          )}`}
+          download="class.ics"
+          title="Add to calendar"
+          className="admin-hover-fill flex size-11 shrink-0 items-center justify-center rounded-[8px] border border-border text-muted"
+        >
+          <CalendarIcon />
+        </a>
+      </div>
+      <div className="flex items-center justify-between gap-3 border-t border-border-faint pt-3">
+        <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
+      </div>
+    </div>
+  );
+}
+
+function NextClassBanner({
+  nextClass,
+  whereLabel,
+  topicLabel,
+  teachersLabel,
+  token,
+  nextClassDecline,
+}: {
+  nextClass: NextClassLike;
+  whereLabel: string;
+  topicLabel: string | null;
+  teachersLabel: string | null;
+  token: string;
+  nextClassDecline: { id: string } | null;
+}) {
+  return (
+    <div
+      className="flex flex-wrap items-center justify-between gap-3 rounded-[6px] border p-4"
+      style={{ borderColor: "color-mix(in oklab, var(--color-primary) 30%, transparent)", background: "var(--color-card)" }}
+    >
+      <div>
+        <p className="font-serif text-[17px] font-semibold text-ink">
+          {formatEventDate(nextClass.eventDate)}
+          {nextClass.eventTime ? ` · ${nextClass.eventTime.slice(0, 5)}` : ""}
+        </p>
+        <p className="mt-1 text-xs text-muted">{[whereLabel, topicLabel, teachersLabel ? `with ${teachersLabel}` : null].filter(Boolean).join(" · ")}</p>
+      </div>
+      <div className="flex items-center gap-3">
+        <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
+        {nextClass.zoomUrl ? (
+          <a
+            href={nextClass.zoomUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-[38px] items-center gap-2 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground"
+          >
+            <VideoIcon />
+            Join online
+          </a>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+interface ClassRow {
+  eventId: string;
+  eventDate: string;
+  topic: string | null;
+  courseName: string;
+  attended: boolean | null;
+  rowMaterials: RowMaterial[];
+}
+
+function ClassesList({ rows, attendedCount }: { rows: ClassRow[]; attendedCount: number }) {
+  return (
+    <div id="classes" className="flex flex-col gap-2">
+      <div className="flex items-baseline justify-between">
+        <p className="text-[10px] font-bold tracking-[0.08em] text-muted uppercase">Your classes</p>
+        <p className="text-[11px] text-muted">{attendedCount} attended</p>
+      </div>
+      {rows.length === 0 ? (
+        <p className="text-sm text-muted">No classes scheduled yet.</p>
+      ) : (
+        rows.map((c) => (
+          <div key={c.eventId} className="flex flex-col gap-2 rounded-[10px] border border-border bg-card px-[14px] py-[13px]">
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-sm font-semibold text-ink">{c.topic ?? c.courseName}</p>
+              <p className="shrink-0 text-[11px] text-muted">{formatShortDate(c.eventDate)}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <StatusPill attended={c.attended} />
+              <ClassMaterialsLink materials={c.rowMaterials} />
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+function ClassesTable({ rows }: { rows: ClassRow[] }) {
+  return (
+    <div id="classes" className="overflow-hidden rounded-[6px] border border-border">
+      <div
+        className="grid grid-cols-[96px_1fr_128px_150px] border-b border-border px-4 py-2 text-[9px] font-bold tracking-[0.06em] text-muted uppercase"
+        style={{ background: "var(--color-card)" }}
+      >
+        <div>Date</div>
+        <div>Topic</div>
+        <div>Attendance</div>
+        <div>Materials</div>
+      </div>
+      {rows.length === 0 ? (
+        <p className="px-4 py-6 text-sm text-muted">No classes scheduled yet.</p>
+      ) : (
+        rows.map((c, i) => (
+          <div
+            key={c.eventId}
+            className={`grid grid-cols-[96px_1fr_128px_150px] items-center px-4 py-2.5 text-xs text-ink ${i > 0 ? "border-t border-border-faint" : ""}`}
+          >
+            <div className="text-muted">{formatShortDate(c.eventDate)}</div>
+            <div className="truncate">{c.topic ?? c.courseName}</div>
+            <div>
+              <StatusPill attended={c.attended} />
+            </div>
+            <div>{c.rowMaterials.length > 0 ? <ClassMaterialsLink materials={c.rowMaterials} /> : <span className="text-muted">—</span>}</div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+function HoursCard({
+  hoursCredited,
+  hoursRemaining,
+  perClassHours,
+  progressPct,
+  milestones,
+  nextMilestoneIndex,
+}: {
+  hoursCredited: number;
+  hoursRemaining: number;
+  perClassHours: number;
+  progressPct: number;
+  milestones: number[];
+  nextMilestoneIndex: number;
+}) {
+  return (
+    <div
+      className="rounded-[10px] border p-3.5"
+      style={{ borderColor: "color-mix(in oklab, var(--color-primary) 18%, transparent)", background: "color-mix(in oklab, var(--color-primary) 8%, var(--color-card))" }}
+    >
+      <div className="flex items-baseline justify-between gap-2.5">
+        <p className="text-[13px] font-semibold text-ink">Your hours</p>
+        <p className="flex items-baseline gap-1">
+          <span className="font-serif text-[21px] font-semibold" style={{ color: "var(--color-ink-warm)" }}>
+            {hoursCredited.toFixed(1)}
+          </span>
+          <span className="text-[11px] text-muted">hrs</span>
+        </p>
+      </div>
+      <p className="mt-1 text-xs text-muted">
+        {hoursRemaining > 0 ? `You are ${hoursRemaining.toFixed(1)} hours from your certificate.` : "You've reached the certificate threshold."} Every class
+        adds {perClassHours.toFixed(2).replace(/\.?0+$/, "")} hours.
+      </p>
+      <div className="mt-2.5 h-[5px] overflow-hidden rounded-full" style={{ background: "oklch(93.5% 0.012 85)" }}>
+        <div className="h-full rounded-full bg-primary" style={{ width: `${progressPct}%` }} />
+      </div>
+      <div className="mt-2.5 flex gap-[7px]">
+        {milestones.map((m, i) => (
+          <MilestoneTile key={m} hours={m} hoursCredited={hoursCredited} isLast={i === milestones.length - 1} isNext={i === nextMilestoneIndex} />
+        ))}
+      </div>
+      <p className="mt-2.5 text-[11px] text-muted">Every class counts, whichever level you are in. Stay for at least two of the three lessons and the class is yours.</p>
+    </div>
+  );
+}
+
+function ThisCourseCard({
+  thisCourseAttended,
+  thisCourseHeldSoFar,
+  thisCourseClasses,
+}: {
+  thisCourseAttended: number;
+  thisCourseHeldSoFar: number;
+  thisCourseClasses: { eventId: string; eventDate: string; attended: boolean | null }[];
+}) {
+  return (
+    <div className="rounded-[10px] border border-border bg-card p-3.5">
+      <p className="text-xs font-semibold text-ink">This course</p>
+      <p className="mt-1 text-xs text-muted">
+        You&apos;ve come to {thisCourseAttended} of {thisCourseHeldSoFar} classes held so far. {thisCourseClasses.length} in total.
+      </p>
+      <div className="mt-2 flex gap-1">
+        {thisCourseClasses
+          .slice()
+          .sort((a, b) => (a.eventDate < b.eventDate ? -1 : 1))
+          .map((c) => (
+            <span
+              key={c.eventId}
+              className="h-[5px] flex-1 rounded-[3px]"
+              style={{ background: c.attended === true ? "var(--color-ink-warm)" : c.attended === false ? "var(--color-border)" : "oklch(93.5% 0.012 85)" }}
+              title={c.eventDate}
+            />
+          ))}
+      </div>
+    </div>
+  );
+}
+
+function Footer({ endDateLabel, materials, token }: { endDateLabel: string | null; materials: unknown[]; token: string }) {
+  return (
+    <div className="mt-2 flex flex-col items-center gap-2 border-t border-border-faint pt-4 text-center">
+      <p className="text-[11px] leading-[1.55] text-muted">
+        This link is yours alone. It stops working when the course ends{endDateLabel ? ` on ${endDateLabel}` : ""} — download anything you want to keep
+        before then.
+      </p>
+      {materials.length > 0 ? (
+        <a href="#classes" className="text-xs font-semibold text-primary hover:underline">
+          Download all my materials
+        </a>
+      ) : null}
+      <PushSubscribeButton subscribe={subscribeVolunteerPush.bind(null, token)} unsubscribe={unsubscribeVolunteerPush.bind(null, token)} />
     </div>
   );
 }
