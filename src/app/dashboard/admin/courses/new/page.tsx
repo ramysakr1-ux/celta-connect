@@ -14,12 +14,19 @@ import { CreateCourseForm } from "@/app/dashboard/admin/create-course-form";
 export default async function NewCoursePage() {
   const session = await getCurrentProfile();
   if (!session?.profile) redirect("/login");
-  if (session.profile.role !== "admin") redirect("/dashboard");
+  if (session.profile.role !== "admin" && session.profile.role !== "platform_owner") redirect("/dashboard");
+
+  // Command Center's Create menu links here for platform_owner with no
+  // centre context of its own -- active_center_id (set by Owner/Invited
+  // entry, same field switchActiveCourse's counterpart already uses) is
+  // the best guess of which centre they mean; falls back to their own home
+  // centre rather than a dead end when neither is set.
+  const targetCenterId = session.profile.active_center_id ?? session.profile.center_id;
 
   const { data: center } = await createAdminClient()
     .from("centers")
     .select("name, center_number")
-    .eq("id", session.profile.center_id)
+    .eq("id", targetCenterId)
     .maybeSingle();
 
   return (

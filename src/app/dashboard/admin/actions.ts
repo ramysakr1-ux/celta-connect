@@ -20,6 +20,12 @@ export async function createCourse(
   formData: FormData
 ): Promise<FormState> {
   const admin = await requireRole("admin");
+  // Command Center's Create menu can reach this for a platform_owner with
+  // no home-centre stake in the course being made -- active_center_id
+  // (set by Owner/Invited entry) is which centre they actually mean, same
+  // resolution the wizard's own landing page already uses; falls back to
+  // their home centre so this never silently targets the wrong one.
+  const targetCenterId = admin.active_center_id ?? admin.center_id;
 
   const name = formData.get("name");
   const startDate = formData.get("start_date");
@@ -74,7 +80,7 @@ export async function createCourse(
 
   const supabase = await createClient();
   const { error } = await supabase.from("courses").insert({
-    center_id: admin.center_id,
+    center_id: targetCenterId,
     name,
     course_code: courseCode,
     cohort_size: cohortSize,
@@ -104,7 +110,7 @@ export async function createCourse(
       const { data: created } = await supabase
         .from("courses")
         .select("id")
-        .eq("center_id", admin.center_id)
+        .eq("center_id", targetCenterId)
         .eq("name", name)
         .order("created_at", { ascending: false })
         .limit(1)

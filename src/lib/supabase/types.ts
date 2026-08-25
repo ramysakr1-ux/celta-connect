@@ -396,6 +396,9 @@ export interface Database {
           withdrawal_letter_generated_at: string | null;
           extension_completes_by: string | null;
           can_decide_admissions: boolean;
+          // migration 0211 -- flags a synthetic account created for a demo
+          // login link, distinct from a real trainer/trainee/admin.
+          is_platform_demo_login: boolean;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {
@@ -2794,6 +2797,30 @@ export interface Database {
           created_by: string;
         };
         Update: Partial<Database["public"]["Tables"]["centre_admin_invites"]["Row"]>;
+        Relationships: [];
+      };
+      platform_demo_login_links: {
+        Row: {
+          id: string;
+          center_id: string;
+          role_key: string;
+          login_token: string;
+          synthetic_profile_id: string | null;
+          course_access_token: string | null;
+          created_by: string;
+          created_at: string;
+          expires_at: string;
+          revoked_at: string | null;
+          last_used_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["platform_demo_login_links"]["Row"]> & {
+          center_id: string;
+          role_key: string;
+          login_token: string;
+          created_by: string;
+          expires_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["platform_demo_login_links"]["Row"]>;
         Relationships: [];
       };
       platform_owner_invites: {
