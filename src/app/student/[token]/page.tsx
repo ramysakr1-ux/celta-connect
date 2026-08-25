@@ -567,10 +567,29 @@ function NextClassBanner({
 interface ClassRow {
   eventId: string;
   eventDate: string;
+  eventTime: string | null;
+  zoomUrl: string | null;
   topic: string | null;
   courseName: string;
   attended: boolean | null;
   rowMaterials: RowMaterial[];
+}
+
+// Ramy, 25 Aug 2026, looking at the next-class card next to Your Classes:
+// "could we have the Zoom link to join the class also in today's cards?"
+// -- the upcoming row in the list had a status pill and nothing else,
+// while the featured next-class card above it already carried the time and
+// a Join online button for the exact same class. Small version of that same
+// pairing, scoped to any upcoming row with a real Zoom link (not just the
+// one row that happens to also be "next").
+function JoinOnlineChip({ eventTime, zoomUrl }: { eventTime: string | null; zoomUrl: string }) {
+  return (
+    <a href={zoomUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+      {eventTime ? <span className="tabular-nums">{eventTime.slice(0, 5)} ·</span> : null}
+      <VideoIcon />
+      Join online
+    </a>
+  );
 }
 
 function ClassesList({ rows, attendedCount }: { rows: ClassRow[]; attendedCount: number }) {
@@ -593,6 +612,11 @@ function ClassesList({ rows, attendedCount }: { rows: ClassRow[]; attendedCount:
               <StatusPill attended={c.attended} />
               <ClassMaterialsLink materials={c.rowMaterials} />
             </div>
+            {c.attended === null && c.zoomUrl ? (
+              <div className="border-t border-border-faint pt-2">
+                <JoinOnlineChip eventTime={c.eventTime} zoomUrl={c.zoomUrl} />
+              </div>
+            ) : null}
           </div>
         ))
       )}
@@ -625,7 +649,15 @@ function ClassesTable({ rows }: { rows: ClassRow[] }) {
             <div>
               <StatusPill attended={c.attended} />
             </div>
-            <div>{c.rowMaterials.length > 0 ? <ClassMaterialsLink materials={c.rowMaterials} /> : <span className="text-muted">—</span>}</div>
+            <div>
+              {c.rowMaterials.length > 0 ? (
+                <ClassMaterialsLink materials={c.rowMaterials} />
+              ) : c.attended === null && c.zoomUrl ? (
+                <JoinOnlineChip eventTime={c.eventTime} zoomUrl={c.zoomUrl} />
+              ) : (
+                <span className="text-muted">—</span>
+              )}
+            </div>
           </div>
         ))
       )}
