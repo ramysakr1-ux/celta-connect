@@ -56,7 +56,7 @@ export async function addVolunteerStudentViaRegister(_prevState: FormState, form
   if (email) {
     const { data: course } = await admin
       .from("courses")
-      .select("center_id")
+      .select("center_id, start_date")
       .eq("id", accessToken.course_id)
       .maybeSingle();
     if (course) {
@@ -79,6 +79,25 @@ export async function addVolunteerStudentViaRegister(_prevState: FormState, form
           recipientName: name,
           html: volunteerSignedUpEmailHtml({ volunteerName: name, centreName: center.name }),
         });
+      }
+
+      // Ramy, 25 Aug 2026: "if someone signs up less than a week..." led to
+      // finding the real gap -- runVolunteerClassStartingCron only ever
+      // looks at courses starting within the next 7 days, so someone
+      // registering mid-course (start_date already in the past) would
+      // never be picked up by it. The confirmation email above deliberately
+      // carries no join link ("nothing further you need to do" -- it's
+      // sent long before the link is usable for an early sign-up). For a
+      // course already running, that link is usable right now, so send it
+      // immediately instead of leaving them with no way to ever get one.
+      const today = new Date().toISOString().slice(0, 10);
+      if (course.start_date <= today) {
+        const { sendVolunteerClassStartingEmail } = await import("@/lib/volunteer-class-starting");
+        await sendVolunteerClassStartingEmail(
+          admin,
+          { id: volunteer.id, name, email, level, course_id: accessToken.course_id },
+          { skipIfAlreadySent: true }
+        );
       }
     }
   }
