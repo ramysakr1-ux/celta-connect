@@ -439,8 +439,8 @@ export function volunteerSignedUpEmailHtml(input: {
 }): string {
   return `
     <p>Dear ${esc(input.volunteerName)},</p>
-    <p>Thank you for signing up for free English classes with ${esc(input.centreName)}. We have your details.</p>
-    <p>To be straight with you about timing: these classes run alongside our teacher-training courses, which means every few months rather than continuously. It may be a little while before we're in touch with dates -- that's normal, and it isn't us forgetting you.</p>
+    <p>Welcome, and thank you for signing up for free English classes with ${esc(input.centreName)}!</p>
+    <p>We'll be in touch with your first class date as soon as it's set. Classes run alongside our teacher-training courses, so there may be a short wait -- that's normal, not us forgetting you.</p>
     <p>There's no account to set up and nothing further you need to do.</p>
   `;
 }
@@ -972,9 +972,10 @@ export function volunteerClassStartingEmailHtml(input: {
     // Confirmation -- green is retired from the palette and now equals
     // teal (see EMAIL_TONE), so this renders as the app's real teal.
     tone: "green",
-    body: p(
-      `Thank you for volunteering. You will be in the ${input.levelName} class, taught by teachers completing CELTA, an internationally recognised English teaching qualification -- some are new to teaching, others already have years of classroom experience. An experienced tutor watches every lesson.`
-    ),
+    body:
+      p(
+        `Thank you for volunteering. You will be in the ${input.levelName} class, taught by a group of international teachers, observed by a teacher trainer.`
+      ) + p("We appreciate regular attendance."),
     facts: [
       { label: "Your class", value: input.classFact },
       { label: "When", value: input.whenFact },
