@@ -5,10 +5,10 @@
 export const SIGNUP_QUESTIONS = [
   "How long have you studied English?",
   "Why are you learning English now?",
-  "What is hardest for you?",
-  "What do you enjoy?",
+  "What is the hardest thing for you about learning English?",
+  "What do you enjoy the most about learning English?",
   "Where do you use English?",
-  "Anything we should know?",
+  "Anything else we should know?",
 ];
 
 // Verbatim from Volunteer Sign-Up.dc.html screen 4 -- eight prompts that
