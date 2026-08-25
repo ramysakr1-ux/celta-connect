@@ -388,6 +388,19 @@ h6 {
   .trainer-hover:hover {
     box-shadow: var(--hub-row-shadow);
   }
+  /* Ramy, 25 Aug 2026: "hover rule extension" + "check trainee vs trainer MCT
+     vs ACT" -- the fill-for-buttons/ring-for-rows split (established 24 Aug
+     for trainee) predates this class and was never carried into the trainer
+     hub, so every trainer-hub button has been using the row ring instead of
+     a fill. --hub-hover-accent is already set per-role by the (hub) layout
+     (garnet-bright for MCT, teal for everyone else) -- reuse it here rather
+     than a fixed color, same as .trainer-hover already does for its ring. */
+  .trainer-hover-fill {
+    transition: background-color 150ms ease;
+  }
+  .trainer-hover-fill:hover {
+    background-color: color-mix(in oklab, var(--hub-hover-accent) 20%, var(--color-card));
+  }
 
   /* for-claude-code-trainee-assessor-card-system.md + Trainee Walkthrough.dc.html
      (the actual mockup, not the doc's own paraphrase of it -- corrected
@@ -421,6 +434,25 @@ h6 {
     transition: background-color 150ms ease;
   }
   .trainee-hover-fill:hover {
+    background-color: oklch(93% 0.019 190);
+  }
+  /* Same rule (Ramy, 25 Aug 2026: "hover rule extension" -- past trainee
+     only), for every screen with no role-tinted accent of its own (Centre
+     Admin, Course Admin, Admissions, staff chat, platform). --color-primary
+     (teal) stands in for --trainee-plum here, same as the trainer hub's
+     own --hub-hover-accent stands in for it on MCT/ACT screens -- three
+     parallel pairs, one accent each, same ring-for-rows/fill-for-buttons
+     split throughout. */
+  .admin-hover {
+    transition: box-shadow 150ms ease;
+  }
+  .admin-hover:hover {
+    box-shadow: inset 0 0 0 1px var(--color-primary), 0 3px 8px -3px color-mix(in oklab, var(--color-primary) 45%, transparent);
+  }
+  .admin-hover-fill {
+    transition: background-color 150ms ease;
+  }
+  .admin-hover-fill:hover {
     background-color: oklch(93% 0.019 190);
   }
 

@@ -110,7 +110,7 @@ export default async function VolunteersPage() {
         <div className="flex shrink-0 items-center gap-2">
           <a
             href="/api/filming-consent.pdf"
-            className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink trainer-hover"
+            className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink trainer-hover-fill"
           >
             Filming consent form ↓
           </a>
@@ -169,7 +169,7 @@ export default async function VolunteersPage() {
                           placeholder="No transcript yet -- listen to the recording and paste one here"
                           className="w-full flex-1 rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
                         />
-                        <button type="submit" className="shrink-0 rounded-[6px] border border-border px-2 py-1 text-xs text-ink trainer-hover">
+                        <button type="submit" className="shrink-0 rounded-[6px] border border-border px-2 py-1 text-xs text-ink trainer-hover-fill">
                           Save
                         </button>
                       </form>

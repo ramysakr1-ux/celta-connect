@@ -250,7 +250,7 @@ export default async function TrainerResourceHubPage() {
               points a touring assessor shouldn't be invited to click. */}
           {trainer ? (
           <div className="flex shrink-0 items-center gap-2">
-            <a href="#input-sessions" className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover">
+            <a href="#input-sessions" className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover-fill">
               Upload
             </a>
             <Link

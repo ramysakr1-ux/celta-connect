@@ -396,7 +396,7 @@ export default async function TodayPage() {
               buttons that are in spec, for consistency across the row. */}
           <Link
             href="/trainer/capture"
-            className="trainer-hover flex h-8 items-center rounded-[6px] border border-primary bg-transparent px-[13px] text-xs font-medium text-primary"
+            className="trainer-hover-fill flex h-8 items-center rounded-[6px] border border-primary bg-transparent px-[13px] text-xs font-medium text-primary"
           >
             Capture a point
           </Link>
@@ -408,14 +408,14 @@ export default async function TodayPage() {
           {isMct ? (
             <Link
               href="/trainer/announcements"
-              className="trainer-hover flex h-8 items-center rounded-[6px] border border-border bg-card px-[13px] text-xs font-medium text-ink"
+              className="trainer-hover-fill flex h-8 items-center rounded-[6px] border border-border bg-card px-[13px] text-xs font-medium text-ink"
             >
               Post announcement
             </Link>
           ) : null}
           <Link
             href="/trainer/roster"
-            className="trainer-hover flex h-8 items-center rounded-[6px] px-[13px] text-xs font-semibold text-primary-foreground"
+            className="trainer-hover-fill flex h-8 items-center rounded-[6px] px-[13px] text-xs font-semibold text-primary-foreground"
             style={{ background: isMct ? "oklch(37.5% 0.058 195)" : "oklch(42% 0.13 27)" }}
           >
             Write TP feedback

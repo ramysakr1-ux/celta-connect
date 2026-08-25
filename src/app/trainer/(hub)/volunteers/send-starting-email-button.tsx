@@ -15,7 +15,7 @@ export function SendStartingEmailButton({ volunteerId }: { volunteerId: string }
         type="submit"
         disabled={pending}
         title="Sends the class-starting email with their join link now, regardless of the automatic send timing"
-        className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink trainer-hover disabled:opacity-60"
+        className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink trainer-hover-fill disabled:opacity-60"
       >
         {pending ? "Sending..." : state.sent ? "Sent!" : "Email starting link"}
       </button>

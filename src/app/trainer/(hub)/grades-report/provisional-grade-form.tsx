@@ -48,7 +48,7 @@ export function ProvisionalGradeForm({
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                 slot === opt
                   ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border text-muted trainer-hover hover:text-ink"
+                  : "border-border text-muted trainer-hover-fill hover:text-ink"
               }`}
             >
               {opt}
@@ -57,7 +57,7 @@ export function ProvisionalGradeForm({
           <button
             type="submit"
             disabled={pending}
-            className="ml-auto rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover disabled:opacity-60"
+            className="ml-auto rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover-fill disabled:opacity-60"
           >
             {pending ? "Saving..." : "Save"}
           </button>

@@ -66,7 +66,7 @@ export function TimeBandsForm({ timeBands, isCustom }: { timeBands: TimeBand[]; 
           <button
             type="button"
             onClick={() => setRows((prev) => [...prev, { start: "", end: "" }])}
-            className="self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover"
+            className="self-start rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover-fill"
           >
             + Add band
           </button>

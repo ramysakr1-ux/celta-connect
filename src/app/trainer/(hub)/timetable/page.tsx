@@ -277,7 +277,7 @@ export default async function TrainerTimetablePage({
                   <button
                     type="submit"
                     title="Re-resolve Skills/LfC due dates against the current TP rotation and group pairing"
-                    className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover"
+                    className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover-fill"
                   >
                     Recompute due dates
                   </button>
@@ -289,7 +289,7 @@ export default async function TrainerTimetablePage({
                   type="submit"
                   className={`flex items-center gap-2 rounded-[6px] border px-4 py-2 text-sm font-medium ${
                     locked
-                      ? "border-border text-ink trainer-hover"
+                      ? "border-border text-ink trainer-hover-fill"
                       : "border-primary bg-primary text-primary-foreground"
                   }`}
                 >

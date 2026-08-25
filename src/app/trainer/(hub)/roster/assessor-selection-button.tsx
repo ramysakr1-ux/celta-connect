@@ -18,7 +18,7 @@ export function AssessorSelectionButton({ candidates }: { candidates: { id: stri
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink trainer-hover"
+        className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink trainer-hover-fill"
       >
         Select for assessor visit
       </button>

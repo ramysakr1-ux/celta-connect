@@ -234,7 +234,7 @@ export function DeliveredSessionCard({
             <form action={selfAction} className="mt-1 flex flex-col gap-1.5">
               <input type="hidden" name="id" value={row.id} />
               <textarea name="self_evaluation" rows={3} placeholder="Strengths, and what to develop" className={textareaClass} />
-              <button type="submit" disabled={selfPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink trainer-hover disabled:opacity-60">
+              <button type="submit" disabled={selfPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink trainer-hover-fill disabled:opacity-60">
                 {selfPending ? "Saving…" : "Save"}
               </button>
               {selfState.error ? <p className="text-xs text-destructive">{selfState.error}</p> : null}
@@ -249,7 +249,7 @@ export function DeliveredSessionCard({
             <form action={fbAction} className="mt-1 flex flex-col gap-1.5">
               <input type="hidden" name="id" value={row.id} />
               <textarea name="supervisor_feedback" rows={3} placeholder="Written feedback on this specific session" className={textareaClass} />
-              <button type="submit" disabled={fbPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink trainer-hover disabled:opacity-60">
+              <button type="submit" disabled={fbPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink trainer-hover-fill disabled:opacity-60">
                 {fbPending ? "Saving…" : "Save"}
               </button>
               {fbState.error ? <p className="text-xs text-destructive">{fbState.error}</p> : null}
@@ -327,7 +327,7 @@ export function FeedbackSessionCard({
           <form action={draftAction} className="mt-1 flex flex-col gap-1.5">
             <input type="hidden" name="id" value={row.id} />
             <textarea name="private_draft" rows={3} className={textareaClass} />
-            <button type="submit" disabled={draftPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink trainer-hover disabled:opacity-60">
+            <button type="submit" disabled={draftPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink trainer-hover-fill disabled:opacity-60">
               {draftPending ? "Saving…" : "Save draft"}
             </button>
             {draftState.error ? <p className="text-xs text-destructive">{draftState.error}</p> : null}
@@ -340,7 +340,7 @@ export function FeedbackSessionCard({
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Discuss with your supervisor</p>
           <input type="hidden" name="id" value={row.id} />
           <textarea name="supervisor_discussion_notes" rows={2} placeholder="What the discussion covered" className={textareaClass} />
-          <button type="submit" disabled={finalPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink trainer-hover disabled:opacity-60">
+          <button type="submit" disabled={finalPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink trainer-hover-fill disabled:opacity-60">
             {finalPending ? "Saving…" : "Mark discussed"}
           </button>
           {finalState.error ? <p className="text-xs text-destructive">{finalState.error}</p> : null}
@@ -361,7 +361,7 @@ export function FeedbackSessionCard({
           <form action={fofAction} className="mt-1 flex flex-col gap-1.5">
             <input type="hidden" name="id" value={row.id} />
             <textarea name="feedback_on_feedback_notes" rows={2} className={textareaClass} />
-            <button type="submit" disabled={fofPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink trainer-hover disabled:opacity-60">
+            <button type="submit" disabled={fofPending} className="self-start rounded-[6px] border border-border px-2.5 py-1 text-xs font-semibold text-ink trainer-hover-fill disabled:opacity-60">
               {fofPending ? "Saving…" : "Save"}
             </button>
             {fofState.error ? <p className="text-xs text-destructive">{fofState.error}</p> : null}
@@ -553,7 +553,7 @@ export function ReflectiveEssayForm({ titRecordId, essay, submittedAt }: { titRe
             type="submit"
             formAction={saveAction}
             disabled={savePending}
-            className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink trainer-hover disabled:opacity-60"
+            className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink trainer-hover-fill disabled:opacity-60"
           >
             {savePending ? "Saving…" : "Save draft"}
           </button>
@@ -587,7 +587,7 @@ export function AssessorDayCard({ titRecordId, bookedAt, completedAt }: { titRec
         ) : (
           <form action={bookAssessorDay}>
             <input type="hidden" name="tit_record_id" value={titRecordId} />
-            <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink trainer-hover">
+            <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink trainer-hover-fill">
               Mark booked
             </button>
           </form>
@@ -595,7 +595,7 @@ export function AssessorDayCard({ titRecordId, bookedAt, completedAt }: { titRec
         {bookedAt && !completedAt ? (
           <form action={completeAssessorDay}>
             <input type="hidden" name="tit_record_id" value={titRecordId} />
-            <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink trainer-hover">
+            <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink trainer-hover-fill">
               Mark completed
             </button>
           </form>

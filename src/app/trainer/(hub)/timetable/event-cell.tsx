@@ -108,7 +108,7 @@ function EventRow({
               placeholder="4c, 5f"
               className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
             />
-            <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 trainer-hover">
+            <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 trainer-hover-fill">
               Save
             </button>
           </form>
@@ -130,7 +130,7 @@ function EventRow({
               <option value="f2f">Face-to-face</option>
               <option value="online">Online</option>
             </select>
-            <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 trainer-hover">
+            <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 trainer-hover-fill">
               Save
             </button>
           </form>
@@ -154,7 +154,7 @@ function EventRow({
                 {v.name}
               </label>
             ))}
-            <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 trainer-hover">
+            <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 trainer-hover-fill">
               Save
             </button>
           </form>
