@@ -252,24 +252,23 @@ export async function sendApplicantEmail(input: {
 // job is to give a date and doesn't give one has failed, however polite it is.
 // ---------------------------------------------------------------------------
 
-// "A plain acknowledgement. Says nothing about the outcome and gives a date by
-// which they will hear." The silence about outcome is the point -- this fires
-// on form submission, before anyone has read anything.
-export function acknowledgementEmailHtml(input: {
-  applicantName: string;
-  courseName: string;
-  hearBy: string;
-}): string {
-  // applicantName is whatever an unauthenticated visitor typed into /apply
-  // -- escaped here (this function predates the p()/emailShell helpers that
-  // escape automatically, see the note on this file's other four old-style
-  // raw-HTML functions).
-  return `
-    <p>Dear ${esc(input.applicantName)},</p>
-    <p>Thank you for applying to ${esc(input.courseName)}. This is just to confirm your application reached us.</p>
-    <p>We'll be in touch by <strong>${esc(input.hearBy)}</strong>. If you don't hear from us by then, please do chase us.</p>
-    <p>This message is automatic -- there's nothing you need to do in reply.</p>
-  `;
+// "A plain acknowledgement. Says nothing about the outcome." The silence
+// about outcome is the point -- this fires on form submission, before anyone
+// has read anything.
+export function acknowledgementEmailHtml(input: { applicantName: string; courseName: string }): string {
+  // Moved onto emailShell() 26 Aug 2026 -- Ramy: "write something generic,
+  // shortly" -- so it gets the same Connect logo + centre-name eyebrow as
+  // every other email (withConnectBranding only fires on emailShell markup).
+  // Ramy, same day, on a first draft that quoted a specific reply-by date:
+  // keep it generic -- "we'll be in touch shortly with the next steps" --
+  // and drop the "this message is automatic" line entirely.
+  return emailShell({
+    heading: "We have your application",
+    tone: "teal",
+    body:
+      p(`Dear ${input.applicantName},`) +
+      p(`Thank you for applying to ${input.courseName}. We'll be in touch shortly with the next steps.`),
+  });
 }
 
 // The workspace invitation. Copy is verbatim from

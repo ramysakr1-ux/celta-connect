@@ -84,15 +84,10 @@ export default async function JourneyPage() {
   // Every preview below goes through withConnectBranding, same as a real
   // send does in sendApplicantEmail -- otherwise this page would show the
   // pre-25-Aug look (no logo, no centre-name eyebrow) forever, quietly
-  // drifting from what actually goes out.
-  const ackHtml = withConnectBranding(
-    emailShell({
-      heading: "We have your application",
-      tone: "teal",
-      body: acknowledgementEmailHtml({ applicantName, courseName, hearBy: "10 September 2026" }),
-    }),
-    centreName
-  );
+  // drifting from what actually goes out. acknowledgementEmailHtml builds
+  // its own emailShell() now (26 Aug 2026), so this just brands it directly
+  // rather than wrapping it in a second shell.
+  const ackHtml = withConnectBranding(acknowledgementEmailHtml({ applicantName, courseName }), centreName);
   const inviteHtml = withConnectBranding(
     interviewInvitationEmailHtml({
       applicantName,

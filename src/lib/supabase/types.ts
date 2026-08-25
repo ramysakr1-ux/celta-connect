@@ -220,10 +220,10 @@ export interface Database {
           interview_gap_minutes: number;
           interview_weeks_ahead: number;
           interview_cutoff_hours: number;
-          // migration 0114 -- working days by which the centre promises to
-          // respond to an application. The acknowledgement email turns this
-          // into a real date.
-          application_response_days: number;
+          // migration 0114, renamed to hours by migration 0219 -- how many
+          // hours the centre aims to respond to an application in. Not
+          // currently quoted in any email; the centre's own internal target.
+          application_response_hours: number;
           // migration 0106 -- which provider this centre uses, and whether
           // onboarding finished. Never a key or anything in PCI scope: the
           // centre onboards with the provider directly and Connect keeps only
