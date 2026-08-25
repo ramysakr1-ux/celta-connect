@@ -50,12 +50,16 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
     setStepIndex((i) => Math.max(i - 1, 0));
   }
 
+  // Ramy, 25 Aug 2026, after this was a plain muted text link that got lost
+  // next to the recorder's own bold teal button: "still don't see an
+  // arrow." It was technically present the whole time -- a real bordered
+  // button now, so it can't be mistaken for background copy.
   const backButton =
     stepIndex > 0 ? (
       <button
         type="button"
         onClick={goBack}
-        className="self-start text-sm font-medium text-[#8a6a2f] underline-offset-2 hover:underline"
+        className="self-start rounded-lg border border-[#8a6a2f] px-4 py-2 text-sm font-semibold text-[#8a6a2f] hover:bg-[#fbf3e3]"
       >
         ← Back
       </button>
