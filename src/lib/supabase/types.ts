@@ -2939,6 +2939,7 @@ export interface Database {
           id: string;
           center_id: string;
           intake_course_id: string;
+          kind: "applicants" | "volunteers";
           source_filename: string;
           column_mapping: Record<string, string | null>;
           status_value_mapping: Record<string, string | null>;
@@ -3224,6 +3225,11 @@ export interface Database {
           // reminder email's unsubscribe link. Covers the day-before and
           // 30-minute email; push keeps its own separate browser toggle.
           reminders_opted_out: boolean;
+          // migration 0218 -- which spreadsheet_imports row created this
+          // volunteer, if any. Null for anyone added by hand or via the
+          // register link, same ON DELETE SET NULL reasoning as
+          // applicants.import_id.
+          import_id: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["volunteer_students"]["Row"]> & {
           course_id: string;

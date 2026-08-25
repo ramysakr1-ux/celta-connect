@@ -6,33 +6,53 @@ import { can } from "@/lib/auth/centre-permissions";
 import { createClient } from "@/lib/supabase/server";
 import { ImportWizard } from "@/app/centre/import/import-wizard";
 import { UndoImportButton } from "@/app/centre/import/undo-import-button";
+import { VolunteerImportWizard } from "@/app/centre/import/volunteer-import-wizard";
+import { UndoVolunteerImportButton } from "@/app/centre/import/undo-volunteer-import-button";
 import { UNDO_WINDOW_DAYS, isWithinUndoWindow, undoDeadline } from "@/lib/spreadsheet-import";
 
 // Centre Admin's "Import" tab (for-claude-code-centre-admin-full.md). Lives
 // under /dashboard/admin rather than as a trainer tab -- this is the
 // money-and-oversight role's screen, not a tutor's.
-export default async function ImportPage() {
+//
+// Ramy, 26 Aug 2026: "we already have imports as a tab... I don't know why
+// we need to build another one" -- volunteer import folded into this same
+// page/tab rather than a separate destination, choosing what to import
+// (Applicants / Volunteers) as the first decision instead of a nav tab.
+// Real permission wrinkle found while wiring this up: course_administrator
+// has volunteers.manage but not import.run, so gating page ENTRY on
+// import.run alone (the pre-existing check) would have locked that role out
+// of volunteer import entirely -- entry is now either capability, and each
+// half of the page gates on its own.
+export default async function ImportPage({ searchParams }: { searchParams: Promise<{ kind?: string }> }) {
   const profile = await requireRole("admin");
-  // A Centre observer (the centre_manager slug) is also a flat `admin`, and
-  // must not reach this screen at all -- the nav omits the tab, and this
-  // stops the direct URL.
   const ctx = await getCentreRoleContext(profile);
-  if (ctx.roles.length > 0 && !can(ctx.roles, "import.run", ctx.overrides)) redirect("/centre");
-  const supabase = await createClient();
+  // No centre_roles rows at all -- the legacy/flat-admin case the rest of
+  // this file's permission checks already treat as full access.
+  const noSpecificRoles = ctx.roles.length === 0;
+  const canApplicants = noSpecificRoles || can(ctx.roles, "import.run", ctx.overrides);
+  const canVolunteers = noSpecificRoles || can(ctx.roles, "volunteers.manage", ctx.overrides);
+  if (!canApplicants && !canVolunteers) redirect("/centre");
 
-  const [{ data: courses }, { data: applicants }, { data: imports }] = await Promise.all([
-    supabase.from("courses").select("id, name").eq("center_id", profile.center_id).order("name"),
-    // Sent to the client so the dry-run can flag duplicates as the admin maps,
-    // without a round trip per keystroke. Emails only -- no other applicant
-    // data crosses over. The commit re-checks server-side regardless.
-    supabase.from("applicants").select("email").eq("center_id", profile.center_id),
-    supabase
-      .from("spreadsheet_imports")
-      .select("id, source_filename, tallies, created_at, undone_at")
-      .eq("center_id", profile.center_id)
-      .order("created_at", { ascending: false })
-      .limit(5),
-  ]);
+  const { kind: kindParam } = await searchParams;
+  const kind: "applicants" | "volunteers" =
+    kindParam === "volunteers" && canVolunteers
+      ? "volunteers"
+      : kindParam === "applicants" && canApplicants
+        ? "applicants"
+        : canApplicants
+          ? "applicants"
+          : "volunteers";
+
+  const supabase = await createClient();
+  const { data: courses } = await supabase.from("courses").select("id, name, end_date").eq("center_id", profile.center_id).order("name");
+
+  const { data: imports } = await supabase
+    .from("spreadsheet_imports")
+    .select("id, source_filename, tallies, created_at, undone_at, kind")
+    .eq("center_id", profile.center_id)
+    .eq("kind", kind)
+    .order("created_at", { ascending: false })
+    .limit(5);
 
   return (
     <div className="flex flex-col gap-6">
@@ -46,16 +66,41 @@ export default async function ImportPage() {
         </Link>
       </div>
 
+      {canApplicants && canVolunteers ? (
+        <div className="flex gap-2">
+          {(["applicants", "volunteers"] as const).map((k) => {
+            const isActive = kind === k;
+            // Volunteers gets the same sage green as the Volunteer pool
+            // page when selected -- applicants keeps the app's usual teal.
+            const activeStyle = isActive && k === "volunteers" ? { background: "oklch(35% 0.075 155)", color: "white" } : undefined;
+            return (
+              <Link
+                key={k}
+                href={`/centre/import?kind=${k}`}
+                className={`rounded-[6px] px-3 py-1.5 text-sm font-medium ${
+                  isActive
+                    ? k === "volunteers"
+                      ? ""
+                      : "bg-primary text-primary-foreground"
+                    : "border border-border text-muted hover:border-primary hover:text-primary"
+                }`}
+                style={activeStyle}
+              >
+                {k === "applicants" ? "Applicants" : "Volunteers"}
+              </Link>
+            );
+          })}
+        </div>
+      ) : null}
+
       {(courses ?? []).length === 0 ? (
         <div className="sheet text-sm text-muted">
-          There are no courses in this centre yet. An import has to land on a specific intake, so create a course
-          first.
+          There are no courses in this centre yet. An import has to land on a specific course, so create one first.
         </div>
+      ) : kind === "applicants" ? (
+        <ApplicantImportSection courses={courses ?? []} centerId={profile.center_id} />
       ) : (
-        <ImportWizard
-          courses={courses ?? []}
-          existingEmails={(applicants ?? []).map((a) => a.email.toLowerCase())}
-        />
+        <VolunteerImportSection courses={courses ?? []} />
       )}
 
       {(imports ?? []).length > 0 ? (
@@ -65,10 +110,7 @@ export default async function ImportPage() {
             const tallies = (imp.tallies ?? {}) as { willImport?: number };
             const undoable = !imp.undone_at && isWithinUndoWindow(imp.created_at);
             return (
-              <div
-                key={imp.id}
-                className={`flex items-center justify-between gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}
-              >
+              <div key={imp.id} className={`flex items-center justify-between gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                 <div className="flex flex-col gap-0.5">
                   <p className="text-sm text-ink">{imp.source_filename}</p>
                   <p className="text-xs text-muted">
@@ -80,7 +122,7 @@ export default async function ImportPage() {
                         : ` · older than ${UNDO_WINDOW_DAYS} days, now ordinary data`}
                   </p>
                 </div>
-                {undoable ? <UndoImportButton importId={imp.id} /> : null}
+                {undoable ? kind === "applicants" ? <UndoImportButton importId={imp.id} /> : <UndoVolunteerImportButton importId={imp.id} /> : null}
               </div>
             );
           })}
@@ -88,4 +130,32 @@ export default async function ImportPage() {
       ) : null}
     </div>
   );
+}
+
+async function ApplicantImportSection({ courses, centerId }: { courses: { id: string; name: string }[]; centerId: string }) {
+  const supabase = await createClient();
+  // Sent to the client so the dry-run can flag duplicates as the admin maps,
+  // without a round trip per keystroke. Emails only -- no other applicant
+  // data crosses over. The commit re-checks server-side regardless.
+  const { data: applicants } = await supabase.from("applicants").select("email").eq("center_id", centerId);
+  return <ImportWizard courses={courses} existingEmails={(applicants ?? []).map((a) => a.email.toLowerCase())} />;
+}
+
+async function VolunteerImportSection({ courses }: { courses: { id: string; name: string; end_date: string }[] }) {
+  const supabase = await createClient();
+  const courseIds = courses.map((c) => c.id);
+  const { data: volunteers } =
+    courseIds.length > 0 ? await supabase.from("volunteer_students").select("course_id, email").in("course_id", courseIds) : { data: [] };
+
+  // Scoped per-course, not flattened across the whole centre -- the wizard's
+  // duplicate check needs "already on THIS course", not "already anywhere
+  // at this centre" (which would wrongly block someone simply new to a
+  // different course).
+  const existingEmailsByCourse: Record<string, string[]> = {};
+  for (const v of volunteers ?? []) {
+    if (!v.email) continue;
+    (existingEmailsByCourse[v.course_id] ??= []).push(v.email.toLowerCase());
+  }
+
+  return <VolunteerImportWizard courses={courses} existingEmailsByCourse={existingEmailsByCourse} />;
 }
