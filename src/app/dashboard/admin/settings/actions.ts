@@ -28,11 +28,17 @@ export async function updateCenterProfile(
   const volunteerThresholdRaw = formData.get("volunteer_certificate_hours_threshold");
   const volunteerCertificateHoursThreshold =
     typeof volunteerThresholdRaw === "string" && volunteerThresholdRaw ? Number(volunteerThresholdRaw) : 160;
+  const responseDaysRaw = formData.get("application_response_days");
+  const applicationResponseDays =
+    typeof responseDaysRaw === "string" && responseDaysRaw ? Number(responseDaysRaw) : 10;
   if (!name || !centerNumber) {
     return { error: "Enter both the centre name and centre number." };
   }
   if (!Number.isInteger(volunteerCertificateHoursThreshold) || volunteerCertificateHoursThreshold < 1) {
     return { error: "The volunteer certificate threshold must be at least 1 hour." };
+  }
+  if (!Number.isInteger(applicationResponseDays) || applicationResponseDays < 1) {
+    return { error: "The applicant response time must be at least 1 working day." };
   }
 
   const admin = createAdminClient();
@@ -44,6 +50,7 @@ export async function updateCenterProfile(
       is_uk_centre: isUkCentre,
       admissions_email: admissionsEmail,
       volunteer_certificate_hours_threshold: volunteerCertificateHoursThreshold,
+      application_response_days: applicationResponseDays,
     })
     .eq("id", profile.center_id);
 

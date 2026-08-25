@@ -11,12 +11,14 @@ export function CenterProfileForm({
   isUkCentre,
   admissionsEmail,
   volunteerCertificateHoursThreshold,
+  applicationResponseDays,
 }: {
   name: string;
   centerNumber: string;
   isUkCentre: boolean;
   admissionsEmail: string | null;
   volunteerCertificateHoursThreshold: number;
+  applicationResponseDays: number;
 }) {
   const [state, action, pending] = useActionState(updateCenterProfile, initialState);
   const isPlaceholder = centerNumber.startsWith("PENDING-");
@@ -87,6 +89,25 @@ export function CenterProfileForm({
         <p className="text-xs text-muted">
           Where replies to applicant emails (offers, rejections) land. Every email is sent from your
           centre&apos;s name, never Connect&apos;s.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="application_response_days" className="text-sm text-muted">
+          Applicant response time (working days)
+        </label>
+        <input
+          id="application_response_days"
+          name="application_response_days"
+          type="number"
+          min={1}
+          required
+          defaultValue={applicationResponseDays}
+          className="w-24 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
+        />
+        <p className="text-xs text-muted">
+          How many working days you promise to respond in. The acknowledgement email quotes this date, so an
+          applicant knows exactly when to chase you if they haven&apos;t heard.
         </p>
       </div>
 
