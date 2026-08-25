@@ -42,7 +42,7 @@ export function TpLessonForm({
           <select
             name="tp_number"
             defaultValue={lesson?.tp_number ?? suggestedTpNumber ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Not part of rotation</option>
             {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
@@ -60,7 +60,7 @@ export function TpLessonForm({
               name="lesson_date"
               type="date"
               defaultValue={lesson?.lesson_date ?? ""}
-              className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -69,7 +69,7 @@ export function TpLessonForm({
               name="length_minutes"
               type="number"
               defaultValue={lesson?.length_minutes ?? ""}
-              className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -77,7 +77,7 @@ export function TpLessonForm({
             <select
               name="level"
               defaultValue={lesson?.level ?? ""}
-              className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             >
               <option value="">Select a level</option>
               {CEFR_LEVELS.map((l) => (
@@ -93,7 +93,7 @@ export function TpLessonForm({
               name="learner_count"
               type="number"
               defaultValue={lesson?.learner_count ?? ""}
-              className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
         </div>
@@ -105,7 +105,7 @@ export function TpLessonForm({
             type="text"
             defaultValue={lesson?.lesson_focus ?? ""}
             placeholder="e.g. Grammar and speaking"
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
 
@@ -114,7 +114,7 @@ export function TpLessonForm({
           <select
             name="tutor_assessment"
             defaultValue={lesson?.tutor_assessment ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Not yet assessed</option>
             {STANDARD_RATING_OPTIONS.map((opt) => (
@@ -131,7 +131,7 @@ export function TpLessonForm({
             name="tutor_comments"
             rows={2}
             defaultValue={lesson?.tutor_comments ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
 

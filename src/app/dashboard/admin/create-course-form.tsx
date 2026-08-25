@@ -9,7 +9,7 @@ import type { DeliveryMode } from "@/lib/delivery-mode";
 const initialState: FormState = { error: null };
 
 const field =
-  "h-10 rounded-[6px] border border-border bg-card px-3 text-sm text-ink outline-none focus:border-primary";
+  "h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 

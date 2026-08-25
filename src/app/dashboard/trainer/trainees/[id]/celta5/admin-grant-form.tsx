@@ -31,7 +31,7 @@ export function AdminGrantForm({ record }: { record: Celta5Record }) {
         <select
           name="access_level"
           defaultValue={record.admin_access_level ?? "read"}
-          className="w-40 appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+          className="w-40 appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
         >
           <option value="read">Read-only</option>
           <option value="edit">Read and edit</option>

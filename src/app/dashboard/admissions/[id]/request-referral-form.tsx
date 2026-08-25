@@ -40,7 +40,7 @@ export function RequestReferralForm({
         name="to_center_id"
         required
         defaultValue=""
-        className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+        className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
       >
         <option value="" disabled>
           Choose a branch

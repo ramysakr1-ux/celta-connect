@@ -44,7 +44,7 @@ export function AssignTutorPanel({ courseId, trainers }: { courseId: string; tra
             name="profile_id"
             required
             defaultValue=""
-            className="h-9 w-full rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-full rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
           >
             <option value="" disabled>
               Choose a tutor
@@ -62,7 +62,7 @@ export function AssignTutorPanel({ courseId, trainers }: { courseId: string; tra
             name="tutor_role"
             value={tutorRole}
             onChange={(e) => setTutorRole(e.target.value)}
-            className="h-9 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
           >
             {Object.entries(TUTOR_ROLE_LABEL).map(([k, v]) => (
               <option key={k} value={k}>

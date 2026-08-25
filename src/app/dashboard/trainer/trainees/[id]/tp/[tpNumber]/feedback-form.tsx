@@ -17,7 +17,7 @@ type CaptureNote = { id: string; text: string; criteria_codes: string[]; capture
 
 const initialState: FormState = { error: null };
 const inputClass =
-  "w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+  "w-full rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary";
 
 const SELF_EVAL_QUOTE_FIELDS: { key: keyof SelfEvaluation; label: string }[] = [
   { key: "what_went_well", label: "What went to plan?" },

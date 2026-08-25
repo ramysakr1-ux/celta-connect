@@ -38,7 +38,7 @@ export function TutorRoleControl({
         defaultValue={current ?? ""}
         disabled={pending}
         onChange={(e) => e.currentTarget.form?.requestSubmit()}
-        className="h-8 rounded-[6px] border border-input bg-card px-2 text-xs text-ink outline-none focus:border-primary disabled:opacity-60"
+        className="h-8 rounded-[6px] border border-input bg-card-inset px-2 text-xs text-ink outline-none focus:border-primary disabled:opacity-60"
       >
         <option value="">Role not set</option>
         {Object.entries(TUTOR_ROLE_LABEL).map(([k, v]) => (

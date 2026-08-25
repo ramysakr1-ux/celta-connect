@@ -39,7 +39,7 @@ export function GroupTutorForm({
         name="tutor_profile_id"
         defaultValue={currentTutorId ?? ""}
         disabled={pending}
-        className="h-8 rounded-[6px] border border-input bg-card px-2 text-xs text-ink outline-none focus:border-primary disabled:opacity-60"
+        className="h-8 rounded-[6px] border border-input bg-card-inset px-2 text-xs text-ink outline-none focus:border-primary disabled:opacity-60"
       >
         <option value="">No tutor assigned</option>
         {tutors.map((t) => (
@@ -55,7 +55,7 @@ export function GroupTutorForm({
         defaultValue={currentMeetingDays ?? ""}
         placeholder="odd days"
         disabled={pending}
-        className="h-8 w-28 rounded-[6px] border border-input bg-card px-2 text-xs text-ink outline-none focus:border-primary disabled:opacity-60"
+        className="h-8 w-28 rounded-[6px] border border-input bg-card-inset px-2 text-xs text-ink outline-none focus:border-primary disabled:opacity-60"
       />
 
       <button

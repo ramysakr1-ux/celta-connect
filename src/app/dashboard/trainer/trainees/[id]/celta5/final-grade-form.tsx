@@ -54,7 +54,7 @@ export function FinalGradeForm({ record }: { record: Celta5Record }) {
           <select
             name="final_teaching_grade"
             defaultValue={record.final_teaching_grade ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-ink outline-none focus:border-primary"
           >
             <option value="">Not yet decided</option>
             <option value="Pass">Pass</option>
@@ -68,7 +68,7 @@ export function FinalGradeForm({ record }: { record: Celta5Record }) {
           <select
             name="final_assignments_grade"
             defaultValue={record.final_assignments_grade ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-ink outline-none focus:border-primary"
           >
             <option value="">Not yet decided</option>
             <option value="Pass">Pass</option>
@@ -82,7 +82,7 @@ export function FinalGradeForm({ record }: { record: Celta5Record }) {
         <select
           name="final_recommended_grade"
           defaultValue={record.final_recommended_grade ?? ""}
-          className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-ink outline-none focus:border-primary"
         >
           <option value="">Not yet decided</option>
           <option value="Pass">Pass</option>
@@ -101,7 +101,7 @@ export function FinalGradeForm({ record }: { record: Celta5Record }) {
           name="overall_notes"
           rows={4}
           defaultValue={record.overall_notes ?? ""}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 

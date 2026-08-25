@@ -21,12 +21,12 @@ export function TutorInviteForm({ courseId }: { courseId: string }) {
         type="email"
         placeholder="tutor@email.com"
         required
-        className="h-9 rounded-[6px] border border-border bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+        className="h-9 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
       />
       <select
         name="tutor_role"
         defaultValue={DEFAULT_INVITE_TUTOR_ROLE}
-        className="h-9 rounded-[6px] border border-border bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+        className="h-9 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
       >
         {Object.entries(TUTOR_ROLE_LABEL).map(([k, v]) => (
           <option key={k} value={k}>

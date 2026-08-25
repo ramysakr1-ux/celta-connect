@@ -40,7 +40,7 @@ export function CenterProfileForm({
           type="text"
           required
           defaultValue={name}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -55,7 +55,7 @@ export function CenterProfileForm({
           required
           defaultValue={isPlaceholder ? "" : centerNumber}
           placeholder="e.g. UK123"
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
         <p className="text-xs text-muted">
           Every course this centre runs shares this number -- it&apos;s set once here, not per
@@ -82,7 +82,7 @@ export function CenterProfileForm({
           type="email"
           defaultValue={admissionsEmail ?? ""}
           placeholder="admissions@yourcentre.example"
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
         <p className="text-xs text-muted">
           Where replies to applicant emails (offers, rejections) land. Every email is sent from your
@@ -101,7 +101,7 @@ export function CenterProfileForm({
           min={1}
           required
           defaultValue={volunteerCertificateHoursThreshold}
-          className="w-24 rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="w-24 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
         <p className="text-xs text-muted">
           Hours of credited attendance a volunteer needs before they&apos;ve earned a certificate. Shown on the

@@ -99,7 +99,7 @@ export function CloseOutCard({
                 type="date"
                 required
                 min={closeOut?.grace_period_ends_at ? closeOut.grace_period_ends_at.slice(0, 10) : undefined}
-                className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
               />
             </div>
             <button
@@ -143,7 +143,7 @@ export function CloseOutCard({
                   name="signed_name"
                   type="text"
                   required
-                  className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
+                  className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
                 />
               </div>
               <button

@@ -115,7 +115,7 @@ function TutorRow({
             <select
               name="tutor_role"
               defaultValue={row.tutorRole ?? ""}
-              className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink"
+              className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink"
             >
               <option value="">No role set</option>
               {TUTOR_ROLE_OPTIONS.map((r) => (
@@ -149,7 +149,7 @@ function TutorRow({
                       type="date"
                       name="verified_at"
                       defaultValue={row.verifiedAt ? row.verifiedAt.slice(0, 10) : ""}
-                      className="rounded-[6px] border border-border bg-card px-2 py-1.5 text-sm text-ink"
+                      className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-sm text-ink"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -157,7 +157,7 @@ function TutorRow({
                     <select
                       name="supervisor_profile_id"
                       defaultValue={row.supervisorProfileId ?? ""}
-                      className="rounded-[6px] border border-border bg-card px-2 py-1.5 text-sm text-ink"
+                      className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-sm text-ink"
                     >
                       <option value="">Not set</option>
                       {supervisorOptions.map((s) => (
@@ -186,7 +186,7 @@ function TutorRow({
                 name="online_experience_note"
                 defaultValue={row.onlineExperienceNote ?? ""}
                 placeholder="e.g. two years teaching on Zoom at a previous centre"
-                className="rounded-[6px] border border-border bg-card px-2 py-1.5 text-sm text-ink"
+                className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-sm text-ink"
               />
             </div>
           ) : null}

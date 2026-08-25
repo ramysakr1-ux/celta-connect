@@ -26,7 +26,7 @@ export function GoogleDriveTargetsForm({
           type="text"
           defaultValue={templateDocId ?? ""}
           placeholder="The long ID from the template doc's URL"
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1.5">
@@ -39,7 +39,7 @@ export function GoogleDriveTargetsForm({
           type="text"
           defaultValue={outputFolderId ?? ""}
           placeholder="The folder where per-trainee CELTA5 copies will be created"
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 

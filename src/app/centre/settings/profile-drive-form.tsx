@@ -43,7 +43,7 @@ export function ProfileDriveForm({
             type="text"
             required
             defaultValue={name}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
         </div>
 
@@ -70,7 +70,7 @@ export function ProfileDriveForm({
             name="address"
             type="text"
             defaultValue={address ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
         </div>
 
@@ -83,7 +83,7 @@ export function ProfileDriveForm({
             name="primary_contact_email"
             type="email"
             defaultValue={primaryContactEmail ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
         </div>
 
@@ -97,7 +97,7 @@ export function ProfileDriveForm({
             type="text"
             placeholder="e.g. Europe/Istanbul"
             defaultValue={timeZone ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
         </div>
 
@@ -111,7 +111,7 @@ export function ProfileDriveForm({
             type="text"
             placeholder="e.g. TRY"
             defaultValue={currency ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
           <p className="text-xs text-muted">Applies to every course unless a course overrides it.</p>
         </div>
@@ -126,7 +126,7 @@ export function ProfileDriveForm({
             type="url"
             placeholder="https://celta.appiancloud.com"
             defaultValue={appianUrl ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
           <p className="text-xs text-muted">
             Cambridge gives every centre the same sign-in link -- Course Admin&apos;s Entry Form card opens this,

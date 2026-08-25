@@ -31,7 +31,7 @@ export function ObservationForm({
             name="observation_date"
             type="date"
             defaultValue={observation?.observation_date ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -40,7 +40,7 @@ export function ObservationForm({
             name="length_minutes"
             type="number"
             defaultValue={observation?.length_minutes ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -48,7 +48,7 @@ export function ObservationForm({
           <select
             name="level"
             defaultValue={observation?.level ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Select a level</option>
             {CEFR_LEVELS.map((l) => (
@@ -64,7 +64,7 @@ export function ObservationForm({
             name="learners_present"
             type="number"
             defaultValue={observation?.learners_present ?? ""}
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
       </div>
@@ -75,7 +75,7 @@ export function ObservationForm({
           name="lesson_focus"
           type="text"
           defaultValue={observation?.lesson_focus ?? ""}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -91,7 +91,7 @@ export function ObservationForm({
             name="mode"
             required
             defaultValue={observation?.mode ?? ""}
-            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           >
             <option value="" disabled>
               Select a mode

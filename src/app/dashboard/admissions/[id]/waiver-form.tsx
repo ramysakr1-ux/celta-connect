@@ -3,7 +3,7 @@ import type { Database } from "@/lib/supabase/types";
 
 type Applicant = Database["public"]["Tables"]["applicants"]["Row"];
 
-const inputClass = "rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary";
+const inputClass = "rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary";
 
 // Split out of the old FeeTrackingForm when that was replaced by
 // PaymentsPanel -- a waiver/discount is a separate concept from payment

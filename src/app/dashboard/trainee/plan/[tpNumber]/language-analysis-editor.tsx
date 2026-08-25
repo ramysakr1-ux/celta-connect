@@ -14,7 +14,7 @@ import { PhonemicPopup } from "@/components/phonemic-popup";
 import { CustomSelect } from "@/components/custom-select";
 
 const inputClass =
-  "w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+  "w-full rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary";
 
 export function LanguageAnalysisEditor({
   open,

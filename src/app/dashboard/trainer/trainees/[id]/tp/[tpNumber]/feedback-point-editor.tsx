@@ -140,7 +140,7 @@ function PointRow({
           value={point.text}
           onChange={(e) => onChange({ text: e.target.value })}
           placeholder="Write one point -- then tag it"
-          className="flex-1 rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="flex-1 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
         {toneAssistEnabled ? (
           <button

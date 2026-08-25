@@ -63,7 +63,7 @@ export function CriteriaTagsEditor({
           name="criteria_code"
           required
           defaultValue=""
-          className="appearance-none rounded-[6px] border border-border bg-card px-2 py-1 text-center text-xs text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-2 py-1 text-center text-xs text-ink outline-none focus:border-primary"
         >
           <option value="" disabled>
             Criterion
@@ -77,7 +77,7 @@ export function CriteriaTagsEditor({
         <select
           name="tag_type"
           defaultValue="strength"
-          className="appearance-none rounded-[6px] border border-border bg-card px-2 py-1 text-center text-xs text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-2 py-1 text-center text-xs text-ink outline-none focus:border-primary"
         >
           <option value="strength">Strength</option>
           <option value="action_point">Action point</option>

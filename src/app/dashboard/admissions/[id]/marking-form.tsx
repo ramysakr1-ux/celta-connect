@@ -40,7 +40,7 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
                 name={`marking_${row.key}`}
                 value={values[row.key]}
                 onChange={(e) => setValues((v) => ({ ...v, [row.key]: e.target.value }))}
-                className="h-8 rounded-[6px] border border-input bg-card px-2 text-sm text-ink"
+                className="h-8 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink"
               >
                 <option value="">Not marked</option>
                 <option value="above">Above standard</option>
@@ -55,7 +55,7 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
                 placeholder="Note required for a Below standard mark"
                 required
                 defaultValue={(applicant[`marking_${row.key}_note` as keyof Applicant] as string | null) ?? ""}
-                className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
               />
             ) : null}
           </div>
@@ -96,7 +96,7 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
           rows={4}
           defaultValue={applicant.task_feedback ?? ""}
           placeholder="Strong on organisation and substance. Both analysis items were left blank, and that is worth attention early."
-          className="mt-1 rounded-[6px] border border-input bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="mt-1 rounded-[6px] border border-input bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
 

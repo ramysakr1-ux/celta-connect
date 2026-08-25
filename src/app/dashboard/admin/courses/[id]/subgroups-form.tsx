@@ -27,7 +27,7 @@ export function CreateSubgroupForm({ courseId }: { courseId: string }) {
           type="text"
           required
           placeholder="e.g. Mon/Wed/Fri"
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
       <button
@@ -71,7 +71,7 @@ export function PairSubgroupsForm({
             type="text"
             required
             placeholder="e.g. Group ABC"
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -82,7 +82,7 @@ export function PairSubgroupsForm({
             id="first_subgroup_id"
             name="first_subgroup_id"
             required
-            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Choose...</option>
             {unpairedSubgroups.map((g) => (
@@ -100,7 +100,7 @@ export function PairSubgroupsForm({
             id="second_subgroup_id"
             name="second_subgroup_id"
             required
-            className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+            className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Choose...</option>
             {unpairedSubgroups.map((g) => (
@@ -165,7 +165,7 @@ export function AddMemberForm({
           id={`trainee_id__${subgroupId}`}
           name="trainee_id"
           required
-          className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
         >
           <option value="">Choose...</option>
           {availableTrainees.map((t) => (

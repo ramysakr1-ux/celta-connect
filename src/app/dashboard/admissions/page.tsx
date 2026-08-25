@@ -268,7 +268,7 @@ export default async function AdmissionsPage() {
               <label htmlFor="intake_course_id" className="text-xs text-muted">
                 Intake
               </label>
-              <select id="intake_course_id" name="intake_course_id" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+              <select id="intake_course_id" name="intake_course_id" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
                 {intakes.map((i) => (
                   <option key={i.id} value={i.id}>
                     {i.name}
@@ -280,19 +280,19 @@ export default async function AdmissionsPage() {
               <label htmlFor="slot_date" className="text-xs text-muted">
                 Date
               </label>
-              <input id="slot_date" name="slot_date" type="date" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink" />
+              <input id="slot_date" name="slot_date" type="date" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink" />
             </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="slot_time" className="text-xs text-muted">
                 Time
               </label>
-              <input id="slot_time" name="slot_time" type="time" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink" />
+              <input id="slot_time" name="slot_time" type="time" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink" />
             </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="mode" className="text-xs text-muted">
                 Mode
               </label>
-              <select id="mode" name="mode" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+              <select id="mode" name="mode" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
                 <option value="face_to_face">Face to face</option>
                 <option value="online">Online</option>
               </select>

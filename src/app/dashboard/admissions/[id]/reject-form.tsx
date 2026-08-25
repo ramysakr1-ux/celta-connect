@@ -43,7 +43,7 @@ export function RejectForm({ applicantId }: { applicantId: string }) {
         rows={3}
         required
         placeholder="Name the specific gap. The applicant may ask, and the assessor may look."
-        className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
       />
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       <button

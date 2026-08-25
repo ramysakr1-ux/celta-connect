@@ -83,7 +83,7 @@ function AddCriterionForm({ assignmentType }: { assignmentType: string }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Add a criterion"
-        className="h-9 flex-1 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+        className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
       />
       <button
         type="submit"

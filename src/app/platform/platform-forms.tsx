@@ -26,7 +26,7 @@ export function CreateCentreForm() {
           <input
             name="name"
             required
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
           />
         </label>
         <label className="flex flex-1 min-w-[10rem] flex-col gap-1.5">
@@ -35,7 +35,7 @@ export function CreateCentreForm() {
             name="center_number"
             required
             placeholder="Cambridge-assigned"
-            className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
           />
         </label>
       </div>
@@ -87,7 +87,7 @@ export function ChangeRoleForm() {
           type="email"
           name="email"
           required
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         />
       </label>
       <label className="flex flex-col gap-1.5">
@@ -95,7 +95,7 @@ export function ChangeRoleForm() {
         <select
           name="role"
           defaultValue="admin"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         >
           {ROLE_OPTIONS.map((r) => (
             <option key={r.value} value={r.value}>

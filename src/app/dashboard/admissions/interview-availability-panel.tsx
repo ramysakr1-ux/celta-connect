@@ -12,7 +12,7 @@ import {
 } from "@/app/dashboard/admissions/actions";
 
 const WEEKDAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const inputClass = "h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary";
+const inputClass = "h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary";
 
 export interface PatternRow {
   id: string;

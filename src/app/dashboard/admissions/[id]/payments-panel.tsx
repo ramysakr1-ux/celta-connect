@@ -90,7 +90,7 @@ export function PaymentsPanel({ applicant, payments }: { applicant: Applicant; p
                         name="marked_note"
                         type="text"
                         placeholder="Reference note (optional)"
-                        className="rounded-[6px] border border-border bg-card px-2 py-1.5 text-xs text-ink outline-none focus:border-primary"
+                        className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-xs text-ink outline-none focus:border-primary"
                       />
                       <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary">
                         Mark paid manually

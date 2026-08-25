@@ -13,7 +13,7 @@ import {
 const upsertInitial: UpsertSubscriptionState = {};
 const invoiceInitial: RecordInvoiceState = {};
 
-const inputClass = "h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary";
+const inputClass = "h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary";
 
 export function SubscriptionForm({ centres }: { centres: { id: string; name: string }[] }) {
   const [state, action, pending] = useActionState(upsertSubscription, upsertInitial);

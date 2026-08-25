@@ -48,7 +48,7 @@ export function DuplicateCourseForm({
           type="text"
           required
           defaultValue={suggestedName}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -62,7 +62,7 @@ export function DuplicateCourseForm({
             name="start_date"
             type="date"
             required
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
@@ -74,7 +74,7 @@ export function DuplicateCourseForm({
             name="end_date"
             type="date"
             required
-            className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
         </div>
       </div>

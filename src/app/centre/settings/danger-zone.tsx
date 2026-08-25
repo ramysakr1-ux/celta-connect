@@ -48,7 +48,7 @@ export function TransferOwnershipCard({ centreName }: { centreName: string }) {
             name="new_owner_email"
             type="email"
             required
-            className="max-w-sm rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="max-w-sm rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -61,7 +61,7 @@ export function TransferOwnershipCard({ centreName }: { centreName: string }) {
             type="text"
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
-            className="max-w-sm rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="max-w-sm rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
         {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
@@ -130,7 +130,7 @@ export function DeleteCentreCard({ centreName }: { centreName: string }) {
               type="text"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
-              className="max-w-sm rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="max-w-sm rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -144,7 +144,7 @@ export function DeleteCentreCard({ centreName }: { centreName: string }) {
               inputMode="numeric"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              className="max-w-[160px] rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="max-w-[160px] rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
           {deleteState.error ? <p className="text-sm text-destructive">{deleteState.error}</p> : null}

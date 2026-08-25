@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { createPaymentPlan, type PaymentFormState } from "@/lib/payments/actions";
 
 const initialState: PaymentFormState = { error: null };
-const inputClass = "rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary";
+const inputClass = "rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary";
 
 // "A payment can be split into a plan... at setup." Shown when an
 // applicant has no payment_plans row yet -- equal instalments 30 days

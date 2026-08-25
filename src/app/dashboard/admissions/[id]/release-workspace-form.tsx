@@ -82,7 +82,7 @@ export function ReleaseWorkspaceForm({
         <select
           name="reason"
           defaultValue={hasDeposit ? "deposit_paid" : "promised_to_pay"}
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         >
           <option value="paid_in_full">Paid in full</option>
           <option value="deposit_paid">Deposit paid</option>
@@ -95,7 +95,7 @@ export function ReleaseWorkspaceForm({
           name="note"
           type="text"
           placeholder="Note (optional) — e.g. paying at the door on day one"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         />
 
         <button

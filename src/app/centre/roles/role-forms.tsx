@@ -35,7 +35,7 @@ export function CreateInviteForm({ customRoles = [] }: { customRoles?: { role_ke
         <select
           name="role"
           defaultValue="centre_administrator"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         >
           {CENTRE_ROLES.map((r) => (
             <option key={r} value={r}>
@@ -55,7 +55,7 @@ export function CreateInviteForm({ customRoles = [] }: { customRoles?: { role_ke
           name="email"
           type="email"
           placeholder="their.email@example.com"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         />
       </label>
       <button
@@ -118,7 +118,7 @@ export function GrantRoleForm({ customRoles = [] }: { customRoles?: { role_key: 
           type="email"
           required
           placeholder="someone@centre.com"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         />
       </label>
       <label className="flex flex-col gap-1.5">
@@ -126,7 +126,7 @@ export function GrantRoleForm({ customRoles = [] }: { customRoles?: { role_key: 
         <select
           name="role"
           defaultValue="centre_administrator"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         >
           {CENTRE_ROLES.map((r) => (
             <option key={r} value={r}>
@@ -190,7 +190,7 @@ export function AssignAreaForm() {
         <select
           name="area"
           defaultValue="admissions"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         >
           {AREAS.map((a) => (
             <option key={a} value={a}>
@@ -206,7 +206,7 @@ export function AssignAreaForm() {
           type="email"
           required
           placeholder="someone@centre.com"
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         />
       </label>
       <label className="flex flex-col gap-1.5">
@@ -215,7 +215,7 @@ export function AssignAreaForm() {
           name="ends_at"
           type="date"
           title="Leave blank for indefinite; a date makes this temporary cover that lapses on its own."
-          className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+          className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
         />
       </label>
       <button

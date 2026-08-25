@@ -97,7 +97,7 @@ export default async function EmailDeliveryPage({
             <select
               name="course"
               defaultValue={courseId}
-              className="h-9 rounded-[6px] border border-input bg-card px-3 text-sm text-ink"
+              className="h-9 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink"
             >
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>

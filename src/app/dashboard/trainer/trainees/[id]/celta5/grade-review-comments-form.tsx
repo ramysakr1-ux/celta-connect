@@ -35,7 +35,7 @@ export function GradeReviewCommentsForm({ record }: { record: Celta5Record }) {
         name="grade_review_tutor_comments"
         rows={4}
         defaultValue={record.grade_review_tutor_comments ?? ""}
-        className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
       />
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

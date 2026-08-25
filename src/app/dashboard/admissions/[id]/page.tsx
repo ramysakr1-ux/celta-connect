@@ -403,7 +403,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                 <label htmlFor="time_key" className="text-xs text-muted">
                   Book a time -- assigned to whoever has interviewed least this intake
                 </label>
-                <select id="time_key" name="time_key" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+                <select id="time_key" name="time_key" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
                   {groupedSlots.map(([key, g]) => (
                     <option key={key} value={key}>
                       {g.slotDate} {g.slotTime.slice(0, 5)} ({g.mode === "online" ? "Online" : "Face to face"}
@@ -421,7 +421,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               <summary className="cursor-pointer font-semibold text-primary hover:underline">Or choose a specific interviewer instead</summary>
               <form action={bookInterviewSlot} className="mt-2 flex flex-wrap items-end gap-3">
                 <input type="hidden" name="applicant_id" value={applicant.id} />
-                <select name="slot_id" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+                <select name="slot_id" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
                   {(openSlots ?? []).map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.slot_date} {s.slot_time.slice(0, 5)} -- {interviewerNameById.get(s.interviewer_id) ?? "Unknown"} (

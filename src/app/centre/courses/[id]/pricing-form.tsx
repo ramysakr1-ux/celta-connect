@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { updateCoursePricing, type FormState } from "@/app/centre/courses/[id]/actions";
 
 const initialState: FormState = { error: null };
-const field = "h-10 rounded-[6px] border border-border bg-card px-3 text-sm text-ink outline-none focus:border-primary";
+const field = "h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary";
 
 export function PricingForm({
   courseId,

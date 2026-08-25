@@ -65,14 +65,14 @@ export function SupportAccessTab({ canGrantBilling, grants }: { canGrantBilling:
                 required
                 rows={2}
                 placeholder="What support needs to see, and why"
-                className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
               />
             </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="duration_hours" className="text-sm text-muted">
                 Duration
               </label>
-              <select id="duration_hours" name="duration_hours" required className="h-9 w-40 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+              <select id="duration_hours" name="duration_hours" required className="h-9 w-40 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
                 <option value="6">6 hours</option>
                 <option value="24">24 hours</option>
                 <option value="72">3 days</option>

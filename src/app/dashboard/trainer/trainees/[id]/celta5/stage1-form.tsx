@@ -35,7 +35,7 @@ export function Stage1Form({ record }: { record: Celta5Record }) {
           type="number"
           step="0.1"
           defaultValue={record.stage1_hours_taught ?? ""}
-          className="w-32 rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="w-32 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -45,7 +45,7 @@ export function Stage1Form({ record }: { record: Celta5Record }) {
           name="stage1_strengths"
           rows={3}
           defaultValue={record.stage1_strengths ?? ""}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -55,7 +55,7 @@ export function Stage1Form({ record }: { record: Celta5Record }) {
           name="stage1_action_plan"
           rows={3}
           defaultValue={record.stage1_action_plan ?? ""}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 

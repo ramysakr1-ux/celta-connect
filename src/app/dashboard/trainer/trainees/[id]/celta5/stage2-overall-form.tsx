@@ -56,7 +56,7 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
           type="number"
           step="0.1"
           defaultValue={record.stage2_hours_taught ?? ""}
-          className="w-32 rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="w-32 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -65,7 +65,7 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
         <select
           name="stage2_tutor_overall"
           defaultValue={record.stage2_tutor_overall ?? ""}
-          className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-ink outline-none focus:border-primary"
         >
           <option value="">Not yet assessed</option>
           {STANDARD_RATING_OPTIONS.map((opt) => (
@@ -82,7 +82,7 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
           name="stage2_tutor_notes"
           rows={3}
           defaultValue={record.stage2_tutor_notes ?? ""}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -92,7 +92,7 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
           name="stage2_tutor_written_assignments_notes"
           rows={2}
           defaultValue={record.stage2_tutor_written_assignments_notes ?? ""}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -102,7 +102,7 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
           name="stage2_tutor_other_notes"
           rows={2}
           defaultValue={record.stage2_tutor_other_notes ?? ""}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 

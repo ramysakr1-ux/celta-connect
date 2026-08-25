@@ -56,7 +56,7 @@ export function ChatRetentionForm({
           name="chat_retention_preset_display"
           value={retentionPreset}
           onChange={(e) => setRetentionPreset(e.target.value as Preset)}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         >
           <option value="nightly">Clear at midnight (default)</option>
           <option value="weekly">Retain for 7 days</option>
@@ -70,7 +70,7 @@ export function ChatRetentionForm({
             min={1}
             value={customDays}
             onChange={(e) => setCustomDays(Math.max(1, Number(e.target.value) || 1))}
-            className="w-20 rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="w-20 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         ) : null}
         <input type="hidden" name="chat_retention_days" value={effectiveDays} />

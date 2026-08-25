@@ -66,7 +66,7 @@ function AddOutcomeForm() {
         name="label"
         type="text"
         placeholder="e.g. Upheld, referred to the centre's malpractice procedure"
-        className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
       />
       <div className="flex items-center gap-4">
         <label className="flex items-center gap-2 text-xs text-muted">

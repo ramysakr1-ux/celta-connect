@@ -32,7 +32,7 @@ function CertificateRow({ courseId, candidate }: { courseId: string; candidate: 
           <select
             name="certificate_grade"
             defaultValue={candidate.certificateGrade ?? ""}
-            className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Not received yet</option>
             {GRADES.map((g) => (

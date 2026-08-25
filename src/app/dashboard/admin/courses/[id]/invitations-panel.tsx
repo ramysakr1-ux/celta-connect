@@ -62,7 +62,7 @@ export function InvitationsPanel({
             type="email"
             required
             placeholder="tutor@email.com"
-            className="h-9 w-full rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-full rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-1 flex-col gap-1">
@@ -70,7 +70,7 @@ export function InvitationsPanel({
           <input
             name="full_name"
             type="text"
-            className="h-9 w-full rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-full rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -79,7 +79,7 @@ export function InvitationsPanel({
             name="role"
             value={role}
             onChange={(e) => setRole(e.target.value as "trainer" | "trainee")}
-            className="h-9 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
           >
             <option value="trainer">Tutor</option>
             <option value="trainee">Candidate</option>
@@ -91,7 +91,7 @@ export function InvitationsPanel({
             name="tutor_role"
             value={tutorRole}
             onChange={(e) => setTutorRole(e.target.value)}
-            className="h-9 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
           >
             <option value="">Not set yet</option>
             {Object.entries(TUTOR_ROLE_LABEL).map(([k, v]) => (

@@ -79,7 +79,7 @@ export function LetterIssueForm({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={8}
-          className="rounded-[6px] border border-border bg-card px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -91,7 +91,7 @@ export function LetterIssueForm({
             onChange={(e) => setListItems(e.target.value)}
             rows={4}
             placeholder="One point per line"
-            className="rounded-[6px] border border-border bg-card px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
+            className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
           />
         </div>
       ) : null}
@@ -102,7 +102,7 @@ export function LetterIssueForm({
           value={closing}
           onChange={(e) => setClosing(e.target.value)}
           rows={3}
-          className="rounded-[6px] border border-border bg-card px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-2.5 py-2 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
 

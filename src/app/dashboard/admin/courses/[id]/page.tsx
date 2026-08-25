@@ -252,7 +252,7 @@ export default async function CourseAdminDetailPage({
               name="assessor_name"
               type="text"
               defaultValue={course.assessor_name ?? ""}
-              className="h-10 rounded-[6px] border border-border bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+              className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -264,7 +264,7 @@ export default async function CourseAdminDetailPage({
               name="assessor_email"
               type="email"
               defaultValue={course.assessor_email ?? ""}
-              className="h-10 rounded-[6px] border border-border bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+              className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
           <button type="submit" className="h-10 rounded-[6px] border border-border px-3 text-sm text-ink hover:border-primary">
@@ -285,7 +285,7 @@ export default async function CourseAdminDetailPage({
             type="date"
             name="assessor_visit_date"
             defaultValue={course.assessor_visit_date ?? ""}
-            className="h-9 rounded-[6px] border border-border bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
           />
           <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary">
             Save

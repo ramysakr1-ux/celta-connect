@@ -45,7 +45,7 @@ export function SyllabusEntryForm({
           type="text"
           defaultValue={mainAim ?? ""}
           required
-          className="rounded-[6px] border border-border bg-card px-2 py-1.5 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1">
@@ -54,7 +54,7 @@ export function SyllabusEntryForm({
           name="aim_type"
           defaultValue={aimType ?? ""}
           required
-          className="rounded-[6px] border border-border bg-card px-2 py-1.5 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-sm text-ink outline-none focus:border-primary"
         >
           <option value="" disabled>
             — choose —
@@ -75,7 +75,7 @@ export function SyllabusEntryForm({
           name="sub_aim"
           type="text"
           defaultValue={subAim ?? ""}
-          className="rounded-[6px] border border-border bg-card px-2 py-1.5 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
       <div className="flex flex-col gap-1">
@@ -85,7 +85,7 @@ export function SyllabusEntryForm({
           type="text"
           defaultValue={material ?? ""}
           required
-          className="rounded-[6px] border border-border bg-card px-2 py-1.5 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
       {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}

@@ -35,7 +35,7 @@ export function ApplicationSettingsForm({
           min={1}
           defaultValue={applicationCap ?? ""}
           placeholder="No limit"
-          className="h-8 w-20 rounded-[6px] border border-border bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+          className="h-8 w-20 rounded-[6px] border border-border bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
         />
       </label>
       <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary">

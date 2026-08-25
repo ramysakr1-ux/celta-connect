@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { sendOffer, type FormState } from "@/app/dashboard/admissions/actions";
 
 const initialState: FormState = { error: null };
-const inputClass = "rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary";
+const inputClass = "rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary";
 
 export function OfferForm({ applicantId, hasDeposit }: { applicantId: string; hasDeposit: boolean }) {
   const [state, action, pending] = useActionState(sendOffer, initialState);

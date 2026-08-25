@@ -139,7 +139,7 @@ export default async function AdmissionsSettingsPage() {
             <label htmlFor="prompt_type" className="text-xs text-muted">
               Type
             </label>
-            <select id="prompt_type" name="prompt_type" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+            <select id="prompt_type" name="prompt_type" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
               <option value="narrative">Narrative</option>
               <option value="descriptive">Descriptive</option>
               <option value="argumentative">Argumentative</option>
@@ -149,7 +149,7 @@ export default async function AdmissionsSettingsPage() {
             <label htmlFor="prompt_text" className="text-xs text-muted">
               Prompt
             </label>
-            <input id="prompt_text" name="prompt_text" type="text" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink" />
+            <input id="prompt_text" name="prompt_text" type="text" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink" />
           </div>
           <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
             Add prompt
@@ -187,7 +187,7 @@ export default async function AdmissionsSettingsPage() {
               name="prompt_text"
               type="text"
               required
-              className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink"
+              className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink"
             />
           </div>
           <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
@@ -229,7 +229,7 @@ export default async function AdmissionsSettingsPage() {
             <label htmlFor="coverage_area" className="text-xs text-muted">
               Assesses
             </label>
-            <select id="coverage_area" name="coverage_area" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink">
+            <select id="coverage_area" name="coverage_area" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
               {COVERAGE_AREAS.map((a) => (
                 <option key={a} value={a}>
                   {COVERAGE_LABEL[a]}
@@ -241,7 +241,7 @@ export default async function AdmissionsSettingsPage() {
             <label htmlFor="question_text" className="text-xs text-muted">
               Question
             </label>
-            <input id="question_text" name="question_text" type="text" required className="h-9 rounded-[6px] border border-input bg-card px-2 text-sm text-ink" />
+            <input id="question_text" name="question_text" type="text" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink" />
           </div>
           <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
             Add question

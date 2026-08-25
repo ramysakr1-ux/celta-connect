@@ -21,7 +21,7 @@ export function WaitingListForm({ applicantId }: { applicantId: string }) {
           name="waiting_list_hear_by"
           type="date"
           required
-          className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
       <button type="submit" className="rounded-[6px] border border-border px-3 py-2 text-sm text-ink hover:border-primary">

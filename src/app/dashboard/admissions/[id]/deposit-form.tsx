@@ -71,7 +71,7 @@ export function DepositForm({
             min="1"
             step="0.01"
             required
-            className="h-9 w-28 rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-28 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
           />
         </label>
         <label className="flex flex-col gap-1">
@@ -81,7 +81,7 @@ export function DepositForm({
             type="text"
             maxLength={3}
             placeholder="GBP"
-            className="h-9 w-20 rounded-[6px] border border-input bg-card px-2 text-sm text-ink uppercase outline-none focus:border-primary"
+            className="h-9 w-20 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink uppercase outline-none focus:border-primary"
           />
         </label>
         <label className="flex flex-1 flex-col gap-1">
@@ -90,7 +90,7 @@ export function DepositForm({
             name="deposit_note"
             type="text"
             placeholder="Bank transfer, ref 4471"
-            className="h-9 w-full rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+            className="h-9 w-full rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
           />
         </label>
         <button

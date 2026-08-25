@@ -102,7 +102,7 @@ export function RefundsPanel({ refunds, canEdit }: { refunds: RefundRow[]; canEd
               step="0.01"
               min="0"
               required
-              className="h-9 w-28 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+              className="h-9 w-28 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -113,7 +113,7 @@ export function RefundsPanel({ refunds, canEdit }: { refunds: RefundRow[]; canEd
               required
               maxLength={3}
               placeholder="GBP"
-              className="h-9 w-20 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink uppercase outline-none focus:border-primary"
+              className="h-9 w-20 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink uppercase outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-1 flex-col gap-1">
@@ -122,7 +122,7 @@ export function RefundsPanel({ refunds, canEdit }: { refunds: RefundRow[]; canEd
               name="reason"
               type="text"
               placeholder="Withdrew before the course started"
-              className="h-9 w-full rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+              className="h-9 w-full rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -130,7 +130,7 @@ export function RefundsPanel({ refunds, canEdit }: { refunds: RefundRow[]; canEd
             <select
               name="settlement"
               defaultValue="manual"
-              className="h-9 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink outline-none focus:border-primary"
+              className="h-9 rounded-[6px] border border-input bg-card-inset px-2.5 text-sm text-ink outline-none focus:border-primary"
             >
               <option value="manual">The centre</option>
               <option value="provider">The provider</option>

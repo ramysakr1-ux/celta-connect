@@ -14,7 +14,7 @@ import type { TemplateSection } from "@/lib/assignment-templates/content";
 
 const initialState: FormState = { error: null };
 const inputClass =
-  "w-full rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+  "w-full rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary";
 
 function wordCount(text: string): number {
   return text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length;

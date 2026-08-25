@@ -50,7 +50,7 @@ export function AttendanceForm({
             type="number"
             step="0.5"
             defaultValue={record.hours_attended ?? ""}
-            className="w-32 rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+            className="w-32 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
           />
         </div>
         <button
@@ -97,7 +97,7 @@ export function AttendanceForm({
             <input
               name="session_date"
               type="date"
-              className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+              className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -105,7 +105,7 @@ export function AttendanceForm({
             <select
               name="category"
               defaultValue="unavoidable"
-              className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
+              className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-sm text-ink outline-none focus:border-primary"
             >
               <option value="unavoidable">Unavoidable</option>
               <option value="other">Other / unexplained</option>
@@ -116,13 +116,13 @@ export function AttendanceForm({
           name="reason"
           type="text"
           placeholder="Reason"
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
         <input
           name="work_made_up"
           type="text"
           placeholder="How work was made up"
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
         {absenceState.error ? (
           <p className="text-sm text-destructive">{absenceState.error}</p>

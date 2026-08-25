@@ -40,7 +40,7 @@ export function LinkVolunteerControl({
         });
       }}
       onBlur={() => setOpen(false)}
-      className="h-7 rounded-[6px] border border-border bg-card px-1.5 text-[11px] text-ink outline-none focus:border-primary"
+      className="h-7 rounded-[6px] border border-border bg-card-inset px-1.5 text-[11px] text-ink outline-none focus:border-primary"
     >
       <option value="" disabled>
         {pending ? "Linking…" : "Choose who…"}

@@ -283,7 +283,7 @@ export default async function CommandCenterPage() {
           No payment provider is connected for centre subscriptions. Wiring one (Stripe or equivalent — webhooks, checkout, invoice automation) is its
           own scoped piece of work.
         </p>
-        <button type="button" disabled className="mt-3 h-10 rounded-[6px] border border-input bg-card px-4 text-sm font-semibold text-muted opacity-60">
+        <button type="button" disabled className="mt-3 h-10 rounded-[6px] border border-input bg-card-inset px-4 text-sm font-semibold text-muted opacity-60">
           Connect payment provider
         </button>
       </div>

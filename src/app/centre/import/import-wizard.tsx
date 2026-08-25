@@ -184,7 +184,7 @@ export function ImportWizard({
             <select
               value={intakeCourseId}
               onChange={(e) => setIntakeCourseId(e.target.value)}
-              className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
+              className="h-10 rounded-[6px] border border-input bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
             >
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -250,7 +250,7 @@ export function ImportWizard({
                     onChange={(e) =>
                       setMapping((m) => ({ ...m, [header]: (e.target.value || null) as ImportFieldKey | null }))
                     }
-                    className="h-9 flex-1 rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+                    className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
                   >
                     <option value="">Not imported</option>
                     {IMPORT_FIELDS.map((f) => (
@@ -297,7 +297,7 @@ export function ImportWizard({
                         [v]: raw === "__skip__" ? null : (raw as (typeof APPLICANT_STAGES)[number]),
                       }));
                     }}
-                    className="h-9 flex-1 rounded-[6px] border border-input bg-card px-2 text-sm text-ink outline-none focus:border-primary"
+                    className="h-9 flex-1 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink outline-none focus:border-primary"
                   >
                     <option value="" disabled>
                       Needs a decision

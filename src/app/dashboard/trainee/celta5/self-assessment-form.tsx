@@ -61,7 +61,7 @@ export function SelfAssessmentForm() {
           name="overall"
           required
           defaultValue=""
-          className="appearance-none rounded-[6px] border border-border bg-card px-3 py-2 text-center text-ink outline-none focus:border-primary"
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-2 text-center text-ink outline-none focus:border-primary"
         >
           <option value="" disabled>
             Choose one
@@ -79,7 +79,7 @@ export function SelfAssessmentForm() {
         <VoiceTextarea
           name="notes"
           rows={3}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -88,7 +88,7 @@ export function SelfAssessmentForm() {
         <VoiceTextarea
           name="written_assignments_notes"
           rows={2}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 
@@ -97,7 +97,7 @@ export function SelfAssessmentForm() {
         <VoiceTextarea
           name="other_notes"
           rows={2}
-          className="rounded-[6px] border border-border bg-card px-3 py-2 text-ink outline-none focus:border-primary"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
 

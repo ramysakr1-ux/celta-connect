@@ -66,7 +66,7 @@ export function PlatformAccessTab({ invite, accessLog }: { invite: PlatformAcces
                 name="note"
                 rows={2}
                 placeholder="What you'd like help with"
-                className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+                className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
               />
             </div>
             {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
