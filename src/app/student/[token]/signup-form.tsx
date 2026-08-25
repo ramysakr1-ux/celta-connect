@@ -148,7 +148,6 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
           >
             {t.agreeLabel}
           </button>
-          <p className="text-xs text-[#8a6a2f]">You can withdraw at any time by emailing the centre.</p>
         </div>
       ) : null}
 
