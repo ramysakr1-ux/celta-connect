@@ -30,6 +30,11 @@ export function VolunteerRecorder({
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [level, setLevel] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  // Ramy, 25 Aug 2026: "once they click on play, it doesn't stop. They
+  // can't stop it... they should be able to pause or stop as well." The
+  // recording only ever ended by clicking through all eight prompts --
+  // no way to pause, and no way to end early if they want to stop partway.
+  const [paused, setPaused] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -79,6 +84,7 @@ export function VolunteerRecorder({
     setErrorMessage(null);
     setStatus("requesting");
     setPromptIndex(0);
+    setPaused(false);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -118,11 +124,29 @@ export function VolunteerRecorder({
 
   function nextQuestion() {
     if (promptIndex >= prompts.length - 1) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      mediaRecorderRef.current?.stop();
+      finishRecording();
       return;
     }
     setPromptIndex((i) => i + 1);
+  }
+
+  function finishRecording() {
+    if (timerRef.current) clearInterval(timerRef.current);
+    mediaRecorderRef.current?.stop();
+  }
+
+  function togglePause() {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder) return;
+    if (paused) {
+      recorder.resume();
+      timerRef.current = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
+      setPaused(false);
+    } else {
+      recorder.pause();
+      if (timerRef.current) clearInterval(timerRef.current);
+      setPaused(true);
+    }
   }
 
   function setFileFromBlob(blob: Blob) {
@@ -141,6 +165,7 @@ export function VolunteerRecorder({
     setAudioUrl(null);
     setElapsedSeconds(0);
     setPromptIndex(0);
+    setPaused(false);
     setStatus("idle");
   }
 
@@ -192,15 +217,21 @@ export function VolunteerRecorder({
 
           <div
             className="flex size-16 items-center justify-center rounded-full bg-[#a8432e] transition-transform"
-            style={{ boxShadow: `0 0 0 ${6 + level * 10}px rgba(168,67,46,0.14)` }}
+            style={{ boxShadow: paused ? "none" : `0 0 0 ${6 + level * 10}px rgba(168,67,46,0.14)` }}
           >
             <div className="size-5 rounded-[3px] bg-white" />
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="size-1.5 animate-pulse rounded-full bg-[#a8432e]" />
-            <span className="text-sm font-semibold text-[#a8432e]">Recording · {formatTime(elapsedSeconds)}</span>
+            <span className={`size-1.5 rounded-full bg-[#a8432e] ${paused ? "" : "animate-pulse"}`} />
+            <span className="text-sm font-semibold text-[#a8432e]">
+              {paused ? "Paused" : "Recording"} · {formatTime(elapsedSeconds)}
+            </span>
           </div>
+
+          <p className="text-center text-xs text-[#8a6a2f]">
+            The recording keeps going on its own -- click &quot;Next question&quot; when you&apos;re done talking.
+          </p>
 
           <button
             type="button"
@@ -209,6 +240,17 @@ export function VolunteerRecorder({
           >
             {isLast ? "Stop and finish" : "Next question →"}
           </button>
+
+          <div className="flex items-center gap-4">
+            <button type="button" onClick={togglePause} className="text-xs font-medium text-[#8a6a2f] hover:underline">
+              {paused ? "Resume" : "Pause"}
+            </button>
+            {!isLast ? (
+              <button type="button" onClick={finishRecording} className="text-xs font-medium text-[#8a6a2f] hover:underline">
+                Finish now
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
@@ -217,7 +259,12 @@ export function VolunteerRecorder({
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <audio src={audioUrl} controls className="w-full" />
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#8a6a2f]">{formatTime(elapsedSeconds)} recorded, all {prompts.length} questions</span>
+            <span className="text-xs text-[#8a6a2f]">
+              {formatTime(elapsedSeconds)} recorded
+              {promptIndex + 1 >= prompts.length
+                ? `, all ${prompts.length} questions`
+                : `, ${promptIndex + 1} of ${prompts.length} questions`}
+            </span>
             <button type="button" onClick={retake} className="ml-auto text-xs font-medium text-[#a8432e] hover:underline">
               Record again
             </button>
