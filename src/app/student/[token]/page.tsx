@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { VolunteerSignupForm } from "@/app/student/[token]/signup-form";
 import { DeclineButton } from "@/app/student/[token]/decline-button";
 import { ClassMaterialsLink } from "@/app/student/[token]/class-materials-link";
+import { LessonMaterialsCard } from "@/app/student/[token]/lesson-materials-card";
 import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
 import { DesignerCredit } from "@/components/designer-credit";
@@ -393,31 +394,29 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     rowMaterials: c.courseId === accessToken.course_id && c.linkedTpNumber != null ? (materialsByTpNumber.get(c.linkedTpNumber) ?? []) : [],
   }));
 
-  // Letter suffix per trainee within a TP round, assigned in the order they
-  // first shared something -- "TP one a, and then TP one b, and then TP one
-  // c" as materials come in, not a fixed slot per trainee.
+  // Ramy, 25 Aug 2026, after seeing "TP4a": "why don't we just write down
+  // the name of the teacher?... teacher name, TP number, and the topic."
+  // The letter never meant anything to a volunteer reading it -- the real
+  // teacher's name does.
+  const lessonTraineeIds = [...new Set([...lessonGroupsByKey.values()].map((g) => g.traineeId))];
+  const { data: lessonTeacherProfiles } = lessonTraineeIds.length
+    ? await admin.from("profiles").select("id, full_name").in("id", lessonTraineeIds)
+    : { data: [] };
+  const teacherNameById = new Map((lessonTeacherProfiles ?? []).map((p) => [p.id, p.full_name]));
+
   const dateByTpNumber = new Map<number, string>();
   for (const c of listClasses) {
     if (c.courseId === accessToken.course_id && c.linkedTpNumber != null) dateByTpNumber.set(c.linkedTpNumber, c.eventDate);
   }
-  const groupsByTpNumber = new Map<number, LessonGroup[]>();
+  const lessonCards: { key: string; teacherName: string; tpNumber: number; topic: string | null; eventDate: string; materials: RichMaterial[] }[] = [];
   for (const group of lessonGroupsByKey.values()) {
-    const list = groupsByTpNumber.get(group.tpNumber) ?? [];
-    list.push(group);
-    groupsByTpNumber.set(group.tpNumber, list);
-  }
-  const lessonCards: { key: string; label: string; eventDate: string; materials: RichMaterial[] }[] = [];
-  for (const [tpNumber, group] of groupsByTpNumber) {
-    group.sort((a, b) => (a.earliestSharedAt < b.earliestSharedAt ? -1 : 1));
-    group.forEach((g, i) => {
-      const letter = String.fromCharCode(97 + i); // a, b, c...
-      const topic = topicByTpTrainee.get(`${tpNumber}:${g.traineeId}`);
-      lessonCards.push({
-        key: `${tpNumber}:${g.traineeId}`,
-        label: `TP${tpNumber}${letter}${topic ? ` — ${topic}` : ""}`,
-        eventDate: dateByTpNumber.get(tpNumber) ?? "",
-        materials: g.materials,
-      });
+    lessonCards.push({
+      key: `${group.tpNumber}:${group.traineeId}`,
+      teacherName: teacherNameById.get(group.traineeId) ?? "Your teacher",
+      tpNumber: group.tpNumber,
+      topic: topicByTpTrainee.get(`${group.tpNumber}:${group.traineeId}`) ?? null,
+      eventDate: dateByTpNumber.get(group.tpNumber) ?? "",
+      materials: group.materials,
     });
   }
   lessonCards.sort((a, b) => (a.key < b.key ? 1 : -1));
@@ -751,19 +750,6 @@ function ClassesTable({ rows }: { rows: ClassRow[] }) {
   );
 }
 
-function FileTypeTile({ fileType }: { fileType: string | null }) {
-  const label = fileType === "pdf" ? "PDF" : fileType === "image" ? "IMG" : "FILE";
-  const isPdf = fileType !== "image";
-  const style = isPdf
-    ? { background: "color-mix(in oklab, oklch(0.38 0.072 195) 14%, oklch(0.992 0.005 90))", color: "oklch(0.38 0.072 195)" }
-    : { background: "color-mix(in oklab, oklch(0.6 0.11 70) 16%, oklch(0.992 0.005 90))", color: "oklch(0.44 0.095 68)" };
-  return (
-    <div className="flex size-[26px] shrink-0 items-center justify-center rounded-[5px] text-[8px] font-bold tracking-[0.02em]" style={style}>
-      {label}
-    </div>
-  );
-}
-
 // volunteer-view-full-spec.md 1b: a dedicated materials panel under the
 // table, scoped to one class session ("Materials -- <topic> · <date>"), not
 // just a per-row count -- Ramy, 25 Aug 2026, after the pills/counts were
@@ -777,33 +763,24 @@ function FileTypeTile({ fileType }: { fileType: string | null }) {
 // not just the most recent -- a volunteer should be able to get materials
 // from any past class, not only the last one. Files for that lesson stack
 // inside its own card rather than each getting its own top-level card.
-function MaterialsPanel({ lessonCards }: { lessonCards: { key: string; label: string; eventDate: string; materials: RichMaterial[] }[] }) {
+function MaterialsPanel({
+  lessonCards,
+}: {
+  lessonCards: { key: string; teacherName: string; tpNumber: number; topic: string | null; eventDate: string; materials: RichMaterial[] }[];
+}) {
   if (lessonCards.length === 0) return null;
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">Materials</p>
       <div className="grid grid-cols-3 gap-2.5">
         {lessonCards.map((c) => (
-          <div key={c.key} className="flex flex-col gap-2.5 rounded-[8px] border border-border p-3">
-            <div>
-              <p className="text-[13px] font-semibold text-ink">{c.label}</p>
-              <p className="text-[11px] text-muted">{formatShortDate(c.eventDate)}</p>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              {c.materials.map((m) => (
-                <div key={m.id} className="flex items-center gap-2">
-                  <FileTypeTile fileType={m.fileType} />
-                  <div className="flex min-w-0 flex-1 flex-col gap-px">
-                    <p className="truncate text-xs font-semibold text-ink">{m.name}</p>
-                    {formatFileSize(m.sizeBytes) ? <p className="text-[11px] text-muted">{formatFileSize(m.sizeBytes)}</p> : null}
-                  </div>
-                  <a href={m.url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[11.5px] font-semibold text-primary hover:underline">
-                    Get
-                  </a>
-                </div>
-              ))}
-            </div>
-          </div>
+          <LessonMaterialsCard
+            key={c.key}
+            teacherName={c.teacherName}
+            tpNumber={c.tpNumber}
+            topic={c.topic}
+            materials={c.materials.map((m) => ({ id: m.id, name: m.name, url: m.url, sizeLabel: formatFileSize(m.sizeBytes) }))}
+          />
         ))}
       </div>
     </div>
