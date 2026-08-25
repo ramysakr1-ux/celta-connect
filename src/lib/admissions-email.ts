@@ -990,6 +990,7 @@ export function volunteerClassStartingEmailHtml(input: {
 // reminder-cron.ts) -- email, per Ramy, 23 Aug 2026.
 export function volunteerSessionReminderEmailHtml(input: {
   classFact: string;
+  dayFact: string;
   whenFact: string;
   joinUrl: string;
   unsubscribeUrl: string;
@@ -1000,6 +1001,7 @@ export function volunteerSessionReminderEmailHtml(input: {
     body: p("A reminder for your class tomorrow."),
     facts: [
       { label: "Your class", value: input.classFact },
+      { label: "Day", value: input.dayFact },
       { label: "When", value: input.whenFact },
     ],
     cta: { label: "Open your class link", url: input.joinUrl },
@@ -1016,6 +1018,7 @@ export function volunteerSessionReminderEmailHtml(input: {
 // to start time and with a nudge toward the Materials panel while they wait.
 export function volunteer30MinReminderEmailHtml(input: {
   classFact: string;
+  dayFact: string;
   whenFact: string;
   joinUrl: string;
   unsubscribeUrl: string;
@@ -1026,6 +1029,7 @@ export function volunteer30MinReminderEmailHtml(input: {
     body: p("Log in early to check today's materials. The Join link opens 10 minutes before class."),
     facts: [
       { label: "Your class", value: input.classFact },
+      { label: "Day", value: input.dayFact },
       { label: "When", value: input.whenFact },
     ],
     cta: { label: "Open your class link", url: input.joinUrl },

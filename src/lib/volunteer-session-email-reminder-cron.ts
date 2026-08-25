@@ -2,6 +2,8 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendApplicantEmail, volunteerSessionReminderEmailHtml } from "@/lib/admissions-email";
 import { toLocalIso } from "@/lib/timetable-grid";
+import { teachingDayNumber } from "@/lib/volunteer-attendance";
+import { extractLevelCode } from "@/lib/levels";
 
 const WINDOW_START_MINUTES = 20 * 60 - 15; // 19h45m before
 const WINDOW_END_MINUTES = 20 * 60 + 15; // 20h15m before
@@ -45,14 +47,25 @@ export async function runVolunteerSessionEmailReminderCron(): Promise<{ eventsCh
   if (dueEvents.length === 0) return { eventsChecked: 0, reminded: 0 };
 
   const courseIds = [...new Set(dueEvents.map((e) => e.course_id))];
-  const [{ data: volunteers }, { data: courses }] = await Promise.all([
-    admin.from("volunteer_students").select("id, name, email, course_id, reminders_opted_out").in("course_id", courseIds),
+  const [{ data: volunteers }, { data: courses }, { data: allTpEvents }] = await Promise.all([
+    admin.from("volunteer_students").select("id, name, email, level, course_id, reminders_opted_out").in("course_id", courseIds),
     admin.from("courses").select("id, name, center_id").in("id", courseIds),
+    // Every TP date for these courses, not just the due window -- "since
+    // everything comes from the timetable, this will also come from the
+    // timetable": the day number a due event gets is its real position
+    // among that course's own teaching dates, not a fixed per-day TP count.
+    admin.from("course_timetable_events").select("course_id, event_date").eq("type", "tp").in("course_id", courseIds),
   ]);
   const courseById = new Map((courses ?? []).map((c) => [c.id, c]));
   const centerIds = [...new Set((courses ?? []).map((c) => c.center_id))];
   const { data: centers } = centerIds.length > 0 ? await admin.from("centers").select("id, name, admissions_email").in("id", centerIds) : { data: [] };
   const centerById = new Map((centers ?? []).map((c) => [c.id, c]));
+  const tpDatesByCourse = new Map<string, string[]>();
+  for (const e of allTpEvents ?? []) {
+    const list = tpDatesByCourse.get(e.course_id) ?? [];
+    list.push(e.event_date);
+    tpDatesByCourse.set(e.course_id, list);
+  }
 
   let reminded = 0;
 
@@ -92,11 +105,18 @@ export async function runVolunteerSessionEmailReminderCron(): Promise<{ eventsCh
     const whenFact = `${new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}${
       event.event_time ? `, ${event.event_time.slice(0, 5)}` : ""
     }`;
+    // Ramy, 25 Aug 2026: "TP4" meant nothing to a volunteer, and neither
+    // does the raw course name/code -- what's actually useful is the
+    // level (set by the MCT at the very beginning, via the same Class
+    // level dropdown every "add volunteer" form already has) and which
+    // teaching day this is.
+    const dayFact = `Day ${teachingDayNumber(tpDatesByCourse.get(event.course_id) ?? [], event.event_date)}`;
 
     const sentVolunteerIds: string[] = [];
     for (const volunteer of dueVolunteers) {
       const token = tokenByVolunteerId.get(volunteer.id);
       if (!token || !volunteer.email) continue;
+      const classFact = volunteer.level ? `${extractLevelCode(volunteer.level)} English lesson` : course.name;
       const { error } = await sendApplicantEmail({
         centerName: center.name,
         centerAdmissionsEmail: center.admissions_email,
@@ -107,7 +127,8 @@ export async function runVolunteerSessionEmailReminderCron(): Promise<{ eventsCh
         type: "volunteer_session_reminder",
         recipientName: volunteer.name,
         html: volunteerSessionReminderEmailHtml({
-          classFact: course.name,
+          classFact,
+          dayFact,
           whenFact,
           joinUrl: event.zoom_url ?? `${base}/student/${token}`,
           unsubscribeUrl: `${base}/student/${token}/unsubscribe`,

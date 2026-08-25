@@ -78,3 +78,16 @@ export function creditedHours(sessionTicks: SessionTick[]): number {
 // now centers.volunteer_certificate_hours_threshold is the real source and
 // this is only the fallback for a row that predates the column somehow.
 export const CERTIFICATE_HOURS_THRESHOLD = 160;
+
+// Ramy, 25 Aug 2026: the reminder emails naming "TP4" meant nothing to a
+// volunteer -- internal trainer jargon, and a course with three TPs a day
+// makes it worse (TP10, TP11, TP12 could all be the same day). "Day 4"
+// instead -- "since everything comes from the timetable, this will also
+// come from the timetable" -- one course-day's worth of TP events all
+// collapse to the same day number, counted from the course's own real
+// timetable rather than any fixed assumption about how many TPs run per
+// day.
+export function teachingDayNumber(courseTpDates: string[], targetDate: string): number {
+  const sorted = [...new Set(courseTpDates)].sort();
+  return sorted.indexOf(targetDate) + 1;
+}
