@@ -12,6 +12,7 @@ import {
   volunteer30MinReminderEmailHtml,
 } from "@/lib/admissions-email";
 import { emailShell, withConnectBranding } from "@/lib/email-layout";
+import { EmailPreview } from "@/app/demo/journey/email-preview";
 
 // Ramy, 2026-08-25: "one link... it will open all of them, and it will sort
 // of tell the process, the journey" -- the application/interview/offer
@@ -23,17 +24,6 @@ import { emailShell, withConnectBranding } from "@/lib/email-layout";
 // of the email that stage actually sends, rendered from the same functions
 // production uses (src/lib/admissions-email.ts), not paraphrased copies.
 export const dynamic = "force-dynamic";
-
-function EmailPreview({ title, to, html }: { title: string; to: string; html: string }) {
-  return (
-    <div className="flex flex-col gap-2">
-      <p className="text-xs font-semibold text-muted">
-        {title} <span className="font-normal">&middot; to {to}</span>
-      </p>
-      <iframe srcDoc={html} title={title} className="h-[340px] w-full rounded-[8px] border border-border bg-white" />
-    </div>
-  );
-}
 
 function Step({
   number,
