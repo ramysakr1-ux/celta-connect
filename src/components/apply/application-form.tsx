@@ -37,14 +37,22 @@ export function ApplicationForm({
   intakes,
   prompts,
   speakingPrompts,
+  preselectedCourseId,
 }: {
   centerId: string;
   intakes: Intake[];
   prompts: WritingPrompt[];
   speakingPrompts: SpeakingPrompt[];
+  preselectedCourseId?: string;
 }) {
   const [state, action, pending] = useActionState(submitApplication, initialState);
-  const [selectedIntakeId, setSelectedIntakeId] = useState(intakes[0]?.id ?? "");
+  // A centre's own site can link straight to one course (?course=<id>) --
+  // e.g. separate "Apply" buttons per open intake -- instead of everyone
+  // landing on the same generic dropdown. Falls back to the first intake if
+  // the id is missing, stale, or no longer accepting applications.
+  const [selectedIntakeId, setSelectedIntakeId] = useState(
+    (preselectedCourseId && intakes.some((i) => i.id === preselectedCourseId) ? preselectedCourseId : intakes[0]?.id) ?? ""
+  );
   const [marketingSource, setMarketingSource] = useState("");
   const [selectedPromptId, setSelectedPromptId] = useState(prompts[0]?.id ?? "");
   const [selectedSpeakingPromptId, setSelectedSpeakingPromptId] = useState(speakingPrompts[0]?.id ?? "");

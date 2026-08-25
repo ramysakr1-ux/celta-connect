@@ -17,7 +17,8 @@ export const dynamic = "force-dynamic";
 // assumes one real, non-demo centre) -- so this is that one centre's
 // application page at a path, not yet a subdomain. Revisit once a second
 // centre is actually onboarded.
-export default async function ApplyPage() {
+export default async function ApplyPage({ searchParams }: { searchParams: Promise<{ course?: string }> }) {
+  const { course: preselectedCourseId } = await searchParams;
   const admin = createAdminClient();
 
   const { data: center } = await admin
@@ -110,7 +111,13 @@ export default async function ApplyPage() {
         )}
         <p className="mb-4 text-sm text-muted">Apply for a Cambridge CELTA course</p>
 
-        <ApplicationForm centerId={center.id} intakes={intakes} prompts={prompts ?? []} speakingPrompts={speakingPrompts ?? []} />
+        <ApplicationForm
+          centerId={center.id}
+          intakes={intakes}
+          prompts={prompts ?? []}
+          speakingPrompts={speakingPrompts ?? []}
+          preselectedCourseId={preselectedCourseId}
+        />
 
         <div className="mt-8 flex items-center justify-end gap-1.5 border-t border-border pt-4">
           <span className="text-[10px] text-muted">Powered by</span>
