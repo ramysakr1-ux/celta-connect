@@ -194,7 +194,9 @@ export default async function JourneyPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">The trainee&apos;s journey</p>
+          <p className="border-b-2 border-destructive pb-2 text-sm font-semibold tracking-[0.1em] text-destructive uppercase">
+            The trainee&apos;s journey
+          </p>
 
           <Step
             number={1}
@@ -236,7 +238,9 @@ export default async function JourneyPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">The volunteer student&apos;s journey</p>
+          <p className="border-b-2 border-destructive pb-2 text-sm font-semibold tracking-[0.1em] text-destructive uppercase">
+            The volunteer student&apos;s journey
+          </p>
 
           <Step
             number={1}
