@@ -305,12 +305,14 @@ async function main() {
   }
 
   // Amara: strong, 4 TPs taught
-  let amaraTp1PlanId = null;
+  const amaraTpPlanIds = []; // index 0 = TP1, ... -- every TP gets a shared
+  // material below, not just the first (Ramy, 25 Aug 2026: "every TP should
+  // have the material so the students can access them").
   for (const [i, cfg] of [
-    { aim: "Present perfect for life experience", grade: "above_standard", days: 12 },
-    { aim: "Reading for gist and detail: a city life article", grade: "to_standard", days: 9 },
-    { aim: "Vocabulary: Air Travel", grade: "above_standard", days: 6 },
-    { aim: "Functional language: Making suggestions", grade: "to_standard", days: 3 },
+    { aim: "Present perfect for life experience", grade: "above_standard", days: 12, materialName: "Present perfect -- slides" },
+    { aim: "Reading for gist and detail: a city life article", grade: "to_standard", days: 9, materialName: "Reading for gist and detail -- handout" },
+    { aim: "Vocabulary: Air Travel", grade: "above_standard", days: 6, materialName: "Air Travel vocabulary -- flashcards" },
+    { aim: "Functional language: Making suggestions", grade: "to_standard", days: 3, materialName: "Making suggestions -- worksheet" },
   ].entries()) {
     const planId = await seedTaughtTp(trainees["Amara Okafor"], i + 1, {
       aim: cfg.aim,
@@ -319,7 +321,7 @@ async function main() {
       actionPoints: ["Vary interaction patterns a little more"],
       daysAgo: cfg.days,
     });
-    if (i === 0) amaraTp1PlanId = planId;
+    amaraTpPlanIds.push({ planId, materialName: cfg.materialName });
   }
   await supabase.from("celta5_records").insert({
     course_id: course.id,
@@ -523,15 +525,17 @@ async function main() {
   if (attendanceRows.length > 0) {
     await supabase.from("volunteer_attendance").insert(attendanceRows);
   }
-  // One shared material off Amara's TP1, so the volunteer's materials card
-  // isn't empty either.
-  if (amaraTp1PlanId) {
+  // A shared material off every one of Amara's TPs, not just the first --
+  // volunteer-view-full-spec.md's own mockup shows a handout count on every
+  // attended/missed row, and Ramy caught the gap directly: "every TP should
+  // have the material so the students can access them."
+  for (const { planId, materialName } of amaraTpPlanIds) {
     const { data: material } = await supabase
       .from("tp_materials")
       .insert({
-        tp_plan_id: amaraTp1PlanId,
+        tp_plan_id: planId,
         trainee_id: trainees["Amara Okafor"],
-        file_name: "Present perfect -- slides",
+        file_name: materialName,
         slides_url: "https://docs.google.com/presentation/d/demo-placeholder/edit",
       })
       .select("id")
