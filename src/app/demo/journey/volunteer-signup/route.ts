@@ -15,6 +15,26 @@ export async function GET() {
   const { data: volunteer } = await admin.from("volunteer_students").select("id").eq("name", "Grace Adeyemi").maybeSingle();
   if (!volunteer) return fallback();
 
+  // Ramy, 25 Aug 2026: "I can't stop. It doesn't stop" turned out to be a
+  // real submission failure, not a UI bug -- volunteer_signup_profiles has
+  // (correctly) a one-row-per-volunteer unique constraint, but this reset
+  // only ever cleared signup_completed_at back to null, never the actual
+  // profile row a completed run had already written. The very first
+  // person to ever finish this demo permanently broke every future
+  // attempt with "Could not save your answers." Clear the stray row (and
+  // its uploaded audio) on every reset, not just the completed-at flag.
+  const { data: staleProfile } = await admin
+    .from("volunteer_signup_profiles")
+    .select("id, audio_url")
+    .eq("volunteer_student_id", volunteer.id)
+    .maybeSingle();
+  if (staleProfile) {
+    await admin.from("volunteer_signup_profiles").delete().eq("id", staleProfile.id);
+    if (staleProfile.audio_url) {
+      await admin.storage.from("volunteer-signup-audio").remove([staleProfile.audio_url]);
+    }
+  }
+
   await admin.from("volunteer_students").update({ signup_completed_at: null }).eq("id", volunteer.id);
 
   const { data: accessToken } = await admin
