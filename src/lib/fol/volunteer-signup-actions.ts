@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { transcribeAudio } from "@/lib/openai/transcribe";
@@ -66,25 +67,41 @@ export async function submitVolunteerSignupProfile(_prevState: VolunteerSignupSt
   });
   if (uploadError) return { error: "Could not upload the recording. Try again." };
 
-  // Best-effort -- a missing OPENAI_API_KEY or a flaky API never blocks the
-  // sign-up itself, same reasoning as a failed audio upload elsewhere in
-  // this app not failing the whole submission.
-  const transcript = await transcribeAudio(audioFile, audioFile.name);
-
+  // Ramy, 25 Aug 2026: "why does it take so long?" -- transcription is a
+  // real OpenAI API call (seconds, not milliseconds), and it was awaited
+  // here before the volunteer ever saw the sign-up finish. It was already
+  // "best-effort" for correctness (a missing key or a flaky API never
+  // blocks the submission), but that only covered failures, not the time
+  // itself. Now the row saves with transcript: null immediately, and
+  // after() fills it in once the API call actually returns -- after() is
+  // guaranteed to run even though redirect() below ends the response.
   const now = new Date().toISOString();
-  const { error: profileError } = await admin.from("volunteer_signup_profiles").insert({
-    center_id: centerId,
-    course_id: volunteer.course_id,
-    volunteer_student_id: volunteer.id,
-    written_answers: answers,
-    audio_url: storagePath,
-    transcript,
-    transcript_generated_at: transcript ? now : null,
-    l1_language: l1Language,
-    consent_given_at: now,
-    recording_consent_given_at: now,
+  const { data: inserted, error: profileError } = await admin
+    .from("volunteer_signup_profiles")
+    .insert({
+      center_id: centerId,
+      course_id: volunteer.course_id,
+      volunteer_student_id: volunteer.id,
+      written_answers: answers,
+      audio_url: storagePath,
+      transcript: null,
+      transcript_generated_at: null,
+      l1_language: l1Language,
+      consent_given_at: now,
+      recording_consent_given_at: now,
+    })
+    .select("id")
+    .single();
+  if (profileError || !inserted) return { error: "Could not save your answers. Try again." };
+
+  after(async () => {
+    const transcript = await transcribeAudio(audioFile, audioFile.name);
+    if (!transcript) return;
+    await admin
+      .from("volunteer_signup_profiles")
+      .update({ transcript, transcript_generated_at: new Date().toISOString() })
+      .eq("id", inserted.id);
   });
-  if (profileError) return { error: "Could not save your answers. Try again." };
 
   await admin.from("volunteer_students").update({ signup_completed_at: now }).eq("id", volunteer.id);
 
