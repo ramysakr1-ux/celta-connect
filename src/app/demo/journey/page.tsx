@@ -7,8 +7,11 @@ import {
   acceptancePlaceEmailHtml,
   welcomeEmailHtml,
   volunteerSignedUpEmailHtml,
+  volunteerClassStartingEmailHtml,
+  volunteerSessionReminderEmailHtml,
+  volunteer30MinReminderEmailHtml,
 } from "@/lib/admissions-email";
-import { emailShell } from "@/lib/email-layout";
+import { emailShell, withConnectBranding } from "@/lib/email-layout";
 
 // Ramy, 2026-08-25: "one link... it will open all of them, and it will sort
 // of tell the process, the journey" -- the application/interview/offer
@@ -79,62 +82,114 @@ export default async function JourneyPage() {
   const courseName = "CELTA Demo Course";
   const centreName = "Connect CELTA Demo Centre";
 
-  const ackHtml = emailShell({
-    heading: "We have your application",
-    tone: "teal",
-    body: acknowledgementEmailHtml({ applicantName, courseName, hearBy: "10 September 2026" }),
-  });
-  const inviteHtml = interviewInvitationEmailHtml({
-    applicantName,
-    bookingUrl: "https://celtaconnect.com/interview/<token>",
-    slotsNote: "3 times available this week -- reply if none suit you.",
-  });
-  const bookedHtml = emailShell({
-    heading: "Interview booked",
-    tone: "teal",
-    body: interviewBookedEmailHtml({
-      recipientName: "Jordan Blake",
-      applicantName,
-      courseName,
-      when: "Wednesday 27 August, 10:00",
-      markedTaskUrl: "https://celtaconnect.com/dashboard/admissions/<applicant>",
+  // Every preview below goes through withConnectBranding, same as a real
+  // send does in sendApplicantEmail -- otherwise this page would show the
+  // pre-25-Aug look (no logo, no centre-name eyebrow) forever, quietly
+  // drifting from what actually goes out.
+  const ackHtml = withConnectBranding(
+    emailShell({
+      heading: "We have your application",
+      tone: "teal",
+      body: acknowledgementEmailHtml({ applicantName, courseName, hearBy: "10 September 2026" }),
     }),
-  });
-  const offerHtml = acceptancePlaceEmailHtml({
-    candidateName: applicantName,
-    courseName,
-    courseDates: "7 August – 4 September 2026",
-    centreLocation: "London",
-    feeAmount: "£2,000",
-    depositAmount: "£500",
-    depositBy: "7 September 2026",
-    balanceBy: "1 October 2026",
-    payUrl: null,
-    officeContact: "admissions@celtaconnect.com",
-    depositAlreadyPaid: false,
-    directorName: "Jordan Blake",
-    directorRole: "Main Course Tutor",
-  });
-  const welcomeHtml = emailShell({
-    heading: "Welcome to Connect",
-    tone: "teal",
-    body: welcomeEmailHtml({
+    centreName
+  );
+  const inviteHtml = withConnectBranding(
+    interviewInvitationEmailHtml({
+      applicantName,
+      bookingUrl: "https://celtaconnect.com/interview/<token>",
+      slotsNote: "3 times available this week -- reply if none suit you.",
+    }),
+    centreName
+  );
+  const bookedHtml = withConnectBranding(
+    emailShell({
+      heading: "Interview booked",
+      tone: "teal",
+      body: interviewBookedEmailHtml({
+        recipientName: "Jordan Blake",
+        applicantName,
+        courseName,
+        when: "Wednesday 27 August, 10:00",
+        markedTaskUrl: "https://celtaconnect.com/dashboard/admissions/<applicant>",
+      }),
+    }),
+    centreName
+  );
+  const offerHtml = withConnectBranding(
+    acceptancePlaceEmailHtml({
       candidateName: applicantName,
       courseName,
-      centreName,
-      tutorNames: ["Jordan Blake", "Marcus Webb"],
-      courseFact: "7 Aug – 4 Sept 2026, full-time",
-      startsFact: "Monday 7 August, 9:00",
-      preCourseTaskFact: "Due before day one",
-      setupUrl: "https://celtaconnect.com/join/<token>",
-      readingListUrl: null,
+      courseDates: "7 August – 4 September 2026",
+      centreLocation: "London",
+      feeAmount: "£2,000",
+      depositAmount: "£500",
+      depositBy: "7 September 2026",
+      balanceBy: "1 October 2026",
+      payUrl: null,
+      officeContact: "admissions@celtaconnect.com",
+      depositAlreadyPaid: false,
+      directorName: "Jordan Blake",
+      directorRole: "Main Course Tutor",
     }),
-  });
-  const volunteerHtml = emailShell({
-    heading: "Thanks for signing up",
-    tone: "teal",
-    body: volunteerSignedUpEmailHtml({ volunteerName: "Grace Adeyemi", centreName }),
-  });
+    centreName
+  );
+  const welcomeHtml = withConnectBranding(
+    emailShell({
+      heading: "Welcome to Connect",
+      tone: "teal",
+      body: welcomeEmailHtml({
+        candidateName: applicantName,
+        courseName,
+        centreName,
+        tutorNames: ["Jordan Blake", "Marcus Webb"],
+        courseFact: "7 Aug – 4 Sept 2026, full-time",
+        startsFact: "Monday 7 August, 9:00",
+        preCourseTaskFact: "Due before day one",
+        setupUrl: "https://celtaconnect.com/join/<token>",
+        readingListUrl: null,
+      }),
+    }),
+    centreName
+  );
+  const volunteerHtml = withConnectBranding(
+    emailShell({
+      heading: "Thanks for signing up",
+      tone: "teal",
+      body: volunteerSignedUpEmailHtml({ volunteerName: "Grace Adeyemi", centreName }),
+    }),
+    centreName
+  );
+  const volunteerClassStartingHtml = withConnectBranding(
+    volunteerClassStartingEmailHtml({
+      centreName,
+      levelName: "B1",
+      classFact: courseName,
+      whenFact: "Monday 7 August, 09:30",
+      joinUrl: "https://celtaconnect.com/student/<token>",
+    }),
+    centreName
+  );
+  const volunteerDayBeforeHtml = withConnectBranding(
+    volunteerSessionReminderEmailHtml({
+      classFact: "B1 English lesson",
+      dayFact: "Day 4",
+      whenFact: "Friday 28 August, 10:00",
+      joinUrl: "https://celtaconnect.com/student/<token>",
+      unsubscribeUrl: "https://celtaconnect.com/student/<token>/unsubscribe",
+    }),
+    centreName
+  );
+  const volunteer30MinHtml = withConnectBranding(
+    volunteer30MinReminderEmailHtml({
+      classFact: "B1 English lesson",
+      dayFact: "Day 4",
+      whenFact: "Friday 28 August, 10:00",
+      joinUrl: "https://celtaconnect.com/student/<token>",
+      unsubscribeUrl: "https://celtaconnect.com/student/<token>/unsubscribe",
+    }),
+    centreName
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -203,13 +258,22 @@ export default async function JourneyPage() {
           <Step number={2} title="Gets a confirmation" blurb="Sent the moment they submit the form.">
             <EmailPreview title="Thanks for signing up" to="Grace Adeyemi" html={volunteerHtml} />
           </Step>
+          <Step number={3} title="Gets notified their course is starting" blurb="A one-time email, once their course is within 7 days of starting -- carries their personal link.">
+            <EmailPreview title="Your free English classes start Monday" to="Grace Adeyemi" html={volunteerClassStartingHtml} />
+          </Step>
           <Step
-            number={3}
+            number={4}
             title="Sees their ongoing view"
-            blurb="Once classes start -- upcoming sessions, shared materials, hours logged toward a certificate."
+            blurb="Upcoming sessions, shared materials, hours logged toward a certificate. 'Let them know' (decline a class) and 'Manage reminder emails' both live here too, not as separate pages."
             href="/demo/volunteer"
             hrefLabel="Open the ongoing volunteer view →"
           />
+          <Step number={5} title="Gets a day-before reminder" blurb="20 hours before each class -- not a fixed clock time, and not 24 hours (that would land right at the previous day's class). Skipped if they declined this one, or turned reminder emails off.">
+            <EmailPreview title="Your class is tomorrow" to="Grace Adeyemi" html={volunteerDayBeforeHtml} />
+          </Step>
+          <Step number={6} title="Gets a 30-minute reminder" blurb="Both an email and a browser push, independently -- push needs a permission grant per device, so the email is what actually reaches everyone.">
+            <EmailPreview title="Your class starts in 30 minutes" to="Grace Adeyemi" html={volunteer30MinHtml} />
+          </Step>
         </div>
       </div>
     </div>
