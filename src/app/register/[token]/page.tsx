@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CopyLinkButton } from "@/app/trainer/(hub)/volunteers/copy-link-button";
 import { AddVolunteerForm } from "@/app/register/[token]/add-volunteer-form";
+import { BulkImportForm } from "@/app/register/[token]/bulk-import-form";
 import { Wordmark } from "@/components/wordmark";
 import { AttendanceRegisterGrid } from "@/components/attendance-register-grid";
 
@@ -62,8 +63,9 @@ export default async function RegisterViewPage({ params }: { params: Promise<{ t
           </p>
         </div>
 
-        <div className="sheet">
+        <div className="sheet flex flex-col gap-4">
           <AddVolunteerForm token={token} />
+          <BulkImportForm token={token} />
         </div>
 
         <div className="sheet !p-0 overflow-hidden">
