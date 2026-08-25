@@ -521,7 +521,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         </div>
       </div>
 
-      <DesignerCredit corner="bottom-right" />
+      <DesignerCredit pinned={false} className="flex justify-center py-4" />
     </div>
   );
 }
