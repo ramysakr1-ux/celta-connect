@@ -8,6 +8,7 @@ import {
   inferCourseCommitmentsMode,
   buildCourseCommitments,
 } from "@/lib/course-commitments";
+import { DELIVERY_MODE_LABEL } from "@/lib/delivery-mode";
 import { Wordmark } from "@/components/wordmark";
 
 interface Intake {
@@ -144,7 +145,7 @@ export function ApplicationForm({
               {intakes.map((i) => (
                 <option key={i.id} value={i.id}>
                   {i.name} ({i.startDate} - {i.endDate}) --{" "}
-                  {i.availabilityLabel}
+                  {DELIVERY_MODE_LABEL[i.deliveryMode]} -- {i.availabilityLabel}
                 </option>
               ))}
             </select>
