@@ -13,6 +13,7 @@ import {
 } from "@/lib/admissions-email";
 import { emailShell, withConnectBranding } from "@/lib/email-layout";
 import { EmailPreview } from "@/app/demo/journey/email-preview";
+import { BackToTop } from "@/app/demo/journey/back-to-top";
 
 // Ramy, 2026-08-25: "one link... it will open all of them, and it will sort
 // of tell the process, the journey" -- the application/interview/offer
@@ -270,6 +271,7 @@ export default async function JourneyPage() {
           </Step>
         </div>
       </div>
+      <BackToTop />
     </div>
   );
 }
