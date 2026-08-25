@@ -318,3 +318,37 @@ export function authEmailShell(input: AuthEmailShellInput): string {
   </table>
 </body></html>`;
 }
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://celtaconnect.com";
+
+// Ramy, 25 Aug 2026: "I wouldn't mind the center name but connect sort of
+// logo there... connect logo on top." Applied once, centrally, in
+// sendApplicantEmail (admissions-email.ts) rather than threaded into each
+// of the ~24 individual xEmailHtml template functions and every one of
+// their call sites -- same reasoning already behind that function's own
+// subject-line centre-name prefix, right next to where this is called.
+// Works on anything either shell above produced: both always emit the
+// exact centering <td> matched below. authEmailShell already shows the
+// centre name prominently in its own branded header bar, so only
+// emailShell's plain <h1> output (never a <h2>) gets the extra eyebrow
+// line -- otherwise the name would appear twice, a few pixels apart.
+export function withConnectBranding(html: string, centerName: string): string {
+  const logo = `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:14px;">
+      <tr><td align="center">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td style="padding-right:7px;"><img src="${SITE_URL}/icon-192.png" width="20" height="20" alt="Connect" style="display:block;border-radius:4px;" /></td>
+          <td style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:13px;color:${MUTED};">Connect</td>
+        </tr></table>
+      </td></tr>
+    </table>`;
+
+  const withLogo = html.replace(
+    '<td align="center" style="padding:28px 14px 40px;">',
+    `<td align="center" style="padding:28px 14px 40px;">${logo}`
+  );
+
+  if (!withLogo.includes("<h1")) return withLogo;
+  const eyebrow = `<p style="margin:0 0 5px;font-size:10.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};">${esc(centerName)}</p>`;
+  return withLogo.replace(/<h1[^>]*>/, (match) => `${eyebrow}${match}`);
+}

@@ -1,6 +1,6 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend/client";
-import { emailShell, authEmailShell, rawP, p, list, inlineButton, signature, esc, EMAIL_TONE } from "@/lib/email-layout";
+import { emailShell, authEmailShell, rawP, p, list, inlineButton, signature, esc, EMAIL_TONE, withConnectBranding } from "@/lib/email-layout";
 
 // "Every email is from the centre... sender is the centre's name, reply-to
 // is a centre address. Connect never appears in anyone's inbox." The
@@ -177,6 +177,12 @@ export async function sendApplicantEmail(input: {
   const leadsWithCentre = input.subject.trim().toLowerCase().startsWith(input.centerName.trim().toLowerCase());
   const subject = leadsWithCentre ? input.subject : `${input.centerName} · ${input.subject}`;
 
+  // Ramy, 25 Aug 2026: "I wouldn't mind the center name but connect sort of
+  // logo there... connect logo on top." Same centralisation reasoning as
+  // the subject-line prefix just above -- every email gets this, without
+  // each of the ~24 template functions needing to know about it.
+  const html = withConnectBranding(input.html, input.centerName);
+
   // Which of the three rules applies. Derived from the email's type rather
   // than passed in, so a caller cannot accidentally send a rejection that
   // replies to a shared inbox.
@@ -197,7 +203,7 @@ export async function sendApplicantEmail(input: {
       to: input.to,
       replyTo,
       subject,
-      html: input.html,
+      html,
     });
     failure = error ? error.message : null;
     // Kept so the delivery webhook can find this row later.
