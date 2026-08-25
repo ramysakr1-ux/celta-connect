@@ -279,8 +279,8 @@ export default async function AdminSettingsPage({
             <h2 className="font-serif text-lg text-ink">Assignment marking criteria</h2>
             <p className="mt-2 text-muted">
               The fixed brief and word count stay as they are -- this is the grey area, where centres and tutors
-              reasonably differ on what counts. Shipped with Cambridge's own defaults; add or deactivate to match
-              your own standardisation. Deactivating keeps it on any record it's already part of, it just stops
+              reasonably differ on what counts. Shipped with Cambridge&apos;s own defaults; add or deactivate to match
+              your own standardisation. Deactivating keeps it on any record it&apos;s already part of, it just stops
               being offered for new marking.
             </p>
             <div className="mt-4">
