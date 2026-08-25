@@ -65,6 +65,7 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
   const isAsynchronous = formData.get("is_asynchronous") === "on";
   const linkedLiveSessionEventId = (formData.get("linked_live_session_event_id") as string | null) || null;
   const tpGroupScopeId = (formData.get("tp_group_scope_id") as string | null) || null;
+  const sharesMaterials = formData.get("shares_materials") === "on";
 
   if (typeof type !== "string" || !EVENT_TYPES.includes(type as (typeof EVENT_TYPES)[number])) {
     return { error: "Invalid event type." };
@@ -103,6 +104,12 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
     // Only meaningful on assignment_due -- a second row for the same
     // assignment_type on a different date, one per staggered group.
     tp_group_scope_id: type === "assignment_due" ? tpGroupScopeId : null,
+    // TP already has its own materials system (tp_materials); this flag is
+    // only meaningful for everything else on the timetable, and only when
+    // a trainer explicitly opts in -- "I don't want it to read lunch for
+    // the trainees" (Ramy, 25 Aug 2026), so the session-materials pickers
+    // don't have to guess from type/title.
+    shares_materials: type !== "tp" ? sharesMaterials : false,
     created_by: trainer.id,
   });
 

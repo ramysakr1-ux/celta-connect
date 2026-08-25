@@ -178,6 +178,17 @@ export function AddEventForm({
           ) : null}
         </div>
       ) : null}
+      {type !== "tp" ? (
+        <div className="flex flex-col gap-1.5 sm:col-span-2">
+          <label className="flex items-center gap-2 text-sm text-ink">
+            <input type="checkbox" name="shares_materials" />
+            Volunteer students can see materials shared for this session
+          </label>
+          <p className="text-xs text-muted">
+            For a demo lesson, Getting to know you, or anything else worth sharing a handout for -- leave unchecked for logistics like Lunch.
+          </p>
+        </div>
+      ) : null}
       <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Linked TP (optional)</label>
         <select

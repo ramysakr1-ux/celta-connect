@@ -2395,6 +2395,7 @@ export interface Database {
           tp_group_scope_id: string | null;
           register_submitted_at: string | null;
           mode: "f2f" | "online" | null;
+          shares_materials: boolean;
           created_by: string | null;
           created_at: string;
           updated_at: string;

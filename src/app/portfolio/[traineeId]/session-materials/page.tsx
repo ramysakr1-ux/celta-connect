@@ -3,32 +3,41 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { SessionMaterialsSection } from "@/components/session-materials-section";
 
-// Ramy, 25 Aug 2026: "why can't the trainers upload their demo lesson...
-// it would read demo lesson, and then the next one would read getting to
-// know you." No existing mechanism let a trainer share material at all --
-// every tp_materials write site is trainee-only, and that table needs a
-// trainee-owned tp_plans row a trainer teaching a demo lesson never has.
-// This shares session_materials with the trainee-facing GTKY page (same
-// component, same action) -- the only real difference is which calendar
-// event the upload attaches to, picked here from a plain dropdown rather
-// than matched by title, since a trainer isn't tied to one specific event
-// the way GTKY is tied to "whichever milestone is titled like GTKY."
-export default async function SessionMaterialsPage({ searchParams }: { searchParams: Promise<{ event?: string }> }) {
+// Ramy, 25 Aug 2026: "I thought it would recognize whatever is on the
+// timetable... if it says games, it will read games." The GTKY page's
+// Materials section only auto-finds an event titled like GTKY -- fine as
+// a shortcut for that one specific case, but not what covers "unassessed"
+// or literally anything else a trainer titled a session. This is that
+// general version: same SessionMaterialsSection/action as the trainer's
+// picker (/trainer/session-materials), just scoped to the trainee's own
+// course and their own uploads -- no title-matching heuristic at all, the
+// trainee just picks the real event off the real timetable. Scoped to
+// `shares_materials` events only, not just "anything that isn't a TP" --
+// "I don't want it to read lunch for the trainees. That would be
+// ridiculous." A trainer opts an event in when creating it.
+export default async function TraineeSessionMaterialsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ traineeId: string }>;
+  searchParams: Promise<{ event?: string }>;
+}) {
+  const { traineeId } = await params;
   const session = await getCurrentProfile();
-  const profile = session?.profile;
-  if (!profile || (profile.role !== "trainer" && profile.role !== "admin" && profile.role !== "platform_owner")) redirect("/login");
-  const courseId = profile.course_id;
-  if (!courseId) {
-    return <div className="sheet text-sm text-muted">No course assigned.</div>;
-  }
+  if (!session?.profile) redirect(`/login?next=${encodeURIComponent(`/portfolio/${traineeId}/session-materials`)}`);
+  const viewer = session.profile;
+  const isStaff = viewer.role === "trainer" || viewer.role === "admin";
+  if (!isStaff && viewer.id !== traineeId) redirect("/dashboard");
 
   const supabase = await createClient();
   const { event: eventId } = await searchParams;
 
-  // Only events a trainer explicitly opted in via the "shares materials"
-  // checkbox on the timetable form -- "I don't want it to read lunch for
-  // the trainees. That would be ridiculous." (Ramy, 25 Aug 2026). TP has
-  // its own tp_materials system already and is excluded regardless.
+  const { data: trainee } = await supabase.from("profiles").select("course_id").eq("id", traineeId).maybeSingle();
+  const courseId = trainee?.course_id;
+  if (!courseId) {
+    return <div className="sheet text-sm text-muted">No course assigned.</div>;
+  }
+
   const { data: events } = await supabase
     .from("course_timetable_events")
     .select("id, title, event_date")
@@ -38,7 +47,12 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
 
   const selectedEvent = eventId ? (events ?? []).find((e) => e.id === eventId) : null;
   const { data: materials } = selectedEvent
-    ? await supabase.from("session_materials").select("id, file_name, file_type, storage_path, slides_url, uploaded_by").eq("timetable_event_id", selectedEvent.id).order("created_at")
+    ? await supabase
+        .from("session_materials")
+        .select("id, file_name, file_type, storage_path, slides_url, uploaded_by")
+        .eq("timetable_event_id", selectedEvent.id)
+        .eq("uploaded_by", traineeId)
+        .order("created_at")
     : { data: [] };
 
   const dateLabel = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
@@ -46,11 +60,11 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Timetable · session materials</p>
+        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Session materials</p>
         <h1 className="font-serif text-2xl text-ink">Share materials for a session</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted">
-          For anything that isn&apos;t a graded TP -- a demo lesson, Getting to know you, an input session. Volunteer students see whatever the
-          session is titled on the timetable, with whatever you attach here.
+          For anything that isn&apos;t a graded TP -- Getting to know you, unassessed practice, anything else on the timetable. Volunteer
+          students see whatever the session is titled, with whatever you attach here.
         </p>
       </div>
 
@@ -74,15 +88,15 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
       {(events ?? []).length === 0 ? <p className="text-sm text-muted">No non-TP sessions on the timetable yet.</p> : null}
 
       {selectedEvent ? (
-        <div className="card rounded-[9px] p-6">
+        <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
           <h2 className="font-serif text-lg text-ink">{selectedEvent.title}</h2>
           <p className="mt-1 mb-4 text-sm text-muted">{dateLabel(selectedEvent.event_date)}</p>
           <SessionMaterialsSection
             timetableEventId={selectedEvent.id}
             courseId={courseId}
-            viewerId={profile.id}
+            viewerId={traineeId}
             materials={materials ?? []}
-            revalidatePath="/trainer/session-materials"
+            revalidatePath={`/portfolio/${traineeId}/session-materials`}
           />
         </div>
       ) : null}
