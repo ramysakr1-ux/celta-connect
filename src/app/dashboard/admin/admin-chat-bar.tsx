@@ -64,7 +64,9 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
   if (rooms.length === 0 || !selected) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex justify-center px-3">
+    // Ramy, 26 Aug 2026: "the chat pill is not really at the bottom...
+    // it needs to go more further down at the bottom, not hovering."
+    <div className="pointer-events-none fixed inset-x-0 bottom-2 z-30 flex justify-center px-3">
       <div className="pointer-events-auto flex w-full max-w-[840px] flex-col gap-2" onKeyDown={handleKeyDown}>
         {pickerOpen && rooms.length > 1 ? (
           <div className="w-[300px] self-start rounded-[16px] border border-border bg-card p-2 shadow-lg">

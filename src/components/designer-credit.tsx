@@ -83,7 +83,7 @@ export function DesignerCredit({
     <span className="pointer-events-auto inline-flex items-center gap-1.5 text-[10.5px] text-muted/70">
       <Wordmark size="icon" iconSizePx={13} />
       <span>
-        designed and built by <span className="text-muted">Ramy</span>
+        designed and built by <span className="font-semibold text-muted">Ramy</span>
       </span>
     </span>
   );

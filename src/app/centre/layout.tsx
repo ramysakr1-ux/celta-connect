@@ -99,8 +99,13 @@ export default async function CentreLayout({ children }: { children: React.React
           Roles, and Import alike), not scoped to any one tab's content --
           it sits after the closing of all three tab blocks in the design's
           own markup. */}
+      {/* Ramy, 26 Aug 2026: "we need to push centre settings up because the
+          chat pill is at the bottom fixed, and it's covering it." The pill
+          is fixed with real height plus its own offset from the screen
+          edge -- pb-6 alone left this card underneath it at the bottom of
+          the page. */}
       {can(ctx.roles, "centre.settings.edit", ctx.overrides) ? (
-        <div className="container pb-6">
+        <div className="container pb-24">
           <Link
             href="/centre/settings"
             className="card flex items-center justify-between gap-4 px-[22px] py-[18px] transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
