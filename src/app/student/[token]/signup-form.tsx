@@ -50,21 +50,6 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
     setStepIndex((i) => Math.max(i - 1, 0));
   }
 
-  // Ramy, 25 Aug 2026, after this was a plain muted text link that got lost
-  // next to the recorder's own bold teal button: "still don't see an
-  // arrow." It was technically present the whole time -- a real bordered
-  // button now, so it can't be mistaken for background copy.
-  const backButton =
-    stepIndex > 0 ? (
-      <button
-        type="button"
-        onClick={goBack}
-        className="self-start rounded-lg border border-[#8a6a2f] px-4 py-2 text-sm font-semibold text-[#8a6a2f] hover:bg-[#fbf3e3]"
-      >
-        ← Back
-      </button>
-    ) : null;
-
   return (
     <form action={action} className="flex flex-col gap-5">
       <input type="hidden" name="token" value={token} />
@@ -73,6 +58,24 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
       {questions.map((_, i) => (
         <input key={i} type="hidden" name={`answer_${i}`} value={answers[i] ?? ""} />
       ))}
+
+      {/* Ramy, 25 Aug 2026: "I still can't go back... once I click on
+          something, I can't go back," then, once it was a bordered button
+          sitting in the middle of each step's content, "why is it so in
+          your face?" One consistent spot now -- top-left, above the
+          progress bar, the conventional place a back control lives in any
+          step wizard -- rather than repeated inline in each step's body. */}
+      <div className="flex h-5 items-center">
+        {stepIndex > 0 ? (
+          <button
+            type="button"
+            onClick={goBack}
+            className="flex items-center gap-1 text-sm font-medium text-[#8a6a2f] hover:text-[#3a2e18]"
+          >
+            ← Back
+          </button>
+        ) : null}
+      </div>
 
       <div className="flex items-center gap-1.5">
         {STEPS.map((s, i) => (
@@ -135,19 +138,16 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
               </div>
             ))}
           </div>
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => {
-                setConsented(true);
-                goNext();
-              }}
-              className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
-            >
-              {t.agreeLabel}
-            </button>
-            {backButton}
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setConsented(true);
+              goNext();
+            }}
+            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
+          >
+            {t.agreeLabel}
+          </button>
           <p className="text-xs text-[#8a6a2f]">You can withdraw at any time by emailing the centre.</p>
         </div>
       ) : null}
@@ -174,16 +174,13 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
               />
             </div>
           ))}
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={goNext}
-              className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
-            >
-              Next
-            </button>
-            {backButton}
-          </div>
+          <button
+            type="button"
+            onClick={goNext}
+            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
+          >
+            Next
+          </button>
         </div>
       ) : null}
 
@@ -194,12 +191,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
             <p className="mt-1 text-sm text-[#8a6a2f]">
               Eight questions. Answer out loud in English. Stop when you want -- two to three minutes altogether.
             </p>
-            <p className="mt-1 text-sm text-[#8a6a2f]">
-              This is not a placement test -- there&apos;s no wrong answer. The recording stays within the course
-              and is not shared outside it.
-            </p>
           </div>
-          {backButton}
           <VolunteerRecorder
             prompts={RECORDING_PROMPTS}
             recordingConsentLine={t?.recordingConsentLine ?? "I agree to being recorded for training purposes."}
