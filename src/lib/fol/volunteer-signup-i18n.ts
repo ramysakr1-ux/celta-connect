@@ -54,7 +54,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "Kabul ediyorum",
     answerInEnglishNote: "İngilizce cevap vereceksiniz, ancak açıkladığımız her şey kendi dilinizde.",
-    recordingConsentLine: "Ses kaydı için ayrıca onay veriyorum.",
+    recordingConsentLine: "Eğitim amaçlı kaydedilmeyi kabul ediyorum.",
   },
   ar: {
     greeting: "مرحبًا",
@@ -70,7 +70,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "أوافق",
     answerInEnglishNote: "ستجيب باللغة الإنجليزية، لكن كل ما نشرحه هو بلغتك.",
-    recordingConsentLine: "أوافق بشكل منفصل على التسجيل الصوتي.",
+    recordingConsentLine: "أوافق على التسجيل لأغراض تدريبية.",
   },
   ru: {
     greeting: "Добро пожаловать",
@@ -86,7 +86,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "Я согласен",
     answerInEnglishNote: "Вы будете отвечать по-английски, но всё, что мы объясняем, — на вашем языке.",
-    recordingConsentLine: "Я отдельно соглашаюсь на аудиозапись.",
+    recordingConsentLine: "Я согласен на аудиозапись в учебных целях.",
   },
   fa: {
     greeting: "خوش آمدید",
@@ -102,7 +102,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "موافقم",
     answerInEnglishNote: "شما به انگلیسی پاسخ خواهید داد، اما هرچه توضیح می‌دهیم به زبان شماست.",
-    recordingConsentLine: "من جداگانه با ضبط صدا موافقت می‌کنم.",
+    recordingConsentLine: "من با ضبط صدا برای اهداف آموزشی موافقم.",
   },
   uk: {
     greeting: "Ласкаво просимо",
@@ -118,7 +118,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "Погоджуюсь",
     answerInEnglishNote: "Ви відповідатимете англійською, але все, що ми пояснюємо, — вашою мовою.",
-    recordingConsentLine: "Я окремо погоджуюсь на аудіозапис.",
+    recordingConsentLine: "Я погоджуюсь на аудіозапис із навчальною метою.",
   },
   en: {
     greeting: "Welcome",
@@ -134,7 +134,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "I agree",
     answerInEnglishNote: "You will answer in English throughout.",
-    recordingConsentLine: "I separately agree to being recorded.",
+    recordingConsentLine: "I agree to being recorded for training purposes.",
   },
   other: {
     greeting: "Welcome",
@@ -150,6 +150,6 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "I agree",
     answerInEnglishNote: "You will answer in English throughout.",
-    recordingConsentLine: "I separately agree to being recorded.",
+    recordingConsentLine: "I agree to being recorded for training purposes.",
   },
 };

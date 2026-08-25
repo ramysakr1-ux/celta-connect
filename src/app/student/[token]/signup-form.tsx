@@ -194,11 +194,15 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
             <p className="mt-1 text-sm text-[#8a6a2f]">
               Eight questions. Answer out loud in English. Stop when you want -- two to three minutes altogether.
             </p>
+            <p className="mt-1 text-sm text-[#8a6a2f]">
+              This is not a placement test -- there&apos;s no wrong answer. The recording stays within the course
+              and is not shared outside it.
+            </p>
           </div>
           {backButton}
           <VolunteerRecorder
             prompts={RECORDING_PROMPTS}
-            recordingConsentLine={t?.recordingConsentLine ?? "I separately agree to being recorded."}
+            recordingConsentLine={t?.recordingConsentLine ?? "I agree to being recorded for training purposes."}
             onStatusChange={setRecorderStatus}
           />
           {state.error ? <p className="text-sm text-red-700">{state.error}</p> : null}
