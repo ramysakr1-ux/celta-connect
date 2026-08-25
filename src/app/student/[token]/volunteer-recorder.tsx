@@ -30,10 +30,11 @@ export function VolunteerRecorder({
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [level, setLevel] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  // Ramy, 25 Aug 2026: "once they click on play, it doesn't stop. They
-  // can't stop it... they should be able to pause or stop as well." The
-  // recording only ever ended by clicking through all eight prompts --
-  // no way to pause, and no way to end early if they want to stop partway.
+  // Ramy, 25 Aug 2026: "it should be like a play pause sort of stuff on the
+  // actual recording, not something hidden" -- a real toggle built into
+  // the recording indicator itself, not a separate link. No early finish
+  // (he removed that): the only way to end the recording for good is
+  // still "Next question" through to the last prompt.
   const [paused, setPaused] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -215,12 +216,28 @@ export function VolunteerRecorder({
             <p className="mt-1 text-lg text-[#3a2e18]">{current.question}</p>
           </div>
 
-          <div
+          {/* Ramy, 25 Aug 2026: "it should be like a play pause sort of
+              stuff on the actual recording, not something hidden" -- the
+              indicator itself is the pause/resume control now, not a
+              separate link below it. No early finish (he removed that
+              too): the only way to actually end the recording is still
+              clicking through to the last question. */}
+          <button
+            type="button"
+            onClick={togglePause}
+            aria-label={paused ? "Resume recording" : "Pause recording"}
             className="flex size-16 items-center justify-center rounded-full bg-[#a8432e] transition-transform"
             style={{ boxShadow: paused ? "none" : `0 0 0 ${6 + level * 10}px rgba(168,67,46,0.14)` }}
           >
-            <div className="size-5 rounded-[3px] bg-white" />
-          </div>
+            {paused ? (
+              <div className="ml-0.5 size-0 border-y-[9px] border-l-[14px] border-y-transparent border-l-white" />
+            ) : (
+              <div className="flex gap-1.5">
+                <div className="h-5 w-1.5 rounded-[2px] bg-white" />
+                <div className="h-5 w-1.5 rounded-[2px] bg-white" />
+              </div>
+            )}
+          </button>
 
           <div className="flex items-center gap-2">
             <span className={`size-1.5 rounded-full bg-[#a8432e] ${paused ? "" : "animate-pulse"}`} />
@@ -240,17 +257,6 @@ export function VolunteerRecorder({
           >
             {isLast ? "Stop and finish" : "Next question →"}
           </button>
-
-          <div className="flex items-center gap-4">
-            <button type="button" onClick={togglePause} className="text-xs font-medium text-[#8a6a2f] hover:underline">
-              {paused ? "Resume" : "Pause"}
-            </button>
-            {!isLast ? (
-              <button type="button" onClick={finishRecording} className="text-xs font-medium text-[#8a6a2f] hover:underline">
-                Finish now
-              </button>
-            ) : null}
-          </div>
         </div>
       ) : null}
 
