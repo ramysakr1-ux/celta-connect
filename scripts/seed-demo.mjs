@@ -471,6 +471,14 @@ async function main() {
         title: e.title,
         event_date: isoDaysFromNow(e.offset),
         linked_assignment_type: e.linked ?? null,
+        // Real trainer-facing timetable events link a TP calendar day to its
+        // rotation number (course_timetable_events.linked_tp_number) so the
+        // volunteer view and portfolio pages can resolve a topic/materials
+        // for that day via plan_assignments/tp_plans.tp_number -- these demo
+        // "TPn"-titled events never carried that link, so every downstream
+        // lookup silently found nothing (caught 25 Aug 2026 comparing the
+        // volunteer view demo against its own design mockup).
+        linked_tp_number: e.type === "tp" ? Number(e.title.replace("TP", "")) : null,
         created_by: trainerId,
       }))
     )
