@@ -1,5 +1,4 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Wordmark } from "@/components/wordmark";
 import { ApplicationForm } from "@/components/apply/application-form";
 
 // "The intake dropdown shows real availability... the number is always the
@@ -17,7 +16,11 @@ export const dynamic = "force-dynamic";
 // assumes one real, non-demo centre) -- so this is that one centre's
 // application page at a path, not yet a subdomain. Revisit once a second
 // centre is actually onboarded.
-export default async function ApplyPage({ searchParams }: { searchParams: Promise<{ course?: string }> }) {
+export default async function ApplyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ course?: string }>;
+}) {
   const { course: preselectedCourseId } = await searchParams;
   const admin = createAdminClient();
 
@@ -32,9 +35,11 @@ export default async function ApplyPage({ searchParams }: { searchParams: Promis
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
-        <div className="sheet-accent p-8 text-center">
-          <p className="text-sm text-muted">Applications aren&apos;t open right now.</p>
-        </div>
+          <div className="sheet-accent p-8 text-center">
+            <p className="text-sm text-muted">
+              Applications aren&apos;t open right now.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -50,11 +55,18 @@ export default async function ApplyPage({ searchParams }: { searchParams: Promis
   const courseIds = (openCourses ?? []).map((c) => c.id);
   const { data: acceptedCounts } =
     courseIds.length > 0
-      ? await admin.from("applicants").select("intake_course_id").in("intake_course_id", courseIds).eq("stage", "accepted")
+      ? await admin
+          .from("applicants")
+          .select("intake_course_id")
+          .in("intake_course_id", courseIds)
+          .eq("stage", "accepted")
       : { data: [] };
   const acceptedByCoure = new Map<string, number>();
   for (const row of acceptedCounts ?? []) {
-    acceptedByCoure.set(row.intake_course_id, (acceptedByCoure.get(row.intake_course_id) ?? 0) + 1);
+    acceptedByCoure.set(
+      row.intake_course_id,
+      (acceptedByCoure.get(row.intake_course_id) ?? 0) + 1,
+    );
   }
 
   // "The number is always the true one... no manufactured scarcity." Shown
@@ -63,7 +75,8 @@ export default async function ApplyPage({ searchParams }: { searchParams: Promis
   // courses stay selectable (a withdrawal or deferral can free a place).
   const intakes = (openCourses ?? []).map((c) => {
     const accepted = acceptedByCoure.get(c.id) ?? 0;
-    const remaining = c.application_cap != null ? c.application_cap - accepted : null;
+    const remaining =
+      c.application_cap != null ? c.application_cap - accepted : null;
     let availabilityLabel: string;
     if (remaining === null) {
       availabilityLabel = "places available";
@@ -102,28 +115,15 @@ export default async function ApplyPage({ searchParams }: { searchParams: Promis
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-xl p-3">
-      <div className="sheet-accent p-8">
-        {center.logo_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={center.logo_url} alt={center.name} className="mb-4 h-12 object-contain" />
-        ) : (
-          <p className="mb-1 font-serif text-lg text-ink">{center.name}</p>
-        )}
-        <p className="mb-4 text-sm text-muted">Apply for a Cambridge CELTA course</p>
-
         <ApplicationForm
           centerId={center.id}
+          centerName={center.name}
+          centerLogoUrl={center.logo_url}
           intakes={intakes}
           prompts={prompts ?? []}
           speakingPrompts={speakingPrompts ?? []}
           preselectedCourseId={preselectedCourseId}
         />
-
-        <div className="mt-8 flex items-center justify-end gap-1.5 border-t border-border pt-4">
-          <span className="text-[10px] text-muted">Powered by</span>
-          <Wordmark size="header" />
-        </div>
-      </div>
       </div>
     </div>
   );
