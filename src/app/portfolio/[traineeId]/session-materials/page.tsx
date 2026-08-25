@@ -63,8 +63,8 @@ export default async function TraineeSessionMaterialsPage({
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Session materials</p>
         <h1 className="font-serif text-2xl text-ink">Share materials for a session</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted">
-          For anything that isn&apos;t a graded TP -- Getting to know you, unassessed practice, anything else on the timetable. Volunteer
-          students see whatever the session is titled, with whatever you attach here.
+          For anything that isn&apos;t a graded TP -- a demo lesson. Volunteer students see whatever the session is titled on the
+          timetable, with whatever you attach here.
         </p>
       </div>
 
