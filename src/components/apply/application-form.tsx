@@ -304,16 +304,16 @@ export function ApplicationForm({
       <div className="flex flex-col gap-2 border-t border-border pt-4 text-sm text-ink">
         <label className="flex items-start gap-2">
           <input type="checkbox" name="ack_no_guarantee" required className="mt-0.5" />
-          I understand that completing the course does not guarantee success.
+          I confirm that completing the course does not guarantee success.
         </label>
         <label className="flex items-start gap-2">
           <input type="checkbox" name="ack_no_exemptions" required className="mt-0.5" />
-          I understand there are no exemptions or recognition of prior learning.
+          I confirm there are no exemptions or recognition of prior learning.
         </label>
         {selectedIntake?.deliveryMode === "mixed" ? (
           <label className="flex items-start gap-2">
             <input type="checkbox" name="ack_mixed_mode" required className="mt-0.5" />
-            I understand this course involves teaching practice in both face-to-face and online modes.
+            I confirm this course involves teaching practice in both face-to-face and online modes.
           </label>
         ) : null}
         <label className="flex items-start gap-2">
