@@ -996,16 +996,41 @@ export function volunteerSessionReminderEmailHtml(input: {
   joinUrl: string;
   unsubscribeUrl: string;
 }): string {
+  // Ramy, 25 Aug 2026: "will you come?... two clear buttons." Both point
+  // at joinUrl -- the dashboard already surfaces this exact class (their
+  // "next class" is tomorrow's, which is what this email is about) with
+  // its own real decline button front and centre, so there's nothing new
+  // to build or track: "Yes" is a reassuring click to their class page,
+  // "No" lands them right where the existing "Let them know" flow lives.
+  const twoButtons = `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:14px 0 6px;">
+      <tr>
+        <td width="50%" style="padding-right:6px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr><td align="center" style="border-radius:6px;background:${EMAIL_TONE.green};">
+              <a href="${input.joinUrl}" style="display:block;padding:12px 8px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:6px;">Yes, I&rsquo;m coming</a>
+            </td></tr>
+          </table>
+        </td>
+        <td width="50%" style="padding-left:6px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr><td align="center" style="border-radius:6px;border:1px solid #e0dcd4;">
+              <a href="${input.joinUrl}" style="display:block;padding:12px 8px;font-size:14px;font-weight:700;color:#241d16;text-decoration:none;border-radius:6px;">No, I can&rsquo;t make it</a>
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>`;
+
   return emailShell({
     heading: "Your class is tomorrow",
     tone: "green",
-    body: p("A reminder for your class tomorrow."),
+    body: p("Will you be joining your class tomorrow?") + rawP(twoButtons),
     facts: [
       { label: "Your class", value: input.classFact },
       { label: "Day", value: input.dayFact },
       { label: "When", value: input.whenFact },
     ],
-    cta: { label: "Open your class link", url: input.joinUrl },
     footnote: "No account and no password. The same link opens your class each time.",
     unsubscribeUrl: input.unsubscribeUrl,
   });
