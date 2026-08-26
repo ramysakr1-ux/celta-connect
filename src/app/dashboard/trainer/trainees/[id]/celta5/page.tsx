@@ -11,6 +11,7 @@ import {
 } from "@/lib/celta-criteria";
 import { computeCurrentTpRound } from "@/lib/course-progress";
 import { toLocalIso } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { AssignmentsSummary, TpFeedbackSummary } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
 import { Stage1Form } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-form";
 import { StageRatingsForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage-ratings-form";
@@ -57,7 +58,7 @@ export default async function Celta5RecordPage({
 
   const [
     { data: course },
-    { data: center },
+    center,
     { data: matrix },
     { data: record },
     { data: absences },
@@ -67,14 +68,17 @@ export default async function Celta5RecordPage({
     { data: tpFeedbackRows },
     { data: tpEvents },
   ] = await Promise.all([
-    supabase.from("courses").select("*").eq("id", trainer.course_id ?? "").maybeSingle(),
-    supabase.from("centers").select("*").eq("id", trainer.center_id).maybeSingle(),
+    supabase.from("courses").select("name, start_date, end_date, delivery_mode, total_hours").eq("id", trainer.course_id ?? "").maybeSingle(),
+    getCachedCenter(trainer.center_id),
     supabase.from("celta5_matrix").select("*").eq("trainee_id", id),
     supabase.from("celta5_records").select("*").eq("trainee_id", id).maybeSingle(),
     supabase.from("attendance_absences").select("*").eq("trainee_id", id).order("session_date"),
     supabase.from("observations").select("*").eq("trainee_id", id).order("observation_date"),
     supabase.from("tp_lessons").select("id").eq("trainee_id", id),
-    supabase.from("assignments").select("*").eq("trainee_id", id),
+    supabase
+      .from("assignments")
+      .select("id, assignment_type, first_status, resubmission_status, first_own_work_confirmed, resubmission_own_work_confirmed, final_grade")
+      .eq("trainee_id", id),
     supabase.from("tp_feedback").select("*").eq("trainee_id", id),
     supabase
       .from("course_timetable_events")

@@ -2,6 +2,8 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/get-profile";
 
 export const ASSESSOR_COOKIE = "assessor_token";
 
@@ -74,3 +76,25 @@ export async function getAssessorTermsStatus(): Promise<{ courseId: string; acce
   if (!data || new Date(data.expires_at) < new Date()) return null;
   return { courseId: data.course_id, accepted: Boolean(data.terms_accepted_at) };
 }
+
+// cache()'d -- the portfolio layout and its celta5 page both independently
+// re-fetched the same trainee row for the same request (confirmed
+// 2026-08-26 perf audit). Recomputes viewer/assessorCourseId internally
+// rather than taking a supabase client as a parameter: both call sites
+// build their own client instance via the identical
+// `assessorCourseId ? createAdminClient() : await createClient()` pattern,
+// and cache() dedupes on argument identity -- two different client
+// instances would defeat the memoization, so this only takes traineeId.
+export const getPortfolioTrainee = cache(async (traineeId: string) => {
+  const session = await getCurrentProfile();
+  const viewer = session?.profile ?? null;
+  const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
+  const supabase = assessorCourseId ? createAdminClient() : await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, course_id, center_id, course_status, special_consideration, role, uln")
+    .eq("id", traineeId)
+    .eq("role", "trainee")
+    .maybeSingle();
+  return data;
+});

@@ -55,7 +55,7 @@ export default async function GradesReportPage() {
   const isMct = trainer ? (courseTutors ?? []).some((t) => t.id === trainer.id && t.tutor_role === "main_course_tutor") : false;
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
-  const [{ data: records }, { data: matrixRows }, { data: tpFeedbackRows }, { data: assignments }, { data: planAssignments }] =
+  const [{ data: records }, { data: matrixRows }, { data: tpFeedbackRows }, { data: planAssignments }] =
     traineeIds.length > 0
       ? await Promise.all([
           supabase.from("celta5_records").select("*").eq("course_id", courseId),
@@ -64,10 +64,9 @@ export default async function GradesReportPage() {
             .select("trainee_id, criteria_code, tutor_status_stage2, tutor_status_stage3")
             .eq("course_id", courseId),
           supabase.from("tp_feedback").select("trainee_id, tp_number, grade, submitted_at").in("trainee_id", traineeIds),
-          supabase.from("assignments").select("*").in("trainee_id", traineeIds),
           supabase.from("plan_assignments").select("trainee_id, tp_point_id, taught_at").eq("course_id", courseId),
         ])
-      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }];
+      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
 
   const tpPointIds = [
     ...new Set((planAssignments ?? []).filter((p) => p.taught_at).map((p) => p.tp_point_id).filter((id): id is string => !!id)),

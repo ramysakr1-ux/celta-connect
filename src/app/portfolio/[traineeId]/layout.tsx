@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioTrainee } from "@/lib/auth/portfolio-access";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { Eye } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
@@ -72,12 +72,7 @@ export default async function PortfolioLayout({
   if (!viewer && !assessorCourseId) redirect("/login");
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
-  const { data: trainee } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", traineeId)
-    .eq("role", "trainee")
-    .maybeSingle();
+  const trainee = await getPortfolioTrainee(traineeId);
   if (!trainee) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 

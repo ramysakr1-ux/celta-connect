@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, getPortfolioTrainee } from "@/lib/auth/portfolio-access";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import {
   CELTA_CRITERIA_SECTIONS,
   CRITERIA_LABELS,
@@ -718,14 +719,14 @@ export default async function PortfolioCelta5Page({
 
   // -- Staff / assessor view --
   const isEditableStaff = isStaff; // real trainer/admin session; assessor is view-only
-  const { data: trainee } = await supabase.from("profiles").select("*").eq("id", traineeId).maybeSingle();
-  if (!trainee || trainee.role !== "trainee") notFound();
+  const trainee = await getPortfolioTrainee(traineeId);
+  if (!trainee) notFound();
   if (viewer?.role === "trainer" && trainee.course_id !== viewer.course_id) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
   const [
     { data: course },
-    { data: center },
+    center,
     { data: matrix },
     { data: record },
     { data: absences },
@@ -737,14 +738,17 @@ export default async function PortfolioCelta5Page({
     { data: tpEvents },
     { data: subgroupMember },
   ] = await Promise.all([
-    supabase.from("courses").select("*").eq("id", trainee.course_id ?? "").maybeSingle(),
-    supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
+    supabase.from("courses").select("name, start_date, end_date, delivery_mode, total_hours").eq("id", trainee.course_id ?? "").maybeSingle(),
+    getCachedCenter(trainee.center_id),
     supabase.from("celta5_matrix").select("*").eq("trainee_id", traineeId),
     supabase.from("celta5_records").select("*").eq("trainee_id", traineeId).maybeSingle(),
     supabase.from("attendance_absences").select("*").eq("trainee_id", traineeId).order("session_date"),
     supabase.from("observations").select("*").eq("trainee_id", traineeId).order("observation_date"),
     supabase.from("tp_lessons").select("id").eq("trainee_id", traineeId),
-    supabase.from("assignments").select("*").eq("trainee_id", traineeId),
+    supabase
+      .from("assignments")
+      .select("id, assignment_type, first_status, resubmission_status, first_own_work_confirmed, resubmission_own_work_confirmed, final_grade")
+      .eq("trainee_id", traineeId),
     supabase.from("tp_feedback").select("*").eq("trainee_id", traineeId),
     supabase.from("plan_assignments").select("tp_number, tp_point_id, taught_at").eq("trainee_id", traineeId),
     supabase

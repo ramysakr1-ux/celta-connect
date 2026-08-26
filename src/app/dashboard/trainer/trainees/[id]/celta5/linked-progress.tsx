@@ -56,7 +56,10 @@ export function AssignmentsSummary({
   assignments,
 }: {
   traineeId: string;
-  assignments: AssignmentRow[];
+  assignments: Pick<
+    AssignmentRow,
+    "id" | "assignment_type" | "first_status" | "resubmission_status" | "first_own_work_confirmed" | "resubmission_own_work_confirmed" | "final_grade"
+  >[];
 }) {
   if (assignments.length === 0) return null;
   const sorted = [...assignments].sort(

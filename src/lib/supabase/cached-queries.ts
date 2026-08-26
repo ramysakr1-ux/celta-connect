@@ -17,7 +17,7 @@ export const getCachedCenter = unstable_cache(
     const admin = createAdminClient();
     const { data } = await admin
       .from("centers")
-      .select("id, name, logo_url, is_demo, center_number, application_low_availability_threshold")
+      .select("id, name, logo_url, is_demo, center_number, application_low_availability_threshold, is_uk_centre")
       .eq("id", centerId)
       .maybeSingle();
     return data;
@@ -34,7 +34,7 @@ export const getCachedRealCenter = unstable_cache(
     const admin = createAdminClient();
     const { data } = await admin
       .from("centers")
-      .select("id, name, logo_url, is_demo, center_number, application_low_availability_threshold")
+      .select("id, name, logo_url, is_demo, center_number, application_low_availability_threshold, is_uk_centre")
       .eq("is_demo", false)
       .limit(1)
       .maybeSingle();
