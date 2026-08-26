@@ -107,6 +107,9 @@ export async function updateStage1(
   }
 
   const completed = formData.get("stage1_completed") === "on";
+  if (completed && !trainer.signature_name) {
+    return { error: "Set your signature first (below) before marking this complete." };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -117,6 +120,7 @@ export async function updateStage1(
       stage1_strengths: optionalString(formData.get("stage1_strengths")),
       stage1_action_plan: optionalString(formData.get("stage1_action_plan")),
       stage1_completed_at: completed ? new Date().toISOString() : null,
+      stage1_tutor_signature_name: completed ? trainer.signature_name : null,
     })
     .eq("trainee_id", traineeId);
 
@@ -165,11 +169,16 @@ export async function updateStage2Overall(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole("trainer");
+  const trainer = await requireRole("trainer");
 
   const traineeId = formData.get("trainee_id");
   if (typeof traineeId !== "string" || !traineeId) {
     return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const completed = formData.get("stage2_completed") === "on";
+  if (completed && !trainer.signature_name) {
+    return { error: "Set your signature first (below) before marking this complete." };
   }
 
   const supabase = await createClient();
@@ -184,8 +193,8 @@ export async function updateStage2Overall(
         formData.get("stage2_tutor_written_assignments_notes")
       ),
       stage2_tutor_other_notes: optionalString(formData.get("stage2_tutor_other_notes")),
-      stage2_completed_at:
-        formData.get("stage2_completed") === "on" ? new Date().toISOString() : null,
+      stage2_completed_at: completed ? new Date().toISOString() : null,
+      stage2_tutor_signature_name: completed ? trainer.signature_name : null,
     })
     .eq("trainee_id", traineeId);
 
@@ -232,11 +241,16 @@ export async function updateStage3Overall(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole("trainer");
+  const trainer = await requireRole("trainer");
 
   const traineeId = formData.get("trainee_id");
   if (typeof traineeId !== "string" || !traineeId) {
     return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const finalized = formData.get("stage3_finalized") === "on";
+  if (finalized && !trainer.signature_name) {
+    return { error: "Set your signature first (below) before marking this complete." };
   }
 
   const supabase = await createClient();
@@ -252,8 +266,8 @@ export async function updateStage3Overall(
         formData.get("stage3_tutor_written_assignments_notes")
       ),
       stage3_tutor_other_notes: optionalString(formData.get("stage3_tutor_other_notes")),
-      stage3_finalized_at:
-        formData.get("stage3_finalized") === "on" ? new Date().toISOString() : null,
+      stage3_finalized_at: finalized ? new Date().toISOString() : null,
+      stage3_tutor_signature_name: finalized ? trainer.signature_name : null,
     })
     .eq("trainee_id", traineeId);
 

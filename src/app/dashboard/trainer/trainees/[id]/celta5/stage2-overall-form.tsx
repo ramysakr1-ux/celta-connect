@@ -5,13 +5,22 @@ import { updateStage2Overall, type FormState } from "@/app/dashboard/trainer/cel
 import { STANDARD_RATING_OPTIONS } from "@/lib/celta-criteria";
 import { StandardRatingPill } from "@/lib/status-pill";
 import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
+import { SetSignatureForm } from "@/components/set-signature-form";
 import type { Database } from "@/lib/supabase/types";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 
 const initialState: FormState = { error: null };
 
-export function Stage2OverallForm({ record }: { record: Celta5Record }) {
+export function Stage2OverallForm({
+  record,
+  trainerFullName,
+  trainerSignatureName,
+}: {
+  record: Celta5Record;
+  trainerFullName: string;
+  trainerSignatureName: string | null;
+}) {
   const [state, action, pending] = useActionState(updateStage2Overall, initialState);
 
   return (
@@ -105,6 +114,14 @@ export function Stage2OverallForm({ record }: { record: Celta5Record }) {
           className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
         />
       </div>
+
+      {record.stage2_tutor_signature_name && record.stage2_completed_at ? (
+        <p className="text-xs text-muted">
+          Signed by {record.stage2_tutor_signature_name} on {new Date(record.stage2_completed_at).toLocaleDateString()}.
+        </p>
+      ) : !trainerSignatureName ? (
+        <SetSignatureForm fullName={trainerFullName} />
+      ) : null}
 
       <label className="flex items-center gap-2 text-sm text-ink">
         <input

@@ -242,7 +242,7 @@ export default async function Celta5RecordPage({
       <AssignmentsSummary traineeId={id} assignments={assignments ?? []} />
       <TpFeedbackSummary traineeId={id} feedbackRows={tpFeedbackRows ?? []} />
 
-      <Stage1Form key={`stage1-${record.updated_at}`} record={record} />
+      <Stage1Form key={`stage1-${record.updated_at}`} record={record} trainerFullName={trainer.full_name} trainerSignatureName={trainer.signature_name} />
 
       <div>
         <h2 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h2>
@@ -259,7 +259,7 @@ export default async function Celta5RecordPage({
         </div>
       </div>
 
-      <Stage2OverallForm key={`stage2-${record.updated_at}`} record={record} />
+      <Stage2OverallForm key={`stage2-${record.updated_at}`} record={record} trainerFullName={trainer.full_name} trainerSignatureName={trainer.signature_name} />
 
       <div>
         <h2 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h2>
@@ -275,7 +275,7 @@ export default async function Celta5RecordPage({
         </div>
       </div>
 
-      <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} />
+      <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} trainerFullName={trainer.full_name} trainerSignatureName={trainer.signature_name} />
 
       {stage3MixedModeLock ? (
         <div className={`card p-4 ${stage3MixedModeLock.mismatched ? "card-red" : "card-amber"}`}>

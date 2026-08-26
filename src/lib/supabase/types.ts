@@ -1720,6 +1720,9 @@ export interface Database {
           // 0186): Stage 1 had no candidate signature column at all before this.
           stage1_candidate_signature_name: string | null;
           stage1_candidate_signed_at: string | null;
+          // migration 0220 -- the tutor side of the same signature pair;
+          // stage1_completed_at doubles as this signature's date.
+          stage1_tutor_signature_name: string | null;
           stage2_tutorial_given: boolean;
           stage2_hours_taught: number | null;
           stage2_candidate_submitted_at: string | null;
@@ -1735,6 +1738,9 @@ export interface Database {
           // migration 0186 -- Stage 2's existing sign-off upgraded to the
           // same reusable-signature shape as Stage 1/3.
           stage2_candidate_signature_name: string | null;
+          // migration 0220 -- the tutor side of the same signature pair;
+          // stage2_completed_at doubles as this signature's date.
+          stage2_tutor_signature_name: string | null;
           // migration 0131 -- "moved earlier" for a standing concern, before
           // the stage's own standard checkpoint. No Stage 1 equivalent --
           // Stage 1 timing is fixed.
@@ -1753,6 +1759,9 @@ export interface Database {
           // 0186): Stage 3 had no candidate signature column at all before this.
           stage3_candidate_signature_name: string | null;
           stage3_candidate_signed_at: string | null;
+          // migration 0220 -- the tutor side of the same signature pair;
+          // stage3_finalized_at doubles as this signature's date.
+          stage3_tutor_signature_name: string | null;
           stage3_moved_earlier_at: string | null;
           stage3_moved_earlier_reason: string | null;
           stage3_moved_earlier_by: string | null;

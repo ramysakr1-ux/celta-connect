@@ -8,6 +8,8 @@ export interface Stage1PageData {
   actionPlan: string | null;
   candidateSignatureName: string | null;
   candidateSignedAt: string | null; // ISO
+  tutorSignatureName: string | null;
+  tutorSignedAt: string | null; // ISO -- stage1_completed_at doubles as this date
 }
 
 // Page 15 (0-indexed 14) of the master PDF. Coordinates measured off the
@@ -24,6 +26,10 @@ const CANDIDATE_SIG_X = 181;
 const CANDIDATE_DATE_X = 434;
 const CANDIDATE_SIG_Y = 729.7;
 
+const TUTOR_SIG_X = 156;
+const TUTOR_DATE_X = 434;
+const TUTOR_SIG_Y = 666.6;
+
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
@@ -39,11 +45,10 @@ export function drawStage1Page(page: PDFPage, fonts: Celta5Fonts, data: Stage1Pa
   if (data.strengths) drawWrapped(page, fonts.regular, [data.strengths], STRENGTHS_BOX);
   if (data.actionPlan) drawWrapped(page, fonts.regular, [data.actionPlan], ACTION_PLAN_BOX);
 
-  // Tutor's signature line is deliberately left blank -- celta5_records has
-  // no tutor identity/signature column for Stage 1 (only stage1_completed_at,
-  // a timestamp with no "who"), and a course can have several trainers, so
-  // there's nothing real to put there yet. Flagged to Ramy; needs a schema
-  // + form change on the Connect side before this line can be filled in.
+  if (data.tutorSignatureName && data.tutorSignedAt) {
+    drawAt(page, fonts.regular, data.tutorSignatureName, TUTOR_SIG_X, TUTOR_SIG_Y);
+    drawAt(page, fonts.regular, formatDate(data.tutorSignedAt), TUTOR_DATE_X, TUTOR_SIG_Y);
+  }
   if (data.candidateSignatureName && data.candidateSignedAt) {
     drawAt(page, fonts.regular, data.candidateSignatureName, CANDIDATE_SIG_X, CANDIDATE_SIG_Y);
     drawAt(page, fonts.regular, formatDate(data.candidateSignedAt), CANDIDATE_DATE_X, CANDIDATE_SIG_Y);

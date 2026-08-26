@@ -1193,7 +1193,7 @@ export default async function PortfolioCelta5Page({
         </div>
       ) : null}
 
-      <Stage1Form key={`stage1-${record.updated_at}`} record={record} />
+      <Stage1Form key={`stage1-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} />
 
       <div>
         <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h3>
@@ -1210,7 +1210,7 @@ export default async function PortfolioCelta5Page({
         </div>
       </div>
 
-      <Stage2OverallForm key={`stage2-${record.updated_at}`} record={record} />
+      <Stage2OverallForm key={`stage2-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} />
 
       <div>
         <h3 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h3>
@@ -1226,7 +1226,7 @@ export default async function PortfolioCelta5Page({
         </div>
       </div>
 
-      <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} />
+      <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} />
 
       {record.stage3_required ? (
         <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
