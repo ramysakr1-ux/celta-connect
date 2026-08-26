@@ -546,6 +546,9 @@ export async function saveMarkingScheme(_prevState: FormState, formData: FormDat
   const staff = await requireAdmissionsHandler();
   const applicantId = formData.get("applicant_id");
   if (typeof applicantId !== "string") return { error: "Something went wrong. Refresh and try again." };
+  if (!canDecideAdmissions(staff)) {
+    return { error: "Only a verified course tutor or a nominated admissions decider can mark the selection task." };
+  }
 
   const rows = ["language_awareness", "accuracy", "organisation", "range", "substance"] as const;
   type ApplicantUpdate = Database["public"]["Tables"]["applicants"]["Update"];
@@ -589,6 +592,9 @@ export async function saveInterviewRecord(_prevState: FormState, formData: FormD
   const applicantId = formData.get("applicant_id");
   const slotId = (formData.get("slot_id") as string | null) || null;
   if (typeof applicantId !== "string") return { error: "Something went wrong. Refresh and try again." };
+  if (!canDecideAdmissions(staff)) {
+    return { error: "Only a verified course tutor or a nominated admissions decider can record an interview." };
+  }
 
   const fixedIds = formData.getAll("fixed_question_id") as string[];
   const fixedTexts = formData.getAll("fixed_question_text") as string[];

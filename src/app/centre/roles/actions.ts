@@ -131,11 +131,15 @@ export async function createCentreAdminInvite(_prev: CreateInviteState, formData
   await logOwnerAction(centerId, profile.id, "roles.invite", { role, email });
 
   if (email) {
-    const { data: center } = await admin.from("centers").select("name").eq("id", centerId).maybeSingle();
-    const centerName = center?.name ?? "Your centre";
     const siteUrl = process.env.SITE_URL;
     if (siteUrl) {
-      const { data: customRolesHere } = await admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId);
+      // Neither depends on the other -- both only need centerId, and
+      // centerName is only used inside this siteUrl-gated branch anyway.
+      const [{ data: center }, { data: customRolesHere }] = await Promise.all([
+        admin.from("centers").select("name").eq("id", centerId).maybeSingle(),
+        admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId),
+      ]);
+      const centerName = center?.name ?? "Your centre";
       const invitedRoleLabel = roleLabel(role, customRolesHere ?? []);
       const { sendApplicantEmail } = await import("@/lib/admissions-email");
       const { esc } = await import("@/lib/email-layout");

@@ -121,27 +121,30 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
 
   const assignmentTypes = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
   const defaultMarkers = await defaultMarkerIdsForCourse(admin, applicant.intake_course_id);
-  await admin.from("assignments").insert(
-    assignmentTypes.map((assignment_type) => ({
-      course_id: applicant.intake_course_id,
-      trainee_id: created.user.id,
-      assignment_type,
-      marker_id: defaultMarkers[assignment_type] ?? null,
-    }))
-  );
-  await admin.from("celta5_matrix").insert(
-    CELTA_CRITERIA_CODES.map((criteria_code) => ({
-      course_id: applicant.intake_course_id,
-      trainee_id: created.user.id,
-      criteria_code,
-    }))
-  );
-  await admin.from("celta5_records").insert({ course_id: applicant.intake_course_id, trainee_id: created.user.id });
-
-  await admin
-    .from("applicants")
-    .update({ stage: "accepted", accepted_at: new Date().toISOString(), resulting_trainee_id: created.user.id })
-    .eq("id", applicant.id);
+  // Four independent writes -- none reads another's result, all keyed off
+  // created.user.id/applicant.intake_course_id/applicant.id already in hand.
+  await Promise.all([
+    admin.from("assignments").insert(
+      assignmentTypes.map((assignment_type) => ({
+        course_id: applicant.intake_course_id,
+        trainee_id: created.user.id,
+        assignment_type,
+        marker_id: defaultMarkers[assignment_type] ?? null,
+      }))
+    ),
+    admin.from("celta5_matrix").insert(
+      CELTA_CRITERIA_CODES.map((criteria_code) => ({
+        course_id: applicant.intake_course_id,
+        trainee_id: created.user.id,
+        criteria_code,
+      }))
+    ),
+    admin.from("celta5_records").insert({ course_id: applicant.intake_course_id, trainee_id: created.user.id }),
+    admin
+      .from("applicants")
+      .update({ stage: "accepted", accepted_at: new Date().toISOString(), resulting_trainee_id: created.user.id })
+      .eq("id", applicant.id),
+  ]);
 
   const supabase = await createClient();
   const { error: signInError } = await supabase.auth.signInWithPassword({ email: applicant.email, password });

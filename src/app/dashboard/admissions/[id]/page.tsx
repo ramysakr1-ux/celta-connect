@@ -357,7 +357,14 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
       <AiReadingPanel applicant={applicant} />
 
-      <MarkingForm applicant={applicant} />
+      {canDecide ? (
+        <MarkingForm applicant={applicant} />
+      ) : (
+        <div className="card flex flex-col gap-1 p-6">
+          <h2 className="font-serif text-lg text-ink">Marking scheme -- selection task</h2>
+          <p className="text-sm text-muted">Only a verified course tutor or a nominated admissions decider can mark this.</p>
+        </div>
+      )}
 
       <div className="card flex flex-col gap-4 p-6">
         <h2 className="font-serif text-lg text-ink">Interview</h2>
@@ -447,13 +454,15 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           </p>
         ) : null}
 
-        {bookedSlot ? (
+        {bookedSlot && canDecide ? (
           <InterviewRecordForm
             applicantId={applicant.id}
             slotId={bookedSlot.id}
             questions={questions ?? []}
             existingRecord={interviewRecord ?? null}
           />
+        ) : bookedSlot ? (
+          <p className="text-sm text-muted">Only a verified course tutor or a nominated admissions decider can record this interview.</p>
         ) : null}
       </div>
 
