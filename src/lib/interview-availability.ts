@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 export interface AvailabilityPattern {
   interviewer_id: string;
@@ -72,14 +72,15 @@ export function computeGeneratedSlots(
   pattern: AvailabilityPattern,
   settings: GenerationSettings,
   blocks: AvailabilityBlock[],
-  now: Date
+  now: Date,
+  timeZone: string
 ): GeneratedSlot[] {
   const step = settings.slotMinutes + settings.gapMinutes;
   const startMin = timeToMinutes(pattern.start_time);
   const endMin = timeToMinutes(pattern.end_time);
   const cutoff = new Date(now.getTime() + settings.cutoffHours * 60 * 60 * 1000);
 
-  const todayIso = toLocalIso(now);
+  const todayIso = toLocalIso(now, timeZone);
   const horizonIso = addDaysIso(todayIso, settings.weeksAhead * 7);
 
   const slots: GeneratedSlot[] = [];
@@ -120,7 +121,7 @@ export async function regenerateSlotsForInterviewer(
   const [{ data: center }, { data: patterns }, { data: blocks }, { data: openIntakes }] = await Promise.all([
     supabase
       .from("centers")
-      .select("interview_slot_minutes, interview_gap_minutes, interview_weeks_ahead, interview_cutoff_hours")
+      .select("interview_slot_minutes, interview_gap_minutes, interview_weeks_ahead, interview_cutoff_hours, time_zone")
       .eq("id", centerId)
       .maybeSingle(),
     supabase.from("interview_availability_patterns").select("*").eq("interviewer_id", interviewerId).eq("active", true),
@@ -131,7 +132,7 @@ export async function regenerateSlotsForInterviewer(
   if (!openIntakes || openIntakes.length === 0) return { error: "No intake is currently accepting applications." };
 
   const now = new Date();
-  const todayIso = toLocalIso(now);
+  const todayIso = toLocalIso(now, center.time_zone ?? DEFAULT_TIMEZONE);
 
   const { error: deleteError } = await supabase
     .from("interview_slots")
@@ -150,7 +151,7 @@ export async function regenerateSlotsForInterviewer(
 
   const rows: Database["public"]["Tables"]["interview_slots"]["Insert"][] = [];
   for (const pattern of patterns ?? []) {
-    const slots = computeGeneratedSlots(pattern, settings, blocks ?? [], now);
+    const slots = computeGeneratedSlots(pattern, settings, blocks ?? [], now, center.time_zone ?? DEFAULT_TIMEZONE);
     for (const s of slots) {
       for (const intake of openIntakes) {
         rows.push({

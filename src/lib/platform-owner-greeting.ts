@@ -1,7 +1,8 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { computeCourseState } from "@/lib/course-progress";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // for-claude-code-role-tinted-backgrounds-v2-final.md's personal-greeting item,
 // moved from /platform/command-center to /platform itself (Ramy, 22 Aug 2026:
@@ -23,10 +24,17 @@ export async function getPlatformOwnerGreeting(fullName: string | null): Promise
     admin.from("centre_invoices").select("status"),
   ]);
 
-  const today = toLocalIso(new Date());
+  // Deliberately platform-wide -- each course's own centre decides its
+  // "running" state, since this can span centres in different timezones.
+  const centerIds = [...new Set((courses ?? []).map((c) => c.center_id))];
+  const centers = await Promise.all(centerIds.map((id) => getCachedCenter(id)));
+  const timezoneByCenterId = new Map(centers.filter((c) => c !== null).map((c) => [c.id, c.time_zone]));
   const runningCentreIds = new Set(
     (courses ?? [])
-      .filter((c) => computeCourseState(c.start_date, c.end_date, today) === "running")
+      .filter((c) => {
+        const timeZone = timezoneByCenterId.get(c.center_id) ?? DEFAULT_TIMEZONE;
+        return computeCourseState(c.start_date, c.end_date, toLocalIso(new Date(), timeZone)) === "running";
+      })
       .map((c) => c.center_id)
   );
 

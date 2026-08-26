@@ -4,7 +4,8 @@ import type { CourseStatus, Database } from "@/lib/supabase/types";
 import { CELTA_CRITERIA_CODES, computeCriteriaPct, computeTrajectory, type Trajectory } from "@/lib/celta-criteria";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { computeAtRiskReasons, type AtRiskReason } from "@/lib/at-risk";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
 
 export type Celta5SignoffStatus = "not_started" | "candidate_signed" | "both_signed";
@@ -149,7 +150,7 @@ export async function fetchRosterRows(
             )
             .eq("course_id", courseId),
           supabase.from("celta5_matrix").select("trainee_id, criteria_code, tutor_status_stage2").eq("course_id", courseId),
-          supabase.from("courses").select("total_hours").eq("id", courseId).maybeSingle(),
+          supabase.from("courses").select("total_hours, center_id").eq("id", courseId).maybeSingle(),
           supabase.from("course_timetable_events").select("id").eq("course_id", courseId).eq("type", "supervised_session"),
           supabase
             .from("supervised_session_completions")
@@ -189,7 +190,8 @@ export async function fetchRosterRows(
   const supervisedTotal = (supervisedEvents ?? []).length;
 
   const totalHours = course?.total_hours ?? 120;
-  const today = toLocalIso(new Date());
+  const center = course ? await getCachedCenter(course.center_id) : null;
+  const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
 
   // Item 9's "flagged low" is relative to the cohort, not an invented fixed
   // number -- the spec gave no absolute threshold.

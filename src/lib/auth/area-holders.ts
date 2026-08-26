@@ -1,7 +1,8 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Area, AreaHolder } from "@/lib/auth/areas";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 /**
  * Who holds each area in this centre. Read through the admin client because
@@ -11,7 +12,8 @@ import { toLocalIso } from "@/lib/timetable-grid";
  */
 export async function getAreaHolders(centerId: string): Promise<Map<Area, AreaHolder>> {
   const admin = createAdminClient();
-  const today = toLocalIso(new Date());
+  const center = await getCachedCenter(centerId);
+  const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
 
   const { data: rows } = await admin
     .from("centre_areas")

@@ -1,7 +1,8 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendPushToOwners } from "@/lib/push/send";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 const WINDOW_START_MINUTES = 25;
 const WINDOW_END_MINUTES = 35;
@@ -24,17 +25,33 @@ export async function runVolunteerSessionReminderCron(): Promise<{ eventsChecked
   const windowStart = new Date(now.getTime() + WINDOW_START_MINUTES * 60_000);
   const windowEnd = new Date(now.getTime() + WINDOW_END_MINUTES * 60_000);
 
+  // Same reasoning as the email reminder crons: "due" depends on each
+  // event's own centre timezone, not known until its course/centre is
+  // resolved -- the query only narrows by a generous, timezone-agnostic
+  // +/-1 day UTC bound (the window itself is under an hour out).
+  const wideStart = new Date(windowStart.getTime() - 24 * 60 * 60 * 1000);
+  const wideEnd = new Date(windowEnd.getTime() + 24 * 60 * 60 * 1000);
   const { data: candidateEvents } = await admin
     .from("course_timetable_events")
     .select("id, course_id, event_date, event_time")
     .eq("type", "tp")
     .not("event_time", "is", null)
-    .gte("event_date", toLocalIso(now))
-    .lte("event_date", toLocalIso(windowEnd));
+    .gte("event_date", wideStart.toISOString().slice(0, 10))
+    .lte("event_date", wideEnd.toISOString().slice(0, 10));
+
+  const candidateCourseIds = [...new Set((candidateEvents ?? []).map((e) => e.course_id))];
+  const { data: candidateCourses } =
+    candidateCourseIds.length > 0 ? await admin.from("courses").select("id, center_id").in("id", candidateCourseIds) : { data: [] };
+  const centerIdByCourseId = new Map((candidateCourses ?? []).map((c) => [c.id, c.center_id]));
+  const centerIds = [...new Set([...centerIdByCourseId.values()])];
+  const centers = await Promise.all(centerIds.map((id) => getCachedCenter(id)));
+  const timezoneByCenterId = new Map(centers.filter((c) => c !== null).map((c) => [c.id, c.time_zone]));
 
   const dueEvents = (candidateEvents ?? []).filter((e) => {
     if (!e.event_time) return false;
-    const eventDateTime = new Date(`${e.event_date}T${e.event_time}`);
+    const centerId = centerIdByCourseId.get(e.course_id);
+    const timeZone = (centerId ? timezoneByCenterId.get(centerId) : null) ?? DEFAULT_TIMEZONE;
+    const eventDateTime = zonedTimeToUtc(e.event_date, e.event_time, timeZone);
     return eventDateTime >= windowStart && eventDateTime < windowEnd;
   });
   if (dueEvents.length === 0) return { eventsChecked: 0, reminded: 0 };

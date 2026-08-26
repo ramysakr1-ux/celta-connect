@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyZoomSignature, buildUrlValidationResponse } from "@/lib/zoom/webhook-signature";
 import { findExactEmailMatch, suggestVolunteerMatch } from "@/lib/zoom/matching";
-import { toLocalIso, toLocalMinutes } from "@/lib/timetable-grid";
+import { toLocalIso, toLocalMinutes, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // zoom-auto-attendance.md §3. Mirrors src/app/api/webhooks/resend/route.ts's
 // shape (raw body, HMAC header verification, always 200 on anything not
@@ -79,15 +80,35 @@ export async function POST(request: Request) {
   // A trainer can reuse one personal Zoom link across many sessions, so
   // zoom_meeting_id alone isn't necessarily unique -- narrow to today's
   // date (the webhook fires live, during the session) and, if more than
-  // one still matches, the one closest to right now.
-  const today = toLocalIso(new Date());
-  const { data: candidateEvents } = await admin
+  // one still matches, the one closest to right now. "Today" depends on
+  // each candidate event's OWN centre's timezone though, and the centre
+  // isn't known until a candidate's course is -- so this can't filter by
+  // date in the query itself the way a single-centre app could. Fetch
+  // every event for this meeting id, then resolve each one's centre
+  // timezone and filter/rank precisely below.
+  const { data: allEventsForMeeting } = await admin
     .from("course_timetable_events")
-    .select("id, course_id, event_time")
-    .eq("zoom_meeting_id", meetingId)
-    .eq("event_date", today);
+    .select("id, course_id, event_date, event_time")
+    .eq("zoom_meeting_id", meetingId);
 
-  const event = pickClosestEvent(candidateEvents ?? []);
+  const courseIds = Array.from(new Set((allEventsForMeeting ?? []).map((e) => e.course_id)));
+  const { data: coursesForEvents } = courseIds.length
+    ? await admin.from("courses").select("id, center_id").in("id", courseIds)
+    : { data: [] };
+  const centerIdByCourseId = new Map((coursesForEvents ?? []).map((c) => [c.id, c.center_id]));
+  const centerIds = Array.from(new Set([...centerIdByCourseId.values()]));
+  const centers = await Promise.all(centerIds.map((id) => getCachedCenter(id)));
+  const timezoneByCenterId = new Map(centers.filter((c) => c !== null).map((c) => [c.id, c.time_zone]));
+  const timezoneForCourseId = (courseId: string) => {
+    const centerId = centerIdByCourseId.get(courseId);
+    return (centerId ? timezoneByCenterId.get(centerId) : null) ?? DEFAULT_TIMEZONE;
+  };
+
+  const candidateEvents = (allEventsForMeeting ?? []).filter(
+    (e) => e.event_date === toLocalIso(new Date(), timezoneForCourseId(e.course_id))
+  );
+
+  const event = pickClosestEvent(candidateEvents, timezoneForCourseId);
   if (!event) return NextResponse.json({ ok: true, unmatched_event: true });
 
   const email = participant.email ? participant.email.trim().toLowerCase() : null;
@@ -163,14 +184,21 @@ export async function POST(request: Request) {
   return NextResponse.json({ ok: true, matched: false });
 }
 
-function pickClosestEvent<T extends { id: string; course_id: string; event_time: string | null }>(events: T[]): T | null {
+function pickClosestEvent<T extends { id: string; course_id: string; event_time: string | null }>(
+  events: T[],
+  timezoneForCourseId: (courseId: string) => string
+): T | null {
   if (events.length === 0) return null;
   if (events.length === 1) return events[0];
-  const nowMinutes = toLocalMinutes(new Date());
-  const toMinutes = (t: string | null) => {
-    if (!t) return nowMinutes;
-    const [h, m] = t.split(":").map(Number);
+  // Each candidate can belong to a different centre (hence a different
+  // "now"), so nowMinutes is resolved per-event rather than once globally.
+  const nowMinutesFor = (e: T) => toLocalMinutes(new Date(), timezoneForCourseId(e.course_id));
+  const toMinutes = (e: T) => {
+    if (!e.event_time) return nowMinutesFor(e);
+    const [h, m] = e.event_time.split(":").map(Number);
     return h * 60 + m;
   };
-  return events.reduce((closest, e) => (Math.abs(toMinutes(e.event_time) - nowMinutes) < Math.abs(toMinutes(closest.event_time) - nowMinutes) ? e : closest));
+  return events.reduce((closest, e) =>
+    Math.abs(toMinutes(e) - nowMinutesFor(e)) < Math.abs(toMinutes(closest) - nowMinutesFor(closest)) ? e : closest
+  );
 }

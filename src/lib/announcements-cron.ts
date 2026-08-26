@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 function addDays(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -54,7 +55,6 @@ function scopeKey(row: PendingRow): string {
 // spent by course-close-out-wipe + that route (see its own comment).
 export async function runAnnouncementsFireCron(): Promise<{ fired: number; deferred: number; dropped: number }> {
   const supabase = createAdminClient();
-  const today = toLocalIso(new Date());
 
   const { data: pending } = await supabase
     .from("course_broadcasts")
@@ -70,12 +70,26 @@ export async function runAnnouncementsFireCron(): Promise<{ fired: number; defer
       : { data: [] };
   const eventDateById = new Map((anchorEvents ?? []).map((e) => [e.id, e.event_date]));
 
+  // "Today" depends on each row's own course's centre -- a single cron run
+  // can span centres in different timezones.
+  const courseIds = [...new Set((pending ?? []).map((p) => p.course_id))];
+  const { data: coursesForBroadcasts } = courseIds.length > 0 ? await supabase.from("courses").select("id, center_id").in("id", courseIds) : { data: [] };
+  const centerIdByCourseId = new Map((coursesForBroadcasts ?? []).map((c) => [c.id, c.center_id]));
+  const centerIds = [...new Set([...centerIdByCourseId.values()])];
+  const centers = await Promise.all(centerIds.map((id) => getCachedCenter(id)));
+  const timezoneByCenterId = new Map(centers.filter((c) => c !== null).map((c) => [c.id, c.time_zone]));
+  const todayForCourseId = (courseId: string) => {
+    const centerId = centerIdByCourseId.get(courseId);
+    const timeZone = (centerId ? timezoneByCenterId.get(centerId) : null) ?? DEFAULT_TIMEZONE;
+    return toLocalIso(new Date(), timeZone);
+  };
+
   // Due today, or carried forward from a day it lost the day's slot on --
   // <= today already gives that for free, no separate bookkeeping needed.
   const due = (pending ?? []).filter((row) => {
     const eventDate = row.anchor_event_id ? eventDateById.get(row.anchor_event_id) : null;
     if (!eventDate || row.anchor_offset_days === null) return false;
-    return addDays(eventDate, row.anchor_offset_days) <= today;
+    return addDays(eventDate, row.anchor_offset_days) <= todayForCourseId(row.course_id);
   });
 
   // "A message stops the moment its subject's state changes" -- a
@@ -87,7 +101,7 @@ export async function runAnnouncementsFireCron(): Promise<{ fired: number; defer
   const eligible = due.filter((row) => {
     if (!row.source_key?.startsWith("deadline:")) return true;
     const eventDate = row.anchor_event_id ? eventDateById.get(row.anchor_event_id) : null;
-    if (eventDate && today > eventDate) {
+    if (eventDate && todayForCourseId(row.course_id) > eventDate) {
       dropIds.push(row.id);
       return false;
     }

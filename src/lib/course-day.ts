@@ -1,7 +1,8 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // "Day N" of the course = the Nth distinct timetabled date, not a raw
 // calendar-day count -- ties FOL's Day 1/10/12 language to the same clock
@@ -16,18 +17,18 @@ export async function isCourseDayReached(
   courseId: string,
   dayNumber: number
 ): Promise<boolean> {
-  const { data } = await supabase
-    .from("course_timetable_events")
-    .select("event_date")
-    .eq("course_id", courseId)
-    .order("event_date", { ascending: true });
-  if (!data) return false;
+  const [{ data }, { data: course }] = await Promise.all([
+    supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).order("event_date", { ascending: true }),
+    supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle(),
+  ]);
+  if (!data || !course) return false;
 
   const distinctDates = Array.from(new Set(data.map((row) => row.event_date))).sort();
   const targetDate = distinctDates[dayNumber - 1];
   if (!targetDate) return false;
 
-  const today = toLocalIso(new Date());
+  const center = await getCachedCenter(course.center_id);
+  const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
   return today >= targetDate;
 }
 
@@ -39,15 +40,15 @@ export async function computeCourseDayProgress(
   supabase: SupabaseClient<Database>,
   courseId: string
 ): Promise<{ currentDay: number; totalDays: number } | null> {
-  const { data } = await supabase
-    .from("course_timetable_events")
-    .select("event_date")
-    .eq("course_id", courseId)
-    .order("event_date", { ascending: true });
+  const [{ data }, { data: course }] = await Promise.all([
+    supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).order("event_date", { ascending: true }),
+    supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle(),
+  ]);
   if (!data || data.length === 0) return null;
 
   const distinctDates = Array.from(new Set(data.map((row) => row.event_date))).sort();
-  const today = toLocalIso(new Date());
+  const center = course ? await getCachedCenter(course.center_id) : null;
+  const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
   const daysReached = distinctDates.filter((d) => d <= today).length;
   if (daysReached === 0) return null;
 

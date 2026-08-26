@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendApplicantEmail, volunteer30MinReminderEmailHtml } from "@/lib/admissions-email";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { teachingDayNumber } from "@/lib/volunteer-attendance";
 import { extractLevelCode } from "@/lib/levels";
 
@@ -22,31 +22,44 @@ export async function runVolunteer30MinEmailReminderCron(): Promise<{ eventsChec
   const windowStart = new Date(now.getTime() + WINDOW_START_MINUTES * 60_000);
   const windowEnd = new Date(now.getTime() + WINDOW_END_MINUTES * 60_000);
 
+  // "Is this event 25-35 minutes from now" depends on each event's own
+  // centre timezone (to know its real UTC instant), which isn't known until
+  // its course/centre is resolved below -- so the query itself only
+  // narrows by a generous, timezone-agnostic +/-1 day UTC bound rather than
+  // trying to filter precisely up front.
+  const wideStart = new Date(windowStart.getTime() - 24 * 60 * 60 * 1000);
+  const wideEnd = new Date(windowEnd.getTime() + 24 * 60 * 60 * 1000);
   const { data: candidateEvents } = await admin
     .from("course_timetable_events")
     .select("id, course_id, title, event_date, event_time, zoom_url")
     .eq("type", "tp")
     .not("event_time", "is", null)
-    .gte("event_date", toLocalIso(now))
-    .lte("event_date", toLocalIso(windowEnd));
+    .gte("event_date", wideStart.toISOString().slice(0, 10))
+    .lte("event_date", wideEnd.toISOString().slice(0, 10));
 
-  const dueEvents = (candidateEvents ?? []).filter((e) => {
-    if (!e.event_time) return false;
-    const eventDateTime = new Date(`${e.event_date}T${e.event_time}`);
-    return eventDateTime >= windowStart && eventDateTime < windowEnd;
-  });
-  if (dueEvents.length === 0) return { eventsChecked: 0, reminded: 0 };
-
-  const courseIds = [...new Set(dueEvents.map((e) => e.course_id))];
+  const candidateCourseIds = [...new Set((candidateEvents ?? []).map((e) => e.course_id))];
   const [{ data: volunteers }, { data: courses }, { data: allTpEvents }] = await Promise.all([
-    admin.from("volunteer_students").select("id, name, email, level, course_id, reminders_opted_out").in("course_id", courseIds),
-    admin.from("courses").select("id, name, center_id").in("id", courseIds),
-    admin.from("course_timetable_events").select("course_id, event_date").eq("type", "tp").in("course_id", courseIds),
+    candidateCourseIds.length > 0
+      ? admin.from("volunteer_students").select("id, name, email, level, course_id, reminders_opted_out").in("course_id", candidateCourseIds)
+      : Promise.resolve({ data: [] }),
+    candidateCourseIds.length > 0 ? admin.from("courses").select("id, name, center_id").in("id", candidateCourseIds) : Promise.resolve({ data: [] }),
+    candidateCourseIds.length > 0
+      ? admin.from("course_timetable_events").select("course_id, event_date").eq("type", "tp").in("course_id", candidateCourseIds)
+      : Promise.resolve({ data: [] }),
   ]);
   const courseById = new Map((courses ?? []).map((c) => [c.id, c]));
   const centerIds = [...new Set((courses ?? []).map((c) => c.center_id))];
-  const { data: centers } = centerIds.length > 0 ? await admin.from("centers").select("id, name, admissions_email").in("id", centerIds) : { data: [] };
+  const { data: centers } = centerIds.length > 0 ? await admin.from("centers").select("id, name, admissions_email, time_zone").in("id", centerIds) : { data: [] };
   const centerById = new Map((centers ?? []).map((c) => [c.id, c]));
+
+  const dueEvents = (candidateEvents ?? []).filter((e) => {
+    if (!e.event_time) return false;
+    const course = courseById.get(e.course_id);
+    const timeZone = course ? (centerById.get(course.center_id)?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
+    const eventDateTime = zonedTimeToUtc(e.event_date, e.event_time, timeZone);
+    return eventDateTime >= windowStart && eventDateTime < windowEnd;
+  });
+  if (dueEvents.length === 0) return { eventsChecked: 0, reminded: 0 };
   const tpDatesByCourse = new Map<string, string[]>();
   for (const e of allTpEvents ?? []) {
     const list = tpDatesByCourse.get(e.course_id) ?? [];

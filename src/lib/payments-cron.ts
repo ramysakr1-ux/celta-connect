@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // "A missed instalment is not an automatic consequence (no auto-suspension,
 // no auto-email) -- it becomes a payments task that sits until a human acts
@@ -10,16 +11,28 @@ import { toLocalIso } from "@/lib/timetable-grid";
 // escalation of any kind.
 export async function runMissedInstalmentsCron(): Promise<{ missed: number }> {
   const admin = createAdminClient();
-  const today = toLocalIso(new Date());
 
-  const { data: overdue } = await admin
+  // "Overdue" depends on each payment's OWN centre's today -- a single
+  // cron run can span centres in different timezones, so "today" can't be
+  // resolved once up front the way a single-centre query could. Fetch every
+  // still-pending payment with a due date, then filter precisely per-row
+  // below once each one's centre timezone is known.
+  const { data: pending } = await admin
     .from("payments")
-    .select("id, center_id, amount, currency, instalment_index, payment_plan_id")
+    .select("id, center_id, amount, currency, instalment_index, payment_plan_id, due_date")
     .eq("status", "pending")
-    .not("due_date", "is", null)
-    .lt("due_date", today);
+    .not("due_date", "is", null);
+  if (!pending || pending.length === 0) return { missed: 0 };
 
-  if (!overdue || overdue.length === 0) return { missed: 0 };
+  const centerIds = Array.from(new Set(pending.map((p) => p.center_id)));
+  const centers = await Promise.all(centerIds.map((id) => getCachedCenter(id)));
+  const timezoneByCenterId = new Map(centers.filter((c) => c !== null).map((c) => [c.id, c.time_zone]));
+
+  const overdue = pending.filter((p) => {
+    const timeZone = timezoneByCenterId.get(p.center_id) ?? DEFAULT_TIMEZONE;
+    return p.due_date! < toLocalIso(new Date(), timeZone);
+  });
+  if (overdue.length === 0) return { missed: 0 };
 
   const planIds = Array.from(new Set(overdue.map((p) => p.payment_plan_id)));
   const { data: plans } = await admin.from("payment_plans").select("id, applicant_id").in("id", planIds);
