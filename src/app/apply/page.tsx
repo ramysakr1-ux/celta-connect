@@ -45,12 +45,16 @@ export default async function ApplyPage({
     );
   }
 
-  // Independent of each other -- courses/accepted-counts is its own
-  // dependent chain, prompts and speakingPrompts each only need center.id --
-  // so run all three branches in parallel instead of stacking 4 sequential
-  // round trips on top of the center lookup above. Measured live: this page
-  // was taking 2.7-4.3s in production before this change.
-  const [{ data: openCourses }, { data: prompts }, { data: speakingPrompts }] = await Promise.all([
+  // All four of these only need center.id, already in hand -- including
+  // accepted-counts, scoped by center_id instead of waiting on courses to
+  // resolve first for a courseIds filter, which would make it a genuinely
+  // dependent third hop. One round trip instead of what was 5 sequential
+  // ones. Measured live: this page was taking 2.7-5.4s in production
+  // before this change (Vercel's function region and Supabase's project
+  // region aren't the same, so every additional sequential hop is
+  // expensive here specifically -- worth aligning those regions
+  // separately, this fix reduces hop *count* but not per-hop latency).
+  const [{ data: openCourses }, { data: prompts }, { data: speakingPrompts }, { data: acceptedCounts }] = await Promise.all([
     admin
       .from("courses")
       .select("id, name, start_date, end_date, delivery_mode, application_cap")
@@ -69,17 +73,9 @@ export default async function ApplyPage({
       .eq("center_id", center.id)
       .eq("active", true)
       .order("created_at"),
+    admin.from("applicants").select("intake_course_id").eq("center_id", center.id).eq("stage", "accepted"),
   ]);
 
-  const courseIds = (openCourses ?? []).map((c) => c.id);
-  const { data: acceptedCounts } =
-    courseIds.length > 0
-      ? await admin
-          .from("applicants")
-          .select("intake_course_id")
-          .in("intake_course_id", courseIds)
-          .eq("stage", "accepted")
-      : { data: [] };
   const acceptedByCoure = new Map<string, number>();
   for (const row of acceptedCounts ?? []) {
     acceptedByCoure.set(
