@@ -379,8 +379,10 @@ export default async function TrainerResourceHubPage() {
         <h2 className="font-serif text-lg text-ink">Forms and documents</h2>
         <p className="mt-1 text-sm text-muted">
           Blank PDFs of the built-in forms -- lesson plan template, self-evaluation form -- for when the platform is
-          down or paper is preferred. Shown on every candidate&apos;s own Resources tab. Cambridge&apos;s own
-          documents (syllabus, appeals procedure) live in{" "}
+          down or paper is preferred, plus the centre&apos;s wider Cambridge documentation set (admin handbook,
+          syllabus, refresher training, and the rest). Use the visible-to-trainee toggle per item -- most of this set
+          is trainer-only. The four core Cambridge originals (syllabus, admin handbook, appeals procedure, centre
+          authorisation) also have their own dedicated slots in{" "}
           <a href="#cambridge-documents" className="text-primary">
             Cambridge documents
           </a>{" "}

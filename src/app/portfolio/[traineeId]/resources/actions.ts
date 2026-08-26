@@ -21,6 +21,7 @@ const CATEGORIES: ResourceCategory[] = [
   "filmed_observations",
   "admissions",
   "centre_documents",
+  "forms",
 ];
 const TYPES: ResourceType[] = ["template", "form", "brief", "cambridge_doc", "reading", "video"];
 const CONTENT_TYPES = ["link", "file", "html"] as const;
