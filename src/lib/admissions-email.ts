@@ -400,13 +400,21 @@ export function interviewBookedEmailHtml(input: {
   when: string;
   markedTaskUrl: string;
 }): string {
-  return `
-    <p>Dear ${esc(input.recipientName)},</p>
-    <p>An interview has been booked with <strong>${esc(input.applicantName)}</strong> for ${esc(input.courseName)}.</p>
-    <p><strong>When:</strong> ${esc(input.when)}</p>
-    <p>Their marked task is here: <a href="${input.markedTaskUrl}">${input.markedTaskUrl}</a></p>
-    <p>This is an automatic notification -- the booking is already in Connect, so there's nothing to confirm.</p>
-  `;
+  // Moved onto emailShell() 26 Aug 2026 -- this staff notification was going
+  // out as bare unstyled paragraphs (no card, no logo, no branding) while
+  // the demo journey's preview of it wrongly showed a shelled version,
+  // making the preview lie about what actually got sent. Same fix as
+  // acknowledgementEmailHtml earlier tonight.
+  return emailShell({
+    heading: "Interview booked",
+    tone: "teal",
+    body:
+      p(`Dear ${input.recipientName},`) +
+      p(`An interview has been booked with ${input.applicantName} for ${input.courseName}.`) +
+      rawP(`<strong>When:</strong> ${esc(input.when)}`) +
+      rawP(`Their marked task is here: <a href="${input.markedTaskUrl}">${esc(input.markedTaskUrl)}</a>`),
+    footnote: "This is an automatic notification -- the booking is already in Connect, so there's nothing to confirm.",
+  });
 }
 
 // "Sent when a reading finds clear problems. No email goes to the applicant."
@@ -436,12 +444,19 @@ export function volunteerSignedUpEmailHtml(input: {
   volunteerName: string;
   centreName: string;
 }): string {
-  return `
-    <p>Dear ${esc(input.volunteerName)},</p>
-    <p>Welcome, and thank you for signing up for free English classes with ${esc(input.centreName)}!</p>
-    <p>We'll be in touch with your first class date as soon as it's set. Classes run alongside our teacher-training courses, so there may be a short wait -- that's normal, not us forgetting you.</p>
-    <p>There's no account to set up and nothing further you need to do.</p>
-  `;
+  // Moved onto emailShell() 26 Aug 2026 -- same fix as acknowledgementEmailHtml
+  // and interviewBookedEmailHtml: this was going out unshelled in production.
+  return emailShell({
+    heading: "Thanks for signing up",
+    tone: "teal",
+    body:
+      p(`Dear ${input.volunteerName},`) +
+      p(`Welcome, and thank you for signing up for free English classes with ${input.centreName}!`) +
+      p(
+        "We'll be in touch with your first class date as soon as it's set. Classes run alongside our teacher-training courses, so there may be a short wait -- that's normal, not us forgetting you."
+      ) +
+      p("There's no account to set up and nothing further you need to do."),
+  });
 }
 
 

@@ -11,7 +11,7 @@ import {
   volunteerSessionReminderEmailHtml,
   volunteer30MinReminderEmailHtml,
 } from "@/lib/admissions-email";
-import { emailShell, withConnectBranding } from "@/lib/email-layout";
+import { withConnectBranding } from "@/lib/email-layout";
 import { EmailPreview } from "@/app/demo/journey/email-preview";
 import { BackToTop } from "@/app/demo/journey/back-to-top";
 
@@ -73,9 +73,35 @@ function Step({
   );
 }
 
+// Matches the settings page's own labels (src/app/dashboard/admissions/
+// settings/page.tsx) -- not exported from there, so kept in sync by hand
+// rather than importing across an unrelated route boundary for one map.
+const COVERAGE_LABEL: Record<string, string> = {
+  motivation_suitability: "Motivation & suitability",
+  language_awareness: "Language awareness",
+  classroom_presence: "Classroom presence",
+  flexibility_openness: "Flexibility & openness",
+  digital_literacy: "Digital literacy",
+  time_commitment: "Time commitment",
+  other: "Other",
+};
+
 export default async function JourneyPage() {
   const admin = createAdminClient();
-  const { data: realCenter } = await admin.from("centers").select("name").eq("is_demo", false).limit(1).maybeSingle();
+  const { data: realCenter } = await admin.from("centers").select("id, name").eq("is_demo", false).limit(1).maybeSingle();
+
+  // Real, live content from the real centre's own interview question bank --
+  // Ramy, 26 Aug 2026: "we wanna see the actual interview as well... do you
+  // have that here? Interview questions." Not sample data like the rest of
+  // this page: whatever the centre has actually configured in Settings.
+  const { data: interviewQuestions } = realCenter
+    ? await admin
+        .from("interview_questions")
+        .select("coverage_area, question_text")
+        .eq("center_id", realCenter.id)
+        .eq("active", true)
+        .order("coverage_area")
+    : { data: [] };
 
   const applicantName = "Tariq Osei";
   const courseName = "CELTA Demo Course";
@@ -97,16 +123,12 @@ export default async function JourneyPage() {
     centreName
   );
   const bookedHtml = withConnectBranding(
-    emailShell({
-      heading: "Interview booked",
-      tone: "teal",
-      body: interviewBookedEmailHtml({
-        recipientName: "Jordan Blake",
-        applicantName,
-        courseName,
-        when: "Wednesday 27 August, 10:00",
-        markedTaskUrl: "https://celtaconnect.com/dashboard/admissions/<applicant>",
-      }),
+    interviewBookedEmailHtml({
+      recipientName: "Jordan Blake",
+      applicantName,
+      courseName,
+      when: "Wednesday 27 August, 10:00",
+      markedTaskUrl: "https://celtaconnect.com/dashboard/admissions/<applicant>",
     }),
     centreName
   );
@@ -128,30 +150,27 @@ export default async function JourneyPage() {
     }),
     centreName
   );
+  // welcomeEmailHtml already builds its own shell, headed "Your CELTA
+  // workspace is ready" -- not "Welcome to Connect". Ramy, 26 Aug 2026:
+  // "there's no welcome to Connect... it'd be welcome to [the course],
+  // and then the centre name" -- this demo page was the one that had it
+  // wrong, wrapping the real function's output in a second, invented shell.
   const welcomeHtml = withConnectBranding(
-    emailShell({
-      heading: "Welcome to Connect",
-      tone: "teal",
-      body: welcomeEmailHtml({
-        candidateName: applicantName,
-        courseName,
-        centreName,
-        tutorNames: ["Jordan Blake", "Marcus Webb"],
-        courseFact: "7 Aug – 4 Sept 2026, full-time",
-        startsFact: "Monday 7 August, 9:00",
-        preCourseTaskFact: "Due before day one",
-        setupUrl: "https://celtaconnect.com/join/<token>",
-        readingListUrl: null,
-      }),
+    welcomeEmailHtml({
+      candidateName: applicantName,
+      courseName,
+      centreName,
+      tutorNames: ["Jordan Blake", "Marcus Webb"],
+      courseFact: "7 Aug – 4 Sept 2026, full-time",
+      startsFact: "Monday 7 August, 9:00",
+      preCourseTaskFact: "Due before day one",
+      setupUrl: "https://celtaconnect.com/join/<token>",
+      readingListUrl: null,
     }),
     centreName
   );
   const volunteerHtml = withConnectBranding(
-    emailShell({
-      heading: "Thanks for signing up",
-      tone: "teal",
-      body: volunteerSignedUpEmailHtml({ volunteerName: "Grace Adeyemi", centreName }),
-    }),
+    volunteerSignedUpEmailHtml({ volunteerName: "Grace Adeyemi", centreName }),
     centreName
   );
   const volunteerClassStartingHtml = withConnectBranding(
@@ -205,7 +224,7 @@ export default async function JourneyPage() {
           <Step
             number={1}
             title="Applies"
-            blurb="The public application form -- name, task responses, acknowledgements."
+            blurb="The public application form -- name, an extended writing task, a recorded speaking task, and a language-awareness check, plus the acknowledgements. Together these three are the pre-interview task."
             href="/apply"
             hrefLabel="Open the real application form →"
             caveat={`This is the live form for ${realCenter?.name ?? "the real centre"} -- the same one real applicants use. Look, don't submit.`}
@@ -213,21 +232,68 @@ export default async function JourneyPage() {
           <Step number={2} title="Gets an acknowledgement" blurb="Sent the moment the form is submitted.">
             <EmailPreview title="We have your application" to={applicantName} html={ackHtml} />
           </Step>
-          <Step number={3} title="Is invited to interview" blurb="Sent once the written task has been read.">
+          <Step
+            number={3}
+            title="Lands in the admissions pipeline"
+            blurb="Immediately, and visible to any staff member who signs in -- not just whoever happens to check their email."
+          >
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-semibold text-muted">A staff member signs in --</p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/demo-journey/sign-in.png" alt="Connect sign-in page" className="w-full max-w-sm rounded-[6px] border border-border" />
+              <p className="text-xs font-semibold text-muted">-- and the application is already there, alongside everyone else who&apos;s applied.</p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/demo-journey/admissions-pipeline.png"
+                alt="Admissions pipeline showing the new application"
+                className="w-full max-w-xl rounded-[6px] border border-border"
+              />
+              <p className="text-xs text-muted">
+                If the centre has turned on AI shadow-mode reading (off by default), a private reading against the
+                marking scheme is also recorded here -- never shown to the applicant, never auto-rejects anyone.
+              </p>
+            </div>
+          </Step>
+          <Step number={4} title="Is invited to interview" blurb="Sent once the written task has been read.">
             <EmailPreview title="We would like to meet you" to={applicantName} html={inviteHtml} />
           </Step>
           <Step
-            number={4}
+            number={5}
             title="Books a time"
             blurb="The link from that email -- freshly reset, always has an open slot."
             href="/demo/journey/interview"
             hrefLabel="Open the real booking page →"
           />
-          <Step number={5} title="Tutors are notified" blurb="Sent to staff, not the applicant, the moment a slot is booked.">
+          <Step number={6} title="Tutors are notified" blurb="Sent to staff, not the applicant, the moment a slot is booked.">
             <EmailPreview title="Interview booked" to="Jordan Blake (MCT)" html={bookedHtml} />
           </Step>
           <Step
-            number={6}
+            number={7}
+            title="The interview itself"
+            blurb="Seven fixed questions from the centre's own bank, plus two more drawn per applicant from whatever the task reading flagged as weak. Both the interviewer and the candidate sign the record afterward."
+          >
+            {interviewQuestions && interviewQuestions.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-semibold text-muted">
+                  {realCenter?.name ?? "The centre"}&apos;s own live question bank, right now:
+                </p>
+                <ul className="flex flex-col gap-2">
+                  {interviewQuestions.map((q, i) => (
+                    <li key={i} className="rounded-[6px] border border-border bg-card p-3">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted">
+                        {COVERAGE_LABEL[q.coverage_area] ?? q.coverage_area}
+                      </span>
+                      <p className="text-sm text-ink">{q.question_text}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-sm text-muted">No active questions configured yet.</p>
+            )}
+          </Step>
+          <Step
+            number={8}
             title="Receives an offer"
             blurb="Sent once a decider records an offer -- deposit, dates, and how to accept."
             href="/demo/journey/offer"
@@ -236,8 +302,8 @@ export default async function JourneyPage() {
           >
             <EmailPreview title="Your place on CELTA Demo Course" to={applicantName} html={offerHtml} />
           </Step>
-          <Step number={7} title="Gets their workspace" blurb="Sent once the centre releases access -- this is the CELTA Connect login link.">
-            <EmailPreview title="Welcome to Connect" to={applicantName} html={welcomeHtml} />
+          <Step number={9} title="Gets their workspace" blurb="Sent once the centre releases access -- this is the CELTA Connect login link.">
+            <EmailPreview title="Your CELTA workspace is ready" to={applicantName} html={welcomeHtml} />
           </Step>
         </div>
 
