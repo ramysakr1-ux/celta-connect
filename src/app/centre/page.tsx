@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, canView } from "@/lib/auth/centre-permissions";
 import { computeAssessorCentreHistory } from "@/lib/assessor-course-history";
+import { AdmissionsChangeIndicator } from "@/app/centre/admissions-change-indicator";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 
 // Centre Admin's Overview.
@@ -38,19 +39,23 @@ export default async function CentreOverviewPage({
   const scope = branch && mine.includes(branch) ? [branch] : mine;
 
   const admin = createAdminClient();
-  const [{ data: centres }, { data: courses }, { data: applicants }, { data: payments }] = await Promise.all([
+  const canSeeAdmissions = canView(ctx.roles, "admissions.view", ctx.overrides);
+  const [{ data: centres }, { data: courses }, { data: applicants }, { data: payments }, { count: unreadAdmissionsCount }] = await Promise.all([
     admin.from("centers").select("id, name, center_number").in("id", mine),
     admin
       .from("courses")
       .select("id, name, center_id, start_date, end_date, delivery_mode, course_code")
       .in("center_id", scope)
       .order("start_date", { ascending: false }),
-    canView(ctx.roles, "admissions.view", ctx.overrides)
+    canSeeAdmissions
       ? admin.from("applicants").select("stage, center_id, deposit_amount, deposit_paid_at").in("center_id", scope)
       : Promise.resolve({ data: [] }),
     canView(ctx.roles, "payments.view", ctx.overrides)
       ? admin.from("payments").select("amount, currency, status, due_date, paid_at, payment_plan_id, center_id").in("center_id", scope)
       : Promise.resolve({ data: [] }),
+    canSeeAdmissions
+      ? admin.from("admissions_notifications").select("id", { count: "exact", head: true }).in("center_id", scope).is("read_at", null)
+      : Promise.resolve({ count: 0 }),
   ]);
 
   const branches = (centres ?? []).map((c) => ({ id: c.id, name: c.name, centerNumber: c.center_number }));
@@ -336,7 +341,10 @@ export default async function CentreOverviewPage({
         {canView(ctx.roles, "admissions.view", ctx.overrides) ? (
           <div className="card !p-0">
             <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
-              <h2 className="font-serif text-base text-ink">Admissions pipeline</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="font-serif text-base text-ink">Admissions pipeline</h2>
+                <AdmissionsChangeIndicator centerIds={scope} initialUnread={(unreadAdmissionsCount ?? 0) > 0} />
+              </div>
               <Link href="/dashboard/admissions" className="text-xs font-medium text-primary hover:underline">
                 Open &rarr;
               </Link>

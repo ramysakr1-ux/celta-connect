@@ -6,6 +6,7 @@ import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { linkVolunteerPeople, unlinkVolunteer } from "@/lib/volunteer-identity";
+import { canView } from "@/lib/auth/centre-permissions";
 
 export async function linkVolunteerAction(formData: FormData): Promise<void> {
   const profile = await requireRole("admin");
@@ -50,6 +51,27 @@ export async function unlinkVolunteerAction(formData: FormData): Promise<void> {
   if (!course || !ctx.availableCenterIds.includes(course.center_id)) return;
 
   await unlinkVolunteer(admin, volunteerStudentId);
+
+  revalidatePath("/centre");
+}
+
+// Ramy, 27 Aug 2026: "a different color light until someone clicks on it" --
+// clears the ambient change-indicator on the Centre Management admissions
+// card. Shared, not per-viewer, same as this-week/page.tsx's existing
+// no_interview_slots read_at usage -- whoever clicks it clears it for
+// everyone, matching a team inbox rather than individual unread state.
+export async function markAdmissionsNotificationsRead(centerId: string): Promise<void> {
+  const profile = await requireRole("admin");
+  const ctx = await getCentreRoleContext(profile);
+  if (!canView(ctx.roles, "admissions.view", ctx.overrides)) return;
+  if (!ctx.availableCenterIds.includes(centerId)) return;
+
+  const admin = createAdminClient();
+  await admin
+    .from("admissions_notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("center_id", centerId)
+    .is("read_at", null);
 
   revalidatePath("/centre");
 }
