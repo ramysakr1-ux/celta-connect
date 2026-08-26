@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
@@ -86,9 +86,7 @@ export default async function PaymentProvidersPage() {
   return (
     <div className="flex max-w-[720px] flex-col gap-5">
       <div>
-        <Link href="/centre" className="text-sm text-muted hover:text-ink">
-          &larr; Centre management
-        </Link>
+        <BackLink href="/centre" label="Centre management" />
         <h1 className="mt-2 font-serif text-[26px] text-ink">Payment providers</h1>
         <p className="mt-1 text-[13px] text-muted">
           Connect {center?.name ?? "your centre"}&apos;s own provider account so card becomes one of the methods you

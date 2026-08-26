@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -53,9 +53,7 @@ export default async function AdmissionsSettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="card p-6">
-        <Link href="/dashboard/admissions" className="text-sm text-muted hover:text-ink">
-          &larr; Admissions
-        </Link>
+        <BackLink href="/dashboard/admissions" label="Admissions" />
         <h1 className="mt-2 font-serif text-xl text-ink">Admissions settings</h1>
         <p className="mt-1 text-muted">
           Extended writing task prompts and the fixed interview question bank. Imported once, edited any time, carried

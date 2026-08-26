@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
@@ -67,9 +67,7 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3">
-        <Link href="/centre" className="text-sm text-muted hover:text-ink">
-          &larr; All courses
-        </Link>
+        <BackLink href="/centre" label="All courses" />
       </div>
 
       <div className="card p-6">

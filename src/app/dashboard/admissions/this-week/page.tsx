@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -85,9 +85,7 @@ export default async function ThisWeeksInterviewsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="card p-6">
-        <Link href="/dashboard/admissions" className="text-sm text-muted hover:text-ink">
-          &larr; Admissions
-        </Link>
+        <BackLink href="/dashboard/admissions" label="Admissions" />
         <h1 className="mt-2 font-serif text-xl text-ink">This week&apos;s interviews</h1>
         <p className="mt-1 text-sm text-muted">
           {weekStart} &ndash; {weekEnd}

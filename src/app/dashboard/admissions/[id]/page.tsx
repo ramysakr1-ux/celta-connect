@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound } from "next/navigation";
 import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
@@ -220,9 +221,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
   return (
     <div className="flex flex-col gap-6">
       <div className="card p-6">
-        <Link href="/dashboard/admissions" className="text-sm text-muted hover:text-ink">
-          &larr; Admissions
-        </Link>
+        <BackLink href="/dashboard/admissions" label="Admissions" />
         <div className="mt-2 flex items-center justify-between">
           <div>
             <h1 className="font-serif text-xl text-ink">{applicant.full_name}</h1>

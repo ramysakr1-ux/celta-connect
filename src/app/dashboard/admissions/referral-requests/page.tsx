@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -57,9 +57,7 @@ export default async function ReferralRequestsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="card p-6">
-        <Link href="/dashboard/admissions" className="text-sm text-muted hover:text-ink">
-          &larr; Admissions
-        </Link>
+        <BackLink href="/dashboard/admissions" label="Admissions" />
         <h1 className="mt-2 font-serif text-xl text-ink">Referral requests</h1>
         <p className="mt-1 text-sm text-muted">
           Candidates sibling branches are asking to refer here, and requests this branch has sent out.

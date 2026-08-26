@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
@@ -279,9 +280,7 @@ export default async function TrainerTimetablePage({
           <div className="sheet flex items-center justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <Link href="/trainer/timetable" className="text-sm font-medium text-primary hover:underline">
-                  &larr; View timetable
-                </Link>
+                <BackLink href="/trainer/timetable" label="View timetable" />
               </div>
               <h1 className="mt-1 font-serif text-xl text-ink">Edit timetable</h1>
               {weekRange ? <p className="mt-1 font-serif text-2xl text-ink">{weekRange}</p> : null}

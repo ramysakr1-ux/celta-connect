@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
@@ -130,9 +131,7 @@ export default async function CentreSettingsPage({
     <div className="flex flex-col gap-6">
       <div className="card p-6">
         <div className="flex items-center gap-3">
-          <Link href="/centre" className="text-sm text-muted hover:text-ink">
-            &larr; Centre management
-          </Link>
+          <BackLink href="/centre" label="Centre management" />
           <span className="rounded-[5px] border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-primary uppercase">
             Centre settings
           </span>

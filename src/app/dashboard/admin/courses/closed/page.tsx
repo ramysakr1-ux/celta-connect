@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { computeCourseState } from "@/lib/course-progress";
@@ -27,9 +28,7 @@ export default async function ClosedCoursesPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link href="/dashboard/admin" className="text-sm text-muted hover:text-ink">
-          &larr; Courses
-        </Link>
+        <BackLink href="/dashboard/admin" label="Courses" />
         <h1 className="mt-2 font-serif text-[24px] font-semibold text-ink">Closed courses</h1>
       </div>
 
