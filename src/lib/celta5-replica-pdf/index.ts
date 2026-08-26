@@ -12,6 +12,7 @@ import { drawStage2OverallPage, type Stage2OverallPageData } from "@/lib/celta5-
 import { drawStage3NotesPage, type Stage3NotesPageData } from "@/lib/celta5-replica-pdf/pages/stage3-notes";
 import { drawStage3OverallPage, type Stage3OverallPageData } from "@/lib/celta5-replica-pdf/pages/stage3-overall";
 import { drawFinalDeclarationPage, type FinalDeclarationPageData } from "@/lib/celta5-replica-pdf/pages/final-declaration";
+import { drawWrittenAssignmentsPage, type WrittenAssignmentsPageData } from "@/lib/celta5-replica-pdf/pages/written-assignments";
 
 export interface Celta5ReplicaInput {
   cover: CoverPageData;
@@ -22,6 +23,7 @@ export interface Celta5ReplicaInput {
   candidateStage2Marks: CriteriaMarks;
   tutorStage2Marks: CriteriaMarks;
   tutorStage3Marks: CriteriaMarks;
+  writtenAssignments: WrittenAssignmentsPageData;
   stage2Notes: Stage2NotesPageData;
   stage2Overall: Stage2OverallPageData;
   stage3Notes: Stage3NotesPageData;
@@ -33,6 +35,7 @@ const PAGE_INDEX = {
   attendance: 10,
   observations: 11,
   assessedTp: 12,
+  writtenAssignments: 13,
   stage1: 14,
   stage2Notes: 19,
   stage2Overall: 20,
@@ -79,6 +82,7 @@ export async function renderCelta5ReplicaBuffer(input: Celta5ReplicaInput): Prom
 
   drawCoverPage(out.getPage(startIndex.get(0)!), fonts, input.cover);
   drawAttendancePage(out.getPage(startIndex.get(PAGE_INDEX.attendance)!), fonts, input.attendance);
+  drawWrittenAssignmentsPage(out.getPage(startIndex.get(PAGE_INDEX.writtenAssignments)!), fonts, input.writtenAssignments);
   drawStage1Page(out.getPage(startIndex.get(PAGE_INDEX.stage1)!), fonts, input.stage1);
 
   const observationsStart = startIndex.get(PAGE_INDEX.observations)!;
