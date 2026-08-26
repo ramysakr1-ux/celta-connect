@@ -123,6 +123,25 @@ export function drawWrapped(
   }
 }
 
+// Draws a hand-circle-style oval border around a fitz-space rect -- used
+// for "Circle only one option" (overall progress ratings). Unfilled, black
+// border, same visual language as a tutor circling one of the printed
+// options by hand.
+export function drawOvalAround(page: PDFPage, box: { x0: number; y0: number; x1: number; y1: number }) {
+  const xMid = (box.x0 + box.x1) / 2;
+  const yMidFitz = (box.y0 + box.y1) / 2;
+  const xScale = (box.x1 - box.x0) / 2 + 10;
+  const yScale = (box.y1 - box.y0) / 2 + 9;
+  page.drawEllipse({
+    x: xMid,
+    y: fitzY(page, yMidFitz, 0),
+    xScale,
+    yScale,
+    borderColor: rgb(0, 0, 0),
+    borderWidth: 1.1,
+  });
+}
+
 // How many copies of a repeatable-table page (Observations, Assessed
 // Teaching Practice) are needed to fit every row -- Ramy's call: rather
 // than capping at the printed row count or shrinking rows to force-fit,

@@ -1790,6 +1790,9 @@ export interface Database {
           // migration 0186 -- captured at sign-off time, same pattern as
           // the other three stages.
           final_candidate_signature_name: string | null;
+          // migration 0221 -- the tutor side of the same signature pair;
+          // trainer_signoff_final_at doubles as this signature's date.
+          final_tutor_signature_name: string | null;
           grade_review_tutor_comments: string | null;
           final_report_released_at: string | null;
           certificate_grade: "Pass" | "Pass B" | "Pass A" | "Fail" | null;

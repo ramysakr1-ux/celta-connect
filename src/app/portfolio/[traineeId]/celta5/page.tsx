@@ -1246,7 +1246,7 @@ export default async function PortfolioCelta5Page({
 
       <FinalGradeForm key={`final-${record.updated_at}`} record={record} />
 
-      <FinalizeRecordForm key={`finalize-${record.updated_at}`} record={record} />
+      <FinalizeRecordForm key={`finalize-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} />
 
       {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
         <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} />

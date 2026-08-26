@@ -326,7 +326,7 @@ export async function finalizeRecord(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole("trainer");
+  const trainer = await requireRole("trainer");
 
   const traineeId = formData.get("trainee_id");
   if (typeof traineeId !== "string" || !traineeId) {
@@ -334,11 +334,17 @@ export async function finalizeRecord(
   }
 
   const finalized = formData.get("finalized") === "on";
+  if (finalized && !trainer.signature_name) {
+    return { error: "Set your signature first (below) before finalizing." };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("celta5_records")
-    .update({ trainer_signoff_final_at: finalized ? new Date().toISOString() : null })
+    .update({
+      trainer_signoff_final_at: finalized ? new Date().toISOString() : null,
+      final_tutor_signature_name: finalized ? trainer.signature_name : null,
+    })
     .eq("trainee_id", traineeId);
 
   if (error) {

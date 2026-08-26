@@ -7,6 +7,11 @@ import { drawObservationsPage, OBSERVATIONS_ROWS_PER_PAGE, type ObservationRow }
 import { drawAssessedTpPage, ASSESSED_TP_ROWS_PER_PAGE, type AssessedTpRow } from "@/lib/celta5-replica-pdf/pages/assessed-tp";
 import { drawAttendancePage, type AttendancePageData } from "@/lib/celta5-replica-pdf/pages/attendance";
 import { drawCriteriaGridPage, STAGE2_PAGES, STAGE3_PAGES, type CriteriaMarks } from "@/lib/celta5-replica-pdf/pages/criteria-grid";
+import { drawStage2NotesPage, type Stage2NotesPageData } from "@/lib/celta5-replica-pdf/pages/stage2-notes";
+import { drawStage2OverallPage, type Stage2OverallPageData } from "@/lib/celta5-replica-pdf/pages/stage2-overall";
+import { drawStage3NotesPage, type Stage3NotesPageData } from "@/lib/celta5-replica-pdf/pages/stage3-notes";
+import { drawStage3OverallPage, type Stage3OverallPageData } from "@/lib/celta5-replica-pdf/pages/stage3-overall";
+import { drawFinalDeclarationPage, type FinalDeclarationPageData } from "@/lib/celta5-replica-pdf/pages/final-declaration";
 
 export interface Celta5ReplicaInput {
   cover: CoverPageData;
@@ -17,9 +22,24 @@ export interface Celta5ReplicaInput {
   candidateStage2Marks: CriteriaMarks;
   tutorStage2Marks: CriteriaMarks;
   tutorStage3Marks: CriteriaMarks;
+  stage2Notes: Stage2NotesPageData;
+  stage2Overall: Stage2OverallPageData;
+  stage3Notes: Stage3NotesPageData;
+  stage3Overall: Stage3OverallPageData;
+  finalDeclaration: FinalDeclarationPageData;
 }
 
-const PAGE_INDEX = { attendance: 10, stage1: 14, observations: 11, assessedTp: 12 };
+const PAGE_INDEX = {
+  attendance: 10,
+  observations: 11,
+  assessedTp: 12,
+  stage1: 14,
+  stage2Notes: 19,
+  stage2Overall: 20,
+  stage3Notes: 24,
+  stage3Overall: 25,
+  finalDeclaration: 26,
+};
 
 // Produces a visually identical copy of the real Cambridge CELTA 5 booklet
 // -- the master PDF's own pages, unchanged, with the candidate/course data
@@ -30,11 +50,12 @@ const PAGE_INDEX = { attendance: 10, stage1: 14, observations: 11, assessedTp: 1
 // submit to be an unaltered copy of their document (same logo, fonts,
 // layout, centre number etc.) -- see the project's celta5-replica memory.
 //
-// Cover, Attendance, Stage 1, Observations, Assessed TP, and the Stage 2/3
-// criteria grids are wired up so far. Every other page currently passes
-// through from the master unchanged (informational pages already need
-// nothing drawn on them; the remaining progress-record/signature pages
-// still need their own coordinate mapping, in progress).
+// Every dynamic page is wired up now: cover, attendance, Stage 1/2/3
+// (criteria grids, notes, overall assessment, signatures), the final-day
+// declaration, Observations, and Assessed TP. The remaining ~15 pages
+// (roles/responsibilities, appeals procedure, candidate guide,
+// Appendix 1/2) are genuinely static in the real document -- nothing is
+// ever filled in on them, so they pass through from the master unchanged.
 export async function renderCelta5ReplicaBuffer(input: Celta5ReplicaInput): Promise<Buffer> {
   const master = await loadMasterDocument();
   const pageCount = master.getPageCount();
@@ -76,6 +97,12 @@ export async function renderCelta5ReplicaBuffer(input: Celta5ReplicaInput): Prom
   for (const gridPage of STAGE3_PAGES) {
     drawCriteriaGridPage(out.getPage(startIndex.get(gridPage.sourcePageIndex)!), fonts, gridPage, null, input.tutorStage3Marks);
   }
+
+  drawStage2NotesPage(out.getPage(startIndex.get(PAGE_INDEX.stage2Notes)!), fonts, input.stage2Notes);
+  drawStage2OverallPage(out.getPage(startIndex.get(PAGE_INDEX.stage2Overall)!), fonts, input.stage2Overall);
+  drawStage3NotesPage(out.getPage(startIndex.get(PAGE_INDEX.stage3Notes)!), fonts, input.stage3Notes);
+  drawStage3OverallPage(out.getPage(startIndex.get(PAGE_INDEX.stage3Overall)!), fonts, input.stage3Overall);
+  drawFinalDeclarationPage(out.getPage(startIndex.get(PAGE_INDEX.finalDeclaration)!), fonts, input.finalDeclaration);
 
   const bytes = await out.save();
   return Buffer.from(bytes);
