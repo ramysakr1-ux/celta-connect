@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyZoomSignature, buildUrlValidationResponse } from "@/lib/zoom/webhook-signature";
 import { findExactEmailMatch, suggestVolunteerMatch } from "@/lib/zoom/matching";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, toLocalMinutes } from "@/lib/timetable-grid";
 
 // zoom-auto-attendance.md §3. Mirrors src/app/api/webhooks/resend/route.ts's
 // shape (raw body, HMAC header verification, always 200 on anything not
@@ -166,7 +166,7 @@ export async function POST(request: Request) {
 function pickClosestEvent<T extends { id: string; course_id: string; event_time: string | null }>(events: T[]): T | null {
   if (events.length === 0) return null;
   if (events.length === 1) return events[0];
-  const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+  const nowMinutes = toLocalMinutes(new Date());
   const toMinutes = (t: string | null) => {
     if (!t) return nowMinutes;
     const [h, m] = t.split(":").map(Number);

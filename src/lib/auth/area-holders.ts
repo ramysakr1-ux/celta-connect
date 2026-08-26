@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Area, AreaHolder } from "@/lib/auth/areas";
+import { toLocalIso } from "@/lib/timetable-grid";
 
 /**
  * Who holds each area in this centre. Read through the admin client because
@@ -10,7 +11,7 @@ import type { Area, AreaHolder } from "@/lib/auth/areas";
  */
 export async function getAreaHolders(centerId: string): Promise<Map<Area, AreaHolder>> {
   const admin = createAdminClient();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toLocalIso(new Date());
 
   const { data: rows } = await admin
     .from("centre_areas")

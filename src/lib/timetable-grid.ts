@@ -135,22 +135,47 @@ export interface DayRow {
 
 const WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-/** Formats a Date from its local components, not `toISOString()`, which
- * round-trips through UTC and silently shifts the date by a day whenever the
- * server's timezone is ahead of UTC (e.g. Europe/Istanbul -- see the same
- * trap already caught and fixed in timetable-skeleton.ts). */
+// The app is single-tenant today (one real centre, per apply/page.tsx's own
+// comment) -- CENTRE_TIMEZONE is that centre's zone, hardcoded here as an
+// interim fix (Ramy, 2026-08-26: "GMT+3", the centre isn't in the UK).
+// Europe/Istanbul is a fixed UTC+3 year-round (Turkey dropped DST in 2016),
+// so it's a stable stand-in for "GMT+3, no seasonal drift" regardless of
+// whether the centre is literally in Turkey. Real multi-centre timezone
+// support (a timezone column on centers, read per-centre instead of this
+// constant) is planned as its own follow-up, not folded into this fix.
+const CENTRE_TIMEZONE = "Europe/Istanbul";
+
 /**
- * Formats a Date from its local components, not `toISOString()`, which
- * round-trips through UTC and silently shifts the date by a day whenever the
- * server's timezone is ahead of UTC (e.g. Europe/Istanbul -- confirmed live
- * this session). Exported so any "today" comparison elsewhere in the app
- * uses the same safe pattern instead of repeating the bug.
+ * Formats a Date as the calendar date it is at the centre (CENTRE_TIMEZONE),
+ * regardless of what timezone the server process itself is running in. The
+ * previous version used the Date object's own local components
+ * (getFullYear/getMonth/getDate), which are only correct when the server's
+ * OS timezone happens to match the centre's -- it doesn't: Vercel's Node
+ * runtime has no TZ set (defaults to UTC), and the "confirmed live" note
+ * that used to justify that approach was actually testing against a dev
+ * sandbox, not real production. Intl.DateTimeFormat with an explicit
+ * timeZone sidesteps the question of what zone the process is in entirely --
+ * correct on any host, and rolls over at the centre's own midnight rather
+ * than the process's.
  */
 export function toLocalIso(d: Date): string {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  return new Intl.DateTimeFormat("en-CA", { timeZone: CENTRE_TIMEZONE }).format(d);
+}
+
+/** Minutes since midnight at the centre (CENTRE_TIMEZONE) -- same reasoning
+ * as toLocalIso, for code comparing against an "HH:MM" wall-clock time
+ * (e.g. matching a Zoom join event to the closest scheduled TP slot)
+ * instead of a calendar date. */
+export function toLocalMinutes(d: Date): number {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: CENTRE_TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(d);
+  const hour = Number(parts.find((p) => p.type === "hour")?.value ?? 0);
+  const minute = Number(parts.find((p) => p.type === "minute")?.value ?? 0);
+  return hour * 60 + minute;
 }
 
 /** Groups events into one row per distinct date that actually has an event
