@@ -35,7 +35,14 @@ export default async function CentreOwnerPage() {
   const courseIds = (courses ?? []).map((c) => c.id);
   const coursesRunning = (courses ?? []).filter((c) => computeCourseState(c.start_date, c.end_date, today) === "running").length;
 
-  const { data: plans } = courseIds.length ? await admin.from("payment_plans").select("id, course_id").in("course_id", courseIds) : { data: [] };
+  const grantProfileIds = [...new Set((grants ?? []).map((g) => g.profile_id))];
+  const [{ data: plans }, { data: people }] = await Promise.all([
+    courseIds.length ? admin.from("payment_plans").select("id, course_id").in("course_id", courseIds) : Promise.resolve({ data: [] }),
+    grantProfileIds.length
+      ? admin.from("profiles").select("id, full_name, course_id").in("id", grantProfileIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const nameById = new Map((people ?? []).map((p) => [p.id, p.full_name]));
   const planIds = (plans ?? []).map((p) => p.id);
   const { data: payments } = planIds.length
     ? await admin.from("payments").select("amount, status, payment_plan_id").in("payment_plan_id", planIds)
@@ -48,10 +55,6 @@ export default async function CentreOwnerPage() {
 
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
   const ownerActionsThisMonth = (ownerActions ?? []).filter((a) => a.created_at >= monthStart).length;
-
-  const grantProfileIds = [...new Set((grants ?? []).map((g) => g.profile_id))];
-  const { data: people } = grantProfileIds.length ? await admin.from("profiles").select("id, full_name, course_id").in("id", grantProfileIds) : { data: [] };
-  const nameById = new Map((people ?? []).map((p) => [p.id, p.full_name]));
 
   const [{ data: customRoles }, { data: customCapabilities }] = await Promise.all([
     admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId),

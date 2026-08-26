@@ -761,28 +761,24 @@ export default async function PortfolioCelta5Page({
 
   // remaining-compliance.md item 4: CELTA 5 front matter (candidate name,
   // centre number, tutors) populated from real data, never typed by hand.
-  const { data: courseTutorRows } = trainee.course_id
-    ? await supabase.from("course_tutors").select("profile_id").eq("course_id", trainee.course_id).is("left_at", null)
-    : { data: [] };
-
-  const { data: obsTasks } = trainee.course_id
-    ? await supabase.from("observation_tasks").select("id, title, instructions").eq("course_id", trainee.course_id).order("created_at")
-    : { data: [] };
-  const { data: obsTaskSubmissions } = await supabase
-    .from("observation_task_submissions")
-    .select("task_id, response, submitted_at")
-    .eq("trainee_id", traineeId);
+  const lessonIds = (lessons ?? []).map((l) => l.id);
+  const [{ data: courseTutorRows }, { data: obsTasks }, { data: obsTaskSubmissions }, { data: criteriaTags }] = await Promise.all([
+    trainee.course_id
+      ? supabase.from("course_tutors").select("profile_id").eq("course_id", trainee.course_id).is("left_at", null)
+      : Promise.resolve({ data: [] }),
+    trainee.course_id
+      ? supabase.from("observation_tasks").select("id, title, instructions").eq("course_id", trainee.course_id).order("created_at")
+      : Promise.resolve({ data: [] }),
+    supabase.from("observation_task_submissions").select("task_id, response, submitted_at").eq("trainee_id", traineeId),
+    lessonIds.length > 0
+      ? supabase.from("tp_lesson_criteria_tags").select("*").in("tp_lesson_id", lessonIds).order("created_at")
+      : Promise.resolve({ data: [] }),
+  ]);
   const staffSubmissionByTaskId = new Map((obsTaskSubmissions ?? []).map((s) => [s.task_id, s]));
   const tutorIds = (courseTutorRows ?? []).map((t) => t.profile_id);
   const { data: tutorProfiles } =
     tutorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", tutorIds) : { data: [] };
   const tutorNames = (tutorProfiles ?? []).map((t) => t.full_name);
-
-  const lessonIds = (lessons ?? []).map((l) => l.id);
-  const { data: criteriaTags } =
-    lessonIds.length > 0
-      ? await supabase.from("tp_lesson_criteria_tags").select("*").in("tp_lesson_id", lessonIds).order("created_at")
-      : { data: [] };
 
   const taughtAssignments = (planAssignments ?? []).filter((p) => p.taught_at);
   const tpPointIdsForLevels = [...new Set(taughtAssignments.map((p) => p.tp_point_id).filter((id): id is string => !!id))];

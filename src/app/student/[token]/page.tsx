@@ -239,31 +239,35 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // earlier-that-day TP event on this course, not by tp_number (a single
   // calendar TP round can host several trainees' back-to-back segments
   // under one event_time, same premise nextClassTeachers works from).
+  const [{ data: earlierSameDay }, { data: nextClassDecline }] = await Promise.all([
+    nextClass?.zoomUrl && nextClass.eventTime
+      ? admin
+          .from("course_timetable_events")
+          .select("id")
+          .eq("course_id", nextClass.courseId)
+          .eq("type", "tp")
+          .eq("event_date", nextClass.eventDate)
+          .lt("event_time", nextClass.eventTime)
+          .limit(1)
+      : Promise.resolve({ data: null }),
+    nextClass
+      ? admin
+          .from("volunteer_declines")
+          .select("id")
+          .eq("volunteer_student_id", accessToken.volunteer_student_id)
+          .eq("timetable_event_id", nextClass.eventId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+
   let joinActivationIso: string | null = null;
   if (nextClass?.zoomUrl && nextClass.eventTime) {
-    const { data: earlierSameDay } = await admin
-      .from("course_timetable_events")
-      .select("id")
-      .eq("course_id", nextClass.courseId)
-      .eq("type", "tp")
-      .eq("event_date", nextClass.eventDate)
-      .lt("event_time", nextClass.eventTime)
-      .limit(1);
     const isFirstTpOfDay = !earlierSameDay || earlierSameDay.length === 0;
     if (isFirstTpOfDay) {
       const startMs = new Date(`${nextClass.eventDate}T${nextClass.eventTime}`).getTime();
       joinActivationIso = new Date(startMs - 10 * 60_000).toISOString();
     }
   }
-
-  const { data: nextClassDecline } = nextClass
-    ? await admin
-        .from("volunteer_declines")
-        .select("id")
-        .eq("volunteer_student_id", accessToken.volunteer_student_id)
-        .eq("timetable_event_id", nextClass.eventId)
-        .maybeSingle()
-    : { data: null };
 
   // "Teachers"/"topic" for the next class -- linked_tp_number is matched by
   // VALUE against plan_assignments.tp_number (not a foreign key), and one

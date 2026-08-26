@@ -185,16 +185,18 @@ export default async function ResourceHubPage({
     // connect-spec-corrections-for-claude-code.md item 6 -- centre/course-
     // optional; skip the queries when this course doesn't use the pool.
     const materialPoolEnabled = course?.tp_material_pool_enabled ?? false;
-    const { data: materialItemsRaw } = materialPoolEnabled
-      ? await supabase
-          .from("tp_material_pool_items")
-          .select("*")
-          .or(`center_id.is.null,center_id.eq.${trainee.center_id}`)
-          .order("created_at", { ascending: false })
-      : { data: [] };
-    const { data: mySubgroupMember } = materialPoolEnabled
-      ? await supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle()
-      : { data: null };
+    const [{ data: materialItemsRaw }, { data: mySubgroupMember }] = await Promise.all([
+      materialPoolEnabled
+        ? supabase
+            .from("tp_material_pool_items")
+            .select("*")
+            .or(`center_id.is.null,center_id.eq.${trainee.center_id}`)
+            .order("created_at", { ascending: false })
+        : Promise.resolve({ data: [] }),
+      materialPoolEnabled
+        ? supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle()
+        : Promise.resolve({ data: null }),
+    ]);
     const { data: mySubgroup } = mySubgroupMember?.subgroup_id
       ? await supabase.from("course_subgroups").select("tp_group_id").eq("id", mySubgroupMember.subgroup_id).maybeSingle()
       : { data: null };

@@ -87,7 +87,10 @@ export default async function TodayPage() {
   // build-spec.md: "A line on the marking tutor's Today screen -- '2
   // assignments have scanner findings' -- visible to that tutor only,
   // with no candidate names." A bare count only, never a list here.
-  const { data: courseAssignmentIds } = await supabase.from("assignments").select("id").eq("course_id", courseId);
+  const [{ data: courseAssignmentIds }, materialsOverlaps] = await Promise.all([
+    supabase.from("assignments").select("id").eq("course_id", courseId),
+    findMaterialsOverlaps(supabase, courseId),
+  ]);
   const { data: unreviewedFindings } =
     (courseAssignmentIds ?? []).length > 0
       ? await supabase
@@ -103,7 +106,7 @@ export default async function TodayPage() {
 
   // Handbook 8.2: "raise as a note to the tutor, never an accusation" --
   // same bare-count, no-names treatment as the plagiarism line above.
-  const materialsOverlapCount = new Set((await findMaterialsOverlaps(supabase, courseId)).map((f) => f.assignmentId)).size;
+  const materialsOverlapCount = new Set(materialsOverlaps.map((f) => f.assignmentId)).size;
 
   // "Needs you" -- capped at 3 total, this priority order.
   type Alert = { title: string; meta: string; href: string; destructive?: boolean };
