@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCachedRealCenter } from "@/lib/supabase/cached-queries";
 import { ApplicationForm } from "@/components/apply/application-form";
 
 // "The intake dropdown shows real availability... the number is always the
@@ -24,12 +25,7 @@ export default async function ApplyPage({
   const { course: preselectedCourseId } = await searchParams;
   const admin = createAdminClient();
 
-  const { data: center } = await admin
-    .from("centers")
-    .select("id, name, logo_url, application_low_availability_threshold")
-    .eq("is_demo", false)
-    .limit(1)
-    .maybeSingle();
+  const center = await getCachedRealCenter();
 
   if (!center) {
     return (

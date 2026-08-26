@@ -8,6 +8,7 @@ import { WhatChangedPanel } from "@/components/what-changed-panel";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import { computeApplicantCounts } from "@/lib/admissions-counts";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // for-claude-code-course-admin-landing-and-admissions.md §1: date-derived
 // "upcoming" alone doesn't tell Course Admin what's actually next for a
@@ -38,9 +39,9 @@ export default async function AdminDashboardPage() {
   const supabase = await createClient();
   const today = toLocalIso(new Date());
 
-  const [{ data: courses }, { data: center }, { data: people }, { data: events }] = await Promise.all([
+  const [{ data: courses }, center, { data: people }, { data: events }] = await Promise.all([
     supabase.from("courses").select("*").eq("center_id", profile.center_id).order("start_date", { ascending: false }),
-    supabase.from("centers").select("name, center_number").eq("id", profile.center_id).maybeSingle(),
+    getCachedCenter(profile.center_id),
     supabase.from("profiles").select("course_id, role").eq("center_id", profile.center_id).not("course_id", "is", null),
     supabase.from("course_timetable_events").select("course_id, event_date"),
   ]);
