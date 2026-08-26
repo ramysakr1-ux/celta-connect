@@ -14,6 +14,7 @@ import {
 import { withConnectBranding } from "@/lib/email-layout";
 import { EmailPreview } from "@/app/demo/journey/email-preview";
 import { BackToTop } from "@/app/demo/journey/back-to-top";
+import { AiReadingPanel } from "@/app/dashboard/admissions/[id]/ai-reading-panel";
 
 // Ramy, 2026-08-25: "one link... it will open all of them, and it will sort
 // of tell the process, the journey" -- the application/interview/offer
@@ -102,6 +103,36 @@ export default async function JourneyPage() {
         .eq("active", true)
         .order("coverage_area")
     : { data: [] };
+
+  // Ramy, 26 Aug 2026: "can we have the part where AI is checking it..."
+  // -- Step 3 only described shadow-mode reading in a caveat line before;
+  // this renders the real AiReadingPanel component (same one the real
+  // admissions detail page uses) with representative sample data, the same
+  // "actual component, not a paraphrase" approach the email steps already
+  // take. Deliberately not all-clear -- "borderline" with one below-standard
+  // row shows what the AI actually flags, not just a rubber stamp.
+  // interview_auto_send_at is left null so the panel's own "Hold" form
+  // (which posts to a real applicant id) never renders here.
+  const sampleAiReading = {
+    id: "demo",
+    ai_reading_generated_at: new Date().toISOString(),
+    ai_reading_lane: "borderline",
+    interview_auto_send_at: null,
+    interview_auto_send_cancelled_at: null,
+    interview_auto_send_sent_at: null,
+    ai_reading_summary: {
+      language_awareness: { level: "above" as const, note: null },
+      accuracy: { level: "at" as const, note: null },
+      organisation: {
+        level: "below" as const,
+        note: "Paragraph 2 restates the topic without developing an argument -- no clear structure signposted.",
+      },
+      range: { level: "at" as const, note: null },
+      substance: { level: "above" as const, note: null },
+      summary:
+        "Tariq shows strong topic knowledge and mostly accurate language, but the middle section loses structure -- worth a quick follow-up in interview to see if that's nerves or a genuine gap.",
+    },
+  };
 
   const applicantName = "Tariq Osei";
   const courseName = "CELTA Demo Course";
@@ -250,8 +281,10 @@ export default async function JourneyPage() {
               />
               <p className="text-xs text-muted">
                 If the centre has turned on AI shadow-mode reading (off by default), a private reading against the
-                marking scheme is also recorded here -- never shown to the applicant, never auto-rejects anyone.
+                marking scheme is also recorded right on this applicant&apos;s page -- never shown to them, never
+                auto-rejects anyone. Here&apos;s what that reading actually looks like:
               </p>
+              <AiReadingPanel applicant={sampleAiReading} />
             </div>
           </Step>
           <Step number={4} title="Is invited to interview" blurb="Sent once the written task has been read.">
