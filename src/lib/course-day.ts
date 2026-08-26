@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
+import { toLocalIso } from "@/lib/timetable-grid";
 
 // "Day N" of the course = the Nth distinct timetabled date, not a raw
 // calendar-day count -- ties FOL's Day 1/10/12 language to the same clock
@@ -26,7 +27,7 @@ export async function isCourseDayReached(
   const targetDate = distinctDates[dayNumber - 1];
   if (!targetDate) return false;
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toLocalIso(new Date());
   return today >= targetDate;
 }
 
@@ -46,7 +47,7 @@ export async function computeCourseDayProgress(
   if (!data || data.length === 0) return null;
 
   const distinctDates = Array.from(new Set(data.map((row) => row.event_date))).sort();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toLocalIso(new Date());
   const daysReached = distinctDates.filter((d) => d <= today).length;
   if (daysReached === 0) return null;
 

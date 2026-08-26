@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { toLocalIso } from "@/lib/timetable-grid";
 
 // "A missed instalment is not an automatic consequence (no auto-suspension,
 // no auto-email) -- it becomes a payments task that sits until a human acts
@@ -9,7 +10,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // escalation of any kind.
 export async function runMissedInstalmentsCron(): Promise<{ missed: number }> {
   const admin = createAdminClient();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toLocalIso(new Date());
 
   const { data: overdue } = await admin
     .from("payments")
