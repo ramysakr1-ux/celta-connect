@@ -7,8 +7,8 @@ import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { CourseSwitcher, type SwitcherCourse } from "@/app/trainer/(hub)/course-switcher";
 
 // The operational "Command Centre" -- roster/timetable/volunteers/TP
@@ -102,21 +102,23 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // same reason switchActiveCourse does.
   let switcherCourses: SwitcherCourse[] = [];
   if (profile) {
-    const supabase = await createClient();
-    const { data: center } = await supabase.from("centers").select("is_demo").eq("id", profile.center_id).maybeSingle();
+    const admin = createAdminClient();
+    const wantsTutorLinks = profile.role === "trainer" || profile.role === "platform_owner";
+    // None of these three depend on each other's results -- center is now
+    // cross-request cached (is_demo essentially never changes), course
+    // only needs profile.course_id, tutorLinks only needs profile.id. Was
+    // 2-3 stacked sequential round trips on every single page under
+    // /trainer/(hub)/*, now effectively free (center) or one batch.
+    const [center, courseResult, tutorLinksResult] = await Promise.all([
+      getCachedCenter(profile.center_id),
+      profile.course_id ? admin.from("courses").select("name").eq("id", profile.course_id).maybeSingle() : Promise.resolve({ data: null }),
+      wantsTutorLinks ? admin.from("course_tutors").select("course_id").eq("profile_id", profile.id).is("left_at", null) : Promise.resolve({ data: null }),
+    ]);
     isDemo = center?.is_demo ?? false;
-    if (profile.course_id) {
-      const { data: course } = await supabase.from("courses").select("name").eq("id", profile.course_id).maybeSingle();
-      courseCode = course?.name ?? null;
-    }
-    if (profile.role === "trainer" || profile.role === "platform_owner") {
-      const admin = createAdminClient();
-      const { data: tutorLinks } = await admin
-        .from("course_tutors")
-        .select("course_id")
-        .eq("profile_id", profile.id)
-        .is("left_at", null);
-      const linkedCourseIds = [...new Set((tutorLinks ?? []).map((l) => l.course_id))];
+    courseCode = courseResult.data?.name ?? null;
+
+    if (wantsTutorLinks) {
+      const linkedCourseIds = [...new Set((tutorLinksResult.data ?? []).map((l) => l.course_id))];
       if (linkedCourseIds.length > 1) {
         const { data: linkedCourses } = await admin
           .from("courses")

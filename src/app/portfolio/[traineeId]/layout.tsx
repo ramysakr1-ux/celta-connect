@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { Eye } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
@@ -156,14 +157,14 @@ export default async function PortfolioLayout({
 
   const today = new Date().toISOString().slice(0, 10);
   const [
-    { data: center },
+    center,
     { data: lessons },
     { data: assignments },
     { data: preCourseSections },
     { data: preCourseResponses },
     { data: todaysEvents },
   ] = await Promise.all([
-    supabase.from("centers").select("*").eq("id", trainee.center_id).maybeSingle(),
+    getCachedCenter(trainee.center_id),
     supabase.from("tp_lessons").select("id").eq("trainee_id", trainee.id),
     supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
     supabase.from("pre_course_task_sections").select("id").eq("center_id", trainee.center_id),

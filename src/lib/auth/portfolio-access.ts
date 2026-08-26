@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -30,7 +31,10 @@ export async function isAssessorTourMode(): Promise<boolean> {
 // admin client (RLS has no auth.uid() to key off for this viewer at all) --
 // it never grants access to any Server Action, which all still gate on
 // requireRole() and simply fail closed for a sessionless caller.
-export async function getAssessorCourseId(): Promise<string | null> {
+// cache()'d -- confirmed 10 nested pages under /portfolio/[traineeId]
+// independently re-running this same lookup on top of the identical call
+// portfolio/[traineeId]/layout.tsx already made for the same request.
+export const getAssessorCourseId = cache(async (): Promise<string | null> => {
   const cookieStore = await cookies();
   const token = cookieStore.get(ASSESSOR_COOKIE)?.value;
   if (!token) return null;
@@ -45,7 +49,7 @@ export async function getAssessorCourseId(): Promise<string | null> {
 
   if (!data || new Date(data.expires_at) < new Date()) return null;
   return data.course_id;
-}
+});
 
 // Separate from getAssessorCourseId() on purpose: that function is used
 // everywhere as a blunt "is this a live assessor session" check, and

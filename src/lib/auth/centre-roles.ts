@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { OverrideMatrix } from "@/lib/auth/centre-permissions";
@@ -28,7 +29,14 @@ export interface CentreRoleContext {
  * home centre and grants nothing. The database enforces the same rule for RLS;
  * this is the app-side answer to the same question, and the two must agree.
  */
-export async function getCentreRoleContext(profile: {
+// cache() keyed on the profile object's reference identity -- every call
+// site gets `profile` from the (also cache()-wrapped) getCurrentProfile,
+// directly or via requireRole, so they share the same reference within one
+// request and this memoizes correctly. Confirmed real duplicate calls: 9
+// nested pages under /centre independently re-running this (2-5 DB round
+// trips each) on top of the identical call centre/layout.tsx already made
+// for the same request.
+export const getCentreRoleContext = cache(async function getCentreRoleContext(profile: {
   id: string;
   center_id: string;
   active_center_id?: string | null;
@@ -131,4 +139,4 @@ export async function getCentreRoleContext(profile: {
     customRoles,
     customCapabilities,
   };
-}
+});
