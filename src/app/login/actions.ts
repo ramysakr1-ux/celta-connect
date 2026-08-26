@@ -8,6 +8,7 @@ import { sendApplicantEmail } from "@/lib/admissions-email";
 import { authEmailShell, p } from "@/lib/email-layout";
 import { isAuthRateLimited } from "@/lib/auth-rate-limit";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { resolveLandingPath } from "@/lib/auth/landing-path";
 
 export interface SignInState {
   error: string | null;
@@ -105,13 +106,23 @@ export async function signIn(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return { error: "Incorrect email or password." };
   }
 
-  redirect(safeRedirectPath(formData.get("next") as string | null, "/dashboard"));
+  // Redirect straight to the real landing page instead of through
+  // /dashboard -- that page just re-fetches this same profile and runs
+  // this same role logic before redirecting again, an entire extra
+  // request/render round trip on every single sign-in. An explicit `next`
+  // (e.g. bounced here from a protected deep link) still wins either way.
+  const next = formData.get("next") as string | null;
+  if (next && next.startsWith("/") && !next.startsWith("//")) {
+    redirect(next);
+  }
+  const { data: profile } = await supabase.from("profiles").select("*").eq("id", authData.user.id).maybeSingle();
+  redirect(profile ? await resolveLandingPath(profile) : "/dashboard");
 }
 
 export async function signOut() {
