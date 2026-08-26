@@ -54,7 +54,7 @@ export default async function AdminSettingsPage({
   // connected in this request's query string.
   const { data: driveRow } = await admin
     .from("center_google_connections")
-    .select("id")
+    .select("center_id")
     .eq("center_id", profile.center_id)
     .maybeSingle();
   const driveConnected = Boolean(driveRow);
