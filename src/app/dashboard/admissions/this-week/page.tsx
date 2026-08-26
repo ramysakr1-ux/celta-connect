@@ -1,17 +1,26 @@
 import Link from "next/link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI"] as const;
 
-function mondayOf(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay(); // 0 = Sun ... 6 = Sat
+// Pure date-string arithmetic (UTC-anchored Date construction, never local
+// components) -- "this week" starts from todayIso, already resolved to the
+// centre's own timezone by the caller, so nothing here needs to touch the
+// server's own local clock again.
+function addDaysIso(iso: string, days: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  date.setUTCDate(date.getUTCDate() + days);
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+}
+function mondayOfIso(todayIso: string): string {
+  const [y, m, d] = todayIso.split("-").map(Number);
+  const day = new Date(Date.UTC(y, m - 1, d)).getUTCDay(); // 0 = Sun ... 6 = Sat
   const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
+  return addDaysIso(todayIso, diff);
 }
 
 // Interview Booking.dc.html 1a, "This week's interviews" -- the staff grid
@@ -24,11 +33,9 @@ export default async function ThisWeeksInterviewsPage() {
   const staff = await requireAdmissionsHandler();
   const supabase = await createClient();
 
-  const monday = mondayOf(new Date());
-  const friday = new Date(monday);
-  friday.setDate(friday.getDate() + 4);
-  const weekStart = toLocalIso(monday);
-  const weekEnd = toLocalIso(friday);
+  const timeZone = (await getCachedCenter(staff.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const weekStart = mondayOfIso(toLocalIso(new Date(), timeZone));
+  const weekEnd = addDaysIso(weekStart, 4);
 
   const [{ data: slots }, { data: flagRows }] = await Promise.all([
     supabase
@@ -71,9 +78,7 @@ export default async function ThisWeeksInterviewsPage() {
   }
 
   const days = DAY_LABELS.map((label, i) => {
-    const d = new Date(monday);
-    d.setDate(d.getDate() + i);
-    const iso = toLocalIso(d);
+    const iso = addDaysIso(weekStart, i);
     return { label, date: iso, slots: byDate.get(iso) ?? [] };
   });
 

@@ -5,7 +5,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus } from "@/lib/auth/portfolio-access";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
 import { hasMarkingGuidance } from "@/lib/marking-guidance";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DesignerCredit } from "@/components/designer-credit";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
 
@@ -74,7 +75,6 @@ export default async function AssessorPage({
   if (!courseId) redirect("/login?error=assessor_link_invalid");
 
   const admin = createAdminClient();
-  const today = toLocalIso(new Date());
 
   const [{ data: course }, { data: accessToken }, readiness, candidates] = await Promise.all([
     admin.from("courses").select("*, centers(name, center_number, appian_url)").eq("id", courseId).maybeSingle(),
@@ -87,6 +87,8 @@ export default async function AssessorPage({
   if (!course) redirect("/login?error=assessor_link_invalid");
 
   const center = course.centers as unknown as { name: string; center_number: string; appian_url: string | null } | null;
+  const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
 
   // MCT-set, not computed from assessor_visit_date -- see migration 0127.
   const sendByDate = course.provisional_grades_due_at ? course.provisional_grades_due_at.slice(0, 10) : null;

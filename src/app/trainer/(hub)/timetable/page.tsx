@@ -10,7 +10,8 @@ import { AddEventForm } from "@/app/trainer/(hub)/timetable/add-event-form";
 import { GenerateSkeletonForm } from "@/app/trainer/(hub)/timetable/generate-skeleton-form";
 import { DragBoard, type UnmatchedParticipant } from "@/app/trainer/(hub)/timetable/drag-board";
 import { TimeBandsForm } from "@/app/trainer/(hub)/timetable/time-bands-form";
-import { resolveTimeBands, toLocalIso, type TimetableEvent } from "@/lib/timetable-grid";
+import { resolveTimeBands, toLocalIso, DEFAULT_TIMEZONE, type TimetableEvent } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { halfOwningDate, type TpTimetableEvent } from "@/lib/rotation";
 import { ReadOnlyTimetableBoard, type EventMeta } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
 import { Stage2Section } from "@/app/trainer/(hub)/timetable/stage2-section";
@@ -52,7 +53,7 @@ export default async function TrainerTimetablePage({
   }
 
   const [{ data: course }, { data: events }, { data: volunteers }] = await Promise.all([
-    supabase.from("courses").select("timetable_locked_at, time_bands, delivery_mode").eq("id", courseId).maybeSingle(),
+    supabase.from("courses").select("timetable_locked_at, time_bands, delivery_mode, center_id").eq("id", courseId).maybeSingle(),
     supabase
       .from("course_timetable_events")
       .select("*")
@@ -88,7 +89,8 @@ export default async function TrainerTimetablePage({
   const locked = Boolean(course?.timetable_locked_at);
   const timeBands = resolveTimeBands(course?.time_bands ?? null);
   const isCustomTimeBands = Boolean(course?.time_bands && course.time_bands.length > 0);
-  const today = toLocalIso(new Date());
+  const timeZone = (course ? (await getCachedCenter(course.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
 
   // The grid no longer prints a strong week header of its own (apply-to-app.md
   // §2.7), so the edit-mode header carries the overall date range instead.
@@ -363,6 +365,7 @@ export default async function TrainerTimetablePage({
                 unmatchedByEvent={unmatchedByEvent}
                 mixedMode={course?.delivery_mode === "mixed"}
                 canEdit={isMct}
+                timeZone={timeZone}
               />
             </div>
           ) : (

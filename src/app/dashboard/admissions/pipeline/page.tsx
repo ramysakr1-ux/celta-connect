@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { computeApplicantPaymentState } from "@/lib/payments/applicant-payment-state";
 import { computeFunnel, computeFunnelAlerts, type FunnelApplicant } from "@/lib/admissions-pipeline";
 import { PipelineFunnel, type PipelinePerson } from "@/app/dashboard/admissions/pipeline/pipeline-funnel";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // Admissions Pipeline.dc.html: "A course fills in stages, and each stage
 // leaks... this is the one screen that shows where the leak is while
@@ -19,7 +20,8 @@ export default async function AdmissionsPipelinePage({
   const staff = await requireAdmissionsHandler();
   const { course: selectedCourseId } = await searchParams;
   const supabase = await createClient();
-  const today = toLocalIso(new Date());
+  const timeZone = (await getCachedCenter(staff.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
 
   const { data: courses } = await supabase
     .from("courses")

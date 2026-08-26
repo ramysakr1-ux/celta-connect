@@ -9,7 +9,8 @@ import { deleteBroadcast } from "@/app/portfolio/[traineeId]/stream-actions";
 import { TodayTab } from "@/app/portfolio/[traineeId]/today-tab";
 import { CandidateStatusCard } from "@/app/portfolio/[traineeId]/withdraw-card";
 import { TUTOR_ROLE_LABELS, type TutorRole } from "@/lib/tutor-roles";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 import { DesignerCredit } from "@/components/designer-credit";
@@ -60,11 +61,12 @@ export default async function CourseStreamPage({
   const { data: trainee } = await supabase
     .from("profiles")
     .select(
-      "course_id, email, phone, course_status, course_status_set_at, course_status_note, withdrawal_reportable, extension_completes_by, special_consideration, special_consideration_arrangements, special_consideration_evidence_url"
+      "course_id, center_id, email, phone, course_status, course_status_set_at, course_status_note, withdrawal_reportable, extension_completes_by, special_consideration, special_consideration_arrangements, special_consideration_evidence_url"
     )
     .eq("id", traineeId)
     .maybeSingle();
   if (!trainee?.course_id) notFound();
+  const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
   // build-spec.md §18 -- "Visibility follows the chat rule: tutors
@@ -90,10 +92,10 @@ export default async function CourseStreamPage({
   // at traineeId's own routes, each independently guarded already.
   if (!isStaff && !assessorCourseId) {
     const { data: course } = await supabase.from("courses").select("name").eq("id", trainee.course_id).maybeSingle();
-    return <TodayTab supabase={supabase} traineeId={traineeId} courseId={trainee.course_id} courseName={course?.name ?? null} />;
+    return <TodayTab supabase={supabase} traineeId={traineeId} courseId={trainee.course_id} courseName={course?.name ?? null} timeZone={timeZone} />;
   }
 
-  const today = toLocalIso(new Date());
+  const today = toLocalIso(new Date(), timeZone);
 
   const [{ data: broadcasts }, { data: timetableEvents }, { data: tutors }, { data: assignments }] =
     await Promise.all([
@@ -241,7 +243,7 @@ export default async function CourseStreamPage({
             // event (no event_time) has no real start to badge against.
             const zoomStartDate = linkedEvent
               ? linkedEvent.event_time
-                ? new Date(`${linkedEvent.event_date}T${linkedEvent.event_time}`)
+                ? zonedTimeToUtc(linkedEvent.event_date, linkedEvent.event_time, timeZone)
                 : null
               : b.zoom_time
                 ? new Date(b.zoom_time)

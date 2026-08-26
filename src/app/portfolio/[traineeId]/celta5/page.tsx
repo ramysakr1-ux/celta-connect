@@ -20,7 +20,7 @@ import { AssignmentsSummary, TpFeedbackSummary, AssessedTpStatsBadge } from "@/a
 import { CriteriaRatingPill, StandardRatingPill } from "@/lib/status-pill";
 import { computeProgressIssues, computeAssessedTpStats, computeAssessedHoursByMode, computeCurrentTpRound } from "@/lib/course-progress";
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
 import { ObservationForm } from "@/app/dashboard/trainee/celta5/observation-form";
@@ -761,7 +761,7 @@ export default async function PortfolioCelta5Page({
 
   // assessment-model.md link 3: which TP round the COHORT has reached,
   // not this one trainee's own pace -- see computeCurrentTpRound().
-  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], toLocalIso(new Date()));
+  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE));
 
   // remaining-compliance.md item 4: CELTA 5 front matter (candidate name,
   // centre number, tutors) populated from real data, never typed by hand.

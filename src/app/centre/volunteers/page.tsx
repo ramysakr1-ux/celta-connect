@@ -8,7 +8,8 @@ import { computeSessionTicks } from "@/lib/volunteer-attendance";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { VolunteerPoolRow } from "@/app/centre/volunteer-pool-row";
 import { Wordmark } from "@/components/wordmark";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // Dedicated screen per Volunteer Pool.dc.html (Desktop/Connect.zip handoff,
 // 2026-08-20): "reached from the 'Volunteer pool' card on the Centre Admin
@@ -39,7 +40,18 @@ export default async function CentreVolunteersPage({
   const courseIds = (courses ?? []).map((c) => c.id);
   const courseNameById = new Map((courses ?? []).map((c) => [c.id, c.name]));
   const courseEndById = new Map((courses ?? []).map((c) => [c.id, c.end_date]));
-  const today = toLocalIso(new Date());
+  // This view can span several centres at once (a branch owner's "all
+  // branches" scope) -- each course's own centre decides its "today".
+  const centerIdByCourseId = new Map((courses ?? []).map((c) => [c.id, c.center_id]));
+  const scopeCenters = await Promise.all(scope.map((id) => getCachedCenter(id)));
+  const timezoneByCenterId = new Map(scopeCenters.filter((c) => c !== null).map((c) => [c.id, c.time_zone]));
+  const todayByCourseId = new Map(
+    courseIds.map((id) => {
+      const centerId = centerIdByCourseId.get(id);
+      const timeZone = (centerId ? timezoneByCenterId.get(centerId) : null) ?? DEFAULT_TIMEZONE;
+      return [id, toLocalIso(new Date(), timeZone)];
+    })
+  );
 
   const { data: volunteers } =
     courseIds.length > 0
@@ -64,8 +76,9 @@ export default async function CentreVolunteersPage({
   // is already a per-person list, so "who's coming to the next class"
   // shows right on that person's own row rather than as a separate summary.
   const nextTpEventIdByCourse = new Map<string, string>();
+  const fallbackToday = toLocalIso(new Date(), DEFAULT_TIMEZONE);
   for (const e of tpEvents ?? []) {
-    if (e.event_date < today) continue;
+    if (e.event_date < (todayByCourseId.get(e.course_id) ?? fallbackToday)) continue;
     const current = nextTpEventIdByCourse.get(e.course_id);
     const currentDate = current ? (tpEvents ?? []).find((x) => x.id === current)?.event_date : undefined;
     if (!current || (currentDate && e.event_date < currentDate)) nextTpEventIdByCourse.set(e.course_id, e.id);
@@ -97,7 +110,7 @@ export default async function CentreVolunteersPage({
       // at least one of them hasn't ended yet.
       const active = g.members.some((m) => {
         const end = courseEndById.get(m.courseId);
-        return !end || end >= today;
+        return !end || end >= (todayByCourseId.get(m.courseId) ?? fallbackToday);
       });
       return { ...g, hours, active };
     })

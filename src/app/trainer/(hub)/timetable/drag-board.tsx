@@ -111,7 +111,11 @@ function buildWeeks(events: TimetableEvent[]): WeekRow[] {
     for (let i = 0; i < 7; i += 1) {
       const d = new Date(cursor);
       d.setDate(cursor.getDate() + i);
-      const iso = toLocalIso(d);
+      // Not toLocalIso() -- d was built by pure calendar arithmetic off an
+      // already-known event date (no "current real-world moment" or centre
+      // timezone involved), so it needs the same local round-trip its own
+      // construction used, not a real timezone conversion.
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       const dayEvents = byDate.get(iso) ?? [];
       if (i >= 5 && dayEvents.length === 0) continue;
       days.push({ isoDate: iso, dayOfMonth: d.getDate(), weekday: WEEKDAY_NAMES[d.getDay()], events: dayEvents });
@@ -133,6 +137,7 @@ export function DragBoard({
   unmatchedByEvent,
   mixedMode,
   canEdit,
+  timeZone,
 }: {
   events: TimetableEvent[];
   locked: boolean;
@@ -146,9 +151,10 @@ export function DragBoard({
   // isn't gated: taking the register is a day-of teaching task, not a
   // timetable edit, and actions.ts' setAttendance was deliberately left open.
   canEdit: boolean;
+  timeZone: string;
 }) {
   const weeks = buildWeeks(events);
-  const today = toLocalIso(new Date());
+  const today = toLocalIso(new Date(), timeZone);
   // for-claude-code-timetable-dragboard-fidelity.md: the day-stack redesign
   // (cd673c0, an approved replacement of the old time-band grid) never
   // carried over live-Zoom-join capability -- event-cell.tsx's JoinChip

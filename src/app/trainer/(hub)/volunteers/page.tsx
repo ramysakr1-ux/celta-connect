@@ -13,7 +13,8 @@ import { AttendanceRegisterGrid } from "@/components/attendance-register-grid";
 import { VolunteerSessionPanels } from "@/app/trainer/(hub)/volunteers/session-panels";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { computeSessionTicks, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-attendance";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // §14 -- the trainer-side register that mints the tokenized links volunteer
 // students use to reach /student/[token] (no login, no password -- see
@@ -66,7 +67,8 @@ export default async function VolunteersPage() {
   const tokenByVolunteer = new Map((tokens ?? []).map((t) => [t.volunteer_student_id, t.token]));
   const transcriptByVolunteer = new Map((signupProfiles ?? []).map((p) => [p.volunteer_student_id, p.transcript]));
 
-  const today = toLocalIso(new Date());
+  const timeZone = (courseForThreshold ? (await getCachedCenter(courseForThreshold.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
   const volunteerSessions = (volunteers ?? []).map((v) => {
     const attendedEventIds = new Set(
       (attendanceRows ?? []).filter((a) => a.volunteer_student_id === v.id).map((a) => a.timetable_event_id)

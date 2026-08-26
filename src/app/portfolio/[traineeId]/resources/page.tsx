@@ -6,7 +6,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { computeThisWeekRange } from "@/lib/course-progress";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import {
   RESOURCE_CATEGORY_LABELS,
   RESOURCE_CATEGORY_ORDER,
@@ -137,7 +138,8 @@ export default async function ResourceHubPage({
     materials: (typeof resources)[number][];
   }[] = [];
   if (showTraineeLayout && trainee.course_id && course?.start_date) {
-    const today = toLocalIso(new Date());
+    const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+    const today = toLocalIso(new Date(), timeZone);
     const { weekStart, weekEnd } = computeThisWeekRange(course.start_date, today);
     const { data: weekEvents } = await supabase
       .from("course_timetable_events")

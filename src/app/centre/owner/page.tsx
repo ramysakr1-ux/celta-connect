@@ -3,7 +3,8 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { computeCourseState } from "@/lib/course-progress";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { roleLabel, CAPABILITY_LABELS, type Capability } from "@/lib/auth/centre-permissions";
 import { CapabilityCustomizer } from "@/app/centre/owner/capability-customizer";
 import { BranchVisibilityCard } from "@/app/centre/owner/branch-visibility-card";
@@ -23,7 +24,8 @@ export default async function CentreOwnerPage() {
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
   const admin = createAdminClient();
-  const today = toLocalIso(new Date());
+  const timeZone = (await getCachedCenter(centerId))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
 
   const [{ data: center }, { data: courses }, { data: grants }, { data: ownerActions }] = await Promise.all([
     admin.from("centers").select("id, name, organisation_id").eq("id", centerId).maybeSingle(),

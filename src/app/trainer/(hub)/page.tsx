@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchRosterRows } from "@/lib/roster";
-import { categorize, isEventLive, toLocalIso } from "@/lib/timetable-grid";
+import { categorize, isEventLive, toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { CATEGORY_ACCENT } from "@/app/trainer/(hub)/timetable/event-cell";
 import { computeWeekOf } from "@/lib/course-progress";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
@@ -42,7 +43,11 @@ export default async function TodayPage() {
     return <div className="sheet text-sm text-muted">No course assigned.</div>;
   }
 
-  const today = toLocalIso(new Date());
+  // trainer is null for an assessor session -- courseId is still known
+  // though (from the assessor token), just not trainer.center_id.
+  const centerId = trainer?.center_id ?? (await supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle()).data?.center_id;
+  const timeZone = (centerId ? (await getCachedCenter(centerId))?.time_zone : null) ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
 
   // Feedback assist (design_handoff_feedback_assist, 2026-08-17) is a
   // trainer's own tool, not a course-admin one -- "whoever runs course admin
@@ -257,9 +262,12 @@ export default async function TodayPage() {
   // question, not a daily nudge.
   const REGISTER_LOOKBACK_DAYS = 7;
   const lookbackDate = (() => {
+    // Pure calendar-date arithmetic on the already-resolved `today` string,
+    // not a fresh real-timezone conversion -- same self-consistent local
+    // round-trip reasoning as buildDayRows' own week-start computation.
     const d = new Date(`${today}T00:00:00`);
     d.setDate(d.getDate() - REGISTER_LOOKBACK_DAYS);
-    return toLocalIso(d);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   })();
   const { data: unloggedSessions } = await supabase
     .from("course_timetable_events")

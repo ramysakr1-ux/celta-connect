@@ -5,7 +5,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { canView, can } from "@/lib/auth/centre-permissions";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { tutorRoleLabel } from "@/lib/tutor-roles";
 import { PricingForm } from "@/app/centre/courses/[id]/pricing-form";
 
@@ -53,7 +54,8 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
     joined: Boolean(t.verified_at),
   }));
 
-  const today = toLocalIso(new Date());
+  const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
   const state = computeCourseState(course.start_date, course.end_date, today);
   const standing =
     state === "running"

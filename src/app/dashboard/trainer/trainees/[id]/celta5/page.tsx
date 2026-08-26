@@ -10,7 +10,7 @@ import {
   CELTA_CRITERIA_CODES,
 } from "@/lib/celta-criteria";
 import { computeCurrentTpRound } from "@/lib/course-progress";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { AssignmentsSummary, TpFeedbackSummary } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
 import { Stage1Form } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-form";
@@ -101,7 +101,7 @@ export default async function Celta5RecordPage({
 
   // assessment-model.md link 3: which TP round the COHORT has reached,
   // not this one trainee's own pace -- see computeCurrentTpRound().
-  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], toLocalIso(new Date()));
+  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE));
 
   const lessonIds = (lessons ?? []).map((l) => l.id);
   const { data: criteriaTags } =

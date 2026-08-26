@@ -1,6 +1,7 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { AnnouncementComposer } from "@/app/trainer/(hub)/announcements/composer";
 import { ScheduledPanel, type ScheduledRowData } from "@/app/trainer/(hub)/announcements/scheduled-panel";
 
@@ -23,7 +24,8 @@ export default async function AnnouncementsPage() {
   }
   const supabase = await createClient();
   const courseId = trainer.course_id;
-  const today = toLocalIso(new Date());
+  const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
 
   const [{ data: course }, { data: upcomingEvents }, { data: broadcasts }, { count: traineeCount }, { count: trainerCount }] =
     await Promise.all([

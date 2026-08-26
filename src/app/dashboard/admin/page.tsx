@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getRecentCentreChanges } from "@/lib/what-changed";
 import { WhatChangedPanel } from "@/components/what-changed-panel";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
@@ -37,7 +37,6 @@ const ENTRY_FORM_WARNING_WINDOW_DAYS = 14;
 export default async function AdminDashboardPage() {
   const profile = await requireRole("admin");
   const supabase = await createClient();
-  const today = toLocalIso(new Date());
 
   const [{ data: courses }, center, { data: people }, { data: events }] = await Promise.all([
     supabase.from("courses").select("*").eq("center_id", profile.center_id).order("start_date", { ascending: false }),
@@ -45,6 +44,7 @@ export default async function AdminDashboardPage() {
     supabase.from("profiles").select("course_id, role").eq("center_id", profile.center_id).not("course_id", "is", null),
     supabase.from("course_timetable_events").select("course_id, event_date"),
   ]);
+  const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
 
   const courseIds = (courses ?? []).map((c) => c.id);
   const { data: applicants } = courseIds.length

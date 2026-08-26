@@ -2,7 +2,8 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { rotationPosition, distinctTpDates, halfOwningDate, checkIntensiveTpBreaks, tpBlockEndsOnFinalDay } from "@/lib/rotation";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { ReorderForm } from "@/app/trainer/(hub)/rotation/reorder-form";
 import { ScheduleForm } from "@/app/trainer/(hub)/rotation/schedule-form";
 import { AssignButton } from "@/app/trainer/(hub)/rotation/assign-button";
@@ -111,7 +112,8 @@ export default async function TrainerRotationPage() {
     .eq("course_id", courseId)
     .eq("type", "tp");
   const tpEventRows = tpEvents ?? [];
-  const today = toLocalIso(new Date());
+  const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
 
   // Handbook 8.1.4: "two-day minimum break midway, no more than six
   // consecutive TP days." The break-check only means something once a

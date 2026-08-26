@@ -2,7 +2,8 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { computeCourseState } from "@/lib/course-progress";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // for-claude-code-course-admin-landing-and-admissions.md §1: "Closed --
 // past courses, collapsed to a simple list/link to history." The landing
@@ -12,7 +13,8 @@ import { toLocalIso } from "@/lib/timetable-grid";
 export default async function ClosedCoursesPage() {
   const profile = await requireRole("admin");
   const supabase = await createClient();
-  const today = toLocalIso(new Date());
+  const timeZone = (await getCachedCenter(profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
 
   const { data: courses } = await supabase
     .from("courses")

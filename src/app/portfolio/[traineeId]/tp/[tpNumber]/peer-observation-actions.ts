@@ -6,7 +6,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { criteriaForTpDate, getPeerGroupMembers } from "@/lib/peer-observation";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 export interface PeerNoteFormState {
   error: string | null;
@@ -45,16 +46,18 @@ async function findOrCreateSheet(
     .maybeSingle();
   if (existing) return existing;
 
-  const [{ data: plan }, { data: sessions }] = await Promise.all([
+  const [{ data: plan }, { data: sessions }, { data: course }] = await Promise.all([
     admin.from("plan_assignments").select("id").eq("trainee_id", observedTraineeId).eq("tp_number", tpNumber).maybeSingle(),
     admin
       .from("course_timetable_events")
       .select("event_date, input_session_criteria")
       .eq("course_id", courseId)
       .eq("type", "input_session"),
+    admin.from("courses").select("center_id").eq("id", courseId).maybeSingle(),
   ]);
 
-  const criteriaCodes = criteriaForTpDate(sessions ?? [], toLocalIso(new Date()));
+  const timeZone = course ? ((await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
+  const criteriaCodes = criteriaForTpDate(sessions ?? [], toLocalIso(new Date(), timeZone));
   const { prompt1, prompt2 } = buildPrompts(criteriaCodes);
 
   const { data: created, error } = await admin

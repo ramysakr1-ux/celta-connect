@@ -9,7 +9,8 @@ import { TutorRoleControl } from "@/app/dashboard/admin/courses/[id]/tutor-role-
 import { TutorInviteForm } from "@/app/dashboard/admin/courses/[id]/tutor-invite-form";
 import { EntryFormSentCheckbox } from "@/app/dashboard/admin/courses/[id]/entry-form-sent-checkbox";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 import { computeApplicantCounts, summarizeApplicantsForCard, MIN_CANDIDATES } from "@/lib/admissions-counts";
 
@@ -65,7 +66,8 @@ export default async function CourseAdminDetailPage({
   const visibleCandidateRows = candidateRows.slice(0, CANDIDATE_ROW_LIMIT);
   const hiddenCandidateCount = candidateRows.length - visibleCandidateRows.length;
 
-  const today = toLocalIso(new Date());
+  const timeZone = (await getCachedCenter(admin.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
   const courseState = computeCourseState(course.start_date, course.end_date, today);
   const weekOf = courseState === "running" ? computeWeekOf(course.start_date, course.end_date, today) : null;
 

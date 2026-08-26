@@ -3,7 +3,8 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { resolveTimeBands, toLocalIso } from "@/lib/timetable-grid";
+import { resolveTimeBands, toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { halfTpDates, halfOwningDate, type TpTimetableEvent } from "@/lib/rotation";
 import { groupCodeForHalf, isMine, type HalfInfo } from "@/lib/timetable-read-only";
 import { ReadOnlyTimetableBoard } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
@@ -31,11 +32,12 @@ export default async function TraineeTimetablePage({
   const isStaff = (viewer?.role === "trainer" || viewer?.role === "admin") && preview !== "trainee";
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
-  const { data: trainee } = await supabase.from("profiles").select("course_id, full_name").eq("id", traineeId).maybeSingle();
+  const { data: trainee } = await supabase.from("profiles").select("course_id, center_id, full_name").eq("id", traineeId).maybeSingle();
   if (!trainee?.course_id) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
 
-  const today = toLocalIso(new Date());
+  const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
 
   const [{ data: course }, { data: events }, { data: plans }, { data: subgroupMember }, { data: supervisedCompletions }] = await Promise.all([
     supabase.from("courses").select("time_bands").eq("id", trainee.course_id).maybeSingle(),

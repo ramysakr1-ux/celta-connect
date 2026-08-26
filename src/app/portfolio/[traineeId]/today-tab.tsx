@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
-import { toLocalIso } from "@/lib/timetable-grid";
+import { toLocalIso, zonedTimeToUtc } from "@/lib/timetable-grid";
 import { computeWeekOf } from "@/lib/course-progress";
 import { rotationPosition, halfTpDates, type TpTimetableEvent } from "@/lib/rotation";
 import { getTpCardStatus } from "@/lib/tp-plan-content";
@@ -39,13 +39,15 @@ export async function TodayTab({
   traineeId,
   courseId,
   courseName,
+  timeZone,
 }: {
   supabase: SupabaseClient<Database>;
   traineeId: string;
   courseId: string;
   courseName: string | null;
+  timeZone: string;
 }) {
-  const today = toLocalIso(new Date());
+  const today = toLocalIso(new Date(), timeZone);
 
   const [
     { data: course },
@@ -135,7 +137,7 @@ export async function TodayTab({
     for (const s of todaysFilmedSessions) {
       const event = todaysFilmedEventById.get(s.timetable_event_id);
       if (!event) continue;
-      const startsAt = event.event_time ? new Date(`${event.event_date}T${event.event_time}`) : null;
+      const startsAt = event.event_time ? zonedTimeToUtc(event.event_date, event.event_time, timeZone) : null;
       if (startsAt && now.getTime() < startsAt.getTime() - 10 * 60 * 1000) continue; // more than 10 min out
       const { data: task } = await supabase.from("filmed_observation_tasks").select("id").eq("session_id", s.id).maybeSingle();
       const { data: response } = task
