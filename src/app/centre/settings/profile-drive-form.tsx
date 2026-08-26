@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { updateCentreProfile, type FormState } from "@/app/centre/settings/actions";
 import { disconnectGoogleDrive } from "@/app/dashboard/admin/settings/actions";
 import { GoogleDriveTargetsForm } from "@/app/dashboard/admin/settings/targets-form";
+import { TIMEZONE_OPTIONS } from "@/lib/timezones";
 
 const initialState: FormState = { error: null };
 
@@ -22,7 +23,7 @@ export function ProfileDriveForm({
   centerNumber: string;
   address: string | null;
   primaryContactEmail: string | null;
-  timeZone: string | null;
+  timeZone: string;
   currency: string | null;
   appianUrl: string | null;
   filmsTpSessions: boolean;
@@ -91,14 +92,22 @@ export function ProfileDriveForm({
           <label htmlFor="cs_timezone" className="text-sm text-muted">
             Time zone
           </label>
-          <input
+          <select
             id="cs_timezone"
             name="time_zone"
-            type="text"
-            placeholder="e.g. Europe/Istanbul"
-            defaultValue={timeZone ?? ""}
+            required
+            defaultValue={timeZone}
             className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
-          />
+          >
+            {TIMEZONE_OPTIONS.map((tz) => (
+              <option key={tz.value} value={tz.value}>
+                {tz.label}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted">
+            Drives every &quot;today&quot;/&quot;is this due&quot; check for this centre -- attendance day counts, payment due dates, timetable grouping.
+          </p>
         </div>
 
         <div className="flex flex-col gap-1.5">

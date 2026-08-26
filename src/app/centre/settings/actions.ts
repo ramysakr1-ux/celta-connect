@@ -11,6 +11,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendApplicantEmail } from "@/lib/admissions-email";
 import { signOut } from "@/app/login/actions";
 import { ensureCourseArchived } from "@/lib/course-close-out/export";
+import { TIMEZONE_OPTIONS } from "@/lib/timezones";
 
 export interface FormState {
   error: string | null;
@@ -33,11 +34,12 @@ export async function updateCentreProfile(_prevState: FormState, formData: FormD
   const name = (formData.get("name") as string | null)?.trim();
   const address = (formData.get("address") as string | null)?.trim() || null;
   const primaryContactEmail = (formData.get("primary_contact_email") as string | null)?.trim() || null;
-  const timeZone = (formData.get("time_zone") as string | null)?.trim() || null;
+  const timeZone = (formData.get("time_zone") as string | null)?.trim();
   const currency = (formData.get("currency") as string | null)?.trim() || null;
   const appianUrl = (formData.get("appian_url") as string | null)?.trim() || null;
   const filmsTpSessions = formData.get("films_tp_sessions") === "on";
   if (!name) return { error: "Enter the centre name." };
+  if (!timeZone || !TIMEZONE_OPTIONS.some((tz) => tz.value === timeZone)) return { error: "Pick a valid time zone." };
 
   const admin = createAdminClient();
   const { error } = await admin
