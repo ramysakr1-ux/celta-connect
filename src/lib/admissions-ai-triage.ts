@@ -40,7 +40,7 @@ export async function runSelectionTaskTriage(
   const { data: applicant } = await admin
     .from("applicants")
     .select(
-      "id, center_id, language_awareness_submission, writing_task_submission, writing_task_prompt_id, task_feedback_ai_suggestion, speaking_task_transcript, speaking_task_prompt_id, speaking_task_ai_suggestion"
+      "id, center_id, full_name, intake_course_id, language_awareness_submission, writing_task_submission, writing_task_prompt_id, task_feedback_ai_suggestion, speaking_task_transcript, speaking_task_prompt_id, speaking_task_ai_suggestion"
     )
     .eq("id", applicantId)
     .maybeSingle();
@@ -118,11 +118,62 @@ export async function runSelectionTaskTriage(
   await admin.from("applicants").update(update).eq("id", applicantId);
 
   if (lane === "clear_problems") {
+    // Kept as its own in-app row -- "a tutor is notified... in-app only" --
+    // alongside the email+push below, which now covers every lane.
     await notifyClearProblems(admin, { applicantId, centerId: applicant.center_id });
   }
+  await notifyReadingComplete(admin, { applicant, lane, reading });
 
   return { ran: true, lane };
 }
+
+// Ramy, 27 Aug 2026: "when API sends the notification that someone has
+// completed their preinterview task with a suggestion" -- email + push to
+// every admissions handler at the centre, for any lane. Never blocks the
+// triage result on a delivery failure.
+async function notifyReadingComplete(
+  admin: SupabaseClient<Database>,
+  input: {
+    applicant: { id: string; center_id: string; full_name: string; intake_course_id: string | null };
+    lane: TriageLane;
+    reading: SelectionTaskReading;
+  }
+): Promise<void> {
+  const { data: course } = input.applicant.intake_course_id
+    ? await admin.from("courses").select("name").eq("id", input.applicant.intake_course_id).maybeSingle()
+    : { data: null };
+  const courseName = course?.name ?? "the course";
+  const laneLabel = LANE_COPY_LABEL[input.lane];
+
+  const { notifyAdmissionsHandlers } = await import("@/lib/admissions-notify");
+  const { aiReadingCompleteEmailHtml } = await import("@/lib/admissions-email");
+  const siteUrl = process.env.SITE_URL ?? "https://celtaconnect.com";
+  const reviewUrl = `${siteUrl}/dashboard/admissions/${input.applicant.id}`;
+
+  await notifyAdmissionsHandlers(admin, {
+    centerId: input.applicant.center_id,
+    applicantId: input.applicant.id,
+    emailType: "reading_flagged",
+    subject: `Task reading ready -- ${input.applicant.full_name} (${laneLabel})`,
+    pushBody: `${input.applicant.full_name}'s task reading is ready -- ${laneLabel.toLowerCase()}.`,
+    pushUrl: reviewUrl,
+    buildEmailHtml: (recipientName) =>
+      aiReadingCompleteEmailHtml({
+        recipientName,
+        applicantName: input.applicant.full_name,
+        courseName,
+        laneLabel,
+        summary: input.reading.summary,
+        reviewUrl,
+      }),
+  }).catch(() => null);
+}
+
+const LANE_COPY_LABEL: Record<TriageLane, string> = {
+  clear: "Clear on every criterion",
+  borderline: "Mixed / borderline",
+  clear_problems: "Clear problems flagged",
+};
 
 // "A tutor is notified. Nothing sent. The tutor reads it themselves" --
 // in-app only (rule 18: never push/email for this). Reuses the existing

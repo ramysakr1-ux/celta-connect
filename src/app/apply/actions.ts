@@ -199,6 +199,27 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
     message: `${fullName} applied for this intake.`,
   });
 
+  // Ramy, 27 Aug 2026: "the right person gets pinged" -- email + push to
+  // everyone holding admissions.manage at the centre, not just the silent
+  // in-app row above. Never blocks the application on a delivery failure,
+  // same reasoning as the AI triage call above.
+  {
+    const { notifyAdmissionsHandlers } = await import("@/lib/admissions-notify");
+    const { applicationSubmittedEmailHtml } = await import("@/lib/admissions-email");
+    const siteUrl = process.env.SITE_URL ?? "https://celtaconnect.com";
+    const reviewUrl = `${siteUrl}/dashboard/admissions/${applicant.id}`;
+    await notifyAdmissionsHandlers(admin, {
+      centerId,
+      applicantId: applicant.id,
+      emailType: "application_submitted",
+      subject: `New application -- ${fullName}`,
+      pushBody: `${fullName} applied for ${course.name}.`,
+      pushUrl: reviewUrl,
+      buildEmailHtml: (recipientName) =>
+        applicationSubmittedEmailHtml({ recipientName, applicantName: fullName, courseName: course.name, reviewUrl }),
+    }).catch(() => null);
+  }
+
   // "Form submitted -> A plain acknowledgement. Says nothing about the
   // outcome." Sent here rather than from a cron so it arrives while they're
   // still on the confirmation screen. Ramy, 26 Aug 2026: keep it generic --
