@@ -213,12 +213,26 @@ export async function requestBranchReferral(input: {
   // "The area owner is notified. Not a request for permission -- a
   // statement" -- same reasoning applied to a receiving branch that hasn't
   // asked for this candidate but needs to know one is waiting.
+  const referralMessage = `${from.name} is asking to refer ${applicant.full_name} to your branch.`;
   await admin.from("admissions_notifications").insert({
     center_id: input.toCenterId,
     applicant_id: input.applicantId,
     type: "referral_request",
-    message: `${from.name} is asking to refer ${applicant.full_name} to your branch.`,
+    message: referralMessage,
   } as never);
+  {
+    const { notifyAdmissionsHandlers } = await import("@/lib/admissions-notify");
+    const { referralRequestStaffEmailHtml } = await import("@/lib/admissions-email");
+    await notifyAdmissionsHandlers(admin, {
+      centerId: input.toCenterId,
+      applicantId: input.applicantId,
+      emailType: "referral_request_notify",
+      subject: `Referral request -- ${applicant.full_name}`,
+      pushBody: referralMessage,
+      pushUrl: `${process.env.SITE_URL ?? "https://celtaconnect.com"}/dashboard/admissions/referral-requests`,
+      buildEmailHtml: (recipientName) => referralRequestStaffEmailHtml({ recipientName, message: referralMessage, reviewUrl: null }),
+    }).catch(() => null);
+  }
 
   return { requestId: created.id };
 }
@@ -293,12 +307,26 @@ export async function declineBranchReferralRequest(input: {
   if (updateError) return { error: "Could not decline the request." };
 
   const { data: to } = await admin.from("centers").select("name").eq("id", request.to_center_id).maybeSingle();
+  const declineMessage = `${to?.name ?? "The branch"} declined your referral request.`;
   await admin.from("admissions_notifications").insert({
     center_id: request.from_center_id,
     applicant_id: request.applicant_id,
     type: "referral_request",
-    message: `${to?.name ?? "The branch"} declined your referral request.`,
+    message: declineMessage,
   } as never);
+  {
+    const { notifyAdmissionsHandlers } = await import("@/lib/admissions-notify");
+    const { referralRequestStaffEmailHtml } = await import("@/lib/admissions-email");
+    await notifyAdmissionsHandlers(admin, {
+      centerId: request.from_center_id,
+      applicantId: request.applicant_id,
+      emailType: "referral_request_notify",
+      subject: "Referral request declined",
+      pushBody: declineMessage,
+      pushUrl: `${process.env.SITE_URL ?? "https://celtaconnect.com"}/dashboard/admissions/referral-requests`,
+      buildEmailHtml: (recipientName) => referralRequestStaffEmailHtml({ recipientName, message: declineMessage, reviewUrl: null }),
+    }).catch(() => null);
+  }
 
   return {};
 }

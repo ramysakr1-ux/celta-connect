@@ -617,7 +617,7 @@ export async function saveInterviewRecord(_prevState: FormState, formData: FormD
   }
 
   const supabase = await createClient();
-  const { data: applicant } = await supabase.from("applicants").select("center_id").eq("id", applicantId).maybeSingle();
+  const { data: applicant } = await supabase.from("applicants").select("center_id, full_name").eq("id", applicantId).maybeSingle();
   if (!applicant || applicant.center_id !== staff.center_id) return { error: "Applicant not found." };
 
   const { data: existing } = await supabase.from("interview_records").select("id").eq("applicant_id", applicantId).maybeSingle();
@@ -647,6 +647,22 @@ export async function saveInterviewRecord(_prevState: FormState, formData: FormD
     type: "interview_completed",
     message: "Interview completed -- a decision is needed.",
   });
+  {
+    const { notifyAdmissionsHandlers } = await import("@/lib/admissions-notify");
+    const { interviewCompletedEmailHtml } = await import("@/lib/admissions-email");
+    const siteUrl = process.env.SITE_URL ?? "https://celtaconnect.com";
+    const reviewUrl = `${siteUrl}/dashboard/admissions/${applicantId}`;
+    const admin = createAdminClient();
+    await notifyAdmissionsHandlers(admin, {
+      centerId: staff.center_id,
+      applicantId,
+      emailType: "interview_completed",
+      subject: `Decision needed -- ${applicant.full_name}`,
+      pushBody: `${applicant.full_name}'s interview is complete -- a decision is needed.`,
+      pushUrl: reviewUrl,
+      buildEmailHtml: (recipientName) => interviewCompletedEmailHtml({ recipientName, applicantName: applicant.full_name, reviewUrl }),
+    }).catch(() => null);
+  }
 
   revalidatePath(`/dashboard/admissions/${applicantId}`);
   return { error: null };

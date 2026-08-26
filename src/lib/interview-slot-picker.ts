@@ -99,4 +99,18 @@ export async function flagNoInterviewSlots(
     type: "no_interview_slots",
     message: `${input.applicantName} has no interview slots open yet -- add some.`,
   });
+  {
+    const { notifyAdmissionsHandlers } = await import("@/lib/admissions-notify");
+    const { noInterviewSlotsEmailHtml } = await import("@/lib/admissions-email");
+    const reviewUrl = `${process.env.SITE_URL ?? "https://celtaconnect.com"}/dashboard/admissions/this-week`;
+    await notifyAdmissionsHandlers(admin, {
+      centerId: input.centerId,
+      applicantId: input.applicantId,
+      emailType: "no_interview_slots",
+      subject: `No interview slots -- ${input.applicantName}`,
+      pushBody: `${input.applicantName} has no interview slots open yet -- add some.`,
+      pushUrl: reviewUrl,
+      buildEmailHtml: (recipientName) => noInterviewSlotsEmailHtml({ recipientName, applicantName: input.applicantName, reviewUrl }),
+    }).catch(() => null);
+  }
 }

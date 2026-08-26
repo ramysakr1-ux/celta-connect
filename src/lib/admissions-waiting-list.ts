@@ -118,6 +118,22 @@ export async function offerNextWaitingListPlace(
     type: "place_offered",
     message: `A place has been offered to ${next.full_name} -- expires ${formatDeadline(expiresAt)}.`,
   });
+  {
+    const { notifyAdmissionsHandlers } = await import("@/lib/admissions-notify");
+    const { placeOfferedStaffEmailHtml } = await import("@/lib/admissions-email");
+    const reviewSiteUrl = process.env.SITE_URL ?? "https://celtaconnect.com";
+    const reviewUrl = `${reviewSiteUrl}/dashboard/admissions/${next.id}`;
+    await notifyAdmissionsHandlers(supabase, {
+      centerId: input.centerId,
+      applicantId: next.id,
+      emailType: "place_offered",
+      subject: `Place offered -- ${next.full_name}`,
+      pushBody: `A place has been offered to ${next.full_name} -- expires ${formatDeadline(expiresAt)}.`,
+      pushUrl: reviewUrl,
+      buildEmailHtml: (recipientName) =>
+        placeOfferedStaffEmailHtml({ recipientName, applicantName: next.full_name, expiresLabel: formatDeadline(expiresAt), reviewUrl }),
+    }).catch(() => null);
+  }
 
   return { offeredApplicantId: next.id, offeredApplicantName: next.full_name };
 }

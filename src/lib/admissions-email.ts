@@ -62,7 +62,14 @@ export type ApplicantEmailType =
   // Ramy, 27 Aug 2026: "the right person gets pinged" -- staff holding
   // admissions.manage at the centre, notified the moment a new application
   // lands. Distinct from acknowledgement (applicant-facing).
-  | "application_submitted";
+  | "application_submitted"
+  // Staff-facing companion to interview_completed/place_freed -- same
+  // notifyAdmissionsHandlers() wiring, different trigger. Distinct from
+  // place_freed (applicant-facing "a place opened up for you").
+  | "interview_completed"
+  | "place_offered"
+  | "referral_request_notify"
+  | "no_interview_slots";
 
 /**
  * Who a reply reaches. All Emails.dc.html gives every email exactly one of
@@ -110,6 +117,10 @@ export const EMAIL_REPLY_TO: Record<ApplicantEmailType, EmailReplyTo> = {
   close_out_receipt: "noreply",
   centre_admin_invite: "noreply",
   application_submitted: "noreply",
+  interview_completed: "noreply",
+  place_offered: "noreply",
+  referral_request_notify: "noreply",
+  no_interview_slots: "noreply",
 };
 
 export async function sendApplicantEmail(input: {
@@ -438,6 +449,56 @@ export function applicationSubmittedEmailHtml(input: {
   return `
     <p>Dear ${esc(input.recipientName)},</p>
     <p><strong>${esc(input.applicantName)}</strong> has applied for ${esc(input.courseName)}.</p>
+    <p><a href="${input.reviewUrl}">${input.reviewUrl}</a></p>
+  `;
+}
+
+// Ramy, 27 Aug 2026: fires the moment an interview record is saved --
+// "a decision is needed" is the same admissions_notifications row this
+// mirrors, just actually delivered now.
+export function interviewCompletedEmailHtml(input: {
+  recipientName: string;
+  applicantName: string;
+  reviewUrl: string;
+}): string {
+  return `
+    <p>Dear ${esc(input.recipientName)},</p>
+    <p>The interview for <strong>${esc(input.applicantName)}</strong> is complete -- a decision is needed.</p>
+    <p><a href="${input.reviewUrl}">${input.reviewUrl}</a></p>
+  `;
+}
+
+// Staff-facing companion to placeFreedEmailHtml (applicant-facing) -- fires
+// the moment a waiting-list place is offered, same notifyAdmissionsHandlers
+// wiring as the rest of this section.
+export function placeOfferedStaffEmailHtml(input: {
+  recipientName: string;
+  applicantName: string;
+  expiresLabel: string;
+  reviewUrl: string;
+}): string {
+  return `
+    <p>Dear ${esc(input.recipientName)},</p>
+    <p>A place has been offered to <strong>${esc(input.applicantName)}</strong> off the waiting list -- expires ${esc(input.expiresLabel)}.</p>
+    <p><a href="${input.reviewUrl}">${input.reviewUrl}</a></p>
+  `;
+}
+
+// Covers both branch-referral events (a request raised, or one declined) --
+// the message text already distinguishes them, same as the in-app
+// admissions_notifications row this mirrors.
+export function referralRequestStaffEmailHtml(input: { recipientName: string; message: string; reviewUrl: string | null }): string {
+  return `
+    <p>Dear ${esc(input.recipientName)},</p>
+    <p>${esc(input.message)}</p>
+    ${input.reviewUrl ? `<p><a href="${input.reviewUrl}">${input.reviewUrl}</a></p>` : ""}
+  `;
+}
+
+export function noInterviewSlotsEmailHtml(input: { recipientName: string; applicantName: string; reviewUrl: string }): string {
+  return `
+    <p>Dear ${esc(input.recipientName)},</p>
+    <p><strong>${esc(input.applicantName)}</strong> has no interview slots open yet -- add some.</p>
     <p><a href="${input.reviewUrl}">${input.reviewUrl}</a></p>
   `;
 }

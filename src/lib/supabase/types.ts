@@ -2461,7 +2461,11 @@ export interface Database {
             | "centre_delete_code"
             | "close_out_receipt"
             | "centre_admin_invite"
-            | "application_submitted";
+            | "application_submitted"
+            | "interview_completed"
+            | "place_offered"
+            | "referral_request_notify"
+            | "no_interview_slots";
           to_email: string;
           // Six of the nineteen go to staff, assessors or volunteers, who have
           // no applicant row to take a name from.
