@@ -2460,7 +2460,8 @@ export interface Database {
             | "sign_in_link"
             | "centre_delete_code"
             | "close_out_receipt"
-            | "centre_admin_invite";
+            | "centre_admin_invite"
+            | "application_submitted";
           to_email: string;
           // Six of the nineteen go to staff, assessors or volunteers, who have
           // no applicant row to take a name from.

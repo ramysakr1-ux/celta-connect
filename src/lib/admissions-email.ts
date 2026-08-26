@@ -58,7 +58,11 @@ export type ApplicantEmailType =
   // for-claude-code-email-delivery-tracking-visible.md follow-up: the
   // Centre Admin role-invite flow (centre_admin_invites) gets a real,
   // tracked, optional email send alongside its existing bare-link path.
-  | "centre_admin_invite";
+  | "centre_admin_invite"
+  // Ramy, 27 Aug 2026: "the right person gets pinged" -- staff holding
+  // admissions.manage at the centre, notified the moment a new application
+  // lands. Distinct from acknowledgement (applicant-facing).
+  | "application_submitted";
 
 /**
  * Who a reply reaches. All Emails.dc.html gives every email exactly one of
@@ -105,6 +109,7 @@ export const EMAIL_REPLY_TO: Record<ApplicantEmailType, EmailReplyTo> = {
   centre_delete_code: "noreply",
   close_out_receipt: "noreply",
   centre_admin_invite: "noreply",
+  application_submitted: "noreply",
 };
 
 export async function sendApplicantEmail(input: {
@@ -420,6 +425,23 @@ export function interviewBookedEmailHtml(input: {
 // "Sent when a reading finds clear problems. No email goes to the applicant."
 // The second sentence is the important one and belongs in the email itself: the
 // tutor must know the applicant is sitting in silence, waiting on them.
+// Ramy, 27 Aug 2026: fires to everyone holding admissions.manage at the
+// centre the moment a new application lands -- same "whoever's in charge
+// gets pinged" reasoning as readingFlaggedEmailHtml below, just for the
+// earlier trigger point.
+export function applicationSubmittedEmailHtml(input: {
+  recipientName: string;
+  applicantName: string;
+  courseName: string;
+  reviewUrl: string;
+}): string {
+  return `
+    <p>Dear ${esc(input.recipientName)},</p>
+    <p><strong>${esc(input.applicantName)}</strong> has applied for ${esc(input.courseName)}.</p>
+    <p><a href="${input.reviewUrl}">${input.reviewUrl}</a></p>
+  `;
+}
+
 export function readingFlaggedEmailHtml(input: {
   tutorName: string;
   applicantName: string;
@@ -433,6 +455,29 @@ export function readingFlaggedEmailHtml(input: {
     ${input.flags.length ? `<p><strong>What was flagged:</strong></p><ul>${input.flags.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
     <p><a href="${input.reviewUrl}">${input.reviewUrl}</a></p>
     <p><strong>Nothing has been sent to the applicant.</strong> They're waiting to hear, and no email goes to them until you decide -- a rejection is never written by the app.</p>
+  `;
+}
+
+// Ramy, 27 Aug 2026: "when API sends the notification that someone has
+// completed their preinterview task with a suggestion" -- fires for every
+// lane (clear/borderline/clear_problems), not just the flagged one above.
+// reading_flagged (clear_problems specifically, with its own "what was
+// flagged" list) stays as the more detailed email for that one lane; this
+// is the lighter, lane-agnostic version used for all three.
+export function aiReadingCompleteEmailHtml(input: {
+  recipientName: string;
+  applicantName: string;
+  courseName: string;
+  laneLabel: string;
+  summary: string;
+  reviewUrl: string;
+}): string {
+  return `
+    <p>Dear ${esc(input.recipientName)},</p>
+    <p>The AI reading for <strong>${esc(input.applicantName)}</strong>'s application (${esc(input.courseName)}) is ready -- <strong>${esc(input.laneLabel)}</strong>.</p>
+    <p>${esc(input.summary)}</p>
+    <p><a href="${input.reviewUrl}">${input.reviewUrl}</a></p>
+    <p><strong>Nothing has been sent to the applicant.</strong> This is a suggestion only -- no decision has been made and no email goes to them until one is.</p>
   `;
 }
 
