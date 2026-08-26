@@ -671,8 +671,9 @@ export async function updateGradeReviewComments(
 
 
 /**
- * Administration Handbook 13.6: end-of-course reports must not be released
- * before the final day. Nothing enforced this -- both release paths set
+ * Administration Handbook 2022 s13.4 / June 2025 s14.4: end-of-course reports
+ * must not be released before the final day. Nothing enforced this -- both
+ * release paths set
  * final_report_released_at with no date check, so a whole cohort's reports
  * could go out on day one. Found by the 2026-08-16 compliance audit.
  *
@@ -699,7 +700,7 @@ async function finalDayBlock(
       day: "numeric",
       month: "long",
     });
-    return `Reports can't be released before the final day of the course (${finalDay}) -- Administration Handbook 13.6.`;
+    return `Reports can't be released before the final day of the course (${finalDay}) -- Administration Handbook s13.4 (2022) / s14.4 (June 2025).`;
   }
   return null;
 }
@@ -760,8 +761,8 @@ export async function releaseFinalReport(
   }
 
   const supabase = await createClient();
-  // Same gate as the bulk path -- releasing one candidate early breaches 13.6
-  // exactly as much as releasing everyone.
+  // Same gate as the bulk path -- releasing one candidate early breaches
+  // s13.4/s14.4 exactly as much as releasing everyone.
   const { data: record } = await supabase
     .from("celta5_records")
     .select("course_id")

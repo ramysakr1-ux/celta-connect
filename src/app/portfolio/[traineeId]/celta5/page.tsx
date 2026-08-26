@@ -56,9 +56,9 @@ function ReadOnlyField({ label, value }: { label: string; value: string | null }
 // which are already scoped to the calling user's own record so they work
 // unchanged here). Staff viewers get the exact editable record from
 // /dashboard/trainer/trainees/[id]/celta5 -- attendance, stage forms, the
-// 42-code criteria matrix, trajectory, final grade -- keyed off :traineeId
+// 41-code criteria matrix, trajectory, final grade -- keyed off :traineeId
 // instead of the trainer route's :id. The criteria set/wording is the real,
-// booklet-verified CELTA_CRITERIA_SECTIONS (42 codes) -- not the shorter
+// booklet-verified CELTA_CRITERIA_SECTIONS (41 codes, no 3c) -- not the shorter
 // invented set shown in the design reference, per standing instruction that
 // the real CELTA5 booklet always overrides the visual reference on this.
 export default async function PortfolioCelta5Page({

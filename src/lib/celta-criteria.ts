@@ -1,11 +1,14 @@
 // The Cambridge CELTA 5 criteria, transcribed verbatim from the official
-// CELTA 5 Candidate Record Booklet (CELTA 5: May 2023 revision, the actual
+// CELTA 5 Candidate Record Booklet (CELTA 5: July 2023 revision, the actual
 // PDF, re-read directly page by page 2026-08-20), Appendix 1 / Stage Two
 // Progress Record. 41 codes total, not 42 -- Section 3 has exactly two,
 // 3a and 3b, everywhere in the real booklet (Stage Two Progress Record,
 // Stage Three Progress Record, and Appendix 1 all show only 3a/3b, never a
 // 3c). A "3c" was wrongly added 2026-08-19 on a claimed syllabus-PDF
-// confirmation that doesn't hold up against the actual CELTA 5 booklet --
+// confirmation -- confirmed 2026-08-26 that the syllabus document (CELTA
+// Syllabus and Assessment Guidelines, Dec 2022) genuinely does contain a 3c;
+// the two official documents disagree, and the booklet governs actual
+// grading (celta5_matrix), so 41 codes/no-3c is correct here regardless --
 // removed 2026-08-20, along with its backfilled celta5_matrix rows
 // (migration 0171). If Cambridge revises the booklet again, update this
 // file to match the new one -- and re-verify by reading the actual PDF
