@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, ChevronDown } from "lucide-react";
+import { ArrowUp, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { MessageThread, type MessageThreadHandle, type Message } from "@/app/dashboard/staff-chat/message-thread";
 import type { ChannelSummary, Coworker } from "@/lib/staff-chat";
@@ -21,6 +21,40 @@ function channelMeta(type: ChannelSummary["type"]): string {
   // query (ChannelSummary doesn't carry one today); "group" is the spec's
   // own sanctioned fallback, keeping this a presentation-only change.
   return "group";
+}
+
+const SOUND_PREF_KEY = "connect-staff-chat-sound";
+
+// Ramy, 27 Aug 2026: "no audio by default... but a disable sound option" --
+// off unless a viewer has explicitly opted in, remembered per-browser (same
+// "own separate on/off toggle in the browser" shape as the existing push
+// preference, not a synced account setting). Synthesized with the Web Audio
+// API rather than an audio file -- a two-note chime, no asset to ship or
+// keep in sync.
+function playChime() {
+  try {
+    const AudioContextCtor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextCtor) return;
+    const ctx = new AudioContextCtor();
+    const now = ctx.currentTime;
+    [880, 1174.66].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      const start = now + i * 0.09;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.15, start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.2);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.22);
+    });
+    setTimeout(() => ctx.close(), 500);
+  } catch {
+    // Best-effort only -- a chime that fails to play must never break chat.
+  }
 }
 
 function msUntilLocalMidnight(): number {
@@ -76,11 +110,13 @@ export function StaffChatDrawer({
   const [threadOpen, setThreadOpen] = useState(false);
   const [startingDm, setStartingDm] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [soundEnabled, setSoundEnabled] = useState(false);
   const [msLeft, setMsLeft] = useState(0);
   const [body, setBody] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messageThreadRef = useRef<MessageThreadHandle>(null);
   const threadOpenRef = useRef(threadOpen);
+  const soundEnabledRef = useRef(soundEnabled);
 
   const selected = channels.find((c) => c.id === selectedId) ?? null;
   const groupChannel = channels.find((c) => c.type !== "dm") ?? null;
@@ -95,6 +131,29 @@ export function StaffChatDrawer({
   useEffect(() => {
     threadOpenRef.current = threadOpen;
   }, [threadOpen]);
+
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
+
+  // Read after mount, not in the initial state -- matches server output
+  // (false) on first paint so hydration never mismatches, then picks up
+  // the real per-browser preference a moment later.
+  useEffect(() => {
+    // Deferred to a microtask, same shape as push-subscribe-button.tsx's own
+    // async browser-preference check -- keeps this out of the synchronous
+    // "setState directly in an effect" pattern React now flags, even though
+    // the read itself is a plain sync localStorage call.
+    Promise.resolve().then(() => setSoundEnabled(localStorage.getItem(SOUND_PREF_KEY) === "on"));
+  }, []);
+
+  function toggleSound() {
+    setSoundEnabled((prev) => {
+      const next = !prev;
+      localStorage.setItem(SOUND_PREF_KEY, next ? "on" : "off");
+      return next;
+    });
+  }
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
@@ -140,7 +199,10 @@ export function StaffChatDrawer({
         (payload) => {
           const msg = payload.new as { sender_id: string; channel_id: string };
           if (msg.sender_id === profileId || !myChannelIds.has(msg.channel_id)) return;
-          if (!threadOpenRef.current) setUnreadCount((n) => n + 1);
+          if (!threadOpenRef.current) {
+            setUnreadCount((n) => n + 1);
+            if (soundEnabledRef.current) playChime();
+          }
         }
       )
       .subscribe();
@@ -344,6 +406,17 @@ export function StaffChatDrawer({
                 : retentionCopy.charAt(0).toUpperCase() + retentionCopy.slice(1)}
             </span>
           </div>
+
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-pressed={soundEnabled}
+            title={soundEnabled ? "Sound on for new messages -- click to mute" : "Sound off for new messages -- click to enable"}
+            aria-label={soundEnabled ? "Mute chat sound" : "Enable chat sound"}
+            className="hidden size-[34px] shrink-0 items-center justify-center rounded-full text-muted hover:bg-accent/40 hover:text-ink sm:flex"
+          >
+            {soundEnabled ? <Volume2 className="size-4" aria-hidden="true" /> : <VolumeX className="size-4" aria-hidden="true" />}
+          </button>
 
           <button
             type="button"
