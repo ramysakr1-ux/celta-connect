@@ -135,40 +135,38 @@ export interface DayRow {
 
 const WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// The app is single-tenant today (one real centre, per apply/page.tsx's own
-// comment) -- CENTRE_TIMEZONE is that centre's zone, hardcoded here as an
-// interim fix (Ramy, 2026-08-26: "GMT+3", the centre isn't in the UK).
-// Europe/Istanbul is a fixed UTC+3 year-round (Turkey dropped DST in 2016),
-// so it's a stable stand-in for "GMT+3, no seasonal drift" regardless of
-// whether the centre is literally in Turkey. Real multi-centre timezone
-// support (a timezone column on centers, read per-centre instead of this
-// constant) is planned as its own follow-up, not folded into this fix.
-const CENTRE_TIMEZONE = "Europe/Istanbul";
+// centers.time_zone's own column default (migration 0223) -- the one place
+// this value is allowed to be implicit, for code with genuinely no centre
+// in scope yet (seed/demo data). Every real call site should have a real
+// centre's timeZone in hand instead of reaching for this.
+export const DEFAULT_TIMEZONE = "Europe/Istanbul";
 
 /**
- * Formats a Date as the calendar date it is at the centre (CENTRE_TIMEZONE),
- * regardless of what timezone the server process itself is running in. The
- * previous version used the Date object's own local components
- * (getFullYear/getMonth/getDate), which are only correct when the server's
- * OS timezone happens to match the centre's -- it doesn't: Vercel's Node
- * runtime has no TZ set (defaults to UTC), and the "confirmed live" note
- * that used to justify that approach was actually testing against a dev
- * sandbox, not real production. Intl.DateTimeFormat with an explicit
- * timeZone sidesteps the question of what zone the process is in entirely --
- * correct on any host, and rolls over at the centre's own midnight rather
- * than the process's.
+ * Formats a Date as the calendar date it is at a given centre, regardless of
+ * what timezone the server process itself is running in. `timeZone` is a
+ * required IANA identifier (centers.time_zone) rather than a hardcoded
+ * constant -- multi-centre support (2026-08-26) means "today" depends on
+ * which centre is asking, not one app-wide value. The old version used the
+ * Date object's own local components (getFullYear/getMonth/getDate), which
+ * are only correct when the server's OS timezone happens to match the
+ * centre's -- it doesn't: Vercel's Node runtime has no TZ set (defaults to
+ * UTC), and the "confirmed live" note that used to justify that approach was
+ * actually testing against a dev sandbox, not real production.
+ * Intl.DateTimeFormat with an explicit timeZone sidesteps the question of
+ * what zone the process is in entirely -- correct on any host, and rolls
+ * over at the centre's own midnight rather than the process's.
  */
-export function toLocalIso(d: Date): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: CENTRE_TIMEZONE }).format(d);
+export function toLocalIso(d: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone }).format(d);
 }
 
-/** Minutes since midnight at the centre (CENTRE_TIMEZONE) -- same reasoning
- * as toLocalIso, for code comparing against an "HH:MM" wall-clock time
- * (e.g. matching a Zoom join event to the closest scheduled TP slot)
- * instead of a calendar date. */
-export function toLocalMinutes(d: Date): number {
+/** Minutes since midnight at a given centre -- same reasoning as toLocalIso,
+ * for code comparing against an "HH:MM" wall-clock time (e.g. matching a
+ * Zoom join event to the closest scheduled TP slot) instead of a calendar
+ * date. */
+export function toLocalMinutes(d: Date, timeZone: string): number {
   const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: CENTRE_TIMEZONE,
+    timeZone,
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
@@ -176,6 +174,25 @@ export function toLocalMinutes(d: Date): number {
   const hour = Number(parts.find((p) => p.type === "hour")?.value ?? 0);
   const minute = Number(parts.find((p) => p.type === "minute")?.value ?? 0);
   return hour * 60 + minute;
+}
+
+/**
+ * Converts an event's wall-clock date/time (as stored -- "2026-08-26" +
+ * "14:00:00", meaning 2pm at the centre) into the real UTC instant it
+ * represents. `new Date(`${event_date}T${event_time}`)` -- used in a few
+ * places to compute "is this event starting soon" -- parses that string in
+ * the SERVER's own local timezone, not the centre's, so it silently
+ * computes the wrong real-world moment whenever they differ (which is most
+ * of the time: Vercel's Node runtime defaults to UTC). This finds the
+ * target timezone's actual UTC offset at that date (DST-aware) via a
+ * round-trip through Intl, rather than assuming a fixed offset.
+ */
+export function zonedTimeToUtc(dateIso: string, timeStr: string, timeZone: string): Date {
+  const naiveUtc = new Date(`${dateIso}T${timeStr.slice(0, 5)}:00Z`);
+  const asTz = new Date(naiveUtc.toLocaleString("en-US", { timeZone }));
+  const asUtc = new Date(naiveUtc.toLocaleString("en-US", { timeZone: "UTC" }));
+  const offsetMs = asUtc.getTime() - asTz.getTime();
+  return new Date(naiveUtc.getTime() + offsetMs);
 }
 
 /** Groups events into one row per distinct date that actually has an event
@@ -201,7 +218,11 @@ export function buildDayRows(events: TimetableEvent[], timeBands: TimeBand[] = D
     const mondayOffset = (d.getDay() + 6) % 7;
     const monday = new Date(d);
     monday.setDate(d.getDate() - mondayOffset);
-    const weekKey = toLocalIso(monday);
+    // Not toLocalIso() -- monday was built by pure calendar arithmetic off
+    // an already-known date string (no "current real-world moment" or
+    // centre timezone involved), so it needs the same local round-trip its
+    // own construction used, not a real timezone conversion.
+    const weekKey = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, "0")}-${String(monday.getDate()).padStart(2, "0")}`;
 
     let weekLabel: string | null = null;
     if (weekKey !== currentWeekStart) {

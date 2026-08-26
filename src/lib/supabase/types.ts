@@ -205,7 +205,11 @@ export interface Database {
           // is that override.
           address: string | null;
           primary_contact_email: string | null;
-          time_zone: string | null;
+          // migration 0223 -- promoted from a cosmetic display field to the
+          // real source of truth for every "what's today at this centre"
+          // check. IANA identifier (e.g. "Europe/Istanbul"); NOT NULL, every
+          // centre has a real value.
+          time_zone: string;
           // migration 0203 -- Cambridge gives every centre the same Appian
           // sign-in URL; Entry Form's "Open Appian" link reads this.
           appian_url: string | null;
