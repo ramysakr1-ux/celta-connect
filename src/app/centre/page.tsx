@@ -58,19 +58,39 @@ export default async function CentreOverviewPage({
   const multiBranch = branches.length > 1;
 
   const courseIds = (courses ?? []).map((c) => c.id);
-  const { data: volunteers } =
+  // None of these five depend on each other's results (only on courseIds/
+  // scope/ctx.roles, already in hand) -- batched into one round trip
+  // instead of five stacked sequential ones.
+  const [{ data: volunteers }, { data: assessorLinkRows }, { data: bounces }, { data: plans }, { data: pendingRefundRows }] = await Promise.all([
     canView(ctx.roles, "volunteers.view", ctx.overrides) && courseIds.length > 0
-      ? await admin.from("volunteer_students").select("id, volunteer_person_id").in("course_id", courseIds)
-      : { data: [] };
-
-  // for-claude-code-concurrent-course-checks.md: "keep the assessor history
-  // per centre so it can be seen." course_tutors is the real per-course
-  // assessor link (assignExistingTutor's insert path); reused here purely
-  // for visibility, nothing here blocks anything.
-  const { data: assessorLinkRows } =
+      ? admin.from("volunteer_students").select("id, volunteer_person_id").in("course_id", courseIds)
+      : Promise.resolve({ data: [] }),
+    // for-claude-code-concurrent-course-checks.md: "keep the assessor
+    // history per centre so it can be seen." course_tutors is the real
+    // per-course assessor link (assignExistingTutor's insert path), reused
+    // here purely for visibility, nothing here blocks anything.
     canView(ctx.roles, "courseAdmin.view", ctx.overrides) && courseIds.length > 0
-      ? await admin.from("course_tutors").select("course_id, profile_id").eq("tutor_role", "external_assessor").in("course_id", courseIds)
-      : { data: [] };
+      ? admin.from("course_tutors").select("course_id, profile_id").eq("tutor_role", "external_assessor").in("course_id", courseIds)
+      : Promise.resolve({ data: [] }),
+    // "Only 'bounced' creates a task -- on the admissions screen, scoped to
+    // the candidate." Surfaced here too because a bounced workspace
+    // invitation to a paid-up candidate is the one nobody can afford to miss.
+    canView(ctx.roles, "admissions.view", ctx.overrides)
+      ? admin
+          .from("email_bounce_tasks")
+          .select("id, email_address, reason, consecutive_bounces, applicant_id")
+          .in("center_id", scope)
+          .is("resolved_at", null)
+          .order("created_at", { ascending: false })
+          .limit(5)
+      : Promise.resolve({ data: [] }),
+    canView(ctx.roles, "payments.view", ctx.overrides) && courseIds.length > 0
+      ? admin.from("payment_plans").select("id, course_id").in("course_id", courseIds)
+      : Promise.resolve({ data: [] }),
+    canView(ctx.roles, "payments.view", ctx.overrides)
+      ? admin.from("refunds").select("id, amount").in("center_id", scope).eq("status", "pending")
+      : Promise.resolve({ data: [] }),
+  ]);
   const assessorProfileIds = [...new Set((assessorLinkRows ?? []).map((r) => r.profile_id))];
   const { data: assessorProfiles } =
     assessorProfileIds.length > 0 ? await admin.from("profiles").select("id, full_name").in("id", assessorProfileIds) : { data: [] };
@@ -93,23 +113,6 @@ export default async function CentreOverviewPage({
   // own group of one, keyed by its own row id so it still counts correctly.
   const volunteerPersonCount = new Set((volunteers ?? []).map((v) => v.volunteer_person_id ?? v.id)).size;
 
-  // "Only 'bounced' creates a task -- on the admissions screen, scoped to the
-  // candidate." Surfaced here too because a bounced workspace invitation to a
-  // paid-up candidate is the one nobody can afford to miss.
-  const { data: bounces } = canView(ctx.roles, "admissions.view", ctx.overrides)
-    ? await admin
-        .from("email_bounce_tasks")
-        .select("id, email_address, reason, consecutive_bounces, applicant_id")
-        .in("center_id", scope)
-        .is("resolved_at", null)
-        .order("created_at", { ascending: false })
-        .limit(5)
-    : { data: [] };
-
-  const { data: plans } =
-    canView(ctx.roles, "payments.view", ctx.overrides) && courseIds.length > 0
-      ? await admin.from("payment_plans").select("id, course_id").in("course_id", courseIds)
-      : { data: [] };
   const courseOfPlan = new Map((plans ?? []).map((p) => [p.id, p.course_id]));
   const owedByCourse = new Map<string, number>();
   for (const p of payments ?? []) {
@@ -125,9 +128,6 @@ export default async function CentreOverviewPage({
   const owing = (payments ?? []).filter((p) => p.status === "pending" || p.status === "missed");
   const outstanding = owing.reduce((sum, p) => sum + Number(p.amount), 0);
   const owingCourseCount = new Set(owing.map((p) => courseOfPlan.get(p.payment_plan_id)).filter(Boolean)).size;
-  const { data: pendingRefundRows } = canView(ctx.roles, "payments.view", ctx.overrides)
-    ? await admin.from("refunds").select("id, amount").in("center_id", scope).eq("status", "pending")
-    : { data: [] };
   const pendingRefunds = pendingRefundRows ?? [];
   const refundsPending = pendingRefunds.reduce((sum, r) => sum + Number(r.amount), 0);
 

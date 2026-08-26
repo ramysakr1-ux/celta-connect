@@ -59,23 +59,33 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       supabase.from("interview_records").select("*").eq("applicant_id", id).maybeSingle(),
     ]);
 
-  const speakingAudioSignedUrl = applicant.speaking_task_audio_url
-    ? (await supabase.storage.from("applicant-speaking-task-audio").createSignedUrl(applicant.speaking_task_audio_url, 3600)).data?.signedUrl ?? null
-    : null;
+  // None of these five depend on each other's results (only on
+  // applicant/id, already in hand) -- batched into one round trip instead
+  // of five stacked sequential ones.
+  const [signedUrlResult, { data: paymentPlan }, { data: emailHistory }, { data: depositMarkedBy }, { data: releasedBy }] = await Promise.all([
+    applicant.speaking_task_audio_url
+      ? supabase.storage.from("applicant-speaking-task-audio").createSignedUrl(applicant.speaking_task_audio_url, 3600)
+      : Promise.resolve({ data: null }),
+    supabase.from("payment_plans").select("id, total_amount").eq("applicant_id", id).maybeSingle(),
+    // All Emails.dc.html: applicant_emails already tracks all 19 email
+    // types with real delivery state (migration 0108/0113, populated by
+    // the Resend webhook) -- nothing on this page read it. First real
+    // surface for it.
+    supabase.from("applicant_emails").select("*").eq("applicant_id", id).order("created_at", { ascending: false }),
+    applicant.deposit_marked_by
+      ? supabase.from("profiles").select("full_name").eq("id", applicant.deposit_marked_by).maybeSingle()
+      : Promise.resolve({ data: null }),
+    applicant.workspace_released_by
+      ? supabase.from("profiles").select("full_name").eq("id", applicant.workspace_released_by).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  const speakingAudioSignedUrl = signedUrlResult.data?.signedUrl ?? null;
+  const depositMarkedByName = depositMarkedBy?.full_name ?? null;
+  const releasedByName = releasedBy?.full_name ?? null;
 
-  const { data: paymentPlan } = await supabase.from("payment_plans").select("id, total_amount").eq("applicant_id", id).maybeSingle();
   const { data: payments } = paymentPlan
     ? await supabase.from("payments").select("*").eq("payment_plan_id", paymentPlan.id)
     : { data: [] };
-
-  // All Emails.dc.html: applicant_emails already tracks all 19 email types
-  // with real delivery state (migration 0108/0113, populated by the Resend
-  // webhook) -- nothing on this page read it. First real surface for it.
-  const { data: emailHistory } = await supabase
-    .from("applicant_emails")
-    .select("*")
-    .eq("applicant_id", id)
-    .order("created_at", { ascending: false });
 
   // The four states: not paid / deposit paid / paying instalments / paid in
   // full. Derived from the deposit plus the plan, never stored -- a stored
@@ -87,15 +97,6 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
     instalments: (payments ?? []).map((p) => ({ amount: Number(p.amount), status: p.status })),
     planTotal: paymentPlan ? Number(paymentPlan.total_amount) : null,
   });
-  const { data: depositMarkedBy } = applicant.deposit_marked_by
-    ? await supabase.from("profiles").select("full_name").eq("id", applicant.deposit_marked_by).maybeSingle()
-    : { data: null };
-  const depositMarkedByName = depositMarkedBy?.full_name ?? null;
-
-  const { data: releasedBy } = applicant.workspace_released_by
-    ? await supabase.from("profiles").select("full_name").eq("id", applicant.workspace_released_by).maybeSingle()
-    : { data: null };
-  const releasedByName = releasedBy?.full_name ?? null;
 
   // build-spec.md §11: whose job this actually is. Areas only apply to the
   // admin family -- a trainer handling admissions isn't in the area model at

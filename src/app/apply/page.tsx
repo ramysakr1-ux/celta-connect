@@ -45,12 +45,31 @@ export default async function ApplyPage({
     );
   }
 
-  const { data: openCourses } = await admin
-    .from("courses")
-    .select("id, name, start_date, end_date, delivery_mode, application_cap")
-    .eq("center_id", center.id)
-    .eq("accepting_applications", true)
-    .order("start_date", { ascending: true });
+  // Independent of each other -- courses/accepted-counts is its own
+  // dependent chain, prompts and speakingPrompts each only need center.id --
+  // so run all three branches in parallel instead of stacking 4 sequential
+  // round trips on top of the center lookup above. Measured live: this page
+  // was taking 2.7-4.3s in production before this change.
+  const [{ data: openCourses }, { data: prompts }, { data: speakingPrompts }] = await Promise.all([
+    admin
+      .from("courses")
+      .select("id, name, start_date, end_date, delivery_mode, application_cap")
+      .eq("center_id", center.id)
+      .eq("accepting_applications", true)
+      .order("start_date", { ascending: true }),
+    admin
+      .from("application_writing_prompts")
+      .select("id, prompt_type, prompt_text")
+      .eq("center_id", center.id)
+      .eq("active", true)
+      .order("prompt_type"),
+    admin
+      .from("speaking_task_prompts")
+      .select("id, prompt_text")
+      .eq("center_id", center.id)
+      .eq("active", true)
+      .order("created_at"),
+  ]);
 
   const courseIds = (openCourses ?? []).map((c) => c.id);
   const { data: acceptedCounts } =
@@ -97,20 +116,6 @@ export default async function ApplyPage({
       full: remaining !== null && remaining <= 0,
     };
   });
-
-  const { data: prompts } = await admin
-    .from("application_writing_prompts")
-    .select("id, prompt_type, prompt_text")
-    .eq("center_id", center.id)
-    .eq("active", true)
-    .order("prompt_type");
-
-  const { data: speakingPrompts } = await admin
-    .from("speaking_task_prompts")
-    .select("id, prompt_text")
-    .eq("center_id", center.id)
-    .eq("active", true)
-    .order("created_at");
 
   return (
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
