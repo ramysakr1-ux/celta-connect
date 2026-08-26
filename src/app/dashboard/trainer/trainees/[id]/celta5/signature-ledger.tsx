@@ -32,21 +32,40 @@ export function SignatureLedger({ rows, traineeId }: { rows: SignatureLedgerRow[
     <div className="sheet">
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-serif text-lg text-ink">Signatures</h3>
-        {ready ? (
-          <a
-            href={`/api/portfolio/${traineeId}/celta5/booklet`}
-            className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
-          >
-            Export CELTA 5 booklet
-          </a>
-        ) : (
-          <span
-            className="shrink-0 cursor-not-allowed rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted"
-            title="All signatures below must read Signed before the booklet can be exported"
-          >
-            Export CELTA 5 booklet
-          </span>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {ready ? (
+            <>
+              <a
+                href={`/api/portfolio/${traineeId}/celta5/booklet`}
+                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+              >
+                Export CELTA 5 booklet
+              </a>
+              <a
+                href={`/api/portfolio/${traineeId}/celta5/replica`}
+                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary"
+                title="The real Cambridge CELTA 5 document, unaltered, with this candidate's data filled in -- what actually gets submitted to Cambridge"
+              >
+                Export real CELTA 5
+              </a>
+            </>
+          ) : (
+            <>
+              <span
+                className="cursor-not-allowed rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted"
+                title="All signatures below must read Signed before the booklet can be exported"
+              >
+                Export CELTA 5 booklet
+              </span>
+              <span
+                className="cursor-not-allowed rounded-[6px] border border-border px-3 py-1.5 text-sm text-muted"
+                title="All signatures below must read Signed before the booklet can be exported"
+              >
+                Export real CELTA 5
+              </span>
+            </>
+          )}
+        </div>
       </div>
       <div className="mt-3 flex flex-col gap-2">
         {rows.map((row) => (
