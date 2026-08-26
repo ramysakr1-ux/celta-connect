@@ -361,6 +361,8 @@ export function ApplicationForm({
                 This isn&apos;t an interview -- there&apos;s no follow-up, no
                 conversation. Pick a prompt, record your response, and submit.
                 It&apos;s reviewed by a person ahead of your real interview.
+                Aim for 1-2 minutes -- there&apos;s no penalty for going over
+                or under.
               </p>
               <div className="flex flex-col gap-1.5">
                 <label
