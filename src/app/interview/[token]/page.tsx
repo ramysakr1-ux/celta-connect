@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Wordmark } from "@/components/wordmark";
 import { getPickerTimeOptions, hasBookableOption, flagNoInterviewSlots } from "@/lib/interview-slot-picker";
@@ -102,7 +103,9 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-sm p-3">
       <div className="sheet-entry p-8">
-        <Wordmark size="hero" />
+        <Link href="/" className="inline-block hover:opacity-80">
+          <Wordmark size="hero" />
+        </Link>
         {children}
       </div>
       </div>

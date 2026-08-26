@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LoginForm } from "@/app/login/login-form";
 import { Wordmark } from "@/components/wordmark";
 
@@ -13,7 +14,9 @@ export default async function LoginPage({
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
         <div className="sheet-accent p-8">
-          <Wordmark size="hero" />
+          <Link href="/" className="inline-block hover:opacity-80">
+            <Wordmark size="hero" />
+          </Link>
           <p className="mt-3 text-sm text-muted">Sign in to your centre.</p>
           <p className="mt-2 text-xs text-muted">
             Assessors and volunteer students don&apos;t sign in -- you have your own link. Trainees sign in here too,

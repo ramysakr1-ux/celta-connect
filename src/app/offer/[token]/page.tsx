@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Wordmark } from "@/components/wordmark";
 import { OfferAcceptForm } from "@/app/offer/[token]/offer-accept-form";
@@ -38,7 +39,9 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
         <div className="sheet-entry p-8">
-          <Wordmark size="hero" />
+          <Link href="/" className="inline-block hover:opacity-80">
+            <Wordmark size="hero" />
+          </Link>
           <p className="mt-4 text-sm text-destructive">
             This offer link is invalid, expired, or has already been used. Contact the centre if you believe this is
             a mistake.
@@ -58,7 +61,9 @@ export default async function OfferPage({ params }: { params: Promise<{ token: s
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-sm p-3">
       <div className="sheet-entry p-8">
-        <Wordmark size="hero" />
+        <Link href="/" className="inline-block hover:opacity-80">
+          <Wordmark size="hero" />
+        </Link>
         <p className="mt-1 text-sm text-ink">
           {applicant.full_name}, you&apos;re offered a place on <strong>{course?.name}</strong>
           {course ? ` (${formatDate(course.start_date)} – ${formatDate(course.end_date)})` : ""} at {center?.name}.

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Wordmark } from "@/components/wordmark";
 import { UnsubscribeButton } from "@/app/student/[token]/unsubscribe/unsubscribe-button";
@@ -23,7 +24,9 @@ export default async function UnsubscribePage({ params }: { params: Promise<{ to
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
           <div className="sheet-accent p-8 text-center">
-            <Wordmark size="hero" />
+            <Link href="/" className="inline-block hover:opacity-80">
+              <Wordmark size="hero" />
+            </Link>
             <p className="mt-4 text-sm text-destructive">This link has expired or isn&apos;t valid. Ask your teacher for a new one.</p>
           </div>
         </div>
@@ -42,7 +45,9 @@ export default async function UnsubscribePage({ params }: { params: Promise<{ to
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-sm p-3">
         <div className="sheet-accent p-8 text-center">
-          <Wordmark size="hero" />
+          <Link href="/" className="inline-block hover:opacity-80">
+            <Wordmark size="hero" />
+          </Link>
           <h1 className="mt-5 font-serif text-lg text-ink">{optedOut ? "Turn reminder emails back on?" : "Stop class reminder emails?"}</h1>
           <p className="mt-2 text-sm text-muted">
             {optedOut

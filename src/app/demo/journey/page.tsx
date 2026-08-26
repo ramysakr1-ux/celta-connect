@@ -12,6 +12,7 @@ import {
   volunteer30MinReminderEmailHtml,
 } from "@/lib/admissions-email";
 import { withConnectBranding } from "@/lib/email-layout";
+import Link from "next/link";
 import { EmailPreview } from "@/app/demo/journey/email-preview";
 import { BackToTop } from "@/app/demo/journey/back-to-top";
 import { AiReadingPanel } from "@/app/dashboard/admissions/[id]/ai-reading-panel";
@@ -239,7 +240,9 @@ export default async function JourneyPage() {
     <div className="min-h-screen bg-background">
       <div className="container flex flex-col gap-10 py-12">
         <div className="flex flex-col items-center gap-3 text-center">
-          <Wordmark size="hero" />
+          <Link href="/" className="hover:opacity-80">
+            <Wordmark size="hero" />
+          </Link>
           <h1 className="font-serif text-2xl text-ink">The application journey</h1>
           <p className="max-w-lg text-sm text-muted">
             Every stage a real trainee or volunteer goes through, in order -- the live form or page where there is

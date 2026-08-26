@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { JoinCentreForm } from "@/app/join-centre/[token]/join-centre-form";
 import { Wordmark } from "@/components/wordmark";
@@ -22,7 +23,9 @@ export default async function JoinCentrePage({ params }: { params: Promise<{ tok
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
         <div className="sheet-entry p-8">
-          <Wordmark size="hero" />
+          <Link href="/" className="inline-block hover:opacity-80">
+            <Wordmark size="hero" />
+          </Link>
           <p className="mt-4 text-sm text-destructive">
             This invite link is invalid or has already been used. Ask the centre owner for a new one.
           </p>
@@ -42,7 +45,9 @@ export default async function JoinCentrePage({ params }: { params: Promise<{ tok
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-sm p-3">
       <div className="sheet-entry p-8">
-        <Wordmark size="hero" />
+        <Link href="/" className="inline-block hover:opacity-80">
+          <Wordmark size="hero" />
+        </Link>
         <p className="mt-1 text-sm text-muted">
           You&apos;re joining {center?.name ?? "your centre"} as a {roleLabel}. You do not need to be on a course —
           this link opens the centre.

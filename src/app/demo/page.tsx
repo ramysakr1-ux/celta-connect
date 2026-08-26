@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Wordmark } from "@/components/wordmark";
 
 // build-spec.md's "Demo -- a flagged clone of the real app," extended per
@@ -48,7 +49,9 @@ export default function DemoLandingPage() {
     <div className="min-h-screen bg-background">
       <div className="container flex flex-col gap-8 py-12">
         <div className="flex flex-col items-center gap-3 text-center">
-          <Wordmark size="hero" />
+          <Link href="/" className="hover:opacity-80">
+            <Wordmark size="hero" />
+          </Link>
           <h1 className="font-serif text-2xl text-ink">Try Connect as any role</h1>
           <p className="max-w-md text-sm text-muted">
             Every link below drops you straight into a seeded, isolated demo centre with real-looking mid-course

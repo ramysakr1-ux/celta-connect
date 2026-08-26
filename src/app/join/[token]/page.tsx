@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { JoinForm } from "@/app/join/[token]/join-form";
 import { Wordmark } from "@/components/wordmark";
@@ -41,7 +42,9 @@ export default async function JoinPage({
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
         <div className="sheet-entry p-8">
-          <Wordmark size="hero" />
+          <Link href="/" className="inline-block hover:opacity-80">
+            <Wordmark size="hero" />
+          </Link>
           <h1 className="mt-4 font-serif text-xl text-ink">The course has closed</h1>
           <p className="mt-2 text-sm text-muted">
             {course.name} at {center?.name ?? "your centre"} has finished, and the course material was returned to the
@@ -73,7 +76,9 @@ export default async function JoinPage({
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
         <div className="sheet-entry p-8">
-          <Wordmark size="hero" />
+          <Link href="/" className="inline-block hover:opacity-80">
+            <Wordmark size="hero" />
+          </Link>
           <p className="mt-4 text-sm text-destructive">
             This join link is invalid or has expired. Ask your centre admin for a new one.
           </p>
@@ -90,7 +95,9 @@ export default async function JoinPage({
     <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
       <div className="frame w-full max-w-sm p-3">
       <div className="sheet-entry p-8">
-        <Wordmark size="hero" />
+        <Link href="/" className="inline-block hover:opacity-80">
+          <Wordmark size="hero" />
+        </Link>
         <p className="mt-1 text-sm text-muted">
           You&apos;re joining {course.name} as a <span className="capitalize">{role}</span>. Your workspace opens as
           soon as you accept.

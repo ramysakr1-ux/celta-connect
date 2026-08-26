@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { MARKETING_SOURCE_OPTIONS } from "@/lib/marketing-source";
 import { submitApplication, type ApplyFormState } from "@/app/apply/actions";
 import { AudioRecorder } from "@/components/audio-recorder";
@@ -511,7 +512,9 @@ export function ApplicationForm({
 
       <div className="mt-8 flex items-center justify-end gap-1.5 border-t border-border pt-4">
         <span className="text-[10px] text-muted">Powered by</span>
-        <Wordmark size="header" />
+        <Link href="/" className="hover:opacity-80">
+          <Wordmark size="header" />
+        </Link>
       </div>
     </div>
   );

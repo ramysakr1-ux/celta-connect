@@ -54,7 +54,11 @@ export default async function CentreLayout({ children }: { children: React.React
           and sign out, which used to collide with the credit on one line. */}
       <div className="container flex items-center justify-between gap-6 pt-10">
         <div className="flex items-center gap-3.5">
-          <Link href="/centre" className="shrink-0 hover:opacity-80">
+          {/* Ramy, 27 Aug 2026: "except for my home screen, which if I click
+              connect, should take me to command center" -- same fixed
+              destination as every other layout's logo for platform_owner,
+              regardless of which section they entered Centre Management from. */}
+          <Link href={profile.role === "platform_owner" ? "/platform/command-center" : "/centre"} className="shrink-0 hover:opacity-80">
             <Wordmark size="header" />
           </Link>
           <span className="h-[18px] w-px bg-border" aria-hidden="true" />

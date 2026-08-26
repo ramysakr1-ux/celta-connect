@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { VolunteerSignupForm } from "@/app/student/[token]/signup-form";
 import { DeclineButton } from "@/app/student/[token]/decline-button";
@@ -155,7 +156,9 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
         <div className="sheet-accent p-8 text-center">
-          <Wordmark size="hero" />
+          <Link href="/" className="inline-block hover:opacity-80">
+            <Wordmark size="hero" />
+          </Link>
           <p className="mt-4 text-sm text-destructive">
             This link has expired or isn&apos;t valid. Ask your teacher for a new one.
           </p>
@@ -180,7 +183,9 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
         <div className="frame w-full max-w-sm p-3">
         <div className="sheet-accent p-8 text-center">
-          <Wordmark size="hero" />
+          <Link href="/" className="inline-block hover:opacity-80">
+            <Wordmark size="hero" />
+          </Link>
           <p className="mt-4 text-sm text-destructive">This link isn&apos;t valid. Ask your teacher for a new one.</p>
         </div>
         </div>
@@ -195,7 +200,9 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     return (
       <div className="min-h-screen bg-background">
         <div className="container flex items-center gap-4 py-6">
-          <Wordmark size="header" />
+          <Link href="/" className="hover:opacity-80">
+            <Wordmark size="header" />
+          </Link>
         </div>
         <div className="container pb-16">
           <div className="frame mx-auto flex max-w-xl flex-col gap-6 p-6">
@@ -540,7 +547,9 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
           <div className="hidden md:block md:rounded-[6px]" style={{ background: "oklch(99.2% 0.005 90)" }}>
             {/* Header bar */}
             <header className="flex h-[52px] items-center justify-between border-b border-border px-5">
-              <Wordmark size="header-compact" />
+              <Link href="/" className="hover:opacity-80">
+                <Wordmark size="header-compact" />
+              </Link>
               <Greeting name={volunteer.name} suffix="volunteer student" className="text-xs text-muted" />
             </header>
 
@@ -577,7 +586,9 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
               padded 18px 16px 26px, one column. */}
           <div className="md:hidden">
             <header className="flex h-[54px] items-center justify-between border-b border-border px-4" style={{ background: "oklch(99.2% 0.005 90)" }}>
-              <Wordmark size="header-compact" />
+              <Link href="/" className="hover:opacity-80">
+                <Wordmark size="header-compact" />
+              </Link>
               <Greeting name={firstName} className="text-xs text-muted" />
             </header>
 
