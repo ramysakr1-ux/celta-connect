@@ -21,7 +21,12 @@ export function FinalizeRecordForm({
   const [state, action, pending] = useActionState(finalizeRecord, initialState);
 
   return (
-    <form action={action} className="sheet flex flex-col gap-3 p-6">
+    <div className="sheet flex flex-col gap-3 p-6">
+      {record.trainer_signoff_final_at ? null : !trainerSignatureName ? (
+        <SetSignatureForm fullName={trainerFullName} />
+      ) : null}
+
+    <form action={action} className="contents">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
       <h2 className="font-serif text-lg text-ink">Final sign-off</h2>
       <p className="text-sm text-muted">
@@ -42,8 +47,6 @@ export function FinalizeRecordForm({
         <p className="text-xs text-muted">
           Finalized by {record.final_tutor_signature_name} on {new Date(record.trainer_signoff_final_at).toLocaleString()}.
         </p>
-      ) : !trainerSignatureName ? (
-        <SetSignatureForm fullName={trainerFullName} />
       ) : null}
       {record.trainee_signoff_final_at ? (
         <p className="text-xs text-muted">
@@ -61,5 +64,6 @@ export function FinalizeRecordForm({
         {pending ? "Saving..." : "Save"}
       </button>
     </form>
+    </div>
   );
 }

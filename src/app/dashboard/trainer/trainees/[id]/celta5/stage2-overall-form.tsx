@@ -24,7 +24,12 @@ export function Stage2OverallForm({
   const [state, action, pending] = useActionState(updateStage2Overall, initialState);
 
   return (
-    <form action={action} className="sheet flex flex-col gap-4 p-6">
+    <div className="sheet flex flex-col gap-4 p-6">
+      {record.stage2_tutor_signature_name && record.stage2_completed_at ? null : !trainerSignatureName ? (
+        <SetSignatureForm fullName={trainerFullName} />
+      ) : null}
+
+    <form action={action} className="contents">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
       <h2 className="font-serif text-lg text-ink">Progress Record — Stage 2: mid-course tutorial</h2>
 
@@ -119,8 +124,6 @@ export function Stage2OverallForm({
         <p className="text-xs text-muted">
           Signed by {record.stage2_tutor_signature_name} on {new Date(record.stage2_completed_at).toLocaleDateString()}.
         </p>
-      ) : !trainerSignatureName ? (
-        <SetSignatureForm fullName={trainerFullName} />
       ) : null}
 
       <label className="flex items-center gap-2 text-sm text-ink">
@@ -147,5 +150,6 @@ export function Stage2OverallForm({
         {pending ? "Saving..." : "Save"}
       </button>
     </form>
+    </div>
   );
 }
