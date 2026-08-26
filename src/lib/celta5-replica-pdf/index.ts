@@ -2,10 +2,14 @@ import "server-only";
 import { PDFDocument } from "pdf-lib";
 import { loadMasterDocument, embedCelta5Fonts } from "@/lib/celta5-replica-pdf/engine";
 import { drawCoverPage, type CoverPageData } from "@/lib/celta5-replica-pdf/pages/cover";
+import { drawStage1Page, type Stage1PageData } from "@/lib/celta5-replica-pdf/pages/stage1";
 
 export interface Celta5ReplicaInput {
   cover: CoverPageData;
+  stage1: Stage1PageData;
 }
+
+const PAGE_INDEX = { stage1: 14 };
 
 // Produces a visually identical copy of the real Cambridge CELTA 5 booklet
 // -- the master PDF's own pages, unchanged, with the candidate/course data
@@ -16,10 +20,11 @@ export interface Celta5ReplicaInput {
 // submit to be an unaltered copy of their document (same logo, fonts,
 // layout, centre number etc.) -- see the project's celta5-replica memory.
 //
-// Only the cover page is wired up so far. Every other page currently
+// Cover and Stage 1 are wired up so far. Every other page currently
 // passes through from the master unchanged (informational pages already
-// need nothing drawn on them; the progress-record/criteria-grid/signature
-// pages still need their own per-page coordinate mapping, in progress).
+// need nothing drawn on them; the remaining progress-record/attendance/
+// criteria-grid/signature pages still need their own coordinate mapping,
+// in progress).
 export async function renderCelta5ReplicaBuffer(input: Celta5ReplicaInput): Promise<Buffer> {
   const master = await loadMasterDocument();
   const pageCount = master.getPageCount();
@@ -30,6 +35,7 @@ export async function renderCelta5ReplicaBuffer(input: Celta5ReplicaInput): Prom
   copiedPages.forEach((page) => out.addPage(page));
 
   drawCoverPage(out.getPage(0), fonts, input.cover);
+  drawStage1Page(out.getPage(PAGE_INDEX.stage1), fonts, input.stage1);
 
   const bytes = await out.save();
   return Buffer.from(bytes);

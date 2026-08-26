@@ -73,3 +73,52 @@ export function drawCellGrid(page: PDFPage, font: PDFFont, value: string, cellXM
     if (chars[i]) drawAt(page, font, chars[i], 0, fitzY1, size, { align: "center", xMid });
   });
 }
+
+// A hollow-square tick box on the real form (see the checkbox rects on
+// Stage 1/2/3 Progress Records, the final-day declaration) -- an X drawn
+// centered inside it. `box` is a fitz-space rect [x0, y0, x1, y1].
+export function drawCheck(page: PDFPage, font: PDFFont, box: [number, number, number, number]) {
+  const [x0, y0, x1, y1] = box;
+  const xMid = (x0 + x1) / 2;
+  const yMid = (y0 + y1) / 2;
+  const size = Math.min(x1 - x0, y1 - y0) * 0.8;
+  drawAt(page, font, "X", 0, yMid + size / 2.6, size, { align: "center", xMid });
+}
+
+// Word-wraps free text top-down inside a fitz-space box, one paragraph per
+// input array entry (a blank line's worth of gap between paragraphs).
+// Truncates rather than overflowing past the box's bottom -- these boxes
+// are a fixed size on the real page, same constraint a tutor writing by
+// hand would have.
+export function drawWrapped(
+  page: PDFPage,
+  font: PDFFont,
+  paragraphs: string[],
+  box: { x0: number; y0: number; x1: number; y1: number },
+  size = 9.5,
+  lineHeight = 12
+) {
+  const maxWidth = box.x1 - box.x0;
+  let cursorY = box.y0;
+  for (const paragraph of paragraphs) {
+    const words = paragraph.split(/\s+/).filter(Boolean);
+    let line = "";
+    for (const word of words) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (font.widthOfTextAtSize(candidate, size) > maxWidth && line) {
+        if (cursorY + lineHeight > box.y1) return;
+        drawAt(page, font, line, box.x0, cursorY, size);
+        cursorY += lineHeight;
+        line = word;
+      } else {
+        line = candidate;
+      }
+    }
+    if (line) {
+      if (cursorY + lineHeight > box.y1) return;
+      drawAt(page, font, line, box.x0, cursorY, size);
+      cursorY += lineHeight;
+    }
+    cursorY += lineHeight * 0.4;
+  }
+}
