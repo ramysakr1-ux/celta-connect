@@ -122,3 +122,61 @@ export function drawWrapped(
     cursorY += lineHeight * 0.4;
   }
 }
+
+// How many copies of a repeatable-table page (Observations, Assessed
+// Teaching Practice) are needed to fit every row -- Ramy's call: rather
+// than capping at the printed row count or shrinking rows to force-fit,
+// duplicate the real master page as many times as needed and continue the
+// table across copies, same as a candidate extending it by hand.
+export function computeCopiesNeeded(rowCount: number, rowsPerPage: number): number {
+  return Math.max(1, Math.ceil(rowCount / rowsPerPage));
+}
+
+// Expands a straight page list into one with extra copies of specific
+// source pages spliced in, and records where each source page's copies
+// start in the expanded (output) list -- e.g. page 12 needing 3 copies to
+// fit its rows becomes 3 consecutive entries in `list`, and
+// `startIndex.get(12)` is the output index of the first one.
+export function buildPageList(totalPages: number, repeatCounts: Map<number, number>): { list: number[]; startIndex: Map<number, number> } {
+  const list: number[] = [];
+  const startIndex = new Map<number, number>();
+  for (let i = 0; i < totalPages; i++) {
+    const copies = repeatCounts.get(i) ?? 1;
+    startIndex.set(i, list.length);
+    for (let c = 0; c < copies; c++) list.push(i);
+  }
+  return { list, startIndex };
+}
+
+export interface TableColumn {
+  x0: number;
+  x1: number;
+  wrap?: boolean; // multi-line within the row (e.g. "Lesson focus"); single-line elsewhere
+}
+
+// Draws one row of a repeatable table -- `rowDividers` are the fitz-space y
+// values measured off the real page (consecutive pairs are one row's
+// [top, bottom]); `rowIndex` picks which pair. Cells align with `columns`
+// in order; a wrap column word-wraps within the row's height instead of
+// overflowing into the next column.
+export function drawTableRow(
+  page: PDFPage,
+  font: PDFFont,
+  cells: string[],
+  columns: TableColumn[],
+  rowDividers: number[],
+  rowIndex: number,
+  size = 8.5
+) {
+  const top = rowDividers[rowIndex];
+  const bottom = rowDividers[rowIndex + 1];
+  columns.forEach((col, i) => {
+    const text = cells[i] ?? "";
+    if (!text) return;
+    if (col.wrap) {
+      drawWrapped(page, font, [text], { x0: col.x0 + 4, y0: top + 10, x1: col.x1 - 4, y1: bottom - 2 }, size, size + 2);
+    } else {
+      drawAt(page, font, text, col.x0 + 4, top + (bottom - top) / 2 + size / 2.6, size);
+    }
+  });
+}
