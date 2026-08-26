@@ -174,7 +174,7 @@ export function drawTableRow(
     const text = cells[i] ?? "";
     if (!text) return;
     if (col.wrap) {
-      drawWrapped(page, font, [text], { x0: col.x0 + 4, y0: top + 10, x1: col.x1 - 4, y1: bottom - 2 }, size, size + 2);
+      drawWrapped(page, font, [text], { x0: col.x0 + 4, y0: top + size + 2.5, x1: col.x1 - 4, y1: bottom - 2 }, size, size + 1.5);
     } else {
       drawAt(page, font, text, col.x0 + 4, top + (bottom - top) / 2 + size / 2.6, size);
     }

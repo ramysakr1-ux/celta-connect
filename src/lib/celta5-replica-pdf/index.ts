@@ -5,15 +5,17 @@ import { drawCoverPage, type CoverPageData } from "@/lib/celta5-replica-pdf/page
 import { drawStage1Page, type Stage1PageData } from "@/lib/celta5-replica-pdf/pages/stage1";
 import { drawObservationsPage, OBSERVATIONS_ROWS_PER_PAGE, type ObservationRow } from "@/lib/celta5-replica-pdf/pages/observations";
 import { drawAssessedTpPage, ASSESSED_TP_ROWS_PER_PAGE, type AssessedTpRow } from "@/lib/celta5-replica-pdf/pages/assessed-tp";
+import { drawAttendancePage, type AttendancePageData } from "@/lib/celta5-replica-pdf/pages/attendance";
 
 export interface Celta5ReplicaInput {
   cover: CoverPageData;
+  attendance: AttendancePageData;
   stage1: Stage1PageData;
   observations: ObservationRow[];
   assessedTp: AssessedTpRow[];
 }
 
-const PAGE_INDEX = { stage1: 14, observations: 11, assessedTp: 12 };
+const PAGE_INDEX = { attendance: 10, stage1: 14, observations: 11, assessedTp: 12 };
 
 // Produces a visually identical copy of the real Cambridge CELTA 5 booklet
 // -- the master PDF's own pages, unchanged, with the candidate/course data
@@ -24,11 +26,11 @@ const PAGE_INDEX = { stage1: 14, observations: 11, assessedTp: 12 };
 // submit to be an unaltered copy of their document (same logo, fonts,
 // layout, centre number etc.) -- see the project's celta5-replica memory.
 //
-// Cover, Stage 1, Observations and Assessed TP are wired up so far. Every
-// other page currently passes through from the master unchanged
+// Cover, Attendance, Stage 1, Observations and Assessed TP are wired up so
+// far. Every other page currently passes through from the master unchanged
 // (informational pages already need nothing drawn on them; the remaining
-// progress-record/attendance/criteria-grid/signature pages still need
-// their own coordinate mapping, in progress).
+// progress-record/criteria-grid/signature pages still need their own
+// coordinate mapping, in progress).
 export async function renderCelta5ReplicaBuffer(input: Celta5ReplicaInput): Promise<Buffer> {
   const master = await loadMasterDocument();
   const pageCount = master.getPageCount();
@@ -51,6 +53,7 @@ export async function renderCelta5ReplicaBuffer(input: Celta5ReplicaInput): Prom
   copiedPages.forEach((page) => out.addPage(page));
 
   drawCoverPage(out.getPage(startIndex.get(0)!), fonts, input.cover);
+  drawAttendancePage(out.getPage(startIndex.get(PAGE_INDEX.attendance)!), fonts, input.attendance);
   drawStage1Page(out.getPage(startIndex.get(PAGE_INDEX.stage1)!), fonts, input.stage1);
 
   const observationsStart = startIndex.get(PAGE_INDEX.observations)!;
