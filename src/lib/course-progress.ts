@@ -27,14 +27,26 @@ export function computeProgressIssues(input: {
   timetableEvents: TimetableEvent[];
   taughtTpNumbers: Set<number>;
   assignmentStatusByType: Map<AssignmentType, { first_status: SubmissionStatus; resubmission_status: SubmissionStatus }>;
+  // Each TP round has two timetable rows (one per half/group, same
+  // linked_tp_number, different dates) -- see computeCurrentTpRound's own
+  // comment. Without this, a paired trainee's still-on-time TP got flagged
+  // "not yet taught" off the OTHER half's earlier date for the same round
+  // number. Unpaired subgroups (no half system) pass null and fall back to
+  // checking every TP row, same honest fallback rotation.ts's own callers
+  // already use elsewhere.
+  halfOrder?: 1 | 2 | null;
 }): ProgressIssue[] {
-  const { today, timetableEvents, taughtTpNumbers, assignmentStatusByType } = input;
+  const { today, timetableEvents, taughtTpNumbers, assignmentStatusByType, halfOrder } = input;
   const issues: ProgressIssue[] = [];
+  const ownTpDates = halfOrder
+    ? new Set(halfTpDates(timetableEvents.filter((e) => e.type === "tp"), halfOrder))
+    : null;
 
   for (const event of timetableEvents) {
     if (event.event_date >= today) continue; // not due yet
 
     if (event.type === "tp" && event.linked_tp_number != null) {
+      if (ownTpDates && !ownTpDates.has(event.event_date)) continue; // the other half's date for this round, not this trainee's own
       if (!taughtTpNumbers.has(event.linked_tp_number)) {
         issues.push({
           label: `TP${event.linked_tp_number}`,
@@ -92,7 +104,12 @@ export function computeWeekOf(startDate: string, endDate: string, today: string)
   const end = new Date(`${endDate}T00:00:00`);
   const now = new Date(`${today}T00:00:00`);
   const totalWeeks = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (7 * 86400000)));
-  const currentWeek = Math.min(totalWeeks, Math.max(1, Math.ceil((now.getTime() - start.getTime()) / (7 * 86400000)) + 1));
+  // Ramy, 28 Aug 2026: "the logic behind everything" -- Math.ceil(d/7)+1 is
+  // already 1 for every d in (0,7], so the +1 pushed the label a full week
+  // ahead for 6 of every 7 days (only the exact day-0/day-7/... boundaries
+  // came out right). Same floor-based day-to-week-index math as
+  // computeThisWeekRange just below, +1 for 1-indexed display.
+  const currentWeek = Math.min(totalWeeks, Math.max(1, Math.floor((now.getTime() - start.getTime()) / (7 * 86400000)) + 1));
   return `week ${currentWeek} of ${totalWeeks}`;
 }
 

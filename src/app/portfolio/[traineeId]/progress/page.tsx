@@ -105,7 +105,12 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
   // real TP length rather than fabricated. Same derivation as celta5/page.tsx.
   const peerSheetsObserved = new Set((peerNotes ?? []).map((n) => n.sheet_id)).size;
   const peerHours = (peerSheetsObserved * TP_LESSON_LENGTH_MINUTES) / 60;
-  const { liveHours: experiencedTeacherHours, filmedHours } = computeObservationHours(observations ?? []);
+  // Ramy, 28 Aug 2026: "the logic behind everything" -- was liveHours, which
+  // silently dropped any filmed hours from the figure compared against the
+  // 6h requirement. computeObservationHours's own hoursCounted (live +
+  // filmed capped at 3h) is the number that actually counts toward it, per
+  // Section 5's real "6 hours total, up to 3 may be filmed" rule.
+  const { hoursCounted: experiencedTeacherHours, filmedHours } = computeObservationHours(observations ?? []);
 
   // for-claude-code-progress-tab-screen.md: "Heading summarizes the two
   // things most likely to need action... not a static label." Picks the

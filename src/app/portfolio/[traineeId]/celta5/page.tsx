@@ -215,6 +215,7 @@ export default async function PortfolioCelta5Page({
       timetableEvents: timetableEvents ?? [],
       taughtTpNumbers,
       assignmentStatusByType,
+      halfOrder: subgroupForMode?.half_order === 1 || subgroupForMode?.half_order === 2 ? subgroupForMode.half_order : null,
     });
 
     const tutorIds = (courseTutorRows ?? []).map((t) => t.profile_id);
@@ -252,7 +253,10 @@ export default async function PortfolioCelta5Page({
     // derived from the real TP length rather than fabricated.
     const peerSheetsObserved = new Set((peerNotes ?? []).map((n) => n.sheet_id)).size;
     const peerHours = (peerSheetsObserved * TP_LESSON_LENGTH_MINUTES) / 60;
-    const { liveHours: experiencedTeacherHours, filmedHours } = computeObservationHours(observations ?? []);
+    // Ramy, 28 Aug 2026: "the logic behind everything" -- was liveHours,
+    // which silently dropped filmed hours from the figure compared against
+    // the 6h requirement (same bug as the standalone Progress tab's card).
+    const { hoursCounted: experiencedTeacherHours, filmedHours } = computeObservationHours(observations ?? []);
 
     const progressHeadingParts: string[] = [];
     if (myStage2Slot) progressHeadingParts.push(`Stage 2 tutorial booked`);

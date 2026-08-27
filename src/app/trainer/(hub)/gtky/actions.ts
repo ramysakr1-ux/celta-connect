@@ -62,6 +62,19 @@ export async function chooseGtkyActivity(formData: FormData): Promise<void> {
   if (typeof slug !== "string" || !slug) return;
 
   const supabase = await createClient();
+  // Ramy, 28 Aug 2026: "the logic behind everything" -- nothing previously
+  // checked slug against this trainee's own offered_slugs (unlike
+  // pickGtkyActivityForTrainee above, which only ever writes
+  // offered_slugs[0]), so a tampered form could lock in any activity in the
+  // whole bank, not just one of the three level/mode-matched picks actually
+  // offered.
+  const { data: assignment } = await supabase
+    .from("gtky_assignments")
+    .select("offered_slugs")
+    .eq("trainee_id", trainee.id)
+    .maybeSingle();
+  if (!assignment || !assignment.offered_slugs.includes(slug)) return;
+
   await supabase
     .from("gtky_assignments")
     .update({ chosen_slug: slug, chosen_at: new Date().toISOString() })
