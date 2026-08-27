@@ -243,7 +243,10 @@ export default async function CentreOverviewPage({
       {canView(ctx.roles, "payments.view", ctx.overrides) ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {metrics.map((m, i) => (
-            <div key={m.label} className={`card px-5 py-4 ${m.alert ? "card-amber" : i % 2 === 0 ? "" : "card-gold"}`}>
+            <div
+              key={m.label}
+              className={`card px-5 py-4 ${m.alert ? "card-side-amber" : i % 2 === 0 ? "card-side-teal" : "card-side-garnet"}`}
+            >
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{m.label}</p>
               <p className={`mt-1 font-serif text-[28px] ${m.alert ? "text-destructive" : "text-ink"}`}>{m.value}</p>
               <p className="mt-0.5 text-xs text-muted">{m.note}</p>
@@ -339,7 +342,7 @@ export default async function CentreOverviewPage({
 
         <div className="flex flex-col gap-4">
         {canView(ctx.roles, "admissions.view", ctx.overrides) ? (
-          <div className="card !p-0">
+          <div className="card card-garnet !p-0">
             <div className="flex items-baseline justify-between border-b border-border px-5 py-3.5">
               <div className="flex items-center gap-2">
                 <h2 className="font-serif text-base text-ink">Admissions pipeline</h2>
