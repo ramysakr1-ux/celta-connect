@@ -32,41 +32,46 @@ export async function getAdminChatRooms(profileId: string, centerIds: string[]):
 
   const admin = createAdminClient();
 
-  const { data: centres } = await admin.from("centers").select("id, name").in("id", centerIds);
-  const { data: existing } = await admin
-    .from("staff_channels")
-    .select("id, center_id, name")
-    .eq("type", "centre_admin")
-    .in("center_id", centerIds);
+  // Ramy, 27 Aug 2026: these two didn't depend on each other (both only
+  // need centerIds), and the per-centre insert+upsert loop below ran each
+  // centre's round trips one after another -- for a single-centre account
+  // (the common case) that's one extra sequential stage on every /centre
+  // navigation, and for a multi-centre account (yours) it multiplied by
+  // centre count. Both fixed to run concurrently.
+  const [{ data: centres }, { data: existing }] = await Promise.all([
+    admin.from("centers").select("id, name").in("id", centerIds),
+    admin.from("staff_channels").select("id, center_id, name").eq("type", "centre_admin").in("center_id", centerIds),
+  ]);
 
   const byCentre = new Map((existing ?? []).map((c) => [c.center_id, c]));
-  const rooms: AdminChatRoom[] = [];
 
-  for (const centre of centres ?? []) {
-    // "Named after the centre, not a course" -- ITI Istanbul · admin.
-    const name = `${centre.name} · admin`;
-    let channel = byCentre.get(centre.id);
+  const rooms = await Promise.all(
+    (centres ?? []).map(async (centre) => {
+      // "Named after the centre, not a course" -- ITI Istanbul · admin.
+      const name = `${centre.name} · admin`;
+      let channel = byCentre.get(centre.id);
 
-    if (!channel) {
-      const { data: created } = await admin
-        .from("staff_channels")
-        .insert({ center_id: centre.id, type: "centre_admin", name })
-        .select("id, center_id, name")
-        .single();
-      if (!created) continue;
-      channel = created;
-    }
+      if (!channel) {
+        const { data: created } = await admin
+          .from("staff_channels")
+          .insert({ center_id: centre.id, type: "centre_admin", name })
+          .select("id, center_id, name")
+          .single();
+        if (!created) return null;
+        channel = created;
+      }
 
-    // Membership follows the grant. Idempotent, so this is safe to run on
-    // every load and self-heals if someone was appointed while away.
-    await admin
-      .from("staff_channel_members")
-      .upsert({ channel_id: channel.id, profile_id: profileId }, { onConflict: "channel_id,profile_id" });
+      // Membership follows the grant. Idempotent, so this is safe to run on
+      // every load and self-heals if someone was appointed while away.
+      await admin
+        .from("staff_channel_members")
+        .upsert({ channel_id: channel.id, profile_id: profileId }, { onConflict: "channel_id,profile_id" });
 
-    rooms.push({ channelId: channel.id, name: channel.name ?? name, centerId: centre.id });
-  }
+      return { channelId: channel.id, name: channel.name ?? name, centerId: centre.id };
+    })
+  );
 
-  return rooms.sort((a, b) => a.name.localeCompare(b.name));
+  return rooms.filter((r): r is AdminChatRoom => r !== null).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**

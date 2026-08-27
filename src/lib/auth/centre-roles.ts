@@ -44,11 +44,24 @@ export const getCentreRoleContext = cache(async function getCentreRoleContext(pr
 }): Promise<CentreRoleContext> {
   const supabase = await createClient();
 
-  const { data: grants } = await supabase
-    .from("centre_roles")
-    .select("id, center_id, role")
-    .eq("profile_id", profile.id)
-    .is("revoked_at", null);
+  // Ramy, 27 Aug 2026: measured ~2.6-2.9s per /centre navigation, traced to
+  // a chain of small sequential round trips. This query and the
+  // platform_owner-only invites query below don't depend on each other --
+  // both only need profile.id/profile.role, not each other's result -- so
+  // they run concurrently now instead of one after another.
+  const invitesPromise =
+    profile.role === "platform_owner"
+      ? // platform_owner_invites' own RLS (migration 0208) only lets a
+        // centre's own centre_roles holders read it -- "the platform owner
+        // reads every row... via the admin client," same as every other page
+        // that queries this table for platform_owner's own purposes.
+        createAdminClient().from("platform_owner_invites").select("center_id").is("revoked_at", null)
+      : Promise.resolve({ data: [] as { center_id: string }[] });
+
+  const [{ data: grants }, { data: invites }] = await Promise.all([
+    supabase.from("centre_roles").select("id, center_id, role").eq("profile_id", profile.id).is("revoked_at", null),
+    invitesPromise,
+  ]);
 
   const held = grants ?? [];
   const grantedCenterIds = held.map((g) => g.center_id);
@@ -61,16 +74,7 @@ export const getCentreRoleContext = cache(async function getCentreRoleContext(pr
   // admin can do" -- never course data, which is a separate, course_tutors-
   // scoped door), not a role of its own -- an invite doesn't create a
   // centre_roles row, it stands alongside it.
-  let invitedCenterIds: string[] = [];
-  if (profile.role === "platform_owner") {
-    // platform_owner_invites' own RLS (migration 0208) only lets a
-    // centre's own centre_roles holders read it -- "the platform owner
-    // reads every row... via the admin client," same as every other page
-    // that queries this table for platform_owner's own purposes.
-    const admin = createAdminClient();
-    const { data: invites } = await admin.from("platform_owner_invites").select("center_id").is("revoked_at", null);
-    invitedCenterIds = (invites ?? []).map((i) => i.center_id);
-  }
+  const invitedCenterIds = (invites ?? []).map((i) => i.center_id);
 
   const requested = profile.active_center_id ?? null;
   const activeCenterId =

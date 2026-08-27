@@ -32,18 +32,20 @@ export default async function CentreLayout({ children }: { children: React.React
   // rendering it once here covers all of them. Reuses the exact component
   // and getAdminChatRooms() Course Admin already has -- same centre-scoped,
   // permanent, admins-only channel, not a second implementation.
-  const adminChatRooms = await getAdminChatRooms(profile.id, ctx.availableCenterIds);
-
-  // §13: "a single-centre customer never sees it" -- only loaded when there is
-  // more than one branch to narrow between.
-  const switchable =
+  //
+  // Ramy, 27 Aug 2026: this and the branch-switcher query below were
+  // sequential -- neither depends on the other's result, both only need
+  // ctx.availableCenterIds -- so they run concurrently now (one of several
+  // fixes for the ~2.6-2.9s measured per /centre navigation).
+  const [adminChatRooms, switchableRaw] = await Promise.all([
+    getAdminChatRooms(profile.id, ctx.availableCenterIds),
+    // §13: "a single-centre customer never sees it" -- only loaded when there is
+    // more than one branch to narrow between.
     ctx.availableCenterIds.length > 1
-      ? (
-          (
-            await createAdminClient().from("centers").select("id, name, center_number").in("id", ctx.availableCenterIds)
-          ).data ?? []
-        ).map((c) => ({ id: c.id, name: c.name, centerNumber: c.center_number }))
-      : [];
+      ? createAdminClient().from("centers").select("id, name, center_number").in("id", ctx.availableCenterIds)
+      : Promise.resolve({ data: [] as { id: string; name: string; center_number: string | null }[] }),
+  ]);
+  const switchable = (switchableRaw.data ?? []).map((c) => ({ id: c.id, name: c.name, centerNumber: c.center_number }));
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
