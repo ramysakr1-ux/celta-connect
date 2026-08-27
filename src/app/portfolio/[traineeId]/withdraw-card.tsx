@@ -39,6 +39,7 @@ export function CandidateStatusCard({
   hoursAttended,
   totalHours,
   pendingRequest,
+  accent = "teal",
 }: {
   traineeId: string;
   specialConsideration: string | null;
@@ -47,6 +48,10 @@ export function CandidateStatusCard({
   hoursAttended: number;
   totalHours: number;
   pendingRequest: PendingWithdrawalRequest | null;
+  // Purely decorative teal/garnet alternation (page.tsx computes which one
+  // this card lands on by its real position in the sidebar stack) -- no
+  // status meaning of its own, so it defaults to plain teal.
+  accent?: "teal" | "garnet";
 }) {
   const [mode, setMode] = useState<Mode>("none");
   const requestNoteStarter = pendingRequest
@@ -61,7 +66,7 @@ export function CandidateStatusCard({
   const belowHalfway = hoursAttended < totalHours / 2;
 
   return (
-    <div className="sheet-accent h-fit">
+    <div className={`sheet-accent h-fit ${accent === "garnet" ? "sheet-garnet" : ""}`}>
       <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
 
       {pendingRequest ? (

@@ -46,6 +46,10 @@ export function FolPanel({
 }) {
   const [claimState, claimAction, claimPending] = useActionState(submitFolClaim, initialClaimState);
 
+  // Decorative teal/garnet alternation down this stack of plain sheets --
+  // no status meaning of its own, same rule as everywhere else. Fixed
+  // sequential positions (not reordered at runtime), so hardcoded per sheet
+  // rather than computed from a counter.
   return (
     <div className="flex flex-col gap-4">
       <div className="sheet flex flex-col gap-3 p-6">
@@ -107,7 +111,7 @@ export function FolPanel({
         </form>
       </div>
 
-      <div className="sheet flex flex-col gap-2 p-6">
+      <div className="sheet sheet-garnet flex flex-col gap-2 p-6">
         <h2 className="font-serif text-lg text-ink">The pool -- {poolEntries.length} logged so far</h2>
         {poolEntries.length === 0 ? (
           <p className="text-sm text-muted">Nothing logged yet -- yours will be the first.</p>
@@ -179,7 +183,7 @@ export function FolPanel({
       )}
 
       {myClaims.length > 0 ? (
-        <div className="sheet flex flex-col gap-2 p-6">
+        <div className="sheet sheet-garnet flex flex-col gap-2 p-6">
           <h2 className="font-serif text-lg text-ink">Your claims</h2>
           <ul className="flex flex-col gap-1.5">
             {myClaims.map((c) => (

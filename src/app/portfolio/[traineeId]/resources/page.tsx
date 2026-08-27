@@ -288,8 +288,10 @@ export default async function ResourceHubPage({
                 <p className="mt-3 sheet border-dashed text-sm text-muted">Nothing scheduled this week.</p>
               ) : (
                 <ul className="mt-3 flex flex-col gap-2">
-                  {thisWeekSessions.map((s) => (
-                    <li key={s.id} className="sheet trainee-hover flex flex-col gap-1.5 p-4">
+                  {thisWeekSessions.map((s, i) => (
+                    // Decorative teal/garnet alternation -- no status meaning
+                    // of its own, same rule as everywhere else.
+                    <li key={s.id} className={`sheet trainee-hover flex flex-col gap-1.5 p-4 ${i % 2 === 1 ? "sheet-garnet" : ""}`}>
                       <div className="flex items-center justify-between gap-3">
                         <p className="text-sm font-semibold text-ink">{s.title}</p>
                         {s.event_time ? <span className="shrink-0 text-xs tabular-nums text-muted">{s.event_time.slice(0, 5)}</span> : null}
@@ -352,8 +354,10 @@ export default async function ResourceHubPage({
               <p className="mt-3 sheet border-dashed text-sm text-muted">Nothing here yet.</p>
             ) : (
               <ul className="mt-3 flex flex-col gap-3">
-                {formResources.map((resource) => (
-                  <li key={resource.id} className="sheet trainee-hover flex flex-col gap-1.5 p-4">
+                {formResources.map((resource, i) => (
+                  // Decorative teal/garnet alternation -- no status meaning
+                  // of its own, same rule as everywhere else.
+                  <li key={resource.id} className={`sheet trainee-hover flex flex-col gap-1.5 p-4 ${i % 2 === 1 ? "sheet-garnet" : ""}`}>
                     <ResourceContentLink
                       title={resource.title}
                       fileUrl={resource.file_url}
@@ -444,8 +448,10 @@ export default async function ResourceHubPage({
               <p className="mt-3 sheet border-dashed text-sm text-muted">No items in this category yet.</p>
             ) : (
             <ul className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {byCategory.get(category)!.map((resource) => (
-                <li key={resource.id} className="sheet trainee-hover flex h-full flex-col gap-3 p-4">
+              {byCategory.get(category)!.map((resource, i) => (
+                // Decorative teal/garnet alternation -- no status meaning of
+                // its own, same rule as everywhere else.
+                <li key={resource.id} className={`sheet trainee-hover flex h-full flex-col gap-3 p-4 ${i % 2 === 1 ? "sheet-garnet" : ""}`}>
                   <div className="flex items-start gap-3">
                     <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
                       {(() => {

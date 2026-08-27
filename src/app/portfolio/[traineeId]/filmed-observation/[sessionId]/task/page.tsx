@@ -47,13 +47,20 @@ export default async function FilmedObservationTaskPage({
     : [];
   const completed = Boolean(response?.completed_at);
 
+  // Decorative teal/garnet alternation down this stack of plain sheets --
+  // no status meaning of its own, same rule as everywhere else. A counter
+  // (not a literal index) so it still alternates correctly whether or not
+  // the criteria-codes sheet below actually renders.
+  let sheetCounter = 0;
+  const nextSheetGarnet = () => sheetCounter++ % 2 === 1;
+
   return (
     <div className="flex flex-col gap-4">
       <Link href={`/portfolio/${traineeId}/filmed-observation/${sessionId}`} className="text-xs text-muted hover:text-primary">
         ← Back to the session
       </Link>
 
-      <div className="sheet flex flex-col gap-1">
+      <div className={`sheet flex flex-col gap-1 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
         <h1 className="font-serif text-xl text-ink">{fSession.lesson_title ?? "Filmed lesson"}</h1>
         <p className="text-sm text-muted">
           {[fSession.level, fSession.learner_count ? `${fSession.learner_count} learners` : null, fSession.length_minutes ? `${fSession.length_minutes} min` : null]
@@ -63,7 +70,7 @@ export default async function FilmedObservationTaskPage({
       </div>
 
       {task.criteria_codes.length > 0 ? (
-        <div className="sheet flex flex-col gap-1">
+        <div className={`sheet flex flex-col gap-1 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Input session this week</p>
           <p className="text-sm text-ink">
             {task.criteria_codes.map((c) => `${c} · ${CRITERIA_LABELS[c] ?? c}`).join(" · ")}
@@ -71,7 +78,7 @@ export default async function FilmedObservationTaskPage({
         </div>
       ) : null}
 
-      <div className="sheet flex flex-col gap-4">
+      <div className={`sheet flex flex-col gap-4 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
         <TaskResponseForm
           taskId={task.id}
           prompt1={task.prompt_1}

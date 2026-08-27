@@ -246,10 +246,12 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
             requirement below.
           </p>
           <div className="mt-3 flex flex-col gap-3">
-            {(obsTasks ?? []).map((task) => {
+            {(obsTasks ?? []).map((task, i) => {
               const submission = submissionByTaskId.get(task.id);
               return (
-                <div key={task.id} className="sheet">
+                // Decorative teal/garnet alternation -- no status meaning of
+                // its own, same rule as everywhere else.
+                <div key={task.id} className={`sheet ${i % 2 === 1 ? "sheet-garnet" : ""}`}>
                   <p className="font-medium text-ink">{task.title}</p>
                   <p className="mt-1 text-sm text-muted">{task.instructions}</p>
                   {submission ? (

@@ -171,7 +171,9 @@ export default async function TpDetailPage({
           <h1 className="font-serif text-xl text-ink">{trainee.full_name} — TP{tpNumber}</h1>
           <p className="mt-1 text-sm text-muted">Peer observation</p>
         </div>
-        <div className="sheet p-6">
+        {/* Decorative teal/garnet alternation against the header sheet
+            above -- no status meaning of its own, same rule as elsewhere. */}
+        <div className="sheet sheet-garnet p-6">
           {!sheet || !sheet.revealed_at ? (
             <PeerNoteForm
               traineeId={traineeId}
@@ -438,7 +440,10 @@ export default async function TpDetailPage({
 
         {isStaff ? (
           <>
-            <div id="plan" className="sheet scroll-mt-20 p-6">
+            {/* Decorative teal/garnet alternation down this stack of plain
+                content sheets ("Brief" above stays teal) -- no status
+                meaning of its own, same rule as everywhere else. */}
+            <div id="plan" className="sheet sheet-garnet scroll-mt-20 p-6">
               <h2 className="font-serif text-lg text-ink">What they planned</h2>
               {!plan ? (
                 <p className="mt-2 text-sm text-muted">The trainee hasn&apos;t started a lesson plan for this TP yet.</p>
@@ -547,7 +552,7 @@ export default async function TpDetailPage({
             ) : null}
 
             {materials && materials.length > 0 ? (
-              <div id="materials" className="sheet scroll-mt-20 p-6">
+              <div id="materials" className="sheet sheet-garnet scroll-mt-20 p-6">
                 <h2 className="font-serif text-lg text-ink">Materials</h2>
                 <ul className="mt-2 flex flex-col gap-2 text-sm text-ink">
                   {materials.map((m) => {
@@ -608,7 +613,7 @@ export default async function TpDetailPage({
                 autoTagEnabled={center?.auto_tag_criteria_enabled ?? true}
               />
             ) : plan ? (
-              <div className="sheet p-6">
+              <div className="sheet sheet-garnet p-6">
                 <h2 className="font-serif text-lg text-ink">Tutor feedback</h2>
                 <p className="mt-2 text-sm text-muted">Not yet submitted.</p>
               </div>

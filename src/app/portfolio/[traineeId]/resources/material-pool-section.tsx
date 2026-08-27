@@ -31,20 +31,30 @@ export function MaterialPoolSection({ items, canClaim }: { items: MaterialPoolIt
         your TP group can plan around the same material.
       </p>
       <ul className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {items.map((item) => (
-          <ItemCard key={item.id} item={item} canClaim={canClaim} />
+        {items.map((item, i) => (
+          <ItemCard key={item.id} item={item} canClaim={canClaim} garnet={i % 2 === 1} />
         ))}
       </ul>
     </div>
   );
 }
 
-function ItemCard({ item, canClaim }: { item: MaterialPoolItemForTrainee; canClaim: boolean }) {
+function ItemCard({
+  item,
+  canClaim,
+  garnet,
+}: {
+  item: MaterialPoolItemForTrainee;
+  canClaim: boolean;
+  // Purely decorative teal/garnet alternation by grid position -- no status
+  // meaning of its own, same rule as everywhere else.
+  garnet: boolean;
+}) {
   const [state, action, pending] = useActionState(claimMaterialItem, initial);
   const unavailable = item.claimedByOther;
 
   return (
-    <li className="sheet trainee-hover flex flex-col gap-2 p-4">
+    <li className={`sheet trainee-hover flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
       <p className="text-sm font-semibold text-ink">
         {item.bookTitle}
         {item.level ? <span className="ml-1.5 text-xs font-normal text-muted">{item.level}</span> : null}

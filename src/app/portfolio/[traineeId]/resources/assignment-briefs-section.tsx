@@ -11,12 +11,12 @@ interface BriefRow {
   published_at: string | null;
 }
 
-function BriefCard({ brief }: { brief: BriefRow }) {
+function BriefCard({ brief, garnet }: { brief: BriefRow; garnet: boolean }) {
   const [open, setOpen] = useState(false);
   const info = ASSIGNMENT_INFO[brief.assignment_type];
 
   return (
-    <li className="sheet trainee-hover flex flex-col gap-2 p-4">
+    <li className={`sheet trainee-hover flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
       <button type="button" onClick={() => setOpen((o) => !o)} className="text-left text-sm font-semibold text-ink hover:text-primary">
         {info?.title ?? brief.assignment_type} {open ? "▾" : "→"}
       </button>
@@ -44,8 +44,8 @@ export function AssignmentBriefsSection({ briefs }: { briefs: BriefRow[] }) {
     <div>
       <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Assignment Briefs</h3>
       <ul className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {briefs.map((brief) => (
-          <BriefCard key={brief.id} brief={brief} />
+        {briefs.map((brief, i) => (
+          <BriefCard key={brief.id} brief={brief} garnet={i % 2 === 1} />
         ))}
       </ul>
     </div>

@@ -236,7 +236,11 @@ export default async function AssignmentDetailPage({
       ) : null}
 
       {!template ? (
-        <div className="sheet p-6">
+        // Decorative teal/garnet alternation against the deadline-editor
+        // sheet above -- only actually two stacked plain sheets when
+        // isEditableStaff (that sheet only renders then); a trainee/assessor
+        // view has just this one card, so it stays plain teal.
+        <div className={`sheet p-6 ${isEditableStaff ? "sheet-garnet" : ""}`}>
           <p className="text-muted">
             {isStaff
               ? "This assignment's brief hasn't been published yet."
@@ -244,7 +248,7 @@ export default async function AssignmentDetailPage({
           </p>
         </div>
       ) : isEditableStaff && assignment.open_case_id ? (
-        <div className="sheet flex flex-col gap-2 p-6">
+        <div className="sheet sheet-garnet flex flex-col gap-2 p-6">
           <p className="pill pill-warning w-fit">Marking paused</p>
           <p className="text-muted">
             A malpractice case is open on this submission. No outcome can be recorded until it&apos;s decided.
@@ -258,12 +262,12 @@ export default async function AssignmentDetailPage({
         </div>
       ) : isEditableStaff ? (
         roundStatus !== "submitted" ? (
-          <div className="sheet p-6">
+          <div className="sheet sheet-garnet p-6">
             <p className="text-muted">Not yet submitted for this round -- nothing to review until the trainee submits.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            <div className="sheet flex flex-col gap-1">
+            <div className="sheet sheet-garnet flex flex-col gap-1">
               <p className="text-sm text-ink">
                 AI declaration: {aiDeclared ? "used" : "not used"}
                 {aiDeclared && aiConversationUrl ? (

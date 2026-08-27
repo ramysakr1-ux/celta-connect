@@ -248,7 +248,9 @@ export function FilmedObservationWatchScreen({
         ) : null}
 
         {taskId ? (
-          <div className="card p-4">
+          // Decorative teal/garnet alternation against the lesson-info card
+          // above -- no status meaning of its own, same rule as elsewhere.
+          <div className="card card-garnet p-4">
             <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Observation task</p>
             {criteriaLine ? <p className="mt-1 text-sm text-ink">{criteriaLine}</p> : null}
             {taskCompletedAt ? (

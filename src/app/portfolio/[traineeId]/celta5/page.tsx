@@ -251,6 +251,15 @@ export default async function PortfolioCelta5Page({
     progressHeadingParts.push(bothSigned ? "CELTA 5 signed off" : stage2Submitted ? "CELTA 5 under review" : "CELTA 5 not started");
     const progressHeading = progressHeadingParts.join(" · ");
 
+    // Decorative teal/garnet alternation down this long vertical stack of
+    // plain sheets -- no status meaning of its own, same rule as everywhere
+    // else. "Course progress" just below stays plain teal (index 0); this
+    // counter starts at 1 and is called, in render order, only for each
+    // sheet that actually renders, so it still alternates correctly across
+    // this section's many mutually-exclusive branches.
+    let sheetCounter = 1;
+    const nextSheetGarnet = () => sheetCounter++ % 2 === 1;
+
     return (
       <div className="flex flex-col gap-4">
         <div>
@@ -422,7 +431,7 @@ export default async function PortfolioCelta5Page({
             </div>
           </div>
         ) : !stage1And2Released ? (
-          <div className="sheet">
+          <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
             <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2</h3>
             <p className="mt-2 text-muted">
               Your self-assessment was submitted {new Date(record.stage2_candidate_submitted_at!).toLocaleString()}.
@@ -432,7 +441,7 @@ export default async function PortfolioCelta5Page({
         ) : (
           <>
             {record.stage1_completed_at ? (
-              <div className="sheet">
+              <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
                 <h3 className="font-serif text-lg text-ink">Progress Record — Stage 1</h3>
                 {record.stage1_strengths ? (
                   <div className="mt-2">
@@ -473,7 +482,7 @@ export default async function PortfolioCelta5Page({
                   {CELTA_CRITERIA_CODES.length}
                 </span>
               </div>
-              <div className="sheet mt-3 overflow-hidden !p-0">
+              <div className={`sheet mt-3 overflow-hidden !p-0 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
                 <div className="list-row">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
@@ -567,7 +576,7 @@ export default async function PortfolioCelta5Page({
         {finalReleased ? (
           <>
             {record.stage3_required ? (
-              <div className="sheet">
+              <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
                 <h3 className="font-serif text-lg text-ink">Stage Three</h3>
                 <div className="mt-3">
                   <p className="text-sm text-muted">Tutor&apos;s overall assessment</p>
@@ -608,7 +617,7 @@ export default async function PortfolioCelta5Page({
                 already nulls final_recommended_grade/overall_notes for a
                 trainee at the data layer (migration 0034) -- this is just
                 the matching UI, not the only enforcement. */}
-            <div className="sheet">
+            <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
               <h3 className="font-serif text-lg text-ink">Final report</h3>
               {record.final_report_released_at ? (
                 <>
@@ -636,7 +645,7 @@ export default async function PortfolioCelta5Page({
               )}
             </div>
 
-            <div className="sheet">
+            <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
               {record.trainee_signoff_final_at ? (
                 <p className="text-sm text-muted">
                   Signed by {record.final_candidate_signature_name ?? "you"} on {new Date(record.trainee_signoff_final_at).toLocaleString()}.
@@ -648,7 +657,7 @@ export default async function PortfolioCelta5Page({
           </>
         ) : null}
 
-        <div className="sheet">
+        <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
           <p className="text-sm text-muted">Teaching practice</p>
           <div className="mt-2">
             <AssessedTpStatsBadge stats={assessedTpStats} byMode={assessedHoursByMode} />
@@ -663,10 +672,12 @@ export default async function PortfolioCelta5Page({
               requirement below.
             </p>
             <div className="mt-3 flex flex-col gap-3">
-              {(obsTasks ?? []).map((task) => {
+              {(obsTasks ?? []).map((task, i) => {
                 const submission = submissionByTaskId.get(task.id);
                 return (
-                  <div key={task.id} className="sheet">
+                  // Decorative teal/garnet alternation -- no status meaning
+                  // of its own, same rule as everywhere else.
+                  <div key={task.id} className={`sheet ${i % 2 === 1 ? "sheet-garnet" : ""}`}>
                     <p className="font-medium text-ink">{task.title}</p>
                     <p className="mt-1 text-sm text-muted">{task.instructions}</p>
                     {submission ? (
@@ -944,7 +955,10 @@ export default async function PortfolioCelta5Page({
           <div className="h-full bg-[oklch(46%_0.09_320)]" style={{ width: `${observationFilmedPct}%` }} />
         </div>
       </div>
-      <div className="sheet mt-3 overflow-hidden !p-0">
+      {/* Decorative teal/garnet alternation -- shared by both the assessor
+          and trainer-edit views below, since this block renders once and is
+          reused in both branches. */}
+      <div className="sheet sheet-garnet mt-3 overflow-hidden !p-0">
         {observations && observations.length > 0 ? (
           <table className="table-plain w-full">
             <thead>
@@ -992,7 +1006,7 @@ export default async function PortfolioCelta5Page({
           </div>
         </div>
 
-        <div className="sheet">
+        <div className="sheet sheet-garnet">
           <p className="text-sm text-muted">Attendance</p>
           <p className="mt-1 text-ink">
             {record.hours_attended ?? 0} / {course?.total_hours ?? 120} hrs
@@ -1024,7 +1038,7 @@ export default async function PortfolioCelta5Page({
               {CELTA_CRITERIA_CODES.length}
             </span>
           </div>
-          <div className="sheet mt-3 overflow-hidden !p-0">
+          <div className="sheet sheet-garnet mt-3 overflow-hidden !p-0">
             <div className="list-row">
               <p className="text-sm text-muted">Tutor&apos;s overall assessment</p>
               <StandardRatingPill rating={record.stage2_tutor_overall} />
@@ -1131,13 +1145,13 @@ export default async function PortfolioCelta5Page({
         </div>
 
         {record.stage3_required && record.grade_review_tutor_comments ? (
-          <div className="sheet">
+          <div className="sheet sheet-garnet">
             <h3 className="font-serif text-lg text-ink">Information for the CELTA grade review</h3>
             <p className="mt-2 whitespace-pre-wrap text-ink">{record.grade_review_tutor_comments}</p>
           </div>
         ) : null}
 
-        <div className="sheet">
+        <div className="sheet sheet-garnet">
           <h3 className="font-serif text-lg text-ink">Final-day sign-off</h3>
           {record.trainee_signoff_final_at ? (
             <p className="mt-2 text-sm text-ink">
@@ -1233,7 +1247,7 @@ export default async function PortfolioCelta5Page({
       ) : null}
 
       {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
-        <div className="sheet flex items-center justify-between gap-3">
+        <div className="sheet sheet-garnet flex items-center justify-between gap-3">
           <p className="text-ink">Final report ready to download.</p>
           <a
             href={`/api/celta5/${traineeId}/final-report`}

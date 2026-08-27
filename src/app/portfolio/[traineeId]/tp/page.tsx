@@ -273,7 +273,10 @@ export default async function TpHubPage({
       </div>
 
       {!isStaff && carriedForward.length > 0 ? (
-        <div className="sheet flex flex-col gap-2.5">
+        // Decorative teal/garnet alternation against the TP table sheet
+        // above -- no status meaning of its own (the warning-colored
+        // eyebrow text inside is untouched).
+        <div className="sheet sheet-garnet flex flex-col gap-2.5">
           <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">Carried forward</p>
           <p className="text-xs text-muted">
             Starred action points from TP{mostRecentFeedbackTp} feedback, already folded into your next lesson plan

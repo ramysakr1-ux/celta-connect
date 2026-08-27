@@ -55,7 +55,9 @@ export default async function TraineeStage2TutorialPage({
         </p>
       </div>
 
-      <div className="sheet">
+      {/* Decorative teal/garnet alternation against the header sheet above --
+          no status meaning of its own, same rule as everywhere else. */}
+      <div className="sheet sheet-garnet">
         <div className="flex flex-col">
           {(slots ?? []).map((s, i) => {
             const isMine = s.trainee_id === myProfileId;

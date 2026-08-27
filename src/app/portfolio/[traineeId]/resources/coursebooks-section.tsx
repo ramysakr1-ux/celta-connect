@@ -21,8 +21,8 @@ export function CoursebooksSection({
     <div>
       <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Coursebooks</h3>
       <ul className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {coursebooks.map((book) => (
-          <CoursebookCard key={book.id} book={book} isEditableStaff={isEditableStaff} />
+        {coursebooks.map((book, i) => (
+          <CoursebookCard key={book.id} book={book} isEditableStaff={isEditableStaff} garnet={i % 2 === 1} />
         ))}
       </ul>
     </div>
@@ -32,14 +32,18 @@ export function CoursebooksSection({
 function CoursebookCard({
   book,
   isEditableStaff,
+  garnet,
 }: {
   book: { id: string; title: string; level: string; access_notes: string | null };
   isEditableStaff: boolean;
+  // Purely decorative teal/garnet alternation by grid position -- no status
+  // meaning of its own, same rule as everywhere else.
+  garnet: boolean;
 }) {
   const [state, action, pending] = useActionState(updateCoursebookAccessNotes, initialState);
 
   return (
-    <li className="sheet trainee-hover flex flex-col gap-2 p-4">
+    <li className={`sheet trainee-hover flex flex-col gap-2 p-4 ${garnet ? "sheet-garnet" : ""}`}>
       <p className="text-sm font-semibold text-ink">{book.title}</p>
       <p className="text-xs text-muted">{book.level}</p>
       {isEditableStaff ? (

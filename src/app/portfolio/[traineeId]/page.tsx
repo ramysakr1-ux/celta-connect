@@ -209,6 +209,19 @@ export default async function CourseStreamPage({
         .maybeSingle()
     : { data: null };
 
+  // Ramy, 27 Aug 2026: decorative teal/garnet alternation down the sidebar
+  // stack (This week / Outside Connect / Course tutors / Candidate status) --
+  // purely decorative, same rule as everywhere else. Computed from real
+  // render position (not a literal index) so it still alternates correctly
+  // whichever of the two mutually-exclusive status branches renders, and
+  // whether or not the isRegisteredTutor-only "Outside Connect" panel does.
+  let sidebarSheetIndex = 0;
+  const thisWeekIndex = sidebarSheetIndex++;
+  const outsideConnectIndex = isRegisteredTutor ? sidebarSheetIndex++ : -1;
+  const courseTutorsIndex = sidebarSheetIndex++;
+  const statusIndex = sidebarSheetIndex++;
+  const garnetAt = (i: number) => i % 2 === 1;
+
   return (
     <div className="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-[1fr_300px] lg:grid-rows-[auto_1fr]">
       <div className="flex items-center justify-between lg:col-start-1 lg:row-start-1">
@@ -220,7 +233,7 @@ export default async function CourseStreamPage({
         {(broadcasts ?? []).length === 0 ? (
           <p className="sheet text-sm text-muted">No broadcasts yet.</p>
         ) : (
-          (broadcasts ?? []).map((b) => {
+          (broadcasts ?? []).map((b, i) => {
             const author = b.profiles as unknown as { full_name: string; role: string } | null;
             const linkedEvent = b.course_timetable_events as unknown as {
               event_date: string;
@@ -257,7 +270,10 @@ export default async function CourseStreamPage({
               .toUpperCase();
 
             return (
-              <div key={b.id} className="sheet">
+              // Decorative teal/garnet alternation down this repeating list --
+              // same purely-decorative rule as e.g. dashboard/admin's course
+              // groups, no status meaning of its own.
+              <div key={b.id} className={`sheet ${i % 2 === 1 ? "sheet-garnet" : ""}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted">
@@ -329,7 +345,7 @@ export default async function CourseStreamPage({
 
       <div className="flex flex-col gap-4 lg:col-start-2 lg:row-start-2">
         <div className="flex flex-col gap-4 lg:sticky lg:top-6">
-          <div className="sheet-accent h-fit">
+          <div className={`sheet-accent h-fit ${garnetAt(thisWeekIndex) ? "sheet-garnet" : ""}`}>
             <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">This week</p>
             {(timetableEvents ?? []).length > 0 ? (
               <ul className="mt-3 flex flex-col">
@@ -365,7 +381,7 @@ export default async function CourseStreamPage({
           </div>
 
           {isRegisteredTutor ? (
-            <div className="sheet-accent h-fit">
+            <div className={`sheet-accent h-fit ${garnetAt(outsideConnectIndex) ? "sheet-garnet" : ""}`}>
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Outside Connect -- urgent only</p>
               <p className="mt-1 text-xs text-muted">
                 Everything else belongs in the app, where it&apos;s on the record and the whole group sees it.
@@ -388,7 +404,7 @@ export default async function CourseStreamPage({
             </div>
           ) : null}
 
-          <div className="sheet-accent h-fit">
+          <div className={`sheet-accent h-fit ${garnetAt(courseTutorsIndex) ? "sheet-garnet" : ""}`}>
             <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Course tutors</p>
             {(tutors ?? []).length > 0 ? (
               <ul className="mt-3 flex flex-col gap-2">
@@ -420,9 +436,10 @@ export default async function CourseStreamPage({
               hoursAttended={hoursAttended}
               totalHours={totalHours}
               pendingRequest={pendingWithdrawalRequest}
+              accent={garnetAt(statusIndex) ? "garnet" : "teal"}
             />
           ) : isStaff && trainee.course_status !== "active" ? (
-            <div className="sheet-accent h-fit">
+            <div className={`sheet-accent h-fit ${garnetAt(statusIndex) ? "sheet-garnet" : ""}`}>
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Candidate status</p>
               <p className="mt-2 text-sm font-semibold text-ink">{COURSE_STATUS_LABEL[trainee.course_status]}</p>
               {trainee.course_status_set_at ? (
