@@ -78,15 +78,22 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   const HUB_INK = "oklch(23.5% 0.017 65)"; // = --color-ink
   const HUB_TEAL = "oklch(37.5% 0.058 195)"; // = --color-primary, written literally so this doesn't drift if that token ever does
   const HUB_GARNET = "oklch(42% 0.13 27)";
-  const HUB_GARNET_BRIGHT = "oklch(70% 0.16 27)"; // MCT-side hover accent -- brighter than the header's own garnet underline, so it reads against both the dark header and light card rows
+  const HUB_GARNET_BRIGHT = "oklch(70% 0.16 27)"; // ACT-side hover accent -- brighter than the header's own garnet fill, so it reads against light card rows
+  // Ramy, 2026-08-27: "make the hovering for MCT and ACT matching their
+  // header's [color]" -- was previously HUB_GARNET_BRIGHT for MCT and
+  // HUB_TEAL for ACT (matching each other's header UNDERLINE, not their own
+  // header background), which is the opposite of what he wants. MCT's own
+  // header is ink, not a saturated hue, so its hover accent is a brightened
+  // version of the same ink hue rather than borrowing ACT's garnet.
+  const HUB_INK_BRIGHT = "oklch(70% 0.03 65)"; // MCT-side hover accent -- brightened version of the header's own ink hue
   const headerInk = isMct ? "oklch(96% 0.008 85)" : "oklch(97% 0.006 85)";
   const hubVars = {
     "--hub-header-bg": isMct ? HUB_INK : HUB_GARNET,
     "--hub-header-underline": isMct ? HUB_GARNET : HUB_TEAL,
-    "--hub-hover-accent": isMct ? HUB_GARNET_BRIGHT : HUB_TEAL,
+    "--hub-hover-accent": isMct ? HUB_INK_BRIGHT : HUB_GARNET_BRIGHT,
     "--hub-row-shadow": isMct
-      ? `inset 0 0 0 1px ${HUB_GARNET_BRIGHT}, 0 3px 8px -3px oklch(70% 0.16 27 / 0.35)`
-      : `inset 0 0 0 1px ${HUB_TEAL}, 0 3px 8px -3px color-mix(in oklab, ${HUB_TEAL} 45%, transparent)`,
+      ? `inset 0 0 0 1px ${HUB_INK_BRIGHT}, 0 3px 8px -3px oklch(70% 0.03 65 / 0.35)`
+      : `inset 0 0 0 1px ${HUB_GARNET_BRIGHT}, 0 3px 8px -3px color-mix(in oklab, ${HUB_GARNET_BRIGHT} 45%, transparent)`,
     "--hub-tile-bg": `color-mix(in oklab, ${headerInk} 22%, transparent)`,
   } as React.CSSProperties;
 
