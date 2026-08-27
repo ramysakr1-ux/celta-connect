@@ -44,9 +44,15 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
           : "volunteers";
 
   const supabase = await createClient();
-  // Ramy, 27 Aug 2026 (round 2): courses and imports don't depend on each
-  // other -- both only need profile.center_id/kind, already known.
-  const [{ data: courses }, { data: imports }] = await Promise.all([
+  // Ramy, 27 Aug 2026 (round 2): courses, imports, and (when viewing the
+  // applicants kind) the existing-applicant-emails lookup don't depend on
+  // each other -- all three only need profile.center_id/kind, already
+  // known. The emails lookup used to live inside ApplicantImportSection, an
+  // async child rendered AFTER this batch resolved -- a whole extra
+  // sequential round trip on every real Vercel-function measurement (traced
+  // live via Vercel's own request logs, not just query-counting) for a
+  // query that never needed to wait.
+  const [{ data: courses }, { data: imports }, { data: applicantEmailRows }] = await Promise.all([
     supabase.from("courses").select("id, name, end_date").eq("center_id", profile.center_id).order("name"),
     supabase
       .from("spreadsheet_imports")
@@ -55,6 +61,9 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
       .eq("kind", kind)
       .order("created_at", { ascending: false })
       .limit(5),
+    kind === "applicants"
+      ? supabase.from("applicants").select("email").eq("center_id", profile.center_id)
+      : Promise.resolve({ data: [] as { email: string }[] }),
   ]);
 
   return (
@@ -99,7 +108,7 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
           There are no courses in this centre yet. An import has to land on a specific course, so create one first.
         </div>
       ) : kind === "applicants" ? (
-        <ApplicantImportSection courses={courses ?? []} centerId={profile.center_id} />
+        <ImportWizard courses={courses ?? []} existingEmails={(applicantEmailRows ?? []).map((a) => a.email.toLowerCase())} />
       ) : (
         <VolunteerImportSection courses={courses ?? []} />
       )}
@@ -131,15 +140,6 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
       ) : null}
     </div>
   );
-}
-
-async function ApplicantImportSection({ courses, centerId }: { courses: { id: string; name: string }[]; centerId: string }) {
-  const supabase = await createClient();
-  // Sent to the client so the dry-run can flag duplicates as the admin maps,
-  // without a round trip per keystroke. Emails only -- no other applicant
-  // data crosses over. The commit re-checks server-side regardless.
-  const { data: applicants } = await supabase.from("applicants").select("email").eq("center_id", centerId);
-  return <ImportWizard courses={courses} existingEmails={(applicants ?? []).map((a) => a.email.toLowerCase())} />;
 }
 
 async function VolunteerImportSection({ courses }: { courses: { id: string; name: string; end_date: string }[] }) {
