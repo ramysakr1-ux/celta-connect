@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isMctOnCourse } from "@/lib/course-mct";
 import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rules";
 import { verifyCourseForCloseOut } from "@/lib/course-close-out/verify";
 import { exportCourseToDrive } from "@/lib/course-close-out/export";
@@ -13,18 +14,36 @@ export interface FormState {
   error: string | null;
 }
 
+// for-claude-code-course-admin-landing-and-admissions.md (23 Aug 2026):
+// close-out is "MCT territory once the course is running, not Course
+// Admin's" -- moved here from Course Admin's page 2026-08-27, reusing
+// this same action file (the business logic never needed to change, only
+// who's allowed to trigger it). Admin keeps full access, same convention
+// as every other MCT-gated action in the trainer hub (see
+// timetable/actions.ts's requireTimetableEditAccess).
+const NOT_MCT_ERROR = "Only the main course tutor can run close-out.";
+
+async function requireMctCloseOutAccess(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  trainer: { role: string; id: string; course_id: string | null }
+): Promise<boolean> {
+  if (trainer.role === "admin" || !trainer.course_id) return true;
+  return isMctOnCourse(supabase, trainer.course_id, trainer.id);
+}
+
 // One of close-out's three blocking rules -- "Cambridge has not confirmed
 // final grades" -- is the centre's own judgement, never computed by the
 // app. A plain toggle, same spirit as deferral_transfers.hours_carried.
 export async function toggleCambridgeGradesConfirmed(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const trainer = await requireRole(["trainer", "admin"]);
   const courseId = formData.get("course_id");
   if (typeof courseId !== "string") return;
 
-  const course = await loadOwnedCourse(courseId, admin.center_id);
+  const course = await loadOwnedCourse(courseId, trainer.center_id);
   if (!course) return;
 
   const supabase = await createClient();
+  if (!(await requireMctCloseOutAccess(supabase, trainer))) return;
   const { data: current } = await supabase.from("courses").select("cambridge_grades_confirmed_at").eq("id", courseId).single();
 
   await supabase
@@ -32,11 +51,11 @@ export async function toggleCambridgeGradesConfirmed(formData: FormData): Promis
     .update(
       current?.cambridge_grades_confirmed_at
         ? { cambridge_grades_confirmed_at: null, cambridge_grades_confirmed_by: null }
-        : { cambridge_grades_confirmed_at: new Date().toISOString(), cambridge_grades_confirmed_by: admin.id }
+        : { cambridge_grades_confirmed_at: new Date().toISOString(), cambridge_grades_confirmed_by: trainer.id }
     )
     .eq("id", courseId);
 
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/grades-report");
 }
 
 // build-spec.md compliance-audit item 10 (Handbook 10.5): "Certificates
@@ -50,7 +69,7 @@ const CERTIFICATE_GRADES = ["Pass", "Pass B", "Pass A", "Fail"] as const;
 type CertificateGrade = (typeof CERTIFICATE_GRADES)[number];
 
 export async function recordCertificateGrade(_prevState: FormState, formData: FormData): Promise<FormState> {
-  const admin = await requireRole("admin");
+  const trainer = await requireRole(["trainer", "admin"]);
   const courseId = formData.get("course_id");
   const traineeId = formData.get("trainee_id");
   const gradeRaw = formData.get("certificate_grade");
@@ -62,22 +81,23 @@ export async function recordCertificateGrade(_prevState: FormState, formData: Fo
     gradeRaw && (CERTIFICATE_GRADES as readonly string[]).includes(gradeRaw) ? (gradeRaw as CertificateGrade) : null;
   if (gradeRaw && !grade) return { error: "Invalid grade." };
 
-  const course = await loadOwnedCourse(courseId, admin.center_id);
+  const course = await loadOwnedCourse(courseId, trainer.center_id);
   if (!course) return { error: "Course not found." };
 
   const supabase = await createClient();
+  if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
   const { error } = await supabase
     .from("celta5_records")
     .update(
       grade
-        ? { certificate_grade: grade, certificate_recorded_at: new Date().toISOString(), certificate_recorded_by: admin.id }
+        ? { certificate_grade: grade, certificate_recorded_at: new Date().toISOString(), certificate_recorded_by: trainer.id }
         : { certificate_grade: null, certificate_recorded_at: null, certificate_recorded_by: null }
     )
     .eq("course_id", courseId)
     .eq("trainee_id", traineeId);
   if (error) return { error: "Could not record the certificate grade." };
 
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/grades-report");
   return { error: null };
 }
 
@@ -99,14 +119,17 @@ async function loadOwnedCourse(courseId: string, centerId: string) {
 // itself. The blocking check lives on confirmCloseOutReceipt instead,
 // since that's the actual trigger for the wipe (see its own comment).
 export async function initiateCloseOut(_prevState: FormState, formData: FormData): Promise<FormState> {
-  const admin = await requireRole("admin");
+  const trainer = await requireRole(["trainer", "admin"]);
   const courseId = formData.get("course_id");
   if (typeof courseId !== "string" || !courseId) {
     return { error: "Something went wrong. Refresh and try again." };
   }
 
-  const course = await loadOwnedCourse(courseId, admin.center_id);
+  const course = await loadOwnedCourse(courseId, trainer.center_id);
   if (!course) return { error: "Course not found." };
+
+  const supabase = await createClient();
+  if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
 
   const adminClient = createAdminClient();
   const { data: existing } = await adminClient
@@ -123,9 +146,9 @@ export async function initiateCloseOut(_prevState: FormState, formData: FormData
   } else {
     await adminClient.from("course_close_outs").insert({
       course_id: courseId,
-      center_id: admin.center_id,
+      center_id: trainer.center_id,
       status: "verifying",
-      created_by: admin.id,
+      created_by: trainer.id,
     });
   }
 
@@ -136,12 +159,12 @@ export async function initiateCloseOut(_prevState: FormState, formData: FormData
       status: report.issues.length > 0 ? "verify_failed" : "ready_to_export",
       verification_report: report,
       verified_at: new Date().toISOString(),
-      verified_by: admin.id,
+      verified_by: trainer.id,
       updated_at: new Date().toISOString(),
     })
     .eq("course_id", courseId);
 
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/grades-report");
   return { error: null };
 }
 
@@ -158,7 +181,7 @@ export async function initiateCloseOut(_prevState: FormState, formData: FormData
 // rules mean. Re-checked here server-side, never trusted from the UI's
 // disabled state.
 export async function confirmCloseOutReceipt(_prevState: FormState, formData: FormData): Promise<FormState> {
-  const admin = await requireRole("admin");
+  const trainer = await requireRole(["trainer", "admin"]);
   const courseId = formData.get("course_id");
   const signedName = formData.get("signed_name");
   if (typeof courseId !== "string" || !courseId) {
@@ -168,8 +191,11 @@ export async function confirmCloseOutReceipt(_prevState: FormState, formData: Fo
     return { error: "Type your name to confirm receipt." };
   }
 
-  const course = await loadOwnedCourse(courseId, admin.center_id);
+  const course = await loadOwnedCourse(courseId, trainer.center_id);
   if (!course) return { error: "Course not found." };
+
+  const supabase = await createClient();
+  if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
 
   const blockingReasons = await getCloseOutBlockingReasons(courseId);
   if (blockingReasons.length > 0) {
@@ -191,13 +217,13 @@ export async function confirmCloseOutReceipt(_prevState: FormState, formData: Fo
       status: "grace_period",
       receipt_signed_name: signedName.trim(),
       receipt_signed_at: now.toISOString(),
-      receipt_signed_by: admin.id,
+      receipt_signed_by: trainer.id,
       grace_period_ends_at: gracePeriodEnds.toISOString(),
       updated_at: now.toISOString(),
     })
     .eq("course_id", courseId);
 
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/grades-report");
   return { error: null };
 }
 
@@ -212,7 +238,7 @@ export async function confirmCloseOutReceipt(_prevState: FormState, formData: Fo
 // service-role only, so the log entry can't be forged or suppressed by the
 // admin who triggered it.
 export async function extendGracePeriod(_prevState: FormState, formData: FormData): Promise<FormState> {
-  const admin = await requireRole("admin");
+  const trainer = await requireRole(["trainer", "admin"]);
   const courseId = formData.get("course_id");
   const newDateRaw = formData.get("new_deletion_date");
   if (typeof courseId !== "string" || !courseId) {
@@ -222,8 +248,11 @@ export async function extendGracePeriod(_prevState: FormState, formData: FormDat
     return { error: "Pick a new deletion date." };
   }
 
-  const course = await loadOwnedCourse(courseId, admin.center_id);
+  const course = await loadOwnedCourse(courseId, trainer.center_id);
   if (!course) return { error: "Course not found." };
+
+  const supabase = await createClient();
+  if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
 
   const adminClient = createAdminClient();
   const { data: closeOut } = await adminClient
@@ -247,8 +276,8 @@ export async function extendGracePeriod(_prevState: FormState, formData: FormDat
     .eq("id", closeOut.id);
 
   await adminClient.from("centre_owner_actions").insert({
-    center_id: admin.center_id,
-    actor_profile_id: admin.id,
+    center_id: trainer.center_id,
+    actor_profile_id: trainer.id,
     action: "close_out.deletion_delayed",
     target_table: "course_close_outs",
     target_id: closeOut.id,
@@ -259,7 +288,7 @@ export async function extendGracePeriod(_prevState: FormState, formData: FormDat
     },
   });
 
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/grades-report");
   return { error: null };
 }
 
@@ -267,14 +296,17 @@ export async function extendGracePeriod(_prevState: FormState, formData: FormDat
 // verification has passed (status='ready_to_export') -- re-checked here,
 // not just trusted from the UI's disabled state.
 export async function exportCloseOut(_prevState: FormState, formData: FormData): Promise<FormState> {
-  const admin = await requireRole("admin");
+  const trainer = await requireRole(["trainer", "admin"]);
   const courseId = formData.get("course_id");
   if (typeof courseId !== "string" || !courseId) {
     return { error: "Something went wrong. Refresh and try again." };
   }
 
-  const course = await loadOwnedCourse(courseId, admin.center_id);
+  const course = await loadOwnedCourse(courseId, trainer.center_id);
   if (!course) return { error: "Course not found." };
+
+  const supabase = await createClient();
+  if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
 
   const adminClient = createAdminClient();
   const { data: closeOut } = await adminClient.from("course_close_outs").select("status").eq("course_id", courseId).maybeSingle();
@@ -283,11 +315,11 @@ export async function exportCloseOut(_prevState: FormState, formData: FormData):
   }
 
   try {
-    await exportCourseToDrive(courseId, admin.id);
+    await exportCourseToDrive(courseId, trainer.id);
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Export failed. Try again." };
   }
 
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/grades-report");
   return { error: null };
 }

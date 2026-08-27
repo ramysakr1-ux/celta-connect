@@ -11,6 +11,9 @@ import { ProvisionalGradeForm } from "@/app/trainer/(hub)/grades-report/provisio
 import { UpgradeConditionsForm } from "@/app/trainer/(hub)/grades-report/upgrade-conditions-form";
 import { CohortSheet } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
 import { FinalGradeForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/final-grade-form";
+import { CloseOutCard } from "@/app/dashboard/admin/courses/[id]/close-out-card";
+import { CertificateCheckCard, type CertificateCandidate } from "@/app/dashboard/admin/courses/[id]/certificate-check-card";
+import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rules";
 import { StandardRatingGlyph } from "@/lib/status-pill";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CriteriaRating } from "@/lib/supabase/types";
@@ -54,6 +57,20 @@ export default async function GradesReportPage() {
   const tutorNameById = new Map((courseTutors ?? []).map((t) => [t.id, t.full_name]));
   const isMct = trainer ? (courseTutors ?? []).some((t) => t.id === trainer.id && t.tutor_role === "main_course_tutor") : false;
 
+  // Close-out ("MCT territory once the course is running, not Course
+  // Admin's" -- for-claude-code-course-admin-landing-and-admissions.md)
+  // lives here, at the bottom of the same page where the MCT already does
+  // every other end-of-course grade action -- close-out's own first
+  // blocking rule is literally "Cambridge has confirmed final grades."
+  // MCT-only fetch, same gate as the write actions themselves.
+  const [{ data: courseRow }, { data: closeOut }, blockingReasons] = isMct
+    ? await Promise.all([
+        supabase.from("courses").select("cambridge_grades_confirmed_at").eq("id", courseId).maybeSingle(),
+        createAdminClient().from("course_close_outs").select("*").eq("course_id", courseId).maybeSingle(),
+        getCloseOutBlockingReasons(courseId),
+      ])
+    : [{ data: null }, { data: null }, []];
+
   const traineeIds = (trainees ?? []).map((t) => t.id);
   const [{ data: records }, { data: matrixRows }, { data: tpFeedbackRows }, { data: planAssignments }] =
     traineeIds.length > 0
@@ -87,6 +104,20 @@ export default async function GradesReportPage() {
     ratings[row.criteria_code] = row.tutor_status_stage3 ?? row.tutor_status_stage2;
     matrixByTrainee.set(row.trainee_id, ratings);
   }
+
+  // CertificateCheckCard only wants candidates who already have a final
+  // recommended grade -- nothing to check a certificate against otherwise.
+  const certificateCandidates: CertificateCandidate[] = (trainees ?? [])
+    .map((t) => {
+      const record = recordByTrainee.get(t.id);
+      return {
+        traineeId: t.id,
+        fullName: t.full_name,
+        recommendedGrade: record?.final_recommended_grade ?? null,
+        certificateGrade: record?.certificate_grade ?? null,
+      };
+    })
+    .filter((c) => c.recommendedGrade !== null);
 
   return (
     <LaptopOnlyGate task="The Grades Report" skip={!trainer}>
@@ -192,6 +223,18 @@ export default async function GradesReportPage() {
           })}
         </div>
       )}
+
+      {isMct ? (
+        <>
+          <CertificateCheckCard courseId={courseId} candidates={certificateCandidates} />
+          <CloseOutCard
+            courseId={courseId}
+            cambridgeGradesConfirmedAt={courseRow?.cambridge_grades_confirmed_at ?? null}
+            blockingReasons={blockingReasons}
+            closeOut={closeOut}
+          />
+        </>
+      ) : null}
     </div>
     </LaptopOnlyGate>
   );
