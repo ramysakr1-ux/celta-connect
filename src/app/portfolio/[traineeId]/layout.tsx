@@ -16,6 +16,7 @@ import { computeWeekOf } from "@/lib/course-progress";
 import { InstallPrompt } from "@/components/install-prompt";
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
+import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import {
   CELTA_CRITERIA_CODES,
   computeCriteriaPct,
@@ -78,6 +79,14 @@ export default async function PortfolioLayout({
 
   const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
   const isStaffView = isStaff || Boolean(assessorCourseId);
+
+  // Scavenger hunt Q6 ("What is today's course day counter showing, right
+  // now?") -- the counter renders in this same layout's header on every
+  // page, so any real visit by the trainee themselves resolves it, not a
+  // specific destination page the way the other five questions each have.
+  if (viewer?.role === "trainee" && viewer.id === traineeId && trainee.course_id) {
+    await markScavengerHuntFound(supabase, trainee.course_id, traineeId, "day_counter");
+  }
   // for-claude-code-trainee-interface.md's top nav replaces the sidebar only
   // for a real candidate viewing their own (or, via the peer-observation
   // carve-out above, a groupmate's) portfolio -- staff/assessor keep the
@@ -156,14 +165,14 @@ export default async function PortfolioLayout({
     { data: lessons },
     { data: assignments },
     { data: preCourseSections },
-    { data: preCourseResponses },
+    { data: preCourseProgress },
     { data: todaysEvents },
   ] = await Promise.all([
     getCachedCenter(trainee.center_id),
     supabase.from("tp_lessons").select("id").eq("trainee_id", trainee.id),
     supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
     supabase.from("pre_course_task_sections").select("id").eq("center_id", trainee.center_id),
-    supabase.from("pre_course_task_responses").select("section_id, response").eq("trainee_id", trainee.id),
+    supabase.from("pre_course_task_progress").select("section_id, completed_at").eq("trainee_id", trainee.id),
     trainee.course_id
       ? supabase
           .from("course_timetable_events")
@@ -179,7 +188,7 @@ export default async function PortfolioLayout({
     (a) => a.first_status === "approved" || a.resubmission_status === "approved"
   ).length;
   const preCourseTotal = preCourseSections?.length ?? 0;
-  const preCourseAnswered = (preCourseResponses ?? []).filter((r) => r.response && r.response.trim() !== "").length;
+  const preCourseAnswered = (preCourseProgress ?? []).filter((r) => r.completed_at).length;
 
   // Trajectory: trainer/assessor-only informal estimate, computed the exact
   // same way the CELTA5 page does (tutor's Stage Two ratings, falling back

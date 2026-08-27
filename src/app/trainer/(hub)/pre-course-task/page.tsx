@@ -4,11 +4,16 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { mostRecentFridayBefore } from "@/lib/starts-monday-cron";
 
 // Checkpoint 12 -- "aggregate view for the tutor" (build-spec.md item 18).
-// Ungraded, so this is a completion-tracking view (who's handed in what),
-// not a marking view -- full responses are read on the candidate's own
-// portfolio page (already staff-readable via that page's role branch).
+// Rebuilt 27 Aug 2026 against for-claude-code-pre-course-task-screens.md:
+// the task is done on paper and never submitted, so there is no text left
+// to skim here any more -- this is purely a section-level completion
+// tracker (who's read what) plus the answer-key unlock date, not a marking
+// view. The old "what the cohort said" response-aggregation panel is gone
+// along with pre_course_task_responses -- there was never real content to
+// aggregate once nothing is typed.
 export default async function TrainerPreCourseTaskPage() {
   const session = await getCurrentProfile();
   const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner" ? session.profile : null;
@@ -21,7 +26,7 @@ export default async function TrainerPreCourseTaskPage() {
     return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
   }
 
-  const { data: course } = await supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle();
+  const { data: course } = await supabase.from("courses").select("center_id, start_date").eq("id", courseId).maybeSingle();
   if (!course) {
     return <div className="sheet p-6 text-sm text-muted">Course not found.</div>;
   }
@@ -40,26 +45,35 @@ export default async function TrainerPreCourseTaskPage() {
     .order("sequence_index");
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
-  const { data: responses } =
+  const { data: progress } =
     traineeIds.length > 0
-      ? await supabase.from("pre_course_task_responses").select("trainee_id, section_id, response").in("trainee_id", traineeIds)
+      ? await supabase.from("pre_course_task_progress").select("trainee_id, section_id, completed_at").in("trainee_id", traineeIds)
       : { data: [] };
 
-  const answeredSet = new Set(
-    (responses ?? []).filter((r) => r.response && r.response.trim() !== "").map((r) => `${r.trainee_id}:${r.section_id}`)
-  );
-  const nameById = new Map((trainees ?? []).map((t) => [t.id, t.full_name]));
+  const doneSet = new Set((progress ?? []).filter((p) => p.completed_at).map((p) => `${p.trainee_id}:${p.section_id}`));
 
   const cambridgeSections = (sections ?? []).filter((s) => s.source === "cambridge");
   const supplementSections = (sections ?? []).filter((s) => s.source === "centre_supplement");
   const orderedSections = [...cambridgeSections, ...supplementSections];
 
+  const today = new Date().toISOString().slice(0, 10);
+  const answerKeyDate = course.start_date ? mostRecentFridayBefore(course.start_date) : null;
+  const answerKeyOpen = Boolean(answerKeyDate && today >= answerKeyDate);
+
   return (
     <div className="flex flex-col gap-4">
       <div>
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
-        <h1 className="font-serif text-2xl text-ink">Who&apos;s handed something in</h1>
-        <p className="mt-1 text-sm text-muted">Ungraded -- this tracks completion, not quality. Open a candidate to read their answers.</p>
+        <h1 className="font-serif text-2xl text-ink">Who&apos;s read what</h1>
+        <p className="mt-1 text-sm text-muted">
+          Done on paper, never submitted -- this tracks section-level progress, not answers. Candidates read their
+          own paper copy on day one.
+        </p>
+        {answerKeyDate ? (
+          <p className="mt-1 text-xs text-muted">
+            Answer key {answerKeyOpen ? "opened" : "opens"} {answerKeyDate} -- cohort-wide, not per-candidate.
+          </p>
+        ) : null}
       </div>
 
       {orderedSections.length === 0 ? (
@@ -83,7 +97,7 @@ export default async function TrainerPreCourseTaskPage() {
             </thead>
             <tbody>
               {(trainees ?? []).map((t) => {
-                const answeredCount = orderedSections.filter((s) => answeredSet.has(`${t.id}:${s.id}`)).length;
+                const doneCount = orderedSections.filter((s) => doneSet.has(`${t.id}:${s.id}`)).length;
                 return (
                   <tr key={t.id} className="border-b border-border-faint last:border-none hover:bg-accent/40">
                     <td className="px-4 py-2.5">
@@ -92,22 +106,22 @@ export default async function TrainerPreCourseTaskPage() {
                       </Link>
                     </td>
                     {orderedSections.map((s) => {
-                      const answered = answeredSet.has(`${t.id}:${s.id}`);
+                      const done = doneSet.has(`${t.id}:${s.id}`);
                       return (
                         <td key={s.id} className="px-0.5 py-2.5 text-center">
                           <span
-                            title={answered ? "Answered" : "Not answered yet"}
+                            title={done ? "Done" : "Not done yet"}
                             className={`inline-flex h-[22px] w-[26px] items-center justify-center rounded-[5px] text-xs font-medium ${
-                              answered ? "status-pill status-pill-on-track" : "border border-dashed border-border-faint text-muted"
+                              done ? "status-pill status-pill-on-track" : "border border-dashed border-border-faint text-muted"
                             }`}
                           >
-                            {answered ? "✓" : "--"}
+                            {done ? "✓" : "--"}
                           </span>
                         </td>
                       );
                     })}
                     <td className="px-4 py-2.5 text-center text-xs font-medium text-muted">
-                      {answeredCount} of {orderedSections.length}
+                      {doneCount} of {orderedSections.length}
                     </td>
                   </tr>
                 );
@@ -121,54 +135,6 @@ export default async function TrainerPreCourseTaskPage() {
         <span>C = Cambridge&apos;s Pre-Course Task</span>
         <span>S = your centre&apos;s supplement</span>
       </div>
-
-      {/* connect-withdrawal-precourse-scope-spec-2026-08-21.md item 1: the
-          tutor aggregate view, additive to the completion table above.
-          Every section here is free text (pre_course_task_sections has no
-          task-type/answer-key column), so there's no correct/incorrect to
-          score against -- this is the "read-aloud-friendly summary" branch
-          for every section, not the design's worked example of a scored
-          sentence-correction task, which would need structured response
-          data this schema doesn't have. */}
-      {orderedSections.length > 0 && (trainees ?? []).length > 0 ? (
-        <div className="flex flex-col gap-3">
-          <div>
-            <h2 className="font-serif text-lg text-ink">What the cohort said</h2>
-            <p className="mt-1 text-sm text-muted">Skim, not scored -- every answer is free text. Open a section to read them.</p>
-          </div>
-          {orderedSections.map((s) => {
-            const sectionResponses = (responses ?? [])
-              .filter((r) => r.section_id === s.id && r.response && r.response.trim() !== "")
-              .map((r) => ({ traineeId: r.trainee_id, text: r.response as string }))
-              .sort((a, b) => (nameById.get(a.traineeId) ?? "").localeCompare(nameById.get(b.traineeId) ?? ""));
-            return (
-              <details key={s.id} className="sheet">
-                <summary className="flex cursor-pointer items-center justify-between gap-3">
-                  <span className="text-sm font-semibold text-ink">
-                    {s.source === "cambridge" ? "C" : "S"}
-                    {s.sequence_index} · {s.title}
-                  </span>
-                  <span className="text-xs text-muted">
-                    {sectionResponses.length} of {(trainees ?? []).length} answered
-                  </span>
-                </summary>
-                <div className="mt-3 flex flex-col divide-y divide-border-faint">
-                  {sectionResponses.length === 0 ? (
-                    <p className="py-2 text-sm text-muted first:pt-2">Nobody has answered this yet.</p>
-                  ) : (
-                    sectionResponses.map((r) => (
-                      <div key={r.traineeId} className="flex flex-col gap-1 py-3 first:pt-2">
-                        <p className="text-xs font-medium text-muted">{nameById.get(r.traineeId) ?? "Unknown"}</p>
-                        <p className="whitespace-pre-wrap text-sm text-ink">{r.text}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </details>
-            );
-          })}
-        </div>
-      ) : null}
     </div>
   );
 }
