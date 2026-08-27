@@ -15,6 +15,8 @@ import { FolCrossCheck } from "@/app/portfolio/[traineeId]/assignments/[assignme
 import { isCourseDayReached } from "@/lib/course-day";
 import { getAssignmentCriteria } from "@/lib/assignment-criteria";
 import { checkAiCitationShape, AI_CITATION_MISMATCH_LABEL } from "@/lib/ai-declaration-check";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // §8 detail -- trainee viewers get the real editable pipeline
 // (AssignmentAuthoringForm, exactly as built for
@@ -164,8 +166,16 @@ export default async function AssignmentDetailPage({
     };
   }
 
+  // Ramy, 28 Aug 2026: "the logic behind everything" -- due_date is a
+  // date-only string, and new Date(due_date) < new Date() compared it at
+  // UTC midnight against the real instant, so this flipped to "late" up to
+  // several hours before the trainee's own centre-local deadline actually
+  // passed (same bug class as isEventLive). Compare local date strings
+  // instead, same pattern as today-tab.tsx/assignments/page.tsx.
+  const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
   const deadlinePassed = Boolean(
-    assignment.due_date && round === "first" && !locked && new Date(assignment.due_date) < new Date()
+    assignment.due_date && round === "first" && !locked && assignment.due_date < today
   );
   const roundStatus = round === "resubmission" ? assignment.resubmission_status : assignment.first_status;
   const canExportCoverSheet = assignment.first_status === "approved" || assignment.first_status === "resubmission_required";

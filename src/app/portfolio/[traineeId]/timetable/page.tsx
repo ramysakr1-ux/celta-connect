@@ -95,6 +95,7 @@ export default async function TraineeTimetablePage({
   let viewerSubgroupId: string | null = null;
   let viewerGroupLabel: string | null = null;
   const halvesByCode = new Map<string, string>(); // computed "ABC"/"DEF" -> subgroupId
+  const halfOrderBySubgroupId = new Map<string, 1 | 2>();
 
   if (subgroupMember) {
     viewerSubgroupId = subgroupMember.subgroup_id;
@@ -137,6 +138,7 @@ export default async function TraineeTimetablePage({
 
       for (const half of halves) {
         halvesByCode.set(groupCodeForHalf(half), half.subgroupId);
+        halfOrderBySubgroupId.set(half.subgroupId, half.halfOrder);
       }
       viewerGroupLabel = tpGroup?.name ?? subgroup.name ?? null;
     } else {
@@ -157,15 +159,19 @@ export default async function TraineeTimetablePage({
 
   const isOwnTpSlot = (event: TimetableEvent) => event.type === "tp" && ownTpDates.has(event.event_date);
 
+  // Ramy, 28 Aug 2026: "the logic behind everything" -- the loop below used
+  // to require subgroupId === viewerSubgroupId, which can only ever match
+  // the viewer's OWN half, so on a day the other half teaches this returned
+  // null and the card/detail-panel showed no group code at all. The letter
+  // code is display info for every TP slot ("who's teaching today"), not
+  // gated to "mine" -- that gating is isMineEvent's job, separately.
   const teachingLettersFor = (event: TimetableEvent): string | null => {
-    if (event.type !== "tp" || !viewerSubgroupId) return null;
+    if (event.type !== "tp") return null;
     const owningHalfOrder = halfOwningDate(tpEvents, event.event_date);
     if (owningHalfOrder === null) return null;
     for (const [code, subgroupId] of halvesByCode) {
-      if (subgroupId === viewerSubgroupId && owningHalfOrder === viewerHalfOrder) return code;
+      if (halfOrderBySubgroupId.get(subgroupId) === owningHalfOrder) return code;
     }
-    // Not the viewer's own half teaching that day -- still show the owning
-    // half's code if we can find it (any half whose halfOrder matches).
     return null;
   };
 

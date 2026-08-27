@@ -7,6 +7,8 @@ import { mostRecentFridayBefore } from "@/lib/starts-monday-cron";
 import { PreCourseTaskSections } from "@/app/portfolio/[traineeId]/pre-course-task/pre-course-task-sections";
 import { ScavengerHuntPanel } from "@/app/portfolio/[traineeId]/pre-course-task/scavenger-hunt-panel";
 import type { Database } from "@/lib/supabase/types";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 type Item = Database["public"]["Tables"]["pre_course_task_items"]["Row"];
 
@@ -65,7 +67,10 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
   // Staff/assessor always see the answer key (they already have access to
   // everything else) -- gating is a candidate-facing pacing device, same
   // reasoning as assignment gating.
-  const today = new Date().toISOString().slice(0, 10);
+  // Ramy, 28 Aug 2026: "the logic behind everything" -- was the server's
+  // UTC date, wrong for this real trainee-facing eligibility gate.
+  const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
   const answerKeyUnlocked = !isTraineeViewer || (course?.start_date ? today >= mostRecentFridayBefore(course.start_date) : false);
 
   return (

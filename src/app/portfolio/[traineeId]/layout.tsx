@@ -199,7 +199,7 @@ export default async function PortfolioLayout({
           .eq("event_date", today)
       : Promise.resolve({ data: [] }),
   ]);
-  const quietHoursNote = computeQuietHoursNote((todaysEvents ?? []).map((e) => e.event_time), new Date());
+  const quietHoursNote = computeQuietHoursNote((todaysEvents ?? []).map((e) => e.event_time), new Date(), today, timeZone);
 
   const tpsTaught = (lessons ?? []).length;
   const assignmentsPassed = (assignments ?? []).filter(

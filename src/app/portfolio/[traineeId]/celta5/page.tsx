@@ -144,7 +144,7 @@ export default async function PortfolioCelta5Page({
         ? supabase.from("courses").select("name, start_date, end_date, delivery_mode").eq("id", viewer.course_id).maybeSingle()
         : Promise.resolve({ data: null }),
       viewer?.center_id
-        ? supabase.from("centers").select("name, center_number, is_uk_centre").eq("id", viewer.center_id).maybeSingle()
+        ? supabase.from("centers").select("name, center_number, is_uk_centre, time_zone").eq("id", viewer.center_id).maybeSingle()
         : Promise.resolve({ data: null }),
       viewer?.course_id
         ? supabase.from("course_tutors").select("profile_id").eq("course_id", viewer.course_id).is("left_at", null)
@@ -207,8 +207,11 @@ export default async function PortfolioCelta5Page({
 
     const taughtTpNumbers = new Set((plans ?? []).filter((p) => p.taught_at).map((p) => p.tp_number));
     const assignmentStatusByType = new Map((assignments ?? []).map((a) => [a.assignment_type, a]));
+    // Ramy, 28 Aug 2026: "the logic behind everything" -- was the server's
+    // UTC date; currentTpRound below already reads the centre's real
+    // time_zone the correct way, this call was just missed.
     const progressIssues = computeProgressIssues({
-      today: new Date().toISOString().slice(0, 10),
+      today: toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE),
       timetableEvents: timetableEvents ?? [],
       taughtTpNumbers,
       assignmentStatusByType,

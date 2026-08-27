@@ -117,17 +117,26 @@ export function bandIndexFor(eventTime: string | null, timeBands: TimeBand[] = D
 // message queueing/blocking infrastructure exists to actually hold
 // anything until morning, this just tells a trainee messaging late that a
 // reply won't come until then.
+// Ramy, 28 Aug 2026: "the logic behind everything" -- previously took just
+// `now` and used Date.setHours, which sets the hour in the JS engine's own
+// local time (UTC on Vercel) even though the event times being compared are
+// the centre's wall-clock times. Needs the centre's real date/timeZone now,
+// same pattern as isEventLive.
 export function computeQuietHoursNote(
   todaysEventTimes: (string | null)[],
-  now: Date
+  now: Date,
+  today: string,
+  timeZone: string
 ): string | null {
   const times = todaysEventTimes.filter((t): t is string => !!t).sort();
   if (times.length === 0) return null;
   const lastEventTime = times[times.length - 1];
   const [h, m] = lastEventTime.split(":").map(Number);
-  const quietFrom = new Date(now);
-  quietFrom.setHours(h + 1, m, 0, 0);
-  if (now < quietFrom) return null;
+  const quietFromHour = h + 1;
+  if (quietFromHour >= 24) return null; // last session starts too late in the day for a same-day quiet-hours window
+  const quietFromTime = `${String(quietFromHour).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  const quietFrom = zonedTimeToUtc(today, quietFromTime, timeZone);
+  if (now.getTime() < quietFrom.getTime()) return null;
   return `Quiet hours -- today's last session ended a while ago, so your tutor likely won't reply until morning.`;
 }
 
