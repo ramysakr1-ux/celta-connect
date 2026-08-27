@@ -319,7 +319,7 @@ export function ImportWizard({
               type="button"
               onClick={() => setStep("preview")}
               disabled={!canPreview}
-              className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
             >
               See what happens
             </button>
@@ -403,7 +403,7 @@ export function ImportWizard({
             <button
               type="submit"
               disabled={pending || analysis.tallies.willImport === 0}
-              className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
             >
               {pending ? "Importing..." : `Import ${analysis.tallies.willImport} people`}
             </button>

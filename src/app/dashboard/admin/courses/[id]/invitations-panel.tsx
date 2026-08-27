@@ -104,7 +104,7 @@ export function InvitationsPanel({
         <button
           type="submit"
           disabled={sending}
-          className="admin-hover-fill h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
+          className="h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
         >
           {sending ? "Sending…" : `Send invite as ${inviteRoleLabel}`}
         </button>

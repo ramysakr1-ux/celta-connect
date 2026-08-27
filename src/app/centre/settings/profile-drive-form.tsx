@@ -164,7 +164,7 @@ export function ProfileDriveForm({
           <button
             type="submit"
             disabled={pending}
-            className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+            className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save"}
           </button>
@@ -188,7 +188,7 @@ export function ProfileDriveForm({
             </form>
           </div>
         ) : (
-          <a href="/api/google/connect" className="admin-hover-fill mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card">
+          <a href="/api/google/connect" className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card">
             Connect Google Drive
           </a>
         )}

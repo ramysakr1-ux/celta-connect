@@ -104,7 +104,7 @@ export function ProviderList({
             <button
               type="submit"
               disabled={pending}
-              className="admin-hover-fill h-10 w-full rounded-[6px] bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-60"
+              className="h-10 w-full rounded-[6px] bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-60"
             >
               {pending ? "Connecting..." : `Connect ${chosen.name}`}
             </button>

@@ -73,7 +73,7 @@ export function PlatformAccessTab({ invite, accessLog }: { invite: PlatformAcces
             <button
               type="submit"
               disabled={pending}
-              className="admin-hover-fill self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+              className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
             >
               {pending ? "Sending…" : "Send invite"}
             </button>

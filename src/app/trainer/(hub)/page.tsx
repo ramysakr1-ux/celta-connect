@@ -426,7 +426,7 @@ export default async function TodayPage() {
           ) : null}
           <Link
             href="/trainer/roster"
-            className="trainer-hover-fill flex h-8 items-center rounded-[6px] px-[13px] text-xs font-semibold text-primary-foreground"
+            className="flex h-8 items-center rounded-[6px] px-[13px] text-xs font-semibold text-primary-foreground"
             style={{ background: isMct ? "oklch(37.5% 0.058 195)" : "oklch(42% 0.13 27)" }}
           >
             Write TP feedback

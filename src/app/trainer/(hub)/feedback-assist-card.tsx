@@ -115,7 +115,7 @@ export function FeedbackAssistCard({
                 <button
                   type="submit"
                   disabled={savePending}
-                  className="trainer-hover-fill h-[30px] rounded-[6px] bg-primary px-3.5 text-[12.5px] font-semibold text-primary-foreground disabled:opacity-60"
+                  className="h-[30px] rounded-[6px] bg-primary px-3.5 text-[12.5px] font-semibold text-primary-foreground disabled:opacity-60"
                 >
                   {savePending ? "Saving…" : "Save"}
                 </button>

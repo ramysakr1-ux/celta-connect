@@ -67,7 +67,7 @@ export function SubscriptionForm({ centres }: { centres: { id: string; name: str
       <button
         type="submit"
         disabled={pending}
-        className="h-10 self-start rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60 admin-hover-fill"
+        className="h-10 self-start rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save subscription"}
       </button>
@@ -114,7 +114,7 @@ export function InvoiceForm({ centres }: { centres: { id: string; name: string }
       <button
         type="submit"
         disabled={pending}
-        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60 admin-hover-fill"
+        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Recording..." : "Record invoice"}
       </button>

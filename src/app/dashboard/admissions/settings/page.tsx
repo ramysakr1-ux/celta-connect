@@ -149,7 +149,7 @@ export default async function AdmissionsSettingsPage() {
             </label>
             <input id="prompt_text" name="prompt_text" type="text" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink" />
           </div>
-          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card admin-hover-fill">
+          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
             Add prompt
           </button>
         </form>
@@ -188,7 +188,7 @@ export default async function AdmissionsSettingsPage() {
               className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink"
             />
           </div>
-          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card admin-hover-fill">
+          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
             Add prompt
           </button>
         </form>
@@ -241,7 +241,7 @@ export default async function AdmissionsSettingsPage() {
             </label>
             <input id="question_text" name="question_text" type="text" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink" />
           </div>
-          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card admin-hover-fill">
+          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
             Add question
           </button>
         </form>

@@ -151,7 +151,7 @@ export function DeleteCentreCard({ centreName }: { centreName: string }) {
           <button
             type="submit"
             disabled={!unlocked || deletePending}
-            className="admin-hover-fill self-start rounded-[6px] bg-destructive px-4 py-2 text-sm font-semibold text-white hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="self-start rounded-[6px] bg-destructive px-4 py-2 text-sm font-semibold text-white hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {deletePending ? "Deleting…" : "Permanently delete this centre"}
           </button>

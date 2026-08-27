@@ -38,7 +38,7 @@ export function ZoomConnectionForm({
           </form>
         </div>
       ) : (
-        <a href="/api/zoom/connect" className="admin-hover-fill mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card">
+        <a href="/api/zoom/connect" className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card">
           Connect Zoom
         </a>
       )}

@@ -60,7 +60,7 @@ export function ReferralRequestRow({
             <button
               type="submit"
               disabled={acceptPending || courses.length === 0}
-              className="rounded-[6px] border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60 admin-hover-fill"
+              className="rounded-[6px] border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
             >
               {acceptPending ? "Accepting..." : "Accept"}
             </button>

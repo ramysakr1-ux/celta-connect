@@ -35,7 +35,6 @@ export function ProductSwitcher() {
     <div ref={ref} style={{ position: "relative" }}>
       <div
         onClick={() => setOpen((v) => !v)}
-        className="admin-hover-fill"
         style={{ width: 34, height: 34, borderRadius: 6, background: DARK_ITEM, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="oklch(78% 0.02 80)">

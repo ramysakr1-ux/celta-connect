@@ -42,7 +42,7 @@ export function CreateCentreForm() {
       <button
         type="submit"
         disabled={pending}
-        className="h-10 self-start rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60 admin-hover-fill"
+        className="h-10 self-start rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Creating..." : "Create centre + owner invite"}
       </button>
@@ -107,7 +107,7 @@ export function ChangeRoleForm() {
       <button
         type="submit"
         disabled={pending}
-        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60 admin-hover-fill"
+        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Changing..." : "Change role"}
       </button>

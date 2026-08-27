@@ -196,7 +196,7 @@ function TutorRow({
           <button
             type="submit"
             disabled={pending}
-            className="admin-hover-fill self-start rounded-[6px] bg-primary px-3 py-1.5 text-sm font-medium text-card disabled:opacity-60"
+            className="self-start rounded-[6px] bg-primary px-3 py-1.5 text-sm font-medium text-card disabled:opacity-60"
           >
             {pending ? "Saving..." : "Save"}
           </button>

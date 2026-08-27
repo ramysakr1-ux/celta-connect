@@ -73,7 +73,7 @@ export function RefundsPanel({ refunds, canEdit }: { refunds: RefundRow[]; canEd
                     <button
                       type="submit"
                       disabled={settling}
-                      className="admin-hover-fill rounded-[6px] bg-ink-warm px-3 py-1.5 text-xs font-semibold text-card disabled:opacity-60"
+                      className="rounded-[6px] bg-ink-warm px-3 py-1.5 text-xs font-semibold text-card disabled:opacity-60"
                     >
                       Mark as sent
                     </button>
@@ -139,7 +139,7 @@ export function RefundsPanel({ refunds, canEdit }: { refunds: RefundRow[]; canEd
           <button
             type="submit"
             disabled={agreeing}
-            className="admin-hover-fill h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
+            className="h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
           >
             {agreeing ? "Recording…" : "Agree a refund"}
           </button>

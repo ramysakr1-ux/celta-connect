@@ -233,7 +233,7 @@ export default async function AdminSettingsPage({
             ) : (
               <a
                 href="/api/google/connect"
-                className="admin-hover-fill mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card"
+                className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card"
               >
                 Connect Google Drive
               </a>

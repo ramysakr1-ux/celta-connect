@@ -437,7 +437,7 @@ export function StaffChatDrawer({
             onClick={handleSend}
             disabled={readOnly || !selected || !body.trim()}
             aria-label="Send"
-            className="admin-hover-fill flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-card hover:bg-primary disabled:opacity-60"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-card hover:bg-primary disabled:opacity-60"
           >
             <ArrowUp className="size-4" aria-hidden="true" />
           </button>

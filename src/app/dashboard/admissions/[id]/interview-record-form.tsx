@@ -122,7 +122,7 @@ export function InterviewRecordForm({
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60 admin-hover-fill"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save interview record"}
       </button>

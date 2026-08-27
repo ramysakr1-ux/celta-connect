@@ -232,7 +232,7 @@ export default async function CentreOverviewPage({
           {can(ctx.roles, "roles.grant", ctx.overrides) ? (
             <Link
               href="/centre/roles"
-              className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
             >
               Invite people
             </Link>
@@ -439,7 +439,7 @@ export default async function CentreOverviewPage({
         <div>
           <Link
             href="/dashboard/admin"
-            className="admin-hover-fill inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            className="inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
           >
             New course
           </Link>

@@ -48,7 +48,7 @@ export function GoogleDriveTargetsForm({
       <button
         type="submit"
         disabled={pending}
-        className="admin-hover-fill self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
       >
         {pending ? "Saving..." : "Save"}
       </button>

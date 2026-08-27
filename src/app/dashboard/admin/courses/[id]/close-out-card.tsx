@@ -64,8 +64,8 @@ export function CloseOutCard({
         <input type="hidden" name="course_id" value={courseId} />
         <button
           type="submit"
-          className={`admin-hover-fill rounded-[6px] px-3 py-1.5 text-xs font-semibold ${
-            cambridgeGradesConfirmedAt ? "bg-primary text-card" : "border border-border text-ink"
+          className={`rounded-[6px] px-3 py-1.5 text-xs font-semibold ${
+            cambridgeGradesConfirmedAt ? "bg-primary text-card" : "admin-hover-fill border border-border text-ink"
           }`}
         >
           {cambridgeGradesConfirmedAt ? `Confirmed ${formatDateTime(cambridgeGradesConfirmedAt)}` : "Mark confirmed"}
@@ -149,7 +149,7 @@ export function CloseOutCard({
               <button
                 type="submit"
                 disabled={receiptPending}
-                className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+                className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
               >
                 {receiptPending ? "Confirming..." : "Confirm receipt"}
               </button>
@@ -203,7 +203,7 @@ export function CloseOutCard({
               <button
                 type="submit"
                 disabled={exportPending}
-                className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+                className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
               >
                 {exportPending ? "Exporting... (this can take a while)" : "Export to Drive"}
               </button>

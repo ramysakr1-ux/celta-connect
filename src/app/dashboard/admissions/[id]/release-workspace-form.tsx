@@ -101,7 +101,7 @@ export function ReleaseWorkspaceForm({
         <button
           type="submit"
           disabled={pending}
-          className="mt-1 rounded-[6px] bg-ink-warm px-4 py-2 text-sm font-semibold text-card disabled:opacity-60 admin-hover-fill"
+          className="mt-1 rounded-[6px] bg-ink-warm px-4 py-2 text-sm font-semibold text-card disabled:opacity-60"
         >
           {pending ? "Sending…" : "Release workspace access"}
         </button>

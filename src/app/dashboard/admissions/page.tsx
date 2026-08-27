@@ -300,7 +300,7 @@ export default async function AdmissionsPage() {
             <label className="flex items-center gap-1.5 pb-2 text-xs text-ink">
               <input type="checkbox" name="panel" />A panel (second interviewer)
             </label>
-            <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card admin-hover-fill">
+            <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
               Create slot
             </button>
           </form>

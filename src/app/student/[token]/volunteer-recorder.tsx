@@ -199,7 +199,7 @@ export function VolunteerRecorder({
             type="button"
             onClick={startRecording}
             disabled={!consented || status === "requesting"}
-            className="volunteer-hover-fill self-start rounded-lg bg-[#a8432e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="self-start rounded-lg bg-[#a8432e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             {status === "requesting" ? "Requesting microphone…" : "Start recording"}
           </button>
@@ -226,7 +226,7 @@ export function VolunteerRecorder({
             type="button"
             onClick={togglePause}
             aria-label={paused ? "Resume recording" : "Pause recording"}
-            className="volunteer-hover-fill flex size-16 items-center justify-center rounded-full bg-[#a8432e] transition-transform"
+            className="flex size-16 items-center justify-center rounded-full bg-[#a8432e] transition-transform"
             style={{ boxShadow: paused ? "none" : `0 0 0 ${6 + level * 10}px rgba(168,67,46,0.14)` }}
           >
             {paused ? (
@@ -253,7 +253,7 @@ export function VolunteerRecorder({
           <button
             type="button"
             onClick={nextQuestion}
-            className="volunteer-hover-fill w-full max-w-xs rounded-lg bg-[#3a2e18] px-5 py-3 text-sm font-semibold text-white"
+            className="w-full max-w-xs rounded-lg bg-[#3a2e18] px-5 py-3 text-sm font-semibold text-white"
           >
             {isLast ? "Stop and finish" : "Next question →"}
           </button>

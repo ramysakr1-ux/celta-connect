@@ -156,7 +156,7 @@ export default async function AdminDashboardPage() {
             a primary button that 404s is worse than no button. */}
         <Link
           href="/dashboard/admin/courses/new"
-          className="admin-hover-fill flex h-[34px] shrink-0 items-center rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold whitespace-nowrap text-primary-foreground"
+          className="flex h-[34px] shrink-0 items-center rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold whitespace-nowrap text-primary-foreground"
         >
           New course
         </Link>

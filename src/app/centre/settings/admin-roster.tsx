@@ -47,7 +47,7 @@ export function AdminRoster({
           <button
             type="button"
             onClick={() => setShowInvite((v) => !v)}
-            className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
           >
             Invite someone
           </button>

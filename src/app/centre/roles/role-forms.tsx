@@ -61,7 +61,7 @@ export function CreateInviteForm({ customRoles = [] }: { customRoles?: { role_ke
       <button
         type="submit"
         disabled={pending}
-        className="admin-hover-fill h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Creating..." : "Create invite"}
       </button>
@@ -143,7 +143,7 @@ export function GrantRoleForm({ customRoles = [] }: { customRoles?: { role_key: 
       <button
         type="submit"
         disabled={pending}
-        className="admin-hover-fill h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Appointing..." : "Appoint"}
       </button>
@@ -221,7 +221,7 @@ export function AssignAreaForm() {
       <button
         type="submit"
         disabled={pending}
-        className="admin-hover-fill h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
       >
         {pending ? "Assigning..." : "Assign"}
       </button>

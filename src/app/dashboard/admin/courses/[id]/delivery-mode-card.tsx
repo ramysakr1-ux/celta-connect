@@ -40,7 +40,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
       <input type="hidden" name="delivery_mode" value={mode} />
       <DeliveryModePicker value={mode} onChange={setMode} />
       <div className="flex gap-3">
-        <button type="submit" className="admin-hover-fill self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card">
+        <button type="submit" className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card">
           Save
         </button>
         <button

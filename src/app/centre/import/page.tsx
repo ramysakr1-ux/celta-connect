@@ -77,8 +77,10 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
               <Link
                 key={k}
                 href={`/centre/import?kind=${k}`}
-                className={`admin-hover-fill rounded-[6px] px-3 py-1.5 text-sm font-medium ${
-                  isActive ? "text-white" : "border border-border text-muted hover:border-primary hover:text-primary"
+                className={`rounded-[6px] px-3 py-1.5 text-sm font-medium ${
+                  isActive
+                    ? "text-white"
+                    : "admin-hover-fill border border-border text-muted hover:border-primary hover:text-primary"
                 }`}
                 style={isActive ? { background: "oklch(35% 0.075 155)" } : undefined}
               >

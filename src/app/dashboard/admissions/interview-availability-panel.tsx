@@ -127,7 +127,7 @@ export function InterviewAvailabilityPanel({
             <option value="face_to_face">Face to face</option>
             <option value="online">Online</option>
           </select>
-          <button type="submit" className="h-9 rounded-[6px] bg-primary px-3 text-xs font-semibold text-primary-foreground admin-hover-fill">
+          <button type="submit" className="h-9 rounded-[6px] bg-primary px-3 text-xs font-semibold text-primary-foreground">
             Add window
           </button>
         </form>
@@ -195,7 +195,7 @@ export function InterviewAvailabilityPanel({
               </option>
             ))}
           </select>
-          <button type="submit" disabled={regenPending} className="h-9 rounded-[6px] bg-ink-warm px-4 text-xs font-semibold text-card hover:bg-ink-warm/90 disabled:opacity-60 admin-hover-fill">
+          <button type="submit" disabled={regenPending} className="h-9 rounded-[6px] bg-ink-warm px-4 text-xs font-semibold text-card hover:bg-ink-warm/90 disabled:opacity-60">
             {regenPending ? "Generating…" : "Generate slots from pattern"}
           </button>
           {regenState.created !== undefined ? (
