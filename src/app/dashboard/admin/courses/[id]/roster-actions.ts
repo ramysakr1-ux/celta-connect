@@ -12,8 +12,12 @@ import type { DeliveryMode } from "@/lib/delivery-mode";
 
 const VALID_DELIVERY_MODES: DeliveryMode[] = ["f2f", "online", "mixed"];
 
+// Moved to /trainer/roster 2026-08-27, same MCT-gated pattern as
+// close-out-actions.ts/updateChatRetentionDays -- a course-wide setting
+// ("asked once, read everywhere -- the timetable, observation log and
+// pre-course task all read this field"), same weight as chat retention.
 export async function updateDeliveryMode(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const staff = await requireRole(["trainer", "admin"]);
 
   const courseId = formData.get("course_id");
   const deliveryMode = formData.get("delivery_mode");
@@ -27,10 +31,11 @@ export async function updateDeliveryMode(formData: FormData): Promise<void> {
 
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== admin.center_id) return;
+  if (!course || course.center_id !== staff.center_id) return;
+  if (staff.role !== "admin" && staff.course_id && !(await isMctOnCourse(supabase, staff.course_id, staff.id))) return;
 
   await supabase.from("courses").update({ delivery_mode: deliveryMode as DeliveryMode }).eq("id", courseId);
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/roster");
 }
 
 // connect-spec-corrections-for-claude-code.md item 6: the TP7/8 material
