@@ -44,15 +44,18 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
           : "volunteers";
 
   const supabase = await createClient();
-  const { data: courses } = await supabase.from("courses").select("id, name, end_date").eq("center_id", profile.center_id).order("name");
-
-  const { data: imports } = await supabase
-    .from("spreadsheet_imports")
-    .select("id, source_filename, tallies, created_at, undone_at, kind")
-    .eq("center_id", profile.center_id)
-    .eq("kind", kind)
-    .order("created_at", { ascending: false })
-    .limit(5);
+  // Ramy, 27 Aug 2026 (round 2): courses and imports don't depend on each
+  // other -- both only need profile.center_id/kind, already known.
+  const [{ data: courses }, { data: imports }] = await Promise.all([
+    supabase.from("courses").select("id, name, end_date").eq("center_id", profile.center_id).order("name"),
+    supabase
+      .from("spreadsheet_imports")
+      .select("id, source_filename, tallies, created_at, undone_at, kind")
+      .eq("center_id", profile.center_id)
+      .eq("kind", kind)
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
