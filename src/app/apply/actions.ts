@@ -53,6 +53,7 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
   if (
     !formData.get("ack_no_guarantee") ||
     !formData.get("ack_no_exemptions") ||
+    !formData.get("ack_full_attendance") ||
     !formData.get("ack_writing_task") ||
     !formData.get("ack_commitments")
   ) {
@@ -128,6 +129,7 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
       anything_else: (formData.get("anything_else") as string | null)?.trim() || null,
       acknowledged_no_guarantee_at: new Date().toISOString(),
       acknowledged_no_exemptions_at: new Date().toISOString(),
+      acknowledged_full_attendance_at: new Date().toISOString(),
       acknowledged_mixed_mode_demand_at: course.delivery_mode === "mixed" ? new Date().toISOString() : null,
       commitments_accepted_at: new Date().toISOString(),
       commitments_snapshot: commitmentsSnapshot,

@@ -525,6 +525,7 @@ export interface Database {
           anything_else: string | null;
           acknowledged_no_guarantee_at: string | null;
           acknowledged_no_exemptions_at: string | null;
+          acknowledged_full_attendance_at: string | null;
           acknowledged_mixed_mode_demand_at: string | null;
           // migration 0139 -- the exact assembled text shown at accept time,
           // not re-derived later (a subsequent centre revision must never

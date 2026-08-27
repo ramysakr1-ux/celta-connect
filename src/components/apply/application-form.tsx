@@ -472,6 +472,16 @@ export function ApplicationForm({
               I confirm there are no exemptions or recognition of prior
               learning.
             </label>
+            <label className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                name="ack_full_attendance"
+                required
+                className="mt-0.5"
+              />
+              I confirm I don&apos;t know of anything that would stop me
+              attending or participating in significant parts of this course.
+            </label>
             {selectedIntake?.deliveryMode === "mixed" ? (
               <label className="flex items-start gap-2">
                 <input

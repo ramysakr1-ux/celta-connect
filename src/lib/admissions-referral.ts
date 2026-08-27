@@ -37,6 +37,7 @@ const CARRIED_FIELDS = [
   // exactly the re-application this is not.
   "acknowledged_no_guarantee_at",
   "acknowledged_no_exemptions_at",
+  "acknowledged_full_attendance_at",
 ] as const;
 
 export interface ReferralResult {
