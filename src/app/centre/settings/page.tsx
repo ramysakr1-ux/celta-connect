@@ -41,7 +41,20 @@ export default async function CentreSettingsPage({
   const isOwner = ctx.roles.includes("centre_owner");
 
   const admin = createAdminClient();
-  const [{ data: center }, { data: driveConnection }, { data: zoomConnection }, { data: grants }, { data: invites }, { data: supportGrants }] = await Promise.all([
+  // Ramy, 27 Aug 2026: customRoles (below the Promise.all, until this fix)
+  // only needs centerId, already known at this point -- no reason it waited
+  // for these six to finish first. Folded in as a seventh parallel query.
+  const [
+    { data: center },
+    { data: driveConnection },
+    { data: zoomConnection },
+    { data: grants },
+    { data: invites },
+    { data: supportGrants },
+    { data: customRoles },
+    { data: platformInvite },
+    { data: platformAccessLog },
+  ] = await Promise.all([
     admin
       .from("centers")
       .select(
@@ -62,8 +75,13 @@ export default async function CentreSettingsPage({
           .order("created_at", { ascending: false })
       : Promise.resolve({ data: [] }),
     admin.from("platform_support_grants").select("*").eq("center_id", centerId).order("granted_at", { ascending: false }),
+    admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId),
+    // Ramy, 27 Aug 2026: these two (previously their own Promise.all,
+    // further down) only need centerId too -- folded in here alongside
+    // customRoles for the same reason.
+    admin.from("platform_owner_invites").select("id, invited_at, note, revoked_at").eq("center_id", centerId).order("invited_at", { ascending: false }).limit(1).maybeSingle(),
+    admin.from("platform_owner_access_log").select("id, accessed_at, page").eq("center_id", centerId).order("accessed_at", { ascending: false }).limit(50),
   ]);
-  const { data: customRoles } = await admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId);
 
   if (!center) redirect("/centre");
 
@@ -117,10 +135,6 @@ export default async function CentreSettingsPage({
   }));
   const canGrantBilling = ctx.roles.includes("centre_administrator") || ctx.roles.includes("centre_owner");
 
-  const [{ data: platformInvite }, { data: platformAccessLog }] = await Promise.all([
-    admin.from("platform_owner_invites").select("id, invited_at, note, revoked_at").eq("center_id", centerId).order("invited_at", { ascending: false }).limit(1).maybeSingle(),
-    admin.from("platform_owner_access_log").select("id, accessed_at, page").eq("center_id", centerId).order("accessed_at", { ascending: false }).limit(50),
-  ]);
   const platformInviteRow: PlatformAccessRow | null =
     platformInvite && !platformInvite.revoked_at
       ? { id: platformInvite.id, invitedAt: platformInvite.invited_at, note: platformInvite.note, status: "active" }
