@@ -504,7 +504,11 @@ h6 {
     transition: background-color 150ms ease;
   }
   .volunteer-hover-fill:hover {
-    background-color: color-mix(in oklab, var(--trainee-plum) 20%, var(--color-card)) !important;
+    /* Matches .trainee-hover-fill's own choice, not a plum tint -- Ramy,
+       27 Aug 2026, confirmed: the plum accent is for rows only (the ring),
+       buttons keep the same generic teal wash used everywhere else in the
+       app, for both Trainee and Volunteer alike. */
+    background-color: oklch(93% 0.019 190) !important;
   }
   /* Same rule (Ramy, 25 Aug 2026: "hover rule extension" -- past trainee
      only), for every screen with no role-tinted accent of its own (Centre
