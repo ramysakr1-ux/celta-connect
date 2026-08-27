@@ -29,6 +29,7 @@ import { STANDING_LABEL } from "@/components/trajectory-gradient-bar";
 import { computeQuietHoursNote, toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { getPeerGroupMembers } from "@/lib/peer-observation";
+import { computeCourseDayProgress } from "@/lib/course-day";
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
 // only ever land on their own :traineeId (redirected home otherwise);
@@ -120,6 +121,16 @@ export default async function PortfolioLayout({
     const today = toLocalIso(new Date(), timeZone);
     const weekOf = courseDates?.start_date && courseDates?.end_date ? computeWeekOf(courseDates.start_date, courseDates.end_date, today) : null;
     bannerWeekNumber = weekOf ? Number(weekOf.match(/week (\d+)/)?.[1]) || null : null;
+  }
+
+  // specs/for-claude-code-trainee-interface.md §"Header": "Day N of 20"
+  // course-day counter, right side, next to the avatar -- computeCourseDayProgress
+  // already existed (built for the FOL spot-check page's own Day N language)
+  // but was never actually called from the trainee header itself, so the
+  // spec's counter never rendered anywhere a real trainee could see it.
+  let courseDayProgress: { currentDay: number; totalDays: number } | null = null;
+  if (showTraineeNav && trainee.course_id) {
+    courseDayProgress = await computeCourseDayProgress(supabase, trainee.course_id);
   }
 
   // §1.1d: the "Preview as trainee" button promises a real preview
@@ -279,7 +290,11 @@ export default async function PortfolioLayout({
               <Link href={`/portfolio/${trainee.id}`} className="shrink-0 block">
                 <Wordmark size="header" />
               </Link>
-              <TraineeHeaderCorner traineeId={trainee.id} traineeInitials={traineeInitials} />
+              <TraineeHeaderCorner
+                traineeId={trainee.id}
+                traineeInitials={traineeInitials}
+                courseDayProgress={courseDayProgress}
+              />
             </div>
           </div>
           <div className="border-t border-border" />

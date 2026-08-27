@@ -38,6 +38,7 @@ interface WaitingItem {
   label: string;
   detail: string;
   href: string;
+  isLetter?: boolean;
 }
 
 // for-claude-code-trainee-interface.md's Today tab -- the new landing
@@ -287,6 +288,7 @@ export async function TodayTab({
       label: LETTER_LABEL[letter.letter_type] ?? "A formal letter",
       detail: "Please read and acknowledge it",
       href: `/portfolio/${traineeId}/letters/${letter.id}`,
+      isLetter: true,
     });
   }
   for (const invite of tutorialInvites ?? []) {
@@ -326,7 +328,20 @@ export async function TodayTab({
       href: `/portfolio/${traineeId}/celta5`,
     });
   }
-  const waitingCapped = waiting.slice(0, 3);
+  // A formal letter is the one item type here with no other route to it
+  // anywhere in the trainee UI (no letters archive/nav entry) -- it must
+  // never fall off this cap, or it becomes permanently unreachable. Every
+  // letter is always kept; the other items fill whatever slots remain,
+  // in their existing priority order.
+  const letterSlots = waiting.filter((w) => w.isLetter).length;
+  const otherSlotsRemaining = Math.max(0, 3 - letterSlots);
+  let otherSlotsUsed = 0;
+  const waitingCapped = waiting.filter((w) => {
+    if (w.isLetter) return true;
+    if (otherSlotsUsed >= otherSlotsRemaining) return false;
+    otherSlotsUsed += 1;
+    return true;
+  });
   // for-claude-code-trainee-interface.md: "up to 3 items, newest first" --
   // was rendering every broadcast unbounded.
   const broadcastsCapped = (broadcasts ?? []).slice(0, 3);
