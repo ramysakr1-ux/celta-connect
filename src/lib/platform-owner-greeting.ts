@@ -45,9 +45,16 @@ export async function getPlatformOwnerGreeting(fullName: string | null): Promise
   const outstandingCount = (invoices ?? []).filter((i) => i.status === "outstanding").length;
 
   const firstName = fullName?.split(" ")[0] || "there";
-  const hour = new Date().getHours();
+  // Ramy, 28 Aug 2026: "the timezone changed" -- both of these read the
+  // server's own local time (UTC on Vercel, regardless of function region)
+  // via getHours()/toLocaleDateString() with no timeZone, while the
+  // running-centres check three lines above already does this correctly.
+  // Ramy's own timezone (DEFAULT_TIMEZONE, Europe/Istanbul) is the right
+  // reference here -- this greeting is his, not any one centre's.
+  const now = new Date();
+  const hour = Number(new Intl.DateTimeFormat("en-GB", { hour: "numeric", hour12: false, timeZone: DEFAULT_TIMEZONE }).format(now));
   const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
-  const dateEyebrow = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }).toUpperCase();
+  const dateEyebrow = now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: DEFAULT_TIMEZONE }).toUpperCase();
 
   const recapParts = [
     `${runningCentreIds.size} centre${runningCentreIds.size === 1 ? "" : "s"} running`,
