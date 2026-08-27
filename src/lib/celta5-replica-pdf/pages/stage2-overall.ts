@@ -1,5 +1,5 @@
 import type { PDFPage } from "pdf-lib";
-import { drawAt, drawWrapped, drawOvalAround, type Celta5Fonts } from "@/lib/celta5-replica-pdf/engine";
+import { drawAt, drawWrapped, drawOvalAround, drawSignature, type Celta5Fonts } from "@/lib/celta5-replica-pdf/engine";
 
 export type StandardRating = "above_standard" | "to_standard" | "not_to_standard";
 
@@ -55,11 +55,11 @@ export function drawStage2OverallPage(page: PDFPage, fonts: Celta5Fonts, data: S
   if (data.tutorNotes) drawWrapped(page, fonts.regular, [data.tutorNotes], TUTOR_NOTES_BOX);
 
   if (data.tutorSignatureName && data.tutorSignedAt) {
-    drawAt(page, fonts.regular, data.tutorSignatureName, TUTOR_SIG_X, TUTOR_SIG_Y);
+    drawSignature(page, fonts.regular, data.tutorSignatureName, TUTOR_SIG_X, TUTOR_SIG_Y, TUTOR_DATE_X - TUTOR_SIG_X - 10);
     drawAt(page, fonts.regular, formatDate(data.tutorSignedAt), TUTOR_DATE_X, TUTOR_SIG_Y);
   }
   if (data.candidateSignatureName && data.candidateSignedAt) {
-    drawAt(page, fonts.regular, data.candidateSignatureName, CANDIDATE_SIG_X, CANDIDATE_SIG_Y);
+    drawSignature(page, fonts.regular, data.candidateSignatureName, CANDIDATE_SIG_X, CANDIDATE_SIG_Y, CANDIDATE_DATE_X - CANDIDATE_SIG_X - 10);
     drawAt(page, fonts.regular, formatDate(data.candidateSignedAt), CANDIDATE_DATE_X, CANDIDATE_SIG_Y);
   }
 }

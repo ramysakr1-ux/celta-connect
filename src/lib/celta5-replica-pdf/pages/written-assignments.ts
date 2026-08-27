@@ -1,5 +1,5 @@
 import type { PDFPage } from "pdf-lib";
-import { drawAt, drawCheck, type Celta5Fonts } from "@/lib/celta5-replica-pdf/engine";
+import { drawCheck, drawSignature, type Celta5Fonts } from "@/lib/celta5-replica-pdf/engine";
 
 export type AssignmentTypeValue = "Focus on Learner" | "LRT" | "Skills" | "LfC";
 
@@ -24,6 +24,14 @@ const PASS_1ST_X = [194.7, 275.7];
 const PASS_2ND_X = [275.7, 347.7];
 const FAIL_X = [347.7, 408.7];
 const SIGNATURE_X = 413;
+// The row's own right-hand edge is unmeasured (no column boundary printed
+// after the signature) -- 538 matches this document's consistent portrait
+// right margin elsewhere (Stage 1's STRENGTHS_BOX/ACTION_PLAN_BOX both end
+// at x1=538). Ramy, 2026-08-27, reviewing a real export: "the writing
+// doesn't wrap around, so it went outside the page border" -- a long
+// candidate name drawn with the old unbounded drawAt() ran straight off
+// the printable page.
+const SIGNATURE_MAX_WIDTH = 538 - SIGNATURE_X;
 
 export function drawWrittenAssignmentsPage(page: PDFPage, fonts: Celta5Fonts, data: WrittenAssignmentsPageData) {
   const byType = new Map(data.assignments.map((a) => [a.assignmentType, a]));
@@ -43,7 +51,7 @@ export function drawWrittenAssignmentsPage(page: PDFPage, fonts: Celta5Fonts, da
     }
 
     if (a.candidateSignatureName) {
-      drawAt(page, fonts.regular, a.candidateSignatureName, SIGNATURE_X, yMid + 3);
+      drawSignature(page, fonts.regular, a.candidateSignatureName, SIGNATURE_X, yMid + 3, SIGNATURE_MAX_WIDTH);
     }
   });
 }

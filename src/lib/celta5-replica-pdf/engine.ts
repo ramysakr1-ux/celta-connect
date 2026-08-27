@@ -64,6 +64,40 @@ export function drawAt(
   page.drawText(text, { x: drawX, y: fitzY(page, fitzY1), size, font, color: rgb(0, 0, 0) });
 }
 
+// A typed signature name has no natural length limit (unlike a checkbox or
+// a date), but every signature line on the real form sits in a fixed gap
+// before the next printed element (the date column, or the page's own right
+// margin) -- a long name drawn with plain drawAt() runs straight past that
+// boundary and off the printable page (found via Ramy's own review of a
+// real export, 2026-08-27: "the writing doesn't wrap around, so it went
+// outside the page border"). Shrinks the font to fit maxWidth first, same
+// as a person writing smaller to fit their name on a line; truncates with
+// an ellipsis only if even the minimum size still doesn't fit.
+export function drawSignature(
+  page: PDFPage,
+  font: PDFFont,
+  text: string,
+  x: number,
+  fitzY1: number,
+  maxWidth: number,
+  size = 10.5,
+  minSize = 7
+) {
+  if (!text) return;
+  let fitSize = size;
+  while (fitSize > minSize && font.widthOfTextAtSize(text, fitSize) > maxWidth) {
+    fitSize -= 0.5;
+  }
+  let drawText = text;
+  if (font.widthOfTextAtSize(drawText, fitSize) > maxWidth) {
+    while (drawText.length > 1 && font.widthOfTextAtSize(`${drawText}...`, fitSize) > maxWidth) {
+      drawText = drawText.slice(0, -1);
+    }
+    drawText = `${drawText}...`;
+  }
+  page.drawText(drawText, { x, y: fitzY(page, fitzY1), size: fitSize, font, color: rgb(0, 0, 0) });
+}
+
 // Splits into an ordered array of character cells for the boxed digit-cell
 // grids (Centre Number: 5 cells, ULN: 10 cells) -- one char centered per
 // cell, blank cells left empty if the value is shorter than the grid.

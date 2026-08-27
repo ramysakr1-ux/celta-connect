@@ -1,5 +1,5 @@
 import type { PDFPage } from "pdf-lib";
-import { drawAt, drawCheck, type Celta5Fonts } from "@/lib/celta5-replica-pdf/engine";
+import { drawAt, drawCheck, drawSignature, type Celta5Fonts } from "@/lib/celta5-replica-pdf/engine";
 
 export interface FinalDeclarationPageData {
   checklistTp: boolean;
@@ -44,13 +44,13 @@ export function drawFinalDeclarationPage(page: PDFPage, fonts: Celta5Fonts, data
   });
 
   if (data.candidateSignatureName && data.candidateSignedAt) {
-    drawAt(page, fonts.regular, data.candidateSignatureName, CANDIDATE_SIG_X, CANDIDATE_SIG_Y);
+    drawSignature(page, fonts.regular, data.candidateSignatureName, CANDIDATE_SIG_X, CANDIDATE_SIG_Y, CANDIDATE_DATE_X - CANDIDATE_SIG_X - 10);
     drawAt(page, fonts.regular, formatDate(data.candidateSignedAt), CANDIDATE_DATE_X, CANDIDATE_SIG_Y);
   }
   // "Accepted by Tutor" -- the final grade-review acceptance, a distinct
   // signature from the Stage 1/2/3 ones (see migration 0221).
   if (data.tutorSignatureName && data.tutorSignedAt) {
-    drawAt(page, fonts.regular, data.tutorSignatureName, TUTOR_SIG_X, TUTOR_SIG_Y);
+    drawSignature(page, fonts.regular, data.tutorSignatureName, TUTOR_SIG_X, TUTOR_SIG_Y, TUTOR_DATE_X - TUTOR_SIG_X - 10);
     drawAt(page, fonts.regular, formatDate(data.tutorSignedAt), TUTOR_DATE_X, TUTOR_SIG_Y);
   }
 }
