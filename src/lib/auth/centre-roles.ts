@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { OverrideMatrix } from "@/lib/auth/centre-permissions";
 
@@ -29,39 +29,46 @@ export interface CentreRoleContext {
  * home centre and grants nothing. The database enforces the same rule for RLS;
  * this is the app-side answer to the same question, and the two must agree.
  */
-// cache() keyed on the profile object's reference identity -- every call
-// site gets `profile` from the (also cache()-wrapped) getCurrentProfile,
-// directly or via requireRole, so they share the same reference within one
-// request and this memoizes correctly. Confirmed real duplicate calls: 9
-// nested pages under /centre independently re-running this (2-5 DB round
-// trips each) on top of the identical call centre/layout.tsx already made
-// for the same request.
-export const getCentreRoleContext = cache(async function getCentreRoleContext(profile: {
-  id: string;
-  center_id: string;
-  active_center_id?: string | null;
-  role?: string;
-}): Promise<CentreRoleContext> {
-  const supabase = await createClient();
+// Ramy, 28 Aug 2026: "no project if we don't fix this." Round 2's
+// Promise.all work reduced this to its minimum sequential-STAGE count, but
+// each stage still pays a real ~150-250ms Supabase round trip regardless of
+// batching -- traced live, that floor is the dominant remaining cost, not
+// something more parallelization can touch. This data (which roles someone
+// holds, the owner's permission overrides, custom roles/capabilities)
+// changes only when an owner action fires -- essentially never between one
+// navigation and the next -- so it's now cached across requests for 30s
+// instead of hit fresh on every single click. A stale-role window of at
+// most 30s is a UI-layer tradeoff only: real data access is still enforced
+// by RLS underneath regardless of what this cache says, so a revoked grant
+// can't be exploited by a stale read here.
+//
+// unstable_cache can't use cookies() (createClient()), so this inner
+// function runs entirely on the admin client -- safe here because every
+// query already carries its own explicit .eq() scope (profile_id or
+// center_id), the same authorization the RLS policies would have applied;
+// nothing here relies on RLS's identity inference to stay correct.
+const getCachedCentreRoleData = unstable_cache(
+  async (profileId: string, centerId: string, activeCenterIdRequested: string | null, role: string | undefined) => {
+    const admin = createAdminClient();
 
-  // Ramy, 27 Aug 2026: measured ~2.6-2.9s per /centre navigation, traced to
-  // a chain of small sequential round trips. This query and the
-  // platform_owner-only invites query below don't depend on each other --
-  // both only need profile.id/profile.role, not each other's result -- so
-  // they run concurrently now instead of one after another.
-  const invitesPromise =
-    profile.role === "platform_owner"
-      ? // platform_owner_invites' own RLS (migration 0208) only lets a
-        // centre's own centre_roles holders read it -- "the platform owner
-        // reads every row... via the admin client," same as every other page
-        // that queries this table for platform_owner's own purposes.
-        createAdminClient().from("platform_owner_invites").select("center_id").is("revoked_at", null)
-      : Promise.resolve({ data: [] as { center_id: string }[] });
+    // Ramy, 27 Aug 2026: measured ~2.6-2.9s per /centre navigation, traced to
+    // a chain of small sequential round trips. This query and the
+    // platform_owner-only invites query below don't depend on each other --
+    // both only need profileId/role, not each other's result -- so they run
+    // concurrently now instead of one after another.
+    const invitesPromise =
+      role === "platform_owner"
+        ? // platform_owner_invites' own RLS (migration 0208) only lets a
+          // centre's own centre_roles holders read it -- "the platform owner
+          // reads every row... via the admin client," same as every other page
+          // that queries this table for platform_owner's own purposes.
+          admin.from("platform_owner_invites").select("center_id").is("revoked_at", null)
+        : Promise.resolve({ data: [] as { center_id: string }[] });
 
-  const [{ data: grants }, { data: invites }] = await Promise.all([
-    supabase.from("centre_roles").select("id, center_id, role").eq("profile_id", profile.id).is("revoked_at", null),
-    invitesPromise,
-  ]);
+    const [{ data: grants }, { data: invites }] = await Promise.all([
+      admin.from("centre_roles").select("id, center_id, role").eq("profile_id", profileId).is("revoked_at", null),
+      invitesPromise,
+    ]);
 
   const held = grants ?? [];
   const grantedCenterIds = held.map((g) => g.center_id);
@@ -76,11 +83,11 @@ export const getCentreRoleContext = cache(async function getCentreRoleContext(pr
   // centre_roles row, it stands alongside it.
   const invitedCenterIds = (invites ?? []).map((i) => i.center_id);
 
-  const requested = profile.active_center_id ?? null;
+  const requested = activeCenterIdRequested;
   const activeCenterId =
-    requested && (requested === profile.center_id || grantedCenterIds.includes(requested) || invitedCenterIds.includes(requested))
+    requested && (requested === centerId || grantedCenterIds.includes(requested) || invitedCenterIds.includes(requested))
       ? requested
-      : profile.center_id;
+      : centerId;
 
   const here = held.filter((g) => g.center_id === activeCenterId);
   const roles = here.map((g) => g.role);
@@ -92,7 +99,7 @@ export const getCentreRoleContext = cache(async function getCentreRoleContext(pr
   // here -- every other role is centre-wide and the query would be noise.
   const courseAdminGrant = here.find((g) => g.role === "course_administrator");
   const scopePromise = courseAdminGrant
-    ? supabase.from("course_administrator_scope").select("course_id").eq("centre_role_id", courseAdminGrant.id)
+    ? admin.from("course_administrator_scope").select("course_id").eq("centre_role_id", courseAdminGrant.id)
     : Promise.resolve({ data: [] as { course_id: string }[] });
 
   // for-claude-code-centre-owner-role-customizer.md: only queried when this
@@ -107,9 +114,9 @@ export const getCentreRoleContext = cache(async function getCentreRoleContext(pr
   const overridesPromise =
     roles.length > 0 && activeCenterId
       ? Promise.all([
-          supabase.from("centre_permission_overrides").select("role_key, capability_key, granted_level").eq("center_id", activeCenterId),
-          supabase.from("centre_custom_roles").select("role_key, label").eq("center_id", activeCenterId),
-          supabase.from("centre_custom_capabilities").select("capability_key, label").eq("center_id", activeCenterId),
+          admin.from("centre_permission_overrides").select("role_key, capability_key, granted_level").eq("center_id", activeCenterId),
+          admin.from("centre_custom_roles").select("role_key, label").eq("center_id", activeCenterId),
+          admin.from("centre_custom_capabilities").select("capability_key, label").eq("center_id", activeCenterId),
         ])
       : Promise.resolve([{ data: [] as never[] }, { data: [] as never[] }, { data: [] as never[] }]);
 
@@ -135,7 +142,7 @@ export const getCentreRoleContext = cache(async function getCentreRoleContext(pr
   // that writes the disclosure log, so a centre only joins this list once
   // that specific route has actually been used to enter it this session --
   // never just because an invite exists somewhere.
-  const availableCenterIds = [...new Set([profile.center_id, ...grantedCenterIds, ...(invitedCenterIds.includes(activeCenterId) ? [activeCenterId] : [])])].filter(
+  const availableCenterIds = [...new Set([centerId, ...grantedCenterIds, ...(invitedCenterIds.includes(activeCenterId) ? [activeCenterId] : [])])].filter(
     Boolean
   );
 
@@ -148,4 +155,25 @@ export const getCentreRoleContext = cache(async function getCentreRoleContext(pr
     customRoles,
     customCapabilities,
   };
+  },
+  ["centre-role-context"],
+  { revalidate: 30 }
+);
+
+// cache() keyed on the profile object's reference identity -- every call
+// site gets `profile` from the (also cache()-wrapped) getCurrentProfile,
+// directly or via requireRole, so they share the same reference within one
+// request and this memoizes correctly. Confirmed real duplicate calls: 9
+// nested pages under /centre independently re-running this (2-5 DB round
+// trips each) on top of the identical call centre/layout.tsx already made
+// for the same request. Layered on top of getCachedCentreRoleData's
+// across-request cache -- this is the within-request layer, that one is
+// the across-navigation layer.
+export const getCentreRoleContext = cache(async function getCentreRoleContext(profile: {
+  id: string;
+  center_id: string;
+  active_center_id?: string | null;
+  role?: string;
+}): Promise<CentreRoleContext> {
+  return getCachedCentreRoleData(profile.id, profile.center_id, profile.active_center_id ?? null, profile.role);
 });
