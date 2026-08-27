@@ -2,7 +2,7 @@
 
 Written 14 Aug 2026, for Claude Code. Repo: `ramysakr1-ux/celta-connect` @ `main`. Source: `Compliance Audit.dc.html` — read that file's full item text (`title`, `what`, `src`, `quote`, `fix`) for the complete wording; this file is the scan checklist.
 
-Sources audited: Administration Handbook 2026, Syllabus and Assessment Guidelines 5th edition, CELTA 5 (April 2021 / July 2023 revisions), three centre guidance documents. No contradictions found — only omissions. Status below reflects a spot-check against the live repo on 14 Aug 2026; unconfirmed items were not found by a quick code search, which is NOT proof they're missing — verify directly.
+Sources audited: Administration Handbook (2022 edition -- no 2026 edition of this document exists; corrected 2026-08-27 after a later audit found the original "2026" citation here was fabricated), Syllabus and Assessment Guidelines 5th edition, CELTA 5 (April 2021 / July 2023 revisions), three centre guidance documents. No contradictions found — only omissions. Status below reflects a spot-check against the live repo on 14 Aug 2026; unconfirmed items were not found by a quick code search, which is NOT proof they're missing — verify directly.
 
 ## ✅ Confirmed built (3)
 1. **Two of four assignments in academic prose** — `src/app/dashboard/admin/assignment-briefs/[id]/page.tsx` blocks publish unless exactly 2 of 4 briefs are prose format.
