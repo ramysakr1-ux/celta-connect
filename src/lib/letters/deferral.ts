@@ -57,7 +57,7 @@ export async function buildDeferralDraft(
     centerName: center?.name ?? "Your centre",
     centerSubtitle: `Cambridge CELTA centre${center?.center_number ? ` · ${center.center_number}` : ""}`,
     centerLogoUrl: null,
-    kicker: "Centre record · Admin Handbook 6.9",
+    kicker: "Centre record · Admin Handbook 7.9",
     docTitle: "Deferral — centre record and candidate letter",
     dateLabel: formatDate(today),
     dayLine: null,
@@ -69,7 +69,7 @@ export async function buildDeferralDraft(
     ],
     body: [
       `Dear ${trainee.full_name.split(" ")[0]},`,
-      `Following your request and the grounds provided, ${center?.name ?? "the centre"} supports your application to defer completion of CELTA course ${course.name} to a subsequent course. You have completed more than half of this course, which is the condition Cambridge requires for a deferral rather than a withdrawal.`,
+      `Following your request and the grounds provided, ${center?.name ?? "the centre"} supports your application to defer completion of CELTA course ${course.name} to a subsequent course, having consulted Cambridge English about this deferral as required.`,
       "The centre is submitting a deferral form in Appian, giving full details of the reasons and the arrangements for your re-integration and completion. Cambridge then confirms the arrangements. Your result on this course will be recorded as Deferred on the centre grade form.",
     ],
     list: { title: "What carries to your next course", items: carries },

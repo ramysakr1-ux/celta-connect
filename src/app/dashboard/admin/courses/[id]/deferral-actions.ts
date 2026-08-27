@@ -48,7 +48,7 @@ export async function linkDeferralTransfer(formData: FormData): Promise<void> {
     return;
   }
 
-  // Handbook 6.9: "The new course should be in the same mode of delivery
+  // Handbook 7.9 (June 2025 numbering): "The new course should be in the same mode of delivery
   // as the original course, unless otherwise agreed in writing by the
   // candidate." Both courses definitely exist by link time, so the
   // comparison happens here rather than being snapshotted earlier.

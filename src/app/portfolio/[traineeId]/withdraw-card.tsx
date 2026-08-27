@@ -37,7 +37,6 @@ export function CandidateStatusCard({
   specialConsiderationArrangements,
   specialConsiderationEvidenceUrl,
   hoursAttended,
-  totalHours,
   pendingRequest,
   accent = "teal",
 }: {
@@ -46,7 +45,6 @@ export function CandidateStatusCard({
   specialConsiderationArrangements?: string[];
   specialConsiderationEvidenceUrl?: string | null;
   hoursAttended: number;
-  totalHours: number;
   pendingRequest: PendingWithdrawalRequest | null;
   // Purely decorative teal/garnet alternation (page.tsx computes which one
   // this card lands on by its real position in the sidebar stack) -- no
@@ -63,7 +61,6 @@ export function CandidateStatusCard({
   const [deferralState, deferralAction, deferralPending] = useActionState(markForDeferral, initialDeferralState);
   const [hoursCarried, setHoursCarried] = useState(hoursAttended);
   const hoursCarriedOverridden = hoursCarried !== hoursAttended;
-  const belowHalfway = hoursAttended < totalHours / 2;
 
   return (
     <div className={`sheet-accent h-fit ${accent === "garnet" ? "sheet-garnet" : ""}`}>
@@ -238,17 +235,20 @@ export function CandidateStatusCard({
           <input type="hidden" name="trainee_id" value={traineeId} />
           {pendingRequest?.kind === "defer" ? <input type="hidden" name="request_id" value={pendingRequest.id} /> : null}
           <p className="text-xs text-muted">
-            Only if more than half the course is completed, in exceptional circumstances. Everything
-            freezes as it stands &mdash; TPs taught, assignments (even mid-marking), CELTA5 criteria and
-            tutorial records &mdash; and carries to whichever course they&apos;re later linked to from
-            that course&apos;s admin page.
+            Considered when part of the course is completed but the candidate can&apos;t finish, in
+            exceptional circumstances (Admin Handbook 7.9) &mdash; there&apos;s no fixed completion
+            threshold. Everything freezes as it stands &mdash; TPs taught, assignments (even
+            mid-marking), CELTA5 criteria and tutorial records &mdash; and carries to whichever course
+            they&apos;re later linked to from that course&apos;s admin page.
           </p>
-          {belowHalfway ? (
-            <p className="text-xs text-status-warning-text">
-              {hoursAttended.toFixed(1)} of {totalHours} hours attended &mdash; under half the course.
-              Deferral is still the centre&apos;s call, but the Handbook frames it as a &gt;50% case.
-            </p>
-          ) : null}
+
+          <label className="flex items-start gap-2 text-xs text-ink">
+            <input type="checkbox" name="cambridge_consulted" required className="mt-0.5" />
+            <span>
+              The centre has consulted Cambridge English about this deferral, as the Handbook requires
+              before agreeing to one.
+            </span>
+          </label>
 
           <div className="flex flex-col gap-1">
             <label className="text-xs text-muted">Reason for the deferral (required)</label>

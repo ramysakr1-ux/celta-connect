@@ -184,8 +184,10 @@ export interface DeferralFormState {
   error: string | null;
 }
 
-// specs/build-spec.md §3 "Deferral" + CELTA Admin Handbook §6.9. Largest of
-// the four leaving-course cases -- "everything freezes as it stands,
+// specs/build-spec.md §3 "Deferral" + CELTA Admin Handbook June 2025 §7.9
+// (real PDF re-read 2026-08-27; build-spec.md itself still cites the
+// superseded 2022 §6.9 >50% threshold -- code follows the real document).
+// Largest of the four leaving-course cases -- "everything freezes as it stands,
 // complete or not" means the snapshot here is far richer than a restart's:
 // full assignment state (not just passed ones -- a resubmission not yet
 // returned must be able to continue), taught TPs (for numbering/hours
@@ -205,12 +207,21 @@ export async function markForDeferral(
   const hoursCarriedNote = ((formData.get("hours_carried_note") as string | null) ?? "").trim() || null;
   const reintegrationDeadline = (formData.get("reintegration_deadline") as string | null) || null;
   const requestId = (formData.get("request_id") as string | null) || null;
+  const cambridgeConsulted = formData.get("cambridge_consulted") === "on";
 
   if (typeof traineeId !== "string") {
     return { error: "Missing candidate." };
   }
   if (!reasons) {
     return { error: "A reason for the deferral is required (kept on the Appian form)." };
+  }
+  // Admin Handbook June 2025 s7.9 dropped the 2022 edition's >50%-completed
+  // threshold and replaced it with a genuinely new required step instead:
+  // "centres... must consult Cambridge English through the process
+  // described" before agreeing to a deferral -- not optional, so this is a
+  // hard gate like the reasons field above, not a soft warning.
+  if (!cambridgeConsulted) {
+    return { error: "Confirm the centre has consulted Cambridge English before agreeing to this deferral." };
   }
 
   const supabase = await createClient();
@@ -336,6 +347,7 @@ export async function markForDeferral(
       carried_celta5_record: carriedRecord,
       note,
       created_by: staff.id,
+      cambridge_consulted_at: now,
     }),
     admin
       .from("profiles")

@@ -1404,6 +1404,7 @@ export interface Database {
           linked_at: string | null;
           linked_by: string | null;
           hold_at_centre: boolean;
+          cambridge_consulted_at: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["deferral_transfers"]["Row"]> & {
           center_id: string;

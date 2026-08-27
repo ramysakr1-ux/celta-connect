@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { renderFormalLetterBuffer, type FormalLetterInput } from "@/lib/formal-letter-pdf/document";
 
 // Renders the SNAPSHOT stored at issue time, not live data -- this is a
-// filed written record (Admin Handbook 9.2 / 6.9 both cited in the source
+// filed written record (Admin Handbook 9.2 / 7.9 both cited in the source
 // design), so it must read back exactly what was sent even if the
 // underlying assignment/celta5/deferral record has changed since.
 export async function GET(_request: Request, { params }: { params: Promise<{ letterId: string }> }) {

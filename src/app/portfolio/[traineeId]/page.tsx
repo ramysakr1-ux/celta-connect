@@ -134,16 +134,16 @@ export default async function CourseStreamPage({
   // row), so it's resolved here against this trainee's own assignments.
   const assignmentIdByType = new Map((assignments ?? []).map((a) => [a.assignment_type, a.id]));
 
-  // §3 "Deferral" eligibility -- ">50% of the course completed", surfaced
-  // as a warning on the status card, not a hard block (the handbook leaves
-  // it to the centre's discretion either way).
+  // §3 "Deferral" eligibility -- Admin Handbook June 2025 §7.9 dropped the
+  // 2022 edition's >50%-completed threshold entirely; deferral is now the
+  // centre's discretionary call regardless of hours completed, gated
+  // instead on consulting Cambridge English first (the required checkbox
+  // on the deferral form).
   let hoursAttended = 0;
-  let totalHours = 120;
   let pendingWithdrawalRequest = null;
   if (isStaff && trainee.course_status === "active") {
-    const [{ data: celta5Record }, { data: course }, { data: pendingRequest }] = await Promise.all([
+    const [{ data: celta5Record }, { data: pendingRequest }] = await Promise.all([
       supabase.from("celta5_records").select("hours_attended").eq("trainee_id", traineeId).maybeSingle(),
-      supabase.from("courses").select("total_hours").eq("id", trainee.course_id).maybeSingle(),
       // connect-withdrawal-precourse-scope-spec-2026-08-21.md item 2 -- the
       // candidate's own self-serve request, surfaced for the trainer to
       // action (not auto-executed).
@@ -155,7 +155,6 @@ export default async function CourseStreamPage({
         .maybeSingle(),
     ]);
     hoursAttended = celta5Record?.hours_attended ?? 0;
-    totalHours = course?.total_hours ?? 120;
     pendingWithdrawalRequest = pendingRequest ?? null;
   }
 
@@ -434,7 +433,6 @@ export default async function CourseStreamPage({
                   : null
               }
               hoursAttended={hoursAttended}
-              totalHours={totalHours}
               pendingRequest={pendingWithdrawalRequest}
               accent={garnetAt(statusIndex) ? "garnet" : "teal"}
             />
