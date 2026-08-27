@@ -86,6 +86,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // header is ink, not a saturated hue, so its hover accent is a brightened
   // version of the same ink hue rather than borrowing ACT's garnet.
   const HUB_INK_BRIGHT = "oklch(70% 0.03 65)"; // MCT-side hover accent -- brightened version of the header's own ink hue
+  const HUB_GOLD = "oklch(63% 0.096 72)"; // = --color-gold
   const headerInk = isMct ? "oklch(96% 0.008 85)" : "oklch(97% 0.006 85)";
   const hubVars = {
     "--hub-header-bg": isMct ? HUB_INK : HUB_GARNET,
@@ -95,6 +96,15 @@ export default async function TrainerHubLayout({ children }: { children: React.R
       ? `inset 0 0 0 1px ${HUB_INK_BRIGHT}, 0 3px 8px -3px oklch(70% 0.03 65 / 0.35)`
       : `inset 0 0 0 1px ${HUB_GARNET_BRIGHT}, 0 3px 8px -3px color-mix(in oklab, ${HUB_GARNET_BRIGHT} 45%, transparent)`,
     "--hub-tile-bg": `color-mix(in oklab, ${headerInk} 22%, transparent)`,
+    // Ramy, 27 Aug 2026: the decorative teal/garnet card alternation
+    // (.card-garnet/.sheet-garnet, unrelated to the role hover/header
+    // system above) would otherwise pile a second, unrelated reason for
+    // garnet onto ACT screens specifically, since ACT's own header/hover
+    // is already garnet -- gold instead gives ACT the same "not monotone"
+    // effect without doubling up on its own role color. MCT keeps garnet,
+    // since MCT's theme (dark ink) has no garnet anywhere else to collide
+    // with.
+    "--hub-decorative-accent": isMct ? HUB_GARNET : HUB_GOLD,
   } as React.CSSProperties;
 
   let isDemo = false;

@@ -213,12 +213,22 @@ h6 {
      card that has no status meaning of its own to convey, alternating with
      plain (unmodified, teal) .card in whatever order reads best on that
      page. */
+  /* --hub-decorative-accent is set per-role by the trainer (hub) layout
+     ONLY (gold for ACT, garnet for MCT) -- everywhere else in the app this
+     variable is simply unset, so the fallback (--color-garnet) applies and
+     nothing changes. Ramy, 27 Aug 2026: ACT's header/hover accent is
+     already garnet, so this purely-decorative alternation would otherwise
+     pile a second, unrelated reason for the same color onto ACT screens
+     specifically -- gold there instead gives ACT the same "not monotone"
+     effect without doubling up on its own role color. */
   .card-garnet {
-    border-top-color: var(--color-garnet);
+    border-top-color: var(--hub-decorative-accent, var(--color-garnet));
   }
-  .sheet-garnet {
-    border-top-color: var(--color-garnet);
-  }
+  /* .sheet-garnet itself is declared further down (after .sheet/.sheet-accent
+     and friends) -- .sheet's own border-top shorthand is declared below this
+     point in the file, and on equal specificity the later declaration in the
+     stylesheet wins regardless of class order in the markup, so a
+     "sheet sheet-garnet" element rendered teal if this rule sat here. */
   /* "The small ones" -- Ramy: smaller tile-style cards carry the accent as
      a left-side bar instead of a top rule (same left-border mechanism
      .trainee-header already uses), same two-color alternation. */
@@ -598,6 +608,18 @@ h6 {
     box-shadow: none;
   }
 
+  /* Decorative teal/garnet alternation for .sheet-based cards (see the
+     "27 Aug 2026" comment near .card-garnet above for the rationale --
+     same override, just for `.sheet`). Declared here, after every plain
+     .sheet* variant, on purpose: this and .sheet-accent etc. all set
+     border-top-color at equal (single-class) specificity, so whichever
+     rule is LAST in the stylesheet wins, independent of the order classes
+     are listed in the markup. A `sheet sheet-garnet` element rendered
+     plain teal when this lived up near .card-garnet, because .sheet's own
+     border-top shorthand came later in the file and silently won. */
+  .sheet-garnet {
+    border-top-color: var(--hub-decorative-accent, var(--color-garnet));
+  }
 
   .pill {
     display: inline-flex;
