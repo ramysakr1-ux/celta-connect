@@ -27,34 +27,60 @@ export default async function AdmissionsPage() {
   const staff = await requireAdmissionsHandler();
   const supabase = await createClient();
 
-  const [{ data: applicants }, { data: intakes }, { data: openSlots }, { data: interviewStaff }, { data: patternRows }, { data: blockRows }, { data: center }] =
-    await Promise.all([
-      supabase
-        .from("applicants")
-        .select("id, full_name, email, stage, intake_course_id, created_at, deposit_amount, deposit_paid_at, ai_reading_lane, marketing_source")
-        .eq("center_id", staff.center_id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("courses")
-        .select("id, name")
-        .eq("center_id", staff.center_id)
-        .eq("accepting_applications", true)
-        .order("start_date"),
-      supabase
-        .from("interview_slots")
-        .select("id, intake_course_id, slot_date, slot_time, mode, panel, booked_applicant_id")
-        .eq("center_id", staff.center_id)
-        .is("booked_applicant_id", null)
-        .order("slot_date"),
-      supabase.from("profiles").select("id, full_name").eq("center_id", staff.center_id).in("role", ["admin", "trainer"]).order("full_name"),
-      supabase.from("interview_availability_patterns").select("*").eq("center_id", staff.center_id).eq("active", true),
-      supabase.from("interview_blocks").select("*").eq("center_id", staff.center_id).order("start_date"),
-      supabase
-        .from("centers")
-        .select("interview_slot_minutes, interview_gap_minutes, interview_weeks_ahead, interview_cutoff_hours")
-        .eq("id", staff.center_id)
-        .maybeSingle(),
-    ]);
+  // Ramy, 28 Aug 2026: "admission pipeline takes forever" -- traced the same
+  // way as Centre Management. This page ran its main 7-query batch, then
+  // pendingReferralCount and waitingApplicants each alone afterward, then
+  // waitingIntakeCourses after THAT -- four sequential stages where only
+  // one real dependency exists (waitingIntakeCourses genuinely needs
+  // waitingIntakeIds from waitingApplicants). pendingReferralCount and
+  // waitingApplicants both only need staff.center_id, already known before
+  // the very first query -- folded into the same batch as everything else.
+  const [
+    { data: applicants },
+    { data: intakes },
+    { data: openSlots },
+    { data: interviewStaff },
+    { data: patternRows },
+    { data: blockRows },
+    { data: center },
+    { count: pendingReferralCount },
+    { data: waitingApplicants },
+  ] = await Promise.all([
+    supabase
+      .from("applicants")
+      .select("id, full_name, email, stage, intake_course_id, created_at, deposit_amount, deposit_paid_at, ai_reading_lane, marketing_source")
+      .eq("center_id", staff.center_id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("courses")
+      .select("id, name")
+      .eq("center_id", staff.center_id)
+      .eq("accepting_applications", true)
+      .order("start_date"),
+    supabase
+      .from("interview_slots")
+      .select("id, intake_course_id, slot_date, slot_time, mode, panel, booked_applicant_id")
+      .eq("center_id", staff.center_id)
+      .is("booked_applicant_id", null)
+      .order("slot_date"),
+    supabase.from("profiles").select("id, full_name").eq("center_id", staff.center_id).in("role", ["admin", "trainer"]).order("full_name"),
+    supabase.from("interview_availability_patterns").select("*").eq("center_id", staff.center_id).eq("active", true),
+    supabase.from("interview_blocks").select("*").eq("center_id", staff.center_id).order("start_date"),
+    supabase
+      .from("centers")
+      .select("interview_slot_minutes, interview_gap_minutes, interview_weeks_ahead, interview_cutoff_hours")
+      .eq("id", staff.center_id)
+      .maybeSingle(),
+    // "The area owner is notified... a statement, so they are not told by a
+    // candidate." A count here is that statement for referral requests --
+    // the dedicated page (referral-requests/page.tsx) is where they're
+    // actually decided.
+    supabase.from("branch_referral_requests").select("id", { count: "exact", head: true }).eq("to_center_id", staff.center_id).eq("status", "pending"),
+    // Waiting-list counts per intake -- fetched independent of the
+    // "accepting_applications" intakes above, since a course can still have
+    // a waiting list after being closed to new applications.
+    supabase.from("applicants").select("intake_course_id").eq("center_id", staff.center_id).eq("stage", "waiting_list").eq("waiting_list_opt_out", false),
+  ]);
 
   const intakeNameById = new Map((intakes ?? []).map((i) => [i.id, i.name]));
   const staffNameById = new Map((interviewStaff ?? []).map((s) => [s.id, s.full_name]));
@@ -84,30 +110,30 @@ export default async function AdmissionsPage() {
     cutoffHours: center?.interview_cutoff_hours ?? 24,
   };
 
-  // "The area owner is notified... a statement, so they are not told by a
-  // candidate." A count here is that statement for referral requests -- the
-  // dedicated page (referral-requests/page.tsx) is where they're actually
-  // decided.
-  const { count: pendingReferralCount } = await supabase
-    .from("branch_referral_requests")
-    .select("id", { count: "exact", head: true })
-    .eq("to_center_id", staff.center_id)
-    .eq("status", "pending");
-
   // Waiting-list counts per intake -- fetched independent of the
   // "accepting_applications" intakes above, since a course can still have
   // a waiting list after being closed to new applications.
-  const { data: waitingApplicants } = await supabase
-    .from("applicants")
-    .select("intake_course_id")
-    .eq("center_id", staff.center_id)
-    .eq("stage", "waiting_list")
-    .eq("waiting_list_opt_out", false);
   const waitingIntakeIds = Array.from(new Set((waitingApplicants ?? []).map((a) => a.intake_course_id)));
-  const { data: waitingIntakeCourses } =
+
+  // for-claude-code-marketing-source-question.md: "a simple per-course
+  // breakdown (count/percentage per source)" for the centre's own
+  // marketing, across every applicant regardless of stage -- not just the
+  // currently-accepting intakes intakeNameById covers, so this looks up
+  // course names for every course any applicant is actually linked to.
+  const marketingCourseIds = Array.from(new Set((applicants ?? []).map((a) => a.intake_course_id)));
+
+  // waitingIntakeCourses genuinely needs waitingIntakeIds (just resolved
+  // above); marketingCourses only needs marketingCourseIds, which came from
+  // `applicants` in the very first batch -- the two don't depend on each
+  // other, so they run together instead of one after the other.
+  const [{ data: waitingIntakeCourses }, { data: marketingCourses }] = await Promise.all([
     waitingIntakeIds.length > 0
-      ? await supabase.from("courses").select("id, name").in("id", waitingIntakeIds)
-      : { data: [] as { id: string; name: string }[] };
+      ? supabase.from("courses").select("id, name").in("id", waitingIntakeIds)
+      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+    marketingCourseIds.length > 0
+      ? supabase.from("courses").select("id, name").in("id", marketingCourseIds)
+      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+  ]);
   const waitingIntakeNameById = new Map((waitingIntakeCourses ?? []).map((c) => [c.id, c.name]));
   const waitingByIntake = new Map<string, { name: string; count: number }>();
   for (const a of waitingApplicants ?? []) {
@@ -118,16 +144,6 @@ export default async function AdmissionsPage() {
     });
   }
 
-  // for-claude-code-marketing-source-question.md: "a simple per-course
-  // breakdown (count/percentage per source)" for the centre's own
-  // marketing, across every applicant regardless of stage -- not just the
-  // currently-accepting intakes intakeNameById covers, so this looks up
-  // course names for every course any applicant is actually linked to.
-  const marketingCourseIds = Array.from(new Set((applicants ?? []).map((a) => a.intake_course_id)));
-  const { data: marketingCourses } =
-    marketingCourseIds.length > 0
-      ? await supabase.from("courses").select("id, name").in("id", marketingCourseIds)
-      : { data: [] as { id: string; name: string }[] };
   const marketingCourseNameById = new Map((marketingCourses ?? []).map((c) => [c.id, c.name]));
   const marketingByCourse = new Map<string, { name: string; total: number; counts: Partial<Record<MarketingSource, number>> }>();
   for (const a of applicants ?? []) {
