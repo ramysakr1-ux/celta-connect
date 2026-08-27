@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { Wordmark } from "@/components/wordmark";
 import {
   acknowledgementEmailHtml,
+  applicationSubmittedEmailHtml,
   interviewInvitationEmailHtml,
   interviewBookedEmailHtml,
   acceptancePlaceEmailHtml,
@@ -154,6 +155,22 @@ export default async function JourneyPage() {
     }),
     centreName
   );
+  // Ramy, 27 Aug 2026: "it's not showing what happens with the speaking...
+  // how the center gets notified" -- the journey page previously stopped at
+  // the writing-task AI reading and never mentioned the notification that
+  // actually fires on submission. Built exactly like every other email
+  // preview here: the real function (notifyAdmissionsHandlers's
+  // buildEmailHtml, src/lib/admissions-notify.ts), wrapped the same way
+  // sendApplicantEmail wraps it for a real send.
+  const submittedHtml = withConnectBranding(
+    applicationSubmittedEmailHtml({
+      recipientName: "Jordan Blake",
+      applicantName,
+      courseName,
+      reviewUrl: "https://celtaconnect.com/dashboard/admissions/<applicant>",
+    }),
+    centreName
+  );
   const bookedHtml = withConnectBranding(
     interviewBookedEmailHtml({
       recipientName: "Jordan Blake",
@@ -288,6 +305,53 @@ export default async function JourneyPage() {
                 auto-rejects anyone. Here&apos;s what that reading actually looks like:
               </p>
               <AiReadingPanel applicant={sampleAiReading} />
+
+              <p className="mt-2 text-xs text-muted">
+                The recorded speaking task is transcribed automatically (fails silently if it can&apos;t -- a missing
+                transcript never blocks the application) and read for a short advisory note, shown separately on the
+                same applicant page:
+              </p>
+              <div className="rounded-[6px] border border-border bg-card p-3">
+                <p className="text-xs font-semibold text-muted">Speaking task</p>
+                <p className="mt-1 text-sm text-ink">
+                  &quot;Tell us about a time you had to adapt your communication style for a new audience.&quot;
+                </p>
+                <p className="mt-2 text-xs text-muted">0:47 recording -- played back exactly as submitted.</p>
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-xs font-semibold text-primary">Transcript</summary>
+                  <p className="mt-1 text-sm whitespace-pre-wrap text-ink">
+                    So, um, a good example would be when I was tutoring a group of teenagers after mostly doing adult
+                    classes for years. I had to slow down, use a lot more visual support, and check in more often
+                    because they wouldn&apos;t always say when they were lost. It taught me to read the room rather
+                    than just deliver the plan I&apos;d prepared.
+                  </p>
+                </details>
+                <div className="mt-2 rounded-[6px] border border-dashed border-border p-2.5">
+                  <p className="text-[10px] font-semibold tracking-[0.06em] text-muted uppercase">AI reading -- suggested, not sent</p>
+                  <p className="mt-1 text-sm text-ink">
+                    Clear, natural spoken English with good self-correction. Talks fluently about adapting to an
+                    audience -- a decent sign for classroom awareness. Worth a second, more specific example in
+                    interview.
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-2 text-xs font-semibold text-muted">And admissions staff are notified immediately --</p>
+              <div className="flex flex-wrap items-center gap-3 rounded-[6px] border border-border bg-card p-3">
+                <span
+                  aria-hidden="true"
+                  title="New admissions activity -- click to clear"
+                  className="size-2.5 shrink-0 animate-pulse rounded-full bg-destructive"
+                />
+                <p className="text-sm text-ink">
+                  A live dot next to &quot;Admissions pipeline&quot; on Centre Management&apos;s overview, for anyone
+                  with the page open -- stays lit until someone clicks it, shared across every staff member who can
+                  see it. Alongside a push notification to every device that&apos;s enabled them. No chime for this
+                  one specifically -- the sound toggle is a separate, opt-in feature on staff chat, not wired to
+                  admissions.
+                </p>
+              </div>
+              <EmailPreview title="New application" to="Jordan Blake (MCT)" html={submittedHtml} />
             </div>
           </Step>
           <Step number={4} title="Is invited to interview" blurb="Sent once the written task has been read.">
