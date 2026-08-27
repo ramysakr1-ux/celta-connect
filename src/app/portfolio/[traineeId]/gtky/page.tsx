@@ -58,7 +58,8 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
         <h1 className="mt-1 font-serif text-2xl text-ink">Getting to know your class</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">
           Twenty minutes, unassessed, and the tutor is not in the room. Three options below, matched to the level
-          you will teach -- choose whichever appeals, and tell your tutor on the first morning.
+          you will teach -- choose whichever appeals. If you do not pick, your tutor picks for you -- that is
+          completely fine.
         </p>
       </div>
 

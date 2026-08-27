@@ -29,6 +29,7 @@ import { getPeerGroupMembers } from "@/lib/peer-observation";
 import { PeerNoteForm } from "@/app/portfolio/[traineeId]/tp/[tpNumber]/peer-note-form";
 import { GroupFeedbackForm } from "@/app/portfolio/[traineeId]/tp/[tpNumber]/group-feedback-form";
 import type { Database } from "@/lib/supabase/types";
+import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
 type TpFeedback = Database["public"]["Tables"]["tp_feedback"]["Row"];
 
@@ -114,6 +115,13 @@ export default async function TpDetailPage({
     .maybeSingle();
   if (!trainee) notFound();
   if (assessorCourseId && trainee.course_id !== assessorCourseId) notFound();
+
+  // Scavenger hunt Q1 ("Where does your first lesson plan live?") -- any
+  // TP plan page, not just TP1 specifically, since the point is finding
+  // where lesson plans live at all. Owner only, not a peer observer.
+  if (viewer?.role === "trainee" && viewer.id === traineeId && trainee.course_id) {
+    await markScavengerHuntFound(supabase, trainee.course_id, traineeId, "lesson_plan");
+  }
 
   // Ramy, 25 Aug 2026: "the trainees also should know... maybe it will show
   // on their TP cards" -- aggregate volunteer count for the calendar round

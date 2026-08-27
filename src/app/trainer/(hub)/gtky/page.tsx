@@ -1,7 +1,7 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { GTKY_BANK } from "@/lib/gtky-activities";
-import { assignGtkyActivities } from "@/app/trainer/(hub)/gtky/actions";
+import { assignGtkyActivities, pickGtkyActivityForTrainee } from "@/app/trainer/(hub)/gtky/actions";
 
 const BAND_LABELS: Record<string, string> = {
   a1: "Beginner",
@@ -40,7 +40,7 @@ export default async function GtkyPage() {
         <h1 className="font-serif text-2xl text-ink">Getting to know you -- day one</h1>
         <p className="mt-1 text-sm text-muted">
           Twenty minutes each, unassessed, the tutor not in the room. Three activities offered per candidate, matched
-          to the level they will teach; they choose one and tell you on the first morning.
+          to the level they will teach; they pick one in Connect. Anyone who hasn&apos;t by Monday, pick for them below.
         </p>
       </div>
 
@@ -74,6 +74,7 @@ export default async function GtkyPage() {
                 <th className="text-sm text-muted">Level</th>
                 <th className="text-sm text-muted">Offered</th>
                 <th className="text-sm text-muted">Chosen</th>
+                <th className="text-sm text-muted"></th>
               </tr>
             </thead>
             <tbody>
@@ -86,6 +87,16 @@ export default async function GtkyPage() {
                   </td>
                   <td className={a.chosen_slug ? "text-ink" : "text-muted"}>
                     {a.chosen_slug ? activityBySlug.get(a.chosen_slug)?.name ?? a.chosen_slug : "Not yet"}
+                  </td>
+                  <td>
+                    {!a.chosen_slug ? (
+                      <form action={pickGtkyActivityForTrainee}>
+                        <input type="hidden" name="trainee_id" value={a.trainee_id} />
+                        <button type="submit" className="text-xs font-semibold text-primary hover:underline">
+                          Pick for them
+                        </button>
+                      </form>
+                    ) : null}
                   </td>
                 </tr>
               ))}

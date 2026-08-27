@@ -324,9 +324,12 @@ export function welcomeEmailHtml(input: {
         tutors +
         "Everything for the course lives behind the link below: your timetable, teaching practice, assignments and feedback."
     ) +
+    rawP(
+      "Two things to do before you start, both on the Pre-course task tab: Cambridge's pre-course task (about 4 hours, on paper is fine) and a short scavenger hunt finding your way around Connect (ten minutes, no marks). Take your time -- you have weeks, not days."
+    ) +
     (input.readingListUrl
       ? rawP(
-          `Your pre-course task and reading list are waiting there too. ` +
+          `The reading list is waiting there too. ` +
             `<a href="${input.readingListUrl}" style="color:${EMAIL_TONE.teal};">The reading list</a> is worth a look before you start.`
         )
       : "");

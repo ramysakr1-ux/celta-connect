@@ -19,6 +19,40 @@ export async function assignGtkyActivities(): Promise<void> {
   revalidatePath("/trainer/gtky");
 }
 
+// for-claude-code-pre-course-task-screens.md, screen 1a0g: "if you do not
+// pick, your tutor picks for you." Picks the first of the three already-
+// offered activities (already level/mode-matched and deduped within the
+// TP group by resolveGtkyAssignments) rather than a fresh random draw --
+// simplest reading of "pick for them" that still respects what was
+// already offered. Same "locked once made" guard as the trainee's own
+// choice.
+export async function pickGtkyActivityForTrainee(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return;
+
+  const traineeId = formData.get("trainee_id");
+  if (typeof traineeId !== "string") return;
+
+  const supabase = await createClient();
+  const { data: assignment } = await supabase
+    .from("gtky_assignments")
+    .select("offered_slugs, chosen_slug, course_id")
+    .eq("trainee_id", traineeId)
+    .maybeSingle();
+  if (!assignment || assignment.chosen_slug || assignment.course_id !== trainer.course_id) return;
+  const slug = assignment.offered_slugs[0];
+  if (!slug) return;
+
+  await supabase
+    .from("gtky_assignments")
+    .update({ chosen_slug: slug, chosen_at: new Date().toISOString() })
+    .eq("trainee_id", traineeId)
+    .is("chosen_slug", null);
+
+  revalidatePath("/trainer/gtky");
+  revalidatePath(`/portfolio/${traineeId}`, "layout");
+}
+
 // Candidate picks one of their three offered activities -- locked once
 // made, same rule as any other assignment ("no re-randomization once a
 // candidate has made their pick").

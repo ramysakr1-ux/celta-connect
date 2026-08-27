@@ -6,6 +6,7 @@ import {
   lateEnrolmentEmailHtml,
   accountNotSetUpEmailHtml,
 } from "@/lib/admissions-email";
+import { resolveGtkyAssignments } from "@/lib/gtky-assignment";
 
 // specs/handoffs/Course Emails.dc.html: "Welcome goes out the Friday
 // before and carries the link to their day-one activity, because that is
@@ -33,7 +34,12 @@ const LEVEL_BAND_LABEL: Record<string, string> = {
   upper: "upper-intermediate",
 };
 
-function mostRecentFridayBefore(dateIso: string): string {
+// Exported for the pre-course task's answer-key unlock (for-claude-code-
+// pre-course-task-screens.md: "opens to the whole cohort on the Friday
+// date... nobody is gated on anyone else finishing first") -- same Friday
+// this file's own cron already anchors the welcome email to, not a second
+// date to keep in sync.
+export function mostRecentFridayBefore(dateIso: string): string {
   const d = new Date(`${dateIso}T00:00:00`);
   do {
     d.setDate(d.getDate() - 1);
@@ -57,6 +63,14 @@ export async function runStartsMondayCron(): Promise<{ sent: number }> {
     if (today < fridayBefore) continue; // not yet the Friday before -- nothing to do
 
     const isLate = today > fridayBefore;
+
+    // Ramy, 27 Aug 2026: "a trainer is not picking anything, it's all done
+    // automatically" -- resolveGtkyAssignments is already idempotent per
+    // trainee (skips anyone who already has a row) and already derives
+    // level/group entirely from real data (TP1's coursebook, subgroup
+    // pairing), so the only thing wrong was that a trainer had to click a
+    // button to fire it. Same Friday window as everything else here.
+    await resolveGtkyAssignments(admin, course.id);
 
     const { data: applicants } = await admin
       .from("applicants")

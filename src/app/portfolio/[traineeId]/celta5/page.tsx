@@ -40,6 +40,7 @@ import { FinalizeRecordForm } from "@/app/dashboard/trainer/trainees/[id]/celta5
 import { ReleaseFinalReportForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/release-final-report-form";
 import { SignatureLedger } from "@/app/dashboard/trainer/trainees/[id]/celta5/signature-ledger";
 import { computeSignatureLedger } from "@/lib/celta5-signatures";
+import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
 function ReadOnlyField({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
@@ -105,6 +106,11 @@ export default async function PortfolioCelta5Page({
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
 
   if (!isStaff && !assessorCourseId) {
+    // Scavenger hunt Q4 ("Where do you log an observation hour?") -- this
+    // page is that place, so a real trainee landing here resolves it.
+    if (viewer?.course_id) {
+      await markScavengerHuntFound(supabase, viewer.course_id, traineeId, "observation_hour");
+    }
     const [
       { data: recordRows },
       { data: matrix },

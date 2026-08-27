@@ -14,6 +14,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 import { DesignerCredit } from "@/components/designer-credit";
+import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import { AssessorMeetingCard } from "./assessor-meeting-card";
 import { buildDeferralDraft } from "@/lib/letters/deferral";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
@@ -91,6 +92,12 @@ export default async function CourseStreamPage({
   // groupmate's page) -- harmless, every link Today renders still points
   // at traineeId's own routes, each independently guarded already.
   if (!isStaff && !assessorCourseId) {
+    // Scavenger hunt Q3 ("Where would an announcement from your tutor show
+    // up?") -- this is that place, so any real trainee landing here
+    // resolves it.
+    if (viewer?.role === "trainee" && trainee.course_id) {
+      await markScavengerHuntFound(supabase, trainee.course_id, viewer.id, "announcement");
+    }
     const { data: course } = await supabase.from("courses").select("name").eq("id", trainee.course_id).maybeSingle();
     return <TodayTab supabase={supabase} traineeId={traineeId} courseId={trainee.course_id} courseName={course?.name ?? null} timeZone={timeZone} />;
   }

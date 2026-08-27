@@ -10,6 +10,7 @@ import { groupCodeForHalf, isMine, type HalfInfo } from "@/lib/timetable-read-on
 import { ReadOnlyTimetableBoard } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
 import { SupervisedSessionsPanel } from "@/app/portfolio/[traineeId]/timetable/supervised-sessions-panel";
 import type { TimetableEvent } from "@/lib/timetable-grid";
+import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
 // for-claude-code-timetable-view.md's read-only 4-week board -- trainee's
 // own view, and what staff see when previewing a trainee's portfolio
@@ -38,6 +39,13 @@ export default async function TraineeTimetablePage({
 
   const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
+
+  // Scavenger hunt Q2 ("Who else is in Group ABC with you?") -- the group
+  // name shows in this page's own header, so a real trainee landing here
+  // resolves it.
+  if (viewer?.role === "trainee" && !isStaff) {
+    await markScavengerHuntFound(supabase, trainee.course_id, viewer.id, "group");
+  }
 
   const [{ data: course }, { data: events }, { data: plans }, { data: subgroupMember }, { data: supervisedCompletions }] = await Promise.all([
     supabase.from("courses").select("time_bands").eq("id", trainee.course_id).maybeSingle(),

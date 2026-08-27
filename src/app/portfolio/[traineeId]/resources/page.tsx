@@ -28,6 +28,7 @@ import { SectionsRail } from "@/app/trainer/(hub)/resource-hub/sections-rail";
 import { ResourceHubSearch, type ResourceHubSearchItem } from "@/components/resource-hub-search";
 import { getCambridgeDocuments } from "@/lib/cambridge-documents";
 import { CambridgeDocumentsShelf } from "@/app/trainer/(hub)/resource-hub/cambridge-documents-shelf";
+import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
 // §5 -- Resource Hub, a genuinely new feature (the pre-existing `resources`
 // table had zero UI anywhere). Starts empty by design -- no seeded content,
@@ -129,6 +130,13 @@ export default async function ResourceHubPage({
   // and the composer -- this page is still their one management tool for
   // course-specific resources, distinct from the course-wide trainer hub.
   const showTraineeLayout = !canSeeTrainerOnly;
+
+  // Scavenger hunt Q5 ("Where is the syllabus, if the platform is ever
+  // down?") -- the Cambridge documents shelf on this page is that place,
+  // so a real trainee landing here resolves it.
+  if (showTraineeLayout && viewer?.role === "trainee" && trainee.course_id) {
+    await markScavengerHuntFound(supabase, trainee.course_id, viewer.id, "syllabus");
+  }
 
   let thisWeekSessions: {
     id: string;
