@@ -100,7 +100,7 @@ export default async function GradesReportPage() {
         isMct={isMct}
       />
 
-      <div className="sheet">
+      <div className="sheet sheet-garnet">
         <p className="mt-2 text-sm text-muted">
           Provisional grades are set by the trainer around Stage 2 -- if a candidate is genuinely in
           doubt between two grades, mark them as such below. A final justification is only needed
@@ -113,7 +113,7 @@ export default async function GradesReportPage() {
         <div className="sheet text-sm text-muted">No candidates on this course yet.</div>
       ) : (
         <div className="flex flex-col gap-4">
-          {(trainees ?? []).map((trainee) => {
+          {(trainees ?? []).map((trainee, traineeIndex) => {
             const record = recordByTrainee.get(trainee.id) ?? null;
             const ratings = matrixByTrainee.get(trainee.id) ?? {};
             const { planningStrengths, planningActionPoints, teachingStrengths, teachingActionPoints } =
@@ -124,7 +124,11 @@ export default async function GradesReportPage() {
             const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
 
             return (
-              <div key={trainee.id} id={`candidate-${trainee.id}`} className="sheet flex flex-col gap-4 scroll-mt-6">
+              <div
+                key={trainee.id}
+                id={`candidate-${trainee.id}`}
+                className={`sheet flex flex-col gap-4 scroll-mt-6 ${traineeIndex % 2 === 1 ? "sheet-garnet" : ""}`}
+              >
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs text-muted">

@@ -58,7 +58,7 @@ export default async function AdminAssignmentBriefDetailPage({
       </div>
 
       {template.generation_status === "completed" ? (
-        <div className="card p-6">
+        <div className="card card-garnet p-6">
           <h2 className="font-serif text-lg text-ink">Sections</h2>
           <p className="mt-1 text-sm text-muted">
             Edit the titles and instruction text as needed, then publish -- trainees only see the

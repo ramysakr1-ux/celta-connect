@@ -47,7 +47,7 @@ export function ManageTutorsCard({
   const [revokeState, revokeAction, revoking] = useActionState(revokeInvitation, initial);
 
   return (
-    <div className="sheet flex flex-col gap-4 p-6">
+    <div className="sheet sheet-garnet flex flex-col gap-4 p-6">
       <div>
         <h2 className="font-serif text-lg text-ink">Tutors</h2>
         <p className="mt-1 text-sm text-muted">Invite by name, or hand off a role -- including the MCT itself.</p>

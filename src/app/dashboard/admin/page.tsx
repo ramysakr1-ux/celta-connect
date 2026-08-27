@@ -192,7 +192,7 @@ export default async function AdminDashboardPage() {
         <div className="flex flex-col gap-5">
           {groups.length > 0 || closedCourses.length > 0 ? (
             <>
-              {groups.map((group) => (
+              {groups.map((group, groupIndex) => (
                 <div key={group.group} className="flex flex-col gap-2">
                   <div className="flex items-baseline gap-2.5">
                     <p className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">{GROUP_LABEL[group.group]}</p>
@@ -200,7 +200,14 @@ export default async function AdminDashboardPage() {
                       {group.courses.length} course{group.courses.length === 1 ? "" : "s"}
                     </p>
                   </div>
-                  <div className={`card overflow-hidden !p-0 ${group.group === "running" ? "opacity-80" : ""}`}>
+                  {/* Purely decorative teal/garnet alternation between the
+                      group cards -- Ramy, 27 Aug 2026, same treatment as the
+                      Centre Management pilot (src/app/centre/page.tsx). No
+                      status meaning of its own, so "running"'s opacity-80
+                      de-emphasis stacks on top of whichever color lands here. */}
+                  <div
+                    className={`card overflow-hidden !p-0 ${groupIndex % 2 === 1 ? "card-garnet" : ""} ${group.group === "running" ? "opacity-80" : ""}`}
+                  >
                     {group.courses.map((row) => (
                       <Link
                         key={row.course.id}

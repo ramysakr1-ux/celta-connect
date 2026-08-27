@@ -379,7 +379,7 @@ export default async function TrainerTimetablePage({
             // start (the skeleton generator is the only actionable content when
             // there's nothing on the grid yet). Every course that already has
             // events gets the collapsed default the spec asks for.
-            <details className="sheet" open={allEvents.length === 0}>
+            <details className="sheet sheet-garnet" open={allEvents.length === 0}>
               <summary className="cursor-pointer font-serif text-lg text-ink">Course setup</summary>
               <div className="mt-4 flex flex-col gap-6">
                 {allEvents.length === 0 ? (

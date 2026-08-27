@@ -253,7 +253,7 @@ export default async function TrainerRosterPage() {
       ) : null}
 
       {filmsTpSessions ? (
-        <div className="sheet flex flex-wrap items-center gap-3 p-4">
+        <div className="sheet sheet-garnet flex flex-wrap items-center gap-3 p-4">
           <span className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">Filming consent</span>
           <span className="text-xs text-muted">Signed forms are on paper, kept with the class register -- this just tracks who&apos;s handed one in.</span>
           <a href="/api/filming-consent.pdf" className="text-xs font-medium text-primary hover:underline">

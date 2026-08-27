@@ -151,7 +151,7 @@ export default async function AdminSettingsPage({
       <Link href="/dashboard/admin" className="text-sm text-muted hover:text-ink">
         ← Courses
       </Link>
-      <div className="card p-6">
+      <div className="card card-garnet p-6">
         <h1 className="font-serif text-xl text-ink">Settings</h1>
         <p className="mt-2 text-muted">Centre-level integrations and configuration.</p>
       </div>
@@ -240,7 +240,7 @@ export default async function AdminSettingsPage({
             )}
           </div>
 
-          <div id="feedback-style" className="card scroll-mt-6 p-6">
+          <div id="feedback-style" className="card card-garnet scroll-mt-6 p-6">
             <h2 className="font-serif text-lg text-ink">Feedback Style Examples</h2>
             <p className="mt-2 text-muted">
               Real feedback snippets used to guide the AI tone-cleanup feature on trainer feedback

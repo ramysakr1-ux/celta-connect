@@ -29,7 +29,7 @@ export default async function AdminAssignmentBriefsPage() {
       <Link href="/dashboard/admin" className="text-sm text-muted hover:text-ink">
         ← Courses
       </Link>
-      <div className="card p-6">
+      <div className="card card-garnet p-6">
         <h1 className="font-serif text-xl text-ink">Assignment Briefs</h1>
         <p className="mt-2 text-muted">
           Upload your centre&apos;s own brief for each written assignment as a PDF -- Claude splits it
@@ -42,10 +42,10 @@ export default async function AdminAssignmentBriefsPage() {
         ) : null}
       </div>
 
-      {ASSIGNMENT_ORDER.map((type) => {
+      {ASSIGNMENT_ORDER.map((type, index) => {
         const template = templateByType.get(type);
         return (
-          <div key={type} className="card p-6">
+          <div key={type} className={`card p-6 ${index % 2 === 1 ? "card-garnet" : ""}`}>
             <div className="flex items-center justify-between">
               <h2 className="font-serif text-lg text-ink">{ASSIGNMENT_INFO[type].title}</h2>
               {template ? (
