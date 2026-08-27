@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { OverrideMatrix } from "@/lib/auth/centre-permissions";
+import type { GrantLevel, OverrideMatrix } from "@/lib/auth/centre-permissions";
 
 export interface CentreRoleContext {
   /** Roles held in the centre the viewer is currently acting in -- built-in slugs or owner-defined custom role keys. */
@@ -47,31 +47,30 @@ export interface CentreRoleContext {
 // query already carries its own explicit .eq() scope (profile_id or
 // center_id), the same authorization the RLS policies would have applied;
 // nothing here relies on RLS's identity inference to stay correct.
+//
+// Ramy, 28 Aug 2026 (round 3): the 30s cache above already cut how OFTEN
+// this runs, but each run still paid up to 6 separate Supabase round trips,
+// and every one of those multiplies under concurrent load (measured live:
+// 20 simultaneous requests to one page took up to 4x longer than the same
+// request alone). get_centre_role_data (migration 0232) returns every raw
+// row this function needs in ONE round trip -- it does NOT replicate any
+// of the authorization decisions below (activeCenterId resolution, role
+// computation, which override rows apply), only the data fetching. All of
+// that logic stays exactly as it already was, just fed from one payload.
 const getCachedCentreRoleData = unstable_cache(
   async (profileId: string, centerId: string, activeCenterIdRequested: string | null, role: string | undefined) => {
     const admin = createAdminClient();
 
-    // Ramy, 27 Aug 2026: measured ~2.6-2.9s per /centre navigation, traced to
-    // a chain of small sequential round trips. This query and the
-    // platform_owner-only invites query below don't depend on each other --
-    // both only need profileId/role, not each other's result -- so they run
-    // concurrently now instead of one after another.
-    const invitesPromise =
-      role === "platform_owner"
-        ? // platform_owner_invites' own RLS (migration 0208) only lets a
-          // centre's own centre_roles holders read it -- "the platform owner
-          // reads every row... via the admin client," same as every other page
-          // that queries this table for platform_owner's own purposes.
-          admin.from("platform_owner_invites").select("center_id").is("revoked_at", null)
-        : Promise.resolve({ data: [] as { center_id: string }[] });
+    const { data: raw } = await admin.rpc("get_centre_role_data", {
+      p_profile_id: profileId,
+      p_center_id: centerId,
+      p_active_center_id_requested: activeCenterIdRequested,
+      p_is_platform_owner: role === "platform_owner",
+    });
 
-    const [{ data: grants }, { data: invites }] = await Promise.all([
-      admin.from("centre_roles").select("id, center_id, role").eq("profile_id", profileId).is("revoked_at", null),
-      invitesPromise,
-    ]);
-
-  const held = grants ?? [];
-  const grantedCenterIds = held.map((g) => g.center_id);
+    const held = (raw?.grants ?? []) as { id: string; center_id: string; role: string }[];
+    const invites = (raw?.invites ?? []) as { center_id: string }[];
+    const grantedCenterIds = held.map((g) => g.center_id);
 
   // Migration 0212's app-side half: a platform_owner's live, un-revoked
   // invites are a second grant source, alongside centre_roles -- same
@@ -95,44 +94,42 @@ const getCachedCentreRoleData = unstable_cache(
     roles.push("centre_owner");
   }
 
-  // Only load course scope when a Course administrator grant is actually held
-  // here -- every other role is centre-wide and the query would be noise.
+  // Only USE course scope when a Course administrator grant is actually held
+  // here -- every other role is centre-wide. The raw rows for every
+  // course_administrator grant this profile holds anywhere already came
+  // back in `raw`; filtering to this specific grant's id is free (no query).
   const courseAdminGrant = here.find((g) => g.role === "course_administrator");
-  const scopePromise = courseAdminGrant
-    ? admin.from("course_administrator_scope").select("course_id").eq("centre_role_id", courseAdminGrant.id)
-    : Promise.resolve({ data: [] as { course_id: string }[] });
+  const allScopeRows = (raw?.course_admin_scope ?? []) as { centre_role_id: string; course_id: string }[];
+  const scopedCourseIds = courseAdminGrant
+    ? allScopeRows.filter((s) => s.centre_role_id === courseAdminGrant.id).map((s) => s.course_id)
+    : [];
 
-  // for-claude-code-centre-owner-role-customizer.md: only queried when this
+  // for-claude-code-centre-owner-role-customizer.md: only USED when this
   // person actually holds a role here at all -- someone with no centre role
-  // never reaches a screen that would use these anyway, and it saves three
-  // queries on every other request in the app that touches getCurrentProfile
-  // indirectly through a page that happens to call this.
-  //
-  // Ramy, 27 Aug 2026 (round 2): this block and scopePromise above only
-  // depend on `here`/`activeCenterId`, both already resolved by this point --
-  // no reason they ran as two sequential awaits. Now one Promise.all.
-  const overridesPromise =
-    roles.length > 0 && activeCenterId
-      ? Promise.all([
-          admin.from("centre_permission_overrides").select("role_key, capability_key, granted_level").eq("center_id", activeCenterId),
-          admin.from("centre_custom_roles").select("role_key, label").eq("center_id", activeCenterId),
-          admin.from("centre_custom_capabilities").select("capability_key, label").eq("center_id", activeCenterId),
-        ])
-      : Promise.resolve([{ data: [] as never[] }, { data: [] as never[] }, { data: [] as never[] }]);
-
-  const [{ data: scope }, [{ data: overrideRows }, { data: customRoleRows }, { data: customCapRows }]] = await Promise.all([
-    scopePromise,
-    overridesPromise,
-  ]);
-  const scopedCourseIds = (scope ?? []).map((s) => s.course_id);
+  // never reaches a screen that would use these anyway. `raw` already
+  // carries override/custom-role/custom-capability rows for both candidate
+  // centres (home and requested); filtering to the resolved activeCenterId
+  // is free (no query) instead of a conditional fetch.
+  const allOverrideRows = (raw?.overrides ?? []) as { center_id: string; role_key: string; capability_key: string; granted_level: GrantLevel }[];
+  const allCustomRoleRows = (raw?.custom_roles ?? []) as { center_id: string; role_key: string; label: string }[];
+  const allCustomCapRows = (raw?.custom_capabilities ?? []) as { center_id: string; capability_key: string; label: string }[];
 
   const overrides: OverrideMatrix = {};
-  for (const row of overrideRows ?? []) {
-    overrides[row.role_key] = overrides[row.role_key] ?? {};
-    overrides[row.role_key][row.capability_key] = row.granted_level;
+  const customRoles: { role_key: string; label: string }[] = [];
+  const customCapabilities: { capability_key: string; label: string }[] = [];
+  if (roles.length > 0 && activeCenterId) {
+    for (const row of allOverrideRows) {
+      if (row.center_id !== activeCenterId) continue;
+      overrides[row.role_key] = overrides[row.role_key] ?? {};
+      overrides[row.role_key][row.capability_key] = row.granted_level;
+    }
+    for (const row of allCustomRoleRows) {
+      if (row.center_id === activeCenterId) customRoles.push({ role_key: row.role_key, label: row.label });
+    }
+    for (const row of allCustomCapRows) {
+      if (row.center_id === activeCenterId) customCapabilities.push({ capability_key: row.capability_key, label: row.label });
+    }
   }
-  const customRoles = customRoleRows ?? [];
-  const customCapabilities = customCapRows ?? [];
 
   // /centre's own Overview page (build-spec.md §13) aggregates across every
   // id in this list with no further access check of its own -- it trusts
