@@ -211,6 +211,7 @@ export default async function TraineeTimetablePage({
           viewerGroupLabel={viewerGroupLabel}
           today={today}
           nowIso={new Date().toISOString()}
+          timeZone={timeZone}
         />
       )}
 

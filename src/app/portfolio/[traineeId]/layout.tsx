@@ -26,7 +26,7 @@ import {
 } from "@/lib/celta-criteria";
 import { HideDuringPreview, TraineeEyebrowLabel, PreviewBanner, ChatDrawerSwitcher } from "@/app/portfolio/[traineeId]/preview-chrome";
 import { STANDING_LABEL } from "@/components/trajectory-gradient-bar";
-import { computeQuietHoursNote } from "@/lib/timetable-grid";
+import { computeQuietHoursNote, toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { getPeerGroupMembers } from "@/lib/peer-observation";
 
@@ -80,6 +80,15 @@ export default async function PortfolioLayout({
   const isStaff = viewer?.role === "trainer" || viewer?.role === "admin";
   const isStaffView = isStaff || Boolean(assessorCourseId);
 
+  // Ramy, 28 Aug 2026: "the logic behind everything" -- fetched once here
+  // (rather than inside the Promise.all further down, where it used to
+  // live) so its timezone is available for BOTH "today" computations below,
+  // not just the later one. Both used to be new Date().toISOString(),
+  // UTC's own date -- wrong for any centre off UTC (the app default is
+  // Europe/Istanbul, GMT+3) for the few hours a day the two disagree.
+  const center = await getCachedCenter(trainee.center_id);
+  const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
+
   // Scavenger hunt Q6 ("What is today's course day counter showing, right
   // now?") -- the counter renders in this same layout's header on every
   // page, so any real visit by the trainee themselves resolves it, not a
@@ -108,7 +117,7 @@ export default async function PortfolioLayout({
   let bannerWeekNumber: number | null = null;
   if (showTraineeNav && trainee.course_id) {
     const { data: courseDates } = await supabase.from("courses").select("start_date, end_date").eq("id", trainee.course_id).maybeSingle();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = toLocalIso(new Date(), timeZone);
     const weekOf = courseDates?.start_date && courseDates?.end_date ? computeWeekOf(courseDates.start_date, courseDates.end_date, today) : null;
     bannerWeekNumber = weekOf ? Number(weekOf.match(/week (\d+)/)?.[1]) || null : null;
   }
@@ -159,16 +168,14 @@ export default async function PortfolioLayout({
       ).data?.[0]
     : null;
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toLocalIso(new Date(), timeZone);
   const [
-    center,
     { data: lessons },
     { data: assignments },
     { data: preCourseSections },
     { data: preCourseProgress },
     { data: todaysEvents },
   ] = await Promise.all([
-    getCachedCenter(trainee.center_id),
     supabase.from("tp_lessons").select("id").eq("trainee_id", trainee.id),
     supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
     supabase.from("pre_course_task_sections").select("id").eq("center_id", trainee.center_id),

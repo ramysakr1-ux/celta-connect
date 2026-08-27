@@ -26,9 +26,9 @@ function CameraIcon() {
   );
 }
 
-function JoinChip({ event, now }: { event: TimetableEvent; now: Date }) {
+function JoinChip({ event, now, timeZone }: { event: TimetableEvent; now: Date; timeZone: string }) {
   if (!event.zoom_url) return null;
-  const live = isEventLive(event, now);
+  const live = isEventLive(event, now, timeZone);
   // apply-to-app.md §2.5 -- live gets a real pill (with a leading dot so it
   // catches the eye across a busy grid); not-live is icon-only, no
   // pill/border/label, so a whole column of un-joinable Zoom links doesn't
@@ -65,6 +65,7 @@ function EventRow({
   event,
   locked,
   now,
+  timeZone,
   showTime,
   volunteers,
   attendedIds,
@@ -74,6 +75,7 @@ function EventRow({
   event: TimetableEvent;
   locked: boolean;
   now: Date;
+  timeZone: string;
   showTime: (event: TimetableEvent) => boolean;
   volunteers: Volunteer[];
   attendedIds: Set<string>;
@@ -93,7 +95,7 @@ function EventRow({
       {event.tag && category === "rm" ? (
         <span className="mt-0.5 block text-[10px] text-muted">{event.tag}</span>
       ) : null}
-      <JoinChip event={event} now={now} />
+      <JoinChip event={event} now={now} timeZone={timeZone} />
       {!locked ? (
         <details className="mt-1">
           <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
@@ -202,6 +204,7 @@ export function EventCell({
   events,
   locked,
   now,
+  timeZone,
   showTime,
   volunteers,
   attendedByEvent,
@@ -210,6 +213,7 @@ export function EventCell({
   events: TimetableEvent[];
   locked: boolean;
   now: Date;
+  timeZone: string;
   showTime: (event: TimetableEvent) => boolean;
   volunteers: Volunteer[];
   attendedByEvent: Map<string, Set<string>>;
@@ -232,6 +236,7 @@ export function EventCell({
           event={event}
           locked={locked}
           now={now}
+          timeZone={timeZone}
           showTime={showTime}
           volunteers={volunteers}
           attendedIds={attendedByEvent.get(event.id) ?? emptySet}

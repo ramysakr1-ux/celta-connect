@@ -444,6 +444,7 @@ export default async function TrainerTimetablePage({
               viewerGroupLabel={viewerGroupLabel}
               today={today}
               nowIso={new Date().toISOString()}
+              timeZone={timeZone}
             />
           )}
         </>

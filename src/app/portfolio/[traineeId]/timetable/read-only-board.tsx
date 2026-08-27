@@ -104,6 +104,7 @@ export interface ReadOnlyBoardProps {
   viewerGroupLabel: string | null;
   today: string;
   nowIso: string;
+  timeZone: string;
 }
 
 const EMPTY_META: EventMeta = { mine: true, ownTpSlot: false, teachingLetters: null };
@@ -116,6 +117,7 @@ export function ReadOnlyTimetableBoard({
   viewerGroupLabel,
   today,
   nowIso,
+  timeZone,
 }: ReadOnlyBoardProps) {
   const now = useMemo(() => new Date(nowIso), [nowIso]);
   const dayRows = useMemo(() => buildDayRows(events, timeBands), [events, timeBands]);
@@ -129,18 +131,21 @@ export function ReadOnlyTimetableBoard({
   const [selectedEvent, setSelectedEvent] = useState<TimetableEvent | null>(null);
 
   const week = weeks[weekIndex] ?? weeks[0];
-  const liveEvent = events.find((e) => isEventLive(e, now)) ?? null;
+  const liveEvent = events.find((e) => isEventLive(e, now, timeZone)) ?? null;
   // for-claude-code-timetable-view.md: "time range + 'opened HH:MM'" -- opened
   // is the join-window's own start (isEventLive's -10min), the range's end is
   // the event's time band boundary, not a stored field on the event itself.
+  // Ramy, 28 Aug 2026: this used to build a Date via new Date(0).setHours(),
+  // which reads back in the VIEWER's own local timezone, not the centre's --
+  // event_time is already the centre's own wall-clock "HH:MM", so this is
+  // just HH:MM arithmetic now, no Date/timezone conversion needed at all.
   const liveEventTimes = liveEvent?.event_time
     ? (() => {
         const [h, m] = liveEvent.event_time!.split(":").map(Number);
-        const opened = new Date(0);
-        opened.setHours(h, m - 10, 0, 0);
+        const totalMin = ((h * 60 + m - 10) % 1440 + 1440) % 1440;
         const pad = (n: number) => String(n).padStart(2, "0");
         const band = timeBands[bandIndexFor(liveEvent.event_time, timeBands)];
-        return { opened: `${pad(opened.getHours())}:${pad(opened.getMinutes())}`, end: band?.end };
+        return { opened: `${pad(Math.floor(totalMin / 60))}:${pad(totalMin % 60)}`, end: band?.end };
       })()
     : null;
 
@@ -255,11 +260,11 @@ export function ReadOnlyTimetableBoard({
                     {isToday ? <p className="text-[10px] font-semibold text-primary uppercase">Today</p> : null}
                   </td>
                   <td className="align-top">
-                    <Cell events={row.admin} eventMeta={eventMeta} now={now} mineOnly={mineOnly} onSelect={setSelectedEvent} />
+                    <Cell events={row.admin} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
                   </td>
                   {row.bands.map((bandEvents, i) => (
                     <td key={i} className="align-top">
-                      <Cell events={bandEvents} eventMeta={eventMeta} now={now} mineOnly={mineOnly} onSelect={setSelectedEvent} />
+                      <Cell events={bandEvents} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
                     </td>
                   ))}
                 </tr>
@@ -299,12 +304,14 @@ function Cell({
   events,
   eventMeta,
   now,
+  timeZone,
   mineOnly,
   onSelect,
 }: {
   events: TimetableEvent[];
   eventMeta: Record<string, EventMeta>;
   now: Date;
+  timeZone: string;
   mineOnly: boolean;
   onSelect: (event: TimetableEvent) => void;
 }) {
@@ -332,6 +339,7 @@ function Cell({
           event={event}
           meta={eventMeta[event.id] ?? EMPTY_META}
           now={now}
+          timeZone={timeZone}
           mineOnly={mineOnly}
           onSelect={onSelect}
           titleWeight={style.titleWeight}
@@ -346,6 +354,7 @@ function SessionTile({
   event,
   meta,
   now,
+  timeZone,
   mineOnly,
   onSelect,
   titleWeight,
@@ -354,6 +363,7 @@ function SessionTile({
   event: TimetableEvent;
   meta: EventMeta;
   now: Date;
+  timeZone: string;
   mineOnly: boolean;
   onSelect: (event: TimetableEvent) => void;
   titleWeight: number;
@@ -362,7 +372,7 @@ function SessionTile({
   const { mine, ownTpSlot, teachingLetters: letters } = meta;
   const youTeach = mineOnly && ownTpSlot;
   const showCamera = displayCat !== "lu" && displayCat !== "admin";
-  const live = isEventLive(event, now);
+  const live = isEventLive(event, now, timeZone);
 
   return (
     <button type="button" onClick={() => onSelect(event)} className="flex flex-col items-start gap-1 text-left">

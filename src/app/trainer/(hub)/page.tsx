@@ -456,7 +456,7 @@ export default async function TodayPage() {
             ) : (
               (todayEvents ?? []).map((event, i) => {
                 const category = categorize(event);
-                const live = event.type === "tp" && isEventLive(event, new Date());
+                const live = event.type === "tp" && isEventLive(event, new Date(), timeZone);
                 return (
                   <div
                     key={event.id}

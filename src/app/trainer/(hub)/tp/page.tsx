@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { buildMarkingQueue, meetingDaysLabel, type QueueStatus } from "@/lib/tp-marking-queue";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 const RULE_COLOR: Record<QueueStatus, string> = {
   feedback_due: "var(--color-status-warning-text)",
@@ -34,6 +36,13 @@ export default async function TeachingPracticeQueuePage() {
   if (!courseId) {
     return <div className="sheet text-sm text-muted">No course assigned.</div>;
   }
+  // Ramy, 28 Aug 2026: "the logic behind everything" -- today was previously
+  // new Date().toLocaleDateString("en-CA"), which reads the server's own
+  // local time (UTC on Vercel), not the trainer's centre. Same bug class as
+  // isEventLive below, same fix: the centre's real time_zone.
+  const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const now = new Date();
+  const today = toLocalIso(now, timeZone);
 
   const [{ data: subgroupRows }, { data: memberRows }, { data: roster }, { data: plans }, { data: feedback }, { data: tpEvents }] =
     await Promise.all([
@@ -67,8 +76,9 @@ export default async function TeachingPracticeQueuePage() {
     plans: (plans ?? []).filter((p) => traineeIds.has(p.trainee_id)),
     feedback: (feedback ?? []).filter((f) => traineeIds.has(f.trainee_id)),
     tpEvents: tpEvents ?? [],
-    today: new Date().toLocaleDateString("en-CA"),
-    now: new Date(),
+    today,
+    now,
+    timeZone,
   });
 
   return (

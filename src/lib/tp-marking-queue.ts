@@ -64,8 +64,9 @@ export function buildMarkingQueue(input: {
   tpEvents: TimetableEvent[];
   today: string;
   now: Date;
+  timeZone: string;
 }): QueueRow[] {
-  const { subgroups, plans, feedback, tpEvents, today, now } = input;
+  const { subgroups, plans, feedback, tpEvents, today, now, timeZone } = input;
   const rows: QueueRow[] = [];
   const nameByTraineeId = new Map<string, string>();
   for (const g of subgroups) for (const m of g.members) nameByTraineeId.set(m.traineeId, m.fullName);
@@ -129,7 +130,7 @@ export function buildMarkingQueue(input: {
       if (notYetTaught.length === 0) continue;
 
       const dayEvents = eventsByDate.get(nextDate) ?? [];
-      const liveEvent = nextDate === today ? dayEvents.find((e) => e.type === "tp" && isEventLive(e, now)) : undefined;
+      const liveEvent = nextDate === today ? dayEvents.find((e) => e.type === "tp" && isEventLive(e, now, timeZone)) : undefined;
       const when = formatEventWhen(dayEvents.find((e) => e.type === "tp") ?? dayEvents[0]);
 
       notYetTaught.forEach((member, i) => {

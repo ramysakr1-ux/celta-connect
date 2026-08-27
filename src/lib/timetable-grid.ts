@@ -35,10 +35,22 @@ export type CellCategory = "admin" | "wg" | "rm" | "iw" | "lu" | "cs";
 // card, so both places read from one definition instead of two that could
 // drift. Join opens ~10 min before the band's start and stays open through
 // a generous window after -- exact lead time/duration rules are reserved to
-// the content spec, this is a reasonable default. Computed from local date
-// components, not a UTC round-trip (see the addWeekdays bug note in
-// timetable-skeleton.ts -- same trap applies to any date math here).
-export function isEventLive(event: TimetableEvent, now: Date): boolean {
+// the content spec, this is a reasonable default.
+//
+// Ramy, 28 Aug 2026: this used to build start/end via
+// `new Date(...).setHours(...)`, which reads/writes in whatever timezone
+// the executing process happens to be in (the trainee's browser for the
+// client-side read-only board, UTC for the server) -- never the course's
+// actual centre timezone. For any centre off UTC (the app default is
+// Europe/Istanbul, GMT+3), a session could show "Live"/"Join" hours early
+// or fail to activate during the real session. today-tab.tsx had already
+// worked around this exact bug locally with zonedTimeToUtc + a hand-rolled
+// joinable check -- this just makes that the one real definition every
+// caller shares, instead of one correct implementation and five broken
+// ones. `timeZone` is now required; callers pass the course's centre's
+// time_zone (falling back to DEFAULT_TIMEZONE the same way every other
+// timezone-aware call site in this file does).
+export function isEventLive(event: TimetableEvent, now: Date, timeZone: string): boolean {
   // Ramy, 27 Aug 2026: the live-now bar should fire for an in-person
   // session too (its own design reference's worked example is a TP, not a
   // Zoom session) -- "live" is purely a time-window fact now. Callers that
@@ -46,12 +58,11 @@ export function isEventLive(event: TimetableEvent, now: Date): boolean {
   // existing (unchanged) -- only the status/indicator side stops requiring
   // a link to exist.
   if (!event.event_time) return false;
-  const [h, m] = event.event_time.split(":").map(Number);
-  const start = new Date(`${event.event_date}T00:00:00`);
-  start.setHours(h, m - 10, 0, 0);
-  const end = new Date(`${event.event_date}T00:00:00`);
-  end.setHours(h + 3, m, 0, 0);
-  return now >= start && now <= end;
+  const startsAt = zonedTimeToUtc(event.event_date, event.event_time, timeZone);
+  const start = startsAt.getTime() - 10 * 60 * 1000;
+  const end = startsAt.getTime() + 3 * 60 * 60 * 1000;
+  const nowMs = now.getTime();
+  return nowMs >= start && nowMs <= end;
 }
 
 // §1.1a v2 colour legend, category derived from the event's own type/tag,

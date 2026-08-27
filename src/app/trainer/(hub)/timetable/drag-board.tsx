@@ -240,7 +240,7 @@ export function DragBoard({
                       {day.events.map((event) => {
                         const cat = tileCategory(event);
                         const spine = TILE_COLOR[cat];
-                        const live = isEventLive(event, now);
+                        const live = isEventLive(event, now, timeZone);
                         return (
                           <div
                             key={event.id}
@@ -317,6 +317,7 @@ export function DragBoard({
           onClose={() => setSelectedEvent(null)}
           mixedMode={mixedMode}
           now={now}
+          timeZone={timeZone}
           canEdit={canEdit}
         />
       ) : null}
@@ -336,6 +337,7 @@ function DetailPanel({
   onClose,
   mixedMode,
   now,
+  timeZone,
   canEdit,
 }: {
   event: TimetableEvent;
@@ -347,6 +349,7 @@ function DetailPanel({
   onClose: () => void;
   mixedMode: boolean;
   now: Date;
+  timeZone: string;
   canEdit: boolean;
 }) {
   const rows: { label: string; value: string }[] = [
@@ -357,7 +360,7 @@ function DetailPanel({
   if (event.tag) rows.push({ label: "Tag", value: event.tag });
   if (event.linked_tp_number) rows.push({ label: "TP number", value: `TP${event.linked_tp_number}` });
   if (event.linked_assignment_type) rows.push({ label: "Assignment", value: event.linked_assignment_type });
-  const live = isEventLive(event, now);
+  const live = isEventLive(event, now, timeZone);
 
   return (
     <div className="sheet flex flex-col gap-3">
