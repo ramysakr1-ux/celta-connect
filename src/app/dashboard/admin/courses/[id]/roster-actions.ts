@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
+import { isMctOnCourse } from "@/lib/course-mct";
 import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
 import { esc } from "@/lib/email-layout";
@@ -75,8 +76,15 @@ export async function updateApplicationSettings(formData: FormData): Promise<voi
 // Ramy, 2026-08-18: "chat retention lives in Course Admin, configured by
 // the MCT per course" -- moved from the old centre-wide setting
 // (migration 0154). Null means the fixed 1-day/midnight-clear default.
+// Moved to /trainer/roster 2026-08-27 -- "chat retention lives in Course
+// Admin, configured by the MCT per course" (Ramy, 18 Aug) already said the
+// MCT owns this; only the page it lived on has changed, now that Course
+// Admin's own page no longer covers anything course-running-related. Same
+// requireRole(["trainer","admin"]) + isMctOnCourse() gate as every other
+// MCT-only trainer-hub action (see close-out-actions.ts's
+// requireMctCloseOutAccess for the precedent this copies).
 export async function updateChatRetentionDays(formData: FormData): Promise<void> {
-  const staff = await requireRole("admin");
+  const staff = await requireRole(["trainer", "admin"]);
   const courseId = formData.get("course_id");
   const modeRaw = formData.get("chat_retention_mode");
   const mode = modeRaw === "course" ? "course" : "days";
@@ -88,12 +96,13 @@ export async function updateChatRetentionDays(formData: FormData): Promise<void>
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
   if (!course || course.center_id !== staff.center_id) return;
+  if (staff.role !== "admin" && staff.course_id && !(await isMctOnCourse(supabase, staff.course_id, staff.id))) return;
 
   await supabase
     .from("courses")
     .update({ chat_retention_days: chatRetentionDays, chat_retention_mode: mode })
     .eq("id", courseId);
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/roster");
 }
 
 export async function updateAssessorVisitDate(formData: FormData): Promise<void> {

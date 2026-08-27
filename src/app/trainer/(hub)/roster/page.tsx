@@ -12,6 +12,7 @@ import { AssessorSelectionButton } from "@/app/trainer/(hub)/roster/assessor-sel
 import { toggleFilmingConsent } from "@/app/trainer/(hub)/roster/filming-consent-actions";
 import { ManageTutorsCard } from "@/app/trainer/(hub)/roster/manage-tutors-card";
 import { AssignTutorPanel, type AssignableTrainer } from "@/app/dashboard/admin/courses/[id]/assign-tutor-panel";
+import { ChatRetentionForm } from "@/app/dashboard/admin/courses/[id]/chat-retention-form";
 
 // The detailed operational roster. Row computation lives in lib/roster.ts,
 // shared with the CSV export route below so the two can't drift on what a
@@ -119,8 +120,18 @@ export default async function TrainerRosterPage() {
   let rosterTutors: import("./manage-tutors-card").RosterTutorRow[] = [];
   let pendingTutorInvites: import("./manage-tutors-card").PendingTutorInvite[] = [];
   let assignableTrainers: AssignableTrainer[] = [];
+  let chatRetentionDays = 1;
+  let chatRetentionMode: "days" | "course" = "days";
   if (isMct && trainer) {
     const adminClient = createAdminClient();
+    const { data: courseRetention } = await adminClient
+      .from("courses")
+      .select("chat_retention_days, chat_retention_mode")
+      .eq("id", courseId)
+      .maybeSingle();
+    chatRetentionDays = courseRetention?.chat_retention_days ?? 1;
+    chatRetentionMode = courseRetention?.chat_retention_mode ?? "days";
+
     const [{ data: tutorRows }, { data: invitationRows }] = await Promise.all([
       adminClient
         .from("course_tutors")
@@ -286,6 +297,10 @@ export default async function TrainerRosterPage() {
         <>
           <ManageTutorsCard courseId={courseId} tutors={rosterTutors} pendingInvites={pendingTutorInvites} />
           {assignableTrainers.length > 0 ? <AssignTutorPanel courseId={courseId} trainers={assignableTrainers} /> : null}
+          <div className="sheet flex flex-col gap-2 p-4">
+            <span className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">Chat retention</span>
+            <ChatRetentionForm courseId={courseId} chatRetentionDays={chatRetentionDays} chatRetentionMode={chatRetentionMode} />
+          </div>
         </>
       ) : null}
     </div>
