@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // for-claude-code-command-center.md, built 2026-08-25, restructured to
 // command-center-full-spec.md's sidebar-nav shell the same day. Ramy's own
@@ -45,7 +46,7 @@ export default async function CommandCenterOverviewPage() {
   const admin = createAdminClient();
 
   const [{ data: centers }, { data: ownerRoles }, { data: tutorLinks }, { data: invites }] = await Promise.all([
-    admin.from("centers").select("id, name, is_demo, created_at").order("name", { ascending: true }),
+    admin.from("centers").select("id, name, is_demo, created_at, time_zone").order("name", { ascending: true }),
     admin.from("centre_roles").select("center_id").eq("profile_id", profile.id).eq("role", "centre_owner").is("revoked_at", null),
     admin
       .from("course_tutors")
@@ -67,10 +68,20 @@ export default async function CommandCenterOverviewPage() {
       : Promise.resolve({ data: [] }),
   ]);
   const coursesList = courses ?? [];
-  const today = new Date().toISOString().slice(0, 10);
+  // Ramy, 28 Aug 2026: "the timezone changed" -- this used to be
+  // new Date().toISOString().slice(0,10), UTC's own date, which disagrees
+  // with a viewer's actual calendar date for several hours every day
+  // (right now, UTC is still Aug 27 while Istanbul -- and Singapore -- are
+  // already Aug 28). Not something the region change caused (toISOString()
+  // is UTC no matter where the function runs); it just happened to surface
+  // now. Fixed the way every other course-running check in the app already
+  // does it: each course's own centre's time_zone, not the server's.
+  const now = new Date();
+  const todayByCenterId = new Map(centersList.map((c) => [c.id, toLocalIso(now, c.time_zone ?? DEFAULT_TIMEZONE)]));
   const runningCourseByCenterId = new Map<string, boolean>();
   const courseLabelByCenterId = new Map<string, string>();
   for (const c of coursesList) {
+    const today = todayByCenterId.get(c.center_id) ?? toLocalIso(now, DEFAULT_TIMEZONE);
     if (c.start_date <= today && c.end_date >= today) {
       runningCourseByCenterId.set(c.center_id, true);
       courseLabelByCenterId.set(c.center_id, c.name);
@@ -92,7 +103,9 @@ export default async function CommandCenterOverviewPage() {
         label: course.course_code || course.name,
         centerName: centerNameById.get(course.center_id) ?? "Unknown centre",
         role: t.tutor_role,
-        running: course.start_date <= today && course.end_date >= today,
+        running:
+          course.start_date <= (todayByCenterId.get(course.center_id) ?? toLocalIso(now, DEFAULT_TIMEZONE)) &&
+          course.end_date >= (todayByCenterId.get(course.center_id) ?? toLocalIso(now, DEFAULT_TIMEZONE)),
       };
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);

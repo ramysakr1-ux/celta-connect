@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 function money(amount: number, currency: string) {
   return `${currency}${amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
@@ -35,13 +36,18 @@ export default async function CommandCenterMoneyPage() {
   const centerNameById = new Map((centers ?? []).map((c) => [c.id, c.name]));
   const invoicesList = invoices ?? [];
 
+  // Ramy, 28 Aug 2026: "the timezone changed" -- getFullYear()/getMonth()
+  // read the server's own local time, not any particular viewer's. This
+  // page spans every centre (no single centre's timezone applies), so it
+  // uses the platform owner's own timezone -- same DEFAULT_TIMEZONE
+  // (Europe/Istanbul) already used as the app's owner-facing fallback.
   const now = new Date();
+  const thisMonthKey = toLocalIso(now, DEFAULT_TIMEZONE).slice(0, 7);
   const collectedThisMonth = new Map<string, number>();
   const outstanding = new Map<string, number>();
   for (const inv of invoicesList) {
     if (inv.status === "paid" && inv.paid_at) {
-      const paidAt = new Date(inv.paid_at);
-      if (paidAt.getFullYear() === now.getFullYear() && paidAt.getMonth() === now.getMonth()) {
+      if (toLocalIso(new Date(inv.paid_at), DEFAULT_TIMEZONE).slice(0, 7) === thisMonthKey) {
         collectedThisMonth.set(inv.currency, (collectedThisMonth.get(inv.currency) ?? 0) + inv.amount);
       }
     }

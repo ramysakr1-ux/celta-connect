@@ -1,5 +1,6 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Ramy, 25 Aug 2026, rejecting the first build of this page (a flat name-
 // by-name roster): "this is a command center for all my projects, not for
@@ -26,10 +27,15 @@ export default async function CommandCenterPeoplePage() {
   const [{ data: ownerRoles }, { data: invites }, { data: centers }] = await Promise.all([
     admin.from("centre_roles").select("center_id").eq("profile_id", profile.id).eq("role", "centre_owner").is("revoked_at", null),
     admin.from("platform_owner_invites").select("center_id").is("revoked_at", null),
-    admin.from("centers").select("id, name"),
+    admin.from("centers").select("id, name, time_zone"),
   ]);
   const accessibleCenterIds = [...new Set([...(ownerRoles ?? []).map((r) => r.center_id), ...(invites ?? []).map((i) => i.center_id)])];
   const centerNameById = new Map((centers ?? []).map((c) => [c.id, c.name]));
+  // Ramy, 28 Aug 2026: "the timezone changed" -- same fix as the Overview
+  // page. Each centre's own local date, not the server's UTC date.
+  const now = new Date();
+  const todayByCenterId = new Map((centers ?? []).map((c) => [c.id, toLocalIso(now, c.time_zone ?? DEFAULT_TIMEZONE)]));
+  const todayFor = (centerId: string | null | undefined) => todayByCenterId.get(centerId ?? "") ?? toLocalIso(now, DEFAULT_TIMEZONE);
 
   if (accessibleCenterIds.length === 0) {
     return (
@@ -51,7 +57,7 @@ export default async function CommandCenterPeoplePage() {
 
   const coursesList = courses ?? [];
   const courseIds = new Set(coursesList.map((c) => c.id));
-  const today = new Date().toISOString().slice(0, 10);
+  const courseCenterById = new Map(coursesList.map((c) => [c.id, c.center_id]));
 
   function countBy<T extends { course_id: string | null }>(rows: T[] | null): Map<string, number> {
     const m = new Map<string, number>();
@@ -68,7 +74,7 @@ export default async function CommandCenterPeoplePage() {
 
   const tpSessionsSoFarByCourse = new Map<string, number>();
   for (const e of tpEvents ?? []) {
-    if (!courseIds.has(e.course_id) || e.event_date > today) continue;
+    if (!courseIds.has(e.course_id) || e.event_date > todayFor(courseCenterById.get(e.course_id))) continue;
     tpSessionsSoFarByCourse.set(e.course_id, (tpSessionsSoFarByCourse.get(e.course_id) ?? 0) + 1);
   }
 
@@ -83,7 +89,7 @@ export default async function CommandCenterPeoplePage() {
   const totalTrainees = [...traineeCountByCourse.values()].reduce((s, n) => s + n, 0);
   const totalTrainers = [...trainerCountByCourse.values()].reduce((s, n) => s + n, 0);
   const totalVolunteers = [...volunteerCountByCourse.values()].reduce((s, n) => s + n, 0);
-  const runningCourses = coursesList.filter((c) => c.start_date <= today && c.end_date >= today).length;
+  const runningCourses = coursesList.filter((c) => c.start_date <= todayFor(c.center_id) && c.end_date >= todayFor(c.center_id)).length;
 
   const kpis = [
     { label: "Courses running", value: runningCourses, sub: `${coursesList.length} total across your centres` },
@@ -114,8 +120,9 @@ export default async function CommandCenterPeoplePage() {
           ))}
         </div>
         {coursesList.map((c) => {
-          const running = c.start_date <= today && c.end_date >= today;
-          const ended = c.end_date < today;
+          const courseToday = todayFor(c.center_id);
+          const running = c.start_date <= courseToday && c.end_date >= courseToday;
+          const ended = c.end_date < courseToday;
           const volunteerCount = volunteerCountByCourse.get(c.id) ?? 0;
           const sessionsSoFar = tpSessionsSoFarByCourse.get(c.id) ?? 0;
           const attended = attendanceCountByCourse.get(c.id) ?? 0;
