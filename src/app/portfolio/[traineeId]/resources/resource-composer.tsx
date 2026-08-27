@@ -182,7 +182,7 @@ export function ResourceComposer({
         <button
           type="submit"
           disabled={pending || uploading}
-          className="ml-auto rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          className="trainee-hover-fill ml-auto rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
         >
           {uploading ? "Uploading…" : pending ? "Adding…" : "Add resource"}
         </button>

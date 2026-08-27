@@ -16,7 +16,7 @@ function BriefCard({ brief }: { brief: BriefRow }) {
   const info = ASSIGNMENT_INFO[brief.assignment_type];
 
   return (
-    <li className="sheet flex flex-col gap-2 p-4">
+    <li className="sheet trainee-hover flex flex-col gap-2 p-4">
       <button type="button" onClick={() => setOpen((o) => !o)} className="text-left text-sm font-semibold text-ink hover:text-primary">
         {info?.title ?? brief.assignment_type} {open ? "▾" : "→"}
       </button>

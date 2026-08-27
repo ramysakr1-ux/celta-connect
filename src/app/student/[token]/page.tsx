@@ -714,7 +714,7 @@ function NextClassCard({
           )}`}
           download="class.ics"
           title="Add to calendar"
-          className="admin-hover-fill flex size-11 shrink-0 items-center justify-center rounded-[8px] border border-border text-muted"
+          className="volunteer-hover-fill flex size-11 shrink-0 items-center justify-center rounded-[8px] border border-border text-muted"
         >
           <CalendarIcon />
         </a>

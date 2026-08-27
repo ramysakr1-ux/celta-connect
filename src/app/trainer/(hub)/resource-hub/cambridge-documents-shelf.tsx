@@ -29,7 +29,7 @@ function DocCard({ doc, editable }: { doc: DocRow; editable: boolean }) {
   const hasDoc = Boolean(doc.signedUrl || doc.url);
 
   return (
-    <div className="rounded-[6px] border border-border p-4">
+    <div className="trainer-hover rounded-[6px] border border-border p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-ink">{doc.label}</p>

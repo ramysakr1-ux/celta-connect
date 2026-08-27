@@ -37,7 +37,7 @@ export function ResourceCategoryManager({
           {resources.map((r) => {
             const Icon = RESOURCE_TYPE_ICON[r.resource_type];
             return (
-              <li key={r.id} className="sheet flex h-full flex-col gap-3 p-4">
+              <li key={r.id} className="sheet trainer-hover flex h-full flex-col gap-3 p-4">
                 <div className="flex items-start gap-3">
                   <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
                     <Icon className="size-4" aria-hidden="true" />

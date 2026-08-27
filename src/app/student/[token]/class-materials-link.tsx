@@ -40,7 +40,7 @@ export function ClassMaterialsLink({ materials }: { materials: Material[] }) {
               href={m.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="truncate rounded-[6px] px-2 py-1.5 text-left text-xs text-ink admin-hover-fill"
+              className="truncate rounded-[6px] px-2 py-1.5 text-left text-xs text-ink volunteer-hover-fill"
             >
               {m.name}
             </a>

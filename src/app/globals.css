@@ -47,6 +47,7 @@
   --color-gold-foreground: oklch(99% 0.005 90);
   --color-ink-warm: oklch(30% 0.042 58); /* warm dark brown, one step lighter/warmer than --color-ink -- the wordmark tile, and headings/primary buttons/checkboxes on entry surfaces (rename-to-connect.md) */
   --color-bronze: oklch(50% 0.09 62); /* third accent, from the Centre Admin design system -- consultation-time timetable category, distinct from primary/gold/ink at a glance */
+  --color-garnet: oklch(42% 0.13 27); /* same hue as the trainer hub's ACT-side garnet -- Ramy, 27 Aug 2026: card top/side accent bars should alternate teal/garnet "so it's not all green," purely decorative, not a semantic status color like --color-destructive (very similar hue, kept separate on purpose -- reusing the error color for plain decoration would risk a garnet card silently reading as "something's wrong"). */
   --color-destructive: oklch(45% 0.15 27);
   --color-input: oklch(88.8% 0.013 82);
   --color-accent: oklch(93% 0.019 190); /* pale teal-green, the "green hover" wash */
@@ -107,6 +108,7 @@
   --color-gold-foreground: var(--color-gold-foreground);
   --color-ink-warm: var(--color-ink-warm);
   --color-bronze: var(--color-bronze);
+  --color-garnet: var(--color-garnet);
   --color-destructive: var(--color-destructive);
   --color-input: var(--color-input);
   --color-accent: var(--color-accent);
@@ -203,6 +205,34 @@ h6 {
   }
   .card-red {
     border-top-color: var(--color-destructive);
+  }
+  /* Ramy, 27 Aug 2026: "the line on top... will alternate colors basically
+     just to make it colorful. So it's not all green [teal]." Purely
+     decorative alternation between the two colors he named, distinct from
+     the semantic gold/amber/red modifiers above -- reach for this on a big
+     card that has no status meaning of its own to convey, alternating with
+     plain (unmodified, teal) .card in whatever order reads best on that
+     page. */
+  .card-garnet {
+    border-top-color: var(--color-garnet);
+  }
+  .sheet-garnet {
+    border-top-color: var(--color-garnet);
+  }
+  /* "The small ones" -- Ramy: smaller tile-style cards carry the accent as
+     a left-side bar instead of a top rule (same left-border mechanism
+     .trainee-header already uses), same two-color alternation. */
+  .card-side-teal {
+    border-top: none;
+    border-left: 4px solid var(--color-primary);
+  }
+  .card-side-garnet {
+    border-top: none;
+    border-left: 4px solid var(--color-garnet);
+  }
+  .card-side-amber {
+    border-top: none;
+    border-left: 4px solid var(--color-status-warning-text);
   }
 
   /* Hairline-divided rows living inside ONE .card wrapper, for document-like
@@ -446,6 +476,25 @@ h6 {
   }
   .trainee-hover-fill:hover {
     background-color: oklch(93% 0.019 190) !important;
+  }
+  /* Volunteer Student shares Trainee's plum accent (not the generic teal
+     admin one) -- same ring-for-rows/fill-for-buttons split, --trainee-plum
+     standing in for the accent on both. !important is required: Tailwind
+     v4's utilities layer always outranks this components-layer rule
+     regardless of source order or specificity, so any button that also
+     carries its own conflicting hover background utility would otherwise
+     silently swallow this fill with zero visual effect. */
+  .volunteer-hover {
+    transition: box-shadow 150ms ease;
+  }
+  .volunteer-hover:hover {
+    box-shadow: inset 0 0 0 1px var(--trainee-plum), 0 3px 8px -3px color-mix(in oklab, var(--trainee-plum) 45%, transparent);
+  }
+  .volunteer-hover-fill {
+    transition: background-color 150ms ease;
+  }
+  .volunteer-hover-fill:hover {
+    background-color: color-mix(in oklab, var(--trainee-plum) 20%, var(--color-card)) !important;
   }
   /* Same rule (Ramy, 25 Aug 2026: "hover rule extension" -- past trainee
      only), for every screen with no role-tinted accent of its own (Centre

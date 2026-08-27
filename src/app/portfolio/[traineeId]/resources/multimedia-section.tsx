@@ -29,7 +29,7 @@ function TrackRow({ row }: { row: AudioRow }) {
   }
 
   return (
-    <li className="flex flex-col gap-2 rounded-[6px] border border-border-faint px-3 py-2">
+    <li className="trainee-hover flex flex-col gap-2 rounded-[6px] border border-border-faint px-3 py-2">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-sm text-ink">{row.file_name}</p>

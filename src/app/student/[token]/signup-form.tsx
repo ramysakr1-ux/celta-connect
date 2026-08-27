@@ -98,7 +98,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
                 key={l.code}
                 type="button"
                 onClick={() => setLang(l.code)}
-                className={`flex items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left ${
+                className={`volunteer-hover-fill flex items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left ${
                   lang === l.code ? "border-[#1a5c5e] bg-[#fbf3e3]" : "border-[#eddfc4] bg-white"
                 }`}
               >
@@ -115,7 +115,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
             type="button"
             onClick={goNext}
             disabled={!lang}
-            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="volunteer-hover-fill self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             {t?.continueLabel ?? "Continue"}
           </button>
@@ -144,7 +144,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
               setConsented(true);
               goNext();
             }}
-            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
+            className="volunteer-hover-fill self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
           >
             {t.agreeLabel}
           </button>
@@ -176,7 +176,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
           <button
             type="button"
             onClick={goNext}
-            className="self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
+            className="volunteer-hover-fill self-start rounded-lg bg-[#1a5c5e] px-5 py-2.5 text-sm font-semibold text-white"
           >
             Next
           </button>
@@ -201,7 +201,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
             <button
               type="submit"
               disabled={pending}
-              className="flex items-center gap-2 self-start rounded-lg bg-[#3a2e18] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              className="volunteer-hover-fill flex items-center gap-2 self-start rounded-lg bg-[#3a2e18] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
             >
               {pending ? (
                 <>

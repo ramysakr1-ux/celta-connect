@@ -59,7 +59,7 @@ export function JoinOnlineButton({ zoomUrl, activationIso, className }: { zoomUr
 
   if (active) {
     return (
-      <a href={zoomUrl} target="_blank" rel="noopener noreferrer" className={className}>
+      <a href={zoomUrl} target="_blank" rel="noopener noreferrer" className={`${className} volunteer-hover-fill`}>
         <VideoIcon />
         Join online
       </a>
@@ -72,7 +72,7 @@ export function JoinOnlineButton({ zoomUrl, activationIso, className }: { zoomUr
 
   return (
     <div className="relative">
-      <button type="button" onClick={() => setShowMessage((v) => !v)} className={`${className} opacity-60`}>
+      <button type="button" onClick={() => setShowMessage((v) => !v)} className={`${className} opacity-60 volunteer-hover-fill`}>
         <VideoIcon />
         Join in {mounted ? formatCountdown(activationMs! - now) : "--:--"}
       </button>

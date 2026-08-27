@@ -22,7 +22,7 @@ export function DeclineButton({ token, eventId, alreadyDeclined }: { token: stri
         <button
           type="submit"
           disabled={pending}
-          className="admin-hover-fill h-8 rounded-full border border-border px-3.5 text-xs font-semibold text-ink disabled:opacity-60"
+          className="volunteer-hover-fill h-8 rounded-full border border-border px-3.5 text-xs font-semibold text-ink disabled:opacity-60"
         >
           {pending ? "Sending…" : "Let them know"}
         </button>

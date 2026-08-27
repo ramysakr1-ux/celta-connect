@@ -16,7 +16,7 @@ export function SectionsRail({ sections }: { sections: SectionLink[] }) {
         <a
           key={s.href}
           href={s.href}
-          className="flex items-center justify-between gap-2 rounded-[6px] px-2 py-1.5 text-sm text-ink hover:bg-accent/40"
+          className="trainer-hover-fill flex items-center justify-between gap-2 rounded-[6px] px-2 py-1.5 text-sm text-ink hover:bg-accent/40"
         >
           <span>{s.label}</span>
           <span className="text-xs tabular-nums text-muted">{s.count}</span>

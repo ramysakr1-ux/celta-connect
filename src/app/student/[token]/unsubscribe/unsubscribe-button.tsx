@@ -25,7 +25,7 @@ export function UnsubscribeButton({ token, initiallyOptedOut }: { token: string;
         <button
           type="submit"
           disabled={resubPending}
-          className="admin-hover-fill h-9 rounded-full border border-border px-4 text-sm font-semibold text-ink disabled:opacity-60"
+          className="volunteer-hover-fill h-9 rounded-full border border-border px-4 text-sm font-semibold text-ink disabled:opacity-60"
         >
           {resubPending ? "Saving…" : "Turn reminder emails back on"}
         </button>
@@ -41,7 +41,7 @@ export function UnsubscribeButton({ token, initiallyOptedOut }: { token: string;
       <button
         type="submit"
         disabled={unsubPending}
-        className="admin-hover-fill h-9 rounded-full border border-border px-4 text-sm font-semibold text-ink disabled:opacity-60"
+        className="volunteer-hover-fill h-9 rounded-full border border-border px-4 text-sm font-semibold text-ink disabled:opacity-60"
       >
         {unsubPending ? "Saving…" : "Yes, stop these emails"}
       </button>

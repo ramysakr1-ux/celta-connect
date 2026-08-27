@@ -33,7 +33,7 @@ export function LessonMaterialsCard({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="admin-hover-fill flex w-full flex-col items-start gap-0.5 rounded-[10px] border border-border px-3.5 py-2.5 text-left"
+        className="volunteer-hover-fill flex w-full flex-col items-start gap-0.5 rounded-[10px] border border-border px-3.5 py-2.5 text-left"
       >
         <p className="text-[13px] font-semibold text-ink">
           {label} — {teacherName}
@@ -48,7 +48,7 @@ export function LessonMaterialsCard({
               href={m.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between gap-2 truncate rounded-[6px] px-2 py-1.5 text-left text-xs text-ink admin-hover-fill"
+              className="flex items-center justify-between gap-2 truncate rounded-[6px] px-2 py-1.5 text-left text-xs text-ink volunteer-hover-fill"
             >
               <span className="truncate">{m.name}</span>
               {m.sizeLabel ? <span className="shrink-0 text-[11px] text-muted">{m.sizeLabel}</span> : null}

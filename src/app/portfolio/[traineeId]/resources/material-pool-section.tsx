@@ -44,7 +44,7 @@ function ItemCard({ item, canClaim }: { item: MaterialPoolItemForTrainee; canCla
   const unavailable = item.claimedByOther;
 
   return (
-    <li className="sheet flex flex-col gap-2 p-4">
+    <li className="sheet trainee-hover flex flex-col gap-2 p-4">
       <p className="text-sm font-semibold text-ink">
         {item.bookTitle}
         {item.level ? <span className="ml-1.5 text-xs font-normal text-muted">{item.level}</span> : null}
@@ -82,7 +82,7 @@ function ItemCard({ item, canClaim }: { item: MaterialPoolItemForTrainee; canCla
           <button
             type="submit"
             disabled={pending}
-            className="h-7 rounded-[6px] border border-dashed border-status-warning-text px-2.5 text-xs font-medium text-status-warning-text hover:bg-status-warning-bg disabled:opacity-60"
+            className="trainee-hover-fill h-7 rounded-[6px] border border-dashed border-status-warning-text px-2.5 text-xs font-medium text-status-warning-text hover:bg-status-warning-bg disabled:opacity-60"
           >
             {pending ? "Claiming…" : "Claim"}
           </button>
