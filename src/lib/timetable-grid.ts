@@ -195,9 +195,17 @@ export function zonedTimeToUtc(dateIso: string, timeStr: string, timeZone: strin
   return new Date(naiveUtc.getTime() + offsetMs);
 }
 
-/** Groups events into one row per distinct date that actually has an event
- * (so a part-time course's non-meeting days don't render as empty rows),
- * inserting a week-label break whenever the ISO week changes. */
+/** Groups events into one row per day, Mon-Fri always present across the
+ * whole event-date span even when empty -- same rule the trainer's own
+ * editable grid uses (drag-board.tsx's buildWeeks), so the trainee/staff-
+ * preview read-only board doesn't silently drop days that just haven't been
+ * populated yet. Weekends only get a row if a real event already lands
+ * there, so the grid doesn't widen for a course that never meets on
+ * weekends. Was previously events-only ("so a part-time course's
+ * non-meeting days don't render as empty rows") -- corrected 2026-08-27
+ * after Ramy flagged the read-only trainee timetable looking incomplete
+ * next to the trainer's own full-skeleton grid; drag-board.tsx doesn't
+ * special-case part-time courses either, so this doesn't need to. */
 export function buildDayRows(events: TimetableEvent[], timeBands: TimeBand[] = DEFAULT_TIME_BANDS): DayRow[] {
   const byDate = new Map<string, TimetableEvent[]>();
   for (const event of events) {
@@ -206,11 +214,22 @@ export function buildDayRows(events: TimetableEvent[], timeBands: TimeBand[] = D
     byDate.set(event.event_date, list);
   }
 
-  const dates = [...byDate.keys()].sort();
+  const eventDates = [...byDate.keys()].sort();
+  const dates: string[] = [];
+  if (eventDates.length > 0) {
+    const cursor = new Date(`${eventDates[0]}T00:00:00`);
+    const last = new Date(`${eventDates[eventDates.length - 1]}T00:00:00`);
+    while (cursor <= last) {
+      const iso = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}-${String(cursor.getDate()).padStart(2, "0")}`;
+      const isWeekday = cursor.getDay() >= 1 && cursor.getDay() <= 5;
+      if (isWeekday || byDate.has(iso)) dates.push(iso);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  }
   let currentWeekStart: string | null = null;
 
   return dates.map((isoDate) => {
-    const dayEvents = byDate.get(isoDate)!;
+    const dayEvents = byDate.get(isoDate) ?? [];
     const d = new Date(`${isoDate}T00:00:00`);
     const weekday = WEEKDAY_NAMES[d.getDay()];
     const dayOfMonth = d.getDate();
