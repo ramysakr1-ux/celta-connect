@@ -435,7 +435,7 @@ export default async function AssessorPage({
 
         <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 20, alignItems: "start" }}>
           {openCandidate ? (
-            <div style={{ background: CARD, border: "1px solid color-mix(in oklab, oklch(38% 0.072 195) 32%, transparent)", borderTop: `3px solid ${TEAL}`, borderRadius: 9, overflow: "hidden" }}>
+            <div className="card overflow-hidden" style={{ borderColor: "color-mix(in oklab, oklch(38% 0.072 195) 32%, transparent)" }}>
               <div
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
@@ -494,13 +494,12 @@ export default async function AssessorPage({
               <Link
                 key={c.traineeId}
                 href={`/assessor?candidate=${c.traineeId}`}
-                className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+                className="card assessor-hover-fill no-underline"
                 style={{
                   background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))" : CARD,
                   border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 35%, transparent)" : BORDER}`,
                   borderLeft: `3px solid ${c.flaggedIssue ? AMBER : TEAL}`,
-                  borderRadius: 9, padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10,
-                  textDecoration: "none",
+                  padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10,
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
@@ -556,10 +555,12 @@ export default async function AssessorPage({
                   Moodle schedule
                 </p>
                 <div
+                  className="card card-gold"
                   style={{
-                    background: CARD, border: "1px solid color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
-                    borderTop: `3px solid ${GOLD}`,
-                    borderRadius: 7, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10,
+                    borderLeftColor: "color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
+                    borderRightColor: "color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
+                    borderBottomColor: "color-mix(in oklab, oklch(51% 0.017 70) 26%, transparent)",
+                    padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10,
                   }}
                 >
                   <p style={{ fontSize: 11.5, color: MUTED }}>
@@ -586,10 +587,11 @@ export default async function AssessorPage({
                 On the day
               </p>
               <div
+                className="card"
                 style={{
-                  background: CARD, border: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 26%, transparent)`,
+                  border: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 26%, transparent)`,
                   borderTop: `3px solid ${GOLD_UNDERLINE}`,
-                  borderRadius: 9, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
+                  padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
                 }}
               >
                 {(onDayEvents ?? []).length === 0 ? (
@@ -658,7 +660,7 @@ export default async function AssessorPage({
               </div>
             </div>
 
-            <Panel title="Centre documents">
+            <Panel title="Centre documents" accent="garnet">
               {CENTRE_DOCUMENTS.map((doc) => {
                 // "Marking guidance" is the one line item that now lives in
                 // the app itself, not the resources upload table -- see
@@ -672,7 +674,7 @@ export default async function AssessorPage({
                 return (
                   <div
                     key={doc.name}
-                    className={present && href ? "transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_6%,transparent)]" : undefined}
+                    className={present && href ? "assessor-hover" : undefined}
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
                       padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
@@ -697,7 +699,7 @@ export default async function AssessorPage({
               {extraCentreDocs.map((d) => (
                 <div
                   key={d.id}
-                  className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_6%,transparent)]"
+                  className="assessor-hover"
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
                     padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
@@ -730,11 +732,8 @@ export default async function AssessorPage({
                 Malpractice cases
               </p>
               <div
-                style={{
-                  background: "var(--color-card)", border: "1px solid oklch(88% 0.016 82)",
-                  borderTop: `3px solid ${AMBER}`, borderRadius: 9, padding: "14px 16px",
-                  display: "flex", flexDirection: "column", gap: 14,
-                }}
+                className="card card-amber"
+                style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 14 }}
               >
                 {(malpracticeCases ?? []).length === 0 ? (
                   <p style={{ fontSize: 12, color: MUTED }}>No plagiarism or malpractice cases have been raised on this course.</p>
@@ -790,9 +789,10 @@ export default async function AssessorPage({
                 Not in this pack
               </p>
               <div
+                className="frame"
                 style={{
-                  background: "var(--color-frame)", border: `1px solid ${BORDER}`, borderTop: `3px solid ${MUTED}`,
-                  borderRadius: 9, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
+                  borderTop: `3px solid ${MUTED}`,
+                  padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
                 }}
               >
                 {[
@@ -885,18 +885,30 @@ function Dot({ ok, label }: { ok: boolean; label: string }) {
   );
 }
 
-function Panel({ title, children, accent = "teal" }: { title: string; children: React.ReactNode; accent?: "teal" | "gold" }) {
+// Ramy, 27 Aug 2026: the decorative teal/garnet card-line alternation
+// (same pilot as Centre Admin's overview page) applies only to panels with
+// no status meaning of their own -- "gold" here isn't part of that
+// alternation, it's this page's own pre-existing warm highlight (kept as an
+// inline override, at its own tuned value, distinct from .card-gold's
+// slightly different hue) and stays available even though no current call
+// site uses it.
+function Panel({
+  title,
+  children,
+  accent = "teal",
+}: {
+  title: string;
+  children: React.ReactNode;
+  accent?: "teal" | "gold" | "garnet";
+}) {
   return (
     <div>
       <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(51% 0.017 70)", marginBottom: 8 }}>
         {title}
       </p>
       <div
-        style={{
-          background: "var(--color-card)", border: "1px solid oklch(88% 0.016 82)",
-          borderTop: `3px solid ${accent === "gold" ? "oklch(60% 0.11 70)" : "oklch(37.5% 0.058 195)"}`,
-          borderRadius: 9, overflow: "hidden",
-        }}
+        className={`card overflow-hidden ${accent === "garnet" ? "card-garnet" : ""}`}
+        style={accent === "gold" ? { borderTopColor: "oklch(60% 0.11 70)" } : undefined}
       >
         {children}
       </div>
@@ -907,7 +919,7 @@ function Panel({ title, children, accent = "teal" }: { title: string; children: 
 function DocRow({ label, href, status }: { label: string; href: string; status: string }) {
   return (
     <div
-      className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_6%,transparent)]"
+      className="assessor-hover"
       style={{
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
         padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",

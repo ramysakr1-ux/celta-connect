@@ -43,7 +43,7 @@ export default async function AssessorMarkingGuidancePage() {
           back to the pack overview at all. */}
       <AssessorReadOnlyBanner />
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "34px 24px 60px" }}>
-        <div style={{ background: "var(--color-frame)", border: "1px solid oklch(88% 0.016 82)", borderRadius: 6, padding: 24 }}>
+        <div className="frame" style={{ padding: 24 }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "oklch(51% 0.017 70)" }}>
             Assessor access — read-only · marking guidance
           </p>
@@ -66,16 +66,7 @@ export default async function AssessorMarkingGuidancePage() {
                     const row = byKey?.get(c.key);
                     const hasContent = row && (row.met_text || row.grey_text || row.not_text || row.agreed_text);
                     return (
-                      <div
-                        key={c.key}
-                        style={{
-                          background: "var(--color-card)",
-                          border: "1px solid oklch(88% 0.016 82)",
-                          borderTop: "3px solid oklch(37.5% 0.058 195)",
-                          borderRadius: 6,
-                          padding: "16px 18px",
-                        }}
-                      >
+                      <div key={c.key} className="card" style={{ padding: "16px 18px" }}>
                         <p style={{ fontSize: 13.5, fontWeight: 600, marginBottom: hasContent ? 12 : 0, color: "oklch(23.5% 0.017 65)" }}>{c.text}</p>
                         {hasContent ? (
                           <>

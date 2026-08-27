@@ -2,16 +2,6 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const CARD = "oklch(0.992 0.005 90)";
-const INK = "oklch(0.235 0.017 65)";
-const MUTED = "oklch(0.51 0.017 70)";
-const BORDER = "oklch(0.895 0.012 82)";
-const SAND = "oklch(0.935 0.012 82)";
-const GOLD = "oklch(0.63 0.096 72)";
-const GREEN = "oklch(0.5 0.11 155)";
-const RED = "oklch(0.58 0.16 25)";
-const DARK = "oklch(0.14 0.012 60)";
-
 function money(amount: number, currency: string) {
   return `${currency}${amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 }
@@ -26,6 +16,14 @@ function money(amount: number, currency: string) {
 // the platform-billing level (a centre's own payment_provider is a
 // different, centre-scoped thing -- collecting from their candidates, not
 // Connect billing the centre). Shown disconnected rather than faked.
+//
+// Migrated onto the shared .card design system 27 Aug 2026 -- was hand-built
+// inline styles (CARD/GOLD/GREEN/RED literals) copied straight from
+// command-center-visual-reference.html. "Outstanding" keeps its real amber
+// meaning via .callout-gold (the system's own "light color-mix into the
+// card level, never a flat fill" treatment); the disabled "Connect to
+// Stripe" placeholder now matches the identical disabled-integration button
+// already established on /platform/accounts ("Connect payment provider").
 export default async function CommandCenterMoneyPage() {
   await requireRole("platform_owner");
   const admin = createAdminClient();
@@ -59,46 +57,46 @@ export default async function CommandCenterMoneyPage() {
   const recent = invoicesList.slice(0, 10);
 
   return (
-    <div style={{ background: CARD, borderRadius: 10, boxShadow: "rgba(30,20,10,0.04) 0 1px 2px", padding: 20, display: "flex", flexDirection: "column", gap: 14, maxWidth: 720 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ fontFamily: "Newsreader, serif", fontSize: 17, fontWeight: 600, color: INK }}>Billing &amp; payments</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 700, color: MUTED }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: MUTED }} />
+    <div className="card flex max-w-[720px] flex-col gap-3.5 p-5">
+      <div className="flex items-center justify-between">
+        <h2 className="font-serif text-lg text-ink">Billing &amp; payments</h2>
+        <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted">
+          <div className="h-1.5 w-1.5 rounded-full bg-muted" />
           Not connected
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-        <div style={{ padding: "12px 14px", borderRadius: 7, background: SAND, display: "flex", flexDirection: "column", gap: 3 }}>
-          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: MUTED }}>Collected this month</div>
-          <div style={{ fontFamily: "Newsreader, serif", fontSize: 21, fontWeight: 600, color: INK }}>
+      <div className="grid grid-cols-2 gap-2.5">
+        <div className="flex flex-col gap-0.5 rounded-[6px] bg-card-inset px-3.5 py-3">
+          <div className="text-[10.5px] font-bold uppercase tracking-[0.06em] text-muted">Collected this month</div>
+          <div className="font-serif text-xl font-semibold text-ink">
             {collectedThisMonth.size === 0 ? "—" : [...collectedThisMonth.entries()].map(([c, a]) => money(a, c)).join(" · ")}
           </div>
         </div>
-        <div style={{ padding: "12px 14px", borderRadius: 7, background: `color-mix(in oklab, ${GOLD} 10%, ${CARD})`, border: `1px solid color-mix(in oklab, ${GOLD} 26%, transparent)`, display: "flex", flexDirection: "column", gap: 3 }}>
-          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: GOLD }}>Outstanding</div>
-          <div style={{ fontFamily: "Newsreader, serif", fontSize: 21, fontWeight: 600, color: INK }}>
+        <div className="callout-gold flex flex-col gap-0.5 rounded-[6px] border border-gold/25 px-3.5 py-3">
+          <div className="text-[10.5px] font-bold uppercase tracking-[0.06em] text-gold">Outstanding</div>
+          <div className="font-serif text-xl font-semibold text-ink">
             {outstanding.size === 0 ? "—" : [...outstanding.entries()].map(([c, a]) => money(a, c)).join(" · ")}
           </div>
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "oklch(0.58 0.017 70)", paddingBottom: 8 }}>Recent transactions</div>
+      <div className="flex flex-col">
+        <div className="pb-2 text-[10.5px] font-bold uppercase tracking-[0.06em] text-muted">Recent transactions</div>
         {recent.length === 0 ? (
-          <p style={{ fontSize: 12.5, color: MUTED }}>Nothing recorded yet.</p>
+          <p className="text-[12.5px] text-muted">Nothing recorded yet.</p>
         ) : (
           recent.map((inv) => {
             const isOverdue = inv.status === "outstanding" && inv.due_date && new Date(inv.due_date) < overdueCutoff;
             return (
-              <div key={inv.id} className="admin-hover" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "9px 0", borderTop: `1px solid ${BORDER}` }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{centerNameById.get(inv.center_id) ?? "Unknown centre"}</div>
-                  <div style={{ fontSize: 11, color: "oklch(0.58 0.017 70)" }}>{inv.note ?? (inv.status === "paid" ? "Course fee" : "Invoice")}</div>
+              <div key={inv.id} className="admin-hover flex items-center justify-between gap-2.5 border-t border-border py-[9px]">
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <div className="text-[12.5px] font-semibold text-ink">{centerNameById.get(inv.center_id) ?? "Unknown centre"}</div>
+                  <div className="text-[11px] text-muted">{inv.note ?? (inv.status === "paid" ? "Course fee" : "Invoice")}</div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flex: "0 0 auto" }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 700, color: INK }}>{money(inv.amount, inv.currency)}</div>
-                  <div style={{ fontSize: 10.5, fontWeight: 700, color: inv.status === "paid" ? GREEN : isOverdue ? RED : MUTED }}>
+                <div className="flex shrink-0 flex-col items-end gap-0.5">
+                  <div className="text-[12.5px] font-bold text-ink">{money(inv.amount, inv.currency)}</div>
+                  <div className={`text-[10.5px] font-bold ${inv.status === "paid" ? "text-primary" : isOverdue ? "text-destructive" : "text-muted"}`}>
                     {inv.status === "paid" ? "PAID" : isOverdue ? "OVERDUE" : inv.status.toUpperCase()}
                   </div>
                 </div>
@@ -108,16 +106,18 @@ export default async function CommandCenterMoneyPage() {
         )}
       </div>
 
-      <p style={{ fontSize: 11.5, color: MUTED, lineHeight: 1.5 }}>
+      <p className="text-[11.5px] leading-normal text-muted">
         No Stripe (or other payment processor) connection exists for platform billing yet — invoices above are recorded by hand.
       </p>
-      <div
-        style={{ textAlign: "center", padding: "12px 16px", borderRadius: 6, background: GOLD, color: DARK, fontSize: 12.5, fontWeight: 700, cursor: "not-allowed", opacity: 0.6 }}
+      <button
+        type="button"
+        disabled
         title="Not built yet"
+        className="h-10 rounded-[6px] border border-input bg-card-inset px-4 text-sm font-semibold text-muted opacity-60"
       >
         Connect to Stripe
-      </div>
-      <Link href="/platform/accounts" style={{ fontSize: 11, fontWeight: 600, color: "oklch(0.58 0.017 70)", textDecoration: "none" }}>
+      </button>
+      <Link href="/platform/accounts" className="text-[11px] font-semibold text-muted hover:underline">
         Manage subscriptions &amp; invoices →
       </Link>
     </div>

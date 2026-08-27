@@ -1,14 +1,6 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const CARD = "oklch(0.992 0.005 90)";
-const INK = "oklch(0.235 0.017 65)";
-const MUTED = "oklch(0.51 0.017 70)";
-const BORDER = "oklch(0.895 0.012 82)";
-const TEAL = "oklch(0.375 0.058 195)";
-const GOLD = "oklch(0.63 0.096 72)";
-const RED = "oklch(0.58 0.16 25)";
-
 // Ramy, 25 Aug 2026, rejecting the first build of this page (a flat name-
 // by-name roster): "this is a command center for all my projects, not for
 // a CELTA course... I don't want the details of the everyday activities.
@@ -17,6 +9,16 @@ const RED = "oklch(0.58 0.16 25)";
 // rate, nothing name-level. The detailed roster this replaced already
 // exists at the course's own /trainer/roster for whoever actually runs
 // that course day to day.
+//
+// Migrated onto the shared .card design system 27 Aug 2026 -- was hand-built
+// inline styles (CARD/TEAL/GOLD/RED literals) copied straight from
+// command-center-visual-reference.html. The KPI row previously carried one
+// hardcoded teal left-border on every tile; now alternates .card-side-teal/
+// .card-side-garnet like every other KPI row in the app (see pulse-strip.tsx
+// and src/app/platform/accounts/page.tsx). The per-course Status pill reuses
+// the same Running/Ended/Upcoming semantics -- and colors -- as
+// src/app/centre/page.tsx's courseState() (teal/grey/gold), via the shared
+// .status-pill component this time instead of a hand-rolled color-mix.
 export default async function CommandCenterPeoplePage() {
   const profile = await requireRole("platform_owner");
   const admin = createAdminClient();
@@ -31,9 +33,9 @@ export default async function CommandCenterPeoplePage() {
 
   if (accessibleCenterIds.length === 0) {
     return (
-      <div style={{ background: CARD, borderRadius: 10, boxShadow: "rgba(30,20,10,0.04) 0 1px 2px", padding: 20 }}>
-        <div style={{ fontFamily: "Newsreader, serif", fontSize: 17, fontWeight: 600, color: INK, marginBottom: 8 }}>People, across your centres</div>
-        <p style={{ fontSize: 13, color: MUTED }}>You don&apos;t currently have Owner or Invited access to any centre.</p>
+      <div className="card p-5">
+        <h2 className="mb-2 font-serif text-lg text-ink">People, across your centres</h2>
+        <p className="text-sm text-muted">You don&apos;t currently have Owner or Invited access to any centre.</p>
       </div>
     );
   }
@@ -83,28 +85,30 @@ export default async function CommandCenterPeoplePage() {
   const totalVolunteers = [...volunteerCountByCourse.values()].reduce((s, n) => s + n, 0);
   const runningCourses = coursesList.filter((c) => c.start_date <= today && c.end_date >= today).length;
 
+  const kpis = [
+    { label: "Courses running", value: runningCourses, sub: `${coursesList.length} total across your centres` },
+    { label: "Trainees", value: totalTrainees, sub: "across every course" },
+    { label: "Trainers", value: totalTrainers, sub: "MCT/ACT combined" },
+    { label: "Volunteers", value: totalVolunteers, sub: "signed up" },
+  ];
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-        {[
-          { label: "Courses running", value: runningCourses, sub: `${coursesList.length} total across your centres` },
-          { label: "Trainees", value: totalTrainees, sub: "across every course" },
-          { label: "Trainers", value: totalTrainers, sub: "MCT/ACT combined" },
-          { label: "Volunteers", value: totalVolunteers, sub: "signed up" },
-        ].map((stat) => (
-          <div key={stat.label} style={{ background: CARD, borderRadius: 8, borderLeft: `3px solid ${TEAL}`, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 5, boxShadow: "rgba(30,20,10,0.04) 0 1px 2px" }}>
-            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>{stat.label}</div>
-            <div style={{ fontFamily: "Newsreader, serif", fontSize: 26, fontWeight: 600, color: INK, fontVariantNumeric: "tabular-nums" }}>{stat.value}</div>
-            <div style={{ fontSize: 11, color: MUTED }}>{stat.sub}</div>
+    <div className="flex flex-col gap-[22px]">
+      <div className="grid grid-cols-4 gap-3">
+        {kpis.map((stat, i) => (
+          <div key={stat.label} className={`card ${i % 2 === 0 ? "card-side-teal" : "card-side-garnet"} flex flex-col gap-1.5 px-[18px] py-4`}>
+            <div className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted">{stat.label}</div>
+            <div className="font-serif text-[26px] font-semibold text-ink tabular-nums">{stat.value}</div>
+            <div className="text-[11px] text-muted">{stat.sub}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ background: CARD, borderRadius: 10, boxShadow: "rgba(30,20,10,0.04) 0 1px 2px", overflow: "hidden" }}>
-        <div style={{ padding: "18px 20px 6px", fontFamily: "Newsreader, serif", fontSize: 17, fontWeight: 600, color: INK }}>By course</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 0.8fr 0.7fr 0.7fr 1.2fr" }}>
+      <div className="card !p-0">
+        <h2 className="px-5 pt-[18px] pb-1.5 font-serif text-lg text-ink">By course</h2>
+        <div className="grid grid-cols-[1.4fr_0.8fr_0.7fr_0.7fr_1.2fr]">
           {["Centre / course", "Status", "Trainees", "Trainers", "Volunteer attendance"].map((h) => (
-            <div key={h} style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: MUTED, padding: "12px 20px", borderBottom: `1px solid ${BORDER}` }}>
+            <div key={h} className="border-b border-border px-5 py-3 text-[10.5px] font-bold uppercase tracking-wide text-muted">
               {h}
             </div>
           ))}
@@ -118,39 +122,36 @@ export default async function CommandCenterPeoplePage() {
           const possible = volunteerCount * sessionsSoFar;
           const attendancePct = possible > 0 ? Math.round((attended / possible) * 100) : null;
           return (
-            <div key={c.id} className="admin-hover" style={{ display: "grid", gridTemplateColumns: "1.4fr 0.8fr 0.7fr 0.7fr 1.2fr", alignItems: "center" }}>
-              <div style={{ padding: "13px 20px", borderBottom: `1px solid ${BORDER}`, fontSize: 13, fontWeight: 600, color: INK }}>
+            <div key={c.id} className="admin-hover grid grid-cols-[1.4fr_0.8fr_0.7fr_0.7fr_1.2fr] items-center">
+              <div className="border-b border-border px-5 py-[13px] text-[13px] font-semibold text-ink">
                 {centerNameById.get(c.center_id) ?? "Unknown centre"}
-                <div style={{ fontSize: 11, fontWeight: 400, color: MUTED }}>{c.name}</div>
+                <div className="text-[11px] font-normal text-muted">{c.name}</div>
               </div>
-              <div style={{ padding: "13px 20px", borderBottom: `1px solid ${BORDER}` }}>
-                <span
-                  style={{
-                    fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 20,
-                    background: running ? `color-mix(in oklab, ${TEAL} 12%, ${CARD})` : ended ? `color-mix(in oklab, ${MUTED} 10%, ${CARD})` : `color-mix(in oklab, ${GOLD} 14%, ${CARD})`,
-                    color: running ? TEAL : ended ? MUTED : "oklch(0.44 0.095 68)",
-                  }}
-                >
+              <div className="border-b border-border px-5 py-[13px]">
+                <span className={`status-pill ${running ? "status-pill-on-track" : ended ? "bg-status-neutral-bg text-muted" : "status-pill-pending"}`}>
                   {running ? "Running" : ended ? "Ended" : "Upcoming"}
                 </span>
               </div>
-              <div style={{ padding: "13px 20px", borderBottom: `1px solid ${BORDER}`, fontSize: 13, color: INK, fontVariantNumeric: "tabular-nums" }}>{traineeCountByCourse.get(c.id) ?? 0}</div>
-              <div style={{ padding: "13px 20px", borderBottom: `1px solid ${BORDER}`, fontSize: 13, color: INK, fontVariantNumeric: "tabular-nums" }}>{trainerCountByCourse.get(c.id) ?? 0}</div>
-              <div style={{ padding: "13px 20px", borderBottom: `1px solid ${BORDER}`, fontSize: 13, color: INK }}>
+              <div className="border-b border-border px-5 py-[13px] text-[13px] tabular-nums text-ink">{traineeCountByCourse.get(c.id) ?? 0}</div>
+              <div className="border-b border-border px-5 py-[13px] text-[13px] tabular-nums text-ink">{trainerCountByCourse.get(c.id) ?? 0}</div>
+              <div className="border-b border-border px-5 py-[13px] text-[13px] text-ink">
                 {volunteerCount === 0 ? (
-                  <span style={{ color: MUTED }}>No volunteers</span>
+                  <span className="text-muted">No volunteers</span>
                 ) : attendancePct === null ? (
-                  <span style={{ color: MUTED }}>No TP sessions yet</span>
+                  <span className="text-muted">No TP sessions yet</span>
                 ) : (
-                  <span style={{ fontWeight: 700, color: attendancePct < 60 ? RED : attendancePct < 80 ? "oklch(0.44 0.095 68)" : TEAL }}>
-                    {attendancePct}% <span style={{ fontWeight: 400, color: MUTED }}>({volunteerCount} volunteers, {sessionsSoFar} sessions)</span>
+                  <span className={`font-bold ${attendancePct < 60 ? "text-destructive" : attendancePct < 80 ? "text-status-warning-text" : "text-primary"}`}>
+                    {attendancePct}%{" "}
+                    <span className="font-normal text-muted">
+                      ({volunteerCount} volunteers, {sessionsSoFar} sessions)
+                    </span>
                   </span>
                 )}
               </div>
             </div>
           );
         })}
-        {coursesList.length === 0 ? <p style={{ padding: 20, fontSize: 13, color: MUTED }}>No courses at your accessible centres yet.</p> : null}
+        {coursesList.length === 0 ? <p className="p-5 text-sm text-muted">No courses at your accessible centres yet.</p> : null}
       </div>
     </div>
   );

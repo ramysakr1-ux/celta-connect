@@ -526,6 +526,31 @@ h6 {
     background-color: oklch(93% 0.019 190) !important;
   }
 
+  /* Assessor's own accent -- garnet, a plain fixed color rather than a
+     per-viewer CSS variable. Unlike --hub-hover-accent (which has to flip
+     between an MCT look and an ACT look depending on who's viewing the same
+     trainer-hub DOM), there is only ever one assessor look: whoever lands on
+     an /assessor page sees garnet, and a real assessor who tours into other
+     areas of the app sees THAT area's own accent instead. Ramy, 27 Aug 2026:
+     "garnet, not derived from the header" (the header is its own dark
+     ink-brown, oklch(30% 0.042 58), unrelated to this) -- same simple
+     fixed-color choice already made for ACT. Same ring-for-rows/
+     fill-for-buttons split as every other pair above; !important on the fill
+     for the same reason as .trainer-hover-fill -- Tailwind's utilities layer
+     otherwise wins over a components-layer rule regardless of source order. */
+  .assessor-hover {
+    transition: box-shadow 150ms ease;
+  }
+  .assessor-hover:hover {
+    box-shadow: inset 0 0 0 1px var(--color-garnet), 0 3px 8px -3px color-mix(in oklab, var(--color-garnet) 45%, transparent);
+  }
+  .assessor-hover-fill {
+    transition: background-color 150ms ease;
+  }
+  .assessor-hover-fill:hover {
+    background-color: color-mix(in oklab, var(--color-garnet) 20%, var(--color-card)) !important;
+  }
+
   /* Shared "entry moment" card -- pale tinted teal-green background + soft
      primary border, the same combination the Course Stream Zoom card uses
      (bg-accent/50 over a card backdrop, border-primary/25). Baked into a
