@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { buildDayRows, categorize, isEventLive, type CellCategory, type DayRow, type TimeBand, type TimetableEvent } from "@/lib/timetable-grid";
+import { buildDayRows, bandIndexFor, categorize, isEventLive, type CellCategory, type DayRow, type TimeBand, type TimetableEvent } from "@/lib/timetable-grid";
 
 // for-claude-code-timetable-view.md -- read-only 4-week glass-card board,
 // shared by trainee and staff-preview viewers of a trainee's portfolio
@@ -130,6 +130,19 @@ export function ReadOnlyTimetableBoard({
 
   const week = weeks[weekIndex] ?? weeks[0];
   const liveEvent = events.find((e) => isEventLive(e, now)) ?? null;
+  // for-claude-code-timetable-view.md: "time range + 'opened HH:MM'" -- opened
+  // is the join-window's own start (isEventLive's -10min), the range's end is
+  // the event's time band boundary, not a stored field on the event itself.
+  const liveEventTimes = liveEvent?.event_time
+    ? (() => {
+        const [h, m] = liveEvent.event_time!.split(":").map(Number);
+        const opened = new Date(0);
+        opened.setHours(h, m - 10, 0, 0);
+        const pad = (n: number) => String(n).padStart(2, "0");
+        const band = timeBands[bandIndexFor(liveEvent.event_time, timeBands)];
+        return { opened: `${pad(opened.getHours())}:${pad(opened.getMinutes())}`, end: band?.end };
+      })()
+    : null;
 
   const initials = viewerName
     .split(" ")
@@ -178,17 +191,24 @@ export function ReadOnlyTimetableBoard({
       {liveEvent ? (
         <div className="flex items-center justify-between gap-3 rounded-[10px] px-4 py-3 text-primary-foreground" style={{ background: "oklch(38% 0.072 195)" }}>
           <div className="flex items-center gap-3">
-            <span className="size-2 shrink-0 animate-pulse rounded-full bg-muted" />
+            <span className="size-2 shrink-0 animate-pulse rounded-full" style={{ background: "oklch(63% 0.096 72)" }} />
             <span className="text-[11px] font-semibold tracking-[0.08em] uppercase">Live now</span>
             <span className="text-sm font-medium">{liveEvent.title}</span>
-            {liveEvent.event_time ? <span className="text-xs opacity-80">{liveEvent.event_time.slice(0, 5)}</span> : null}
+            {liveEvent.event_time ? (
+              <span className="text-xs opacity-80">
+                {liveEvent.event_time.slice(0, 5)}
+                {liveEventTimes?.end ? ` – ${liveEventTimes.end}` : ""}
+                {liveEventTimes?.opened ? ` · opened ${liveEventTimes.opened}` : ""}
+              </span>
+            ) : null}
           </div>
           {liveEvent.zoom_url ? (
             <a
               href={liveEvent.zoom_url}
               target="_blank"
               rel="noreferrer"
-              className="shrink-0 rounded-full bg-card px-3 py-1 text-xs font-semibold text-ink"
+              className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold text-ink"
+              style={{ background: "oklch(63% 0.096 72)" }}
             >
               Join
             </a>

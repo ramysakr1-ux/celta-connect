@@ -107,11 +107,29 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
   const peerHours = (peerSheetsObserved * TP_LESSON_LENGTH_MINUTES) / 60;
   const { liveHours: experiencedTeacherHours, filmedHours } = computeObservationHours(observations ?? []);
 
+  // for-claude-code-progress-tab-screen.md: "Heading summarizes the two
+  // things most likely to need action... not a static label." Picks the
+  // most pressing of Stage 1/2/3 (a triggered-but-unfiled Stage 3 outranks
+  // an unbooked Stage 2, which outranks an unfiled Stage 1) plus the CELTA 5
+  // self-assessment state, same pairing as the design's own example
+  // ("Stage 2 tutorial booked · CELTA 5 not started").
+  const stageSummary =
+    record.stage3_required && !record.stage3_finalized_at
+      ? "Stage 3 report pending"
+      : !myStage2Slot
+        ? "Stage 2 tutorial not booked"
+        : !record.stage1_completed_at
+          ? "Stage 1 report not yet filed"
+          : "Stage 2 tutorial booked";
+  const celtaSummary = bothSigned ? "CELTA 5 signed off" : stage2Submitted ? "CELTA 5 awaiting countersignature" : "CELTA 5 not started";
+
   return (
     <div className="flex flex-col gap-4">
       <div>
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Progress</p>
-        <h1 className="mt-1 font-serif text-2xl text-ink">Self-assessment, observation hours, and sign-off</h1>
+        <h1 className="mt-1 font-serif text-2xl text-ink">
+          {stageSummary} · {celtaSummary}
+        </h1>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

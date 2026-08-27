@@ -6,9 +6,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { getTpCardStatus, TP_LESSON_LENGTH_MINUTES, type TpCardStatus } from "@/lib/tp-plan-content";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { computeCriteriaPct, CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { ASSIGNMENT_INFO, ASSIGNMENT_ORDER, ASSIGNMENT_STATUS_LABEL } from "@/lib/assignment-info";
-import { TpRow } from "@/app/portfolio/[traineeId]/tp/tp-row";
 import type { Database } from "@/lib/supabase/types";
 
 type SubmissionStatus = Database["public"]["Tables"]["assignments"]["Row"]["first_status"];
@@ -32,6 +32,39 @@ const TONE_PILL_CLASS: Record<TpCardStatus["tone"], string> = {
   "at-risk": "pill-danger",
   pending: "pill-neutral",
 };
+
+// for-claude-code-trainee-interface.md's "My teaching" row status -- a
+// different vocabulary from getTpCardStatus's submission-workflow states
+// (Draft in progress / Awaiting tutor feedback / etc, still used for the
+// in-progress cases below): once feedback is released this shows whether
+// the lesson met standard, once it's today it says so, and an unmarked
+// future lesson says what's still due -- never a grade, per the trainee
+// app's own "no grade column, ever" rule.
+function myTeachingRowStatus(input: {
+  isToday: boolean;
+  taught: boolean;
+  planSubmitted: boolean;
+  selfEvalSubmitted: boolean;
+  feedbackSubmitted: boolean;
+  grade: "above_standard" | "to_standard" | "not_to_standard" | null | undefined;
+}): { label: string; pillClass: string } {
+  if (input.feedbackSubmitted) {
+    return input.grade === "not_to_standard"
+      ? { label: "Not to standard", pillClass: "pill-danger" }
+      : input.grade === "above_standard"
+        ? { label: "Above standard", pillClass: "pill-success" }
+        : { label: "To standard", pillClass: "pill-success" };
+  }
+  if (input.isToday) return { label: "Today", pillClass: "pill-info" };
+  if (!input.taught && !input.planSubmitted) return { label: "Plan due", pillClass: "pill-warning" };
+  const inProgress = getTpCardStatus({
+    planSubmitted: input.planSubmitted,
+    taught: input.taught,
+    selfEvalSubmitted: input.selfEvalSubmitted,
+    feedbackSubmitted: input.feedbackSubmitted,
+  });
+  return { label: inProgress.label, pillClass: TONE_PILL_CLASS[inProgress.tone] };
+}
 
 // TP3-6 aims are already generated as a short "Category: Topic" string
 // (e.g. "Vocabulary: Air Travel") and need no help. TP1/2 ("scripted"
@@ -94,6 +127,11 @@ export default async function TpHubPage({
         .select("assignment_type, first_status, resubmission_status, due_date")
         .eq("trainee_id", traineeId),
     ]);
+
+  // Cosmetic "Today" highlight only, not a compliance boundary -- not worth
+  // this page's first center/timezone fetch just to swap DEFAULT_TIMEZONE
+  // for the real one.
+  const today = toLocalIso(new Date(), DEFAULT_TIMEZONE);
 
   const planByTpNumber = new Map((plans ?? []).map((p) => [p.tp_number, p]));
   const lessonByTpNumber = new Map((lessons ?? []).map((l) => [l.tp_number as number, l]));
@@ -197,36 +235,31 @@ export default async function TpHubPage({
         ) : null}
       </div>
 
-      <div className="sheet overflow-hidden !p-0">
-        <table className="table-plain w-full">
-          <thead>
-            <tr>
-              <th className="text-sm text-muted">TP</th>
-              <th className="text-sm text-muted">Focus</th>
-              <th className="text-sm text-muted">Date</th>
-              <th className="text-sm text-muted">Status</th>
-              <th className="text-right text-sm text-muted">Action</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className={`grid grid-cols-1 gap-4 ${!isStaff && carriedForward.length > 0 ? "lg:grid-cols-[1.5fr_1fr]" : ""}`}>
+        <div className="sheet flex flex-col gap-1 border-t-[3px] border-t-primary">
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Your lessons</p>
+          <div className="flex flex-col">
             {TP_NUMBERS.map((tpNumber) => {
               const plan = planByTpNumber.get(tpNumber);
 
               if (!plan) {
                 const selfSelect = (tpNumber === 7 || tpNumber === 8) && !isStaff;
                 const href = selfSelect ? "/dashboard/trainee/plan/syllabus-grid" : null;
-                return (
-                  <TpRow key={tpNumber} href={href}>
-                    <td className="font-serif text-lg text-muted">TP{tpNumber}</td>
-                    <td className="text-sm text-muted">
-                      {selfSelect ? "Choose your own topic in the syllabus planning grid" : "Not yet assigned"}
-                    </td>
-                    <td className="text-sm text-muted">Not yet scheduled</td>
-                    <td>
-                      <span className="pill pill-neutral">{selfSelect ? "Self-select" : "Not yet assigned"}</span>
-                    </td>
-                    <td className="text-right text-sm text-muted">{selfSelect ? "Choose topic →" : "—"}</td>
-                  </TpRow>
+                const row = (
+                  <div className="flex items-start gap-3 border-t border-border-faint py-2.5 first:border-t-0">
+                    <span className="font-serif text-lg text-muted">TP{tpNumber}</span>
+                    <div className="flex flex-1 flex-col gap-0.5">
+                      <p className="text-sm text-muted">{selfSelect ? "Choose your own topic in the syllabus planning grid" : "Not yet assigned"}</p>
+                    </div>
+                    <span className="pill pill-neutral shrink-0">{selfSelect ? "Self-select" : "Not yet assigned"}</span>
+                  </div>
+                );
+                return href ? (
+                  <Link key={tpNumber} href={href} className="trainee-hover -mx-2 rounded-[6px] px-2">
+                    {row}
+                  </Link>
+                ) : (
+                  <div key={tpNumber}>{row}</div>
                 );
               }
 
@@ -236,9 +269,11 @@ export default async function TpHubPage({
               const tpPlan = tpPlanByTpNumber.get(tpNumber);
               const selfEvaluation = selfEvalByTpNumber.get(tpNumber);
               const feedback = feedbackByTpNumber.get(tpNumber);
-              const status = getTpCardStatus({
-                planSubmitted: Boolean(tpPlan?.submitted_at),
+              const isToday = lesson?.lesson_date === today;
+              const status = myTeachingRowStatus({
+                isToday,
                 taught: Boolean(plan.taught_at),
+                planSubmitted: Boolean(tpPlan?.submitted_at),
                 selfEvalSubmitted: Boolean(selfEvaluation?.submitted_at),
                 feedbackSubmitted: Boolean(feedback?.submitted_at),
                 grade: feedback?.grade,
@@ -246,51 +281,53 @@ export default async function TpHubPage({
               const trainerName = (lesson?.trainer_id && trainerNameById.get(lesson.trainer_id)) || null;
 
               return (
-                <TpRow key={tpNumber} href={`/portfolio/${traineeId}/tp/${tpNumber}`}>
-                  <td className="font-serif text-lg text-ink">TP{tpNumber}</td>
-                  <td className="text-sm text-ink">
-                    {plan.short_title ?? shortenAim(plan.main_lesson_aim)}
-                    {lesson?.level || trainerName ? (
-                      <span className="block text-xs text-muted">
-                        {[lesson?.level, trainerName, lesson?.length_minutes ? `${lesson.length_minutes} mins` : label.name]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </span>
-                    ) : null}
-                  </td>
-                  <td className="text-sm text-muted">{lesson?.lesson_date ?? "Not yet scheduled"}</td>
-                  <td>
-                    <span className={`pill ${TONE_PILL_CLASS[status.tone]}`}>{status.label}</span>
-                  </td>
-                  <td className="text-right text-sm text-primary">
-                    {tpPlan?.submitted_at ? "View feedback" : "Lesson plan"}
-                  </td>
-                </TpRow>
+                <Link
+                  key={tpNumber}
+                  href={`/portfolio/${traineeId}/tp/${tpNumber}`}
+                  className="trainee-hover -mx-2 flex items-start gap-3 rounded-[6px] border-t border-border-faint px-2 py-2.5 first:border-t-0"
+                  style={{ borderLeft: `3px solid ${isToday ? "var(--color-primary)" : "var(--color-muted)"}`, marginLeft: 0, paddingLeft: 10 }}
+                >
+                  <span className="font-serif text-lg text-ink">TP{tpNumber}</span>
+                  <div className="flex flex-1 flex-col gap-0.5">
+                    <p className="text-sm text-ink">{plan.short_title ?? shortenAim(plan.main_lesson_aim)}</p>
+                    <p className="text-xs text-muted">
+                      {[lesson?.lesson_date ?? "Not yet scheduled", lesson?.level, trainerName, lesson?.length_minutes ? `${lesson.length_minutes} mins` : label.name]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </div>
+                  <span className={`pill ${status.pillClass} shrink-0`}>{status.label}</span>
+                </Link>
               );
             })}
-          </tbody>
-        </table>
-      </div>
-
-      {!isStaff && carriedForward.length > 0 ? (
-        // Decorative teal/garnet alternation against the TP table sheet
-        // above -- no status meaning of its own (the warning-colored
-        // eyebrow text inside is untouched).
-        <div className="sheet sheet-garnet flex flex-col gap-2.5">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">Carried forward</p>
-          <p className="text-xs text-muted">
-            Starred action points from TP{mostRecentFeedbackTp} feedback, already folded into your next lesson plan
-            as personal aims.
+          </div>
+          <p className="mt-2 text-[11px] text-muted">
+            No grade column anywhere. A candidate never sees a provisional grade -- they see whether a lesson was to
+            standard, and what to do next.
           </p>
-          <ul className="flex flex-col gap-1.5">
-            {carriedForward.map((point, i) => (
-              <li key={i} className="border-l-2 border-status-warning-text pl-2.5 text-sm text-ink">
-                {point}
-              </li>
-            ))}
-          </ul>
         </div>
-      ) : null}
+
+        {!isStaff && carriedForward.length > 0 ? (
+          // Decorative teal/garnet alternation against "Your lessons" beside
+          // it -- no status meaning of its own (the warning-colored eyebrow
+          // text inside is untouched).
+          <div className="sheet sheet-garnet flex flex-col gap-2.5">
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-status-warning-text uppercase">Carried forward</p>
+            <p className="text-xs text-muted">
+              Starred action points from TP{mostRecentFeedbackTp} feedback, already folded into your next lesson plan
+              as personal aims.
+            </p>
+            <ul className="flex flex-col gap-1.5">
+              {carriedForward.map((point, i) => (
+                <li key={i} className="border-l-2 border-status-warning-text pl-2.5 text-sm text-ink">
+                  {point}
+                </li>
+              ))}
+            </ul>
+            <p className="text-[11px] text-muted">Starred action points arrive as personal aims in your next plan automatically. You never copy them across.</p>
+          </div>
+        ) : null}
+      </div>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {canSeeCriteria ? (

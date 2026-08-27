@@ -278,6 +278,9 @@ export async function TodayTab({
     });
   }
   const waitingCapped = waiting.slice(0, 3);
+  // for-claude-code-trainee-interface.md: "up to 3 items, newest first" --
+  // was rendering every broadcast unbounded.
+  const broadcastsCapped = (broadcasts ?? []).slice(0, 3);
 
   // for-claude-code-trainee-assessor-card-system.md's card-edge rule: small
   // cards in a 3-column layout get a left border, large/wide cards in a
@@ -351,12 +354,14 @@ export async function TodayTab({
             (garnet) beside it. Edge side (left vs top) follows cardEdge --
             see its own comment above. */}
         <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("green")}`}>
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Announcements</p>
-          {(broadcasts ?? []).length === 0 ? (
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">
+            Announcements{broadcastsCapped.length > 0 ? ` · ${broadcastsCapped.length}` : ""}
+          </p>
+          {broadcastsCapped.length === 0 ? (
             <p className="text-sm text-muted">Nothing posted yet.</p>
           ) : (
             <div className="flex flex-col">
-              {(broadcasts ?? []).map((b, i) => (
+              {broadcastsCapped.map((b, i) => (
                 <div key={b.id} className={`flex flex-col gap-1 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""} ${b.pinned ? "border-l-2 border-status-warning-text pl-2.5" : ""}`}>
                   <p className={`text-sm ${b.pinned ? "font-bold text-ink" : "font-semibold text-ink"}`}>{b.title}</p>
                   {b.body ? (
@@ -372,7 +377,9 @@ export async function TodayTab({
         {/* Waiting on you -- garnet, alternating against "Announcements"
             (green) beside it. */}
         <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("garnet")}`}>
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Waiting on you</p>
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">
+            Waiting on you{waiting.length > 0 ? ` · ${waiting.length}` : ""}
+          </p>
           {waitingCapped.length === 0 ? (
             <p className="text-sm text-muted">Nothing waiting on you right now.</p>
           ) : (
