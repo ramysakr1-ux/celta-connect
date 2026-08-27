@@ -36,14 +36,19 @@ export default async function CentreVolunteersPage({
   const scope = branch && mine.includes(branch) ? [branch] : mine;
 
   const admin = createAdminClient();
-  const { data: courses } = await admin.from("courses").select("id, name, center_id, end_date").in("center_id", scope);
+  // Ramy, 27 Aug 2026 (round 2): scopeCenters only needs `scope`, already
+  // known -- it doesn't need `courses` first, so it ran alongside it rather
+  // than waiting for it.
+  const [{ data: courses }, scopeCenters] = await Promise.all([
+    admin.from("courses").select("id, name, center_id, end_date").in("center_id", scope),
+    Promise.all(scope.map((id) => getCachedCenter(id))),
+  ]);
   const courseIds = (courses ?? []).map((c) => c.id);
   const courseNameById = new Map((courses ?? []).map((c) => [c.id, c.name]));
   const courseEndById = new Map((courses ?? []).map((c) => [c.id, c.end_date]));
   // This view can span several centres at once (a branch owner's "all
   // branches" scope) -- each course's own centre decides its "today".
   const centerIdByCourseId = new Map((courses ?? []).map((c) => [c.id, c.center_id]));
-  const scopeCenters = await Promise.all(scope.map((id) => getCachedCenter(id)));
   const timezoneByCenterId = new Map(scopeCenters.filter((c) => c !== null).map((c) => [c.id, c.time_zone]));
   const todayByCourseId = new Map(
     courseIds.map((id) => {

@@ -90,37 +90,42 @@ export const getCentreRoleContext = cache(async function getCentreRoleContext(pr
 
   // Only load course scope when a Course administrator grant is actually held
   // here -- every other role is centre-wide and the query would be noise.
-  let scopedCourseIds: string[] = [];
   const courseAdminGrant = here.find((g) => g.role === "course_administrator");
-  if (courseAdminGrant) {
-    const { data: scope } = await supabase
-      .from("course_administrator_scope")
-      .select("course_id")
-      .eq("centre_role_id", courseAdminGrant.id);
-    scopedCourseIds = (scope ?? []).map((s) => s.course_id);
-  }
+  const scopePromise = courseAdminGrant
+    ? supabase.from("course_administrator_scope").select("course_id").eq("centre_role_id", courseAdminGrant.id)
+    : Promise.resolve({ data: [] as { course_id: string }[] });
 
   // for-claude-code-centre-owner-role-customizer.md: only queried when this
   // person actually holds a role here at all -- someone with no centre role
   // never reaches a screen that would use these anyway, and it saves three
   // queries on every other request in the app that touches getCurrentProfile
   // indirectly through a page that happens to call this.
+  //
+  // Ramy, 27 Aug 2026 (round 2): this block and scopePromise above only
+  // depend on `here`/`activeCenterId`, both already resolved by this point --
+  // no reason they ran as two sequential awaits. Now one Promise.all.
+  const overridesPromise =
+    roles.length > 0 && activeCenterId
+      ? Promise.all([
+          supabase.from("centre_permission_overrides").select("role_key, capability_key, granted_level").eq("center_id", activeCenterId),
+          supabase.from("centre_custom_roles").select("role_key, label").eq("center_id", activeCenterId),
+          supabase.from("centre_custom_capabilities").select("capability_key, label").eq("center_id", activeCenterId),
+        ])
+      : Promise.resolve([{ data: [] as never[] }, { data: [] as never[] }, { data: [] as never[] }]);
+
+  const [{ data: scope }, [{ data: overrideRows }, { data: customRoleRows }, { data: customCapRows }]] = await Promise.all([
+    scopePromise,
+    overridesPromise,
+  ]);
+  const scopedCourseIds = (scope ?? []).map((s) => s.course_id);
+
   const overrides: OverrideMatrix = {};
-  let customRoles: { role_key: string; label: string }[] = [];
-  let customCapabilities: { capability_key: string; label: string }[] = [];
-  if (roles.length > 0 && activeCenterId) {
-    const [{ data: overrideRows }, { data: customRoleRows }, { data: customCapRows }] = await Promise.all([
-      supabase.from("centre_permission_overrides").select("role_key, capability_key, granted_level").eq("center_id", activeCenterId),
-      supabase.from("centre_custom_roles").select("role_key, label").eq("center_id", activeCenterId),
-      supabase.from("centre_custom_capabilities").select("capability_key, label").eq("center_id", activeCenterId),
-    ]);
-    for (const row of overrideRows ?? []) {
-      overrides[row.role_key] = overrides[row.role_key] ?? {};
-      overrides[row.role_key][row.capability_key] = row.granted_level;
-    }
-    customRoles = customRoleRows ?? [];
-    customCapabilities = customCapRows ?? [];
+  for (const row of overrideRows ?? []) {
+    overrides[row.role_key] = overrides[row.role_key] ?? {};
+    overrides[row.role_key][row.capability_key] = row.granted_level;
   }
+  const customRoles = customRoleRows ?? [];
+  const customCapabilities = customCapRows ?? [];
 
   // /centre's own Overview page (build-spec.md §13) aggregates across every
   // id in this list with no further access check of its own -- it trusts

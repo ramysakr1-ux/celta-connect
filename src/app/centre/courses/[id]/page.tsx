@@ -37,9 +37,13 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
     .maybeSingle();
   if (!course || !ctx.availableCenterIds.includes(course.center_id)) notFound();
 
-  const [{ data: tutorRows }, { count: traineeCount }] = await Promise.all([
+  // Ramy, 27 Aug 2026 (round 2): getCachedCenter only needs `course`,
+  // already resolved above -- it doesn't need tutorRows/traineeCount first,
+  // so it now runs alongside them instead of after.
+  const [{ data: tutorRows }, { count: traineeCount }, cachedCenter] = await Promise.all([
     admin.from("course_tutors").select("profile_id, tutor_role, verified_at, left_at").eq("course_id", id).is("left_at", null),
     admin.from("profiles").select("id", { count: "exact", head: true }).eq("course_id", id).eq("role", "trainee"),
+    getCachedCenter(course.center_id),
   ]);
 
   const tutorProfileIds = (tutorRows ?? []).map((t) => t.profile_id);
@@ -54,7 +58,7 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
     joined: Boolean(t.verified_at),
   }));
 
-  const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const timeZone = cachedCenter?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
   const state = computeCourseState(course.start_date, course.end_date, today);
   const standing =

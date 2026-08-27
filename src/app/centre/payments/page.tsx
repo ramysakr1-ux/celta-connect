@@ -24,11 +24,31 @@ export default async function PaymentProvidersPage() {
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
   const supabase = await createClient();
-  const { data: center } = await supabase
-    .from("centers")
-    .select("name, payment_provider, payment_provider_connected_at")
-    .eq("id", centerId)
-    .maybeSingle();
+
+  // Ramy, 27 Aug 2026 (round 2): center, refunds, paymentNotifications, and
+  // transactions are four independent queries -- none needs another's
+  // result, all previously ran one after another.
+  const [{ data: center }, { data: refunds }, { data: paymentNotifications }, { data: transactions }] = await Promise.all([
+    supabase.from("centers").select("name, payment_provider, payment_provider_connected_at").eq("id", centerId).maybeSingle(),
+    supabase
+      .from("refunds")
+      .select("id, amount, currency, reason, status, settlement, agreed_at, applicant_id")
+      .eq("center_id", profile.center_id)
+      .order("agreed_at", { ascending: false })
+      .limit(40),
+    // runMissedInstalmentsCron (src/lib/payments-cron.ts) has been writing
+    // these on every overdue instalment with nothing anywhere reading them
+    // back -- first reader.
+    supabase.from("payment_notifications").select("id, message, created_at").eq("center_id", centerId).is("read_at", null).order("created_at", { ascending: false }),
+    // payment_provider_transactions logs every Stripe webhook event purely
+    // for idempotency (migration 0087) -- nothing anywhere read it back.
+    supabase
+      .from("payment_provider_transactions")
+      .select("id, provider, event_type, amount, currency, received_at")
+      .eq("center_id", centerId)
+      .order("received_at", { ascending: false })
+      .limit(30),
+  ]);
 
   // Checked server-side so the light tells the truth: Stripe can be "connected"
   // on paper while the server has no key, in which case the first real checkout
@@ -36,16 +56,10 @@ export default async function PaymentProvidersPage() {
   const credentialsPresent =
     center?.payment_provider === "stripe" ? Boolean(process.env.STRIPE_SECRET_KEY) : false;
 
-  const { data: refunds } = await supabase
-    .from("refunds")
-    .select("id, amount, currency, reason, status, settlement, agreed_at, applicant_id")
-    .eq("center_id", profile.center_id)
-    .order("agreed_at", { ascending: false })
-    .limit(40);
-
   // Names for the rows that have an applicant. A refund can also stand alone
   // (a deposit taken before anyone applied through Connect), so this is a
-  // lookup, not a join.
+  // lookup, not a join. Genuinely depends on `refunds` above -- can't join
+  // the batch it came from.
   const refundApplicantIds = [...new Set((refunds ?? []).map((r) => r.applicant_id).filter(Boolean))] as string[];
   const { data: refundApplicants } = refundApplicantIds.length
     ? await supabase.from("applicants").select("id, full_name").in("id", refundApplicantIds)
@@ -63,25 +77,6 @@ export default async function PaymentProvidersPage() {
     ageDays: Math.floor((Date.now() - new Date(r.agreed_at).getTime()) / 86400000),
     applicantName: r.applicant_id ? (refundName.get(r.applicant_id) ?? null) : null,
   }));
-
-  // runMissedInstalmentsCron (src/lib/payments-cron.ts) has been writing
-  // these on every overdue instalment with nothing anywhere reading them
-  // back -- first reader.
-  const { data: paymentNotifications } = await supabase
-    .from("payment_notifications")
-    .select("id, message, created_at")
-    .eq("center_id", centerId)
-    .is("read_at", null)
-    .order("created_at", { ascending: false });
-
-  // payment_provider_transactions logs every Stripe webhook event purely
-  // for idempotency (migration 0087) -- nothing anywhere read it back.
-  const { data: transactions } = await supabase
-    .from("payment_provider_transactions")
-    .select("id, provider, event_type, amount, currency, received_at")
-    .eq("center_id", centerId)
-    .order("received_at", { ascending: false })
-    .limit(30);
 
   return (
     <div className="flex max-w-[720px] flex-col gap-5">

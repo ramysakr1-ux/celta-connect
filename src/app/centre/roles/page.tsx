@@ -30,6 +30,7 @@ export default async function CentreRolesPage() {
   // profiles through it would depend on a second policy agreeing. The page is
   // already gated on holding a role in this centre.
   const admin = createAdminClient();
+  const supabase = await createClient();
   const [{ data: grants }, { data: log }, { data: invites }] = await Promise.all([
     admin.from("centre_roles").select("id, role, profile_id").eq("center_id", centerId).is("revoked_at", null).order("granted_at"),
     mayAppoint
@@ -56,31 +57,33 @@ export default async function CentreRolesPage() {
   // to_email since centre_admin_invites has no provider_message_id of its
   // own, newest row per address kept.
   const inviteEmails = [...new Set((invites ?? []).map((i) => i.email).filter((e): e is string => !!e).map((e) => e.toLowerCase()))];
-  const { data: inviteDeliveries } =
+  const ids = [...new Set([...(grants ?? []).map((g) => g.profile_id), ...(log ?? []).map((l) => l.actor_profile_id)])];
+
+  // Ramy, 27 Aug 2026 (round 2): inviteDeliveries (needs inviteEmails),
+  // people (needs ids), and areaHolders (only needs centerId, independent of
+  // both) were three sequential awaits with no real chain between them --
+  // now one Promise.all.
+  const [{ data: inviteDeliveries }, { data: people }, areaHolders] = await Promise.all([
     inviteEmails.length > 0
-      ? await admin
+      ? admin
           .from("applicant_emails")
           .select("to_email, status, created_at")
           .eq("center_id", centerId)
           .eq("type", "centre_admin_invite")
           .in("to_email", inviteEmails)
           .order("created_at", { ascending: false })
-      : { data: [] };
+      : Promise.resolve({ data: [] }),
+    ids.length ? supabase.from("profiles").select("id, full_name, email").in("id", ids) : Promise.resolve({ data: [] }),
+    // §11: "Everyone sees everything. Areas never hide information" -- so
+    // this list renders for every admin, not only the owner who can change it.
+    getAreaHolders(centerId),
+  ]);
   const deliveryStatusByEmail = new Map<string, EmailDeliveryStatus>();
   for (const row of inviteDeliveries ?? []) {
     const key = row.to_email.toLowerCase();
     if (!deliveryStatusByEmail.has(key)) deliveryStatusByEmail.set(key, row.status as EmailDeliveryStatus);
   }
-
-  const ids = [...new Set([...(grants ?? []).map((g) => g.profile_id), ...(log ?? []).map((l) => l.actor_profile_id)])];
-  const { data: people } = ids.length
-    ? await (await createClient()).from("profiles").select("id, full_name, email").in("id", ids)
-    : { data: [] };
   const nameOf = new Map((people ?? []).map((p) => [p.id, p.full_name]));
-
-  // §11: "Everyone sees everything. Areas never hide information" -- so this
-  // list renders for every admin, not only the owner who can change it.
-  const areaHolders = await getAreaHolders(centerId);
 
   const holders: Record<string, { id: string; name: string }[]> = {};
   for (const g of grants ?? []) {

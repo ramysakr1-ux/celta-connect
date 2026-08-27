@@ -24,31 +24,65 @@ export default async function CentreOwnerPage() {
 
   const centerId = ctx.activeCenterId ?? profile.center_id;
   const admin = createAdminClient();
-  const timeZone = (await getCachedCenter(centerId))?.time_zone ?? DEFAULT_TIMEZONE;
-  const today = toLocalIso(new Date(), timeZone);
 
-  const [{ data: center }, { data: courses }, { data: grants }, { data: ownerActions }] = await Promise.all([
-    admin.from("centers").select("id, name, organisation_id").eq("id", centerId).maybeSingle(),
-    admin.from("courses").select("id, start_date, end_date").eq("center_id", centerId),
-    admin.from("centre_roles").select("id, profile_id, role").eq("center_id", centerId).is("revoked_at", null),
-    admin.from("centre_owner_actions").select("id, created_at").eq("center_id", centerId),
-  ]);
+  // Ramy, 27 Aug 2026 (round 2): every query below only needs centerId,
+  // already known at this point -- getCachedCenter (time zone), the centers
+  // row (name/organisation_id, separate from getCachedCenter since that one
+  // doesn't select organisation_id), courses, grants, owner-actions, and the
+  // custom-role/capability pair (previously a THIRD sequential Promise.all,
+  // run after the plans/people/payments chain below for no reason) all used
+  // to run in up to 4 sequential stages.
+  const [cachedCenter, { data: center }, { data: courses }, { data: grants }, { data: ownerActions }, { data: customRoles }, { data: customCapabilities }] =
+    await Promise.all([
+      getCachedCenter(centerId),
+      admin.from("centers").select("id, name, organisation_id").eq("id", centerId).maybeSingle(),
+      admin.from("courses").select("id, start_date, end_date").eq("center_id", centerId),
+      admin.from("centre_roles").select("id, profile_id, role").eq("center_id", centerId).is("revoked_at", null),
+      admin.from("centre_owner_actions").select("id, created_at").eq("center_id", centerId),
+      admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId),
+      admin.from("centre_custom_capabilities").select("capability_key, label").eq("center_id", centerId),
+    ]);
+
+  const timeZone = cachedCenter?.time_zone ?? DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
 
   const courseIds = (courses ?? []).map((c) => c.id);
   const coursesRunning = (courses ?? []).filter((c) => computeCourseState(c.start_date, c.end_date, today) === "running").length;
 
   const grantProfileIds = [...new Set((grants ?? []).map((g) => g.profile_id))];
-  const [{ data: plans }, { data: people }] = await Promise.all([
+
+  // Cross-branch visibility only matters when this centre's organisation
+  // actually has more than one branch. `siblings` only needs
+  // center.organisation_id (already resolved above), so it runs alongside
+  // plans/people rather than waiting for that unrelated chain to finish.
+  const [{ data: plans }, { data: people }, { data: siblings }] = await Promise.all([
     courseIds.length ? admin.from("payment_plans").select("id, course_id").in("course_id", courseIds) : Promise.resolve({ data: [] }),
     grantProfileIds.length
       ? admin.from("profiles").select("id, full_name, course_id").in("id", grantProfileIds)
       : Promise.resolve({ data: [] }),
+    center?.organisation_id
+      ? admin.from("centers").select("id, name").eq("organisation_id", center.organisation_id).neq("id", centerId)
+      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
   ]);
   const nameById = new Map((people ?? []).map((p) => [p.id, p.full_name]));
   const planIds = (plans ?? []).map((p) => p.id);
-  const { data: payments } = planIds.length
-    ? await admin.from("payments").select("amount, status, payment_plan_id").in("payment_plan_id", planIds)
-    : { data: [] };
+  const siblingBranches = siblings ?? [];
+
+  // payments (needs planIds) and branch visibility (needs siblingBranches)
+  // are independent of each other -- run together, not one after the other.
+  const [{ data: payments }, { data: vis }] = await Promise.all([
+    planIds.length
+      ? admin.from("payments").select("amount, status, payment_plan_id").in("payment_plan_id", planIds)
+      : Promise.resolve({ data: [] }),
+    siblingBranches.length > 0
+      ? admin
+          .from("centre_branch_visibility")
+          .select("viewer_center_id, target_center_id, visibility")
+          .in("viewer_center_id", [centerId, ...siblingBranches.map((b) => b.id)])
+          .in("target_center_id", [centerId, ...siblingBranches.map((b) => b.id)])
+      : Promise.resolve({ data: [] as { viewer_center_id: string; target_center_id: string; visibility: string }[] }),
+  ]);
+  const visibilityRows = vis ?? [];
   const outstandingBalance = (payments ?? [])
     .filter((p) => p.status === "pending" || p.status === "missed")
     .reduce((sum, p) => sum + Number(p.amount), 0);
@@ -57,29 +91,6 @@ export default async function CentreOwnerPage() {
 
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
   const ownerActionsThisMonth = (ownerActions ?? []).filter((a) => a.created_at >= monthStart).length;
-
-  const [{ data: customRoles }, { data: customCapabilities }] = await Promise.all([
-    admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId),
-    admin.from("centre_custom_capabilities").select("capability_key, label").eq("center_id", centerId),
-  ]);
-
-  // Cross-branch visibility only matters when this centre's organisation
-  // actually has more than one branch.
-  let siblingBranches: { id: string; name: string }[] = [];
-  let visibilityRows: { viewer_center_id: string; target_center_id: string; visibility: string }[] = [];
-  if (center?.organisation_id) {
-    const { data: siblings } = await admin.from("centers").select("id, name").eq("organisation_id", center.organisation_id).neq("id", centerId);
-    siblingBranches = siblings ?? [];
-    if (siblingBranches.length > 0) {
-      const allIds = [centerId, ...siblingBranches.map((b) => b.id)];
-      const { data: vis } = await admin
-        .from("centre_branch_visibility")
-        .select("viewer_center_id, target_center_id, visibility")
-        .in("viewer_center_id", allIds)
-        .in("target_center_id", allIds);
-      visibilityRows = vis ?? [];
-    }
-  }
 
   const capabilityRows: { key: string; label: string }[] = [
     ...(Object.keys(CAPABILITY_LABELS) as Capability[]).map((key) => ({ key: key as string, label: CAPABILITY_LABELS[key] })),
