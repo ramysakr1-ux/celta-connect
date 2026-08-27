@@ -39,7 +39,13 @@ export type CellCategory = "admin" | "wg" | "rm" | "iw" | "lu" | "cs";
 // components, not a UTC round-trip (see the addWeekdays bug note in
 // timetable-skeleton.ts -- same trap applies to any date math here).
 export function isEventLive(event: TimetableEvent, now: Date): boolean {
-  if (!event.zoom_url || !event.event_time) return false;
+  // Ramy, 27 Aug 2026: the live-now bar should fire for an in-person
+  // session too (its own design reference's worked example is a TP, not a
+  // Zoom session) -- "live" is purely a time-window fact now. Callers that
+  // render a Join action still gate that separately on event.zoom_url
+  // existing (unchanged) -- only the status/indicator side stops requiring
+  // a link to exist.
+  if (!event.event_time) return false;
   const [h, m] = event.event_time.split(":").map(Number);
   const start = new Date(`${event.event_date}T00:00:00`);
   start.setHours(h, m - 10, 0, 0);

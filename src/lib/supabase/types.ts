@@ -2403,6 +2403,12 @@ export interface Database {
           event_date: string;
           event_time: string | null;
           tag: string | null;
+          // migration 0229 -- Timetable View (standalone).html's per-card
+          // subtitle line ("Supervised", "Observation task", "Self-evaluations
+          // lead"), distinct from `tag`: tag is data other code reads
+          // (group scoping, "consultation" lookups), detail is display-only
+          // free text with no code depending on its value.
+          detail: string | null;
           linked_assignment_type: string | null;
           linked_tp_number: number | null;
           zoom_url: string | null;
@@ -3462,22 +3468,54 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["pre_course_task_sections"]["Row"]>;
         Relationships: [];
       };
-      pre_course_task_responses: {
+      pre_course_task_items: {
+        Row: {
+          id: string;
+          section_id: string;
+          task_number: number | null;
+          sequence_index: number;
+          prompt: string;
+          answer: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["pre_course_task_items"]["Row"]> & {
+          section_id: string;
+          sequence_index: number;
+          prompt: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["pre_course_task_items"]["Row"]>;
+        Relationships: [];
+      };
+      pre_course_task_progress: {
         Row: {
           id: string;
           course_id: string;
           trainee_id: string;
           section_id: string;
-          response: string | null;
-          submitted_at: string | null;
-          updated_at: string;
+          completed_at: string | null;
         };
-        Insert: Partial<Database["public"]["Tables"]["pre_course_task_responses"]["Row"]> & {
+        Insert: Partial<Database["public"]["Tables"]["pre_course_task_progress"]["Row"]> & {
           course_id: string;
           trainee_id: string;
           section_id: string;
         };
-        Update: Partial<Database["public"]["Tables"]["pre_course_task_responses"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["pre_course_task_progress"]["Row"]>;
+        Relationships: [];
+      };
+      scavenger_hunt_progress: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_id: string;
+          question_key: string;
+          found_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["scavenger_hunt_progress"]["Row"]> & {
+          course_id: string;
+          trainee_id: string;
+          question_key: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["scavenger_hunt_progress"]["Row"]>;
         Relationships: [];
       };
       volunteer_shared_materials: {

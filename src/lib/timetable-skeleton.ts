@@ -18,6 +18,12 @@ export interface SkeletonEventDraft {
   linkedAssignmentType?: AssignmentType;
   linkedTpNumber?: number;
   /**
+   * Timetable View (standalone).html's per-card subtitle ("Supervised",
+   * "Observation task", "Self-evaluations lead", "With task") -- display
+   * only, nothing else in the app reads it.
+   */
+  detail?: string;
+  /**
    * "Every sub-criterion names the session that teaches it" --
    * project_spec_audit_2026-08-18's assessment-model.md link 1, seeded
    * from Ramy's INPUT_WEEKS mapping (2026-08-18): the exact CELTA
@@ -59,10 +65,72 @@ function pos(day: number): number {
   return day / (DEFAULT_TEACHING_DAYS - 1);
 }
 
+// Ramy, 27 Aug 2026: "Feedback" and "Lesson planning" didn't exist as their
+// own timetable rows at all before this -- only TP/input-session/milestone/
+// assignment tiles were ever generated, so the two slots our-structure.md's
+// own "fixed skeleton" names as daily contact time (12:20-13:05 feedback,
+// 16:45-18:00 supervised lesson planning) had nothing to show on the grid,
+// nothing for the live-now bar to catch, and no subtitle to carry. Day-by-
+// day presence/detail text transcribed directly from Timetable View
+// (standalone).html's own W1-W4 data (the "meta" field per card), not
+// invented -- days 0/9/14/19 have no TP round or a different structure
+// (orientation, FOL divergence, syllabus planning, close) and genuinely
+// carry neither slot in that source. Group letter (DEF/ABC) deliberately
+// left out of `detail` -- which half owns which day only resolves at
+// generation time via rotation.ts's halfTpDates(), not from this static
+// draft, so a hardcoded letter here could easily be wrong for a given
+// course's actual pairing.
+const FEEDBACK_DAYS = [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16];
+const WRITTEN_FEEDBACK_ONLY_DAYS = [17, 18]; // TP8 -- design's own "Final TP, no live session"
+const SUPERVISED_PLANNING_DAYS = [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13]; // rm/"Supervised"
+const BOOKABLE_PLANNING_DAYS = [15, 16, 17]; // iw/"Bookable" -- design shifts category in week 4
+
+const FEEDBACK_AND_LESSON_PLANNING: SkeletonEventDraft[] = [
+  ...FEEDBACK_DAYS.map((day) => ({
+    type: "supervised_session" as const,
+    title: "Feedback",
+    position: pos(day),
+    time: "12:20",
+    tag: "supervised",
+    detail: "Self-evaluations lead",
+  })),
+  ...WRITTEN_FEEDBACK_ONLY_DAYS.map((day) => ({
+    type: "supervised_session" as const,
+    title: "Feedback",
+    position: pos(day),
+    time: "12:20",
+    tag: "supervised",
+    detail: "Written feedback only",
+  })),
+  ...SUPERVISED_PLANNING_DAYS.map((day) => ({
+    type: "supervised_session" as const,
+    title: "Lesson planning",
+    position: pos(day),
+    time: "16:45",
+    tag: "supervised",
+    detail: "Supervised",
+  })),
+  ...BOOKABLE_PLANNING_DAYS.map((day) => ({
+    type: "supervised_session" as const,
+    title: "Lesson planning",
+    position: pos(day),
+    time: "16:45",
+    tag: "individual",
+    detail: "Bookable",
+  })),
+];
+
 export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // Day 0 (Mon) -- orientation, demo, FOL's own teaching slot (FOL is
   // "released" the moment it's taught, not a separate milestone).
-  { type: "milestone", title: "Course begins -- orientation", position: pos(0), time: "10:00", tag: "whole_group" },
+  {
+    type: "milestone",
+    title: "Course begins -- orientation",
+    position: pos(0),
+    time: "10:00",
+    tag: "whole_group",
+    detail: "Timetable, CELTA 5, portfolio",
+  },
   // Ramy's INPUT_WEEKS mapping, 2026-08-18: Day 1 carries three sessions,
   // not one -- the old single "Introduction to CELTA & Learner Needs"
   // placeholder is split into the two real sessions it stood in for.
@@ -83,6 +151,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     linkedAssignmentType: "Focus on Learner",
     inputSessionCriteria: ["1a", "1b", "1c"],
+    detail: "The assignment session",
   },
   {
     type: "input_session",
@@ -137,7 +206,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     inputSessionCriteria: ["2a", "2c"],
   },
-  { type: "milestone", title: "Filmed observation 1", position: pos(2), time: "17:00", tag: "individual" },
+  { type: "milestone", title: "Filmed observation 1", position: pos(2), time: "17:00", tag: "individual", detail: "With task" },
 
   // Day 3-4 (Thu/Fri) -- TP2, one half each day. SRT released day 3
   // (Timetable Refresh.dc.html FULL week 1, "9"), Stage 1 tutorials begin
@@ -159,7 +228,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     inputSessionCriteria: ["3a", "3b", "4c"],
   },
-  { type: "milestone", title: "Language Skills Related Tasks released", position: pos(3), time: "17:00", tag: "whole_group" },
+  { type: "milestone", title: "Language Skills Related Tasks released", position: pos(3), time: "17:00", tag: "whole_group", linkedAssignmentType: "Skills" },
   { type: "tp", title: "TP2 -- Half B", position: pos(4), time: "10:00", tag: "individual", linkedTpNumber: 2 },
   {
     // "overlaps with Language analysis 1 on 4i" (Ramy) -- both rows below
@@ -181,7 +250,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     inputSessionCriteria: ["4i", "2b", "2f"],
   },
-  { type: "milestone", title: "Filmed observation 2", position: pos(4), time: "17:00", tag: "individual" },
+  { type: "milestone", title: "Filmed observation 2", position: pos(4), time: "17:00", tag: "individual", detail: "With task" },
   { type: "milestone", title: "Stage 1 tutorials begin", position: pos(4), time: "14:30", tag: "individual" },
 
   // Day 5-6 (Mon/Tue) -- TP3. Skills (SRT) is due the day after each
@@ -225,7 +294,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     inputSessionCriteria: ["5l"],
   },
-  { type: "milestone", title: "Filmed observation 3", position: pos(6), time: "17:00", tag: "individual" },
+  { type: "milestone", title: "Filmed observation 3", position: pos(6), time: "17:00", tag: "individual", detail: "With task" },
   {
     type: "assignment_due",
     title: "Language Skills Related Tasks -- due 9am (Half A)",
@@ -268,8 +337,8 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     linkedAssignmentType: "Skills",
   },
   { type: "tp", title: "TP4 -- Half B", position: pos(8), time: "10:00", tag: "individual", linkedTpNumber: 4 },
-  { type: "milestone", title: "Filmed observation 4", position: pos(8), time: "17:00", tag: "individual" },
-  { type: "milestone", title: "Language Related Tasks released", position: pos(8), time: "17:00", tag: "whole_group" },
+  { type: "milestone", title: "Filmed observation 4", position: pos(8), time: "17:00", tag: "individual", detail: "With task" },
+  { type: "milestone", title: "Language Related Tasks released", position: pos(8), time: "17:00", tag: "whole_group", linkedAssignmentType: "LRT" },
 
   // Day 9 (Fri) -- no TP: demo lesson 2 / new level, FOL's divergence
   // session (comparing pooled notes before claiming), LRT due for both
@@ -347,7 +416,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     linkedAssignmentType: "Skills",
   },
   { type: "tp", title: "TP6 -- Half B", position: pos(13), time: "10:00", tag: "individual", linkedTpNumber: 6 },
-  { type: "milestone", title: "Lessons from the Classroom released", position: pos(13), time: "17:00", tag: "whole_group" },
+  { type: "milestone", title: "Lessons from the Classroom released", position: pos(13), time: "17:00", tag: "whole_group", linkedAssignmentType: "LfC" },
 
   // Day 14 (Fri) -- no TP: syllabus planning, FOL resubmission due.
   { type: "input_session", title: "Syllabus planning", position: pos(14), time: "10:00", tag: "whole_group" },
@@ -388,7 +457,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // (flagged there as clustering worth spreading out once real pacing is
   // tested -- kept as-is here for the same reason).
   { type: "tp", title: "TP8 -- Half A", position: pos(17), time: "10:00", tag: "individual", linkedTpNumber: 8 },
-  { type: "milestone", title: "Filmed observation 5", position: pos(17), time: "17:00", tag: "individual" },
+  { type: "milestone", title: "Filmed observation 5", position: pos(17), time: "17:00", tag: "individual", detail: "With task" },
   { type: "tp", title: "TP8 -- Half B", position: pos(18), time: "10:00", tag: "individual", linkedTpNumber: 8 },
   { type: "input_session", title: "Reflective Practice & Professional Development", position: pos(18), time: "14:30", tag: "whole_group" },
   {
@@ -410,6 +479,8 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
 
   // Day 19 (Fri) -- close.
   { type: "milestone", title: "Course ends -- final feedback", position: pos(19), time: "15:30", tag: "whole_group" },
+
+  ...FEEDBACK_AND_LESSON_PLANNING,
 ];
 
 // design_handoff_mixed_mode_part_time, for-claude-code-part-time-week-view.md:
@@ -493,7 +564,7 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
   },
 
   { type: "tp", title: "TP1 -- Group ABC", position: partTimePos(2), time: "10:00", tag: "individual", linkedTpNumber: 1 },
-  { type: "milestone", title: "Language Skills Related Tasks released", position: partTimePos(2), time: "17:00", tag: "whole_group" },
+  { type: "milestone", title: "Language Skills Related Tasks released", position: partTimePos(2), time: "17:00", tag: "whole_group", linkedAssignmentType: "Skills" },
   {
     type: "input_session",
     title: "Lesson planning input",
@@ -524,7 +595,7 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     inputSessionCriteria: ["5g", "2c", "2e"],
   },
   { type: "tp", title: "TP2 -- Group DEF", position: partTimePos(5), time: "10:00", tag: "individual", linkedTpNumber: 2 },
-  { type: "milestone", title: "Filmed observation 1", position: partTimePos(5), time: "17:00", tag: "individual" },
+  { type: "milestone", title: "Filmed observation 1", position: partTimePos(5), time: "17:00", tag: "individual", detail: "With task" },
   {
     type: "input_session",
     title: "Teaching vocabulary",
@@ -582,8 +653,8 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     inputSessionCriteria: ["2e", "4i"],
   },
   { type: "tp", title: "TP4 -- Group DEF", position: partTimePos(9), time: "10:00", tag: "individual", linkedTpNumber: 4 },
-  { type: "milestone", title: "Filmed observation 2", position: partTimePos(9), time: "17:00", tag: "individual" },
-  { type: "milestone", title: "Language Related Tasks released", position: partTimePos(9), time: "17:00", tag: "whole_group" },
+  { type: "milestone", title: "Filmed observation 2", position: partTimePos(9), time: "17:00", tag: "individual", detail: "With task" },
+  { type: "milestone", title: "Language Related Tasks released", position: partTimePos(9), time: "17:00", tag: "whole_group", linkedAssignmentType: "LRT" },
   {
     type: "input_session",
     title: "Language analysis 1",
@@ -657,7 +728,7 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     inputSessionCriteria: ["2g"],
   },
   { type: "tp", title: "TP6 -- Group DEF", position: partTimePos(15), time: "10:00", tag: "individual", linkedTpNumber: 6 },
-  { type: "milestone", title: "Filmed observation 3", position: partTimePos(15), time: "17:00", tag: "individual" },
+  { type: "milestone", title: "Filmed observation 3", position: partTimePos(15), time: "17:00", tag: "individual", detail: "With task" },
   {
     type: "input_session",
     title: "Portfolio and record-keeping",
@@ -685,7 +756,7 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     inputSessionCriteria: ["5m", "5n"],
   },
   { type: "tp", title: "TP7 -- Group DEF", position: partTimePos(17), time: "10:00", tag: "individual", linkedTpNumber: 7 },
-  { type: "milestone", title: "Lessons from the Classroom released", position: partTimePos(17), time: "17:00", tag: "whole_group" },
+  { type: "milestone", title: "Lessons from the Classroom released", position: partTimePos(17), time: "17:00", tag: "whole_group", linkedAssignmentType: "LfC" },
   {
     // Second pass -- 4c already introduced in Text-based teaching above,
     // same reinforcing-pass reasoning as full-time.
@@ -699,7 +770,7 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
 
   // TP8 -- the final assessed lesson for each group.
   { type: "tp", title: "TP8 -- Group ABC, final assessed", position: partTimePos(18), time: "10:00", tag: "individual", linkedTpNumber: 8 },
-  { type: "milestone", title: "Filmed observation 4", position: partTimePos(18), time: "17:00", tag: "individual" },
+  { type: "milestone", title: "Filmed observation 4", position: partTimePos(18), time: "17:00", tag: "individual", detail: "With task" },
   {
     // No exact week given for either of the two Week-3+ reinforcing
     // passes in the original mapping (full-time placed them as a
@@ -825,6 +896,7 @@ export function buildSkeletonEvents(
       event_date: addSessionDays(startDate, sessionOffset, meetingDays),
       event_time: draft.time ?? null,
       tag: draft.tag ?? null,
+      detail: draft.detail ?? null,
       linked_assignment_type: draft.linkedAssignmentType ?? null,
       linked_tp_number: draft.linkedTpNumber ?? null,
       input_session_criteria: draft.inputSessionCriteria ?? [],

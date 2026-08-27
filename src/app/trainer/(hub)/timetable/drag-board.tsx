@@ -268,9 +268,9 @@ export function DragBoard({
                               <span className="truncate text-[11px] font-medium text-ink">{event.title}</span>
                             </div>
                             {event.event_time ? <span className="text-[9px] text-muted">{event.event_time.slice(0, 5)}</span> : null}
-                            {live ? (
+                            {live && event.zoom_url ? (
                               <a
-                                href={event.zoom_url ?? undefined}
+                                href={event.zoom_url}
                                 target="_blank"
                                 rel="noreferrer"
                                 onClick={(e) => e.stopPropagation()}
@@ -279,6 +279,11 @@ export function DragBoard({
                                 <span className="size-[4px] shrink-0 rounded-full bg-primary-foreground" />
                                 Join
                               </a>
+                            ) : live ? (
+                              <span className="mt-1 inline-flex w-fit items-center gap-1 self-start rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-primary">
+                                <span className="size-[4px] shrink-0 rounded-full bg-primary" />
+                                Live
+                              </span>
                             ) : null}
                           </div>
                         );

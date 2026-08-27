@@ -474,9 +474,9 @@ export default async function TodayPage() {
                           to open -- the pill is the affordance that was
                           already here, only its label and weight change. */}
                       <p className={`text-[12.5px] text-ink ${live ? "font-semibold" : ""}`}>{event.title}</p>
-                      {live ? (
+                      {live && event.zoom_url ? (
                         <a
-                          href={event.zoom_url ?? undefined}
+                          href={event.zoom_url}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-primary-foreground"
@@ -484,6 +484,11 @@ export default async function TodayPage() {
                           <span className="size-[5px] shrink-0 rounded-full bg-primary-foreground" />
                           Join now
                         </a>
+                      ) : live ? (
+                        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-primary">
+                          <span className="size-[5px] shrink-0 rounded-full bg-primary" />
+                          Live
+                        </span>
                       ) : null}
                     </div>
                   </div>

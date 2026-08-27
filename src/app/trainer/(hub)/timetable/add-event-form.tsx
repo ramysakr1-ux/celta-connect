@@ -82,6 +82,17 @@ export function AddEventForm({
         />
       </div>
       <div className="flex flex-col gap-1.5">
+        <label className="text-sm text-muted">
+          Subtitle (optional -- e.g. &quot;Supervised&quot;, &quot;Observation task&quot;, &quot;Self-evaluations lead&quot;)
+        </label>
+        <input
+          name="detail"
+          type="text"
+          className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        />
+        <p className="text-xs text-muted">Shows as the small line under the title on the trainee&apos;s read-only timetable.</p>
+      </div>
+      <div className="flex flex-col gap-1.5">
         <label className="text-sm text-muted">Zoom link (optional)</label>
         <input
           name="zoom_url"

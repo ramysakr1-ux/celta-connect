@@ -58,6 +58,7 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
   const eventDate = formData.get("event_date");
   const eventTime = (formData.get("event_time") as string | null) || null;
   const tag = (formData.get("tag") as string | null)?.trim() || null;
+  const detail = (formData.get("detail") as string | null)?.trim() || null;
   const zoomUrl = (formData.get("zoom_url") as string | null)?.trim() || null;
   const linkedAssignmentType = (formData.get("linked_assignment_type") as string | null) || null;
   const linkedTpNumberRaw = formData.get("linked_tp_number");
@@ -92,6 +93,7 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
     event_date: eventDate,
     event_time: eventTime,
     tag,
+    detail,
     zoom_url: zoomUrl,
     zoom_meeting_id: extractZoomMeetingId(zoomUrl),
     linked_assignment_type: linkedAssignmentType,
@@ -142,6 +144,30 @@ export async function setInputSessionCriteria(formData: FormData): Promise<void>
 
   const codes = parseCriteriaCodes(formData.get("input_session_criteria") as string | null);
   await supabase.from("course_timetable_events").update({ input_session_criteria: codes }).eq("id", eventId);
+
+  revalidatePath("/trainer/timetable");
+}
+
+// Timetable View (standalone).html's per-card subtitle -- display-only free
+// text, any event type (unlike input_session-only criteria above).
+export async function setEventDetail(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return;
+
+  const eventId = formData.get("event_id");
+  if (typeof eventId !== "string") return;
+
+  const supabase = await createClient();
+  if (!(await requireTimetableEditAccess(supabase, trainer))) return;
+  const { data: event } = await supabase
+    .from("course_timetable_events")
+    .select("id, course_id")
+    .eq("id", eventId)
+    .maybeSingle();
+  if (!event || event.course_id !== trainer.course_id) return;
+
+  const detail = (formData.get("detail") as string | null)?.trim() || null;
+  await supabase.from("course_timetable_events").update({ detail }).eq("id", eventId);
 
   revalidatePath("/trainer/timetable");
 }

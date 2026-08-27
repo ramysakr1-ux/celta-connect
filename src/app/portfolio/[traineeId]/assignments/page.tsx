@@ -12,6 +12,8 @@ import {
   ASSIGNMENT_STATUS_LABEL as STATUS_LABEL,
 } from "@/lib/assignment-info";
 import { DEADLINE_URGENCY_CLASS, getDeadlineUrgency } from "@/lib/deadline";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import type { Database } from "@/lib/supabase/types";
 
 type AssignmentRow = Database["public"]["Tables"]["assignments"]["Row"];
@@ -32,6 +34,39 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
     const { data: trainee } = await supabase.from("profiles").select("course_id").eq("id", traineeId).maybeSingle();
     if (!trainee || trainee.course_id !== assessorCourseId) notFound();
   }
+
+  // Ramy, 27 Aug 2026: "Assignments can stay hidden or gated until their
+  // outdate" -- all four rows are created for every trainee at course-join
+  // time (join/actions.ts, offer/actions.ts), which is a seed-data
+  // convenience, not evidence the brief has actually been set yet. Gate on
+  // the timetable's own record of when each assignment was set (the
+  // earliest course_timetable_events row tagged with that
+  // linked_assignment_type, reaching today) -- same "the timetable is the
+  // spine" principle as everything else, not a second source of truth.
+  const { data: trainee } = await supabase.from("profiles").select("course_id, center_id").eq("id", traineeId).maybeSingle();
+  const timeZone = trainee?.center_id ? ((await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE;
+  const today = toLocalIso(new Date(), timeZone);
+  const { data: settingEvents } = trainee?.course_id
+    ? await supabase
+        .from("course_timetable_events")
+        .select("linked_assignment_type, event_date")
+        .eq("course_id", trainee.course_id)
+        .not("linked_assignment_type", "is", null)
+    : { data: [] };
+  const setDateByAssignmentType = new Map<string, string>();
+  for (const e of settingEvents ?? []) {
+    if (!e.linked_assignment_type) continue;
+    const existing = setDateByAssignmentType.get(e.linked_assignment_type);
+    if (!existing || e.event_date < existing) setDateByAssignmentType.set(e.linked_assignment_type, e.event_date);
+  }
+  const isSet = (assignmentType: string) => {
+    const setDate = setDateByAssignmentType.get(assignmentType);
+    return Boolean(setDate && setDate <= today);
+  };
+  // Staff/assessor previewing always see the full set -- gating is a
+  // candidate-facing pacing device, not a real access restriction (same
+  // reasoning as every other staff-sees-everything carve-out in this app).
+  const isStaffViewer = Boolean(assessorCourseId) || (session?.profile != null && session.profile.role !== "trainee");
 
   const { data: assignmentsRaw } = await supabase.from("assignments").select("*").eq("trainee_id", traineeId);
   // build-spec.md "Assignment 5": "not numbered as a Cambridge assignment
@@ -66,6 +101,7 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
               assignment={a}
               eyebrow={`Assignment ${i + 1}`}
               accentClass={(Math.floor(i / 2) + (i % 2)) % 2 === 0 ? "border-t-[oklch(38%_0.085_155)]" : "border-t-[oklch(42%_0.13_27)]"}
+              locked={!isStaffViewer && !isSet(a.assignment_type)}
             />
           ))
         ) : (
@@ -100,13 +136,30 @@ function AssignmentCard({
   assignment: a,
   eyebrow,
   accentClass,
+  locked,
 }: {
   traineeId: string;
   assignment: AssignmentRow;
+  locked?: boolean;
   eyebrow: string;
   accentClass?: string;
 }) {
   const info = ASSIGNMENT_INFO[a.assignment_type];
+  if (locked) {
+    // "Not yet open" is one of the spec's own named outcome states
+    // (for-claude-code-trainee-interface.md §4) -- gated, not hidden, so a
+    // candidate sees all four exist without being able to open one before
+    // its input session has actually taught it.
+    return (
+      <div className={`sheet flex h-full flex-col rounded-[9px] border-t-[3px] border-dashed p-5 opacity-60 ${accentClass ?? "border-t-[var(--trainee-plum)]"}`}>
+        <div>
+          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{eyebrow}</p>
+          <h3 className="font-serif text-lg text-ink">{info.title}</h3>
+        </div>
+        <p className="mt-2 text-sm text-muted">Not yet open -- this appears once the input session that sets it has run.</p>
+      </div>
+    );
+  }
   return (
     <Link
       href={`/portfolio/${traineeId}/assignments/${a.id}`}

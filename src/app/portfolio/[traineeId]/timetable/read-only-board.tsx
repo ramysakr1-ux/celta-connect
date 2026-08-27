@@ -369,6 +369,7 @@ function SessionTile({
       <span className="text-[11.5px] leading-snug text-ink" style={{ fontWeight: titleWeight }}>
         {event.title}
       </span>
+      {event.detail ? <span className="text-[10px] text-muted">{event.detail}</span> : null}
       {letters || event.event_time ? (
         <span className="text-[10px] text-muted">
           {event.event_time?.slice(0, 5)}

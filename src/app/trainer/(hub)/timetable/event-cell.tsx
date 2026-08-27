@@ -1,5 +1,5 @@
 import { categorize, isEventLive, type TimetableEvent } from "@/lib/timetable-grid";
-import { setAttendance, setInputSessionCriteria, setTpEventMode } from "@/app/trainer/(hub)/timetable/actions";
+import { setAttendance, setEventDetail, setInputSessionCriteria, setTpEventMode } from "@/app/trainer/(hub)/timetable/actions";
 import { DeleteEventButton } from "@/app/trainer/(hub)/timetable/delete-event-button";
 
 export type Volunteer = { id: string; name: string };
@@ -94,6 +94,28 @@ function EventRow({
         <span className="mt-0.5 block text-[10px] text-muted">{event.tag}</span>
       ) : null}
       <JoinChip event={event} now={now} />
+      {!locked ? (
+        <details className="mt-1">
+          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
+            {event.detail ? `Subtitle: ${event.detail}` : "Set subtitle"}
+          </summary>
+          <form action={setEventDetail} className="sheet mt-1 flex flex-col gap-1 p-2.5 text-xs">
+            <input type="hidden" name="event_id" value={event.id} />
+            <input
+              name="detail"
+              type="text"
+              defaultValue={event.detail ?? ""}
+              placeholder="Supervised, Observation task…"
+              className="rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
+            />
+            <button type="submit" className="mt-0.5 self-start rounded-[6px] border border-border px-2 py-0.5 trainer-hover-fill">
+              Save
+            </button>
+          </form>
+        </details>
+      ) : event.detail ? (
+        <span className="mt-0.5 block text-[10px] text-muted">{event.detail}</span>
+      ) : null}
       {event.type === "input_session" ? (
         <details className="mt-1">
           <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.12em] text-muted hover:text-ink">
