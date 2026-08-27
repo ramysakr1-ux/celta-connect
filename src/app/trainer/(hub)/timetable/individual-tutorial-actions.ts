@@ -69,7 +69,7 @@ export async function createOrUpdateIndividualTutorialInvite(_prevState: FormSta
   const halfOrder = subgroup?.half_order === 1 || subgroup?.half_order === 2 ? subgroup.half_order : null;
   const traineesTpDates = halfOrder ? halfTpDates(tpEvents ?? [], halfOrder) : distinctTpDates(tpEvents ?? []);
   if (traineesTpDates.includes(eventDate)) {
-    return { error: `${traineeName} is teaching a TP lesson on ${eventDate} -- a candidate can't teach twice in one day (Handbook 8.1.4). Pick a different date.` };
+    return { error: `${traineeName} is teaching a TP lesson on ${eventDate} -- a candidate can't teach twice in one day (Handbook 9.1.3). Pick a different date.` };
   }
 
   const { data: existing } = await supabase

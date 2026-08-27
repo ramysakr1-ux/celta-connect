@@ -30,9 +30,9 @@ Read this first, then the full spec.
 
 **9 · Learner recordings are never auto-transcribed.** Speech recognition repairs the errors that are the evidence. Prompts become timeline markers with loop and slow playback instead; candidates transcribe what they quote.
 
-**10 · Written tasks come before acceptance** (Handbook 6.2), and **special-arrangements requests reach Cambridge before acceptance** (6.4). Both block the Accept action rather than appearing as tasks. The task itself opens in Connect and is never emailed as an attachment; the **pre-course** task is self-check, so nothing is handed in and the answer key is released to the whole cohort at a point the centre sets.
+**10 · Written tasks come before acceptance** (Handbook 7.2), and **special-arrangements requests reach Cambridge before acceptance** (7.4). Both block the Accept action rather than appearing as tasks. The task itself opens in Connect and is never emailed as an attachment; the **pre-course** task is self-check, so nothing is handed in and the answer key is released to the whole cohort at a point the centre sets.
 
-**11 · Rejected applicants' records are never deleted** (11.2). They stay in the pipeline marked not accepted — the assessor asks for them, and a centre with no rejections looks like one that accepts everybody.
+**11 · Rejected applicants' records are never deleted** (12.2). They stay in the pipeline marked not accepted — the assessor asks for them, and a centre with no rejections looks like one that accepts everybody.
 
 **11a · The app never writes a rejection.** A reading of the written task triages into three lanes — clear books an interview automatically after a fifteen-minute hold, borderline queues for a human, clear problems notify a tutor. At no confidence and under no setting does software refuse an applicant, because a candidate turned down can ask why and the answer has to be a person's words. Auto-booking is switched on only after shadow mode has produced evidence for the threshold.
 
@@ -42,7 +42,7 @@ Read this first, then the full spec.
 
 **12a · Marked is not verified, and the record says which.** A card payment reads *Confirmed* because a provider said so; a transfer or cash reads *Marked by* and a name. The same distinction governs everything Connect cannot check for itself — it holds the centre's assertion and who made it, never a tick that implies proof. Connect never holds money and never decides a refund.
 
-**12b · Leaving mid-course has three shapes, and the halfway point decides.** Below it, a **centre deferral** — the centre's own arrangement under 6.9, a place on a later course without a new fee, no Appian form, recorded on both courses. Above it, a **Cambridge deferral** — Appian form, Cambridge confirms, grade recorded as deferred, six months from the end of the original course for full-time and twelve for part-time, same mode unless agreed in writing and familiarisation owed if it changes. The app refuses to record a centre deferral past the halfway point.
+**12b · Leaving mid-course has three shapes.** In the first half, a **fee-free restart** — the centre's own arrangement under 7.9, a place on a later course without a new fee, no Appian form, passed assessment carries (the app's "restart" mode). Once part of the course is complete, a **deferral** instead — Appian form, Cambridge confirms, grade recorded as deferred, six months from the end of the original course for full-time and twelve for part-time, same mode unless agreed in writing and familiarisation owed if it changes. Corrected 2026-08-27: June 2025 dropped the halfway-point split this paragraph used to describe and the numeric threshold the app used to enforce -- deferral is the centre's discretionary call at any point, gated instead on consulting Cambridge English first, not on hours completed.
 
 ---
 

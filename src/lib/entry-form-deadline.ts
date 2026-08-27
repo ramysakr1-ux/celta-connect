@@ -2,12 +2,12 @@ import type { Database } from "@/lib/supabase/types";
 
 type DeliveryMode = Database["public"]["Tables"]["courses"]["Row"]["delivery_mode"];
 
-// Handbook 3.1 / build-spec.md §9: "Course dates to Cambridge four weeks
+// Handbook 4.1 / build-spec.md §9: "Course dates to Cambridge four weeks
 // ahead (Moodle) or two weeks (other) -- derive from start date and mode."
 // "Moodle" means online input (course-modes.md: online courses deliver
 // input "online via Moodle and/or centre platform"); a mixed course still
 // has its TP location on-site (mode is defined by TP location per
-// Handbook 2.2.1, not input location, per for-claude-code-course-admin.md),
+// Handbook 3.3, not input location, per for-claude-code-course-admin.md),
 // so it follows f2f's two-week rule here, not online's four.
 const MOODLE_LEAD_DAYS = 28;
 const OTHER_LEAD_DAYS = 14;

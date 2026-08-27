@@ -100,7 +100,7 @@ export default async function AssessorPage({
       ? admin.from("course_timetable_events").select("*").eq("course_id", courseId).eq("event_date", course.assessor_visit_date).order("event_time")
       : Promise.resolve({ data: [] }),
     admin.from("resources").select("id, title, file_url").eq("center_id", course.center_id).eq("category", "centre_documents"),
-    // course-modes.md §7 (Handbook 2.2.2): "Moodle content ... must be
+    // course-modes.md §7 (Handbook 3.4): "Moodle content ... must be
     // augmented with centre-delivered online input. Assessors must be given
     // a schedule showing which Moodle sections candidates were asked to
     // complete and what input the centre provided ... nothing generates it
@@ -565,7 +565,7 @@ export default async function AssessorPage({
                 >
                   <p style={{ fontSize: 11.5, color: MUTED }}>
                     Which Moodle sections candidates were asked to complete, and the centre-delivered input that
-                    augmented each one (Handbook 2.2.2).
+                    augmented each one (Handbook 3.4).
                   </p>
                   {moodleSchedule.map((s) => (
                     <div key={s.id} style={{ fontSize: 12.5 }}>

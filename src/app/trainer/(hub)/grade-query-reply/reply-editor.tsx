@@ -60,7 +60,7 @@ export function ReplyEditor({
           value={whatNext}
           onChange={(e) => setWhatNext(e.target.value)}
           rows={4}
-          placeholder="e.g. The centre's Internal Complaints Procedure (Handbook 15), and then Cambridge Appeal Stage One..."
+          placeholder="e.g. The centre's Internal Complaints Procedure (Handbook 16), and then Cambridge Appeal Stage One..."
           className="rounded-[6px] border border-border bg-card px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
       </div>

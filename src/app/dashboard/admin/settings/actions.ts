@@ -263,7 +263,7 @@ export async function deleteStyleExample(formData: FormData): Promise<void> {
 }
 
 // for-claude-code-malpractice-outcomes.md: the centre's own malpractice
-// policy, not a list Connect invents (Handbook 8.2.4). No update action --
+// policy, not a list Connect invents (Handbook 9.2.4). No update action --
 // these are short, occasionally-set policy lines; deleting and re-adding
 // covers a correction without needing a second form.
 export async function addMalpracticeOutcomeOption(

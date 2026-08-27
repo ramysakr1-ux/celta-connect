@@ -30,7 +30,7 @@ The 120-hour total must break down into exactly the syllabus's named categories,
 
 ## 3 · Asynchronous input requires a linked live session
 
-**Handbook 2.2** — recorded or Moodle input "must always be combined with opportunities for live follow-up discussion".
+**Handbook 3.4** — recorded or Moodle input "must always be combined with opportunities for live follow-up discussion".
 
 An input session card already holds slides, handouts, recordings and links. Add a flag: is this session **delivered** asynchronously, or does it merely have a recording of a live session?
 
@@ -76,9 +76,9 @@ This is the only category currently missing from the resource hub, and it is the
 
 Two items from the audit are deliberately **not** enforced:
 
-**The eight-student class average** (8.1.3). Derive it from the register and show it as a live figure. Do not warn and do not block — a centre cannot make volunteers turn up, and the honest answer to an assessor is the register itself.
+**The eight-student class average** (9.1.3). Derive it from the register and show it as a live figure. Do not warn and do not block — a centre cannot make volunteers turn up, and the honest answer to an assessor is the register itself.
 
-**Assessor reuse limits** (12.3). A centre does not choose its assessor and repeat visits are common. Keep the assessor history per centre so it can be seen; do not flag it.
+**Assessor reuse limits** (13.3). A centre does not choose its assessor and repeat visits are common. Keep the assessor history per centre so it can be seen; do not flag it.
 
 ## Changed by decision
 

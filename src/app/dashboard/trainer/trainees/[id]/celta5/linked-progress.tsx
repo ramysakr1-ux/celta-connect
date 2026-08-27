@@ -32,7 +32,7 @@ export function AssessedTpStatsBadge({ stats, byMode }: { stats: AssessedTpStats
         {MIN_LEVELS_REQUIRED} required)
       </span>
       {byMode ? (
-        // course-modes.md §2 (Handbook 8.1.2): "at least two of the six
+        // course-modes.md §2 (Handbook 9.1.2): "at least two of the six
         // assessed hours in each mode" -- mixed-mode courses only.
         <span
           className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${

@@ -28,7 +28,7 @@ export interface FailRiskDraft {
 // starting point for the two prose fields (action points, closing) a
 // trainer can still edit before issuing. "Two lessons still to teach" is
 // read from plan_assignments (taught_at is null), the closest real signal
-// to Admin Handbook 9.2's timing requirement.
+// to Admin Handbook 10.2's timing requirement.
 export async function buildFailRiskDraft(
   supabase: SupabaseClient<Database>,
   courseId: string,

@@ -109,7 +109,7 @@ export default async function TodayPage() {
       : { data: [] };
   const assignmentsWithFindings = new Set((unreviewedFindings ?? []).map((f) => f.assignment_id)).size;
 
-  // Handbook 8.2: "raise as a note to the tutor, never an accusation" --
+  // Handbook 9.2: "raise as a note to the tutor, never an accusation" --
   // same bare-count, no-names treatment as the plagiarism line above.
   const materialsOverlapCount = new Set(materialsOverlaps.map((f) => f.assignmentId)).size;
 

@@ -1,9 +1,9 @@
-// for-claude-code-concurrent-course-checks.md, Handbook 2.4 (exact text
+// for-claude-code-concurrent-course-checks.md, Handbook 3.7 (exact text
 // quoted there): a tutor engaged on two concurrent full-time courses is
 // blocked outright (well-being/quality rule, not a capacity guess);
 // full-time + part-time is explicitly allowed; multiple part-time courses
 // is allowed but treated as a soft/visible judgment call, same tier as the
-// assessor rule (12.3, out of scope for this function -- assessor is
+// assessor rule (13.3, out of scope for this function -- assessor is
 // visible-only, never blocked, per the same doc).
 //
 // Scope is decided by the caller: "same centre only", and "trainee/TinT
@@ -48,7 +48,7 @@ export function checkConcurrentCourseAssignment(
       level: "blocked",
       course: fullTimeClash,
       reason:
-        "This tutor is already on another full-time course over this period. Handbook 2.4: a tutor must not be engaged on more than one full-time course concurrently.",
+        "This tutor is already on another full-time course over this period. Handbook 3.7: a tutor must not be engaged on more than one full-time course concurrently.",
     };
   }
 
@@ -58,7 +58,7 @@ export function checkConcurrentCourseAssignment(
       level: "warn",
       course: partTimeClash,
       reason:
-        "This tutor is already on another part-time course over this period. Handbook 2.4 allows this, but asks the same well-being/quality judgment to be applied.",
+        "This tutor is already on another part-time course over this period. Handbook 3.7 allows this, but asks the same well-being/quality judgment to be applied.",
     };
   }
 

@@ -172,7 +172,7 @@ Every observation — live or filmed — is a card on its timetable slot, carryi
 - the **materials** used
 - the **observation task**, completed by each candidate
 
-The completed task goes into the candidate's portfolio the way a self-evaluation does. So six hours of directed observation is six cards and six completed tasks per candidate, and when the assessor asks for evidence of 9.1 it assembles itself.
+The completed task goes into the candidate's portfolio the way a self-evaluation does. So six hours of directed observation is six cards and six completed tasks per candidate, and when the assessor asks for evidence of 10.1 it assembles itself.
 
 This is what makes it *directed* rather than watching, which is the handbook's own word. **A demo or filmed observation cannot be timetabled without a task attached** — the same rule as a teaching practice slot without a TP point.
 

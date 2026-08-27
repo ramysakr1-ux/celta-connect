@@ -425,7 +425,7 @@ export default async function CentreOverviewPage({
                 <span className="text-xs text-muted">
                   {assessorHistory.length} {assessorHistory.length === 1 ? "assessor" : "assessors"}
                   {assessorHistory.some((a) => a.flag)
-                    ? ` · ${assessorHistory.filter((a) => a.flag).length} at or over a Handbook 12.3 limit`
+                    ? ` · ${assessorHistory.filter((a) => a.flag).length} at or over a Handbook 13.3 limit`
                     : ""}
                 </span>
               </div>

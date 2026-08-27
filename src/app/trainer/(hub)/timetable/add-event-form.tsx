@@ -171,7 +171,7 @@ export function AddEventForm({
                 ))}
               </select>
               <p className="text-xs text-muted">
-                Handbook 2.2: recorded or Moodle input must always be combined with a live follow-up
+                Handbook 3.4: recorded or Moodle input must always be combined with a live follow-up
                 discussion. Required before the timetable can be locked.
               </p>
             </>

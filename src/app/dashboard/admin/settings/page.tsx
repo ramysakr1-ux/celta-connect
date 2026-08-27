@@ -265,7 +265,7 @@ export default async function AdminSettingsPage({
           <div id="malpractice-outcomes" className="card scroll-mt-6 p-6">
             <h2 className="font-serif text-lg text-ink">Malpractice outcomes</h2>
             <p className="mt-2 text-muted">
-              Handbook 8.2.4 requires your own internal policy on plagiarism/malpractice penalties --
+              Handbook 9.2.4 requires your own internal policy on plagiarism/malpractice penalties --
               Connect never invents one. Add each outcome your policy names, and whether it fails the
               assignment and/or refers the case to your own procedure. A tutor deciding a case picks
               from this list. Leave it empty to keep the plain Upheld / Not upheld decision.

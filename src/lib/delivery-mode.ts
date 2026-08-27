@@ -1,7 +1,7 @@
 import { halfTpDates } from "@/lib/rotation";
 
 // Centre Admin.dc.html 2a -- delivery mode is asked once at course setup.
-// Text below is lifted verbatim from that reference (Handbook 2.2.1/2.2.2
+// Text below is lifted verbatim from that reference (Handbook 3.3/3.4
 // paraphrase already vetted by Ramy's design pass), not reworded here.
 export type DeliveryMode = "f2f" | "online" | "mixed";
 
@@ -125,7 +125,7 @@ export interface Stage3ModeLockCheck {
   mismatched: boolean;
 }
 
-// connect-spec-corrections-for-claude-code.md item 1 (Handbook 9.2): "the
+// connect-spec-corrections-for-claude-code.md item 1 (Handbook 10.2): "the
 // final two assessed TP lessons must be in the same mode of delivery," for
 // a mixed-mode candidate who both gets a Stage 3 tutorial and is borderline
 // Pass/Fail (the VALID_SLASH_PAIRS "Fail/Pass" slash, celta5-actions.ts).

@@ -58,7 +58,7 @@ export async function toggleCambridgeGradesConfirmed(formData: FormData): Promis
   revalidatePath("/trainer/grades-report");
 }
 
-// build-spec.md compliance-audit item 10 (Handbook 10.5): "Certificates
+// build-spec.md compliance-audit item 10 (Handbook 11.5): "Certificates
 // checked against the recommended grades on arrival; Cambridge contacted
 // immediately on an error." The mismatch itself isn't computed here --
 // CertificateCheckCard reads final_recommended_grade vs certificate_grade

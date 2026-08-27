@@ -97,7 +97,7 @@ Nine new screens and four corrections to existing behaviour. Nothing here change
 
 **Six months runs from the issuing of results, and the deferral window from the end of the original course.** Two different anchors. The deferral window is six months if the *original* course was full-time, twelve if it was part-time — set by the course they left, not the one they return on.
 
-**A mode change on a Cambridge deferral obliges familiarisation activities** (6.9). That is a requirement, not a note.
+**A mode change on a Cambridge deferral obliges familiarisation activities** (7.9). That is a requirement, not a note.
 
 **The grade explanation must be generated before close-out.** After the export there is nothing to generate it from. It goes inside each portfolio alongside the CELTA 5.
 

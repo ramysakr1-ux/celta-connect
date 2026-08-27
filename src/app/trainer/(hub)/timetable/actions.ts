@@ -96,7 +96,7 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
     zoom_meeting_id: extractZoomMeetingId(zoomUrl),
     linked_assignment_type: linkedAssignmentType,
     linked_tp_number: linkedTpNumber && linkedTpNumber >= 1 && linkedTpNumber <= 8 ? linkedTpNumber : null,
-    // Only meaningful on input_session rows -- Handbook 2.2: async input
+    // Only meaningful on input_session rows -- Handbook 3.4: async input
     // needs a real linked live follow-up slot, not free text.
     is_asynchronous: type === "input_session" ? isAsynchronous : false,
     linked_live_session_event_id: type === "input_session" ? linkedLiveSessionEventId : null,
@@ -456,7 +456,7 @@ export async function setTimetableLock(formData: FormData): Promise<void> {
       redirect("/trainer/timetable?lock_error=async_missing_link");
     }
 
-    // build-spec.md compliance-audit item 1 (Handbook 8.1.4): "A candidate
+    // build-spec.md compliance-audit item 1 (Handbook 9.1.3): "A candidate
     // cannot teach twice in one day." Under correct rotation (rotation.ts'
     // distinctTpDates/halfTpDates), one calendar date hosts exactly one TP
     // round -- one half teaching, the other not. That invariant can only be
@@ -480,7 +480,7 @@ export async function setTimetableLock(formData: FormData): Promise<void> {
       redirect(`/trainer/timetable?lock_error=tp_double_booked&date=${doubleBookedDate}`);
     }
 
-    // course-modes.md §1 (Handbook 2.2.3), the last piece of delivery-
+    // course-modes.md §1 (Handbook 3.5), the last piece of delivery-
     // mode.ts's "not yet built" list: "A TP group teaches in only one mode
     // at a time... never a mix inside one group at one stage." Checked per
     // half (each half's own ordered TP rounds, via rotation.ts'
@@ -507,7 +507,7 @@ export async function setTimetableLock(formData: FormData): Promise<void> {
       }
     }
 
-    // connect-spec-corrections-for-claude-code.md item 2 (Handbook 8.1.4):
+    // connect-spec-corrections-for-claude-code.md item 2 (Handbook 9.1.3):
     // "no more than 6 consecutive days of TP before the break" -- refuse,
     // not just the rotation page's existing advisory display
     // (checkIntensiveTpBreaks was already computing this, just never

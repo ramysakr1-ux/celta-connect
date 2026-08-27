@@ -60,7 +60,7 @@ function CertificateRow({ courseId, candidate }: { courseId: string; candidate: 
   );
 }
 
-// build-spec.md compliance-audit item 10 (Handbook 10.5): "Certificates
+// build-spec.md compliance-audit item 10 (Handbook 11.5): "Certificates
 // checked against the recommended grades on arrival; Cambridge contacted
 // immediately on an error." Only candidates with a final recommended grade
 // are shown -- nothing to check a certificate against otherwise.

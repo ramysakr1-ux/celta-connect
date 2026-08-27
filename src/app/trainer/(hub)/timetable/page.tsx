@@ -327,28 +327,28 @@ export default async function TrainerTimetablePage({
           {lock_error === "async_missing_link" ? (
             <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
               Can&apos;t lock -- an asynchronous input session has no linked live follow-up slot (Handbook
-              2.2). Add the link on that session, or add the live slot first.
+              3.4). Add the link on that session, or add the live slot first.
             </div>
           ) : null}
 
           {lock_error === "tp_double_booked" ? (
             <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
               Can&apos;t lock -- two TP rounds are scheduled on {lockErrorDate ?? "the same date"}, which means a
-              candidate would be teaching twice in one day (Handbook 8.1.4). Move one of the rounds to a different date.
+              candidate would be teaching twice in one day (Handbook 9.1.3). Move one of the rounds to a different date.
             </div>
           ) : null}
 
           {lock_error === "mode_not_blocked" ? (
             <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
               Can&apos;t lock -- {lockErrorHalf ? `group ${lockErrorHalf}'s` : "a group's"} TP rounds switch between
-              face-to-face and online more than once (Handbook 2.2.3). Each half teaches one mode, then the other --
+              face-to-face and online more than once (Handbook 3.5). Each half teaches one mode, then the other --
               not a mix. Check each TP round&apos;s mode in its detail panel.
             </div>
           ) : null}
 
           {lock_error === "intensive_no_break" ? (
             <div className="sheet border-destructive/30 bg-destructive/10 text-sm text-destructive">
-              Can&apos;t lock -- {lockErrorRun ?? "several"} TP days in a row with no break (Handbook 8.1.4). No more
+              Can&apos;t lock -- {lockErrorRun ?? "several"} TP days in a row with no break (Handbook 9.1.3). No more
               than 6 consecutive TP days without a two-day break in the middle. Move a session to open a gap.
             </div>
           ) : null}

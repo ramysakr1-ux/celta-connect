@@ -155,7 +155,7 @@ export function CohortSheet({
           )}
           {undecidedRows.length > 0 ? (
             <p className="border-t border-border-faint px-4 py-2.5 text-[11px] leading-relaxed text-muted">
-              Admin Handbook 9.2: a fail-risk letter must be issued with at least two assessed lessons still to
+              Admin Handbook 10.2: a fail-risk letter must be issued with at least two assessed lessons still to
               teach -- issued from each candidate&apos;s own CELTA 5 page, not from here.
             </p>
           ) : null}

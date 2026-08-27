@@ -178,12 +178,12 @@ export function computeAssessedTpStats(input: {
 export interface AssessedHoursByMode {
   f2fHours: number;
   onlineHours: number;
-  meetsFloor: boolean; // both modes have reached the 2-hour minimum (Handbook 8.1.2)
+  meetsFloor: boolean; // both modes have reached the 2-hour minimum (Handbook 9.1.2)
 }
 
 const MODE_HOURS_FLOOR = 2;
 
-// specs/course-modes.md §2 (Handbook 8.1.2): "At least two of the six
+// specs/course-modes.md §2 (Handbook 9.1.2): "At least two of the six
 // assessed hours in each mode." Only meaningful on a mixed-mode course --
 // resolves each taught TP's calendar date from the trainee's own half
 // (rotation.ts' halfTpDates, tp_number is 1-based into that ordered list,

@@ -62,7 +62,7 @@ export interface IntensiveTpBreakCheck {
   hasTwoDayBreak: boolean;
 }
 
-// Handbook 8.1.4: "two-day minimum break midway, no more than six
+// Handbook 9.1.3: "two-day minimum break midway, no more than six
 // consecutive TP days." Computed straight from the real timetable
 // (course_timetable_events, type='tp'), never a stored setting.
 // connect-spec-corrections-for-claude-code.md item 2 upgraded

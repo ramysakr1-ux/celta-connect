@@ -71,7 +71,7 @@ export default async function CourseAdminDetailPage({
   const courseState = computeCourseState(course.start_date, course.end_date, today);
   const weekOf = courseState === "running" ? computeWeekOf(course.start_date, course.end_date, today) : null;
 
-  // §5a (Handbook §6): soft warning only, never a gate -- centres get
+  // §5a (Handbook §7): soft warning only, never a gate -- centres get
   // case-by-case Cambridge approval for smaller courses by email.
   const belowMinimum = courseState !== "closed" && acceptedCount > 0 && acceptedCount < MIN_CANDIDATES;
 
@@ -146,7 +146,7 @@ export default async function CourseAdminDetailPage({
         )}
         {belowMinimum ? (
           <p className="text-sm text-status-warning-text">
-            {acceptedCount} accepted -- below the minimum of {MIN_CANDIDATES} (Handbook §6). Contact Cambridge (JCA) if
+            {acceptedCount} accepted -- below the minimum of {MIN_CANDIDATES} (Handbook §7). Contact Cambridge (JCA) if
             this doesn&apos;t change before the start date.
           </p>
         ) : null}
@@ -175,7 +175,7 @@ export default async function CourseAdminDetailPage({
         {!course.entry_form_sent_at ? (
           <p className={`text-sm ${entryFormOverdue ? "font-semibold text-destructive" : "text-muted"}`}>
             {entryFormOverdue ? "Overdue" : "Due"} {entryFormDeadline} -- {course.delivery_mode === "online" ? "four" : "two"} weeks before
-            the course starts (Handbook 3.1).
+            the course starts (Handbook 4.1).
           </p>
         ) : (
           <p className="text-sm text-ink">Marked sent {course.entry_form_sent_at.slice(0, 10)}.</p>

@@ -27,19 +27,19 @@ These came from Cambridge's syllabus, the CELTA 5 booklet, the centre's own assi
 - A withdrawn candidate **leaves an empty slot**. Positions of the others do not change. Do not re-derive.
 - Observation is **not transferable**. A tutor may not mark a lesson they did not watch. If a tutor leaves, the replacement observes the next lesson themselves.
 
-**Observation of experienced teachers — Admin Handbook 9.1**
+**Observation of experienced teachers — Admin Handbook 10.1**
 - Six hours' directed observation of experienced ELT professionals. All six may be live; **a maximum of three hours may be filmed**. Filmed observation counts toward the six.
 - **Peer observation cannot be included** in the six hours. It is required as a course activity (candidates attend TP in groups so peer observation can take place) but is never counted here.
 - **Demonstration classes** taught by a tutor or other experienced teacher and observed by trainees **do count** — a demo class led by a tutor with the TP students is recommended.
 - Mixed-mode courses: candidates should observe **both online and face-to-face** lessons. Moodle courses: three hours come from the online materials, three must be live from the centre.
 - The record of attendance at observed classes goes in the **CELTA 5**; the observed teacher signs it **where the centre requires** — so the signature column is centre-optional, not always shown.
 
-**Teaching practice — Admin Handbook 10.2**
+**Teaching practice — Admin Handbook 9.1.3**
 - All assessed TP must be observed by a **verified** CELTA tutor, and each candidate must be observed/assessed by **a minimum of two tutors** during the course.
 - **Five of the six assessed hours must be whole-class teaching.** One assessed lesson may be one-to-one or paired, where the course programme includes one-to-one teaching.
 - Maximum TP length is **3 hours per day** for tutors and candidates.
 
-**Assessor visit — Admin Handbook 13.1 / 13.2**
+**Assessor visit — Admin Handbook 14.1 / 14.2**
 
 The pack must contain, in addition to portfolios:
 - individual **descriptions of the candidates with photographs** where possible
@@ -51,7 +51,7 @@ The pack must contain, in addition to portfolios:
 - **attendance registers for the language students** attending TP classes (the volunteer register). **This is the only register the assessor pack needs.** Candidate attendance is not a separate list — it is recorded in the CELTA 5 and nowhere else, and no candidate attendance register should be built for the pack.
 - a **sample candidate end-of-course report**
 - a copy of the **last assessor's report**, shared by secure means
-- the **double-marking record** (8.2.3)
+- the **double-marking record** (9.2.3)
 - face-to-face only: map and accommodation details
 
 Portfolio selection — a minimum of four, made up of:
@@ -106,7 +106,7 @@ The grid is **its own page**, not a panel on the timetable: six candidates write
 *The suggestion is arithmetic, not judgement.* Across TP7 and TP8 each candidate should teach **one skills lesson and one language lesson, and each should be a type they have not taught before**. The grid reads their six completed TPs, finds the two gaps, and proposes. **Any type can be chosen.** Overriding the suggestion asks for one line of reasoning, which appears in the tutor's view and in the TP record. Two overrides in a group of six is a normal number, not a flag.
 
 **Peer observation — the shared sheet**
-- Peer observation is a required course activity but **never counts toward the six hours** (Admin Handbook 9.1). Log it separately; keep it out of the six-hour tally.
+- Peer observation is a required course activity but **never counts toward the six hours** (Admin Handbook 10.1). Log it separately; keep it out of the six-hour tally.
 - **Five take notes during each lesson** — everyone in the group of six except the candidate teaching. Notes are private while being written; one sheet per lesson.
 - **Two prompts per note, never more, and both are single-line boxes.** An observer is there to watch a lesson, not to type through one — the note should take under a minute and read as a jotting. Cap each at roughly 140 characters and let it be obvious from the box height. Anything longer gets filled in carelessly, and short notes make for sharper feedback.
 - **The task is generated from the criterion the cohort is working on**, which comes from that week's input session. Week one asks about instructions (4c), week four about staging and pace. The same criterion is what tutors mark on each candidate's own next lesson — so watching for it and being assessed on it are the same act. This is the thread: input session → criterion → TP point → peer task → TP feedback.
@@ -254,7 +254,7 @@ So Connect never writes to Appian. It holds the course number, records that each
 
 Record `courses.appian_course_number`, and timestamps for provisionals-entered, number-sent-to-assessor, grade-meeting-held, final-report-sent. Those five facts are what a centre needs to answer "where are we".
 
-**Trainers-in-training — Admin Handbook 2.4.4 and 2.4.5**
+**Trainers-in-training — Admin Handbook 3.7.4 and 3.7.5**
 
 A person learning to become a CELTA tutor, working on a live course under supervision. Not a fifth candidate role and not a tutor role — a distinct status with its own rules.
 
@@ -280,18 +280,18 @@ A person learning to become a CELTA tutor, working on a live course under superv
 - **Freelance tutors**: check verification before employing, request references from two previous centres, include liaison time in the terms. They must respond quickly after the course, **particularly on candidate appeals** — so a freelance tutor's access cannot be cut at close-out while an appeal window is open.
 - Centres **send freelance tutors the assessor's recommendations**, but **must not copy them the report** — they may see it at the centre. That is a real permission rule: report visible on site, not exportable to a freelancer.
 
-**Application and selection — Admin Handbook 6.2 and 6.3**
+**Application and selection — Admin Handbook 7.2 and 7.3**
 
 Applicants are **first-class records, not uploaded documents.** The file exists from first contact; an accepted applicant becomes a candidate with nothing retyped. See `Applications.dc.html`.
 
-- **Entry requirements (6.3), all four required.** At least 18 — Cambridge recommends 20 or over, 18–20 at the centre's discretion. An awareness of language and competence in written and spoken English sufficient to undertake the course and prepare to teach a range of levels — recommended level C2 or C1+. A standard of education equivalent to that required for entry into higher education; where formal qualifications are absent, the centre may accept at its discretion if screening is convincing, and the evidence must be recorded. CELTA is for applicants with little or no ELT experience; some experience with little formal training may be considered.
-- **Selection process (6.2).** Selection is conducted by **verified course tutors** or a nominated person at the centre. **All applicants must be interviewed** — online or face to face, in surroundings where privacy can be assured. **All applicants must submit written tasks before being accepted**, and those tasks must include **language awareness tasks and an extended writing task**. For courses with an online TP element, the interview should be conducted online on the centre's teaching platform, and the process must assess **digital literacy**.
-- **The extended writing task offers a choice of prompt.** The centre defines three or four — one narrative, one descriptive, one argumentative — and the applicant picks one. Three or four, not ten: enough that nobody is stuck with a prompt they have nothing to say about, few enough that a tutor knows them by heart. **The marking criteria do not change with the prompt** (organisation, accuracy, range, holding a position for 400 words), which is what keeps the writing comparable and a rejection defensible under 6.2. Record which prompt they chose — the choice is itself a small piece of evidence.
+- **Entry requirements (7.3), all four required.** At least 18 — Cambridge recommends 20 or over, 18–20 at the centre's discretion. An awareness of language and competence in written and spoken English sufficient to undertake the course and prepare to teach a range of levels — recommended level C2 or C1+. A standard of education equivalent to that required for entry into higher education; where formal qualifications are absent, the centre may accept at its discretion if screening is convincing, and the evidence must be recorded. CELTA is for applicants with little or no ELT experience; some experience with little formal training may be considered.
+- **Selection process (7.2).** Selection is conducted by **verified course tutors** or a nominated person at the centre. **All applicants must be interviewed** — online or face to face, in surroundings where privacy can be assured. **All applicants must submit written tasks before being accepted**, and those tasks must include **language awareness tasks and an extended writing task**. For courses with an online TP element, the interview should be conducted online on the centre's teaching platform, and the process must assess **digital literacy**.
+- **The extended writing task offers a choice of prompt.** The centre defines three or four — one narrative, one descriptive, one argumentative — and the applicant picks one. Three or four, not ten: enough that nobody is stuck with a prompt they have nothing to say about, few enough that a tutor knows them by heart. **The marking criteria do not change with the prompt** (organisation, accuracy, range, holding a position for 400 words), which is what keeps the writing comparable and a rejection defensible under 7.2. Record which prompt they chose — the choice is itself a small piece of evidence.
 - Prompts, like interview questions and assignment criteria, are **centre settings imported at setup**, with defaults supplied. Different centres select for different things.
 - **Equality of opportunity** is the centre's responsibility, and questions about physical and mental health must follow local legislation. The app must not force a health question; it offers a single optional "anything we should know" field and leaves the wording to the centre.
 - **Candidates must be told**, and it should be recorded that they were: completing the course does not guarantee success; there are **no exemptions or recognition of prior learning**; and on mixed-mode courses, the additional demand of changing TP mode.
 - **Applicants who cannot attend significant parts of the course must not be accepted** (6.5). Ask at application, not at enrolment.
-- **Special requirements (6.4)** are declared at application, so arrangements exist on day one rather than being improvised in week two.
+- **Special requirements (7.4)** are declared at application, so arrangements exist on day one rather than being improvised in week two.
 - **Six replies, and nobody is left without one.** All are centre-branded, sent from the centre, with the Connect mark absent.
   - **Offer** — names what was strong and what will need work, states the fee, and carries one link that confirms the place, takes the candidate agreement, sets up the workspace and delivers the pre-course task. Accepting is what creates the account. Include an accept-by date and say what happens after it.
 
@@ -353,7 +353,7 @@ Reconsider a payment integration only when a second centre asks. It brings refun
 
 Applications exist before a course starts and are handled by people who may never be on it — a registrar, an office manager, a director. Two consequences for the permission model:
 
-- **A staff role that is centre-level, not course-level.** Not "course admin". Someone who can see and act on the pipeline for every course at the centre, without being a tutor on any of them, and without access to candidate assessment. Selection itself must still be *conducted* by a verified course tutor or a nominated person (6.2), so the role distinguishes **handling** an application (booking, chasing, correspondence) from **deciding** on one (interview, marking, accept/reject), and only verified tutors or nominees can do the second.
+- **A staff role that is centre-level, not course-level.** Not "course admin". Someone who can see and act on the pipeline for every course at the centre, without being a tutor on any of them, and without access to candidate assessment. Selection itself must still be *conducted* by a verified course tutor or a nominated person (7.2), so the role distinguishes **handling** an application (booking, chasing, correspondence) from **deciding** on one (interview, marking, accept/reject), and only verified tutors or nominees can do the second.
 - **Late applications after the course has started** must still work. The pipeline is attached to the centre and filtered by intake, never gated on the course being in a pre-start state.
 - Such a person may be given a **tokenised link** to the pipeline rather than a full account, on the same pattern as the assessor: read plus the specific actions they need, expiring, revocable.
 
@@ -371,7 +371,7 @@ Notifications carry the applicant's name and stage, never a suggested verdict �
   - It is **always labelled as a suggestion**, visually distinct from anything a person wrote, and it is **never shown to the applicant** or included in the assessor pack.
   - A tutor's decision is recorded independently. If the app ever lets a tutor accept a suggestion with one click, it has become the decision-maker — so it must not.
   - **Rejections still require a human-written reason.** A generated sentence is not a reason, and an applicant challenging a rejection is entitled to a person's judgement.
-  - Because the process must demonstrate equality of opportunity (6.2), record that a suggestion was generated and what it said. An unexamined model quietly filtering applicants is precisely the risk here.
+  - Because the process must demonstrate equality of opportunity (7.2), record that a suggestion was generated and what it said. An unexamined model quietly filtering applicants is precisely the risk here.
 - **Rejected applicants' files are retained** for the course they applied to, appear in the assessor pack, and are deleted with everything else at close-out.
 
 **Pre-course task — Cambridge's, plus a centre supplement**
@@ -384,7 +384,7 @@ Notifications carry the applicant's name and stage, never a suggested verdict �
 
 **Grade query — the reply before an appeal**
 
-A candidate unhappy with their grade emails asking why. Handbook 15 covers the formal Internal Complaints Procedure and then Cambridge appeal stages, but almost every case starts as an informal email, and answering it well ends most of them there.
+A candidate unhappy with their grade emails asking why. Handbook 16 covers the formal Internal Complaints Procedure and then Cambridge appeal stages, but almost every case starts as an informal email, and answering it well ends most of them there.
 
 Build a **grade explanation** the tutor generates and edits, drawn entirely from the record:
 
@@ -415,7 +415,7 @@ Cambridge's own guidance (*Advice on the use of generative AI in assessed work*,
 
 **Referencing.** All AI use must be referenced in a recognised style used consistently; **APA is recommended**. Both an in-text citation and a reference-list entry are required. The in-text citation must state the prompt or prompts, put the AI-aided text in quotes so it is identifiable, and name the tool with the date. The reference entry is author, date, title (model name, italicised, with "[Large language model]"), and a URL linking as directly as possible to the conversation.
 
-**Plagiarism — Admin Handbook 8.2.3 and 8.2.4.** Candidates must **confirm in writing** that assignments are their own work; this does not exclude joint preparation and discussion, but they must not collaborate to the extent of submitting substantially similar assignments. Centres must provide guidance on what plagiarism is and how to avoid it, hold an internal policy stating the penalties, deal with detected plagiarism under their malpractice policy, and **must not knowingly submit plagiarised work to Cambridge for moderation**. Candidates must be told that awarding bodies apply severe penalties for plagiarism in externally moderated work — **from loss of marks to disqualification and a ban on re-entry for up to three years**.
+**Plagiarism — Admin Handbook 9.2.3 and 9.2.4.** Candidates must **confirm in writing** that assignments are their own work; this does not exclude joint preparation and discussion, but they must not collaborate to the extent of submitting substantially similar assignments. Centres must provide guidance on what plagiarism is and how to avoid it, hold an internal policy stating the penalties, deal with detected plagiarism under their malpractice policy, and **must not knowingly submit plagiarised work to Cambridge for moderation**. Candidates must be told that awarding bodies apply severe penalties for plagiarism in externally moderated work — **from loss of marks to disqualification and a ban on re-entry for up to three years**.
 
 **What this means for the submission form.** Two things are required before an assignment will send, and the app blocks on both: the **own-work declaration**, and the **AI declaration** — either "not used" or a conversation link plus the citations. **Word the question to name proofreaders explicitly**: "Did you use any AI tool, including a proofreader such as Grammarly?" Cambridge permits proofreading and requires only that it be referenced; naming the tool is the centre's own addition to its brief and worth keeping, because many candidates do not think of a spellchecker as AI, and the offence Cambridge penalises is unacknowledged use rather than use. Grammarly is a browser extension and works in any text field, so it cannot be blocked and should not be — the declaration is the control. The permitted and prohibited lists are shown at the point of declaring, not only at enrolment, because that is when a candidate is deciding.
 
@@ -498,13 +498,13 @@ That way a centre wanting Copyscape, Turnitin, Copyleaks, or an AI-text checker 
 
 Three things to hold to when a third party is added: the **licence and cost belong to the centre**, not to Connect; a candidate's work being **sent to an external service must be disclosed** in the candidate agreement before it happens, since they accepted terms that did not mention it; and an external tool's **score is never shown or stored as a verdict** — the same rule that applies to the built-in scanner.
 
-**Appeals — Admin Handbook 15**
+**Appeals — Admin Handbook 16**
 
 Three steps, and the app's job differs at each.
 
-**15.1 · At the centre, before anything formal.** The handbook is specific about what a tutor should do when a candidate is unhappy with the recommended grade: *"A tutor should go through the coursework with the candidate, showing the evidence on which the grading decision was based… refer to overall grade descriptors, to specific assessment criteria and to evidence from teaching practice feedback and lesson plans in the candidate's portfolio."* That is exactly the grade explanation specified above — it is not a nicety, it is the procedure. Candidates must also be told that **all recommended grades remain provisional until confirmed by Cambridge** after Grade Review by a Joint Chief Assessor.
+**16.1 · At the centre, before anything formal.** The handbook is specific about what a tutor should do when a candidate is unhappy with the recommended grade: *"A tutor should go through the coursework with the candidate, showing the evidence on which the grading decision was based… refer to overall grade descriptors, to specific assessment criteria and to evidence from teaching practice feedback and lesson plans in the candidate's portfolio."* That is exactly the grade explanation specified above — it is not a nicety, it is the procedure. Candidates must also be told that **all recommended grades remain provisional until confirmed by Cambridge** after Grade Review by a Joint Chief Assessor.
 
-**15.2 · Appeal Stage One.** Available only after the candidate has been through **all stages of the centre's Internal Complaints Procedure** and remains dissatisfied, **and once the result is confirmed by Cambridge**. There is an administrative fee. **Cambridge must receive the appeal via the centre within two weeks of the candidate receiving their final result**, and the appeal must be made by the candidate, not a third party.
+**16.2 · Appeal Stage One.** Available only after the candidate has been through **all stages of the centre's Internal Complaints Procedure** and remains dissatisfied, **and once the result is confirmed by Cambridge**. There is an administrative fee. **Cambridge must receive the appeal via the centre within two weeks of the candidate receiving their final result**, and the appeal must be made by the candidate, not a third party.
 
 The process: the centre gives the candidate the **Cambridge Teaching Qualifications Stage One Appeal Form** (downloaded from the Cambridge Support Site — the app does not reproduce it). The candidate completes it and returns it to the centre. The centre **writes a response** to the issues raised, then sends the form and its response to `TeachingAwardAppeals@CambridgeEnglish.org` **within two weeks of receiving the completed form**, along with the candidate's **portfolio and application and selection notes**, sent electronically and securely by the same route as portfolios for moderation.
 
@@ -518,7 +518,7 @@ What Cambridge scrutinises, and therefore what the app must be able to produce a
 
 So the app should offer an **appeal bundle** action that assembles all of it — the same machinery as the assessor pack, different recipient. The two-week clocks are the thing to surface: both are short and both are the centre's responsibility to meet.
 
-**15.3 · Appeal Stage Two** — independent review, on the candidate's own request, using Cambridge's Stage Two form. Nothing for the app to do beyond keeping the Stage One bundle retrievable.
+**16.3 · Appeal Stage Two** — independent review, on the candidate's own request, using Cambridge's Stage Two form. Nothing for the app to do beyond keeping the Stage One bundle retrievable.
 
 Two consequences worth stating. **A candidate's file cannot be deleted at close-out while an appeal window is open or an appeal is running** — the two-week window runs from their receiving the final result, which is after close-out. And **application and selection notes are appeal evidence**, which settles why they are retained rather than discarded once a course begins.
 
@@ -551,7 +551,7 @@ Two consequences worth stating. **A candidate's file cannot be deleted at close-
 - Passing on first or second submission **does not affect the certificate grade**.
 - Each assignment has **its own criteria list**, in its own order, imported from the centre's own cover sheet. Criteria are data. Never hardcode them.
 - Assignments may be **conflated** — two briefs delivered as one document, counting as two, both parts must pass independently. The data model must allow one submission to satisfy two assignment records.
-- **Double-marking — Admin Handbook 8.2.3.** A minimum of two tutors must be involved in marking. **A proportion of each assignment must be double-marked**, by candidate count: up to 9 candidates → **3 of each assignment**; up to 16 → **4**; up to 24 → **5**. The sample **must include any fail assignments**. Double-marking means checking the first marker's grading and comments; both tutors **initial** the assignment. **Blind double-marking** (each tutor marks independently, then they discuss and agree) is recommended but not required — support both modes, blind as an option, not the default.
+- **Double-marking — Admin Handbook 9.2.3.** A minimum of two tutors must be involved in marking. **A proportion of each assignment must be double-marked**, by candidate count: up to 9 candidates → **3 of each assignment**; up to 16 → **4**; up to 24 → **5**. The sample **must include any fail assignments**. Double-marking means checking the first marker's grading and comments; both tutors **initial** the assignment. **Blind double-marking** (each tutor marks independently, then they discuss and agree) is recommended but not required — support both modes, blind as an option, not the default.
 - **Who double-marks whom is the centre's choice** — commonly tutors who swap TP groups mark each other's candidates. Do not encode a pairing rule. The app assigns and tracks; the centre decides.
 - The centre **must keep a record of which assignments were double-marked**, and assessors may ask to see it. Generate that record automatically and include it in the assessor pack.
 - **Assignment deadlines anchor to TP rounds where the task depends on teaching, not to fixed days.** Focus on the Learner cannot be written before the candidate has taught the group four times — the brief asks for difficulties noticed across TP1–4 — so it **opens after TP4 completes** and is due a set number of days after that. Lessons from the Classroom must fall after the last observed lesson. Language Related Tasks and the Skills Related Task do not depend on having taught, so they can sit on fixed dates.
@@ -572,19 +572,19 @@ Two consequences worth stating. **A candidate's file cannot be deleted at close-
   - **Signatories are derived, not fixed.** If a course tutor gave the tutorial or marked the assignment, there are three: that tutor, **the main course tutor countersigning**, and the candidate acknowledging receipt. If the MCT did it themselves, the first two collapse into one and the letter has two. The app knows who conducted the tutorial and who marked the assignment, so it decides — and a tutor can still add or remove a signatory before issuing. The MCT's name must appear either way: it is what makes the notice the centre speaking rather than an individual.
   - The candidate acknowledges receipt, not agreement — refusing to sign does not invalidate the notice, and it is recorded as unacknowledged for the assessor.
   - Withdrawal and deferral keep **two** signatures. Those are agreements between the candidate and the centre, not notices issued to a candidate.
-- **Stage 3 tutorials — Admin Handbook 9.2, verbatim triggers.** Stage 3 progress checks must be completed **in the final third of the course** for all candidates who: were **not to standard at Stage 2**; were **at standard at Stage 2 but are not making the expected progress** in the second half; were **above standard at Stage 2 but are not making the expected progress** in the second half; or **have received indications of Pass B or Pass A but have not maintained their progress**. All four are derivable by the app from the Stage 2 record plus subsequent TP outcomes — flag them rather than relying on a tutor to notice. In every case a tutorial must be given **and the whole tutorial record completed**. A centre may additionally give Stage 3 tutorials to everyone (centre setting).
+- **Stage 3 tutorials — Admin Handbook 10.2, verbatim triggers.** Stage 3 progress checks must be completed **in the final third of the course** for all candidates who: were **not to standard at Stage 2**; were **at standard at Stage 2 but are not making the expected progress** in the second half; were **above standard at Stage 2 but are not making the expected progress** in the second half; or **have received indications of Pass B or Pass A but have not maintained their progress**. All four are derivable by the app from the Stage 2 record plus subsequent TP outcomes — flag them rather than relying on a tutor to notice. In every case a tutorial must be given **and the whole tutorial record completed**. A centre may additionally give Stage 3 tutorials to everyone (centre setting).
 - **Stage 1** is carried out on all candidates; a tutorial at Stage 1 is optional. **Stage 2** is carried out on all candidates and **requires a one-to-one tutorial**, ordinarily at the halfway point — after 3 hours' TP, when candidates swap tutors/TP groups — but the trigger is **hours of assessed TP, not calendar position** (a nine-lesson course puts it at 2h40 or 3h20). Derive it from assessed hours. The **final progress record must be completed for all candidates**. Minimum one tutorial per candidate overall, recorded in the CELTA 5.
 - **The order of letter, record and signature is not fixed.** A centre may issue the Fail letter first, release the Stage 3 record for the candidate to read in their own time, and hold the tutorial afterwards. The app must not impose a sequence on those three. The one thing it does enforce: **the tutorial must be held**, and if the candidate has not signed the record by the time it starts, they sign during it.
-- **Fail letter — Admin Handbook 9.2.** Potential Fail candidates are issued a Fail letter making the possible Fail outcome clear and **drawing attention to the action points detailed by the tutors in the CELTA 5**. It must be issued **with at least two lessons left to teach**, so the candidate can respond. The app should therefore warn when a Fail-risk candidate has fewer than two TPs remaining and no letter issued. It is filed in **CELTA 5 Section A** and appears in the assessor pack.
+- **Fail letter — Admin Handbook 10.2.** Potential Fail candidates are issued a Fail letter making the possible Fail outcome clear and **drawing attention to the action points detailed by the tutors in the CELTA 5**. It must be issued **with at least two lessons left to teach**, so the candidate can respond. The app should therefore warn when a Fail-risk candidate has fewer than two TPs remaining and no letter issued. It is filed in **CELTA 5 Section A** and appears in the assessor pack.
 - **Mixed-mode rule:** if a candidate receives a Stage 3 tutorial and is borderline Pass/Fail, their **final two assessed TP lessons must be in the same mode** (all online or all face-to-face). Enforce this when scheduling.
 - Final grades are **subject to confirmation by Cambridge**. The app is never the authority.
 - Withdrawn and Extension are real outcome values alongside Pass A / Pass B / Pass / Fail.
 
-**Extensions — Admin Handbook 6.8, checked.** Two different things share the word.
+**Extensions — Admin Handbook 7.8, checked.** Two different things share the word.
 
 **Nothing is resubmitted after the course closes.** Every assignment, and every resubmission, is submitted inside the course. LFC is deliberately last and gets the shortest window of the four — set around day 15, in on day 18, resubmitted on day 19 — which is why it must be the easiest and most structured of the four. An assignment that cannot fit its resubmission inside the course has been set too late; it is not deferred past the end date. The only exception is a Cambridge-approved extension (below).
 
-*Assignment extension (common).* A new date on one assignment inside a running course. The handbook does not govern it; 5.3 asks the centre to state its own policy on deferrals and extensions in the candidate agreement. Centre decision, reason recorded on the file and visible in the assessor pack, never in the final report, never announced to the cohort. It moves the deadline only — the one-chance resubmission rule, word count, criteria and plagiarism check are all unchanged. **Warn when the new date squeezes the resubmission window**: a candidate granted four days near the end can silently lose the second chance they are entitled to.
+*Assignment extension (common).* A new date on one assignment inside a running course. The handbook does not govern it; 6.3 asks the centre to state its own policy on deferrals and extensions in the candidate agreement. Centre decision, reason recorded on the file and visible in the assessor pack, never in the final report, never announced to the cohort. It moves the deadline only — the one-chance resubmission rule, word count, criteria and plagiarism check are all unchanged. **Warn when the new date squeezes the resubmission window**: a candidate granted four days near the end can silently lose the second chance they are entitled to.
 
 *Course extension (rare).* Completing assessment after the official end-of-course date. Exceptional circumstances only, for a candidate who has completed a substantial part of the course or was granted additional time for special requirements (e.g. dyslexia). **All extensions must be agreed with Cambridge in advance.** Process: centre submits a deferral/extension form via Appian → Cambridge confirms → the grade is recorded as **Extension** on the Centre Grade Approval form → when the candidate finishes, the centre confirms the result with the assessor → both centre and assessor inform CELTA Admin of the agreed final grade. **Maximum one month after the course ends** — count it down in the app. An open extension **blocks close-out**, exactly as an open appeal does; the course cannot erase while someone is still submitting into it.
 
@@ -722,16 +722,16 @@ This is the area most likely to be built wrong. Three distinct things:
 - Their portfolio is **paused, not erased** — read-only, and it stays in the assessor pack marked Withdrawn, because assessors do ask to see withdrawn files.
 - TP: the slot empties; nobody else moves.
 
-**Deferral** — Admin Handbook 6.9: allowed **only if the candidate has completed more than half the course**, in exceptional circumstances, at the centre's discretion. Otherwise it is a withdrawal.
+**Deferral** — Admin Handbook 7.9 (June 2025 edition; the 2022 edition's ">50% completed" threshold cited here previously is gone, corrected 2026-08-27): allowed when **the candidate has completed part of the course**, in exceptional circumstances, at the centre's discretion, and **only once the centre has consulted Cambridge English**.
 - Cambridge process: centre submits a deferral form via Appian → Cambridge confirms → the **original** course records the final grade as **Deferred** → the candidate's name is added to the **new** course's entry form marked deferred → the assessor is told in advance and given the previous assessor's comments → both centre and assessor confirm the final result at the end.
 - Re-integration normally **no later than six months** after the original course ends (12 months part-time). Surface that deadline in the app.
 - **The new course should be the same mode of delivery as the original** (face-to-face, online, mixed) unless the candidate agrees otherwise **in writing**. If the mode changes, the centre must provide **familiarisation activities**. The app should warn when a destination course is a different mode, capture the written agreement, and prompt for the familiarisation plan.
 - **Everything freezes as it stands, complete or not.** Whatever the candidate had on the day they stopped is preserved exactly: TPs taught, assignments passed, an assignment mid-marking, a resubmission not yet returned, criteria met, self-evaluations, tutorial records. Nothing is discarded for being incomplete and nothing is re-judged. It travels to the destination course as their **portfolio** — the same place it lived on the original course — and it also exports to the centre's Drive at close-out of the original course, so there is a record either way.
-- **How many hours carry is the centre's judgement, not a calculation.** 6.9 asks the centre to weigh how much was completed, how the candidate performed, and what the break will do to the outcome. Default the carried figure to the hours already assessed, let a tutor change it, and require a note when they do. The level of support offered should scale with the length of the gap.
+- **How many hours carry is the centre's judgement, not a calculation.** 7.9 asks the centre to weigh how much was completed, how the candidate performed, and what the break will do to the outcome. Default the carried figure to the hours already assessed, let a tutor change it, and require a note when they do. The level of support offered should scale with the length of the gap.
 
-**First-half withdrawal with a restart** — Admin Handbook 6.9, a separate case: a candidate forced to withdraw in the first half may, at the centre's discretion, **start a new course from the beginning without paying a new fee**, and *"can transfer any successful assessment to the new course."* Teaching starts again from TP1; passed assignments carry. This is not a deferral and must not reuse the deferral flow.
+**First-half withdrawal with a restart** — Admin Handbook 7.9, a separate case: a candidate forced to withdraw in the first half may, at the centre's discretion, **start a new course from the beginning without paying a new fee**, and *"can transfer any successful assessment to the new course."* Teaching starts again from TP1; passed assignments carry. This is not a deferral and must not reuse the deferral flow.
 
-**Withdrawn vs Fail is decided by attendance and the CELTA 5 declaration, not by choice** (Admin Handbook 10.4):
+**Withdrawn vs Fail is decided by attendance and the CELTA 5 declaration, not by choice** (Admin Handbook 11.4):
 - Attends to the end and submits a portfolio, even incomplete → **Fail**.
 - Does not attend the final day and has not signed the CELTA 5 declaration → **Withdrawn**.
 - Attends the whole course but declines assessment, in writing → **Withdrawn**.
@@ -1078,7 +1078,7 @@ Contact hours and own-time hours are unchanged — 135 and 80. The five-week sha
 
 ## Trainer in training — blind marking and input progression
 
-Source is the Admin Handbook (2.4.4 and 12.7); `Trainer in Training.dc.html` holds the design.
+Source is the Admin Handbook (3.7.4 and 13.7); `Trainer in Training.dc.html` holds the design.
 
 **Blind marking.** The trainer in training receives a copy of assignments **already marked by the supervisor**, with the marks and comments withheld. They mark blind, then the two are compared side by side. Usually a couple of assignments rather than a full set — the point is calibration, not workload.
 
@@ -1112,17 +1112,17 @@ The app schedules these against real timetable slots, so a supervisor can see at
 
 ## The candidate admissions record
 
-`Candidate Record.dc.html`. Sourced from Admin Handbook 6.2, 6.3, 6.4 and 11.2.
+`Candidate Record.dc.html`. Sourced from Admin Handbook 7.2, 7.3, 7.4 and 12.2.
 
 **Contents.** Application form · identity authentication (passport, checked at interview, recorded with who checked it) · interview record naming the verified tutor or trained nominated person who conducted it · language awareness task · extended writing task · entry-requirement evidence (age, language level, education) · three signed acknowledgements · plagiarism policy signature · pre-course task · platform familiarisation task (online TP courses only).
 
 **Three ordering rules that block acceptance, not tasks that sit in a list:**
 
-1. **Written tasks before acceptance** (6.2 — "All applicants must submit written tasks before being accepted"). Both tasks marked before Accept is available.
-2. **Special-arrangements requests to Cambridge before acceptance** (6.4). Asking in week one is too late.
-3. **Rejections are never deleted** (11.2 — records of rejected candidates must be available to assessors). They stay in the pipeline marked not accepted, which also keeps the conversion figures honest.
+1. **Written tasks before acceptance** (7.2 — "All applicants must submit written tasks before being accepted"). Both tasks marked before Accept is available.
+2. **Special-arrangements requests to Cambridge before acceptance** (7.4). Asking in week one is too late.
+3. **Rejections are never deleted** (12.2 — records of rejected candidates must be available to assessors). They stay in the pipeline marked not accepted, which also keeps the conversion figures honest.
 
-**Discretion is written, not ticked.** Under 20, and no formal qualifications, are both permitted at centre discretion — but 6.3 asks for convincing evidence, so each needs a written judgement on the record.
+**Discretion is written, not ticked.** Under 20, and no formal qualifications, are both permitted at centre discretion — but 7.3 asks for convincing evidence, so each needs a written judgement on the record.
 
 **Online courses** get an online interview on the teaching platform plus a familiarisation task. On a face-to-face course those fields are hidden rather than shown as gaps.
 
@@ -1135,7 +1135,7 @@ The app schedules these against real timetable slots, so a supervisor can see at
 
 Read the Administration Handbook (134 obligations), the Syllabus and Assessment Guidelines, a completed CELTA 5, and the AI, plagiarism and netiquette guidance against all designs. `Compliance Audit.dc.html` holds the full report. No contradictions found — all nineteen are omissions. Classified by what each fix costs: **eight are validation or a warning alone**, **four are validation plus a new field or figure**, **six need new interface only**, and **one is an open decision**. So ten of the nineteen need something built, not five.
 
-**Timetable and TP rules to enforce (Handbook 2.4, 8.1.3, 8.1.4, 8.2, 9.2, 13.6)**
+**Timetable and TP rules to enforce (Handbook 3.7, 9.1.3, 9.1.4, 9.2, 10.2, 14.4)**
 
 1. A candidate cannot teach twice in one day; a tutor is not expected to observe both groups in one day.
 2. Five of the six assessed hours must be whole-class teaching, and the non-whole-class lesson may not be either of the final two. **Scheduling a one-to-one or small-group assessed lesson makes the "Teaching one to one" input session required**, timetabled before the lesson it prepares — a candidate should not be sent into a lesson type the course never taught.

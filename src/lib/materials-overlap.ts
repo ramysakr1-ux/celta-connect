@@ -10,7 +10,7 @@ export interface MaterialsOverlapFlag {
   tpNumber: number;
 }
 
-// Handbook 8.2 / build-spec.md's numbered rule 7: "Materials prepared for
+// Handbook 9.2 / build-spec.md's numbered rule 7: "Materials prepared for
 // LRT or SRT must not be the basis of an assessed lesson, or vice versa --
 // raise as a note to the tutor, never an accusation." No design file exists
 // for this (Conflated Assignments.dc.html is referenced in

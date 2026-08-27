@@ -1,6 +1,6 @@
 // for-claude-code-concurrent-course-checks.md: "a centre does not choose
 // its assessor, and repeat visits are common -- keep the assessor history
-// per centre so it can be seen, and leave it at that." Handbook 12.3, verbatim
+// per centre so it can be seen, and leave it at that." Handbook 13.3, verbatim
 // per Assessor History.dc.html: "the same assessor must not be used for more
 // than two consecutive courses, and may not assess more than two courses
 // concurrently at one centre." Two separate limits -- consecutive (a run
@@ -32,7 +32,7 @@ export interface AssessorHistoryEntry {
   name: string;
   courses: AssessorHistoryCourse[];
   /** The most this assessor was ever booked on at once, by date overlap --
-   *  the figure Handbook 12.3's "two concurrent" cap is about. */
+   *  the figure Handbook 13.3's "two concurrent" cap is about. */
   peakConcurrent: number;
   peakConcurrentSeverity: Severity;
   /** Length of this assessor's most recent unbroken run through the
@@ -40,7 +40,7 @@ export interface AssessorHistoryEntry {
    *  is the "how many in a row, right now" figure, distinct from overlap. */
   currentStreak: number;
   currentStreakSeverity: Severity;
-  /** Only true when either figure has reached or passed its Handbook 12.3
+  /** Only true when either figure has reached or passed its Handbook 13.3
    *  limit -- purely informational, per the design spec ("never blocks"). */
   flag: boolean;
   flagText: string;
@@ -52,7 +52,7 @@ function overlaps(a: CentreCourseWindow, b: CentreCourseWindow): boolean {
 
 // "ink (fine), amber (at the 2-course limit), red (over it)" -- Assessor
 // History.dc.html's own severity legend, applied identically to both the
-// consecutive-streak and peak-concurrent figures since Handbook 12.3 sets
+// consecutive-streak and peak-concurrent figures since Handbook 13.3 sets
 // the same cap (two) on both.
 function severityFor(n: number): Severity {
   if (n >= 3) return "over";
@@ -132,15 +132,15 @@ export function computeAssessorCentreHistory(
     const reasons: string[] = [];
     if (currentStreakSeverity === "over") {
       reasons.push(
-        `${numberWord(currentStreak).replace(/^./, (c) => c.toUpperCase())} consecutive courses at this centre — ${numberWord(currentStreak - 2)} over the two-course guidance in Handbook 12.3.`
+        `${numberWord(currentStreak).replace(/^./, (c) => c.toUpperCase())} consecutive courses at this centre — ${numberWord(currentStreak - 2)} over the two-course guidance in Handbook 13.3.`
       );
     } else if (currentStreakSeverity === "at-limit") {
-      reasons.push("Currently at the two-course consecutive limit in Handbook 12.3.");
+      reasons.push("Currently at the two-course consecutive limit in Handbook 13.3.");
     }
     if (peakConcurrentSeverity === "over") {
-      reasons.push(`Assessed ${numberWord(peakConcurrent)} courses concurrently — over the two-course concurrent limit in Handbook 12.3.`);
+      reasons.push(`Assessed ${numberWord(peakConcurrent)} courses concurrently — over the two-course concurrent limit in Handbook 13.3.`);
     } else if (peakConcurrentSeverity === "at-limit") {
-      reasons.push("Assessed two courses concurrently — at the two-course concurrent limit in Handbook 12.3.");
+      reasons.push("Assessed two courses concurrently — at the two-course concurrent limit in Handbook 13.3.");
     }
     const flag = reasons.length > 0;
     const flagText = flag ? `${reasons.join(" ")} Not blocked; a centre does not choose its assessor.` : "";

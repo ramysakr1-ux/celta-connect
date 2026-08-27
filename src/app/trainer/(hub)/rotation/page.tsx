@@ -68,7 +68,7 @@ export default async function TrainerRotationPage() {
     .filter((r) => !assignedTraineeIds.has(r.id))
     .map((r) => ({ id: r.id, full_name: r.full_name }));
 
-  // Handbook 2.4: "TP must be split evenly between the two tutors." Real
+  // Handbook 3.7: "TP must be split evenly between the two tutors." Real
   // signal is who actually GAVE feedback (tp_feedback.trainer_id), not
   // course_tp_groups.tutor_profile_id -- a group's named tutor and who
   // ends up submitting a given round's feedback can differ in practice
@@ -136,7 +136,7 @@ export default async function TrainerRotationPage() {
   const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
 
-  // Handbook 8.1.4: "two-day minimum break midway, no more than six
+  // Handbook 9.1.3: "two-day minimum break midway, no more than six
   // consecutive TP days." The break-check only means something once a
   // course actually looks like an intensive block (a normal 2-3x/week
   // course always has gaps) -- gated on the run already being long enough
@@ -172,7 +172,7 @@ export default async function TrainerRotationPage() {
       {looksIntensive ? (
         <div className="sheet p-6">
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Intensive TP block</p>
-          <p className="mt-1 text-xs text-muted">Handbook 8.1.4: a two-day minimum break midway, no more than six consecutive TP days.</p>
+          <p className="mt-1 text-xs text-muted">Handbook 9.1.3: a two-day minimum break midway, no more than six consecutive TP days.</p>
           <p className="mt-2 text-sm text-ink">Longest run so far: {intensiveCheck.longestConsecutiveRun} consecutive TP days.</p>
           {intensiveCheck.exceedsMaxConsecutive ? (
             <p className="mt-1 text-xs text-status-warning-text">Over six days in a row -- worth a look.</p>
@@ -189,7 +189,7 @@ export default async function TrainerRotationPage() {
             TP block ends on the final day
           </p>
           <p className="mt-1 text-sm text-status-warning-text">
-            The last scheduled TP day lands on the course&apos;s own final day (Handbook 8.1.4). Worth moving it
+            The last scheduled TP day lands on the course&apos;s own final day (Handbook 9.1.4). Worth moving it
             earlier so the final day isn&apos;t also someone&apos;s last assessed lesson.
           </p>
         </div>
@@ -198,7 +198,7 @@ export default async function TrainerRotationPage() {
       {tpDistribution.length >= 2 ? (
         <div className="sheet p-6">
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">TP feedback given, per tutor</p>
-          <p className="mt-1 text-xs text-muted">Handbook 2.4: TP should be split evenly between the two tutors.</p>
+          <p className="mt-1 text-xs text-muted">Handbook 3.7: TP should be split evenly between the two tutors.</p>
           <div className="mt-2 flex flex-wrap gap-4">
             {tpDistribution.map((t) => (
               <span key={t.name} className="text-sm text-ink">

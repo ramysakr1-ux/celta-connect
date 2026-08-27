@@ -104,7 +104,7 @@ export async function recordCandidateAccount(_prevState: FormState, formData: Fo
 
 // for-claude-code-malpractice-outcomes.md: the outcome comes from the
 // centre's own configured list (malpractice_outcome_options) when one
-// exists, never a hardcoded pair -- Handbook 8.2.4. Falls back to the
+// exists, never a hardcoded pair -- Handbook 9.2.4. Falls back to the
 // original binary upheld/not_upheld when a centre hasn't configured any
 // outcomes yet. Either way, the only real effects beyond this table are
 // driven by the resolved fails_assignment flag: fail the linked assignment

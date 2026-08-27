@@ -20,7 +20,7 @@ export function FailRiskLetterSection({
       <p className="text-[11px] font-semibold tracking-[0.1em] text-status-warning-text uppercase">Formal notice · potential fail</p>
       <h2 className="mt-1 font-serif text-lg text-ink">Fail-risk letter</h2>
       <p className="mt-1 text-sm text-muted">
-        Admin Handbook 9.2 requires this with at least two assessed lessons still to teach. It&apos;s a formal
+        Admin Handbook 10.2 requires this with at least two assessed lessons still to teach. It&apos;s a formal
         notice, not a decision.
       </p>
 

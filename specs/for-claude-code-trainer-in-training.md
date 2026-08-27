@@ -47,7 +47,7 @@ This working copy — draft plus the supervisor's tracked edits and discussion �
 ## Screen 1b2 — Feedback on how they gave feedback (Task Thirteen)
 A separate, private document between the TinT and supervisor: not what the feedback said, but how the TinT delivered it — eliciting vs. telling, prioritising action points, handling a defensive reaction, pacing, tact. Discussed straight after each feedback session the TinT conducts, filed in the e-portfolio, never reaching the candidate.
 
-## Screen 1c — The extra assessor day (external scheme only, Handbook 12.7 / Admin Handbook 2.4.4)
+## Screen 1c — The extra assessor day (external scheme only, Handbook 13.7 / Admin Handbook 3.7.4)
 Required only when: the TinT trains on the External scheme, or trains on the Internal scheme at a centre other than the one nominating them. On this day, the assessor:
 1. Reads the TinT's e-portfolio, alone.
 2. Observes the TinT conducting an input session.

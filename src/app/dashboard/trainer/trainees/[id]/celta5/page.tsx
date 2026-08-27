@@ -87,7 +87,7 @@ export default async function Celta5RecordPage({
       .eq("type", "tp"),
   ]);
 
-  // connect-spec-corrections-for-claude-code.md item 1 (Handbook 9.2):
+  // connect-spec-corrections-for-claude-code.md item 1 (Handbook 10.2):
   // mixed-mode + Stage 3 given + borderline Fail/Pass -- the final two
   // assessed TP lessons must share one mode. Same half -> halfTpDates ->
   // event.mode bridge computeAssessedHoursByMode already uses elsewhere.
@@ -284,7 +284,7 @@ export default async function Celta5RecordPage({
       {stage3MixedModeLock ? (
         <div className={`card p-4 ${stage3MixedModeLock.mismatched ? "card-red" : "card-amber"}`}>
           <p className={`text-sm font-semibold ${stage3MixedModeLock.mismatched ? "text-destructive" : "text-status-warning-text"}`}>
-            Handbook 9.2 -- borderline Pass/Fail on a mixed-mode course
+            Handbook 10.2 -- borderline Pass/Fail on a mixed-mode course
           </p>
           <p className="mt-1 text-sm text-muted">
             The final two assessed lessons (TP{stage3MixedModeLock.lastTwoTpNumbers[0]} and TP

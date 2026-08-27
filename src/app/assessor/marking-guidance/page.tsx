@@ -15,7 +15,7 @@ const TAB_ORDER: AssignmentTypeValue[] = [...ASSIGNMENT_ORDER, "Plagiarism Refle
 // assessor surfaces (see assessor-pack-contents.ts). The assessor's own
 // route into this: the "Marking guidance" line on the centre-documents
 // panel (assessor/page.tsx), per design's "sits in the visit pack rather
-// than being asked for" -- 8.2 evidence, not a nav item.
+// than being asked for" -- 9.2 evidence, not a nav item.
 export default async function AssessorMarkingGuidancePage() {
   const cookieStore = await cookies();
   if (!cookieStore.get(ASSESSOR_COOKIE)?.value) redirect("/login");

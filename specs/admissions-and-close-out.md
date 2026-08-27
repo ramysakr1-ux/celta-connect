@@ -10,7 +10,7 @@ Everything decided in the session of 8–9 August. Written as build rules, not a
 
 **The application page is public and branded.** Linked from the centre's own website. No account, no password. The applicant picks which intake they want. Source is recorded (website, referral, Instagram) — the only honest measure of which channel is worth paying for.
 
-**The task opens in Connect, not by email.** Cambridge's language awareness questions plus an extended writing task where the applicant chooses one of the centre's three or four prompts. It saves as they type; the email only tells them it is waiting. Both parts are required before anyone can be accepted (Handbook 6.2).
+**The task opens in Connect, not by email.** Cambridge's language awareness questions plus an extended writing task where the applicant chooses one of the centre's three or four prompts. It saves as they type; the email only tells them it is waiting. Both parts are required before anyone can be accepted (Handbook 7.2).
 
 **Five acknowledgements are ticked before the form can be submitted**, one per section of the course commitments document:
 1. Full-time and intensive; should not be working during it.
@@ -67,14 +67,14 @@ The **interview log entry is the event**. Email (to admissions and the named int
 
 **Seven fixed questions plus two drawn per applicant.**
 
-The fixed set is the centre's own, imported at setup like assignment briefs. Everyone is asked the same ones — that is what makes a rejection defensible. Connect ships a starter set the centre edits, and the bank checks coverage against what the handbook asks selection to assess, saying **None** where an area has no question. A centre running face-to-face has no digital-literacy question until it sets up a mixed-mode course, at which point 6.2 requires one.
+The fixed set is the centre's own, imported at setup like assignment briefs. Everyone is asked the same ones — that is what makes a rejection defensible. Connect ships a starter set the centre edits, and the bank checks coverage against what the handbook asks selection to assess, saying **None** where an area has no question. A centre running face-to-face has no digital-literacy question until it sets up a mixed-mode course, at which point 7.2 requires one.
 
 The drawn pair comes from the rows the reading **flagged**, weakest first. Suggested, never asked automatically; if nothing is flagged the slots stay empty. What the interviewer actually asked is what goes on the record. This is why the task is marked before the interview.
 
 ### The interview record
 
 Carries the questions and the answers, and **two signatures typed at the end of the interview with both people still in the room**:
-- **Interviewer** — required. 6.2 asks who conducted selection, not just when.
+- **Interviewer** — required. 7.2 asks who conducted selection, not just when.
 - **Applicant** — optional and worth having. Confirms the notes reflect the conversation, which matters if a rejection is challenged.
 
 An online interview signs the same way.
@@ -192,7 +192,7 @@ Entry removed before submission. The place is refillable **days one to three**; 
 
 ### First half — centre deferral
 
-**The centre's own arrangement.** Under 6.9 a candidate forced out in the first half may, at the centre's discretion, start a new course from the beginning **without paying a new fee**, carrying any assessment they passed.
+**The centre's own arrangement.** Under 7.9 a candidate forced out in the first half may, at the centre's discretion, start a new course from the beginning **without paying a new fee**, carrying any assessment they passed.
 
 - Recorded as "centre deferral from C3/2026 to C5/2026", on **both** courses. Never a bare withdrawal on one and a fresh application on the other.
 - No Appian form, no Cambridge confirmation, no deferred grade. A withdrawal here and an ordinary entry there, linked.
@@ -201,16 +201,16 @@ Entry removed before submission. The place is refillable **days one to three**; 
 - Same-mode and familiarisation rules do **not** apply: she is doing a whole course in one mode.
 - Her portfolio is still in *this* course's assessor pack, however short.
 
-### More than half — Cambridge deferral
+### Deferral
 
-Permitted under 6.9 at the centre's discretion, with Cambridge's confirmation.
+Corrected 2026-08-27: the "more than half completed" threshold below is the superseded 2022 rule. The real June 2025 §7.9 rule has no completion threshold at all -- a deferral may be considered once **part of the course** is completed, in exceptional circumstances, at the centre's discretion, **provided the centre consults Cambridge English first**. Cambridge then separately confirms the arrangements via Appian, below -- two distinct steps, not one.
 
 - **Appian form** submitted with the reasons and the re-integration arrangements; Cambridge confirms before anything is settled with the candidate.
 - Grade on this course recorded as **deferred** — not a fail, not blank.
 - She is added by name to the **new course's entry form** marked deferred, and that course's assessor is told before the visit, with comments from the previous assessor if any.
 - **Six months from the end of the original course for full-time, twelve for part-time.** The window is set by the course she **left** and runs from its **end date**, not from the day she withdrew.
-- **Same mode of delivery unless she agrees otherwise in writing** (6.9). If the mode changes, the centre **must provide familiarisation activities** — a build requirement, attached to the deferral.
-- How much carries is the centre's judgement: 6.9 asks it to consider how much was completed and what the break will do to the outcome, and to make sure she understands the implications. Connect defaults to hours already assessed; a tutor changes it in writing.
+- **Same mode of delivery unless she agrees otherwise in writing** (7.9). If the mode changes, the centre **must provide familiarisation activities** — a build requirement, attached to the deferral.
+- How much carries is the centre's judgement: 7.9 asks it to consider how much was completed and what the break will do to the outcome, and to make sure she understands the implications. Connect defaults to hours already assessed; a tutor changes it in writing.
 - The place is not refilled. Fee carried, not refunded.
 - **The date passing is not a silent expiry.** If the deadline arrives with nothing arranged, that is a centre failure and the app says so rather than closing the case.
 

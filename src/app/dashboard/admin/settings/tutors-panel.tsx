@@ -139,7 +139,7 @@ function TutorRow({
             {isTit ? (
               <>
                 <p className="text-xs text-muted">
-                  Handbook 2.4.4/2.4.5 -- training undertaken without prior Cambridge verification isn&apos;t
+                  Handbook 3.7.4/3.7.5 -- training undertaken without prior Cambridge verification isn&apos;t
                   acknowledged, so a verification date is required before this can be saved as checked.
                 </p>
                 <div className="grid grid-cols-2 gap-3">

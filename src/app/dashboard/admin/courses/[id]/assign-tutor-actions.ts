@@ -44,8 +44,8 @@ export async function assignExistingTutor(_prev: AssignTutorState, formData: For
     return { error: "Only the main course tutor can do this." };
   }
 
-  // Same centre only -- both Handbook rules this check exists for (2.4 and
-  // 12.3) are scoped that way, per for-claude-code-concurrent-course-checks.md.
+  // Same centre only -- both Handbook rules this check exists for (3.7 and
+  // 13.3) are scoped that way, per for-claude-code-concurrent-course-checks.md.
   const { data: trainer } = await adminClient
     .from("profiles")
     .select("id, full_name, role, center_id")
@@ -69,8 +69,8 @@ export async function assignExistingTutor(_prev: AssignTutorState, formData: For
     }
   }
 
-  // Handbook 2.4's FT/FT-blocked, FT/PT-allowed rule applies to a tutor
-  // "engaged to work" -- an assessor is a different rule (12.3, visible-only,
+  // Handbook 3.7's FT/FT-blocked, FT/PT-allowed rule applies to a tutor
+  // "engaged to work" -- an assessor is a different rule (13.3, visible-only,
   // not enforced here), and trainee/TinT involvement and a not-yet-set role
   // are exempt per the resolution doc's own carve-outs.
   let warning: string | null = null;

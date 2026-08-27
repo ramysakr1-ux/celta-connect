@@ -13,7 +13,7 @@ export type TriageLane = "clear" | "borderline" | "clear_problems";
 // worst outcome routes to a person, never to a decline.
 //
 // Judgement call, documented rather than guessed silently: language
-// awareness is the one row Admin Handbook 6.3 treats as a hard entry
+// awareness is the one row Admin Handbook 7.3 treats as a hard entry
 // requirement ("competence in written and spoken English... recommended
 // level C2 or C1+"), so a "below" there alone is enough to flag rather than
 // merely queue. Any other single "below" is borderline; two or more "below"

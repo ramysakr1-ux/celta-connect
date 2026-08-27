@@ -174,7 +174,7 @@ export default async function PortfolioCelta5Page({
       coursebookLevelById: new Map((coursebooksForLevels ?? []).map((c) => [c.id, c.level])),
     });
 
-    // course-modes.md §2 (Handbook 8.1.2) -- mixed-mode only.
+    // course-modes.md §2 (Handbook 9.1.2) -- mixed-mode only.
     const { data: subgroupForMode } = subgroupMember?.subgroup_id
       ? await supabase.from("course_subgroups").select("half_order").eq("id", subgroupMember.subgroup_id).maybeSingle()
       : { data: null };
@@ -812,7 +812,7 @@ export default async function PortfolioCelta5Page({
     coursebookLevelById: new Map((coursebooksForLevels ?? []).map((c) => [c.id, c.level])),
   });
 
-  // course-modes.md §2 (Handbook 8.1.2) -- mixed-mode only.
+  // course-modes.md §2 (Handbook 9.1.2) -- mixed-mode only.
   const { data: subgroupForMode } = subgroupMember?.subgroup_id
     ? await supabase.from("course_subgroups").select("half_order").eq("id", subgroupMember.subgroup_id).maybeSingle()
     : { data: null };

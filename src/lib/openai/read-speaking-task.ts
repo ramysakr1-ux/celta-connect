@@ -3,7 +3,7 @@ import "server-only";
 // Companion to read-selection-task.ts, but deliberately separate: the
 // speaking task was never part of that function's 5-row marking scheme
 // (language_awareness/accuracy/organisation/range/substance -- Admin
-// Handbook 6.3's writing/language-awareness scheme only), so this doesn't
+// Handbook 7.3's writing/language-awareness scheme only), so this doesn't
 // feed deriveTriageLane, auto-booking, or the clear-problems notification.
 // It's a standalone, read-only suggestion next to the recording -- same
 // "starting point for a tutor, never a verdict" framing as the writing

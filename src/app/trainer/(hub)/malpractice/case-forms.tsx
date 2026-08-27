@@ -38,7 +38,7 @@ export function CandidateAccountForm({ caseId }: { caseId: string }) {
 }
 
 // for-claude-code-malpractice-outcomes.md: picks from the centre's own
-// configured outcome list (Handbook 8.2.4 -- Connect never invents a
+// configured outcome list (Handbook 9.2.4 -- Connect never invents a
 // penalty) when one exists; falls back to the original plain Upheld / Not
 // upheld pair when a centre hasn't configured any outcomes yet.
 export function DecisionForm({ caseId, outcomeOptions }: { caseId: string; outcomeOptions: OutcomeOption[] }) {
