@@ -16,6 +16,18 @@ const TP_LESSON_LENGTH_MINUTES = 45;
 // for a single fixed CELTA number.
 const OBSERVATION_HOURS_REQUIRED = 6;
 
+// Same pattern as fol-spot-check/page.tsx's own local relativeTime -- kept
+// page-local rather than shared, matching that precedent, for a 6-line helper.
+function relativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(diffMs / 60_000);
+  if (minutes < 60) return minutes <= 1 ? "just now" : `${minutes} minutes ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
 const LETTER_LABEL: Record<string, string> = {
   fail_risk: "A formal notice about your progress",
   assignment_warning: "A formal notice about an assignment",
@@ -98,6 +110,14 @@ export async function TodayTab({
     .order("sent_at", { ascending: false })
     .limit(3);
 
+  // for-claude-code-trainee-interface.md: "Author + relative time under
+  // each" -- author_id was already being fetched above but never resolved
+  // to a name or displayed.
+  const authorIds = [...new Set((broadcasts ?? []).map((b) => b.author_id).filter((id): id is string => Boolean(id)))];
+  const { data: authors } =
+    authorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", authorIds) : { data: [] };
+  const authorNameById = new Map((authors ?? []).map((a) => [a.id, a.full_name]));
+
   const { data: tutorialInvites } = await supabase
     .from("individual_tutorial_invites")
     .select("id, stage, timetable_event_id, confirmed_at")
@@ -178,7 +198,16 @@ export async function TodayTab({
   // "You teach today" -- reuses the exact same half/date bridge rotation.ts
   // and the trainer-side Teaching Practice queue already trust, scoped to
   // just this one trainee's own subgroup instead of a whole course scan.
-  let teachingToday: { tpNumber: number; title: string; teachingOrder: number; groupSize: number; zoomUrl: string | null; roomOrLevel: string | null } | null = null;
+  let teachingToday: {
+    tpNumber: number;
+    title: string;
+    teachingOrder: number;
+    groupSize: number;
+    zoomUrl: string | null;
+    eventTime: string | null;
+    groupName: string | null;
+    joinable: boolean;
+  } | null = null;
   if (subgroupMember) {
     const subgroup = subgroupRow;
     const { data: members } = await supabase
@@ -204,13 +233,33 @@ export async function TodayTab({
         const size = (members ?? []).length;
         const order = rotationPosition(subgroupMember.base_slot, size, tpNumber) + 1;
         const event = tpEvents[0];
+        // Matches the timetable's own camera-icon/live-now-bar gate
+        // (isEventLive: joinable from 10 min before start) -- this card's
+        // "Join the room" button used to have no time check at all, unlike
+        // those two, so a trainee could join six hours early from here and
+        // nowhere else. zonedTimeToUtc/timeZone rather than isEventLive's
+        // naive Date() parsing, to match this file's own existing
+        // timezone-aware pattern just above (filmedObservationReminder).
+        const startsAt = event.event_time ? zonedTimeToUtc(event.event_date, event.event_time, timeZone) : null;
+        const joinable = startsAt ? Date.now() >= startsAt.getTime() - 10 * 60 * 1000 : false;
+        // Spec calls for "which TP, when, where, level, group size, teaching
+        // order" -- this app doesn't track a physical room anywhere, and
+        // event.title (the old roomOrLevel value, e.g. "TP1 -- Half A") was
+        // fetched but never actually rendered, and wouldn't have been
+        // meaningful even if it had been (just repeats the TP number already
+        // shown). Group name is the one real "where" this schema has.
+        const { data: tpGroup } = subgroupTpGroupId
+          ? await supabase.from("course_tp_groups").select("name").eq("id", subgroupTpGroupId).maybeSingle()
+          : { data: null };
         teachingToday = {
           tpNumber,
           title: plan.short_title || plan.main_lesson_aim,
           teachingOrder: order,
           groupSize: size,
           zoomUrl: event.zoom_url,
-          roomOrLevel: event.title,
+          eventTime: event.event_time,
+          groupName: tpGroup?.name ?? null,
+          joinable,
         };
       }
     }
@@ -334,14 +383,25 @@ export async function TodayTab({
               TP{teachingToday.tpNumber} — {teachingToday.title}
             </p>
             <p className="text-sm text-muted">
+              {teachingToday.eventTime ? `${teachingToday.eventTime.slice(0, 5)} · ` : ""}
               {teachingToday.teachingOrder === 1 ? "1st" : teachingToday.teachingOrder === 2 ? "2nd" : `${teachingToday.teachingOrder}th`} of{" "}
               {teachingToday.groupSize} today · {TP_LESSON_LENGTH_MINUTES} min
+              {teachingToday.groupName ? ` · Group ${teachingToday.groupName}` : ""}
             </p>
             <div className="flex items-center gap-2">
-              {teachingToday.zoomUrl ? (
+              {teachingToday.zoomUrl && teachingToday.joinable ? (
                 <a href={teachingToday.zoomUrl} target="_blank" rel="noreferrer" className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
                   Join the room
                 </a>
+              ) : teachingToday.zoomUrl ? (
+                <span
+                  title="Opens 10 minutes before the session"
+                  aria-disabled="true"
+                  className="rounded-[6px] bg-primary/10 px-3.5 py-2 text-sm font-semibold text-primary/60"
+                  style={{ cursor: "default" }}
+                >
+                  Join the room
+                </span>
               ) : null}
               <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="trainee-hover-fill rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
                 Open your plan
@@ -367,7 +427,9 @@ export async function TodayTab({
                   {b.body ? (
                     <div className="flex flex-col gap-2 text-sm whitespace-pre-line text-ink">{b.body}</div>
                   ) : null}
-                  <p className="text-xs text-muted">{new Date(b.created_at).toLocaleString()}</p>
+                  <p className="text-xs text-muted">
+                    {b.author_id ? (authorNameById.get(b.author_id) ?? "Your tutor") : "Your tutor"} · {relativeTime(b.created_at)}
+                  </p>
                 </div>
               ))}
             </div>
