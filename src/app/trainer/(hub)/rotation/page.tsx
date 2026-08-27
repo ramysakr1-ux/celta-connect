@@ -13,6 +13,9 @@ import { RevealPeerNotesForm } from "@/app/trainer/(hub)/rotation/reveal-peer-no
 import { ClassGroupingForm } from "@/app/trainer/(hub)/rotation/class-grouping-form";
 import { AimConstraintsForm } from "@/app/trainer/(hub)/rotation/aim-constraints-form";
 import { RotationTabs } from "@/app/trainer/(hub)/rotation/rotation-tabs";
+import { CreateSubgroupForm, PairSubgroupsForm, UnpairButton, AddMemberForm } from "@/app/dashboard/admin/courses/[id]/subgroups-form";
+import { RemoveMemberButton } from "@/app/trainer/(hub)/rotation/remove-member-button";
+import { GroupTutorForm } from "@/app/dashboard/admin/courses/[id]/group-tutor-form";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CourseStatus } from "@/lib/supabase/types";
@@ -30,13 +33,28 @@ export default async function TrainerRotationPage() {
     .eq("course_id", courseId)
     .order("created_at");
 
-  const { data: tpGroups } = await supabase.from("course_tp_groups").select("id, name").eq("course_id", courseId);
+  const { data: tpGroups } = await supabase
+    .from("course_tp_groups")
+    .select("id, name, tutor_profile_id, meeting_days")
+    .eq("course_id", courseId);
+
+  // Any trainer on the course can own a TP group -- setTpGroupTutor's own
+  // comment: "Ramy was clear that the MCT/ACT distinction governs
+  // announcements, not teaching."
+  const { data: courseTutorsForGroups } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .eq("course_id", courseId)
+    .eq("role", "trainer")
+    .order("full_name");
 
   const { data: members } = await supabase
     .from("course_subgroup_members")
     .select("id, subgroup_id, trainee_id, base_slot")
     .in("subgroup_id", (subgroups ?? []).map((g) => g.id))
     .order("base_slot");
+
+  const assignedTraineeIds = new Set((members ?? []).map((m) => m.trainee_id));
 
   const { data: roster } = await supabase
     .from("profiles")
@@ -46,6 +64,9 @@ export default async function TrainerRotationPage() {
 
   const nameByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.full_name]));
   const courseStatusByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.course_status]));
+  const availableTrainees = (roster ?? [])
+    .filter((r) => !assignedTraineeIds.has(r.id))
+    .map((r) => ({ id: r.id, full_name: r.full_name }));
 
   // Handbook 2.4: "TP must be split evenly between the two tutors." Real
   // signal is who actually GAVE feedback (tp_feedback.trainer_id), not
@@ -136,6 +157,7 @@ export default async function TrainerRotationPage() {
     (members ?? [])
       .filter((m) => m.subgroup_id === subgroupId)
       .map((m) => ({
+        memberId: m.id,
         traineeId: m.trainee_id,
         fullName: nameByTraineeId.get(m.trainee_id) ?? "Unknown",
         baseSlot: m.base_slot,
@@ -194,13 +216,12 @@ export default async function TrainerRotationPage() {
 
   const boardSection = (
     <>
-      {(subgroups ?? []).length === 0 ? (
-        <div className="sheet p-6">
-          <p className="text-muted">
-            No subgroups yet. Ask your centre admin to set up subgroups on the course page.
-          </p>
-        </div>
-      ) : null}
+      <div className="sheet p-6">
+        {(subgroups ?? []).length === 0 ? (
+          <p className="mb-3 text-muted">No subgroups yet -- create one below to get started.</p>
+        ) : null}
+        <CreateSubgroupForm courseId={courseId} />
+      </div>
 
       {/* Paired TP groups -- the real board + running order, per checkpoint 3 */}
       {(tpGroups ?? []).map((tpGroup) => {
@@ -214,9 +235,11 @@ export default async function TrainerRotationPage() {
           return halves.map((g) => (
             <UnpairedSubgroupBoard
               key={g.id}
+              courseId={courseId}
               subgroupId={g.id}
               name={g.name}
               members={buildMembers(g.id)}
+              availableTrainees={availableTrainees}
               planByTraineeAndTp={planByTraineeAndTp}
             />
           ));
@@ -248,6 +271,20 @@ export default async function TrainerRotationPage() {
               }
               today={today}
             />
+
+            <div className="sheet flex flex-wrap items-end justify-between gap-3 p-4">
+              <div className="flex-1">
+                <p className="mb-1 text-xs font-semibold tracking-[0.08em] text-muted uppercase">Group tutor</p>
+                <GroupTutorForm
+                  groupId={tpGroup.id}
+                  courseId={courseId}
+                  tutors={(courseTutorsForGroups ?? []).map((t) => ({ id: t.id, name: t.full_name }))}
+                  currentTutorId={tpGroup.tutor_profile_id}
+                  currentMeetingDays={tpGroup.meeting_days}
+                />
+              </div>
+              <UnpairButton courseId={courseId} tpGroupId={tpGroup.id} />
+            </div>
 
             {nextHalf && nextDate && nextTpNumber >= 1 && nextTpNumber <= 6 ? (
               <RunningOrderPanel
@@ -282,12 +319,20 @@ export default async function TrainerRotationPage() {
       {unpaired.map((subgroup) => (
         <UnpairedSubgroupBoard
           key={subgroup.id}
+          courseId={courseId}
           subgroupId={subgroup.id}
           name={subgroup.name}
           members={buildMembers(subgroup.id)}
+          availableTrainees={availableTrainees}
           planByTraineeAndTp={planByTraineeAndTp}
         />
       ))}
+
+      {unpaired.length >= 2 ? (
+        <div className="sheet p-6">
+          <PairSubgroupsForm courseId={courseId} unpairedSubgroups={unpaired.map((g) => ({ id: g.id, name: g.name }))} />
+        </div>
+      ) : null}
     </>
   );
 
@@ -399,14 +444,18 @@ export default async function TrainerRotationPage() {
 // subgroup that hasn't been paired into a TP group yet -- existing courses
 // must keep rendering exactly as they did before this checkpoint.
 function UnpairedSubgroupBoard({
+  courseId,
   subgroupId,
   name,
   members,
+  availableTrainees,
   planByTraineeAndTp,
 }: {
+  courseId: string;
   subgroupId: string;
   name: string;
-  members: { traineeId: string; fullName: string; baseSlot: number; courseStatus: CourseStatus }[];
+  members: { memberId: string; traineeId: string; fullName: string; baseSlot: number; courseStatus: CourseStatus }[];
+  availableTrainees: { id: string; full_name: string }[];
   planByTraineeAndTp: Map<string, { taught_at: string | null; class_grouping: "whole_class" | "one_to_one_or_small_group" }>;
 }) {
   const size = members.length;
@@ -416,12 +465,25 @@ function UnpairedSubgroupBoard({
       <div>
         <h2 className="font-serif text-lg text-ink">{name}</h2>
         {size > 0 ? (
-          <div className="mt-3">
-            <ReorderForm subgroupId={subgroupId} members={members} />
-          </div>
+          <>
+            <div className="mt-3">
+              <ReorderForm subgroupId={subgroupId} members={members} />
+            </div>
+            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {members.map((m) => (
+                <li key={m.memberId} className="flex items-center gap-1.5 text-sm text-ink">
+                  {m.fullName}
+                  <RemoveMemberButton courseId={courseId} memberId={m.memberId} />
+                </li>
+              ))}
+            </ul>
+          </>
         ) : (
           <p className="mt-2 text-sm text-muted">No trainees in this subgroup yet.</p>
         )}
+        <div className="mt-3">
+          <AddMemberForm courseId={courseId} subgroupId={subgroupId} availableTrainees={availableTrainees} />
+        </div>
       </div>
 
       {size > 0 ? (

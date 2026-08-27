@@ -10,6 +10,15 @@ export interface FormState {
   error: string | null;
 }
 
+// Moved to /trainer/rotation 2026-08-27 -- these actions and their UI
+// (subgroups-form.tsx) were left unmounted when Course Admin's page was
+// trimmed 23 Aug ("MCT territory once the course is running"). Widened from
+// admin-only to any trainer on the course (not MCT-gated): unlike close-out
+// or chat retention, nothing here is administrative -- setTpGroupTutor's own
+// comment already established "the MCT/ACT distinction governs
+// announcements, not teaching," and /trainer/rotation itself has never been
+// MCT-restricted, so subgroup/pairing management follows the same openness.
+//
 // checkpoint 3: was a flat 3-per-subgroup cap. Real rule (confirmed with
 // Ramy): a TP group is capped at 6 trainees combined across both halves,
 // never more, halves can be uneven. An unpaired subgroup can grow to 6 on
@@ -21,7 +30,7 @@ export async function createSubgroup(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole("admin");
+  await requireRole(["trainer", "admin"]);
 
   const courseId = formData.get("course_id");
   const name = formData.get("name");
@@ -36,7 +45,7 @@ export async function createSubgroup(
     return { error: "Could not create subgroup. Try again." };
   }
 
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/rotation");
   return { error: null };
 }
 
@@ -44,10 +53,9 @@ export async function addSubgroupMember(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole("admin");
+  await requireRole(["trainer", "admin"]);
 
   const subgroupId = formData.get("subgroup_id");
-  const courseId = formData.get("course_id");
   const traineeId = formData.get("trainee_id");
   if (typeof subgroupId !== "string" || typeof traineeId !== "string" || !traineeId) {
     return { error: "Choose a trainee to add." };
@@ -100,12 +108,12 @@ export async function addSubgroupMember(
     return { error: "Could not add trainee. Are they already in a subgroup?" };
   }
 
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/rotation");
   return { error: null };
 }
 
 export async function removeSubgroupMember(formData: FormData): Promise<void> {
-  await requireRole("admin");
+  await requireRole(["trainer", "admin"]);
 
   const memberId = formData.get("member_id");
   const courseId = formData.get("course_id");
@@ -115,7 +123,7 @@ export async function removeSubgroupMember(formData: FormData): Promise<void> {
   await supabase.from("course_subgroup_members").delete().eq("id", memberId);
 
   if (typeof courseId === "string") {
-    revalidatePath(`/dashboard/admin/courses/${courseId}`);
+    revalidatePath("/trainer/rotation");
   }
 }
 
@@ -124,7 +132,7 @@ export async function removeSubgroupMember(formData: FormData): Promise<void> {
 // specs/build-spec.md and src/lib/rotation.ts). The combined-6 cap is
 // re-checked atomically inside pair_subgroups() itself, not just here.
 export async function pairSubgroups(_prevState: FormState, formData: FormData): Promise<FormState> {
-  await requireRole("admin");
+  await requireRole(["trainer", "admin"]);
 
   const courseId = formData.get("course_id");
   const name = formData.get("name");
@@ -158,7 +166,7 @@ export async function pairSubgroups(_prevState: FormState, formData: FormData): 
   // Harmless no-op if the timetable isn't generated yet.
   await syncAssignmentDueDates(supabase, courseId);
 
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/rotation");
   return { error: null };
 }
 
@@ -166,7 +174,7 @@ export async function pairSubgroups(_prevState: FormState, formData: FormData): 
 // RPC/atomicity concern here -- plain updates plus a delete, same shape as
 // removeSubgroupMember.
 export async function unpairTpGroup(formData: FormData): Promise<void> {
-  await requireRole("admin");
+  await requireRole(["trainer", "admin"]);
 
   const tpGroupId = formData.get("tp_group_id");
   const courseId = formData.get("course_id");
@@ -178,7 +186,7 @@ export async function unpairTpGroup(formData: FormData): Promise<void> {
 
   if (typeof courseId === "string") {
     await syncAssignmentDueDates(supabase, courseId);
-    revalidatePath(`/dashboard/admin/courses/${courseId}`);
+    revalidatePath("/trainer/rotation");
   }
 }
 
@@ -196,7 +204,7 @@ export async function unpairTpGroup(formData: FormData): Promise<void> {
  * distinction governs announcements, not teaching.
  */
 export async function setTpGroupTutor(_prevState: FormState, formData: FormData): Promise<FormState> {
-  const profile = await requireRole("admin");
+  const profile = await requireRole(["trainer", "admin"]);
 
   const groupId = formData.get("group_id");
   const courseId = formData.get("course_id");
@@ -232,6 +240,6 @@ export async function setTpGroupTutor(_prevState: FormState, formData: FormData)
     .eq("course_id", courseId);
   if (error) return { error: "Could not save. Try again." };
 
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/rotation");
   return { error: null };
 }
