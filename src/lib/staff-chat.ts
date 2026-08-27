@@ -121,19 +121,53 @@ export async function getInitialStaffChatData(
 }> {
   const supabase = client ?? (await createClient());
 
-  const { data: profileForCleanup } = await supabase.from("profiles").select("center_id").eq("id", profileId).maybeSingle();
-  if (profileForCleanup?.center_id) {
-    await deleteStaleStaffMessages(profileForCleanup.center_id);
+  // Ramy, 28 Aug 2026: "no project if we don't fix this." This function ran
+  // up to 7 real sequential round trips. Two were the same `profiles` row
+  // fetched twice (once for cleanup's center_id, again later for
+  // course_id/role) -- merged into one. deleteStaleStaffMessages is a
+  // centre-wide cleanup sweep (its own multi-query scan+delete) whose
+  // result nothing here ever uses (`Promise<void>`, called purely for the
+  // side effect) -- it was blocking the ENTIRE page response regardless.
+  // Fired without awaiting instead: stale messages get swept by the next
+  // load instead of gating this one.
+  const [{ data: profile }, { data: memberships }] = await Promise.all([
+    supabase.from("profiles").select("center_id, course_id, role").eq("id", profileId).maybeSingle(),
+    supabase.from("staff_channel_members").select("channel_id").eq("profile_id", profileId),
+  ]);
+
+  if (profile?.center_id) {
+    deleteStaleStaffMessages(profile.center_id).catch((err) => console.error("deleteStaleStaffMessages failed", err));
   }
 
-  const { data: memberships } = await supabase
-    .from("staff_channel_members")
-    .select("channel_id")
-    .eq("profile_id", profileId);
+  // Who this person may start a conversation with.
+  //
+  // An ADMIN may message other admins, and nobody on a course. Ramy,
+  // 2026-08-16: "they can only message people from the centre admin, but not
+  // course tutors." Previously this read "trainers on the same course" for
+  // everyone, so an admin who happened to have a course_id was offered that
+  // course's tutors -- the exact thing the trainer-only rule exists to
+  // prevent, and it would have looked like a feature rather than a leak.
+  //
+  // A TRAINER may message registered trainers on the same course -- "you
+  // cannot be on the course unless registered as one of the trainers on the
+  // course," no admin exception, ever (migration 0039).
+  const isAdmin = profile?.role === "admin";
+
+  // coworkerRowsPromise only needs `profile`, already resolved above -- it
+  // runs alongside the whole channels chain below instead of waiting for it.
+  const coworkerRowsPromise: PromiseLike<{ data: { id: string; full_name: string }[] | null }> = isAdmin
+    ? profile?.center_id
+      ? supabase.from("profiles").select("id, full_name").eq("center_id", profile.center_id).eq("role", "admin").neq("id", profileId).order("full_name")
+      : Promise.resolve({ data: [] })
+    : profile?.course_id
+      ? supabase.from("profiles").select("id, full_name").eq("course_id", profile.course_id).eq("role", "trainer").neq("id", profileId).order("full_name")
+      : Promise.resolve({ data: [] });
 
   const channelIds = (memberships ?? []).map((m) => m.channel_id);
   if (channelIds.length === 0) {
-    return { channels: [], coworkers: [] };
+    const { data: coworkerRows } = await coworkerRowsPromise;
+    const coworkers: Coworker[] = (coworkerRows ?? []).map((c) => ({ id: c.id, full_name: c.full_name, role: isAdmin ? "admin" : "trainer" }));
+    return { channels: [], coworkers };
   }
 
   const { data: channels } = await supabase
@@ -142,33 +176,33 @@ export async function getInitialStaffChatData(
     .in("id", channelIds);
 
   const channelCourseIds = [...new Set((channels ?? []).map((c) => c.course_id).filter((id): id is string => !!id))];
-  const { data: channelCourses } =
-    channelCourseIds.length > 0
-      ? await supabase.from("courses").select("id, chat_retention_days, chat_retention_mode").in("id", channelCourseIds)
-      : { data: [] };
-  const retentionByCourseId = new Map((channelCourses ?? []).map((c) => [c.id, c]));
-
   const dmChannelIds = (channels ?? []).filter((c) => c.type === "dm").map((c) => c.id);
 
-  let dmOtherMembers: { channel_id: string; profile_id: string }[] = [];
-  if (dmChannelIds.length > 0) {
-    const { data } = await supabase
-      .from("staff_channel_members")
-      .select("channel_id, profile_id")
-      .in("channel_id", dmChannelIds)
-      .neq("profile_id", profileId);
-    dmOtherMembers = data ?? [];
-  }
+  // channelCourses and dmOtherMembers both only depend on `channels`,
+  // already resolved -- no reason they ran one after the other.
+  const [{ data: channelCourses }, { data: dmOtherMembers }] = await Promise.all([
+    channelCourseIds.length > 0
+      ? supabase.from("courses").select("id, chat_retention_days, chat_retention_mode").in("id", channelCourseIds)
+      : Promise.resolve({ data: [] as { id: string; chat_retention_days: number | null; chat_retention_mode: string }[] }),
+    dmChannelIds.length > 0
+      ? supabase.from("staff_channel_members").select("channel_id, profile_id").in("channel_id", dmChannelIds).neq("profile_id", profileId)
+      : Promise.resolve({ data: [] as { channel_id: string; profile_id: string }[] }),
+  ]);
+  const retentionByCourseId = new Map((channelCourses ?? []).map((c) => [c.id, c]));
 
-  const otherProfileIds = dmOtherMembers.map((m) => m.profile_id);
-  const { data: otherProfiles } =
+  const otherProfileIds = (dmOtherMembers ?? []).map((m) => m.profile_id);
+  // otherProfiles (needs otherProfileIds, just resolved) and coworkerRows
+  // (needed nothing from this chain at all) run together here too.
+  const [{ data: otherProfiles }, { data: coworkerRows }] = await Promise.all([
     otherProfileIds.length > 0
-      ? await supabase.from("profiles").select("id, full_name").in("id", otherProfileIds)
-      : { data: [] };
+      ? supabase.from("profiles").select("id, full_name").in("id", otherProfileIds)
+      : Promise.resolve({ data: [] as { id: string; full_name: string }[] }),
+    coworkerRowsPromise,
+  ]);
 
   const nameByProfileId = new Map((otherProfiles ?? []).map((p) => [p.id, p.full_name]));
   const dmNameByChannelId = new Map(
-    dmOtherMembers.map((m) => [m.channel_id, nameByProfileId.get(m.profile_id) ?? "Unknown"])
+    (dmOtherMembers ?? []).map((m) => [m.channel_id, nameByProfileId.get(m.profile_id) ?? "Unknown"])
   );
 
   const summaries: ChannelSummary[] = (channels ?? [])
@@ -190,46 +224,6 @@ export async function getInitialStaffChatData(
       const order = { center_trainers: 0, all_staff: 0, tp_group: 0, course_admin: 0, centre_admin: 0, dm: 1 };
       return order[a.type] - order[b.type] || a.name.localeCompare(b.name);
     });
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("course_id, center_id, role")
-    .eq("id", profileId)
-    .maybeSingle();
-
-  // Who this person may start a conversation with.
-  //
-  // An ADMIN may message other admins, and nobody on a course. Ramy,
-  // 2026-08-16: "they can only message people from the centre admin, but not
-  // course tutors." Previously this read "trainers on the same course" for
-  // everyone, so an admin who happened to have a course_id was offered that
-  // course's tutors -- the exact thing the trainer-only rule exists to
-  // prevent, and it would have looked like a feature rather than a leak.
-  //
-  // A TRAINER may message registered trainers on the same course -- "you
-  // cannot be on the course unless registered as one of the trainers on the
-  // course," no admin exception, ever (migration 0039).
-  const isAdmin = profile?.role === "admin";
-
-  const { data: coworkerRows } = isAdmin
-    ? profile?.center_id
-      ? await supabase
-          .from("profiles")
-          .select("id, full_name")
-          .eq("center_id", profile.center_id)
-          .eq("role", "admin")
-          .neq("id", profileId)
-          .order("full_name")
-      : { data: [] }
-    : profile?.course_id
-      ? await supabase
-          .from("profiles")
-          .select("id, full_name")
-          .eq("course_id", profile.course_id)
-          .eq("role", "trainer")
-          .neq("id", profileId)
-          .order("full_name")
-      : { data: [] };
 
   const coworkers: Coworker[] = (coworkerRows ?? []).map((c) => ({
     id: c.id,
