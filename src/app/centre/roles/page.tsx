@@ -111,7 +111,7 @@ export default async function CentreRolesPage() {
           {AREAS.map((a) => {
             const h = areaHolders.get(a);
             return (
-              <div key={a} className="flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/60 px-3 py-2">
+              <div key={a} className="admin-hover flex items-center justify-between gap-3 rounded-[6px] bg-surface-muted/60 px-3 py-2">
                 <span className="text-[13px] text-ink">{AREA_LABELS[a]}</span>
                 <span className="shrink-0 text-xs text-muted">
                   {h ? (

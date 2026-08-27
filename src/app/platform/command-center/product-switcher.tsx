@@ -35,6 +35,7 @@ export function ProductSwitcher() {
     <div ref={ref} style={{ position: "relative" }}>
       <div
         onClick={() => setOpen((v) => !v)}
+        className="admin-hover-fill"
         style={{ width: 34, height: 34, borderRadius: 6, background: DARK_ITEM, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="oklch(78% 0.02 80)">
@@ -50,9 +51,8 @@ export function ProductSwitcher() {
               href={p.href}
               target={p.href.startsWith("http") ? "_blank" : undefined}
               rel={p.href.startsWith("http") ? "noreferrer" : undefined}
-              style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", textDecoration: "none", transition: "background 120ms ease" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = HOVER)}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              className="admin-hover-fill"
+              style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", textDecoration: "none" }}
             >
               <span style={{ width: 22, height: 22, borderRadius: 6, background: p.color, color: CARD, fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" }}>
                 {p.initial}

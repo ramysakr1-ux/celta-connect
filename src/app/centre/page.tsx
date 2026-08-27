@@ -224,7 +224,7 @@ export default async function CentreOverviewPage({
           {can(ctx.roles, "payments.view", ctx.overrides) ? (
             <a
               href={`/centre/financials.csv${branch ? `?branch=${branch}` : ""}`}
-              className="rounded-[6px] border border-border px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
+              className="admin-hover-fill rounded-[6px] border border-border px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
             >
               Export financials
             </a>
@@ -232,7 +232,7 @@ export default async function CentreOverviewPage({
           {can(ctx.roles, "roles.grant", ctx.overrides) ? (
             <Link
               href="/centre/roles"
-              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+              className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
             >
               Invite people
             </Link>
@@ -273,7 +273,7 @@ export default async function CentreOverviewPage({
             const state = courseState(c.start_date, c.end_date);
             const owed = owedByCourse.get(c.id) ?? 0;
             return (
-              <div key={c.id} className={`flex flex-wrap items-center gap-4 px-5 py-3.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+              <div key={c.id} className={`admin-hover flex flex-wrap items-center gap-4 px-5 py-3.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                 <Link href={`/centre/courses/${c.id}`} className="min-w-[13rem] flex-1 hover:text-primary">
                   <p className="text-sm font-semibold text-ink">
                     {c.name}
@@ -315,7 +315,7 @@ export default async function CentreOverviewPage({
             <span className="text-xs text-muted">{(bounces ?? []).length} to fix</span>
           </div>
           {(bounces ?? []).map((b, i) => (
-            <div key={b.id} className={`px-5 py-2.5 ${i > 0 ? "border-t border-destructive/15" : ""}`}>
+            <div key={b.id} className={`admin-hover px-5 py-2.5 ${i > 0 ? "border-t border-destructive/15" : ""}`}>
               <div className="flex items-center justify-between gap-3">
                 {b.applicant_id ? (
                   <Link href={`/dashboard/admissions/${b.applicant_id}`} className="text-sm text-ink hover:underline">
@@ -353,7 +353,7 @@ export default async function CentreOverviewPage({
               <p className="px-5 py-4 text-sm text-muted">Nobody in the pipeline yet.</p>
             ) : (
               [...stageCounts.entries()].map(([stage, count], i) => (
-                <div key={stage} className={`px-5 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+                <div key={stage} className={`admin-hover px-5 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted capitalize">{stage.replace(/_/g, " ")}</span>
                     <span className="text-sm text-ink tabular-nums">{count}</span>
@@ -383,7 +383,7 @@ export default async function CentreOverviewPage({
                 <p className="px-5 py-4 text-sm text-muted">Nothing missed.</p>
               ) : (
                 missed.map((p, i) => (
-                  <div key={i} className={`flex items-center justify-between px-5 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+                  <div key={i} className={`admin-hover flex items-center justify-between px-5 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                     <span className="text-sm text-destructive">
                       Missed instalment{multiBranch ? ` · ${branchName.get(p.center_id)}` : ""}
                     </span>
@@ -399,7 +399,7 @@ export default async function CentreOverviewPage({
           {canView(ctx.roles, "volunteers.view", ctx.overrides) ? (
             <Link
               href="/centre/volunteers"
-              className="card flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+              className="admin-hover-fill card flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
             >
               <div className="flex flex-col gap-0.5">
                 <h2 className="font-serif text-base text-ink">Volunteer pool</h2>
@@ -415,7 +415,7 @@ export default async function CentreOverviewPage({
           {canView(ctx.roles, "courseAdmin.view", ctx.overrides) && assessorHistory.length > 0 ? (
             <Link
               href="/centre/assessor-history"
-              className="card card-gold flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+              className="admin-hover-fill card card-gold flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
             >
               <div className="flex flex-col gap-0.5">
                 <h2 className="font-serif text-base text-ink">Assessor history</h2>
@@ -436,7 +436,7 @@ export default async function CentreOverviewPage({
         <div>
           <Link
             href="/dashboard/admin"
-            className="inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            className="admin-hover-fill inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
           >
             New course
           </Link>

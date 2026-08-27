@@ -32,7 +32,7 @@ export function WaiverForm({ applicant }: { applicant: Applicant }) {
             </label>
             <input id="waiver_agreed_role" name="waiver_agreed_role" type="text" placeholder="e.g. Centre Director" className={inputClass} />
           </div>
-          <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary">
+          <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary admin-hover-fill">
             Record
           </button>
         </form>

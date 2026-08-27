@@ -56,7 +56,7 @@ export function SettingsTabs({
             key={tab.key}
             type="button"
             onClick={() => setSection(tab.key)}
-            className={`-mb-[3px] border-b-2 px-3 pb-2 text-sm font-medium ${
+            className={`admin-hover-fill -mb-[3px] border-b-2 px-3 pb-2 text-sm font-medium ${
               section === tab.key
                 ? tab.key === "danger"
                   ? "border-destructive text-destructive"

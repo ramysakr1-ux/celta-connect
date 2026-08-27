@@ -26,7 +26,7 @@ export function PaymentNotificationsPanel({ notifications, canEdit }: { notifica
       </div>
       <ul className="flex flex-col">
         {notifications.map((n) => (
-          <li key={n.id} className="flex items-center justify-between gap-3 border-b border-status-warning-text/20 px-5 py-3 last:border-none">
+          <li key={n.id} className="admin-hover flex items-center justify-between gap-3 border-b border-status-warning-text/20 px-5 py-3 last:border-none">
             <div>
               <p className="text-sm text-ink">{n.message}</p>
               <p className="mt-0.5 text-xs text-muted">{day(n.createdAt)}</p>
@@ -34,7 +34,7 @@ export function PaymentNotificationsPanel({ notifications, canEdit }: { notifica
             {canEdit ? (
               <form action={markPaymentNotificationRead}>
                 <input type="hidden" name="notification_id" value={n.id} />
-                <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary">
+                <button type="submit" className="admin-hover-fill shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary">
                   Dismiss
                 </button>
               </form>

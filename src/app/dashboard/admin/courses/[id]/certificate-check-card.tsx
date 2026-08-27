@@ -20,7 +20,7 @@ function CertificateRow({ courseId, candidate }: { courseId: string; candidate: 
   );
 
   return (
-    <div className={`flex flex-col gap-2 rounded-[6px] border p-3 ${mismatch ? "border-destructive/40 bg-destructive/5" : "border-border"}`}>
+    <div className={`admin-hover flex flex-col gap-2 rounded-[6px] border p-3 ${mismatch ? "border-destructive/40 bg-destructive/5" : "border-border"}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-ink">{candidate.fullName}</p>
@@ -44,7 +44,7 @@ function CertificateRow({ courseId, candidate }: { courseId: string; candidate: 
           <button
             type="submit"
             disabled={pending}
-            className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary disabled:opacity-60"
+            className="admin-hover-fill rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary disabled:opacity-60"
           >
             {pending ? "Saving..." : "Save"}
           </button>

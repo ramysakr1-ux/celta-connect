@@ -40,7 +40,7 @@ export function ProviderList({
               key={p.key}
               type="button"
               onClick={() => setSelected(p.key)}
-              className={`flex items-center gap-3 rounded-[8px] border px-4 py-3 text-left ${
+              className={`admin-hover flex items-center gap-3 rounded-[8px] border px-4 py-3 text-left ${
                 active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"
               }`}
             >
@@ -93,7 +93,7 @@ export function ProviderList({
             <button
               type="submit"
               disabled={disconnecting}
-              className="h-10 w-full rounded-[6px] border border-border bg-card text-sm font-semibold text-ink hover:border-destructive hover:text-destructive disabled:opacity-60"
+              className="admin-hover-fill h-10 w-full rounded-[6px] border border-border bg-card text-sm font-semibold text-ink hover:border-destructive hover:text-destructive disabled:opacity-60"
             >
               {disconnecting ? "Disconnecting..." : `Disconnect ${chosen.name}`}
             </button>
@@ -104,7 +104,7 @@ export function ProviderList({
             <button
               type="submit"
               disabled={pending}
-              className="h-10 w-full rounded-[6px] bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-60"
+              className="admin-hover-fill h-10 w-full rounded-[6px] bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-60"
             >
               {pending ? "Connecting..." : `Connect ${chosen.name}`}
             </button>

@@ -79,7 +79,7 @@ export function SupportAccessTab({ canGrantBilling, grants }: { canGrantBilling:
               </select>
             </div>
             {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-            <button type="submit" disabled={pending} className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60">
+            <button type="submit" disabled={pending} className="admin-hover-fill self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60">
               {pending ? "Granting..." : "Grant access"}
             </button>
           </form>

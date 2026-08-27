@@ -112,7 +112,7 @@ export default async function CentreLayout({ children }: { children: React.React
         <div className="container pb-24">
           <Link
             href="/centre/settings"
-            className="card flex items-center justify-between gap-4 px-[22px] py-[18px] transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+            className="admin-hover-fill card flex items-center justify-between gap-4 px-[22px] py-[18px] transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
           >
             <div className="flex flex-col gap-[3px]">
               <span className="font-serif text-[15px] font-semibold text-ink">Centre settings</span>

@@ -33,7 +33,7 @@ export function CreateSubgroupForm({ courseId }: { courseId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
       >
         {pending ? "Creating..." : "Create subgroup"}
       </button>
@@ -113,7 +113,7 @@ export function PairSubgroupsForm({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+          className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
         >
           {pending ? "Pairing..." : "Pair as TP group"}
         </button>
@@ -178,7 +178,7 @@ export function AddMemberForm({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
       >
         {pending ? "Adding..." : "Add"}
       </button>

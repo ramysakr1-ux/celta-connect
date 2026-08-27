@@ -170,6 +170,7 @@ export default async function CommandCenterOverviewPage() {
             <Link
               key={c.tutorLinkId}
               href={`/platform/command-center/enter-course/${c.courseId}`}
+              className="admin-hover"
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderTop: `1px solid ${BORDER}`, textDecoration: "none" }}
             >
               <span style={{ fontSize: 13, fontWeight: 600, color: INK }}>
@@ -186,7 +187,7 @@ export default async function CommandCenterOverviewPage() {
           <div style={{ background: CARD, borderRadius: 10, boxShadow: "rgba(30,20,10,0.04) 0 1px 2px", overflow: "hidden" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 6px" }}>
               <div style={{ fontFamily: "Newsreader, serif", fontSize: 17, fontWeight: 600, color: INK }}>Centres</div>
-              <Link href="/platform" style={{ padding: "8px 16px", borderRadius: 20, background: GOLD, color: DARK, fontSize: 12, fontWeight: 700, textDecoration: "none" }}>
+              <Link href="/platform" className="admin-hover-fill" style={{ padding: "8px 16px", borderRadius: 20, background: GOLD, color: DARK, fontSize: 12, fontWeight: 700, textDecoration: "none" }}>
                 + Add a centre
               </Link>
             </div>
@@ -202,7 +203,7 @@ export default async function CommandCenterOverviewPage() {
                 const access = ownedCenterIds.has(c.id) ? "Owner" : invitedByCenterId.has(c.id) ? "Invited" : null;
                 const running = runningCourseByCenterId.get(c.id) ?? false;
                 return (
-                  <div key={c.id} style={{ display: "grid", gridTemplateColumns: "1.4fr 1.2fr 0.8fr 1.2fr", alignItems: "center" }}>
+                  <div key={c.id} className="admin-hover" style={{ display: "grid", gridTemplateColumns: "1.4fr 1.2fr 0.8fr 1.2fr", alignItems: "center" }}>
                     <div style={{ padding: "15px 20px", borderBottom: `1px solid ${BORDER}`, fontSize: 13.5, color: INK, fontWeight: 600 }}>
                       {c.name}
                       {c.is_demo ? <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 400, color: MUTED }}>(demo)</span> : null}
@@ -299,7 +300,7 @@ export default async function CommandCenterOverviewPage() {
               <p style={{ fontSize: 12.5, color: MUTED }}>Nothing yet.</p>
             ) : (
               (supportMessages ?? []).map((m) => (
-                <div key={m.id} style={{ display: "flex", flexDirection: "column", gap: 3, padding: "12px 0", borderTop: `1px solid ${BORDER}` }}>
+                <div key={m.id} className="admin-hover" style={{ display: "flex", flexDirection: "column", gap: 3, padding: "12px 0", borderTop: `1px solid ${BORDER}` }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                       <span style={{ width: 6, height: 6, borderRadius: "50%", background: m.read_at ? BORDER : GOLD, flex: "0 0 auto" }} />
@@ -322,7 +323,7 @@ export default async function CommandCenterOverviewPage() {
               <p style={{ fontSize: 12.5, color: MUTED }}>Nothing yet.</p>
             ) : (
               activity.map((item, i) => (
-                <div key={i} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
+                <div key={i} className="admin-hover" style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
                   <div style={{ fontSize: 11, color: "oklch(0.58 0.017 70)", width: 44, flex: "0 0 auto" }}>{relativeTime(item.at)}</div>
                   <div style={{ fontSize: 12.5, color: "oklch(0.38 0.017 65)" }}>{item.label}</div>
                 </div>
@@ -332,6 +333,7 @@ export default async function CommandCenterOverviewPage() {
 
           <Link
             href="/platform/accounts"
+            className="admin-hover-fill"
             style={{ textAlign: "center", padding: "12px 16px", borderRadius: 10, border: `1px solid ${BORDER}`, fontSize: 12.5, fontWeight: 600, color: TEAL, textDecoration: "none" }}
           >
             Accounts, subscriptions &amp; invoices →
@@ -350,6 +352,7 @@ export default async function CommandCenterOverviewPage() {
 function AttentionRow({ dot, title, detail }: { dot: string; title: string; detail: string }) {
   return (
     <div
+      className="admin-hover"
       style={{
         display: "flex", gap: 12, alignItems: "flex-start", padding: "12px 14px", borderRadius: 7,
         background: `color-mix(in oklab, ${dot} 8%, ${CARD})`,

@@ -233,7 +233,7 @@ export default async function EmailPreviewPage({
           <Link
             key={s.key}
             href={`/dashboard/admin/email-preview?email=${s.key}`}
-            className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+            className={`admin-hover-fill rounded-full border px-3 py-1.5 text-xs font-semibold ${
               s.key === active.key
                 ? "border-ink bg-ink text-card"
                 : "border-border text-muted hover:border-rule hover:text-ink"

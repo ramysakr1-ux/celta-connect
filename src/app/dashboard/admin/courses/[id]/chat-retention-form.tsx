@@ -74,7 +74,7 @@ export function ChatRetentionForm({
           />
         ) : null}
         <input type="hidden" name="chat_retention_days" value={effectiveDays} />
-        <button type="submit" className="rounded-[6px] border border-border px-3 py-2 text-sm text-ink hover:border-primary">
+        <button type="submit" className="admin-hover-fill rounded-[6px] border border-border px-3 py-2 text-sm text-ink hover:border-primary">
           Save
         </button>
       </div>

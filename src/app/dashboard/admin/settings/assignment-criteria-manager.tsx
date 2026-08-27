@@ -50,7 +50,7 @@ export function AssignmentCriteriaManager({ criteria }: { criteria: Criterion[] 
 function CriterionRow({ criterion }: { criterion: Criterion }) {
   return (
     <li
-      className={`flex items-center justify-between gap-3 rounded-[6px] border px-3 py-2 ${
+      className={`admin-hover flex items-center justify-between gap-3 rounded-[6px] border px-3 py-2 ${
         criterion.active ? "border-border" : "border-border-faint opacity-60"
       }`}
     >
@@ -88,7 +88,7 @@ function AddCriterionForm({ assignmentType }: { assignmentType: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="h-9 shrink-0 rounded-[6px] border border-border px-3 text-xs font-medium text-ink hover:border-primary disabled:opacity-60"
+        className="admin-hover-fill h-9 shrink-0 rounded-[6px] border border-border px-3 text-xs font-medium text-ink hover:border-primary disabled:opacity-60"
       >
         {pending ? "Adding…" : "Add"}
       </button>

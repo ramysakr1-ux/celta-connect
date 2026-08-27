@@ -20,7 +20,7 @@ export function OfferNextPlaceForm({ intakeCourseId, waitingCount }: { intakeCou
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary disabled:opacity-60"
+        className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary disabled:opacity-60 admin-hover-fill"
       >
         {pending ? "Offering..." : "Offer next place"}
       </button>

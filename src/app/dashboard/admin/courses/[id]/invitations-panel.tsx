@@ -104,7 +104,7 @@ export function InvitationsPanel({
         <button
           type="submit"
           disabled={sending}
-          className="h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
+          className="admin-hover-fill h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
         >
           {sending ? "Sending…" : `Send invite as ${inviteRoleLabel}`}
         </button>
@@ -139,7 +139,7 @@ export function InvitationsPanel({
         <div className="mt-3 flex flex-col gap-1.5">
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Invited, not yet joined</p>
           {pending.map((inv) => (
-            <div key={inv.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-border-faint py-1.5 last:border-none">
+            <div key={inv.id} className="admin-hover flex flex-wrap items-center justify-between gap-2 border-b border-border-faint py-1.5 last:border-none">
               <span className="text-sm text-ink">
                 {inv.fullName ?? inv.email}
                 {inv.fullName ? <span className="text-muted"> · {inv.email}</span> : null}

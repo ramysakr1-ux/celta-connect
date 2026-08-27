@@ -119,7 +119,7 @@ export default async function CourseAdminDetailPage({
               <Link
                 key={row.id}
                 href={`/dashboard/admissions/${row.id}`}
-                className="grid grid-cols-[1fr_auto_auto] items-center gap-3 border-b border-border-faint py-2.5 transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+                className="admin-hover grid grid-cols-[1fr_auto_auto] items-center gap-3 border-b border-border-faint py-2.5 transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
               >
                 <span className="truncate text-sm font-medium text-ink">{row.fullName}</span>
                 <span className="text-xs text-muted">{row.stageLabel}</span>
@@ -183,7 +183,7 @@ export default async function CourseAdminDetailPage({
               href={center.appian_url}
               target="_blank"
               rel="noreferrer"
-              className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
+              className="admin-hover-fill rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
             >
               Open Appian &rarr;
             </a>
@@ -269,7 +269,7 @@ export default async function CourseAdminDetailPage({
               className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
-          <button type="submit" className="h-10 rounded-[6px] border border-border px-3 text-sm text-ink hover:border-primary">
+          <button type="submit" className="admin-hover-fill h-10 rounded-[6px] border border-border px-3 text-sm text-ink hover:border-primary">
             Save
           </button>
         </form>
@@ -289,7 +289,7 @@ export default async function CourseAdminDetailPage({
             defaultValue={course.assessor_visit_date ?? ""}
             className="h-9 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
           />
-          <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary">
+          <button type="submit" className="admin-hover-fill rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary">
             Save
           </button>
         </form>

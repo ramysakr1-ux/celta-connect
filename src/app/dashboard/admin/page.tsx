@@ -156,7 +156,7 @@ export default async function AdminDashboardPage() {
             a primary button that 404s is worse than no button. */}
         <Link
           href="/dashboard/admin/courses/new"
-          className="flex h-[34px] shrink-0 items-center rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold whitespace-nowrap text-primary-foreground"
+          className="admin-hover-fill flex h-[34px] shrink-0 items-center rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold whitespace-nowrap text-primary-foreground"
         >
           New course
         </Link>
@@ -205,7 +205,7 @@ export default async function AdminDashboardPage() {
                       <Link
                         key={row.course.id}
                         href={`/dashboard/admin/courses/${row.course.id}`}
-                        className="flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+                        className="admin-hover flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
                       >
                         <div className="min-w-0">
                           <p className="truncate text-sm font-semibold text-ink">{row.course.name}</p>
@@ -243,7 +243,7 @@ export default async function AdminDashboardPage() {
                   <p className="text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Closed</p>
                   <Link
                     href="/dashboard/admin/courses/closed"
-                    className="card flex items-center justify-between gap-4 px-5 py-3.5 transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+                    className="admin-hover-fill card flex items-center justify-between gap-4 px-5 py-3.5 transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
                   >
                     <span className="text-sm text-ink">
                       {closedCourses.length} closed course{closedCourses.length === 1 ? "" : "s"}
@@ -276,7 +276,7 @@ export default async function AdminDashboardPage() {
               <Link
                 key={m.label}
                 href={m.href}
-                className="-mx-2 flex items-center justify-between gap-3 border-b border-border-faint px-2 py-2 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+                className="admin-hover -mx-2 flex items-center justify-between gap-3 border-b border-border-faint px-2 py-2 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
               >
                 <span className="text-xs text-ink">{m.label}</span>
                 <span className="text-xs tabular-nums text-muted">
@@ -328,7 +328,7 @@ export default async function AdminDashboardPage() {
           <div className="mt-1 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Link
               href="/dashboard/admin/coursebooks"
-              className="flex flex-col gap-1.5 rounded-[7px] border border-border p-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+              className="admin-hover-fill flex flex-col gap-1.5 rounded-[7px] border border-border p-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
             >
               <span className="text-[12.5px] font-semibold text-ink">Build from the shared library</span>
               <span className="text-[11px] leading-relaxed text-muted">

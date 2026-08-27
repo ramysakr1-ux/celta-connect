@@ -47,7 +47,7 @@ export function PipelineFunnel({
               className={`flex min-w-0 flex-col gap-1.5 rounded-[6px] border-t-[3px] px-3.5 py-3 text-left transition-colors ${
                 on
                   ? "border-t-primary bg-[color-mix(in_oklab,var(--color-primary)_42%,var(--color-card))] border border-primary/30"
-                  : "border-t-border-faint border border-border bg-transparent hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+                  : "border-t-border-faint border border-border bg-transparent hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))] admin-hover-fill"
               }`}
             >
               <div className="flex items-baseline justify-between gap-2">
@@ -74,7 +74,7 @@ export function PipelineFunnel({
           ) : (
             <ul>
               {people.map((p) => (
-                <li key={p.id} className="border-b border-border-faint px-4 py-2.5 last:border-none">
+                <li key={p.id} className="border-b border-border-faint px-4 py-2.5 last:border-none admin-hover">
                   <p className="text-sm font-semibold text-ink">{p.name}</p>
                   <p className="text-xs text-muted">{p.meta}</p>
                 </li>

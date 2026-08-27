@@ -398,8 +398,19 @@ h6 {
   .trainer-hover-fill {
     transition: background-color 150ms ease;
   }
+  /* !important: Tailwind v4's utilities layer always outranks this
+     components-layer rule regardless of source order or selector
+     specificity -- any button that also carries its own conflicting
+     hover background utility (common on solid-colored buttons) would
+     otherwise silently swallow this fill with zero visual effect. Found
+     2026-08-27 testing a real button live (getComputedStyle showed the
+     Tailwind hover color winning, not this one) after the admin-hover
+     sweep, and confirmed the same latent bug already existed wherever
+     trainee/trainer-hover-fill sat next to a pre-existing hover background
+     utility -- not new today, just never caught because screenshots don't
+     reliably show a subtle color-shift miss. */
   .trainer-hover-fill:hover {
-    background-color: color-mix(in oklab, var(--hub-hover-accent) 20%, var(--color-card));
+    background-color: color-mix(in oklab, var(--hub-hover-accent) 20%, var(--color-card)) !important;
   }
 
   /* for-claude-code-trainee-assessor-card-system.md + Trainee Walkthrough.dc.html
@@ -434,7 +445,7 @@ h6 {
     transition: background-color 150ms ease;
   }
   .trainee-hover-fill:hover {
-    background-color: oklch(93% 0.019 190);
+    background-color: oklch(93% 0.019 190) !important;
   }
   /* Same rule (Ramy, 25 Aug 2026: "hover rule extension" -- past trainee
      only), for every screen with no role-tinted accent of its own (Centre
@@ -453,7 +464,7 @@ h6 {
     transition: background-color 150ms ease;
   }
   .admin-hover-fill:hover {
-    background-color: oklch(93% 0.019 190);
+    background-color: oklch(93% 0.019 190) !important;
   }
 
   /* Shared "entry moment" card -- pale tinted teal-green background + soft

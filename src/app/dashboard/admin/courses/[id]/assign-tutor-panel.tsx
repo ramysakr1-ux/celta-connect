@@ -74,7 +74,7 @@ export function AssignTutorPanel({ courseId, trainers }: { courseId: string; tra
         <button
           type="submit"
           disabled={pending}
-          className="h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
+          className="admin-hover-fill h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
         >
           {pending ? "Adding…" : "Add to this course"}
         </button>

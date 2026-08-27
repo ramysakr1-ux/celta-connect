@@ -28,7 +28,7 @@ export function ReferralRequestRow({
   const [declining, setDeclining] = useState(false);
 
   return (
-    <div className="card flex flex-col gap-3 p-6">
+    <div className="card flex flex-col gap-3 p-6 admin-hover">
       <div>
         <p className="text-sm font-semibold text-ink">{request.applicantName}</p>
         <p className="text-xs text-muted">{request.applicantEmail}</p>
@@ -60,7 +60,7 @@ export function ReferralRequestRow({
             <button
               type="submit"
               disabled={acceptPending || courses.length === 0}
-              className="rounded-[6px] border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
+              className="rounded-[6px] border border-primary bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60 admin-hover-fill"
             >
               {acceptPending ? "Accepting..." : "Accept"}
             </button>
@@ -68,7 +68,7 @@ export function ReferralRequestRow({
           <button
             type="button"
             onClick={() => setDeclining(true)}
-            className="rounded-[6px] border border-border px-3 py-2 text-sm font-medium text-ink hover:border-destructive"
+            className="rounded-[6px] border border-border px-3 py-2 text-sm font-medium text-ink hover:border-destructive admin-hover-fill"
           >
             Decline
           </button>
@@ -86,14 +86,14 @@ export function ReferralRequestRow({
           <button
             type="submit"
             disabled={declinePending}
-            className="rounded-[6px] border border-destructive px-3 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-60"
+            className="rounded-[6px] border border-destructive px-3 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-60 admin-hover-fill"
           >
             {declinePending ? "Declining..." : "Confirm decline"}
           </button>
           <button
             type="button"
             onClick={() => setDeclining(false)}
-            className="rounded-[6px] border border-border px-3 py-2 text-sm text-muted hover:text-ink"
+            className="rounded-[6px] border border-border px-3 py-2 text-sm text-muted hover:text-ink admin-hover-fill"
           >
             Cancel
           </button>

@@ -57,7 +57,7 @@ export default async function AdminAssignmentBriefsPage() {
             {template ? (
               <Link
                 href={`/dashboard/admin/assignment-briefs/${template.id}`}
-                className="mt-3 inline-block rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+                className="admin-hover-fill mt-3 inline-block rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
               >
                 Review brief
               </Link>

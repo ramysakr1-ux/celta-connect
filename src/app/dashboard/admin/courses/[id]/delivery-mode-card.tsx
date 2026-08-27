@@ -19,7 +19,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+          className="admin-hover-fill rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
         >
           Change
         </button>
@@ -40,7 +40,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
       <input type="hidden" name="delivery_mode" value={mode} />
       <DeliveryModePicker value={mode} onChange={setMode} />
       <div className="flex gap-3">
-        <button type="submit" className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card">
+        <button type="submit" className="admin-hover-fill self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card">
           Save
         </button>
         <button
@@ -49,7 +49,7 @@ export function DeliveryModeCard({ courseId, savedMode }: { courseId: string; sa
             setMode(savedMode);
             setEditing(false);
           }}
-          className="self-start rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
+          className="admin-hover-fill self-start rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
         >
           Cancel
         </button>

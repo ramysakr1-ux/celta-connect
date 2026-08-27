@@ -80,7 +80,7 @@ export default async function AdmissionsSettingsPage() {
             <button
               type="submit"
               disabled={staff.role !== "admin"}
-              className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-ink hover:border-primary disabled:opacity-50"
+              className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-ink hover:border-primary disabled:opacity-50 admin-hover-fill"
             >
               {center?.admissions_ai_shadow_mode_enabled ? "On -- turn off" : "Off -- turn on"}
             </button>
@@ -101,7 +101,7 @@ export default async function AdmissionsSettingsPage() {
             <button
               type="submit"
               disabled={staff.role !== "admin" || !center?.admissions_ai_shadow_mode_enabled}
-              className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-ink hover:border-primary disabled:opacity-50"
+              className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-ink hover:border-primary disabled:opacity-50 admin-hover-fill"
             >
               {center?.admissions_ai_autobook_enabled ? "On -- turn off" : "Off -- turn on"}
             </button>
@@ -117,7 +117,7 @@ export default async function AdmissionsSettingsPage() {
         </p>
         <ul className="flex flex-col gap-2">
           {(prompts ?? []).map((p) => (
-            <li key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3">
+            <li key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3 admin-hover">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{p.prompt_type}</span>
                 <p className="text-sm text-ink">{p.prompt_text}</p>
@@ -149,7 +149,7 @@ export default async function AdmissionsSettingsPage() {
             </label>
             <input id="prompt_text" name="prompt_text" type="text" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink" />
           </div>
-          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card admin-hover-fill">
             Add prompt
           </button>
         </form>
@@ -163,7 +163,7 @@ export default async function AdmissionsSettingsPage() {
         </p>
         <ul className="flex flex-col gap-2">
           {(speakingPrompts ?? []).map((p) => (
-            <li key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3">
+            <li key={p.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3 admin-hover">
               <p className="text-sm text-ink">{p.prompt_text}</p>
               <form action={toggleSpeakingPromptActive}>
                 <input type="hidden" name="prompt_id" value={p.id} />
@@ -188,7 +188,7 @@ export default async function AdmissionsSettingsPage() {
               className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink"
             />
           </div>
-          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card admin-hover-fill">
             Add prompt
           </button>
         </form>
@@ -207,7 +207,7 @@ export default async function AdmissionsSettingsPage() {
         ) : null}
         <ul className="flex flex-col gap-2">
           {(questions ?? []).map((q) => (
-            <li key={q.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3">
+            <li key={q.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border p-3 admin-hover">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{COVERAGE_LABEL[q.coverage_area]}</span>
                 <p className="text-sm text-ink">{q.question_text}</p>
@@ -241,7 +241,7 @@ export default async function AdmissionsSettingsPage() {
             </label>
             <input id="question_text" name="question_text" type="text" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink" />
           </div>
-          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+          <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card admin-hover-fill">
             Add question
           </button>
         </form>

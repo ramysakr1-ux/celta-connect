@@ -105,7 +105,7 @@ export function MarkingForm({ applicant }: { applicant: Applicant }) {
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+        className="self-start rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60 admin-hover-fill"
       >
         {pending ? "Saving..." : "Save marking"}
       </button>

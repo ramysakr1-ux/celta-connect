@@ -68,7 +68,7 @@ export function TransferOwnershipCard({ centreName }: { centreName: string }) {
         <button
           type="submit"
           disabled={!unlocked || pending}
-          className="self-start rounded-[6px] border border-destructive px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-40"
+          className="admin-hover-fill self-start rounded-[6px] border border-destructive px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {pending ? "Transferring…" : "Transfer ownership"}
         </button>
@@ -110,7 +110,7 @@ export function DeleteCentreCard({ centreName }: { centreName: string }) {
           <button
             type="submit"
             disabled={requestPending}
-            className="self-start rounded-[6px] border border-destructive px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-40"
+            className="admin-hover-fill self-start rounded-[6px] border border-destructive px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {requestPending ? "Sending code…" : "Send me a confirmation code"}
           </button>
@@ -151,7 +151,7 @@ export function DeleteCentreCard({ centreName }: { centreName: string }) {
           <button
             type="submit"
             disabled={!unlocked || deletePending}
-            className="self-start rounded-[6px] bg-destructive px-4 py-2 text-sm font-semibold text-white hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="admin-hover-fill self-start rounded-[6px] bg-destructive px-4 py-2 text-sm font-semibold text-white hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {deletePending ? "Deleting…" : "Permanently delete this centre"}
           </button>

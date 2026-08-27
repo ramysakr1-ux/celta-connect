@@ -64,7 +64,7 @@ function TutorRow({
 
   if (!editing) {
     return (
-      <tr className="border-b border-border-faint last:border-none">
+      <tr className="admin-hover border-b border-border-faint last:border-none">
         <td className="py-2.5 text-ink">{row.tutorName}</td>
         <td className="py-2.5 text-muted">{roleLabel}</td>
         <td className="py-2.5 text-muted">
@@ -196,7 +196,7 @@ function TutorRow({
           <button
             type="submit"
             disabled={pending}
-            className="self-start rounded-[6px] bg-primary px-3 py-1.5 text-sm font-medium text-card disabled:opacity-60"
+            className="admin-hover-fill self-start rounded-[6px] bg-primary px-3 py-1.5 text-sm font-medium text-card disabled:opacity-60"
           >
             {pending ? "Saving..." : "Save"}
           </button>

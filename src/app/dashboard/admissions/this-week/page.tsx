@@ -106,7 +106,7 @@ export default async function ThisWeeksInterviewsPage() {
                 return (
                   <div
                     key={s.id}
-                    className={`flex flex-col gap-1 rounded-[8px] border p-3 ${
+                    className={`flex flex-col gap-1 rounded-[8px] border p-3 admin-hover ${
                       filled ? "border-primary/30 bg-primary/5" : "border-border bg-card"
                     }`}
                   >

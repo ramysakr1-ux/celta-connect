@@ -61,7 +61,7 @@ export function GroupTutorForm({
       <button
         type="submit"
         disabled={pending}
-        className="h-8 rounded-[6px] border border-border px-2.5 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60"
+        className="admin-hover-fill h-8 rounded-[6px] border border-border px-2.5 text-xs font-semibold text-ink hover:border-primary disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save"}
       </button>

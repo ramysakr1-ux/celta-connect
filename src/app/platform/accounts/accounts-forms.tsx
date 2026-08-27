@@ -67,7 +67,7 @@ export function SubscriptionForm({ centres }: { centres: { id: string; name: str
       <button
         type="submit"
         disabled={pending}
-        className="h-10 self-start rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="h-10 self-start rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60 admin-hover-fill"
       >
         {pending ? "Saving..." : "Save subscription"}
       </button>
@@ -114,7 +114,7 @@ export function InvoiceForm({ centres }: { centres: { id: string; name: string }
       <button
         type="submit"
         disabled={pending}
-        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+        className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60 admin-hover-fill"
       >
         {pending ? "Recording..." : "Record invoice"}
       </button>
@@ -133,7 +133,7 @@ export function InvoiceRowActions({ invoiceId }: { invoiceId: string }) {
         type="button"
         disabled={pending}
         onClick={() => startTransition(() => markInvoicePaid(invoiceId))}
-        className="rounded-[6px] border border-primary/40 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/5 disabled:opacity-60"
+        className="rounded-[6px] border border-primary/40 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/5 disabled:opacity-60 admin-hover-fill"
       >
         Mark paid
       </button>
@@ -141,7 +141,7 @@ export function InvoiceRowActions({ invoiceId }: { invoiceId: string }) {
         type="button"
         disabled={pending}
         onClick={() => startTransition(() => markInvoiceVoid(invoiceId))}
-        className="rounded-[6px] border border-border-faint px-2.5 py-1 text-xs font-semibold text-muted hover:bg-card disabled:opacity-60"
+        className="rounded-[6px] border border-border-faint px-2.5 py-1 text-xs font-semibold text-muted hover:bg-card disabled:opacity-60 admin-hover-fill"
       >
         Void
       </button>

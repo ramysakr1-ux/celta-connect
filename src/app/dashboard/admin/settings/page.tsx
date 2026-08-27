@@ -190,7 +190,7 @@ export default async function AdminSettingsPage({
                 <input type="checkbox" name="auto_tag_criteria_enabled" defaultChecked={center?.auto_tag_criteria_enabled ?? true} />
                 Auto-tag criteria while typing TP feedback
               </label>
-              <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary">
+              <button type="submit" className="admin-hover-fill rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink hover:border-primary">
                 Save
               </button>
             </form>
@@ -233,7 +233,7 @@ export default async function AdminSettingsPage({
             ) : (
               <a
                 href="/api/google/connect"
-                className="mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card"
+                className="admin-hover-fill mt-4 inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card"
               >
                 Connect Google Drive
               </a>

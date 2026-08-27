@@ -84,7 +84,7 @@ export function PaymentPlanForm({
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+        className="self-start rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60 admin-hover-fill"
       >
         {pending ? "Creating..." : "Create payment plan"}
       </button>

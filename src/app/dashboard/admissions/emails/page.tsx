@@ -107,7 +107,7 @@ export default async function EmailDeliveryPage({
             </select>
             <button
               type="submit"
-              className="h-9 rounded-[6px] border border-border bg-card px-3 text-sm font-medium text-ink hover:border-primary"
+              className="h-9 rounded-[6px] border border-border bg-card px-3 text-sm font-medium text-ink hover:border-primary admin-hover-fill"
             >
               Go
             </button>
@@ -123,7 +123,7 @@ export default async function EmailDeliveryPage({
           {(bounceTasks ?? []).map((b) => (
             <div
               key={b.id}
-              className="flex items-start gap-3 rounded-[8px] border border-destructive/25 bg-destructive/5 px-4 py-3.5"
+              className="flex items-start gap-3 rounded-[8px] border border-destructive/25 bg-destructive/5 px-4 py-3.5 admin-hover"
             >
               <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-destructive" />
               <p className="flex-1 text-[13px] leading-relaxed text-ink">
@@ -159,7 +159,7 @@ export default async function EmailDeliveryPage({
             return (
               <div
                 key={email.id}
-                className="grid grid-cols-[1.3fr_1.1fr_1fr_1fr_1fr] items-center border-b border-border-faint px-4 py-3 last:border-none"
+                className="grid grid-cols-[1.3fr_1.1fr_1fr_1fr_1fr] items-center border-b border-border-faint px-4 py-3 last:border-none admin-hover"
               >
                 <div className="text-[12.5px] font-semibold text-ink">{email.recipient_name ?? "—"}</div>
                 <div className="text-xs text-muted">{humanizeType(email.type)}</div>

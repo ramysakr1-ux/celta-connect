@@ -146,7 +146,7 @@ export default async function AdmissionsPipelinePage({
                 <Link
                   key={c.id}
                   href={`/dashboard/admissions/pipeline?course=${c.id}`}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${c.id === activeCourseId ? "bg-primary text-primary-foreground" : "border border-border text-muted hover:border-primary"}`}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${c.id === activeCourseId ? "bg-primary text-primary-foreground" : "border border-border text-muted hover:border-primary admin-hover-fill"}`}
                 >
                   {c.course_code || c.name}
                 </Link>
@@ -195,7 +195,7 @@ export default async function AdmissionsPipelinePage({
                     ? "Full and paid"
                     : `${shortfall} short${waiting > 0 ? `, ${waiting} on the waiting list` : ""}`;
               return (
-                <tr key={c.id}>
+                <tr key={c.id} className="admin-hover">
                   <td>
                     <Link href={`/dashboard/admissions/pipeline?course=${c.id}`} className="font-medium text-ink hover:underline">
                       {c.course_code || c.name}

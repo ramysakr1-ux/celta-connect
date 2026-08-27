@@ -95,7 +95,7 @@ export default async function CentreCourseDetailPage({ params }: { params: Promi
           ) : (
             <div className="mt-3 flex flex-col gap-2">
               {tutors.map((t) => (
-                <div key={t.email} className="flex items-center justify-between gap-3 border-t border-border-faint pt-2 first:border-none first:pt-0">
+                <div key={t.email} className="admin-hover flex items-center justify-between gap-3 border-t border-border-faint pt-2 first:border-none first:pt-0">
                   <div>
                     <p className="text-sm text-ink">{t.name}</p>
                     <p className="text-xs text-muted">{t.email}</p>

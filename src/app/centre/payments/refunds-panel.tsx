@@ -53,7 +53,7 @@ export function RefundsPanel({ refunds, canEdit }: { refunds: RefundRow[]; canEd
         pending.map((r) => {
           const age = r.ageDays;
           return (
-            <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+            <div key={r.id} className="admin-hover flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
               <div>
                 <p className="text-sm text-ink">
                   {money(r)}
@@ -73,7 +73,7 @@ export function RefundsPanel({ refunds, canEdit }: { refunds: RefundRow[]; canEd
                     <button
                       type="submit"
                       disabled={settling}
-                      className="rounded-[6px] bg-ink-warm px-3 py-1.5 text-xs font-semibold text-card disabled:opacity-60"
+                      className="admin-hover-fill rounded-[6px] bg-ink-warm px-3 py-1.5 text-xs font-semibold text-card disabled:opacity-60"
                     >
                       Mark as sent
                     </button>
@@ -139,7 +139,7 @@ export function RefundsPanel({ refunds, canEdit }: { refunds: RefundRow[]; canEd
           <button
             type="submit"
             disabled={agreeing}
-            className="h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
+            className="admin-hover-fill h-9 rounded-[6px] bg-ink-warm px-4 text-sm font-semibold text-card disabled:opacity-60"
           >
             {agreeing ? "Recording…" : "Agree a refund"}
           </button>

@@ -29,7 +29,7 @@ export function UndoImportButton({ importId }: { importId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-xs font-medium text-ink hover:border-destructive hover:text-destructive disabled:opacity-60"
+        className="admin-hover-fill rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-xs font-medium text-ink hover:border-destructive hover:text-destructive disabled:opacity-60"
       >
         {pending ? "Undoing..." : "Undo this import"}
       </button>

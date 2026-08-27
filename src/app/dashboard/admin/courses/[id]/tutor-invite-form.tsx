@@ -34,7 +34,7 @@ export function TutorInviteForm({ courseId }: { courseId: string }) {
           </option>
         ))}
       </select>
-      <button type="submit" disabled={pending} className="h-9 rounded-[6px] border border-border px-3 text-sm text-ink hover:border-primary disabled:opacity-60">
+      <button type="submit" disabled={pending} className="admin-hover-fill h-9 rounded-[6px] border border-border px-3 text-sm text-ink hover:border-primary disabled:opacity-60">
         {pending ? "Inviting…" : "Invite a tutor"}
       </button>
       {state.error ? <p className="text-xs text-destructive sm:col-span-3">{state.error}</p> : null}

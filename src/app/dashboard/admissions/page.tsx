@@ -200,7 +200,7 @@ export default async function AdmissionsPage() {
           <tbody>
             {stale.length > 0 ? (
               stale.map((a) => (
-                <tr key={a.id}>
+                <tr key={a.id} className="admin-hover">
                   <td>
                     <Link href={`/dashboard/admissions/${a.id}`} className="font-medium text-ink hover:underline">
                       {a.full_name}
@@ -252,7 +252,7 @@ export default async function AdmissionsPage() {
         {(openSlots ?? []).length > 0 ? (
           <ul className="flex flex-col gap-1.5">
             {(openSlots ?? []).map((s) => (
-              <li key={s.id} className="text-sm text-ink">
+              <li key={s.id} className="text-sm text-ink admin-hover">
                 {intakeNameById.get(s.intake_course_id) ?? "--"} -- {s.slot_date} {s.slot_time} ({s.mode === "online" ? "Online" : "Face to face"}
                 {s.panel ? ", panel" : ""})
               </li>
@@ -300,7 +300,7 @@ export default async function AdmissionsPage() {
             <label className="flex items-center gap-1.5 pb-2 text-xs text-ink">
               <input type="checkbox" name="panel" />A panel (second interviewer)
             </label>
-            <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+            <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card admin-hover-fill">
               Create slot
             </button>
           </form>
@@ -315,7 +315,7 @@ export default async function AdmissionsPage() {
           <p className="text-sm text-muted">Centre marketing only -- not part of any candidate's academic record.</p>
           <ul className="flex flex-col gap-4">
             {Array.from(marketingByCourse.entries()).map(([courseId, { name, total, counts }]) => (
-              <li key={courseId} className="border-t border-border pt-3">
+              <li key={courseId} className="border-t border-border pt-3 admin-hover">
                 <p className="text-sm font-medium text-ink">
                   {name} <span className="font-normal text-muted">({total})</span>
                 </p>
@@ -346,7 +346,7 @@ export default async function AdmissionsPage() {
           </p>
           <ul className="flex flex-col gap-3">
             {Array.from(waitingByIntake.entries()).map(([intakeCourseId, { name, count }]) => (
-              <li key={intakeCourseId} className="flex items-center justify-between border-t border-border pt-3">
+              <li key={intakeCourseId} className="flex items-center justify-between border-t border-border pt-3 admin-hover">
                 <span className="text-sm text-ink">{name}</span>
                 <OfferNextPlaceForm intakeCourseId={intakeCourseId} waitingCount={count} />
               </li>

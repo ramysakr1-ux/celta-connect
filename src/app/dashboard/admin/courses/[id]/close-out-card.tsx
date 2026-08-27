@@ -64,7 +64,7 @@ export function CloseOutCard({
         <input type="hidden" name="course_id" value={courseId} />
         <button
           type="submit"
-          className={`rounded-[6px] px-3 py-1.5 text-xs font-semibold ${
+          className={`admin-hover-fill rounded-[6px] px-3 py-1.5 text-xs font-semibold ${
             cambridgeGradesConfirmedAt ? "bg-primary text-card" : "border border-border text-ink"
           }`}
         >
@@ -105,7 +105,7 @@ export function CloseOutCard({
             <button
               type="submit"
               disabled={extendPending}
-              className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+              className="admin-hover-fill rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
             >
               {extendPending ? "Saving..." : "Extend deletion date"}
             </button>
@@ -149,7 +149,7 @@ export function CloseOutCard({
               <button
                 type="submit"
                 disabled={receiptPending}
-                className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+                className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
               >
                 {receiptPending ? "Confirming..." : "Confirm receipt"}
               </button>
@@ -203,7 +203,7 @@ export function CloseOutCard({
               <button
                 type="submit"
                 disabled={exportPending}
-                className="rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
+                className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-medium text-card disabled:opacity-60"
               >
                 {exportPending ? "Exporting... (this can take a while)" : "Export to Drive"}
               </button>
@@ -214,7 +214,7 @@ export function CloseOutCard({
               <button
                 type="submit"
                 disabled={verifyPending}
-                className="rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+                className="admin-hover-fill rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
               >
                 {verifyPending ? "Checking..." : status === "verify_failed" ? "Re-check" : "Run verification"}
               </button>

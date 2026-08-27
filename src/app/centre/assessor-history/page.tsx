@@ -93,7 +93,7 @@ export default async function AssessorHistoryPage({
       ) : (
         <div className="flex flex-col gap-8">
           {history.map((a) => (
-            <div key={a.profileId} className="flex flex-col gap-4 rounded-[8px] border border-border bg-card p-[22px_24px]">
+            <div key={a.profileId} className="admin-hover flex flex-col gap-4 rounded-[8px] border border-border bg-card p-[22px_24px]">
               <div className="flex flex-wrap items-baseline justify-between gap-3.5">
                 <div className="flex flex-col gap-[3px]">
                   <p className="font-serif text-[19px] font-semibold text-ink">{a.name}</p>
@@ -141,7 +141,7 @@ export default async function AssessorHistoryPage({
                 {a.courses.map((c, i) => (
                   <div
                     key={c.id}
-                    className={`grid grid-cols-[96px_1fr_minmax(0,160px)_96px] items-center gap-2 px-3 py-2.5 text-[12.5px] text-ink ${i > 0 ? "border-t border-border-faint" : ""}`}
+                    className={`admin-hover grid grid-cols-[96px_1fr_minmax(0,160px)_96px] items-center gap-2 px-3 py-2.5 text-[12.5px] text-ink ${i > 0 ? "border-t border-border-faint" : ""}`}
                   >
                     <span className="text-xs text-muted">{dateRange(c.start_date, c.end_date)}</span>
                     <span className="font-semibold">{c.label}</span>

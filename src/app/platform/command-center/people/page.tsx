@@ -118,7 +118,7 @@ export default async function CommandCenterPeoplePage() {
           const possible = volunteerCount * sessionsSoFar;
           const attendancePct = possible > 0 ? Math.round((attended / possible) * 100) : null;
           return (
-            <div key={c.id} style={{ display: "grid", gridTemplateColumns: "1.4fr 0.8fr 0.7fr 0.7fr 1.2fr", alignItems: "center" }}>
+            <div key={c.id} className="admin-hover" style={{ display: "grid", gridTemplateColumns: "1.4fr 0.8fr 0.7fr 0.7fr 1.2fr", alignItems: "center" }}>
               <div style={{ padding: "13px 20px", borderBottom: `1px solid ${BORDER}`, fontSize: 13, fontWeight: 600, color: INK }}>
                 {centerNameById.get(c.center_id) ?? "Unknown centre"}
                 <div style={{ fontSize: 11, fontWeight: 400, color: MUTED }}>{c.name}</div>

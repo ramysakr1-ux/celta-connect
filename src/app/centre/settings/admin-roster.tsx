@@ -47,7 +47,7 @@ export function AdminRoster({
           <button
             type="button"
             onClick={() => setShowInvite((v) => !v)}
-            className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
           >
             Invite someone
           </button>
@@ -71,7 +71,7 @@ export function AdminRoster({
         {rows.map((row, i) => (
           <div
             key={row.grantId}
-            className={`flex items-center justify-between gap-4 px-5 py-3 ${i > 0 ? "border-t border-border-faint" : ""}`}
+            className={`admin-hover flex items-center justify-between gap-4 px-5 py-3 ${i > 0 ? "border-t border-border-faint" : ""}`}
           >
             <div className="min-w-0">
               <p className="truncate text-sm text-ink">{row.name}</p>
@@ -94,7 +94,7 @@ export function AdminRoster({
         <div className="flex flex-col gap-2">
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Pending invites</p>
           {invites.map((inv) => (
-            <div key={inv.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-border-faint px-3 py-2">
+            <div key={inv.id} className="admin-hover flex items-center justify-between gap-3 rounded-[6px] border border-border-faint px-3 py-2">
               <span className="text-sm text-ink">{roleLabel(inv.role, customRoles)}</span>
               <span className="text-xs text-muted">{new Date(inv.created_at).toLocaleDateString()}</span>
               <RevokeInviteButton inviteId={inv.id} />

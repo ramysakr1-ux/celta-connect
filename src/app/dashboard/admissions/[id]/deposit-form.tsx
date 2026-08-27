@@ -96,7 +96,7 @@ export function DepositForm({
         <button
           type="submit"
           disabled={pending}
-          className="h-9 rounded-[6px] bg-primary px-3 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          className="h-9 rounded-[6px] bg-primary px-3 text-sm font-semibold text-primary-foreground disabled:opacity-60 admin-hover-fill"
         >
           {pending ? "Recording..." : "Record deposit"}
         </button>

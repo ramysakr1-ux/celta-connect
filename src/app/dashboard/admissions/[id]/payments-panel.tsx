@@ -47,7 +47,7 @@ export function PaymentsPanel({ applicant, payments }: { applicant: Applicant; p
       ) : (
         <ul className="flex flex-col gap-3">
           {sorted.map((payment) => (
-            <li key={payment.id} className="rounded-[6px] border border-border p-3">
+            <li key={payment.id} className="rounded-[6px] border border-border p-3 admin-hover">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium text-ink">
@@ -92,7 +92,7 @@ export function PaymentsPanel({ applicant, payments }: { applicant: Applicant; p
                         placeholder="Reference note (optional)"
                         className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-xs text-ink outline-none focus:border-primary"
                       />
-                      <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary">
+                      <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink hover:border-primary admin-hover-fill">
                         Mark paid manually
                       </button>
                     </form>

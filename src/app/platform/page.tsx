@@ -44,7 +44,7 @@ export default async function PlatformPage() {
         </div>
         <Link
           href="/platform/command-center"
-          className="h-10 shrink-0 rounded-[6px] border border-primary/40 px-4 text-sm font-semibold leading-10 text-primary hover:bg-primary/5"
+          className="h-10 shrink-0 rounded-[6px] border border-primary/40 px-4 text-sm font-semibold leading-10 text-primary hover:bg-primary/5 admin-hover-fill"
         >
           Command center
         </Link>
@@ -77,7 +77,7 @@ export default async function PlatformPage() {
           <p className="px-5 py-4 text-sm text-muted">No centres yet.</p>
         ) : (
           (centers ?? []).map((c) => (
-            <div key={c.id} className="list-row flex items-center justify-between gap-3">
+            <div key={c.id} className="list-row admin-hover flex items-center justify-between gap-3">
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium text-ink">
                   {c.name}

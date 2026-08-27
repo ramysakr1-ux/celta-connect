@@ -37,7 +37,7 @@ export function MalpracticeOutcomesManager({ options }: { options: OutcomeOption
 
 function OutcomeRow({ option }: { option: OutcomeOption }) {
   return (
-    <li className="flex items-center justify-between gap-3 rounded-[6px] border border-border px-3 py-2">
+    <li className="admin-hover flex items-center justify-between gap-3 rounded-[6px] border border-border px-3 py-2">
       <div className="min-w-0">
         <p className="truncate text-sm text-ink">{option.label}</p>
         <p className="text-xs text-muted">
@@ -81,7 +81,7 @@ function AddOutcomeForm() {
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] bg-primary px-3 py-1.5 text-xs font-medium text-card disabled:opacity-60"
+        className="admin-hover-fill self-start rounded-[6px] bg-primary px-3 py-1.5 text-xs font-medium text-card disabled:opacity-60"
       >
         {pending ? "Adding…" : "Add"}
       </button>

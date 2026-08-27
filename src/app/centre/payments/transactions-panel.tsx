@@ -39,7 +39,7 @@ export function TransactionsPanel({ transactions }: { transactions: TransactionR
       </div>
       <ul className="flex flex-col">
         {transactions.map((t) => (
-          <li key={t.id} className="flex items-center justify-between gap-3 px-5 py-3 border-b border-border-faint last:border-none">
+          <li key={t.id} className="admin-hover flex items-center justify-between gap-3 px-5 py-3 border-b border-border-faint last:border-none">
             <div>
               <span className={`status-pill ${EVENT_PILL_CLASS[t.eventType]}`}>{EVENT_LABEL[t.eventType]}</span>
               <p className="mt-1 text-xs text-muted">{when(t.receivedAt)}</p>

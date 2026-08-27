@@ -196,7 +196,7 @@ export default async function CommandCenterPage() {
             const sub = subByCenter.get(c.id);
             const latestInvoice = latestInvoiceByCenter.get(c.id);
             return (
-              <div key={c.id} className="list-row flex flex-wrap items-center justify-between gap-3">
+              <div key={c.id} className="list-row admin-hover flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-sm font-medium text-ink">
                     {c.name}
@@ -234,7 +234,7 @@ export default async function CommandCenterPage() {
           <p className="px-5 py-4 text-sm text-muted">No trainers on record yet.</p>
         ) : (
           trainerRows.map((t) => (
-            <div key={t.name} className="list-row flex flex-col gap-1.5">
+            <div key={t.name} className="list-row admin-hover flex flex-col gap-1.5">
               <span className="text-sm font-medium text-ink">{t.name}</span>
               {t.current.length > 0 ? (
                 <div className="flex flex-col gap-0.5">
@@ -296,7 +296,7 @@ export default async function CommandCenterPage() {
           <p className="px-5 py-4 text-sm text-muted">Nothing yet.</p>
         ) : (
           activity.map((item, i) => (
-            <div key={i} className="list-row flex items-center justify-between gap-3">
+            <div key={i} className="list-row admin-hover flex items-center justify-between gap-3">
               <span className="text-sm text-ink">{item.label}</span>
               <span className="text-xs text-muted">{new Date(item.at).toLocaleString()}</span>
             </div>

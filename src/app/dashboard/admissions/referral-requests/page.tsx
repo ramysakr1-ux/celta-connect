@@ -90,7 +90,7 @@ export default async function ReferralRequestsPage() {
         <div className="flex flex-col gap-2">
           <h2 className="font-serif text-lg text-ink">Already decided</h2>
           {decidedIncoming.map((r) => (
-            <div key={r.id} className="card p-4 text-sm text-ink">
+            <div key={r.id} className="card p-4 text-sm text-ink admin-hover">
               {applicantById.get(r.applicant_id)?.full_name ?? "Unknown candidate"} from{" "}
               {centerNameById.get(r.from_center_id) ?? "another branch"} --{" "}
               <span className={r.status === "accepted" ? "text-primary" : "text-muted"}>{r.status}</span>
@@ -103,7 +103,7 @@ export default async function ReferralRequestsPage() {
         <div className="flex flex-col gap-2">
           <h2 className="font-serif text-lg text-ink">Sent by this branch</h2>
           {(sent ?? []).map((r) => (
-            <div key={r.id} className="card p-4 text-sm text-ink">
+            <div key={r.id} className="card p-4 text-sm text-ink admin-hover">
               {applicantById.get(r.applicant_id)?.full_name ?? "Unknown candidate"} to{" "}
               {centerNameById.get(r.to_center_id) ?? "another branch"} --{" "}
               <span className={r.status === "accepted" ? "text-primary" : r.status === "declined" ? "text-destructive" : "text-muted"}>

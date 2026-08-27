@@ -41,7 +41,7 @@ export function EmailHistoryPanel({ emails }: { emails: EmailRow[] }) {
       <h2 className="font-serif text-lg text-ink">Email history</h2>
       <ul className="flex flex-col gap-2.5">
         {emails.map((email) => (
-          <li key={email.id} className="flex items-start justify-between gap-3 border-b border-border-faint pb-2.5 last:border-none last:pb-0">
+          <li key={email.id} className="flex items-start justify-between gap-3 border-b border-border-faint pb-2.5 last:border-none last:pb-0 admin-hover">
             <div className="min-w-0">
               <p className="truncate text-sm text-ink">{email.subject}</p>
               <p className="text-xs text-muted">

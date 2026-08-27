@@ -24,7 +24,7 @@ export function WaitingListForm({ applicantId }: { applicantId: string }) {
           className="rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary"
         />
       </div>
-      <button type="submit" className="rounded-[6px] border border-border px-3 py-2 text-sm text-ink hover:border-primary">
+      <button type="submit" className="rounded-[6px] border border-border px-3 py-2 text-sm text-ink hover:border-primary admin-hover-fill">
         Add to waiting list
       </button>
     </form>

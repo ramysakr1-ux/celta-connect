@@ -28,7 +28,7 @@ export function MaterialPoolToggleCard({ courseId, enabled }: { courseId: string
       <button
         type="submit"
         disabled={pending}
-        className="shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
+        className="admin-hover-fill shrink-0 rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary disabled:opacity-60"
       >
         {pending ? "Saving…" : enabled ? "Turn off" : "Turn on"}
       </button>

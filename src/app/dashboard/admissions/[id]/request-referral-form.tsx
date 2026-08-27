@@ -55,7 +55,7 @@ export function RequestReferralForm({
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-[6px] border border-border px-4 py-2 text-sm font-semibold text-ink hover:border-primary disabled:opacity-60"
+        className="self-start rounded-[6px] border border-border px-4 py-2 text-sm font-semibold text-ink hover:border-primary disabled:opacity-60 admin-hover-fill"
       >
         {pending ? "Sending..." : "Send referral request"}
       </button>

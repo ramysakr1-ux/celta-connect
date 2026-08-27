@@ -90,6 +90,7 @@ export function DemoLinksCard({ centres, activeLinks }: { centres: { id: string;
         <button
           type="submit"
           disabled={pending}
+          className="admin-hover-fill"
           style={{ height: 32, borderRadius: 6, background: GOLD, color: DARK, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", border: "none", opacity: pending ? 0.7 : 1 }}
         >
           {pending ? "Generating…" : "Generate link"}
@@ -101,7 +102,7 @@ export function DemoLinksCard({ centres, activeLinks }: { centres: { id: string;
         <p style={{ fontSize: 12.5, color: MUTED }}>No active demo links.</p>
       ) : (
         activeLinks.map((link) => (
-          <div key={link.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "10px 0", borderTop: `1px solid ${BORDER}` }}>
+          <div key={link.id} className="admin-hover" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "10px 0", borderTop: `1px solid ${BORDER}` }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
               <div style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>
                 {ROLE_LABEL[link.roleKey as DemoLoginRoleKey] ?? link.roleKey} · {link.centreName}

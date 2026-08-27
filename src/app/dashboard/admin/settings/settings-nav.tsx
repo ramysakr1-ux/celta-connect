@@ -52,7 +52,7 @@ export function SettingsNav({ items }: { items: SettingsNavItem[] }) {
       <p className="px-4 pb-2 text-[10px] font-semibold tracking-[0.12em] text-muted uppercase">Settings</p>
       {items.map((item) => {
         const isActive = !item.external && item.href === active;
-        const className = `flex items-center justify-between gap-2 border-l-2 px-4 py-2 text-sm ${
+        const className = `admin-hover-fill flex items-center justify-between gap-2 border-l-2 px-4 py-2 text-sm ${
           isActive ? "border-primary font-medium text-ink" : "border-transparent text-muted hover:text-ink"
         }`;
         const body = (

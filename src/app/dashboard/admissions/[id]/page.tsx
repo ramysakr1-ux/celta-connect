@@ -392,7 +392,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               </div>
               <form action={sendInterviewInviteManually}>
                 <input type="hidden" name="applicant_id" value={applicant.id} />
-                <button type="submit" className="shrink-0 rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+                <button type="submit" className="shrink-0 rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card admin-hover-fill">
                   {applicant.interview_invite_sent_at ? "Resend invite" : "Send interview invite"}
                 </button>
               </form>
@@ -420,7 +420,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                   ))}
                 </select>
               </div>
-              <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card">
+              <button type="submit" className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-card admin-hover-fill">
                 Book
               </button>
             </form>
@@ -437,7 +437,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                     </option>
                   ))}
                 </select>
-                <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary">
+                <button type="submit" className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary admin-hover-fill">
                   Book with this interviewer
                 </button>
               </form>

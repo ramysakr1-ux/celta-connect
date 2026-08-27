@@ -77,7 +77,7 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
               <Link
                 key={k}
                 href={`/centre/import?kind=${k}`}
-                className={`rounded-[6px] px-3 py-1.5 text-sm font-medium ${
+                className={`admin-hover-fill rounded-[6px] px-3 py-1.5 text-sm font-medium ${
                   isActive ? "text-white" : "border border-border text-muted hover:border-primary hover:text-primary"
                 }`}
                 style={isActive ? { background: "oklch(35% 0.075 155)" } : undefined}
@@ -106,7 +106,7 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
             const tallies = (imp.tallies ?? {}) as { willImport?: number };
             const undoable = !imp.undone_at && isWithinUndoWindow(imp.created_at);
             return (
-              <div key={imp.id} className={`flex items-center justify-between gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+              <div key={imp.id} className={`admin-hover flex items-center justify-between gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                 <div className="flex flex-col gap-0.5">
                   <p className="text-sm text-ink">{imp.source_filename}</p>
                   <p className="text-xs text-muted">

@@ -91,7 +91,7 @@ export default async function CommandCenterMoneyPage() {
           recent.map((inv) => {
             const isOverdue = inv.status === "outstanding" && inv.due_date && new Date(inv.due_date) < overdueCutoff;
             return (
-              <div key={inv.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "9px 0", borderTop: `1px solid ${BORDER}` }}>
+              <div key={inv.id} className="admin-hover" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "9px 0", borderTop: `1px solid ${BORDER}` }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
                   <div style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{centerNameById.get(inv.center_id) ?? "Unknown centre"}</div>
                   <div style={{ fontSize: 11, color: "oklch(0.58 0.017 70)" }}>{inv.note ?? (inv.status === "paid" ? "Course fee" : "Invoice")}</div>

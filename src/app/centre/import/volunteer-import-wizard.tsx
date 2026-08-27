@@ -175,7 +175,7 @@ export function VolunteerImportWizard({
                 type="button"
                 onClick={onDriveConnect}
                 disabled={drivePending}
-                className="h-10 shrink-0 rounded-[6px] border border-border bg-card px-3.5 text-sm text-ink hover:border-primary disabled:opacity-50"
+                className="admin-hover-fill h-10 shrink-0 rounded-[6px] border border-border bg-card px-3.5 text-sm text-ink hover:border-primary disabled:opacity-50"
               >
                 {drivePending ? "Opening…" : "Connect centre's Drive"}
               </button>
@@ -211,7 +211,7 @@ export function VolunteerImportWizard({
             {headers.map((header, i) => {
               const value = mapping[header];
               return (
-                <div key={`${header}-${i}`} className={`flex items-center gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
+                <div key={`${header}-${i}`} className={`admin-hover flex items-center gap-3 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                   <span className="w-40 shrink-0 truncate text-sm text-ink">{header || "(unnamed column)"}</span>
                   <span className="text-xs text-muted">&rarr;</span>
                   <select
@@ -242,7 +242,7 @@ export function VolunteerImportWizard({
               type="button"
               onClick={() => setStep("preview")}
               disabled={!canPreview}
-              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
             >
               See what happens
             </button>
@@ -279,7 +279,7 @@ export function VolunteerImportWizard({
             {analysis.rows.map((r) => (
               <div
                 key={r.rowNumber}
-                className={`mb-1 flex items-center gap-3 rounded-[6px] border-l-[3px] bg-surface-muted/40 py-2 pr-3 pl-3 ${
+                className={`admin-hover mb-1 flex items-center gap-3 rounded-[6px] border-l-[3px] bg-surface-muted/40 py-2 pr-3 pl-3 ${
                   r.verdict === "import" ? "border-l-primary" : r.verdict === "no_name" ? "border-l-destructive" : "border-l-status-warning-text"
                 }`}
               >
@@ -309,7 +309,7 @@ export function VolunteerImportWizard({
             <button
               type="submit"
               disabled={pending || analysis.tallies.willImport === 0}
-              className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              className="admin-hover-fill rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
             >
               {pending ? "Importing..." : `Import ${analysis.tallies.willImport} volunteer${analysis.tallies.willImport === 1 ? "" : "s"}`}
             </button>

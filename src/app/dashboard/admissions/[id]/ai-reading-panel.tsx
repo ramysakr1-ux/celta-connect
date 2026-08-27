@@ -86,7 +86,7 @@ export function AiReadingPanel({
             An interview will be booked automatically -- held until{" "}
             {new Date(applicant.interview_auto_send_at!).toLocaleString("en-GB", { hour: "2-digit", minute: "2-digit" })}.
           </p>
-          <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary">
+          <button type="submit" className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:border-primary admin-hover-fill">
             Hold
           </button>
         </form>

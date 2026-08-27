@@ -85,7 +85,7 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
         captureStep(e.currentTarget.form);
         setStep(next);
       }}
-      className="self-start rounded-[6px] bg-primary px-[15px] py-2 text-[13px] font-semibold text-primary-foreground"
+      className="admin-hover-fill self-start rounded-[6px] bg-primary px-[15px] py-2 text-[13px] font-semibold text-primary-foreground"
     >
       {label}
     </button>
@@ -197,7 +197,7 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
                   key={d}
                   type="button"
                   onClick={() => setDaysOff((prev) => (on ? prev.filter((x) => x !== d) : [...prev, d]))}
-                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                  className={`admin-hover-fill rounded-full border px-3 py-1 text-xs font-semibold ${
                     on
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-card text-muted hover:text-ink"
@@ -319,7 +319,7 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
           <button
             type="submit"
             disabled={pending}
-            className="rounded-[6px] bg-primary px-[15px] py-2 text-[13px] font-bold text-primary-foreground disabled:opacity-60"
+            className="admin-hover-fill rounded-[6px] bg-primary px-[15px] py-2 text-[13px] font-bold text-primary-foreground disabled:opacity-60"
           >
             {pending ? "Launching…" : "Launch course"}
           </button>

@@ -79,7 +79,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
                   setSelectedId(r.channelId);
                   setPickerOpen(false);
                 }}
-                className={`flex w-full items-center gap-2.5 rounded-[11px] px-3 py-2.5 text-left hover:bg-accent/40 ${
+                className={`admin-hover flex w-full items-center gap-2.5 rounded-[11px] px-3 py-2.5 text-left hover:bg-accent/40 ${
                   r.channelId === selected.channelId ? "bg-accent/25" : ""
                 }`}
               >
@@ -121,7 +121,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
             onClick={() => rooms.length > 1 && setPickerOpen((v) => !v)}
             aria-expanded={pickerOpen}
             aria-label="Choose a branch"
-            className={`flex h-10 shrink-0 items-center gap-2 rounded-[20px] bg-accent/40 pl-2 pr-3 hover:bg-accent/60 ${
+            className={`admin-hover-fill flex h-10 shrink-0 items-center gap-2 rounded-[20px] bg-accent/40 pl-2 pr-3 hover:bg-accent/60 ${
               rooms.length <= 1 ? "cursor-default" : ""
             }`}
           >
@@ -161,7 +161,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
             type="button"
             onClick={() => setThreadOpen((v) => !v)}
             aria-expanded={threadOpen}
-            className="flex h-[34px] shrink-0 items-center gap-1.5 rounded-[17px] bg-accent/40 px-2 text-xs font-semibold hover:bg-accent/60 sm:px-3"
+            className="admin-hover-fill flex h-[34px] shrink-0 items-center gap-1.5 rounded-[17px] bg-accent/40 px-2 text-xs font-semibold hover:bg-accent/60 sm:px-3"
           >
             {threadOpen ? "Hide" : "Thread"}
           </button>
@@ -171,7 +171,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
             onClick={handleSend}
             disabled={!body.trim()}
             aria-label="Send"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-card hover:bg-primary disabled:opacity-60"
+            className="admin-hover-fill flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-card hover:bg-primary disabled:opacity-60"
           >
             <ArrowUp className="size-4" aria-hidden="true" />
           </button>
