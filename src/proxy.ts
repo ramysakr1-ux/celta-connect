@@ -27,9 +27,22 @@ export async function proxy(request: NextRequest) {
 
   // Refreshes the session cookie if expired. Required for Server Components,
   // which can only read cookies, not write them.
+  //
+  // Ramy, 27 Aug 2026: getUser() always makes a network round trip to
+  // Supabase Auth, on every single request that matches this proxy's
+  // matcher -- traced live via Vercel's own request logs as a real,
+  // measured cost (~150-200ms) stacking on top of every navigation, and
+  // this project has asymmetric JWT signing keys published (confirmed via
+  // /auth/v1/.well-known/jwks.json), so getClaims() verifies the token's
+  // signature LOCALLY instead, with zero network call in the common case --
+  // it only reaches the network when the session actually needs refreshing
+  // (same _callRefreshToken path getUser() relies on indirectly), which is
+  // rare relative to every-request. Supabase's own SDK docs recommend
+  // getClaims() over getUser()/getSession() for exactly this reason.
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data,
+  } = await supabase.auth.getClaims();
+  const user = data?.claims ? { id: data.claims.sub, email: data.claims.email } : null;
 
   const isAuthRoute = request.nextUrl.pathname.startsWith("/login");
   const isPublicRoute =
