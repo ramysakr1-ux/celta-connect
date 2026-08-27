@@ -19,16 +19,18 @@ export interface RequestReferralDestination {
 export function RequestReferralForm({
   applicantId,
   destinations,
+  garnet = false,
 }: {
   applicantId: string;
   destinations: RequestReferralDestination[];
+  garnet?: boolean;
 }) {
   const [state, action, pending] = useActionState(requestReferralAction, initialState);
 
   if (destinations.length === 0) return null;
 
   return (
-    <form action={action} className="card flex flex-col gap-3 p-6">
+    <form action={action} className={`card flex flex-col gap-3 p-6 ${garnet ? "card-garnet" : ""}`}>
       <input type="hidden" name="applicant_id" value={applicantId} />
       <h2 className="font-serif text-lg text-ink">Request a referral to another branch</h2>
       <p className="text-xs text-muted">

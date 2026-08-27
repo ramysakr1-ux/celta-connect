@@ -144,8 +144,14 @@ export default async function CommandCenterPage() {
         </div>
       </div>
 
+      {/* Small KPI-tile-style stat cards move the decorative accent to the
+          left side instead of the top rule, per the Centre Management pilot
+          (src/app/centre/page.tsx) -- MRR/Renewals/Outstanding already carry
+          a real semantic top-rule color (gold/conditional amber/conditional
+          red) and stay untouched; only the one plain tile gets the side
+          treatment. */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="card p-4">
+        <div className="card card-side-teal p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Active centres</p>
           <p className="mt-1.5 text-2xl font-bold text-ink">{centresList.length}</p>
         </div>
@@ -168,7 +174,7 @@ export default async function CommandCenterPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="card p-4">
+        <div className="card card-side-garnet p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">Connect</p>
           <p className="mt-1.5 text-xl font-bold text-ink">{centresList.length} centres</p>
           <p className="mt-1 text-sm text-muted">{mrrByCurrency.length ? mrrByCurrency.map((m) => money(m.amount, m.currency)).join(" · ") : "£0"}/mo</p>
@@ -185,6 +191,9 @@ export default async function CommandCenterPage() {
         </div>
       </div>
 
+      {/* Purely decorative teal/garnet alternation across these plain stacked
+          cards below -- none carries a status of its own, same treatment as
+          the Centre Management pilot (src/app/centre/page.tsx). */}
       <div className="card">
         <div className="border-b border-border-faint px-5 py-3.5">
           <h2 className="font-serif text-lg text-ink">Accounts ({centresList.length})</h2>
@@ -225,7 +234,7 @@ export default async function CommandCenterPage() {
         )}
       </div>
 
-      <div className="card">
+      <div className="card card-garnet">
         <div className="border-b border-border-faint px-5 py-3.5">
           <h2 className="font-serif text-lg text-ink">Trainers ({trainerRows.length})</h2>
           <p className="mt-0.5 text-xs text-muted">Who&apos;s working where, across every centre — owner-only.</p>
@@ -270,7 +279,7 @@ export default async function CommandCenterPage() {
         </div>
       </div>
 
-      <div className="card p-5">
+      <div className="card card-garnet p-5">
         <h2 className="font-serif text-lg text-ink">Record an invoice</h2>
         <div className="mt-4">
           <InvoiceForm centres={centresList} />
@@ -288,7 +297,7 @@ export default async function CommandCenterPage() {
         </button>
       </div>
 
-      <div className="card">
+      <div className="card card-garnet">
         <div className="border-b border-border-faint px-5 py-3.5">
           <h2 className="font-serif text-lg text-ink">Activity</h2>
         </div>

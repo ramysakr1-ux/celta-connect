@@ -9,9 +9,9 @@ const inputClass = "rounded-[6px] border border-border bg-card-inset px-3 py-1.5
 // PaymentsPanel -- a waiver/discount is a separate concept from payment
 // tracking (it changes what's owed, not how it's paid) and isn't part of
 // the payments-bridge spec.
-export function WaiverForm({ applicant }: { applicant: Applicant }) {
+export function WaiverForm({ applicant, garnet = false }: { applicant: Applicant; garnet?: boolean }) {
   return (
-    <div className="card flex flex-col gap-3 p-6">
+    <div className={`card flex flex-col gap-3 p-6 ${garnet ? "card-garnet" : ""}`}>
       <h2 className="font-serif text-lg text-ink">Waiver / discount</h2>
       {applicant.waiver_note ? (
         <p className="text-sm text-ink">

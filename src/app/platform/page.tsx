@@ -50,6 +50,9 @@ export default async function PlatformPage() {
         </Link>
       </div>
 
+      {/* Purely decorative teal/garnet alternation across these three plain
+          stacked cards -- none carries a status of its own, same treatment
+          as the Centre Management pilot (src/app/centre/page.tsx). */}
       <div className="card p-5">
         <h2 className="font-serif text-lg text-ink">Create a centre</h2>
         <p className="mt-1 text-sm text-muted">
@@ -61,7 +64,7 @@ export default async function PlatformPage() {
         </div>
       </div>
 
-      <div className="card p-5">
+      <div className="card card-garnet p-5">
         <h2 className="font-serif text-lg text-ink">Change a user's role</h2>
         <p className="mt-1 text-sm text-muted">Looks someone up by email and sets their account-level role directly.</p>
         <div className="mt-4">

@@ -24,13 +24,21 @@ const STATUS_PILL_CLASS: Record<Payment["status"], string> = {
 // (FeeTrackingForm) with the instalment-capable payments/payment_plans
 // model -- provider-sourced (Stripe webhook) and manually-marked rows
 // render side by side, distinguished only by their source badge.
-export function PaymentsPanel({ applicant, payments }: { applicant: Applicant; payments: Payment[] }) {
+export function PaymentsPanel({
+  applicant,
+  payments,
+  garnet = false,
+}: {
+  applicant: Applicant;
+  payments: Payment[];
+  garnet?: boolean;
+}) {
   const sorted = [...payments].sort((a, b) => a.instalment_index - b.instalment_index);
   const total = sorted.reduce((sum, p) => sum + p.amount, 0);
   const paidTotal = sorted.filter((p) => p.status === "paid").reduce((sum, p) => sum + p.amount, 0);
 
   return (
-    <div className="card flex flex-col gap-4 p-6">
+    <div className={`card flex flex-col gap-4 p-6 ${garnet ? "card-garnet" : ""}`}>
       <div>
         <h2 className="font-serif text-lg text-ink">Payments</h2>
         {sorted.length > 0 ? (

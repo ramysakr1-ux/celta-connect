@@ -2,9 +2,9 @@ import { addToWaitingList } from "@/app/dashboard/admissions/actions";
 
 // "Position, the course, and a date by which they will hear either way.
 // Without that date it is just an unanswered application."
-export function WaitingListForm({ applicantId }: { applicantId: string }) {
+export function WaitingListForm({ applicantId, garnet = false }: { applicantId: string; garnet?: boolean }) {
   return (
-    <form action={addToWaitingList} className="card flex flex-wrap items-end gap-3 p-6">
+    <form action={addToWaitingList} className={`card flex flex-wrap items-end gap-3 p-6 ${garnet ? "card-garnet" : ""}`}>
       <input type="hidden" name="applicant_id" value={applicantId} />
       <div>
         <h2 className="font-serif text-lg text-ink">Waiting list</h2>

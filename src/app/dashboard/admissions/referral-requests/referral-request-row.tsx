@@ -12,6 +12,7 @@ const initialState: ReferralDecisionState = { error: null };
 export function ReferralRequestRow({
   request,
   courses,
+  garnet = false,
 }: {
   request: {
     id: string;
@@ -22,13 +23,14 @@ export function ReferralRequestRow({
     requestedAt: string;
   };
   courses: { id: string; name: string }[];
+  garnet?: boolean;
 }) {
   const [acceptState, acceptAction, acceptPending] = useActionState(acceptReferralRequestAction, initialState);
   const [declineState, declineAction, declinePending] = useActionState(declineReferralRequestAction, initialState);
   const [declining, setDeclining] = useState(false);
 
   return (
-    <div className="card flex flex-col gap-3 p-6 admin-hover">
+    <div className={`card flex flex-col gap-3 p-6 admin-hover ${garnet ? "card-garnet" : ""}`}>
       <div>
         <p className="text-sm font-semibold text-ink">{request.applicantName}</p>
         <p className="text-xs text-muted">{request.applicantEmail}</p>

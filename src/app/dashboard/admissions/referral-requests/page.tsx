@@ -64,12 +64,16 @@ export default async function ReferralRequestsPage() {
         </p>
       </div>
 
+      {/* Purely decorative teal/garnet alternation by list position within
+          each of the three lists below -- same treatment as the Centre
+          Management pilot (src/app/centre/page.tsx). None of these carry a
+          status of their own. */}
       <div className="flex flex-col gap-3">
         <h2 className="font-serif text-lg text-ink">Waiting on you ({pendingIncoming.length})</h2>
         {pendingIncoming.length === 0 ? (
           <p className="text-sm text-muted">Nothing waiting.</p>
         ) : (
-          pendingIncoming.map((r) => (
+          pendingIncoming.map((r, i) => (
             <ReferralRequestRow
               key={r.id}
               request={{
@@ -81,6 +85,7 @@ export default async function ReferralRequestsPage() {
                 requestedAt: r.requested_at,
               }}
               courses={(courses ?? []).map((c) => ({ id: c.id, name: c.name }))}
+              garnet={i % 2 === 1}
             />
           ))
         )}
@@ -89,8 +94,8 @@ export default async function ReferralRequestsPage() {
       {decidedIncoming.length > 0 ? (
         <div className="flex flex-col gap-2">
           <h2 className="font-serif text-lg text-ink">Already decided</h2>
-          {decidedIncoming.map((r) => (
-            <div key={r.id} className="card p-4 text-sm text-ink admin-hover">
+          {decidedIncoming.map((r, i) => (
+            <div key={r.id} className={`card p-4 text-sm text-ink admin-hover ${i % 2 === 1 ? "card-garnet" : ""}`}>
               {applicantById.get(r.applicant_id)?.full_name ?? "Unknown candidate"} from{" "}
               {centerNameById.get(r.from_center_id) ?? "another branch"} --{" "}
               <span className={r.status === "accepted" ? "text-primary" : "text-muted"}>{r.status}</span>
@@ -102,8 +107,8 @@ export default async function ReferralRequestsPage() {
       {(sent ?? []).length > 0 ? (
         <div className="flex flex-col gap-2">
           <h2 className="font-serif text-lg text-ink">Sent by this branch</h2>
-          {(sent ?? []).map((r) => (
-            <div key={r.id} className="card p-4 text-sm text-ink admin-hover">
+          {(sent ?? []).map((r, i) => (
+            <div key={r.id} className={`card p-4 text-sm text-ink admin-hover ${i % 2 === 1 ? "card-garnet" : ""}`}>
               {applicantById.get(r.applicant_id)?.full_name ?? "Unknown candidate"} to{" "}
               {centerNameById.get(r.to_center_id) ?? "another branch"} --{" "}
               <span className={r.status === "accepted" ? "text-primary" : r.status === "declined" ? "text-destructive" : "text-muted"}>

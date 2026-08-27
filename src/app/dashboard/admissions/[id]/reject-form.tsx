@@ -8,12 +8,12 @@ const initialState: FormState = { error: null };
 // "Both require a human-written reason before they can be sent, and
 // neither is ever generated." Sending the actual email is Phase E; this
 // records the decision and the reason now.
-export function RejectForm({ applicantId }: { applicantId: string }) {
+export function RejectForm({ applicantId, garnet = false }: { applicantId: string; garnet?: boolean }) {
   const [state, action, pending] = useActionState(rejectApplicant, initialState);
   const [stage, setStage] = useState<"rejected_before_interview" | "rejected_after_interview">("rejected_before_interview");
 
   return (
-    <form action={action} className="card flex flex-col gap-3 p-6">
+    <form action={action} className={`card flex flex-col gap-3 p-6 ${garnet ? "card-garnet" : ""}`}>
       <input type="hidden" name="applicant_id" value={applicantId} />
       <h2 className="font-serif text-lg text-ink">Reject</h2>
       <div className="flex gap-4 text-sm text-ink">

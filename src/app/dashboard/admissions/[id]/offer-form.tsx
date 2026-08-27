@@ -6,11 +6,19 @@ import { sendOffer, type FormState } from "@/app/dashboard/admissions/actions";
 const initialState: FormState = { error: null };
 const inputClass = "rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-sm text-ink outline-none focus:border-primary";
 
-export function OfferForm({ applicantId, hasDeposit }: { applicantId: string; hasDeposit: boolean }) {
+export function OfferForm({
+  applicantId,
+  hasDeposit,
+  garnet = false,
+}: {
+  applicantId: string;
+  hasDeposit: boolean;
+  garnet?: boolean;
+}) {
   const [state, action, pending] = useActionState(sendOffer, initialState);
 
   return (
-    <form action={action} className="card flex flex-col gap-3 p-6">
+    <form action={action} className={`card flex flex-col gap-3 p-6 ${garnet ? "card-garnet" : ""}`}>
       <input type="hidden" name="applicant_id" value={applicantId} />
       <h2 className="font-serif text-lg text-ink">Offer</h2>
       <p className="text-sm text-muted">

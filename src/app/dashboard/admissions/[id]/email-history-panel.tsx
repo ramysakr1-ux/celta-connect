@@ -26,10 +26,10 @@ function formatDate(iso: string): string {
 // reversed, real delivery state from applicant_emails (migration 0108/0113,
 // populated by the Resend webhook) -- not a guess at what "should" have
 // sent, the actual log.
-export function EmailHistoryPanel({ emails }: { emails: EmailRow[] }) {
+export function EmailHistoryPanel({ emails, garnet = false }: { emails: EmailRow[]; garnet?: boolean }) {
   if (emails.length === 0) {
     return (
-      <div className="card flex flex-col gap-1 p-6">
+      <div className={`card flex flex-col gap-1 p-6 ${garnet ? "card-garnet" : ""}`}>
         <h2 className="font-serif text-lg text-ink">Email history</h2>
         <p className="text-sm text-muted">No emails sent yet.</p>
       </div>
@@ -37,7 +37,7 @@ export function EmailHistoryPanel({ emails }: { emails: EmailRow[] }) {
   }
 
   return (
-    <div className="card flex flex-col gap-3 p-6">
+    <div className={`card flex flex-col gap-3 p-6 ${garnet ? "card-garnet" : ""}`}>
       <h2 className="font-serif text-lg text-ink">Email history</h2>
       <ul className="flex flex-col gap-2.5">
         {emails.map((email) => (

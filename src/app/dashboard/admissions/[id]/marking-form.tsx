@@ -16,14 +16,14 @@ const ROWS = [
 
 const initialState: FormState = { error: null };
 
-export function MarkingForm({ applicant }: { applicant: Applicant }) {
+export function MarkingForm({ applicant, garnet = false }: { applicant: Applicant; garnet?: boolean }) {
   const [state, action, pending] = useActionState(saveMarkingScheme, initialState);
   const [values, setValues] = useState<Record<string, string>>(
     Object.fromEntries(ROWS.map((r) => [r.key, (applicant[`marking_${r.key}` as keyof Applicant] as string | null) ?? ""]))
   );
 
   return (
-    <form action={action} className="card flex flex-col gap-4 p-6">
+    <form action={action} className={`card flex flex-col gap-4 p-6 ${garnet ? "card-garnet" : ""}`}>
       <input type="hidden" name="applicant_id" value={applicant.id} />
       <h2 className="font-serif text-lg text-ink">Marking scheme -- selection task</h2>
       <p className="text-sm text-muted">Same shape as the Standard of English criterion on the assignment cover sheets.</p>

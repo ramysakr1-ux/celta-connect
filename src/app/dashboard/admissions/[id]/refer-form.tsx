@@ -18,13 +18,21 @@ export interface ReferDestination {
 // single-action case; a destination the viewer doesn't hold access to
 // simply never appears in this list, per-referApplicantAction's own
 // server-side re-check.
-export function ReferForm({ applicantId, destinations }: { applicantId: string; destinations: ReferDestination[] }) {
+export function ReferForm({
+  applicantId,
+  destinations,
+  garnet = false,
+}: {
+  applicantId: string;
+  destinations: ReferDestination[];
+  garnet?: boolean;
+}) {
   const [state, action, pending] = useActionState(referApplicantAction, initialState);
 
   if (destinations.length === 0) return null;
 
   return (
-    <form action={action} className="card flex flex-col gap-3 p-6">
+    <form action={action} className={`card flex flex-col gap-3 p-6 ${garnet ? "card-garnet" : ""}`}>
       <input type="hidden" name="applicant_id" value={applicantId} />
       <h2 className="font-serif text-lg text-ink">Refer to another branch</h2>
       <p className="text-xs text-muted">

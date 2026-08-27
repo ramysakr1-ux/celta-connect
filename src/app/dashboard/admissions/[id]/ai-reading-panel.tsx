@@ -31,6 +31,7 @@ function isReading(value: unknown): value is SelectionTaskReading {
 // form below it -- the tutor's own select dropdowns are untouched by it.
 export function AiReadingPanel({
   applicant,
+  garnet = false,
 }: {
   applicant: {
     id: string;
@@ -41,6 +42,7 @@ export function AiReadingPanel({
     interview_auto_send_cancelled_at: string | null;
     interview_auto_send_sent_at: string | null;
   };
+  garnet?: boolean;
 }) {
   if (!applicant.ai_reading_generated_at || !isReading(applicant.ai_reading_summary)) return null;
   const reading = applicant.ai_reading_summary;
@@ -53,7 +55,7 @@ export function AiReadingPanel({
     !applicant.interview_auto_send_sent_at;
 
   return (
-    <div className="card flex flex-col gap-3 border-dashed p-6">
+    <div className={`card flex flex-col gap-3 border-dashed p-6 ${garnet ? "card-garnet" : ""}`}>
       <div className="flex items-center justify-between gap-3">
         <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">AI reading -- suggested, not sent</p>
         {lane ? (

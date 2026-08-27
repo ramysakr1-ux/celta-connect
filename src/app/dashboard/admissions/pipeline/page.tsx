@@ -138,7 +138,11 @@ export default async function AdmissionsPipelinePage({
         </div>
       </div>
 
-      <div className="card flex flex-col gap-4 p-6">
+      {/* Purely decorative teal/garnet alternation down this page's stack of
+          plain cards -- same treatment as the Centre Management pilot
+          (src/app/centre/page.tsx). None of these carry a status of their
+          own. */}
+      <div className="card card-garnet flex flex-col gap-4 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">

@@ -143,7 +143,10 @@ export default async function EmailDeliveryPage({
         </div>
       ) : null}
 
-      <div className="card overflow-hidden !p-0">
+      {/* Purely decorative teal/garnet alternation against the header card
+          above -- same treatment as the Centre Management pilot
+          (src/app/centre/page.tsx). Neither carries a status of its own. */}
+      <div className="card card-garnet overflow-hidden !p-0">
         <div className="grid grid-cols-[1.3fr_1.1fr_1fr_1fr_1fr] border-b border-border bg-surface-muted px-4 py-2.5 text-[10.5px] font-bold tracking-[0.05em] text-muted uppercase">
           <div>To</div>
           <div>Email</div>

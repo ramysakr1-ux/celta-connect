@@ -186,7 +186,11 @@ export default async function AdmissionsPage() {
         </div>
       </div>
 
-      <div className="card overflow-hidden !p-0">
+      {/* Purely decorative teal/garnet alternation down this page's stack of
+          plain cards -- same treatment as the Centre Management pilot
+          (src/app/centre/page.tsx). None of these carry a status of their
+          own. */}
+      <div className="card card-garnet overflow-hidden !p-0">
         <table className="table-plain w-full">
           <thead>
             <tr>
@@ -247,7 +251,7 @@ export default async function AdmissionsPage() {
         </div>
       </div>
 
-      <div className="card flex flex-col gap-4 p-6">
+      <div className="card card-garnet flex flex-col gap-4 p-6">
         <h2 className="font-serif text-lg text-ink">Open interview slots</h2>
         {(openSlots ?? []).length > 0 ? (
           <ul className="flex flex-col gap-1.5">
@@ -338,7 +342,7 @@ export default async function AdmissionsPage() {
       ) : null}
 
       {waitingByIntake.size > 0 ? (
-        <div className="card flex flex-col gap-4 p-6">
+        <div className="card card-garnet flex flex-col gap-4 p-6">
           <h2 className="font-serif text-lg text-ink">Waiting lists</h2>
           <p className="text-sm text-muted">
             When a place frees up (a withdrawal, deferral, or a lapsed offer), offer it to whoever&apos;s next -- the app
