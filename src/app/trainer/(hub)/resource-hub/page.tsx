@@ -11,6 +11,7 @@ import { DENSITY_TIER_LABELS } from "@/lib/tp-density";
 import { getCambridgeDocuments } from "@/lib/cambridge-documents";
 import { CambridgeDocumentsShelf } from "@/app/trainer/(hub)/resource-hub/cambridge-documents-shelf";
 import { MaterialPoolShelf } from "@/app/trainer/(hub)/resource-hub/material-pool-shelf";
+import { MaterialPoolToggleCard } from "@/app/dashboard/admin/courses/[id]/material-pool-toggle-card";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
@@ -39,6 +40,10 @@ export default async function TrainerResourceHubPage() {
 
   const supabase = trainer ? await createClient() : createAdminClient();
   const courseId = trainer?.course_id ?? assessorCourseId;
+  // UI visibility only, matching roster.tsx/grades-report.tsx's own isMct --
+  // admin bypasses at the action layer (updateTpMaterialPoolEnabled), not
+  // here, same split as every other MCT-gated section in the trainer hub.
+  const isMct = trainer?.tutor_role === "main_course_tutor";
 
   const cambridgeAdmin = createAdminClient();
   // A trainer/admin session already carries center_id on their profile; an
@@ -420,12 +425,19 @@ export default async function TrainerResourceHubPage() {
         </div>
       </div>
 
-      {materialPoolEnabled ? (
+      {isMct || materialPoolEnabled ? (
         <div id="tp-material-pool">
           <h2 className="font-serif text-lg text-ink">TP7/8 material pool</h2>
-          <div className="mt-3">
-            <MaterialPoolShelf items={materialItems} readOnly={!trainer} />
-          </div>
+          {isMct && courseId ? (
+            <div className="mt-3">
+              <MaterialPoolToggleCard courseId={courseId} enabled={materialPoolEnabled} />
+            </div>
+          ) : null}
+          {materialPoolEnabled ? (
+            <div className="mt-3">
+              <MaterialPoolShelf items={materialItems} readOnly={!trainer} />
+            </div>
+          ) : null}
         </div>
       ) : null}
       </div>

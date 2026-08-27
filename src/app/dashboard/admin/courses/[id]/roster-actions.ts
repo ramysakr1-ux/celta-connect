@@ -37,8 +37,12 @@ export async function updateDeliveryMode(formData: FormData): Promise<void> {
 // pool is centre/course-optional, not universal -- some centres keep using
 // the main coursebook for TP7/8 instead. Gates both the trainer resource
 // hub's shelf and the candidate's claim section (see their page.tsx files).
+// Moved to /trainer/resource-hub 2026-08-27, same MCT-gated pattern as
+// close-out-actions.ts's requireMctCloseOutAccess -- a course-wide setting,
+// same weight as chat retention, not a day-to-day teaching action like
+// subgroups.
 export async function updateTpMaterialPoolEnabled(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const staff = await requireRole(["trainer", "admin"]);
 
   const courseId = formData.get("course_id");
   const enabled = formData.get("enabled");
@@ -46,10 +50,11 @@ export async function updateTpMaterialPoolEnabled(formData: FormData): Promise<v
 
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== admin.center_id) return;
+  if (!course || course.center_id !== staff.center_id) return;
+  if (staff.role !== "admin" && staff.course_id && !(await isMctOnCourse(supabase, staff.course_id, staff.id))) return;
 
   await supabase.from("courses").update({ tp_material_pool_enabled: enabled === "true" }).eq("id", courseId);
-  revalidatePath(`/dashboard/admin/courses/${courseId}`);
+  revalidatePath("/trainer/resource-hub");
 }
 
 // "The intake dropdown shows real availability" -- a course must be
