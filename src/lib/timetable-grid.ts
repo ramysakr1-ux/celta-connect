@@ -14,13 +14,20 @@ export type { TimeBand };
 // takes the active bands as a parameter instead of reading this constant
 // directly, and callers fall back to this default when a course hasn't
 // customised it (time_bands is null).
+// Ramy, 28 Aug 2026: "this is the master timetable... the heart of the
+// whole course" -- exact 9 real 45-minute bands read directly off
+// Timetable View (standalone).html's own header row, replacing the
+// previous 6 wider, invented bands.
 export const DEFAULT_TIME_BANDS: TimeBand[] = [
-  { start: "10:00", end: "12:30", label: "10:00–12:30" },
+  { start: "10:00", end: "10:45", label: "10:00–10:45" },
+  { start: "10:45", end: "11:30", label: "10:45–11:30" },
+  { start: "11:45", end: "12:30", label: "11:45–12:30" },
   { start: "12:45", end: "13:30", label: "12:45–13:30" },
-  { start: "13:45", end: "14:30", label: "13:45–14:30" },
-  { start: "14:30", end: "15:30", label: "14:30–15:30" },
-  { start: "15:30", end: "17:00", label: "15:30–17:00" },
-  { start: "17:00", end: "18:00", label: "17:00–18:00" },
+  { start: "13:30", end: "14:15", label: "13:30–14:15" },
+  { start: "14:15", end: "15:00", label: "14:15–15:00" },
+  { start: "15:15", end: "16:00", label: "15:15–16:00" },
+  { start: "16:15", end: "17:00", label: "16:15–17:00" },
+  { start: "17:15", end: "18:00", label: "17:15–18:00" },
 ];
 
 /** A course's active time bands -- its own customised shape, or the default. */
