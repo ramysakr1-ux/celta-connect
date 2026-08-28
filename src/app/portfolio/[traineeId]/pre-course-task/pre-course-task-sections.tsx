@@ -68,6 +68,13 @@ function SectionCard({
         <div className="flex flex-col divide-y divide-border-faint">
           {items.map((item) => (
             <div key={item.id} className="flex flex-col gap-1.5 py-3 first:pt-0">
+              {/* The reading that precedes this task in the Cambridge
+                  document -- deliberately muted and set off by a rule, so
+                  it reads as context rather than as part of the question
+                  the candidate is answering. */}
+              {item.lead_in ? (
+                <p className="mb-1 whitespace-pre-wrap border-l-2 border-border pl-3 text-[13px] leading-relaxed text-muted">{item.lead_in}</p>
+              ) : null}
               {item.task_number ? <p className="text-xs font-semibold text-ink">Task {item.task_number}</p> : null}
               <p className="whitespace-pre-wrap text-sm text-ink">{item.prompt}</p>
               <TaskAnswerBox itemId={item.id} initialResponse={responsesByItemId.get(item.id) ?? ""} readOnly={!isEditable} />

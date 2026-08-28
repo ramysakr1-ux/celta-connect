@@ -3494,6 +3494,10 @@ export interface Database {
           task_number: number | null;
           sequence_index: number;
           prompt: string;
+          // The reading passage that precedes this task in the Cambridge
+          // document -- context to read, not part of the question. Split out
+          // of `prompt` in migration 0238.
+          lead_in: string | null;
           answer: string | null;
           created_at: string;
         };
