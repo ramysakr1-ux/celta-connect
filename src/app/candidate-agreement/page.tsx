@@ -43,6 +43,35 @@ function ToComplete({ children }: { children: React.ReactNode }) {
   );
 }
 
+function ToCompleteList() {
+  // Ramy, 29 Aug 2026: "it should be clear -- the centre's stand and
+  // whether it's AI or plagiarism from the internet, what the penalty is.
+  // Maybe stated in the form that assignment five is an automatic fail, or
+  // immediate resubmission, something like that."
+  //
+  // He is right that a candidate needs the specific consequence, not "may
+  // mean". But the outcomes are genuinely centre-set: Connect stores them
+  // per centre in malpractice_outcome_options, and a centre configures its
+  // own list (Elmswood currently has two, "Not upheld" and "Upheld,
+  // assignment failed"). Writing an invented scale here would state as
+  // policy something the centre has not decided and the app would not
+  // enforce.
+  return (
+    <div className="rounded-[6px] border border-dashed border-border bg-surface-muted px-3 py-2 text-sm">
+      <p>
+        <span className="font-semibold text-ink">[Centre to complete]</span> Set out the actual consequence for each
+        case, so a candidate can read it before they are ever in one. For example: whether a first upheld case fails
+        that assignment outright or allows a resubmission; whether a resubmission is still available afterwards or is
+        forfeited; and what a second upheld case means for finishing the course.
+      </p>
+      <p className="mt-1.5 text-xs">
+        These must match the outcomes configured for this centre in Connect, so what a candidate is told here and what
+        a tutor can actually record are the same list.
+      </p>
+    </div>
+  );
+}
+
 export default function CandidateAgreementPage() {
   return (
     <div className="flex min-h-screen flex-1 justify-center p-8">
@@ -126,10 +155,18 @@ export default function CandidateAgreementPage() {
               for you.
             </p>
             <p>
-              Suspected plagiarism is investigated as malpractice. You will be told what has been found, shown the
-              evidence, and given the chance to respond before any decision is taken. A finding may mean the assignment
-              fails, may mean you cannot resubmit it, and in serious or repeated cases may mean you cannot pass the
-              course. Cambridge is notified where their rules require it.
+              This covers work copied from the internet, from a previous candidate, from another centre, or generated
+              for you by AI. The source does not change how it is treated.
+            </p>
+            <p>
+              Suspected plagiarism is opened as a malpractice case. You will be told exactly what has been found, shown
+              the evidence, and given the chance to respond in writing before any decision is taken. Nothing is decided
+              about you without you seeing it first.
+            </p>
+            <p>What follows a case that is upheld:</p>
+            <ToCompleteList />
+            <p>
+              Where Cambridge&apos;s own rules require it, they are notified. That is not a discretion the centre has.
             </p>
           </Section>
 
