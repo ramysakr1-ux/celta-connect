@@ -82,14 +82,35 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
   const passedCount = standardAssignments.filter(
     (a) => a.first_status === "approved" || a.resubmission_status === "approved"
   ).length;
+  // for-claude-code-trainee-interface.md: "Heading: what's due, e.g. '1 due
+  // today'" -- plus an "Open Assignment N" shortcut straight to it. Was
+  // missing entirely; only the passed-count showed. due_date tracks
+  // whichever round (first or resubmission) is currently live, same field
+  // getDeadlineUrgency already reads.
+  const dueTodayAssignment = standardAssignments.find(
+    (a) => a.due_date === today && (a.first_status === "not_submitted" || a.resubmission_status === "not_submitted")
+  );
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-serif text-xl text-ink">Written Assignments</h2>
-        <p className="text-xs text-muted">
-          {passedCount} of {standardAssignments.length} passed
-        </p>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="font-serif text-xl text-ink">Written Assignments</h2>
+          {dueTodayAssignment ? <p className="mt-0.5 text-xs font-medium text-status-warning-text">1 due today</p> : null}
+        </div>
+        <div className="flex items-center gap-3">
+          {dueTodayAssignment ? (
+            <Link
+              href={`/portfolio/${traineeId}/assignments/${dueTodayAssignment.id}`}
+              className="shrink-0 rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
+            >
+              Open Assignment {ASSIGNMENT_ORDER.indexOf(dueTodayAssignment.assignment_type) + 1}
+            </Link>
+          ) : null}
+          <p className="text-xs text-muted">
+            {passedCount} of {standardAssignments.length} passed
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:auto-rows-fr">
