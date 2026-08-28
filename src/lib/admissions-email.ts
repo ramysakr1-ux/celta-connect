@@ -325,7 +325,7 @@ export function welcomeEmailHtml(input: {
         "Everything for the course lives behind the link below: your timetable, teaching practice, assignments and feedback."
     ) +
     rawP(
-      "Two things to do before you start, both on the Pre-course task tab: Cambridge's pre-course task (about 4 hours, on paper is fine) and a short scavenger hunt finding your way around Connect (ten minutes, no marks). Take your time -- you have weeks, not days."
+      "Two things to do before you start, both on the Pre-course task tab: Cambridge's pre-course task (about 4 hours, answered right there and saved as you go) and a short scavenger hunt finding your way around Connect (ten minutes, no marks). Take your time -- you have weeks, not days."
     ) +
     (input.readingListUrl
       ? rawP(
@@ -858,10 +858,10 @@ export function acceptancePlaceEmailHtml(input: {
         "The first is your Connect account — that is where the whole course lives: your timetable, your lesson plans, your assignments. We will send you the link as soon as the deposit clears."
       ) +
       p(
-        "Second, the pre-course task. It takes most people eight to ten hours spread over a few weeks, and you hand it in on the first morning. It is not graded. Do not leave it until the week before."
+        "Second, the pre-course task. You answer it in Connect and it saves as you go. It takes most people eight to ten hours spread over a few weeks, and it is not graded. Do not leave it until the week before."
       ) +
       p(
-        "You will hear from us again the Friday before the course starts, with your group, your level, and what happens on day one. Nothing else is expected before then."
+        "You will hear from us again two days before the course starts, with your group, your level, and what happens on day one. Nothing else is expected before then."
       ) +
       p("If anything changes for you between now and then, tell us early — we can almost always help.") +
       signature(input.directorName, input.directorRole),
@@ -965,23 +965,23 @@ export function lateEnrolmentEmailHtml(input: {
         `We start at ${input.startTime} on ${input.startDay}, ${input.room}. You are in ${input.groupName}, teaching the ${input.levelName} class, with ${input.tutorNames}.`
       ) +
       p(
-        "The pre-course task normally takes eight to ten hours. Do what you can and bring whatever you have — nobody will comment on how much. You can finish it during the first week."
+        "The pre-course task normally takes eight to ten hours, and you answer it in Connect. Do what you can -- nobody will comment on how much, and you can finish it during the first week."
       ) +
       list([
-        "Setting up Connect — a minute at most, and worth doing before Monday.",
-        "The getting-to-know-you activity — twenty minutes on Monday afternoon, three to choose from, unassessed. Pick one if you have time. If not, your tutor will choose for you and that is completely fine.",
+        "Setting up Connect — a minute at most, and worth doing before day one.",
+        "The getting-to-know-you activity — twenty minutes on the first afternoon, three to choose from, unassessed. Pick one if you have time. If not, your tutor will choose for you and that is completely fine.",
         "Everything else can wait until you are here.",
       ]) +
       inlineButton({
         label: "Set up Connect and see your activities",
         url: input.setupUrl,
-        sub: "The only thing on this list worth doing before Monday.",
+        sub: "The only thing on this list worth doing before day one.",
       }) +
       // Muted in the design, deliberately -- it is meant to settle someone,
       // not to shout.
       `<p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#6d655c;">Starting late is much more common than you would think, and it makes no difference at all to how the course goes or how you are assessed.</p>` +
       p(
-        "If you would rather talk it through before Monday, call me on the centre number and ask for me directly."
+        "If you would rather talk it through beforehand, call me on the centre number and ask for me directly."
       ) +
       signature(input.directorName, input.directorRole),
   });
@@ -1015,7 +1015,7 @@ export function accountNotSetUpEmailHtml(input: {
         url: input.setupUrl,
         sub: "Your group, your level and your first activity are waiting behind this link.",
       }) +
-      p("Once you are in, everything else about Monday will be there — nothing to prepare beyond that.") +
+      p("Once you are in, everything else about day one will be there — nothing to prepare beyond that.") +
       signature(input.directorName, input.directorRole),
   });
 }

@@ -8,13 +8,13 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { answerKeyOpensOn } from "@/lib/pre-course-answer-key";
 
 // Checkpoint 12 -- "aggregate view for the tutor" (build-spec.md item 18).
-// Rebuilt 27 Aug 2026 against for-claude-code-pre-course-task-screens.md:
-// the task is done on paper and never submitted, so there is no text left
-// to skim here any more -- this is purely a section-level completion
-// tracker (who's read what) plus the answer-key unlock date, not a marking
-// view. The old "what the cohort said" response-aggregation panel is gone
-// along with pre_course_task_responses -- there was never real content to
-// aggregate once nothing is typed.
+//
+// Ramy, 28 Aug 2026: "there is no paper." Candidates answer the task inside
+// Connect, so this is a per-section count of tasks actually answered rather
+// than the section-level "who's read what" self-report it tracked while the
+// task was still done off-screen. Deliberately still not a marking view --
+// nothing here is graded, and a tutor who wants to read a candidate's
+// answers opens their name and reads them on the candidate's own page.
 export default async function TrainerPreCourseTaskPage() {
   const session = await getCurrentProfile();
   const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner" ? session.profile : null;
