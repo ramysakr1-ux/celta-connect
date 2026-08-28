@@ -432,9 +432,20 @@ export default async function ResourceHubPage({
               Task-linked
             </span>
           </div>
+          {/* Ramy, 29 Aug 2026: dropped "your cohort's filmed lessons...
+              with consent on record", both inherited from the §3a design.
+              The design assumed the film IS the cohort's own filmed class;
+              the real content is published demo lessons on YouTube, one of
+              them from a third-party channel. Filming consent in Connect
+              covers a trainee consenting to their OWN TP class being
+              filmed and has nothing to do with these, so the chip asserted
+              something untrue on every card. Reworded to what is true of
+              both cases -- if a centre later films its own cohort and
+              consent genuinely is on record, bring the chip back driven by
+              real data rather than hardcoded. */}
           <p className="text-[12.5px] leading-[1.5] text-muted">
-            Your cohort&apos;s filmed lessons — each tied to a slot on your timetable, with consent on record and a task
-            to complete after watching.
+            Filmed lessons for you to observe — each tied to a slot on your timetable, with a task to complete after
+            watching.
           </p>
 
           {/* Progress across all of them, the same shape as the pre-course
@@ -529,16 +540,13 @@ export default async function ResourceHubPage({
                           {s.subAim ? (<><span className="font-semibold text-ink">Sub aim</span> — {s.subAim}</>) : null}
                         </span>
                       ) : null}
-                      <span className="flex flex-wrap gap-1.5">
-                        {s.hasTask ? (
+                      {s.hasTask ? (
+                        <span className="flex flex-wrap gap-1.5">
                           <span className="rounded-full border border-border px-[7px] py-[1px] text-[10px] font-semibold text-muted">
                             Observation task attached
                           </span>
-                        ) : null}
-                        <span className="rounded-full border border-border px-[7px] py-[1px] text-[10px] font-semibold" style={{ color: "oklch(38% 0.072 195)" }}>
-                          Consent recorded
                         </span>
-                      </span>
+                      ) : null}
                       <span
                         className="self-start rounded-[6px] px-[14px] py-2 text-[12px] font-bold"
                         style={{ background: "oklch(30% 0.042 58)", color: "oklch(99.2% 0.005 90)" }}

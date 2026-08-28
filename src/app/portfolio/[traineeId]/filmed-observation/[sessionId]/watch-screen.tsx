@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { parseVideoUrl } from "@/lib/video-url";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { addFilmedObservationTimestampedNote } from "@/app/portfolio/[traineeId]/filmed-observation-actions";
@@ -53,6 +54,7 @@ export function FilmedObservationWatchScreen({
   initialMessages: Message[];
   initialSeekSeconds: number | null;
 }) {
+  const video = parseVideoUrl(recordingUrl);
   const videoRef = useRef<HTMLVideoElement>(null);
   const shownBreakIds = useRef<Set<string>>(new Set());
   const [activeBreak, setActiveBreak] = useState<Break | null>(null);
@@ -208,10 +210,23 @@ export function FilmedObservationWatchScreen({
         </p>
 
         <div className="relative overflow-hidden rounded-[10px] border border-border bg-ink">
-          {recordingUrl ? (
+          {video?.kind === "youtube" ? (
+            // Ramy, 29 Aug 2026: the recordings are YouTube links. The
+            // <video> element below plays a direct media file and renders
+            // nothing for a youtu.be URL, so without this every recording
+            // was a broken player.
+            <iframe
+              src={video.embedUrl}
+              title="Filmed observation recording"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+              className="aspect-video w-full border-0 bg-black"
+            />
+          ) : video?.kind === "file" ? (
             <video
               ref={videoRef}
-              src={recordingUrl}
+              src={video.src}
               controls
               onTimeUpdate={onTimeUpdate}
               className="aspect-video w-full bg-black"
@@ -223,7 +238,7 @@ export function FilmedObservationWatchScreen({
             </div>
           )}
 
-          {activeBreak ? (
+          {activeBreak && video?.kind === "file" ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-ink/92 px-6 text-center text-card">
               <p className="text-[11px] font-semibold tracking-[0.1em] uppercase text-card/70">
                 Break {activeBreak.break_number} of {breaks.length}
@@ -242,9 +257,32 @@ export function FilmedObservationWatchScreen({
         </div>
 
         {breaks.length > 0 ? (
-          <p className="text-xs text-muted">
-            {breaks.length} discussion break{breaks.length === 1 ? "" : "s"} scheduled in this recording.
-          </p>
+          video?.kind === "youtube" ? (
+            // Honest degradation: a YouTube iframe cannot be paused from
+            // here without wiring its JS API, so the breaks do not fire
+            // automatically on a linked recording the way they do on an
+            // uploaded file. Rather than silently drop them, the prompts
+            // and their timestamps are listed so a trainee can still pause
+            // at the right moments themselves.
+            <div className="flex flex-col gap-1.5">
+              <p className="text-xs text-muted">
+                {breaks.length} discussion break{breaks.length === 1 ? "" : "s"} in this recording. Pause at each point
+                yourself -- the player is YouTube&apos;s, so we can&apos;t stop it for you.
+              </p>
+              <ul className="flex flex-col gap-1">
+                {breaks.map((b) => (
+                  <li key={b.id} className="flex gap-2 text-xs text-muted">
+                    <span className="shrink-0 font-semibold tabular-nums text-ink">{formatClock(b.timestamp_seconds)}</span>
+                    <span>{b.prompt}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-xs text-muted">
+              {breaks.length} discussion break{breaks.length === 1 ? "" : "s"} scheduled in this recording.
+            </p>
+          )
         ) : null}
 
         {taskId ? (
