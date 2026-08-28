@@ -5,7 +5,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { mostRecentFridayBefore } from "@/lib/starts-monday-cron";
+import { answerKeyOpensOn } from "@/lib/pre-course-answer-key";
 
 // Checkpoint 12 -- "aggregate view for the tutor" (build-spec.md item 18).
 // Rebuilt 27 Aug 2026 against for-claude-code-pre-course-task-screens.md:
@@ -85,7 +85,7 @@ export default async function TrainerPreCourseTaskPage() {
   const orderedSections = [...cambridgeSections, ...supplementSections];
 
   const today = new Date().toISOString().slice(0, 10);
-  const answerKeyDate = course.start_date ? mostRecentFridayBefore(course.start_date) : null;
+  const answerKeyDate = course.start_date ? answerKeyOpensOn(course.start_date) : null;
   const answerKeyOpen = Boolean(answerKeyDate && today >= answerKeyDate);
 
   return (
@@ -99,7 +99,9 @@ export default async function TrainerPreCourseTaskPage() {
         </p>
         {answerKeyDate ? (
           <p className="mt-1 text-xs text-muted">
-            Answer key {answerKeyOpen ? "opened" : "opens"} {answerKeyDate} -- cohort-wide, not per-candidate.
+            Answer key {answerKeyOpen ? "opened" : "opens"} {answerKeyDate} -- 48 hours before the course starts,
+            cohort-wide. A candidate only sees the answer to a task once they have answered it themselves; you see all
+            of them regardless.
           </p>
         ) : null}
       </div>

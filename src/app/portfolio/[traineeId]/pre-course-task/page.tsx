@@ -3,7 +3,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { mostRecentFridayBefore } from "@/lib/starts-monday-cron";
+import { answerKeyOpensOn } from "@/lib/pre-course-answer-key";
 import { PreCourseTaskSections } from "@/app/portfolio/[traineeId]/pre-course-task/pre-course-task-sections";
 import { ScavengerHuntPanel } from "@/app/portfolio/[traineeId]/pre-course-task/scavenger-hunt-panel";
 import type { Database } from "@/lib/supabase/types";
@@ -23,7 +23,7 @@ type Item = Database["public"]["Tables"]["pre_course_task_items"]["Row"];
 // (pre_course_task_responses, continuous autosave, no submit step), staff
 // see those answers read-only on this same page, and progress is measured
 // in tasks answered rather than sections self-ticked. The answer key still
-// unlocks cohort-wide on the Friday before start, not per-candidate.
+// unlocks cohort-wide 48 hours before start, not per-candidate.
 export default async function PreCourseTaskPage({ params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
   const session = await getCurrentProfile();
@@ -75,7 +75,7 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
   // UTC date, wrong for this real trainee-facing eligibility gate.
   const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
-  const answerKeyUnlocked = !isTraineeViewer || (course?.start_date ? today >= mostRecentFridayBefore(course.start_date) : false);
+  const answerKeyUnlocked = !isTraineeViewer || (course?.start_date ? today >= answerKeyOpensOn(course.start_date) : false);
 
   return (
     <div className="flex flex-col gap-5">

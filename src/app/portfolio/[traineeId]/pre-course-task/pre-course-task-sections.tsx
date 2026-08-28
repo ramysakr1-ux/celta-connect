@@ -32,7 +32,7 @@ function TaskRow({ item, answerKeyUnlocked, isEditable, response }: { item: Item
       </div>
       <p className="whitespace-pre-wrap text-sm text-ink">{item.prompt}</p>
       <TaskAnswerBox itemId={item.id} initialResponse={response} readOnly={!isEditable} shape={parseTaskShape(item.shape)} />
-      {/* Ramy, 28 Aug 2026: the cohort-wide Friday unlock alone used to be
+      {/* Ramy, 28 Aug 2026: the cohort-wide date unlock alone used to be
           enough, because the task was answered on paper -- the key coming
           out couldn't touch work already written. Now the candidate types
           into this very screen, so an unlocked key printed under an empty

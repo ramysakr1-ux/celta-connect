@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG } from "@/lib/input-session-registry-links";
-import { mostRecentFridayBefore } from "@/lib/starts-monday-cron";
+import { answerKeyOpensOn } from "@/lib/pre-course-answer-key";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -289,7 +289,7 @@ export default async function ResourceHubPage({
   const precourseSectionsTotal = precourseItems?.length ?? 0;
   const precourseSectionsDone = (precourseResponses ?? []).filter((r) => responseIsAnswered(r.response)).length;
   const precourseAllDone = precourseSectionsTotal > 0 && precourseSectionsDone >= precourseSectionsTotal;
-  const answerKeyDate = course?.start_date ? mostRecentFridayBefore(course.start_date) : null;
+  const answerKeyDate = course?.start_date ? answerKeyOpensOn(course.start_date) : null;
   const answerKeyLive = precourseAllDone && Boolean(answerKeyDate && today >= answerKeyDate);
   const huntFoundCount = (huntProgress ?? []).length;
 
@@ -425,8 +425,8 @@ export default async function ResourceHubPage({
           </div>
           <p className="text-[12.5px] leading-[1.5] text-muted">
             {answerKeyLive
-              ? `All ${precourseSectionsTotal} tasks answered, and the Friday-before date has arrived — same door, flipped state. Compare your own answers at your own pace; nothing to submit here.`
-              : `${precourseSectionsDone} of ${precourseSectionsTotal} tasks answered. Answer key stays hidden — it unlocks cohort-wide on the Friday before the course starts, not on completion. Find your way around: ${huntFoundCount} of 6 found.`}
+              ? `All ${precourseSectionsTotal} tasks answered, and the answer key is open — same door, flipped state. Compare your own answers at your own pace; nothing to submit here.`
+              : `${precourseSectionsDone} of ${precourseSectionsTotal} tasks answered. Answer key stays hidden — it unlocks cohort-wide 48 hours before the course starts, and then only on the tasks you have answered. Find your way around: ${huntFoundCount} of 6 found.`}
           </p>
           {!answerKeyLive ? (
             <div className="h-[6px] overflow-hidden rounded-full" style={{ background: "oklch(89.5% 0.012 85)" }}>
