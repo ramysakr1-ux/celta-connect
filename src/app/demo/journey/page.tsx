@@ -135,6 +135,15 @@ export default async function JourneyPage() {
     },
   };
 
+  // Ramy, 28 Aug 2026: "update it with the logic we now have after
+  // installing the API key" -- the OpenAI key unlocked four real features;
+  // Step 3 already showed the written-task AiReadingPanel, but not this
+  // second, separate one (speaking_task_ai_suggestion, read-speaking-
+  // task.ts) -- standalone, never feeds the AiReadingPanel's lane or
+  // autobook, same real component/copy the actual admissions page uses.
+  const sampleSpeakingSuggestion =
+    "Tariq speaks fluently with only occasional hesitation, and handles the follow-up question well. Range is solid for everyday topics but narrows on the more abstract prompt -- worth listening for how he handles unfamiliar vocabulary in interview.";
+
   const applicantName = "Tariq Osei";
   const courseName = "CELTA Demo Course";
   const centreName = "CELTA Demo Centre";
@@ -288,6 +297,14 @@ export default async function JourneyPage() {
                 auto-rejects anyone. Here&apos;s what that reading actually looks like:
               </p>
               <AiReadingPanel applicant={sampleAiReading} />
+              <p className="text-xs text-muted">
+                The speaking task recording gets its own separate suggestion, independent of the reading above --
+                never affects its lane or the autobook decision, just a starting point next to the audio:
+              </p>
+              <div className="rounded-[6px] border border-dashed border-border p-3">
+                <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">AI reading -- suggested, not sent</p>
+                <p className="mt-1 text-sm text-ink">{sampleSpeakingSuggestion}</p>
+              </div>
             </div>
           </Step>
           <Step number={4} title="Is invited to interview" blurb="Sent once the written task has been read.">
