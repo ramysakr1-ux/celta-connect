@@ -22,6 +22,7 @@ import {
   updateReflectiveEssay,
   submitReflectiveEssay,
   updateScheme,
+  updateTrainsAtNominatingCentre,
   updateModesTrained,
   bookAssessorDay,
   completeAssessorDay,
@@ -62,10 +63,12 @@ export function SchemeAndModesForm({
   titRecordId,
   scheme,
   modesTrained,
+  trainsAtNominatingCentre,
 }: {
   titRecordId: string;
   scheme: "internal" | "external";
   modesTrained: string[];
+  trainsAtNominatingCentre: boolean;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-4">
@@ -77,6 +80,20 @@ export function SchemeAndModesForm({
           <option value="external">External</option>
         </select>
       </form>
+      {scheme === "internal" ? (
+        <form action={updateTrainsAtNominatingCentre} className="flex items-center gap-1.5">
+          <input type="hidden" name="tit_record_id" value={titRecordId} />
+          <label className="flex items-center gap-1.5 text-sm text-ink">
+            <input
+              type="checkbox"
+              name="trains_at_nominating_centre"
+              defaultChecked={trainsAtNominatingCentre}
+              onChange={(e) => e.currentTarget.form?.requestSubmit()}
+            />
+            Trains at the nominating centre
+          </label>
+        </form>
+      ) : null}
       <form action={updateModesTrained} className="flex items-center gap-3">
         <input type="hidden" name="tit_record_id" value={titRecordId} />
         <label className="text-xs text-muted">Modes trained in</label>

@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { CANDIDATES_TO_FOLLOW } from "@/lib/trainer-in-training";
 
 export interface FormState {
   error: string | null;
@@ -122,18 +123,28 @@ export async function updateDeliveredSessionSelfEval(_prevState: FormState, form
   return { error: null };
 }
 
-// Supervisor-only in practice (RLS still allows the TinT to write here too,
-// since course_tutors carries no per-column ownership -- kept honest in the
-// UI rather than the database, matching this app's established trust
-// boundary pattern of "the server action / UI is the real boundary" used
-// elsewhere for similarly soft distinctions).
+// Ramy, 28 Aug 2026: was "supervisor-only in practice" via UI convention
+// only -- RLS let the TinT write their own supervisor's feedback field too.
+// Same real identity check as signTaskRecordItem now, since this is
+// exactly the kind of document the spec says "carries no signature at all"
+// from the TinT's side -- it has to actually be the supervisor.
 export async function updateDeliveredSessionSupervisorFeedback(_prevState: FormState, formData: FormData): Promise<FormState> {
-  await requireRole(["trainer", "admin"]);
+  const viewer = await requireRole(["trainer", "admin"]);
   const id = formData.get("id");
   const text = (formData.get("supervisor_feedback") as string | null)?.trim();
   if (typeof id !== "string" || !text) return { error: "Write the feedback first." };
 
   const supabase = await createClient();
+  const { data: session } = await supabase
+    .from("tit_delivered_sessions")
+    .select("tit_records(course_tutors(supervisor_profile_id))")
+    .eq("id", id)
+    .maybeSingle();
+  const tutors = (session?.tit_records as unknown as { course_tutors: { supervisor_profile_id: string | null } | null } | null)?.course_tutors;
+  if (viewer.role !== "admin" && tutors?.supervisor_profile_id !== viewer.id) {
+    return { error: "Only this TinT's supervisor can write this." };
+  }
+
   const { error } = await supabase
     .from("tit_delivered_sessions")
     .update({ supervisor_feedback: text, supervisor_feedback_at: new Date().toISOString() })
@@ -230,6 +241,17 @@ export async function addCandidateFollowed(_prevState: FormState, formData: Form
   }
 
   const supabase = await createClient();
+  // Ramy, 28 Aug 2026: spec's "two candidates followed, not four" (Task
+  // Nine) -- was display-text only (CANDIDATES_TO_FOLLOW used just for the
+  // "N of 2" label), nothing actually stopped a 3rd+ row.
+  const { count } = await supabase
+    .from("tit_candidates_followed")
+    .select("id", { count: "exact", head: true })
+    .eq("tit_record_id", titRecordId);
+  if ((count ?? 0) >= CANDIDATES_TO_FOLLOW) {
+    return { error: `Already following ${CANDIDATES_TO_FOLLOW} candidates -- that's the maximum (Task Nine).` };
+  }
+
   const { error } = await supabase.from("tit_candidates_followed").insert({ tit_record_id: titRecordId, trainee_id: traineeId });
   if (error) return { error: error.code === "23505" ? "Already being followed." : "Could not save. Try again." };
   revalidateWorkspace();
@@ -290,12 +312,31 @@ export async function updateTaskRecordItem(_prevState: FormState, formData: Form
 }
 
 export async function signTaskRecordItem(formData: FormData): Promise<void> {
-  await requireRole(["trainer", "admin"]);
+  const viewer = await requireRole(["trainer", "admin"]);
   const id = formData.get("id");
   const who = formData.get("who");
   if (typeof id !== "string" || (who !== "tit" && who !== "supervisor")) return;
 
   const supabase = await createClient();
+  // Ramy, 28 Aug 2026: "each task signed off by both the TinT and
+  // supervisor" (16-item Task Record) -- RLS lets both parties write this
+  // row (they need to, to sign their own half), but nothing previously
+  // stopped one from also signing the OTHER party's half. A signature only
+  // counts if it's actually the matching person clicking it.
+  const { data: item } = await supabase
+    .from("tit_task_record_items")
+    .select("tit_record_id, tit_records(course_tutors(profile_id, supervisor_profile_id))")
+    .eq("id", id)
+    .maybeSingle();
+  const record = item?.tit_records as unknown as { course_tutors: { profile_id: string; supervisor_profile_id: string | null } | null } | null;
+  const tutors = record?.course_tutors;
+  if (!tutors) return;
+  const allowed = who === "tit" ? tutors.profile_id === viewer.id : tutors.supervisor_profile_id === viewer.id;
+  // Admins step in for real emergencies (e.g. the supervisor is unreachable) --
+  // still gated by the coarse requireRole above, unlike a TinT/supervisor
+  // trying to sign the other's half.
+  if (!allowed && viewer.role !== "admin") return;
+
   const now = new Date().toISOString();
   const update = who === "tit" ? { tit_signed_at: now } : { supervisor_signed_at: now };
   await supabase.from("tit_task_record_items").update(update).eq("id", id);
@@ -350,6 +391,21 @@ export async function updateScheme(formData: FormData): Promise<void> {
 
   const supabase = await createClient();
   await supabase.from("tit_records").update({ scheme }).eq("id", titRecordId);
+  revalidateWorkspace();
+}
+
+// specs/for-claude-code-trainer-in-training.md line 51 -- the extra
+// assessor day also applies "Internal scheme at a centre other than the
+// one nominating them," not just External. Only meaningful for Internal
+// (External already always requires the day, regardless of this flag).
+export async function updateTrainsAtNominatingCentre(formData: FormData): Promise<void> {
+  await requireRole(["trainer", "admin"]);
+  const titRecordId = formData.get("tit_record_id");
+  const value = formData.get("trains_at_nominating_centre") === "on";
+  if (typeof titRecordId !== "string") return;
+
+  const supabase = await createClient();
+  await supabase.from("tit_records").update({ trains_at_nominating_centre: value }).eq("id", titRecordId);
   revalidateWorkspace();
 }
 

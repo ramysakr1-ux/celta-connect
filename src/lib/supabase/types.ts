@@ -2149,6 +2149,7 @@ export interface Database {
           id: string;
           course_tutors_id: string;
           scheme: "internal" | "external";
+          trains_at_nominating_centre: boolean;
           modes_trained: string[];
           reflective_essay: string | null;
           reflective_essay_submitted_at: string | null;

@@ -6,6 +6,7 @@ import {
   computeHeadlineStats,
   TIT_PRE_COURSE_TASKS,
   HEADLINE_MIN_PCT,
+  INPUT_ASYNC_MAX_PCT,
   MIN_DELIVERED_SESSIONS,
   TASK12_STAGE1_REQUIRED,
   CANDIDATES_TO_FOLLOW,
@@ -116,7 +117,7 @@ export async function TitWorkspace({
 
   const observedEventIds = new Set((observedSessions ?? []).map((o) => o.timetable_event_id));
   const observedByEventId = new Map((observedSessions ?? []).map((o) => [o.timetable_event_id, o]));
-  const stats = computeHeadlineStats(timetableEvents ?? [], observedEventIds);
+  const stats = computeHeadlineStats(timetableEvents ?? [], observedSessions ?? []);
 
   const traineeNameById = new Map((courseTrainees ?? []).map((t) => [t.id, t.full_name]));
   const eventTitleById = new Map((timetableEvents ?? []).map((e) => [e.id, e.title]));
@@ -127,7 +128,10 @@ export async function TitWorkspace({
   const inputEvents = (timetableEvents ?? []).filter((e) => e.type === "input_session");
   const tpEvents = (timetableEvents ?? []).filter((e) => e.type === "tp");
 
-  const requiresAssessorDay = titRecord.scheme === "external";
+  // Ramy, 28 Aug 2026: spec line 51 -- External always requires it;
+  // Internal requires it too when the TinT doesn't train at their own
+  // nominating centre. Was scheme === "external" only.
+  const requiresAssessorDay = titRecord.scheme === "external" || !titRecord.trains_at_nominating_centre;
 
   return (
     <div className="sheet flex flex-col gap-6">
@@ -145,11 +149,25 @@ export async function TitWorkspace({
         <SubmitPortfolioButton titRecordId={titRecord.id} submittedAt={titRecord.portfolio_submitted_at} />
       </div>
 
-      <SchemeAndModesForm titRecordId={titRecord.id} scheme={titRecord.scheme} modesTrained={titRecord.modes_trained} />
+      <SchemeAndModesForm
+        titRecordId={titRecord.id}
+        scheme={titRecord.scheme}
+        modesTrained={titRecord.modes_trained}
+        trainsAtNominatingCentre={titRecord.trains_at_nominating_centre}
+      />
 
       {/* Headline stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label="Input observed" pct={stats.inputObservedPct} detail={`${stats.inputObservedCount} of ${stats.inputTotalCount}`} />
+        <StatCard
+          label="Input observed"
+          pct={stats.inputObservedPct}
+          detail={`${stats.inputObservedCount} of ${stats.inputTotalCount} · ${stats.inputAsyncPct}% async`}
+          warning={
+            stats.inputAsyncPct > INPUT_ASYNC_MAX_PCT
+              ? `Over the ${INPUT_ASYNC_MAX_PCT}% asynchronous ceiling (${stats.inputAsyncCount} of ${stats.inputObservedCount} observed sessions)`
+              : null
+          }
+        />
         <StatCard label="TP / feedback observed" pct={stats.tpObservedPct} detail={`${stats.tpObservedCount} of ${stats.tpTotalCount}`} />
         <div className="rounded-[6px] border border-border p-3">
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Sessions delivered</p>
@@ -306,9 +324,11 @@ export async function TitWorkspace({
         <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
           Candidates followed start to end ({(candidatesFollowed ?? []).length} of {CANDIDATES_TO_FOLLOW})
         </h3>
-        <div className="mt-2">
-          <AddCandidateFollowedForm titRecordId={titRecord.id} trainees={(courseTrainees ?? []).map((t) => ({ id: t.id, name: t.full_name }))} />
-        </div>
+        {(candidatesFollowed ?? []).length < CANDIDATES_TO_FOLLOW ? (
+          <div className="mt-2">
+            <AddCandidateFollowedForm titRecordId={titRecord.id} trainees={(courseTrainees ?? []).map((t) => ({ id: t.id, name: t.full_name }))} />
+          </div>
+        ) : null}
         <div className="mt-3 flex flex-col gap-2">
           {(candidatesFollowed ?? []).map((r) => (
             <CandidateFollowedCard
@@ -369,15 +389,17 @@ export async function TitWorkspace({
       {/* Extra assessor day */}
       {requiresAssessorDay ? (
         <section>
-          <h3 className="text-[11px] font-semibold tracking-[0.08em] text-status-warning-text uppercase">Extra assessor day -- external scheme</h3>
+          <h3 className="text-[11px] font-semibold tracking-[0.08em] text-status-warning-text uppercase">
+            Extra assessor day -- {titRecord.scheme === "external" ? "external scheme" : "internal scheme, different centre"}
+          </h3>
           <div className="mt-2">
             <AssessorDayCard titRecordId={titRecord.id} bookedAt={titRecord.assessor_day_booked_at} completedAt={titRecord.assessor_day_completed_at} />
           </div>
         </section>
       ) : (
         <p className="text-xs text-muted">
-          Internal scheme: no extra assessor day -- your supervisor alone assesses your work and e-portfolio, and sends
-          their own moderation report straight to the JCA.
+          Internal scheme, trains at the nominating centre: no extra assessor day -- your supervisor alone assesses
+          your work and e-portfolio, and sends their own moderation report straight to the JCA.
         </p>
       )}
 
@@ -392,7 +414,7 @@ export async function TitWorkspace({
   );
 }
 
-function StatCard({ label, pct, detail }: { label: string; pct: number; detail: string }) {
+function StatCard({ label, pct, detail, warning }: { label: string; pct: number; detail: string; warning?: string | null }) {
   const met = pct >= HEADLINE_MIN_PCT;
   return (
     <div className="rounded-[6px] border border-border p-3">
@@ -402,6 +424,7 @@ function StatCard({ label, pct, detail }: { label: string; pct: number; detail: 
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-muted">
         <div className={`h-full rounded-full ${met ? "bg-primary" : "bg-status-warning-text"}`} style={{ width: `${Math.min(pct, 100)}%` }} />
       </div>
+      {warning ? <p className="mt-1.5 text-xs font-medium text-destructive">{warning}</p> : null}
     </div>
   );
 }

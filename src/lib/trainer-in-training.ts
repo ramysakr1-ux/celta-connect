@@ -51,10 +51,14 @@ export async function ensureTitRecord(
   return created.id;
 }
 
+export const INPUT_ASYNC_MAX_PCT = 10;
+
 export interface TitHeadlineStats {
   inputObservedCount: number;
   inputTotalCount: number;
   inputObservedPct: number;
+  inputAsyncCount: number;
+  inputAsyncPct: number;
   tpObservedCount: number;
   tpTotalCount: number;
   tpObservedPct: number;
@@ -65,18 +69,26 @@ export interface TitHeadlineStats {
 // asynchronous but TP/feedback never can be)." Derived from the course's
 // real timetable at read time, never stored as a percentage -- same
 // "derived, not stored" principle rotation.ts already uses for TP dates.
+// Ramy, 28 Aug 2026: inputAsyncPct was tracked in the schema (the
+// `asynchronous` flag) but never actually computed or checked against the
+// 10% ceiling -- a TinT could satisfy 80% input-observed entirely via
+// recordings with no signal anywhere that the cap was blown.
 export function computeHeadlineStats(
   timetableEvents: { id: string; type: string }[],
-  observedEventIds: ReadonlySet<string>
+  observedSessions: { timetable_event_id: string; asynchronous: boolean }[]
 ): TitHeadlineStats {
+  const observedByEventId = new Map(observedSessions.map((o) => [o.timetable_event_id, o]));
   const inputEvents = timetableEvents.filter((e) => e.type === "input_session");
   const tpEvents = timetableEvents.filter((e) => e.type === "tp");
-  const inputObservedCount = inputEvents.filter((e) => observedEventIds.has(e.id)).length;
-  const tpObservedCount = tpEvents.filter((e) => observedEventIds.has(e.id)).length;
+  const inputObserved = inputEvents.filter((e) => observedByEventId.has(e.id));
+  const tpObservedCount = tpEvents.filter((e) => observedByEventId.has(e.id)).length;
+  const inputAsyncCount = inputObserved.filter((e) => observedByEventId.get(e.id)?.asynchronous).length;
   return {
-    inputObservedCount,
+    inputObservedCount: inputObserved.length,
     inputTotalCount: inputEvents.length,
-    inputObservedPct: inputEvents.length > 0 ? Math.round((inputObservedCount / inputEvents.length) * 100) : 0,
+    inputObservedPct: inputEvents.length > 0 ? Math.round((inputObserved.length / inputEvents.length) * 100) : 0,
+    inputAsyncCount,
+    inputAsyncPct: inputObserved.length > 0 ? Math.round((inputAsyncCount / inputObserved.length) * 100) : 0,
     tpObservedCount,
     tpTotalCount: tpEvents.length,
     tpObservedPct: tpEvents.length > 0 ? Math.round((tpObservedCount / tpEvents.length) * 100) : 0,
