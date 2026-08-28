@@ -11,10 +11,14 @@ import { usePathname } from "next/navigation";
 // as the mockup's own "My timetable" action button -- there's no separate
 // top-level Timetable entry). Teaching Practice covers both the overview and
 // a single lesson's detail page. CELTA 5 is its own destination here,
-// alongside Progress, matching the mockup's seven items exactly.
+// alongside Progress.
+// Ramy, 28 Aug 2026: "I don't think we need a shortcut to pre-course task,
+// because this is something that they will not use during the course" --
+// dropped as its own sidebar item (it's still a real route, just reached
+// through the Today landing page's hero/Waiting-on-you cards instead of a
+// standing nav entry for something only relevant before day one).
 const SIDEBAR_TABS = [
   { href: "", label: "Course Stream", alsoMatch: ["/timetable", "/individual-tutorial", "/stage2-tutorial"] },
-  { href: "/pre-course-task", label: "Pre-course task" },
   { href: "/resources", label: "Resource Hub" },
   { href: "/tp", label: "Teaching Practice" },
   { href: "/assignments", label: "Written Assignments" },
