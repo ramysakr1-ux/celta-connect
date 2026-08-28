@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { togglePreCourseTaskSection } from "@/app/portfolio/[traineeId]/pre-course-task/actions";
+import { TaskAnswerBox } from "@/app/portfolio/[traineeId]/pre-course-task/task-answer-box";
 import type { Database } from "@/lib/supabase/types";
 
 type Section = Database["public"]["Tables"]["pre_course_task_sections"]["Row"];
@@ -13,21 +14,28 @@ function SectionCard({
   done,
   answerKeyUnlocked,
   isEditable,
+  responsesByItemId,
 }: {
   section: Section;
   items: Item[];
   done: boolean;
   answerKeyUnlocked: boolean;
   isEditable: boolean;
+  responsesByItemId: Map<string, string>;
 }) {
   const [open, setOpen] = useState(false);
+  const answered = items.filter((i) => (responsesByItemId.get(i.id) ?? "").trim().length > 0).length;
 
   return (
     <div className={`sheet flex flex-col gap-3 border-l-4 ${done ? "border-l-primary" : "border-l-border"}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{section.title}</p>
-          {items.length > 0 ? <p className="mt-0.5 text-xs text-muted">{items.length} tasks</p> : null}
+          {items.length > 0 ? (
+            <p className="mt-0.5 text-xs text-muted">
+              {answered} of {items.length} answered
+            </p>
+          ) : null}
         </div>
         {isEditable ? (
           <form action={togglePreCourseTaskSection}>
@@ -52,7 +60,7 @@ function SectionCard({
 
       {items.length > 0 ? (
         <button type="button" onClick={() => setOpen((v) => !v)} className="self-start text-xs font-semibold text-primary hover:underline">
-          {open ? "Hide the tasks" : "Read the tasks"}
+          {open ? "Hide the tasks" : isEditable ? "Answer the tasks" : "Read the tasks"}
         </button>
       ) : null}
 
@@ -62,6 +70,7 @@ function SectionCard({
             <div key={item.id} className="flex flex-col gap-1.5 py-3 first:pt-0">
               {item.task_number ? <p className="text-xs font-semibold text-ink">Task {item.task_number}</p> : null}
               <p className="whitespace-pre-wrap text-sm text-ink">{item.prompt}</p>
+              <TaskAnswerBox itemId={item.id} initialResponse={responsesByItemId.get(item.id) ?? ""} readOnly={!isEditable} />
               {answerKeyUnlocked ? (
                 item.answer ? (
                   <p className="mt-1 whitespace-pre-wrap rounded-[6px] border border-border-faint bg-accent/20 px-3 py-2 text-sm text-ink">
@@ -88,6 +97,7 @@ function SectionGroup({
   completedSectionIds,
   answerKeyUnlocked,
   isEditable,
+  responsesByItemId,
 }: {
   title: string;
   note: string;
@@ -96,6 +106,7 @@ function SectionGroup({
   completedSectionIds: Set<string>;
   answerKeyUnlocked: boolean;
   isEditable: boolean;
+  responsesByItemId: Map<string, string>;
 }) {
   if (sections.length === 0) return null;
   return (
@@ -112,6 +123,7 @@ function SectionGroup({
           done={completedSectionIds.has(section.id)}
           answerKeyUnlocked={answerKeyUnlocked}
           isEditable={isEditable}
+          responsesByItemId={responsesByItemId}
         />
       ))}
     </div>
@@ -125,6 +137,7 @@ export function PreCourseTaskSections({
   completedSectionIds,
   answerKeyUnlocked,
   isEditable,
+  responsesByItemId,
 }: {
   cambridgeSections: Section[];
   supplementSections: Section[];
@@ -132,16 +145,22 @@ export function PreCourseTaskSections({
   completedSectionIds: Set<string>;
   answerKeyUnlocked: boolean;
   isEditable: boolean;
+  responsesByItemId: Map<string, string>;
 }) {
-  const total = cambridgeSections.length + supplementSections.length;
-  const done = [...cambridgeSections, ...supplementSections].filter((s) => completedSectionIds.has(s.id)).length;
+  // Progress is answered-tasks now, not sections-ticked -- the candidate
+  // types their answers here, so the real measure is how much of the task
+  // is actually written, not how many section headers they've flagged.
+  const allSections = [...cambridgeSections, ...supplementSections];
+  const allItems = allSections.flatMap((s) => itemsBySection.get(s.id) ?? []);
+  const total = allItems.length;
+  const done = allItems.filter((i) => (responsesByItemId.get(i.id) ?? "").trim().length > 0).length;
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between text-xs text-muted">
           <span>
-            {done} of {total} sections done
+            {done} of {total} answered
           </span>
           {answerKeyUnlocked ? <span className="font-semibold text-primary">Answer key open</span> : null}
         </div>
@@ -158,6 +177,7 @@ export function PreCourseTaskSections({
         completedSectionIds={completedSectionIds}
         answerKeyUnlocked={answerKeyUnlocked}
         isEditable={isEditable}
+        responsesByItemId={responsesByItemId}
       />
       <SectionGroup
         title="Your centre's supplement"
@@ -167,6 +187,7 @@ export function PreCourseTaskSections({
         completedSectionIds={completedSectionIds}
         answerKeyUnlocked={answerKeyUnlocked}
         isEditable={isEditable}
+        responsesByItemId={responsesByItemId}
       />
     </div>
   );

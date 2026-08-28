@@ -3521,6 +3521,22 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["pre_course_task_progress"]["Row"]>;
         Relationships: [];
       };
+      pre_course_task_responses: {
+        Row: {
+          id: string;
+          item_id: string;
+          trainee_id: string;
+          response: string;
+          response_kind: "text" | "json";
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["pre_course_task_responses"]["Row"]> & {
+          item_id: string;
+          trainee_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["pre_course_task_responses"]["Row"]>;
+        Relationships: [];
+      };
       scavenger_hunt_progress: {
         Row: {
           id: string;

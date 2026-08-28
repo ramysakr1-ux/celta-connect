@@ -5,13 +5,11 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 
-// for-claude-code-pre-course-task-screens.md (27 Aug 2026): "on paper is
-// fine -- not graded, not handed in -- your tutor reads it on day one."
-// Replaces savePreCourseTaskResponses -- nothing is typed or submitted
-// here, a trainee just marks a section as read/done for their own
-// progress tracking. completed_at toggles off if pressed again (the
-// design's progress bar implies this is a self-report a candidate can
-// correct, not a one-way lock).
+// Marks a whole section read/done. Kept alongside the per-task answers
+// below: a section can be finished without every optional reflection task
+// carrying typed text, so section progress stays its own self-report rather
+// than being derived from answer count. completed_at toggles off if pressed
+// again (a candidate can correct it, it's not a one-way lock).
 export async function togglePreCourseTaskSection(formData: FormData): Promise<void> {
   const trainee = await requireRole("trainee");
   if (!trainee.course_id) return;
@@ -42,4 +40,33 @@ export async function togglePreCourseTaskSection(formData: FormData): Promise<vo
   }
 
   revalidatePath(`/portfolio/${trainee.id}/pre-course-task`);
+}
+
+// Ramy, 28 Aug 2026: "the trainees will answer the pre-course task here."
+// Continuous autosave, one row per candidate per task -- no submit step and
+// no draft/final split, since the task is explicitly never graded and never
+// handed in. Deliberately does NOT revalidatePath: this fires on every
+// debounced keystroke, and re-rendering the whole page mid-typing would
+// fight the textarea for control of its own value.
+export async function savePreCourseTaskAnswer(formData: FormData): Promise<void> {
+  const trainee = await requireRole("trainee");
+
+  const itemId = formData.get("item_id");
+  const response = formData.get("response");
+  if (typeof itemId !== "string" || typeof response !== "string") return;
+
+  const kindRaw = formData.get("response_kind");
+  const responseKind = kindRaw === "json" ? "json" : "text";
+
+  const supabase = await createClient();
+  await supabase.from("pre_course_task_responses").upsert(
+    {
+      item_id: itemId,
+      trainee_id: trainee.id,
+      response,
+      response_kind: responseKind,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "item_id,trainee_id" }
+  );
 }

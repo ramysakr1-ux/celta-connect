@@ -14,12 +14,16 @@ type Item = Database["public"]["Tables"]["pre_course_task_items"]["Row"];
 
 // Checkpoint 12 (build-spec.md item 18) -- Cambridge's Pre-Course Task
 // (C) UCLES 2018, five sections, plus a centre supplement (online teaching,
-// use of L1). Rebuilt 27 Aug 2026 against for-claude-code-pre-course-task-
-// screens.md: done on paper, never submitted -- "not graded, not handed
-// in, your tutor reads it on day one." Connect's job is just showing the
-// real content, tracking section-level self-reported progress, and
-// unlocking the answer key on the Friday before start (cohort-wide, not
-// per-trainee) -- not collecting typed answers.
+// use of L1).
+//
+// Ramy, 28 Aug 2026: "Who said everything has happened on paper? It's not
+// happening on paper. It's happening here." Reverses the 27 Aug model,
+// where this page was a read-only reader and candidates worked on paper for
+// a tutor to read on day one. Candidates now answer inside Connect
+// (pre_course_task_responses, continuous autosave, no submit step), staff
+// see those answers read-only on this same page, and progress is measured
+// in tasks answered rather than sections self-ticked. The answer key still
+// unlocks cohort-wide on the Friday before start, not per-candidate.
 export default async function PreCourseTaskPage({ params }: { params: Promise<{ traineeId: string }> }) {
   const { traineeId } = await params;
   const session = await getCurrentProfile();
@@ -42,13 +46,14 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
     .order("sequence_index");
   const sectionIds = (sections ?? []).map((s) => s.id);
 
-  const [{ data: items }, { data: progress }, { data: course }, { data: huntProgress }] = await Promise.all([
+  const [{ data: items }, { data: progress }, { data: course }, { data: huntProgress }, { data: responses }] = await Promise.all([
     sectionIds.length > 0
       ? supabase.from("pre_course_task_items").select("*").in("section_id", sectionIds).order("sequence_index")
       : Promise.resolve({ data: [] }),
     supabase.from("pre_course_task_progress").select("section_id, completed_at").eq("trainee_id", traineeId),
     trainee.course_id ? supabase.from("courses").select("start_date").eq("id", trainee.course_id).maybeSingle() : Promise.resolve({ data: null }),
     supabase.from("scavenger_hunt_progress").select("question_key").eq("trainee_id", traineeId),
+    supabase.from("pre_course_task_responses").select("item_id, response").eq("trainee_id", traineeId),
   ]);
 
   const itemsBySection = new Map<string, Item[]>();
@@ -58,6 +63,7 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
     itemsBySection.set(item.section_id, list);
   }
   const completedSectionIds = new Set((progress ?? []).filter((p) => p.completed_at).map((p) => p.section_id));
+  const responsesByItemId = new Map((responses ?? []).map((r) => [r.item_id, r.response]));
   const huntFoundKeys = new Set((huntProgress ?? []).map((p) => p.question_key));
 
   const cambridgeSections = (sections ?? []).filter((s) => s.source === "cambridge");
@@ -79,8 +85,9 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
         <h2 className="font-serif text-2xl text-ink">Cambridge&apos;s Pre-Course Task, plus your centre&apos;s supplement</h2>
         <p className="mt-1 text-sm text-muted">
-          About 4 hours total, on paper is fine -- not graded, not handed in. Your tutor reads your paper copy on day
-          one.
+          About 4 hours total. You answer it here and it saves as you go -- nothing to print, nothing to hand in. It is
+          not graded and not counted as coursework, but your tutor reads it before day one. Work through it in several
+          sittings rather than one; that is Cambridge&apos;s own advice, and the grammar section rewards it.
         </p>
       </div>
 
@@ -92,6 +99,7 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
           completedSectionIds={completedSectionIds}
           answerKeyUnlocked={answerKeyUnlocked}
           isEditable={isTraineeViewer}
+          responsesByItemId={responsesByItemId}
         />
         <ScavengerHuntPanel foundKeys={huntFoundKeys} />
       </div>

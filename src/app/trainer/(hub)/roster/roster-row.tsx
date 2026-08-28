@@ -298,6 +298,19 @@ export function RosterRowView({
               <span className="text-muted">--</span>
             )}
           </td>
+          <td className="text-right tabular-nums">
+            {row.preCourseTaskTotal > 0 ? (
+              <Link
+                href={`/portfolio/${row.id}/pre-course-task`}
+                onClick={(e) => e.stopPropagation()}
+                className={`hover:underline ${row.preCourseTaskAnswered < row.preCourseTaskTotal ? "text-status-warning-text" : "text-ink"}`}
+              >
+                {row.preCourseTaskAnswered} / {row.preCourseTaskTotal}
+              </Link>
+            ) : (
+              <span className="text-muted">--</span>
+            )}
+          </td>
         </>
       ) : null}
     </tr>

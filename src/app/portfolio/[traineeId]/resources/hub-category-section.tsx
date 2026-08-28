@@ -9,6 +9,16 @@ import { useState } from "react";
 // laid out in a real grid with its neighbors -- not one shared bordered box
 // with thin divider lines between rows. Clicking a card expands it in place
 // (grows taller within the grid) rather than navigating away.
+//
+// Ramy, 28 Aug 2026 (again): an open category only spanned half the library
+// grid (xl:col-span-2 of 4), but the item grid inside it (ResourceItemCard/
+// InputSessionCard, both grid-cols-2 sm:grid-cols-3 xl:grid-cols-4) sizes
+// off the VIEWPORT breakpoint, not the container it's actually sitting in --
+// so on a real desktop screen it tried to lay 4 columns out in half the
+// width, crushing every card down to ~140px and wrapping titles into
+// unreadable columns ("Classroom management" clipped to "Classroc"). An
+// open category now takes the full library width so its own item grid has
+// the room it was already written assuming it had.
 export function HubCategorySection({
   label,
   count,
@@ -25,7 +35,7 @@ export function HubCategorySection({
   const [open, setOpen] = useState(Boolean(defaultOpen));
 
   return (
-    <div className={`sheet trainee-hover flex flex-col overflow-hidden rounded-[8px] ${open ? "xl:col-span-2" : ""}`}>
+    <div className={`sheet trainee-hover flex flex-col overflow-hidden rounded-[8px] ${open ? "sm:col-span-2 xl:col-span-4" : ""}`}>
       <button type="button" onClick={() => setOpen((v) => !v)} className="flex w-full items-center gap-3 p-4 text-left">
         <span className="w-[10px] shrink-0 text-[11px] text-muted">{open ? "▾" : "▸"}</span>
         <span className={`font-serif flex-1 text-[12px] font-bold tracking-[0.09em] uppercase ${open ? "text-ink" : "text-muted"}`}>{label}</span>

@@ -78,6 +78,14 @@ export interface RosterRow {
   // every item above: a column here, not a new bespoke screen.
   obsTasksDone: number;
   obsTasksTotal: number;
+  // Ramy, 28 Aug 2026: "more important that it would appear on the roster
+  // who finished it and who hasn't." The pre-course task is answered inside
+  // Connect now, so who's done it is real data rather than something a
+  // tutor finds out by asking on day one. Total is centre-wide (sections
+  // hang off center_id, not course_id), so it's the same denominator for
+  // every candidate here.
+  preCourseTaskAnswered: number;
+  preCourseTaskTotal: number;
 }
 
 // Single source of truth for what a roster row means -- both the roster
@@ -191,6 +199,29 @@ export async function fetchRosterRows(
 
   const totalHours = course?.total_hours ?? 120;
   const center = course ? await getCachedCenter(course.center_id) : null;
+
+  // Pre-course task lives on the CENTRE, not the course -- sections are
+  // seeded per centre and shared by every course it runs, so the total is
+  // one number for the whole roster rather than per-candidate.
+  const { data: pctSections } =
+    course && traineeIds.length > 0
+      ? await supabase.from("pre_course_task_sections").select("id").eq("center_id", course.center_id)
+      : { data: [] };
+  const pctSectionIds = (pctSections ?? []).map((s) => s.id);
+  const { data: pctItems } =
+    pctSectionIds.length > 0 ? await supabase.from("pre_course_task_items").select("id").in("section_id", pctSectionIds) : { data: [] };
+  const preCourseTaskTotal = (pctItems ?? []).length;
+  const { data: pctResponses } =
+    preCourseTaskTotal > 0
+      ? await supabase.from("pre_course_task_responses").select("trainee_id, response").in("trainee_id", traineeIds)
+      : { data: [] };
+  // Counts only answers with real text in them -- an empty row exists the
+  // moment autosave fires, so row-count alone would read as "answered."
+  const preCourseAnsweredByTrainee = new Map<string, number>();
+  for (const row of pctResponses ?? []) {
+    if (!row.response?.trim()) continue;
+    preCourseAnsweredByTrainee.set(row.trainee_id, (preCourseAnsweredByTrainee.get(row.trainee_id) ?? 0) + 1);
+  }
   const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
 
   // Item 9's "flagged low" is relative to the cohort, not an invented fixed
@@ -342,6 +373,8 @@ export async function fetchRosterRows(
       folEntriesLow,
       obsTasksDone,
       obsTasksTotal,
+      preCourseTaskAnswered: preCourseAnsweredByTrainee.get(trainee.id) ?? 0,
+      preCourseTaskTotal,
     };
   });
 }
