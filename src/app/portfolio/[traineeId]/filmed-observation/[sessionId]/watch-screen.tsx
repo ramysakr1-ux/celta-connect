@@ -275,32 +275,10 @@ export function FilmedObservationWatchScreen({
         </div>
 
         {breaks.length > 0 ? (
-          video?.kind === "youtube" ? (
-            // Honest degradation: a YouTube iframe cannot be paused from
-            // here without wiring its JS API, so the breaks do not fire
-            // automatically on a linked recording the way they do on an
-            // uploaded file. Rather than silently drop them, the prompts
-            // and their timestamps are listed so a trainee can still pause
-            // at the right moments themselves.
-            <div className="flex flex-col gap-1.5">
-              <p className="text-xs text-muted">
-                {breaks.length} discussion break{breaks.length === 1 ? "" : "s"} in this recording. Pause at each point
-                yourself -- the player is YouTube&apos;s, so we can&apos;t stop it for you.
-              </p>
-              <ul className="flex flex-col gap-1">
-                {breaks.map((b) => (
-                  <li key={b.id} className="flex gap-2 text-xs text-muted">
-                    <span className="shrink-0 font-semibold tabular-nums text-ink">{formatClock(b.timestamp_seconds)}</span>
-                    <span>{b.prompt}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            <p className="text-xs text-muted">
-              {breaks.length} discussion break{breaks.length === 1 ? "" : "s"} scheduled in this recording.
-            </p>
-          )
+          <p className="text-xs text-muted">
+            {breaks.length} break{breaks.length === 1 ? "" : "s"} in this recording — it pauses on its own so you can
+            write up your notes and talk to whoever is watching with you. Skip a pause with &ldquo;Resume now&rdquo;.
+          </p>
         ) : null}
 
         {taskId ? (
