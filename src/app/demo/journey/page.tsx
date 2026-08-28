@@ -221,8 +221,9 @@ export default async function JourneyPage() {
   // day-one activity, because that is the first moment levels and groups
   // exist"), built and sending for real but never shown in this journey.
   // The answer key itself has no separate email -- it's a pure date gate
-  // computed live in pre-course-task/page.tsx (mostRecentFridayBefore),
-  // same Friday this email fires on, not a second date to track.
+  // computed live in pre-course-task/page.tsx (answerKeyOpensOn), the same
+  // 48-hours-before-start date this email now fires on, not a second date
+  // to track.
   const startsMondayHtml = withConnectBranding(
     startsMondayEmailHtml({
       candidateName: applicantName,

@@ -893,25 +893,25 @@ export function startsMondayEmailHtml(input: {
     body:
       p(`Dear ${input.candidateName},`) +
       p(
-        `We start at ${input.startTime} on ${input.startDay}, in ${input.room}. Bring the pre-course task and something to write with. Nothing else.`
+        `We start at ${input.startTime} on ${input.startDay}, in ${input.room}. Bring something to write with. Nothing else -- your pre-course task is already in Connect, so there is nothing to print or carry.`
       ) +
       p(
         `You are in ${input.groupName}, teaching the ${input.levelName} class. Your tutors are ${input.tutorNames}.`
       ) +
       p(
-        "On Monday afternoon, after the demo lesson, each of you will spend twenty minutes with the class doing a getting-to-know-you activity. It is not assessed, nobody is watching, and it is meant to be enjoyable. We have put three to choose from in Connect — have a look this weekend and pick whichever appeals."
+        `On the first afternoon, after the demo lesson, each of you will spend twenty minutes with the class doing a getting-to-know-you activity. It is not assessed, nobody is watching, and it is meant to be enjoyable. We have put three to choose from in Connect — have a look before then and pick whichever appeals.`
       ) +
       inlineButton({
         label: "See your three activities",
         url: input.activitiesUrl,
-        sub: "Two minutes. Choose one, and that is genuinely all the preparation Monday needs.",
+        sub: "Two minutes. Choose one, and that is genuinely all the preparation the first day needs.",
         tone: "amber",
       }) +
-      p("Everything else on Monday is watching and listening. There is nothing else to prepare.") +
+      p("Everything else on the first day is watching and listening. There is nothing else to prepare.") +
       p(
         "Your tutors will answer any questions on the first morning, so please do not worry about anything between now and then."
       ) +
-      p("See you Monday.") +
+      p(`See you on ${input.startDay}.`) +
       signature(input.directorName, input.directorRole),
   });
 }

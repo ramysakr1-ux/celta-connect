@@ -10,10 +10,11 @@
 // start date instead, so every course gets the same 48 hours regardless of
 // which weekday it begins.
 //
-// Deliberately NOT reusing mostRecentFridayBefore: that function still
-// anchors the welcome-email cron in starts-monday-cron.ts, which is a
-// genuinely Friday-shaped job ("the Friday-before email") and not the same
-// rule. Two separate dates that merely coincided on Monday-start courses.
+// Ramy, same conversation: "the getting to know you is part of the email,
+// so I guess, yeah, altogether." The welcome email announces the GTKY
+// activities as ready to pick, so it has to arrive with the key rather than
+// days ahead of it -- starts-monday-cron.ts now fires on this same date,
+// and mostRecentFridayBefore is gone entirely, having had no other caller.
 //
 // Date-only arithmetic, matching how every caller compares it -- against a
 // centre-local ISO date from toLocalIso(), never a timestamp.

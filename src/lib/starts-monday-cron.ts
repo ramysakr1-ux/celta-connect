@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { answerKeyOpensOn } from "@/lib/pre-course-answer-key";
 import {
   sendApplicantEmail,
   startsMondayEmailHtml,
@@ -34,19 +35,6 @@ const LEVEL_BAND_LABEL: Record<string, string> = {
   upper: "upper-intermediate",
 };
 
-// Exported for the pre-course task's answer-key unlock (for-claude-code-
-// pre-course-task-screens.md: "opens to the whole cohort on the Friday
-// date... nobody is gated on anyone else finishing first") -- same Friday
-// this file's own cron already anchors the welcome email to, not a second
-// date to keep in sync.
-export function mostRecentFridayBefore(dateIso: string): string {
-  const d = new Date(`${dateIso}T00:00:00`);
-  do {
-    d.setDate(d.getDate() - 1);
-  } while (d.getDay() !== 5);
-  return d.toISOString().slice(0, 10);
-}
-
 export async function runStartsMondayCron(): Promise<{ sent: number }> {
   const admin = createAdminClient();
   const today = new Date().toISOString().slice(0, 10);
@@ -59,17 +47,27 @@ export async function runStartsMondayCron(): Promise<{ sent: number }> {
 
   let sent = 0;
   for (const course of courses ?? []) {
-    const fridayBefore = mostRecentFridayBefore(course.start_date);
-    if (today < fridayBefore) continue; // not yet the Friday before -- nothing to do
+    // Ramy, 28 Aug 2026: "the getting to know you is part of the email, so
+    // I guess, yeah, altogether." This fired on the Friday before, which is
+    // only 48 hours out when a course happens to start on a Monday -- a
+    // Wednesday start got this email five days early, a Saturday start six.
+    // Worse, it had drifted out of step with the pre-course answer key the
+    // moment that moved to a real 48 hours: the email announces the GTKY
+    // activities as ready to pick, so the two have to arrive together.
+    // Anchored to the course's own start date now, same helper the answer
+    // key uses, so the whole pre-course bundle lands at once whatever
+    // weekday the course begins on.
+    const announceOn = answerKeyOpensOn(course.start_date);
+    if (today < announceOn) continue; // not yet 48 hours out -- nothing to do
 
-    const isLate = today > fridayBefore;
+    const isLate = today > announceOn;
 
     // Ramy, 27 Aug 2026: "a trainer is not picking anything, it's all done
     // automatically" -- resolveGtkyAssignments is already idempotent per
     // trainee (skips anyone who already has a row) and already derives
     // level/group entirely from real data (TP1's coursebook, subgroup
     // pairing), so the only thing wrong was that a trainer had to click a
-    // button to fire it. Same Friday window as everything else here.
+    // button to fire it. Same 48-hour window as everything else here.
     await resolveGtkyAssignments(admin, course.id);
 
     const { data: applicants } = await admin
