@@ -32,6 +32,18 @@ export default async function FilmedObservationWatchPage({
     .maybeSingle();
   if (!fSession) notFound();
 
+  // Records that this candidate opened the recording, which is what the
+  // Resource Hub panel's "Watched" vs "not opened yet" states read from
+  // (migration 0240). Same fire-and-forget shape as the scavenger hunt:
+  // marked by the real visit rather than a checkbox, idempotent on
+  // (session_id, trainee_id) so a rewatch is a no-op. Only the candidate's
+  // own visit counts -- a trainer opening the page must not mark it.
+  if (session.profile.role === "trainee" && session.profile.id === traineeId) {
+    await supabase
+      .from("filmed_observation_views")
+      .upsert({ session_id: sessionId, trainee_id: traineeId }, { onConflict: "session_id,trainee_id", ignoreDuplicates: true });
+  }
+
   const [{ data: event }, { data: breaks }, { data: task }, { data: courseProfiles }, { data: messages }] = await Promise.all([
     supabase.from("course_timetable_events").select("event_date, event_time").eq("id", fSession.timetable_event_id).maybeSingle(),
     supabase

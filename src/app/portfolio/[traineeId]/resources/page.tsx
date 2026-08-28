@@ -221,17 +221,30 @@ export default async function ResourceHubPage({
   const { data: filmedSessionsRaw } = trainee.course_id
     ? await supabase
         .from("filmed_observation_sessions")
-        .select("id, lesson_title, level, learner_count, teacher_name, timetable_event_id")
+        .select("id, lesson_title, level, learner_count, teacher_name, main_aim, sub_aim, recording_url, length_minutes, timetable_event_id")
         .eq("course_id", trainee.course_id)
     : { data: [] };
   const filmedEventIds = (filmedSessionsRaw ?? []).map((s) => s.timetable_event_id);
   const { data: filmedEvents } =
-    filmedEventIds.length > 0 ? await supabase.from("course_timetable_events").select("id, event_date, event_time").in("id", filmedEventIds) : { data: [] };
+    filmedEventIds.length > 0
+      ? await supabase.from("course_timetable_events").select("id, title, event_date, event_time").in("id", filmedEventIds)
+      : { data: [] };
   const filmedEventById = new Map((filmedEvents ?? []).map((e) => [e.id, e]));
   const { data: myFilmedResponses } =
     viewer?.role === "trainee"
-      ? await supabase.from("filmed_observation_task_responses").select("task_id, completed_at").eq("trainee_id", traineeId)
+      ? await supabase
+          .from("filmed_observation_task_responses")
+          .select("task_id, completed_at, response_1, response_2, response_general")
+          .eq("trainee_id", traineeId)
       : { data: [] };
+  // "Watched" is a real recorded view (migration 0240), never inferred from
+  // whether they wrote anything -- a candidate can watch the whole lesson
+  // and type nothing, which would otherwise read as never having opened it.
+  const { data: myFilmedViews } =
+    viewer?.role === "trainee"
+      ? await supabase.from("filmed_observation_views").select("session_id").eq("trainee_id", traineeId)
+      : { data: [] };
+  const viewedSessionIds = new Set((myFilmedViews ?? []).map((v) => v.session_id));
   const { data: filmedTasks } =
     (filmedSessionsRaw ?? []).length > 0
       ? await supabase
@@ -244,6 +257,13 @@ export default async function ResourceHubPage({
       : { data: [] };
   const taskIdBySessionId = new Map((filmedTasks ?? []).map((t) => [t.session_id, t.id]));
   const completedTaskIds = new Set((myFilmedResponses ?? []).filter((r) => r.completed_at).map((r) => r.task_id));
+  // A started-but-unfinished response is its own state: the design says
+  // "your written response saved" separately from "task done".
+  const startedTaskIds = new Set(
+    (myFilmedResponses ?? [])
+      .filter((r) => [r.response_1, r.response_2, r.response_general].some((v) => v?.trim()))
+      .map((r) => r.task_id)
+  );
   const filmedSessions = (filmedSessionsRaw ?? [])
     .map((s) => {
       const event = filmedEventById.get(s.timetable_event_id);
@@ -254,6 +274,14 @@ export default async function ResourceHubPage({
         level: s.level,
         learnerCount: s.learner_count,
         teacherName: s.teacher_name,
+        mainAim: s.main_aim,
+        subAim: s.sub_aim,
+        hasRecording: Boolean(s.recording_url?.trim()),
+        lengthMinutes: s.length_minutes,
+        eventTitle: event?.title ?? null,
+        viewed: viewedSessionIds.has(s.id),
+        started: taskId ? startedTaskIds.has(taskId) : false,
+        hasTask: Boolean(taskId),
         eventDate: event?.event_date ?? null,
         eventTime: event?.event_time ?? null,
         completed: taskId ? completedTaskIds.has(taskId) : false,
@@ -382,68 +410,171 @@ export default async function ResourceHubPage({
           not a Library tile: same "you DO this, you don't browse it"
           reasoning. */}
       {filmedSessions.length > 0 ? (
-        <div className="flex flex-col gap-4 rounded-[8px] border border-border p-[20px_22px]" style={{ background: "oklch(96.4% 0.014 85)" }}>
-          <div className="flex items-center justify-between">
-            <p className="text-[13px] font-semibold text-ink">Filmed Observations</p>
+        <div className="flex flex-col gap-3.5 rounded-[8px] border border-border p-[20px_22px]" style={{ background: "oklch(96.4% 0.014 85)" }}>
+          <div className="flex items-start justify-between gap-3">
+            <p className="font-serif text-[17px] font-semibold text-ink">Filmed Observations</p>
             <span
-              className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.05em]"
+              className="shrink-0 rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.05em]"
               style={{ background: "color-mix(in oklab, oklch(60% 0.11 70) 14%, oklch(99.2% 0.005 90))", color: "oklch(60% 0.11 70)" }}
             >
               Task-linked
             </span>
           </div>
-          <div className="grid grid-cols-1 gap-[14px] sm:grid-cols-2 xl:grid-cols-3">
-            {filmedSessions.map((s) => (
-              <Link
-                key={s.id}
-                href={`/portfolio/${traineeId}/filmed-observation/${s.id}`}
-                className="trainee-hover flex flex-col gap-2 overflow-hidden rounded-[6px] border border-border"
-                style={{ background: "oklch(99.2% 0.005 90)" }}
-              >
-                <div className="flex items-center justify-center" style={{ aspectRatio: "16/7", background: "oklch(23.5% 0.017 65)" }}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="oklch(99.2% 0.005 90)" strokeWidth="1.6">
-                    <circle cx="12" cy="12" r="10" />
-                    <polygon points="10 8 16 12 10 16 10 8" fill="oklch(99.2% 0.005 90)" />
-                  </svg>
-                </div>
-                <div className="flex flex-col gap-2 px-3 pb-3">
-                  <p className="text-[13px] font-semibold text-ink">{s.lessonTitle ?? "Filmed lesson"}</p>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
-                    {s.teacherName ? (
-                      <span>
-                        <span className="font-semibold text-ink">Teacher</span> {s.teacherName}
+          <p className="text-[12.5px] leading-[1.5] text-muted">
+            Your cohort&apos;s filmed lessons — each tied to a slot on your timetable, with consent on record and a task
+            to complete after watching.
+          </p>
+
+          {/* Progress across all of them, the same shape as the pre-course
+              task: a candidate's real question is how many they still owe,
+              which the per-card states alone never answered. */}
+          <div className="flex items-center gap-3">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: "oklch(93% 0.024 80)" }}>
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${(filmedSessions.filter((s) => s.completed).length / filmedSessions.length) * 100}%`,
+                  background: "oklch(38% 0.072 195)",
+                }}
+              />
+            </div>
+            <span className="shrink-0 text-[11.5px] tabular-nums text-muted">
+              {filmedSessions.filter((s) => s.completed).length} of {filmedSessions.length} tasks done
+            </span>
+          </div>
+
+          {/* One list, not "featured plus the others" -- which one deserves
+              the detail is whichever still needs the candidate, and that is
+              rarely the first. The active one expands in place behind a
+              gold rail; everything else stays a compact row. Also survives
+              a centre running four or six sessions rather than five. */}
+          <ul className="flex flex-col gap-2">
+            {filmedSessions.map((s) => {
+              const status = !s.hasRecording
+                ? { label: "No recording yet", sub: "Your tutor attaches the recording before the session", tone: "idle" as const }
+                : s.completed
+                  ? { label: "Done", sub: "Watched · your written response saved", tone: "done" as const }
+                  : s.started
+                    ? { label: "Task waiting", sub: "Recording attached · your response is saved but not finished", tone: "open" as const }
+                    : s.viewed
+                      ? { label: "Task waiting", sub: "Watched · you haven't answered the task yet", tone: "open" as const }
+                      : { label: "Not watched", sub: "Recording attached · not opened yet", tone: "idle" as const };
+              const isActive = status.tone === "open";
+              const dateLabel = s.eventDate
+                ? new Date(`${s.eventDate}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+                : null;
+              const row = (
+                <>
+                  <span className="flex items-center gap-2.5 p-[11px_13px]">
+                    <span
+                      className="flex size-[26px] shrink-0 items-center justify-center rounded-[6px]"
+                      style={{ background: "oklch(93.5% 0.016 85)" }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round"
+                        stroke={s.hasRecording ? "oklch(38% 0.072 195)" : "oklch(51% 0.017 70)"}>
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M10 8l6 4-6 4z" />
+                      </svg>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="text-[10px] font-bold tracking-[0.06em] text-muted uppercase">
+                        {s.eventTitle ?? "Filmed observation"}
+                        {dateLabel ? ` · ${dateLabel}` : ""}
                       </span>
-                    ) : null}
-                    {s.level ? (
-                      <span>
-                        <span className="font-semibold text-ink">Level</span> {s.level}
-                      </span>
-                    ) : null}
-                    {s.learnerCount ? (
-                      <span>
-                        <span className="font-semibold text-ink">Learners</span> {s.learnerCount}
-                      </span>
-                    ) : null}
-                  </div>
-                  {s.eventDate ? (
-                    <p className="text-[11px] text-muted">
-                      {s.eventDate}
-                      {s.eventTime ? ` · ${s.eventTime.slice(0, 5)}` : ""}
-                    </p>
-                  ) : null}
-                  <span
-                    className="self-start rounded-full border px-[7px] py-[1px] text-[10px] font-semibold"
-                    style={
-                      s.completed
-                        ? { borderColor: "oklch(88% 0.016 82)", color: "oklch(38% 0.072 195)" }
-                        : { borderColor: "oklch(88% 0.016 82)", color: "oklch(51% 0.017 70)" }
-                    }
-                  >
-                    {s.completed ? "Task completed" : "Task not yet done"}
+                      <p className="mt-[1px] text-[12.5px] font-semibold text-ink">
+                        {s.lessonTitle ?? (s.hasRecording ? "Filmed lesson — focus set by your tutor" : "Scheduled on your timetable")}
+                      </p>
+                      <p className="mt-[1px] text-[11px] text-muted">{status.sub}</p>
+                    </span>
+                    <span
+                      className="shrink-0 rounded-full border px-2 py-[2px] text-[10px] font-semibold whitespace-nowrap"
+                      style={
+                        status.tone === "done"
+                          ? { background: "oklch(38% 0.072 195)", color: "oklch(99.2% 0.005 90)", borderColor: "oklch(38% 0.072 195)" }
+                          : status.tone === "open"
+                            ? {
+                                background: "color-mix(in oklab, oklch(60% 0.11 70) 12%, oklch(99.2% 0.005 90))",
+                                color: "oklch(60% 0.11 70)",
+                                borderColor: "color-mix(in oklab, oklch(60% 0.11 70) 34%, transparent)",
+                              }
+                            : { borderColor: "oklch(88% 0.016 82)", color: "oklch(51% 0.017 70)" }
+                      }
+                    >
+                      {status.label}
+                    </span>
                   </span>
-                </div>
-              </Link>
-            ))}
+                  {isActive ? (
+                    <span className="flex flex-col gap-2 border-t p-[12px_13px]" style={{ borderColor: "color-mix(in srgb, oklch(88% 0.016 82) 60%, transparent)" }}>
+                      <span className="flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-muted">
+                        {s.teacherName ? (<span><span className="font-semibold text-ink">Teacher</span> {s.teacherName}</span>) : null}
+                        {s.level ? (<span><span className="font-semibold text-ink">Level</span> {s.level}</span>) : null}
+                        {s.learnerCount ? (<span><span className="font-semibold text-ink">Learners</span> {s.learnerCount}</span>) : null}
+                        {s.lengthMinutes ? (<span><span className="font-semibold text-ink">Length</span> {s.lengthMinutes} min</span>) : null}
+                      </span>
+                      {s.mainAim || s.subAim ? (
+                        <span className="text-[11px] leading-[1.5] text-muted">
+                          {s.mainAim ? (<><span className="font-semibold text-ink">Main aim</span> — {s.mainAim}<br /></>) : null}
+                          {s.subAim ? (<><span className="font-semibold text-ink">Sub aim</span> — {s.subAim}</>) : null}
+                        </span>
+                      ) : null}
+                      <span className="flex flex-wrap gap-1.5">
+                        {s.hasTask ? (
+                          <span className="rounded-full border border-border px-[7px] py-[1px] text-[10px] font-semibold text-muted">
+                            Observation task attached
+                          </span>
+                        ) : null}
+                        <span className="rounded-full border border-border px-[7px] py-[1px] text-[10px] font-semibold" style={{ color: "oklch(38% 0.072 195)" }}>
+                          Consent recorded
+                        </span>
+                      </span>
+                      <span
+                        className="self-start rounded-[6px] px-[14px] py-2 text-[12px] font-bold"
+                        style={{ background: "oklch(30% 0.042 58)", color: "oklch(99.2% 0.005 90)" }}
+                      >
+                        Watch and answer the task →
+                      </span>
+                    </span>
+                  ) : null}
+                </>
+              );
+              const style = {
+                background: "oklch(99.2% 0.005 90)",
+                ...(isActive
+                  ? { borderColor: "color-mix(in oklab, oklch(60% 0.11 70) 40%, transparent)", borderLeftWidth: "3px", borderLeftColor: "oklch(60% 0.11 70)" }
+                  : {}),
+              };
+              // A session with no recording is not a link -- there is
+              // nothing behind it yet, and a dead click reads as broken.
+              return s.hasRecording ? (
+                <li key={s.id}>
+                  <Link
+                    href={`/portfolio/${traineeId}/filmed-observation/${s.id}`}
+                    className="trainee-hover flex flex-col overflow-hidden rounded-[6px] border border-border"
+                    style={style}
+                  >
+                    {row}
+                  </Link>
+                </li>
+              ) : (
+                <li key={s.id} className="flex flex-col overflow-hidden rounded-[6px] border border-dashed border-border">
+                  {row}
+                </li>
+              );
+            })}
+          </ul>
+
+          <div
+            className="rounded-[6px] border p-[11px_13px]"
+            style={{
+              background: "color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90))",
+              borderColor: "color-mix(in oklab, oklch(60% 0.11 70) 30%, transparent)",
+            }}
+          >
+            <p className="text-[11px] font-bold" style={{ color: "oklch(60% 0.11 70)" }}>Note to trainees</p>
+            <p className="mt-[3px] text-[11.5px] leading-[1.5] text-muted">
+              These recordings can run past 45 minutes. Use the player&apos;s own seek bar to skip ahead — you&apos;re not
+              expected to watch every second, just enough to answer the task.
+            </p>
           </div>
         </div>
       ) : null}

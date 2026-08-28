@@ -1060,6 +1060,20 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["filmed_observation_sessions"]["Row"]>;
         Relationships: [];
       };
+      filmed_observation_views: {
+        Row: {
+          id: string;
+          session_id: string;
+          trainee_id: string;
+          first_opened_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["filmed_observation_views"]["Row"]> & {
+          session_id: string;
+          trainee_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["filmed_observation_views"]["Row"]>;
+        Relationships: [];
+      };
       filmed_observation_breaks: {
         Row: {
           id: string;
