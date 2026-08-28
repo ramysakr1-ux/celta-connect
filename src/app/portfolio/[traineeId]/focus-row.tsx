@@ -21,6 +21,9 @@ const FOCUS_ROUTES = [
   // The watch screen itself, not its /task child -- that page is ordinary
   // reading-width content.
   /\/filmed-observation\/[^/]+$/,
+  // Ramy, 29 Aug 2026: "once you click, you're jumping inside a different
+  // room. So the entire page is a resource hub, nothing else there."
+  /\/resources$/,
 ];
 
 export function PortfolioFocusRow({ sidebar, children }: { sidebar: React.ReactNode; children: React.ReactNode }) {

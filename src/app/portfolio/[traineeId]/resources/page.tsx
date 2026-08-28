@@ -78,28 +78,37 @@ function InputSessionCard({
   canSeeTrainerOnly: boolean;
   traineeId: string;
 }) {
-  const Icon = session.registrySlug ? MonitorPlay : CalendarClock;
+  // Ramy, 29 Aug 2026: "the input session cards, when I click on them they
+  // don't open, and I'm not sure why." Two causes, both fixed here.
+  //
+  // First, the whole card carried the hover fill -- so it promised it was
+  // clickable -- while only the title text was ever a link. Clicking the
+  // icon, the date or any whitespace did nothing. The whole card is the
+  // link now.
+  //
+  // Second, only 8 of the 22 timetable sessions have a confirmed
+  // interactive counterpart, so the other 14 genuinely have nowhere to go.
+  // Those now look inert rather than pretending: a calendar icon instead of
+  // a screen, no hover lift, and "On your timetable" where the others say
+  // "Open session". Making all 22 look alike is what caused the complaint.
+  const openable = Boolean(session.registrySlug);
+  const Icon = openable ? MonitorPlay : CalendarClock;
   const dateLabel = `${new Date(`${session.event_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}${
     session.event_time ? ` · ${session.event_time.slice(0, 5)}` : ""
   }`;
-  return (
-    <li className="trainee-hover-fill flex flex-col gap-[5px] rounded-[6px] border border-border bg-[oklch(96.4%_0.014_85)] p-[11px_12px]">
-      <div className="flex items-start gap-2">
-        <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
-          <Icon className="size-3.5" aria-hidden="true" />
+
+  const body = (
+    <>
+      <div className="flex items-start gap-2.5">
+        <span
+          className="flex size-7 shrink-0 items-center justify-center rounded-[7px]"
+          style={{ background: "oklch(93.5% 0.016 85)" }}
+        >
+          <Icon className="size-[15px]" style={{ color: openable ? "oklch(38% 0.072 195)" : "oklch(51% 0.017 70)" }} aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          {session.registrySlug ? (
-            <Link
-              href={`/input-sessions/${session.registrySlug}?back=${encodeURIComponent(`/portfolio/${traineeId}/resources`)}`}
-              className="text-[13px] font-semibold text-ink hover:underline"
-            >
-              {session.title}
-            </Link>
-          ) : (
-            <p className="text-[13px] font-semibold text-ink">{session.title}</p>
-          )}
-          <p className="mt-0.5 text-[10px] font-semibold tracking-[0.06em] text-muted uppercase">{dateLabel}</p>
+          <p className="text-[13.5px] leading-[1.3] font-semibold text-ink">{session.title}</p>
+          <p className="mt-0.5 text-[10.5px] font-bold tracking-[0.06em] text-muted uppercase">{dateLabel}</p>
         </div>
       </div>
       {canSeeTrainerOnly && session.criteria.length > 0 ? (
@@ -120,6 +129,34 @@ function InputSessionCard({
           ))}
         </ul>
       ) : null}
+      <div className="mt-auto pt-1">
+        {openable ? (
+          <span className="text-[11px] font-bold" style={{ color: "oklch(38% 0.072 195)" }}>
+            Open session →
+          </span>
+        ) : (
+          <span className="text-[11px] text-muted">On your timetable</span>
+        )}
+      </div>
+    </>
+  );
+
+  const shell = "flex min-h-[118px] flex-col gap-2 rounded-[8px] border border-border p-[14px]";
+  const bg = { background: "oklch(96.4% 0.014 85)" };
+
+  return openable ? (
+    <li>
+      <Link
+        href={`/input-sessions/${session.registrySlug}?back=${encodeURIComponent(`/portfolio/${traineeId}/resources`)}`}
+        className={`trainee-hover-fill ${shell}`}
+        style={bg}
+      >
+        {body}
+      </Link>
+    </li>
+  ) : (
+    <li className={shell} style={bg}>
+      {body}
     </li>
   );
 }
@@ -381,7 +418,14 @@ export default async function ResourceHubPage({
   // and the film observations as well" -- Resource Hub (this whole page) >
   // Pre-course Task card + Filmed Observations card, standalone, then
   // Library (the searchable grid) below them for everything else.
-  const libraryCategories = visibleCategories.filter((k) => k !== "filmed_observations");
+  // Ramy, 29 Aug 2026, asked whether input sessions belong outside the
+  // Library, and they do. Everything else in the Library is reference
+  // material you look UP when you need it; input sessions are the course
+  // itself, in timetable order, that you work THROUGH -- the same character
+  // as filmed observations. They are also 22 of the ~30 items, so leaving
+  // them in made the Library look like it was mostly input sessions with a
+  // few oddments attached.
+  const libraryCategories = visibleCategories.filter((k) => k !== "filmed_observations" && k !== "input_sessions");
   const totalItems = libraryCategories.reduce((sum, k) => sum + countByKey[k], 0);
 
   const coursebookSearchItems: ResourceHubSearchItem[] = (coursebooks ?? []).map((c) => ({ id: `cb-${c.id}`, title: c.title, subtitle: "Coursebooks", href: "#coursebooks" }));
@@ -395,9 +439,36 @@ export default async function ResourceHubPage({
   const searchItems = [...resourceSearchItems, ...coursebookSearchItems, ...briefSearchItems];
 
   return (
-    <div className="flex flex-col gap-6 rounded-[6px] border border-border bg-[oklch(96.4%_0.014_85)] p-6">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="font-serif text-[22px] font-semibold text-ink">Resource Hub</h2>
+    <div className="flex flex-col gap-[22px]">
+      {/* Ramy, 29 Aug 2026: "once you click, you're jumping inside a
+          different room -- the entire page is a resource hub, nothing else
+          there." The rail is dropped for this route in focus-row.tsx; this
+          masthead is what tells you you have arrived somewhere, rather than
+          a heading that reads like one more section of the portfolio. */}
+      <div
+        className="flex flex-wrap items-center justify-between gap-5 rounded-[12px] p-[22px_26px]"
+        style={{ background: "oklch(30% 0.042 58)" }}
+      >
+        <div className="min-w-0">
+          <Link href={`/portfolio/${traineeId}`} className="text-[12.5px]" style={{ color: "oklch(99.2% 0.005 90 / 0.8)" }}>
+            ← Course stream
+          </Link>
+          <h1 className="mt-1.5 font-serif text-[30px] font-semibold" style={{ color: "oklch(99.2% 0.005 90)" }}>
+            Resource Hub
+          </h1>
+          <p className="mt-1 max-w-[52ch] text-[13px]" style={{ color: "oklch(99.2% 0.005 90 / 0.72)" }}>
+            Everything the course gives you, in one place — your filmed observations, and the library of sessions, books
+            and forms behind them.
+          </p>
+        </div>
+        <div
+          className="flex h-10 min-w-[260px] flex-1 items-center gap-3 rounded-[8px] px-[14px] sm:max-w-[360px]"
+          style={{ background: "oklch(99.2% 0.005 90 / 0.12)", border: "1px solid oklch(99.2% 0.005 90 / 0.22)" }}
+        >
+          <div className="flex-1">
+            <ResourceHubSearch items={searchItems} />
+          </div>
+        </div>
       </div>
 
       {/* Ramy, 28 Aug 2026: "this will just sit on its own. It doesn't
@@ -599,49 +670,49 @@ export default async function ResourceHubPage({
         </div>
       ) : null}
 
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="font-serif text-lg font-semibold text-ink">Library</h3>
-        <p className="text-xs text-muted">
-          {totalItems} items · {libraryCategories.length} categories
-        </p>
-      </div>
-
-      <div className="flex h-10 items-center gap-3 rounded-[6px] border border-border bg-card px-[15px]">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
-          <circle cx="6.6" cy="6.6" r="4.6" stroke="currentColor" strokeWidth="1.6" className="text-muted" />
-          <path d="M10.2 10.2 L14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="text-muted" />
-        </svg>
-        <div className="flex-1">
-          <ResourceHubSearch items={searchItems} />
+      {visibleCategories.includes("input_sessions") ? (
+        <div className="rounded-[10px] border border-border p-[22px]" style={{ background: "oklch(96.4% 0.014 85)" }}>
+          <div className="mb-1 flex items-baseline justify-between gap-3">
+            <h2 className="font-serif text-[21px] font-semibold text-ink">Input Sessions</h2>
+            <Link
+              href={`/input-sessions?back=${encodeURIComponent(`/portfolio/${traineeId}/resources`)}`}
+              className="shrink-0 text-xs font-semibold text-primary"
+            >
+              Connect Native session library →
+            </Link>
+          </div>
+          <p className="mb-4 text-[12.5px] text-muted">
+            Every input session on your course, in timetable order. The ones with an interactive version open here;
+            the rest are on your timetable to attend.
+          </p>
+          {courseInputSessions.length === 0 ? (
+            <p className="sheet border-dashed text-sm text-muted">No input sessions scheduled yet.</p>
+          ) : (
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+              {courseInputSessions.map((s) => (
+                <InputSessionCard key={s.id} session={s} canSeeTrainerOnly={canSeeTrainerOnly} traineeId={traineeId} />
+              ))}
+            </ul>
+          )}
         </div>
-        <p className="hidden shrink-0 text-[11px] text-muted sm:block">finds files, sessions and forms — not answers</p>
-      </div>
+      ) : null}
 
-      <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="rounded-[10px] border border-border p-[22px]" style={{ background: "oklch(96.4% 0.014 85)" }}>
+        <div className="mb-1 flex items-baseline justify-between gap-3">
+          <h2 className="font-serif text-[21px] font-semibold text-ink">Library</h2>
+          <p className="shrink-0 text-xs tabular-nums text-muted">
+            {totalItems} items · {libraryCategories.length} categories
+          </p>
+        </div>
+        <p className="mb-4 text-[12.5px] text-muted">
+          Everything you can read, watch or download. Nothing here is collapsed — scroll to what you need, or search
+          from the top of the page.
+        </p>
+
+        <div className="flex flex-col gap-3.5">
         {libraryCategories.map((key) => (
           <HubCategorySection key={key} label={HUB_CATEGORY_LABELS[key]} count={`${countByKey[key]} items`} restricted={HUB_STAFF_ONLY.includes(key)}>
-            {key === "input_sessions" ? (
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted">Full course timetable, in order</p>
-                  <Link
-                    href={`/input-sessions?back=${encodeURIComponent(`/portfolio/${traineeId}/resources`)}`}
-                    className="shrink-0 text-xs font-semibold text-primary"
-                  >
-                    Connect Native session library →
-                  </Link>
-                </div>
-                {courseInputSessions.length === 0 ? (
-                  <p className="sheet border-dashed text-sm text-muted">No input sessions scheduled yet.</p>
-                ) : (
-                  <ul className="grid grid-cols-2 gap-[10px] sm:grid-cols-3 xl:grid-cols-4">
-                    {courseInputSessions.map((s) => (
-                      <InputSessionCard key={s.id} session={s} canSeeTrainerOnly={canSeeTrainerOnly} traineeId={traineeId} />
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ) : key === "coursebooks" ? (
+            {key === "coursebooks" ? (
               <CoursebooksSection coursebooks={coursebooks ?? []} isEditableStaff={isEditableStaff} />
             ) : key === "tp78_materials" ? (
               materialPoolEnabled ? (
@@ -691,6 +762,7 @@ export default async function ResourceHubPage({
             )}
           </HubCategorySection>
         ))}
+        </div>
       </div>
 
       {isEditableStaff ? <ResourceComposer traineeId={traineeId} centerId={trainee.center_id} /> : null}

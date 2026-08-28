@@ -67,4 +67,10 @@ export const HUB_CATEGORY_LABELS: Record<HubCategoryKey, string> = {
 // trainee." Hard, category-level restriction, same mechanism
 // TRAINER_ONLY_CATEGORIES already uses for admissions/centre_documents in
 // resource-info.ts -- tp_points joins that set as a genuinely new addition.
-export const HUB_STAFF_ONLY: HubCategoryKey[] = ["centre_documents", "admissions", "tp_points"];
+// Ramy, 29 Aug 2026: "the coursebooks will not be trainee view, they are
+// trainer view." Joins the set. Worth noting what a trainee loses: the
+// section listed the course's own books with their access notes, which is
+// arguably useful to them -- but which book a TP class uses reaches them
+// through their TP materials anyway, and the shelf is really a staff
+// planning tool.
+export const HUB_STAFF_ONLY: HubCategoryKey[] = ["coursebooks", "centre_documents", "admissions", "tp_points"];
