@@ -96,12 +96,19 @@ export async function addDeliveredSession(_prevState: FormState, formData: FormD
   const titRecordId = formData.get("tit_record_id");
   const title = (formData.get("title") as string | null)?.trim();
   const deliveredAt = formData.get("delivered_at");
+  // Task Twelve Stage 2: "fully self-designed... never reused from the
+  // centre's own Resource Hub library" -- required attestation, not a
+  // real content check (out of scope), but nothing existed before this.
+  const selfDesigned = formData.get("self_designed") === "on";
   if (typeof titRecordId !== "string" || !title || typeof deliveredAt !== "string" || !deliveredAt) {
     return { error: "Name the session and when you delivered it." };
   }
+  if (!selfDesigned) return { error: "Confirm this session was self-designed before adding it." };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("tit_delivered_sessions").insert({ tit_record_id: titRecordId, title, delivered_at: deliveredAt });
+  const { error } = await supabase
+    .from("tit_delivered_sessions")
+    .insert({ tit_record_id: titRecordId, title, delivered_at: deliveredAt, self_designed_attested_at: new Date().toISOString() });
   if (error) return { error: "Could not save. Try again." };
   revalidateWorkspace();
   return { error: null };
@@ -293,6 +300,26 @@ export async function addShadowMarking(_prevState: FormState, formData: FormData
     supervisor_grade: supervisorGrade,
     agreed,
   });
+  if (error) return { error: "Could not save. Try again." };
+  revalidateWorkspace();
+  return { error: null };
+}
+
+// "Trained online only -> must shadow the equivalent of at least 3 days
+// on a face-to-face course before tutoring face-to-face" -- log one real
+// shadow day at a time, same "log entry" shape as addShadowMarking above.
+export async function addShadowDay(_prevState: FormState, formData: FormData): Promise<FormState> {
+  await requireRole(["trainer", "admin"]);
+  const titRecordId = formData.get("tit_record_id");
+  const mode = formData.get("mode");
+  const shadowedAt = formData.get("shadowed_at");
+  const note = (formData.get("note") as string | null)?.trim() || null;
+  if (typeof titRecordId !== "string" || (mode !== "f2f" && mode !== "online") || typeof shadowedAt !== "string" || !shadowedAt) {
+    return { error: "Pick the mode and the date." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("tit_shadow_days").insert({ tit_record_id: titRecordId, mode, shadowed_at: shadowedAt, note });
   if (error) return { error: "Could not save. Try again." };
   revalidateWorkspace();
   return { error: null };

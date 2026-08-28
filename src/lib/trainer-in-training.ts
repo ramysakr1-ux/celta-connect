@@ -1,26 +1,20 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
+import { TIT_PRE_COURSE_TASKS, TASK_RECORD_ITEM_COUNT } from "@/lib/trainer-in-training-constants";
 
-// specs/for-claude-code-trainer-in-training.md's Screen 1a portfolio
-// checklist, Route One / Training and Development programme -- "most
-// common route," the spec's own framing.
-export const TIT_PRE_COURSE_TASKS: { key: string; label: string }[] = [
-  { key: "tracking_own_development", label: "Tracking your own development" },
-  { key: "syllabus_and_assessment_guidelines", label: "Syllabus & Assessment Guidelines" },
-  { key: "administration_handbook", label: "Administration Handbook" },
-  { key: "syllabus_and_course_timetable", label: "Syllabus & course timetable" },
-  { key: "candidate_reading", label: "Candidate reading" },
-  { key: "candidate_selection", label: "Candidate selection" },
-  { key: "observing_interviews", label: "Observing interviews" },
-  { key: "standards_of_assessment", label: "Standards of assessment" },
-];
-
-export const HEADLINE_MIN_PCT = 80;
-export const MIN_DELIVERED_SESSIONS = 4;
-export const TASK12_STAGE1_REQUIRED = 2;
-export const CANDIDATES_TO_FOLLOW = 2;
-export const TASK_RECORD_ITEM_COUNT = 16;
+export {
+  HEADLINE_MIN_PCT,
+  MIN_DELIVERED_SESSIONS,
+  TASK12_STAGE1_REQUIRED,
+  CANDIDATES_TO_FOLLOW,
+  TASK_RECORD_ITEM_COUNT,
+  INPUT_ASYNC_MAX_PCT,
+  SHADOW_DAYS_REQUIRED,
+  TIT_MODES,
+  TIT_MODE_LABEL,
+  TIT_PRE_COURSE_TASKS,
+} from "@/lib/trainer-in-training-constants";
 
 // "Verification must precede training -- training done without prior
 // Cambridge verification is never acknowledged, so the app should refuse
@@ -50,8 +44,6 @@ export async function ensureTitRecord(
 
   return created.id;
 }
-
-export const INPUT_ASYNC_MAX_PCT = 10;
 
 export interface TitHeadlineStats {
   inputObservedCount: number;

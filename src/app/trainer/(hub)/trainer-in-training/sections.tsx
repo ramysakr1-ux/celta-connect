@@ -17,6 +17,7 @@ import {
   addCandidateFollowed,
   updateCandidateNotes,
   addShadowMarking,
+  addShadowDay,
   updateTaskRecordItem,
   signTaskRecordItem,
   updateReflectiveEssay,
@@ -30,6 +31,7 @@ import {
   submitPortfolio,
   type FormState,
 } from "@/app/trainer/(hub)/trainer-in-training/actions";
+import { SHADOW_DAYS_REQUIRED, TIT_MODE_LABEL } from "@/lib/trainer-in-training-constants";
 
 const initial: FormState = { error: null };
 const inputClass = "rounded-[6px] border border-input bg-card px-2.5 py-1.5 text-sm text-ink outline-none focus:border-primary";
@@ -218,6 +220,13 @@ export function AddDeliveredSessionForm({ titRecordId }: { titRecordId: string }
       <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60">
         {pending ? "Adding…" : "Add"}
       </button>
+      {/* Task Twelve Stage 2: "fully self-designed... never reused from
+          the centre's own Resource Hub library" -- required, not optional,
+          so a session can't be logged without attesting to this. */}
+      <label className="flex w-full items-center gap-1.5 text-xs text-muted">
+        <input type="checkbox" name="self_designed" required />
+        I designed this session myself -- not adapted from the Resource Hub library
+      </label>
       {state.error ? <p className="w-full text-xs text-destructive">{state.error}</p> : null}
     </form>
   );
@@ -489,6 +498,61 @@ export function ShadowMarkingList({
         </li>
       ))}
     </ul>
+  );
+}
+
+// Mode-shadow restriction: "trained online only -> must shadow the
+// equivalent of at least 3 days on a face-to-face course before tutoring
+// face-to-face." Only offers the mode(s) NOT already in modesTrained --
+// no reason to log shadow days for a mode already qualified in.
+export function AddShadowDayForm({ titRecordId, untrainedModes }: { titRecordId: string; untrainedModes: readonly ("f2f" | "online")[] }) {
+  const [state, action, pending] = useActionState(addShadowDay, initial);
+  if (untrainedModes.length === 0) return null;
+  return (
+    <form action={action} className="flex flex-wrap items-end gap-2">
+      <input type="hidden" name="tit_record_id" value={titRecordId} />
+      <select name="mode" defaultValue={untrainedModes[0]} className={inputClass}>
+        {untrainedModes.map((m) => (
+          <option key={m} value={m}>
+            {TIT_MODE_LABEL[m]}
+          </option>
+        ))}
+      </select>
+      <input name="shadowed_at" type="date" className={inputClass} required />
+      <input name="note" placeholder="Which course/session (optional)" className={`${inputClass} min-w-[180px] flex-1`} />
+      <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60">
+        {pending ? "Adding…" : "Log day"}
+      </button>
+      {state.error ? <p className="w-full text-xs text-destructive">{state.error}</p> : null}
+    </form>
+  );
+}
+
+export function ShadowDaysProgress({
+  untrainedModes,
+  countByMode,
+}: {
+  untrainedModes: readonly ("f2f" | "online")[];
+  countByMode: Record<string, number>;
+}) {
+  if (untrainedModes.length === 0) {
+    return <p className="text-sm text-muted">Trained in both modes -- no shadowing required.</p>;
+  }
+  return (
+    <div className="flex flex-col gap-1.5">
+      {untrainedModes.map((m) => {
+        const count = countByMode[m] ?? 0;
+        const met = count >= SHADOW_DAYS_REQUIRED;
+        return (
+          <p key={m} className="text-sm">
+            <span className="text-ink">{TIT_MODE_LABEL[m]}</span>{" "}
+            <span className={met ? "text-primary" : "text-status-warning-text"}>
+              {count} of {SHADOW_DAYS_REQUIRED} shadow days{met ? " -- cleared to tutor" : ""}
+            </span>
+          </p>
+        );
+      })}
+    </div>
   );
 }
 

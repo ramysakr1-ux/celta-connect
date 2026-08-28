@@ -2222,6 +2222,7 @@ export interface Database {
           self_evaluation_at: string | null;
           supervisor_feedback: string | null;
           supervisor_feedback_at: string | null;
+          self_designed_attested_at: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["tit_delivered_sessions"]["Row"]> & {
@@ -2230,6 +2231,23 @@ export interface Database {
           delivered_at: string;
         };
         Update: Partial<Database["public"]["Tables"]["tit_delivered_sessions"]["Row"]>;
+        Relationships: [];
+      };
+      tit_shadow_days: {
+        Row: {
+          id: string;
+          tit_record_id: string;
+          mode: "f2f" | "online";
+          shadowed_at: string;
+          note: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tit_shadow_days"]["Row"]> & {
+          tit_record_id: string;
+          mode: "f2f" | "online";
+          shadowed_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tit_shadow_days"]["Row"]>;
         Relationships: [];
       };
       tit_feedback_sessions: {

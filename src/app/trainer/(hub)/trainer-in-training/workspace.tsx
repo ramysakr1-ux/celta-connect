@@ -10,6 +10,8 @@ import {
   MIN_DELIVERED_SESSIONS,
   TASK12_STAGE1_REQUIRED,
   CANDIDATES_TO_FOLLOW,
+  TIT_MODES,
+  SHADOW_DAYS_REQUIRED,
 } from "@/lib/trainer-in-training";
 import {
   PreCourseChecklist,
@@ -25,6 +27,8 @@ import {
   CandidateFollowedCard,
   AddShadowMarkingForm,
   ShadowMarkingList,
+  AddShadowDayForm,
+  ShadowDaysProgress,
   TaskRecordItemRow,
   ReflectiveEssayForm,
   AssessorDayCard,
@@ -90,6 +94,7 @@ export async function TitWorkspace({
     { data: feedbackSessions },
     { data: candidatesFollowed },
     { data: shadowMarking },
+    { data: shadowDays },
     { data: taskRecordItems },
     { data: courseTrainees },
     { data: courseAssignments },
@@ -108,6 +113,7 @@ export async function TitWorkspace({
     supabase.from("tit_feedback_sessions").select("*").eq("tit_record_id", titRecordId).order("conducted_at", { ascending: false }),
     supabase.from("tit_candidates_followed").select("*").eq("tit_record_id", titRecordId),
     supabase.from("tit_shadow_marking").select("*").eq("tit_record_id", titRecordId).order("marked_at", { ascending: false }),
+    supabase.from("tit_shadow_days").select("*").eq("tit_record_id", titRecordId).order("shadowed_at", { ascending: false }),
     supabase.from("tit_task_record_items").select("*").eq("tit_record_id", titRecordId).order("item_number"),
     supabase.from("profiles").select("id, full_name").eq("course_id", courseTutor.course_id).eq("role", "trainee"),
     supabase.from("assignments").select("id, trainee_id, assignment_type").eq("course_id", courseTutor.course_id),
@@ -118,6 +124,15 @@ export async function TitWorkspace({
   const observedEventIds = new Set((observedSessions ?? []).map((o) => o.timetable_event_id));
   const observedByEventId = new Map((observedSessions ?? []).map((o) => [o.timetable_event_id, o]));
   const stats = computeHeadlineStats(timetableEvents ?? [], observedSessions ?? []);
+
+  // Mode-shadow restriction: whichever of f2f/online ISN'T in
+  // modes_trained needs SHADOW_DAYS_REQUIRED logged before this TinT is
+  // cleared to tutor there.
+  const untrainedModes = TIT_MODES.filter((m) => !titRecord.modes_trained.includes(m));
+  const shadowDayCountByMode: Record<string, number> = {};
+  for (const d of shadowDays ?? []) {
+    shadowDayCountByMode[d.mode] = (shadowDayCountByMode[d.mode] ?? 0) + 1;
+  }
 
   const traineeNameById = new Map((courseTrainees ?? []).map((t) => [t.id, t.full_name]));
   const eventTitleById = new Map((timetableEvents ?? []).map((e) => [e.id, e.title]));
@@ -363,6 +378,21 @@ export async function TitWorkspace({
             }))}
           />
         </div>
+      </section>
+
+      {/* Mode-shadow restriction */}
+      <section>
+        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
+          Mode shadowing -- must shadow {SHADOW_DAYS_REQUIRED} days before tutoring in a mode you didn&apos;t train in
+        </h3>
+        <div className="mt-2">
+          <ShadowDaysProgress untrainedModes={untrainedModes} countByMode={shadowDayCountByMode} />
+        </div>
+        {untrainedModes.length > 0 ? (
+          <div className="mt-3">
+            <AddShadowDayForm titRecordId={titRecord.id} untrainedModes={untrainedModes} />
+          </div>
+        ) : null}
       </section>
 
       {/* Task Record */}
