@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { markFilmedObservationTaskComplete, saveFilmedObservationTaskResponse } from "@/app/portfolio/[traineeId]/filmed-observation-actions";
 
@@ -10,10 +9,12 @@ import { markFilmedObservationTaskComplete, saveFilmedObservationTaskResponse } 
 // rail, so the full observation task sits beside the video instead of
 // living on a page the candidate has to leave the recording to reach.
 //
-// The standalone task page still exists and reads the same responses --
-// for finishing up afterwards, or coming back a week later.
+// No link out to the standalone task page any more -- Ramy: "we already
+// have one at the bottom of the task, we don't need another one." With the
+// whole task here beside the video there is nowhere else to go. That page
+// still exists and reads the same responses, reached from the observation
+// log after the fact.
 export function FilmedObservationTaskPanel({
-  traineeId,
   sessionId,
   taskId,
   prompts,
@@ -23,7 +24,6 @@ export function FilmedObservationTaskPanel({
   criteriaLine,
   completedAt,
 }: {
-  traineeId: string;
   sessionId: string;
   taskId: string | null;
   prompts: string[];
@@ -153,12 +153,6 @@ export function FilmedObservationTaskPanel({
             <span className="text-[11px] text-muted">This is what logs the hour toward your six.</span>
           </form>
         ) : null}
-        <Link
-          href={`/portfolio/${traineeId}/filmed-observation/${sessionId}/task`}
-          className="text-xs font-medium text-primary hover:underline"
-        >
-          Open the full task page ↗
-        </Link>
       </div>
     </div>
   );

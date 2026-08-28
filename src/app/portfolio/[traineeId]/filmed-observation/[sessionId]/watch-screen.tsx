@@ -181,28 +181,10 @@ export function FilmedObservationWatchScreen({
   }
 
   return (
-    // Ramy, 29 Aug 2026: "it's not half the screen task, half the screen
-    // video -- it's one quarter task, one quarter video, and then the rest
-    // of the screen is just other stuff." He was right, and the arithmetic
-    // was worse than it looked: .container caps at 1280px and centres, so a
-    // 1920px screen loses ~640px to margin before this page starts. Minus
-    // the portfolio sidebar (~180px), the frame's padding (~48px) and a
-    // 340px rail, the video was left about 660px wide -- a third of the
-    // screen, next to a third of the screen showing nothing.
-    //
-    // This is a video-watching page, so the reading-width constraint that
-    // is right for text pages is wrong here. The negative margin escapes
-    // .container and the frame padding to take the real viewport width;
-    // everything else on the page keeps its normal measure.
-    //
-    // The video is also capped by height, not just width: on an ultrawide
-    // it would otherwise grow past the fold and push the task off-screen,
-    // which is the same problem in the other direction.
-    // No w-screen: 100vw includes the scrollbar, so it would add a
-    // horizontal scrollbar on any page tall enough to have a vertical one.
-    // A block element already fills its container, and the negative margins
-    // widen that container to the viewport.
-    <div className="mx-[calc(50%-50vw)] grid grid-cols-1 gap-4 px-4 lg:grid-cols-[minmax(0,1fr)_400px] xl:gap-6 xl:px-8">
+    // Full width because PortfolioFocusRow drops the nav rail and the
+    // 1280px container for this route -- see focus-row.tsx for why that is
+    // done there rather than with a negative-margin escape here.
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_400px] xl:gap-6">
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <div className="flex -space-x-2">
@@ -310,39 +292,39 @@ export function FilmedObservationWatchScreen({
           </p>
         ) : null}
 
-        {taskId ? (
-          // Decorative teal/garnet alternation against the lesson-info card
-          // above -- no status meaning of its own, same rule as elsewhere.
+        {taskId && !taskCompletedAt ? (
+          // Ramy, 29 Aug 2026: this card was headed "Observation task" and
+          // carried its own "See the full task page" link. Both now
+          // duplicate the real task panel in the rail beside it -- two
+          // headings for two different things, and two links to the same
+          // page. "We already have one at the bottom of the task, we don't
+          // need another one for the add-a-note one."
+          //
+          // Kept rather than folded into the task panel because it does
+          // something the eight prompts cannot: it stamps what you write
+          // with the second of the recording you were at, and the full task
+          // page turns those stamps into click-to-seek links. It is for
+          // catching a moment before you know which prompt it answers.
           <div className="card card-garnet p-4">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Observation task</p>
-            {criteriaLine ? <p className="mt-1 text-sm text-ink">{criteriaLine}</p> : null}
-            {taskCompletedAt ? (
-              <p className="mt-2 text-sm font-semibold text-primary">Marked complete</p>
-            ) : (
-              <div className="mt-2 flex flex-col gap-2">
-                <div className="flex gap-2">
-                  <input
-                    value={noteText}
-                    onChange={(e) => setNoteText(e.target.value)}
-                    placeholder="Quick note at this point in the video..."
-                    className="flex-1 rounded-[6px] border border-border bg-card-inset px-2.5 py-1.5 text-sm text-ink outline-none focus:border-primary"
-                  />
-                  <button
-                    type="button"
-                    onClick={addNoteAtCurrentTime}
-                    className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink trainee-hover-fill"
-                  >
-                    {noteSaved ? "Saved" : "Add note"}
-                  </button>
-                </div>
-                <Link
-                  href={`/portfolio/${traineeId}/filmed-observation/${sessionId}/task`}
-                  className="self-start text-sm font-medium text-primary hover:underline"
-                >
-                  See the full task page ↗
-                </Link>
-              </div>
-            )}
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Notes against the recording</p>
+            <p className="mt-1 text-xs text-muted">
+              Saved with the exact moment you wrote them, so you can jump straight back to it later.
+            </p>
+            <div className="mt-2 flex gap-2">
+              <input
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="What just happened…"
+                className="flex-1 rounded-[6px] border border-border bg-card-inset px-2.5 py-1.5 text-sm text-ink outline-none focus:border-primary"
+              />
+              <button
+                type="button"
+                onClick={addNoteAtCurrentTime}
+                className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-xs font-semibold text-ink trainee-hover-fill"
+              >
+                {noteSaved ? "Saved" : "Add note"}
+              </button>
+            </div>
           </div>
         ) : null}
       </div>
@@ -364,7 +346,6 @@ export function FilmedObservationWatchScreen({
           is still there. */}
       <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
         <FilmedObservationTaskPanel
-          traineeId={traineeId}
           sessionId={sessionId}
           taskId={taskId}
           prompts={taskPrompts}

@@ -25,6 +25,7 @@ import {
   computeTrajectory,
   type Trajectory,
 } from "@/lib/celta-criteria";
+import { PortfolioFocusRow } from "@/app/portfolio/[traineeId]/focus-row";
 import { HideDuringPreview, TraineeEyebrowLabel, PreviewBanner, ChatDrawerSwitcher } from "@/app/portfolio/[traineeId]/preview-chrome";
 import { STANDING_LABEL } from "@/components/trajectory-gradient-bar";
 import { computeQuietHoursNote, toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
@@ -322,10 +323,7 @@ export default async function PortfolioLayout({
             </div>
           </div>
           <div className="border-t border-border" />
-          <div className="container flex flex-1 gap-6 py-6">
-            <TraineeSidebarNav traineeId={trainee.id} />
-            <div className="min-w-0 flex-1 p-6">{children}</div>
-          </div>
+          <PortfolioFocusRow sidebar={<TraineeSidebarNav traineeId={trainee.id} />}>{children}</PortfolioFocusRow>
         </div>
       ) : (
         <div className="border-b border-border bg-card">
