@@ -390,9 +390,17 @@ export async function TodayTab({
         </div>
       </div>
 
-      <div className={`grid grid-cols-1 gap-5 ${teachingToday ? "lg:grid-cols-[1.2fr_1fr_1fr]" : "lg:grid-cols-2"}`}>
+      {/* Ramy, 28 Aug 2026: items-start -- without it, CSS Grid's default
+          stretch makes every card in the row match the tallest one, losing
+          the reference design's real size progression (short hero card,
+          taller announcements, tallest waiting-on-you). Each card should
+          size to its own content instead. */}
+      <div className={`grid grid-cols-1 items-start gap-5 ${teachingToday ? "lg:grid-cols-[1.2fr_1fr_1fr]" : "lg:grid-cols-2"}`}>
         {teachingToday ? (
-          <div className={`sheet-accent trainee-hover flex flex-col gap-3 rounded-[9px] ${cardEdge("primary")}`}>
+          <div
+            className={`sheet-accent trainee-hover flex flex-col gap-3 rounded-[9px] ${cardEdge("primary")}`}
+            style={{ background: "color-mix(in oklch, var(--color-accent) 18%, var(--color-card))" }}
+          >
             <p className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">You teach today</p>
             <p className="font-serif text-xl text-ink">
               TP{teachingToday.tpNumber} — {teachingToday.title}
