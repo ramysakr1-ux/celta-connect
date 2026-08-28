@@ -10,7 +10,7 @@
 
 export type PlayableVideo =
   | { kind: "file"; src: string }
-  | { kind: "youtube"; embedUrl: string; watchUrl: string };
+  | { kind: "youtube"; videoId: string; embedUrl: string; watchUrl: string };
 
 // Handles the three shapes a person actually pastes: the share link
 // (youtu.be/ID), the address bar (youtube.com/watch?v=ID), and an embed URL
@@ -42,6 +42,7 @@ export function parseVideoUrl(raw: string | null | undefined): PlayableVideo | n
   if (id && /^[A-Za-z0-9_-]{11}$/.test(id)) {
     return {
       kind: "youtube",
+      videoId: id,
       // youtube-nocookie keeps the trainee out of YouTube's ad-profile
       // cookies for a page they were required to open by their course.
       // enablejsapi so the existing discussion-break logic can drive it.

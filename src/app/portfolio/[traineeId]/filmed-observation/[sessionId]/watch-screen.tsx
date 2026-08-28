@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { parseVideoUrl } from "@/lib/video-url";
+import { useYouTubePlayer } from "@/lib/use-youtube-player";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { addFilmedObservationTimestampedNote } from "@/app/portfolio/[traineeId]/filmed-observation-actions";
@@ -56,6 +57,7 @@ export function FilmedObservationWatchScreen({
 }) {
   const video = parseVideoUrl(recordingUrl);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const isYouTube = video?.kind === "youtube";
   const shownBreakIds = useRef<Set<string>>(new Set());
   const [activeBreak, setActiveBreak] = useState<Break | null>(null);
   const [countdown, setCountdown] = useState(0);
@@ -100,7 +102,8 @@ export function FilmedObservationWatchScreen({
 
   function resumePlayback() {
     setActiveBreak(null);
-    videoRef.current?.play();
+    if (isYouTube) ytPlayerRef.current?.playVideo();
+    else videoRef.current?.play();
   }
 
   // The countdown's starting value is set at the moment a break triggers
@@ -123,18 +126,37 @@ export function FilmedObservationWatchScreen({
      
   }, [activeBreak]);
 
-  function onTimeUpdate() {
-    const video = videoRef.current;
-    if (!video || activeBreak) return;
-    const due = breaks
-      .filter((b) => !shownBreakIds.current.has(b.id) && video.currentTime >= b.timestamp_seconds - 0.5)
-      .sort((a, b) => a.timestamp_seconds - b.timestamp_seconds)[0];
-    if (due) {
+  // One rule for both players: the only difference is who gets told to
+  // pause. Kept in a ref because the YouTube poller holds onto it, and a
+  // stale closure here would mean a break that never fires.
+  const activeBreakRef = useRef<Break | null>(null);
+  activeBreakRef.current = activeBreak;
+
+  const checkBreaks = useCallback(
+    (currentSeconds: number, pause: () => void) => {
+      if (activeBreakRef.current) return;
+      const due = breaks
+        .filter((b) => !shownBreakIds.current.has(b.id) && currentSeconds >= b.timestamp_seconds - 0.5)
+        .sort((a, b) => a.timestamp_seconds - b.timestamp_seconds)[0];
+      if (!due) return;
       shownBreakIds.current.add(due.id);
-      video.pause();
+      pause();
       setCountdown(due.duration_seconds);
       setActiveBreak(due);
-    }
+    },
+    [breaks]
+  );
+
+  const { containerRef: ytContainerRef, playerRef: ytPlayerRef } = useYouTubePlayer({
+    videoId: isYouTube ? video.videoId : null,
+    enabled: isYouTube,
+    onTick: (t) => checkBreaks(t, () => ytPlayerRef.current?.pauseVideo()),
+  });
+
+  function onTimeUpdate() {
+    const el = videoRef.current;
+    if (!el) return;
+    checkBreaks(el.currentTime, () => el.pause());
   }
 
   async function addNoteAtCurrentTime() {
@@ -211,18 +233,14 @@ export function FilmedObservationWatchScreen({
 
         <div className="relative overflow-hidden rounded-[10px] border border-border bg-ink">
           {video?.kind === "youtube" ? (
-            // Ramy, 29 Aug 2026: the recordings are YouTube links. The
-            // <video> element below plays a direct media file and renders
-            // nothing for a youtu.be URL, so without this every recording
-            // was a broken player.
-            <iframe
-              src={video.embedUrl}
-              title="Filmed observation recording"
-              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-              className="aspect-video w-full border-0 bg-black"
-            />
+            // Ramy, 29 Aug 2026: the recordings are YouTube links, and the
+            // discussion breaks have to pause them ("the film will pause...
+            // three pauses for sixty or ninety seconds"). A plain <iframe>
+            // cannot be paused from this page, so the YouTube IFrame Player
+            // API mounts its own iframe into this div and we drive it.
+            // No API key involved -- that is the Data API, a different
+            // thing; this one is a script anyone can load.
+            <div ref={ytContainerRef} className="aspect-video w-full bg-black [&>iframe]:h-full [&>iframe]:w-full" />
           ) : video?.kind === "file" ? (
             <video
               ref={videoRef}
@@ -238,7 +256,7 @@ export function FilmedObservationWatchScreen({
             </div>
           )}
 
-          {activeBreak && video?.kind === "file" ? (
+          {activeBreak ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-ink/92 px-6 text-center text-card">
               <p className="text-[11px] font-semibold tracking-[0.1em] uppercase text-card/70">
                 Break {activeBreak.break_number} of {breaks.length}
