@@ -410,19 +410,25 @@ export async function TodayTab({
   // The real design handoff (Trainee Walkthrough.dc.html, updated 28 Aug)
   // computes each panel's own edge color in its script (lines ~474-483): a
   // panel with no accent of its own falls through to one shared default, a
-  // muted mauve -- corrected in for-claude-code-trainee-color-fix.md to
-  // oklch(42% 0.045 340) (from an earlier, too-pink oklch(52% 0.1 322)).
-  // Neither Announcements nor Waiting-on-you carries its own accent, so both
-  // use this same color, not the earlier (24 Aug, now superseded)
-  // green/garnet alternation. The hero card keeps its own teal edge -- the
-  // file computes that as color-mix(in oklab, teal 55%, transparent), not a
-  // flat solid teal, so its color comes from heroEdgeColor below instead.
+  // muted mauve. That default is already a named, established token
+  // elsewhere in the app -- globals.css's --trainee-plum (oklch(42% 0.045
+  // 340), corrected 23 Aug 2026 from the same too-pink starting value this
+  // file's own color-fix doc describes), already used as the fallback
+  // accent on Assignments, TP, GTKY, session materials, and more. Reference
+  // that token directly rather than duplicating its raw value here -- same
+  // pattern those other files already use (border-t-[var(--trainee-plum)]),
+  // just the left variant since this grid is 3-column. Neither Announcements
+  // nor Waiting-on-you carries its own accent, so both use this one color,
+  // not the earlier (24 Aug, now superseded) green/garnet alternation. The
+  // hero card keeps its own teal edge -- the file computes that as
+  // color-mix(in oklab, teal 55%, transparent), referencing --color-primary
+  // the same way, not a flat solid teal or a duplicated literal.
   const CARD_EDGE: Record<"mauve" | "primary", string> = {
-    mauve: "border-l-[3px] border-l-[oklch(42%_0.045_340)] border-t-0",
+    mauve: "border-l-[3px] border-l-[var(--trainee-plum)] border-t-0",
     primary: "border-l-[3px] border-t-0",
   };
   const cardEdge = (color: keyof typeof CARD_EDGE) => CARD_EDGE[color];
-  const heroEdgeColor = "color-mix(in oklab, oklch(37.5% 0.058 195) 55%, transparent)";
+  const heroEdgeColor = "color-mix(in oklab, var(--color-primary) 55%, transparent)";
 
   // Ramy, 28 Aug 2026, correcting an earlier pass: "the hero card is
   // exclusive for teaching" -- not assignments due, not Announcements
@@ -527,11 +533,17 @@ export async function TodayTab({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <PushSubscribeButton subscribe={subscribeSessionPush} unsubscribe={unsubscribeSessionPush} />
-          <Link href={`/portfolio/${traineeId}/timetable`} className="trainee-hover-fill rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
+          <Link
+            href={`/portfolio/${traineeId}/timetable`}
+            className="trainee-hover-fill inline-flex h-[34px] items-center rounded-[6px] border border-border bg-card px-[14px] text-[13px] font-medium text-ink"
+          >
             My timetable
           </Link>
           {teachingToday ? (
-            <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
+            <Link
+              href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`}
+              className="inline-flex h-[34px] items-center rounded-[6px] bg-primary px-[14px] text-[13px] font-semibold text-primary-foreground"
+            >
               Open TP{teachingToday.tpNumber} plan
             </Link>
           ) : null}
@@ -543,53 +555,74 @@ export async function TodayTab({
           the reference design's real size progression (short hero card,
           taller announcements, tallest waiting-on-you). Each card should
           size to its own content instead. Grid is permanently 3-column now
-          -- "three cards will always be there," never a 2-card fallback. */}
-      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[1.2fr_1fr_1fr]">
+          -- "three cards will always be there," never a 2-card fallback.
+          Dimensions below (18px grid gap, 16px/18px card padding, 13px
+          internal gap, 25px/13px/10.5px type sizes, 34px buttons, the 5px
+          gold dot on a primary CTA) are the literal pixel values from
+          Trainee Walkthrough.dc.html's own panel template (lines ~83-106),
+          not Tailwind's default spacing/type scale -- Ramy, 28 Aug 2026:
+          "I'm going to use the exact specs and HTML that you shared with
+          me," not an approximation. */}
+      <div className="grid grid-cols-1 items-start gap-[18px] lg:grid-cols-[1.2fr_1fr_1fr]">
         {heroKind === "teaching" && teachingToday ? (
           <div
-            className={`sheet-accent trainee-hover flex flex-col gap-3 rounded-[9px] ${cardEdge("primary")}`}
+            className={`sheet-accent trainee-hover flex flex-col gap-[13px] rounded-[9px] px-[18px] py-4 ${cardEdge("primary")}`}
             style={{ background: "color-mix(in oklch, var(--color-accent) 18%, var(--color-card))", borderLeftColor: heroEdgeColor }}
           >
-            <p className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">You teach today</p>
-            <p className="font-serif text-xl text-ink">
+            <p className="text-[10.5px] font-semibold tracking-[0.12em] text-primary uppercase">You teach today</p>
+            <p className="font-serif text-[25px] leading-[1.15] font-semibold text-ink-warm">
               TP{teachingToday.tpNumber} — {teachingToday.title}
             </p>
-            <p className="text-sm text-muted">
+            <p className="text-[13px] leading-[1.5] text-ink-warm">
               {teachingToday.eventTime ? `${teachingToday.eventTime.slice(0, 5)} · ` : ""}
               {teachingToday.teachingOrder === 1 ? "1st" : teachingToday.teachingOrder === 2 ? "2nd" : `${teachingToday.teachingOrder}th`} of{" "}
               {teachingToday.groupSize} today · {TP_LESSON_LENGTH_MINUTES} min
               {teachingToday.groupName ? ` · Group ${teachingToday.groupName}` : ""}
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pt-[3px]">
               {teachingToday.zoomUrl && teachingToday.joinable ? (
-                <a href={teachingToday.zoomUrl} target="_blank" rel="noreferrer" className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
+                <a
+                  href={teachingToday.zoomUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-[34px] items-center gap-[7px] rounded-[6px] bg-primary px-[14px] text-[13px] font-semibold text-primary-foreground"
+                >
+                  <span className="size-[5px] shrink-0 rounded-full bg-gold" />
                   Join the room
                 </a>
               ) : teachingToday.zoomUrl ? (
                 <span
                   title="Opens 10 minutes before the session"
                   aria-disabled="true"
-                  className="rounded-[6px] bg-primary/10 px-3.5 py-2 text-sm font-semibold text-primary/60"
+                  className="inline-flex h-[34px] items-center gap-[7px] rounded-[6px] bg-primary/10 px-[14px] text-[13px] font-semibold text-primary/60"
                   style={{ cursor: "default" }}
                 >
+                  <span className="size-[5px] shrink-0 rounded-full bg-gold/60" />
                   Join the room
                 </span>
               ) : null}
-              <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="trainee-hover-fill rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
+              <Link
+                href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`}
+                className="inline-flex h-[34px] items-center rounded-[6px] border border-border bg-card px-[13px] text-[13px] font-medium text-ink"
+              >
                 Open your plan
               </Link>
             </div>
           </div>
         ) : genericHero ? (
           <div
-            className={`sheet-accent trainee-hover flex flex-col gap-3 rounded-[9px] ${cardEdge("primary")}`}
+            className={`sheet-accent trainee-hover flex flex-col gap-[13px] rounded-[9px] px-[18px] py-4 ${cardEdge("primary")}`}
             style={{ background: "color-mix(in oklch, var(--color-accent) 18%, var(--color-card))", borderLeftColor: heroEdgeColor }}
           >
-            <p className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">{genericHero.label}</p>
-            <p className="font-serif text-xl text-ink">{genericHero.big}</p>
-            <p className="text-sm text-muted">{genericHero.bigSub}</p>
-            <div className="flex items-center gap-2">
-              <Link href={genericHero.ctaHref} className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
+            <p className="text-[10.5px] font-semibold tracking-[0.12em] text-primary uppercase">{genericHero.label}</p>
+            <p className="font-serif text-[25px] leading-[1.15] font-semibold text-ink-warm">{genericHero.big}</p>
+            <p className="text-[13px] leading-[1.5] text-ink-warm">{genericHero.bigSub}</p>
+            <div className="flex items-center gap-2 pt-[3px]">
+              <Link
+                href={genericHero.ctaHref}
+                className="inline-flex h-[34px] items-center gap-[7px] rounded-[6px] bg-primary px-[14px] text-[13px] font-semibold text-primary-foreground"
+              >
+                <span className="size-[5px] shrink-0 rounded-full bg-gold" />
                 {genericHero.ctaLabel}
               </Link>
             </div>
