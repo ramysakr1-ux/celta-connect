@@ -53,7 +53,7 @@ export default async function FilmedObservationWatchPage({
       .order("break_number"),
     supabase
       .from("filmed_observation_tasks")
-      .select("id, criteria_codes")
+      .select("id, criteria_codes, prompts, prompt_1, prompt_2, general_prompt, rating_label, rating_options")
       .eq("session_id", sessionId)
       .maybeSingle(),
     supabase.from("profiles").select("id, full_name").eq("course_id", fSession.course_id),
@@ -67,7 +67,7 @@ export default async function FilmedObservationWatchPage({
   const { data: myResponse } = task
     ? await supabase
         .from("filmed_observation_task_responses")
-        .select("completed_at")
+        .select("completed_at, responses")
         .eq("task_id", task.id)
         .eq("trainee_id", session.profile.id)
         .maybeSingle()
@@ -110,6 +110,12 @@ export default async function FilmedObservationWatchPage({
         breaks={breaks ?? []}
         taskId={task?.id ?? null}
         criteriaLine={criteriaLine}
+        // Falls back to the three legacy prompt columns for any task
+        // authored before migration 0243 widened this to an array.
+        taskPrompts={task?.prompts ?? (task ? [task.prompt_1, task.prompt_2, task.general_prompt].filter(Boolean) : [])}
+        ratingLabel={task?.rating_label ?? null}
+        ratingOptions={task?.rating_options ?? []}
+        initialResponses={myResponse?.responses ?? {}}
         taskCompletedAt={myResponse?.completed_at ?? null}
         nameById={nameById}
         initialMessages={messages ?? []}

@@ -6,7 +6,7 @@ import { useYouTubePlayer } from "@/lib/use-youtube-player";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { addFilmedObservationTimestampedNote } from "@/app/portfolio/[traineeId]/filmed-observation-actions";
-import { FilmedObservationChat } from "@/app/portfolio/[traineeId]/filmed-observation/[sessionId]/chat";
+import { FilmedObservationTaskPanel } from "@/app/portfolio/[traineeId]/filmed-observation/[sessionId]/task-panel";
 import type { Database } from "@/lib/supabase/types";
 
 type Break = Database["public"]["Tables"]["filmed_observation_breaks"]["Row"];
@@ -33,6 +33,10 @@ export function FilmedObservationWatchScreen({
   taskId,
   criteriaLine,
   taskCompletedAt,
+  taskPrompts,
+  ratingLabel,
+  ratingOptions,
+  initialResponses,
   nameById,
   initialMessages,
   initialSeekSeconds,
@@ -51,6 +55,10 @@ export function FilmedObservationWatchScreen({
   taskId: string | null;
   criteriaLine: string | null;
   taskCompletedAt: string | null;
+  taskPrompts: string[];
+  ratingLabel: string | null;
+  ratingOptions: string[];
+  initialResponses: Record<string, string>;
   nameById: Map<string, string>;
   initialMessages: Message[];
   initialSeekSeconds: number | null;
@@ -277,7 +285,7 @@ export function FilmedObservationWatchScreen({
         {breaks.length > 0 ? (
           <p className="text-xs text-muted">
             {breaks.length} break{breaks.length === 1 ? "" : "s"} in this recording — it pauses on its own so you can
-            write up your notes and talk to whoever is watching with you. Skip a pause with &ldquo;Resume now&rdquo;.
+            catch up on your notes and compare notes with your TP group. Skip a pause with &ldquo;Resume now&rdquo;.
           </p>
         ) : null}
 
@@ -318,8 +326,33 @@ export function FilmedObservationWatchScreen({
         ) : null}
       </div>
 
-      <div className="h-[520px] lg:h-auto">
-        <FilmedObservationChat sessionId={sessionId} myProfileId={myProfileId} nameById={nameById} initialMessages={initialMessages} />
+      {/* Ramy, 29 Aug 2026: the per-session chat box is gone. "They can
+          only talk to their TP group. They don't have to talk to everybody
+          -- they have their chat pill, they can talk during the pause with
+          the TP group. And they have now a chance to watch and type at the
+          same time. It's only forty-five minutes, we don't want to waste
+          too much time."
+          Two chat boxes on one screen was the real problem: the pill is
+          already mounted in the portfolio layout, so it is on this page
+          anyway, and a trainee's group channel there IS their TP group.
+          Giving the whole rail to the task is what lets them watch and
+          write at once instead of leaving the video to answer.
+          filmed_observation_messages and its component are deliberately
+          left in place rather than deleted -- an empty table costs nothing,
+          and if the per-session thread is ever wanted back the data layer
+          is still there. */}
+      <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+        <FilmedObservationTaskPanel
+          traineeId={traineeId}
+          sessionId={sessionId}
+          taskId={taskId}
+          prompts={taskPrompts}
+          ratingLabel={ratingLabel}
+          ratingOptions={ratingOptions}
+          initialResponses={initialResponses}
+          criteriaLine={criteriaLine}
+          completedAt={taskCompletedAt}
+        />
       </div>
     </div>
   );

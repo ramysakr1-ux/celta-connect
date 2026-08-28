@@ -59,6 +59,49 @@ export async function saveFilmedObservationTaskDraft(formData: FormData): Promis
   revalidatePath("/portfolio/[traineeId]/filmed-observation/[sessionId]/task", "page");
 }
 
+// Per-field autosave for the eight-prompt task. Writes into the `responses`
+// JSON column (migration 0243) rather than the three fixed response_N
+// columns, which could only ever hold three of eight answers.
+//
+// One field at a time, not the whole form: the panel debounces per prompt
+// so a candidate working down eight boxes saves each as they finish it,
+// rather than nothing saving until they stop typing altogether.
+export async function saveFilmedObservationTaskResponse(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const taskId = formData.get("task_id");
+  const field = formData.get("field");
+  const value = formData.get("value");
+  if (typeof taskId !== "string" || !taskId || typeof field !== "string" || typeof value !== "string") return;
+
+  await ensureResponseRow(supabase, taskId, user.id);
+
+  const { data: existing } = await supabase
+    .from("filmed_observation_task_responses")
+    .select("completed_at, responses")
+    .eq("task_id", taskId)
+    .eq("trainee_id", user.id)
+    .maybeSingle();
+  if (existing?.completed_at) return; // locked once marked complete
+
+  // Read-modify-write on one JSON column. Safe here because a candidate
+  // only ever writes their own row from one screen at a time, and the
+  // debounce means concurrent writes to different fields land in sequence
+  // rather than racing.
+  const current = (existing?.responses ?? {}) as Record<string, string>;
+  const next = { ...current, [field]: value };
+
+  await supabase
+    .from("filmed_observation_task_responses")
+    .update({ responses: next })
+    .eq("task_id", taskId)
+    .eq("trainee_id", user.id);
+}
+
 // The compact in-session quick-note: captures the current playback second
 // alongside a short note, appended to the same timestamped_notes list the
 // full task page later shows with click-to-seek -- one running list, not

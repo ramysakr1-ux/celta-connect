@@ -1116,6 +1116,9 @@ export interface Database {
           prompt_1: string;
           prompt_2: string;
           general_prompt: string;
+          // Migration 0243: the ordered prompt list. The three fixed
+          // prompt columns above predate it and could only hold three.
+          prompts: string[] | null;
           rating_label: string;
           rating_options: string[];
           created_by: string | null;
@@ -1137,6 +1140,8 @@ export interface Database {
           response_1: string | null;
           response_2: string | null;
           response_general: string | null;
+          // Migration 0243: answers keyed by prompt index, plus "rating".
+          responses: Record<string, string> | null;
           rating: string | null;
           timestamped_notes: { timestamp_seconds: number; note: string }[];
           completed_at: string | null;
