@@ -325,7 +325,7 @@ export function welcomeEmailHtml(input: {
         "Everything for the course lives behind the link below: your timetable, teaching practice, assignments and feedback."
     ) +
     rawP(
-      "Two things to do before you start, both on the Pre-course task tab: Cambridge's pre-course task (about 4 hours, answered right there and saved as you go) and a short scavenger hunt finding your way around Connect (ten minutes, no marks). Take your time -- you have weeks, not days."
+      "Two things to do before you start, both on the Pre-course task tab: Cambridge's pre-course task (answered right there and saved as you go) and a short scavenger hunt finding your way around Connect (ten minutes, no marks). Take your time -- you have weeks, not days."
     ) +
     (input.readingListUrl
       ? rawP(
@@ -390,7 +390,7 @@ export function referralEmailHtml(input: {
 // The two tasks are NOT interchangeable, and this comment has been wrong in
 // both directions already: the pre-INTERVIEW task is part of applying, and the
 // pre-COURSE task rides with the workspace invitation (item 11, "Before day
-// one - Pre-course task, about 4 hours"). Merging them would mean asking a
+// one - Pre-course task"). Merging them would mean asking a
 // candidate to sit the selection task after they had been accepted.
 export function taskWaitingEmailHtml(input: {
   applicantName: string;
@@ -764,7 +764,7 @@ export function placeFreedEmailHtml(input: {
         `A candidate has withdrawn from ${input.courseName} and you were next on the list, so the place is yours. The course runs ${input.courseDates}.`
       ) +
       p(
-        `We know this is short notice${input.startsInPhrase ? ` — it starts ${input.startsInPhrase}` : ""}. Your written task and interview are already on file, so there is nothing to repeat. ${input.feeLine} contact the office about payment, and the pre-course task takes about four hours.`
+        `We know this is short notice${input.startsInPhrase ? ` — it starts ${input.startsInPhrase}` : ""}. Your written task and interview are already on file, so there is nothing to repeat. ${input.feeLine} contact the office about payment, and the pre-course task is waiting in Connect.`
       ) +
       p(
         `Please tell us by ${input.respondBy}. There are others on the list behind you, and if we have not heard we will pass the place on.`
@@ -858,7 +858,7 @@ export function acceptancePlaceEmailHtml(input: {
         "The first is your Connect account — that is where the whole course lives: your timetable, your lesson plans, your assignments. We will send you the link as soon as the deposit clears."
       ) +
       p(
-        "Second, the pre-course task. You answer it in Connect and it saves as you go. It takes about four hours, best spread over a few sittings rather than one, and it is not graded. Do not leave it until the week before."
+        "Second, the pre-course task. You answer it in Connect and it saves as you go. It is not graded, and Cambridge advise working through it in a number of sittings rather than one. Do not leave it until the week before."
       ) +
       p(
         "You will hear from us again two days before the course starts, with your group, your level, and what happens on day one. Nothing else is expected before then."
@@ -965,7 +965,7 @@ export function lateEnrolmentEmailHtml(input: {
         `We start at ${input.startTime} on ${input.startDay}, ${input.room}. You are in ${input.groupName}, teaching the ${input.levelName} class, with ${input.tutorNames}.`
       ) +
       p(
-        "The pre-course task takes about four hours, and you answer it in Connect. Do what you can -- nobody will comment on how much, and you can finish it during the first week."
+        "The pre-course task is in Connect. Do what you can -- nobody will comment on how much, and you can finish it during the first week."
       ) +
       list([
         "Setting up Connect — a minute at most, and worth doing before day one.",

@@ -83,9 +83,9 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
         <h2 className="font-serif text-2xl text-ink">Cambridge&apos;s Pre-Course Task, plus your centre&apos;s supplement</h2>
         <p className="mt-1 text-sm text-muted">
-          About 4 hours total. You answer it here and it saves as you go -- nothing to print, nothing to hand in. It is
-          not graded and not counted as coursework, but your tutor reads it before day one. Work through it in several
-          sittings rather than one; that is Cambridge&apos;s own advice, and the grammar section rewards it.
+          You answer it here and it saves as you go. It is not graded and not counted as coursework, but your tutor
+          reads it before day one. Work through it in several sittings rather than one; that is Cambridge&apos;s own
+          advice, and the grammar section rewards it.
         </p>
       </div>
 

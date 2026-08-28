@@ -1358,7 +1358,7 @@ export async function releaseWorkspace(_prevState: FormState, formData: FormData
         ? `${course.name}${course.delivery_mode === "online" ? ", fully online" : course.delivery_mode === "mixed" ? ", mixed mode" : ""}`
         : "Your course",
       startsFact: fmt(course?.start_date ?? null) || "Dates to be confirmed",
-      preCourseTaskFact: "Pre-course task, about 4 hours",
+      preCourseTaskFact: "Pre-course task",
       setupUrl: `${base}/offer/${applicant.offer_token}`,
       readingListUrl: `${base}/resources?category=reading`,
     }),

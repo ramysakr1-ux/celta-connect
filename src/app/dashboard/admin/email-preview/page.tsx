@@ -190,7 +190,7 @@ const SAMPLES: { key: string; label: string; source: string; html: string }[] = 
       tutorNames: ["Ramy Sakr", "Hakan Şen"],
       courseFact: "C2/2024, full-time 4 weeks",
       startsFact: "Monday 6 November, 9:00",
-      preCourseTaskFact: "Pre-course task, about 4 hours",
+      preCourseTaskFact: "Pre-course task",
       setupUrl: "https://celtaconnect.com/offer/sample",
       readingListUrl: "https://celtaconnect.com/resources?category=reading",
     }),
