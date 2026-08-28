@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { togglePreCourseTaskSection } from "@/app/portfolio/[traineeId]/pre-course-task/actions";
 import { TaskAnswerBox } from "@/app/portfolio/[traineeId]/pre-course-task/task-answer-box";
+import { parseTaskShape, responseIsAnswered } from "@/lib/pre-course-task-shape";
 import type { Database } from "@/lib/supabase/types";
 
 type Section = Database["public"]["Tables"]["pre_course_task_sections"]["Row"];
@@ -24,7 +25,7 @@ function SectionCard({
   responsesByItemId: Map<string, string>;
 }) {
   const [open, setOpen] = useState(false);
-  const answered = items.filter((i) => (responsesByItemId.get(i.id) ?? "").trim().length > 0).length;
+  const answered = items.filter((i) => responseIsAnswered(responsesByItemId.get(i.id))).length;
 
   return (
     <div className={`sheet flex flex-col gap-3 border-l-4 ${done ? "border-l-primary" : "border-l-border"}`}>
@@ -77,7 +78,12 @@ function SectionCard({
               ) : null}
               {item.task_number ? <p className="text-xs font-semibold text-ink">Task {item.task_number}</p> : null}
               <p className="whitespace-pre-wrap text-sm text-ink">{item.prompt}</p>
-              <TaskAnswerBox itemId={item.id} initialResponse={responsesByItemId.get(item.id) ?? ""} readOnly={!isEditable} />
+              <TaskAnswerBox
+                itemId={item.id}
+                initialResponse={responsesByItemId.get(item.id) ?? ""}
+                readOnly={!isEditable}
+                shape={parseTaskShape(item.shape)}
+              />
               {answerKeyUnlocked ? (
                 item.answer ? (
                   <p className="mt-1 whitespace-pre-wrap rounded-[6px] border border-border-faint bg-accent/20 px-3 py-2 text-sm text-ink">
@@ -160,7 +166,7 @@ export function PreCourseTaskSections({
   const allSections = [...cambridgeSections, ...supplementSections];
   const allItems = allSections.flatMap((s) => itemsBySection.get(s.id) ?? []);
   const total = allItems.length;
-  const done = allItems.filter((i) => (responsesByItemId.get(i.id) ?? "").trim().length > 0).length;
+  const done = allItems.filter((i) => responseIsAnswered(responsesByItemId.get(i.id))).length;
 
   return (
     <div className="flex flex-col gap-5">

@@ -1,4 +1,5 @@
 import "server-only";
+import { responseIsAnswered } from "@/lib/pre-course-task-shape";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CourseStatus, Database } from "@/lib/supabase/types";
 import { CELTA_CRITERIA_CODES, computeCriteriaPct, computeTrajectory, type Trajectory } from "@/lib/celta-criteria";
@@ -215,11 +216,13 @@ export async function fetchRosterRows(
     preCourseTaskTotal > 0
       ? await supabase.from("pre_course_task_responses").select("trainee_id, response").in("trainee_id", traineeIds)
       : { data: [] };
-  // Counts only answers with real text in them -- an empty row exists the
-  // moment autosave fires, so row-count alone would read as "answered."
+  // Shares responseIsAnswered with the task page itself, so the roster and
+  // the candidate's own progress bar can never disagree about what counts
+  // -- a structured task saves JSON, and an empty shell of one must not
+  // read as answered.
   const preCourseAnsweredByTrainee = new Map<string, number>();
   for (const row of pctResponses ?? []) {
-    if (!row.response?.trim()) continue;
+    if (!responseIsAnswered(row.response)) continue;
     preCourseAnsweredByTrainee.set(row.trainee_id, (preCourseAnsweredByTrainee.get(row.trainee_id) ?? 0) + 1);
   }
   const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);

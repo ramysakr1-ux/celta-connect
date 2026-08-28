@@ -3498,6 +3498,10 @@ export interface Database {
           // document -- context to read, not part of the question. Split out
           // of `prompt` in migration 0238.
           lead_in: string | null;
+          // What kind of worksheet this task is (open / matching / choice
+          // per row / ...), seeded in migration 0239. See TaskShape in
+          // lib/pre-course-task-shape.ts.
+          shape: unknown | null;
           answer: string | null;
           created_at: string;
         };
