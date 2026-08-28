@@ -353,16 +353,23 @@ export async function TodayTab({
   // so which edge these three cards use switches with it. Full literal
   // class strings (not string-built) so Tailwind's static scanner can see
   // them -- a template-built `border-l-${color}` would never be generated.
-  // Ramy, 2026-08-24: plain content cards alternate green/garnet so no two
-  // neighbors (across a row or down a column) share a color -- confirmed
-  // live against a 6-card preview. "You teach today" keeps its own teal
-  // (primary) as a distinct hero callout, not folded into the alternation.
-  const CARD_EDGE: Record<"green" | "garnet" | "primary", { left: string; top: string }> = {
-    green: { left: "border-l-[3px] border-l-[oklch(38%_0.085_155)] border-t-0", top: "border-t-[3px] border-t-[oklch(38%_0.085_155)] border-l-0" },
-    garnet: { left: "border-l-[3px] border-l-[oklch(42%_0.13_27)] border-t-0", top: "border-t-[3px] border-t-[oklch(42%_0.13_27)] border-l-0" },
-    primary: { left: "border-l-[3px] border-l-primary border-t-0", top: "border-t-[3px] border-t-primary border-l-0" },
+  // Ramy, 28 Aug 2026: replaced the earlier green/garnet alternation (24
+  // Aug) -- the real design handoff (Trainee Walkthrough.dc.html, updated
+  // 28 Aug) computes each panel's own edge color in its script (lines
+  // ~474-483): a panel with no accent of its own falls through to one
+  // shared default, a muted mauve -- corrected in for-claude-code-trainee-
+  // color-fix.md to oklch(42% 0.045 340) (from an earlier, too-pink
+  // oklch(52% 0.1 322)). Neither Announcements nor Waiting-on-you carries
+  // its own accent, so both use this same color, not two alternating ones.
+  // "You teach today" keeps its own teal edge -- the file computes that as
+  // color-mix(in oklab, teal 55%, transparent), not a flat solid teal, so
+  // its color comes from an inline style below rather than this table.
+  const CARD_EDGE: Record<"mauve" | "primary", { left: string; top: string }> = {
+    mauve: { left: "border-l-[3px] border-l-[oklch(42%_0.045_340)] border-t-0", top: "border-t-[3px] border-t-[oklch(42%_0.045_340)] border-l-0" },
+    primary: { left: "border-l-[3px] border-t-0", top: "border-t-[3px] border-l-0" },
   };
   const cardEdge = (color: keyof typeof CARD_EDGE) => (teachingToday ? CARD_EDGE[color].left : CARD_EDGE[color].top);
+  const heroEdgeColor = "color-mix(in oklab, oklch(37.5% 0.058 195) 55%, transparent)";
   const weekOf = course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
   const eyebrow = [courseName, weekOf].filter(Boolean).join(" · ");
   // The trainee's name moved to TraineeNameBanner, above the Connect header
@@ -399,7 +406,7 @@ export async function TodayTab({
         {teachingToday ? (
           <div
             className={`sheet-accent trainee-hover flex flex-col gap-3 rounded-[9px] ${cardEdge("primary")}`}
-            style={{ background: "color-mix(in oklch, var(--color-accent) 18%, var(--color-card))" }}
+            style={{ background: "color-mix(in oklch, var(--color-accent) 18%, var(--color-card))", borderLeftColor: heroEdgeColor }}
           >
             <p className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">You teach today</p>
             <p className="font-serif text-xl text-ink">
@@ -433,10 +440,10 @@ export async function TodayTab({
           </div>
         ) : null}
 
-        {/* Announcements -- green, alternating against "Waiting on you"
-            (garnet) beside it. Edge side (left vs top) follows cardEdge --
-            see its own comment above. */}
-        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("green")}`}>
+        {/* Announcements -- shared mauve default (no accent of its own),
+            same as Waiting-on-you beside it. Edge side (left vs top)
+            follows cardEdge -- see its own comment above. */}
+        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("mauve")}`}>
           <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">
             Announcements{broadcastsCapped.length > 0 ? ` · ${broadcastsCapped.length}` : ""}
           </p>
@@ -459,9 +466,9 @@ export async function TodayTab({
           )}
         </div>
 
-        {/* Waiting on you -- garnet, alternating against "Announcements"
-            (green) beside it. */}
-        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("garnet")}`}>
+        {/* Waiting on you -- shared mauve default, same as Announcements
+            beside it. */}
+        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("mauve")}`}>
           <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">
             Waiting on you{waiting.length > 0 ? ` · ${waiting.length}` : ""}
           </p>
