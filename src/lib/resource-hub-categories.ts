@@ -73,4 +73,27 @@ export const HUB_CATEGORY_LABELS: Record<HubCategoryKey, string> = {
 // arguably useful to them -- but which book a TP class uses reaches them
 // through their TP materials anyway, and the shelf is really a staff
 // planning tool.
-export const HUB_STAFF_ONLY: HubCategoryKey[] = ["coursebooks", "centre_documents", "admissions", "tp_points"];
+// Ramy, 29 Aug 2026: "what exactly is teaching practice resources, and
+// what is lesson planning resources? Why is this here? They get everything
+// pushed to them -- they get the TP points with the scanned copies of the
+// pages they are teaching."
+//
+// He is right, and so is the spec: for-claude-code-trainee-interface.md §5
+// defines a five-item trainee rail (input sessions, coursebooks,
+// multimedia, assignment briefs, forms) and neither of these was ever on
+// it. Both are generic staff filing buckets from the trainer-side
+// taxonomy -- a centre's lesson-plan pro-forma, a TP handout -- that I
+// pulled into the trainee Hub when building the 15-category structure.
+// That was my error, not a decision.
+//
+// Nothing is deleted: staff still see and file into both, and a document a
+// trainee genuinely needs belongs in Forms and Documents, which is what
+// that category is for.
+export const HUB_STAFF_ONLY: HubCategoryKey[] = [
+  "lesson_planning",
+  "teaching_practice",
+  "coursebooks",
+  "centre_documents",
+  "admissions",
+  "tp_points",
+];
