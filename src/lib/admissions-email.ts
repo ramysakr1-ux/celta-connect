@@ -858,7 +858,7 @@ export function acceptancePlaceEmailHtml(input: {
         "The first is your Connect account — that is where the whole course lives: your timetable, your lesson plans, your assignments. We will send you the link as soon as the deposit clears."
       ) +
       p(
-        "Second, the pre-course task. You answer it in Connect and it saves as you go. It takes most people eight to ten hours spread over a few weeks, and it is not graded. Do not leave it until the week before."
+        "Second, the pre-course task. You answer it in Connect and it saves as you go. It takes about four hours, best spread over a few sittings rather than one, and it is not graded. Do not leave it until the week before."
       ) +
       p(
         "You will hear from us again two days before the course starts, with your group, your level, and what happens on day one. Nothing else is expected before then."
@@ -965,7 +965,7 @@ export function lateEnrolmentEmailHtml(input: {
         `We start at ${input.startTime} on ${input.startDay}, ${input.room}. You are in ${input.groupName}, teaching the ${input.levelName} class, with ${input.tutorNames}.`
       ) +
       p(
-        "The pre-course task normally takes eight to ten hours, and you answer it in Connect. Do what you can -- nobody will comment on how much, and you can finish it during the first week."
+        "The pre-course task takes about four hours, and you answer it in Connect. Do what you can -- nobody will comment on how much, and you can finish it during the first week."
       ) +
       list([
         "Setting up Connect — a minute at most, and worth doing before day one.",
