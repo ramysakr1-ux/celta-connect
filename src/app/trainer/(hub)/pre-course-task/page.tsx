@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { responseIsAnswered } from "@/lib/pre-course-task-shape";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -45,12 +46,39 @@ export default async function TrainerPreCourseTaskPage() {
     .order("sequence_index");
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
-  const { data: progress } =
+  // Ramy, 28 Aug 2026: candidates answer the task inside Connect now, so
+  // this grid counts real answers per section instead of the section-level
+  // "Mark done" self-report it used to read -- that pill is gone, and a
+  // tick a candidate gave themselves was never evidence they had written
+  // anything anyway. responseIsAnswered is shared with the candidate's own
+  // page and the roster column, so all three agree.
+  const { data: sectionItems } =
+    (sections ?? []).length > 0
+      ? await supabase
+          .from("pre_course_task_items")
+          .select("id, section_id")
+          .in(
+            "section_id",
+            (sections ?? []).map((s) => s.id)
+          )
+      : { data: [] };
+  const { data: responses } =
     traineeIds.length > 0
-      ? await supabase.from("pre_course_task_progress").select("trainee_id, section_id, completed_at").in("trainee_id", traineeIds)
+      ? await supabase.from("pre_course_task_responses").select("trainee_id, item_id, response").in("trainee_id", traineeIds)
       : { data: [] };
 
-  const doneSet = new Set((progress ?? []).filter((p) => p.completed_at).map((p) => `${p.trainee_id}:${p.section_id}`));
+  const sectionIdByItemId = new Map((sectionItems ?? []).map((i) => [i.id, i.section_id]));
+  const itemCountBySection = new Map<string, number>();
+  for (const i of sectionItems ?? []) itemCountBySection.set(i.section_id, (itemCountBySection.get(i.section_id) ?? 0) + 1);
+
+  const answeredBySectionAndTrainee = new Map<string, number>();
+  for (const r of responses ?? []) {
+    if (!responseIsAnswered(r.response)) continue;
+    const sectionId = sectionIdByItemId.get(r.item_id);
+    if (!sectionId) continue;
+    const key = `${r.trainee_id}:${sectionId}`;
+    answeredBySectionAndTrainee.set(key, (answeredBySectionAndTrainee.get(key) ?? 0) + 1);
+  }
 
   const cambridgeSections = (sections ?? []).filter((s) => s.source === "cambridge");
   const supplementSections = (sections ?? []).filter((s) => s.source === "centre_supplement");
@@ -64,10 +92,10 @@ export default async function TrainerPreCourseTaskPage() {
     <div className="flex flex-col gap-4">
       <div>
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
-        <h1 className="font-serif text-2xl text-ink">Who&apos;s read what</h1>
+        <h1 className="font-serif text-2xl text-ink">Who&apos;s answered what</h1>
         <p className="mt-1 text-sm text-muted">
-          Done on paper, never submitted -- this tracks section-level progress, not answers. Candidates read their
-          own paper copy on day one.
+          Answered in Connect and never submitted -- candidates type into the task itself and it saves as they go.
+          This counts tasks actually answered per section; open a name to read their answers.
         </p>
         {answerKeyDate ? (
           <p className="mt-1 text-xs text-muted">
@@ -97,7 +125,8 @@ export default async function TrainerPreCourseTaskPage() {
             </thead>
             <tbody>
               {(trainees ?? []).map((t) => {
-                const doneCount = orderedSections.filter((s) => doneSet.has(`${t.id}:${s.id}`)).length;
+                const answeredTotal = orderedSections.reduce((n, s) => n + (answeredBySectionAndTrainee.get(`${t.id}:${s.id}`) ?? 0), 0);
+                const itemsTotal = orderedSections.reduce((n, s) => n + (itemCountBySection.get(s.id) ?? 0), 0);
                 return (
                   <tr key={t.id} className="border-b border-border-faint last:border-none hover:bg-accent/40">
                     <td className="px-4 py-2.5">
@@ -106,22 +135,24 @@ export default async function TrainerPreCourseTaskPage() {
                       </Link>
                     </td>
                     {orderedSections.map((s) => {
-                      const done = doneSet.has(`${t.id}:${s.id}`);
+                      const answered = answeredBySectionAndTrainee.get(`${t.id}:${s.id}`) ?? 0;
+                      const sectionItemCount = itemCountBySection.get(s.id) ?? 0;
+                      const complete = sectionItemCount > 0 && answered >= sectionItemCount;
                       return (
                         <td key={s.id} className="px-0.5 py-2.5 text-center">
                           <span
-                            title={done ? "Done" : "Not done yet"}
-                            className={`inline-flex h-[22px] w-[26px] items-center justify-center rounded-[5px] text-xs font-medium ${
-                              done ? "status-pill status-pill-on-track" : "border border-dashed border-border-faint text-muted"
+                            title={sectionItemCount > 0 ? `${answered} of ${sectionItemCount} answered` : "No tasks in this section yet"}
+                            className={`inline-flex h-[22px] w-[34px] items-center justify-center rounded-[5px] text-[11px] font-medium tabular-nums ${
+                              complete ? "status-pill status-pill-on-track" : "border border-dashed border-border-faint text-muted"
                             }`}
                           >
-                            {done ? "✓" : "--"}
+                            {sectionItemCount === 0 ? "--" : `${answered}/${sectionItemCount}`}
                           </span>
                         </td>
                       );
                     })}
                     <td className="px-4 py-2.5 text-center text-xs font-medium text-muted">
-                      {doneCount} of {orderedSections.length}
+                      {answeredTotal} of {itemsTotal}
                     </td>
                   </tr>
                 );

@@ -46,11 +46,10 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
     .order("sequence_index");
   const sectionIds = (sections ?? []).map((s) => s.id);
 
-  const [{ data: items }, { data: progress }, { data: course }, { data: huntProgress }, { data: responses }] = await Promise.all([
+  const [{ data: items }, { data: course }, { data: huntProgress }, { data: responses }] = await Promise.all([
     sectionIds.length > 0
       ? supabase.from("pre_course_task_items").select("*").in("section_id", sectionIds).order("sequence_index")
       : Promise.resolve({ data: [] }),
-    supabase.from("pre_course_task_progress").select("section_id, completed_at").eq("trainee_id", traineeId),
     trainee.course_id ? supabase.from("courses").select("start_date").eq("id", trainee.course_id).maybeSingle() : Promise.resolve({ data: null }),
     supabase.from("scavenger_hunt_progress").select("question_key").eq("trainee_id", traineeId),
     supabase.from("pre_course_task_responses").select("item_id, response").eq("trainee_id", traineeId),
@@ -62,7 +61,6 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
     list.push(item);
     itemsBySection.set(item.section_id, list);
   }
-  const completedSectionIds = new Set((progress ?? []).filter((p) => p.completed_at).map((p) => p.section_id));
   const responsesByItemId = new Map((responses ?? []).map((r) => [r.item_id, r.response]));
   const huntFoundKeys = new Set((huntProgress ?? []).map((p) => p.question_key));
 
@@ -96,7 +94,6 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
           cambridgeSections={cambridgeSections}
           supplementSections={supplementSections}
           itemsBySection={itemsBySection}
-          completedSectionIds={completedSectionIds}
           answerKeyUnlocked={answerKeyUnlocked}
           isEditable={isTraineeViewer}
           responsesByItemId={responsesByItemId}

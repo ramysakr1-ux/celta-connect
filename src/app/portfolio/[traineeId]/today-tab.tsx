@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { responseIsAnswered } from "@/lib/pre-course-task-shape";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -234,15 +235,29 @@ export async function TodayTab({
   // found. Only queried pre-course -- these tables are irrelevant once the
   // course has actually started.
   const preCourse = course?.start_date ? today < course.start_date : false;
-  const [{ data: precourseSections }, { data: precourseProgress }, { data: huntProgress }] = preCourse
+  // Ramy, 28 Aug 2026: counts tasks actually answered, not sections
+  // self-ticked -- the task is answered inside Connect now, and the hero
+  // card, the Resource Hub door and the roster all have to say the same
+  // number. responseIsAnswered is the one shared definition.
+  const [{ data: precourseSections }, { data: precourseResponses }, { data: huntProgress }] = preCourse
     ? await Promise.all([
         supabase.from("pre_course_task_sections").select("id").eq("center_id", centerId),
-        supabase.from("pre_course_task_progress").select("section_id, completed_at").eq("trainee_id", traineeId),
+        supabase.from("pre_course_task_responses").select("item_id, response").eq("trainee_id", traineeId),
         supabase.from("scavenger_hunt_progress").select("question_key").eq("trainee_id", traineeId),
       ])
     : [{ data: [] }, { data: [] }, { data: [] }];
-  const precourseSectionsTotal = precourseSections?.length ?? 0;
-  const precourseSectionsDone = (precourseProgress ?? []).filter((p) => p.completed_at).length;
+  const { data: precourseItems } =
+    preCourse && (precourseSections ?? []).length > 0
+      ? await supabase
+          .from("pre_course_task_items")
+          .select("id")
+          .in(
+            "section_id",
+            (precourseSections ?? []).map((s) => s.id)
+          )
+      : { data: [] };
+  const precourseSectionsTotal = precourseItems?.length ?? 0;
+  const precourseSectionsDone = (precourseResponses ?? []).filter((r) => responseIsAnswered(r.response)).length;
   const huntFoundCount = (huntProgress ?? []).length;
   const scavengerDone = huntFoundCount >= SCAVENGER_HUNT_QUESTIONS.length;
 
@@ -382,7 +397,7 @@ export async function TodayTab({
   if (preCourse && precourseSectionsDone < precourseSectionsTotal) {
     waiting.push({
       label: "Finish your pre-course task",
-      detail: `${precourseSectionsDone} of ${precourseSectionsTotal} sections done`,
+      detail: `${precourseSectionsDone} of ${precourseSectionsTotal} tasks answered`,
       href: `/portfolio/${traineeId}/pre-course-task`,
     });
   }

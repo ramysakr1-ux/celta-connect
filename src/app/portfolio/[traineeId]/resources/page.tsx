@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { responseIsAnswered } from "@/lib/pre-course-task-shape";
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -200,7 +201,7 @@ export default async function ResourceHubPage({
     : { data: [] };
   const coursebookIds = [...new Set((scheduledCoursebookIds ?? []).map((s) => s.tp_coursebook_id))];
 
-  const [{ data: coursebooks }, { data: audioTracks }, { data: videos }, { data: briefs }, { data: course }, { data: precourseSections }, { data: precourseProgress }, { data: huntProgress }] =
+  const [{ data: coursebooks }, { data: audioTracks }, { data: videos }, { data: briefs }, { data: course }, { data: precourseSections }, { data: precourseResponses }, { data: huntProgress }] =
     await Promise.all([
       coursebookIds.length > 0 ? supabase.from("tp_coursebooks").select("id, title, level, access_notes").in("id", coursebookIds).order("title") : Promise.resolve({ data: [] }),
       supabase.from("tp_audio_library").select("*").eq("center_id", trainee.center_id).order("coursebook_title"),
@@ -208,7 +209,7 @@ export default async function ResourceHubPage({
       supabase.from("assignment_templates").select("id, assignment_type, sections, published_at").eq("center_id", trainee.center_id).not("published_at", "is", null),
       trainee.course_id ? supabase.from("courses").select("start_date, tp_material_pool_enabled").eq("id", trainee.course_id).maybeSingle() : Promise.resolve({ data: null }),
       supabase.from("pre_course_task_sections").select("id").eq("center_id", trainee.center_id),
-      supabase.from("pre_course_task_progress").select("section_id, completed_at").eq("trainee_id", traineeId),
+      supabase.from("pre_course_task_responses").select("item_id, response").eq("trainee_id", traineeId),
       supabase.from("scavenger_hunt_progress").select("question_key").eq("trainee_id", traineeId),
     ]);
 
@@ -269,8 +270,24 @@ export default async function ResourceHubPage({
   // "Location" update: "shows 'Continue your pre-course task' pre-
   // completion, 'Answer key is live' post-unlock." Same two states the
   // Today hero card already computes, now also the door's own card content.
-  const precourseSectionsTotal = precourseSections?.length ?? 0;
-  const precourseSectionsDone = (precourseProgress ?? []).filter((p) => p.completed_at).length;
+  //
+  // Ramy, 28 Aug 2026: counted sections self-ticked while the task page
+  // itself had already moved to counting tasks actually answered, so the
+  // door and the page behind it disagreed ("2 of 3 sections done" against
+  // "3 of 29 answered"). Both read the same numbers now, via the same
+  // shared responseIsAnswered the roster column uses.
+  const { data: precourseItems } =
+    (precourseSections ?? []).length > 0
+      ? await supabase
+          .from("pre_course_task_items")
+          .select("id")
+          .in(
+            "section_id",
+            (precourseSections ?? []).map((s) => s.id)
+          )
+      : { data: [] };
+  const precourseSectionsTotal = precourseItems?.length ?? 0;
+  const precourseSectionsDone = (precourseResponses ?? []).filter((r) => responseIsAnswered(r.response)).length;
   const precourseAllDone = precourseSectionsTotal > 0 && precourseSectionsDone >= precourseSectionsTotal;
   const answerKeyDate = course?.start_date ? mostRecentFridayBefore(course.start_date) : null;
   const answerKeyLive = precourseAllDone && Boolean(answerKeyDate && today >= answerKeyDate);
@@ -408,8 +425,8 @@ export default async function ResourceHubPage({
           </div>
           <p className="text-[12.5px] leading-[1.5] text-muted">
             {answerKeyLive
-              ? `All ${precourseSectionsTotal} sections done, and the Friday-before date has arrived — same door, flipped state. Compare your own answers at your own pace; nothing to submit here.`
-              : `${precourseSectionsDone} of ${precourseSectionsTotal} sections done. Answer key stays hidden — it unlocks cohort-wide on the Friday before the course starts, not on completion. Find your way around: ${huntFoundCount} of 6 found.`}
+              ? `All ${precourseSectionsTotal} tasks answered, and the Friday-before date has arrived — same door, flipped state. Compare your own answers at your own pace; nothing to submit here.`
+              : `${precourseSectionsDone} of ${precourseSectionsTotal} tasks answered. Answer key stays hidden — it unlocks cohort-wide on the Friday before the course starts, not on completion. Find your way around: ${huntFoundCount} of 6 found.`}
           </p>
           {!answerKeyLive ? (
             <div className="h-[6px] overflow-hidden rounded-full" style={{ background: "oklch(89.5% 0.012 85)" }}>

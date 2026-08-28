@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { responseIsAnswered } from "@/lib/pre-course-task-shape";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -184,13 +185,13 @@ export default async function PortfolioLayout({
     { data: lessons },
     { data: assignments },
     { data: preCourseSections },
-    { data: preCourseProgress },
+    { data: preCourseResponses },
     { data: todaysEvents },
   ] = await Promise.all([
     supabase.from("tp_lessons").select("id").eq("trainee_id", trainee.id),
     supabase.from("assignments").select("first_status, resubmission_status").eq("trainee_id", trainee.id),
     supabase.from("pre_course_task_sections").select("id").eq("center_id", trainee.center_id),
-    supabase.from("pre_course_task_progress").select("section_id, completed_at").eq("trainee_id", trainee.id),
+    supabase.from("pre_course_task_responses").select("item_id, response").eq("trainee_id", trainee.id),
     trainee.course_id
       ? supabase
           .from("course_timetable_events")
@@ -205,8 +206,21 @@ export default async function PortfolioLayout({
   const assignmentsPassed = (assignments ?? []).filter(
     (a) => a.first_status === "approved" || a.resubmission_status === "approved"
   ).length;
-  const preCourseTotal = preCourseSections?.length ?? 0;
-  const preCourseAnswered = (preCourseProgress ?? []).filter((r) => r.completed_at).length;
+  // Tasks answered, not sections self-ticked -- same shared
+  // responseIsAnswered the task page, the Hub door and the roster use, so
+  // every place that shows this fraction shows the same one.
+  const { data: preCourseItems } =
+    (preCourseSections ?? []).length > 0
+      ? await supabase
+          .from("pre_course_task_items")
+          .select("id")
+          .in(
+            "section_id",
+            (preCourseSections ?? []).map((s) => s.id)
+          )
+      : { data: [] };
+  const preCourseTotal = preCourseItems?.length ?? 0;
+  const preCourseAnswered = (preCourseResponses ?? []).filter((r) => responseIsAnswered(r.response)).length;
 
   // Trajectory: trainer/assessor-only informal estimate, computed the exact
   // same way the CELTA5 page does (tutor's Stage Two ratings, falling back
