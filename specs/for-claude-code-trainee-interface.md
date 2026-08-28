@@ -2,10 +2,17 @@
 
 Written 14 Aug 2026, for Claude Code. Repo: `ramysakr1-ux/celta-connect` @ `main`. Source: `Trainee Walkthrough.dc.html` (current, authoritative). **`Trainee Home.dc.html` is superseded — do not build from it.**
 
-Nav: `Today, Timetable, My teaching, Assignments, Resources` — five tabs, fewer than the trainer's seven. No grades tab, no grades anywhere in the trainee app.
+**Nav/header corrected 28 Aug 2026 — Ramy confirmed the built version is
+the one going forward, per a later design handoff; the five-tab/56px-header
+description this doc originally had is wrong and removed.** Rest of this
+doc (Today tab detail, etc.) still stands.
 
-## Header (56px, every trainee screen)
-Connect mark + wordmark, left. Nav tabs, center (active: teal text + underline). Right: "Day N of 20" course-day counter, and a 26×26 initials avatar (teal-tinted).
+Nav is a 232px left "Workspace" sidebar rail (`trainee-sidebar-nav.tsx`),
+seven items: Course Stream, Pre-course task, Resource Hub, Teaching
+Practice, Written Assignments, CELTA 5, Progress. "My timetable" and (when
+teaching that day) "Open TP{N} plan" are two pills on the Course Stream
+page's own header, top right (`today-tab.tsx`) — not part of a shared top
+nav bar. No grades tab, no grades anywhere in the trainee app.
 
 ## 1. Today — landing page, where the trainee arrives every morning
 
