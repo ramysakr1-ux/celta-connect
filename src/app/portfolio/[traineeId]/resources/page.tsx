@@ -4,12 +4,13 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { computeThisWeekRange } from "@/lib/course-progress";
+import { TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG } from "@/lib/input-session-registry-links";
 import { mostRecentFridayBefore } from "@/lib/starts-monday-cron";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { RESOURCE_CATEGORY_LABELS, RESOURCE_TYPE_ICON, RESOURCE_TYPE_LABELS, TRAINER_ONLY_CATEGORIES } from "@/lib/resource-info";
+import { MonitorPlay, CalendarClock } from "lucide-react";
 import { HUB_CATEGORY_ORDER, HUB_CATEGORY_LABELS, HUB_STAFF_ONLY, type HubCategoryKey } from "@/lib/resource-hub-categories";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import type { Database } from "@/lib/supabase/types";
@@ -56,6 +57,69 @@ function ResourceItemCard({ resource, isEditableStaff, traineeId }: { resource: 
             Remove
           </button>
         </form>
+      ) : null}
+    </li>
+  );
+}
+
+// Same box as ResourceItemCard above -- Ramy, 28 Aug 2026: "small sort of
+// box with the title... a little icon maybe to indicate what kind of input
+// it is... that hovering effect, the green teal" -- the timetable's input
+// sessions were still on an old plain stacked-list layout instead of this
+// shared card. MonitorPlay marks a session that links out to one of the 21
+// real interactive Connect Native sessions; CalendarClock marks a real
+// scheduled session with no interactive match yet -- never a guess either
+// way, driven only by TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG.
+function InputSessionCard({
+  session,
+  canSeeTrainerOnly,
+  traineeId,
+}: {
+  session: { id: string; title: string; event_date: string; event_time: string | null; criteria: string[]; registrySlug: string | null; materials: ResourceRow[] };
+  canSeeTrainerOnly: boolean;
+  traineeId: string;
+}) {
+  const Icon = session.registrySlug ? MonitorPlay : CalendarClock;
+  const dateLabel = `${new Date(`${session.event_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}${
+    session.event_time ? ` · ${session.event_time.slice(0, 5)}` : ""
+  }`;
+  return (
+    <li className="trainee-hover-fill flex flex-col gap-[5px] rounded-[6px] border border-border bg-[oklch(96.4%_0.014_85)] p-[11px_12px]">
+      <div className="flex items-start gap-2">
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
+          <Icon className="size-3.5" aria-hidden="true" />
+        </span>
+        <div className="min-w-0 flex-1">
+          {session.registrySlug ? (
+            <Link
+              href={`/input-sessions/${session.registrySlug}?back=${encodeURIComponent(`/portfolio/${traineeId}/resources`)}`}
+              className="text-[13px] font-semibold text-ink hover:underline"
+            >
+              {session.title}
+            </Link>
+          ) : (
+            <p className="text-[13px] font-semibold text-ink">{session.title}</p>
+          )}
+          <p className="mt-0.5 text-[10px] font-semibold tracking-[0.06em] text-muted uppercase">{dateLabel}</p>
+        </div>
+      </div>
+      {canSeeTrainerOnly && session.criteria.length > 0 ? (
+        <div className="flex flex-wrap gap-1">
+          {session.criteria.map((code) => (
+            <span key={code} className="badge-solid" title={CRITERIA_LABELS[code] ?? ""}>
+              {code}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      {session.materials.length > 0 ? (
+        <ul className="flex flex-col gap-1">
+          {session.materials.map((m) => (
+            <li key={m.id}>
+              <ResourceContentLink title={m.title} fileUrl={m.file_url} storagePath={m.storage_path} contentType={m.content_type} />
+            </li>
+          ))}
+        </ul>
       ) : null}
     </li>
   );
@@ -212,24 +276,29 @@ export default async function ResourceHubPage({
   const answerKeyLive = precourseAllDone && Boolean(answerKeyDate && today >= answerKeyDate);
   const huntFoundCount = (huntProgress ?? []).length;
 
-  let thisWeekSessions: { id: string; title: string; event_time: string | null; criteria: string[]; materials: (typeof resources)[number][] }[] = [];
-  if (trainee.course_id && course?.start_date) {
-    const { weekStart, weekEnd } = computeThisWeekRange(course.start_date, today);
-    const { data: weekEvents } = await supabase
+  // Ramy, 28 Aug 2026: "leave all the input sessions, the real ones...
+  // put them inside an input session card with my HTML input session and
+  // move on." The real timetable's own sessions, every one of them for the
+  // whole course (not just this week), never renamed -- linked to the real
+  // interactive Connect Native page only where TIMETABLE_TITLE_TO_INPUT_
+  // SESSION_SLUG confirms it's genuinely the same session, never guessed.
+  let courseInputSessions: { id: string; title: string; event_date: string; event_time: string | null; criteria: string[]; registrySlug: string | null; materials: (typeof resources)[number][] }[] = [];
+  if (trainee.course_id) {
+    const { data: allInputEvents } = await supabase
       .from("course_timetable_events")
       .select("id, title, event_date, event_time, input_session_criteria")
       .eq("course_id", trainee.course_id)
       .eq("type", "input_session")
-      .gte("event_date", weekStart)
-      .lte("event_date", weekEnd)
       .order("event_date")
       .order("event_time");
     const inputSessionResources = byCategory.get("input_sessions") ?? [];
-    thisWeekSessions = (weekEvents ?? []).map((e) => ({
+    courseInputSessions = (allInputEvents ?? []).map((e) => ({
       id: e.id,
       title: e.title,
+      event_date: e.event_date,
       event_time: e.event_time,
       criteria: e.input_session_criteria ?? [],
+      registrySlug: TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG[e.title] ?? null,
       materials: inputSessionResources.filter((r) => r.title.trim().toLowerCase() === e.title.trim().toLowerCase()),
     }));
   }
@@ -266,7 +335,7 @@ export default async function ResourceHubPage({
   );
 
   const countByKey: Record<HubCategoryKey, number> = {
-    input_sessions: thisWeekSessions.length,
+    input_sessions: courseInputSessions.length,
     lesson_planning: byCategory.get("lesson_planning")?.length ?? 0,
     teaching_practice: byCategory.get("teaching_practice")?.length ?? 0,
     tp78_materials: materialItems.length,
@@ -465,42 +534,20 @@ export default async function ResourceHubPage({
             {key === "input_sessions" ? (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted">This week — full library and timetable order coming soon</p>
-                  <Link href="/input-sessions" className="shrink-0 text-xs font-semibold text-primary">
-                    Open session library →
+                  <p className="text-xs text-muted">Full course timetable, in order</p>
+                  <Link
+                    href={`/input-sessions?back=${encodeURIComponent(`/portfolio/${traineeId}/resources`)}`}
+                    className="shrink-0 text-xs font-semibold text-primary"
+                  >
+                    Connect Native session library →
                   </Link>
                 </div>
-                {thisWeekSessions.length === 0 ? (
-                  <p className="sheet border-dashed text-sm text-muted">Nothing scheduled this week.</p>
+                {courseInputSessions.length === 0 ? (
+                  <p className="sheet border-dashed text-sm text-muted">No input sessions scheduled yet.</p>
                 ) : (
-                  <ul className="flex flex-col gap-2">
-                    {thisWeekSessions.map((s) => (
-                      <li key={s.id} className="sheet trainee-hover flex flex-col gap-1.5 p-4">
-                        <div className="flex items-center justify-between gap-3">
-                          <p className="text-sm font-semibold text-ink">{s.title}</p>
-                          {s.event_time ? <span className="shrink-0 text-xs tabular-nums text-muted">{s.event_time.slice(0, 5)}</span> : null}
-                        </div>
-                        {s.criteria.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {s.criteria.map((code) => (
-                              <span key={code} className="badge-solid" title={CRITERIA_LABELS[code] ?? ""}>
-                                {code}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-                        {s.materials.length === 0 ? (
-                          <p className="text-xs text-muted">No materials linked yet.</p>
-                        ) : (
-                          <ul className="flex flex-col gap-1">
-                            {s.materials.map((m) => (
-                              <li key={m.id}>
-                                <ResourceContentLink title={m.title} fileUrl={m.file_url} storagePath={m.storage_path} contentType={m.content_type} />
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </li>
+                  <ul className="grid grid-cols-2 gap-[10px] sm:grid-cols-3 xl:grid-cols-4">
+                    {courseInputSessions.map((s) => (
+                      <InputSessionCard key={s.id} session={s} canSeeTrainerOnly={canSeeTrainerOnly} traineeId={traineeId} />
                     ))}
                   </ul>
                 )}
