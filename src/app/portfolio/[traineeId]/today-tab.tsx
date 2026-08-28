@@ -1,13 +1,12 @@
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { toLocalIso, zonedTimeToUtc } from "@/lib/timetable-grid";
 import { computeWeekOf } from "@/lib/course-progress";
 import { rotationPosition, halfTpDates, type TpTimetableEvent } from "@/lib/rotation";
 import { getTpCardStatus } from "@/lib/tp-plan-content";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
-import { PushSubscribeButton } from "@/components/push-subscribe-button";
-import { subscribeSessionPush, unsubscribeSessionPush } from "@/lib/push/actions";
 import { SCAVENGER_HUNT_QUESTIONS } from "@/lib/scavenger-hunt";
 
 const TP_LESSON_LENGTH_MINUTES = 45;
@@ -27,6 +26,18 @@ function relativeTime(iso: string): string {
   if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
   const days = Math.floor(hours / 24);
   return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+// The hero card's "in 90 minutes" meta -- Trainee Walkthrough.dc.html's own
+// example, a live countdown to the lesson's start, not fixed text. Mirrors
+// relativeTime's shape but counting forward instead of back.
+function countdownTo(startsAt: Date): string {
+  const diffMs = startsAt.getTime() - Date.now();
+  if (diffMs <= 0) return "starting now";
+  const minutes = Math.round(diffMs / 60_000);
+  if (minutes < 60) return `in ${minutes} minute${minutes === 1 ? "" : "s"}`;
+  const hours = Math.round(minutes / 60);
+  return `in ${hours} hour${hours === 1 ? "" : "s"}`;
 }
 
 // Plain calendar-day arithmetic on a YYYY-MM-DD string -- deliberately not
@@ -50,6 +61,17 @@ interface WaitingItem {
   detail: string;
   href: string;
   isLetter?: boolean;
+  // Ramy, 28 Aug 2026: matches the real mockup's row() pill fields --
+  // "Assignment 3 due today" and "Book your Stage 1 tutorial slot" both
+  // carry a due-by pill (amber), while self-eval/observation rows don't --
+  // only date-bound urgency gets one. Reuses the sitewide .pill system
+  // (pill-warning/pill-danger), not a new color invention.
+  pill?: string;
+  pillClass?: "pill-warning" | "pill-danger";
+  // "urgent items never get bumped off this list even when more pile up" --
+  // previously only formal letters had this guarantee; extended to any
+  // date-bound urgent item (assignment due today/overdue), same reasoning.
+  urgent?: boolean;
 }
 
 // for-claude-code-trainee-interface.md's Today tab -- the new landing
@@ -237,6 +259,7 @@ export async function TodayTab({
   // Ramy, 28 Aug 2026: the hero card should say "you teach tomorrow" on a
   // day the trainee isn't teaching, not disappear.
   type TeachingOn = {
+    date: string;
     tpNumber: number;
     title: string;
     teachingOrder: number;
@@ -245,6 +268,8 @@ export async function TodayTab({
     eventTime: string | null;
     groupName: string | null;
     joinable: boolean;
+    level: string | null;
+    volunteers: { expected: number; total: number } | null;
   };
   async function computeTeachingFor(dateIso: string): Promise<TeachingOn | null> {
     if (!subgroupMember) return null;
@@ -292,7 +317,39 @@ export async function TodayTab({
     const { data: tpGroup } = subgroupTpGroupId
       ? await supabase.from("course_tp_groups").select("name").eq("id", subgroupTpGroupId).maybeSingle()
       : { data: null };
+    // Level -- real, available in advance, just a two-hop join: this TP
+    // round's own tp_point (if it was assigned from the coursebook
+    // generator, not a manual/syllabus-grid override) carries the
+    // coursebook it came from, and tp_coursebooks.level is the real CEFR
+    // level. Silently omitted (not faked) when tp_point_id is null.
+    const { data: tpPoint } = plan.tp_point_id
+      ? await supabase.from("tp_points").select("tp_coursebook_id").eq("id", plan.tp_point_id).maybeSingle()
+      : { data: null };
+    const { data: coursebook } = tpPoint?.tp_coursebook_id
+      ? await supabase.from("tp_coursebooks").select("level").eq("id", tpPoint.tp_coursebook_id).maybeSingle()
+      : { data: null };
+    // Volunteer headcount -- Ramy, 25 Aug 2026: "the trainees also should
+    // know... maybe it will show on their TP cards" -- same aggregate
+    // already built for the TP detail page (tp/[tpNumber]/page.tsx):
+    // every active volunteer_students row for the course counts as
+    // "coming" unless they explicitly declined this specific timetable
+    // event. Admin client, not the trainee's own -- volunteer_declines has
+    // no trainee RLS policy (0143_volunteer_declines.sql), same reason
+    // that page already uses one.
+    const admin = createAdminClient();
+    const { data: courseVolunteers } = await admin.from("volunteer_students").select("id").eq("course_id", courseId).is("removed_at", null);
+    const courseVolunteerIds = (courseVolunteers ?? []).map((v) => v.id);
+    let volunteers: { expected: number; total: number } | null = null;
+    if (courseVolunteerIds.length > 0) {
+      const { data: declines } = await admin
+        .from("volunteer_declines")
+        .select("volunteer_student_id")
+        .eq("timetable_event_id", event.id)
+        .in("volunteer_student_id", courseVolunteerIds);
+      volunteers = { total: courseVolunteerIds.length, expected: courseVolunteerIds.length - (declines?.length ?? 0) };
+    }
     return {
+      date: dateIso,
       tpNumber,
       title: plan.short_title || plan.main_lesson_aim,
       teachingOrder: order,
@@ -301,6 +358,8 @@ export async function TodayTab({
       eventTime: event.event_time,
       groupName: tpGroup?.name ?? null,
       joinable,
+      level: coursebook?.level ?? null,
+      volunteers,
     };
   }
   const teachingToday = await computeTeachingFor(today);
@@ -338,8 +397,11 @@ export async function TodayTab({
     if (a.first_status === "not_submitted" && a.due_date && a.due_date <= today) {
       waiting.push({
         label: `${ASSIGNMENT_INFO[a.assignment_type]?.title ?? a.assignment_type} due`,
-        detail: a.due_date === today ? "Due today" : "Overdue",
+        detail: a.due_date,
         href: `/portfolio/${traineeId}/assignments/${a.id}`,
+        pill: a.due_date === today ? "Today" : "Overdue",
+        pillClass: a.due_date === today ? "pill-warning" : "pill-danger",
+        urgent: true,
       });
     }
   }
@@ -384,14 +446,16 @@ export async function TodayTab({
   }
   // A formal letter is the one item type here with no other route to it
   // anywhere in the trainee UI (no letters archive/nav entry) -- it must
-  // never fall off this cap, or it becomes permanently unreachable. Every
-  // letter is always kept; the other items fill whatever slots remain,
-  // in their existing priority order.
-  const letterSlots = waiting.filter((w) => w.isLetter).length;
-  const otherSlotsRemaining = Math.max(0, 3 - letterSlots);
+  // never fall off this cap, or it becomes permanently unreachable. Ramy,
+  // 28 Aug 2026: "urgent items never get bumped off this list" -- extended
+  // the same guarantee to any date-bound urgent item (assignment due
+  // today/overdue), not just letters. Guaranteed items always keep a slot;
+  // the rest fill whatever remains, in their existing priority order.
+  const guaranteedSlots = waiting.filter((w) => w.isLetter || w.urgent).length;
+  const otherSlotsRemaining = Math.max(0, 3 - guaranteedSlots);
   let otherSlotsUsed = 0;
   const waitingCapped = waiting.filter((w) => {
-    if (w.isLetter) return true;
+    if (w.isLetter || w.urgent) return true;
     if (otherSlotsUsed >= otherSlotsRemaining) return false;
     otherSlotsUsed += 1;
     return true;
@@ -433,7 +497,13 @@ export async function TodayTab({
   // unassessed," his words) -- the pre-course task and scavenger hunt are
   // real to-dos, not teaching, so they live on Waiting-on-you instead (see
   // its own comment above).
-  async function findNextTeaching(): Promise<{ tpNumber: number; date: string } | null> {
+  // Ramy, 28 Aug 2026: "this is not just a hero card for you teach today,
+  // it's a hero card for the next TP... when they click on my plan, it
+  // will open the plan for the coming TP." One model, not three -- so this
+  // reuses computeTeachingFor itself (same level/volunteers/order/etc. as
+  // today and tomorrow get) rather than a separate thin lookup that only
+  // knew a TP number and a date.
+  async function findNextTeaching(): Promise<TeachingOn | null> {
     if (!subgroupMember || !subgroupRow?.half_order) return null;
     const allTpTimetableEvents: TpTimetableEvent[] = (
       await supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).eq("type", "tp")
@@ -443,14 +513,25 @@ export async function TodayTab({
       if (halfDates[i] <= tomorrow) continue;
       const tpNumber = i + 1;
       const plan = planByTpNumber.get(tpNumber);
-      if (plan && !plan.taught_at) return { tpNumber, date: halfDates[i] };
+      if (plan && !plan.taught_at) return computeTeachingFor(halfDates[i]);
     }
     return null;
   }
   const teachingNext = !preCourse && !teachingToday && !teachingTomorrow ? await findNextTeaching() : null;
+  // Ramy, 28 Aug 2026: "this is never gonna be the case because they will
+  // always have a TP... if it's the end of the course, why do they still
+  // have a lot of things waiting on them?" -- caught a real bug, not a
+  // hypothetical: every demo trainee has zero course_subgroup_members rows
+  // (the demo course's subgroups/TP groups were never seeded at all), so
+  // computeTeachingFor/findNextTeaching always returned null for a reason
+  // that has nothing to do with having taught every TP -- there was no
+  // schedule to check in the first place. "All your TPs are taught" must
+  // only fire when the half schedule was actually found and confirmed
+  // exhausted, not whenever the lookup comes back empty for any reason.
+  const hasTeachingSchedule = Boolean(subgroupMember && subgroupRow?.half_order);
 
   type HeroContent = { label: string; big: string; bigSub: string; ctaHref: string; ctaLabel: string };
-  const heroKind: "teaching" | "teaching_tomorrow" | "teaching_next" | "teaching_done" | "precourse_gtky" = preCourse
+  const heroKind: "teaching" | "teaching_tomorrow" | "teaching_next" | "teaching_done" | "teaching_unscheduled" | "precourse_gtky" = preCourse
     ? "precourse_gtky"
     : teachingToday
       ? "teaching"
@@ -458,7 +539,9 @@ export async function TodayTab({
         ? "teaching_tomorrow"
         : teachingNext
           ? "teaching_next"
-          : "teaching_done";
+          : hasTeachingSchedule
+            ? "teaching_done"
+            : "teaching_unscheduled";
   const genericHero: HeroContent | null =
     heroKind === "precourse_gtky"
       ? !gtkyAssignment
@@ -488,17 +571,41 @@ export async function TodayTab({
         ? {
             label: "You teach tomorrow",
             big: `TP${teachingTomorrow.tpNumber} — ${teachingTomorrow.title}`,
-            bigSub: `${teachingTomorrow.eventTime ? `${teachingTomorrow.eventTime.slice(0, 5)} · ` : ""}${teachingTomorrow.teachingOrder === 1 ? "1st" : teachingTomorrow.teachingOrder === 2 ? "2nd" : `${teachingTomorrow.teachingOrder}th`} of ${teachingTomorrow.groupSize} tomorrow · ${TP_LESSON_LENGTH_MINUTES} min${teachingTomorrow.groupName ? ` · Group ${teachingTomorrow.groupName}` : ""}`,
+            bigSub: [
+              teachingTomorrow.eventTime ? teachingTomorrow.eventTime.slice(0, 5) : null,
+              teachingTomorrow.level,
+              `${teachingTomorrow.teachingOrder === 1 ? "1st" : teachingTomorrow.teachingOrder === 2 ? "2nd" : `${teachingTomorrow.teachingOrder}th`} of ${teachingTomorrow.groupSize} tomorrow`,
+              `${TP_LESSON_LENGTH_MINUTES} min`,
+              teachingTomorrow.groupName ? `Group ${teachingTomorrow.groupName}` : null,
+              teachingTomorrow.volunteers ? `${teachingTomorrow.volunteers.expected} of ${teachingTomorrow.volunteers.total} volunteers coming` : null,
+            ]
+              .filter(Boolean)
+              .join(" · "),
             ctaHref: `/portfolio/${traineeId}/tp/${teachingTomorrow.tpNumber}`,
             ctaLabel: "Open your plan",
           }
         : heroKind === "teaching_next" && teachingNext
           ? {
-              label: "Your next teaching",
-              big: `TP${teachingNext.tpNumber}`,
-              bigSub: new Date(`${teachingNext.date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
-              ctaHref: `/portfolio/${traineeId}/timetable`,
-              ctaLabel: "My timetable",
+              // Same "You teach {day}" pattern as today/tomorrow, just with
+              // the actual weekday name once it's further out than tomorrow.
+              label: `You teach ${new Date(`${teachingNext.date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long" })}`,
+              big: `TP${teachingNext.tpNumber} — ${teachingNext.title}`,
+              bigSub: [
+                new Date(`${teachingNext.date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" }),
+                teachingNext.eventTime ? teachingNext.eventTime.slice(0, 5) : null,
+                teachingNext.level,
+                `${teachingNext.teachingOrder === 1 ? "1st" : teachingNext.teachingOrder === 2 ? "2nd" : `${teachingNext.teachingOrder}th`} of ${teachingNext.groupSize}`,
+                `${TP_LESSON_LENGTH_MINUTES} min`,
+                teachingNext.groupName ? `Group ${teachingNext.groupName}` : null,
+                teachingNext.volunteers ? `${teachingNext.volunteers.expected} of ${teachingNext.volunteers.total} volunteers coming` : null,
+              ]
+                .filter(Boolean)
+                .join(" · "),
+              // Ramy, 28 Aug 2026: "when they click on my plan, it will open
+              // the plan for the coming TP" -- same direct link as today
+              // and tomorrow, not a detour through the timetable page.
+              ctaHref: `/portfolio/${traineeId}/tp/${teachingNext.tpNumber}`,
+              ctaLabel: "Open your plan",
             }
           : heroKind === "teaching_done"
             ? {
@@ -508,7 +615,40 @@ export async function TodayTab({
                 ctaHref: `/portfolio/${traineeId}/tp`,
                 ctaLabel: "My teaching",
               }
-            : null;
+            : heroKind === "teaching_unscheduled"
+              ? {
+                  label: "Teaching practice",
+                  big: "Your teaching schedule isn't set up yet",
+                  bigSub: "Nothing to show here until your tutor puts you in a TP group.",
+                  ctaHref: `/portfolio/${traineeId}/tp`,
+                  ctaLabel: "My teaching",
+                }
+              : null;
+
+  // Hero card meta + footer, teaching-today only -- the countdown and the
+  // "nothing above it until after {time}" note both only make sense for
+  // the lesson that's actually happening today, not tomorrow/next.
+  const teachingTodayStartsAt =
+    teachingToday?.eventTime ? zonedTimeToUtc(today, teachingToday.eventTime, timeZone) : null;
+  const teachingTodayMeta = teachingTodayStartsAt ? countdownTo(teachingTodayStartsAt) : null;
+  // Real cutoff, not invented: the same day's own "Feedback" session
+  // (timetable-skeleton.ts's FEEDBACK_AND_LESSON_PLANNING, title exactly
+  // "Feedback", always type supervised_session) -- if today has one, its
+  // start time is genuinely when this trainee is free of teaching +
+  // feedback. Omitted (not faked) on a day with no Feedback session.
+  const { data: todaysFeedbackEvent } = teachingToday
+    ? await supabase
+        .from("course_timetable_events")
+        .select("event_time")
+        .eq("course_id", courseId)
+        .eq("event_date", today)
+        .eq("type", "supervised_session")
+        .eq("title", "Feedback")
+        .maybeSingle()
+    : { data: null };
+  const teachingTodayFoot = todaysFeedbackEvent?.event_time
+    ? `The one thing that matters this morning, and nothing above it. Everything else here can wait until after ${todaysFeedbackEvent.event_time.slice(0, 5)}.`
+    : null;
 
   const weekOf = course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
   const eyebrow = [courseName, weekOf].filter(Boolean).join(" · ");
@@ -525,12 +665,11 @@ export async function TodayTab({
           <h1 className="font-serif text-2xl text-ink">{todayHeading}</h1>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <PushSubscribeButton subscribe={subscribeSessionPush} unsubscribe={unsubscribeSessionPush} />
           <Link
             href={`/portfolio/${traineeId}/timetable`}
             className="trainee-hover-fill inline-flex h-[34px] items-center rounded-[6px] border border-border bg-card px-[14px] text-[13px] font-medium text-ink"
           >
-            My timetable
+            Timetable
           </Link>
           {teachingToday ? (
             <Link
@@ -562,15 +701,31 @@ export async function TodayTab({
             className={`sheet-accent trainee-hover flex flex-col gap-[13px] rounded-[9px] px-[18px] py-4 ${cardEdge("primary")}`}
             style={{ background: "color-mix(in oklab, var(--color-accent) 40%, var(--color-card))", borderLeftColor: heroEdgeColor }}
           >
-            <p className="text-[10.5px] font-semibold tracking-[0.12em] text-primary uppercase">You teach today</p>
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="text-[10.5px] font-semibold tracking-[0.12em] text-primary uppercase">You teach today</p>
+              {teachingTodayMeta ? <p className="text-[11px] text-muted">{teachingTodayMeta}</p> : null}
+            </div>
             <p className="font-serif text-[25px] leading-[1.15] font-semibold text-ink-warm">
               TP{teachingToday.tpNumber} — {teachingToday.title}
             </p>
+            {/* Ramy, 28 Aug 2026: level and volunteer headcount are both
+                real, checked against the schema -- level via this TP's own
+                tp_point -> tp_coursebook, volunteer count via the same
+                aggregate already built for the TP detail page (25 Aug:
+                "the trainees also should know"). No fabricated student
+                count -- that field doesn't exist anywhere before a lesson
+                is taught, only tp_lessons.learner_count after the fact. */}
             <p className="text-[13px] leading-[1.5] text-ink-warm">
-              {teachingToday.eventTime ? `${teachingToday.eventTime.slice(0, 5)} · ` : ""}
-              {teachingToday.teachingOrder === 1 ? "1st" : teachingToday.teachingOrder === 2 ? "2nd" : `${teachingToday.teachingOrder}th`} of{" "}
-              {teachingToday.groupSize} today · {TP_LESSON_LENGTH_MINUTES} min
-              {teachingToday.groupName ? ` · Group ${teachingToday.groupName}` : ""}
+              {[
+                teachingToday.eventTime ? teachingToday.eventTime.slice(0, 5) : null,
+                teachingToday.level,
+                `${teachingToday.teachingOrder === 1 ? "1st" : teachingToday.teachingOrder === 2 ? "2nd" : `${teachingToday.teachingOrder}th`} of ${teachingToday.groupSize} today`,
+                `${TP_LESSON_LENGTH_MINUTES} min`,
+                teachingToday.groupName ? `Group ${teachingToday.groupName}` : null,
+                teachingToday.volunteers ? `${teachingToday.volunteers.expected} of ${teachingToday.volunteers.total} volunteers coming` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
             </p>
             <div className="flex items-center gap-2 pt-[3px]">
               {teachingToday.zoomUrl && teachingToday.joinable ? (
@@ -601,6 +756,7 @@ export async function TodayTab({
                 Open your plan
               </Link>
             </div>
+            {teachingTodayFoot ? <p className="text-[13px] leading-[1.5] text-muted">{teachingTodayFoot}</p> : null}
           </div>
         ) : genericHero ? (
           <div
@@ -660,7 +816,10 @@ export async function TodayTab({
             <div className="flex flex-col">
               {waitingCapped.map((w, i) => (
                 <Link key={i} href={w.href} className={`trainee-hover -mx-2 flex flex-col gap-0.5 rounded-[6px] px-2 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                  <p className="text-sm font-semibold text-ink">{w.label}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-ink">{w.label}</p>
+                    {w.pill ? <span className={`pill shrink-0 ${w.pillClass ?? "pill-warning"}`}>{w.pill}</span> : null}
+                  </div>
                   <p className="text-xs text-muted">{w.detail}</p>
                 </Link>
               ))}
@@ -668,17 +827,6 @@ export async function TodayTab({
           )}
         </div>
       </div>
-
-      <p className="text-center text-xs text-muted">
-        Something not right?{" "}
-        <Link href={`/portfolio/${traineeId}/concern`} className="text-primary hover:underline">
-          Raise a concern
-        </Link>
-        {" · "}
-        <Link href={`/portfolio/${traineeId}/withdrawal-request`} className="text-primary hover:underline">
-          Request to withdraw or defer
-        </Link>
-      </p>
     </div>
   );
 }
