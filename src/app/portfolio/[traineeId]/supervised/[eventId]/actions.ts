@@ -15,6 +15,20 @@ export async function heartbeatSupervisedSession(eventId: string, deltaSeconds: 
   const trainee = await requireRole("trainee");
   if (deltaSeconds <= 0) return;
   const supabase = await createClient();
+  // Ramy, 28 Aug 2026: "the logic behind everything" -- neither action here
+  // checked eventId belongs to a real "supervised_session" event in this
+  // trainee's own course (only the read page did), so a trainee could ping
+  // this with the id of any other timetable event in their course and rack
+  // up fraudulent contact-time credit roster.ts counts toward
+  // supervisedDone. Same check the page itself already does.
+  const { data: event } = await supabase
+    .from("course_timetable_events")
+    .select("id")
+    .eq("id", eventId)
+    .eq("type", "supervised_session")
+    .eq("course_id", trainee.course_id ?? "")
+    .maybeSingle();
+  if (!event) return;
   const { data: existing } = await supabase
     .from("supervised_session_completions")
     .select("time_spent_seconds, submitted_at")
@@ -75,6 +89,17 @@ export async function submitSupervisedQuiz(
   if (!(topic in SUPERVISED_QUIZ_TOPICS)) return { error: "Unknown topic." };
 
   const supabase = await createClient();
+  // Same real-event/own-course check as heartbeatSupervisedSession above --
+  // without it, a trainee could submit a scored completion against any
+  // timetable event id in their course, not just a real supervised session.
+  const { data: event } = await supabase
+    .from("course_timetable_events")
+    .select("id")
+    .eq("id", eventId)
+    .eq("type", "supervised_session")
+    .eq("course_id", trainee.course_id ?? "")
+    .maybeSingle();
+  if (!event) return { error: "Session not found." };
   const { data: existing } = await supabase
     .from("supervised_session_completions")
     .select("submitted_at")

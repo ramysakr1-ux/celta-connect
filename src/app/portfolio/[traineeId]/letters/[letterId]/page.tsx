@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { AcknowledgeButton } from "@/app/portfolio/[traineeId]/letters/[letterId]/acknowledge-button";
 import { SignDeferralButton } from "@/app/portfolio/[traineeId]/letters/[letterId]/sign-deferral-button";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 const LETTER_TITLE: Record<string, string> = {
   fail_risk: "Notice of a potential Fail outcome",
@@ -26,6 +28,17 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
 
   const snapshot = letter.snapshot as unknown as FormalLetterInput;
 
+  // Ramy, 28 Aug 2026: "the logic behind everything" -- issued_at/
+  // acknowledged_at are real instants (timestamptz), not date-only strings;
+  // formatting them with no explicit timeZone reads the server process's
+  // own local time (UTC in production), not the trainee's centre, and can
+  // show the wrong calendar day right around local midnight. Compliance-
+  // adjacent for a formal letter, so worth the explicit fetch.
+  const { data: traineeProfile } = await supabase.from("profiles").select("center_id").eq("id", traineeId).maybeSingle();
+  const timeZone = traineeProfile?.center_id ? (await getCachedCenter(traineeProfile.center_id))?.time_zone ?? DEFAULT_TIMEZONE : DEFAULT_TIMEZONE;
+  const formatLetterDate = (iso: string) =>
+    new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone }).format(new Date(iso));
+
   return (
     <div className="flex flex-col gap-4">
       <Link href={`/portfolio/${traineeId}`} className="text-xs text-muted hover:text-primary">
@@ -35,7 +48,7 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
       <div className="sheet flex flex-col gap-3">
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">{snapshot.kicker ?? "Formal letter"}</p>
         <h1 className="font-serif text-xl text-ink">{LETTER_TITLE[letter.letter_type] ?? snapshot.docTitle}</h1>
-        <p className="text-sm text-muted">Issued {new Date(letter.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
+        <p className="text-sm text-muted">Issued {formatLetterDate(letter.issued_at)}</p>
 
         <div className="flex flex-col gap-3 border-t border-border-faint pt-3">
           {snapshot.body.map((para, i) => (
@@ -68,7 +81,7 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
               {letter.letter_type === "deferral" && letter.candidate_signature_name
                 ? `Signed by ${letter.candidate_signature_name} on `
                 : "Acknowledged "}
-              {new Date(letter.acknowledged_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+              {formatLetterDate(letter.acknowledged_at)}
             </p>
           ) : letter.letter_type === "deferral" ? (
             <SignDeferralButton letterId={letterId} signatureName={session.profile.signature_name} fullName={session.profile.full_name} />

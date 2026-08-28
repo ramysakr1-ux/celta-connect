@@ -102,6 +102,8 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
               eyebrow={`Assignment ${i + 1}`}
               accentClass={(Math.floor(i / 2) + (i % 2)) % 2 === 0 ? "border-t-[oklch(38%_0.085_155)]" : "border-t-[oklch(42%_0.13_27)]"}
               locked={!isStaffViewer && !isSet(a.assignment_type)}
+              today={today}
+              timeZone={timeZone}
             />
           ))
         ) : (
@@ -122,6 +124,8 @@ export default async function AssignmentsPage({ params }: { params: Promise<{ tr
                 assignment={a}
                 eyebrow="Plagiarism case"
                 accentClass="border-border"
+                today={today}
+                timeZone={timeZone}
               />
             ))}
           </div>
@@ -137,9 +141,13 @@ function AssignmentCard({
   eyebrow,
   accentClass,
   locked,
+  today,
+  timeZone,
 }: {
   traineeId: string;
   assignment: AssignmentRow;
+  today: string;
+  timeZone: string;
   locked?: boolean;
   eyebrow: string;
   accentClass?: string;
@@ -178,12 +186,12 @@ function AssignmentCard({
       <p className="mt-3 text-xs text-muted">
         {[
           a.due_date ? (
-            <span key="due" className={DEADLINE_URGENCY_CLASS[getDeadlineUrgency(a.due_date, a.first_submitted_at)]}>
+            <span key="due" className={DEADLINE_URGENCY_CLASS[getDeadlineUrgency(a.due_date, a.first_submitted_at, today)]}>
               Due {a.due_date}
             </span>
           ) : null,
           <span key="words">{ASSIGNMENT_WORD_COUNT}</span>,
-          a.first_submitted_at ? <span key="submitted">Submitted {a.first_submitted_at.slice(0, 10)}</span> : null,
+          a.first_submitted_at ? <span key="submitted">Submitted {toLocalIso(new Date(a.first_submitted_at), timeZone)}</span> : null,
         ]
           .filter(Boolean)
           .flatMap((node, idx) => (idx > 0 ? [" · ", node] : [node]))}

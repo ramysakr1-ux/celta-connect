@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { WithdrawalRequestForm } from "@/app/portfolio/[traineeId]/withdrawal-request/withdrawal-request-form";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // connect-withdrawal-precourse-scope-spec-2026-08-21.md item 2: the
 // candidate's own self-serve request, separate from the staff-initiated
@@ -15,8 +17,12 @@ export default async function WithdrawalRequestPage({ params }: { params: Promis
   if (session.profile.id !== traineeId) notFound();
 
   const supabase = await createClient();
-  const { data: profile } = await supabase.from("profiles").select("full_name, signature_name, course_status").eq("id", traineeId).maybeSingle();
+  const { data: profile } = await supabase.from("profiles").select("full_name, signature_name, course_status, center_id").eq("id", traineeId).maybeSingle();
   if (!profile) notFound();
+  // Ramy, 28 Aug 2026: "the logic behind everything" -- created_at is a real
+  // instant; formatting it with no timeZone read the server's own local
+  // time, not the trainee's centre.
+  const timeZone = profile.center_id ? (await getCachedCenter(profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE : DEFAULT_TIMEZONE;
 
   const { data: existingRequest } = await supabase
     .from("withdrawal_requests")
@@ -50,7 +56,7 @@ export default async function WithdrawalRequestPage({ params }: { params: Promis
             <p className="text-sm font-semibold text-primary">Sent -- waiting for the centre.</p>
             <p className="mt-1 text-sm text-muted">
               Your {existingRequest.kind === "withdraw" ? "withdrawal" : "deferral"} request was sent{" "}
-              {new Date(existingRequest.created_at).toLocaleDateString("en-GB")}. A tutor will act on it and follow
+              {new Intl.DateTimeFormat("en-GB", { timeZone }).format(new Date(existingRequest.created_at))}. A tutor will act on it and follow
               up with you.
             </p>
           </div>
