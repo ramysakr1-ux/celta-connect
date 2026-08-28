@@ -167,7 +167,15 @@ function InputSessionCard({
 // reason nobody could say what belonged in them.
 const EMPTY_NOTE: Partial<Record<HubCategoryKey, string>> = {
   lesson_planning: "Worked examples to look at before you write your own — a completed lesson plan, a language analysis sheet, board plans from previous cohorts. Your tutor adds these.",
-  teaching_practice: "Samples from previous cohorts — a self-evaluation, an example of the feedback you can expect. Your tutor adds these.",
+  // Ramy, 29 Aug 2026: "there's no good feedback, bad feedback -- tutor
+  // feedback is different, that shouldn't be part of the samples." He is
+  // right and my first draft was wrong. A self-evaluation is the
+  // candidate's own work, so showing one helps them write theirs. Tutor
+  // feedback is a tutor's judgement on one specific lesson; posting a
+  // "good example" implies a form it ought to take and sets an expectation
+  // about what their own feedback should look like. That is a template for
+  // something that should not be templated.
+  teaching_practice: "Samples from previous cohorts — for example a self-evaluation, so you can see what one looks like before you write your first. Your tutor adds these.",
   reading: "The course's recommended reading, added by your centre.",
   multimedia: "Audio and video your tutors add for teaching practice.",
   written_assignments: "The four assignment briefs appear here once your tutor publishes them.",
