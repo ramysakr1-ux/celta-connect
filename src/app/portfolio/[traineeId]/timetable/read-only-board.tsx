@@ -316,36 +316,81 @@ function Cell({
   onSelect: (event: TimetableEvent) => void;
 }) {
   if (events.length === 0) return null;
-  const displayCat = toDisplayCategory(categorize(events[0]));
-  const style = CATEGORY_STYLE[displayCat];
-  const mine = events.some((e) => (eventMeta[e.id] ?? EMPTY_META).mine);
-  const faded = mineOnly && !mine;
+
+  // Ramy, 28 Aug 2026: "the master timetable" -- simultaneous TP slots
+  // (TP1·A, TP1·B, TP1·C teaching at the same time) are separate cards
+  // side by side in the real design. Other same-band items (a plenary
+  // immediately followed by an announcement, same room/audience) still
+  // legitimately stack inside one shared card -- "some things will be
+  // stacked... but not TP." Only split when every event here is a TP.
+  const allTp = events.every((e) => e.type === "tp");
+  if (!allTp) {
+    const displayCat = toDisplayCategory(categorize(events[0]));
+    const style = CATEGORY_STYLE[displayCat];
+    const mine = events.some((e) => (eventMeta[e.id] ?? EMPTY_META).mine);
+    const faded = mineOnly && !mine;
+    return (
+      <div
+        className="flex flex-col gap-1.5 rounded-[10px] p-2 transition-opacity duration-150"
+        style={{
+          opacity: faded ? 0.25 : 1,
+          backdropFilter: "blur(10px)",
+          border: "1px solid oklch(100% 0 0 / 0.75)",
+          borderTop: `2.5px solid ${style.accent}`,
+          boxShadow: "0 6px 18px oklch(23.5% 0.017 65 / 0.07), inset 0 1px 0 oklch(100% 0 0 / 0.8)",
+          background: `linear-gradient(180deg, ${style.tintFrom}, ${style.tintTo})`,
+        }}
+      >
+        {events.map((event) => (
+          <SessionTile
+            key={event.id}
+            event={event}
+            meta={eventMeta[event.id] ?? EMPTY_META}
+            now={now}
+            timeZone={timeZone}
+            mineOnly={mineOnly}
+            onSelect={onSelect}
+            titleWeight={style.titleWeight}
+            displayCat={displayCat}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <div
-      className="flex flex-col gap-1.5 rounded-[10px] p-2 transition-opacity duration-150"
-      style={{
-        opacity: faded ? 0.25 : 1,
-        backdropFilter: "blur(10px)",
-        border: "1px solid oklch(100% 0 0 / 0.75)",
-        borderTop: `2.5px solid ${style.accent}`,
-        boxShadow: "0 6px 18px oklch(23.5% 0.017 65 / 0.07), inset 0 1px 0 oklch(100% 0 0 / 0.8)",
-        background: `linear-gradient(180deg, ${style.tintFrom}, ${style.tintTo})`,
-      }}
-    >
-      {events.map((event) => (
-        <SessionTile
-          key={event.id}
-          event={event}
-          meta={eventMeta[event.id] ?? EMPTY_META}
-          now={now}
-          timeZone={timeZone}
-          mineOnly={mineOnly}
-          onSelect={onSelect}
-          titleWeight={style.titleWeight}
-          displayCat={displayCat}
-        />
-      ))}
+    <div className="flex items-start gap-1.5">
+      {events.map((event) => {
+        const displayCat = toDisplayCategory(categorize(event));
+        const style = CATEGORY_STYLE[displayCat];
+        const mine = (eventMeta[event.id] ?? EMPTY_META).mine;
+        const faded = mineOnly && !mine;
+        return (
+          <div
+            key={event.id}
+            className="min-w-0 flex-1 rounded-[10px] p-2 transition-opacity duration-150"
+            style={{
+              opacity: faded ? 0.25 : 1,
+              backdropFilter: "blur(10px)",
+              border: "1px solid oklch(100% 0 0 / 0.75)",
+              borderTop: `2.5px solid ${style.accent}`,
+              boxShadow: "0 6px 18px oklch(23.5% 0.017 65 / 0.07), inset 0 1px 0 oklch(100% 0 0 / 0.8)",
+              background: `linear-gradient(180deg, ${style.tintFrom}, ${style.tintTo})`,
+            }}
+          >
+            <SessionTile
+              event={event}
+              meta={eventMeta[event.id] ?? EMPTY_META}
+              now={now}
+              timeZone={timeZone}
+              mineOnly={mineOnly}
+              onSelect={onSelect}
+              titleWeight={style.titleWeight}
+              displayCat={displayCat}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
