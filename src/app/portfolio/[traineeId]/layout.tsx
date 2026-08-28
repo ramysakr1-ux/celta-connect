@@ -95,6 +95,16 @@ export default async function PortfolioLayout({
   // now?") -- the counter renders in this same layout's header on every
   // page, so any real visit by the trainee themselves resolves it, not a
   // specific destination page the way the other five questions each have.
+  //
+  // Which means a candidate is at 1/6 the moment they first sign in,
+  // before hunting for anything. Reviewed 28 Aug 2026 and deliberately
+  // kept. Making it cost effort would need a manual "mark as found"
+  // control, which the spec rules out ("not a form to fill in, it's an
+  // instrumented tour"). And it does useful work as-is: nothing on the
+  // panel tells a candidate there is no button to press, so one row
+  // resolving on arrival demonstrates the rule -- these resolve as you
+  // explore -- where a blank 0/6 would send them looking for a control
+  // that does not exist.
   if (viewer?.role === "trainee" && viewer.id === traineeId && trainee.course_id) {
     await markScavengerHuntFound(supabase, trainee.course_id, traineeId, "day_counter");
   }
