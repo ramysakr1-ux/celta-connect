@@ -191,6 +191,17 @@ export default async function TpHubPage({
     return status.label === "Awaiting tutor feedback";
   });
 
+  // for-claude-code-trainee-interface.md's "My teaching" header has two
+  // trainee-facing shortcuts (mockup: "Log an observation" / "Open TP2
+  // plan") that this page never had -- same "next TP needing X" pattern
+  // as nextTpNeedingFeedback above, just for "not yet planned" instead of
+  // "not yet fed back".
+  const nextTpNeedingPlan = TP_NUMBERS.find((tpNumber) => {
+    const plan = planByTpNumber.get(tpNumber);
+    if (!plan || plan.taught_at) return false;
+    return !tpPlanByTpNumber.get(tpNumber)?.submitted_at;
+  });
+
   // for-claude-code-trainee-interface.md's "Carried forward" panel --
   // starred action points from the MOST RECENT feedback (highest TP number
   // with feedback submitted), already folded into the next plan as
@@ -232,6 +243,24 @@ export default async function TpHubPage({
           >
             Write TP feedback
           </Link>
+        ) : null}
+        {!isStaff ? (
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href={`/portfolio/${traineeId}/celta5`}
+              className="trainee-hover-fill rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink"
+            >
+              Log an observation
+            </Link>
+            {nextTpNeedingPlan ? (
+              <Link
+                href={`/portfolio/${traineeId}/tp/${nextTpNeedingPlan}`}
+                className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
+              >
+                Open TP{nextTpNeedingPlan} plan
+              </Link>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
