@@ -14,6 +14,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { AssignmentsSummary, TpFeedbackSummary } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
 import { Stage1Form } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-form";
+import { Stage1ReleaseForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-release-form";
 import { StageRatingsForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage-ratings-form";
 import { Stage2OverallForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage2-overall-form";
 import { Stage3OverallForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage3-overall-form";
@@ -247,6 +248,14 @@ export default async function Celta5RecordPage({
       <TpFeedbackSummary traineeId={id} feedbackRows={tpFeedbackRows ?? []} />
 
       <Stage1Form key={`stage1-${record.updated_at}`} record={record} trainerFullName={trainer.full_name} trainerSignatureName={trainer.signature_name} />
+
+      <Stage1ReleaseForm
+        key={`stage1-release-${record.updated_at}`}
+        traineeId={id}
+        completedAt={record.stage1_completed_at}
+        releasedAt={record.stage1_released_at}
+        candidateSignedAt={record.stage1_candidate_signed_at}
+      />
 
       <div>
         <h2 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h2>

@@ -134,6 +134,51 @@ export async function updateStage1(
   return { error: null };
 }
 
+// Ramy, 29 Aug 2026: "the trainee sees nothing until the tutor hits Release
+// to trainee; before that they get a 'not yet released' state. Tutor can
+// also un-release."
+//
+// Separate from updateStage1 on purpose. Saving the report and publishing
+// it to the candidate are two decisions, and merging them is exactly the
+// bug this fixes -- stage1_completed_at used to mean both, so finishing the
+// report published it in the same click.
+//
+// Re-releasing clears the candidate's signature. That is the mechanism, not
+// a side effect: a signature attests to specific text, so text that changes
+// needs signing again. Enforced by a trigger in migration 0246 as well, so
+// it holds whichever code path moves the release date.
+export async function setStage1Release(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const trainer = await requireRole("trainer");
+
+  const traineeId = formData.get("trainee_id");
+  const release = formData.get("release") === "on";
+  if (typeof traineeId !== "string" || !traineeId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const supabase = await createClient();
+  const { data: record } = await supabase
+    .from("celta5_records")
+    .select("stage1_completed_at, stage1_candidate_signed_at")
+    .eq("trainee_id", traineeId)
+    .maybeSingle();
+  if (!record) return { error: "Could not find that record." };
+  if (release && !record.stage1_completed_at) {
+    return { error: "Finish and sign Stage One before releasing it." };
+  }
+
+  const { error } = await supabase
+    .from("celta5_records")
+    .update({ stage1_released_at: release ? new Date().toISOString() : null })
+    .eq("trainee_id", traineeId);
+  if (error) return { error: "Could not save. Try again." };
+
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+  revalidatePath(`/portfolio/${traineeId}/celta5`);
+  return { error: null };
+}
+
+
 export async function updateStage2Ratings(
   _prevState: FormState,
   formData: FormData

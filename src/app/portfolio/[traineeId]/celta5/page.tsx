@@ -289,7 +289,7 @@ export default async function PortfolioCelta5Page({
                 <div>
                   <p className="text-sm font-semibold text-ink">Stage 1 report</p>
                   <p className="mt-0.5 text-xs text-muted">
-                    {record.stage1_completed_at
+                    {record.stage1_released_at
                       ? "Filed by your tutor · the tutorial itself is optional, not held up on this"
                       : stage1Invite
                         ? `Tutorial ${stage1Invite.confirmed_at ? "confirmed" : "invited, not yet confirmed"}${
@@ -300,8 +300,8 @@ export default async function PortfolioCelta5Page({
                         : "Not yet filed"}
                   </p>
                 </div>
-                <span className={`pill ${record.stage1_completed_at ? "pill-success" : "pill-warning"}`}>
-                  {record.stage1_completed_at ? "Filed" : "Not filed"}
+                <span className={`pill ${record.stage1_released_at ? "pill-success" : "pill-warning"}`}>
+                  {record.stage1_released_at ? "Filed" : "Not filed"}
                 </span>
               </div>
               <div className="flex items-start justify-between gap-3 border-b border-border-faint py-2.5">
@@ -454,7 +454,12 @@ export default async function PortfolioCelta5Page({
           </div>
         ) : (
           <>
-            {record.stage1_completed_at ? (
+            {/* Ramy, 29 Aug 2026: Stage One is tutor-gated -- "the trainee
+                sees nothing until the tutor hits Release to trainee".
+                Keyed on released_at, not completed_at: those used to be the
+                same column, so a tutor finishing the report published it in
+                the same action and could neither draft nor take it back. */}
+            {record.stage1_released_at ? (
               <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
                 <h3 className="font-serif text-lg text-ink">Progress Record — Stage 1</h3>
                 {record.stage1_strengths ? (
@@ -486,7 +491,19 @@ export default async function PortfolioCelta5Page({
                   )}
                 </div>
               </div>
-            ) : null}
+            ) : (
+              // The "not yet released" state the spec asks for. Deliberately
+              // says the report exists and is coming, rather than rendering
+              // nothing -- a candidate who knows Stage One happens should
+              // not be left wondering whether the page is broken.
+              <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
+                <h3 className="font-serif text-lg text-ink">Progress Record — Stage 1</h3>
+                <p className="mt-2 text-sm text-muted">
+                  Your tutor writes this from your teaching practice feedback and releases it to you. Not yet released —
+                  you will see it here, and be asked to sign it, once they do.
+                </p>
+              </div>
+            )}
 
             <div>
               <div className="flex items-center justify-between gap-3">
