@@ -407,24 +407,17 @@ export async function TodayTab({
   // more 2-column state that needed the top variant. Full literal class
   // strings (not string-built) so Tailwind's static scanner can see them --
   // a template-built `border-l-${color}` would never be generated.
-  // The real design handoff (Trainee Walkthrough.dc.html, updated 28 Aug)
-  // computes each panel's own edge color in its script (lines ~474-483): a
-  // panel with no accent of its own falls through to one shared default, a
-  // muted mauve. That default is already a named, established token
-  // elsewhere in the app -- globals.css's --trainee-plum (oklch(42% 0.045
-  // 340), corrected 23 Aug 2026 from the same too-pink starting value this
-  // file's own color-fix doc describes), already used as the fallback
-  // accent on Assignments, TP, GTKY, session materials, and more. Reference
-  // that token directly rather than duplicating its raw value here -- same
-  // pattern those other files already use (border-t-[var(--trainee-plum)]),
-  // just the left variant since this grid is 3-column. Neither Announcements
-  // nor Waiting-on-you carries its own accent, so both use this one color,
-  // not the earlier (24 Aug, now superseded) green/garnet alternation. The
-  // hero card keeps its own teal edge -- the file computes that as
-  // color-mix(in oklab, teal 55%, transparent), referencing --color-primary
-  // the same way, not a flat solid teal or a duplicated literal.
+  // Ramy, 28 Aug 2026, live on the preview: the design file's own default
+  // (--trainee-plum) read "a very bright color" against this card's pale
+  // background -- rejected in favor of --color-garnet, the same accent
+  // already used sitewide (Assignments' second card, Resources' list-item
+  // alternation, the trainer-hub ACT color). Not paired back up with teal
+  // into the old alternation, though -- one shared garnet, same as plum was
+  // one shared color, just a different hue. The hero card keeps its own
+  // teal edge -- the file computes that as color-mix(in oklab, teal 55%,
+  // transparent), referencing --color-primary, not a flat solid teal.
   const CARD_EDGE: Record<"mauve" | "primary", string> = {
-    mauve: "border-l-[3px] border-l-[var(--trainee-plum)] border-t-0",
+    mauve: "border-l-[3px] border-l-[var(--color-garnet)] border-t-0",
     primary: "border-l-[3px] border-t-0",
   };
   const cardEdge = (color: keyof typeof CARD_EDGE) => CARD_EDGE[color];
