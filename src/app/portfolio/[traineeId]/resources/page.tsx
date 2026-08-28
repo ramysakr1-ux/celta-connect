@@ -161,8 +161,33 @@ function InputSessionCard({
   );
 }
 
-function PlainCategoryGrid({ resources, isEditableStaff, traineeId }: { resources: ResourceRow[]; isEditableStaff: boolean; traineeId: string }) {
-  if (resources.length === 0) return <p className="sheet border-dashed text-sm text-muted">Nothing here yet.</p>;
+// What an empty category should say. "Nothing here yet" eight times over
+// reads as a broken page rather than an empty shelf, and for the two
+// sample shelves it also hides what they are FOR -- which is the whole
+// reason nobody could say what belonged in them.
+const EMPTY_NOTE: Partial<Record<HubCategoryKey, string>> = {
+  lesson_planning: "Worked examples to look at before you write your own — a completed lesson plan, a language analysis sheet, board plans from previous cohorts. Your tutor adds these.",
+  teaching_practice: "Samples from previous cohorts — a self-evaluation, an example of the feedback you can expect. Your tutor adds these.",
+  reading: "The course's recommended reading, added by your centre.",
+  multimedia: "Audio and video your tutors add for teaching practice.",
+  written_assignments: "The four assignment briefs appear here once your tutor publishes them.",
+  forms: "Centre forms and documents, added by your centre.",
+  cambridge_documentation: "Cambridge's own course documents.",
+};
+
+function PlainCategoryGrid({
+  resources,
+  isEditableStaff,
+  traineeId,
+  emptyNote,
+}: {
+  resources: ResourceRow[];
+  isEditableStaff: boolean;
+  traineeId: string;
+  emptyNote?: string;
+}) {
+  if (resources.length === 0)
+    return <p className="sheet border-dashed text-sm text-muted">{emptyNote ?? "Nothing here yet."}</p>;
   return (
     <ul className="grid grid-cols-2 gap-[10px] sm:grid-cols-3 xl:grid-cols-4">
       {resources.map((r) => (
@@ -787,7 +812,7 @@ export default async function ResourceHubPage({
                 <PlainCategoryGrid resources={formResources} isEditableStaff={isEditableStaff} traineeId={traineeId} />
               </div>
             ) : (
-              <PlainCategoryGrid resources={byCategory.get(key) ?? []} isEditableStaff={isEditableStaff} traineeId={traineeId} />
+              <PlainCategoryGrid resources={byCategory.get(key) ?? []} isEditableStaff={isEditableStaff} traineeId={traineeId} emptyNote={EMPTY_NOTE[key]} />
             )}
           </HubCategorySection>
         ))}

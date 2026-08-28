@@ -48,8 +48,8 @@ export const HUB_CATEGORY_ORDER: HubCategoryKey[] = [
 
 export const HUB_CATEGORY_LABELS: Record<HubCategoryKey, string> = {
   input_sessions: "Input Sessions",
-  lesson_planning: "Lesson Planning",
-  teaching_practice: "Teaching Practice",
+  lesson_planning: "Lesson Planning — samples",
+  teaching_practice: "Teaching Practice — samples",
   tp78_materials: "TP7–8 Materials",
   multimedia: "Multimedia",
   coursebooks: "Coursebooks",
@@ -73,25 +73,24 @@ export const HUB_CATEGORY_LABELS: Record<HubCategoryKey, string> = {
 // arguably useful to them -- but which book a TP class uses reaches them
 // through their TP materials anyway, and the shelf is really a staff
 // planning tool.
-// Ramy, 29 Aug 2026: "what exactly is teaching practice resources, and
-// what is lesson planning resources? Why is this here? They get everything
-// pushed to them -- they get the TP points with the scanned copies of the
-// pages they are teaching."
+// Ramy, 29 Aug 2026: coursebooks and TP points are trainer-side, and
+// centre documents and admissions always were.
 //
-// He is right, and so is the spec: for-claude-code-trainee-interface.md §5
-// defines a five-item trainee rail (input sessions, coursebooks,
-// multimedia, assignment briefs, forms) and neither of these was ever on
-// it. Both are generic staff filing buckets from the trainer-side
-// taxonomy -- a centre's lesson-plan pro-forma, a TP handout -- that I
-// pulled into the trainee Hub when building the 15-category structure.
-// That was my error, not a decision.
+// Lesson Planning and Teaching Practice were briefly staff-only too --
+// nobody could say what belonged in them, and a trainee does not browse
+// for TP material, it reaches them through their own TP screens. Then he
+// asked the question that resolved it: "do we have samples for the
+// trainees? Like a sample lesson plan, a sample LA sheet." We do not --
+// nothing in the app or the schema -- and that is what these two shelves
+// are for. His own Resource Hub.dc.html even listed "Board plan examples
+// -- six worked board plans from previous cohorts" under Lesson Planning,
+// designed and never built.
 //
-// Nothing is deleted: staff still see and file into both, and a document a
-// trainee genuinely needs belongs in Forms and Documents, which is what
-// that category is for.
+// So they are trainee-visible, and labelled as sample shelves rather than
+// generic filing buckets. Empty until real samples are added: a worked
+// language analysis sheet is pedagogy, not copy, and inventing one would
+// mean teaching candidates something plausible and possibly wrong.
 export const HUB_STAFF_ONLY: HubCategoryKey[] = [
-  "lesson_planning",
-  "teaching_practice",
   "coursebooks",
   "centre_documents",
   "admissions",
