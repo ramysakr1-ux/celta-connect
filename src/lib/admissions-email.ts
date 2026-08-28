@@ -892,19 +892,34 @@ export function startsMondayEmailHtml(input: {
     tone: "amber",
     body:
       p(`Dear ${input.candidateName},`) +
-      p(
-        `We start at ${input.startTime} on ${input.startDay}, in ${input.room}. Bring something to write with. Nothing else -- your pre-course task is already in Connect, so there is nothing to print or carry.`
-      ) +
+      // Ramy, 28 Aug 2026: leads on the date, and "don't say anything about
+      // bringing something to write with -- it's in that 1970s." Also fixes
+      // a real grammar bug this line carried: `room` already supplies its
+      // own preposition ("at Elmswood English Centre" / "online, via the
+      // link in Connect"), so the old sentence's extra "in" rendered as
+      // "in at Elmswood English Centre".
+      p(`Your course starts on ${input.startDay}, ${input.startTime}, ${input.room}.`) +
       p(
         `You are in ${input.groupName}, teaching the ${input.levelName} class. Your tutors are ${input.tutorNames}.`
       ) +
+      // Ramy: "state that there are two things you need to do now before
+      // the course starts." The email used to bury the one action it had
+      // (pick an activity) in the middle of a paragraph, and never
+      // mentioned the answer key at all -- so nothing told a candidate it
+      // had opened. Both are named up front as a numbered pair now, with
+      // the detail underneath and a single button for both.
+      p("Two things to do before day one, and neither takes long.") +
+      list([
+        "Check the answer key for your pre-course task. It is open now, next to the answers you wrote.",
+        "Pick your getting-to-know-you activity. We have left you three to choose from.",
+      ]) +
       p(
-        `On the first afternoon, after the demo lesson, each of you will spend twenty minutes with the class doing a getting-to-know-you activity. It is not assessed, nobody is watching, and it is meant to be enjoyable. We have put three to choose from in Connect — have a look before then and pick whichever appeals.`
+        "The activity is for the first afternoon, after the demo lesson: twenty minutes with the class, to get to know them and them you. It is not assessed, nobody is watching, and it is meant to be enjoyable."
       ) +
       inlineButton({
-        label: "See your three activities",
+        label: "Log in to Connect",
         url: input.activitiesUrl,
-        sub: "Two minutes. Choose one, and that is genuinely all the preparation the first day needs.",
+        sub: "Both are waiting for you there.",
         tone: "amber",
       }) +
       p("Everything else on the first day is watching and listening. There is nothing else to prepare.") +
