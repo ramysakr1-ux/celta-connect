@@ -6,6 +6,7 @@ import {
   interviewBookedEmailHtml,
   acceptancePlaceEmailHtml,
   welcomeEmailHtml,
+  startsMondayEmailHtml,
   volunteerSignedUpEmailHtml,
   volunteerClassStartingEmailHtml,
   volunteerSessionReminderEmailHtml,
@@ -210,6 +211,30 @@ export default async function JourneyPage() {
     }),
     centreName
   );
+  // Ramy, 28 Aug 2026: "the second email would be getting to know you and
+  // the answer key" -- the real Friday-before-start email
+  // (starts-monday-cron.ts's own comment: "carries the link to their
+  // day-one activity, because that is the first moment levels and groups
+  // exist"), built and sending for real but never shown in this journey.
+  // The answer key itself has no separate email -- it's a pure date gate
+  // computed live in pre-course-task/page.tsx (mostRecentFridayBefore),
+  // same Friday this email fires on, not a second date to track.
+  const startsMondayHtml = withConnectBranding(
+    startsMondayEmailHtml({
+      candidateName: applicantName,
+      courseName,
+      startTime: "09:30",
+      startDay: "Monday 7 August",
+      room: `at ${centreName}`,
+      groupName: "ABC",
+      levelName: "intermediate",
+      tutorNames: "Jordan Blake and Marcus Webb",
+      activitiesUrl: "https://celtaconnect.com/portfolio/<trainee>/gtky",
+      directorName: "Jordan Blake",
+      directorRole: "Course Director",
+    }),
+    centreName
+  );
   const volunteerHtml = withConnectBranding(
     volunteerSignedUpEmailHtml({ volunteerName: "Grace Adeyemi", centreName }),
     centreName
@@ -358,6 +383,27 @@ export default async function JourneyPage() {
           <Step number={9} title="Gets their workspace" blurb="Sent once the centre releases access -- this is the CELTA Connect login link.">
             <EmailPreview title="Your CELTA workspace is ready" to={applicantName} html={welcomeHtml} />
           </Step>
+          <Step
+            number={10}
+            title="Does the pre-course task and the scavenger hunt"
+            blurb="What they actually land on, not just what the email says -- Cambridge's real 5-section task plus the 'find your way around Connect' hunt, self-resolving as they actually navigate to each place. Both real, live components."
+            href="/demo/trainee-precourse"
+            hrefLabel="Open the real page →"
+          />
+          <Step
+            number={11}
+            title="Gets notified the course starts Monday"
+            blurb="Sent the Friday immediately before start -- the first moment groups and levels actually exist, so this is also the first message carrying their real group and the link to the day-one activity."
+          >
+            <EmailPreview title={`${courseName} starts Monday 7 August`} to={applicantName} html={startsMondayHtml} />
+          </Step>
+          <Step
+            number={12}
+            title="Picks their day-one activity"
+            blurb="The GTKY pick -- three getting-to-know-you activities, per group not per trainee. If nobody picks, the tutor picks for the group automatically the same Friday."
+            href="/demo/trainee-gtky"
+            hrefLabel="Open the real page →"
+          />
         </div>
 
         <div className="flex flex-col gap-4">
