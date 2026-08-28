@@ -68,6 +68,23 @@ export async function proxy(request: NextRequest) {
     // alone with no app around it" -- gating it behind login would make the
     // link in that email bounce off a sign-in wall.
     request.nextUrl.pathname.startsWith("/getting-started") ||
+    // Admin Handbook §6.3: the candidate agreement must be given to
+    // candidates BEFORE the course starts -- so before most of them have an
+    // account. Gating it behind login would make the one document Cambridge
+    // names as a pre-course obligation unreachable at exactly the point it
+    // is required. Same reasoning as /terms, which the signup checkboxes
+    // already link to from an unauthenticated page.
+    // Pre-existing bug, found 29 Aug 2026 while adding the line below:
+    // /terms is the "full terms" link the join, offer-accept and
+    // join-centre checkboxes all point at, and every one of those pages is
+    // itself unauthenticated -- /join/[token], /offer/[token],
+    // /join-centre/[token]. So a candidate ticking "I agree" and clicking
+    // through to read what they were agreeing to hit a sign-in wall for an
+    // account they did not have yet. Its own file comment describes it as
+    // "the full-terms link promised by the join/offer-accept checkboxes",
+    // so this was never intended to be gated.
+    request.nextUrl.pathname.startsWith("/terms") ||
+    request.nextUrl.pathname.startsWith("/candidate-agreement") ||
     // Tokenized no-login links (course_access_tokens, migration 0030) --
     // volunteer students, the admissions register link, and assessors never
     // get a real Supabase session at all, so these must stay reachable

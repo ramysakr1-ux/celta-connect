@@ -9,7 +9,7 @@ import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { RESOURCE_CATEGORY_LABELS, RESOURCE_TYPE_ICON, RESOURCE_TYPE_LABELS, TRAINER_ONLY_CATEGORIES } from "@/lib/resource-info";
-import { MonitorPlay, CalendarClock } from "lucide-react";
+import { MonitorPlay, CalendarClock, Stamp } from "lucide-react";
 import { HUB_CATEGORY_ORDER, HUB_CATEGORY_LABELS, HUB_STAFF_ONLY, type HubCategoryKey } from "@/lib/resource-hub-categories";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import type { Database } from "@/lib/supabase/types";
@@ -756,7 +756,36 @@ export default async function ResourceHubPage({
                 <p className="text-xs text-muted">Staff-only — opens the trainer's coursebooks & TP points management.</p>
               </Link>
             ) : key === "forms" ? (
-              <PlainCategoryGrid resources={formResources} isEditableStaff={isEditableStaff} traineeId={traineeId} />
+              // Admin Handbook §6.3 requires every centre to give candidates
+              // a candidate agreement, and §6.2 an internal complaints
+              // procedure (which it permits inside the agreement). Both live
+              // at /candidate-agreement, so this category always has the one
+              // document Cambridge actually names -- it is not left to
+              // whether someone remembered to upload a PDF.
+              <div className="flex flex-col gap-3">
+                <ul className="grid grid-cols-2 gap-[10px] sm:grid-cols-3 xl:grid-cols-4">
+                  <li className="trainee-hover-fill flex flex-col gap-[5px] rounded-[6px] border border-border bg-[oklch(96.4%_0.014_85)] p-[11px_12px]">
+                    <div className="flex items-start gap-2">
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
+                        <Stamp className="size-3.5" aria-hidden="true" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <Link href="/candidate-agreement" className="text-[13px] font-semibold text-ink hover:underline">
+                          Candidate Agreement
+                        </Link>
+                        <p className="mt-0.5 text-[10px] font-semibold tracking-[0.06em] text-muted uppercase">
+                          Required by Cambridge
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-[11px] leading-[1.4] text-muted">
+                      What the centre expects of you and what you can expect back — attendance, plagiarism, deferrals,
+                      and how to raise a complaint.
+                    </p>
+                  </li>
+                </ul>
+                <PlainCategoryGrid resources={formResources} isEditableStaff={isEditableStaff} traineeId={traineeId} />
+              </div>
             ) : (
               <PlainCategoryGrid resources={byCategory.get(key) ?? []} isEditableStaff={isEditableStaff} traineeId={traineeId} />
             )}
