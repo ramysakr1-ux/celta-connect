@@ -21,7 +21,6 @@ export type HubCategoryKey =
   | "cambridge_documentation"
   | "reading"
   | "filmed_observations"
-  | "precourse_task"
   | "forms"
   | "centre_documents"
   | "admissions"
@@ -41,7 +40,6 @@ export const HUB_CATEGORY_ORDER: HubCategoryKey[] = [
   "cambridge_documentation",
   "reading",
   "filmed_observations",
-  "precourse_task",
   "forms",
   "centre_documents",
   "admissions",
@@ -59,7 +57,6 @@ export const HUB_CATEGORY_LABELS: Record<HubCategoryKey, string> = {
   cambridge_documentation: "Cambridge Documentation",
   reading: "Reading",
   filmed_observations: "Filmed Observations",
-  precourse_task: "Pre-course Task",
   forms: "Forms and Documents",
   centre_documents: "Centre Documents",
   admissions: "Admissions",

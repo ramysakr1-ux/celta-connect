@@ -1,12 +1,10 @@
 import { notFound } from "next/navigation";
-import { responseIsAnswered } from "@/lib/pre-course-task-shape";
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG } from "@/lib/input-session-registry-links";
-import { answerKeyOpensOn } from "@/lib/pre-course-answer-key";
 import { CRITERIA_LABELS } from "@/lib/celta-criteria";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -201,16 +199,13 @@ export default async function ResourceHubPage({
     : { data: [] };
   const coursebookIds = [...new Set((scheduledCoursebookIds ?? []).map((s) => s.tp_coursebook_id))];
 
-  const [{ data: coursebooks }, { data: audioTracks }, { data: videos }, { data: briefs }, { data: course }, { data: precourseSections }, { data: precourseResponses }, { data: huntProgress }] =
+  const [{ data: coursebooks }, { data: audioTracks }, { data: videos }, { data: briefs }, { data: course }] =
     await Promise.all([
       coursebookIds.length > 0 ? supabase.from("tp_coursebooks").select("id, title, level, access_notes").in("id", coursebookIds).order("title") : Promise.resolve({ data: [] }),
       supabase.from("tp_audio_library").select("*").eq("center_id", trainee.center_id).order("coursebook_title"),
       supabase.from("tp_video_library").select("*").eq("center_id", trainee.center_id).order("created_at", { ascending: false }),
       supabase.from("assignment_templates").select("id, assignment_type, sections, published_at").eq("center_id", trainee.center_id).not("published_at", "is", null),
       trainee.course_id ? supabase.from("courses").select("start_date, tp_material_pool_enabled").eq("id", trainee.course_id).maybeSingle() : Promise.resolve({ data: null }),
-      supabase.from("pre_course_task_sections").select("id").eq("center_id", trainee.center_id),
-      supabase.from("pre_course_task_responses").select("item_id, response").eq("trainee_id", traineeId),
-      supabase.from("scavenger_hunt_progress").select("question_key").eq("trainee_id", traineeId),
     ]);
 
   // Filmed Observations -- Ramy, 28 Aug 2026: caught a real naming
@@ -266,32 +261,6 @@ export default async function ResourceHubPage({
     })
     .sort((a, b) => (a.eventDate ?? "").localeCompare(b.eventDate ?? ""));
 
-  // Pre-course Task door -- for-claude-code-pre-course-task-screens.md's
-  // "Location" update: "shows 'Continue your pre-course task' pre-
-  // completion, 'Answer key is live' post-unlock." Same two states the
-  // Today hero card already computes, now also the door's own card content.
-  //
-  // Ramy, 28 Aug 2026: counted sections self-ticked while the task page
-  // itself had already moved to counting tasks actually answered, so the
-  // door and the page behind it disagreed ("2 of 3 sections done" against
-  // "3 of 29 answered"). Both read the same numbers now, via the same
-  // shared responseIsAnswered the roster column uses.
-  const { data: precourseItems } =
-    (precourseSections ?? []).length > 0
-      ? await supabase
-          .from("pre_course_task_items")
-          .select("id")
-          .in(
-            "section_id",
-            (precourseSections ?? []).map((s) => s.id)
-          )
-      : { data: [] };
-  const precourseSectionsTotal = precourseItems?.length ?? 0;
-  const precourseSectionsDone = (precourseResponses ?? []).filter((r) => responseIsAnswered(r.response)).length;
-  const precourseAllDone = precourseSectionsTotal > 0 && precourseSectionsDone >= precourseSectionsTotal;
-  const answerKeyDate = course?.start_date ? answerKeyOpensOn(course.start_date) : null;
-  const answerKeyLive = precourseAllDone && Boolean(answerKeyDate && today >= answerKeyDate);
-  const huntFoundCount = (huntProgress ?? []).length;
 
   // Ramy, 28 Aug 2026: "leave all the input sessions, the real ones...
   // put them inside an input session card with my HTML input session and
@@ -362,7 +331,6 @@ export default async function ResourceHubPage({
     cambridge_documentation: (byCategory.get("cambridge_documentation")?.length ?? 0) + cambridgeDocs.filter((d) => d.url || d.storagePath).length,
     reading: byCategory.get("reading")?.length ?? 0,
     filmed_observations: filmedSessions.length,
-    precourse_task: precourseSectionsTotal,
     forms: formResources.length,
     centre_documents: byCategory.get("centre_documents")?.length ?? 0,
     admissions: byCategory.get("admissions")?.length ?? 0,
@@ -373,7 +341,7 @@ export default async function ResourceHubPage({
   // and the film observations as well" -- Resource Hub (this whole page) >
   // Pre-course Task card + Filmed Observations card, standalone, then
   // Library (the searchable grid) below them for everything else.
-  const libraryCategories = visibleCategories.filter((k) => k !== "precourse_task" && k !== "filmed_observations");
+  const libraryCategories = visibleCategories.filter((k) => k !== "filmed_observations");
   const totalItems = libraryCategories.reduce((sum, k) => sum + countByKey[k], 0);
 
   const coursebookSearchItems: ResourceHubSearchItem[] = (coursebooks ?? []).map((c) => ({ id: `cb-${c.id}`, title: c.title, subtitle: "Coursebooks", href: "#coursebooks" }));
@@ -392,65 +360,18 @@ export default async function ResourceHubPage({
         <h2 className="font-serif text-[22px] font-semibold text-ink">Resource Hub</h2>
       </div>
 
-      {/* Resource Hub.dc.html screen 4a, exact values -- "the one
-          interactive door in a read-only hub." Standalone, above Library,
-          not a category tile: this is the only thing here you answer,
-          everything else is a shelf you click through to view. Real
-          progress bar this time, not just text -- missed in the first
-          pass. */}
-      <div
-        className="flex flex-col gap-4 rounded-[8px] border border-border p-[20px_22px]"
-        style={{ background: "oklch(96.4% 0.014 85)" }}
-      >
-        <Link
-          href={`/portfolio/${traineeId}/pre-course-task`}
-          className="trainee-hover flex flex-col gap-3 rounded-[8px] border p-[18px]"
-          style={{
-            background: "oklch(99.2% 0.005 90)",
-            borderColor: answerKeyLive ? "color-mix(in oklab, oklch(60% 0.11 70) 34%, transparent)" : "oklch(88% 0.016 82)",
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <p className="font-serif text-[16px] font-semibold text-ink">Pre-course Task</p>
-            <span
-              className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.05em]"
-              style={
-                answerKeyLive
-                  ? { background: "color-mix(in oklab, oklch(60% 0.11 70) 16%, oklch(99.2% 0.005 90))", color: "oklch(60% 0.11 70)" }
-                  : { background: "oklch(93.5% 0.016 85)", color: "oklch(51% 0.017 70)" }
-              }
-            >
-              {answerKeyLive ? "Answer key live" : "In progress"}
-            </span>
-          </div>
-          <p className="text-[12.5px] leading-[1.5] text-muted">
-            {answerKeyLive
-              ? `All ${precourseSectionsTotal} tasks answered, and the answer key is open — same door, flipped state. Compare your own answers at your own pace; nothing to submit here.`
-              : `${precourseSectionsDone} of ${precourseSectionsTotal} tasks answered. Answer key stays hidden — it unlocks cohort-wide 48 hours before the course starts, and then only on the tasks you have answered. Find your way around: ${huntFoundCount} of 6 found.`}
-          </p>
-          {!answerKeyLive ? (
-            <div className="h-[6px] overflow-hidden rounded-full" style={{ background: "oklch(89.5% 0.012 85)" }}>
-              <div
-                className="h-full"
-                style={{
-                  width: precourseSectionsTotal > 0 ? `${(precourseSectionsDone / precourseSectionsTotal) * 100}%` : "0%",
-                  background: "oklch(38% 0.072 195)",
-                }}
-              />
-            </div>
-          ) : null}
-          <span
-            className="self-start rounded-[6px] px-[14px] py-2 text-[12px] font-bold"
-            style={
-              answerKeyLive
-                ? { background: "color-mix(in oklab, oklch(60% 0.11 70) 20%, oklch(99.2% 0.005 90))", color: "oklch(30% 0.042 58)" }
-                : { background: "oklch(30% 0.042 58)", color: "oklch(99.2% 0.005 90)" }
-            }
-          >
-            {answerKeyLive ? "Open answer key" : "Continue"}
-          </span>
-        </Link>
-      </div>
+      {/* Ramy, 28 Aug 2026: "this will just sit on its own. It doesn't
+          really need to be part of the Resource Hub -- there will be a tab
+          for the trainers, and the trainee will get here from their hero
+          card." The Pre-course Task door lived here because the task used
+          to be a read-only shelf like everything else in the Hub. It is the
+          one thing in Connect a candidate writes into now, which makes it a
+          poor fit for a library of things you open and look at -- so it is
+          reached from the Today hero card (before day one) and from the
+          trainer's own tab, not from here. The scavenger hunt stays with it
+          on that page rather than moving in here, which is also what the
+          workspace email already promises: "both on the Pre-course task
+          tab." */}
 
       {/* Resource Hub.dc.html screen 3a, exact card values -- "Filmed
           Observation... your own cohort's real filmed lesson." Real data
