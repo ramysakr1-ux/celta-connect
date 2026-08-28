@@ -306,13 +306,34 @@ export async function TodayTab({
   const teachingToday = await computeTeachingFor(today);
   const teachingTomorrow = !preCourse && !teachingToday ? await computeTeachingFor(tomorrow) : null;
 
-  // Waiting on you -- capped at 3, this priority order: assignment due,
-  // confirm a Stage 1/3 tutorial invite, self-evaluation due, observation
-  // hours to log. Tutorial confirmation sits above self-evaluations -- it's
-  // a one-time commitment tied to a specific date the tutor is waiting on,
-  // not a rolling backlog item like self-evals, so it shouldn't get
-  // crowded out by however many TPs happen to be awaiting a self-eval.
+  // Waiting on you -- capped at 3, this priority order: pre-course task,
+  // scavenger hunt, assignment due, confirm a Stage 1/3 tutorial invite,
+  // self-evaluation due, observation hours to log. Tutorial confirmation
+  // sits above self-evaluations -- it's a one-time commitment tied to a
+  // specific date the tutor is waiting on, not a rolling backlog item like
+  // self-evals, so it shouldn't get crowded out by however many TPs happen
+  // to be awaiting a self-eval.
+  // Ramy, 28 Aug 2026: "the third card is exclusive for things that are
+  // waiting on you" -- the pre-course task and scavenger hunt are real
+  // to-dos, so they belong here, not on the hero card (that's teaching-only
+  // now: today's TP, tomorrow's TP, or the day-one GTKY pick, which is why
+  // GTKY itself doesn't get its own item here anymore -- it already has a
+  // home on the hero card).
   const waiting: WaitingItem[] = [];
+  if (preCourse && precourseSectionsDone < precourseSectionsTotal) {
+    waiting.push({
+      label: "Finish your pre-course task",
+      detail: `${precourseSectionsDone} of ${precourseSectionsTotal} sections done`,
+      href: `/portfolio/${traineeId}/pre-course-task`,
+    });
+  }
+  if (preCourse && !scavengerDone) {
+    waiting.push({
+      label: "Find your way around Connect",
+      detail: `${huntFoundCount} of ${SCAVENGER_HUNT_QUESTIONS.length} found`,
+      href: `/portfolio/${traineeId}/pre-course-task`,
+    });
+  }
   for (const a of assignments ?? []) {
     if (a.first_status === "not_submitted" && a.due_date && a.due_date <= today) {
       waiting.push({
@@ -338,13 +359,6 @@ export async function TodayTab({
       label: `Confirm your ${stageLabel} tutorial`,
       detail: event ? `${event.event_date}${event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}` : "Time set by your tutor",
       href: `/portfolio/${traineeId}/individual-tutorial/${invite.id}`,
-    });
-  }
-  if (gtkyAssignment && !gtkyAssignment.chosen_slug) {
-    waiting.push({
-      label: "Choose your day-one activity",
-      detail: "Three options, waiting for you -- pick one before the first morning",
-      href: `/portfolio/${traineeId}/gtky`,
     });
   }
   for (const [tpNumber, plan] of planByTpNumber) {
@@ -410,90 +424,92 @@ export async function TodayTab({
   const cardEdge = (color: keyof typeof CARD_EDGE) => CARD_EDGE[color];
   const heroEdgeColor = "color-mix(in oklab, oklch(37.5% 0.058 195) 55%, transparent)";
 
-  // Ramy, 28 Aug 2026: "three cards will always be there... the information
-  // on them will change. So the students get used to what their landing
-  // page looks like." Same size/color hero card every day; only its content
-  // switches, in this priority order once the course has started: teaching
-  // today, teaching tomorrow, an assignment due today/tomorrow, else
-  // whatever's most recent in Announcements (or a plain "nothing due"
-  // message if there's nothing to show at all).
-  const assignmentDueSoon = preCourse
-    ? null
-    : (assignments ?? [])
-        .filter((a) => a.first_status === "not_submitted" && a.due_date && a.due_date >= today && a.due_date <= tomorrow)
-        .sort((a, b) => (a.due_date! < b.due_date! ? -1 : 1))[0] ?? null;
-  const latestAnnouncement = broadcastsCapped[0] ?? null;
+  // Ramy, 28 Aug 2026, correcting an earlier pass: "the hero card is
+  // exclusive for teaching" -- not assignments due, not Announcements
+  // overflow. Same size/color hero card every day; only its content
+  // switches, always about teaching: today's TP, tomorrow's TP, the next
+  // upcoming TP further out, or -- once every TP is taught -- a plain
+  // "you're done teaching" note. Before the course starts there's no TP
+  // yet, so the hero carries the day-one GTKY pick instead ("teaching,
+  // unassessed," his words) -- the pre-course task and scavenger hunt are
+  // real to-dos, not teaching, so they live on Waiting-on-you instead (see
+  // its own comment above).
+  async function findNextTeaching(): Promise<{ tpNumber: number; date: string } | null> {
+    if (!subgroupMember || !subgroupRow?.half_order) return null;
+    const allTpTimetableEvents: TpTimetableEvent[] = (
+      await supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).eq("type", "tp")
+    ).data ?? [];
+    const halfDates = halfTpDates(allTpTimetableEvents, subgroupRow.half_order);
+    for (let i = 0; i < halfDates.length; i++) {
+      if (halfDates[i] <= tomorrow) continue;
+      const tpNumber = i + 1;
+      const plan = planByTpNumber.get(tpNumber);
+      if (plan && !plan.taught_at) return { tpNumber, date: halfDates[i] };
+    }
+    return null;
+  }
+  const teachingNext = !preCourse && !teachingToday && !teachingTomorrow ? await findNextTeaching() : null;
 
   type HeroContent = { label: string; big: string; bigSub: string; ctaHref: string; ctaLabel: string };
-  const heroKind: "teaching" | "teaching_tomorrow" | "assignment_due" | "precourse_scavenger" | "precourse_gtky" | "course_news" = preCourse
-    ? scavengerDone
-      ? "precourse_gtky"
-      : "precourse_scavenger"
+  const heroKind: "teaching" | "teaching_tomorrow" | "teaching_next" | "teaching_done" | "precourse_gtky" = preCourse
+    ? "precourse_gtky"
     : teachingToday
       ? "teaching"
       : teachingTomorrow
         ? "teaching_tomorrow"
-        : assignmentDueSoon
-          ? "assignment_due"
-          : "course_news";
+        : teachingNext
+          ? "teaching_next"
+          : "teaching_done";
   const genericHero: HeroContent | null =
-    heroKind === "precourse_scavenger"
-      ? {
-          label: "Before day one",
-          big: "Your pre-course task",
-          bigSub: `${precourseSectionsDone} of ${precourseSectionsTotal} sections done · Find your way around: ${huntFoundCount} of ${SCAVENGER_HUNT_QUESTIONS.length} found`,
-          ctaHref: `/portfolio/${traineeId}/pre-course-task`,
-          ctaLabel: "Continue",
-        }
-      : heroKind === "precourse_gtky"
-        ? gtkyAssignment && !gtkyAssignment.chosen_slug
+    heroKind === "precourse_gtky"
+      ? !gtkyAssignment
+        ? {
+            label: "Before day one",
+            big: "Your day-one activity",
+            bigSub: "Ready once your teaching groups are set -- check back closer to the start.",
+            ctaHref: `/portfolio/${traineeId}/pre-course-task`,
+            ctaLabel: "Pre-course task",
+          }
+        : !gtkyAssignment.chosen_slug
           ? {
               label: "Before day one",
               big: "Pick your day-one activity",
-              bigSub: `Pre-course task: ${precourseSectionsDone} of ${precourseSectionsTotal} sections done · Three activity options are waiting -- pick one before the first morning`,
+              bigSub: "Three options, unassessed -- pick one before your first morning.",
               ctaHref: `/portfolio/${traineeId}/gtky`,
               ctaLabel: "Choose your activity",
             }
           : {
               label: "Before day one",
-              big: "Your pre-course task",
-              bigSub: `${precourseSectionsDone} of ${precourseSectionsTotal} sections done -- see you Monday`,
-              ctaHref: `/portfolio/${traineeId}/pre-course-task`,
-              ctaLabel: "Open pre-course task",
+              big: "You're set for day one",
+              bigSub: "Your day-one activity is picked -- see you Monday.",
+              ctaHref: `/portfolio/${traineeId}/gtky`,
+              ctaLabel: "View your pick",
             }
-        : heroKind === "teaching_tomorrow" && teachingTomorrow
+      : heroKind === "teaching_tomorrow" && teachingTomorrow
+        ? {
+            label: "You teach tomorrow",
+            big: `TP${teachingTomorrow.tpNumber} — ${teachingTomorrow.title}`,
+            bigSub: `${teachingTomorrow.eventTime ? `${teachingTomorrow.eventTime.slice(0, 5)} · ` : ""}${teachingTomorrow.teachingOrder === 1 ? "1st" : teachingTomorrow.teachingOrder === 2 ? "2nd" : `${teachingTomorrow.teachingOrder}th`} of ${teachingTomorrow.groupSize} tomorrow · ${TP_LESSON_LENGTH_MINUTES} min${teachingTomorrow.groupName ? ` · Group ${teachingTomorrow.groupName}` : ""}`,
+            ctaHref: `/portfolio/${traineeId}/tp/${teachingTomorrow.tpNumber}`,
+            ctaLabel: "Open your plan",
+          }
+        : heroKind === "teaching_next" && teachingNext
           ? {
-              label: "You teach tomorrow",
-              big: `TP${teachingTomorrow.tpNumber} — ${teachingTomorrow.title}`,
-              bigSub: `${teachingTomorrow.eventTime ? `${teachingTomorrow.eventTime.slice(0, 5)} · ` : ""}${teachingTomorrow.teachingOrder === 1 ? "1st" : teachingTomorrow.teachingOrder === 2 ? "2nd" : `${teachingTomorrow.teachingOrder}th`} of ${teachingTomorrow.groupSize} tomorrow · ${TP_LESSON_LENGTH_MINUTES} min${teachingTomorrow.groupName ? ` · Group ${teachingTomorrow.groupName}` : ""}`,
-              ctaHref: `/portfolio/${traineeId}/tp/${teachingTomorrow.tpNumber}`,
-              ctaLabel: "Open your plan",
+              label: "Your next teaching",
+              big: `TP${teachingNext.tpNumber}`,
+              bigSub: new Date(`${teachingNext.date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
+              ctaHref: `/portfolio/${traineeId}/timetable`,
+              ctaLabel: "My timetable",
             }
-          : heroKind === "assignment_due" && assignmentDueSoon
+          : heroKind === "teaching_done"
             ? {
-                label: "Coming up",
-                big: `${ASSIGNMENT_INFO[assignmentDueSoon.assignment_type]?.title ?? assignmentDueSoon.assignment_type} due`,
-                bigSub: assignmentDueSoon.due_date === today ? "Due today" : "Due tomorrow",
-                ctaHref: `/portfolio/${traineeId}/assignments/${assignmentDueSoon.id}`,
-                ctaLabel: "Open assignment",
+                label: "Teaching practice",
+                big: "All your TPs are taught",
+                bigSub: "Nothing left to teach -- see My teaching for the full record.",
+                ctaHref: `/portfolio/${traineeId}/tp`,
+                ctaLabel: "My teaching",
               }
-            : heroKind === "course_news"
-              ? latestAnnouncement
-                ? {
-                    label: "Course news",
-                    big: latestAnnouncement.title,
-                    bigSub: `${latestAnnouncement.author_id ? (authorNameById.get(latestAnnouncement.author_id) ?? "Your tutor") : "Your tutor"} · ${relativeTime(latestAnnouncement.created_at)}`,
-                    ctaHref: `/portfolio/${traineeId}/timetable`,
-                    ctaLabel: "My timetable",
-                  }
-                : {
-                    label: "Today",
-                    big: "Nothing due right now",
-                    bigSub: "Check your timetable for what's coming up next.",
-                    ctaHref: `/portfolio/${traineeId}/timetable`,
-                    ctaLabel: "My timetable",
-                  }
-              : null;
+            : null;
 
   const weekOf = course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
   const eyebrow = [courseName, weekOf].filter(Boolean).join(" · ");
@@ -613,7 +629,7 @@ export async function TodayTab({
             Waiting on you{waiting.length > 0 ? ` · ${waiting.length}` : ""}
           </p>
           {waitingCapped.length === 0 ? (
-            <p className="text-sm text-muted">Nothing waiting on you right now.</p>
+            <p className="text-sm text-muted">Well done — you're all caught up.</p>
           ) : (
             <div className="flex flex-col">
               {waitingCapped.map((w, i) => (
