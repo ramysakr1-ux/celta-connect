@@ -229,8 +229,6 @@ function AssignmentCard({
         <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Tutor feedback</p>
         <p className="mt-1 line-clamp-2 text-sm text-ink">{a.tutor_feedback || "No feedback yet."}</p>
       </div>
-
-      {a.final_grade ? <p className="mt-2 text-xs text-muted">Final grade: {a.final_grade}</p> : null}
     </Link>
   );
 }
