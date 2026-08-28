@@ -156,6 +156,22 @@ export default async function TpHubPage({
   // and reads as permanently empty for any course run through the live
   // app (same dead-table bug fixed in src/lib/roster.ts).
   const tpsTaught = (plans ?? []).filter((p) => p.taught_at).length;
+
+  // Ramy, 29 Aug 2026: "all eight TPs are there -- they should not be. Only
+  // TP one will be there, and as soon as they finish TP one, TP two appears
+  // and so on."
+  //
+  // Gated on taught_at rather than on a plan existing, because a trainer
+  // can assign the whole rotation on day one -- which would reveal all
+  // eight immediately and defeat the point. Shows every TP taught so far
+  // plus the next one, so a candidate always sees exactly one lesson ahead
+  // and their own history behind.
+  //
+  // Staff see all eight regardless: a tutor needs the whole rotation to
+  // plan against, and hiding it from them would break the page they use to
+  // run TP.
+  const highestTaught = (plans ?? []).reduce((max, p) => (p.taught_at && p.tp_number > max ? p.tp_number : max), 0);
+  const visibleTpNumbers = isStaff ? [...TP_NUMBERS] : TP_NUMBERS.filter((n) => n <= highestTaught + 1);
   const assessedHours = (tpsTaught * TP_LESSON_LENGTH_MINUTES) / 60;
 
   let criteriaPct: number | null = null;
@@ -268,7 +284,7 @@ export default async function TpHubPage({
         <div className="sheet flex flex-col gap-1 border-t-[3px] border-t-primary">
           <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Your lessons</p>
           <div className="flex flex-col">
-            {TP_NUMBERS.map((tpNumber) => {
+            {visibleTpNumbers.map((tpNumber) => {
               const plan = planByTpNumber.get(tpNumber);
 
               if (!plan) {
@@ -372,33 +388,10 @@ export default async function TpHubPage({
           </div>
         ) : null}
 
-        <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-[oklch(42%_0.13_27)]">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">Written assignments</p>
-          <div className="flex flex-col">
-            {ASSIGNMENT_ORDER.map((type, i) => {
-              const a = (assignments ?? []).find((row) => row.assignment_type === type);
-              const overall = overallAssignmentStatus(a);
-              const statusText = overall ? ASSIGNMENT_STATUS_LABEL[overall] : "Not started";
-              const statusClass =
-                overall === "approved"
-                  ? "text-ink font-semibold"
-                  : overall === "resubmission_required"
-                    ? "text-status-warning-text"
-                    : "text-muted";
-              return (
-                <div
-                  key={type}
-                  className={`flex items-center justify-between py-1.75 text-sm ${i > 0 ? "border-t border-border-faint" : ""}`}
-                >
-                  <span className="text-ink">
-                    {ASSIGNMENT_ORDER.indexOf(type) + 1} · {ASSIGNMENT_INFO[type].title}
-                  </span>
-                  <span className={`font-semibold ${statusClass}`}>{statusText}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {/* Ramy, 29 Aug 2026: "at the bottom it says written assignments
+            -- we don't need them there, because there is a written
+            assignments tab." It duplicated the tab in full, including
+            status, so the two could disagree the moment one was edited. */}
       </div>
     </div>
   );

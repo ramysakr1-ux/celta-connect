@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation";
 
 // for-claude-code-trainee-assessor-card-system.md / Trainee Walkthrough.dc.html:
 // a left "Workspace" rail, not TraineeTopNav's horizontal tabs -- and a
-// genuinely different grouping, not just a different shape for the same six
+// genuinely different grouping, not just a different shape for the same
 // destinations. Course Stream covers Today, the read-only Timetable, and
 // tutorial booking (all reached via in-page links/buttons from Today, same
 // as the mockup's own "My timetable" action button -- there's no separate
 // top-level Timetable entry). Teaching Practice covers both the overview and
-// a single lesson's detail page. CELTA 5 is its own destination here,
-// alongside Progress.
+// a single lesson's detail page. CELTA 5 is its own destination here --
+// it absorbed Progress on 29 Aug 2026, see the note on that entry below.
 // Ramy, 28 Aug 2026: "I don't think we need a shortcut to pre-course task,
 // because this is something that they will not use during the course" --
 // dropped as its own sidebar item (it's still a real route, just reached
@@ -22,8 +22,18 @@ const SIDEBAR_TABS = [
   { href: "/resources", label: "Resource Hub" },
   { href: "/tp", label: "Teaching Practice" },
   { href: "/assignments", label: "Written Assignments" },
+  // Ramy, 29 Aug 2026: "CELTA 5 at the bottom where you're working on it,
+  // and then something says Progress, and it's exactly the same. We don't
+  // need both."
+  //
+  // He is right, and the Progress page's own comment already conceded it:
+  // "some query logic is duplicated with celta5/page.tsx's trainee branch
+  // -- an accepted tradeoff." Same self-assessment block, same observation
+  // tasks, same observations of experienced teachers. CELTA 5 is the
+  // superset (criteria matrix, the three stages, signatures, attendance,
+  // absences), so it is the one that stays. The /progress route still
+  // exists and still works if linked directly; it is just not a tab.
   { href: "/celta5", label: "CELTA 5" },
-  { href: "/progress", label: "Progress" },
 ] as const;
 
 // Desktop only (`hidden md:flex`), same breakpoint TraineeTopNav used --
