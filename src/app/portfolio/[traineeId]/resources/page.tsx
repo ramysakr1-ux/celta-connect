@@ -178,7 +178,7 @@ const EMPTY_NOTE: Partial<Record<HubCategoryKey, string>> = {
   teaching_practice: "Samples from previous cohorts — for example a self-evaluation, so you can see what one looks like before you write your first. Your tutor adds these.",
   reading: "The course's recommended reading, added by your centre.",
   multimedia: "Audio and video your tutors add for teaching practice.",
-  written_assignments: "The four assignment briefs appear here once your tutor publishes them.",
+  written_assignments: "The four assignment briefs — what each assignment asks for, read before you write it. Your own submitted work is on the Written Assignments tab.",
   forms: "Centre forms and documents, added by your centre.",
   cambridge_documentation: "Cambridge's own course documents.",
   // Ramy, 29 Aug 2026: "an archive for clients -- the library where you
@@ -503,7 +503,17 @@ export default async function ResourceHubPage({
         style={{ background: "oklch(30% 0.042 58)" }}
       >
         <div className="min-w-0">
-          <Link href={`/portfolio/${traineeId}`} className="text-[12.5px]" style={{ color: "oklch(99.2% 0.005 90 / 0.8)" }}>
+          {/* Ramy, 29 Aug 2026: "can we put that arrow back inside some kind
+              of colourful pill? It's just hard to see." It was plain text at
+              80% opacity on a dark masthead -- the one control on the page
+              that gets you out of the room, and the lowest-contrast thing on
+              it. Now a filled pill, which also makes it read as a button
+              rather than a caption. */}
+          <Link
+            href={`/portfolio/${traineeId}`}
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-[5px] text-[12px] font-bold transition-colors"
+            style={{ background: "oklch(60% 0.11 70)", color: "oklch(23.5% 0.017 65)" }}
+          >
             ← Course stream
           </Link>
           <h1 className="mt-1.5 font-serif text-[30px] font-semibold" style={{ color: "oklch(99.2% 0.005 90)" }}>

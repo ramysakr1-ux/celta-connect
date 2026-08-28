@@ -53,7 +53,12 @@ export const HUB_CATEGORY_LABELS: Record<HubCategoryKey, string> = {
   tp78_materials: "TP7–8 Materials",
   multimedia: "Multimedia",
   coursebooks: "Coursebooks",
-  written_assignments: "Written Assignments",
+  // Ramy, 29 Aug 2026: "written assignments, I think, briefs -- so it's
+  // just a cover sheet, basically, not the actual assignment." The shelf
+  // holds the four briefs a candidate reads before writing; their own
+  // submitted work lives on the Written Assignments tab. Same words for two
+  // different things was the confusion.
+  written_assignments: "Assignment Briefs",
   cambridge_documentation: "Cambridge Documentation",
   reading: "Reading",
   filmed_observations: "Filmed Observations",

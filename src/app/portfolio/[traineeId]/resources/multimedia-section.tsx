@@ -51,7 +51,22 @@ function TrackRow({ row }: { row: AudioRow }) {
 // manages at /trainer/audio -- "multimedia yes/yes" in the hub visibility
 // table (unlike TP points, this one's meant to be trainee-visible).
 export function MultimediaSection({ tracks }: { tracks: AudioRow[] }) {
-  if (tracks.length === 0) return null;
+  // Ramy, 29 Aug 2026: "multimedia, video, other videos -- I don't see
+  // audio." It returned null when empty, so with no tracks the audio half
+  // vanished entirely and the category looked like it was video-only. An
+  // empty shelf should say it is empty, not disappear -- otherwise nobody
+  // can tell the difference between "no audio yet" and "audio is not a
+  // thing here".
+  if (tracks.length === 0) {
+    return (
+      <div>
+        <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Audio</h3>
+        <p className="sheet mt-3 border-dashed text-sm text-muted">
+          Coursebook audio your tutors add for teaching practice — nothing here yet.
+        </p>
+      </div>
+    );
+  }
 
   const byBook = new Map<string, AudioRow[]>();
   for (const row of tracks) {
@@ -62,7 +77,7 @@ export function MultimediaSection({ tracks }: { tracks: AudioRow[] }) {
 
   return (
     <div>
-      <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Multimedia</h3>
+      <h3 className="font-serif text-[11px] font-bold tracking-[0.09em] text-muted uppercase">Audio</h3>
       <div className="mt-3 flex flex-col gap-4">
         {[...byBook.entries()].map(([book, rows]) => (
           <div key={book}>
