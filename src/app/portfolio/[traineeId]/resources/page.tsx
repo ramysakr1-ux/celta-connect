@@ -218,18 +218,30 @@ export default async function ResourceHubPage({
   // task, and completion feeding the real observation-hours tracker. Same
   // query pattern today-tab.tsx's own filmedObservationReminder already
   // uses, just for every session on the course, not just today's.
+  // Driven by the TIMETABLE slots, not by the sessions -- a session row
+  // only exists once a trainer has opened the setup form and saved, so
+  // keying off sessions meant a candidate saw nothing at all until then,
+  // not even that five were scheduled. The design's "Scheduled on your
+  // timetable / No recording yet" row is exactly this case. Matched by
+  // title the same way the trainer's own drag-board does; filmed
+  // observations are milestone events, not a distinct event type.
+  const { data: filmedEvents } = trainee.course_id
+    ? await supabase
+        .from("course_timetable_events")
+        .select("id, title, event_date, event_time")
+        .eq("course_id", trainee.course_id)
+        .eq("type", "milestone")
+        .ilike("title", "Filmed observation%")
+        .order("event_date")
+    : { data: [] };
+  const filmedEventById = new Map((filmedEvents ?? []).map((e) => [e.id, e]));
   const { data: filmedSessionsRaw } = trainee.course_id
     ? await supabase
         .from("filmed_observation_sessions")
         .select("id, lesson_title, level, learner_count, teacher_name, main_aim, sub_aim, recording_url, length_minutes, timetable_event_id")
         .eq("course_id", trainee.course_id)
     : { data: [] };
-  const filmedEventIds = (filmedSessionsRaw ?? []).map((s) => s.timetable_event_id);
-  const { data: filmedEvents } =
-    filmedEventIds.length > 0
-      ? await supabase.from("course_timetable_events").select("id, title, event_date, event_time").in("id", filmedEventIds)
-      : { data: [] };
-  const filmedEventById = new Map((filmedEvents ?? []).map((e) => [e.id, e]));
+  const sessionByEventId = new Map((filmedSessionsRaw ?? []).map((s) => [s.timetable_event_id, s]));
   const { data: myFilmedResponses } =
     viewer?.role === "trainee"
       ? await supabase
@@ -264,26 +276,26 @@ export default async function ResourceHubPage({
       .filter((r) => [r.response_1, r.response_2, r.response_general].some((v) => v?.trim()))
       .map((r) => r.task_id)
   );
-  const filmedSessions = (filmedSessionsRaw ?? [])
-    .map((s) => {
-      const event = filmedEventById.get(s.timetable_event_id);
-      const taskId = taskIdBySessionId.get(s.id);
+  const filmedSessions = (filmedEvents ?? [])
+    .map((event) => {
+      const fs = sessionByEventId.get(event.id) ?? null;
+      const taskId = fs ? taskIdBySessionId.get(fs.id) : undefined;
       return {
-        id: s.id,
-        lessonTitle: s.lesson_title,
-        level: s.level,
-        learnerCount: s.learner_count,
-        teacherName: s.teacher_name,
-        mainAim: s.main_aim,
-        subAim: s.sub_aim,
-        hasRecording: Boolean(s.recording_url?.trim()),
-        lengthMinutes: s.length_minutes,
-        eventTitle: event?.title ?? null,
-        viewed: viewedSessionIds.has(s.id),
+        id: fs?.id ?? null,
+        lessonTitle: fs?.lesson_title ?? null,
+        level: fs?.level ?? null,
+        learnerCount: fs?.learner_count ?? null,
+        teacherName: fs?.teacher_name ?? null,
+        mainAim: fs?.main_aim ?? null,
+        subAim: fs?.sub_aim ?? null,
+        hasRecording: Boolean(fs?.recording_url?.trim()),
+        lengthMinutes: fs?.length_minutes ?? null,
+        eventTitle: event.title,
+        viewed: fs ? viewedSessionIds.has(fs.id) : false,
         started: taskId ? startedTaskIds.has(taskId) : false,
         hasTask: Boolean(taskId),
-        eventDate: event?.event_date ?? null,
-        eventTime: event?.event_time ?? null,
+        eventDate: event.event_date,
+        eventTime: event.event_time,
         completed: taskId ? completedTaskIds.has(taskId) : false,
       };
     })
@@ -545,7 +557,7 @@ export default async function ResourceHubPage({
               };
               // A session with no recording is not a link -- there is
               // nothing behind it yet, and a dead click reads as broken.
-              return s.hasRecording ? (
+              return s.hasRecording && s.id ? (
                 <li key={s.id}>
                   <Link
                     href={`/portfolio/${traineeId}/filmed-observation/${s.id}`}
@@ -556,7 +568,7 @@ export default async function ResourceHubPage({
                   </Link>
                 </li>
               ) : (
-                <li key={s.id} className="flex flex-col overflow-hidden rounded-[6px] border border-dashed border-border">
+                <li key={s.id ?? s.eventTitle} className="flex flex-col overflow-hidden rounded-[6px] border border-dashed border-border">
                   {row}
                 </li>
               );
