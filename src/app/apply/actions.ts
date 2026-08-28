@@ -226,6 +226,13 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
   // outcome." Sent here rather than from a cron so it arrives while they're
   // still on the confirmation screen. Ramy, 26 Aug 2026: keep it generic --
   // "we'll be in touch shortly" -- rather than quoting a specific date.
+  // Ramy, 28 Aug 2026, correcting his own earlier framing: "the
+  // acknowledgement... gets to everybody. The difference is some receive
+  // an interview appointment, and some receive a rejection." Confirmed:
+  // this send is unconditional, on purpose -- the AI triage lane
+  // (clear_problems) still drives the separate MCT notification
+  // (notifyClearProblems, admissions-ai-triage.ts), it just never gates
+  // this one.
   //
   // A failure to send is deliberately NOT surfaced to the applicant: their
   // application is already saved, and telling them "could not submit" because

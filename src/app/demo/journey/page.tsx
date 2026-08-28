@@ -5,6 +5,10 @@ import {
   interviewInvitationEmailHtml,
   interviewBookedEmailHtml,
   acceptancePlaceEmailHtml,
+  rejectionEmailHtml,
+  rejectionAfterInterviewEmailHtml,
+  placeFreedEmailHtml,
+  notThisTimeEmailHtml,
   welcomeEmailHtml,
   startsMondayEmailHtml,
   volunteerSignedUpEmailHtml,
@@ -235,6 +239,60 @@ export default async function JourneyPage() {
     }),
     centreName
   );
+  // Ramy, 28 Aug 2026: "some receive an interview appointment, and some
+  // receive a rejection letter" -- the real branch point, missing from
+  // this journey entirely until now. Two distinct rejection emails exist
+  // for two distinct moments (before ever meeting them, and after a real
+  // interview) -- twenty-decisions.md 11a: never automatic, always a
+  // human's own words in `reason`.
+  const rejectionHtml = withConnectBranding(
+    rejectionEmailHtml({
+      applicantName: "Priya Sharma",
+      centreName,
+      reason:
+        "The written task showed some strong moments, but the language-awareness section wasn't yet at the level this course needs to build on -- specifically explaining word order in reported speech.",
+    }),
+    centreName
+  );
+  const rejectionAfterInterviewHtml = withConnectBranding(
+    rejectionAfterInterviewEmailHtml({
+      applicantName: "Daniel Kim",
+      interviewDate: "Wednesday 27 August",
+      reason:
+        "We talked through how you'd handle being observed teaching from week one, and I don't think this course's pace is the right fit yet -- come back to it once you've had more time in front of a class.",
+    }),
+    centreName
+  );
+  // Ramy, 28 Aug 2026: "what happens if they pass the interview but the
+  // course is full?" -- the real waiting-list mechanism, same three-way
+  // decision point as offer/reject: position + a real "hear either way by"
+  // date, then two real automatic outcomes -- offered the moment a place
+  // frees up (place_freed), or a dedicated "not this time" if that date
+  // passes with nothing (admissions-cron.ts's nightly check).
+  const placeFreedHtml = withConnectBranding(
+    placeFreedEmailHtml({
+      applicantName: "Priya Sharma",
+      courseName,
+      courseDates: "7 August to 4 September",
+      startsInPhrase: "in 6 days",
+      feeLine: "The fee is as set for this course;",
+      respondBy: "Wednesday 2 September, 17:00 UTC",
+      offerUrl: "https://celtaconnect.com/offer/<token>",
+      hoursLeftLabel: "Accept your place",
+      nextCourseName: null,
+    }),
+    centreName
+  );
+  const notThisTimeHtml = withConnectBranding(
+    notThisTimeEmailHtml({
+      applicantName: "Priya Sharma",
+      courseName,
+      positionWord: "3rd",
+      nextCourseName: null,
+      nextCourseStart: null,
+    }),
+    centreName
+  );
   const volunteerHtml = withConnectBranding(
     volunteerSignedUpEmailHtml({ volunteerName: "Grace Adeyemi", centreName }),
     centreName
@@ -332,7 +390,21 @@ export default async function JourneyPage() {
               </div>
             </div>
           </Step>
-          <Step number={4} title="Is invited to interview" blurb="Sent once the written task has been read.">
+          <p className="ml-8 max-w-2xl text-xs text-muted">
+            Neither of the next two happens automatically for everyone. If AI shadow-mode reading is on and this
+            applicant is clear on every criterion, an interview invite queues itself and sends 15 minutes later --
+            unless a staff member cancels it first. Everyone else gets nothing automatic: a real person on the admin
+            or MCT side reads the application themselves and manually sends one of the two below.
+          </p>
+          <div className="ml-8 flex flex-col gap-2 border-l-2 border-dashed border-destructive/40 pl-4">
+            <p className="text-xs font-semibold text-destructive">Manually sent -- decided not to proceed</p>
+            <EmailPreview title="We are not taking your application further" to="Priya Sharma" html={rejectionHtml} />
+          </div>
+          <Step
+            number={4}
+            title="Is invited to interview"
+            blurb="Either the 15-minute autobook (clear on every criterion, if the centre has that on) or a staff member sending it manually -- same email either way."
+          >
             <EmailPreview title="We would like to meet you" to={applicantName} html={inviteHtml} />
           </Step>
           <Step
@@ -370,6 +442,26 @@ export default async function JourneyPage() {
               <p className="text-sm text-muted">No active questions configured yet.</p>
             )}
           </Step>
+          <div className="ml-8 flex flex-col gap-2 border-l-2 border-dashed border-destructive/40 pl-4">
+            <p className="text-xs font-semibold text-destructive">OR -- meeting them changes the decision</p>
+            <EmailPreview title="We are not able to offer you a place this time" to="Daniel Kim" html={rejectionAfterInterviewHtml} />
+          </div>
+          <div className="ml-8 flex flex-col gap-2 border-l-2 border-dashed border-status-warning-text/50 pl-4">
+            <p className="text-xs font-semibold text-status-warning-text">
+              OR -- they&apos;re a clear yes, but the course is full: waiting list, with a real date they&apos;ll hear
+              either way -- their task and interview stay on file, they never repeat them
+            </p>
+            <EmailPreview title="A place has come free — it is yours if you want it" to="Priya Sharma" html={placeFreedHtml} />
+            <p className="text-xs text-muted">
+              Sent automatically the moment a real place opens -- withdrawal, deferral, or an unaccepted offer lapsing.
+              48 hours to respond, same accept-page as any offer.
+            </p>
+            <EmailPreview title="The course filled before a place came free" to="Priya Sharma" html={notThisTimeHtml} />
+            <p className="text-xs text-muted">
+              Or, if their own hear-by date passes first with nothing freed -- sent automatically by the nightly job,
+              nobody left waiting past the date they were promised.
+            </p>
+          </div>
           <Step
             number={8}
             title="Receives an offer"
