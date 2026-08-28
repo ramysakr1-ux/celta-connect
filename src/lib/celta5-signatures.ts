@@ -26,7 +26,7 @@ export function computeSignatureLedger(
   record: Celta5Record,
   assignments: Pick<
     AssignmentRow,
-    "assignment_type" | "first_status" | "resubmission_status" | "first_own_work_confirmed" | "resubmission_own_work_confirmed"
+    "assignment_type" | "first_status" | "resubmission_status" | "first_own_work_confirmed" | "resubmission_own_work_confirmed" | "first_outcome_signed_at" | "resubmission_outcome_signed_at"
   >[]
 ): SignatureLedgerRow[] {
   const rows: SignatureLedgerRow[] = [
@@ -57,11 +57,30 @@ export function computeSignatureLedger(
     const isResubmissionRound = a.first_status === "resubmission_required" || a.resubmission_status !== "not_submitted";
     const status = isResubmissionRound ? a.resubmission_status : a.first_status;
     const confirmed = isResubmissionRound ? a.resubmission_own_work_confirmed : a.first_own_work_confirmed;
+    const title = ASSIGNMENT_INFO[a.assignment_type]?.title ?? a.assignment_type;
     rows.push({
       key: `own_work_${a.assignment_type}`,
-      label: `${ASSIGNMENT_INFO[a.assignment_type]?.title ?? a.assignment_type} -- own work`,
+      label: `${title} -- own work`,
       state: confirmed ? "signed" : status === "not_submitted" ? "locked" : "open",
       at: null,
+    });
+    // Ramy, 29 Aug 2026: "the trainees must sign for the assignments -- if
+    // it's pass, for resubmission, second submission, or fail." A separate
+    // signature from own-work above: that one is declared before
+    // submitting, this one acknowledges the result afterwards.
+    //
+    // Only becomes signable once there IS a result -- a status that is
+    // still not_submitted or submitted has nothing to acknowledge yet.
+    const outcomeSignedAt = isResubmissionRound ? a.resubmission_outcome_signed_at : a.first_outcome_signed_at;
+    // The real statuses are approved / resubmission_required -- there is no
+    // "passed" or "failed" on an assignment. A resubmission that is still
+    // required after the resubmission round IS the fail case.
+    const hasResult = status === "approved" || status === "resubmission_required";
+    rows.push({
+      key: `outcome_${a.assignment_type}`,
+      label: `${title} -- result seen`,
+      state: outcomeSignedAt ? "signed" : hasResult ? "open" : "locked",
+      at: outcomeSignedAt,
     });
   }
 

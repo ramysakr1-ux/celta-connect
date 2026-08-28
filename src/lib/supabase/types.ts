@@ -1205,6 +1205,13 @@ export interface Database {
           resubmission_ai_conversation_url: string | null;
           first_own_work_confirmed: boolean;
           resubmission_own_work_confirmed: boolean;
+          // Migration 0245 -- the candidate acknowledging the RESULT, which
+          // is a different signature from the own-work declaration above
+          // (that one is made before submitting).
+          first_outcome_signed_at: string | null;
+          first_outcome_signature_name: string | null;
+          resubmission_outcome_signed_at: string | null;
+          resubmission_outcome_signature_name: string | null;
           final_grade: string | null;
           due_date: string | null;
           // migration 0178 -- "something already late" push idempotency

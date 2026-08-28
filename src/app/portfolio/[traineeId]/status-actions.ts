@@ -428,3 +428,99 @@ export async function grantExtension(
   revalidatePath("/trainer/roster");
   return { error: null };
 }
+
+export type AbsenceFormState = { error: string | null };
+
+// Ramy, 29 Aug 2026: "the trainee side should also show the attendance --
+// it's like for absences. If they skip something, then they have to record
+// it."
+//
+// The trainer's own addAbsence in celta5-actions.ts requires a trainer, so
+// until now the only way an absence reached the record was a tutor typing
+// it in afterwards. This is the candidate declaring their own, which is
+// how it is meant to work: they know they missed the session, the tutor
+// finds out because they said so.
+//
+// Deliberately cannot set tutor_comment -- that is the tutor's response to
+// the absence, and migration 0244's policy rejects the insert if it is
+// present rather than trusting this to leave it out.
+export async function reportOwnAbsence(_prevState: AbsenceFormState, formData: FormData): Promise<AbsenceFormState> {
+  const trainee = await requireRole("trainee");
+  if (!trainee.course_id) return { error: "You are not on a course yet." };
+
+  const category = formData.get("category");
+  if (category !== "unavoidable" && category !== "other") {
+    return { error: "Choose whether this was unavoidable." };
+  }
+  const sessionDate = formData.get("session_date");
+  if (typeof sessionDate !== "string" || !sessionDate) {
+    return { error: "Say which day you missed." };
+  }
+  const reason = formData.get("reason");
+  if (typeof reason !== "string" || !reason.trim()) {
+    return { error: "Give a short reason -- your tutor needs to know what happened." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("attendance_absences").insert({
+    course_id: trainee.course_id,
+    trainee_id: trainee.id,
+    category,
+    session_date: sessionDate,
+    reason: reason.trim(),
+    work_made_up: typeof formData.get("work_made_up") === "string" ? (formData.get("work_made_up") as string).trim() || null : null,
+  });
+  if (error) return { error: "Could not save. Try again." };
+
+  revalidatePath(`/portfolio/${trainee.id}/celta5`);
+  return { error: null };
+}
+
+// Ramy, 29 Aug 2026: "the trainees must sign for the assignments -- if it's
+// pass, for resubmission, second submission, or fail."
+//
+// Distinct from the own-work confirmation, which is declared BEFORE
+// submitting. This records that the candidate has seen the result and its
+// consequence -- a resubmission window opening, a resubmission being spent,
+// a criterion left unmet. It is not agreement, and signing it does not
+// waive the right to query the grade; it is a record that they were shown.
+export async function signAssignmentOutcome(_prevState: AbsenceFormState, formData: FormData): Promise<AbsenceFormState> {
+  const trainee = await requireRole("trainee");
+
+  const assignmentId = formData.get("assignment_id");
+  const round = formData.get("round");
+  if (typeof assignmentId !== "string" || !assignmentId || (round !== "first" && round !== "resubmission")) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase.from("profiles").select("signature_name, full_name").eq("id", trainee.id).maybeSingle();
+  const name = profile?.signature_name?.trim() || profile?.full_name?.trim();
+  if (!name) return { error: "Set your signature name first." };
+
+  const { data: existing } = await supabase
+    .from("assignments")
+    .select("first_outcome_signed_at, resubmission_outcome_signed_at")
+    .eq("id", assignmentId)
+    .eq("trainee_id", trainee.id)
+    .maybeSingle();
+  if (!existing) return { error: "Could not find that assignment." };
+  // Idempotent: a second press must not overwrite the original date, which
+  // is the whole evidential point of the signature.
+  if (round === "first" ? existing.first_outcome_signed_at : existing.resubmission_outcome_signed_at) {
+    return { error: null };
+  }
+
+  const now = new Date().toISOString();
+  const patch =
+    round === "first"
+      ? { first_outcome_signed_at: now, first_outcome_signature_name: name }
+      : { resubmission_outcome_signed_at: now, resubmission_outcome_signature_name: name };
+
+  const { error } = await supabase.from("assignments").update(patch).eq("id", assignmentId).eq("trainee_id", trainee.id);
+  if (error) return { error: "Could not save. Try again." };
+
+  revalidatePath(`/portfolio/${trainee.id}/assignments/${assignmentId}`);
+  revalidatePath(`/portfolio/${trainee.id}/celta5`);
+  return { error: null };
+}

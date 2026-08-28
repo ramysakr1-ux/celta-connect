@@ -39,6 +39,7 @@ import { AdminGrantForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/adm
 import { FinalizeRecordForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/finalize-record-form";
 import { ReleaseFinalReportForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/release-final-report-form";
 import { SignatureLedger } from "@/app/dashboard/trainer/trainees/[id]/celta5/signature-ledger";
+import { AbsencePanel } from "@/app/portfolio/[traineeId]/celta5/absence-panel";
 import { computeSignatureLedger } from "@/lib/celta5-signatures";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
@@ -771,7 +772,7 @@ export default async function PortfolioCelta5Page({
     supabase.from("tp_lessons").select("id").eq("trainee_id", traineeId),
     supabase
       .from("assignments")
-      .select("id, assignment_type, first_status, resubmission_status, first_own_work_confirmed, resubmission_own_work_confirmed, final_grade")
+      .select("id, assignment_type, first_status, resubmission_status, first_own_work_confirmed, resubmission_own_work_confirmed, first_outcome_signed_at, resubmission_outcome_signed_at, final_grade")
       .eq("trainee_id", traineeId),
     supabase.from("tp_feedback").select("*").eq("trainee_id", traineeId),
     supabase.from("plan_assignments").select("tp_number, tp_point_id, taught_at").eq("trainee_id", traineeId),
@@ -1175,6 +1176,8 @@ export default async function PortfolioCelta5Page({
             <p className="mt-2 text-sm text-muted">Not yet signed off by the candidate.</p>
           )}
         </div>
+
+        <AbsencePanel absences={absences ?? []} hoursAttended={record.hours_attended} totalHours={course?.total_hours ?? 120} />
 
         <SignatureLedger rows={signatureLedger} traineeId={traineeId} />
       </div>
