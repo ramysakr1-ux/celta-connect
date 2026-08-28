@@ -181,7 +181,28 @@ export function FilmedObservationWatchScreen({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
+    // Ramy, 29 Aug 2026: "it's not half the screen task, half the screen
+    // video -- it's one quarter task, one quarter video, and then the rest
+    // of the screen is just other stuff." He was right, and the arithmetic
+    // was worse than it looked: .container caps at 1280px and centres, so a
+    // 1920px screen loses ~640px to margin before this page starts. Minus
+    // the portfolio sidebar (~180px), the frame's padding (~48px) and a
+    // 340px rail, the video was left about 660px wide -- a third of the
+    // screen, next to a third of the screen showing nothing.
+    //
+    // This is a video-watching page, so the reading-width constraint that
+    // is right for text pages is wrong here. The negative margin escapes
+    // .container and the frame padding to take the real viewport width;
+    // everything else on the page keeps its normal measure.
+    //
+    // The video is also capped by height, not just width: on an ultrawide
+    // it would otherwise grow past the fold and push the task off-screen,
+    // which is the same problem in the other direction.
+    // No w-screen: 100vw includes the scrollbar, so it would add a
+    // horizontal scrollbar on any page tall enough to have a vertical one.
+    // A block element already fills its container, and the negative margins
+    // widen that container to the viewport.
+    <div className="mx-[calc(50%-50vw)] grid grid-cols-1 gap-4 px-4 lg:grid-cols-[minmax(0,1fr)_400px] xl:gap-6 xl:px-8">
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <div className="flex -space-x-2">
@@ -239,7 +260,7 @@ export function FilmedObservationWatchScreen({
           expected to watch every second, just enough to answer the task.
         </p>
 
-        <div className="relative overflow-hidden rounded-[10px] border border-border bg-ink">
+        <div className="relative mx-auto w-full max-w-[min(100%,calc((100vh-15rem)*16/9))] overflow-hidden rounded-[10px] border border-border bg-ink">
           {video?.kind === "youtube" ? (
             // Ramy, 29 Aug 2026: the recordings are YouTube links, and the
             // discussion breaks have to pause them ("the film will pause...
