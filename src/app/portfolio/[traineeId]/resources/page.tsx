@@ -181,6 +181,26 @@ const EMPTY_NOTE: Partial<Record<HubCategoryKey, string>> = {
   written_assignments: "The four assignment briefs appear here once your tutor publishes them.",
   forms: "Centre forms and documents, added by your centre.",
   cambridge_documentation: "Cambridge's own course documents.",
+  // Ramy, 29 Aug 2026: "an archive for clients -- the library where you
+  // have all the originals. We're just not using it, but since this is
+  // meant to be for other centres, maybe they would choose different
+  // documentation, so it's good to have it there for reference. An
+  // assessor wants to look at them to see what it actually looks like
+  // without looking at the built-in structure. No one is gonna touch it."
+  //
+  // Deliberately NOT a trainee shelf and not a working one: the live
+  // versions of all this paperwork already exist as answerable screens
+  // (observation tasks on Progress, filmed observation tasks, assignment
+  // briefs, the structured lesson plan). This is the blank originals those
+  // were built from, kept so an assessor can see the documents themselves
+  // and another centre can decide whether to adopt them.
+  //
+  // Lands in Centre Documents rather than a new category because
+  // resources.category is a database enum -- a new value needs a migration
+  // -- and this shelf is already staff-and-assessor visible, which is
+  // exactly the audience.
+  centre_documents:
+    "The centre's own paperwork, plus the archive of original blank forms — lesson plan, language analysis sheet, observation tasks, assignment briefs — kept for reference rather than for use. The live versions are elsewhere in Connect.",
 };
 
 function PlainCategoryGrid({
