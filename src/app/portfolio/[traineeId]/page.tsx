@@ -99,7 +99,16 @@ export default async function CourseStreamPage({
       await markScavengerHuntFound(supabase, trainee.course_id, viewer.id, "announcement");
     }
     const { data: course } = await supabase.from("courses").select("name").eq("id", trainee.course_id).maybeSingle();
-    return <TodayTab supabase={supabase} traineeId={traineeId} courseId={trainee.course_id} courseName={course?.name ?? null} timeZone={timeZone} />;
+    return (
+      <TodayTab
+        supabase={supabase}
+        traineeId={traineeId}
+        courseId={trainee.course_id}
+        centerId={trainee.center_id}
+        courseName={course?.name ?? null}
+        timeZone={timeZone}
+      />
+    );
   }
 
   const today = toLocalIso(new Date(), timeZone);

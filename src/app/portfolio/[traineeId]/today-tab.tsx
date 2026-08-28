@@ -8,6 +8,7 @@ import { getTpCardStatus } from "@/lib/tp-plan-content";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { PushSubscribeButton } from "@/components/push-subscribe-button";
 import { subscribeSessionPush, unsubscribeSessionPush } from "@/lib/push/actions";
+import { SCAVENGER_HUNT_QUESTIONS } from "@/lib/scavenger-hunt";
 
 const TP_LESSON_LENGTH_MINUTES = 45;
 // Matches celta5/page.tsx's own local OBSERVATION_HOURS_REQUIRED -- kept as
@@ -26,6 +27,16 @@ function relativeTime(iso: string): string {
   if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
   const days = Math.floor(hours / 24);
   return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+// Plain calendar-day arithmetic on a YYYY-MM-DD string -- deliberately not
+// timezone-aware (unlike toLocalIso/zonedTimeToUtc elsewhere in this file),
+// since `today` is already the trainee's local calendar date and "tomorrow"
+// just means the next date on that same calendar, not a moment in time.
+function addDaysIso(iso: string, days: number): string {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
 }
 
 const LETTER_LABEL: Record<string, string> = {
@@ -51,16 +62,19 @@ export async function TodayTab({
   supabase,
   traineeId,
   courseId,
+  centerId,
   courseName,
   timeZone,
 }: {
   supabase: SupabaseClient<Database>;
   traineeId: string;
   courseId: string;
+  centerId: string;
   courseName: string | null;
   timeZone: string;
 }) {
   const today = toLocalIso(new Date(), timeZone);
+  const tomorrow = addDaysIso(today, 1);
 
   const [
     { data: course },
@@ -191,15 +205,38 @@ export async function TodayTab({
     .eq("trainee_id", traineeId)
     .maybeSingle();
 
+  // Ramy, 28 Aug 2026: "three cards will always be there... the information
+  // on them will change" -- before the course starts there's no TP to teach,
+  // so the hero card carries pre-course-task/scavenger-hunt progress instead,
+  // switching to the day-one GTKY pick once the scavenger hunt is fully
+  // found. Only queried pre-course -- these tables are irrelevant once the
+  // course has actually started.
+  const preCourse = course?.start_date ? today < course.start_date : false;
+  const [{ data: precourseSections }, { data: precourseProgress }, { data: huntProgress }] = preCourse
+    ? await Promise.all([
+        supabase.from("pre_course_task_sections").select("id").eq("center_id", centerId),
+        supabase.from("pre_course_task_progress").select("section_id, completed_at").eq("trainee_id", traineeId),
+        supabase.from("scavenger_hunt_progress").select("question_key").eq("trainee_id", traineeId),
+      ])
+    : [{ data: [] }, { data: [] }, { data: [] }];
+  const precourseSectionsTotal = precourseSections?.length ?? 0;
+  const precourseSectionsDone = (precourseProgress ?? []).filter((p) => p.completed_at).length;
+  const huntFoundCount = (huntProgress ?? []).length;
+  const scavengerDone = huntFoundCount >= SCAVENGER_HUNT_QUESTIONS.length;
+
   const planByTpNumber = new Map((plans ?? []).map((p) => [p.tp_number, p]));
   const tpPlanByTpNumber = new Map((tpPlans ?? []).map((p) => [p.tp_number, p]));
   const selfEvalByTpNumber = new Map((selfEvaluations ?? []).map((s) => [s.tp_number, s]));
   const feedbackByTpNumber = new Map((feedbackRows ?? []).map((f) => [f.tp_number, f]));
 
-  // "You teach today" -- reuses the exact same half/date bridge rotation.ts
-  // and the trainer-side Teaching Practice queue already trust, scoped to
-  // just this one trainee's own subgroup instead of a whole course scan.
-  let teachingToday: {
+  // "You teach today"/"You teach tomorrow" -- reuses the exact same
+  // half/date bridge rotation.ts and the trainer-side Teaching Practice
+  // queue already trust, scoped to just this one trainee's own subgroup
+  // instead of a whole course scan. Pulled into a function of the date so
+  // it can answer "today" first and, only if that's empty, "tomorrow" --
+  // Ramy, 28 Aug 2026: the hero card should say "you teach tomorrow" on a
+  // day the trainee isn't teaching, not disappear.
+  type TeachingOn = {
     tpNumber: number;
     title: string;
     teachingOrder: number;
@@ -208,8 +245,9 @@ export async function TodayTab({
     eventTime: string | null;
     groupName: string | null;
     joinable: boolean;
-  } | null = null;
-  if (subgroupMember) {
+  };
+  async function computeTeachingFor(dateIso: string): Promise<TeachingOn | null> {
+    if (!subgroupMember) return null;
     const subgroup = subgroupRow;
     const { data: members } = await supabase
       .from("course_subgroup_members")
@@ -220,51 +258,53 @@ export async function TodayTab({
       .select("*")
       .eq("course_id", courseId)
       .eq("type", "tp")
-      .eq("event_date", today);
+      .eq("event_date", dateIso);
+    if (!subgroup?.half_order || !tpEvents || tpEvents.length === 0) return null;
 
-    if (subgroup?.half_order && tpEvents && tpEvents.length > 0) {
-      const allTpTimetableEvents: TpTimetableEvent[] = (
-        await supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).eq("type", "tp")
-      ).data ?? [];
-      const halfDates = halfTpDates(allTpTimetableEvents, subgroup.half_order);
-      const tpIndex = halfDates.indexOf(today);
-      const tpNumber = tpIndex >= 0 ? tpIndex + 1 : null;
-      const plan = tpNumber ? planByTpNumber.get(tpNumber) : null;
-      if (tpNumber && plan && !plan.taught_at && (members ?? []).length > 0) {
-        const size = (members ?? []).length;
-        const order = rotationPosition(subgroupMember.base_slot, size, tpNumber) + 1;
-        const event = tpEvents[0];
-        // Matches the timetable's own camera-icon/live-now-bar gate
-        // (isEventLive: joinable from 10 min before start) -- this card's
-        // "Join the room" button used to have no time check at all, unlike
-        // those two, so a trainee could join six hours early from here and
-        // nowhere else. zonedTimeToUtc/timeZone rather than isEventLive's
-        // naive Date() parsing, to match this file's own existing
-        // timezone-aware pattern just above (filmedObservationReminder).
-        const startsAt = event.event_time ? zonedTimeToUtc(event.event_date, event.event_time, timeZone) : null;
-        const joinable = startsAt ? Date.now() >= startsAt.getTime() - 10 * 60 * 1000 : false;
-        // Spec calls for "which TP, when, where, level, group size, teaching
-        // order" -- this app doesn't track a physical room anywhere, and
-        // event.title (the old roomOrLevel value, e.g. "TP1 -- Half A") was
-        // fetched but never actually rendered, and wouldn't have been
-        // meaningful even if it had been (just repeats the TP number already
-        // shown). Group name is the one real "where" this schema has.
-        const { data: tpGroup } = subgroupTpGroupId
-          ? await supabase.from("course_tp_groups").select("name").eq("id", subgroupTpGroupId).maybeSingle()
-          : { data: null };
-        teachingToday = {
-          tpNumber,
-          title: plan.short_title || plan.main_lesson_aim,
-          teachingOrder: order,
-          groupSize: size,
-          zoomUrl: event.zoom_url,
-          eventTime: event.event_time,
-          groupName: tpGroup?.name ?? null,
-          joinable,
-        };
-      }
-    }
+    const allTpTimetableEvents: TpTimetableEvent[] = (
+      await supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).eq("type", "tp")
+    ).data ?? [];
+    const halfDates = halfTpDates(allTpTimetableEvents, subgroup.half_order);
+    const tpIndex = halfDates.indexOf(dateIso);
+    const tpNumber = tpIndex >= 0 ? tpIndex + 1 : null;
+    const plan = tpNumber ? planByTpNumber.get(tpNumber) : null;
+    if (!tpNumber || !plan || plan.taught_at || (members ?? []).length === 0) return null;
+
+    const size = (members ?? []).length;
+    const order = rotationPosition(subgroupMember.base_slot, size, tpNumber) + 1;
+    const event = tpEvents[0];
+    // Matches the timetable's own camera-icon/live-now-bar gate
+    // (isEventLive: joinable from 10 min before start) -- this card's
+    // "Join the room" button used to have no time check at all, unlike
+    // those two, so a trainee could join six hours early from here and
+    // nowhere else. zonedTimeToUtc/timeZone rather than isEventLive's
+    // naive Date() parsing, to match this file's own existing
+    // timezone-aware pattern just above (filmedObservationReminder).
+    // Only ever true for `today` -- a "tomorrow" lookup can't be joinable yet.
+    const startsAt = event.event_time ? zonedTimeToUtc(event.event_date, event.event_time, timeZone) : null;
+    const joinable = dateIso === today && startsAt ? Date.now() >= startsAt.getTime() - 10 * 60 * 1000 : false;
+    // Spec calls for "which TP, when, where, level, group size, teaching
+    // order" -- this app doesn't track a physical room anywhere, and
+    // event.title (the old roomOrLevel value, e.g. "TP1 -- Half A") was
+    // fetched but never actually rendered, and wouldn't have been
+    // meaningful even if it had been (just repeats the TP number already
+    // shown). Group name is the one real "where" this schema has.
+    const { data: tpGroup } = subgroupTpGroupId
+      ? await supabase.from("course_tp_groups").select("name").eq("id", subgroupTpGroupId).maybeSingle()
+      : { data: null };
+    return {
+      tpNumber,
+      title: plan.short_title || plan.main_lesson_aim,
+      teachingOrder: order,
+      groupSize: size,
+      zoomUrl: event.zoom_url,
+      eventTime: event.event_time,
+      groupName: tpGroup?.name ?? null,
+      joinable,
+    };
   }
+  const teachingToday = await computeTeachingFor(today);
+  const teachingTomorrow = !preCourse && !teachingToday ? await computeTeachingFor(tomorrow) : null;
 
   // Waiting on you -- capped at 3, this priority order: assignment due,
   // confirm a Stage 1/3 tutorial invite, self-evaluation due, observation
@@ -347,29 +387,114 @@ export async function TodayTab({
   const broadcastsCapped = (broadcasts ?? []).slice(0, 3);
 
   // for-claude-code-trainee-assessor-card-system.md's card-edge rule: small
-  // cards in a 3-column layout get a left border, large/wide cards in a
-  // 1-2 column layout get a top border instead -- this grid switches
-  // between the two depending on whether there's a "you teach today" card,
-  // so which edge these three cards use switches with it. Full literal
-  // class strings (not string-built) so Tailwind's static scanner can see
-  // them -- a template-built `border-l-${color}` would never be generated.
-  // Ramy, 28 Aug 2026: replaced the earlier green/garnet alternation (24
-  // Aug) -- the real design handoff (Trainee Walkthrough.dc.html, updated
-  // 28 Aug) computes each panel's own edge color in its script (lines
-  // ~474-483): a panel with no accent of its own falls through to one
-  // shared default, a muted mauve -- corrected in for-claude-code-trainee-
-  // color-fix.md to oklch(42% 0.045 340) (from an earlier, too-pink
-  // oklch(52% 0.1 322)). Neither Announcements nor Waiting-on-you carries
-  // its own accent, so both use this same color, not two alternating ones.
-  // "You teach today" keeps its own teal edge -- the file computes that as
-  // color-mix(in oklab, teal 55%, transparent), not a flat solid teal, so
-  // its color comes from an inline style below rather than this table.
-  const CARD_EDGE: Record<"mauve" | "primary", { left: string; top: string }> = {
-    mauve: { left: "border-l-[3px] border-l-[oklch(42%_0.045_340)] border-t-0", top: "border-t-[3px] border-t-[oklch(42%_0.045_340)] border-l-0" },
-    primary: { left: "border-l-[3px] border-t-0", top: "border-t-[3px] border-l-0" },
+  // cards in a 3-column grid get a left border. Ramy, 28 Aug 2026: "three
+  // cards will always be there" -- the grid is permanently 3-column now (see
+  // heroKind below), so every card always takes the left variant; there's no
+  // more 2-column state that needed the top variant. Full literal class
+  // strings (not string-built) so Tailwind's static scanner can see them --
+  // a template-built `border-l-${color}` would never be generated.
+  // The real design handoff (Trainee Walkthrough.dc.html, updated 28 Aug)
+  // computes each panel's own edge color in its script (lines ~474-483): a
+  // panel with no accent of its own falls through to one shared default, a
+  // muted mauve -- corrected in for-claude-code-trainee-color-fix.md to
+  // oklch(42% 0.045 340) (from an earlier, too-pink oklch(52% 0.1 322)).
+  // Neither Announcements nor Waiting-on-you carries its own accent, so both
+  // use this same color, not the earlier (24 Aug, now superseded)
+  // green/garnet alternation. The hero card keeps its own teal edge -- the
+  // file computes that as color-mix(in oklab, teal 55%, transparent), not a
+  // flat solid teal, so its color comes from heroEdgeColor below instead.
+  const CARD_EDGE: Record<"mauve" | "primary", string> = {
+    mauve: "border-l-[3px] border-l-[oklch(42%_0.045_340)] border-t-0",
+    primary: "border-l-[3px] border-t-0",
   };
-  const cardEdge = (color: keyof typeof CARD_EDGE) => (teachingToday ? CARD_EDGE[color].left : CARD_EDGE[color].top);
+  const cardEdge = (color: keyof typeof CARD_EDGE) => CARD_EDGE[color];
   const heroEdgeColor = "color-mix(in oklab, oklch(37.5% 0.058 195) 55%, transparent)";
+
+  // Ramy, 28 Aug 2026: "three cards will always be there... the information
+  // on them will change. So the students get used to what their landing
+  // page looks like." Same size/color hero card every day; only its content
+  // switches, in this priority order once the course has started: teaching
+  // today, teaching tomorrow, an assignment due today/tomorrow, else
+  // whatever's most recent in Announcements (or a plain "nothing due"
+  // message if there's nothing to show at all).
+  const assignmentDueSoon = preCourse
+    ? null
+    : (assignments ?? [])
+        .filter((a) => a.first_status === "not_submitted" && a.due_date && a.due_date >= today && a.due_date <= tomorrow)
+        .sort((a, b) => (a.due_date! < b.due_date! ? -1 : 1))[0] ?? null;
+  const latestAnnouncement = broadcastsCapped[0] ?? null;
+
+  type HeroContent = { label: string; big: string; bigSub: string; ctaHref: string; ctaLabel: string };
+  const heroKind: "teaching" | "teaching_tomorrow" | "assignment_due" | "precourse_scavenger" | "precourse_gtky" | "course_news" = preCourse
+    ? scavengerDone
+      ? "precourse_gtky"
+      : "precourse_scavenger"
+    : teachingToday
+      ? "teaching"
+      : teachingTomorrow
+        ? "teaching_tomorrow"
+        : assignmentDueSoon
+          ? "assignment_due"
+          : "course_news";
+  const genericHero: HeroContent | null =
+    heroKind === "precourse_scavenger"
+      ? {
+          label: "Before day one",
+          big: "Your pre-course task",
+          bigSub: `${precourseSectionsDone} of ${precourseSectionsTotal} sections done · Find your way around: ${huntFoundCount} of ${SCAVENGER_HUNT_QUESTIONS.length} found`,
+          ctaHref: `/portfolio/${traineeId}/pre-course-task`,
+          ctaLabel: "Continue",
+        }
+      : heroKind === "precourse_gtky"
+        ? gtkyAssignment && !gtkyAssignment.chosen_slug
+          ? {
+              label: "Before day one",
+              big: "Pick your day-one activity",
+              bigSub: `Pre-course task: ${precourseSectionsDone} of ${precourseSectionsTotal} sections done · Three activity options are waiting -- pick one before the first morning`,
+              ctaHref: `/portfolio/${traineeId}/gtky`,
+              ctaLabel: "Choose your activity",
+            }
+          : {
+              label: "Before day one",
+              big: "Your pre-course task",
+              bigSub: `${precourseSectionsDone} of ${precourseSectionsTotal} sections done -- see you Monday`,
+              ctaHref: `/portfolio/${traineeId}/pre-course-task`,
+              ctaLabel: "Open pre-course task",
+            }
+        : heroKind === "teaching_tomorrow" && teachingTomorrow
+          ? {
+              label: "You teach tomorrow",
+              big: `TP${teachingTomorrow.tpNumber} — ${teachingTomorrow.title}`,
+              bigSub: `${teachingTomorrow.eventTime ? `${teachingTomorrow.eventTime.slice(0, 5)} · ` : ""}${teachingTomorrow.teachingOrder === 1 ? "1st" : teachingTomorrow.teachingOrder === 2 ? "2nd" : `${teachingTomorrow.teachingOrder}th`} of ${teachingTomorrow.groupSize} tomorrow · ${TP_LESSON_LENGTH_MINUTES} min${teachingTomorrow.groupName ? ` · Group ${teachingTomorrow.groupName}` : ""}`,
+              ctaHref: `/portfolio/${traineeId}/tp/${teachingTomorrow.tpNumber}`,
+              ctaLabel: "Open your plan",
+            }
+          : heroKind === "assignment_due" && assignmentDueSoon
+            ? {
+                label: "Coming up",
+                big: `${ASSIGNMENT_INFO[assignmentDueSoon.assignment_type]?.title ?? assignmentDueSoon.assignment_type} due`,
+                bigSub: assignmentDueSoon.due_date === today ? "Due today" : "Due tomorrow",
+                ctaHref: `/portfolio/${traineeId}/assignments/${assignmentDueSoon.id}`,
+                ctaLabel: "Open assignment",
+              }
+            : heroKind === "course_news"
+              ? latestAnnouncement
+                ? {
+                    label: "Course news",
+                    big: latestAnnouncement.title,
+                    bigSub: `${latestAnnouncement.author_id ? (authorNameById.get(latestAnnouncement.author_id) ?? "Your tutor") : "Your tutor"} · ${relativeTime(latestAnnouncement.created_at)}`,
+                    ctaHref: `/portfolio/${traineeId}/timetable`,
+                    ctaLabel: "My timetable",
+                  }
+                : {
+                    label: "Today",
+                    big: "Nothing due right now",
+                    bigSub: "Check your timetable for what's coming up next.",
+                    ctaHref: `/portfolio/${traineeId}/timetable`,
+                    ctaLabel: "My timetable",
+                  }
+              : null;
+
   const weekOf = course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
   const eyebrow = [courseName, weekOf].filter(Boolean).join(" · ");
   // The trainee's name moved to TraineeNameBanner, above the Connect header
@@ -401,9 +526,10 @@ export async function TodayTab({
           stretch makes every card in the row match the tallest one, losing
           the reference design's real size progression (short hero card,
           taller announcements, tallest waiting-on-you). Each card should
-          size to its own content instead. */}
-      <div className={`grid grid-cols-1 items-start gap-5 ${teachingToday ? "lg:grid-cols-[1.2fr_1fr_1fr]" : "lg:grid-cols-2"}`}>
-        {teachingToday ? (
+          size to its own content instead. Grid is permanently 3-column now
+          -- "three cards will always be there," never a 2-card fallback. */}
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[1.2fr_1fr_1fr]">
+        {heroKind === "teaching" && teachingToday ? (
           <div
             className={`sheet-accent trainee-hover flex flex-col gap-3 rounded-[9px] ${cardEdge("primary")}`}
             style={{ background: "color-mix(in oklch, var(--color-accent) 18%, var(--color-card))", borderLeftColor: heroEdgeColor }}
@@ -435,6 +561,20 @@ export async function TodayTab({
               ) : null}
               <Link href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`} className="trainee-hover-fill rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink">
                 Open your plan
+              </Link>
+            </div>
+          </div>
+        ) : genericHero ? (
+          <div
+            className={`sheet-accent trainee-hover flex flex-col gap-3 rounded-[9px] ${cardEdge("primary")}`}
+            style={{ background: "color-mix(in oklch, var(--color-accent) 18%, var(--color-card))", borderLeftColor: heroEdgeColor }}
+          >
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">{genericHero.label}</p>
+            <p className="font-serif text-xl text-ink">{genericHero.big}</p>
+            <p className="text-sm text-muted">{genericHero.bigSub}</p>
+            <div className="flex items-center gap-2">
+              <Link href={genericHero.ctaHref} className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
+                {genericHero.ctaLabel}
               </Link>
             </div>
           </div>
