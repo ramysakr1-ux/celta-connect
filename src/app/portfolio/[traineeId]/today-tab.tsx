@@ -560,7 +560,7 @@ export async function TodayTab({
         {heroKind === "teaching" && teachingToday ? (
           <div
             className={`sheet-accent trainee-hover flex flex-col gap-[13px] rounded-[9px] px-[18px] py-4 ${cardEdge("primary")}`}
-            style={{ background: "color-mix(in oklch, var(--color-accent) 18%, var(--color-card))", borderLeftColor: heroEdgeColor }}
+            style={{ background: "color-mix(in oklab, var(--color-accent) 40%, var(--color-card))", borderLeftColor: heroEdgeColor }}
           >
             <p className="text-[10.5px] font-semibold tracking-[0.12em] text-primary uppercase">You teach today</p>
             <p className="font-serif text-[25px] leading-[1.15] font-semibold text-ink-warm">
@@ -605,7 +605,7 @@ export async function TodayTab({
         ) : genericHero ? (
           <div
             className={`sheet-accent trainee-hover flex flex-col gap-[13px] rounded-[9px] px-[18px] py-4 ${cardEdge("primary")}`}
-            style={{ background: "color-mix(in oklch, var(--color-accent) 18%, var(--color-card))", borderLeftColor: heroEdgeColor }}
+            style={{ background: "color-mix(in oklab, var(--color-accent) 40%, var(--color-card))", borderLeftColor: heroEdgeColor }}
           >
             <p className="text-[10.5px] font-semibold tracking-[0.12em] text-primary uppercase">{genericHero.label}</p>
             <p className="font-serif text-[25px] leading-[1.15] font-semibold text-ink-warm">{genericHero.big}</p>
