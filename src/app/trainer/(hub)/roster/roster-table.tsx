@@ -11,8 +11,8 @@ import type { RosterRow } from "@/lib/roster";
 // genuine progress-tracking detail, not cut -- just collapsed behind a
 // toggle, so nothing a trainer relies on gets removed sight-unseen, only
 // decluttered by default.
-const CORE_COLUMN_COUNT = 7; // Assessed hrs, TPs, Assignments, Criteria, Attendance, Provisional, At risk
-const DETAIL_COLUMN_COUNT = 10; // TP stages, Supervised review, Observation hrs, Stage 1, Stage 2/3, CELTA 5, FOL, Standing, Obs. tasks, Pre-course
+export const CORE_COLUMN_COUNT = 7; // Assessed hrs, TPs, Assignments, Criteria, Attendance, Provisional, At risk
+export const DETAIL_COLUMN_COUNT = 11; // TP stages, Supervised review, Observation hrs, Stage 1, Stage 2/3, CELTA 5, FOL, Standing, Obs. tasks, Pre-course, Filmed obs
 
 export function RosterTable({
   rows,
@@ -65,6 +65,7 @@ export function RosterTable({
                   <th className="text-right text-sm text-muted">Standing</th>
                   <th className="text-right text-sm text-muted">Obs. tasks</th>
                   <th className="text-right text-sm text-muted">Pre-course</th>
+                  <th className="text-right text-sm text-muted">Filmed obs</th>
                 </>
               ) : null}
             </tr>

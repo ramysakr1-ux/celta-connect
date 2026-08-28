@@ -53,6 +53,7 @@ export async function GET() {
     "Provisional grade",
     "Observation tasks",
     "Pre-course task",
+    "Filmed observations",
     "At risk",
   ];
   const lines = [
@@ -83,6 +84,7 @@ export async function GET() {
         csvCell(r.provisionalLabel ?? "Not set"),
         csvCell(r.obsTasksTotal > 0 ? `${r.obsTasksDone} / ${r.obsTasksTotal}` : "--"),
         csvCell(r.preCourseTaskTotal > 0 ? `${r.preCourseTaskAnswered} / ${r.preCourseTaskTotal}` : "--"),
+        csvCell(r.filmedObsTotal > 0 ? `${r.filmedObsDone} / ${r.filmedObsTotal}` : "--"),
         csvCell(r.atRiskReasons.map((reason) => AT_RISK_LABELS[reason]).join("; ")),
       ].join(",")
     ),

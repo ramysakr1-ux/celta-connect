@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TrajectoryBarCompact } from "@/components/trajectory-gradient-bar";
 import type { RosterRow } from "@/lib/roster";
+import { CORE_COLUMN_COUNT, DETAIL_COLUMN_COUNT } from "@/app/trainer/(hub)/roster/roster-table";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { ordinal } from "@/lib/stage2-tutorials";
@@ -136,7 +137,12 @@ export function RosterRowView({
           </Link>
         </td>
         {showContact ? <ContactCell row={row} courseCode={courseCode} /> : <td />}
-        <td colSpan={showDetail ? 16 : 7} className="text-right">
+        {/* Derived, not hardcoded: this was 16 against a table of 9 core
+            + 10 detail columns, so the status pill already under-spanned by
+            one before "Filmed obs" was added. The name and contact cells
+            are rendered separately above, hence the -1 for the name; the
+            contact cell is inside CORE's own count of what follows it. */}
+        <td colSpan={CORE_COLUMN_COUNT + 1 + (showDetail ? DETAIL_COLUMN_COUNT : 0)} className="text-right">
           <span className="pill pill-neutral">{COURSE_STATUS_LABEL[row.courseStatus]}</span>
         </td>
       </tr>
@@ -306,6 +312,19 @@ export function RosterRowView({
                 className={`hover:underline ${row.preCourseTaskAnswered < row.preCourseTaskTotal ? "text-status-warning-text" : "text-ink"}`}
               >
                 {row.preCourseTaskAnswered} / {row.preCourseTaskTotal}
+              </Link>
+            ) : (
+              <span className="text-muted">--</span>
+            )}
+          </td>
+          <td className="text-right tabular-nums">
+            {row.filmedObsTotal > 0 ? (
+              <Link
+                href={`/portfolio/${row.id}/resources`}
+                onClick={(e) => e.stopPropagation()}
+                className={`hover:underline ${row.filmedObsDone < row.filmedObsTotal ? "text-status-warning-text" : "text-ink"}`}
+              >
+                {row.filmedObsDone} / {row.filmedObsTotal}
               </Link>
             ) : (
               <span className="text-muted">--</span>

@@ -87,6 +87,13 @@ export interface RosterRow {
   // every candidate here.
   preCourseTaskAnswered: number;
   preCourseTaskTotal: number;
+  // Ramy, 29 Aug 2026: completing a filmed observation task notifies
+  // nobody, deliberately -- five candidates times five recordings is
+  // twenty-five emails about something with no deadline. A column answers
+  // the question a tutor actually has ("who is behind?") at a glance,
+  // which is how every other item on this roster already works.
+  filmedObsDone: number;
+  filmedObsTotal: number;
 }
 
 // Single source of truth for what a roster row means -- both the roster
@@ -220,6 +227,44 @@ export async function fetchRosterRows(
   // the candidate's own progress bar can never disagree about what counts
   // -- a structured task saves JSON, and an empty shell of one must not
   // read as answered.
+  // Denominator is the course's scheduled filmed-observation slots, not the
+  // sessions a trainer has set up -- a slot with no recording attached is
+  // still one the candidate will owe, and counting only prepared sessions
+  // would make the target shrink and grow as staff work through setup.
+  const { data: filmedObsEvents } = await supabase
+    .from("course_timetable_events")
+    .select("id")
+    .eq("course_id", courseId)
+    .eq("type", "milestone")
+    .ilike("title", "Filmed observation%");
+  const filmedObsTotal = (filmedObsEvents ?? []).length;
+  const { data: filmedObsSessions } =
+    filmedObsTotal > 0 ? await supabase.from("filmed_observation_sessions").select("id").eq("course_id", courseId) : { data: [] };
+  const { data: filmedObsTasks } =
+    (filmedObsSessions ?? []).length > 0
+      ? await supabase
+          .from("filmed_observation_tasks")
+          .select("id")
+          .in(
+            "session_id",
+            (filmedObsSessions ?? []).map((x) => x.id)
+          )
+      : { data: [] };
+  const { data: filmedObsResponses } =
+    (filmedObsTasks ?? []).length > 0 && traineeIds.length > 0
+      ? await supabase
+          .from("filmed_observation_task_responses")
+          .select("trainee_id, task_id, completed_at")
+          .in("trainee_id", traineeIds)
+          .not("completed_at", "is", null)
+      : { data: [] };
+  const filmedObsTaskIds = new Set((filmedObsTasks ?? []).map((t) => t.id));
+  const filmedObsDoneByTrainee = new Map<string, number>();
+  for (const r of filmedObsResponses ?? []) {
+    if (!filmedObsTaskIds.has(r.task_id)) continue;
+    filmedObsDoneByTrainee.set(r.trainee_id, (filmedObsDoneByTrainee.get(r.trainee_id) ?? 0) + 1);
+  }
+
   const preCourseAnsweredByTrainee = new Map<string, number>();
   for (const row of pctResponses ?? []) {
     if (!responseIsAnswered(row.response)) continue;
@@ -378,6 +423,8 @@ export async function fetchRosterRows(
       obsTasksTotal,
       preCourseTaskAnswered: preCourseAnsweredByTrainee.get(trainee.id) ?? 0,
       preCourseTaskTotal,
+      filmedObsDone: filmedObsDoneByTrainee.get(trainee.id) ?? 0,
+      filmedObsTotal,
     };
   });
 }
