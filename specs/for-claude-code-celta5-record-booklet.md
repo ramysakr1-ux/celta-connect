@@ -121,10 +121,14 @@ Five checks, all computed, each showing ✓ or a red ! with live numbers:
 | Final-day five checks | **not built** as a checklist |
 | Contents, cover, static sections, appendices | **not built** |
 
-## Open question for Ramy
+## Resolved
 
-The design has a **Trainee / Tutor "viewing as" switch**, labelled in the
-mock-up as "for demonstrating the automation; it is not part of the CELTA 5
-text". Confirm that is a demo control and not wanted in the build — the app
-already resolves the viewer by role, and a real switch would let a
-candidate see the tutor view.
+**Trainee / Tutor "viewing as" switch** — not in the build. Ramy, 29 Aug:
+"that was just a note for me, it's not in the build." It exists in the
+design so the mock-up can show both states without two logins.
+
+Worth keeping the reason written down: shipping it would defeat Stage Two.
+The whole point of that gate is that a candidate rates every criterion
+before seeing the tutor's marks, and a switch to the tutor view would hand
+them exactly the marks the gate exists to hide. The app resolves the viewer
+by role already.
