@@ -154,8 +154,13 @@ export function AssignmentAuthoringForm({
   const wordCountOutOfRange = totalWords < 750 || totalWords > 1000;
   const aiDeclarationIncomplete = aiDeclared && !aiConversationUrl.trim();
 
+  // Ramy, 28 Aug 2026: "I don't want it to be blocked if it exceeds the
+  // word count... there will be a warning... but it should not block it."
+  // Word count stays visible (the color-coded indicator below, on-track/
+  // at-risk/pending) but never disables the submit button -- same "warn,
+  // never block a real submission" principle this file already applies to
+  // a late deadline just below.
   const blockReasons: string[] = [];
-  if (wordCountOutOfRange) blockReasons.push(`word count must be 750-1,000 (currently ${totalWords})`);
   if (aiDeclarationIncomplete) blockReasons.push("add the AI conversation link below before submitting");
   if (!ownWorkConfirmed) blockReasons.push("confirm this is your own work below");
   const submitDisabled = blockReasons.length > 0;
@@ -165,9 +170,11 @@ export function AssignmentAuthoringForm({
   // record (specs/for-claude-code.md).
   const submitWarning = submitDisabled
     ? `Can't submit yet -- ${blockReasons.join("; ")}.`
-    : deadlinePassed
-      ? "This assignment is past its deadline -- submitting now will be recorded as late."
-      : "Submitting locks your responses until your tutor returns them.";
+    : wordCountOutOfRange
+      ? `Word count is outside 750-1,000 (currently ${totalWords}) -- you can still submit; your tutor will see this.`
+      : deadlinePassed
+        ? "This assignment is past its deadline -- submitting now will be recorded as late."
+        : "Submitting locks your responses until your tutor returns them.";
 
   const sectionsPayload = sections.map((s) => ({ key: s.key, title: s.title, text: texts[s.key] ?? "" }));
 
