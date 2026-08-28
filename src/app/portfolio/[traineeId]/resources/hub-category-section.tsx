@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-// Resource Hub.dc.html screen 1b, exact values -- "the hub opens as a table
-// of contents," Ramy 28 Aug 2026: "it should not be lost... headings and
-// subheadings, collapsible." Every category is one row in a bordered list,
-// collapsed by default, click the row to expand. Pixel values (padding,
-// gaps, font sizes, the chevron glyph itself) are copied from the design
-// file's own script, not approximated -- same discipline as the Today card
-// fix earlier tonight.
+// Ramy, 28 Aug 2026: "I want cards, not a list" -- corrected from the first
+// pass, which was still a stacked accordion list even after the border-fix,
+// just with the composer moved out of the way. Each category is now its own
+// independent card (rounded corners, its own border, its own background),
+// laid out in a real grid with its neighbors -- not one shared bordered box
+// with thin divider lines between rows. Clicking a card expands it in place
+// (grows taller within the grid) rather than navigating away.
 export function HubCategorySection({
   label,
   count,
@@ -25,12 +25,8 @@ export function HubCategorySection({
   const [open, setOpen] = useState(Boolean(defaultOpen));
 
   return (
-    <div className="border-b border-[color-mix(in_srgb,var(--color-border)_40%,var(--color-card)_60%)] last:border-b-0">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="trainee-hover-fill flex w-full items-center gap-[14px] px-5 py-[14px] text-left"
-      >
+    <div className={`sheet trainee-hover flex flex-col overflow-hidden rounded-[8px] ${open ? "xl:col-span-2" : ""}`}>
+      <button type="button" onClick={() => setOpen((v) => !v)} className="flex w-full items-center gap-3 p-4 text-left">
         <span className="w-[10px] shrink-0 text-[11px] text-muted">{open ? "▾" : "▸"}</span>
         <span className={`font-serif flex-1 text-[12px] font-bold tracking-[0.09em] uppercase ${open ? "text-ink" : "text-muted"}`}>{label}</span>
         {restricted ? (
@@ -38,9 +34,9 @@ export function HubCategorySection({
             Trainer only
           </span>
         ) : null}
-        <span className="w-[62px] shrink-0 text-right text-[12px] tabular-nums text-muted">{count}</span>
+        <span className="w-[54px] shrink-0 text-right text-[12px] tabular-nums text-muted">{count}</span>
       </button>
-      {open ? <div className="px-5 pb-4">{children}</div> : null}
+      {open ? <div className="border-t border-border-faint px-4 pt-3 pb-4">{children}</div> : null}
     </div>
   );
 }

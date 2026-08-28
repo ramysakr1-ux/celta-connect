@@ -148,6 +148,59 @@ export default async function ResourceHubPage({
       supabase.from("scavenger_hunt_progress").select("question_key").eq("trainee_id", traineeId),
     ]);
 
+  // Filmed Observations -- Ramy, 28 Aug 2026: caught a real naming
+  // collision from earlier tonight, exactly the trap migration
+  // 0189_tp_video_library.sql's own comment warns about. This category was
+  // wrongly wired to the generic resources.category='filmed_observations'
+  // shelf (an empty, unrelated staff document bucket) instead of the real
+  // feature: your own cohort's actual filmed lesson, tied 1:1 to a
+  // timetable milestone event, with lesson context, a trainer-authored
+  // task, and completion feeding the real observation-hours tracker. Same
+  // query pattern today-tab.tsx's own filmedObservationReminder already
+  // uses, just for every session on the course, not just today's.
+  const { data: filmedSessionsRaw } = trainee.course_id
+    ? await supabase
+        .from("filmed_observation_sessions")
+        .select("id, lesson_title, level, learner_count, teacher_name, timetable_event_id")
+        .eq("course_id", trainee.course_id)
+    : { data: [] };
+  const filmedEventIds = (filmedSessionsRaw ?? []).map((s) => s.timetable_event_id);
+  const { data: filmedEvents } =
+    filmedEventIds.length > 0 ? await supabase.from("course_timetable_events").select("id, event_date, event_time").in("id", filmedEventIds) : { data: [] };
+  const filmedEventById = new Map((filmedEvents ?? []).map((e) => [e.id, e]));
+  const { data: myFilmedResponses } =
+    viewer?.role === "trainee"
+      ? await supabase.from("filmed_observation_task_responses").select("task_id, completed_at").eq("trainee_id", traineeId)
+      : { data: [] };
+  const { data: filmedTasks } =
+    (filmedSessionsRaw ?? []).length > 0
+      ? await supabase
+          .from("filmed_observation_tasks")
+          .select("id, session_id")
+          .in(
+            "session_id",
+            (filmedSessionsRaw ?? []).map((s) => s.id)
+          )
+      : { data: [] };
+  const taskIdBySessionId = new Map((filmedTasks ?? []).map((t) => [t.session_id, t.id]));
+  const completedTaskIds = new Set((myFilmedResponses ?? []).filter((r) => r.completed_at).map((r) => r.task_id));
+  const filmedSessions = (filmedSessionsRaw ?? [])
+    .map((s) => {
+      const event = filmedEventById.get(s.timetable_event_id);
+      const taskId = taskIdBySessionId.get(s.id);
+      return {
+        id: s.id,
+        lessonTitle: s.lesson_title,
+        level: s.level,
+        learnerCount: s.learner_count,
+        teacherName: s.teacher_name,
+        eventDate: event?.event_date ?? null,
+        eventTime: event?.event_time ?? null,
+        completed: taskId ? completedTaskIds.has(taskId) : false,
+      };
+    })
+    .sort((a, b) => (a.eventDate ?? "").localeCompare(b.eventDate ?? ""));
+
   // Pre-course Task door -- for-claude-code-pre-course-task-screens.md's
   // "Location" update: "shows 'Continue your pre-course task' pre-
   // completion, 'Answer key is live' post-unlock." Same two states the
@@ -222,7 +275,7 @@ export default async function ResourceHubPage({
     written_assignments: (byCategory.get("written_assignments")?.length ?? 0) + (briefs?.length ?? 0),
     cambridge_documentation: (byCategory.get("cambridge_documentation")?.length ?? 0) + cambridgeDocs.filter((d) => d.url || d.storagePath).length,
     reading: byCategory.get("reading")?.length ?? 0,
-    filmed_observations: byCategory.get("filmed_observations")?.length ?? 0,
+    filmed_observations: filmedSessions.length,
     precourse_task: precourseSectionsTotal,
     forms: formResources.length,
     centre_documents: byCategory.get("centre_documents")?.length ?? 0,
@@ -230,7 +283,12 @@ export default async function ResourceHubPage({
     tp_points: coursebooks?.length ?? 0,
   };
   const visibleCategories = HUB_CATEGORY_ORDER.filter((k) => canSeeTrainerOnly || !HUB_STAFF_ONLY.includes(k));
-  const totalItems = visibleCategories.reduce((sum, k) => sum + countByKey[k], 0);
+  // Ramy, 28 Aug 2026: "the resource hub sits on top of the pre-course task
+  // and the film observations as well" -- Resource Hub (this whole page) >
+  // Pre-course Task card + Filmed Observations card, standalone, then
+  // Library (the searchable grid) below them for everything else.
+  const libraryCategories = visibleCategories.filter((k) => k !== "precourse_task" && k !== "filmed_observations");
+  const totalItems = libraryCategories.reduce((sum, k) => sum + countByKey[k], 0);
 
   const coursebookSearchItems: ResourceHubSearchItem[] = (coursebooks ?? []).map((c) => ({ id: `cb-${c.id}`, title: c.title, subtitle: "Coursebooks", href: "#coursebooks" }));
   const briefSearchItems: ResourceHubSearchItem[] = (briefs ?? []).map((b) => ({
@@ -246,8 +304,147 @@ export default async function ResourceHubPage({
     <div className="flex flex-col gap-6 rounded-[6px] border border-border bg-[oklch(96.4%_0.014_85)] p-6">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-serif text-[22px] font-semibold text-ink">Resource Hub</h2>
+      </div>
+
+      {/* Resource Hub.dc.html screen 4a, exact values -- "the one
+          interactive door in a read-only hub." Standalone, above Library,
+          not a category tile: this is the only thing here you answer,
+          everything else is a shelf you click through to view. Real
+          progress bar this time, not just text -- missed in the first
+          pass. */}
+      <div
+        className="flex flex-col gap-4 rounded-[8px] border border-border p-[20px_22px]"
+        style={{ background: "oklch(96.4% 0.014 85)" }}
+      >
+        <Link
+          href={`/portfolio/${traineeId}/pre-course-task`}
+          className="trainee-hover flex flex-col gap-3 rounded-[8px] border p-[18px]"
+          style={{
+            background: "oklch(99.2% 0.005 90)",
+            borderColor: answerKeyLive ? "color-mix(in oklab, oklch(60% 0.11 70) 34%, transparent)" : "oklch(88% 0.016 82)",
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <p className="font-serif text-[16px] font-semibold text-ink">Pre-course Task</p>
+            <span
+              className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.05em]"
+              style={
+                answerKeyLive
+                  ? { background: "color-mix(in oklab, oklch(60% 0.11 70) 16%, oklch(99.2% 0.005 90))", color: "oklch(60% 0.11 70)" }
+                  : { background: "oklch(93.5% 0.016 85)", color: "oklch(51% 0.017 70)" }
+              }
+            >
+              {answerKeyLive ? "Answer key live" : "In progress"}
+            </span>
+          </div>
+          <p className="text-[12.5px] leading-[1.5] text-muted">
+            {answerKeyLive
+              ? `All ${precourseSectionsTotal} sections done, and the Friday-before date has arrived — same door, flipped state. Compare your own answers at your own pace; nothing to submit here.`
+              : `${precourseSectionsDone} of ${precourseSectionsTotal} sections done. Answer key stays hidden — it unlocks cohort-wide on the Friday before the course starts, not on completion. Find your way around: ${huntFoundCount} of 6 found.`}
+          </p>
+          {!answerKeyLive ? (
+            <div className="h-[6px] overflow-hidden rounded-full" style={{ background: "oklch(89.5% 0.012 85)" }}>
+              <div
+                className="h-full"
+                style={{
+                  width: precourseSectionsTotal > 0 ? `${(precourseSectionsDone / precourseSectionsTotal) * 100}%` : "0%",
+                  background: "oklch(38% 0.072 195)",
+                }}
+              />
+            </div>
+          ) : null}
+          <span
+            className="self-start rounded-[6px] px-[14px] py-2 text-[12px] font-bold"
+            style={
+              answerKeyLive
+                ? { background: "color-mix(in oklab, oklch(60% 0.11 70) 20%, oklch(99.2% 0.005 90))", color: "oklch(30% 0.042 58)" }
+                : { background: "oklch(30% 0.042 58)", color: "oklch(99.2% 0.005 90)" }
+            }
+          >
+            {answerKeyLive ? "Open answer key" : "Continue"}
+          </span>
+        </Link>
+      </div>
+
+      {/* Resource Hub.dc.html screen 3a, exact card values -- "Filmed
+          Observation... your own cohort's real filmed lesson." Real data
+          from filmed_observation_sessions (the actual feature), not the
+          generic resources.category='filmed_observations' shelf that was
+          wired here by mistake earlier tonight -- see the query comment
+          above for the full story. Standalone, next to Pre-course Task,
+          not a Library tile: same "you DO this, you don't browse it"
+          reasoning. */}
+      {filmedSessions.length > 0 ? (
+        <div className="flex flex-col gap-4 rounded-[8px] border border-border p-[20px_22px]" style={{ background: "oklch(96.4% 0.014 85)" }}>
+          <div className="flex items-center justify-between">
+            <p className="text-[13px] font-semibold text-ink">Filmed Observations</p>
+            <span
+              className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.05em]"
+              style={{ background: "color-mix(in oklab, oklch(60% 0.11 70) 14%, oklch(99.2% 0.005 90))", color: "oklch(60% 0.11 70)" }}
+            >
+              Task-linked
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-[14px] sm:grid-cols-2 xl:grid-cols-3">
+            {filmedSessions.map((s) => (
+              <Link
+                key={s.id}
+                href={`/portfolio/${traineeId}/filmed-observation/${s.id}`}
+                className="trainee-hover flex flex-col gap-2 overflow-hidden rounded-[6px] border border-border"
+                style={{ background: "oklch(99.2% 0.005 90)" }}
+              >
+                <div className="flex items-center justify-center" style={{ aspectRatio: "16/7", background: "oklch(23.5% 0.017 65)" }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="oklch(99.2% 0.005 90)" strokeWidth="1.6">
+                    <circle cx="12" cy="12" r="10" />
+                    <polygon points="10 8 16 12 10 16 10 8" fill="oklch(99.2% 0.005 90)" />
+                  </svg>
+                </div>
+                <div className="flex flex-col gap-2 px-3 pb-3">
+                  <p className="text-[13px] font-semibold text-ink">{s.lessonTitle ?? "Filmed lesson"}</p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
+                    {s.teacherName ? (
+                      <span>
+                        <span className="font-semibold text-ink">Teacher</span> {s.teacherName}
+                      </span>
+                    ) : null}
+                    {s.level ? (
+                      <span>
+                        <span className="font-semibold text-ink">Level</span> {s.level}
+                      </span>
+                    ) : null}
+                    {s.learnerCount ? (
+                      <span>
+                        <span className="font-semibold text-ink">Learners</span> {s.learnerCount}
+                      </span>
+                    ) : null}
+                  </div>
+                  {s.eventDate ? (
+                    <p className="text-[11px] text-muted">
+                      {s.eventDate}
+                      {s.eventTime ? ` · ${s.eventTime.slice(0, 5)}` : ""}
+                    </p>
+                  ) : null}
+                  <span
+                    className="self-start rounded-full border px-[7px] py-[1px] text-[10px] font-semibold"
+                    style={
+                      s.completed
+                        ? { borderColor: "oklch(88% 0.016 82)", color: "oklch(38% 0.072 195)" }
+                        : { borderColor: "oklch(88% 0.016 82)", color: "oklch(51% 0.017 70)" }
+                    }
+                  >
+                    {s.completed ? "Task completed" : "Task not yet done"}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="font-serif text-lg font-semibold text-ink">Library</h3>
         <p className="text-xs text-muted">
-          {totalItems} items · {visibleCategories.length} categories
+          {totalItems} items · {libraryCategories.length} categories
         </p>
       </div>
 
@@ -262,10 +459,8 @@ export default async function ResourceHubPage({
         <p className="hidden shrink-0 text-[11px] text-muted sm:block">finds files, sessions and forms — not answers</p>
       </div>
 
-      {isEditableStaff ? <ResourceComposer traineeId={traineeId} centerId={trainee.center_id} /> : null}
-
-      <div className="overflow-hidden rounded-[6px] border border-border bg-card">
-        {visibleCategories.map((key) => (
+      <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {libraryCategories.map((key) => (
           <HubCategorySection key={key} label={HUB_CATEGORY_LABELS[key]} count={`${countByKey[key]} items`} restricted={HUB_STAFF_ONLY.includes(key)}>
             {key === "input_sessions" ? (
               <div className="flex flex-col gap-3">
@@ -348,23 +543,6 @@ export default async function ResourceHubPage({
                 <PlainCategoryGrid resources={byCategory.get("cambridge_documentation") ?? []} isEditableStaff={isEditableStaff} traineeId={traineeId} />
                 <CambridgeDocumentsShelf docs={cambridgeDocs} editable={false} />
               </div>
-            ) : key === "precourse_task" ? (
-              <Link
-                href={`/portfolio/${traineeId}/pre-course-task`}
-                className="sheet-accent trainee-hover flex flex-col gap-2 rounded-[8px] p-5"
-                style={{ background: "color-mix(in oklab, var(--color-accent) 40%, var(--color-card))" }}
-              >
-                <p className="text-[10.5px] font-semibold tracking-[0.12em] text-primary uppercase">{answerKeyLive ? "Answer key live" : "In progress"}</p>
-                <p className="font-serif text-lg font-semibold text-ink-warm">Pre-course Task</p>
-                <p className="text-sm text-ink-warm">
-                  {answerKeyLive
-                    ? `All ${precourseSectionsTotal} sections done, and the Friday-before date has arrived — same door, flipped state. Compare your own answers at your own pace; nothing to submit here.`
-                    : `${precourseSectionsDone} of ${precourseSectionsTotal} sections done. Answer key stays hidden — it unlocks cohort-wide on the Friday before the course starts, not on completion. Find your way around: ${huntFoundCount} of 6 found.`}
-                </p>
-                <span className="mt-1 self-start rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground">
-                  {answerKeyLive ? "Open answer key" : "Continue"}
-                </span>
-              </Link>
             ) : key === "tp_points" ? (
               <Link href="/trainer/coursebooks" className="sheet trainee-hover flex flex-col gap-1 p-4">
                 <p className="text-sm font-semibold text-ink">TP Points Library</p>
@@ -378,6 +556,8 @@ export default async function ResourceHubPage({
           </HubCategorySection>
         ))}
       </div>
+
+      {isEditableStaff ? <ResourceComposer traineeId={traineeId} centerId={trainee.center_id} /> : null}
     </div>
   );
 }
