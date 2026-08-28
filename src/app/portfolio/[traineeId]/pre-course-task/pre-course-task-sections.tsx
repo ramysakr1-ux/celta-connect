@@ -17,6 +17,7 @@ type Item = Database["public"]["Tables"]["pre_course_task_items"]["Row"];
 // now, so a candidate could tick a section they hadn't written a word in
 // and watch the two numbers disagree.
 function TaskRow({ item, answerKeyUnlocked, isEditable, response }: { item: Item; answerKeyUnlocked: boolean; isEditable: boolean; response: string }) {
+  const answered = responseIsAnswered(response);
   return (
     <div className="flex flex-col gap-1.5 py-4 first:pt-0">
       {/* The reading that precedes this task in the Cambridge document --
@@ -27,11 +28,19 @@ function TaskRow({ item, answerKeyUnlocked, isEditable, response }: { item: Item
       ) : null}
       <div className="flex items-baseline gap-2">
         {item.task_number ? <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">Task {item.task_number}</p> : null}
-        {responseIsAnswered(response) ? <span className="text-[11px] font-semibold text-primary">Answered</span> : null}
+        {answered ? <span className="text-[11px] font-semibold text-primary">Answered</span> : null}
       </div>
       <p className="whitespace-pre-wrap text-sm text-ink">{item.prompt}</p>
       <TaskAnswerBox itemId={item.id} initialResponse={response} readOnly={!isEditable} shape={parseTaskShape(item.shape)} />
-      {answerKeyUnlocked ? (
+      {/* Ramy, 28 Aug 2026: the cohort-wide Friday unlock alone used to be
+          enough, because the task was answered on paper -- the key coming
+          out couldn't touch work already written. Now the candidate types
+          into this very screen, so an unlocked key printed under an empty
+          box is just the answer, handed over before they think. The date
+          gate still decides WHEN the key exists; answering the task is what
+          reveals it. Staff and assessors (isEditable false) are unaffected
+          -- they see everything, as they did before. */}
+      {answerKeyUnlocked && (!isEditable || answered) ? (
         item.answer ? (
           <p className="mt-1 whitespace-pre-wrap rounded-[6px] border border-border-faint bg-accent/20 px-3 py-2 text-sm text-ink">
             <span className="font-semibold text-primary">Answer — </span>
@@ -40,6 +49,8 @@ function TaskRow({ item, answerKeyUnlocked, isEditable, response }: { item: Item
         ) : (
           <p className="mt-1 text-xs text-muted">No fixed answer for this one -- it&apos;s a reflection task.</p>
         )
+      ) : answerKeyUnlocked && item.answer ? (
+        <p className="mt-1 text-xs text-muted">Answer your version first -- Cambridge&apos;s appears here once you do.</p>
       ) : null}
     </div>
   );
