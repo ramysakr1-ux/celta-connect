@@ -198,6 +198,11 @@ export interface Database {
           admissions_stale_threshold_days: number;
           application_low_availability_threshold: number;
           admissions_email: string | null;
+          // migration 0248 -- CELTA Administration Handbook 10.2 lets a
+          // centre give Stage Three to every candidate. Raises Cambridge's
+          // floor, never lowers it: the four mandatory triggers in
+          // src/lib/stage3-triggers.ts apply whatever this is set to.
+          stage3_for_all_candidates: boolean;
           // migration 0155 -- Centre Settings' Profile & Drive tab.
           // primary_contact_email is distinct from admissions_email
           // (applicant-facing reply-to only); currency "applies to every

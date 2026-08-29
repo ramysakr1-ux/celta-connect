@@ -47,6 +47,7 @@ import { ProgressOverview } from "@/app/portfolio/[traineeId]/celta5/booklet/pro
 import { ObservationsRecord, AssessedTpRecord } from "@/app/portfolio/[traineeId]/celta5/booklet/records";
 import { FinalDayChecks, type FinalCheck } from "@/app/portfolio/[traineeId]/celta5/booklet/final-day";
 import { computeSignatureLedger } from "@/lib/celta5-signatures";
+import { computeStage3Triggers, stage3Expected, isStage3Mandatory, STAGE3_TRIGGER_LABELS } from "@/lib/stage3-triggers";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
 function ReadOnlyField({ label, value }: { label: string; value: string | null }) {
@@ -151,7 +152,7 @@ export default async function PortfolioCelta5Page({
         ? supabase.from("courses").select("name, start_date, end_date, delivery_mode, total_hours").eq("id", viewer.course_id).maybeSingle()
         : Promise.resolve({ data: null }),
       viewer?.center_id
-        ? supabase.from("centers").select("name, center_number, is_uk_centre, time_zone").eq("id", viewer.center_id).maybeSingle()
+        ? supabase.from("centers").select("name, center_number, is_uk_centre, time_zone, stage3_for_all_candidates").eq("id", viewer.center_id).maybeSingle()
         : Promise.resolve({ data: null }),
       viewer?.course_id
         ? supabase.from("course_tutors").select("profile_id").eq("course_id", viewer.course_id).is("left_at", null)
@@ -332,6 +333,27 @@ export default async function PortfolioCelta5Page({
         state: (assignmentsGraded >= 4 ? "met" : "short") as "met" | "short" | "neutral",
       },
     ];
+    // Handbook 10.2 / CELTA 5 p.20 -- who must be given Stage Three.
+    // "Not making the expected progress" is read from TPs taught after the
+    // Stage 2 tutorial; assessedTpOutcomes below is ordered by teaching
+    // date, so anything after the tutorial date is the second half.
+    const stage2TutorialDate = record.stage2_completed_at ?? null;
+    const postStage2TpOutcomes = (plans ?? [])
+      .filter((p) => p.taught_at && (!stage2TutorialDate || p.taught_at > stage2TutorialDate))
+      .map(() => null as null);
+    const stage3Triggers = computeStage3Triggers({
+      stage2TutorOverall: record.stage2_tutor_overall ?? null,
+      postStage2TpOutcomes,
+      higherGradeIndicated: false,
+      centreGivesStage3ToAll: center?.stage3_for_all_candidates ?? false,
+    });
+    const stage3IsExpected = stage3Expected(stage3Triggers) || record.stage3_required;
+    const stage3TriggerReason = isStage3Mandatory(stage3Triggers)
+      ? STAGE3_TRIGGER_LABELS[stage3Triggers.find((t) => t !== "centre_gives_to_all")!]
+      : stage3Triggers.length > 0
+        ? STAGE3_TRIGGER_LABELS.centre_gives_to_all
+        : undefined;
+
     const finalChecks: FinalCheck[] = [
       {
         label: "Six hours of assessed teaching practice at at least two levels",
@@ -350,13 +372,17 @@ export default async function PortfolioCelta5Page({
       },
       { label: "Stage Two progress record complete", met: bothSigned },
       {
-        // Cambridge only requires Stage Three for candidates who are off
-        // track (see the Stage Three rubric); stage3_required carries that
-        // decision, so "not required" satisfies this check rather than
-        // blocking a candidate who was never meant to have one.
-        label: "Stage Three progress record complete",
-        met: record.stage3_required ? !!record.stage3_finalized_at : true,
-        detail: record.stage3_required ? undefined : "not required for you",
+        // Stage Three is expected when Cambridge requires it (the four
+        // Handbook 10.2 triggers, computed from the record rather than left
+        // to a tutor to notice) or when the centre gives it to everyone.
+        // A candidate outside both isn't held up by this check -- and the
+        // centre setting can only add candidates, never remove a triggered
+        // one. See src/lib/stage3-triggers.ts.
+        label: stage3IsExpected ? "Stage Three progress record complete" : "Stage Three progress record",
+        met: stage3IsExpected ? !!record.stage3_finalized_at : true,
+        detail: stage3IsExpected
+          ? stage3TriggerReason
+          : "not required for you",
       },
     ];
 
