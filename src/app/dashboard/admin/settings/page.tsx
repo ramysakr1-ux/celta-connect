@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { disconnectGoogleDrive, updateAutoTagCriteria } from "@/app/dashboard/admin/settings/actions";
@@ -148,9 +149,7 @@ export default async function AdminSettingsPage({
       {/* Only reached from the Centre material panel now (the persistent
           AdminTabs nav that used to link here is gone -- see dashboard/
           admin/page.tsx). A real way back, so this can't be a dead end. */}
-      <Link href="/dashboard/admin" className="text-sm text-muted hover:text-ink">
-        ← Courses
-      </Link>
+      <BackLink href="/dashboard/admin" label={"Courses"} />
       <div className="card card-garnet p-6">
         <h1 className="font-serif text-xl text-ink">Settings</h1>
         <p className="mt-2 text-muted">Centre-level integrations and configuration.</p>

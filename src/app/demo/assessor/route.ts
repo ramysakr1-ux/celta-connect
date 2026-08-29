@@ -30,13 +30,23 @@ export async function GET() {
 
   const { data: existing } = await admin
     .from("course_access_tokens")
-    .select("token")
+    .select("token, terms_accepted_at")
     .eq("course_id", course.id)
     .eq("role", "assessor")
     .gt("expires_at", new Date().toISOString())
     .maybeSingle();
 
-  if (existing) return NextResponse.redirect(new URL(`/assessor/${existing.token}`, siteUrl));
+  if (existing) {
+    // A token minted before the fix above may still have no acceptance on
+    // it, which would strand this visitor at the gate too.
+    if (!existing.terms_accepted_at) {
+      await admin
+        .from("course_access_tokens")
+        .update({ terms_accepted_at: new Date().toISOString() })
+        .eq("token", existing.token);
+    }
+    return NextResponse.redirect(new URL(`/assessor/${existing.token}`, siteUrl));
+  }
 
   // Demo courses can have an end_date in the past (the "Closed" spring
   // course) -- don't let that make the token expire before anyone uses it.
@@ -45,7 +55,18 @@ export async function GET() {
   farFuture.setFullYear(farFuture.getFullYear() + 1);
   const { data: created } = await admin
     .from("course_access_tokens")
-    .insert({ course_id: course.id, role: "assessor", expires_at: farFuture.toISOString() })
+    // Terms are pre-accepted on the DEMO link specifically. A real
+    // assessor accepts them at /assessor/gate, which writes to this row --
+    // but demo centres are read-only at the database layer (migration
+    // 0079's trigger), so that write can never succeed here and the demo
+    // assessor was stuck at the gate forever after any reseed. Ramy hit it
+    // as "there's no way to go back". The real flow is untouched.
+    .insert({
+      course_id: course.id,
+      role: "assessor",
+      expires_at: farFuture.toISOString(),
+      terms_accepted_at: new Date().toISOString(),
+    })
     .select("token")
     .single();
   if (!created) return fallback();

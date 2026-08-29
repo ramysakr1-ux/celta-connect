@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
@@ -26,9 +27,7 @@ export default async function AdminAssignmentBriefsPage() {
       {/* Reachable from Settings' own nav, and directly from the Centre
           material panel now too (dashboard/admin/page.tsx) -- a real way
           back either way. */}
-      <Link href="/dashboard/admin" className="text-sm text-muted hover:text-ink">
-        ← Courses
-      </Link>
+      <BackLink href="/dashboard/admin" label={"Courses"} />
       <div className="card card-garnet p-6">
         <h1 className="font-serif text-xl text-ink">Assignment Briefs</h1>
         <p className="mt-2 text-muted">

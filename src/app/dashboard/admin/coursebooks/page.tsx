@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { CoursebookList } from "@/components/tp-library/coursebook-list";
@@ -20,9 +21,7 @@ export default async function AdminCoursebooksPage() {
       {/* Only reached from the Centre material panel now (the persistent
           AdminTabs nav that used to link here is gone -- see dashboard/
           admin/page.tsx). A real way back, so this can't be a dead end. */}
-      <Link href="/dashboard/admin" className="text-sm text-muted hover:text-ink">
-        ← Courses
-      </Link>
+      <BackLink href="/dashboard/admin" label={"Courses"} />
       <div className="card p-6">
         <h1 className="font-serif text-xl text-ink">TP Points Library</h1>
         <p className="mt-2 text-muted">

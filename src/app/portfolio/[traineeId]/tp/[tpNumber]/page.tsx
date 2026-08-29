@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -172,9 +173,7 @@ export default async function TpDetailPage({
 
     return (
       <div className="flex flex-col gap-4">
-        <Link href={`/portfolio/${traineeId}/tp`} className="text-sm text-muted hover:text-primary">
-          ← All teaching practices
-        </Link>
+        <BackLink href={`/portfolio/${traineeId}/tp`} label={"All teaching practices"} />
         <div className="sheet p-6">
           <h1 className="font-serif text-xl text-ink">{trainee.full_name} — TP{tpNumber}</h1>
           <p className="mt-1 text-sm text-muted">Peer observation</p>
@@ -213,9 +212,7 @@ export default async function TpDetailPage({
   if (!assignment) {
     return (
       <div className="flex flex-col gap-4">
-        <Link href={`/portfolio/${traineeId}/tp`} className="text-sm text-muted hover:text-primary">
-          ← All teaching practices
-        </Link>
+        <BackLink href={`/portfolio/${traineeId}/tp`} label={"All teaching practices"} />
         <div className="sheet p-6">
           <h1 className="font-serif text-2xl text-ink">TP{tpNumber}</h1>
           <p className="mt-2 text-sm text-muted">
@@ -306,9 +303,7 @@ export default async function TpDetailPage({
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
       <div className="flex min-w-0 flex-col gap-4">
-        <Link href={`/portfolio/${traineeId}/tp`} className="text-sm text-muted hover:text-primary">
-          ← All teaching practices
-        </Link>
+        <BackLink href={`/portfolio/${traineeId}/tp`} label={"All teaching practices"} />
 
         <div className="flex items-start justify-between gap-4">
           <div>

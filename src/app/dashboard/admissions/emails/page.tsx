@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
 
@@ -112,9 +113,7 @@ export default async function EmailDeliveryPage({
               Go
             </button>
           </form>
-          <Link href="/dashboard/admissions" className="text-sm text-muted hover:text-ink">
-            ← Admissions
-          </Link>
+          <BackLink href="/dashboard/admissions" label={"Admissions"} />
         </div>
       </div>
 

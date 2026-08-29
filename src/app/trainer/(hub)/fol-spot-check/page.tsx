@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { computeCourseDayProgress } from "@/lib/course-day";
@@ -146,9 +147,7 @@ export default async function FolSpotCheckPage() {
         </span>
       </div>
 
-      <Link href="/trainer/roster" className="text-sm text-primary">
-        ← Back to Roster
-      </Link>
+      <BackLink href="/trainer/roster" label={"Back to Roster"} />
     </div>
   );
 }

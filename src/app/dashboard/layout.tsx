@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { signOut } from "@/app/login/actions";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
 import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
@@ -16,7 +17,21 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await getCurrentProfile();
-  if (!session) redirect("/login");
+  if (!session) {
+    // An assessor browsing in tour mode has a token, not a session, so
+    // getCurrentProfile() returns null here and they were being redirected
+    // to a login they cannot use -- a dead end, from links the trainer hub
+    // itself offers them (assignment briefs, marking guidance, a
+    // candidate's CELTA 5 record). Ramy, 29 Aug 2026: "once they're out,
+    // clicking on anything... there's no way to go back."
+    //
+    // Send them back to their own pack instead. Deliberately not rendering
+    // this section read-only for them: /dashboard is the admin and centre
+    // surface, and widening what an assessor can see is a decision to take
+    // on purpose, not a side effect of fixing a broken link.
+    if (await getAssessorCourseId()) redirect("/assessor");
+    redirect("/login");
+  }
 
   const { profile, email } = session;
 

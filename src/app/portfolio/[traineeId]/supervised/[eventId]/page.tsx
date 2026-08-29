@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { SupervisedTaskForm } from "@/app/portfolio/[traineeId]/supervised/[eventId]/task-form";
@@ -36,9 +37,7 @@ export default async function SupervisedSessionPage({
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4">
-      <Link href={`/portfolio/${traineeId}/timetable`} className="text-sm text-primary hover:underline">
-        ← Timetable
-      </Link>
+      <BackLink href={`/portfolio/${traineeId}/timetable`} label={"Timetable"} />
       <div className="sheet">
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
           {new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}

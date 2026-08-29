@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { AssignmentResultSignature } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/result-signature";
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -192,9 +193,7 @@ export default async function AssignmentDetailPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href={`/portfolio/${traineeId}/assignments`} className="text-sm text-muted hover:text-primary">
-        ← All assignments
-      </Link>
+      <BackLink href={`/portfolio/${traineeId}/assignments`} label={"All assignments"} />
 
       {/* Ramy, 30 Aug 2026: the one signature a trainee could not give.
           Migration 0245 added the columns and the signature ledger listed

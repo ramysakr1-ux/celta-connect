@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -509,13 +510,7 @@ export default async function ResourceHubPage({
               that gets you out of the room, and the lowest-contrast thing on
               it. Now a filled pill, which also makes it read as a button
               rather than a caption. */}
-          <Link
-            href={`/portfolio/${traineeId}`}
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-[5px] text-[12px] font-bold transition-colors"
-            style={{ background: "oklch(60% 0.11 70)", color: "oklch(23.5% 0.017 65)" }}
-          >
-            ← Course stream
-          </Link>
+          <BackLink href={`/portfolio/${traineeId}`} label="Course stream" />
           <h1 className="mt-1.5 font-serif text-[30px] font-semibold" style={{ color: "oklch(99.2% 0.005 90)" }}>
             Resource Hub
           </h1>

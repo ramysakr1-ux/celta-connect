@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -81,9 +82,7 @@ export default async function AssessorHistoryPage({
             visible so a centre administrator can see the pattern.
           </p>
         </div>
-        <Link href="/centre" className="shrink-0 text-sm font-semibold text-muted hover:text-ink">
-          ← Overview
-        </Link>
+        <BackLink href="/centre" label={"Overview"} />
       </div>
 
       {history.length === 0 ? (

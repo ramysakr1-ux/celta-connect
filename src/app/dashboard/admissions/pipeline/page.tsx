@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
 import { computeApplicantPaymentState } from "@/lib/payments/applicant-payment-state";
@@ -132,9 +133,7 @@ export default async function AdmissionsPipelinePage({
               do something about it.
             </p>
           </div>
-          <Link href="/dashboard/admissions" className="shrink-0 text-sm text-muted hover:text-ink">
-            ← Back to admissions
-          </Link>
+          <BackLink href="/dashboard/admissions" label={"Back to admissions"} />
         </div>
       </div>
 

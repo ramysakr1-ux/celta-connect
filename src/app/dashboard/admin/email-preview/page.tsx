@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import {
@@ -216,9 +217,7 @@ export default async function EmailPreviewPage({
           Course Admin tab -- this is candidate-email preview, which
           for-claude-code-course-admin.md explicitly excludes from Course
           Admin. */}
-      <Link href="/dashboard/admissions" className="text-sm text-muted hover:text-ink">
-        ← Admissions
-      </Link>
+      <BackLink href="/dashboard/admissions" label={"Admissions"} />
       <div>
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Connect · emails</p>
         <h1 className="mt-1 font-serif text-[26px] text-ink">What your centre sends</h1>

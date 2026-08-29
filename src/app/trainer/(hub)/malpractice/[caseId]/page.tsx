@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
@@ -41,9 +42,7 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href={`/portfolio/${caseRow.trainee_id}/assignments`} className="text-sm text-muted hover:text-primary">
-        ← {trainee?.full_name ?? "Candidate"}&apos;s assignments
-      </Link>
+      <BackLink href={`/portfolio/${caseRow.trainee_id}/assignments`} label={`${trainee?.full_name ?? "Candidate"}\u2019s assignments`} />
 
       <div className="sheet flex flex-col gap-1">
         <div className="flex items-center justify-between gap-3">

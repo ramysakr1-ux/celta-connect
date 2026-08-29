@@ -130,11 +130,21 @@ export async function proxy(request: NextRequest) {
   // app now lives at bare /assessor (the token-entry route redirects here
   // after setting the cookie) -- distinct from /assessor/[token], which is
   // already public above since it's the unauthenticated entry point itself.
+  //
+  // Second instance of the same bug, found 29 Aug 2026: the trainer hub an
+  // assessor is allowed to browse links straight into /dashboard --
+  // assignment briefs, marking guidance, a candidate's CELTA 5 record --
+  // and this list did not include it, so those links 307'd them to a login
+  // they cannot use. Ramy: "once they're out, clicking on anything...
+  // there's no way to go back." It is a dead end, not a permission
+  // boundary: the pages themselves are the same read-only staff pages
+  // already reachable under /trainer.
   const isAssessorReachableRoute =
     hasAssessorCookie &&
     (request.nextUrl.pathname === "/assessor" ||
       request.nextUrl.pathname === "/trainer" ||
       request.nextUrl.pathname.startsWith("/trainer/") ||
+      request.nextUrl.pathname.startsWith("/dashboard/") ||
       request.nextUrl.pathname.startsWith("/portfolio/"));
 
   if (!user && !isPublicRoute && !isAssessorReachableRoute) {

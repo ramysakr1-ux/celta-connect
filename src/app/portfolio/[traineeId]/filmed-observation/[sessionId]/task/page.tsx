@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -56,9 +57,7 @@ export default async function FilmedObservationTaskPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href={`/portfolio/${traineeId}/filmed-observation/${sessionId}`} className="text-xs text-muted hover:text-primary">
-        ← Back to the session
-      </Link>
+      <BackLink href={`/portfolio/${traineeId}/filmed-observation/${sessionId}`} label={"Back to the session"} />
 
       <div className={`sheet flex flex-col gap-1 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
         <h1 className="font-serif text-xl text-ink">{fSession.lesson_title ?? "Filmed lesson"}</h1>

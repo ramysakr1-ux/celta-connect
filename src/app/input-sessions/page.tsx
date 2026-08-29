@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { INPUT_SESSIONS } from "@/app/input-sessions/registry";
@@ -19,9 +20,7 @@ export default async function InputSessionsIndexPage({ searchParams }: { searchP
     <div className="mx-auto flex max-w-3xl flex-col gap-6 p-6 sm:p-10">
       <div>
         {backHref ? (
-          <Link href={backHref} className="text-sm text-primary hover:underline">
-            ← Resource hub
-          </Link>
+          <BackLink href={backHref} label={"Resource hub"} />
         ) : null}
         <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Resource hub</p>
         <h1 className="mt-1 font-serif text-2xl text-ink">Input sessions</h1>

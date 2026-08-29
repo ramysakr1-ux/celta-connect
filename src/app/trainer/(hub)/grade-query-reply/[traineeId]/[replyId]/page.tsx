@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
@@ -45,9 +46,7 @@ export default async function GradeQueryReplyDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href={`/trainer/grade-query-reply/${traineeId}`} className="text-sm text-muted hover:text-primary">
-        ← {trainee?.full_name ?? "Candidate"}&apos;s grade query replies
-      </Link>
+      <BackLink href={`/trainer/grade-query-reply/${traineeId}`} label={`${trainee?.full_name ?? "Candidate"}\u2019s grade query replies`} />
 
       <div className="sheet flex flex-col gap-1 p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -34,9 +35,7 @@ export default async function WithdrawalRequestPage({ params }: { params: Promis
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href={`/portfolio/${traineeId}`} className="text-xs text-muted hover:text-primary">
-        ← Course stream
-      </Link>
+      <BackLink href={`/portfolio/${traineeId}`} label={"Course stream"} />
 
       <div className="sheet flex flex-col gap-4">
         <div>

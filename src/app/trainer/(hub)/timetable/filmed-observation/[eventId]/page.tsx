@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
@@ -45,9 +46,7 @@ export default async function FilmedObservationSetupPage({ params }: { params: P
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/trainer/timetable" className="text-xs text-muted hover:text-primary">
-        ← Timetable
-      </Link>
+      <BackLink href="/trainer/timetable" label={"Timetable"} />
 
       <div className="sheet">
         <p className="text-xs text-muted">Filmed observation · group watch session</p>

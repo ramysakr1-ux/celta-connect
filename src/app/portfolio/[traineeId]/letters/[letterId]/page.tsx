@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -41,9 +42,7 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href={`/portfolio/${traineeId}`} className="text-xs text-muted hover:text-primary">
-        ← Course stream
-      </Link>
+      <BackLink href={`/portfolio/${traineeId}`} label={"Course stream"} />
 
       <div className="sheet flex flex-col gap-3">
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">{snapshot.kicker ?? "Formal letter"}</p>

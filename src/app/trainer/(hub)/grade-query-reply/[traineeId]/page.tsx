@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
@@ -35,9 +36,7 @@ export default async function GradeQueryReplyListPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href={`/dashboard/trainer/trainees/${traineeId}/celta5`} className="text-sm text-muted hover:text-primary">
-        ← {trainee.full_name}&apos;s CELTA 5 record
-      </Link>
+      <BackLink href={`/dashboard/trainer/trainees/${traineeId}/celta5`} label={`${trainee.full_name}\u2019s CELTA 5 record`} />
 
       <div className="sheet flex flex-col gap-2 p-6">
         <h1 className="font-serif text-xl text-ink">Grade query reply -- {trainee.full_name}</h1>

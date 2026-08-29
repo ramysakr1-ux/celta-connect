@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { OverrideForm } from "@/app/trainer/(hub)/rotation/override/override-form";
@@ -36,9 +37,7 @@ export default async function TpPointOverridePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href="/trainer/rotation" className="text-sm text-muted hover:text-primary">
-        ← Rotation
-      </Link>
+      <BackLink href="/trainer/rotation" label={"Rotation"} />
 
       <div className="sheet p-6">
         <h1 className="font-serif text-xl text-ink">Manual TP-point override</h1>

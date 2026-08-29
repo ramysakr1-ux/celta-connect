@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { responseIsAnswered } from "@/lib/pre-course-task-shape";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -329,9 +330,7 @@ export default async function PortfolioLayout({
         <div className="border-b border-border bg-card">
           <div className="container flex h-14 items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <Link href="/trainer/roster" className="shrink-0 text-sm text-primary">
-                ← Roster
-              </Link>
+              <BackLink href="/trainer/roster" label={"Roster"} />
               <span className="h-5 w-px shrink-0 bg-border" />
               <h1 className="truncate font-serif text-[17px] text-ink">{trainee.full_name}</h1>
               {isCourseStatusReadOnly(trainee.course_status) ? (
