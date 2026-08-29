@@ -495,8 +495,13 @@ export async function signAssignmentOutcome(_prevState: AbsenceFormState, formDa
 
   const supabase = await createClient();
   const { data: profile } = await supabase.from("profiles").select("signature_name, full_name").eq("id", trainee.id).maybeSingle();
+  // Falls back to the profile name, because on this form typing the name
+  // IS the act of signing -- Ramy's design says "Type your name both next
+  // to 'Name' and 'Signed'". Requiring a signature to have been set
+  // elsewhere first blocked the candidate on the very page that collects
+  // it, which is how these two confirmations ended up unsignable.
   const name = profile?.signature_name?.trim() || profile?.full_name?.trim();
-  if (!name) return { error: "Set your signature name first." };
+  if (!name) return { error: "Your record has no name on it. Ask your tutor to check your profile." };
 
   // The booklet signs the way the paper CELTA 5 does -- the candidate
   // types their name next to both "Name" and "Signed" (Ramy's design file,

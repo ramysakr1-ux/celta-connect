@@ -520,7 +520,7 @@ export default async function PortfolioCelta5Page({
             appealsConfirmedAt={record.appeals_read_confirmed_at}
             appealsSignatureName={record.appeals_read_signature_name}
             canSign={!isStaff && !assessorCourseId && viewer?.id === traineeId}
-            viewerSignatureName={viewer?.signature_name ?? null}
+            fullName={viewer?.full_name ?? null}
           />
 
           <BookletSection id="c5-attendance" num="Section 5" title="Record of attendance">
@@ -1346,7 +1346,7 @@ export default async function PortfolioCelta5Page({
           appealsConfirmedAt={record.appeals_read_confirmed_at}
           appealsSignatureName={record.appeals_read_signature_name}
           canSign={!isStaff && !assessorCourseId && viewer?.id === traineeId}
-          viewerSignatureName={viewer?.signature_name ?? null}
+          fullName={viewer?.full_name ?? null}
         />
 
         <AbsencePanel absences={absences ?? []} hoursAttended={record.hours_attended} totalHours={course?.total_hours ?? 120} />

@@ -1,10 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import { confirmCelta5Section, type AbsenceFormState } from "@/app/portfolio/[traineeId]/status-actions";
 import { BOOKLET_SECTIONS, type BookletSection } from "@/lib/celta5-booklet-content";
-
-const initial: AbsenceFormState = { error: null };
+import { ConfirmBox } from "@/app/portfolio/[traineeId]/celta5/booklet/confirm-box";
 
 // Cambridge's own section numbers, so these read as pages 1-4 of the
 // booklet rather than as four loose cards.
@@ -65,72 +62,20 @@ function Blocks({ section }: { section: BookletSection }) {
   return <div className="flex flex-col gap-2">{out}</div>;
 }
 
-function Confirmation({
-  section,
-  text,
-  confirmedAt,
-  signatureName,
-  canSign,
-  viewerSignatureName,
-}: {
-  section: string;
-  text: string;
-  confirmedAt: string | null;
-  signatureName: string | null;
-  canSign: boolean;
-  viewerSignatureName: string | null;
-}) {
-  const [state, formAction, pending] = useActionState(confirmCelta5Section, initial);
-
-  if (confirmedAt) {
-    return (
-      <div className="c5-box" style={{ marginTop: 16 }}>
-        <p className="text-[11px] leading-relaxed text-ink">{text}</p>
-        <p className="mt-1 text-[10px] text-muted">
-          Signed by {signatureName} on {new Date(confirmedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="c5-box" style={{ marginTop: 16 }}>
-      <p className="text-[11px] leading-relaxed text-ink">{text}</p>
-      {!canSign ? (
-        <p className="mt-1 text-[10px] text-muted">Not yet confirmed.</p>
-      ) : !viewerSignatureName ? (
-        <p className="mt-1 text-[10px] text-muted">Set your signature name on this page before confirming.</p>
-      ) : (
-        <form action={formAction} className="mt-2">
-          <input type="hidden" name="section" value={section} />
-          {state.error ? <p className="mb-1 text-[10px] text-destructive">{state.error}</p> : null}
-          <button
-            type="submit"
-            disabled={pending}
-            className="c5-btn"
-          >
-            {pending ? "Saving…" : `Confirm as ${viewerSignatureName}`}
-          </button>
-        </form>
-      )}
-    </div>
-  );
-}
-
 export function BookletSections({
   portfolioConfirmedAt,
   portfolioSignatureName,
   appealsConfirmedAt,
   appealsSignatureName,
   canSign,
-  viewerSignatureName,
+  fullName,
 }: {
   portfolioConfirmedAt: string | null;
   portfolioSignatureName: string | null;
   appealsConfirmedAt: string | null;
   appealsSignatureName: string | null;
   canSign: boolean;
-  viewerSignatureName: string | null;
+  fullName: string | null;
 }) {
   return (
     <>
@@ -142,13 +87,13 @@ export function BookletSections({
             <Blocks section={section} />
           </div>
           {section.confirm ? (
-            <Confirmation
+            <ConfirmBox
               section={section.key}
               text={section.confirm}
               confirmedAt={section.key === "portfolio" ? portfolioConfirmedAt : appealsConfirmedAt}
               signatureName={section.key === "portfolio" ? portfolioSignatureName : appealsSignatureName}
               canSign={canSign}
-              viewerSignatureName={viewerSignatureName}
+              fullName={fullName}
             />
           ) : null}
         </section>

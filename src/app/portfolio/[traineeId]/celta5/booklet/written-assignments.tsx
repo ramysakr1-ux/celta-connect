@@ -22,10 +22,17 @@ export function WrittenAssignmentsRecord({ rows }: { rows: AssignmentRow[] }) {
   return (
     <>
       <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 8 }}>
-        During the course, you are required to produce four assignments for assessment purposes. You will be given
-        written feedback on each assignment, and a grade (Pass or Fail). Written assignments are marked for their
-        content and their standard of English and you must pass in both areas to be awarded an overall pass for the
-        assignment.
+        During the course, you are required to produce four assignments for assessment purposes. These are practical in
+        nature and help to synthesise principles and practice from your teaching and learning on the course. You need to
+        read the rubrics carefully, and address the questions set. Please note that two assignments can be conflated at
+        the discretion of the centre, in which case both sections of the assignment will receive separate grades.
+      </p>
+      <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 8 }}>
+        You will be given written feedback on each assignment, and a grade (Pass or Fail). Written assignments are
+        marked for their content and their standard of English and you must pass in both areas to be awarded an overall
+        pass for the assignment. If you are given a printed format for an assignment, please use it. A minimum of two of
+        the assignments must be written in suitably formal, continuous prose. Written work can be handwritten (provided
+        that it can be read easily) or typed. You will be required to confirm that the written work is your own.
       </p>
       <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 8 }}>
         In the event that any piece of work is considered unsatisfactory, you will have one opportunity to resubmit
