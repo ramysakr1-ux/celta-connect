@@ -43,3 +43,10 @@ next-env.d.ts
 
 # supabase CLI cache
 supabase/.temp
+
+# Working copies dragged in for one-off reference. The design files that
+# ARE the authority live in design-sources/ and are tracked; anything else
+# landing in the root is a scratch copy and should not be committed.
+/Untitled.pdf
+/*.zip
+/_*.html
