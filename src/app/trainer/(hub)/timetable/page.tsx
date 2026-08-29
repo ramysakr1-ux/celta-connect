@@ -11,7 +11,7 @@ import { AddEventForm } from "@/app/trainer/(hub)/timetable/add-event-form";
 import { GenerateSkeletonForm } from "@/app/trainer/(hub)/timetable/generate-skeleton-form";
 import { DragBoard, type UnmatchedParticipant } from "@/app/trainer/(hub)/timetable/drag-board";
 import { TimeBandsForm } from "@/app/trainer/(hub)/timetable/time-bands-form";
-import { resolveTimeBands, toLocalIso, DEFAULT_TIMEZONE, type TimetableEvent } from "@/lib/timetable-grid";
+import { resolveTimeBands, toLocalIso, DEFAULT_TIMEZONE, type TimetableEvent, type TimeBand } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { halfOwningDate, type TpTimetableEvent } from "@/lib/rotation";
 import { ReadOnlyTimetableBoard, type EventMeta } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
@@ -71,7 +71,44 @@ export default async function TrainerTimetablePage({
       .order("event_time"),
     supabase.from("volunteer_students").select("id, name").eq("course_id", courseId).is("removed_at", null).order("name"),
   ]);
-  const allEvents: TimetableEvent[] = events ?? [];
+  const baseEvents: TimetableEvent[] = events ?? [];
+
+  const assessorVisitDate = assessorCourseId ? (course?.assessor_visit_date ?? null) : null;
+  const isAssessorViewer = Boolean(assessorCourseId) && !trainer;
+
+  // Ramy, 30 Aug 2026: "when the assessor clicks on the timetable, is there a
+  // chance they can also see the grades meeting even though it's not meant to
+  // be on the timetable? Is there a trick that only the assessor can see it?"
+  //
+  // Yes, and the safe trick is the obvious one: don't store it. This row is
+  // built here, in the assessor's own render, and never written to
+  // course_timetable_events -- so no query a candidate or tutor makes can
+  // return it, because there is nothing in the table to return. It cannot
+  // leak by someone forgetting a filter later, which a stored-and-hidden row
+  // eventually would.
+  //
+  // The id is a literal rather than a uuid so it is obvious in any log or
+  // debugger that this is not a database row.
+  const GRADING_MEETING_ID = "assessor-only-grading-meeting";
+  const gradingMeetingEvent: TimetableEvent | null =
+    isAssessorViewer && assessorVisitDate
+      ? ({
+          ...(baseEvents[0] ?? {}),
+          id: GRADING_MEETING_ID,
+          course_id: courseId,
+          type: "supervised_session",
+          title: "Grading meeting",
+          detail: "With all tutors. Yours only -- not on the candidates' timetable.",
+          event_date: assessorVisitDate,
+          event_time: gradingMeetingTime(baseEvents, assessorVisitDate, course?.time_bands),
+          tag: "group_room",
+          zoom_url: null,
+          linked_assignment_type: null,
+          linked_tp_number: null,
+        } as TimetableEvent)
+      : null;
+
+  const allEvents: TimetableEvent[] = gradingMeetingEvent ? [...baseEvents, gradingMeetingEvent] : baseEvents;
 
   // Ramy, 25 Aug 2026: "the trainers should show if they are... how many
   // volunteers... attending" -- aggregate only, no names. Total is fixed
@@ -280,16 +317,15 @@ export default async function TrainerTimetablePage({
   // skeleton's own convention, not a guess -- see FEEDBACK_AND_LESSON_PLANNING
   // in src/lib/timetable-skeleton.ts, and today-tab.tsx already matches the
   // same way.
-  const assessorVisitDate = assessorCourseId ? (course?.assessor_visit_date ?? null) : null;
-  const isAssessorViewer = Boolean(assessorCourseId) && !trainer;
 
   const eventMeta: Record<string, EventMeta> = {};
   for (const event of allEvents) {
     const mine = isAssessorViewer
-      ? event.event_date === assessorVisitDate &&
+      ? event.id === GRADING_MEETING_ID ||
+        (event.event_date === assessorVisitDate &&
         (event.type === "tp" ||
           (event.type === "supervised_session" &&
-            (event.title === "Feedback" || (event.title ?? "").toLowerCase().includes("assessor"))))
+            (event.title === "Feedback" || (event.title ?? "").toLowerCase().includes("assessor")))))
       : event.type !== "tp"
         ? true
         : ownedHalfOrders.size > 0 && (() => {
@@ -504,4 +540,27 @@ export default async function TrainerTimetablePage({
       ) : null}
     </div>
   );
+}
+
+
+/**
+ * Where the grading meeting sits on the assessor's own view of the day: after
+ * the meeting with the candidates if that is timetabled, otherwise after the
+ * feedback, otherwise the last band. Handbook 14.2/14.3's order -- observe,
+ * feedback, candidates, then grades with the tutors.
+ */
+function gradingMeetingTime(
+  events: TimetableEvent[],
+  visitDate: string,
+  courseTimeBands: TimeBand[] | null | undefined
+): string {
+  const bands = resolveTimeBands(courseTimeBands);
+  const onDay = events.filter((e) => e.event_date === visitDate && e.event_time);
+  const anchor = onDay
+    .filter((e) => (e.title ?? "").toLowerCase().includes("assessor") || e.title === "Feedback")
+    .map((e) => (e.event_time ?? "").slice(0, 5))
+    .sort()
+    .pop();
+  if (!anchor) return bands[bands.length - 1].start;
+  return bands.find((b) => b.start > anchor)?.start ?? bands[bands.length - 1].start;
 }

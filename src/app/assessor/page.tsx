@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus } from "@/lib/auth/portfolio-access";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
+import { halfOwningDate, halfTpDates, rotationPosition } from "@/lib/rotation";
 import { hasMarkingGuidance } from "@/lib/marking-guidance";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -199,6 +200,69 @@ export default async function AssessorPage({
   // candidates. Ramy: "we do include the assessor meeting, which is basically
   // the assessor meeting the trainees" -- so on a properly set up course it is
   // a real event on the day and this panel should not also invent a row for it.
+  // Ramy, 30 Aug 2026: "the assessment timetable is too long. It's only two
+  // trainees being observed... preferably the names of the trainees and the
+  // teaching slots. And then feedback, and then maybe lunch, and then meeting
+  // with the trainees and the grades meeting. So in total it's four or five
+  // things including lunch."
+  //
+  // The panel was listing the whole day -- lesson planning, filmed
+  // observations, everything -- which is the candidates' day, not the
+  // assessor's. Narrowed to the sessions the assessor is actually at, and the
+  // teaching slots carry the candidate's name rather than a letter, since
+  // "TP7 · A" tells an assessor nothing about who they are about to watch.
+  //
+  // Every slot is named, not two: which two get observed is decided on the
+  // day (Ramy, same conversation: "sometimes things change and the assessor
+  // observes maybe first and third").
+  const [{ data: courseTpEvents }, { data: visitSubgroups }] = await Promise.all([
+    admin.from("course_timetable_events").select("event_date").eq("course_id", courseId).eq("type", "tp"),
+    admin.from("course_subgroups").select("id, half_order").eq("course_id", courseId),
+  ]);
+  const allCourseTpEvents = courseTpEvents ?? [];
+  const { data: visitMembers } =
+    (visitSubgroups ?? []).length > 0
+      ? await admin
+          .from("course_subgroup_members")
+          .select("subgroup_id, trainee_id, base_slot")
+          .in("subgroup_id", (visitSubgroups ?? []).map((sg) => sg.id))
+      : { data: [] };
+
+  const assessorDayTypes = new Set(["tp", "supervised_session"]);
+  const visitDayEvents = (onDayEvents ?? []).filter(
+    (e) =>
+      assessorDayTypes.has(e.type) ||
+      (e.tag === "lunch" && (onDayEvents ?? []).some((x) => x.type === "tp"))
+  );
+
+  // Who teaches each slot, in teaching order. Same rotation derivation as the
+  // pack's lesson-plans page: the visit date belongs to one half, and each
+  // member's rotation position for that TP number gives their place in the
+  // day's TP slots, which are already ordered by time.
+  const visitHalf = course.assessor_visit_date
+    ? halfOwningDate(allCourseTpEvents, course.assessor_visit_date)
+    : null;
+  const visitTpNumber =
+    visitHalf && course.assessor_visit_date
+      ? halfTpDates(allCourseTpEvents, visitHalf).indexOf(course.assessor_visit_date) + 1
+      : 0;
+  const teachingOrderNames: string[] = [];
+  if (visitHalf && visitTpNumber > 0) {
+    const halfSubgroupIds = (visitSubgroups ?? []).filter((sg) => sg.half_order === visitHalf).map((sg) => sg.id);
+    const members = (visitMembers ?? []).filter((m) => halfSubgroupIds.includes(m.subgroup_id));
+    const sizeBySubgroup = new Map(
+      halfSubgroupIds.map((id) => [id, members.filter((m) => m.subgroup_id === id).length])
+    );
+    const ordered = members
+      .map((m) => ({
+        name: candidates.find((c) => c.traineeId === m.trainee_id)?.name ?? null,
+        order: rotationPosition(m.base_slot, sizeBySubgroup.get(m.subgroup_id) ?? 1, visitTpNumber) + 1,
+      }))
+      .filter((x): x is { name: string; order: number } => Boolean(x.name))
+      .sort((a, b) => a.order - b.order);
+    teachingOrderNames.push(...ordered.map((o) => o.name));
+  }
+
   const hasTimetabledCandidateMeeting = (onDayEvents ?? []).some((e) =>
     (e.title ?? "").toLowerCase().includes("assessor")
   );
@@ -753,19 +817,27 @@ export default async function AssessorPage({
                   padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
                 }}
               >
-                {(onDayEvents ?? []).length === 0 ? (
+                {visitDayEvents.length === 0 ? (
                   <span style={{ fontSize: 12, color: MUTED }}>
                     {course.assessor_visit_date ? "No timetable events on the visit date yet." : "No assessor visit date set yet."}
                   </span>
                 ) : (
-                  (onDayEvents ?? []).map((e) => (
+                  visitDayEvents.map((e, i) => (
                     <div key={e.id} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
                       <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                         <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none", fontVariantNumeric: "tabular-nums" }}>
                           {e.event_time?.slice(0, 5) ?? ""}
                         </span>
                         <span>
-                          <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>{e.title}</span>
+                          <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>
+                            {/* Named, not lettered: "TP7 · A" tells an assessor
+                                nothing about who they are about to watch. The
+                                nth TP slot of the day belongs to the nth
+                                candidate in the rotation order. */}
+                            {e.type === "tp"
+                              ? (teachingOrderNames[visitDayEvents.filter((x, j) => x.type === "tp" && j < i).length] ?? e.title)
+                              : e.title}
+                          </span>
                           {/* for-claude-code-assessor-pack-decisions.md §2: "a
                               real, clickable join link... not just a static
                               'Observable' label. An assessor who can't click
@@ -774,7 +846,7 @@ export default async function AssessorPage({
                               real join window is Zoom's own waiting room, not
                               something this page enforces. */}
                           <span style={{ fontSize: 11, color: MUTED }}>
-                            {e.type === "tp" ? "Observable · " : ""}
+                            {e.type === "tp" ? `${e.title} · ` : ""}
                             {e.zoom_url ? "Online — joining link opens 10 minutes before" : "In person at the centre"}
                           </span>
                         </span>
