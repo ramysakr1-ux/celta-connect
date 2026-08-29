@@ -24,22 +24,24 @@ const CATEGORY_STYLE: Record<DisplayCategory, { accent: string; tintFrom: string
     accent: "oklch(38% 0.072 195)",
     tintFrom: "oklch(95.5% 0.03 195 / 0.75)",
     tintTo: "oklch(95.5% 0.03 195 / 0.35)",
-    label: "Whole group -- Zoom",
+    label: "Whole group — Zoom input",
     titleWeight: 500,
   },
   rm: {
     accent: "oklch(23.5% 0.017 65)",
     tintFrom: "oklch(100% 0 0 / 0.92)",
     tintTo: "oklch(100% 0 0 / 0.55)",
-    label: "Group room -- TP, feedback, planning",
+    label: "Group room — TP, feedback, planning",
     titleWeight: 600,
   },
   admin: {
-    // Re-pointed off gold per the color audit (2026-08-21) -- deadlines are
-    // amber, matching the same category's fix on the trainer-side event-cell.tsx.
-    accent: "oklch(44% 0.095 68)",
-    tintFrom: "oklch(94.5% 0.065 85 / 0.75)",
-    tintTo: "oklch(94.5% 0.065 85 / 0.35)",
+    // Ramy's design file (29 Aug 2026) uses gold here, and gold is what the
+    // 2026-08-21 colour audit had re-pointed to amber. His file is the
+    // authority for this screen, so gold it is -- the legend swatch and the
+    // card spine both read from this one value, so they cannot disagree.
+    accent: "oklch(60% 0.11 70)",
+    tintFrom: "oklch(96% 0.045 80 / 0.75)",
+    tintTo: "oklch(96% 0.045 80 / 0.35)",
     label: "Admin & deadlines",
     titleWeight: 500,
   },
@@ -47,7 +49,7 @@ const CATEGORY_STYLE: Record<DisplayCategory, { accent: string; tintFrom: string
     accent: "oklch(51% 0.017 70)",
     tintFrom: "oklch(96% 0.008 85 / 0.6)",
     tintTo: "oklch(96% 0.008 85 / 0.25)",
-    label: "Individual -- consultations, own time",
+    label: "Individual · bookable",
     titleWeight: 500,
   },
   lu: {
@@ -230,11 +232,17 @@ export function ReadOnlyTimetableBoard({
         ))}
       </div>
 
+      {/* Desktop board. Columns, row height and padding are the design
+          file's own values, not approximations -- 64px gutter, 150px admin
+          column, nine bands at a 118px floor that stretch to fill. Hidden
+          below 900px, where the day list takes over. */}
       <div
-        className="overflow-x-auto rounded-[14px] p-3"
+        className="hidden overflow-x-auto rounded-[14px] min-[900px]:block"
         style={{
+          padding: "4px 16px 12px",
+          border: "1px solid oklch(88% 0.016 82)",
           background:
-            "linear-gradient(135deg, oklch(38% 0.072 195 / 0.06), oklch(96% 0.045 80 / 0.06), oklch(60% 0.11 70 / 0.08))",
+            "linear-gradient(135deg, oklch(97% 0.02 190 / 0.5), oklch(97.5% 0.018 85 / 0.6) 45%, oklch(96% 0.025 70 / 0.4))",
         }}
       >
         <table className="w-full min-w-[900px] border-separate" style={{ borderSpacing: "6px" }}>
@@ -272,6 +280,87 @@ export function ReadOnlyTimetableBoard({
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile. The design is a 1280px grid; below 900px that is a sideways
+          scroll nobody reads, so the same week renders as a day list -- same
+          categories, same colours, same live bar and lens, time band moved
+          from a column header onto each row since there are no columns left
+          to head. In "Mine" it HIDES rather than dims: on a grid a faded
+          tile still says "something is here", on a phone it only costs the
+          scarcest thing there is, which is vertical space. */}
+      <div className="flex flex-col gap-3 min-[900px]:hidden">
+        {(week?.rows ?? []).map((row) => {
+          const isToday = row.isoDate === today;
+          const rowItems: { band: string; event: TimetableEvent }[] = [
+            ...row.admin.map((e) => ({ band: "Admin", event: e })),
+            ...row.bands.flatMap((bandEvents, i) =>
+              bandEvents.map((e) => ({ band: timeBands[i]?.label ?? "", event: e }))
+            ),
+          ];
+          const visible = rowItems.filter(({ event }) => !mineOnly || (eventMeta[event.id] ?? EMPTY_META).mine);
+          if (visible.length === 0) return null;
+          return (
+            <div
+              key={row.isoDate}
+              className="overflow-hidden rounded-[12px] border border-border bg-frame"
+              style={isToday ? { boxShadow: "inset 3px 0 0 oklch(38% 0.072 195)" } : undefined}
+            >
+              <div className="flex items-baseline gap-2 border-b border-border-faint px-3.5 py-2.5">
+                <span className={`font-serif text-lg ${isToday ? "text-primary" : "text-ink"}`}>{row.date.split(" ")[1]}</span>
+                <span className="text-[9px] font-semibold tracking-[0.12em] text-muted uppercase">{row.weekday}</span>
+                {isToday ? (
+                  <span className="text-[8.5px] font-semibold tracking-[0.1em] text-primary uppercase">Today</span>
+                ) : null}
+              </div>
+              {visible.map(({ band, event }) => {
+                const cat = toDisplayCategory(categorize(event));
+                const style = CATEGORY_STYLE[cat];
+                const meta = eventMeta[event.id] ?? EMPTY_META;
+                const live = isEventLive(event, now, timeZone);
+                return (
+                  <button
+                    key={event.id}
+                    type="button"
+                    onClick={() => setSelectedEvent(event)}
+                    className="flex w-full items-start gap-3 border-b border-border-faint px-3.5 py-2.5 text-left last:border-b-0"
+                    style={{ borderLeft: `3px solid ${style.accent === "transparent" ? "oklch(88% 0.016 82)" : style.accent}` }}
+                  >
+                    <span className="w-[74px] shrink-0 pt-0.5 text-[10px] font-semibold text-muted">{band}</span>
+                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="text-[12.5px] text-ink" style={{ fontWeight: style.titleWeight }}>
+                        {event.title}
+                      </span>
+                      {meta.teachingLetters ? (
+                        <span className="text-[10.5px] text-muted">{meta.teachingLetters}</span>
+                      ) : null}
+                      {mineOnly && meta.ownTpSlot ? (
+                        <span
+                          className="mt-0.5 self-start rounded-full px-2 py-0.5 text-[9px] font-bold tracking-[0.06em] uppercase"
+                          style={{ background: "oklch(60% 0.11 70 / 0.18)", color: "oklch(45% 0.09 70)" }}
+                        >
+                          You teach
+                        </span>
+                      ) : null}
+                    </span>
+                    {event.zoom_url ? (
+                      <span
+                        className="flex size-[26px] shrink-0 items-center justify-center self-center rounded-full"
+                        style={
+                          live
+                            ? { background: "oklch(38% 0.072 195)", color: "oklch(98.5% 0.006 90)" }
+                            : { background: "oklch(38% 0.072 195 / 0.1)", color: "oklch(38% 0.072 195 / 0.6)" }
+                        }
+                      >
+                        <CameraIcon />
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex justify-center gap-2">

@@ -24,6 +24,11 @@ const FOCUS_ROUTES = [
   // Ramy, 29 Aug 2026: "once you click, you're jumping inside a different
   // room. So the entire page is a resource hub, nothing else there."
   /\/resources$/,
+  // The timetable's grid is nine time bands wide -- the design file sets a
+  // 1280px minimum, so inside the rail and the container it starts scrolling
+  // sideways before it has shown a full day. Ramy, 29 Aug 2026, asked for
+  // full width here explicitly: "I'll go with full width as well, agreed."
+  /\/timetable$/,
 ];
 
 export function PortfolioFocusRow({ sidebar, children }: { sidebar: React.ReactNode; children: React.ReactNode }) {
