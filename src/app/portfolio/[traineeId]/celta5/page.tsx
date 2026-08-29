@@ -905,6 +905,15 @@ export default async function PortfolioCelta5Page({
                 This box is to be completed for all candidates whose portfolios are submitted to Cambridge English.
                 (See CELTA Administration Handbook for details of portfolios to be submitted.)
               </p>
+              {/* The second instruction, which the app had dropped. It is the
+                  one that tells a tutor WHAT to write, so a box carrying only
+                  the first paragraph says who must fill it in and not what
+                  belongs in it. */}
+              <p className="mt-2 text-[10px] leading-relaxed italic text-muted">
+                Please state whether the candidate did or did not demonstrate effectiveness in the areas identified,
+                making reference to feedback to the candidate in final lessons and/or written assignments, as
+                appropriate.
+              </p>
               <p className="mt-2 text-[11px] leading-relaxed text-ink">{record.grade_review_tutor_comments || "—"}</p>
             </div>
 
