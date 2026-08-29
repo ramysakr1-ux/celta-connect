@@ -383,7 +383,13 @@ export function ReadOnlyTimetableBoard({
       ) : null}
 
       <p className="text-center text-[11px] text-muted">
-        Read-only -- ask your tutor to change anything here. &quot;Mine&quot; hides sessions that don&apos;t involve you; it never removes anything from the real schedule.
+        {/* The two views do different things and the sentence has to be true
+            of both: the grid fades a session it can still show in place,
+            the phone list drops it because vertical space is the scarce
+            thing there. Saying "hides" on desktop was simply wrong -- the
+            tile is right there at 25%. */}
+        Read-only -- ask your tutor to change anything here. &quot;Mine&quot; fades sessions that don&apos;t involve you, and
+        hides them on a phone; it never removes anything from the real schedule.
       </p>
     </div>
   );
