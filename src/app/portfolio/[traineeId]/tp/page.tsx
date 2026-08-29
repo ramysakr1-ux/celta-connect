@@ -107,6 +107,13 @@ export default async function TpHubPage({
   // own real celta5 tab reads this via a different RPC-based, RLS-safe
   // path -- not duplicated here for one summary card).
   const canSeeCriteria = isStaff || Boolean(assessorCourseId);
+  // The candidate themselves, as opposed to merely "not staff" -- an
+  // assessor has no session, so `!isStaff` was true for them and handed
+  // them the candidate's own action buttons ("Log an observation", "Open
+  // TP7 plan") and the self-select prompt, whose link goes to a
+  // trainee-only page that bounces an assessor to a login. See the same
+  // fix in portfolio/[traineeId]/page.tsx.
+  const isOwnWorkspace = !isStaff && !assessorCourseId;
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
 
@@ -260,7 +267,7 @@ export default async function TpHubPage({
             Write TP feedback
           </Link>
         ) : null}
-        {!isStaff ? (
+        {isOwnWorkspace ? (
           <div className="flex shrink-0 items-center gap-2">
             <Link
               href={`/portfolio/${traineeId}/celta5`}
@@ -288,7 +295,7 @@ export default async function TpHubPage({
               const plan = planByTpNumber.get(tpNumber);
 
               if (!plan) {
-                const selfSelect = (tpNumber === 7 || tpNumber === 8) && !isStaff;
+                const selfSelect = (tpNumber === 7 || tpNumber === 8) && isOwnWorkspace;
                 const href = selfSelect ? "/dashboard/trainee/plan/syllabus-grid" : null;
                 const row = (
                   <div className="flex items-start gap-3 border-t border-border-faint py-2.5 first:border-t-0">

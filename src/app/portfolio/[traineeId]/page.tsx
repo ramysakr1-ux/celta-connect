@@ -214,7 +214,14 @@ export default async function CourseStreamPage({
   // themselves, and only when a visit is actually scheduled -- a permanent
   // control would read as an invitation to complain, and a tutor viewing the
   // portfolio must never be able to raise or cancel one on someone's behalf.
-  const ownVisitDate = !isStaff && trainee.course_id ? (courseForVisit?.assessor_visit_date ?? null) : null;
+  // Ramy, 29 Aug 2026, viewing Daniel as the assessor: "there's
+  // something that says ask to speak with the assessor. I thought the
+  // assessor was supposed to be the one taking a look at this." The gate
+  // was `!isStaff`, which on these pages has always meant "the candidate
+  // themselves" -- but an assessor carries no Supabase session at all, so
+  // isStaff is false for them too and they fell straight through it into
+  // the candidate's own controls. Needs the assessor excluded explicitly.
+  const ownVisitDate = !isStaff && !assessorCourseId && trainee.course_id ? (courseForVisit?.assessor_visit_date ?? null) : null;
   const { data: ownMeetingRequest } = ownVisitDate
     ? await supabase
         .from("assessor_meeting_requests")

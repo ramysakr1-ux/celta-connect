@@ -195,7 +195,10 @@ export default async function TraineeTimetablePage({
 
   return (
     <div className="flex flex-col gap-5">
-      {!isStaff ? (
+      {/* The candidate's own subscribe action, not the assessor's -- see the
+          note in portfolio/[traineeId]/page.tsx on `!isStaff` quietly
+          including a sessionless assessor. */}
+      {!isStaff && !assessorCourseId ? (
         <div className="flex justify-end">
           <a
             href={`/api/portfolio/${traineeId}/timetable.ics`}
