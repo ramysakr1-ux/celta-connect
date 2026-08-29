@@ -23,7 +23,12 @@ export interface SignatureLedgerRow {
 // one row per assignment, reading whichever round is the trainee's current
 // or most recent one.
 export function computeSignatureLedger(
-  record: Celta5Record,
+  // Omit<..., "admin_access_granted_by"> because the trainee's own record
+  // arrives from get_my_celta5_record(), which masks that column along with
+  // the grade fields. The ledger only reads signature dates and names, so
+  // widening the parameter is honest -- narrowing the caller with a cast
+  // would have hidden the fact that a trainee's record is a masked view.
+  record: Omit<Celta5Record, "admin_access_granted_by"> & Partial<Pick<Celta5Record, "admin_access_granted_by">>,
   assignments: Pick<
     AssignmentRow,
     "assignment_type" | "first_status" | "resubmission_status" | "first_own_work_confirmed" | "resubmission_own_work_confirmed" | "first_outcome_signed_at" | "resubmission_outcome_signed_at"

@@ -54,6 +54,16 @@ import { computeSignatureLedger } from "@/lib/celta5-signatures";
 import { computeStage3Triggers, stage3Expected, isStage3Mandatory, STAGE3_TRIGGER_LABELS } from "@/lib/stage3-triggers";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
+// CELTA 5's own wording for the overall-progress options (p.19, p.24).
+// The booklet prints the sentence, not the enum, and "not recorded" is a
+// truthful empty state -- a blank box reads as an oversight.
+function overallLabel(v: string | null | undefined): string {
+  if (v === "above_standard") return "Above standard for this stage of the course";
+  if (v === "to_standard") return "To standard for this stage of the course";
+  if (v === "not_to_standard") return "Not to standard for this stage and needs more work in order to pass the course";
+  return "Not recorded yet";
+}
+
 function ReadOnlyField({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
   return (
@@ -139,6 +149,7 @@ export default async function PortfolioCelta5Page({
       { data: tutorialInvites },
       { data: peerNotes },
       { data: tpLessons },
+      { data: traineeAbsences },
     ] = await Promise.all([
       supabase.rpc("get_my_celta5_record"),
       supabase.rpc("get_my_celta5_matrix"),
@@ -155,7 +166,7 @@ export default async function PortfolioCelta5Page({
       supabase
         .from("assignments")
         .select(
-          "assignment_type, first_status, resubmission_status, final_grade, first_outcome_signature_name, first_outcome_signed_at, resubmission_outcome_signature_name, resubmission_outcome_signed_at"
+          "assignment_type, first_status, resubmission_status, final_grade, first_own_work_confirmed, resubmission_own_work_confirmed, first_outcome_signature_name, first_outcome_signed_at, resubmission_outcome_signature_name, resubmission_outcome_signed_at"
         )
         .eq("trainee_id", traineeId),
       viewer?.course_id
@@ -183,6 +194,10 @@ export default async function PortfolioCelta5Page({
         .select("lesson_date, length_minutes, level, learner_count, lesson_focus, tutor_assessment, trainer_id")
         .eq("trainee_id", traineeId)
         .order("lesson_date"),
+      // Section 5 of the booklet. This branch never fetched absences before
+      // because the old page had no attendance section at all -- the record
+      // Cambridge prints was simply missing from the candidate's own view.
+      supabase.from("attendance_absences").select("*").eq("trainee_id", traineeId).order("session_date"),
     ]);
     const record = recordRows?.[0];
     const submissionByTaskId = new Map((obsTaskSubmissions ?? []).map((s) => [s.task_id, s]));
@@ -483,9 +498,13 @@ export default async function PortfolioCelta5Page({
           <h1 className="mt-1 font-serif text-2xl text-ink">{progressHeading}</h1>
         </div>
 
-        {/* The booklet proper. Ramy, 29 Aug 2026 -- the external assessor
-            inspects this page during the visit, so it reproduces the
-            Cambridge document's structure rather than the app's own. */}
+        {/* ONE booklet, in Cambridge's order. Ramy, 29 Aug 2026: the first
+            cut rendered the new booklet ABOVE the old progress page instead
+            of replacing it, so Stage Two appeared twice and the static
+            sections sat out of order below everything. The forms a candidate
+            actually uses now live inside the section they belong to, and
+            every box the paper form prints -- including the tutorial
+            summaries -- has a place here whether it is filled or not. */}
         <div className="c5-doc">
           <BookletSection title="Progress overview">
             <ProgressOverview cards={bookletCards} />
@@ -495,16 +514,97 @@ export default async function PortfolioCelta5Page({
             <BookletContents />
           </BookletSection>
 
+          <BookletSections
+            portfolioConfirmedAt={record.portfolio_terms_confirmed_at}
+            portfolioSignatureName={record.portfolio_terms_signature_name}
+            appealsConfirmedAt={record.appeals_read_confirmed_at}
+            appealsSignatureName={record.appeals_read_signature_name}
+            canSign={!isStaff && !assessorCourseId && viewer?.id === traineeId}
+            viewerSignatureName={viewer?.signature_name ?? null}
+          />
+
+          <BookletSection id="c5-attendance" num="Section 5" title="Record of attendance">
+            <AttendanceRecord
+              courseHours={course?.total_hours ?? null}
+              hoursAttended={record.hours_attended}
+              unavoidable={(traineeAbsences ?? [])
+                .filter((a) => a.category === "unavoidable")
+                .map((a) => ({
+                  date: a.session_date ?? "",
+                  session: a.session_missed ?? "",
+                  reason: a.reason ?? "",
+                  madeUp: a.work_made_up ?? "",
+                  tutor: a.tutor_signature_name ?? "",
+                }))}
+              other={(traineeAbsences ?? [])
+                .filter((a) => a.category === "other")
+                .map((a) => ({
+                  date: a.session_date ?? "",
+                  session: a.session_missed ?? "",
+                  reason: a.reason ?? "",
+                  madeUp: a.work_made_up ?? "",
+                  candidate: a.candidate_comment ?? "",
+                  tutor: [a.tutor_comment, a.tutor_signature_name].filter(Boolean).join(" · "),
+                }))}
+            />
+            <div className="mt-4">
+              <AbsencePanel
+                variant="booklet"
+                absences={traineeAbsences ?? []}
+                hoursAttended={record.hours_attended}
+                totalHours={course?.total_hours ?? 120}
+              />
+            </div>
+          </BookletSection>
+
           <BookletSection
             id="c5-observations"
             num="Section 6"
             title="Record of observations of experienced classroom teachers (including filmed observations)"
           >
             <ObservationsRecord rows={observationRows} />
+            {(obsTasks ?? []).length > 0 ? (
+              <div className="mt-4">
+                <p className="text-[11px] font-bold text-ink">Observation tasks</p>
+                <div className="mt-2 flex flex-col gap-3">
+                  {(obsTasks ?? []).map((task) => {
+                    const submission = submissionByTaskId.get(task.id);
+                    return (
+                      <div key={task.id} className="c5-box">
+                        <p className="text-[11px] font-bold text-ink">{task.title}</p>
+                        {task.instructions ? <p className="mt-1 text-[10px] text-muted">{task.instructions}</p> : null}
+                        {submission?.submitted_at ? (
+                          <p className="mt-2 text-[10px] text-muted">
+                            Submitted {new Date(submission.submitted_at).toLocaleDateString("en-GB")}.
+                          </p>
+                        ) : (
+                          <div className="mt-2">
+                            <ObservationTaskForm taskId={task.id} deliveryMode={course?.delivery_mode ?? undefined} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+            <div className="mt-4">
+              <p className="text-[11px] font-bold text-ink">Log an observation</p>
+              <div className="mt-2 flex flex-col gap-3">
+                {observations?.map((o) => (
+                  <ObservationForm key={`${o.id}-${o.updated_at}`} observation={o} deliveryMode={course?.delivery_mode ?? undefined} />
+                ))}
+                <ObservationForm deliveryMode={course?.delivery_mode ?? undefined} />
+              </div>
+            </div>
           </BookletSection>
 
           <BookletSection id="c5-tp" num="Section 7" title="Record of assessed teaching practice">
             <AssessedTpRecord rows={assessedTpRows} />
+          </BookletSection>
+
+          <BookletSection id="c5-assignments" num="Section 8" title="Record of written assignments">
+            <WrittenAssignmentsRecord rows={writtenAssignmentRows} />
           </BookletSection>
 
           <BookletSection id="c5-stage1" num="Section 9" title="Stage One progress record">
@@ -523,21 +623,30 @@ export default async function PortfolioCelta5Page({
                   <span className="lab">Action plan for next stage of the course</span>
                   <p className="text-[11px] leading-relaxed text-ink">{record.stage1_action_plan || "—"}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-[11px]">
-                  <span>
-                    <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
-                    <strong className="text-ink">{record.stage1_tutor_signature_name ?? "—"}</strong>
-                  </span>
-                  <span>
-                    <span className="text-muted">Candidate&rsquo;s signature:</span>{" "}
-                    <strong className="text-ink">{record.stage1_candidate_signature_name ?? "not yet signed"}</strong>
-                  </span>
+                <p className="text-[11px]">
+                  <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
+                  <strong className="text-ink">{record.stage1_tutor_signature_name ?? "—"}</strong>
+                </p>
+                <div className="mt-3 border-t border-border-faint pt-3">
+                  {record.stage1_candidate_signed_at ? (
+                    <p className="text-[11px] text-muted">
+                      Signed by {record.stage1_candidate_signature_name} on{" "}
+                      {new Date(record.stage1_candidate_signed_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
+                    </p>
+                  ) : !viewer?.signature_name ? (
+                    <SetSignatureForm fullName={viewer?.full_name ?? ""} />
+                  ) : (
+                    <form action={signOffStage1}>
+                      <p className="mb-2 text-[11px] text-ink">I have read and agree with the summarising comments above.</p>
+                      <button type="submit" className="c5-btn">Sign as {viewer.signature_name}</button>
+                    </form>
+                  )}
                 </div>
               </>
             ) : (
               <StageLocked>
-                Not released yet. Your tutor is preparing your Stage One record from your TP feedback so far — you&rsquo;ll
-                be notified and asked to sign once it&rsquo;s ready.
+                Not released yet. Your tutor is preparing your Stage One record from your TP feedback so far &mdash;
+                you&rsquo;ll be notified and asked to sign once it&rsquo;s ready.
               </StageLocked>
             )}
           </BookletSection>
@@ -553,6 +662,11 @@ export default async function PortfolioCelta5Page({
               this stage: &lsquo;S+&rsquo; above the standard, &lsquo;S&rsquo; meets the standard, &lsquo;N&rsquo; not
               to standard, &lsquo;X&rsquo; not applicable at this stage.
             </p>
+            {!stage2Submitted ? (
+              <div style={{ marginBottom: 12 }}>
+                <SelfAssessmentForm />
+              </div>
+            ) : null}
             <CriteriaGrid
               stage="stage2"
               rows={stage2Rows}
@@ -561,6 +675,90 @@ export default async function PortfolioCelta5Page({
               tutorLocked={!stage2Submitted}
               tutorLockedLabel="Hidden until you submit"
             />
+
+            {/* The boxes the paper form prints. Cambridge asks for the
+                candidate's issues and the tutor's beside them, then the two
+                overall assessments, then the tutorial summary. Each renders
+                whether or not it is filled -- an assessor reading this needs
+                to see the box exists and is empty, not to wonder whether the
+                screen simply omits it. */}
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="c5-box">
+                <span className="lab">Written assignments &mdash; you</span>
+                <p className="text-[11px] leading-relaxed text-ink">{record.stage2_candidate_written_assignments_notes || "—"}</p>
+              </div>
+              <div className="c5-box">
+                <span className="lab">Written assignments &mdash; tutor</span>
+                {stage2Submitted ? (
+                  <p className="text-[11px] leading-relaxed text-ink">{record.stage2_tutor_written_assignments_notes || "—"}</p>
+                ) : (
+                  <p className="text-[10px] italic text-muted">Hidden until you submit your self-assessment.</p>
+                )}
+              </div>
+              <div className="c5-box">
+                <span className="lab">Other issues &mdash; you</span>
+                <p className="text-[11px] leading-relaxed text-ink">{record.stage2_candidate_other_notes || "—"}</p>
+              </div>
+              <div className="c5-box">
+                <span className="lab">Other issues &mdash; tutor</span>
+                {stage2Submitted ? (
+                  <p className="text-[11px] leading-relaxed text-ink">{record.stage2_tutor_other_notes || "—"}</p>
+                ) : (
+                  <p className="text-[10px] italic text-muted">Hidden until you submit your self-assessment.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-3 flex flex-col gap-3">
+              <div className="c5-box">
+                <span className="lab">Overall progress &mdash; candidate&rsquo;s assessment</span>
+                <p className="text-[11px] text-ink">{overallLabel(record.stage2_candidate_overall)}</p>
+                {record.stage2_candidate_notes ? (
+                  <p className="mt-1 text-[11px] leading-relaxed text-muted">{record.stage2_candidate_notes}</p>
+                ) : null}
+              </div>
+              <div className="c5-box">
+                <span className="lab">Overall progress &mdash; tutor&rsquo;s assessment</span>
+                {stage1And2Released ? (
+                  <p className="text-[11px] text-ink">{overallLabel(record.stage2_tutor_overall)}</p>
+                ) : (
+                  <p className="text-[10px] italic text-muted">Released after your tutorial.</p>
+                )}
+              </div>
+              <div className="c5-box">
+                <span className="lab">Summary of tutorial and action points</span>
+                {stage1And2Released ? (
+                  <p className="text-[11px] leading-relaxed text-ink">{record.stage2_tutor_notes || "—"}</p>
+                ) : (
+                  <p className="text-[10px] italic text-muted">Released after your tutorial.</p>
+                )}
+              </div>
+            </div>
+
+            {stage1And2Released ? (
+              <div className="mt-3 border-t border-border-faint pt-3">
+                <p className="mb-2 text-[11px] text-ink">
+                  <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
+                  <strong>{record.stage2_tutor_signature_name ?? "—"}</strong>
+                </p>
+                {record.trainee_signoff_stage2_at ? (
+                  <p className="text-[11px] text-muted">
+                    Signed by {record.stage2_candidate_signature_name ?? "you"} on{" "}
+                    {new Date(record.trainee_signoff_stage2_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
+                  </p>
+                ) : !viewer?.signature_name ? (
+                  <SetSignatureForm fullName={viewer?.full_name ?? ""} />
+                ) : (
+                  <form action={signOffStage2}>
+                    <p className="mb-2 text-[11px] text-ink">
+                      This is an accurate record of the tutorial discussion and my progress to date. I have read and
+                      agree with the summarising comments.
+                    </p>
+                    <button type="submit" className="c5-btn">Sign as {viewer.signature_name}</button>
+                  </form>
+                )}
+              </div>
+            ) : null}
           </BookletSection>
 
           <BookletSection id="c5-stage3" num="Section 11" title="Stage Three progress record">
@@ -572,7 +770,42 @@ export default async function PortfolioCelta5Page({
             </p>
             {stage3IsExpected ? (
               record.stage3_finalized_at ? (
-                <CriteriaGrid stage="stage3" rows={stage3Rows} showCandidateColumn={false} candidateEditable={false} tutorLocked={false} />
+                <>
+                  <CriteriaGrid stage="stage3" rows={stage3Rows} showCandidateColumn={false} candidateEditable={false} tutorLocked={false} />
+                  <div className="mt-3 flex flex-col gap-3">
+                    <div className="c5-box">
+                      <span className="lab">Written assignments &mdash; tutor&rsquo;s comments</span>
+                      <p className="text-[11px] leading-relaxed text-ink">{record.stage3_tutor_notes || "—"}</p>
+                    </div>
+                    <div className="c5-box">
+                      <span className="lab">Other issues &mdash; tutor&rsquo;s comments</span>
+                      <p className="text-[11px] leading-relaxed text-ink">{record.stage3_tutor_other_notes || "—"}</p>
+                    </div>
+                    <div className="c5-box">
+                      <span className="lab">Overall progress &mdash; tutor&rsquo;s assessment</span>
+                      <p className="text-[11px] text-ink">{overallLabel(record.stage3_tutor_overall)}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 border-t border-border-faint pt-3">
+                    <p className="mb-2 text-[11px] text-ink">
+                      <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
+                      <strong>{record.stage3_tutor_signature_name ?? "—"}</strong>
+                    </p>
+                    {record.stage3_candidate_signed_at ? (
+                      <p className="text-[11px] text-muted">
+                        Signed by {record.stage3_candidate_signature_name} on{" "}
+                        {new Date(record.stage3_candidate_signed_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
+                      </p>
+                    ) : !viewer?.signature_name ? (
+                      <SetSignatureForm fullName={viewer?.full_name ?? ""} />
+                    ) : (
+                      <form action={signOffStage3}>
+                        <p className="mb-2 text-[11px] text-ink">I have read and agree with the summarising comments above.</p>
+                        <button type="submit" className="c5-btn">Sign as {viewer.signature_name}</button>
+                      </form>
+                    )}
+                  </div>
+                </>
               ) : (
                 <StageLocked>
                   {stage3TriggerReason
@@ -588,12 +821,11 @@ export default async function PortfolioCelta5Page({
             )}
           </BookletSection>
 
-          <BookletSection id="c5-assignments" num="Section 8" title="Record of written assignments">
-            <WrittenAssignmentsRecord rows={writtenAssignmentRows} />
-          </BookletSection>
-
           <BookletSection id="c5-final" num="Section 12" title="To be completed on the final day of the course">
             <FinalDayChecks checks={finalChecks} />
+            <div className="mt-4">
+              <FinalChecklistForm signatureName={viewer?.signature_name ?? null} fullName={viewer?.full_name ?? ""} />
+            </div>
           </BookletSection>
 
           <BookletSection id="c5-appendix1" num="Appendix 1" title="CELTA criteria">
@@ -605,480 +837,6 @@ export default async function PortfolioCelta5Page({
           </BookletSection>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-[oklch(38%_0.085_155)]">
-            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Stage 1 / 2 / 3</p>
-            <div className="flex flex-col">
-              <div className="flex items-start justify-between gap-3 border-b border-border-faint py-2.5">
-                <div>
-                  <p className="text-sm font-semibold text-ink">Stage 1 report</p>
-                  <p className="mt-0.5 text-xs text-muted">
-                    {record.stage1_released_at
-                      ? "Filed by your tutor · the tutorial itself is optional, not held up on this"
-                      : stage1Invite
-                        ? `Tutorial ${stage1Invite.confirmed_at ? "confirmed" : "invited, not yet confirmed"}${
-                            tutorialEventById.get(stage1Invite.timetable_event_id)
-                              ? ` · ${tutorialEventById.get(stage1Invite.timetable_event_id)!.event_date}`
-                              : ""
-                          } -- the report itself isn't filed yet`
-                        : "Not yet filed"}
-                  </p>
-                </div>
-                <span className={`pill ${record.stage1_released_at ? "pill-success" : "pill-warning"}`}>
-                  {record.stage1_released_at ? "Filed" : "Not filed"}
-                </span>
-              </div>
-              <div className="flex items-start justify-between gap-3 border-b border-border-faint py-2.5">
-                <div>
-                  <p className="text-sm font-semibold text-ink">Stage 2 tutorial</p>
-                  <p className="mt-0.5 text-xs text-muted">
-                    {myStage2Slot
-                      ? `You booked ${myStage2Slot.position === 1 ? "1st" : myStage2Slot.position === 2 ? "2nd" : myStage2Slot.position === 3 ? "3rd" : `${myStage2Slot.position}th`}`
-                      : "Book your slot from the timetable"}
-                  </p>
-                </div>
-                <span className={`pill ${myStage2Slot ? "pill-success" : "pill-warning"}`}>{myStage2Slot ? "Booked" : "Not booked"}</span>
-              </div>
-              <div className="flex items-start justify-between gap-3 py-2.5">
-                <div>
-                  <p className="text-sm font-semibold text-ink">Stage 3 report</p>
-                  <p className="mt-0.5 text-xs text-muted">
-                    {record.stage3_required
-                      ? record.stage3_finalized_at
-                        ? "Filed by your tutor"
-                        : stage3Invite
-                          ? `Tutorial ${stage3Invite.confirmed_at ? "confirmed" : "invited, not yet confirmed"}${
-                              tutorialEventById.get(stage3Invite.timetable_event_id)
-                                ? ` · ${tutorialEventById.get(stage3Invite.timetable_event_id)!.event_date}`
-                                : ""
-                            }`
-                          : "Triggered -- not yet filed"
-                      : "Only filed if triggered -- not-to-standard at Stage 2, slipping from above-standard, or a failed assignment"}
-                  </p>
-                </div>
-                <span className={`pill ${!record.stage3_required ? "pill-neutral" : record.stage3_finalized_at ? "pill-success" : "pill-warning"}`}>
-                  {!record.stage3_required ? "N/A so far" : record.stage3_finalized_at ? "Filed" : "Pending"}
-                </span>
-              </div>
-            </div>
-            <p className="text-[11px] text-muted">Sourced from the same Standing table your tutor sees -- this is your own row, not a separate record.</p>
-          </div>
-
-          <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-[oklch(42%_0.13_27)]">
-            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">CELTA 5 self-assessment</p>
-            <div className="flex flex-col gap-1">
-              <p className={`text-sm font-semibold ${bothSigned ? "text-ink" : stage2Submitted ? "text-primary" : "text-status-warning-text"}`}>
-                {bothSigned ? "Both signed" : stage2Submitted ? "Candidate signed" : "Not started"}
-              </p>
-              <p className="text-xs text-muted">
-                {bothSigned
-                  ? "Signed off by you and your tutor."
-                  : stage2Submitted
-                    ? stage1And2Released
-                      ? "Your tutor has released the matrix -- review it below and sign off."
-                      : "Submitted -- your tutor is reviewing it."
-                    : "Best completed after TP2, once you have some feedback to reflect on."}
-              </p>
-            </div>
-            <p className="text-xs text-muted">You sign, then your tutor countersigns -- neither alone finishes it.</p>
-            <p className="text-[11px] text-muted">No grade lives here. This is your own reflection against the five CELTA components, not an assessment.</p>
-          </div>
-
-          <div className="sheet flex flex-col gap-3 border-t-[3px] border-t-[oklch(38%_0.085_155)]">
-            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Observation hours</p>
-            <div className="flex flex-col">
-              <div className="flex items-start gap-3 border-b border-border-faint py-2.5">
-                <span className="w-9 shrink-0 text-sm font-semibold text-ink">{experiencedTeacherHours.toFixed(1)}h</span>
-                <p className="text-xs text-muted">
-                  of {OBSERVATION_HOURS_REQUIRED}h minimum, experienced teachers{experiencedTeacherHours >= OBSERVATION_HOURS_REQUIRED ? " -- complete" : ""}
-                </p>
-              </div>
-              <div className="flex items-start gap-3 border-b border-border-faint py-2.5">
-                <span className="w-9 shrink-0 text-sm font-semibold text-ink">{peerHours.toFixed(1)}h</span>
-                <p className="text-xs text-muted">peer observation, live only</p>
-              </div>
-              <div className="flex items-start gap-3 py-2.5">
-                <span className="w-9 shrink-0 text-sm font-semibold text-ink">{filmedHours.toFixed(1)}h</span>
-                <p className="text-xs text-muted">filmed, capped separately -- does not count toward the peer minimum</p>
-              </div>
-            </div>
-            <p className="text-[11px] text-muted">Full log further down this page -- every entry ties back to a specific session.</p>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="font-serif text-xl text-ink">CELTA 5 record</h2>
-          {/* remaining-compliance.md item 4: front matter populated from
-              real data (name/centre/course/tutors), never typed by hand. */}
-          <div className="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-            <div>
-              <p className="text-muted">Candidate</p>
-              <p className="text-ink">{viewer?.full_name}</p>
-            </div>
-            <div>
-              <p className="text-muted">Centre</p>
-              <p className="text-ink">
-                {center?.name ?? "--"}
-                {center?.center_number ? ` (Centre ${center.center_number})` : ""}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted">Course</p>
-              <p className="text-ink">{course?.name ?? "--"}</p>
-            </div>
-            <div>
-              <p className="text-muted">Dates</p>
-              <p className="text-ink">{course ? `${course.start_date} → ${course.end_date}` : "--"}</p>
-            </div>
-            <div>
-              <p className="text-muted">Tutors</p>
-              <p className="text-ink">{tutorNames.length > 0 ? tutorNames.join(", ") : "--"}</p>
-            </div>
-            {center?.is_uk_centre ? (
-              <div>
-                <p className="text-muted">ULN</p>
-                <p className="text-ink">{viewer?.uln || "Not provided"}</p>
-              </div>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="sheet">
-          <p className="text-sm text-muted">Course progress</p>
-          {progressIssues.length === 0 ? (
-            <p className="mt-2">
-              <span className="pill pill-success">On track</span>
-            </p>
-          ) : (
-            <ul className="mt-3 flex flex-col gap-2">
-              {progressIssues.map((issue, i) => (
-                <li key={i} className="flex items-center gap-2">
-                  <span className="pill pill-danger">{issue.label}</span>
-                  <span className="text-sm text-muted">{issue.detail}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {!stage2Submitted ? (
-          <div>
-            <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2: self-assessment</h3>
-            <div className="mt-3">
-              <SelfAssessmentForm />
-            </div>
-          </div>
-        ) : !stage1And2Released ? (
-          <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
-            <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2</h3>
-            <p className="mt-2 text-muted">
-              Your self-assessment was submitted {new Date(record.stage2_candidate_submitted_at!).toLocaleString()}.
-              Your tutor is reviewing it -- your Progress Record for Stages 1 and 2 will appear here once they release it.
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* Ramy, 29 Aug 2026: Stage One is tutor-gated -- "the trainee
-                sees nothing until the tutor hits Release to trainee".
-                Keyed on released_at, not completed_at: those used to be the
-                same column, so a tutor finishing the report published it in
-                the same action and could neither draft nor take it back. */}
-            {record.stage1_released_at ? (
-              <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
-                <h3 className="font-serif text-lg text-ink">Progress Record — Stage 1</h3>
-                {record.stage1_strengths ? (
-                  <div className="mt-2">
-                    <p className="text-sm text-muted">Strengths</p>
-                    <p className="text-ink">{record.stage1_strengths}</p>
-                  </div>
-                ) : null}
-                {record.stage1_action_plan ? (
-                  <div className="mt-2">
-                    <p className="text-sm text-muted">Action plan</p>
-                    <p className="text-ink">{record.stage1_action_plan}</p>
-                  </div>
-                ) : null}
-                <div className="mt-3 border-t border-border-faint pt-3">
-                  {record.stage1_candidate_signed_at ? (
-                    <p className="text-sm text-muted">
-                      Signed by {record.stage1_candidate_signature_name} on {new Date(record.stage1_candidate_signed_at).toLocaleString()}.
-                    </p>
-                  ) : !viewer?.signature_name ? (
-                    <SetSignatureForm fullName={viewer?.full_name ?? ""} />
-                  ) : (
-                    <form action={signOffStage1}>
-                      <p className="mb-2 text-sm text-ink">I have read and agree with the summarising comments above.</p>
-                      <button type="submit" className="rounded-[6px] bg-primary px-4 py-2 font-medium text-primary-foreground">
-                        Sign as {viewer.signature_name}
-                      </button>
-                    </form>
-                  )}
-                </div>
-              </div>
-            ) : (
-              // The "not yet released" state the spec asks for. Deliberately
-              // says the report exists and is coming, rather than rendering
-              // nothing -- a candidate who knows Stage One happens should
-              // not be left wondering whether the page is broken.
-              <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
-                <h3 className="font-serif text-lg text-ink">Progress Record — Stage 1</h3>
-                <p className="mt-2 text-sm text-muted">
-                  Your tutor writes this from your teaching practice feedback and releases it to you. Not yet released —
-                  you will see it here, and be asked to sign it, once they do.
-                </p>
-              </div>
-            )}
-
-            <div>
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2</h3>
-                <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
-                  You: {candidateRatedCount} of {CELTA_CRITERIA_CODES.length} · Tutor: {tutorRatedCount} of{" "}
-                  {CELTA_CRITERIA_CODES.length}
-                </span>
-              </div>
-              <div className={`sheet mt-3 overflow-hidden !p-0 ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
-                <div className="list-row">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <p className="text-sm text-muted">Your overall assessment</p>
-                      <StandardRatingPill rating={record.stage2_candidate_overall} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted">Tutor&apos;s overall assessment</p>
-                      <StandardRatingPill rating={record.stage2_tutor_overall} />
-                    </div>
-                  </div>
-                  {record.stage2_tutor_notes ? (
-                    <div className="mt-4">
-                      <p className="text-sm text-muted">Tutor&apos;s summary and action points</p>
-                      <p className="text-ink">{record.stage2_tutor_notes}</p>
-                    </div>
-                  ) : null}
-                </div>
-
-                {CELTA_CRITERIA_SECTIONS.map(({ section, title, codes }) => (
-                  <div key={section} className="list-row">
-                    <h4 className="font-serif text-ink">
-                      Topic {section} -- {title}
-                    </h4>
-                    <div className="mt-3 flex flex-col gap-3">
-                      {codes.map((code) => {
-                        const row = byCode.get(code);
-                        const disagrees =
-                          !!row?.candidate_status && !!row?.tutor_status_stage2 && row.candidate_status !== row.tutor_status_stage2;
-                        return (
-                          <div key={code} className="border-b border-border-faint pb-3 last:border-none">
-                            <p className="text-sm text-ink">
-                              {code}
-                              {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
-                              {disagrees ? (
-                                <span className="ml-2 text-sm font-semibold text-status-warning-text" title="You and your tutor rated this differently">
-                                  &ne;
-                                </span>
-                              ) : null}
-                            </p>
-                            <div className="mt-1 flex items-center gap-4">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-xs text-muted">You:</span>
-                                <CriteriaRatingPill rating={row?.candidate_status ?? null} />
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-xs text-muted">Tutor:</span>
-                                <CriteriaRatingPill rating={row?.tutor_status_stage2 ?? null} />
-                              </div>
-                            </div>
-                            {CRITERIA_GUIDANCE[code] ? (
-                              <details className="mt-2">
-                                <summary className="cursor-pointer text-xs text-muted hover:text-primary">Guidance</summary>
-                                <ul className="mt-1 flex flex-col gap-0.5 pl-4 text-xs text-muted">
-                                  {CRITERIA_GUIDANCE[code].map((bullet, i) => (
-                                    <li key={i} className="list-disc">
-                                      {bullet}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </details>
-                            ) : null}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-
-                <div className="list-row">
-                  {record.trainee_signoff_stage2_at ? (
-                    <p className="text-sm text-muted">
-                      Signed by {record.stage2_candidate_signature_name ?? "you"} on {new Date(record.trainee_signoff_stage2_at).toLocaleString()}.
-                    </p>
-                  ) : !viewer?.signature_name ? (
-                    <SetSignatureForm fullName={viewer?.full_name ?? ""} />
-                  ) : (
-                    <form action={signOffStage2}>
-                      <p className="mb-2 text-sm text-ink">I have read and agree with the summarising comments above.</p>
-                      <button type="submit" className="rounded-[6px] bg-primary px-4 py-2 font-medium text-primary-foreground">
-                        Sign as {viewer.signature_name}
-                      </button>
-                    </form>
-                  )}
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
-        {finalReleased ? (
-          <>
-            {record.stage3_required ? (
-              <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
-                <h3 className="font-serif text-lg text-ink">Stage Three</h3>
-                <div className="mt-3">
-                  <p className="text-sm text-muted">Tutor&apos;s overall assessment</p>
-                  <StandardRatingPill rating={record.stage3_tutor_overall} />
-                </div>
-                {record.stage3_tutor_notes ? (
-                  <div className="mt-3">
-                    <p className="text-sm text-muted">Summary and action points</p>
-                    <p className="text-ink">{record.stage3_tutor_notes}</p>
-                  </div>
-                ) : null}
-                {record.stage3_finalized_at ? (
-                  <div className="mt-3 border-t border-border-faint pt-3">
-                    {record.stage3_candidate_signed_at ? (
-                      <p className="text-sm text-muted">
-                        Signed by {record.stage3_candidate_signature_name} on {new Date(record.stage3_candidate_signed_at).toLocaleString()}.
-                      </p>
-                    ) : !viewer?.signature_name ? (
-                      <SetSignatureForm fullName={viewer?.full_name ?? ""} />
-                    ) : (
-                      <form action={signOffStage3}>
-                        <p className="mb-2 text-sm text-ink">I have read and agree with the summarising comments above.</p>
-                        <button type="submit" className="rounded-[6px] bg-primary px-4 py-2 font-medium text-primary-foreground">
-                          Sign as {viewer.signature_name}
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-
-            {/* Deliberately no grade reveal here -- Ramy: trainees must never
-                see the real grade in-app, at any point, even at course end.
-                It needs assessor approval first; what a trainee eventually
-                gets is a separate provisional grade report (not yet
-                designed/built), not this record. get_my_celta5_record()
-                already nulls final_recommended_grade/overall_notes for a
-                trainee at the data layer (migration 0034) -- this is just
-                the matching UI, not the only enforcement. */}
-            <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
-              <h3 className="font-serif text-lg text-ink">Final report</h3>
-              {record.final_report_released_at ? (
-                <>
-                  <p className="mt-2 text-sm text-muted">
-                    Your final report is ready.
-                  </p>
-                  <a
-                    href={`/api/celta5/${traineeId}/final-report`}
-                    className="mt-3 inline-flex rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
-                  >
-                    Download final report
-                  </a>
-                  <p className="mt-3 text-xs text-muted">
-                    Questions about your grade? Start by emailing your tutor -- most questions are resolved there.
-                    If you&apos;re still unsatisfied, your centre&apos;s Internal Complaints Procedure is the next
-                    step.
-                  </p>
-                </>
-              ) : (
-                <p className="mt-2 text-sm text-muted">
-                  Your final grade is confirmed after your tutor&apos;s recommendation is reviewed by Cambridge
-                  Assessment English. Your final report will be released here once that&apos;s complete --
-                  typically some time after the course ends.
-                </p>
-              )}
-            </div>
-
-            <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
-              {record.trainee_signoff_final_at ? (
-                <p className="text-sm text-muted">
-                  Signed by {record.final_candidate_signature_name ?? "you"} on {new Date(record.trainee_signoff_final_at).toLocaleString()}.
-                </p>
-              ) : (
-                <FinalChecklistForm signatureName={viewer?.signature_name ?? null} fullName={viewer?.full_name ?? ""} />
-              )}
-            </div>
-          </>
-        ) : null}
-
-        <div className={`sheet ${nextSheetGarnet() ? "sheet-garnet" : ""}`}>
-          <p className="text-sm text-muted">Teaching practice</p>
-          <div className="mt-2">
-            <AssessedTpStatsBadge stats={assessedTpStats} byMode={assessedHoursByMode} />
-          </div>
-        </div>
-
-        {(obsTasks ?? []).length > 0 ? (
-          <div>
-            <h3 className="font-serif text-lg text-ink">Observation tasks</h3>
-            <p className="mt-1 text-sm text-muted">
-              Directed observations your tutor has assigned -- submitting one also counts toward your 6-hour
-              requirement below.
-            </p>
-            <div className="mt-3 flex flex-col gap-3">
-              {(obsTasks ?? []).map((task, i) => {
-                const submission = submissionByTaskId.get(task.id);
-                return (
-                  // Decorative teal/garnet alternation -- no status meaning
-                  // of its own, same rule as everywhere else.
-                  <div key={task.id} className={`sheet ${i % 2 === 1 ? "sheet-garnet" : ""}`}>
-                    <p className="font-medium text-ink">{task.title}</p>
-                    <p className="mt-1 text-sm text-muted">{task.instructions}</p>
-                    {submission ? (
-                      <div className="mt-3 border-t border-border-faint pt-3">
-                        <p className="text-xs text-muted">Submitted {new Date(submission.submitted_at).toLocaleString()}</p>
-                        <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{submission.response}</p>
-                      </div>
-                    ) : (
-                      <ObservationTaskForm taskId={task.id} deliveryMode={course?.delivery_mode ?? undefined} />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : null}
-
-        <div>
-          <h3 className="font-serif text-lg text-ink">Observations of experienced teachers</h3>
-          <p className="mt-1 text-sm text-muted">Log the 6 hours you spend observing experienced teachers (up to 3 filmed).</p>
-          {course?.delivery_mode === "mixed"
-            ? (() => {
-                const hasF2f = (observations ?? []).some((o) => o.mode === "f2f");
-                const hasOnline = (observations ?? []).some((o) => o.mode === "online");
-                const covered = hasF2f && hasOnline;
-                return (
-                  <p className={`mt-1 text-sm ${covered ? "text-primary" : "text-status-warning-text"}`}>
-                    Mixed-mode course: your observations should cover both face-to-face and online teaching.{" "}
-                    {covered
-                      ? "Both modes logged."
-                      : !hasF2f && !hasOnline
-                        ? "Neither mode logged yet."
-                        : !hasF2f
-                          ? "Face-to-face not logged yet."
-                          : "Online not logged yet."}
-                  </p>
-                );
-              })()
-            : null}
-          <div className="mt-3 flex flex-col gap-3">
-            {observations?.map((o) => (
-              <ObservationForm key={`${o.id}-${o.updated_at}`} observation={o} deliveryMode={course?.delivery_mode ?? undefined} />
-            ))}
-            <ObservationForm deliveryMode={course?.delivery_mode ?? undefined} />
-          </div>
-        </div>
       </div>
     );
   }

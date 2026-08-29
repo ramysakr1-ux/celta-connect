@@ -19,18 +19,35 @@ const initial: AbsenceFormState = { error: null };
 //
 // Read-only after filing. A declared absence is a record, not a draft --
 // if they get it wrong they tell their tutor, who can already edit it.
-export function AbsencePanel({ absences, hoursAttended, totalHours }: { absences: Absence[]; hoursAttended: number | null; totalHours: number }) {
+export function AbsencePanel({
+  absences,
+  hoursAttended,
+  totalHours,
+  // Inside the booklet, Section 5 already prints "Record of attendance",
+  // the hours and Cambridge's two tables -- so this renders only the thing
+  // the paper form has no way of doing: letting the candidate add a row.
+  // Ramy, 29 Aug 2026: "be careful not to duplicate... it just feels like
+  // you're building two over each other."
+  variant = "card",
+}: {
+  absences: Absence[];
+  hoursAttended: number | null;
+  totalHours: number;
+  variant?: "card" | "booklet";
+}) {
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(reportOwnAbsence, initial);
+  const booklet = variant === "booklet";
 
   return (
-    <div className="sheet flex flex-col gap-3">
+    <div className={booklet ? "flex flex-col gap-3" : "sheet flex flex-col gap-3"}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-serif text-lg text-ink">Attendance</h3>
-          <p className="mt-0.5 text-xs text-muted">
-            {hoursAttended !== null ? `${hoursAttended} of ${totalHours} hours recorded by your tutor.` : `${totalHours} contact hours on this course.`}{" "}
-            If you miss any part of a session, record it here — your tutor sees it, and it goes on your CELTA 5.
+          {booklet ? null : <h3 className="font-serif text-lg text-ink">Attendance</h3>}
+          <p className={booklet ? "text-[10px] text-muted" : "mt-0.5 text-xs text-muted"}>
+            {booklet
+              ? "If you miss any part of a session, record it here — your tutor sees it, and it goes on your CELTA 5."
+              : `${hoursAttended !== null ? `${hoursAttended} of ${totalHours} hours recorded by your tutor.` : `${totalHours} contact hours on this course.`} If you miss any part of a session, record it here — your tutor sees it, and it goes on your CELTA 5.`}
           </p>
         </div>
         {!open ? (
@@ -44,7 +61,7 @@ export function AbsencePanel({ absences, hoursAttended, totalHours }: { absences
         ) : null}
       </div>
 
-      {absences.length > 0 ? (
+      {!booklet && absences.length > 0 ? (
         <ul className="flex flex-col divide-y divide-border-faint">
           {absences.map((a) => (
             <li key={a.id} className="flex flex-col gap-0.5 py-2.5 first:pt-0">
