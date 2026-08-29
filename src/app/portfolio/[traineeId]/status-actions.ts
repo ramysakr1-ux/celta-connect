@@ -498,6 +498,24 @@ export async function signAssignmentOutcome(_prevState: AbsenceFormState, formDa
   const name = profile?.signature_name?.trim() || profile?.full_name?.trim();
   if (!name) return { error: "Set your signature name first." };
 
+  // The booklet signs the way the paper CELTA 5 does -- the candidate
+  // types their name next to both "Name" and "Signed" (Ramy's design file,
+  // 29 Aug 2026). Both fields are checked here rather than in the client
+  // alone: a signature is the evidence the centre relies on if a result is
+  // ever queried, so it can't rest on markup that a candidate could skip.
+  // Matching is case- and whitespace-insensitive against the name already
+  // on the profile; the stored value stays the canonical profile name so
+  // the signature ledger and the PDF can't disagree with each other.
+  const typedName = String(formData.get("typed_name") ?? "").trim();
+  const typedSignature = String(formData.get("typed_signature") ?? "").trim();
+  if (!typedName || !typedSignature) {
+    return { error: "Type your name next to both Name and Signed." };
+  }
+  const norm = (v: string) => v.toLowerCase().replace(/\s+/g, " ");
+  if (norm(typedName) !== norm(name) || norm(typedSignature) !== norm(name)) {
+    return { error: `Both fields must read "${name}" -- the name on your record.` };
+  }
+
   const { data: existing } = await supabase
     .from("assignments")
     .select("first_outcome_signed_at, resubmission_outcome_signed_at")

@@ -702,6 +702,183 @@ h6 {
   /* Reserved for Pass A specifically -- gold is the signature colour, used
      sparingly (wordmark, Pass A, final-report watermark), never a generic
      "success" state alongside plain Pass/Pass B. */
+  /* ============================================================
+     CELTA 5 booklet -- values lifted verbatim from Ramy's design file
+     "CELTA 5 Record (standalone).html" (29 Aug 2026), which is the
+     authority for this screen. Kept as .c5-* rather than folded into the
+     app's own primitives because the booklet deliberately reads as a
+     document, not as an app surface: an external assessor arriving in the
+     final week compares it against the real Cambridge CELTA 5, and the
+     closer it sits to that, the fewer questions get asked. Source file is
+     backed up alongside the project; re-read it before changing anything
+     here rather than adjusting by eye.
+     ============================================================ */
+  .c5-doc {
+    max-width: 900px;
+    margin: 0 auto;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .c5-section-num {
+    font-size: 9px;
+    color: var(--color-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    letter-spacing: 0.04em;
+  }
+  .c5-section-header {
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+  }
+  .c5-break {
+    padding-bottom: 40px;
+    margin-bottom: 40px;
+    border-bottom: 2px solid var(--color-border);
+  }
+  .c5-break:last-child {
+    border-bottom: 0;
+  }
+  .c5-box {
+    min-height: 60px;
+    border: 1px solid oklch(83% 0.024 85);
+    border-radius: 8px;
+    padding: 12px;
+    background: oklch(97% 0.016 85);
+  }
+  .c5-lockbox {
+    border: 1px dashed oklch(83% 0.024 85);
+    border-radius: 8px;
+    padding: 14px;
+    background: oklch(94.5% 0.02 85);
+    font-size: 10px;
+    color: var(--color-muted);
+    font-style: italic;
+  }
+  .c5-pulled {
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: oklch(38% 0.072 195);
+    background: color-mix(in oklab, oklch(38% 0.072 195) 12%, oklch(97% 0.016 85));
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .c5-btn {
+    display: inline-block;
+    border: 1px solid oklch(38% 0.072 195);
+    background: oklch(38% 0.072 195);
+    color: white;
+    font-weight: 700;
+    font-size: 10px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .c5-btn.ghost {
+    background: transparent;
+    color: oklch(38% 0.072 195);
+  }
+  .c5-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .c5-line {
+    border: 1px solid oklch(83% 0.024 85);
+    border-radius: 6px;
+    background: oklch(94.5% 0.02 85);
+    font-family: inherit;
+    font-size: inherit;
+    padding: 5px 9px;
+    color: var(--color-ink);
+  }
+  .c5-line:focus {
+    outline: none;
+    border-color: oklch(55% 0.09 195);
+    box-shadow: 0 0 0 3px color-mix(in oklab, oklch(55% 0.09 195) 15%, transparent);
+  }
+  .c5-line:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .c5-table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+  }
+  .c5-table td,
+  .c5-table th {
+    border: 1px solid oklch(83% 0.024 85);
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+    background: oklch(97% 0.016 85);
+  }
+  .c5-table th {
+    background: oklch(93% 0.03 85);
+    font-weight: 700;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: oklch(40% 0.03 75);
+  }
+  .c5-table td .c5-line {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  /* S+ / S / N / X rating pills -- radio inputs visually hidden behind
+     their labels, exactly as the design file does it. */
+  .c5-pills {
+    display: flex;
+    gap: 4px;
+  }
+  .c5-pills input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .c5-pills label {
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 9px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid oklch(83% 0.024 85);
+    color: var(--color-muted);
+    background: oklch(94.5% 0.02 85);
+  }
+  .c5-pills input:checked + label.sp {
+    background: oklch(64% 0.13 155);
+    color: white;
+    border-color: oklch(64% 0.13 155);
+  }
+  .c5-pills input:checked + label.s {
+    background: oklch(55% 0.09 195);
+    color: white;
+    border-color: oklch(55% 0.09 195);
+  }
+  .c5-pills input:checked + label.n {
+    background: oklch(58% 0.17 25);
+    color: white;
+    border-color: oklch(58% 0.17 25);
+  }
+  .c5-pills input:checked + label.x {
+    background: oklch(62% 0.01 85);
+    color: white;
+    border-color: oklch(62% 0.01 85);
+  }
+  .c5-pills input:disabled + label {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .c5-pills input:focus-visible + label {
+    outline: 2px solid oklch(55% 0.09 195);
+    outline-offset: 1px;
+  }
+
   .pill-gold {
     background-color: color-mix(in oklab, var(--color-gold) 16%, var(--color-card));
     color: var(--color-gold);

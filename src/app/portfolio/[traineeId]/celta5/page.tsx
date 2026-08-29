@@ -41,6 +41,11 @@ import { ReleaseFinalReportForm } from "@/app/dashboard/trainer/trainees/[id]/ce
 import { SignatureLedger } from "@/app/dashboard/trainer/trainees/[id]/celta5/signature-ledger";
 import { AbsencePanel } from "@/app/portfolio/[traineeId]/celta5/absence-panel";
 import { BookletSections } from "@/app/portfolio/[traineeId]/celta5/booklet-sections";
+import { BookletSection } from "@/app/portfolio/[traineeId]/celta5/booklet/shell";
+import { BookletContents } from "@/app/portfolio/[traineeId]/celta5/booklet/contents";
+import { ProgressOverview } from "@/app/portfolio/[traineeId]/celta5/booklet/progress-overview";
+import { ObservationsRecord, AssessedTpRecord } from "@/app/portfolio/[traineeId]/celta5/booklet/records";
+import { FinalDayChecks, type FinalCheck } from "@/app/portfolio/[traineeId]/celta5/booklet/final-day";
 import { computeSignatureLedger } from "@/lib/celta5-signatures";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
@@ -143,7 +148,7 @@ export default async function PortfolioCelta5Page({
       supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle(),
       supabase.from("assignments").select("assignment_type, first_status, resubmission_status").eq("trainee_id", traineeId),
       viewer?.course_id
-        ? supabase.from("courses").select("name, start_date, end_date, delivery_mode").eq("id", viewer.course_id).maybeSingle()
+        ? supabase.from("courses").select("name, start_date, end_date, delivery_mode, total_hours").eq("id", viewer.course_id).maybeSingle()
         : Promise.resolve({ data: null }),
       viewer?.center_id
         ? supabase.from("centers").select("name, center_number, is_uk_centre, time_zone").eq("id", viewer.center_id).maybeSingle()
@@ -275,11 +280,116 @@ export default async function PortfolioCelta5Page({
     let sheetCounter = 1;
     const nextSheetGarnet = () => sheetCounter++ % 2 === 1;
 
+    // ---- Booklet figures -------------------------------------------------
+    // Everything below feeds the document-shaped view built from Ramy's
+    // design file (see booklet/shell.tsx). All of it is derived from the
+    // same queries the rest of this page already runs -- nothing here is a
+    // second source of truth for a number shown elsewhere.
+    const totalCourseHours = course?.total_hours ?? null;
+    const attendancePct =
+      totalCourseHours && record.hours_attended != null
+        ? Math.round((record.hours_attended / totalCourseHours) * 100)
+        : null;
+    const assignmentsGraded = (assignments ?? []).filter(
+      (a) => a.first_status === "approved" || a.resubmission_status === "approved" || a.first_status === "resubmission_required"
+    ).length;
+    const assignmentsPassed = (assignments ?? []).filter(
+      (a) => a.first_status === "approved" || a.resubmission_status === "approved"
+    ).length;
+    const observationRows = (observations ?? []).map((o) => ({
+      date: o.observation_date ?? "",
+      minutes: o.length_minutes,
+      level: o.level ?? "",
+      learners: o.learners_present,
+      focus: o.lesson_focus ?? "",
+      kind: o.filmed ? "Filmed" : "Experienced teacher",
+    }));
+    const TP_HOURS_REQUIRED = 6;
+    const assessedTpHours = assessedTpStats.hoursAssessed;
+    const bookletCards = [
+      {
+        label: "Attendance",
+        value: attendancePct != null ? `${attendancePct}%` : "—",
+        detail: `${record.hours_attended ?? 0} / ${totalCourseHours ?? "—"} hours attended`,
+        state: (attendancePct != null && attendancePct >= 100 ? "met" : "neutral") as "met" | "short" | "neutral",
+      },
+      {
+        label: "Observation hours",
+        value: `${experiencedTeacherHours.toFixed(2)} / ${OBSERVATION_HOURS_REQUIRED.toFixed(2)}`,
+        detail: `filmed capped at 3 of the ${OBSERVATION_HOURS_REQUIRED} hrs`,
+        state: (experiencedTeacherHours >= OBSERVATION_HOURS_REQUIRED ? "met" : "short") as "met" | "short" | "neutral",
+      },
+      {
+        label: "Assessed TP hours",
+        value: `${assessedTpHours.toFixed(2)} / ${TP_HOURS_REQUIRED.toFixed(2)}`,
+        detail: "at two levels required",
+        state: (assessedTpHours >= TP_HOURS_REQUIRED ? "met" : "short") as "met" | "short" | "neutral",
+      },
+      {
+        label: "Written assignments",
+        value: `${assignmentsGraded} / 4 graded`,
+        detail: `${assignmentsPassed} passed \u00b7 ${Math.max(0, 4 - assignmentsGraded)} pending`,
+        state: (assignmentsGraded >= 4 ? "met" : "short") as "met" | "short" | "neutral",
+      },
+    ];
+    const finalChecks: FinalCheck[] = [
+      {
+        label: "Six hours of assessed teaching practice at at least two levels",
+        met: assessedTpHours >= TP_HOURS_REQUIRED && assessedTpStats.levels.length >= 2,
+        detail: `${assessedTpHours.toFixed(2)} of ${TP_HOURS_REQUIRED.toFixed(2)} hrs`,
+      },
+      {
+        label: "Six hours of observation of experienced teachers",
+        met: experiencedTeacherHours >= OBSERVATION_HOURS_REQUIRED,
+        detail: `${experiencedTeacherHours.toFixed(2)} of ${OBSERVATION_HOURS_REQUIRED.toFixed(2)} hrs`,
+      },
+      {
+        label: "Four written assignments, all graded",
+        met: assignmentsGraded >= 4,
+        detail: `${assignmentsGraded} / 4 graded`,
+      },
+      { label: "Stage Two progress record complete", met: bothSigned },
+      {
+        // Cambridge only requires Stage Three for candidates who are off
+        // track (see the Stage Three rubric); stage3_required carries that
+        // decision, so "not required" satisfies this check rather than
+        // blocking a candidate who was never meant to have one.
+        label: "Stage Three progress record complete",
+        met: record.stage3_required ? !!record.stage3_finalized_at : true,
+        detail: record.stage3_required ? undefined : "not required for you",
+      },
+    ];
+
     return (
       <div className="flex flex-col gap-4">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Certification progress</p>
           <h1 className="mt-1 font-serif text-2xl text-ink">{progressHeading}</h1>
+        </div>
+
+        {/* The booklet proper. Ramy, 29 Aug 2026 -- the external assessor
+            inspects this page during the visit, so it reproduces the
+            Cambridge document's structure rather than the app's own. */}
+        <div className="c5-doc">
+          <BookletSection title="Progress overview">
+            <ProgressOverview cards={bookletCards} />
+          </BookletSection>
+
+          <BookletSection title="Contents">
+            <BookletContents />
+          </BookletSection>
+
+          <BookletSection
+            id="c5-observations"
+            num="Section 6"
+            title="Record of observations of experienced classroom teachers (including filmed observations)"
+          >
+            <ObservationsRecord rows={observationRows} />
+          </BookletSection>
+
+          <BookletSection id="c5-final" num="Section 12" title="To be completed on the final day of the course">
+            <FinalDayChecks checks={finalChecks} />
+          </BookletSection>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
