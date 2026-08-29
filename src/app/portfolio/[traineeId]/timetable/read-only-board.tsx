@@ -108,6 +108,13 @@ export interface ReadOnlyBoardProps {
   timeBands: TimeBand[];
   viewerName: string;
   viewerGroupLabel: string | null;
+  /**
+   * Overrides the footer's explanation of what "Mine" narrows to, and the
+   * "ask your tutor" line with it. An assessor's "Mine" is their visit
+   * schedule, not "sessions that involve you" -- see the assessor branch in
+   * trainer/(hub)/timetable/page.tsx.
+   */
+  mineMeaning?: string;
   today: string;
   nowIso: string;
   timeZone: string;
@@ -121,6 +128,7 @@ export function ReadOnlyTimetableBoard({
   timeBands,
   viewerName,
   viewerGroupLabel,
+  mineMeaning,
   today,
   nowIso,
   timeZone,
@@ -409,8 +417,17 @@ export function ReadOnlyTimetableBoard({
             the phone list drops it because vertical space is the scarce
             thing there. Saying "hides" on desktop was simply wrong -- the
             tile is right there at 25%. */}
-        Read-only -- ask your tutor to change anything here. &quot;Mine&quot; fades sessions that don&apos;t involve you, and
-        hides them on a phone; it never removes anything from the real schedule.
+        {mineMeaning ? (
+          <>
+            Read-only. {mineMeaning} &quot;Mine&quot; fades everything else, and hides it on a phone; it never removes
+            anything from the real schedule.
+          </>
+        ) : (
+          <>
+            Read-only -- ask your tutor to change anything here. &quot;Mine&quot; fades sessions that don&apos;t involve
+            you, and hides them on a phone; it never removes anything from the real schedule.
+          </>
+        )}
       </p>
     </div>
   );

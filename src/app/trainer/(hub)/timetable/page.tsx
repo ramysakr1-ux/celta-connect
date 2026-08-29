@@ -62,7 +62,7 @@ export default async function TrainerTimetablePage({
   }
 
   const [{ data: course }, { data: events }, { data: volunteers }] = await Promise.all([
-    supabase.from("courses").select("timetable_locked_at, time_bands, delivery_mode, center_id").eq("id", courseId).maybeSingle(),
+    supabase.from("courses").select("timetable_locked_at, time_bands, delivery_mode, center_id, assessor_visit_date").eq("id", courseId).maybeSingle(),
     supabase
       .from("course_timetable_events")
       .select("*")
@@ -265,10 +265,32 @@ export default async function TrainerTimetablePage({
   const tpEventsForRotation: TpTimetableEvent[] = allEvents.filter((e) => e.type === "tp").map((e) => ({ event_date: e.event_date }));
   const viewerGroupLabel = (tpGroups ?? []).filter((g) => ownedGroupIds.has(g.id)).map((g) => g.name).join(" / ") || null;
 
+  // Ramy, 30 Aug 2026: "when the assessor goes to the timetable, there is the
+  // timetable for the whole course, and then there is mine. Mine should refer
+  // to the assessor... only focus on the TP the assessor is observing, the
+  // meeting with the trainees, the grade meeting, the feedback."
+  //
+  // That list is the Handbook's own (13.1: "reading candidates' portfolios,
+  // observing teaching practice and tutor feedback to candidates, and holding
+  // a provisional grading meeting with tutors", plus 14.2's meeting with
+  // candidates without tutors present). Everything in it happens on the visit
+  // date, so the date is the first test and the session kind is the second.
+  //
+  // "Feedback" as an exact title on a supervised_session is the timetable
+  // skeleton's own convention, not a guess -- see FEEDBACK_AND_LESSON_PLANNING
+  // in src/lib/timetable-skeleton.ts, and today-tab.tsx already matches the
+  // same way.
+  const assessorVisitDate = assessorCourseId ? (course?.assessor_visit_date ?? null) : null;
+  const isAssessorViewer = Boolean(assessorCourseId) && !trainer;
+
   const eventMeta: Record<string, EventMeta> = {};
   for (const event of allEvents) {
-    const mine =
-      event.type !== "tp"
+    const mine = isAssessorViewer
+      ? event.event_date === assessorVisitDate &&
+        (event.type === "tp" ||
+          (event.type === "supervised_session" &&
+            (event.title === "Feedback" || (event.title ?? "").toLowerCase().includes("assessor"))))
+      : event.type !== "tp"
         ? true
         : ownedHalfOrders.size > 0 && (() => {
             const owningHalf = halfOwningDate(tpEventsForRotation, event.event_date);
@@ -449,6 +471,13 @@ export default async function TrainerTimetablePage({
               eventMeta={eventMeta}
               timeBands={timeBands}
               viewerName={trainer?.full_name ?? "Assessor"}
+              mineMeaning={
+                isAssessorViewer
+                  ? assessorVisitDate
+                    ? "\u201cMine\u201d is your visit: the teaching practice you observe, the tutor feedback after it, and the meetings on the day."
+                    : "No visit date has been set yet, so \u201cMine\u201d has nothing to narrow to."
+                  : undefined
+              }
               viewerGroupLabel={viewerGroupLabel}
               today={today}
               nowIso={new Date().toISOString()}

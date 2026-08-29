@@ -707,9 +707,19 @@ export default async function AssessorPage({
             ) : null}
 
             <div>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD_UNDERLINE, marginBottom: 8 }}>
-                On the day
-              </p>
+              {/* Ramy, 30 Aug 2026: "instead of saying on the day, it should
+                  be the timetable for the assessor visit." Cambridge names it
+                  too -- Handbook 14.1's first line of assessor documentation
+                  is the "Assessment timetable", so that is what it is called
+                  here rather than a phrasing of our own. */}
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD_UNDERLINE }}>
+                  Assessment timetable
+                </p>
+                <Link href="/trainer/timetable" style={{ fontSize: 11, fontWeight: 600, color: TEAL, textDecoration: "none" }}>
+                  In the full timetable →
+                </Link>
+              </div>
               <div
                 className="card"
                 style={{
