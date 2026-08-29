@@ -62,6 +62,7 @@ export function CohortSheet({
   rows,
   canRelease,
   provisionalDueAt,
+  provisionalDueDerived,
   isMct,
 }: {
   courseId: string;
@@ -69,6 +70,7 @@ export function CohortSheet({
   rows: CohortSheetRow[];
   canRelease: boolean;
   provisionalDueAt: string | null;
+  provisionalDueDerived?: boolean;
   isMct: boolean;
 }) {
   const [state, action, pending] = useActionState(releaseAllFinalReports, initialState);
@@ -118,6 +120,7 @@ export function CohortSheet({
 
       <ProvisionalDeadlineBanner
         dueAt={provisionalDueAt}
+        derived={provisionalDueDerived}
         isMct={isMct}
         approvedCount={approvedCount}
         totalCount={withProvisional.length}

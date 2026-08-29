@@ -10,10 +10,30 @@ function formatDue(dueAt: string | null): string {
   return new Date(dueAt).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 }
 
-// MCT sets this directly from the real timetable -- not computed from the
-// assessor visit date. Ramy, 2026-08-17: "the assessor visit falls on a bun
-// day... maybe Friday will be appropriate, but maybe it doesn't."
-export function ProvisionalDeadlineBanner({ dueAt, isMct, approvedCount, totalCount }: { dueAt: string | null; isMct: boolean; approvedCount: number; totalCount: number }) {
+// The MCT still sets this. Ramy, 2026-08-17: "the assessor visit falls on a
+// bank holiday... maybe Friday will be appropriate, but maybe it doesn't" --
+// so it was left entirely manual, and the consequence was that most courses
+// had no date at all.
+//
+// His Grades Report design then stated a rule: "two days before the 30 Nov
+// visit (the prior Friday when that lands on a weekend)". Both hold at once
+// if the rule only fills a blank -- a date the MCT typed always wins, and a
+// course that would otherwise show nothing gets the derivable answer,
+// labelled as derived so nobody mistakes it for something the centre agreed
+// with its assessor. See src/lib/provisional-deadline.ts.
+export function ProvisionalDeadlineBanner({
+  dueAt,
+  derived,
+  isMct,
+  approvedCount,
+  totalCount,
+}: {
+  dueAt: string | null;
+  derived?: boolean;
+  isMct: boolean;
+  approvedCount: number;
+  totalCount: number;
+}) {
   const [state, action, pending] = useActionState(setProvisionalGradesDueDate, initialState);
   const [editing, setEditing] = useState(false);
 
@@ -23,6 +43,11 @@ export function ProvisionalDeadlineBanner({ dueAt, isMct, approvedCount, totalCo
         <p className="text-[13px] font-semibold text-ink">
           {dueAt ? `Provisional grades due to the assessor — ${formatDue(dueAt)}` : "Provisional grades due date not set yet"}
         </p>
+        {dueAt && derived ? (
+          <span className="rounded-full bg-card px-2 py-0.5 text-[10px] font-semibold tracking-[0.06em] text-muted uppercase">
+            Suggested
+          </span>
+        ) : null}
         {isMct ? (
           <button type="button" onClick={() => setEditing((v) => !v)} className="text-xs font-medium text-primary hover:underline">
             {editing ? "Cancel" : dueAt ? "Change date" : "Set date"}
@@ -30,6 +55,9 @@ export function ProvisionalDeadlineBanner({ dueAt, isMct, approvedCount, totalCo
         ) : null}
       </div>
       <p className="text-xs text-muted">
+        {derived && dueAt
+          ? "Two working days before the assessor visit — nobody has set a date, so this is the working assumption until someone does. "
+          : ""}
         Each TP tutor proposes for their own group, the MCT proposes for theirs, then the MCT approves all before
         it&apos;s sent and recorded on the assessor visit page.
         {totalCount > 0 ? ` ${approvedCount} of ${totalCount} MCT-approved.` : ""}

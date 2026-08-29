@@ -1,4 +1,5 @@
 import "server-only";
+import { resolveProvisionalDeadline } from "@/lib/provisional-deadline";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { computeSignatureLedger, isBookletExportReady } from "@/lib/celta5-signatures";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
@@ -15,10 +16,16 @@ type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 export async function computeCohortRows(
   supabase: SupabaseClient<Database>,
   courseId: string
-): Promise<{ courseName: string; provisionalDueAt: string | null; rows: CohortSheetRow[] }> {
+): Promise<{
+  courseName: string;
+  provisionalDueAt: string | null;
+  /** True when no one set a date and the rule derived it from the visit. */
+  provisionalDueDerived: boolean;
+  rows: CohortSheetRow[];
+}> {
   const { data: course } = await supabase
     .from("courses")
-    .select("name, provisional_grades_due_at")
+    .select("name, provisional_grades_due_at, assessor_visit_date")
     .eq("id", courseId)
     .maybeSingle();
 
@@ -91,5 +98,19 @@ export async function computeCohortRows(
     };
   });
 
-  return { courseName: course?.name ?? "Course", provisionalDueAt: course?.provisional_grades_due_at ?? null, rows };
+  // The design's rule -- two days before the visit, pulled back to the Friday
+  // when that falls at a weekend -- rather than leaving it blank because
+  // nobody typed a date. An MCT-set date still wins. See
+  // src/lib/provisional-deadline.ts.
+  const deadline = resolveProvisionalDeadline(
+    course?.provisional_grades_due_at ?? null,
+    course?.assessor_visit_date ?? null
+  );
+
+  return {
+    courseName: course?.name ?? "Course",
+    provisionalDueAt: deadline.dueDate,
+    provisionalDueDerived: deadline.derived,
+    rows,
+  };
 }

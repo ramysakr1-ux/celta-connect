@@ -38,7 +38,7 @@ export default async function GradesReportPage() {
   }
 
   // Shared with the CSV export (export/route.ts) -- one computation, not two.
-  const { courseName, provisionalDueAt, rows: cohortRows } = await computeCohortRows(supabase, courseId);
+  const { courseName, provisionalDueAt, provisionalDueDerived, rows: cohortRows } = await computeCohortRows(supabase, courseId);
 
   const { data: trainees } = await supabase
     .from("profiles")
@@ -128,6 +128,7 @@ export default async function GradesReportPage() {
         rows={cohortRows}
         canRelease={Boolean(trainer)}
         provisionalDueAt={provisionalDueAt}
+        provisionalDueDerived={provisionalDueDerived}
         isMct={isMct}
       />
 

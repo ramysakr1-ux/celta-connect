@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus } from "@/lib/auth/portfolio-access";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
 import { halfOwningDate, halfTpDates, rotationPosition } from "@/lib/rotation";
+import { resolveProvisionalDeadline } from "@/lib/provisional-deadline";
 import { hasMarkingGuidance } from "@/lib/marking-guidance";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -93,7 +94,14 @@ export default async function AssessorPage({
   const today = toLocalIso(new Date(), timeZone);
 
   // MCT-set, not computed from assessor_visit_date -- see migration 0127.
-  const sendByDate = course.provisional_grades_due_at ? course.provisional_grades_due_at.slice(0, 10) : null;
+  // Same rule the grades report works to, or the pack and the tutors' own
+  // screen would disagree about when grades are due -- see
+  // src/lib/provisional-deadline.ts. An MCT-set date still wins.
+  const provisionalDeadline = resolveProvisionalDeadline(
+    course.provisional_grades_due_at ?? null,
+    course.assessor_visit_date ?? null
+  );
+  const sendByDate = provisionalDeadline.dueDate;
   const daysOut = sendByDate ? Math.ceil((new Date(`${sendByDate}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000) : null;
 
   const [{ data: tutorRows }, { data: onDayEvents }, { data: centreDocs }, { data: asyncEvents }, { data: malpracticeCases }] = await Promise.all([

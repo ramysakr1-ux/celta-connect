@@ -872,7 +872,17 @@ export function computeStrengthsAndActionPoints(
     const isPlanning = code.startsWith("4");
     const label = formatCriterion(code);
 
-    if (rating === "S+" || rating === "S") {
+    // S+ only. Ramy's Grades Report design: "every criterion rated S+ in the
+    // CELTA 5 matrix arrives as a strength, every N as an action point."
+    //
+    // This read `"S+" || "S"`, which contradicted the docstring directly
+    // above it AND the footnote the screen prints immediately above these
+    // lists -- "All criteria not listed below are assumed to be to standard."
+    // We were printing that footnote and then listing the to-standard ones.
+    // Not academic: across the live matrix there are 15 S+, 13 S and 9 N, so
+    // roughly half of every strengths list was criteria the report says it
+    // omits by definition. Found 30 Aug 2026 checking the design file.
+    if (rating === "S+") {
       (isPlanning ? result.planningStrengths : result.teachingStrengths).push(label);
     } else if (rating === "N") {
       (isPlanning ? result.planningActionPoints : result.teachingActionPoints).push(label);
