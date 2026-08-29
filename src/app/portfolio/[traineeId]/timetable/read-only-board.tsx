@@ -458,9 +458,24 @@ function Cell({
   // stacked... but not TP." Only split when every event here is a TP.
   const allTp = events.every((e) => e.type === "tp");
   if (!allTp) {
-    const displayCat = toDisplayCategory(categorize(events[0]));
-    const style = CATEGORY_STYLE[displayCat];
+    // Ramy, 30 Aug 2026, on the assessor's view: "it says filmed observation,
+    // which is the same slot the assessor is having the grades meeting in...
+    // I know on the timetable it says filmed observation for the trainees,
+    // but for the assessor it should read grades meeting."
+    //
+    // Both are true at once -- the candidates film an observation while the
+    // assessor sits down with the tutors -- and they share a band, so they
+    // shared a card. "Mine" faded the CARD, and one `some()` meant a card
+    // holding one of yours and one of theirs stayed fully lit, with their
+    // session's title on it.
+    //
+    // In a mixed card, "Mine" now keeps only the events that are yours. A
+    // card where nothing is yours still fades whole rather than emptying, so
+    // the day keeps its shape.
     const mine = events.some((e) => (eventMeta[e.id] ?? EMPTY_META).mine);
+    const shown = mineOnly && mine ? events.filter((e) => (eventMeta[e.id] ?? EMPTY_META).mine) : events;
+    const displayCat = toDisplayCategory(categorize(shown[0] ?? events[0]));
+    const style = CATEGORY_STYLE[displayCat];
     const faded = mineOnly && !mine;
     return (
       <div
@@ -474,7 +489,7 @@ function Cell({
           background: `linear-gradient(180deg, ${style.tintFrom}, ${style.tintTo})`,
         }}
       >
-        {events.map((event) => (
+        {shown.map((event) => (
           <SessionTile
             key={event.id}
             event={event}
