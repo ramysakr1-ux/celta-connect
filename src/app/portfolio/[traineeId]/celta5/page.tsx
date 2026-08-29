@@ -43,6 +43,7 @@ import { AbsencePanel } from "@/app/portfolio/[traineeId]/celta5/absence-panel";
 import { BookletSections } from "@/app/portfolio/[traineeId]/celta5/booklet-sections";
 import { BookletSection } from "@/app/portfolio/[traineeId]/celta5/booklet/shell";
 import { BookletContents } from "@/app/portfolio/[traineeId]/celta5/booklet/contents";
+import { BookletCover } from "@/app/portfolio/[traineeId]/celta5/booklet/cover";
 import { ProgressOverview } from "@/app/portfolio/[traineeId]/celta5/booklet/progress-overview";
 import { AttendanceRecord, ObservationsRecord, AssessedTpRecord } from "@/app/portfolio/[traineeId]/celta5/booklet/records";
 import { FinalDayChecks, type FinalCheck } from "@/app/portfolio/[traineeId]/celta5/booklet/final-day";
@@ -169,7 +170,7 @@ export default async function PortfolioCelta5Page({
         )
         .eq("trainee_id", traineeId),
       viewer?.course_id
-        ? supabase.from("courses").select("name, start_date, end_date, delivery_mode, total_hours").eq("id", viewer.course_id).maybeSingle()
+        ? supabase.from("courses").select("name, start_date, end_date, delivery_mode, total_hours, course_code").eq("id", viewer.course_id).maybeSingle()
         : Promise.resolve({ data: null }),
       viewer?.center_id
         ? supabase.from("centers").select("name, center_number, is_uk_centre, time_zone, stage3_for_all_candidates").eq("id", viewer.center_id).maybeSingle()
@@ -467,6 +468,21 @@ export default async function PortfolioCelta5Page({
         ? STAGE3_TRIGGER_LABELS.centre_gives_to_all
         : undefined;
 
+    const fmtCoverDate = (iso: string | null | undefined) =>
+      iso ? new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : null;
+    const coverData = {
+      candidateName: viewer?.full_name ?? null,
+      centreName: center?.name ?? null,
+      centreNumber: center?.center_number ?? null,
+      courseNumber: course?.course_code ?? null,
+      courseDates:
+        course?.start_date && course?.end_date
+          ? `${fmtCoverDate(course.start_date)} \u2013 ${fmtCoverDate(course.end_date)}`
+          : null,
+      tutors: tutorNames,
+      uln: viewer?.uln ?? null,
+    };
+
     const finalChecks: FinalCheck[] = [
       {
         label: "Six hours of assessed teaching practice at at least two levels",
@@ -514,12 +530,18 @@ export default async function PortfolioCelta5Page({
             every box the paper form prints -- including the tutorial
             summaries -- has a place here whether it is filled or not. */}
         <div className="c5-doc">
-          <BookletSection title="Progress overview">
-            <ProgressOverview cards={bookletCards} />
+          {/* His file's order: cover, then contents, then the overview.
+              The app opened on the overview and had no cover at all. */}
+          <BookletSection>
+            <BookletCover data={coverData} />
           </BookletSection>
 
           <BookletSection title="Contents">
             <BookletContents />
+          </BookletSection>
+
+          <BookletSection title="Progress overview">
+            <ProgressOverview cards={bookletCards} />
           </BookletSection>
 
           <BookletSections
