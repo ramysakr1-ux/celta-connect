@@ -599,8 +599,14 @@ export default async function AssessorPage({
               <div
                 key={r.label}
                 style={{
-                  padding: "10px 0",
-                  borderTop: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent)",
+                  padding: "11px 0 12px",
+                  // Ramy, 30 Aug 2026: "it just looks spread out... maybe
+                  // those lines in between could have a bit of a colour, a
+                  // soft colour, to distinguish them." A neutral hairline
+                  // was doing nothing to hold three columns of text
+                  // together; the panel's own gold, well diluted, groups them
+                  // into a grid without turning each one into a box.
+                  borderTop: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 38%, transparent)`,
                 }}
               >
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
@@ -617,7 +623,13 @@ export default async function AssessorPage({
             ))}
             </div>
             {doubleMarkPerAssignment ? (
-              <div style={{ padding: "11px 15px", background: "var(--color-frame)" }}>
+              <div
+                style={{
+                  padding: "11px 15px",
+                  background: "var(--color-frame)",
+                  borderTop: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 55%, transparent)`,
+                }}
+              >
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
                   <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>The centre&apos;s double-marking, for reference</p>
                   <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>§11</span>
@@ -962,48 +974,65 @@ export default async function AssessorPage({
                   : (centreDocs ?? []).find((d) => d.title.trim().toLowerCase() === doc.name.toLowerCase());
                 const present = isMarkingGuidance ? markingGuidancePresent : Boolean(uploaded?.file_url);
                 const href = isMarkingGuidance ? "/assessor/marking-guidance" : uploaded?.file_url;
-                return (
-                  <div
-                    key={doc.name}
-                    className={present && href ? "assessor-hover" : undefined}
-                    style={{
-                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-                      padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
-                    }}
-                  >
-                    <div>
-                      <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{doc.name}</p>
-                      <p style={{ fontSize: 10.5, color: MUTED }}>{doc.meta}</p>
-                    </div>
+                const rowStyle = {
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                  padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
+                } as const;
+                const body = (
+                  <>
+                    <span>
+                      <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>{doc.name}</span>
+                      <span style={{ fontSize: 10.5, color: MUTED }}>{doc.meta}</span>
+                    </span>
                     {present && href ? (
-                      <a href={href} className="hover:underline" style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}>
-                        Open →
-                      </a>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none" }}>Open →</span>
                     ) : (
                       <span style={{ fontSize: 11, fontWeight: 600, color: AMBER, flex: "none" }}>
                         {isMarkingGuidance ? "Not written yet" : "Not uploaded"}
                       </span>
                     )}
+                  </>
+                );
+                // A row with nothing behind it stays a plain div and gets no
+                // hover: an assessor should be able to tell "not uploaded"
+                // from "uploaded" without clicking to find out. Uploaded
+                // documents are files on storage rather than app routes, so
+                // they open in a new tab the way the old inner anchor did.
+                return present && href ? (
+                  <a
+                    key={doc.name}
+                    href={href}
+                    target={isMarkingGuidance ? undefined : "_blank"}
+                    rel={isMarkingGuidance ? undefined : "noreferrer"}
+                    className="assessor-hover no-underline"
+                    style={rowStyle}
+                  >
+                    {body}
+                  </a>
+                ) : (
+                  <div key={doc.name} style={rowStyle}>
+                    {body}
                   </div>
                 );
               })}
               {extraCentreDocs.map((d) => (
-                <div
+                <a
                   key={d.id}
-                  className="assessor-hover"
+                  href={d.file_url ?? "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="assessor-hover no-underline"
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
                     padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
                   }}
                 >
-                  <div>
-                    <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{d.title}</p>
-                    <p style={{ fontSize: 10.5, color: MUTED }}>Added by the centre</p>
-                  </div>
-                  <a href={d.file_url ?? "#"} className="hover:underline" style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}>
-                    Open →
-                  </a>
-                </div>
+                  <span>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>{d.title}</span>
+                    <span style={{ fontSize: 10.5, color: MUTED }}>Added by the centre</span>
+                  </span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none" }}>Open →</span>
+                </a>
               ))}
               {/* "Tutor list and roles doesn't take you there" -- it did jump,
                   but to a heading further down this same column, which reads
@@ -1223,22 +1252,33 @@ function Panel({
   );
 }
 
+// Ramy, 30 Aug 2026: "can we have a hovering effect on the centre documents
+// as well?"
+//
+// Worth saying what was actually wrong, because it was more than a missing
+// ring: every one of these rows already carried .assessor-hover, so the whole
+// row lit up on hover -- but only the small "Open →" anchor was clickable.
+// The hover was writing a cheque the row could not cash, and on a read-only
+// screen an assessor has no way to discover that except by clicking and
+// having nothing happen. The row is the link now, so the ring means what it
+// looks like it means.
 function DocRow({ label, href, status }: { label: string; href: string; status: string }) {
   return (
-    <div
-      className="assessor-hover"
+    <Link
+      href={href}
+      className="assessor-hover no-underline"
       style={{
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
         padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
       }}
     >
-      <div>
-        <p style={{ fontSize: 12.5, fontWeight: 600, color: "oklch(23.5% 0.017 65)" }}>{label}</p>
-        <p style={{ fontSize: 10.5, color: TEAL }}>{status}</p>
-      </div>
-      <a href={href} className="hover:underline" style={{ fontSize: 11, fontWeight: 600, color: "oklch(38% 0.072 195)", flex: "none", textDecoration: "none" }}>
+      <span>
+        <span style={{ fontSize: 12.5, fontWeight: 600, color: "oklch(23.5% 0.017 65)", display: "block" }}>{label}</span>
+        <span style={{ fontSize: 10.5, color: TEAL }}>{status}</span>
+      </span>
+      <span style={{ fontSize: 11, fontWeight: 600, color: "oklch(38% 0.072 195)", flex: "none" }}>
         Open →
-      </a>
-    </div>
+      </span>
+    </Link>
   );
 }
