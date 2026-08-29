@@ -3,14 +3,12 @@
 import { BOOKLET_SECTIONS, type BookletSection } from "@/lib/celta5-booklet-content";
 import { ConfirmBox } from "@/app/portfolio/[traineeId]/celta5/booklet/confirm-box";
 
-// Cambridge's own section numbers, so these read as pages 1-4 of the
-// booklet rather than as four loose cards.
-const SECTION_NUM: Record<string, string> = {
-  roles: "Section 1",
-  portfolio: "Section 2",
-  appeals: "Section 3",
-  assessment: "Section 4",
-};
+// Ramy's file numbers only the last four pages -- "Section 9" through
+// "Section 12", on Stage One to the final day. Everything before that
+// carries a heading and no number, and the app matches that exactly
+// rather than inventing numbers for pages his design leaves unnumbered.
+// Ramy, 29 Aug 2026: "match my file exactly."
+const SECTION_NUM: Record<string, string> = {};
 
 // Ramy, 30 Aug 2026: "I wanted them to read everything in there." The real
 // CELTA 5's static sections -- portfolio requirements, the Cambridge

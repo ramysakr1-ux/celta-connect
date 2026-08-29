@@ -523,7 +523,7 @@ export default async function PortfolioCelta5Page({
             fullName={viewer?.full_name ?? null}
           />
 
-          <BookletSection id="c5-attendance" num="Section 5" title="Record of attendance">
+          <BookletSection id="c5-attendance" title="Record of attendance">
             <AttendanceRecord
               courseHours={course?.total_hours ?? null}
               hoursAttended={record.hours_attended}
@@ -559,7 +559,6 @@ export default async function PortfolioCelta5Page({
 
           <BookletSection
             id="c5-observations"
-            num="Section 6"
             title="Record of observations of experienced classroom teachers (including filmed observations)"
           >
             <ObservationsRecord rows={observationRows} />
@@ -599,11 +598,11 @@ export default async function PortfolioCelta5Page({
             </div>
           </BookletSection>
 
-          <BookletSection id="c5-tp" num="Section 7" title="Record of assessed teaching practice">
+          <BookletSection id="c5-tp" title="Record of assessed teaching practice">
             <AssessedTpRecord rows={assessedTpRows} />
           </BookletSection>
 
-          <BookletSection id="c5-assignments" num="Section 8" title="Record of written assignments">
+          <BookletSection id="c5-assignments" title="Record of written assignments">
             <WrittenAssignmentsRecord rows={writtenAssignmentRows} />
           </BookletSection>
 
@@ -826,14 +825,35 @@ export default async function PortfolioCelta5Page({
             <div className="mt-4">
               <FinalChecklistForm signatureName={viewer?.signature_name ?? null} fullName={viewer?.full_name ?? ""} />
             </div>
-          </BookletSection>
 
-          <BookletSection id="c5-appendix1" num="Appendix 1" title="CELTA criteria">
+            {/* Cambridge prints this box on the same page, for candidates
+                whose portfolios go to Cambridge English. */}
+            <div className="c5-box" style={{ marginTop: 24 }}>
+              <span className="lab">
+                Information for the CELTA grade review &mdash; tutor comments on action points detailed in Stage Three
+                progress record
+              </span>
+              <p className="text-[10px] leading-relaxed text-muted">
+                This box is to be completed for all candidates whose portfolios are submitted to Cambridge English.
+                (See CELTA Administration Handbook for details of portfolios to be submitted.)
+              </p>
+              <p className="mt-2 text-[11px] leading-relaxed text-ink">{record.grade_review_tutor_comments || "—"}</p>
+            </div>
+
+          {/* His file keeps both appendices inside the final-day page rather
+              than giving them pages of their own, so the booklet ends where
+              his ends. They stay anchored so the contents links still jump. */}
+          <div id="c5-appendix1" className="scroll-mt-6">
+            <div className="c5-section-num">Appendix 1</div>
+            <h2 className="c5-section-header">CELTA criteria</h2>
             <Appendix1 />
-          </BookletSection>
+          </div>
 
-          <BookletSection id="c5-appendix2" num="Appendix 2" title="CELTA performance descriptors">
+          <div id="c5-appendix2" className="scroll-mt-6" style={{ marginTop: 28 }}>
+            <div className="c5-section-num">Appendix 2</div>
+            <h2 className="c5-section-header">CELTA performance descriptors</h2>
             <Appendix2 />
+          </div>
           </BookletSection>
         </div>
 
@@ -1155,7 +1175,7 @@ export default async function PortfolioCelta5Page({
             <BookletContents />
           </BookletSection>
 
-          <BookletSection id="c5-attendance" num="Section 5" title="Record of attendance">
+          <BookletSection id="c5-attendance" title="Record of attendance">
             <AttendanceRecord
               courseHours={course?.total_hours ?? null}
               hoursAttended={record.hours_attended}
@@ -1166,7 +1186,6 @@ export default async function PortfolioCelta5Page({
 
           <BookletSection
             id="c5-observations"
-            num="Section 6"
             title="Record of observations of experienced classroom teachers (including filmed observations)"
           >
             <ObservationsRecord rows={assessorObservationRows} />
