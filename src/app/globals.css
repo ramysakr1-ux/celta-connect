@@ -961,3 +961,22 @@ h6 {
     display: none !important;
   }
 }
+
+/* The assessor pack's "Tutor list and roles" row is the one cohort-document
+   link whose target is on the page it was clicked from, so the jump had
+   nothing to show for itself. scroll-margin clears the sticky read-only
+   banner; the fade marks where the eye should land. Ramy, 29 Aug 2026. */
+.assessor-anchor {
+  scroll-margin-top: 72px;
+  border-radius: 6px;
+}
+.assessor-anchor:target {
+  animation: assessor-anchor-land 2.2s ease-out;
+}
+@keyframes assessor-anchor-land {
+  0%, 35% { background: color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent); }
+  100% { background: transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .assessor-anchor:target { animation: none; outline: 2px solid oklch(60% 0.11 70); }
+}

@@ -24,6 +24,12 @@ const PATH_LABELS: { test: (p: string) => boolean; label: string }[] = [
   { test: (p) => p.startsWith("/trainer/volunteers"), label: "Attendance register" },
   { test: (p) => p.startsWith("/trainer/timetable"), label: "Timetable" },
   { test: (p) => p.startsWith("/trainer/resource-hub"), label: "Resource hub" },
+  // The two cohort documents that are pages of their own rather than a
+  // read-only view of a trainer screen -- they take subject="the course"
+  // at their call sites, so the sentence reads "the course's assignment
+  // titles" rather than "the trainer's".
+  { test: (p) => p.startsWith("/assessor/assignment-titles"), label: "Assignment titles" },
+  { test: (p) => p.startsWith("/assessor/lesson-plans"), label: "Lesson plans for the day" },
   { test: (p) => p.startsWith("/trainer/tp"), label: "Teaching Practice" },
   { test: (p) => p.startsWith("/trainer/rotation"), label: "Rotation" },
   { test: (p) => p.startsWith("/trainer/coursebooks"), label: "Coursebooks" },

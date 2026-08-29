@@ -545,7 +545,7 @@ export default async function AssessorPage({
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <Panel title="Cohort documents">
               {COHORT_DOCUMENTS.map((name) => (
-                <DocRow key={name} label={name} href={COHORT_DOC_HREF(name, firstCandidateId)} status="Live" />
+                <DocRow key={name} label={name} href={COHORT_DOC_HREF(name)} status="Live" />
               ))}
             </Panel>
 
@@ -714,8 +714,14 @@ export default async function AssessorPage({
                   </a>
                 </div>
               ))}
+              {/* "Tutor list and roles doesn't take you there" -- it did jump,
+                  but to a heading further down this same column, which reads
+                  as nothing happening when every sibling row opens a page
+                  instead. .assessor-anchor (globals.css) pulls the target
+                  clear of the sticky banner and tints it briefly, so the jump
+                  lands somewhere the eye can follow. */}
               {tutorNameById.size > 0 ? (
-                <div id="tutor-list" style={{ padding: "11px 15px" }}>
+                <div id="tutor-list" className="assessor-anchor" style={{ padding: "11px 15px" }}>
                   <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>Tutor list</p>
                   {(tutorRows ?? []).map((t) => (
                     <p key={t.profile_id} style={{ fontSize: 12, color: INK }}>
@@ -845,15 +851,25 @@ export default async function AssessorPage({
 
 // Where each cohort document actually opens. Kept beside the shared list so a
 // new document cannot be added without someone deciding where it points.
-function COHORT_DOC_HREF(name: string, firstCandidateId: string | null): string {
+function COHORT_DOC_HREF(name: string): string {
   switch (name) {
     case "Grades report":
       return "/trainer/grades-report";
     case "Course timetable":
-    case "Lesson plans for the day":
       return "/trainer/timetable";
+    // Ramy, 29 Aug 2026: "Lesson plans for the day takes the assessor to
+    // the timetable, and the timetable takes the assessor to the
+    // timetable." Two of the six rows pointed at the same page. The
+    // Handbook's pack list names them separately, and the plans are the
+    // document the assessor actually reads before observing.
+    case "Lesson plans for the day":
+      return "/assessor/lesson-plans";
+    // Was the first candidate's resource hub, where the briefs sit inside
+    // a collapsed category well down a long page -- "Assignment titles
+    // doesn't take you there." The titles are the same for the whole
+    // cohort, so they get a page about the course.
     case "Assignment titles":
-      return firstCandidateId ? `/portfolio/${firstCandidateId}/resources` : "#";
+      return "/assessor/assignment-titles";
     case "Tutor list and roles":
       return "#tutor-list";
     case "Candidate descriptions":

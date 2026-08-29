@@ -167,6 +167,13 @@ async function main() {
       total_hours: 120,
       delivery_mode: "f2f",
       accepting_applications: true,
+      // Monday of week 4 -- a half-1 TP day (start+21, TP7), which is where
+      // the Handbook puts the visit: the last week, on a day with teaching
+      // practice to observe. Without this the assessor pack's "On the day"
+      // panel reads "No assessor visit date set yet" and the new
+      // /assessor/lesson-plans page has no day to draw plans from, so the
+      // whole visit half of the pack demos as empty.
+      assessor_visit_date: isoOf(new Date(courseStart.getTime() + 21 * 86400000)),
     })
     .select("id")
     .single();
@@ -527,6 +534,55 @@ async function main() {
     trainee_id: trainees["Priya Sharma"],
     hours_attended: 6,
   });
+
+  // --- Plans for the assessor's visit day ---
+  //
+  // TP7 is what half 1 teaches on assessor_visit_date (start+21), so these
+  // are the plans the assessor reads before observing -- the pack's
+  // "Lesson plans for the day" row (/assessor/lesson-plans). Submitted but
+  // not taught: the visit is still ahead of "today" in this seed, which is
+  // the state that row exists to show. seedTaughtTp is deliberately not
+  // reused -- it also writes a taught_at, a self-evaluation and tutor
+  // feedback, none of which can exist for a lesson nobody has taught yet.
+  const visitPlans = [
+    {
+      name: "Amara Okafor",
+      main: "Functional language: agreeing and disagreeing politely in a meeting",
+      sub: "Fluency practice in a role-played team discussion",
+      profile: "Twelve B1+ adults, mixed L1, used to working in pairs. Three are quiet in open class.",
+      materials: "Adapted audio from the coursebook unit 8, plus a role card set of my own",
+      framework: "Test-teach-test",
+    },
+    {
+      name: "Daniel Kim",
+      main: "Reading for detail: a short news article on remote work",
+      sub: "Pre-teaching four items of topic vocabulary",
+      profile: "Same B1+ group. Strong readers, but they tend to read every word rather than skim.",
+      materials: "Article with a graded gist task and a detail task I wrote",
+      framework: "Receptive skills lesson",
+    },
+    {
+      name: "Priya Sharma",
+      main: "Grammar: used to for past habits",
+      sub: "Controlled written practice before freer speaking",
+      profile: "Same B1+ group. They have met the past simple but not used to.",
+      materials: "Guided discovery handout built from the coursebook text",
+      framework: "Guided discovery into controlled practice",
+    },
+  ];
+  for (const vp of visitPlans) {
+    await supabase.from("tp_plans").insert({
+      course_id: course.id,
+      trainee_id: trainees[vp.name],
+      tp_number: 7,
+      main_aims: vp.main,
+      subsidiary_aims: vp.sub,
+      class_profile: vp.profile,
+      materials_description: vp.materials,
+      framework_used: vp.framework,
+      submitted_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+    });
+  }
 
   // --- Pre-course task: seeded per-centre (centre admins normally author
   // these themselves), then marked handed in for all three trainees so the
