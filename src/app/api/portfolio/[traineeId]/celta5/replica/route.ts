@@ -233,6 +233,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
       tutorSignatureName: record.final_tutor_signature_name,
       tutorSignedAt: record.trainer_signoff_final_at,
     },
+    confirmations: {
+      candidateName: trainee.full_name,
+      portfolioConfirmedAt: record.portfolio_terms_confirmed_at,
+      portfolioSignatureName: record.portfolio_terms_signature_name,
+      appealsConfirmedAt: record.appeals_read_confirmed_at,
+      appealsSignatureName: record.appeals_read_signature_name,
+    },
   });
 
   return new NextResponse(new Uint8Array(buffer), {

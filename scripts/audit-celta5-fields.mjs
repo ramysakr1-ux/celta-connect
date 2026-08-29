@@ -63,8 +63,8 @@ const FIELDS = [
   // as the final declaration's tutorSignatureName.
   { group: "Final day", name: "Accepted by tutor", origin: "tutor on last day", pdf: "tutorSignatureName: record.final_tutor_signature_name" },
 
-  { group: "Confirmations", name: "Portfolio terms", origin: "candidate, booklet section", pdf: null, booklet: "portfolio_terms_confirmed_at" },
-  { group: "Confirmations", name: "Appeals procedure read", origin: "candidate, booklet section", pdf: null, booklet: "appeals_read_confirmed_at" },
+  { group: "Confirmations", name: "Portfolio terms", origin: "candidate, booklet section", pdf: "portfolioConfirmedAt: record.portfolio_terms_confirmed_at", booklet: "portfolio_terms_confirmed_at" },
+  { group: "Confirmations", name: "Appeals procedure read", origin: "candidate, booklet section", pdf: "appealsConfirmedAt: record.appeals_read_confirmed_at", booklet: "appeals_read_confirmed_at" },
 ];
 
 let ok = 0, gaps = [];

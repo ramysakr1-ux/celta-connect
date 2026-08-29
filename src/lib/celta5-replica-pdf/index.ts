@@ -13,6 +13,7 @@ import { drawStage3NotesPage, type Stage3NotesPageData } from "@/lib/celta5-repl
 import { drawStage3OverallPage, type Stage3OverallPageData } from "@/lib/celta5-replica-pdf/pages/stage3-overall";
 import { drawFinalDeclarationPage, type FinalDeclarationPageData } from "@/lib/celta5-replica-pdf/pages/final-declaration";
 import { drawWrittenAssignmentsPage, type WrittenAssignmentsPageData } from "@/lib/celta5-replica-pdf/pages/written-assignments";
+import { drawConfirmationsPage, type ConfirmationsPageData } from "@/lib/celta5-replica-pdf/pages/confirmations";
 
 export interface Celta5ReplicaInput {
   cover: CoverPageData;
@@ -29,6 +30,7 @@ export interface Celta5ReplicaInput {
   stage3Notes: Stage3NotesPageData;
   stage3Overall: Stage3OverallPageData;
   finalDeclaration: FinalDeclarationPageData;
+  confirmations: ConfirmationsPageData;
 }
 
 const PAGE_INDEX = {
@@ -107,6 +109,12 @@ export async function renderCelta5ReplicaBuffer(input: Celta5ReplicaInput): Prom
   drawStage3NotesPage(out.getPage(startIndex.get(PAGE_INDEX.stage3Notes)!), fonts, input.stage3Notes);
   drawStage3OverallPage(out.getPage(startIndex.get(PAGE_INDEX.stage3Overall)!), fonts, input.stage3Overall);
   drawFinalDeclarationPage(out.getPage(startIndex.get(PAGE_INDEX.finalDeclaration)!), fonts, input.finalDeclaration);
+
+  // Appended after Cambridge's own pages -- see pages/confirmations.ts for
+  // why these travel with the export rather than living only on screen.
+  // A4 portrait, matching the master's own portrait pages.
+  const confirmationsPage = out.addPage([595.28, 841.89]);
+  drawConfirmationsPage(confirmationsPage, fonts, input.confirmations);
 
   const bytes = await out.save();
   return Buffer.from(bytes);

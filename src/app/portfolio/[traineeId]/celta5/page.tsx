@@ -46,6 +46,8 @@ import { BookletContents } from "@/app/portfolio/[traineeId]/celta5/booklet/cont
 import { ProgressOverview } from "@/app/portfolio/[traineeId]/celta5/booklet/progress-overview";
 import { AttendanceRecord, ObservationsRecord, AssessedTpRecord } from "@/app/portfolio/[traineeId]/celta5/booklet/records";
 import { FinalDayChecks, type FinalCheck } from "@/app/portfolio/[traineeId]/celta5/booklet/final-day";
+import { WrittenAssignmentsRecord } from "@/app/portfolio/[traineeId]/celta5/booklet/written-assignments";
+import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { computeSignatureLedger } from "@/lib/celta5-signatures";
 import { computeStage3Triggers, stage3Expected, isStage3Mandatory, STAGE3_TRIGGER_LABELS } from "@/lib/stage3-triggers";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
@@ -148,7 +150,12 @@ export default async function PortfolioCelta5Page({
         : Promise.resolve({ data: [] }),
       supabase.from("plan_assignments").select("tp_number, tp_point_id, taught_at").eq("trainee_id", traineeId),
       supabase.from("course_subgroup_members").select("subgroup_id").eq("trainee_id", traineeId).maybeSingle(),
-      supabase.from("assignments").select("assignment_type, first_status, resubmission_status").eq("trainee_id", traineeId),
+      supabase
+        .from("assignments")
+        .select(
+          "assignment_type, first_status, resubmission_status, final_grade, first_outcome_signature_name, first_outcome_signed_at, resubmission_outcome_signature_name, resubmission_outcome_signed_at"
+        )
+        .eq("trainee_id", traineeId),
       viewer?.course_id
         ? supabase.from("courses").select("name, start_date, end_date, delivery_mode, total_hours").eq("id", viewer.course_id).maybeSingle()
         : Promise.resolve({ data: null }),
@@ -361,6 +368,39 @@ export default async function PortfolioCelta5Page({
       initials: "",
     }));
 
+    // Written assignments. The result is derived from the recorded
+    // statuses rather than re-entered, and the signature shown is the one
+    // the candidate actually gave for the round that was decided -- the
+    // same rule the PDF now follows, so the two cannot disagree.
+    // Cambridge prints the four in this order on the form; these are the
+    // real assignment_type values, not display labels.
+    const ASSIGNMENT_ORDER = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
+    const assignmentByType = new Map((assignments ?? []).map((a) => [a.assignment_type, a]));
+    const writtenAssignmentRows = ASSIGNMENT_ORDER.map((type) => {
+      const a = assignmentByType.get(type);
+      const info = ASSIGNMENT_INFO[type as keyof typeof ASSIGNMENT_INFO];
+      const onResubmission = !!a && a.resubmission_status !== "not_submitted";
+      const result = !a
+        ? "— not yet submitted"
+        : a.resubmission_status === "approved"
+          ? "Pass 2nd submission"
+          : a.first_status === "approved"
+            ? "Pass 1st submission"
+            : a.final_grade === "Fail"
+              ? "Fail"
+              : a.first_status === "resubmission_required"
+                ? "Resubmission required"
+                : "— not yet graded";
+      return {
+        title: info?.title ?? type,
+        result,
+        signatureName: onResubmission
+          ? a?.resubmission_outcome_signature_name ?? null
+          : a?.first_outcome_signature_name ?? null,
+        signedAt: onResubmission ? a?.resubmission_outcome_signed_at ?? null : a?.first_outcome_signed_at ?? null,
+      };
+    });
+
     // Handbook 10.2 / CELTA 5 p.20 -- who must be given Stage Three.
     // "Not making the expected progress" is read from TPs taught after the
     // Stage 2 tutorial; assessedTpOutcomes below is ordered by teaching
@@ -443,6 +483,10 @@ export default async function PortfolioCelta5Page({
 
           <BookletSection id="c5-tp" num="Section 7" title="Record of assessed teaching practice">
             <AssessedTpRecord rows={assessedTpRows} />
+          </BookletSection>
+
+          <BookletSection id="c5-assignments" num="Section 8" title="Record of written assignments">
+            <WrittenAssignmentsRecord rows={writtenAssignmentRows} />
           </BookletSection>
 
           <BookletSection id="c5-final" num="Section 12" title="To be completed on the final day of the course">
