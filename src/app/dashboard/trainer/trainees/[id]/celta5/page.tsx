@@ -22,6 +22,8 @@ import { GradeReviewCommentsForm } from "@/app/dashboard/trainer/trainees/[id]/c
 import { ReleaseFinalReportForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/release-final-report-form";
 import { FinalGradeForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/final-grade-form";
 import { AttendanceForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/attendance-form";
+import { BookletSection } from "@/app/portfolio/[traineeId]/celta5/booklet/shell";
+import { ObservationsRecord, AssessedTpRecord } from "@/app/portfolio/[traineeId]/celta5/booklet/records";
 import { AdminGrantForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/admin-grant-form";
 import { FinalizeRecordForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/finalize-record-form";
 import { isFailRiskTriggered, buildFailRiskDraft } from "@/lib/letters/fail-risk";
@@ -75,7 +77,14 @@ export default async function Celta5RecordPage({
     supabase.from("celta5_records").select("*").eq("trainee_id", id).maybeSingle(),
     supabase.from("attendance_absences").select("*").eq("trainee_id", id).order("session_date"),
     supabase.from("observations").select("*").eq("trainee_id", id).order("observation_date"),
-    supabase.from("tp_lessons").select("id").eq("trainee_id", id),
+    // Was select("id") -- enough for a count, not enough to print the
+    // record of assessed teaching practice, which is Cambridge's Section 7
+    // and now renders on this page too.
+    supabase
+      .from("tp_lessons")
+      .select("id, lesson_date, length_minutes, level, learner_count, lesson_focus, tutor_assessment")
+      .eq("trainee_id", id)
+      .order("lesson_date"),
     supabase
       .from("assignments")
       .select("id, assignment_type, first_status, resubmission_status, first_own_work_confirmed, resubmission_own_work_confirmed, final_grade")
@@ -166,6 +175,9 @@ export default async function Celta5RecordPage({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Trainer-only working header. Deliberately outside the booklet: it
+          is Connect's own chrome, and an assessor reading over a tutor's
+          shoulder should be able to tell the document from the tools. */}
       <div className="card p-6">
         <h1 className="font-serif text-xl text-ink">{trainee.full_name}</h1>
         <p className="mt-1 text-muted">{trainee.email}</p>
@@ -180,86 +192,101 @@ export default async function Celta5RecordPage({
           </div>
           <div>
             <p className="text-muted">Dates</p>
-            <p className="text-ink">
-              {course ? `${course.start_date} → ${course.end_date}` : "--"}
-            </p>
+            <p className="text-ink">{course ? `${course.start_date} → ${course.end_date}` : "--"}</p>
           </div>
         </div>
-        <Link
-          href={`/trainer/grade-query-reply/${id}`}
-          className="mt-4 inline-flex self-start rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary"
-        >
-          Grade query reply →
-        </Link>
-      </div>
-
-      <div className="card p-6">
-        <p className="text-sm text-muted">
-          Trajectory (trainer-only, estimated -- never shown to the trainee, never sets the
-          real final grade)
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link
+            href={`/trainer/grade-query-reply/${id}`}
+            className="inline-flex rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary"
+          >
+            Grade query reply →
+          </Link>
+        </div>
+        <p className="mt-4 text-sm text-muted">
+          Trajectory (trainer-only, estimated -- never shown to the trainee, never sets the real final grade)
         </p>
         <p className="mt-1 font-serif text-xl text-ink">{TRAJECTORY_LABEL[trajectory]}</p>
-      </div>
-
-      <AttendanceForm
-        key={`attendance-${record.updated_at}`}
-        record={record}
-        totalHours={course?.total_hours ?? 120}
-        absences={absences ?? []}
-      />
-
-      <div>
-        <h2 className="font-serif text-lg text-ink">
-          Observations of experienced teachers (self-reported)
-        </h2>
-        <div className="card mt-3 overflow-hidden">
-          {observations && observations.length > 0 ? (
-            <table className="table-plain w-full">
-              <thead>
-                <tr>
-                  <th className="text-sm text-muted">Date</th>
-                  <th className="text-sm text-muted">Length</th>
-                  <th className="text-sm text-muted">Level</th>
-                  <th className="text-sm text-muted">Focus</th>
-                  <th className="text-sm text-muted">Filmed</th>
-                </tr>
-              </thead>
-              <tbody>
-                {observations.map((o) => (
-                  <tr key={o.id}>
-                    <td className="text-ink">{o.observation_date ?? "--"}</td>
-                    <td className="text-muted">
-                      {o.length_minutes ? `${o.length_minutes} min` : "--"}
-                    </td>
-                    <td className="text-muted">{o.level ?? "--"}</td>
-                    <td className="text-muted">{o.lesson_focus ?? "--"}</td>
-                    <td className="text-muted">{o.filmed ? "Yes" : "No"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="p-4 text-muted">No observations logged yet.</p>
-          )}
-        </div>
       </div>
 
       <AssignmentsSummary traineeId={id} assignments={assignments ?? []} />
       <TpFeedbackSummary traineeId={id} feedbackRows={tpFeedbackRows ?? []} />
 
-      <Stage1Form key={`stage1-${record.updated_at}`} record={record} trainerFullName={trainer.full_name} trainerSignatureName={trainer.signature_name} />
+      {/* The booklet. Same document the candidate and the assessor see, in
+          Cambridge's order, with the tutor's own parts editable in the
+          section they belong to rather than stacked in a separate list.
+          Ramy, 29 Aug 2026: "let's fix the delta five for the trainer.
+          It's very important." */}
+      <div className="c5-doc">
+        <BookletSection id="c5-attendance" title="Record of attendance">
+          <AttendanceForm
+            key={`attendance-${record.updated_at}`}
+            record={record}
+            totalHours={course?.total_hours ?? 120}
+            absences={absences ?? []}
+          />
+        </BookletSection>
 
-      <Stage1ReleaseForm
-        key={`stage1-release-${record.updated_at}`}
-        traineeId={id}
-        completedAt={record.stage1_completed_at}
-        releasedAt={record.stage1_released_at}
-        candidateSignedAt={record.stage1_candidate_signed_at}
-      />
+        <BookletSection
+          id="c5-observations"
+          title="Record of observations of experienced classroom teachers (including filmed observations)"
+        >
+          <ObservationsRecord
+            rows={(observations ?? []).map((o) => ({
+              date: o.observation_date ?? "",
+              minutes: o.length_minutes,
+              level: o.level ?? "",
+              learners: o.learners_present,
+              focus: o.lesson_focus ?? "",
+              kind: o.filmed ? "Filmed" : "Experienced teacher",
+            }))}
+          />
+          <p className="mt-2 text-[10px] text-muted">
+            Self-reported by the candidate. Nothing here is editable by a tutor -- the hours count toward the six-hour
+            requirement as logged.
+          </p>
+        </BookletSection>
 
-      <div>
-        <h2 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h2>
-        <div className="mt-3">
+        <BookletSection id="c5-tp" title="Record of assessed teaching practice">
+          <AssessedTpRecord
+            rows={(lessons ?? []).map((l) => ({
+              date: l.lesson_date ?? "",
+              length: l.length_minutes != null ? `${l.length_minutes}` : "",
+              level: l.level ?? "",
+              learners: l.learner_count != null ? `${l.learner_count}` : "",
+              focus: l.lesson_focus ?? "",
+              assessment:
+                l.tutor_assessment === "above_standard"
+                  ? "Above standard"
+                  : l.tutor_assessment === "to_standard"
+                    ? "To standard"
+                    : l.tutor_assessment === "not_to_standard"
+                      ? "Below standard"
+                      : "",
+              initials: "",
+            }))}
+          />
+        </BookletSection>
+
+        <BookletSection id="c5-stage1" num="Section 9" title="Stage One progress record">
+          <Stage1Form
+            key={`stage1-${record.updated_at}`}
+            record={record}
+            trainerFullName={trainer.full_name}
+            trainerSignatureName={trainer.signature_name}
+          />
+          <div className="mt-4">
+            <Stage1ReleaseForm
+              key={`stage1-release-${record.updated_at}`}
+              traineeId={id}
+              completedAt={record.stage1_completed_at}
+              releasedAt={record.stage1_released_at}
+              candidateSignedAt={record.stage1_candidate_signed_at}
+            />
+          </div>
+        </BookletSection>
+
+        <BookletSection id="c5-stage2" num="Section 10" title="Stage Two progress record">
           <StageRatingsForm
             key={`s2-${matrixKey}`}
             stage={2}
@@ -269,14 +296,23 @@ export default async function Celta5RecordPage({
             attentionFlags={attentionFlags}
             currentTpRound={currentTpRound}
           />
-        </div>
-      </div>
+          <div className="mt-4">
+            <Stage2OverallForm
+              key={`stage2-${record.updated_at}`}
+              record={record}
+              trainerFullName={trainer.full_name}
+              trainerSignatureName={trainer.signature_name}
+            />
+          </div>
+        </BookletSection>
 
-      <Stage2OverallForm key={`stage2-${record.updated_at}`} record={record} trainerFullName={trainer.full_name} trainerSignatureName={trainer.signature_name} />
-
-      <div>
-        <h2 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h2>
-        <div className="mt-3">
+        <BookletSection id="c5-stage3" num="Section 11" title="Stage Three progress record">
+          <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 10 }}>
+            This record must be completed by tutors in the final third of the course for all candidates who: a) were
+            not to standard at Stage 2; b) were at standard at Stage 2 but are not making the expected progress in the
+            second half of the course; c) were above standard at Stage 2 but are not making the expected progress in
+            the second half of the course. A tutorial must be given and the whole record completed.
+          </p>
           <StageRatingsForm
             key={`s3-${matrixKey}`}
             stage={3}
@@ -285,32 +321,71 @@ export default async function Celta5RecordPage({
             attentionFlags={attentionFlags}
             currentTpRound={currentTpRound}
           />
-        </div>
+          <div className="mt-4">
+            <Stage3OverallForm
+              key={`stage3-${record.updated_at}`}
+              record={record}
+              trainerFullName={trainer.full_name}
+              trainerSignatureName={trainer.signature_name}
+            />
+          </div>
+          {stage3MixedModeLock ? (
+            <div className={`card mt-4 p-4 ${stage3MixedModeLock.mismatched ? "card-red" : "card-amber"}`}>
+              <p
+                className={`text-sm font-semibold ${
+                  stage3MixedModeLock.mismatched ? "text-destructive" : "text-status-warning-text"
+                }`}
+              >
+                Handbook 10.2 -- borderline Pass/Fail on a mixed-mode course
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                The final two assessed lessons (TP{stage3MixedModeLock.lastTwoTpNumbers[0]} and TP
+                {stage3MixedModeLock.lastTwoTpNumbers[1]}) must both be in the same mode.{" "}
+                {stage3MixedModeLock.mismatched
+                  ? `The timetable currently has them in different modes (${stage3MixedModeLock.modes.join(
+                      " / "
+                    )}) -- re-tag one round before they're taught.`
+                  : stage3MixedModeLock.modes.every((m) => m)
+                    ? `The timetable already has both in ${stage3MixedModeLock.modes[0]} -- no change needed.`
+                    : "One or both rounds aren't tagged with a mode yet -- set it on the timetable before they're taught."}
+              </p>
+            </div>
+          ) : null}
+        </BookletSection>
+
+        <BookletSection id="c5-final" num="Section 12" title="To be completed on the final day of the course">
+          <FinalGradeForm key={`final-${record.updated_at}`} record={record} />
+          <div className="mt-4">
+            <FinalizeRecordForm
+              key={`finalize-${record.updated_at}`}
+              record={record}
+              trainerFullName={trainer.full_name}
+              trainerSignatureName={trainer.signature_name}
+            />
+          </div>
+          {record.final_recommended_grade &&
+          record.final_recommended_grade !== "Withdrawn" &&
+          record.final_recommended_grade !== "Extension" &&
+          record.final_recommended_grade !== "Deferred" &&
+          record.trainer_signoff_final_at ? (
+            <div className="mt-4">
+              <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} />
+            </div>
+          ) : null}
+
+          {/* Cambridge prints the grade-review box on this page. Shown when a
+              Stage Three tutorial applies, which is when a portfolio is most
+              likely to go to Cambridge English. */}
+          {record.stage3_tutorial_required ? (
+            <div className="mt-6">
+              <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
+            </div>
+          ) : null}
+        </BookletSection>
       </div>
 
-      <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} trainerFullName={trainer.full_name} trainerSignatureName={trainer.signature_name} />
-
-      {stage3MixedModeLock ? (
-        <div className={`card p-4 ${stage3MixedModeLock.mismatched ? "card-red" : "card-amber"}`}>
-          <p className={`text-sm font-semibold ${stage3MixedModeLock.mismatched ? "text-destructive" : "text-status-warning-text"}`}>
-            Handbook 10.2 -- borderline Pass/Fail on a mixed-mode course
-          </p>
-          <p className="mt-1 text-sm text-muted">
-            The final two assessed lessons (TP{stage3MixedModeLock.lastTwoTpNumbers[0]} and TP
-            {stage3MixedModeLock.lastTwoTpNumbers[1]}) must both be in the same mode.{" "}
-            {stage3MixedModeLock.mismatched
-              ? `The timetable currently has them in different modes (${stage3MixedModeLock.modes.join(" / ")}) -- re-tag one round before they're taught.`
-              : stage3MixedModeLock.modes.every((m) => m)
-                ? `The timetable already has both in ${stage3MixedModeLock.modes[0]} -- no change needed.`
-                : "One or both rounds aren't tagged with a mode yet -- set it on the timetable before they're taught."}
-          </p>
-        </div>
-      ) : null}
-
-      {record.stage3_tutorial_required ? (
-        <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
-      ) : null}
-
+      {/* Trainer-only operational controls. No equivalent in Cambridge's
+          document, so they sit outside it rather than inside a section. */}
       {isFailRiskTriggered(record) ? (
         <FailRiskLetterSection
           traineeId={id}
@@ -326,14 +401,6 @@ export default async function Celta5RecordPage({
             ).data ?? []
           }
         />
-      ) : null}
-
-      <FinalGradeForm key={`final-${record.updated_at}`} record={record} />
-
-      <FinalizeRecordForm key={`finalize-${record.updated_at}`} record={record} trainerFullName={trainer.full_name} trainerSignatureName={trainer.signature_name} />
-
-      {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
-        <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} />
       ) : null}
 
       {isReferenceLetterEligible(record) ? (
