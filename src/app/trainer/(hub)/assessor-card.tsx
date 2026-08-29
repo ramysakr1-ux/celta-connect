@@ -18,15 +18,22 @@ export function AssessorCard({
   initialName,
   initialEmail,
   initialVisitDate,
+  initialAssessmentKind,
 }: {
   initialName: string | null;
   initialEmail: string | null;
   initialVisitDate: string | null;
+  // Handbook 13.1's two kinds of visit -- it changes how many portfolios the
+  // assessor reads (two vs a minimum of four plus every Fail), so the
+  // requirement list Connect shows is wrong for the two-yearly visit unless
+  // the MCT says which one this is.
+  initialAssessmentKind: "regular" | "two_yearly";
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(initialName ?? "");
   const [email, setEmail] = useState(initialEmail ?? "");
   const [visitDate, setVisitDate] = useState(initialVisitDate ?? "");
+  const [assessmentKind, setAssessmentKind] = useState(initialAssessmentKind);
   const [state, formAction, pending] = useActionState<AssessorContactState, FormData>(async (_prev, formData) => {
     const result = await updateAssessorContact(_prev, formData);
     if (!result.error) setEditing(false);
@@ -98,6 +105,21 @@ export function AssessorCard({
               onChange={(e) => setVisitDate(e.target.value)}
               className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-[13px] text-ink outline-none focus:border-primary"
             />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="mct_assessment_kind" className="text-[11px] text-muted">
+              Which kind of assessment
+            </label>
+            <select
+              id="mct_assessment_kind"
+              name="assessment_kind"
+              value={assessmentKind}
+              onChange={(e) => setAssessmentKind(e.target.value as "regular" | "two_yearly")}
+              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-[13px] text-ink outline-none focus:border-primary"
+            >
+              <option value="regular">Regular — two portfolios read in full</option>
+              <option value="two_yearly">Two-yearly — four portfolios minimum, plus every Fail</option>
+            </select>
           </div>
           {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
           <div className="mt-1 flex justify-end">

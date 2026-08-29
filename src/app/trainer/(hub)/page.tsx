@@ -14,6 +14,7 @@ import { DesignerCredit } from "@/components/designer-credit";
 import { getFeedbackAssistState } from "@/lib/feedback-assist";
 import { FeedbackAssistCard } from "@/app/trainer/(hub)/feedback-assist-card";
 import { AssessorCard } from "@/app/trainer/(hub)/assessor-card";
+import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
 import { findMaterialsOverlaps } from "@/lib/materials-overlap";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
@@ -63,7 +64,7 @@ export default async function TodayPage() {
     await Promise.all([
       supabase
         .from("courses")
-        .select("name, start_date, end_date, assessor_visit_date, provisional_grades_due_at, assessor_name, assessor_email, assessor_notified_at")
+        .select("name, start_date, end_date, assessor_visit_date, provisional_grades_due_at, assessor_name, assessor_email, assessor_notified_at, delivery_mode")
         .eq("id", courseId)
         .maybeSingle(),
       supabase
@@ -157,6 +158,40 @@ export default async function TodayPage() {
       .is("left_at", null)
       .maybeSingle();
     isMct = tutorLink?.tutor_role === "main_course_tutor";
+  }
+
+  // Handbook 14.1's preparation list, sized to this course. Only computed for
+  // the MCT, since that's the only person it renders for -- see the card
+  // below. `as never` on the select keeps this compiling before migration
+  // 0254 has been run; an absent column reads as undefined and falls back to
+  // the Handbook's own default of a regular assessment.
+  const preparationDeadline = centrePreparationDeadline(course?.assessor_visit_date ?? null);
+  let assessmentKind: AssessmentKind = "regular";
+  let centrePreparation: ReturnType<typeof buildCentrePreparationList> = [];
+  if (isMct && courseId) {
+    // assessment_kind is read by its own `select("*")` rather than being
+    // named in the course select above: migration 0254 adds the column and
+    // Ramy runs migrations, and naming an absent column in a select poisons
+    // the whole row's generated type. `*` returns whatever exists, so this
+    // compiles and runs correctly either side of the migration, falling back
+    // to the Handbook's own default of a regular assessment.
+    const [{ data: kindRow }, { count: candidateCount }, { count: withdrawnCount }] = await Promise.all([
+      supabase.from("courses").select("*").eq("id", courseId).maybeSingle(),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("course_id", courseId).eq("role", "trainee"),
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("course_id", courseId)
+        .eq("role", "trainee")
+        .eq("course_status", "withdrawn"),
+    ]);
+    assessmentKind = ((kindRow as { assessment_kind?: string } | null)?.assessment_kind ?? "regular") as AssessmentKind;
+    centrePreparation = buildCentrePreparationList({
+      assessmentKind,
+      deliveryMode: course?.delivery_mode ?? "f2f",
+      candidateCount: candidateCount ?? 0,
+      withdrawnCount: withdrawnCount ?? 0,
+    });
   }
   if (isMct && course?.provisional_grades_due_at) {
     const { data: records } =
@@ -584,7 +619,46 @@ export default async function TodayPage() {
           initialName={course?.assessor_name ?? null}
           initialEmail={course?.assessor_email ?? null}
           initialVisitDate={course?.assessor_visit_date ?? null}
+          initialAssessmentKind={assessmentKind}
         />
+      ) : null}
+
+      {/* Ramy, 30 Aug 2026: "there should be somewhere where the MCT is
+          preparing the assessor pack... they should just be suggested by
+          Connect depending on the course size... depending on the course mode
+          and the course size." Handbook 14.1's list, with the items that
+          depend on this course's mode, size or circumstances marked, so the
+          MCT can see WHY a line is there rather than working from a generic
+          checklist. MCT-only, same as the card above it -- preparing the pack
+          is their job, not every tutor's. */}
+      {isMct && centrePreparation.length > 0 ? (
+        <div className="flex flex-col gap-4 rounded-[8px] border border-border border-t-[3px] border-t-gold bg-card px-[22px] py-5">
+          <div className="flex flex-col gap-[3px]">
+            <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">What the assessor needs from you</p>
+            <p className="text-sm text-muted">
+              Administration Handbook §14.1.{" "}
+              {preparationDeadline
+                ? `Available by ${new Date(`${preparationDeadline}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} — two to three days before the visit, so the assessor can read it.`
+                : "Set a visit date above and Connect will date this list for you."}
+            </p>
+          </div>
+          <ul className="flex flex-col gap-2.5">
+            {centrePreparation.map((item) => (
+              <li key={item.label} className="flex flex-col gap-[2px] border-t border-border-faint pt-2.5 first:border-t-0 first:pt-0">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[13px] font-semibold text-ink">
+                    {item.label}
+                    {item.conditional ? (
+                      <span className="ml-2 text-[10px] font-bold tracking-[0.08em] text-gold uppercase">This course</span>
+                    ) : null}
+                  </p>
+                  <span className="shrink-0 text-[10px] font-semibold text-muted tabular-nums">§{item.cite}</span>
+                </div>
+                <p className="text-xs text-muted">{item.detail}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
 
       <DesignerCredit />

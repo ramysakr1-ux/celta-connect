@@ -184,10 +184,22 @@ export async function updateAssessorContact(_prevState: AssessorContactState, fo
   const assessorName = (formData.get("assessor_name") as string | null)?.trim() || null;
   const assessorEmail = (formData.get("assessor_email") as string | null)?.trim().toLowerCase() || null;
   const assessorVisitDate = (formData.get("assessor_visit_date") as string | null) || null;
+  // Handbook 13.1's two kinds of visit. Only 'two_yearly' is accepted as a
+  // deviation from the default, so a malformed or absent value lands on
+  // 'regular' -- which is both the Handbook's own default and the safer
+  // wrong answer for a centre preparing (it asks for fewer portfolios, so a
+  // centre that under-declares finds out from the assessor, not the reverse).
+  const assessmentKindRaw = formData.get("assessment_kind");
+  const assessmentKind = assessmentKindRaw === "two_yearly" ? "two_yearly" : "regular";
 
   const { error } = await supabase
     .from("courses")
-    .update({ assessor_name: assessorName, assessor_email: assessorEmail, assessor_visit_date: assessorVisitDate })
+    .update({
+      assessor_name: assessorName,
+      assessor_email: assessorEmail,
+      assessor_visit_date: assessorVisitDate,
+      assessment_kind: assessmentKind,
+    } as never)
     .eq("id", trainer.course_id);
   if (error) return { error: "Could not save. Try again." };
 

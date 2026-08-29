@@ -9,6 +9,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DesignerCredit } from "@/components/designer-credit";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
+import { buildAssessorRequirements, doubleMarkingPerAssignment, type AssessmentKind } from "@/lib/assessor-requirements";
 
 // The design file's own palette, so status colour is not re-invented here.
 // Re-pointed 2026-08-21 per the color audit: gold is reserved for the Pass
@@ -161,6 +162,18 @@ export default async function AssessorPage({
     .eq("course_id", courseId)
     .is("withdrawn_at", null);
 
+  // Handbook 14.2 makes the withdrawn candidates the assessor's business too
+  // -- "check documentation for any candidate who has withdrawn from the
+  // course (e.g., letter confirming withdrawal)" -- and 14.1 adds their
+  // application to that. buildCandidateCards doesn't filter by course_status,
+  // but it also doesn't surface it, so this is counted head-only here.
+  const { count: withdrawnCandidateCount } = await admin
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("course_id", courseId)
+    .eq("role", "trainee")
+    .eq("course_status", "withdrawn");
+
   const tutorProfileIds = (tutorRows ?? []).map((t) => t.profile_id);
   const { data: tutorProfiles } =
     tutorProfileIds.length > 0 ? await admin.from("profiles").select("id, full_name").in("id", tutorProfileIds) : { data: [] };
@@ -171,6 +184,32 @@ export default async function AssessorPage({
   // already checks getAssessorCourseId) rather than a course-level page,
   // since briefs are identical for the whole cohort.
   const firstCandidateId = candidates[0]?.traineeId ?? null;
+
+  // Ramy, 30 Aug 2026: "those numbers that are hard to [remember]. Let's get
+  // them down somewhere. Maybe the assessor pack will contain them." Derived
+  // against this course rather than printed as a static list -- Handbook
+  // citations live in src/lib/assessor-requirements.ts.
+  //
+  // "At risk" is read off the provisional grade rather than a separate flag:
+  // the Handbook's trigger is "Fail or potential Fail", and the provisional
+  // slots carrying Fail at all are exactly Fail and Fail/Pass
+  // (PROVISIONAL_SLOTS, src/lib/provisional-grade.ts), so a substring test on
+  // the label is the whole rule, not an approximation of one.
+  const atRiskCount = candidates.filter((c) => c.provisionalLabel?.includes("Fail")).length;
+  const selectedCount = candidates.filter((c) => c.selectedForAssessorVisit).length;
+  const requirements = buildAssessorRequirements({
+    // Cast rather than a regenerated type: migration 0254 adds this column
+    // and Ramy runs migrations, so the generated Database type won't carry it
+    // until after he does. `select("*")` simply omits an absent column, and
+    // the fallback is the Handbook's own default, so the pack reads correctly
+    // either side of the migration running.
+    assessmentKind: ((course as { assessment_kind?: string }).assessment_kind ?? "regular") as AssessmentKind,
+    candidateCount: candidates.length,
+    atRiskCount,
+    selectedCount,
+    withdrawnCount: withdrawnCandidateCount ?? 0,
+  });
+  const doubleMarkPerAssignment = doubleMarkingPerAssignment(candidates.length);
 
   // for-claude-code-assessor-pack-decisions.md §3: "don't hardcode the
   // list -- let the centre add/remove supplementary documents." Resource
@@ -587,6 +626,47 @@ export default async function AssessorPage({
           )}
 
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {/* Ramy, 30 Aug 2026: "those numbers that are hard to [remember].
+                Let's get them down somewhere. Maybe the assessor pack will
+                contain them." First panel in the column deliberately -- it is
+                what the visit IS, so it sits above the documents the visit
+                uses. Every line carries its Handbook section so an assessor
+                who disagrees can check rather than take our word for it. */}
+            <Panel title="What this assessment requires" accent="gold">
+              {requirements.map((r) => (
+                <div
+                  key={r.label}
+                  style={{
+                    padding: "11px 15px",
+                    borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+                    <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{r.label}</p>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>
+                      §{r.cite}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 11.5, color: MUTED, marginTop: 3, lineHeight: 1.5 }}>{r.detail}</p>
+                  {r.emphasis ? (
+                    <p style={{ fontSize: 11.5, color: AMBER, marginTop: 4, lineHeight: 1.5, fontWeight: 500 }}>{r.emphasis}</p>
+                  ) : null}
+                </div>
+              ))}
+              {doubleMarkPerAssignment ? (
+                <div style={{ padding: "11px 15px", background: "var(--color-frame)" }}>
+                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+                    <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>The centre&apos;s double-marking, for reference</p>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>§11</span>
+                  </div>
+                  <p style={{ fontSize: 11.5, color: MUTED, marginTop: 3, lineHeight: 1.5 }}>
+                    {doubleMarkPerAssignment} of each assignment on a course of {candidates.length}. Not the assessor&apos;s task, but
+                    the record may be asked for -- and this is the count that scales with cohort size, unlike anything above it.
+                  </p>
+                </div>
+              ) : null}
+            </Panel>
+
             <Panel title="Cohort documents">
               {COHORT_DOCUMENTS.map((name) => (
                 <DocRow key={name} label={name} href={COHORT_DOC_HREF(name)} status="Live" />
