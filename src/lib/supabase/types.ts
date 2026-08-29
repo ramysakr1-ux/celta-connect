@@ -3779,6 +3779,14 @@ export interface Database {
         Args: { p_center_id: string };
         Returns: void;
       };
+      // migration 0251 -- clears every foreign key pointing at a centre's
+      // profiles so their auth accounts can actually be deleted. Called by
+      // the delete-centre action before the account loop; centre_hard_delete
+      // calls it too, so a caller that forgets still succeeds.
+      centre_release_profile_references: {
+        Args: { p_center_id: string };
+        Returns: void;
+      };
       set_stage2_slot_count: {
         Args: { p_block_id: string; p_slot_count: number };
         Returns: void;

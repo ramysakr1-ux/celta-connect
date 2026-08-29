@@ -249,6 +249,18 @@ export async function deleteCentre(_prevState: DeleteCentreState, formData: Form
 
   await admin.from("centre_delete_codes").update({ consumed_at: nowIso }).eq("id", codeRow.id);
 
+  // Release every foreign key pointing at this centre's profiles before
+  // touching the accounts. Deleting an auth.users row cascades its profiles
+  // row, and 35 tables reference profiles without on delete cascade -- audit
+  // columns like payments.marked_by and applicant_emails.sent_by -- so
+  // without this the very first deleteUser() fails on a foreign-key
+  // violation and the action stops partway, having already removed some
+  // accounts. Migration 0251; scoped to this centre's own profiles.
+  const { error: releaseError } = await admin.rpc("centre_release_profile_references", { p_center_id: centerId });
+  if (releaseError) {
+    return { error: `Could not prepare the centre for deletion (${releaseError.message}). Nothing was touched.` };
+  }
+
   const { data: allProfiles } = await admin.from("profiles").select("id").eq("center_id", centerId);
   for (const p of allProfiles ?? []) {
     const { error: deleteUserError } = await admin.auth.admin.deleteUser(p.id);
