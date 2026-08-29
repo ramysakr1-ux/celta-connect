@@ -543,15 +543,23 @@ export default async function PortfolioCelta5Page({
         <div className="c5-doc">
           {/* His file's order: cover, then contents, then the overview.
               The app opened on the overview and had no cover at all. */}
-          <BookletSection>
+          {/* Ramy, 30 Aug 2026: "the third page is roles and responsibilities,
+              and this page should read page number one." Cover, contents and
+              the progress overview are front matter: they break a page but
+              take no number, so Section 1 is page 1, exactly as the printed
+              booklet has it. The overview is Connect's own addition rather
+              than part of the Cambridge document -- and he asked for it back
+              when an earlier rebuild dropped it -- so it stays where a
+              candidate expects it, just outside the numbering. */}
+          <BookletSection frontMatter>
             <BookletCover data={coverData} />
           </BookletSection>
 
-          <BookletSection title="Contents">
+          <BookletSection title="Contents" frontMatter>
             <BookletContents />
           </BookletSection>
 
-          <BookletSection title="Progress overview">
+          <BookletSection title="Progress overview" frontMatter>
             <ProgressOverview cards={bookletCards} />
 
             {/* Where each stage has got to. Removed when this page was
@@ -1406,7 +1414,8 @@ export default async function PortfolioCelta5Page({
             candidate's own view, read-only, nothing hidden and nothing
             added. */}
         <div className="c5-doc">
-          <BookletSection>
+          {/* Front matter, unnumbered -- see the note on the trainee branch. */}
+          <BookletSection frontMatter>
             <BookletCover
               data={{
                 candidateName: trainee.full_name,
@@ -1423,7 +1432,7 @@ export default async function PortfolioCelta5Page({
             />
           </BookletSection>
 
-          <BookletSection title="Contents">
+          <BookletSection title="Contents" frontMatter>
             <BookletContents />
           </BookletSection>
 

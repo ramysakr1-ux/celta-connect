@@ -746,6 +746,15 @@ h6 {
     margin-bottom: 40px;
     border-bottom: 2px solid var(--color-border);
   }
+  /* Cover and contents: the same page break, no number. The printed
+     booklet doesn't number its front matter either -- Section 1 is page 1.
+     Ramy, 30 Aug 2026. */
+  .c5-break-front {
+    position: relative;
+    padding-bottom: 40px;
+    margin-bottom: 40px;
+    border-bottom: 2px solid var(--color-border);
+  }
   .c5-break::after {
     content: "CELTA 5 — page " counter(c5page);
     position: absolute;

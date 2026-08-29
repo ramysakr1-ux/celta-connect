@@ -16,14 +16,22 @@ export function BookletSection({
   title,
   children,
   id,
+  frontMatter,
 }: {
   num?: string;
   title?: string;
   children: React.ReactNode;
   id?: string;
+  /**
+   * Cover and contents. Ramy, 30 Aug 2026: "the third page is roles and
+   * responsibilities, and this page should read page number one." So the
+   * front matter is unnumbered, exactly as the printed booklet has it --
+   * the counter starts on Section 1.
+   */
+  frontMatter?: boolean;
 }) {
   return (
-    <section id={id} className="c5-break scroll-mt-6">
+    <section id={id} className={`${frontMatter ? "c5-break-front" : "c5-break"} scroll-mt-6`}>
       {num ? <div className="c5-section-num">{num}</div> : null}
       {title ? <h2 className="c5-section-header">{title}</h2> : null}
       {children}
