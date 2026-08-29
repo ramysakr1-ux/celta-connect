@@ -123,6 +123,15 @@ export interface CandidateCardData {
   levels: string[];
   provisionalLabel: string | null;
   celta5Complete: boolean;
+  // What celta5Complete actually turned on, in words. Ramy, 29 Aug 2026:
+  // "can't see the CELTA 5 incomplete. Not sure what that means." The
+  // assessor drawer described this flag as "criteria or tutor comments
+  // still outstanding", which is not what it measures -- it is the Stage
+  // Two completion and candidate sign-off (plus Stage Three where one is
+  // required). The card's own flaggedIssue already said "Stage 2 record
+  // still open" correctly; this puts the same honesty in the drawer, and
+  // names which of the three conditions is the open one.
+  celta5Detail: string;
   tpsComplete: boolean;
   assignmentsComplete: boolean;
   flaggedIssue: string | null;
@@ -166,7 +175,19 @@ export async function buildCandidateCards(
     const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at);
     const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
 
-    const celta5Complete = Boolean(record?.stage2_completed_at && record?.trainee_signoff_stage2_at) && !(record?.stage3_tutorial_required && !record.stage3_finalized_at);
+    const stage3Open = Boolean(record?.stage3_tutorial_required && !record.stage3_finalized_at);
+    const celta5Complete = Boolean(record?.stage2_completed_at && record?.trainee_signoff_stage2_at) && !stage3Open;
+    const celta5Detail = !record
+      ? "No CELTA 5 record started yet"
+      : !record.stage2_completed_at
+        ? "Stage Two not completed by the tutor yet"
+        : !record.trainee_signoff_stage2_at
+          ? "Stage Two complete, waiting on the candidate's signature"
+          : stage3Open
+            ? "Stage Three record still open"
+            : record.stage3_tutorial_required
+              ? "Stages One, Two and Three complete and signed"
+              : "Stages One and Two complete and signed";
     const tpsComplete = assessedTp.tpsTaught >= 8;
     const assignmentsComplete = traineeAssignments.every((a) => {
       const isResubmissionRound = a.first_status === "resubmission_required" || a.resubmission_status !== "not_submitted";
@@ -175,7 +196,7 @@ export async function buildCandidateCards(
     });
 
     let flaggedIssue: string | null = null;
-    if (record?.stage3_tutorial_required && !record.stage3_finalized_at) flaggedIssue = "Stage Three record still open";
+    if (stage3Open) flaggedIssue = "Stage Three record still open";
     else if (!assignmentsComplete) {
       const unresolved = traineeAssignments.find((a) => {
         const isResubmissionRound = a.first_status === "resubmission_required" || a.resubmission_status !== "not_submitted";
@@ -197,6 +218,7 @@ export async function buildCandidateCards(
           : record.provisional_grade
         : null,
       celta5Complete,
+      celta5Detail,
       tpsComplete,
       assignmentsComplete,
       flaggedIssue,
