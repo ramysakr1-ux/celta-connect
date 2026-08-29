@@ -197,7 +197,7 @@ export default async function TrainerTimetablePage({
 
   // Stage 1 / Stage 3 individualized invites -- one candidate, one time,
   // unlike Stage 2's group sheet above. Stage 3 only offers candidates the
-  // trainer has actually flagged (celta5_records.stage3_required) -- it's
+  // trainer has actually flagged (celta5_records.stage3_tutorial_required) -- it's
   // conditional per-candidate, not a whole-cohort checkpoint like Stage 1.
   const [{ data: activeTrainees }, { data: stage3Records }, { data: invites }] = await Promise.all([
     supabase
@@ -207,14 +207,14 @@ export default async function TrainerTimetablePage({
       .eq("role", "trainee")
       .eq("course_status", "active")
       .order("full_name"),
-    supabase.from("celta5_records").select("trainee_id, stage3_required").eq("course_id", courseId),
+    supabase.from("celta5_records").select("trainee_id, stage3_tutorial_required").eq("course_id", courseId),
     supabase
       .from("individual_tutorial_invites")
       .select("id, trainee_id, stage, timetable_event_id, confirmed_at")
       .eq("course_id", courseId),
   ]);
   const traineeNameById = new Map((activeTrainees ?? []).map((t) => [t.id, t.full_name]));
-  const stage3EligibleIds = new Set((stage3Records ?? []).filter((r) => r.stage3_required).map((r) => r.trainee_id));
+  const stage3EligibleIds = new Set((stage3Records ?? []).filter((r) => r.stage3_tutorial_required).map((r) => r.trainee_id));
   const allCandidates = (activeTrainees ?? [])
     .filter((t) => noSubgroupStructureYet || ownTraineeIds.has(t.id))
     .map((t) => ({ id: t.id, name: t.full_name }));

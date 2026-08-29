@@ -142,7 +142,7 @@ export interface CarriedCelta5Record {
   stage2_tutor_notes: string | null;
   stage2_tutor_written_assignments_notes: string | null;
   stage2_tutor_other_notes: string | null;
-  stage3_required: boolean;
+  stage3_tutorial_required: boolean;
   stage3_tutorial_given: boolean;
   stage3_hours_taught: number | null;
   stage3_tutor_overall: StandardRating | null;
@@ -1803,7 +1803,7 @@ export interface Database {
           stage2_moved_earlier_at: string | null;
           stage2_moved_earlier_reason: string | null;
           stage2_moved_earlier_by: string | null;
-          stage3_required: boolean;
+          stage3_tutorial_required: boolean;
           stage3_tutorial_given: boolean;
           stage3_hours_taught: number | null;
           stage3_tutor_overall: StandardRating | null;

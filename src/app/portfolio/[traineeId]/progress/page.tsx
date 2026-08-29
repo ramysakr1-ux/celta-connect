@@ -119,7 +119,7 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
   // self-assessment state, same pairing as the design's own example
   // ("Stage 2 tutorial booked · CELTA 5 not started").
   const stageSummary =
-    record.stage3_required && !record.stage3_finalized_at
+    record.stage3_tutorial_required && !record.stage3_finalized_at
       ? "Stage 3 report pending"
       : !myStage2Slot
         ? "Stage 2 tutorial not booked"
@@ -173,7 +173,7 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
               <div>
                 <p className="text-sm font-semibold text-ink">Stage 3 report</p>
                 <p className="mt-0.5 text-xs text-muted">
-                  {record.stage3_required
+                  {record.stage3_tutorial_required
                     ? record.stage3_finalized_at
                       ? "Filed by your tutor"
                       : stage3Invite
@@ -184,8 +184,8 @@ export default async function ProgressPage({ params }: { params: Promise<{ train
                     : "Only filed if triggered -- not-to-standard at Stage 2, slipping from above-standard, or a failed assignment"}
                 </p>
               </div>
-              <span className={`pill ${!record.stage3_required ? "pill-neutral" : record.stage3_finalized_at ? "pill-success" : "pill-warning"}`}>
-                {!record.stage3_required ? "N/A so far" : record.stage3_finalized_at ? "Filed" : "Pending"}
+              <span className={`pill ${!record.stage3_tutorial_required ? "pill-neutral" : record.stage3_finalized_at ? "pill-success" : "pill-warning"}`}>
+                {!record.stage3_tutorial_required ? "N/A so far" : record.stage3_finalized_at ? "Filed" : "Pending"}
               </span>
             </div>
           </div>

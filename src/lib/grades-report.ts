@@ -56,7 +56,7 @@ export async function computeCohortRows(
     let outstanding = "";
     if (!record) {
       outstanding = "No CELTA 5 record";
-    } else if (record.stage3_required && !record.stage3_finalized_at) {
+    } else if (record.stage3_tutorial_required && !record.stage3_finalized_at) {
       outstanding = "Stage 3 record open";
     } else {
       const unresolved = traineeAssignments.find((a) => {
@@ -84,7 +84,7 @@ export async function computeCohortRows(
       outstanding,
       wasSlashed: Boolean(record?.provisional_grade_upper),
       justified: Boolean(record?.overall_notes),
-      stage3Status: !record?.stage3_required ? "not_required" : record.stage3_finalized_at ? "given" : "not_given",
+      stage3Status: !record?.stage3_tutorial_required ? "not_required" : record.stage3_finalized_at ? "given" : "not_given",
       tpsRemaining: Math.max(8 - taughtForTrainee, 0),
       hasProvisional: Boolean(record?.provisional_grade),
       provisionalApproved: Boolean(record?.provisional_approved_at),

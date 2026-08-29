@@ -312,7 +312,7 @@ export async function updateStage3Overall(
   const { error } = await supabase
     .from("celta5_records")
     .update({
-      stage3_required: formData.get("stage3_required") === "on",
+      stage3_tutorial_required: formData.get("stage3_tutorial_required") === "on",
       stage3_tutorial_given: formData.get("stage3_tutorial_given") === "on",
       stage3_hours_taught: optionalNumber(formData.get("stage3_hours_taught")),
       stage3_tutor_overall: optionalRating(formData.get("stage3_tutor_overall"), STANDARD_RATINGS),
@@ -695,7 +695,7 @@ export async function updateUpgradeConditions(
 }
 
 // The "INFORMATION FOR THE CELTA GRADE REVIEW" box -- required when
-// stage3_required is true, Cambridge/assessor-facing commentary, never
+// stage3_tutorial_required is true, Cambridge/assessor-facing commentary, never
 // shown to the trainee (same treatment as final_recommended_grade/
 // overall_notes per migration 0034).
 export async function updateGradeReviewComments(

@@ -318,7 +318,7 @@ export async function markForDeferral(
         stage2_tutor_notes: record.stage2_tutor_notes,
         stage2_tutor_written_assignments_notes: record.stage2_tutor_written_assignments_notes,
         stage2_tutor_other_notes: record.stage2_tutor_other_notes,
-        stage3_required: record.stage3_required,
+        stage3_tutorial_required: record.stage3_tutorial_required,
         stage3_tutorial_given: record.stage3_tutorial_given,
         stage3_hours_taught: record.stage3_hours_taught,
         stage3_tutor_overall: record.stage3_tutor_overall,

@@ -233,7 +233,7 @@ export async function renderCelta5BookletBuffer(input: Celta5BookletInput): Prom
                         {m?.tutorStatusStage2 ?? "--"}
                       </Text>
                     </Text>
-                    {record.stage3_required ? (
+                    {record.stage3_tutorial_required ? (
                       <Text style={styles.criteriaRatingLabel}>
                         Tutor (Stage 3):{" "}
                         <Text style={[styles.criteriaRatingValue, { color: m?.tutorStatusStage3 ? RATING_COLOR[m.tutorStatusStage3] : COLOR.muted }]}>
@@ -327,7 +327,7 @@ export async function renderCelta5BookletBuffer(input: Celta5BookletInput): Prom
           {record.stage2_tutor_notes ? <Text style={styles.paragraph}>{record.stage2_tutor_notes}</Text> : null}
         </View>
 
-        {record.stage3_required ? (
+        {record.stage3_tutorial_required ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Stage Three -- overall</Text>
             <Text style={styles.paragraph}>Tutor: {record.stage3_tutor_overall ?? "--"}</Text>

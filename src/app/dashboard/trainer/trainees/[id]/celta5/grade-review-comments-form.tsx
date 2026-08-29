@@ -10,7 +10,7 @@ type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 const initialState: FormState = { error: null };
 
 // Verbatim wording from the CELTA5 booklet, only shown for candidates whose
-// portfolios actually get submitted to Cambridge (stage3_required) -- see
+// portfolios actually get submitted to Cambridge (stage3_tutorial_required) -- see
 // project_content_architecture_spec memory, 2026-08-04.
 export function GradeReviewCommentsForm({ record }: { record: Celta5Record }) {
   const [state, action, pending] = useActionState(updateGradeReviewComments, initialState);

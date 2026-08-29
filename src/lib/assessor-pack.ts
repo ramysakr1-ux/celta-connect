@@ -96,7 +96,7 @@ export async function computeAssessorReadiness(
       complete = false;
     }
 
-    if (record?.stage3_required && !record.stage3_finalized_at) {
+    if (record?.stage3_tutorial_required && !record.stage3_finalized_at) {
       issues.push({ traineeId: trainee.id, traineeName: trainee.full_name, reason: "Stage 3 record still open" });
       complete = false;
     }
@@ -166,7 +166,7 @@ export async function buildCandidateCards(
     const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at);
     const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
 
-    const celta5Complete = Boolean(record?.stage2_completed_at && record?.trainee_signoff_stage2_at) && !(record?.stage3_required && !record.stage3_finalized_at);
+    const celta5Complete = Boolean(record?.stage2_completed_at && record?.trainee_signoff_stage2_at) && !(record?.stage3_tutorial_required && !record.stage3_finalized_at);
     const tpsComplete = assessedTp.tpsTaught >= 8;
     const assignmentsComplete = traineeAssignments.every((a) => {
       const isResubmissionRound = a.first_status === "resubmission_required" || a.resubmission_status !== "not_submitted";
@@ -175,7 +175,7 @@ export async function buildCandidateCards(
     });
 
     let flaggedIssue: string | null = null;
-    if (record?.stage3_required && !record.stage3_finalized_at) flaggedIssue = "Stage Three record still open";
+    if (record?.stage3_tutorial_required && !record.stage3_finalized_at) flaggedIssue = "Stage Three record still open";
     else if (!assignmentsComplete) {
       const unresolved = traineeAssignments.find((a) => {
         const isResubmissionRound = a.first_status === "resubmission_required" || a.resubmission_status !== "not_submitted";

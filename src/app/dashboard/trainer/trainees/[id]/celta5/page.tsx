@@ -146,7 +146,7 @@ export default async function Celta5RecordPage({
 
   const stage3MixedModeLock = computeStage3MixedModeLock({
     deliveryMode: course?.delivery_mode ?? null,
-    stage3Required: record.stage3_required,
+    stage3Required: record.stage3_tutorial_required,
     stage3FinalizedAt: record.stage3_finalized_at,
     provisionalGrade: record.provisional_grade,
     provisionalGradeUpper: record.provisional_grade_upper,
@@ -307,7 +307,7 @@ export default async function Celta5RecordPage({
         </div>
       ) : null}
 
-      {record.stage3_required ? (
+      {record.stage3_tutorial_required ? (
         <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
       ) : null}
 

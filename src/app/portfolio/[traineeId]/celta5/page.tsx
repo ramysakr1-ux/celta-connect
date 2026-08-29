@@ -461,7 +461,7 @@ export default async function PortfolioCelta5Page({
       higherGradeIndicated: false,
       centreGivesStage3ToAll: center?.stage3_for_all_candidates ?? false,
     });
-    const stage3IsExpected = stage3Expected(stage3Triggers) || record.stage3_required;
+    const stage3IsExpected = stage3Expected(stage3Triggers) || record.stage3_tutorial_required;
     const stage3TriggerReason = isStage3Mandatory(stage3Triggers)
       ? STAGE3_TRIGGER_LABELS[stage3Triggers.find((t) => t !== "centre_gives_to_all")!]
       : stage3Triggers.length > 0
@@ -1490,7 +1490,7 @@ export default async function PortfolioCelta5Page({
               </>
             ) : (
               <StageLocked>
-                {record.stage3_required
+                {record.stage3_tutorial_required
                   ? "Required for this candidate; not yet completed."
                   : "Not required for this candidate."}
               </StageLocked>
@@ -1606,7 +1606,7 @@ export default async function PortfolioCelta5Page({
       <AssignmentsSummary traineeId={traineeId} assignments={assignments ?? []} />
       <TpFeedbackSummary traineeId={traineeId} feedbackRows={tpFeedbackRows ?? []} />
 
-      {stageFlagSuggestions.length > 0 && (!record.stage1_completed_at || !record.stage3_required) ? (
+      {stageFlagSuggestions.length > 0 && (!record.stage1_completed_at || !record.stage3_tutorial_required) ? (
         <div className="sheet-accent-alert flex flex-col gap-1.5">
           <p className="text-sm font-semibold text-ink">Worth a look for Stage 1 or Stage 3</p>
           <p className="text-xs text-muted">
@@ -1658,7 +1658,7 @@ export default async function PortfolioCelta5Page({
 
       <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} />
 
-      {record.stage3_required ? (
+      {record.stage3_tutorial_required ? (
         <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
       ) : null}
 

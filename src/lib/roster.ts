@@ -162,7 +162,7 @@ export async function fetchRosterRows(
           supabase
             .from("celta5_records")
             .select(
-              "trainee_id, hours_attended, provisional_grade, provisional_grade_upper, stage1_completed_at, stage2_candidate_submitted_at, stage2_completed_at, stage2_moved_earlier_at, stage2_moved_earlier_reason, trainee_signoff_final_at, trainer_signoff_final_at, stage3_required, stage3_finalized_at, stage3_moved_earlier_at, stage3_moved_earlier_reason"
+              "trainee_id, hours_attended, provisional_grade, provisional_grade_upper, stage1_completed_at, stage2_candidate_submitted_at, stage2_completed_at, stage2_moved_earlier_at, stage2_moved_earlier_reason, trainee_signoff_final_at, trainer_signoff_final_at, stage3_tutorial_required, stage3_finalized_at, stage3_moved_earlier_at, stage3_moved_earlier_reason"
             )
             .eq("course_id", courseId),
           supabase.from("celta5_matrix").select("trainee_id, criteria_code, tutor_status_stage2").eq("course_id", courseId),
@@ -356,7 +356,7 @@ export async function fetchRosterRows(
     const stage2BookedPosition = traineeStage2Slot?.position ?? null;
     const stage1Invite = (tutorialInvites ?? []).find((i) => i.trainee_id === trainee.id && i.stage === "stage1");
     const stage1TutorialConfirmed = stage1Invite ? Boolean(stage1Invite.confirmed_at) : null;
-    const stage3Required = Boolean(celta5Record?.stage3_required);
+    const stage3Required = Boolean(celta5Record?.stage3_tutorial_required);
     const stage3Done = Boolean(celta5Record?.stage3_finalized_at);
     const stage3Invite = (tutorialInvites ?? []).find((i) => i.trainee_id === trainee.id && i.stage === "stage3");
     const stage3TutorialConfirmed = stage3Invite ? Boolean(stage3Invite.confirmed_at) : null;

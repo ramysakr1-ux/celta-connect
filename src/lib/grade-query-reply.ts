@@ -87,7 +87,7 @@ export interface GradeQueryAssignmentOutcome {
 
 export interface GradeQueryTutorialStage {
   stage: 1 | 2 | 3;
-  applicable: boolean; // stage 3 only: false when stage3_required is false
+  applicable: boolean; // stage 3 only: false when stage3_tutorial_required is false
   tutorialGiven: boolean;
   hoursTaught: number | null;
   completedAt: string | null;
@@ -154,7 +154,7 @@ export interface AssembleGradeQueryEvidenceInput {
     stage2_completed_at: string | null;
     stage2_tutor_overall: GQStandardRating | null;
     stage2_tutor_notes: string | null;
-    stage3_required: boolean;
+    stage3_tutorial_required: boolean;
     stage3_tutorial_given: boolean;
     stage3_hours_taught: number | null;
     stage3_finalized_at: string | null;
@@ -286,7 +286,7 @@ export function assembleGradeQueryEvidence(
     },
     {
       stage: 3,
-      applicable: r?.stage3_required ?? false,
+      applicable: r?.stage3_tutorial_required ?? false,
       tutorialGiven: r?.stage3_tutorial_given ?? false,
       hoursTaught: r?.stage3_hours_taught ?? null,
       completedAt: r?.stage3_finalized_at ?? null,

@@ -32,18 +32,23 @@ export function Stage3OverallForm({
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
       <h2 className="font-serif text-lg text-ink">Progress Record — Stage 3 / Tutorial: final third (conditional)</h2>
       <p className="text-xs text-muted">
-        Only required if the candidate was not to standard at Stage 2, stalled after being
-        on/above standard, or is showing signs of a higher grade (Pass B/A) but not
-        maintaining progress. Not every candidate needs this.
+        A Stage Three <strong>tutorial</strong> is required if the candidate was not to standard at Stage 2, stalled
+        after being on/above standard, or is showing signs of a higher grade (Pass B/A) but not maintaining progress.
+        Not every candidate needs the tutorial.
+      </p>
+      <p className="text-xs text-muted">
+        Whether a Stage Three <strong>record</strong> is expected is decided by those same triggers and by your
+        centre&rsquo;s own setting &mdash; Handbook 10.2 lets a centre give Stage Three to every candidate. You
+        don&rsquo;t set that here.
       </p>
 
       <label className="flex items-center gap-2 text-sm text-ink">
         <input
           type="checkbox"
-          name="stage3_required"
-          defaultChecked={record.stage3_required}
+          name="stage3_tutorial_required"
+          defaultChecked={record.stage3_tutorial_required}
         />
-        Progress Record — Stage 3 required for this candidate
+        This candidate needs a Stage 3 tutorial
       </label>
 
       <label className="flex items-center gap-2 text-sm text-ink">

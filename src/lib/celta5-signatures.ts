@@ -49,7 +49,7 @@ export function computeSignatureLedger(
     },
   ];
 
-  if (record.stage3_required) {
+  if (record.stage3_tutorial_required) {
     rows.push({
       key: "stage3_tutor",
       label: "Stage Three -- tutor",

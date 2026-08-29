@@ -336,7 +336,7 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
       let outstanding = "";
       if (!record) {
         outstanding = "No CELTA 5 record";
-      } else if (record.stage3_required && !record.stage3_finalized_at) {
+      } else if (record.stage3_tutorial_required && !record.stage3_finalized_at) {
         outstanding = "Stage 3 record open";
       } else {
         const unresolved = traineeAssignments.find((a) => {

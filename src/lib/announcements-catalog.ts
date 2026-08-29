@@ -20,7 +20,7 @@ type AssignmentType = Database["public"]["Tables"]["assignments"]["Row"]["assign
 // - "Stage 1/3 tutorial window opens": only "Stage 1 tutorials begin"
 //   exists as a real skeleton milestone (timetable-skeleton.ts) -- there is
 //   no equivalent Stage 3 milestone, because Stage 3 is conditional per-
-//   candidate (celta5_records.stage3_required), not a whole-cohort date.
+//   candidate (celta5_records.stage3_tutorial_required), not a whole-cohort date.
 //   Stage 3's own reminder isn't generated here; would need per-candidate
 //   logic this pass didn't build.
 export async function generateStandardAnnouncements(
