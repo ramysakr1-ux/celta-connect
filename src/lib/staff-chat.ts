@@ -131,15 +131,21 @@ export async function getInitialStaffChatData(
     .select("channel_id")
     .eq("profile_id", profileId);
 
+  // This used to `return { channels: [], coworkers: [] }` when someone had
+  // no channel memberships, which quietly took the DM list away with it.
+  // Ramy, 29 Aug 2026: "I don't see those options where you can have TP
+  // group or DM with tutor." A trainee is only put in a channel by being
+  // put in a subgroup (migration 0041), so any trainee not yet assigned to
+  // one -- every trainee on a course whose groups haven't been drawn up
+  // yet, which is the whole first days of every course -- lost the ability
+  // to message their tutor at exactly the point they'd most want it. The
+  // two lookups are independent; only the channel half short-circuits now.
   const channelIds = (memberships ?? []).map((m) => m.channel_id);
-  if (channelIds.length === 0) {
-    return { channels: [], coworkers: [] };
-  }
 
-  const { data: channels } = await supabase
-    .from("staff_channels")
-    .select("*")
-    .in("id", channelIds);
+  const { data: channels } =
+    channelIds.length > 0
+      ? await supabase.from("staff_channels").select("*").in("id", channelIds)
+      : { data: [] };
 
   const channelCourseIds = [...new Set((channels ?? []).map((c) => c.course_id).filter((id): id is string => !!id))];
   const { data: channelCourses } =

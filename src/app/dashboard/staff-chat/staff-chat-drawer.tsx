@@ -120,6 +120,9 @@ export function StaffChatDrawer({
 
   const selected = channels.find((c) => c.id === selectedId) ?? null;
   const groupChannel = channels.find((c) => c.type !== "dm") ?? null;
+  // Nothing to open and no one to start a DM with -- worth saying so rather
+  // than offering a picker that opens on nothing. See the picker's own note.
+  const nobodyToMessage = channels.length === 0 && coworkers.length === 0;
   const nameById = new Map(coworkers.map((c) => [c.id, c.full_name]));
   // Retention is per-channel now (its own course's setting, migration
   // 0154), not one number for the whole drawer -- "the one unacceptable
@@ -326,6 +329,17 @@ export function StaffChatDrawer({
                 </button>
               );
             })}
+            {/* Ramy, 29 Aug 2026: "the chat pill isn't really working, it's
+                kind of stale." One cause was the fetch bug fixed in
+                src/lib/staff-chat.ts; the other is that this popup opened
+                empty under its own heading and said nothing about why, so a
+                genuinely empty chat was indistinguishable from a broken
+                one. */}
+            {!groupChannel && coworkers.length === 0 ? (
+              <p className="px-3 pb-2.5 pt-0.5 text-[12px] leading-[1.5] text-muted">
+                No one to message yet. Your TP group chat opens once the tutors have drawn up the groups.
+              </p>
+            ) : null}
           </div>
         ) : null}
 
@@ -366,7 +380,7 @@ export function StaffChatDrawer({
               {selected ? initials(selected.name, selected.type === "dm") : "+"}
             </span>
             <span className="max-w-[70px] truncate text-[13px] font-semibold text-ink sm:max-w-[130px]">
-              {selected ? selected.name : "Pick who to message"}
+              {selected ? selected.name : nobodyToMessage ? "No chat yet" : "Pick who to message"}
             </span>
             {!readOnly ? <ChevronDown className="size-[9px] shrink-0 text-muted" aria-hidden="true" /> : null}
           </button>
@@ -392,7 +406,13 @@ export function StaffChatDrawer({
                   handleSend();
                 }
               }}
-              placeholder={selected ? `Message ${selected.name} -- ${retentionCopy}` : "Pick who to message"}
+              placeholder={
+                selected
+                  ? `Message ${selected.name} -- ${retentionCopy}`
+                  : nobodyToMessage
+                    ? "No chat yet -- your TP group opens once the groups are drawn up"
+                    : "Pick who to message"
+              }
               disabled={!selected}
               className="max-h-24 min-w-0 flex-1 resize-none border-0 bg-transparent text-sm text-ink outline-none placeholder:text-muted/70 disabled:opacity-60"
             />

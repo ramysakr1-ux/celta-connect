@@ -321,6 +321,44 @@ async function main() {
   }
   console.log("trainees:", trainees);
 
+  // --- TP subgroup, which is what actually switches the chat on ---
+  //
+  // Ramy, 29 Aug 2026: "I don't see those options where you can have TP
+  // group or DM with tutor." The demo centre had no subgroups at all, and a
+  // trainee's TP-group chat channel only exists once they're IN a subgroup
+  // -- the trigger in migration 0041 provisions the channel off
+  // course_subgroup_members, nothing else does. So every demo trainee's
+  // chat pill opened on nothing. (The matching code bug, which also took
+  // away DM-your-tutor, is fixed in src/lib/staff-chat.ts.)
+  //
+  // Three candidates, so this is ONE half of a TP group rather than a group
+  // split in two -- half_order is what the rotation reads (today-tab.tsx
+  // bails to "your teaching schedule isn't set up yet" without it, and
+  // halfTpDates in src/lib/rotation.ts gives half 1 alternating TP dates,
+  // which is exactly the TP1 A/B/C then D/E/F shape the demo timetable
+  // below already has). A plain subgroup would switch the chat on and
+  // leave the teaching card contradicting it.
+  const { data: tpGroup, error: tpGroupErr } = await supabase
+    .from("course_tp_groups")
+    .insert({ course_id: course.id, name: "Group A" })
+    .select("id")
+    .single();
+  if (tpGroupErr) throw tpGroupErr;
+  const { data: subgroup, error: subgroupErr } = await supabase
+    .from("course_subgroups")
+    .insert({ course_id: course.id, name: "Group A -- Half A", tp_group_id: tpGroup.id, half_order: 1 })
+    .select("id")
+    .single();
+  if (subgroupErr) throw subgroupErr;
+  // base_slot is the rotation position (0-indexed, unique within the
+  // subgroup, migration 0014) -- who teaches first, second, third, rotating
+  // one place each TP. It's NOT NULL, so seeding members without it fails.
+  const { error: subgroupMemberErr } = await supabase.from("course_subgroup_members").insert(
+    Object.values(trainees).map((traineeId, i) => ({ subgroup_id: subgroup.id, trainee_id: traineeId, base_slot: i }))
+  );
+  if (subgroupMemberErr) throw subgroupMemberErr;
+  console.log("subgroup:", subgroup.id, "-- TP group chat channel provisioned by trigger");
+
   // --- TP feedback helper -- returns the tp_plans.id so callers can attach
   // shared materials to a specific plan. ---
   async function seedTaughtTp(traineeId, tpNumber, { aim, grade, strengths, actionPoints, daysAgo }) {
