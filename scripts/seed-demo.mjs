@@ -734,8 +734,21 @@ async function main() {
     // A "due" card is a deadline and belongs in the admin column; a "Q&A"
     // card is a timetabled session that happens to be about an assignment,
     // so it keeps its band and is tagged admin to stay gold.
-    type: x.type === "assignment_due" && !/\bdue\b/i.test(x.title) ? "milestone" : x.type,
-    tagOverride: x.type === "assignment_due" && !/\bdue\b/i.test(x.title) ? "admin" : null,
+    // Filmed observations are milestone events, not input sessions: that is
+    // how the trainer's board, the Today tab and the resource hub all find
+    // them (they query type='milestone' with a "Filmed observation%" title).
+    // The design colours them teal like whole-group input, which is a
+    // display choice -- the type is what other code reads.
+    type: /^Filmed observation/i.test(x.title)
+      ? "milestone"
+      : x.type === "assignment_due" && !/\bdue\b/i.test(x.title)
+        ? "milestone"
+        : x.type,
+    tagOverride: /^Filmed observation/i.test(x.title)
+      ? "whole_group"
+      : x.type === "assignment_due" && !/\bdue\b/i.test(x.title)
+        ? "admin"
+        : null,
     title: x.title,
     day: x.d,
     // b is the cell index in the design's own row array, where 0 is the
@@ -779,6 +792,82 @@ async function main() {
     )
     .select("id, title");
   const tpEventIdByTitle = new Map((timetableRows ?? []).filter((r) => r.title.startsWith("TP")).map((r) => [r.title, r.id]));
+
+
+  // --- Filmed observations -------------------------------------------------
+  // The five recordings, their three auto-pauses each, and the four
+  // observation tasks. These were originally inserted by migrations
+  // 0241-0243, which join the demo centre's own timetable events -- so when
+  // the demo centre was rebuilt on 29 Aug 2026 the events they attached to
+  // went with it, migrations don't re-run, and the whole feature came back
+  // empty. Ramy had checked it working the day before.
+  //
+  // Seeded here instead because that is the difference that bit us: a
+  // migration runs once, the seed runs on every rebuild. Anything that is
+  // demo CONTENT rather than schema belongs in this file.
+  const foRecordings = [["Filmed observation 1", "Getting to know you -- online", "https://youtu.be/4UKgBuDBALE", 59], ["Filmed observation 2", "Reading and lexis", "https://youtu.be/lMU9LaJjpss", 44], ["Filmed observation 3", "Vocabulary: function and pronunciation", "https://youtu.be/JDIRpzYupPU", 35], ["Filmed observation 4", "Teaching a reading lesson -- pre-intermediate", "https://youtu.be/YlzxRJY7Wbo", 36], ["Filmed observation 5", "Drilling", "https://youtu.be/5v346qd5Rps", 39]];
+  const foBreaks = [[1, 0.25, "Pause. Catch up on your notes, then compare notes with your TP group."], [2, 0.5, "Halfway. Add anything you have spotted, and compare notes with your TP group -- you will each have caught different things."], [3, 0.75, "Last pause. Get your notes down while it is fresh, and compare notes with your TP group before the end."]];
+  const foTasks = [{"event_title": "Filmed observation 1", "prompts": ["Before you watch: from the input session, write down in your own words what classroom management covers. Keep the list in front of you while you watch.", "How does the teacher use the space — where do they stand, when do they move, when do they get out of the way?", "How are learners grouped, and how do the groupings change? Note how the teacher sets up each change and how long it takes.", "What does the teacher do while learners are working? Note what they are listening for, and what they do with what they hear.", "Instructions and checking: pick two task set-ups. Write down what the teacher said, and how they knew the class had understood.", "Strengths. Name three things this teacher does well in managing the class. Give a timestamp for each.", "Action points. Name two things you would do differently, and say what you would do instead — not just what was wrong.", "One thing from this lesson you intend to use in your own teaching practice this week."], "prompt_1": "Before you watch: from the input session, write down in your own words what classroom management covers. Keep the list in front of you while you watch.", "prompt_2": "How does the teacher use the space — where do they stand, when do they move, when do they get out of the way?", "general_prompt": "One thing from this lesson you intend to use in your own teaching practice this week.", "rating_label": "How much of the lesson was learners working rather than the teacher managing?", "rating_options": ["Mostly teacher", "Fairly even", "Mostly learners"]}, {"event_title": "Filmed observation 2", "prompts": ["Is this a language lesson or a skills lesson? Say how you decided, and give the moment in the recording that told you.", "If it is a skills lesson, is it receptive or productive? If it is a language lesson, is the focus grammar, vocabulary, functional language or pronunciation?", "Name the framework the teacher is working to. If it does not match one you have been taught, describe the shape you actually see.", "Map the stages with timestamps. For each stage write one line: what the learners were asked to do.", "What is the main aim of this lesson, in one sentence, in your own words? Do not copy the teacher’s wording.", "Which stage did the most work towards that aim, and which stage could have been cut?", "How does each stage prepare the one after it? Find one link that works well and one that is missing.", "Action point: one change to the staging you would make, and what it would achieve."], "prompt_1": "Is this a language lesson or a skills lesson? Say how you decided, and give the moment in the recording that told you.", "prompt_2": "If it is a skills lesson, is it receptive or productive? If it is a language lesson, is the focus grammar, vocabulary, functional language or pronunciation?", "general_prompt": "Action point: one change to the staging you would make, and what it would achieve.", "rating_label": "How clearly did the shape of the lesson come across?", "rating_options": ["Hard to follow", "Mostly clear", "Very clear"]}, {"event_title": "Filmed observation 3", "prompts": ["Pick any five minutes of the lesson. Note roughly how much of it is the teacher talking, and whether that talk was doing a job.", "Write down three questions the teacher asked, exactly as asked. For each, say what it was for: checking, eliciting, or moving the lesson on.", "Find one point where the teacher told the class something they could have got from the learners instead.", "Note any language the teacher used that was above the level of the class. What would you have said?", "How do learners respond — in full, in single words, to the teacher, or to each other? Give examples with timestamps.", "Errors: note two the teacher dealt with and one they let go. Was each decision the right one?", "Strengths. Two things about the way this teacher talks to the class that you would take for yourself.", "Action point: one thing you would change about the teacher’s language, and why."], "prompt_1": "Pick any five minutes of the lesson. Note roughly how much of it is the teacher talking, and whether that talk was doing a job.", "prompt_2": "Write down three questions the teacher asked, exactly as asked. For each, say what it was for: checking, eliciting, or moving the lesson on.", "general_prompt": "Action point: one thing you would change about the teacher’s language, and why.", "rating_label": "Balance of teacher talk to learner talk", "rating_options": ["Teacher-heavy", "Balanced", "Learner-heavy"]}, {"event_title": "Filmed observation 4", "prompts": ["What could the learners do at the end of the lesson that they could not do at the start? Give the evidence you are basing that on.", "Find the point in the lesson where you can first see learning happening. What is happening on screen?", "Pick one learner you can see or hear throughout. Track what they do across the lesson and what they get out of it.", "Were all learners engaged, or only some? Note any learner who dropped out of the lesson, and when.", "How does the teacher find out what has been learned? Note every check they make, and how reliable each one is.", "Feedback: how is it given — on the spot, delayed, on the board, learner to learner? Give timestamps.", "Strengths. Two things the teacher did that made the learning happen.", "Action point: one change that would have got more learning out of the same 45 minutes."], "prompt_1": "What could the learners do at the end of the lesson that they could not do at the start? Give the evidence you are basing that on.", "prompt_2": "Find the point in the lesson where you can first see learning happening. What is happening on screen?", "general_prompt": "Action point: one change that would have got more learning out of the same 45 minutes.", "rating_label": "How far was the aim of the lesson achieved?", "rating_options": ["Partly", "Largely", "Fully"]}];
+
+  const { data: foEvents } = await supabase
+    .from("course_timetable_events")
+    .select("id, title")
+    .eq("course_id", course.id)
+    .in("title", foRecordings.map((r) => r[0]));
+  const foEventByTitle = new Map((foEvents ?? []).map((e) => [e.title, e.id]));
+
+  const foSessionRows = foRecordings
+    .filter(([title]) => foEventByTitle.has(title))
+    .map(([title, lessonTitle, url, minutes]) => ({
+      course_id: course.id,
+      timetable_event_id: foEventByTitle.get(title),
+      lesson_title: lessonTitle,
+      recording_url: url,
+      length_minutes: minutes,
+    }));
+  const { data: foSessions, error: foErr } = await supabase
+    .from("filmed_observation_sessions")
+    .insert(foSessionRows)
+    .select("id, timetable_event_id, length_minutes");
+  if (foErr) console.warn("  filmed observations:", foErr.message);
+
+  const foSessionByEvent = new Map((foSessions ?? []).map((s) => [s.timetable_event_id, s]));
+
+  const breakRows = (foSessions ?? []).flatMap((s) =>
+    foBreaks.map(([n, fraction, prompt]) => ({
+      session_id: s.id,
+      break_number: n,
+      timestamp_seconds: Math.round((s.length_minutes ?? 0) * 60 * fraction),
+      duration_seconds: 90,
+      prompt,
+    }))
+  );
+  if (breakRows.length) {
+    const { error } = await supabase.from("filmed_observation_breaks").insert(breakRows);
+    if (error) console.warn("  filmed observation breaks:", error.message);
+  }
+
+  const taskRows = foTasks
+    .map((t) => {
+      const eventId = foEventByTitle.get(t.event_title);
+      const session = eventId ? foSessionByEvent.get(eventId) : null;
+      if (!session) return null;
+      return {
+        session_id: session.id,
+        prompts: t.prompts,
+        prompt_1: t.prompt_1,
+        prompt_2: t.prompt_2,
+        general_prompt: t.general_prompt,
+        rating_label: t.rating_label,
+        rating_options: t.rating_options,
+      };
+    })
+    .filter(Boolean);
+  if (taskRows.length) {
+    const { error } = await supabase.from("filmed_observation_tasks").insert(taskRows);
+    if (error) console.warn("  filmed observation tasks:", error.message);
+  }
+  console.log("filmed observations:", foSessionRows.length, "recordings,", breakRows.length, "breaks,", taskRows.length, "tasks");
 
   // --- Volunteer: token-based, no real login (migration 0030). Seeded
   // already past the one-time signup screen so the demo lands straight on
