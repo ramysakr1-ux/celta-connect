@@ -115,20 +115,53 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
       totalHoursAttended: record.hours_attended,
       unavoidableAbsences: (absences ?? [])
         .filter((a) => a.category === "unavoidable")
-        .map((a) => ({ date: a.session_date ? fmtDate(a.session_date) : "", reason: a.reason, workMadeUp: a.work_made_up, tutorComment: null })),
+        // Was hardcoded null, so the tutor signature this table asks for
+        // never reached the PDF at all. migration 0249 gave it a column of
+        // its own; before that it was living in tutor_comment, which is why
+        // the fallback reads both.
+        .map((a) => ({
+          date: a.session_date ? fmtDate(a.session_date) : "",
+          sessionMissed: a.session_missed,
+          reason: a.reason,
+          workMadeUp: a.work_made_up,
+          candidateComment: null, // this sub-table has no candidate-comment column
+          tutorComment: a.tutor_signature_name ?? a.tutor_comment,
+        })),
       otherAbsences: (absences ?? [])
         .filter((a) => a.category === "other")
-        .map((a) => ({ date: a.session_date ? fmtDate(a.session_date) : "", reason: a.reason, workMadeUp: a.work_made_up, tutorComment: a.tutor_comment })),
+        .map((a) => ({
+          date: a.session_date ? fmtDate(a.session_date) : "",
+          sessionMissed: a.session_missed,
+          reason: a.reason,
+          workMadeUp: a.work_made_up,
+          candidateComment: a.candidate_comment,
+          // Cambridge prints "Tutor comment/signature" in one cell here.
+          tutorComment: [a.tutor_comment, a.tutor_signature_name].filter(Boolean).join(" \u00b7 ") || null,
+        })),
     },
     writtenAssignments: {
       assignments: (assignments ?? []).map((a) => {
         const firstPassed = a.first_content_grade === "pass" && a.first_english_grade === "pass";
         const confirmedRound = a.resubmission_status !== "not_submitted" ? a.resubmission_own_work_confirmed : a.first_own_work_confirmed;
+        // The name printed here has to be the name the candidate actually
+        // signed with, not their profile name: migration 0245 stores the
+        // signature per round, and a candidate whose signature_name differs
+        // from full_name was being printed as somebody who never signed.
+        //
+        // Falls back through the round that was actually signed -- the
+        // resubmission's signature when there was a resubmission, the first
+        // submission's otherwise -- and only then to the profile name, so a
+        // record signed before 0245 still prints something true rather than
+        // blank.
+        const onResubmission = a.resubmission_status !== "not_submitted";
+        const signedName = onResubmission
+          ? a.resubmission_outcome_signature_name ?? a.first_outcome_signature_name
+          : a.first_outcome_signature_name;
         return {
           assignmentType: a.assignment_type as AssignmentTypeValue,
           finalGrade: a.final_grade,
           passedOnResubmission: a.final_grade === "Pass" && !firstPassed,
-          candidateSignatureName: confirmedRound ? trainee.full_name : null,
+          candidateSignatureName: signedName ?? (confirmedRound ? trainee.full_name : null),
         };
       }),
     },

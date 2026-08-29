@@ -134,6 +134,7 @@ export default async function PortfolioCelta5Page({
       { data: obsTaskSubmissions },
       { data: tutorialInvites },
       { data: peerNotes },
+      { data: tpLessons },
     ] = await Promise.all([
       supabase.rpc("get_my_celta5_record"),
       supabase.rpc("get_my_celta5_matrix"),
@@ -163,6 +164,16 @@ export default async function PortfolioCelta5Page({
       supabase.from("observation_task_submissions").select("task_id, response, submitted_at").eq("trainee_id", traineeId),
       supabase.from("individual_tutorial_invites").select("stage, timetable_event_id, confirmed_at").eq("trainee_id", traineeId),
       supabase.from("peer_observation_notes").select("sheet_id, submitted_at").eq("observer_id", traineeId).not("submitted_at", "is", null),
+      // Same source the PDF replica reads for this table (see
+      // api/portfolio/[traineeId]/celta5/replica/route.ts). The booklet on
+      // screen and the booklet Cambridge receives must not be able to
+      // disagree about what was taught, so both read tp_lessons rather than
+      // one reading the plan and the other the lesson record.
+      supabase
+        .from("tp_lessons")
+        .select("lesson_date, length_minutes, level, learner_count, lesson_focus, tutor_assessment, trainer_id")
+        .eq("trainee_id", traineeId)
+        .order("lesson_date"),
     ]);
     const record = recordRows?.[0];
     const submissionByTaskId = new Map((obsTaskSubmissions ?? []).map((s) => [s.task_id, s]));
@@ -338,23 +349,17 @@ export default async function PortfolioCelta5Page({
     // initials are columns the TUTOR fills on the Cambridge form -- they are
     // left blank here rather than invented, so a partly-filled row reads as
     // exactly that to an assessor.
-    const levelByCoursebookId = new Map((coursebooksForLevels ?? []).map((c) => [c.id, c.level]));
-    const coursebookByTpPointId = new Map((tpPointsForLevels ?? []).map((tp) => [tp.id, tp.tp_coursebook_id]));
-    const assessedTpRows = taughtAssignments
-      .slice()
-      .sort((a, b) => String(a.taught_at ?? "").localeCompare(String(b.taught_at ?? "")))
-      .map((t) => {
-        const cbId = t.tp_point_id ? coursebookByTpPointId.get(t.tp_point_id) : undefined;
-        return {
-          date: t.taught_at ?? "",
-          length: `${TP_LESSON_LENGTH_MINUTES}`,
-          level: (cbId ? levelByCoursebookId.get(cbId) : "") ?? "",
-          learners: "",
-          focus: "",
-          assessment: "",
-          initials: "",
-        };
-      });
+    const tutorAssessmentLabel = (r: string | null) =>
+      r === "above_standard" ? "Above standard" : r === "to_standard" ? "To standard" : r === "not_to_standard" ? "Below standard" : "";
+    const assessedTpRows = (tpLessons ?? []).map((l) => ({
+      date: l.lesson_date ?? "",
+      length: l.length_minutes != null ? `${l.length_minutes}` : "",
+      level: l.level ?? "",
+      learners: l.learner_count != null ? `${l.learner_count}` : "",
+      focus: l.lesson_focus ?? "",
+      assessment: tutorAssessmentLabel(l.tutor_assessment),
+      initials: "",
+    }));
 
     // Handbook 10.2 / CELTA 5 p.20 -- who must be given Stage Three.
     // "Not making the expected progress" is read from TPs taught after the
