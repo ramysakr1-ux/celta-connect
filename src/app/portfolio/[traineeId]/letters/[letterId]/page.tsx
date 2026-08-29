@@ -2,6 +2,8 @@ import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { AcknowledgeButton } from "@/app/portfolio/[traineeId]/letters/[letterId]/acknowledge-button";
 import { SignDeferralButton } from "@/app/portfolio/[traineeId]/letters/[letterId]/sign-deferral-button";
@@ -20,12 +22,24 @@ const LETTER_TITLE: Record<string, string> = {
 // returns", same pattern as every other candidate detail page.
 export default async function FormalLetterPage({ params }: { params: Promise<{ traineeId: string; letterId: string }> }) {
   const session = await getCurrentProfile();
-  if (!session?.profile) redirect("/login");
   const { traineeId, letterId } = await params;
-  const supabase = await createClient();
+  // Handbook 12.1.1 Section A puts these letters in the portfolio, so an
+  // assessor has to be able to open one. They carry no Supabase session, so
+  // the previous `if (!session?.profile) redirect("/login")` sent them to a
+  // login they cannot use -- the same dead end the pack's own links had.
+  const assessorCourseId = !session?.profile ? await getAssessorCourseId() : null;
+  if (!session?.profile && !assessorCourseId) redirect("/login");
+  const supabase = assessorCourseId ? createAdminClient() : await createClient();
 
   const { data: letter } = await supabase.from("formal_letters").select("*").eq("id", letterId).maybeSingle();
   if (!letter) notFound();
+  // RLS scopes a candidate's own reads; an assessor reads through the admin
+  // client, so the course check has to be made explicitly for them.
+  if (assessorCourseId && letter.trainee_id !== traineeId) notFound();
+  if (assessorCourseId) {
+    const { data: subject } = await supabase.from("profiles").select("course_id").eq("id", traineeId).maybeSingle();
+    if (subject?.course_id !== assessorCourseId) notFound();
+  }
 
   const snapshot = letter.snapshot as unknown as FormalLetterInput;
 
@@ -82,6 +96,11 @@ export default async function FormalLetterPage({ params }: { params: Promise<{ t
                 : "Acknowledged "}
               {formatLetterDate(letter.acknowledged_at)}
             </p>
+          ) : !session?.profile ? (
+            /* Acknowledging and signing are the candidate's own acts. An
+               assessor reads the letter and whether it was acknowledged; they
+               must never be handed the button that does it. */
+            <p className="text-sm text-muted">Not yet acknowledged by the candidate.</p>
           ) : letter.letter_type === "deferral" ? (
             <SignDeferralButton letterId={letterId} signatureName={session.profile.signature_name} fullName={session.profile.full_name} />
           ) : (

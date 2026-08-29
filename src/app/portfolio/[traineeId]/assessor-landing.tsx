@@ -40,12 +40,25 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
   const { data: person } = await admin.from("profiles").select("full_name").eq("id", traineeId).maybeSingle();
   const traineeName = person?.full_name ?? "This candidate";
 
-  const [{ data: course }, { data: record }, cards, { data: assignments }] = await Promise.all([
-    admin.from("courses").select("name, total_hours, assessor_visit_date").eq("id", courseId).maybeSingle(),
-    admin.from("celta5_records").select("hours_attended").eq("trainee_id", traineeId).maybeSingle(),
-    buildCandidateCards(admin, courseId),
-    admin.from("assignments").select("assignment_type, first_status, resubmission_status").eq("trainee_id", traineeId),
-  ]);
+  const [{ data: course }, { data: record }, cards, { data: assignments }, { data: pctResponses }, { data: letters }, { data: malpractice }] =
+    await Promise.all([
+      admin.from("courses").select("name, total_hours, assessor_visit_date, center_id").eq("id", courseId).maybeSingle(),
+      admin.from("celta5_records").select("hours_attended").eq("trainee_id", traineeId).maybeSingle(),
+      buildCandidateCards(admin, courseId),
+      admin.from("assignments").select("assignment_type, first_status, resubmission_status").eq("trainee_id", traineeId),
+      // Answered sections only -- the section TOTAL lives on the centre, which
+      // isn't known until `course` resolves, and "N answered" is the honest
+      // number anyway: a centre can add sections after a candidate finishes.
+      admin.from("pre_course_task_responses").select("response").eq("trainee_id", traineeId),
+      // Handbook 12.1.1 Section A, "where appropriate": a fail warning letter
+      // and a candidate letter of withdrawal are portfolio content in their
+      // own right, and 14.2 has the assessor "check documentation for any
+      // candidate who has withdrawn". Ramy, 30 Aug 2026: "if there was a fail
+      // letter or something to do with plagiarism, that could live in a third
+      // pill. But if there isn't, then that third pill will be inactive."
+      admin.from("formal_letters").select("letter_type, issued_at").eq("trainee_id", traineeId),
+      admin.from("malpractice_cases").select("id, opened_at").eq("trainee_id", traineeId),
+    ]);
   const card = cards.find((c) => c.traineeId === traineeId) ?? null;
 
   // Which TP this candidate teaches on the visit day -- the same rotation
@@ -98,6 +111,15 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
     const resubRound = a.first_status === "resubmission_required" || a.resubmission_status !== "not_submitted";
     return (resubRound ? a.resubmission_status : a.first_status) !== "approved";
   });
+
+  // Migration 0237 replaced the section-keyed table with an item-keyed one
+  // that has no submit step -- a non-empty response IS the answer, so that is
+  // what gets counted rather than a submitted_at that no longer exists.
+  const pctAnswered = (pctResponses ?? []).filter((r) => (r.response ?? "").trim().length > 0).length;
+
+  const letterCount = (letters ?? []).length;
+  const caseCount = (malpractice ?? []).length;
+  const formalRecordCount = letterCount + caseCount;
 
   const hoursAttended = record?.hours_attended ?? 0;
   const totalHours = course?.total_hours ?? 120;
@@ -170,24 +192,56 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
           state={card?.tpsComplete ? "8 of 8 taught" : `${card?.tpsTaught ?? 0} of 8 taught`}
           open={card?.tpsComplete !== true}
           href={`/portfolio/${traineeId}/tp`}
-          note="Section B. Their pre-course task, resources and timetable are linked below."
+          note="Section B. Their pre-course task and application are below."
         />
       </div>
 
-      {/* The candidate's workspace rail is not shown to an assessor (Ramy, 30
-          Aug 2026: "it should be the whole page"), so anything not covered by
-          a card above needs a route from here or it becomes unreachable. */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border pt-4">
-        <span className="text-[10px] font-semibold tracking-[0.09em] text-muted uppercase">Also on file</span>
-        <Link href={`/portfolio/${traineeId}/pre-course-task`} className="text-[12.5px] font-semibold no-underline" style={{ color: TEAL }}>
-          Pre-course task →
-        </Link>
-        <Link href={`/portfolio/${traineeId}/resources`} className="text-[12.5px] font-semibold no-underline" style={{ color: TEAL }}>
-          Resources →
-        </Link>
-        <Link href={`/portfolio/${traineeId}/timetable`} className="text-[12.5px] font-semibold no-underline" style={{ color: TEAL }}>
-          Their timetable →
-        </Link>
+      {/* Ramy, 30 Aug 2026: first "I don't know why you made them these
+          arrows instead of having them sitting inside a card like the rest",
+          then "we could make them like three pills next to each other with
+          the whole width, just to show that they're not as important."
+          
+          The arrows were wrong because they read as an afterthought; full
+          cards would have been wrong the other way, putting the pre-course
+          task on a level with the CELTA 5. Three equal pills across the width
+          says "also here, and secondary" in the shape itself, so the numbered
+          cards keep the Handbook's own hierarchy. */}
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+        <Pill
+          title="Pre-course task"
+          state={
+            pctAnswered > 0
+              ? `${pctAnswered} section${pctAnswered === 1 ? "" : "s"} answered`
+              : "Not handed in"
+          }
+          muted={pctAnswered === 0}
+          href={`/portfolio/${traineeId}/pre-course-task`}
+        />
+        {/* Ramy, 30 Aug 2026: "I don't want the resources there, and I don't
+            want their timetable. I think we should have the pre-course task,
+            and then we'll have the application form." Both dropped were the
+            same for every candidate and neither is portfolio content -- the
+            resource hub is the centre's library and the cohort timetable is
+            already in the pack, so per-candidate copies were noise. The
+            application is the opposite: Handbook 12.2 requires the completed
+            selection task and interview notes to be available to the
+            assessor, and it is the start of this candidate's journey. */}
+        <Pill title="Application" state="Selection task and interview" href={`/portfolio/${traineeId}/application`} />
+        <Pill
+          title="Letters and cases"
+          state={
+            formalRecordCount === 0
+              ? "None on this candidate"
+              : [
+                  letterCount > 0 ? `${letterCount} letter${letterCount === 1 ? "" : "s"}` : null,
+                  caseCount > 0 ? `${caseCount} malpractice case${caseCount === 1 ? "" : "s"}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")
+          }
+          muted={formalRecordCount > 0}
+          href={formalRecordCount > 0 ? `/portfolio/${traineeId}/letters` : null}
+        />
       </div>
 
       <p className="text-xs text-muted">
@@ -205,6 +259,48 @@ function Figure({ label, value, of, ink }: { label: string; value: string; of?: 
         {value}
         {of ? <span className="ml-1.5 font-sans text-[13px] text-muted">{of}</span> : null}
       </p>
+    </div>
+  );
+}
+
+function Pill({
+  title,
+  state,
+  href,
+  muted,
+}: {
+  title: string;
+  state: string;
+  /** null renders the pill inert -- there is nothing behind it to open. */
+  href: string | null;
+  muted?: boolean;
+}) {
+  const body = (
+    <>
+      <span className="min-w-0">
+        <span className="block truncate text-[12.5px] font-semibold" style={{ color: INK }}>
+          {title}
+        </span>
+        <span className="block truncate text-[11px]" style={{ color: muted ? AMBER : MUTED }}>
+          {state}
+        </span>
+      </span>
+      <span className="shrink-0 text-[11px] font-semibold" style={{ color: href ? TEAL : "transparent" }}>
+        →
+      </span>
+    </>
+  );
+  const cls = "card flex items-center justify-between gap-2 rounded-full px-4 py-2.5";
+  // An empty pill stays visible rather than disappearing: "no fail letter"
+  // is itself a fact the assessor wants, and a pill that comes and goes
+  // between candidates makes the set harder to read at a glance.
+  return href ? (
+    <Link href={href} className={`assessor-hover no-underline ${cls}`}>
+      {body}
+    </Link>
+  ) : (
+    <div className={cls} style={{ opacity: 0.62 }}>
+      {body}
     </div>
   );
 }
