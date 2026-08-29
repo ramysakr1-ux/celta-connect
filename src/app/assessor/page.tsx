@@ -560,146 +560,350 @@ export default async function AssessorPage({
           </div>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 20, alignItems: "start" }}>
-          {openCandidate ? (
-            <div className="card overflow-hidden" style={{ borderColor: "color-mix(in oklab, oklch(38% 0.072 195) 32%, transparent)" }}>
+        {/* Ramy, 30 Aug 2026: "it feels like it's a long line... maybe
+            'what this assessment requires' could be a horizontal pill? Since
+            everything underneath the three candidate cards is blank, and then
+            it's all on the right."
+            
+            He was right and the measurements were worse than the feeling: at
+            1440px the left column ran 297px and the right 2,758px, so nine
+            tenths of the page was one column. This panel was the tallest
+            thing in it at 700px, and it is reference read once before
+            starting rather than a list to work down -- so it becomes a
+            full-width band across three columns instead, which uses the dead
+            width and drops it to about 250px. */}
+        <div style={{ marginBottom: 20 }}>
+            <Panel title="What this assessment requires" accent="gold">
+            {/* Ramy, 30 Aug 2026: "I'm not sure what those numbers are.
+                15.1, 14.2. What are they?" They are Handbook sections, and
+                nothing on this panel said so -- a bare "§14.2" is only
+                meaningful to someone who already knows which document it
+                belongs to, which is the opposite of the point. The citation
+                exists so a line can be checked, and it can't be checked if
+                you don't know what to open. */}
+            <div style={{ padding: "10px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)" }}>
+              <p style={{ fontSize: 11.5, color: MUTED, lineHeight: 1.5 }}>
+                Section numbers are the CELTA Administration Handbook, June 2025 &mdash; so any line here can be checked
+                against it rather than taken on trust.
+              </p>
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))",
+                gap: "0 20px",
+                padding: "2px 15px 10px",
+              }}
+            >
+            {requirements.map((r) => (
               <div
+                key={r.label}
                 style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
-                  padding: "14px 20px", background: WARM, color: CREAM,
+                  padding: "10px 0",
+                  borderTop: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent)",
                 }}
               >
-                <div>
-                  <p style={{ fontSize: 14, fontWeight: 600 }}>{openCandidate.name}</p>
-                  <p style={{ fontSize: 11, color: "oklch(76% 0.02 80)" }}>
-                    {openCandidate.tpsTaught}/8 TPs · {openCandidate.hoursAssessed.toFixed(1)} hrs assessed
-                    {openCandidate.levels.length > 0 ? ` · ${openCandidate.levels.join(", ")}` : ""}
-                  </p>
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+                  <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{r.label}</p>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>
+                    §{r.cite}
+                  </span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flex: "none" }}>
-                  {/* The whole point of the visit, said plainly -- the rows
-                      below open one part each, this opens the portfolio
-                      itself. */}
-                  <Link
-                    href={`/portfolio/${openCandidate.traineeId}`}
-                    style={{
-                      fontSize: 11.5, fontWeight: 600, padding: "7px 14px", borderRadius: 6,
-                      border: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 70%, transparent)`,
-                      background: `color-mix(in oklab, ${GOLD_UNDERLINE} 22%, transparent)`,
-                      color: CREAM, textDecoration: "none",
-                    }}
-                  >
-                    Open the whole portfolio →
-                  </Link>
-                  <Link
-                    href="/assessor"
-                    style={{
-                      fontSize: 11.5, fontWeight: 600, padding: "7px 14px", borderRadius: 6,
-                      border: "1px solid oklch(45% 0.045 58)", background: "oklch(24% 0.036 58)",
-                      color: CREAM, textDecoration: "none",
-                    }}
-                  >
-                    Close
-                  </Link>
-                </div>
+                <p style={{ fontSize: 11.5, color: MUTED, marginTop: 3, lineHeight: 1.5 }}>{r.detail}</p>
+                {r.emphasis ? (
+                  <p style={{ fontSize: 11.5, color: AMBER, marginTop: 4, lineHeight: 1.5, fontWeight: 500 }}>{r.emphasis}</p>
+                ) : null}
               </div>
-              {drawerRows.map((row) => {
-                const cells = (
-                  <>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{row.label}</span>
-                    <span style={{ fontSize: 12, color: MUTED }}>{row.value}</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: row.ink, textAlign: "right" }}>{row.state}</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: row.href ? TEAL : "transparent", textAlign: "right" }}>
-                      {row.href ? "Open →" : "—"}
-                    </span>
-                  </>
-                );
-                const rowStyle = {
-                  display: "grid", gridTemplateColumns: "200px 1fr 120px 58px", gap: 14, alignItems: "center",
-                  padding: "12px 20px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 50%, transparent)",
-                } as const;
-                return row.href ? (
-                  <Link key={row.label} href={row.href} className="assessor-hover no-underline" style={rowStyle}>
-                    {cells}
-                  </Link>
-                ) : (
-                  <div key={row.label} style={rowStyle}>
-                    {cells}
+            ))}
+            </div>
+            {doubleMarkPerAssignment ? (
+              <div style={{ padding: "11px 15px", background: "var(--color-frame)" }}>
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+                  <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>The centre&apos;s double-marking, for reference</p>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>§11</span>
+                </div>
+                <p style={{ fontSize: 11.5, color: MUTED, marginTop: 3, lineHeight: 1.5 }}>
+                  {doubleMarkPerAssignment} of each assignment on a course of {candidates.length}. Not the assessor&apos;s task, but
+                  the record may be asked for -- and this is the count that scales with cohort size, unlike anything above it.
+                </p>
+              </div>
+            ) : null}
+          </Panel>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 20, alignItems: "start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {openCandidate ? (
+              <div className="card overflow-hidden" style={{ borderColor: "color-mix(in oklab, oklch(38% 0.072 195) 32%, transparent)" }}>
+                <div
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
+                    padding: "14px 20px", background: WARM, color: CREAM,
+                  }}
+                >
+                  <div>
+                    <p style={{ fontSize: 14, fontWeight: 600 }}>{openCandidate.name}</p>
+                    <p style={{ fontSize: 11, color: "oklch(76% 0.02 80)" }}>
+                      {openCandidate.tpsTaught}/8 TPs · {openCandidate.hoursAssessed.toFixed(1)} hrs assessed
+                      {openCandidate.levels.length > 0 ? ` · ${openCandidate.levels.join(", ")}` : ""}
+                    </p>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-          <>
-          {isNarrowed ? (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-              <span style={{ fontSize: 11.5, color: MUTED }}>
-                Showing {visibleCandidates.length} of {candidates.length} candidates -- the centre&apos;s selection for this visit.
-              </span>
-              <Link
-                href={wantsFullCohort ? "/assessor" : "/assessor?cohort=full"}
-                style={{ fontSize: 11.5, fontWeight: 600, color: TEAL, textDecoration: "none" }}
-              >
-                {wantsFullCohort ? "← Back to selected" : `View full cohort (${candidates.length}) →`}
-              </Link>
-            </div>
-          ) : null}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-            {visibleCandidates.map((c) => (
-              <Link
-                key={c.traineeId}
-                // Ramy, 30 Aug 2026: "I think I want to cut the middleman...
-                // you don't need two gates." The card used to open a summary
-                // drawer whose own "Open the whole portfolio" was the only way
-                // through; the card is now that link.
-                href={`/portfolio/${c.traineeId}`}
-                className="card assessor-hover-fill no-underline"
-                style={{
-                  background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))" : CARD,
-                  border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 35%, transparent)" : BORDER}`,
-                  borderLeft: `3px solid ${c.flaggedIssue ? AMBER : TEAL}`,
-                  padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-                  <span style={{ fontSize: 13.5, fontWeight: 600, color: INK }}>{c.name}</span>
-                  {c.provisionalLabel ? (
-                    <span
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flex: "none" }}>
+                    {/* The whole point of the visit, said plainly -- the rows
+                        below open one part each, this opens the portfolio
+                        itself. */}
+                    <Link
+                      href={`/portfolio/${openCandidate.traineeId}`}
                       style={{
-                        fontSize: 10.5, fontWeight: 700, padding: "3px 9px", borderRadius: 99,
-                        background: (GRADE[c.provisionalLabel] ?? GRADE.Pass).bg,
-                        color: (GRADE[c.provisionalLabel] ?? GRADE.Pass).ink,
-                        flex: "none", whiteSpace: "nowrap",
+                        fontSize: 11.5, fontWeight: 600, padding: "7px 14px", borderRadius: 6,
+                        border: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 70%, transparent)`,
+                        background: `color-mix(in oklab, ${GOLD_UNDERLINE} 22%, transparent)`,
+                        color: CREAM, textDecoration: "none",
                       }}
                     >
-                      {c.provisionalLabel}
+                      Open the whole portfolio →
+                    </Link>
+                    <Link
+                      href="/assessor"
+                      style={{
+                        fontSize: 11.5, fontWeight: 600, padding: "7px 14px", borderRadius: 6,
+                        border: "1px solid oklch(45% 0.045 58)", background: "oklch(24% 0.036 58)",
+                        color: CREAM, textDecoration: "none",
+                      }}
+                    >
+                      Close
+                    </Link>
+                  </div>
+                </div>
+                {drawerRows.map((row) => {
+                  const cells = (
+                    <>
+                      <span style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{row.label}</span>
+                      <span style={{ fontSize: 12, color: MUTED }}>{row.value}</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: row.ink, textAlign: "right" }}>{row.state}</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: row.href ? TEAL : "transparent", textAlign: "right" }}>
+                        {row.href ? "Open →" : "—"}
+                      </span>
+                    </>
+                  );
+                  const rowStyle = {
+                    display: "grid", gridTemplateColumns: "200px 1fr 120px 58px", gap: 14, alignItems: "center",
+                    padding: "12px 20px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 50%, transparent)",
+                  } as const;
+                  return row.href ? (
+                    <Link key={row.label} href={row.href} className="assessor-hover no-underline" style={rowStyle}>
+                      {cells}
+                    </Link>
+                  ) : (
+                    <div key={row.label} style={rowStyle}>
+                      {cells}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+            <>
+            {isNarrowed ? (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                <span style={{ fontSize: 11.5, color: MUTED }}>
+                  Showing {visibleCandidates.length} of {candidates.length} candidates -- the centre&apos;s selection for this visit.
+                </span>
+                <Link
+                  href={wantsFullCohort ? "/assessor" : "/assessor?cohort=full"}
+                  style={{ fontSize: 11.5, fontWeight: 600, color: TEAL, textDecoration: "none" }}
+                >
+                  {wantsFullCohort ? "← Back to selected" : `View full cohort (${candidates.length}) →`}
+                </Link>
+              </div>
+            ) : null}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
+              {visibleCandidates.map((c) => (
+                <Link
+                  key={c.traineeId}
+                  // Ramy, 30 Aug 2026: "I think I want to cut the middleman...
+                  // you don't need two gates." The card used to open a summary
+                  // drawer whose own "Open the whole portfolio" was the only way
+                  // through; the card is now that link.
+                  href={`/portfolio/${c.traineeId}`}
+                  className="card assessor-hover-fill no-underline"
+                  style={{
+                    background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))" : CARD,
+                    border: `1px solid ${c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 35%, transparent)" : BORDER}`,
+                    borderLeft: `3px solid ${c.flaggedIssue ? AMBER : TEAL}`,
+                    padding: "15px 16px", display: "flex", flexDirection: "column", gap: 10,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 600, color: INK }}>{c.name}</span>
+                    {c.provisionalLabel ? (
+                      <span
+                        style={{
+                          fontSize: 10.5, fontWeight: 700, padding: "3px 9px", borderRadius: 99,
+                          background: (GRADE[c.provisionalLabel] ?? GRADE.Pass).bg,
+                          color: (GRADE[c.provisionalLabel] ?? GRADE.Pass).ink,
+                          flex: "none", whiteSpace: "nowrap",
+                        }}
+                      >
+                        {c.provisionalLabel}
+                      </span>
+                    ) : null}
+                  </div>
+                  <span style={{ fontSize: 11, color: MUTED }}>
+                    {c.tpsTaught}/8 TPs · {c.hoursAssessed.toFixed(1)} hrs{c.levels.length > 0 ? ` · ${c.levels.join(", ")}` : ""}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <Dot ok={c.celta5Complete} label="CELTA 5" />
+                    <Dot ok={c.tpsComplete} label="TPs" />
+                    <Dot ok={c.assignmentsComplete} label="Assignments" />
+                  </div>
+                  {c.flaggedIssue ? (
+                    <span
+                      style={{
+                        fontSize: 11, lineHeight: 1.4, color: AMBER, borderRadius: 5, padding: "6px 9px",
+                        background: "color-mix(in oklab, oklch(44% 0.1 68) 10%, var(--color-card))",
+                      }}
+                    >
+                      {c.flaggedIssue}
                     </span>
                   ) : null}
+                </Link>
+              ))}
+              {visibleCandidates.length === 0 ? <p style={{ fontSize: 12.5, color: MUTED }}>No candidates on this course.</p> : null}
+            </div>
+            </>
+            )}
+
+              <div>
+                {/* Ramy, 30 Aug 2026: "instead of saying on the day, it should
+                    be the timetable for the assessor visit." Cambridge names it
+                    too -- Handbook 14.1's first line of assessor documentation
+                    is the "Assessment timetable", so that is what it is called
+                    here rather than a phrasing of our own. */}
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD_UNDERLINE }}>
+                    Assessment timetable
+                  </p>
+                  <Link href="/trainer/timetable" style={{ fontSize: 11, fontWeight: 600, color: TEAL, textDecoration: "none" }}>
+                    In the full timetable →
+                  </Link>
                 </div>
-                <span style={{ fontSize: 11, color: MUTED }}>
-                  {c.tpsTaught}/8 TPs · {c.hoursAssessed.toFixed(1)} hrs{c.levels.length > 0 ? ` · ${c.levels.join(", ")}` : ""}
-                </span>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <Dot ok={c.celta5Complete} label="CELTA 5" />
-                  <Dot ok={c.tpsComplete} label="TPs" />
-                  <Dot ok={c.assignmentsComplete} label="Assignments" />
-                </div>
-                {c.flaggedIssue ? (
-                  <span
-                    style={{
-                      fontSize: 11, lineHeight: 1.4, color: AMBER, borderRadius: 5, padding: "6px 9px",
-                      background: "color-mix(in oklab, oklch(44% 0.1 68) 10%, var(--color-card))",
-                    }}
-                  >
-                    {c.flaggedIssue}
+                <div
+                  className="card"
+                  style={{
+                    border: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 26%, transparent)`,
+                    borderTop: `3px solid ${GOLD_UNDERLINE}`,
+                    padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
+                  }}
+                >
+                  {visitDayEvents.length === 0 ? (
+                    <span style={{ fontSize: 12, color: MUTED }}>
+                      {course.assessor_visit_date ? "No timetable events on the visit date yet." : "No assessor visit date set yet."}
+                    </span>
+                  ) : (
+                    visitDayEvents.map((e, i) => (
+                      <div key={e.id} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                          <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none", fontVariantNumeric: "tabular-nums" }}>
+                            {e.event_time?.slice(0, 5) ?? ""}
+                          </span>
+                          <span>
+                            <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>
+                              {/* Named, not lettered: "TP7 · A" tells an assessor
+                                  nothing about who they are about to watch. The
+                                  nth TP slot of the day belongs to the nth
+                                  candidate in the rotation order. */}
+                              {e.type === "tp"
+                                ? (teachingOrderNames[visitDayEvents.filter((x, j) => x.type === "tp" && j < i).length] ?? e.title)
+                                : e.title}
+                            </span>
+                            {/* for-claude-code-assessor-pack-decisions.md §2: "a
+                                real, clickable join link... not just a static
+                                'Observable' label. An assessor who can't click
+                                into the session isn't meaningfully observing
+                                it." Same zoom_url students/tutors use -- the
+                                real join window is Zoom's own waiting room, not
+                                something this page enforces. */}
+                            <span style={{ fontSize: 11, color: MUTED }}>
+                              {e.type === "tp" ? `${e.title} · ` : ""}
+                              {e.zoom_url ? "Online — joining link opens 10 minutes before" : "In person at the centre"}
+                            </span>
+                          </span>
+                        </div>
+                        {e.zoom_url ? (
+                          <a
+                            href={e.zoom_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}
+                          >
+                            Join →
+                          </a>
+                        ) : null}
+                      </div>
+                    ))
+                  )}
+
+                  {/* Ramy, 30 Aug 2026: "we don't usually include the grades
+                      meeting on the timetable, because the timetable is for the
+                      trainees and the grades meeting is not for the trainees.
+                      We do include the assessor meeting, which is the assessor
+                      meeting the trainees, but the grades meeting is just kind
+                      of implied... I'd rather not [timetable it]."
+                    
+                      So the grading meeting lives here and only here. It is a
+                      real Handbook 14.3 obligation, it just has no business on
+                      a schedule the candidates read, and this panel is the
+                      document that carries it instead -- 14.1 calls this the
+                      assessment timetable, and it is the assessor's, not the
+                      cohort's. Said out loud below rather than left as a gap an
+                      assessor might read as an omission. */}
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
+                    <span>
+                      <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Grading meeting</span>
+                      <span style={{ fontSize: 11, color: MUTED }}>
+                        With all tutors, time agreed with the main course tutor. Not on the candidates&apos; timetable --
+                        it isn&apos;t theirs to attend.
+                      </span>
+                    </span>
+                  </div>
+                  {/* The candidates' own meeting IS timetabled, so it only
+                      appears here when the centre hasn't put it on the day
+                      yet -- otherwise this panel would list it twice, once
+                      from the timetable above and once from here. */}
+                  {!hasTimetabledCandidateMeeting ? (
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                      <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
+                      <span>
+                        <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Candidate-concerns meeting</span>
+                        <span style={{ fontSize: 11, color: MUTED }}>
+                          Private, without tutors present. Not yet on the timetable for the day.
+                        </span>
+                      </span>
+                    </div>
+                  ) : null}
+
+                  {/* Ramy, 30 Aug 2026: "assessor observes two lessons, not three."
+                      Every slot that day is listed and named -- which two get observed
+                      is agreed with the centre on the day, and all of them carry a
+                      lesson plan for exactly that reason -- but the panel should not
+                      read as three observations. */}
+                  {teachingOrderNames.length > 2 ? (
+                    <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(90% 0.012 85)" }}>
+                      You co-observe <strong style={{ color: INK }}>two</strong> of the {teachingOrderNames.length} lessons above
+                      (Handbook 14.2), agreed with the centre. All {teachingOrderNames.length} carry a lesson plan, since the
+                      choice can change on the day.
+                    </span>
+                  ) : null}
+
+                  <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(90% 0.012 85)" }}>
+                    {concernsCount && concernsCount > 0
+                      ? `${concernsCount} candidate${concernsCount === 1 ? " has" : "s have"} asked to speak with you. Names are not shown before the meeting.`
+                      : "No candidate has asked to speak with you."}
                   </span>
-                ) : null}
-              </Link>
-            ))}
-            {visibleCandidates.length === 0 ? <p style={{ fontSize: 12.5, color: MUTED }}>No candidates on this course.</p> : null}
+                </div>
+              </div>
           </div>
-          </>
-          )}
 
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             {/* Ramy, 30 Aug 2026: "those numbers that are hard to [remember].
@@ -708,54 +912,6 @@ export default async function AssessorPage({
                 what the visit IS, so it sits above the documents the visit
                 uses. Every line carries its Handbook section so an assessor
                 who disagrees can check rather than take our word for it. */}
-            <Panel title="What this assessment requires" accent="gold">
-              {/* Ramy, 30 Aug 2026: "I'm not sure what those numbers are.
-                  15.1, 14.2. What are they?" They are Handbook sections, and
-                  nothing on this panel said so -- a bare "§14.2" is only
-                  meaningful to someone who already knows which document it
-                  belongs to, which is the opposite of the point. The citation
-                  exists so a line can be checked, and it can't be checked if
-                  you don't know what to open. */}
-              <div style={{ padding: "10px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)" }}>
-                <p style={{ fontSize: 11.5, color: MUTED, lineHeight: 1.5 }}>
-                  Section numbers are the CELTA Administration Handbook, June 2025 &mdash; so any line here can be checked
-                  against it rather than taken on trust.
-                </p>
-              </div>
-              {requirements.map((r) => (
-                <div
-                  key={r.label}
-                  style={{
-                    padding: "11px 15px",
-                    borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-                    <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{r.label}</p>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>
-                      §{r.cite}
-                    </span>
-                  </div>
-                  <p style={{ fontSize: 11.5, color: MUTED, marginTop: 3, lineHeight: 1.5 }}>{r.detail}</p>
-                  {r.emphasis ? (
-                    <p style={{ fontSize: 11.5, color: AMBER, marginTop: 4, lineHeight: 1.5, fontWeight: 500 }}>{r.emphasis}</p>
-                  ) : null}
-                </div>
-              ))}
-              {doubleMarkPerAssignment ? (
-                <div style={{ padding: "11px 15px", background: "var(--color-frame)" }}>
-                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-                    <p style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>The centre&apos;s double-marking, for reference</p>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, flex: "none", fontVariantNumeric: "tabular-nums" }}>§11</span>
-                  </div>
-                  <p style={{ fontSize: 11.5, color: MUTED, marginTop: 3, lineHeight: 1.5 }}>
-                    {doubleMarkPerAssignment} of each assignment on a course of {candidates.length}. Not the assessor&apos;s task, but
-                    the record may be asked for -- and this is the count that scales with cohort size, unlike anything above it.
-                  </p>
-                </div>
-              ) : null}
-            </Panel>
-
             <Panel title="Cohort documents">
               {COHORT_DOCUMENTS.map((name) => (
                 <DocRow key={name} label={name} href={COHORT_DOC_HREF(name)} status="Live" />
@@ -794,124 +950,6 @@ export default async function AssessorPage({
                 </div>
               </div>
             ) : null}
-
-            <div>
-              {/* Ramy, 30 Aug 2026: "instead of saying on the day, it should
-                  be the timetable for the assessor visit." Cambridge names it
-                  too -- Handbook 14.1's first line of assessor documentation
-                  is the "Assessment timetable", so that is what it is called
-                  here rather than a phrasing of our own. */}
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD_UNDERLINE }}>
-                  Assessment timetable
-                </p>
-                <Link href="/trainer/timetable" style={{ fontSize: 11, fontWeight: 600, color: TEAL, textDecoration: "none" }}>
-                  In the full timetable →
-                </Link>
-              </div>
-              <div
-                className="card"
-                style={{
-                  border: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 26%, transparent)`,
-                  borderTop: `3px solid ${GOLD_UNDERLINE}`,
-                  padding: "14px 16px", display: "flex", flexDirection: "column", gap: 9,
-                }}
-              >
-                {visitDayEvents.length === 0 ? (
-                  <span style={{ fontSize: 12, color: MUTED }}>
-                    {course.assessor_visit_date ? "No timetable events on the visit date yet." : "No assessor visit date set yet."}
-                  </span>
-                ) : (
-                  visitDayEvents.map((e, i) => (
-                    <div key={e.id} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                        <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none", fontVariantNumeric: "tabular-nums" }}>
-                          {e.event_time?.slice(0, 5) ?? ""}
-                        </span>
-                        <span>
-                          <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>
-                            {/* Named, not lettered: "TP7 · A" tells an assessor
-                                nothing about who they are about to watch. The
-                                nth TP slot of the day belongs to the nth
-                                candidate in the rotation order. */}
-                            {e.type === "tp"
-                              ? (teachingOrderNames[visitDayEvents.filter((x, j) => x.type === "tp" && j < i).length] ?? e.title)
-                              : e.title}
-                          </span>
-                          {/* for-claude-code-assessor-pack-decisions.md §2: "a
-                              real, clickable join link... not just a static
-                              'Observable' label. An assessor who can't click
-                              into the session isn't meaningfully observing
-                              it." Same zoom_url students/tutors use -- the
-                              real join window is Zoom's own waiting room, not
-                              something this page enforces. */}
-                          <span style={{ fontSize: 11, color: MUTED }}>
-                            {e.type === "tp" ? `${e.title} · ` : ""}
-                            {e.zoom_url ? "Online — joining link opens 10 minutes before" : "In person at the centre"}
-                          </span>
-                        </span>
-                      </div>
-                      {e.zoom_url ? (
-                        <a
-                          href={e.zoom_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}
-                        >
-                          Join →
-                        </a>
-                      ) : null}
-                    </div>
-                  ))
-                )}
-
-                {/* Ramy, 30 Aug 2026: "we don't usually include the grades
-                    meeting on the timetable, because the timetable is for the
-                    trainees and the grades meeting is not for the trainees.
-                    We do include the assessor meeting, which is the assessor
-                    meeting the trainees, but the grades meeting is just kind
-                    of implied... I'd rather not [timetable it]."
-                    
-                    So the grading meeting lives here and only here. It is a
-                    real Handbook 14.3 obligation, it just has no business on
-                    a schedule the candidates read, and this panel is the
-                    document that carries it instead -- 14.1 calls this the
-                    assessment timetable, and it is the assessor's, not the
-                    cohort's. Said out loud below rather than left as a gap an
-                    assessor might read as an omission. */}
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                  <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
-                  <span>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Grading meeting</span>
-                    <span style={{ fontSize: 11, color: MUTED }}>
-                      With all tutors, time agreed with the main course tutor. Not on the candidates&apos; timetable --
-                      it isn&apos;t theirs to attend.
-                    </span>
-                  </span>
-                </div>
-                {/* The candidates' own meeting IS timetabled, so it only
-                    appears here when the centre hasn't put it on the day
-                    yet -- otherwise this panel would list it twice, once
-                    from the timetable above and once from here. */}
-                {!hasTimetabledCandidateMeeting ? (
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
-                    <span>
-                      <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Candidate-concerns meeting</span>
-                      <span style={{ fontSize: 11, color: MUTED }}>
-                        Private, without tutors present. Not yet on the timetable for the day.
-                      </span>
-                    </span>
-                  </div>
-                ) : null}
-
-                <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(90% 0.012 85)" }}>
-                  {concernsCount && concernsCount > 0
-                    ? `${concernsCount} candidate${concernsCount === 1 ? " has" : "s have"} asked to speak with you. Names are not shown before the meeting.`
-                    : "No candidate has asked to speak with you."}
-                </span>
-              </div>
-            </div>
 
             <Panel title="Centre documents" accent="garnet">
               {CENTRE_DOCUMENTS.map((doc) => {
