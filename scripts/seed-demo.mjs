@@ -31,6 +31,25 @@ function isoDaysFromNow(days) {
   return d.toISOString().slice(0, 10);
 }
 
+// A CELTA course runs Monday to Friday for four weeks. Anchoring the demo
+// course to a Monday matters beyond tidiness: the timetable groups days
+// into calendar weeks, so a course that starts on a Friday spans FIVE
+// Mondays and renders a Week 5 containing one day. Ramy, 29 Aug 2026:
+// "it also reads five weeks at the bottom, and it's the wrong date. So
+// it's just the wrong timetable." The board was right; the seed was not.
+function mondayNearest(daysFromNow) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  // getDay(): 0 Sun .. 6 Sat -- step back to this week's Monday.
+  const back = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - back);
+  return d;
+}
+
+function isoOf(d) {
+  return d.toISOString().slice(0, 10);
+}
+
 async function main() {
   // --- Clean slate ---
   const { data: existing } = await supabase.from("centers").select("id").eq("is_demo", true).maybeSingle();
@@ -91,8 +110,15 @@ async function main() {
   // accepting_applications stays true even mid-course -- nobody has closed
   // intake yet, which is what gives the admissions pipeline / payments demo
   // (below) a live course to attach applicants to. ---
-  const startDate = isoDaysFromNow(-14);
-  const endDate = isoDaysFromNow(14);
+  // Four teaching weeks, Monday to Friday, currently mid-course: start on
+  // the Monday a fortnight back, end on the Friday four weeks later. That
+  // is 20 teaching days across exactly four calendar weeks, which is what
+  // the week picker and "Day N of 20" both assume.
+  const courseStart = mondayNearest(-14);
+  const courseEnd = new Date(courseStart);
+  courseEnd.setDate(courseStart.getDate() + 25); // Mon + 25 = Friday of week 4
+  const startDate = isoOf(courseStart);
+  const endDate = isoOf(courseEnd);
   const { data: course, error: courseErr } = await supabase
     .from("courses")
     .insert({

@@ -61,6 +61,10 @@ const CATEGORY_STYLE: Record<DisplayCategory, { accent: string; tintFrom: string
   },
 };
 
+// From the design file, verbatim.
+const GRID_COLUMNS = "64px 150px repeat(9, minmax(118px, 1fr))";
+const ROW_HEIGHT = 108;
+
 function CameraIcon() {
   return (
     <svg viewBox="0 0 24 24" className="size-3" stroke="currentColor" fill="none" strokeWidth={1.8} aria-hidden="true">
@@ -245,41 +249,58 @@ export function ReadOnlyTimetableBoard({
             "linear-gradient(135deg, oklch(97% 0.02 190 / 0.5), oklch(97.5% 0.018 85 / 0.6) 45%, oklch(96% 0.025 70 / 0.4))",
         }}
       >
-        <table className="w-full min-w-[900px] border-separate" style={{ borderSpacing: "6px" }}>
-          <thead>
-            <tr>
-              <th className="w-16" />
-              <th className="w-[150px] p-2 text-left text-[10px] font-semibold tracking-[0.08em] text-muted uppercase">Admin</th>
-              {timeBands.map((band) => (
-                <th key={band.label} className="min-w-[118px] p-2 text-left text-[10px] font-semibold tracking-[0.08em] text-muted uppercase">
-                  {band.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {(week?.rows ?? []).map((row) => {
-              const isToday = row.isoDate === today;
-              return (
-                <tr key={row.isoDate}>
-                  <td className={`align-top p-2 ${isToday ? "border-l-[3px] border-primary" : ""}`}>
-                    <p className="font-serif text-lg text-ink">{row.date.split(" ")[1]}</p>
-                    <p className="text-[10px] font-semibold tracking-[0.06em] text-muted uppercase">{row.weekday}</p>
-                    {isToday ? <p className="text-[10px] font-semibold text-primary uppercase">Today</p> : null}
-                  </td>
-                  <td className="align-top">
-                    <Cell events={row.admin} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
-                  </td>
-                  {row.bands.map((bandEvents, i) => (
-                    <td key={i} className="align-top">
-                      <Cell events={bandEvents} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        {/* The design's own grid, not a table: 64px day gutter, 150px admin
+            column, nine bands at a 118px floor that stretch to fill. Measured
+            from his file rather than approximated -- cards come out 108px
+            tall, which is what a like-for-like comparison against his page
+            produces. */}
+        <div style={{ display: "grid", gridTemplateColumns: GRID_COLUMNS, alignItems: "stretch" }}>
+          <div />
+          <div className="px-2.5 pt-3 pb-2 text-[9.5px] font-bold tracking-[0.1em] text-muted uppercase">
+            Admin &amp; deadlines
+          </div>
+          {timeBands.map((band) => (
+            <div key={band.label} className="px-2.5 pt-3 pb-2 text-[9.5px] font-bold tracking-[0.06em] text-muted">
+              {band.label.replace(/\s*[–-]\s*/, " – ")}
+            </div>
+          ))}
+          {(week?.rows ?? []).map((row) => {
+            const isToday = row.isoDate === today;
+            return (
+              <div
+                key={row.isoDate}
+                style={{ display: "grid", gridColumn: "1 / -1", gridTemplateColumns: GRID_COLUMNS }}
+                className="border-t border-border-faint"
+              >
+                <div
+                  className="flex flex-col gap-0.5 py-3 pr-2.5"
+                  style={{
+                    height: ROW_HEIGHT,
+                    boxSizing: "border-box",
+                    paddingLeft: isToday ? 9 : 12,
+                    borderLeft: `3px solid ${isToday ? "oklch(38% 0.072 195)" : "transparent"}`,
+                  }}
+                >
+                  <p className={`font-serif text-[19px] leading-none ${isToday ? "text-primary" : "text-ink"}`}>
+                    {row.date.split(" ")[1]}
+                  </p>
+                  <p className="text-[9px] font-bold tracking-[0.12em] text-muted uppercase">{row.weekday}</p>
+                  {isToday ? (
+                    <p className="text-[8.5px] font-bold tracking-[0.1em] text-primary uppercase">Today</p>
+                  ) : null}
+                </div>
+                <div style={{ height: ROW_HEIGHT, boxSizing: "border-box", padding: 5 }}>
+                  <Cell events={row.admin} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
+                </div>
+                {row.bands.map((bandEvents, i) => (
+                  <div key={i} style={{ height: ROW_HEIGHT, boxSizing: "border-box", padding: 5, overflowY: "auto" }}>
+                    <Cell events={bandEvents} eventMeta={eventMeta} now={now} timeZone={timeZone} mineOnly={mineOnly} onSelect={setSelectedEvent} />
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Mobile. The design is a 1280px grid; below 900px that is a sideways
