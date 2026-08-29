@@ -669,19 +669,25 @@ export default async function PortfolioCelta5Page({
               this stage: &lsquo;S+&rsquo; above the standard, &lsquo;S&rsquo; meets the standard, &lsquo;N&rsquo; not
               to standard, &lsquo;X&rsquo; not applicable at this stage.
             </p>
-            {!stage2Submitted ? (
-              <div style={{ marginBottom: 12 }}>
-                <SelfAssessmentForm />
-              </div>
-            ) : null}
-            <CriteriaGrid
-              stage="stage2"
-              rows={stage2Rows}
-              showCandidateColumn
-              candidateEditable={false}
-              tutorLocked={!stage2Submitted}
-              tutorLockedLabel="Hidden until you submit"
-            />
+            {/* One list of criteria, not two. Ramy, 29 Aug 2026: "this looks
+                like there are two stage two self assessment." It did --
+                SelfAssessmentForm already renders all 41 criteria with its
+                own controls, and the grid below it was rendering them
+                again. They do different jobs at different moments, so the
+                page shows whichever one applies: the editable form until
+                the candidate submits, the You/Tutor grid afterwards. */}
+            {stage2Submitted ? (
+              <CriteriaGrid
+                stage="stage2"
+                rows={stage2Rows}
+                showCandidateColumn
+                candidateEditable={false}
+                tutorLocked={!stage1And2Released}
+                tutorLockedLabel="Hidden until your tutorial"
+              />
+            ) : (
+              <SelfAssessmentForm />
+            )}
 
             {/* The boxes the paper form prints. Cambridge asks for the
                 candidate's issues and the tutor's beside them, then the two
