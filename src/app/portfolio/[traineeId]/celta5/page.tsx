@@ -483,35 +483,46 @@ export default async function PortfolioCelta5Page({
       uln: viewer?.uln ?? null,
     };
 
+    // CELTA 5 p.25, verbatim. Ramy, 29 Aug 2026: "fix section twelve...
+    // make sure the wording matches what's in here" -- the app had
+    // substituted "Stage Two progress record complete" and "Stage Three
+    // progress record" for Cambridge's last two confirmations, which
+    // dropped two statements the form actually asks a candidate to make
+    // and added two it doesn't. Cambridge's five, in Cambridge's order:
+    const ownWorkAllConfirmed =
+      (assignments ?? []).length > 0 &&
+      (assignments ?? []).every((a) =>
+        a.resubmission_status !== "not_submitted" ? a.resubmission_own_work_confirmed : a.first_own_work_confirmed
+      );
+    // "All records" means the records this booklet is made of: attendance,
+    // observations, assessed TP and the written assignments table.
+    const allRecordsComplete =
+      observationRows.length > 0 && assessedTpRows.length > 0 && assignmentsGraded >= 4;
     const finalChecks: FinalCheck[] = [
       {
-        label: "Six hours of assessed teaching practice at at least two levels",
+        label: "I have completed six hours of assessed teaching practice at at least two levels.",
         met: assessedTpHours >= TP_HOURS_REQUIRED && assessedTpStats.levels.length >= 2,
         detail: `${assessedTpHours.toFixed(2)} of ${TP_HOURS_REQUIRED.toFixed(2)} hrs`,
       },
       {
-        label: "Six hours of observation of experienced teachers",
+        label: "I have completed six hours of observation of experienced teachers.",
         met: experiencedTeacherHours >= OBSERVATION_HOURS_REQUIRED,
         detail: `${experiencedTeacherHours.toFixed(2)} of ${OBSERVATION_HOURS_REQUIRED.toFixed(2)} hrs`,
       },
       {
-        label: "Four written assignments, all graded",
+        label: "I have completed four written assignments.",
         met: assignmentsGraded >= 4,
         detail: `${assignmentsGraded} / 4 graded`,
       },
-      { label: "Stage Two progress record complete", met: bothSigned },
       {
-        // Stage Three is expected when Cambridge requires it (the four
-        // Handbook 10.2 triggers, computed from the record rather than left
-        // to a tutor to notice) or when the centre gives it to everyone.
-        // A candidate outside both isn't held up by this check -- and the
-        // centre setting can only add candidates, never remove a triggered
-        // one. See src/lib/stage3-triggers.ts.
-        label: stage3IsExpected ? "Stage Three progress record complete" : "Stage Three progress record",
-        met: stage3IsExpected ? !!record.stage3_finalized_at : true,
-        detail: stage3IsExpected
-          ? stage3TriggerReason
-          : "not required for you",
+        label: "The written assignments are my own work.",
+        met: ownWorkAllConfirmed,
+        detail: ownWorkAllConfirmed ? undefined : "declared on each assignment when you submit it",
+      },
+      {
+        label: "I have completed all records.",
+        met: allRecordsComplete,
+        detail: allRecordsComplete ? undefined : "attendance, observations, teaching practice and assignments",
       },
     ];
 
@@ -857,10 +868,31 @@ export default async function PortfolioCelta5Page({
           </BookletSection>
 
           <BookletSection id="c5-final" num="Section 12" title="To be completed on the final day of the course">
+            <p className="text-[10px] italic text-muted" style={{ marginBottom: 4 }}>
+              Please tick the appropriate boxes and sign.
+            </p>
+            <p className="text-[11px] text-ink" style={{ marginBottom: 10 }}>
+              In handing in this portfolio for assessment purposes, I confirm that:
+            </p>
             <FinalDayChecks checks={finalChecks} />
             <div className="mt-4">
               <FinalChecklistForm signatureName={viewer?.signature_name ?? null} fullName={viewer?.full_name ?? ""} />
             </div>
+
+            <p className="text-[11px]" style={{ marginTop: 16 }}>
+              <span className="text-muted">Accepted by Tutor:</span>{" "}
+              <strong className="text-ink">{record.final_tutor_signature_name ?? "\u2014"}</strong>
+              {record.trainer_signoff_final_at ? (
+                <span className="text-muted">
+                  {" \u00b7 "}
+                  {new Date(record.trainer_signoff_final_at).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+              ) : null}
+            </p>
 
             {/* Cambridge prints this box on the same page, for candidates
                 whose portfolios go to Cambridge English. */}
