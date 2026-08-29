@@ -354,8 +354,23 @@ export default async function PortfolioLayout({
               ) : null}
               {trainee.special_consideration ? (
                 <HideDuringPreview>
+                  {/* The tooltip carries the candidate's own words about why
+                      they need consideration -- profiles.special_consideration
+                      is deliberately free-text health-adjacent disclosure
+                      (migration 0055: "serious illness, bereavement") and is
+                      documented there as staff-visible only.
+                      
+                      An assessor is not staff. Handbook 12.2: "Centres must
+                      limit the amount of candidate personal information shared
+                      with Cambridge English... The only personal information
+                      required is candidate names." The badge still tells them
+                      a declaration exists, which is what bears on moderating a
+                      judgement; the reason stops at the centre. Found 30 Aug
+                      2026 while adding the arrangements strip to the assessor
+                      landing -- it was reaching an assessor through the
+                      title attribute. */}
                   <span
-                    title={trainee.special_consideration}
+                    title={assessorCourseId ? undefined : trainee.special_consideration}
                     className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-semibold text-ink"
                   >
                     <span className="size-1.5 shrink-0 rounded-full bg-current" />

@@ -37,7 +37,11 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
   // profile select deliberately doesn't carry full_name (the layout header
   // owns the candidate's identity), and widening that select for one string
   // would touch a query five other blocks on that page read.
-  const { data: person } = await admin.from("profiles").select("full_name").eq("id", traineeId).maybeSingle();
+  const { data: person } = await admin
+    .from("profiles")
+    .select("full_name, special_consideration, special_consideration_arrangements")
+    .eq("id", traineeId)
+    .maybeSingle();
   const traineeName = person?.full_name ?? "This candidate";
 
   const [{ data: course }, { data: record }, cards, { data: assignments }, { data: pctResponses }, { data: letters }, { data: malpractice }] =
@@ -117,6 +121,26 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
   // what gets counted rather than a submitted_at that no longer exists.
   const pctAnswered = (pctResponses ?? []).filter((r) => (r.response ?? "").trim().length > 0).length;
 
+  // Ramy, 30 Aug 2026: "if there is a special requirement, yeah, it should be
+  // there." Handbook 7 has the candidate agreement carry a Candidate
+  // Declaration confirming whether they need special consideration, so that
+  // "reasonable adjustments are made prior to the course starting and
+  // throughout" -- an assessor moderating a judgement needs to know
+  // adjustments were in place.
+  //
+  // But 12.2 is equally explicit the other way: "Centres must limit the
+  // amount of candidate personal information shared with Cambridge English...
+  // The only personal information required is candidate names." And
+  // profiles.special_consideration is deliberately free-text health-adjacent
+  // disclosure (0055: "serious illness, bereavement"), staff-visible only.
+  //
+  // So the line shows WHAT was arranged and never WHY. The arrangements are
+  // a fixed multi-select (extended time, materials in advance) and are the
+  // part that bears on assessment; the reason stays with the centre, which is
+  // where 12.2 wants it.
+  const arrangements = (person?.special_consideration_arrangements ?? []) as string[];
+  const hasDeclaration = arrangements.length > 0 || Boolean((person?.special_consideration ?? "").trim());
+
   const letterCount = (letters ?? []).length;
   const caseCount = (malpractice ?? []).length;
   const formalRecordCount = letterCount + caseCount;
@@ -143,6 +167,30 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
           ink={card?.provisionalLabel ? undefined : AMBER}
         />
       </div>
+
+      {hasDeclaration ? (
+        <div
+          className="rounded-[8px] px-4 py-3"
+          style={{
+            background: "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))",
+            border: "1px solid color-mix(in oklab, oklch(44% 0.1 68) 28%, transparent)",
+            borderLeft: `3px solid ${AMBER}`,
+          }}
+        >
+          <p className="text-[10px] font-bold tracking-[0.09em] uppercase" style={{ color: AMBER }}>
+            Special arrangements in place
+          </p>
+          <p className="mt-1 text-[12.5px]" style={{ color: INK }}>
+            {arrangements.length > 0
+              ? arrangements.join(" · ")
+              : "Arrangements were agreed with this candidate."}
+          </p>
+          <p className="mt-1 text-[11.5px]" style={{ color: MUTED }}>
+            The reason is held by the centre and not shown here — Handbook §12.2 limits the personal information shared
+            with Cambridge to candidate names. Ask the main course tutor if you need it.
+          </p>
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-2.5">
         <Card
