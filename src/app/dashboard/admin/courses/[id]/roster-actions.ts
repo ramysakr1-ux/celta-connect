@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { syncAssessorMeetingEvent } from "@/lib/assessor-day";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
@@ -126,6 +127,10 @@ export async function updateAssessorVisitDate(formData: FormData): Promise<void>
   if (!course || course.center_id !== admin.center_id) return;
 
   await supabase.from("courses").update({ assessor_visit_date: assessorVisitDate }).eq("id", courseId);
+  // Same sync as the MCT's own assessor card (trainer/assessor-actions.ts) --
+  // whoever sets the date first is what the other side sees, so both write
+  // paths have to place the meeting or it depends on which screen was used.
+  await syncAssessorMeetingEvent(supabase, courseId, assessorVisitDate);
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
 }
 

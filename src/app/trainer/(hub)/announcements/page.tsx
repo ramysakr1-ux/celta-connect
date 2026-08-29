@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/auth/require-role";
+import { ASSESSOR_MEETING_TITLE } from "@/lib/assessor-day";
 import { createClient } from "@/lib/supabase/server";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -101,13 +102,33 @@ export default async function AnnouncementsPage() {
   const { data: authors } = authorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", authorIds) : { data: [] };
   const authorNameById = new Map((authors ?? []).map((a) => [a.id, a.full_name]));
 
-  const showAssessorTemplate = (() => {
-    if (!course?.assessor_visit_date) return false;
-    const daysUntil = Math.ceil(
-      (new Date(`${course.assessor_visit_date}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000
-    );
-    return daysUntil >= 0 && daysUntil <= 2;
-  })();
+  // Was 0-2 days before the visit, which is too late to be a reminder --
+  // Ramy, 30 Aug 2026, describing the assessor day: "it's been announced,
+  // there's a countdown for it... and there's a reminder. So there's a whole
+  // thing set around the assessor day." The template is offered as soon as a
+  // visit is on the books, and prefills a scheduled announcement anchored to
+  // the assessor meeting rather than one sent the moment it's written. It
+  // still only prefills; nothing posts without the MCT pressing send.
+  const showAssessorTemplate = Boolean(
+    course?.assessor_visit_date && course.assessor_visit_date >= today
+  );
+
+  // The assessor meeting is what the template anchors to. It is normally in
+  // `upcomingEvents` already, but that query is capped at 30, so a visit at
+  // the end of a long course could fall off the end of it -- fetched
+  // explicitly and merged rather than left to chance.
+  const { data: assessorMeetingEvent } = course?.assessor_visit_date
+    ? await supabase
+        .from("course_timetable_events")
+        .select("id, title, event_date, event_time")
+        .eq("course_id", courseId)
+        .eq("title", ASSESSOR_MEETING_TITLE)
+        .maybeSingle()
+    : { data: null };
+  const composerEvents =
+    assessorMeetingEvent && !(upcomingEvents ?? []).some((e) => e.id === assessorMeetingEvent.id)
+      ? [...(upcomingEvents ?? []), assessorMeetingEvent]
+      : (upcomingEvents ?? []);
 
   const scheduled = (broadcasts ?? []).filter((b) => !b.sent_at);
   const posted = (broadcasts ?? []).filter((b) => b.sent_at);
@@ -155,8 +176,9 @@ export default async function AnnouncementsPage() {
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         {isMct ? (
           <AnnouncementComposer
-            timetableEvents={upcomingEvents ?? []}
+            timetableEvents={composerEvents}
             showAssessorTemplate={showAssessorTemplate}
+            assessorMeetingEventId={assessorMeetingEvent?.id ?? null}
             traineeCount={traineeCount ?? 0}
             trainerCount={trainerCount ?? 0}
             groups={composerGroups}

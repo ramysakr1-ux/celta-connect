@@ -15,6 +15,7 @@ import { getFeedbackAssistState } from "@/lib/feedback-assist";
 import { FeedbackAssistCard } from "@/app/trainer/(hub)/feedback-assist-card";
 import { AssessorCard } from "@/app/trainer/(hub)/assessor-card";
 import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
+import { assessorVisitDayProblem } from "@/lib/assessor-day";
 import { findMaterialsOverlaps } from "@/lib/materials-overlap";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
@@ -168,6 +169,7 @@ export default async function TodayPage() {
   const preparationDeadline = centrePreparationDeadline(course?.assessor_visit_date ?? null);
   let assessmentKind: AssessmentKind = "regular";
   let centrePreparation: ReturnType<typeof buildCentrePreparationList> = [];
+  let visitDayProblem: string | null = null;
   if (isMct && courseId) {
     // assessment_kind is read by its own `select("*")` rather than being
     // named in the course select above: migration 0254 adds the column and
@@ -192,6 +194,7 @@ export default async function TodayPage() {
       candidateCount: candidateCount ?? 0,
       withdrawnCount: withdrawnCount ?? 0,
     });
+    visitDayProblem = await assessorVisitDayProblem(supabase, courseId, course?.assessor_visit_date ?? null);
   }
   if (isMct && course?.provisional_grades_due_at) {
     const { data: records } =
@@ -631,6 +634,23 @@ export default async function TodayPage() {
           MCT can see WHY a line is there rather than working from a generic
           checklist. MCT-only, same as the card above it -- preparing the pack
           is their job, not every tutor's. */}
+      {/* A visit date with no teaching on it can't deliver Handbook 14.2's
+          "co-observe two candidates", and nothing said so -- Elmswood's
+          November course had a visit booked for the 30th with not one event
+          on the day. Sits above the preparation list because no amount of
+          preparing fixes a day with nothing to observe. */}
+      {isMct && visitDayProblem ? (
+        <div className="flex flex-col gap-1 rounded-[8px] border border-status-warning-text/25 bg-status-warning-bg px-[22px] py-4">
+          <p className="text-[11px] font-bold tracking-[0.12em] text-status-warning-text uppercase">
+            The assessor visit needs a look
+          </p>
+          <p className="text-sm text-status-warning-text">{visitDayProblem}</p>
+          <Link href="/trainer/timetable?mode=edit" className="mt-1 self-start text-[12.5px] font-semibold text-status-warning-text underline">
+            Open the timetable
+          </Link>
+        </div>
+      ) : null}
+
       {isMct && centrePreparation.length > 0 ? (
         <div className="flex flex-col gap-4 rounded-[8px] border border-border border-t-[3px] border-t-gold bg-card px-[22px] py-5">
           <div className="flex flex-col gap-[3px]">

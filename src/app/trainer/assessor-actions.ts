@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { isMctOnCourse } from "@/lib/course-mct";
+import { syncAssessorMeetingEvent } from "@/lib/assessor-day";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
 import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
@@ -203,6 +204,15 @@ export async function updateAssessorContact(_prevState: AssessorContactState, fo
     .eq("id", trainer.course_id);
   if (error) return { error: "Could not save. Try again." };
 
+  // The candidates' half of the visit day, put on their timetable. Ramy, 30
+  // Aug 2026: "we do include the assessor meeting, which is basically the
+  // assessor meeting the trainees" -- and nothing was creating it, so the
+  // announcement composer's day-offset anchoring had nothing to hang a
+  // countdown on. See src/lib/assessor-day.ts; the grading meeting is
+  // deliberately not timetabled.
+  await syncAssessorMeetingEvent(supabase, trainer.course_id, assessorVisitDate);
+
   revalidatePath("/trainer");
+  revalidatePath("/trainer/timetable");
   return { error: null };
 }

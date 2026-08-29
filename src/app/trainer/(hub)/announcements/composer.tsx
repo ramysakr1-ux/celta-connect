@@ -40,12 +40,15 @@ interface GroupOption {
 export function AnnouncementComposer({
   timetableEvents,
   showAssessorTemplate,
+  assessorMeetingEventId,
   traineeCount,
   trainerCount,
   groups,
 }: {
   timetableEvents: TimetableEventOption[];
   showAssessorTemplate: boolean;
+  /** The timetable event the template anchors its reminder to, if one exists. */
+  assessorMeetingEventId: string | null;
   traineeCount: number;
   trainerCount: number;
   groups: GroupOption[];
@@ -69,6 +72,15 @@ export function AnnouncementComposer({
           onClick={() => {
             setTitle(ASSESSOR_VISIT_TEMPLATE.title);
             setBody(ASSESSOR_VISIT_TEMPLATE.body);
+            // Prefill the reminder too, not just the words. Anchored two days
+            // before the assessor meeting, which is the announcement Ramy
+            // described ("there's a countdown for it... and there's a
+            // reminder"). Still only a prefill -- the MCT reads it and sends.
+            if (assessorMeetingEventId) {
+              setLinkedEventId(assessorMeetingEventId);
+              setTiming("anchored");
+              setOffsetDays("-2");
+            }
           }}
           className="self-start rounded-full border border-border bg-muted/10 px-3 py-1 text-xs font-medium text-muted hover:bg-muted/20"
         >
