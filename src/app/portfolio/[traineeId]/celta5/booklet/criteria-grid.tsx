@@ -3,13 +3,17 @@ import { LockBox } from "@/app/portfolio/[traineeId]/celta5/booklet/shell";
 
 // The Stage Two / Stage Three criteria grid.
 //
-// Ramy's design renders each criterion as a row with an S+/S/N/X pill
-// group rather than as Cambridge's bare tick columns. X is "Not
-// Applicable" -- the candidate hasn't yet focused on that criterion at
-// this stage -- and it exists in his design and in the Stage Two rubric
-// but not in the printed grid, which simply leaves the cell empty. An
-// empty cell and "not applicable yet" mean different things to an
-// assessor, so the distinction is worth keeping.
+// Ramy's design renders each criterion as a row with a pill group rather
+// than as Cambridge's bare tick columns.
+//
+// The scales differ by stage, and the difference is Cambridge's own.
+// Stage Two has FOUR options -- CELTA 5 p.14 prints them: "'S+' for
+// 'Above the Standard'... 'S' for 'Meets the Standard'... 'N' for 'Not to
+// Standard'... 'X' for 'Not Applicable' at this stage in the course
+// because you have not yet focused on teaching or planning skills
+// associated with that criterion." Stage Three (p.20) lists only three,
+// S+/S/N: by the final third of the course "not applicable" no longer
+// applies, so there is nothing for X to mean.
 //
 // Stage Two shows two columns, You and Tutor: the candidate self-assesses
 // first and the tutor's column stays locked until they submit, so the
@@ -25,17 +29,32 @@ export type CriterionRow = {
   tutor?: Mark;
 };
 
-const MARKS: { value: Exclude<Mark, null>; cls: string }[] = [
+const ALL_MARKS: { value: Exclude<Mark, null>; cls: string }[] = [
   { value: "S+", cls: "sp" },
   { value: "S", cls: "s" },
   { value: "N", cls: "n" },
   { value: "X", cls: "x" },
 ];
 
-function PillGroup({ name, value, disabled }: { name: string; value: Mark; disabled: boolean }) {
+// Stage Three offers three, not four: p.20 lists only S+/S/N, because by
+// the final third of the course "not yet focused on that criterion" is no
+// longer an available answer.
+const STAGE3_MARKS = ALL_MARKS.filter((m) => m.value !== "X");
+
+function PillGroup({
+  name,
+  value,
+  disabled,
+  marks,
+}: {
+  name: string;
+  value: Mark;
+  disabled: boolean;
+  marks: typeof ALL_MARKS;
+}) {
   return (
     <div className="c5-pills">
-      {MARKS.map((m) => (
+      {marks.map((m) => (
         <span key={m.value}>
           <input
             type="radio"
@@ -60,13 +79,16 @@ export function CriteriaGrid({
   candidateEditable,
   tutorLocked,
   tutorLockedLabel = "Locked",
+  stage,
 }: {
   rows: CriterionRow[];
   showCandidateColumn: boolean;
   candidateEditable: boolean;
   tutorLocked: boolean;
   tutorLockedLabel?: string;
+  stage: "stage2" | "stage3";
 }) {
+  const marks = stage === "stage3" ? STAGE3_MARKS : ALL_MARKS;
   return (
     <table className="c5-table">
       <thead>
@@ -92,14 +114,14 @@ export function CriteriaGrid({
               </td>
               {showCandidateColumn ? (
                 <td>
-                  <PillGroup name={`c-${r.code}`} value={r.candidate ?? null} disabled={!candidateEditable} />
+                  <PillGroup name={`c-${r.code}`} value={r.candidate ?? null} disabled={!candidateEditable} marks={marks} />
                 </td>
               ) : null}
               <td>
                 {tutorLocked ? (
                   <span className="text-[10px] italic text-muted">{tutorLockedLabel}</span>
                 ) : (
-                  <PillGroup name={`t-${r.code}`} value={r.tutor ?? null} disabled />
+                  <PillGroup name={`t-${r.code}`} value={r.tutor ?? null} disabled marks={marks} />
                 )}
               </td>
             </tr>

@@ -554,6 +554,7 @@ export default async function PortfolioCelta5Page({
               to standard, &lsquo;X&rsquo; not applicable at this stage.
             </p>
             <CriteriaGrid
+              stage="stage2"
               rows={stage2Rows}
               showCandidateColumn
               candidateEditable={false}
@@ -571,7 +572,7 @@ export default async function PortfolioCelta5Page({
             </p>
             {stage3IsExpected ? (
               record.stage3_finalized_at ? (
-                <CriteriaGrid rows={stage3Rows} showCandidateColumn={false} candidateEditable={false} tutorLocked={false} />
+                <CriteriaGrid stage="stage3" rows={stage3Rows} showCandidateColumn={false} candidateEditable={false} tutorLocked={false} />
               ) : (
                 <StageLocked>
                   {stage3TriggerReason
