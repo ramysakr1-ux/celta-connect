@@ -1,0 +1,134 @@
+// The CELTA 5 Record Booklet's own static text, transcribed from the real
+// Cambridge document via Ramy's design source (CELTA 5 Record
+// (standalone).html). Do not paraphrase or shorten any of it -- this is
+// Cambridge's wording in a document candidates are accountable to, and two
+// of these sections end in a confirmation the candidate signs.
+//
+// Ramy, 30 Aug 2026: "the one I gave you is the entire CELTA 5 in there so
+// they can read it -- I wanted them to read everything in there." An
+// earlier draft linked the appeals section out to the uploaded PDF instead,
+// on the grounds that a copy could go stale. That was wrong for the
+// purpose: a candidate who has to click out mostly will not, and the
+// reading and the signing are the same act. If Cambridge revises the text,
+// update it here.
+
+export type BookletBlock = { kind: "h" | "p" | "li"; text: string };
+
+export interface BookletSection {
+  key: string;
+  title: string;
+  blocks: BookletBlock[];
+  /** The candidate confirmation this section ends with, where it has one. */
+  confirm: string | null;
+}
+
+export const BOOKLET_SECTIONS: BookletSection[] = [
+  {
+    key: "portfolio",
+    title: "Candidate portfolio",
+    confirm: "I confirm that I have understood and accept the above requirements for the CELTA portfolio and that without meeting these requirements, it will not be possible for my work on the course to be assessed for the purpose of awarding the certificate. I understand that if my portfolio is not available at the times specified by the centre, I will be considered as having withdrawn from assessment and will not receive a final recommended grade.",
+    blocks: [
+      { kind: "h", text: "What is the Candidate Portfolio?" },
+      { kind: "p", text: "The Candidate Portfolio represents the work on the course which will be assessed for your final course grade to be awarded. Portfolio documents must be uploaded to the file storage platform used by the centre and kept up-to-date, ready to view by the Cambridge English assessor. The portfolio must also be complete at the end of the course." },
+      { kind: "h", text: "Why do Cambridge English assessors need to see portfolios?" },
+      { kind: "p", text: "Assessors scrutinise a selection of portfolios to moderate candidates' work on the course, and to agree provisional and final recommended results." },
+      { kind: "h", text: "What information does Cambridge English collect?" },
+      { kind: "p", text: "The centre stores portfolios and provides Cambridge English assessors and moderators with viewing rights via a link to the folders. Cambridge English does not retain copies of portfolios. Centres retain portfolios for six months after the end of the course, after which they should be deleted. You may keep copies of any of the content you wish to retain." },
+      { kind: "h", text: "How does Cambridge English protect my information?" },
+      { kind: "p", text: "The only personal information that Cambridge English needs to finalise your results is your full name and course number. You do not need to provide any other identifying information in your portfolio. The confidentiality of portfolios is maintained via a secure, password protected platform, and assessors submit their course reports securely on this system." },
+      { kind: "h", text: "Who can I ask about the handling of my personal information?" },
+      { kind: "p", text: "If you have any questions about the way your personal information is stored, contact your centre administration in the first instance. If your query relates to the way Cambridge English accesses your information, the centre can follow up with Cambridge English on your behalf." },
+      { kind: "h", text: "Portfolio Contents" },
+      { kind: "li", text: "The Candidate Record Booklet CELTA 5" },
+      { kind: "li", text: "All assessed teaching practice lesson plans, lesson materials, handouts you have given to learners, tutor feedback comments and self-evaluations" },
+      { kind: "li", text: "All assessed written assignments (both first submissions and resubmissions where applicable) and tutor feedback comments" },
+      { kind: "h", text: "Portfolio Organisation" },
+      { kind: "p", text: "The portfolio is divided into sections. It must be organised in the following way:" },
+      { kind: "li", text: "The Candidate Record Booklet CELTA 5" },
+      { kind: "li", text: "TP lessons, to include: lesson plan" },
+      { kind: "li", text: "copies of materials, lesson handouts, worksheets given to learners" },
+      { kind: "li", text: "self-evaluation" },
+      { kind: "li", text: "tutor feedback comments" },
+      { kind: "li", text: "Written assignments to include: written assignment" },
+      { kind: "li", text: "tutor feedback comments" },
+    ],
+  },
+  {
+    key: "appeals",
+    title: "Cambridge English appeals procedure",
+    confirm: "I confirm that I have read the Cambridge English Appeals Procedure.",
+    blocks: [
+      { kind: "p", text: "Cambridge English aims to provide access to English language teaching courses of the highest possible quality. However, there may be occasions when candidates have concerns regarding the course provision offered by a centre and/or their final result. The information below provides guidance for the procedures to follow in such cases." },
+      { kind: "p", text: "If you have concerns regarding the course provision or the assessment of your performance during the course, these should be raised with the centre as soon as possible, so that the centre has an opportunity to address them while the course is still in progress." },
+      { kind: "p", text: "It is possible to raise concerns:" },
+      { kind: "li", text: "as part of general feedback during the course in which candidates may be invited to discuss the course or to complete a feedback form" },
+      { kind: "li", text: "during a scheduled individual tutorial with one of the course tutors" },
+      { kind: "li", text: "in a meeting with a course tutor/centre representative as and when a concern occurs." },
+      { kind: "p", text: "In addition, each course is visited by an external assessor for quality assurance purposes. The assessor checks the extent to which centres/courses are meeting Cambridge English requirements regarding, e.g. course delivery, facilities, assessment of candidate performance. You may request an opportunity to speak to the assessor about your concerns during their visit which usually takes place towards the end of the course." },
+      { kind: "p", text: "Early discussion with your centre may help to resolve issues. However, in some cases, concerns may persist. For this reason, centres are required to have an internal complaints procedure to help to address any unresolved issues." },
+      { kind: "p", text: "If you are unhappy with the final grade recommended by your tutors at the end of the course, you should raise this with your centre in the first instance. A representative from the centre should discuss with you the reasons for the final recommended grade. If you are dissatisfied with the outcome of this discussion, you can request to complete the centre's internal complaints procedure." },
+      { kind: "p", text: "Please note that all grades recommended by a centre at the end of a course remain provisional until confirmed by Cambridge English after verification by a Chief Assessor." },
+      { kind: "h", text: "Appeals to Cambridge English" },
+      { kind: "p", text: "If you have completed all stages of your centre's internal complaints procedure and you remain dissatisfied with the response regarding course provision and/or unhappy with the final result once it is confirmed by Cambridge English, you may make an appeal to Cambridge English." },
+      { kind: "p", text: "Candidates may request an enquiry regarding a result and/or make a complaint about course provision. There is an administrative fee payable as part of the Appeal Stage One, the details of which can be found in the Cambridge English Teaching Qualifications Stage One Appeal Form. Where investigation leads to a change of grade, the appeal fee will be refunded." },
+      { kind: "p", text: "All requests for an appeal must be sent to Cambridge English via the centre within two weeks of you receiving your final result. Please note that an appeal must be made by you and not by a third party." },
+      { kind: "p", text: "An investigation into an appeal involves a clerical check of the result by Cambridge English and scrutiny of the following:" },
+      { kind: "li", text: "an Appeal Stage One form" },
+      { kind: "li", text: "your portfolio and CELTA 5 Record Booklet" },
+      { kind: "li", text: "the Assessor's Report for the course you undertook" },
+      { kind: "li", text: "Other documents and correspondence including the following: the centre's response to the appeal" },
+      { kind: "li", text: "the centre's terms and conditions" },
+      { kind: "li", text: "candidate application and selection notes." },
+      { kind: "p", text: "Your centre will provide you with the Cambridge English Teaching Qualifications Stage One Appeal Form. This can be downloaded from the Teaching Qualifications section of the Customer Support Website. Please complete the form, detailing all your concerns and submit this to your centre." },
+      { kind: "p", text: "Once the centre has received a copy of the form, the centre writes their response to the issues raised. The centre sends to Cambridge English your form, their response to your appeal and your portfolio and other related documentation within two weeks of receiving your completed Stage One Form." },
+      { kind: "p", text: "A Chief Assessor, who has had no previous involvement with your course/result, reviews the documentation and prepares a report. The report is then sent to an independent reviewer who reviews the decision and confirms whether the appeals procedure has been followed correctly. In addition, any concerns noted by the independent reviewer from their scrutiny of the centre and candidate documentation are raised with the centre by a Cambridge English Assessment Manager." },
+      { kind: "p", text: "If you are dissatisfied after receiving your Stage One report, you have the opportunity to submit an appeal for review by an Independent Appeals Investigator – a Stage Two Appeal." },
+      { kind: "p", text: "You can request the Cambridge English Teaching Qualifications Stage Two Appeal Form from the Cambridge English Teaching Qualifications Appeals email address: TeachingAwardAppeals@CambridgeEnglish.org" },
+      { kind: "p", text: "A Stage Two Appeal must be submitted by you and not by a third party within two weeks of receiving the Stage One report." },
+      { kind: "p", text: "There is an administrative fee payable as part of the Stage Two Appeal, and the details of the fees can be found in the Cambridge English Teaching Qualifications Stage Two Appeal Form." },
+      { kind: "p", text: "You will be provided with a formal report from an Independent Appeals Investigator. There is no further re-assessment of your work at this stage. The Independent Appeals Investigator will only consider concerns raised regarding a centre's conduct, course provision and/or concerns about the way that Cambridge English handled the Stage One Appeal." },
+      { kind: "p", text: "Please note that Cambridge English is not able to investigate spoken comments, or incidents that took place during the course for which there is no record. It is also not possible for Cambridge English to intervene in the following:" },
+      { kind: "li", text: "contractual arrangements between centres and candidates" },
+      { kind: "li", text: "issues relating to the payment of fees" },
+      { kind: "li", text: "requests for refunds" },
+      { kind: "li", text: "issues relating to candidates' accommodation" },
+      { kind: "li", text: "the conduct of centre staff and tutors" },
+      { kind: "li", text: "end-of-course reports issued by the centre." },
+    ],
+  },
+  {
+    key: "assessment",
+    title: "Candidate guide to assessment",
+    confirm: null,
+    blocks: [
+      { kind: "h", text: "Course content" },
+      { kind: "p", text: "The course covers five topic areas. These are listed in Table 1 below." },
+      { kind: "h", text: "Programme delivery" },
+      { kind: "p", text: "Courses are designed to deliver an integrated programme. They are not designed to deliver each topic area as a block of learning and most sessions in the programme will make reference to subject matter covered in more than one area. For example, a language analysis session may include language analysis for the teacher (Topic 2, Language analysis and awareness); problems particular learners may have with a language area (Topic 1, Learners and teachers and the teaching and learning context); strategies for classroom teaching (Topic 4, Planning and resources and Topic 5, Developing teaching skills and professionalism). Over the course, you build up knowledge related to all the topics covered in the CELTA Syllabus while at the same time developing your classroom skills." },
+      { kind: "h", text: "Assessment" },
+      { kind: "p", text: "There are two modes of assessment:" },
+      { kind: "li", text: "written assignments which relate directly to one or more topics" },
+      { kind: "li", text: "continuous assessment of teaching practice, which includes planning, teaching and self-evaluation." },
+      { kind: "p", text: "The following table summarises how the assessment relates to the five topics. Written assignment titles are in italics." },
+      { kind: "h", text: "Table 1 – Assessment of CELTA Syllabus Topics" },
+      { kind: "h", text: "Assessment of written work" },
+      { kind: "p", text: "Written assignments are graded Pass/Fail. You must meet all the criteria for written work during the course (see page 12). The assessment criteria for each written assignment are detailed in the CELTA Syllabus. The full syllabus can be accessed on the Cambridge English website at www.CambridgeEnglish.org/teaching" },
+      { kind: "h", text: "Assessment of teaching practice" },
+      { kind: "p", text: "The assessment criteria for teaching practice are detailed in the Stage Two Progress Record in this booklet. Appendix 1 provides more detail about these criteria." },
+      { kind: "h", text: "Continuous assessment" },
+      { kind: "p", text: "Continuous assessment of teaching takes place throughout the course. Effective teaching is the result of a combination of skills which are acquired over time. In the early stages of the course, you are assessed against specific assessment criteria and partial performance related to what can be expected at that stage of the course. Towards the end of the course, while continuing to assess individual lessons with reference to specific criteria, tutors take a 'holistic' view of your performance which takes account of:" },
+      { kind: "li", text: "your development over the course" },
+      { kind: "li", text: "the consistency of your achievement in relation to all the assessment criteria" },
+      { kind: "li", text: "your ability to manage the whole learning process" },
+      { kind: "li", text: "the range of lesson types in which you have demonstrated competence" },
+      { kind: "li", text: "your ability to cope with learners at different levels" },
+      { kind: "li", text: "the amount of support given by the tutor (As with any kind of training more autonomy is expected at the end of the training process.)" },
+      { kind: "h", text: "Grading of individual lessons" },
+      { kind: "p", text: "Tutors make an overall assessment of each lesson in relation to the criteria relevant to the lesson and stage of the course. As the course progresses, they will also indicate what you need to do to achieve the standard expected at the end of the course." },
+      { kind: "h", text: "Final grading" },
+      { kind: "p", text: "The final grade is a holistic assessment rather than an average of grades and will take into account the factors outlined above. Weak lessons early in the course do not count against you if sufficient progress is achieved. Lessons in the early part of the course will be graded in relation to the stage of the course and your lessons in the second half of the course need to show that progress has been made and that you are able to plan and teach more independently. A satisfactory final lesson does not automatically indicate an overall pass. An overall pass will depend on whether you have been able to achieve the main assessment objectives in the course as a whole. See also Appendix 2 – CELTA performance descriptors, which describes performance required for each passing grade." },
+      { kind: "h", text: "Charting progress" },
+      { kind: "p", text: "Your progress over the course is charted in this record booklet, which is called CELTA 5. You also receive written feedback after each teaching practice session. In addition, you receive at least one individual tutorial during the course." },
+    ],
+  },
+];

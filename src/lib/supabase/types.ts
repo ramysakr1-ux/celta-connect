@@ -1752,6 +1752,12 @@ export interface Database {
           // trainee. Null means drafted but not visible. Separate from
           // completed_at, which only means the tutor finished writing it.
           stage1_released_at: string | null;
+          // Migration 0247 -- the two confirmations the real CELTA 5's own
+          // static sections end in.
+          portfolio_terms_confirmed_at: string | null;
+          portfolio_terms_signature_name: string | null;
+          appeals_read_confirmed_at: string | null;
+          appeals_read_signature_name: string | null;
           // connect-build-specs-5-gaps-2026-08-21.md item 4 (migration
           // 0186): Stage 1 had no candidate signature column at all before this.
           stage1_candidate_signature_name: string | null;

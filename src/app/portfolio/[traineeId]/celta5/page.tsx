@@ -40,6 +40,7 @@ import { FinalizeRecordForm } from "@/app/dashboard/trainer/trainees/[id]/celta5
 import { ReleaseFinalReportForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/release-final-report-form";
 import { SignatureLedger } from "@/app/dashboard/trainer/trainees/[id]/celta5/signature-ledger";
 import { AbsencePanel } from "@/app/portfolio/[traineeId]/celta5/absence-panel";
+import { BookletSections } from "@/app/portfolio/[traineeId]/celta5/booklet-sections";
 import { computeSignatureLedger } from "@/lib/celta5-signatures";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
@@ -1193,6 +1194,18 @@ export default async function PortfolioCelta5Page({
             <p className="mt-2 text-sm text-muted">Not yet signed off by the candidate.</p>
           )}
         </div>
+
+        {/* The booklet's own static sections, in Cambridge's order, with
+            each confirmation where Cambridge puts it -- Ramy, 30 Aug 2026:
+            "I wanted them to read everything in there." */}
+        <BookletSections
+          portfolioConfirmedAt={record.portfolio_terms_confirmed_at}
+          portfolioSignatureName={record.portfolio_terms_signature_name}
+          appealsConfirmedAt={record.appeals_read_confirmed_at}
+          appealsSignatureName={record.appeals_read_signature_name}
+          canSign={!isStaff && !assessorCourseId && viewer?.id === traineeId}
+          viewerSignatureName={viewer?.signature_name ?? null}
+        />
 
         <AbsencePanel absences={absences ?? []} hoursAttended={record.hours_attended} totalHours={course?.total_hours ?? 120} />
 

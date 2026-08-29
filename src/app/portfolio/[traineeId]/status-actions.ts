@@ -524,3 +524,50 @@ export async function signAssignmentOutcome(_prevState: AbsenceFormState, formDa
   revalidatePath(`/portfolio/${trainee.id}/celta5`);
   return { error: null };
 }
+
+// Ramy, 30 Aug 2026: the real CELTA 5 ends two of its static sections with
+// a candidate confirmation -- "I confirm that I have understood and accept
+// the above requirements for the CELTA portfolio", and "I confirm that I
+// have read the Cambridge English Appeals Procedure".
+//
+// Those are declarations about text the candidate has just read, which is
+// why the whole section has to be on the page rather than behind a link.
+// Signed in place, section by section, in Cambridge's own order.
+export async function confirmCelta5Section(_prevState: AbsenceFormState, formData: FormData): Promise<AbsenceFormState> {
+  const trainee = await requireRole("trainee");
+
+  const section = formData.get("section");
+  if (section !== "portfolio" && section !== "appeals") {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase.from("profiles").select("signature_name, full_name").eq("id", trainee.id).maybeSingle();
+  const name = profile?.signature_name?.trim() || profile?.full_name?.trim();
+  if (!name) return { error: "Set your signature name first." };
+
+  const now = new Date().toISOString();
+  const patch =
+    section === "portfolio"
+      ? { portfolio_terms_confirmed_at: now, portfolio_terms_signature_name: name }
+      : { appeals_read_confirmed_at: now, appeals_read_signature_name: name };
+
+  // Idempotent by column: re-confirming would only rewrite the date, and
+  // the date is the evidence. The UI hides the control once signed, this
+  // is the guard behind it.
+  const { data: existing } = await supabase
+    .from("celta5_records")
+    .select("portfolio_terms_confirmed_at, appeals_read_confirmed_at")
+    .eq("trainee_id", trainee.id)
+    .maybeSingle();
+  if (!existing) return { error: "Could not find your record." };
+  if (section === "portfolio" ? existing.portfolio_terms_confirmed_at : existing.appeals_read_confirmed_at) {
+    return { error: null };
+  }
+
+  const { error } = await supabase.from("celta5_records").update(patch).eq("trainee_id", trainee.id);
+  if (error) return { error: "Could not save. Try again." };
+
+  revalidatePath(`/portfolio/${trainee.id}/celta5`);
+  return { error: null };
+}
