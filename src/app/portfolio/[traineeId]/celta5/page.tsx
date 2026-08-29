@@ -47,6 +47,8 @@ import { ProgressOverview } from "@/app/portfolio/[traineeId]/celta5/booklet/pro
 import { AttendanceRecord, ObservationsRecord, AssessedTpRecord } from "@/app/portfolio/[traineeId]/celta5/booklet/records";
 import { FinalDayChecks, type FinalCheck } from "@/app/portfolio/[traineeId]/celta5/booklet/final-day";
 import { WrittenAssignmentsRecord } from "@/app/portfolio/[traineeId]/celta5/booklet/written-assignments";
+import { CriteriaGrid, StageLocked, type CriterionRow, type Mark } from "@/app/portfolio/[traineeId]/celta5/booklet/criteria-grid";
+import { Appendix1, Appendix2 } from "@/app/portfolio/[traineeId]/celta5/booklet/appendices";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { computeSignatureLedger } from "@/lib/celta5-signatures";
 import { computeStage3Triggers, stage3Expected, isStage3Mandatory, STAGE3_TRIGGER_LABELS } from "@/lib/stage3-triggers";
@@ -401,6 +403,26 @@ export default async function PortfolioCelta5Page({
       };
     });
 
+    // Criteria rows for the Stage Two / Stage Three grids. Topic bands are
+    // printed on the first row of each section, the way the form does it.
+    const toMark = (v: string | null | undefined): Mark =>
+      v === "S+" || v === "S" || v === "N" || v === "X" ? v : null;
+    const buildCriteriaRows = (which: "stage2" | "stage3"): CriterionRow[] =>
+      CELTA_CRITERIA_SECTIONS.flatMap((sec) =>
+        sec.codes.map((code, i) => {
+          const m = byCode.get(code);
+          return {
+            code,
+            text: CRITERIA_LABELS[code] ?? code,
+            topic: i === 0 ? `TOPIC ${sec.section} – ${sec.title.toUpperCase()}` : undefined,
+            candidate: which === "stage2" ? toMark(m?.candidate_status) : null,
+            tutor: toMark(which === "stage2" ? m?.tutor_status_stage2 : m?.tutor_status_stage3),
+          };
+        })
+      );
+    const stage2Rows = buildCriteriaRows("stage2");
+    const stage3Rows = buildCriteriaRows("stage3");
+
     // Handbook 10.2 / CELTA 5 p.20 -- who must be given Stage Three.
     // "Not making the expected progress" is read from TPs taught after the
     // Stage 2 tutorial; assessedTpOutcomes below is ordered by teaching
@@ -485,12 +507,100 @@ export default async function PortfolioCelta5Page({
             <AssessedTpRecord rows={assessedTpRows} />
           </BookletSection>
 
+          <BookletSection id="c5-stage1" num="Section 9" title="Stage One progress record">
+            <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 10 }}>
+              This form will be completed by your tutor in the first third of the course. Some centres may hold a
+              tutorial with you at the same time, but this is not obligatory. Having read and agreed with the summary,
+              sign and date the report.
+            </p>
+            {record.stage1_released_at ? (
+              <>
+                <div className="c5-box" style={{ marginBottom: 10 }}>
+                  <span className="lab">Strengths</span>
+                  <p className="text-[11px] leading-relaxed text-ink">{record.stage1_strengths || "—"}</p>
+                </div>
+                <div className="c5-box" style={{ marginBottom: 10 }}>
+                  <span className="lab">Action plan for next stage of the course</span>
+                  <p className="text-[11px] leading-relaxed text-ink">{record.stage1_action_plan || "—"}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-[11px]">
+                  <span>
+                    <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
+                    <strong className="text-ink">{record.stage1_tutor_signature_name ?? "—"}</strong>
+                  </span>
+                  <span>
+                    <span className="text-muted">Candidate&rsquo;s signature:</span>{" "}
+                    <strong className="text-ink">{record.stage1_candidate_signature_name ?? "not yet signed"}</strong>
+                  </span>
+                </div>
+              </>
+            ) : (
+              <StageLocked>
+                Not released yet. Your tutor is preparing your Stage One record from your TP feedback so far — you&rsquo;ll
+                be notified and asked to sign once it&rsquo;s ready.
+              </StageLocked>
+            )}
+          </BookletSection>
+
+          <BookletSection
+            id="c5-stage2"
+            num={`Section 10${record.stage2_hours_taught != null ? ` · Hours taught: ${record.stage2_hours_taught}` : ""}`}
+            title="Stage Two progress record"
+          >
+            <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 10 }}>
+              With this record, a tutor will conduct a one-to-one tutorial with you. In the column marked
+              &lsquo;You&rsquo;, indicate the extent to which you feel you have demonstrated each of the criteria at
+              this stage: &lsquo;S+&rsquo; above the standard, &lsquo;S&rsquo; meets the standard, &lsquo;N&rsquo; not
+              to standard, &lsquo;X&rsquo; not applicable at this stage.
+            </p>
+            <CriteriaGrid
+              rows={stage2Rows}
+              showCandidateColumn
+              candidateEditable={false}
+              tutorLocked={!stage2Submitted}
+              tutorLockedLabel="Hidden until you submit"
+            />
+          </BookletSection>
+
+          <BookletSection id="c5-stage3" num="Section 11" title="Stage Three progress record">
+            <p className="text-[10px] leading-relaxed text-muted" style={{ marginBottom: 10 }}>
+              This record must be completed by tutors in the final third of the course for all candidates who: a) were
+              not to standard at Stage 2; b) were at standard at Stage 2 but are not making the expected progress in
+              the second half of the course; c) were above standard at Stage 2 but are not making the expected
+              progress in the second half of the course. A tutorial must be given and the whole record completed.
+            </p>
+            {stage3IsExpected ? (
+              record.stage3_finalized_at ? (
+                <CriteriaGrid rows={stage3Rows} showCandidateColumn={false} candidateEditable={false} tutorLocked={false} />
+              ) : (
+                <StageLocked>
+                  {stage3TriggerReason
+                    ? `Stage Three applies to you — ${stage3TriggerReason.toLowerCase()}. Your tutor will complete it in the final third of the course.`
+                    : "Your tutor will complete this in the final third of the course."}
+                </StageLocked>
+              )
+            ) : (
+              <StageLocked>
+                Stage Three is completed for candidates who are not making the expected progress in the second half of
+                the course. It does not currently apply to you.
+              </StageLocked>
+            )}
+          </BookletSection>
+
           <BookletSection id="c5-assignments" num="Section 8" title="Record of written assignments">
             <WrittenAssignmentsRecord rows={writtenAssignmentRows} />
           </BookletSection>
 
           <BookletSection id="c5-final" num="Section 12" title="To be completed on the final day of the course">
             <FinalDayChecks checks={finalChecks} />
+          </BookletSection>
+
+          <BookletSection id="c5-appendix1" num="Appendix 1" title="CELTA criteria">
+            <Appendix1 />
+          </BookletSection>
+
+          <BookletSection id="c5-appendix2" num="Appendix 2" title="CELTA performance descriptors">
+            <Appendix2 />
           </BookletSection>
         </div>
 
