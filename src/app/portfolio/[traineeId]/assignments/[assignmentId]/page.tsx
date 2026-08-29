@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AssignmentResultSignature } from "@/app/portfolio/[traineeId]/assignments/[assignmentId]/result-signature";
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -194,6 +195,22 @@ export default async function AssignmentDetailPage({
       <Link href={`/portfolio/${traineeId}/assignments`} className="text-sm text-muted hover:text-primary">
         ← All assignments
       </Link>
+
+      {/* Ramy, 30 Aug 2026: the one signature a trainee could not give.
+          Migration 0245 added the columns and the signature ledger listed
+          the row, but nothing rendered a control -- so the booklet export
+          was gated on a signature with no button behind it. */}
+      <AssignmentResultSignature
+        assignmentId={assignment.id}
+        round={round}
+        status={roundStatus}
+        signedAt={round === "resubmission" ? assignment.resubmission_outcome_signed_at : assignment.first_outcome_signed_at}
+        signatureName={
+          round === "resubmission" ? assignment.resubmission_outcome_signature_name : assignment.first_outcome_signature_name
+        }
+        viewerSignatureName={viewer?.signature_name ?? null}
+        canSign={!isStaff && viewer?.id === traineeId}
+      />
 
       <div className="flex items-start justify-between gap-4">
         <div>
