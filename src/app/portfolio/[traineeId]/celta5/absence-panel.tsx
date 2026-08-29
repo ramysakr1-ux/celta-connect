@@ -87,7 +87,9 @@ export function AbsencePanel({
             </li>
           ))}
         </ul>
-      ) : (
+      ) : booklet ? null : (
+        // Redundant inside the booklet: Cambridge's own two tables are
+        // already on the page, showing their empty rows.
         <p className="text-sm text-muted">No absences recorded.</p>
       )}
 

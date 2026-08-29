@@ -49,7 +49,6 @@ import { FinalDayChecks, type FinalCheck } from "@/app/portfolio/[traineeId]/cel
 import { WrittenAssignmentsRecord } from "@/app/portfolio/[traineeId]/celta5/booklet/written-assignments";
 import { CriteriaGrid, StageLocked, type CriterionRow, type Mark } from "@/app/portfolio/[traineeId]/celta5/booklet/criteria-grid";
 import { Appendix1, Appendix2 } from "@/app/portfolio/[traineeId]/celta5/booklet/appendices";
-import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { computeSignatureLedger } from "@/lib/celta5-signatures";
 import { computeStage3Triggers, stage3Expected, isStage3Mandatory, STAGE3_TRIGGER_LABELS } from "@/lib/stage3-triggers";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
@@ -391,11 +390,20 @@ export default async function PortfolioCelta5Page({
     // same rule the PDF now follows, so the two cannot disagree.
     // Cambridge prints the four in this order on the form; these are the
     // real assignment_type values, not display labels.
-    const ASSIGNMENT_ORDER = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
+    // Cambridge prints these four titles verbatim on p.12, in this order.
+    // The app's own ASSIGNMENT_INFO labels differ -- "Language Skills
+    // Related Tasks" against Cambridge's "Skills assignment", and title
+    // case against sentence case -- and on this page it is Cambridge's
+    // wording that has to appear, since an assessor reads it as their form.
+    const ASSIGNMENT_ORDER = [
+      { type: "Focus on Learner", title: "Focus on the learner" },
+      { type: "LRT", title: "Language related tasks" },
+      { type: "Skills", title: "Skills assignment" },
+      { type: "LfC", title: "Lessons from the classroom" },
+    ] as const;
     const assignmentByType = new Map((assignments ?? []).map((a) => [a.assignment_type, a]));
-    const writtenAssignmentRows = ASSIGNMENT_ORDER.map((type) => {
+    const writtenAssignmentRows = ASSIGNMENT_ORDER.map(({ type, title }) => {
       const a = assignmentByType.get(type);
-      const info = ASSIGNMENT_INFO[type as keyof typeof ASSIGNMENT_INFO];
       const onResubmission = !!a && a.resubmission_status !== "not_submitted";
       const result = !a
         ? "— not yet submitted"
@@ -409,7 +417,7 @@ export default async function PortfolioCelta5Page({
                 ? "Resubmission required"
                 : "— not yet graded";
       return {
-        title: info?.title ?? type,
+        title,
         result,
         signatureName: onResubmission
           ? a?.resubmission_outcome_signature_name ?? null
