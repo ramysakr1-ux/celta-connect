@@ -368,9 +368,17 @@ export default async function PortfolioLayout({
                       judgement; the reason stops at the centre. Found 30 Aug
                       2026 while adding the arrangements strip to the assessor
                       landing -- it was reaching an assessor through the
-                      title attribute. */}
+                      title attribute.
+                      
+                      Narrowed again the same day: Ramy, asked who is entitled
+                      to read the free text, said "tutors". So the tooltip is
+                      the course tutors' alone -- not admins, not the assessor,
+                      and never the candidate (this whole header only renders
+                      on the staff/assessor view). Everyone else who needs to
+                      act on it still sees the badge, and the arrangements
+                      themselves, which are the operational part. */}
                   <span
-                    title={assessorCourseId ? undefined : trainee.special_consideration}
+                    title={viewer?.role === "trainer" ? (trainee.special_consideration ?? undefined) : undefined}
                     className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-semibold text-ink"
                   >
                     <span className="size-1.5 shrink-0 rounded-full bg-current" />

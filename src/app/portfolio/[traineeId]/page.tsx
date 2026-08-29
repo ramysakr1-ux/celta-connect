@@ -461,10 +461,15 @@ export default async function CourseStreamPage({
           {isStaff && trainee.course_status === "active" ? (
             <CandidateStatusCard
               traineeId={traineeId}
-              specialConsideration={trainee.special_consideration}
+              // Ramy, 30 Aug 2026, asked who should be able to read the
+              // candidate's own words about why they need consideration:
+              // "tutors". Not admins. The arrangements below stay visible to
+              // any staff member who has to act on them; the reason, and the
+              // evidence document behind it, are the course tutors' alone.
+              specialConsideration={viewer?.role === "trainer" ? trainee.special_consideration : null}
               specialConsiderationArrangements={trainee.special_consideration_arrangements}
               specialConsiderationEvidenceUrl={
-                trainee.special_consideration_evidence_url
+                viewer?.role === "trainer" && trainee.special_consideration_evidence_url
                   ? (await supabase.storage.from("special-consideration-evidence").createSignedUrl(trainee.special_consideration_evidence_url, 3600)).data
                       ?.signedUrl ?? null
                   : null
