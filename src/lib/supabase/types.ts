@@ -1171,6 +1171,15 @@ export interface Database {
           reason: string | null;
           work_made_up: string | null;
           tutor_comment: string | null;
+          // migration 0249 -- the columns CELTA 5 p.9 actually prints.
+          // tutor_signature_name is deliberately separate from
+          // tutor_comment: the unavoidable-absences table asks for a
+          // signature only, the other table asks for a comment AND a
+          // signature, so one column cannot serve both honestly.
+          session_missed: string | null;
+          candidate_comment: string | null;
+          tutor_signature_name: string | null;
+          tutor_signed_at: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["attendance_absences"]["Row"]> & {

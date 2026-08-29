@@ -1204,24 +1204,28 @@ export default async function PortfolioCelta5Page({
       focus: o.lesson_focus ?? "",
       kind: o.filmed ? "Filmed" : "Experienced teacher",
     }));
+    // Cambridge asks the two absence tables for different things: the
+    // unavoidable table wants a tutor SIGNATURE, the other table wants a
+    // tutor COMMENT and a signature. Migration 0249 separated those, so
+    // each column here now comes from the field that actually means it.
     const assessorUnavoidable = (absences ?? [])
       .filter((a) => a.category === "unavoidable")
       .map((a) => ({
         date: a.session_date ?? "",
-        session: "",
+        session: a.session_missed ?? "",
         reason: a.reason ?? "",
         madeUp: a.work_made_up ?? "",
-        tutor: a.tutor_comment ?? "",
+        tutor: a.tutor_signature_name ?? "",
       }));
     const assessorOther = (absences ?? [])
       .filter((a) => a.category === "other")
       .map((a) => ({
         date: a.session_date ?? "",
-        session: "",
+        session: a.session_missed ?? "",
         reason: a.reason ?? "",
         madeUp: a.work_made_up ?? "",
-        candidate: "",
-        tutor: a.tutor_comment ?? "",
+        candidate: a.candidate_comment ?? "",
+        tutor: [a.tutor_comment, a.tutor_signature_name].filter(Boolean).join(" \u00b7 "),
       }));
 
     return (

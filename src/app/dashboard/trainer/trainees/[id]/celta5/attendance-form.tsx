@@ -70,8 +70,10 @@ export function AttendanceForm({
               <tr>
                 <th className="text-sm text-muted">Date</th>
                 <th className="text-sm text-muted">Category</th>
+                <th className="text-sm text-muted">Session missed</th>
                 <th className="text-sm text-muted">Reason</th>
                 <th className="text-sm text-muted">Made up</th>
+                <th className="text-sm text-muted">Signed</th>
               </tr>
             </thead>
             <tbody>
@@ -79,8 +81,10 @@ export function AttendanceForm({
                 <tr key={a.id}>
                   <td className="text-ink">{a.session_date ?? "--"}</td>
                   <td className="text-muted capitalize">{a.category}</td>
+                  <td className="text-muted">{a.session_missed ?? "--"}</td>
                   <td className="text-muted">{a.reason ?? "--"}</td>
                   <td className="text-muted">{a.work_made_up ?? "--"}</td>
+                  <td className="text-muted">{a.tutor_signature_name ?? "--"}</td>
                 </tr>
               ))}
             </tbody>
@@ -119,9 +123,38 @@ export function AttendanceForm({
           className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
         <input
+          name="session_missed"
+          type="text"
+          placeholder="Session missed (e.g. Input: teaching receptive skills)"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        />
+        <input
           name="work_made_up"
           type="text"
           placeholder="How work was made up"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        />
+        {/* Cambridge asks the two tables for different things: unavoidable
+            absences take a tutor signature only, other absences take a
+            candidate comment plus a tutor comment AND signature. Both are
+            offered here; the booklet renders whichever the row's category
+            calls for. */}
+        <input
+          name="candidate_comment"
+          type="text"
+          placeholder="Candidate comment (other absences/late arrivals only)"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        />
+        <input
+          name="tutor_comment"
+          type="text"
+          placeholder="Tutor comment (other absences/late arrivals only)"
+          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
+        />
+        <input
+          name="tutor_signature_name"
+          type="text"
+          placeholder="Tutor signature -- type your name to sign this row"
           className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-sm text-ink outline-none focus:border-primary"
         />
         {absenceState.error ? (

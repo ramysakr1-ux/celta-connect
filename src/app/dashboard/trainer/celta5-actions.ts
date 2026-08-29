@@ -77,14 +77,24 @@ export async function addAbsence(
   }
 
   const supabase = await createClient();
+  // migration 0249 -- the remaining columns CELTA 5 p.9 prints. The tutor
+  // signature is stamped with its own timestamp rather than leaning on
+  // created_at: a row can be logged first and signed later, and the date
+  // beside a signature is the evidence, so it has to be the date of the
+  // signature and not of the row.
+  const tutorSignature = optionalString(formData.get("tutor_signature_name"));
   const { error } = await supabase.from("attendance_absences").insert({
     course_id: trainer.course_id!,
     trainee_id: traineeId,
     category,
     session_date: optionalString(formData.get("session_date")),
+    session_missed: optionalString(formData.get("session_missed")),
     reason: optionalString(formData.get("reason")),
     work_made_up: optionalString(formData.get("work_made_up")),
+    candidate_comment: optionalString(formData.get("candidate_comment")),
     tutor_comment: optionalString(formData.get("tutor_comment")),
+    tutor_signature_name: tutorSignature,
+    tutor_signed_at: tutorSignature ? new Date().toISOString() : null,
   });
 
   if (error) {
