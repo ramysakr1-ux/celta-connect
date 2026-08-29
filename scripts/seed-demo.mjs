@@ -25,10 +25,19 @@ const url = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)[1].trim();
 const key = env.match(/SUPABASE_SERVICE_ROLE_KEY=(.+)/)[1].trim();
 const supabase = createClient(url, key);
 
+// toISOString() converts to UTC, which moves the date back a day for any
+// centre east of Greenwich -- seeding at local midnight in Istanbul
+// (GMT+3) produced dates one day earlier than intended, so a course
+// anchored to a Monday came out on the Sunday. Format from the local
+// calendar fields instead.
+function isoOf(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function isoDaysFromNow(days) {
   const d = new Date();
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return isoOf(d);
 }
 
 // A CELTA course runs Monday to Friday for four weeks. Anchoring the demo
@@ -46,8 +55,19 @@ function mondayNearest(daysFromNow) {
   return d;
 }
 
-function isoOf(d) {
-  return d.toISOString().slice(0, 10);
+// Nth teaching day of the course, 1-based, skipping weekends. Timetable
+// events were dated relative to TODAY, which meant they drifted onto
+// Saturdays and past the course's own end date depending on when the seed
+// ran. A CELTA timetable has 20 teaching days; this puts each event on one
+// of them.
+function courseDay(start, n) {
+  const d = new Date(start);
+  let left = n - 1;
+  while (left > 0) {
+    d.setDate(d.getDate() + 1);
+    if (d.getDay() >= 1 && d.getDay() <= 5) left -= 1;
+  }
+  return isoOf(d);
 }
 
 async function main() {
@@ -73,7 +93,20 @@ async function main() {
     for (const p of remaining ?? []) {
       await supabase.auth.admin.deleteUser(p.id).catch(() => {});
     }
-    await supabase.from("profiles").delete().eq("center_id", existing.id);
+    // centre_owner_actions references profiles.id and was added in
+    // migration 0193, AFTER centre_hard_delete was written in 0156 -- so
+    // the hard-delete function has never known about it, and a centre with
+    // any owner action logged against it cannot be deleted. Clear the rows
+    // for this centre's own profiles first. (The function itself is fixed
+    // in migration 0250; this stays so the seed works against a database
+    // that has not run it yet.)
+    const { data: toDelete } = await supabase.from("profiles").select("id").eq("center_id", existing.id);
+    const ids = (toDelete ?? []).map((p) => p.id);
+    if (ids.length > 0) {
+      await supabase.from("centre_owner_actions").delete().in("actor_profile_id", ids);
+    }
+    const { error: profileDeleteErr } = await supabase.from("profiles").delete().eq("center_id", existing.id);
+    if (profileDeleteErr) console.warn("  profile delete:", profileDeleteErr.message);
 
     // 0156_centre_hard_delete.sql is the same function the real "Delete
     // this centre" admin flow uses -- reused here rather than a raw
@@ -114,6 +147,11 @@ async function main() {
   // the Monday a fortnight back, end on the Friday four weeks later. That
   // is 20 teaching days across exactly four calendar weeks, which is what
   // the week picker and "Day N of 20" both assume.
+  // Anchored so "today" falls late in week 4 -- around day 15-16 of 20.
+  // Late enough that Stage One and Stage Two are released and signed, most
+  // TPs graded and three assignments marked, so the demo shows the states
+  // a locked, early-course record never can, while the course is still
+  // running rather than finished.
   const courseStart = mondayNearest(-14);
   const courseEnd = new Date(courseStart);
   courseEnd.setDate(courseStart.getDate() + 25); // Mon + 25 = Friday of week 4
@@ -493,25 +531,217 @@ async function main() {
     }
   }
 
-  // --- Timetable (capture ids: TP events feed the volunteer demo below) ---
-  const events = [
-    { type: "input_session", title: "Introduction to CELTA & Learner Needs", offset: -14 },
-    { type: "tp", title: "TP1", offset: -12 },
-    { type: "input_session", title: "Language Analysis Workshop", offset: -11 },
-    { type: "tp", title: "TP2", offset: -9 },
-    { type: "assignment_due", title: "Focus on Learner due", offset: -10, linked: "Focus on Learner" },
-    { type: "tp", title: "TP3", offset: -6 },
-    { type: "input_session", title: "Receptive Skills Methodology", offset: -5 },
-    { type: "assignment_due", title: "LRT due", offset: -5, linked: "LRT" },
-    { type: "tp", title: "TP4", offset: -3 },
-    { type: "tp", title: "TP5", offset: 2 },
-    { type: "input_session", title: "Teaching Vocabulary", offset: 5 },
-    // Real Zoom link (not test data) -- volunteer-view-full-spec.md's own
-    // mockup pairs a room with a Join online button on the featured next
-    // class, so the demo's own next TP needs one too, not just an
-    // in-person-only example.
-    { type: "tp", title: "TP6", offset: 7, zoomUrl: "https://zoom.us/j/5551234567" },
+  // ---------------------------------------------------------------------
+  // The real four-week timetable, ported from Ramy's own design file
+  // ("Timetable View (standalone)") rather than invented: 179 sessions
+  // across 20 teaching days and nine time bands. d = teaching day 1-20,
+  // b = band index into BAND_TIMES below.
+  //
+  // Replaces the twelve scattered events this seed used to create, which
+  // were dated relative to the day the seed ran and so drifted onto
+  // weekends and past the course's own end date.
+  // ---------------------------------------------------------------------
+  const BAND_TIMES = ["10:00", "10:45", "11:45", "12:45", "13:30", "14:15", "15:15", "16:15", "17:15"];
+
+  const designSessions = [
+    { d: 1, b: 1, type: "input_session", title: "Course introduction", tag: "whole_group", detail: "Timetable, CELTA 5, portfolio", linked: null, tp: null },
+    { d: 1, b: 2, type: "supervised_session", title: "Demo lesson", tag: "group_room", detail: "Observation task", linked: null, tp: null },
+    { d: 1, b: 3, type: "supervised_session", title: "Demo lesson", tag: "group_room", detail: "Observation task", linked: null, tp: null },
+    { d: 1, b: 4, type: "supervised_session", title: "Unassessed teach", tag: "group_room", detail: "All six meet the learners", linked: null, tp: null },
+    { d: 1, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 1, b: 6, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
+    { d: 1, b: 7, type: "input_session", title: "Classroom management", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 1, b: 8, type: "input_session", title: "Classroom management / Zoom", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 1, b: 9, type: "input_session", title: "Focus on the Learner", tag: "whole_group", detail: "The assignment session", linked: null, tp: null },
+    { d: 2, b: 1, type: "tp", title: "TP1 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 1 },
+    { d: 2, b: 2, type: "tp", title: "TP1 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 1 },
+    { d: 2, b: 3, type: "tp", title: "TP1 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 1 },
+    { d: 2, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
+    { d: 2, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 2, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 2, b: 7, type: "input_session", title: "Lesson planning input", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 2, b: 8, type: "input_session", title: "Receptive skills", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 2, b: 9, type: "assignment_due", title: "Assignment 3 Q&A", tag: null, detail: "Released the evening before", linked: null, tp: null },
+    { d: 3, b: 1, type: "tp", title: "TP1 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 1 },
+    { d: 3, b: 2, type: "tp", title: "TP1 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 1 },
+    { d: 3, b: 3, type: "tp", title: "TP1 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 1 },
+    { d: 3, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
+    { d: 3, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 3, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 3, b: 7, type: "input_session", title: "Eliciting and concept checking", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 3, b: 8, type: "input_session", title: "Teaching vocabulary", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 3, b: 9, type: "assignment_due", title: "Assignment 2 (LRT) Q&A", tag: null, detail: "Released the evening before", linked: "LRT", tp: null },
+    { d: 4, b: 1, type: "tp", title: "TP2 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 2 },
+    { d: 4, b: 2, type: "tp", title: "TP2 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 2 },
+    { d: 4, b: 3, type: "tp", title: "TP2 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 2 },
+    { d: 4, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
+    { d: 4, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 4, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 4, b: 7, type: "input_session", title: "PPP", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 4, b: 8, type: "input_session", title: "Text-based teaching", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 4, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    { d: 5, b: 1, type: "tp", title: "TP2 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 2 },
+    { d: 5, b: 2, type: "tp", title: "TP2 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 2 },
+    { d: 5, b: 3, type: "tp", title: "TP2 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 2 },
+    { d: 5, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
+    { d: 5, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 5, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 5, b: 7, type: "input_session", title: "Sounds", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 5, b: 8, type: "input_session", title: "Language analysis", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 5, b: 9, type: "input_session", title: "Filmed observation 1", tag: "whole_group", detail: "With task", linked: null, tp: null },
+    { d: 6, b: 1, type: "tp", title: "TP3 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 3 },
+    { d: 6, b: 2, type: "tp", title: "TP3 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 3 },
+    { d: 6, b: 3, type: "tp", title: "TP3 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 3 },
+    { d: 6, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 DEF", linked: null, tp: null },
+    { d: 6, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 6, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 6, b: 7, type: "input_session", title: "Connected speech", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 6, b: 8, type: "input_session", title: "Stress and intonation", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 6, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    { d: 7, b: 1, type: "tp", title: "TP3 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 3 },
+    { d: 7, b: 2, type: "tp", title: "TP3 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 3 },
+    { d: 7, b: 3, type: "tp", title: "TP3 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 3 },
+    { d: 7, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 ABC", linked: null, tp: null },
+    { d: 7, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 7, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 7, b: 7, type: "input_session", title: "Guided discovery", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 7, b: 8, type: "input_session", title: "MFP", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 7, b: 9, type: "input_session", title: "Filmed observation 2", tag: "whole_group", detail: "With task", linked: null, tp: null },
+    { d: 8, b: 1, type: "tp", title: "TP4 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 4 },
+    { d: 8, b: 2, type: "tp", title: "TP4 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 4 },
+    { d: 8, b: 3, type: "tp", title: "TP4 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 4 },
+    { d: 8, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 DEF", linked: null, tp: null },
+    { d: 8, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 8, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 8, b: 7, type: "input_session", title: "Giving feedback on tasks", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 8, b: 8, type: "input_session", title: "Error correction", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 8, b: 9, type: "milestone", title: "Writing Stage 2 report \u00b7 ABC", tag: "individual", detail: "Own time", linked: null, tp: null },
+    { d: 9, b: 1, type: "tp", title: "TP4 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 4 },
+    { d: 9, b: 2, type: "tp", title: "TP4 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 4 },
+    { d: 9, b: 3, type: "tp", title: "TP4 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 4 },
+    { d: 9, b: 4, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 9, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 9, b: 6, type: "supervised_session", title: "Stage 2 tutorials \u00b7 ABC", tag: "group_room", detail: "DEF writing reports", linked: null, tp: null },
+    { d: 9, b: 7, type: "input_session", title: "Filmed observation 3", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 9, b: 8, type: "supervised_session", title: "Stage 2 tutorials \u00b7 DEF", tag: "group_room", detail: "One-to-one, own tutor", linked: null, tp: null },
+    { d: 9, b: 9, type: "supervised_session", title: "GTKY / unassessed prep", tag: "group_room", detail: "Trainee planning session", linked: null, tp: null },
+    { d: 10, b: 1, type: "input_session", title: "Demo lesson", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 10, b: 2, type: "input_session", title: "Demo lesson", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 10, b: 3, type: "supervised_session", title: "Unassessed teach / GTKY", tag: "group_room", detail: "New level", linked: null, tp: null },
+    { d: 10, b: 4, type: "supervised_session", title: "Unassessed teach / GTKY", tag: "group_room", detail: "New level", linked: null, tp: null },
+    { d: 10, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 10, b: 6, type: "supervised_session", title: "Stage 1 tutorials \u00b7 ABC", tag: "group_room", detail: "DEF supervised \u00b7 assignments", linked: null, tp: null },
+    { d: 10, b: 7, type: "supervised_session", title: "Supervised \u00b7 assignments", tag: "group_room", detail: "Tutors marking", linked: null, tp: null },
+    { d: 10, b: 8, type: "supervised_session", title: "Stage 1 tutorials \u00b7 DEF", tag: "group_room", detail: "One-to-one, own tutor", linked: null, tp: null },
+    { d: 10, b: 9, type: "supervised_session", title: "Supervised \u00b7 assignments", tag: "group_room", detail: "Early finish, if done", linked: null, tp: null },
+    { d: 11, b: 1, type: "tp", title: "TP5 \u00b7 A", tag: "group_room", detail: "New level", linked: null, tp: 5 },
+    { d: 11, b: 2, type: "tp", title: "TP5 \u00b7 B", tag: "group_room", detail: "New level", linked: null, tp: 5 },
+    { d: 11, b: 3, type: "tp", title: "TP5 \u00b7 C", tag: "group_room", detail: "New level", linked: null, tp: 5 },
+    { d: 11, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 DEF", linked: null, tp: null },
+    { d: 11, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 11, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 11, b: 7, type: "input_session", title: "Functional language", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 11, b: 8, type: "input_session", title: "Test-Teach-Test", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 11, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    { d: 12, b: 1, type: "tp", title: "TP5 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 5 },
+    { d: 12, b: 2, type: "tp", title: "TP5 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 5 },
+    { d: 12, b: 3, type: "tp", title: "TP5 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 5 },
+    { d: 12, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 ABC", linked: null, tp: null },
+    { d: 12, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 12, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 12, b: 7, type: "input_session", title: "Productive skills \u2014 writing", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 12, b: 8, type: "input_session", title: "Teaching speaking", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 12, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    { d: 13, b: 1, type: "tp", title: "TP6 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 6 },
+    { d: 13, b: 2, type: "tp", title: "TP6 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 6 },
+    { d: 13, b: 3, type: "tp", title: "TP6 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 6 },
+    { d: 13, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 DEF", linked: null, tp: null },
+    { d: 13, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 13, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 13, b: 7, type: "input_session", title: "Lesson framework", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 13, b: 8, type: "input_session", title: "Teaching listening", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 13, b: 9, type: "input_session", title: "Syllabus planning \u00b7 ABC", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 14, b: 1, type: "tp", title: "TP6 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 6 },
+    { d: 14, b: 2, type: "tp", title: "TP6 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 6 },
+    { d: 14, b: 3, type: "tp", title: "TP6 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 6 },
+    { d: 14, b: 4, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised \u00b7 ABC", linked: null, tp: null },
+    { d: 14, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 14, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 14, b: 7, type: "input_session", title: "Language practice", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 14, b: 8, type: "input_session", title: "Drilling technique", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 14, b: 9, type: "input_session", title: "Syllabus planning \u00b7 DEF", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 15, b: 1, type: "milestone", title: "Late start \u00b7 10:00\u201310:45", tag: "individual", detail: null, linked: null, tp: null },
+    { d: 15, b: 2, type: "input_session", title: "Supervised review \u2014 presenting language", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
+    { d: 15, b: 3, type: "input_session", title: "Supervised review \u2014 phonology", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
+    { d: 15, b: 4, type: "input_session", title: "Supervised review \u2014 classroom management", tag: "whole_group", detail: "Submit for tutor check", linked: null, tp: null },
+    { d: 15, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 15, b: 6, type: "milestone", title: "Stage 3 tutorials", tag: "individual", detail: "By invitation", linked: null, tp: null },
+    { d: 15, b: 7, type: "milestone", title: "Stage 3 tutorials", tag: "individual", detail: "By invitation", linked: null, tp: null },
+    { d: 15, b: 8, type: "milestone", title: "Stage 3 tutorials", tag: "individual", detail: "By invitation", linked: null, tp: null },
+    { d: 15, b: 9, type: "assignment_due", title: "Early finish", tag: null, detail: null, linked: null, tp: null },
+    { d: 16, b: 1, type: "tp", title: "TP7 \u00b7 A", tag: "group_room", detail: null, linked: null, tp: 7 },
+    { d: 16, b: 2, type: "tp", title: "TP7 \u00b7 B", tag: "group_room", detail: null, linked: null, tp: 7 },
+    { d: 16, b: 3, type: "tp", title: "TP7 \u00b7 C", tag: "group_room", detail: null, linked: null, tp: 7 },
+    { d: 16, b: 4, type: "milestone", title: "Lesson planning", tag: "individual", detail: "Bookable \u00b7 DEF", linked: null, tp: null },
+    { d: 16, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 16, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 16, b: 7, type: "supervised_session", title: "Assessor meeting", tag: "group_room", detail: "Ahead of the visit", linked: null, tp: null },
+    { d: 16, b: 8, type: "input_session", title: "Filmed observation 4", tag: "whole_group", detail: "With task", linked: null, tp: null },
+    { d: 16, b: 9, type: "input_session", title: "Filmed observation 5", tag: "whole_group", detail: "With task", linked: null, tp: null },
+    { d: 17, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) due \u00b7 DEF", tag: null, detail: null, linked: "LRT", tp: null },
+    { d: 17, b: 1, type: "tp", title: "TP7 \u00b7 D", tag: "group_room", detail: null, linked: null, tp: 7 },
+    { d: 17, b: 2, type: "tp", title: "TP7 \u00b7 E", tag: "group_room", detail: null, linked: null, tp: 7 },
+    { d: 17, b: 3, type: "tp", title: "TP7 \u00b7 F", tag: "group_room", detail: null, linked: null, tp: 7 },
+    { d: 17, b: 4, type: "milestone", title: "Lesson planning", tag: "individual", detail: "Bookable \u00b7 ABC", linked: null, tp: null },
+    { d: 17, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 17, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Self-evaluations lead", linked: null, tp: null },
+    { d: 17, b: 7, type: "milestone", title: "LFC assignment writing", tag: "individual", detail: "Own time", linked: null, tp: null },
+    { d: 17, b: 8, type: "milestone", title: "LFC assignment writing", tag: "individual", detail: "Own time", linked: null, tp: null },
+    { d: 17, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    { d: 18, b: 0, type: "assignment_due", title: "Assignment 2 (LRT) due \u00b7 ABC", tag: null, detail: null, linked: "LRT", tp: null },
+    { d: 18, b: 1, type: "tp", title: "TP8 \u00b7 A", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
+    { d: 18, b: 2, type: "tp", title: "TP8 \u00b7 B", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
+    { d: 18, b: 3, type: "tp", title: "TP8 \u00b7 C", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
+    { d: 18, b: 4, type: "milestone", title: "Lesson planning", tag: "individual", detail: "Bookable \u00b7 DEF", linked: null, tp: null },
+    { d: 18, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 18, b: 6, type: "supervised_session", title: "Feedback", tag: "group_room", detail: "Written feedback only", linked: null, tp: null },
+    { d: 18, b: 7, type: "input_session", title: "Teaching literacy", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 18, b: 8, type: "supervised_session", title: "Portfolio check \u00b7 ABC", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
+    { d: 18, b: 9, type: "milestone", title: "Consultation", tag: "consultation", detail: "Bookable", linked: null, tp: null },
+    { d: 19, b: 0, type: "assignment_due", title: "Assignment 4 (LFC) due", tag: null, detail: "09:00", linked: null, tp: null },
+    { d: 19, b: 1, type: "tp", title: "TP8 \u00b7 D", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
+    { d: 19, b: 2, type: "tp", title: "TP8 \u00b7 E", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
+    { d: 19, b: 3, type: "tp", title: "TP8 \u00b7 F", tag: "group_room", detail: "Final assessed", linked: null, tp: 8 },
+    { d: 19, b: 4, type: "supervised_session", title: "Written feedback only", tag: "group_room", detail: "Final TP, no live session", linked: null, tp: null },
+    { d: 19, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 19, b: 6, type: "input_session", title: "Professional development and career advice", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 19, b: 7, type: "supervised_session", title: "Final portfolio check", tag: "group_room", detail: "Every field, every signature", linked: null, tp: null },
+    { d: 20, b: 1, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 20, b: 2, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 20, b: 3, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 20, b: 4, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 20, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
+    { d: 20, b: 6, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
+    { d: 20, b: 7, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
   ];
+
+  // --- Timetable (capture ids: TP events feed the volunteer demo below) ---
+  // Built from designSessions above: every card in Ramy's own timetable,
+  // on its real teaching day and time band. TP6 keeps the working Zoom
+  // link the volunteer demo needs -- it is the course's "next TP" and the
+  // volunteer view pairs a room with a Join button on it.
+  const events = designSessions.map((x) => ({
+    type: x.type,
+    title: x.title,
+    day: x.d,
+    time: BAND_TIMES[x.b],
+    tag: x.tag,
+    detail: x.detail,
+    linked: x.linked,
+    tpNumber: x.tp,
+    zoomUrl:
+      x.title === "TP6 \u00b7 A" || x.title === "TP6 \u00b7 D" ? "https://zoom.us/j/5551234567" : null,
+  }));
   const { data: timetableRows } = await supabase
     .from("course_timetable_events")
     .insert(
@@ -519,8 +749,12 @@ async function main() {
         course_id: course.id,
         type: e.type,
         title: e.title,
-        event_date: isoDaysFromNow(e.offset),
+        event_date: courseDay(courseStart, e.day),
+        event_time: e.time ?? null,
+        tag: e.tag ?? null,
+        detail: e.detail ?? null,
         linked_assignment_type: e.linked ?? null,
+        linked_tp_number: e.tpNumber ?? null,
         zoom_url: e.zoomUrl ?? null,
         // Real trainer-facing timetable events link a TP calendar day to its
         // rotation number (course_timetable_events.linked_tp_number) so the
