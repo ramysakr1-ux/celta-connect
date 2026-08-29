@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
-import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isMctOnCourse } from "@/lib/course-mct";
@@ -40,8 +40,16 @@ export default async function TrainerTimetablePage({
   const session = await getCurrentProfile();
   const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner" ? session.profile : null;
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
-  const tourMode = assessorCourseId ? await isAssessorTourMode() : false;
-  if (!trainer && !tourMode) redirect("/login");
+  // Gates on the assessor's own course, NOT on tour mode. Ramy, 29 Aug
+  // 2026: "all those assessor links don't really work." Two of the six
+  // cohort documents in the pack -- "Course timetable" and "Lesson plans
+  // for the day" -- link straight here (assessor/page.tsx's
+  // COHORT_DOC_HREF), and an assessor who hasn't taken the optional tour
+  // has no tour cookie, so both bounced to a login they cannot use. Tour
+  // mode decides which TABS the hub shows, which is a presentation
+  // choice; it was never meant to be the authorization gate. Same shape
+  // as grades-report and roster, the two pack links that did work.
+  if (!trainer && !assessorCourseId) redirect("/login");
 
   const { lock_error, date: lockErrorDate, half: lockErrorHalf, run: lockErrorRun, mode } = await searchParams;
   const supabase = trainer ? await createClient() : createAdminClient();
