@@ -16,6 +16,7 @@ import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 import { DesignerCredit } from "@/components/designer-credit";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import { AssessorMeetingCard } from "./assessor-meeting-card";
+import { AssessorPortfolioLanding } from "./assessor-landing";
 import { buildDeferralDraft } from "@/lib/letters/deferral";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
 import { DeferralLetterSection } from "./deferral-letter-section";
@@ -243,6 +244,19 @@ export default async function CourseStreamPage({
   const courseTutorsIndex = sidebarSheetIndex++;
   const statusIndex = sidebarSheetIndex++;
   const garnetAt = (i: number) => i % 2 === 1;
+
+  // An assessor gets the portfolio, not the candidate's news feed. Ramy, 29
+  // Aug 2026, on landing here from a candidate card: "it kind of takes you to
+  // a strange place." The Course Stream below is the candidate's own home
+  // screen -- broadcasts, this week, tutors -- right for them and their
+  // tutors, wrong for someone who came to read the evidence. Everything else
+  // on this route (the rail, the read-only banner, the roster header) is
+  // already correct for an assessor and stays as it is.
+  if (assessorCourseId && trainee.course_id) {
+    return (
+      <AssessorPortfolioLanding traineeId={traineeId} courseId={trainee.course_id} />
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-[1fr_300px] lg:grid-rows-[auto_1fr]">

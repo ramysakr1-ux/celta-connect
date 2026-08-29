@@ -35,7 +35,20 @@ export interface PortfolioSidebarMeta {
 // moves this into a 232px left sidebar with a meta count per item. Kept the
 // filename/TABS shape as the source of truth to avoid an import-path churn
 // across the layout.
-export function PortfolioTabs({ traineeId, meta }: { traineeId: string; meta: PortfolioSidebarMeta }) {
+export function PortfolioTabs({
+  traineeId,
+  meta,
+  firstTabLabel,
+}: {
+  traineeId: string;
+  meta: PortfolioSidebarMeta;
+  /**
+   * An assessor's first tab is the portfolio landing, not the candidate's
+   * Course Stream (see assessor-landing.tsx), so the rail must not still call
+   * it Course Stream while showing something else.
+   */
+  firstTabLabel?: string;
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const base = `/portfolio/${traineeId}`;
@@ -68,7 +81,7 @@ export function PortfolioTabs({ traineeId, meta }: { traineeId: string; meta: Po
                 : "border-transparent text-muted hover:bg-accent/20"
             }`}
           >
-            <span>{tab.label}</span>
+            <span>{tab.href === "" && firstTabLabel ? firstTabLabel : tab.label}</span>
             {metaValue ? <span className="text-xs tabular-nums text-muted">{metaValue}</span> : null}
           </Link>
         );

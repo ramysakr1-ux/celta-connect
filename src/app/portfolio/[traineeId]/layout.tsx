@@ -392,7 +392,7 @@ export default async function PortfolioLayout({
           "← Assessor pack" link the earlier fix put in the header row
           above -- stays visible however far the assessor scrolls this
           candidate's portfolio. */}
-      {assessorCourseId ? <AssessorReadOnlyBanner subject={trainee.full_name} /> : null}
+      {assessorCourseId ? <AssessorReadOnlyBanner subject={trainee.full_name} portfolioHref={`/portfolio/${trainee.id}`} /> : null}
 
       {isCourseStatusReadOnly(trainee.course_status) ? (
         <div className="bg-destructive/8 border-b border-destructive/20">
@@ -408,7 +408,19 @@ export default async function PortfolioLayout({
       {/* Trainee's sidebar+content row already rendered above, inside the
           unified sheet -- this is the staff/assessor PortfolioTabs layout
           only now. */}
-      {showTraineeNav ? null : (
+      {/* Ramy, 30 Aug 2026: "when the assessor is inside the portfolio, we
+          don't need to see the trainee's workspace tabs. It should be the
+          whole page." The rail is the candidate's own workspace navigation;
+          an assessor navigates from the portfolio landing's cards
+          (assessor-landing.tsx), which name each record and open it, and back
+          out through the read-only banner. Dropping it gives a long CELTA 5
+          or a week of timetable the full width, which is what those records
+          want anyway. */}
+      {showTraineeNav ? null : assessorCourseId ? (
+        <div className="container flex flex-1 flex-col gap-4 py-8">
+          <div className="frame min-w-0 flex-1 p-6">{children}</div>
+        </div>
+      ) : (
         <div className="container flex flex-1 gap-8 py-8">
           <PortfolioTabs traineeId={trainee.id} meta={sidebarMeta} />
           <div className="frame min-w-0 flex-1 p-6">{children}</div>

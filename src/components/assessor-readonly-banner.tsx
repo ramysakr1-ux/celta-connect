@@ -59,8 +59,13 @@ function labelForPath(pathname: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function AssessorReadOnlyBanner({ subject }: { subject?: string }) {
+export function AssessorReadOnlyBanner({ subject, portfolioHref }: { subject?: string; portfolioHref?: string }) {
   const pathname = usePathname();
+  // With the candidate's workspace rail gone for assessors (Ramy, 30 Aug
+  // 2026: "it should be the whole page"), this banner is the only way back
+  // out of a record. Two steps, so neither is a dead end: up to the
+  // candidate's portfolio, then out to the pack.
+  const showPortfolioLink = Boolean(portfolioHref) && pathname !== portfolioHref;
   const pageLabel = labelForPath(pathname);
   const contextLabel = subject
     ? `You're viewing ${subject}'s ${pageLabel.toLowerCase()} as part of the assessor pack.`
@@ -88,6 +93,20 @@ export function AssessorReadOnlyBanner({ subject }: { subject?: string }) {
           {contextLabel}
         </span>
       </div>
+      <div className="flex shrink-0 items-center gap-2">
+      {showPortfolioLink ? (
+        <Link
+          href={portfolioHref!}
+          className="flex shrink-0 items-center gap-1.5 rounded-md px-3.5 py-1.5 text-[12.5px] font-semibold no-underline"
+          style={{
+            color: "oklch(97% 0.008 88)",
+            background: "color-mix(in oklab, oklch(97% 0.008 88) 12%, transparent)",
+            border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
+          }}
+        >
+          ← {subject ? `${subject}'s portfolio` : "The portfolio"}
+        </Link>
+      ) : null}
       <Link
         href="/assessor"
         className="flex shrink-0 items-center gap-1.5 rounded-md px-3.5 py-1.5 text-[12.5px] font-semibold no-underline"
@@ -99,6 +118,7 @@ export function AssessorReadOnlyBanner({ subject }: { subject?: string }) {
       >
         ← Back to assessor pack
       </Link>
+      </div>
     </div>
   );
 }

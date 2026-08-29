@@ -576,7 +576,11 @@ export default async function AssessorPage({
             {visibleCandidates.map((c) => (
               <Link
                 key={c.traineeId}
-                href={`/assessor?candidate=${c.traineeId}`}
+                // Ramy, 30 Aug 2026: "I think I want to cut the middleman...
+                // you don't need two gates." The card used to open a summary
+                // drawer whose own "Open the whole portfolio" was the only way
+                // through; the card is now that link.
+                href={`/portfolio/${c.traineeId}`}
                 className="card assessor-hover-fill no-underline"
                 style={{
                   background: c.flaggedIssue ? "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))" : CARD,
