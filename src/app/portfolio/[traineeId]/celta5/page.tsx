@@ -553,6 +553,87 @@ export default async function PortfolioCelta5Page({
 
           <BookletSection title="Progress overview">
             <ProgressOverview cards={bookletCards} />
+
+            {/* Where each stage has got to. Removed when this page was
+                rebuilt as the booklet, and Ramy noticed: "we had those
+                progress cards in the CELTA 5. I think they're gone now."
+                The cards above are pulled TOTALS; this is a different
+                question -- released, booked, signed, pending -- and it is
+                the one a candidate actually asks. Kept on this page so the
+                booklet stays one document. */}
+            <div className="c5-box" style={{ marginTop: 16 }}>
+              <span className="lab">Stage 1 / 2 / 3</span>
+              <div className="flex flex-col">
+                <div className="flex items-start justify-between gap-3 border-b border-border-faint py-2">
+                  <div>
+                    <p className="text-[11px] font-semibold text-ink">Stage 1 report</p>
+                    <p className="mt-0.5 text-[10px] text-muted">
+                      {record.stage1_released_at
+                        ? "Filed by your tutor · the tutorial itself is optional, not held up on this"
+                        : stage1Invite
+                          ? `Tutorial ${stage1Invite.confirmed_at ? "confirmed" : "invited, not yet confirmed"}${
+                              tutorialEventById.get(stage1Invite.timetable_event_id)
+                                ? ` · ${tutorialEventById.get(stage1Invite.timetable_event_id)!.event_date}`
+                                : ""
+                            } -- the report itself isn't filed yet`
+                          : "Not yet filed"}
+                    </p>
+                  </div>
+                  <span className={`pill ${record.stage1_released_at ? "pill-success" : "pill-warning"}`}>
+                    {record.stage1_released_at ? "Filed" : "Not filed"}
+                  </span>
+                </div>
+                <div className="flex items-start justify-between gap-3 border-b border-border-faint py-2">
+                  <div>
+                    <p className="text-[11px] font-semibold text-ink">Stage 2 tutorial</p>
+                    <p className="mt-0.5 text-[10px] text-muted">
+                      {myStage2Slot
+                        ? `You booked ${myStage2Slot.position === 1 ? "1st" : myStage2Slot.position === 2 ? "2nd" : myStage2Slot.position === 3 ? "3rd" : `${myStage2Slot.position}th`}`
+                        : "Book your slot from the timetable"}
+                    </p>
+                  </div>
+                  <span className={`pill ${myStage2Slot ? "pill-success" : "pill-warning"}`}>
+                    {myStage2Slot ? "Booked" : "Not booked"}
+                  </span>
+                </div>
+                <div className="flex items-start justify-between gap-3 py-2">
+                  <div>
+                    <p className="text-[11px] font-semibold text-ink">Stage 3 report</p>
+                    <p className="mt-0.5 text-[10px] text-muted">
+                      {stage3IsExpected
+                        ? record.stage3_finalized_at
+                          ? "Filed by your tutor"
+                          : stage3Invite
+                            ? `Tutorial ${stage3Invite.confirmed_at ? "confirmed" : "invited, not yet confirmed"}${
+                                tutorialEventById.get(stage3Invite.timetable_event_id)
+                                  ? ` · ${tutorialEventById.get(stage3Invite.timetable_event_id)!.event_date}`
+                                  : ""
+                              }`
+                            : stage3TriggerReason ?? "Expected -- not yet filed"
+                        : "Only filed if triggered -- not to standard at Stage 2, or not making the expected progress in the second half"}
+                    </p>
+                  </div>
+                  <span
+                    className={`pill ${
+                      !stage3IsExpected ? "pill-neutral" : record.stage3_finalized_at ? "pill-success" : "pill-warning"
+                    }`}
+                  >
+                    {!stage3IsExpected ? "N/A so far" : record.stage3_finalized_at ? "Filed" : "Pending"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="c5-box" style={{ marginTop: 12 }}>
+              <span className="lab">CELTA 5 self-assessment</span>
+              <p className="text-[11px] text-ink">
+                {bothSigned
+                  ? "Signed off — you and your tutor have both signed."
+                  : stage2Submitted
+                    ? "Submitted — waiting on your tutor's column and the tutorial."
+                    : `Not started — ${candidateRatedCount} of ${CELTA_CRITERIA_CODES.length} criteria rated.`}
+              </p>
+            </div>
           </BookletSection>
 
           <BookletSections
