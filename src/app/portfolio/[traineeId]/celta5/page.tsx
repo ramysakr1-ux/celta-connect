@@ -44,7 +44,7 @@ import { BookletSections } from "@/app/portfolio/[traineeId]/celta5/booklet-sect
 import { BookletSection } from "@/app/portfolio/[traineeId]/celta5/booklet/shell";
 import { BookletContents } from "@/app/portfolio/[traineeId]/celta5/booklet/contents";
 import { ProgressOverview } from "@/app/portfolio/[traineeId]/celta5/booklet/progress-overview";
-import { ObservationsRecord, AssessedTpRecord } from "@/app/portfolio/[traineeId]/celta5/booklet/records";
+import { AttendanceRecord, ObservationsRecord, AssessedTpRecord } from "@/app/portfolio/[traineeId]/celta5/booklet/records";
 import { FinalDayChecks, type FinalCheck } from "@/app/portfolio/[traineeId]/celta5/booklet/final-day";
 import { computeSignatureLedger } from "@/lib/celta5-signatures";
 import { computeStage3Triggers, stage3Expected, isStage3Mandatory, STAGE3_TRIGGER_LABELS } from "@/lib/stage3-triggers";
@@ -333,6 +333,29 @@ export default async function PortfolioCelta5Page({
         state: (assignmentsGraded >= 4 ? "met" : "short") as "met" | "short" | "neutral",
       },
     ];
+    // Assessed TP rows. Date and level come from the taught plan; length is
+    // the course's real TP length. Lesson focus, tutor assessment and tutor
+    // initials are columns the TUTOR fills on the Cambridge form -- they are
+    // left blank here rather than invented, so a partly-filled row reads as
+    // exactly that to an assessor.
+    const levelByCoursebookId = new Map((coursebooksForLevels ?? []).map((c) => [c.id, c.level]));
+    const coursebookByTpPointId = new Map((tpPointsForLevels ?? []).map((tp) => [tp.id, tp.tp_coursebook_id]));
+    const assessedTpRows = taughtAssignments
+      .slice()
+      .sort((a, b) => String(a.taught_at ?? "").localeCompare(String(b.taught_at ?? "")))
+      .map((t) => {
+        const cbId = t.tp_point_id ? coursebookByTpPointId.get(t.tp_point_id) : undefined;
+        return {
+          date: t.taught_at ?? "",
+          length: `${TP_LESSON_LENGTH_MINUTES}`,
+          level: (cbId ? levelByCoursebookId.get(cbId) : "") ?? "",
+          learners: "",
+          focus: "",
+          assessment: "",
+          initials: "",
+        };
+      });
+
     // Handbook 10.2 / CELTA 5 p.20 -- who must be given Stage Three.
     // "Not making the expected progress" is read from TPs taught after the
     // Stage 2 tutorial; assessedTpOutcomes below is ordered by teaching
@@ -411,6 +434,10 @@ export default async function PortfolioCelta5Page({
             title="Record of observations of experienced classroom teachers (including filmed observations)"
           >
             <ObservationsRecord rows={observationRows} />
+          </BookletSection>
+
+          <BookletSection id="c5-tp" num="Section 7" title="Record of assessed teaching practice">
+            <AssessedTpRecord rows={assessedTpRows} />
           </BookletSection>
 
           <BookletSection id="c5-final" num="Section 12" title="To be completed on the final day of the course">
@@ -1163,9 +1190,66 @@ export default async function PortfolioCelta5Page({
     // as plain text/pills instead of Stage1Form/StageRatingsForm/etc.
     // FinalizeRecordForm and AdminGrantForm are trainer/admin operational
     // controls with no read equivalent for an assessor to see at all.
+    //
+    // This is the branch an external assessor lands on during the visit in
+    // the final week, so it carries the booklet itself -- the whole reason
+    // the trainee view was rebuilt as the Cambridge document (Ramy, 29 Aug
+    // 2026). Until now the document-shaped view existed only on the trainee
+    // branch, i.e. the one view the assessor never opens.
+    const assessorObservationRows = (observations ?? []).map((o) => ({
+      date: o.observation_date ?? "",
+      minutes: o.length_minutes,
+      level: o.level ?? "",
+      learners: o.learners_present,
+      focus: o.lesson_focus ?? "",
+      kind: o.filmed ? "Filmed" : "Experienced teacher",
+    }));
+    const assessorUnavoidable = (absences ?? [])
+      .filter((a) => a.category === "unavoidable")
+      .map((a) => ({
+        date: a.session_date ?? "",
+        session: "",
+        reason: a.reason ?? "",
+        madeUp: a.work_made_up ?? "",
+        tutor: a.tutor_comment ?? "",
+      }));
+    const assessorOther = (absences ?? [])
+      .filter((a) => a.category === "other")
+      .map((a) => ({
+        date: a.session_date ?? "",
+        session: "",
+        reason: a.reason ?? "",
+        madeUp: a.work_made_up ?? "",
+        candidate: "",
+        tutor: a.tutor_comment ?? "",
+      }));
+
     return (
       <div className="flex flex-col gap-4">
         {headerBlock}
+
+        <div className="c5-doc">
+          <BookletSection title="Contents">
+            <BookletContents />
+          </BookletSection>
+
+          <BookletSection id="c5-attendance" num="Section 5" title="Record of attendance">
+            <AttendanceRecord
+              courseHours={course?.total_hours ?? null}
+              hoursAttended={record.hours_attended}
+              unavoidable={assessorUnavoidable}
+              other={assessorOther}
+            />
+          </BookletSection>
+
+          <BookletSection
+            id="c5-observations"
+            num="Section 6"
+            title="Record of observations of experienced classroom teachers (including filmed observations)"
+          >
+            <ObservationsRecord rows={assessorObservationRows} />
+          </BookletSection>
+        </div>
 
         <div className="sheet">
           <p className="text-sm text-muted">Trajectory (estimated, informal)</p>
