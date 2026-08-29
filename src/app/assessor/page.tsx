@@ -645,6 +645,19 @@ export default async function AssessorPage({
                 uses. Every line carries its Handbook section so an assessor
                 who disagrees can check rather than take our word for it. */}
             <Panel title="What this assessment requires" accent="gold">
+              {/* Ramy, 30 Aug 2026: "I'm not sure what those numbers are.
+                  15.1, 14.2. What are they?" They are Handbook sections, and
+                  nothing on this panel said so -- a bare "§14.2" is only
+                  meaningful to someone who already knows which document it
+                  belongs to, which is the opposite of the point. The citation
+                  exists so a line can be checked, and it can't be checked if
+                  you don't know what to open. */}
+              <div style={{ padding: "10px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)" }}>
+                <p style={{ fontSize: 11.5, color: MUTED, lineHeight: 1.5 }}>
+                  Section numbers are the CELTA Administration Handbook, June 2025 &mdash; so any line here can be checked
+                  against it rather than taken on trust.
+                </p>
+              </div>
               {requirements.map((r) => (
                 <div
                   key={r.label}
