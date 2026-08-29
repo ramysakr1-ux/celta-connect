@@ -959,16 +959,20 @@ export default async function PortfolioCelta5Page({
     { data: tpEvents },
     { data: subgroupMember },
   ] = await Promise.all([
-    supabase.from("courses").select("name, start_date, end_date, delivery_mode, total_hours").eq("id", trainee.course_id ?? "").maybeSingle(),
+    supabase.from("courses").select("name, start_date, end_date, delivery_mode, total_hours, course_code").eq("id", trainee.course_id ?? "").maybeSingle(),
     getCachedCenter(trainee.center_id),
     supabase.from("celta5_matrix").select("*").eq("trainee_id", traineeId),
     supabase.from("celta5_records").select("*").eq("trainee_id", traineeId).maybeSingle(),
     supabase.from("attendance_absences").select("*").eq("trainee_id", traineeId).order("session_date"),
     supabase.from("observations").select("*").eq("trainee_id", traineeId).order("observation_date"),
-    supabase.from("tp_lessons").select("id").eq("trainee_id", traineeId),
+    supabase
+      .from("tp_lessons")
+      .select("id, lesson_date, length_minutes, level, learner_count, lesson_focus, tutor_assessment")
+      .eq("trainee_id", traineeId)
+      .order("lesson_date"),
     supabase
       .from("assignments")
-      .select("id, assignment_type, first_status, resubmission_status, first_own_work_confirmed, resubmission_own_work_confirmed, first_outcome_signed_at, resubmission_outcome_signed_at, final_grade")
+      .select("id, assignment_type, first_status, resubmission_status, first_own_work_confirmed, resubmission_own_work_confirmed, first_outcome_signature_name, first_outcome_signed_at, resubmission_outcome_signature_name, resubmission_outcome_signed_at, final_grade")
       .eq("trainee_id", traineeId),
     supabase.from("tp_feedback").select("*").eq("trainee_id", traineeId),
     supabase.from("plan_assignments").select("tp_number, tp_point_id, taught_at").eq("trainee_id", traineeId),
@@ -1243,14 +1247,113 @@ export default async function PortfolioCelta5Page({
         tutor: [a.tutor_comment, a.tutor_signature_name].filter(Boolean).join(" \u00b7 "),
       }));
 
+    // Assessed TP and written assignments read the same sources the
+    // trainee's own booklet does, so the two views cannot disagree about
+    // what an assessor is looking at.
+    const assessorTpRows = (lessons ?? []).map((l) => ({
+      date: l.lesson_date ?? "",
+      length: l.length_minutes != null ? `${l.length_minutes}` : "",
+      level: l.level ?? "",
+      learners: l.learner_count != null ? `${l.learner_count}` : "",
+      focus: l.lesson_focus ?? "",
+      assessment:
+        l.tutor_assessment === "above_standard"
+          ? "Above standard"
+          : l.tutor_assessment === "to_standard"
+            ? "To standard"
+            : l.tutor_assessment === "not_to_standard"
+              ? "Below standard"
+              : "",
+      initials: "",
+    }));
+    const ASSESSOR_ASSIGNMENTS = [
+      { type: "Focus on Learner", title: "Focus on the learner" },
+      { type: "LRT", title: "Language related tasks" },
+      { type: "Skills", title: "Skills assignment" },
+      { type: "LfC", title: "Lessons from the classroom" },
+    ] as const;
+    const assessorAssignmentByType = new Map((assignments ?? []).map((a) => [a.assignment_type, a]));
+    const assessorAssignmentRows = ASSESSOR_ASSIGNMENTS.map(({ type, title }) => {
+      const a = assessorAssignmentByType.get(type);
+      const onResub = !!a && a.resubmission_status !== "not_submitted";
+      return {
+        title,
+        result: !a
+          ? "— not yet submitted"
+          : a.resubmission_status === "approved"
+            ? "Pass 2nd submission"
+            : a.first_status === "approved"
+              ? "Pass 1st submission"
+              : a.final_grade === "Fail"
+                ? "Fail"
+                : a.first_status === "resubmission_required"
+                  ? "Resubmission required"
+                  : "— not yet graded",
+        signatureName: onResub
+          ? a?.resubmission_outcome_signature_name ?? null
+          : a?.first_outcome_signature_name ?? null,
+        signedAt: onResub ? a?.resubmission_outcome_signed_at ?? null : a?.first_outcome_signed_at ?? null,
+      };
+    });
+    const assessorCriteriaRows = (which: "stage2" | "stage3"): CriterionRow[] =>
+      CELTA_CRITERIA_SECTIONS.flatMap((sec) =>
+        sec.codes.map((code, i) => {
+          const m = matrixByCode.get(code);
+          const mark = (v: string | null | undefined): Mark =>
+            v === "S+" || v === "S" || v === "N" || v === "X" ? v : null;
+          return {
+            code,
+            text: CRITERIA_LABELS[code] ?? code,
+            topic: i === 0 ? `TOPIC ${sec.section} – ${sec.title.toUpperCase()}` : undefined,
+            candidate: which === "stage2" ? mark(m?.candidate_status) : null,
+            tutor: mark(which === "stage2" ? m?.tutor_status_stage2 : m?.tutor_status_stage3),
+          };
+        })
+      );
+    const assessorOverall = (v: string | null | undefined) => overallLabel(v);
+    const sigLine = (name: string | null, at: string | null) =>
+      name ? `${name}${at ? ` · ${new Date(at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}` : "Not signed";
+
     return (
       <div className="flex flex-col gap-4">
         {headerBlock}
 
+        {/* The assessor reads the booklet, not a summary of it. Ramy, 29 Aug
+            2026 -- this is the view the rebuild exists for: an external
+            assessor opens this during the visit in the final week and
+            compares it against the real CELTA 5. Same fifteen pages as the
+            candidate's own view, read-only, nothing hidden and nothing
+            added. */}
         <div className="c5-doc">
+          <BookletSection>
+            <BookletCover
+              data={{
+                candidateName: trainee.full_name,
+                centreName: center?.name ?? null,
+                centreNumber: center?.center_number ?? null,
+                courseNumber: course?.course_code ?? null,
+                courseDates:
+                  course?.start_date && course?.end_date
+                    ? `${new Date(`${course.start_date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} – ${new Date(`${course.end_date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`
+                    : null,
+                tutors: [],
+                uln: null,
+              }}
+            />
+          </BookletSection>
+
           <BookletSection title="Contents">
             <BookletContents />
           </BookletSection>
+
+          <BookletSections
+            portfolioConfirmedAt={record.portfolio_terms_confirmed_at}
+            portfolioSignatureName={record.portfolio_terms_signature_name}
+            appealsConfirmedAt={record.appeals_read_confirmed_at}
+            appealsSignatureName={record.appeals_read_signature_name}
+            canSign={false}
+            fullName={trainee.full_name}
+          />
 
           <BookletSection id="c5-attendance" title="Record of attendance">
             <AttendanceRecord
@@ -1267,141 +1370,203 @@ export default async function PortfolioCelta5Page({
           >
             <ObservationsRecord rows={assessorObservationRows} />
           </BookletSection>
+
+          <BookletSection id="c5-tp" title="Record of assessed teaching practice">
+            <AssessedTpRecord rows={assessorTpRows} />
+          </BookletSection>
+
+          <BookletSection id="c5-assignments" title="Record of written assignments">
+            <WrittenAssignmentsRecord rows={assessorAssignmentRows} />
+          </BookletSection>
+
+          <BookletSection id="c5-stage1" num="Section 9" title="Stage One progress record">
+            {record.stage1_released_at ? (
+              <>
+                <div className="c5-box" style={{ marginBottom: 10 }}>
+                  <span className="lab">Strengths</span>
+                  <p className="text-[11px] leading-relaxed whitespace-pre-wrap text-ink">{record.stage1_strengths || "—"}</p>
+                </div>
+                <div className="c5-box" style={{ marginBottom: 10 }}>
+                  <span className="lab">Action plan for next stage of the course</span>
+                  <p className="text-[11px] leading-relaxed whitespace-pre-wrap text-ink">{record.stage1_action_plan || "—"}</p>
+                </div>
+                <p className="text-[11px]">
+                  <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
+                  <strong className="text-ink">{sigLine(record.stage1_tutor_signature_name, record.stage1_completed_at)}</strong>
+                </p>
+                <p className="text-[11px]">
+                  <span className="text-muted">Candidate&rsquo;s signature:</span>{" "}
+                  <strong className="text-ink">{sigLine(record.stage1_candidate_signature_name, record.stage1_candidate_signed_at)}</strong>
+                </p>
+              </>
+            ) : (
+              <StageLocked>Not yet released to the candidate.</StageLocked>
+            )}
+          </BookletSection>
+
+          <BookletSection
+            id="c5-stage2"
+            num={`Section 10${record.stage2_hours_taught != null ? ` · Hours taught: ${record.stage2_hours_taught}` : ""}`}
+            title="Stage Two progress record"
+          >
+            <CriteriaGrid
+              stage="stage2"
+              rows={assessorCriteriaRows("stage2")}
+              showCandidateColumn
+              candidateEditable={false}
+              tutorLocked={false}
+            />
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="c5-box">
+                <span className="lab">Written assignments &mdash; candidate</span>
+                <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage2_candidate_written_assignments_notes || "—"}</p>
+              </div>
+              <div className="c5-box">
+                <span className="lab">Written assignments &mdash; tutor</span>
+                <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage2_tutor_written_assignments_notes || "—"}</p>
+              </div>
+              <div className="c5-box">
+                <span className="lab">Other issues &mdash; candidate</span>
+                <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage2_candidate_other_notes || "—"}</p>
+              </div>
+              <div className="c5-box">
+                <span className="lab">Other issues &mdash; tutor</span>
+                <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage2_tutor_other_notes || "—"}</p>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-col gap-3">
+              <div className="c5-box">
+                <span className="lab">Overall progress &mdash; candidate&rsquo;s assessment</span>
+                <p className="text-[11px] text-ink">{assessorOverall(record.stage2_candidate_overall)}</p>
+                {record.stage2_candidate_notes ? (
+                  <p className="mt-1 text-[11px] whitespace-pre-wrap text-muted">{record.stage2_candidate_notes}</p>
+                ) : null}
+              </div>
+              <div className="c5-box">
+                <span className="lab">Overall progress &mdash; tutor&rsquo;s assessment</span>
+                <p className="text-[11px] text-ink">{assessorOverall(record.stage2_tutor_overall)}</p>
+              </div>
+              <div className="c5-box">
+                <span className="lab">Summary of tutorial and action points</span>
+                <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage2_tutor_notes || "—"}</p>
+              </div>
+            </div>
+            <p className="mt-3 text-[11px]">
+              <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
+              <strong className="text-ink">{sigLine(record.stage2_tutor_signature_name, record.stage2_completed_at)}</strong>
+            </p>
+            <p className="text-[11px]">
+              <span className="text-muted">Candidate&rsquo;s signature:</span>{" "}
+              <strong className="text-ink">{sigLine(record.stage2_candidate_signature_name, record.trainee_signoff_stage2_at)}</strong>
+            </p>
+          </BookletSection>
+
+          <BookletSection id="c5-stage3" num="Section 11" title="Stage Three progress record">
+            {record.stage3_finalized_at ? (
+              <>
+                <CriteriaGrid stage="stage3" rows={assessorCriteriaRows("stage3")} showCandidateColumn={false} candidateEditable={false} tutorLocked={false} />
+                <div className="mt-3 flex flex-col gap-3">
+                  <div className="c5-box">
+                    <span className="lab">Written assignments &mdash; tutor&rsquo;s comments</span>
+                    <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage3_tutor_notes || "—"}</p>
+                  </div>
+                  <div className="c5-box">
+                    <span className="lab">Other issues &mdash; tutor&rsquo;s comments</span>
+                    <p className="text-[11px] whitespace-pre-wrap text-ink">{record.stage3_tutor_other_notes || "—"}</p>
+                  </div>
+                  <div className="c5-box">
+                    <span className="lab">Overall progress &mdash; tutor&rsquo;s assessment</span>
+                    <p className="text-[11px] text-ink">{assessorOverall(record.stage3_tutor_overall)}</p>
+                  </div>
+                </div>
+                <p className="mt-3 text-[11px]">
+                  <span className="text-muted">Tutor&rsquo;s signature:</span>{" "}
+                  <strong className="text-ink">{sigLine(record.stage3_tutor_signature_name, record.stage3_finalized_at)}</strong>
+                </p>
+                <p className="text-[11px]">
+                  <span className="text-muted">Candidate&rsquo;s signature:</span>{" "}
+                  <strong className="text-ink">{sigLine(record.stage3_candidate_signature_name, record.stage3_candidate_signed_at)}</strong>
+                </p>
+              </>
+            ) : (
+              <StageLocked>
+                {record.stage3_required
+                  ? "Required for this candidate; not yet completed."
+                  : "Not required for this candidate."}
+              </StageLocked>
+            )}
+          </BookletSection>
+
+          <BookletSection id="c5-final" num="Section 12" title="To be completed on the final day of the course">
+            <p className="text-[10px] italic text-muted" style={{ marginBottom: 4 }}>
+              Please tick the appropriate boxes and sign.
+            </p>
+            <p className="text-[11px] text-ink" style={{ marginBottom: 10 }}>
+              In handing in this portfolio for assessment purposes, I confirm that:
+            </p>
+            <FinalDayChecks
+              checks={[
+                { label: "I have completed six hours of assessed teaching practice at at least two levels.", met: record.final_checklist_tp },
+                { label: "I have completed six hours of observation of experienced teachers.", met: record.final_checklist_observations },
+                { label: "I have completed four written assignments.", met: record.final_checklist_assignments },
+                { label: "The written assignments are my own work.", met: record.final_checklist_own_work },
+                { label: "I have completed all records.", met: record.final_checklist_all_records },
+              ]}
+            />
+            <p className="mt-3 text-[11px]">
+              <span className="text-muted">Candidate&rsquo;s signature:</span>{" "}
+              <strong className="text-ink">{sigLine(record.final_candidate_signature_name, record.trainee_signoff_final_at)}</strong>
+            </p>
+            <p className="text-[11px]">
+              <span className="text-muted">Accepted by Tutor:</span>{" "}
+              <strong className="text-ink">{sigLine(record.final_tutor_signature_name, record.trainer_signoff_final_at)}</strong>
+            </p>
+
+            <div className="c5-box" style={{ marginTop: 24 }}>
+              <span className="lab">
+                Information for the CELTA grade review &mdash; tutor comments on action points detailed in Stage Three
+                progress record
+              </span>
+              <p className="text-[10px] leading-relaxed text-muted">
+                This box is to be completed for all candidates whose portfolios are submitted to Cambridge English.
+                (See CELTA Administration Handbook for details of portfolios to be submitted.)
+              </p>
+              <p className="mt-2 text-[10px] leading-relaxed italic text-muted">
+                Please state whether the candidate did or did not demonstrate effectiveness in the areas identified,
+                making reference to feedback to the candidate in final lessons and/or written assignments, as
+                appropriate.
+              </p>
+              <p className="mt-2 text-[11px] whitespace-pre-wrap text-ink">{record.grade_review_tutor_comments || "—"}</p>
+            </div>
+
+            <div id="c5-appendix1" className="scroll-mt-6" style={{ marginTop: 28 }}>
+              <div className="c5-section-num">Appendix 1</div>
+              <h2 className="c5-section-header">CELTA criteria</h2>
+              <Appendix1 />
+            </div>
+
+            <div id="c5-appendix2" className="scroll-mt-6" style={{ marginTop: 28 }}>
+              <div className="c5-section-num">Appendix 2</div>
+              <h2 className="c5-section-header">CELTA performance descriptors</h2>
+              <Appendix2 />
+            </div>
+          </BookletSection>
         </div>
 
+        {/* Assessor-only, deliberately outside the booklet: these are
+            Connect's own working aids, not part of Cambridge's document,
+            and an assessor should never mistake one for the other. */}
         <div className="sheet">
-          <p className="text-sm text-muted">Trajectory (estimated, informal)</p>
+          <p className="text-sm text-muted">Trajectory (estimated, informal -- not part of the CELTA 5)</p>
           <div className="mt-3">
             <TrajectoryGradientBars byDimension={trajectoryByDimension} />
           </div>
         </div>
 
-        <div className="sheet sheet-garnet">
-          <p className="text-sm text-muted">Attendance</p>
-          <p className="mt-1 text-ink">
-            {record.hours_attended ?? 0} / {course?.total_hours ?? 120} hrs
-          </p>
-        </div>
-
-        {tasksBlock}
-
-        {observationsBlock}
-
         <AssessedTpStatsBadge stats={assessedTpStats} byMode={assessedHoursByMode} />
 
-        <AssignmentsSummary traineeId={traineeId} assignments={assignments ?? []} />
-        <TpFeedbackSummary traineeId={traineeId} feedbackRows={tpFeedbackRows ?? []} />
-
-        {record.stage1_strengths || record.stage1_action_plan ? (
-          <div className="sheet">
-            <h3 className="font-serif text-lg text-ink">Progress Record — Stage 1</h3>
-            <ReadOnlyField label="Strengths" value={record.stage1_strengths} />
-            <ReadOnlyField label="Action plan" value={record.stage1_action_plan} />
-          </div>
-        ) : null}
-
-        <div>
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h3>
-            <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
-              Candidate: {stage2CandidateRatedCount} of {CELTA_CRITERIA_CODES.length} · Tutor: {stage2TutorRatedCount} of{" "}
-              {CELTA_CRITERIA_CODES.length}
-            </span>
-          </div>
-          <div className="sheet sheet-garnet mt-3 overflow-hidden !p-0">
-            <div className="list-row">
-              <p className="text-sm text-muted">Tutor&apos;s overall assessment</p>
-              <StandardRatingPill rating={record.stage2_tutor_overall} />
-              {record.stage2_tutor_notes ? <p className="mt-2 text-ink">{record.stage2_tutor_notes}</p> : null}
-            </div>
-            {CELTA_CRITERIA_SECTIONS.map(({ section, title, codes }) => (
-              <div key={section} className="list-row">
-                <h4 className="font-serif text-ink">
-                  Topic {section} -- {title}
-                </h4>
-                <div className="mt-3 flex flex-col gap-2">
-                  {codes.map((code) => {
-                    const mRow = matrixByCode.get(code);
-                    const disagrees =
-                      !!mRow?.candidate_status && !!mRow?.tutor_status_stage2 && mRow.candidate_status !== mRow.tutor_status_stage2;
-                    return (
-                      <div key={code} className="flex items-center justify-between gap-3 border-b border-border-faint pb-2 last:border-none">
-                        <p className="text-sm text-ink">
-                          {code}
-                          {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
-                          {disagrees ? (
-                            <span className="ml-2 text-sm font-semibold text-status-warning-text" title="Candidate and tutor ratings differ">
-                              &ne;
-                            </span>
-                          ) : null}
-                        </p>
-                        <div className="flex shrink-0 items-center gap-3">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs text-muted">Candidate:</span>
-                            <CriteriaRatingPill rating={mRow?.candidate_status ?? null} />
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs text-muted">Tutor:</span>
-                            <CriteriaRatingPill rating={mRow?.tutor_status_stage2 ?? null} />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {record.stage3_required ? (
-          <div>
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h3>
-              <span className="rounded-[6px] bg-accent px-2.5 py-1 text-xs font-medium text-ink">
-                Tutor: {stage3TutorRatedCount} of {CELTA_CRITERIA_CODES.length}
-              </span>
-            </div>
-            <div className="sheet mt-3 overflow-hidden !p-0">
-              <div className="list-row">
-                <p className="text-sm text-muted">Tutor&apos;s overall assessment</p>
-                <StandardRatingPill rating={record.stage3_tutor_overall} />
-                {record.stage3_tutor_notes ? <p className="mt-2 text-ink">{record.stage3_tutor_notes}</p> : null}
-              </div>
-              {CELTA_CRITERIA_SECTIONS.map(({ section, title, codes }) => (
-                <div key={section} className="list-row">
-                  <h4 className="font-serif text-ink">
-                    Topic {section} -- {title}
-                  </h4>
-                  <div className="mt-3 flex flex-col gap-2">
-                    {codes.map((code) => (
-                      <div key={code} className="flex items-center justify-between gap-3 border-b border-border-faint pb-2 last:border-none">
-                        <p className="text-sm text-ink">
-                          {code}
-                          {CRITERIA_LABELS[code] ? ` -- ${CRITERIA_LABELS[code]}` : ""}
-                        </p>
-                        <CriteriaRatingPill rating={matrixByCode.get(code)?.tutor_status_stage3 ?? null} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
         <div className="sheet">
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="font-serif text-lg text-ink">Final recommended grade</h3>
-            {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
-              <a
-                href={`/api/celta5/${traineeId}/final-report`}
-                className="shrink-0 rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainee-hover-fill"
-              >
-                Download final report
-              </a>
-            ) : null}
-          </div>
+          <p className="text-sm text-muted">Final recommended grade</p>
           {record.final_recommended_grade ? (
             <>
               <span className="mt-1 inline-flex rounded-[6px] bg-primary px-3 py-1 font-serif text-2xl text-primary-foreground">
@@ -1413,39 +1578,6 @@ export default async function PortfolioCelta5Page({
             <p className="mt-2 text-sm text-muted">Not yet decided.</p>
           )}
         </div>
-
-        {record.stage3_required && record.grade_review_tutor_comments ? (
-          <div className="sheet sheet-garnet">
-            <h3 className="font-serif text-lg text-ink">Information for the CELTA grade review</h3>
-            <p className="mt-2 whitespace-pre-wrap text-ink">{record.grade_review_tutor_comments}</p>
-          </div>
-        ) : null}
-
-        <div className="sheet sheet-garnet">
-          <h3 className="font-serif text-lg text-ink">Final-day sign-off</h3>
-          {record.trainee_signoff_final_at ? (
-            <p className="mt-2 text-sm text-ink">
-              Candidate signed {new Date(record.trainee_signoff_final_at).toLocaleString()}, confirming teaching
-              practice, observations, written assignments, own work, and complete records.
-            </p>
-          ) : (
-            <p className="mt-2 text-sm text-muted">Not yet signed off by the candidate.</p>
-          )}
-        </div>
-
-        {/* The booklet's own static sections, in Cambridge's order, with
-            each confirmation where Cambridge puts it -- Ramy, 30 Aug 2026:
-            "I wanted them to read everything in there." */}
-        <BookletSections
-          portfolioConfirmedAt={record.portfolio_terms_confirmed_at}
-          portfolioSignatureName={record.portfolio_terms_signature_name}
-          appealsConfirmedAt={record.appeals_read_confirmed_at}
-          appealsSignatureName={record.appeals_read_signature_name}
-          canSign={!isStaff && !assessorCourseId && viewer?.id === traineeId}
-          fullName={viewer?.full_name ?? null}
-        />
-
-        <AbsencePanel absences={absences ?? []} hoursAttended={record.hours_attended} totalHours={course?.total_hours ?? 120} />
 
         <SignatureLedger rows={signatureLedger} traineeId={traineeId} />
       </div>
