@@ -732,10 +732,28 @@ h6 {
     font-weight: 700;
     margin: 0 0 6px 0;
   }
+  /* Page numbering, exactly as Ramy's file does it: a counter on the
+     document, stamped bottom-right of each page as "CELTA 5 — page N".
+     He numbered his copy so the two could be checked page for page, so the
+     app has to number the same way or the comparison is guesswork. */
+  .c5-doc {
+    counter-reset: c5page;
+  }
   .c5-break {
+    position: relative;
+    counter-increment: c5page;
     padding-bottom: 40px;
     margin-bottom: 40px;
     border-bottom: 2px solid var(--color-border);
+  }
+  .c5-break::after {
+    content: "CELTA 5 — page " counter(c5page);
+    position: absolute;
+    right: 0;
+    bottom: 10px;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
   }
   .c5-break:last-child {
     border-bottom: 0;

@@ -29,6 +29,10 @@ const FOCUS_ROUTES = [
   // sideways before it has shown a full day. Ramy, 29 Aug 2026, asked for
   // full width here explicitly: "I'll go with full width as well, agreed."
   /\/timetable$/,
+  // The CELTA 5 is a document, not a page of the app -- an assessor opens it
+  // on the visit and reads it as Cambridge's form. Ramy, 29 Aug 2026: "why
+  // am I seeing the workspace? It should be the full page."
+  /\/celta5$/,
 ];
 
 export function PortfolioFocusRow({ sidebar, children }: { sidebar: React.ReactNode; children: React.ReactNode }) {

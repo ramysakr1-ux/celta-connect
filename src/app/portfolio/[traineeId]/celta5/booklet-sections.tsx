@@ -2,6 +2,7 @@
 
 import { BOOKLET_SECTIONS, type BookletSection } from "@/lib/celta5-booklet-content";
 import { ConfirmBox } from "@/app/portfolio/[traineeId]/celta5/booklet/confirm-box";
+import { AssessmentTopicsTable } from "@/app/portfolio/[traineeId]/celta5/booklet/assessment-table";
 
 // Ramy's file numbers only the last four pages -- "Section 9" through
 // "Section 12", on Stage One to the final day. Everything before that
@@ -84,6 +85,7 @@ export function BookletSections({
           <div>
             <Blocks section={section} />
           </div>
+          {section.key === "assessment" ? <AssessmentTopicsTable /> : null}
           {section.confirm ? (
             <ConfirmBox
               section={section.key}
