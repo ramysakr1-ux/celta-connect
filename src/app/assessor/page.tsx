@@ -195,6 +195,14 @@ export default async function AssessorPage({
   // slots carrying Fail at all are exactly Fail and Fail/Pass
   // (PROVISIONAL_SLOTS, src/lib/provisional-grade.ts), so a substring test on
   // the label is the whole rule, not an approximation of one.
+  // Whether the centre has already timetabled the assessor's meeting with the
+  // candidates. Ramy: "we do include the assessor meeting, which is basically
+  // the assessor meeting the trainees" -- so on a properly set up course it is
+  // a real event on the day and this panel should not also invent a row for it.
+  const hasTimetabledCandidateMeeting = (onDayEvents ?? []).some((e) =>
+    (e.title ?? "").toLowerCase().includes("assessor")
+  );
+
   const atRiskCount = candidates.filter((c) => c.provisionalLabel?.includes("Fail")).length;
   const selectedCount = candidates.filter((c) => c.selectedForAssessorVisit).length;
   const requirements = buildAssessorRequirements({
@@ -772,23 +780,45 @@ export default async function AssessorPage({
                   ))
                 )}
 
-                {/* The two fixed meetings the visit day always carries. They
-                    are not timetable events, so nothing would ever have put
-                    them here. */}
+                {/* Ramy, 30 Aug 2026: "we don't usually include the grades
+                    meeting on the timetable, because the timetable is for the
+                    trainees and the grades meeting is not for the trainees.
+                    We do include the assessor meeting, which is the assessor
+                    meeting the trainees, but the grades meeting is just kind
+                    of implied... I'd rather not [timetable it]."
+                    
+                    So the grading meeting lives here and only here. It is a
+                    real Handbook 14.3 obligation, it just has no business on
+                    a schedule the candidates read, and this panel is the
+                    document that carries it instead -- 14.1 calls this the
+                    assessment timetable, and it is the assessor's, not the
+                    cohort's. Said out loud below rather than left as a gap an
+                    assessor might read as an omission. */}
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                   <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
                   <span>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Tutor meeting</span>
-                    <span style={{ fontSize: 11, color: MUTED }}>Time agreed with the main course tutor</span>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Grading meeting</span>
+                    <span style={{ fontSize: 11, color: MUTED }}>
+                      With all tutors, time agreed with the main course tutor. Not on the candidates&apos; timetable --
+                      it isn&apos;t theirs to attend.
+                    </span>
                   </span>
                 </div>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                  <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
-                  <span>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Candidate-concerns meeting</span>
-                    <span style={{ fontSize: 11, color: MUTED }}>Private, without tutors present</span>
-                  </span>
-                </div>
+                {/* The candidates' own meeting IS timetabled, so it only
+                    appears here when the centre hasn't put it on the day
+                    yet -- otherwise this panel would list it twice, once
+                    from the timetable above and once from here. */}
+                {!hasTimetabledCandidateMeeting ? (
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <span style={{ fontSize: 11.5, fontWeight: 600, color: MUTED, width: 58, flex: "none" }}>—</span>
+                    <span>
+                      <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>Candidate-concerns meeting</span>
+                      <span style={{ fontSize: 11, color: MUTED }}>
+                        Private, without tutors present. Not yet on the timetable for the day.
+                      </span>
+                    </span>
+                  </div>
+                ) : null}
 
                 <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(90% 0.012 85)" }}>
                   {concernsCount && concernsCount > 0

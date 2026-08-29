@@ -67,9 +67,17 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
           .eq("tp_number", observedTp)
           .maybeSingle()
       : Promise.resolve({ data: null }),
-    // Whether this candidate is in the half that teaches on the visit day at
-    // all -- the other half is not observed, and a plan card for a lesson
-    // nobody will watch would be a quiet lie about what the visit covers.
+    // Whether this candidate is in the half that teaches on the visit day.
+    //
+    // Ramy, 30 Aug 2026: "the assessor observes usually two lessons and
+    // observes feedback... sometimes things change and the assessor observes
+    // maybe first and third, or first and second. So all three of them will
+    // have the lesson plan included, but no other lesson plans are required."
+    //
+    // So this is deliberately NOT an attempt to work out which two lessons
+    // get observed -- nobody knows that until the day. Everyone teaching on
+    // the visit day carries their plan; the other half teaches nothing that
+    // day, so a plan card for them would be a lesson nobody will watch.
     half
       ? admin
           .from("course_subgroup_members")
@@ -151,7 +159,7 @@ export async function AssessorPortfolioLanding({ traineeId, courseId }: { traine
             state={observedPlan?.submitted_at ? "Submitted" : observedPlan ? "Draft" : "Not started"}
             open={!observedPlan?.submitted_at}
             href={`/portfolio/${traineeId}/tp/${observedTp}`}
-            note="The lesson you are observing on the visit day. The plans for everyone teaching that day are in the pack."
+            note="The lesson they teach on the visit day. Every candidate teaching that day carries their plan, since which two get observed is decided on the day."
           />
         ) : null}
 

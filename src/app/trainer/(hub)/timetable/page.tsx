@@ -474,7 +474,7 @@ export default async function TrainerTimetablePage({
               mineMeaning={
                 isAssessorViewer
                   ? assessorVisitDate
-                    ? "\u201cMine\u201d is your visit: the teaching practice you observe, the tutor feedback after it, and the meetings on the day."
+                    ? "\u201cMine\u201d is your visit: the teaching practice, the tutor feedback after it, and the meeting with the candidates. The grading meeting is not here \u2014 it is not on the candidates\u2019 timetable, and sits in the assessment timetable in your pack instead."
                     : "No visit date has been set yet, so \u201cMine\u201d has nothing to narrow to."
                   : undefined
               }
