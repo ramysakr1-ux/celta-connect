@@ -11,6 +11,10 @@ import type { DeliveryMode } from "@/lib/delivery-mode";
 
 export interface FormState {
   error: string | null;
+  // Set on a successful createCourse so the wizard can send the user into
+  // the course it just made. Ramy, 29 Aug 2026: "opening a new course lands
+  // me in centre management instead of landing me in the course."
+  createdCourseId?: string;
 }
 
 const VALID_DELIVERY_MODES: DeliveryMode[] = ["f2f", "online", "mixed"];
@@ -79,7 +83,7 @@ export async function createCourse(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("courses").insert({
+  const { data: createdCourse, error } = await supabase.from("courses").insert({
     center_id: targetCenterId,
     name,
     course_code: courseCode,
@@ -95,7 +99,7 @@ export async function createCourse(
     start_date: startDate,
     end_date: endDate,
     delivery_mode: deliveryMode as DeliveryMode,
-  });
+  }).select("id").single();
 
   if (error) {
     return { error: "Could not create the course. Try again." };
@@ -130,7 +134,10 @@ export async function createCourse(
   }
 
   revalidatePath("/dashboard/admin");
-  return { error: null };
+  // Hand the new course's id back so the wizard can navigate into it. The
+  // action can't redirect() here: the tutor invitation below is allowed to
+  // fail without failing the launch, and redirect() throws.
+  return { error: null, createdCourseId: createdCourse?.id };
 }
 
 function daysBetween(fromIso: string, toIso: string): number {

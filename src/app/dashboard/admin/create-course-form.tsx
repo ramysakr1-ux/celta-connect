@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createCourse, type FormState } from "@/app/dashboard/admin/actions";
 import { DeliveryModePicker } from "@/components/delivery-mode-picker";
 import { TUTOR_ROLE_LABEL, DEFAULT_INVITE_TUTOR_ROLE } from "@/lib/tutor-roles";
@@ -42,6 +44,16 @@ const MODE_LABEL: Record<DeliveryMode, string> = {
  */
 export function CreateCourseForm({ centerNumber }: { centerNumber?: string | null }) {
   const [state, action, pending] = useActionState(createCourse, initialState);
+  const router = useRouter();
+
+  // Creating a course used to leave you exactly where you started: the
+  // action revalidated /dashboard/admin and returned, so Next re-rendered
+  // the admin page and the new course was somewhere off in a list. Go into
+  // the course instead -- it is the thing you just made and the thing you
+  // are about to set up.
+  useEffect(() => {
+    if (state.createdCourseId) router.push(`/dashboard/admin/courses/${state.createdCourseId}`);
+  }, [state.createdCourseId, router]);
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("f2f");
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [daysOff, setDaysOff] = useState<string[]>([]);
