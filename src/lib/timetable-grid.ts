@@ -82,8 +82,25 @@ export function isEventLive(event: TimetableEvent, now: Date, timeZone: string):
 // teal (join Zoom), "individual" = grey (off-Zoom solo work), anything else
 // (a TP group code or tutor name, or no tag at all on a TP-type event) =
 // "your group's room" (white + border).
+/**
+ * Does this event belong in the leading "Admin & deadlines" column rather
+ * than in a time band? Deadlines do; a timetabled session does not, even
+ * when it is about an assignment and reads gold.
+ */
+export function isAdminColumnEvent(event: TimetableEvent): boolean {
+  if (event.type === "assignment_due" || event.type === "resubmission_due") return true;
+  // A gold-tagged session with a time is a session, not a deadline.
+  return categorize(event) === "admin" && !event.event_time;
+}
+
 export function categorize(event: TimetableEvent): CellCategory {
   if (event.type === "assignment_due" || event.type === "resubmission_due") return "admin";
+  // A session ABOUT an assignment -- the Q&A the evening before a deadline
+  // -- reads gold like the deadline it belongs to, but it is a timetabled
+  // session and belongs in its own time band, not in the admin column.
+  // Ramy's design has both: "Assignment 2 (LRT) due" in the admin column,
+  // "Assignment 3 Q&A" at 17:15 in gold.
+  if (event.tag === "admin") return "admin";
   if (event.tag === "lunch") return "lu";
   if (event.tag === "whole_group") return "wg";
   if (event.tag === "individual") return "iw";
@@ -285,10 +302,16 @@ export function buildDayRows(events: TimetableEvent[], timeBands: TimeBand[] = D
       weekLabel = `${fmt(monday)} – ${fmt(sunday)}`;
     }
 
-    const admin = dayEvents.filter((e) => categorize(e) === "admin");
+    // Placement and colour are different questions, and conflating them put
+    // Ramy's "Assignment 3 Q&A" in the admin column instead of its 17:15
+    // band. A DEADLINE belongs in the admin column -- it is a date, not a
+    // session, and has no time. A session that happens to be about an
+    // assignment is still a session: it has a time band and sits in it,
+    // gold like the deadline it relates to.
+    const admin = dayEvents.filter(isAdminColumnEvent);
     const bands: TimetableEvent[][] = timeBands.map(() => []);
     for (const event of dayEvents) {
-      if (categorize(event) === "admin") continue;
+      if (isAdminColumnEvent(event)) continue;
       bands[bandIndexFor(event.event_time, timeBands)].push(event);
     }
 

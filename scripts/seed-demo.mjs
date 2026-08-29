@@ -731,10 +731,20 @@ async function main() {
   // link the volunteer demo needs -- it is the course's "next TP" and the
   // volunteer view pairs a room with a Join button on it.
   const events = designSessions.map((x) => ({
-    type: x.type,
+    // A "due" card is a deadline and belongs in the admin column; a "Q&A"
+    // card is a timetabled session that happens to be about an assignment,
+    // so it keeps its band and is tagged admin to stay gold.
+    type: x.type === "assignment_due" && !/\bdue\b/i.test(x.title) ? "milestone" : x.type,
+    tagOverride: x.type === "assignment_due" && !/\bdue\b/i.test(x.title) ? "admin" : null,
     title: x.title,
     day: x.d,
-    time: BAND_TIMES[x.b],
+    // b is the cell index in the design's own row array, where 0 is the
+    // admin column and 1-9 are the nine time bands -- so the band time is
+    // BAND_TIMES[b - 1], not BAND_TIMES[b]. Getting this wrong shifted
+    // every session one band late: TP1 · A sat at 10:45 instead of 10:00,
+    // the 10:00 column was empty all week, and the 17:15 session fell off
+    // the end of the array entirely.
+    time: x.b === 0 ? null : BAND_TIMES[x.b - 1],
     tag: x.tag,
     detail: x.detail,
     linked: x.linked,
@@ -751,7 +761,7 @@ async function main() {
         title: e.title,
         event_date: courseDay(courseStart, e.day),
         event_time: e.time ?? null,
-        tag: e.tag ?? null,
+        tag: e.tagOverride ?? e.tag ?? null,
         detail: e.detail ?? null,
         linked_assignment_type: e.linked ?? null,
         linked_tp_number: e.tpNumber ?? null,
