@@ -16,6 +16,20 @@ export interface CoverData {
   uln: string | null;
 }
 
+function Field({ label, value, width = 300 }: { label: string; value: string | null; width?: number }) {
+  return (
+    <p className="flex flex-wrap items-center gap-2 text-[12px]" style={{ marginBottom: 10 }}>
+      <span>{label}</span>
+      <span
+        className="inline-flex items-center rounded-[6px] px-2.5 py-1 text-[12px] font-semibold text-ink"
+        style={{ background: "oklch(94.5% 0.02 85)", border: "1px solid oklch(83% 0.024 85)", minWidth: width }}
+      >
+        {value || " "}
+      </span>
+    </p>
+  );
+}
+
 // The centre number prints as separate boxes on the form, one character
 // each, so it reads as the same field an assessor is used to checking.
 function Boxes({ value, count }: { value: string | null; count: number }) {
@@ -64,16 +78,16 @@ export function BookletCover({ data }: { data: CoverData }) {
         Candidate Record Booklet CELTA 5
       </p>
 
-      {/* Ramy, 30 Aug 2026: "I want to remove that part -- candidate name,
-          dates, centre, tutors, course. The cover page should start with the
-          Cambridge logo."
+      <Field label="Candidate Name:" value={data.candidateName} width={260} />
+      <p className="flex flex-wrap items-center gap-2.5 text-[12px]" style={{ marginBottom: 10 }}>
+        <span>Centre Number:</span>
+        <Boxes value={data.centreNumber} count={6} />
+      </p>
+      <Field label="Centre Name:" value={data.centreName} width={260} />
+      <Field label="Course Number:" value={data.courseNumber} width={160} />
+      <Field label="Course Dates:" value={data.courseDates} width={220} />
+      <Field label="Tutors:" value={data.tutors.join(", ") || null} width={300} />
 
-          On paper those blanks exist because the candidate fills them in. On
-          screen the app already knows every one of them, and the header above
-          this booklet carries the candidate's name on every page, so printing
-          them again was a form pretending to be a form. The ULN stays: it is
-          the one identifier Connect does not hold and a candidate may still
-          need to supply. */}
       <p className="flex flex-wrap items-center gap-2.5 text-[12px]" style={{ marginBottom: 8 }}>
         <span>Unique Learner Number ULN:</span>
         <Boxes value={data.uln} count={10} />
@@ -95,11 +109,11 @@ export function BookletCover({ data }: { data: CoverData }) {
         .
       </p>
 
-      {/* Ramy, 30 Aug 2026: "we also need to find somewhere kind of subtle
-          where we write that this is July 2023." Which edition this
-          reproduces is the first thing an assessor checks if a form looks
-          wrong to them, so it says so -- quietly, at the foot of the cover,
-          where a printed edition line goes. Source of truth is
+      {/* Ramy, 30 Aug 2026: "we need to find somewhere kind of subtle where we
+          write that this is July 2023." Which edition a form reproduces is the
+          first thing an assessor checks when something looks wrong to them, so
+          the cover says so quietly at its foot, where a printed edition line
+          goes. Source of truth is
           src/lib/celta5-replica-pdf/assets/celta5-master-july-2023.pdf. */}
       <p className="text-[9.5px] text-muted" style={{ marginTop: 22, letterSpacing: "0.03em" }}>
         Reproduces the Cambridge Candidate Record Booklet CELTA 5, July 2023 edition.

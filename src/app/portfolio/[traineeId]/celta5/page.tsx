@@ -301,11 +301,6 @@ export default async function PortfolioCelta5Page({
     // the 6h requirement (same bug as the standalone Progress tab's card).
     const { hoursCounted: experiencedTeacherHours, filmedHours } = computeObservationHours(observations ?? []);
 
-    const progressHeadingParts: string[] = [];
-    if (myStage2Slot) progressHeadingParts.push(`Stage 2 tutorial booked`);
-    else if (stage2BlockIds.length > 0) progressHeadingParts.push(`Stage 2 tutorial not booked`);
-    progressHeadingParts.push(bothSigned ? "CELTA 5 signed off" : stage2Submitted ? "CELTA 5 under review" : "CELTA 5 not started");
-    const progressHeading = progressHeadingParts.join(" · ");
 
     // Decorative teal/garnet alternation down this long vertical stack of
     // plain sheets -- no status meaning of its own, same rule as everywhere
@@ -528,11 +523,16 @@ export default async function PortfolioCelta5Page({
 
     return (
       <div className="flex flex-col gap-4">
-        <div>
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Certification progress</p>
-          <h1 className="mt-1 font-serif text-2xl text-ink">{progressHeading}</h1>
-        </div>
-
+      {/* Ramy, 30 Aug 2026: "the parts on top, on top of the Cambridge logo
+          -- that part actually doesn't belong in the CELTA 5."
+          
+          He is right, and it was worse than clutter: this block printed the
+          candidate, centre, course, dates and tutors immediately above a
+          Cambridge cover page that prints the same five things itself. The
+          booklet opens on the cover now, with nothing of Connect's in front
+          of it. (I first read this as "remove the cover fields" and took out
+          the wrong half -- they are the real form's own fields and are
+          back.) */}
         {/* ONE booklet, in Cambridge's order. Ramy, 29 Aug 2026: the first
             cut rendered the new booklet ABOVE the old progress page instead
             of replacing it, so Stage Two appeared twice and the static
@@ -1405,7 +1405,8 @@ export default async function PortfolioCelta5Page({
 
     return (
       <div className="flex flex-col gap-4">
-        {headerBlock}
+        {/* headerBlock deliberately not rendered here -- see the note on the
+            candidate branch. The cover is the document's own title page. */}
 
         {/* The assessor reads the booklet, not a summary of it. Ramy, 29 Aug
             2026 -- this is the view the rebuild exists for: an external
