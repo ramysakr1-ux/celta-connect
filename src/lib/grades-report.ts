@@ -15,7 +15,20 @@ type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 // stay in page.tsx; this is only what CohortSheetRow needs.
 export async function computeCohortRows(
   supabase: SupabaseClient<Database>,
-  courseId: string
+  courseId: string,
+  /**
+   * An assessor sees only what the centre has stood behind. Ramy, 30 Aug
+   * 2026, on the cohort sheet: the MCT "has to send the provisional report
+   * to the assessor -- we'll put it in the pack, and then we'll send the
+   * link." His design says the same, and says the send is a commitment:
+   * "sent to the assessor -- locked. Changing the provisional grade now
+   * needs a new note to the assessor, not a silent edit."
+   *
+   * Nothing enforced that. A tutor's unapproved draft grade, and their
+   * working note, were visible to the assessor the moment they were typed.
+   * With this on, an unapproved candidate reads "Not yet sent" instead.
+   */
+  opts?: { approvedOnly?: boolean }
 ): Promise<{
   courseName: string;
   provisionalDueAt: string | null;
@@ -49,8 +62,14 @@ export async function computeCohortRows(
 
   const recordByTrainee = new Map((records ?? []).map((r) => [r.trainee_id, r]));
 
+  const approvedOnly = opts?.approvedOnly ?? false;
+
   function provisionalLabel(record: Celta5Record | null | undefined): string {
     if (!record?.provisional_grade) return "Not set";
+    // Deliberately not "Not set": the difference between a grade nobody has
+    // proposed and one the MCT hasn't released yet matters to an assessor
+    // reading the sheet before the deadline.
+    if (approvedOnly && !record.provisional_approved_at) return "Not yet sent";
     return record.provisional_grade_upper ? `${record.provisional_grade} / ${record.provisional_grade_upper}` : record.provisional_grade;
   }
 
@@ -93,7 +112,7 @@ export async function computeCohortRows(
       justified: Boolean(record?.overall_notes),
       stage3Status: !record?.stage3_tutorial_required ? "not_required" : record.stage3_finalized_at ? "given" : "not_given",
       tpsRemaining: Math.max(8 - taughtForTrainee, 0),
-      hasProvisional: Boolean(record?.provisional_grade),
+      hasProvisional: Boolean(record?.provisional_grade) && (!approvedOnly || Boolean(record?.provisional_approved_at)),
       provisionalApproved: Boolean(record?.provisional_approved_at),
     };
   });

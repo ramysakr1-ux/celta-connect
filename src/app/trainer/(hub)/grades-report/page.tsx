@@ -39,7 +39,13 @@ export default async function GradesReportPage() {
   }
 
   // Shared with the CSV export (export/route.ts) -- one computation, not two.
-  const { courseName, provisionalDueAt, provisionalDueDerived, rows: cohortRows } = await computeCohortRows(supabase, courseId);
+  // The assessor's copy of the sheet shows only what the MCT has approved
+  // and sent -- see computeCohortRows.
+  const { courseName, provisionalDueAt, provisionalDueDerived, rows: cohortRows } = await computeCohortRows(
+    supabase,
+    courseId,
+    { approvedOnly: !trainer }
+  );
 
   const { data: trainees } = await supabase
     .from("profiles")
@@ -213,7 +219,7 @@ export default async function GradesReportPage() {
                         proposedByMeta={currentLevel}
                         isMct={isMct}
                       />
-                    ) : record?.provisional_grade ? (
+                    ) : record?.provisional_grade && record.provisional_approved_at ? (
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">Provisional grade</span>
                         <span className="rounded-full bg-ink px-2.5 py-0.5 text-[11px] font-bold text-card">
@@ -221,7 +227,18 @@ export default async function GradesReportPage() {
                           {record.provisional_grade_upper ? ` / ${record.provisional_grade_upper}` : ""}
                         </span>
                       </div>
-                    ) : null}
+                    ) : (
+                      /* Unapproved, or nothing proposed. Either way the
+                         assessor is told the state rather than shown a draft
+                         -- the MCT approves and sends, and until then this
+                         candidate's grade is the centre's business. */
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">Provisional grade</span>
+                        <span className="text-[11.5px] text-muted italic">
+                          {record?.provisional_grade ? "Not yet sent by the centre" : "Not proposed yet"}
+                        </span>
+                      </div>
+                    )}
 
                     <p className="text-[11px] text-muted italic">
                       All criteria not listed below is assumed to be &lsquo;To standard&rsquo;.
@@ -268,7 +285,7 @@ export default async function GradesReportPage() {
                       editable={Boolean(trainer)}
                     />
 
-                    {record?.overall_notes ? (
+                    {record?.overall_notes && (trainer || record.provisional_approved_at) ? (
                       <div className="flex flex-col gap-1.5">
                         <div className="flex items-baseline justify-between gap-3">
                           <span className="text-[12px] font-semibold text-ink">{wasSlashed ? "Final justification" : "Note"}</span>
