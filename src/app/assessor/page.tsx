@@ -1210,7 +1210,7 @@ export default async function AssessorPage({
 // new document cannot be added without someone deciding where it points.
 function COHORT_DOC_HREF(name: string): string {
   switch (name) {
-    case "Grades report":
+    case "Grade form":
       return "/trainer/grades-report";
     case "Course timetable":
       return "/trainer/timetable";

@@ -154,7 +154,7 @@ export default async function GradesReportPage() {
     .filter((c) => c.recommendedGrade !== null);
 
   return (
-    <LaptopOnlyGate task="The Grades Report" skip={!trainer}>
+    <LaptopOnlyGate task="The grade form" skip={!trainer}>
     <div className="flex flex-col gap-6">
       <CohortSheet
         courseId={courseId}

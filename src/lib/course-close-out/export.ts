@@ -371,7 +371,7 @@ export async function exportCourseToDrive(courseId: string, exportedBy: string):
     await uploadPdf(
       accessToken,
       topFolder.id,
-      "Grades report.pdf",
+      "Grade form.pdf",
       await renderGradesReportBuffer({
         courseName: course.name,
         centerName: center?.name ?? "",

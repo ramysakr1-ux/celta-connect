@@ -44,7 +44,7 @@ export async function renderGradesReportBuffer(input: GradesReportInput): Promis
     <Document>
       <Page size="A4" orientation="landscape" style={s.page}>
         {centerLogoUrl ? <Image src={centerLogoUrl} style={s.logo} /> : <Text style={s.logoFallbackText}>{centerName}</Text>}
-        <Text style={s.title}>Grades report -- cohort sheet</Text>
+        <Text style={s.title}>Grade form -- cohort sheet</Text>
         <Text style={s.subtitle}>{courseName}</Text>
 
         <View style={s.table}>

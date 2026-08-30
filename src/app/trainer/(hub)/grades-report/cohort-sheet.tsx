@@ -95,7 +95,7 @@ export function CohortSheet({
           <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
             {courseName} · {rows.length} candidate{rows.length === 1 ? "" : "s"}
           </p>
-          <h2 className="font-serif text-xl text-ink">Grades report</h2>
+          <h2 className="font-serif text-xl text-ink">Grade form</h2>
         </div>
         <div className="flex items-center gap-2">
           {/* Ramy: "leave it there exactly." Sits with the other two page

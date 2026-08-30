@@ -8,9 +8,16 @@
 // Handbook wording, not paraphrase -- "Application files / Including rejected
 // applicants" and "The previous assessor's report" are the pack's own terms
 // (see for-claude-code-assessor-visit.md, "Exact terminology").
+//
+// One deliberate departure: the design file's "Grades report" is now "Grade
+// form". Ramy renamed it on 30 Aug 2026 after we checked the Cambridge
+// documents -- "grade report" appears in neither the Administration Handbook
+// nor the Appian User Guidelines, while "grade form" appears eleven times in
+// the Handbook alone. The screen was carrying a name no assessor would
+// recognise.
 
 export const COHORT_DOCUMENTS = [
-  "Grades report",
+  "Grade form",
   "Course timetable",
   "Assignment titles",
   "Tutor list and roles",

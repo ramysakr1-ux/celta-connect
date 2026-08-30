@@ -19,7 +19,7 @@ import { usePathname } from "next/navigation";
 // a blank one.
 const PATH_LABELS: { test: (p: string) => boolean; label: string }[] = [
   { test: (p) => p === "/trainer", label: "Today" },
-  { test: (p) => p.startsWith("/trainer/grades-report"), label: "Grades report" },
+  { test: (p) => p.startsWith("/trainer/grades-report"), label: "Grade form" },
   { test: (p) => p.startsWith("/trainer/roster"), label: "Roster" },
   { test: (p) => p.startsWith("/trainer/volunteers"), label: "Attendance register" },
   { test: (p) => p.startsWith("/trainer/timetable"), label: "Timetable" },

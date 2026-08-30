@@ -34,7 +34,7 @@ const TABS = [
 // Grades Report is assessor-facing material, not an operational trainer
 // tool -- unlike the rest of TABS, it stays visible for assessor sessions
 // (rosterOnly) too.
-const GRADES_REPORT_TAB = { href: "/grades-report", label: "Grades Report" } as const;
+const GRADES_REPORT_TAB = { href: "/grades-report", label: "Grade form" } as const;
 
 // Same route as the trainer's own "Volunteers" tab (TABS[2]) -- checkpoint
 // 9 (Assessor pack) gave /volunteers a read-only branch for assessor
