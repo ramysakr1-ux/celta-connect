@@ -144,9 +144,29 @@ export function InstallPrompt({ variant = "banner" }: { variant?: "banner" | "in
   if (variant === "inline") {
     if (!onClient || standalone) return null;
     return (
-      <div className="flex flex-col items-center gap-1">
-        <button type="button" onClick={handleInstallClick} className="text-[11px] text-muted hover:underline">
-          Keep Connect on your home screen
+      <div className="flex w-full flex-col items-center gap-1.5">
+        {/* A real control, not an 11px grey footnote.
+        
+            Ramy looked for this twice and did not find it: "I checked the
+            volunteer students' view and still no option to create the home
+            screen shortcut." It WAS rendering -- but as muted 11px text at
+            the bottom of a long scroll, squeezed narrow enough to wrap into
+            a column. Something that is genuinely invisible is not built.
+        
+            For a volunteer this is not a nicety. They have no account and no
+            password; a link in an old email is their entire way in, and this
+            button is how that link becomes something they keep. It gets to
+            look like a button. */}
+        <button
+          type="button"
+          onClick={handleInstallClick}
+          className="volunteer-hover-fill inline-flex shrink-0 items-center gap-2 rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium whitespace-nowrap text-ink hover:border-primary"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <rect x="5" y="2" width="14" height="20" rx="2" />
+            <path d="M12 7v6m0 0 2.5-2.5M12 13l-2.5-2.5" />
+          </svg>
+          Keep this on your home screen
         </button>
         {showIosSteps ? (
           <p className="max-w-[46ch] text-center text-[11px] leading-[1.5] text-muted">

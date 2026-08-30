@@ -1271,11 +1271,14 @@ function Footer({ endDateLabel, materials, token }: { endDateLabel: string | nul
           Download all my materials
         </a>
       ) : null}
-      {/* The always-available way in, so dismissing the banner can never
-          strand someone who changes their mind. Renders nothing at all on a
-          browser that cannot install, or once installed. */}
-      <InstallPrompt variant="inline" />
-      <PushSubscribeButton subscribe={subscribeVolunteerPush.bind(null, token)} unsubscribe={unsubscribeVolunteerPush.bind(null, token)} />
+      {/* The two "keep this" controls sit together on one row rather than
+          stacked in the 11px small print, where the install one was
+          invisible enough that Ramy looked for it twice and did not find
+          it. Both render nothing when they do not apply. */}
+      <div className="flex flex-wrap items-start justify-center gap-2 pt-0.5">
+        <InstallPrompt variant="inline" />
+        <PushSubscribeButton subscribe={subscribeVolunteerPush.bind(null, token)} unsubscribe={unsubscribeVolunteerPush.bind(null, token)} />
+      </div>
       <a href={`/student/${token}/unsubscribe`} className="text-[11px] text-muted hover:underline">
         Manage reminder emails
       </a>
