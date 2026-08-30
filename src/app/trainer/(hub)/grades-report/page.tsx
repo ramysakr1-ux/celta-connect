@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { computeStrengthsAndActionPoints, applyGradesReportOverrides, criterionLine } from "@/lib/celta-criteria";
 import { CriteriaList, CopyField } from "@/app/trainer/(hub)/grades-report/report-cards";
+import { buildReleaseChecklist } from "@/lib/release-checklist";
 import { computeAssessedTpStats } from "@/lib/course-progress";
 import { mapTpFeedbackToGlyphRow } from "@/lib/tp-grades";
 import { computeCohortRows } from "@/lib/grades-report";
@@ -55,6 +56,14 @@ export default async function GradesReportPage() {
   const appianUrl =
     (centreForAppian?.centers as unknown as { appian_url: string | null } | null)?.appian_url ?? null;
 
+  // Course-level, read once rather than per candidate.
+  const { data: visitRow } = await createAdminClient()
+    .from("courses")
+    .select("assessor_visit_date")
+    .eq("id", courseId)
+    .maybeSingle();
+  const assessorVisitDateForCourse = visitRow?.assessor_visit_date ?? null;
+
   const { courseName, provisionalDueAt, provisionalDueDerived, rows: cohortRows } = await computeCohortRows(
     supabase,
     courseId,
@@ -93,7 +102,7 @@ export default async function GradesReportPage() {
     : [{ data: null }, { data: null }, []];
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
-  const [{ data: records }, { data: matrixRows }, { data: tpFeedbackRows }, { data: planAssignments }] =
+  const [{ data: records }, { data: matrixRows }, { data: tpFeedbackRows }, { data: planAssignments }, { data: writtenAssignments }] =
     traineeIds.length > 0
       ? await Promise.all([
           supabase.from("celta5_records").select("*").eq("course_id", courseId),
@@ -103,8 +112,12 @@ export default async function GradesReportPage() {
             .eq("course_id", courseId),
           supabase.from("tp_feedback").select("trainee_id, tp_number, grade, submitted_at").in("trainee_id", traineeIds),
           supabase.from("plan_assignments").select("trainee_id, tp_point_id, taught_at").eq("course_id", courseId),
+          // The written assignments, for the release checklist's "four
+          // assignments resolved". The page previously needed only
+          // plan_assignments, which is a different table entirely.
+          supabase.from("assignments").select("*").in("trainee_id", traineeIds),
         ])
-      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
+      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }];
 
   const tpPointIds = [
     ...new Set((planAssignments ?? []).filter((p) => p.taught_at).map((p) => p.tp_point_id).filter((id): id is string => !!id)),
@@ -191,6 +204,18 @@ export default async function GradesReportPage() {
             // across the course, so the one that matters here is the current
             // half's: the last level they taught at.
             const currentLevel = assessedTp.levels.length > 0 ? assessedTp.levels[assessedTp.levels.length - 1] : null;
+
+            // "Before this grade can be released" -- Ramy's own four, from
+            // his design file. I cut my version of this panel because it was
+            // the wrong question; his asks whether the candidate has met the
+            // course requirements, which is the one worth asking.
+            const releaseChecks = buildReleaseChecklist({
+              record,
+              assignments: (writtenAssignments ?? []).filter((a) => a.trainee_id === trainee.id),
+              hoursAssessed: assessedTp.hoursAssessed,
+              levels: assessedTp.levels,
+              assessorVisitDate: assessorVisitDateForCourse,
+            });
 
             return (
               <div
@@ -333,6 +358,33 @@ export default async function GradesReportPage() {
                     </div>
 
                     {trainer ? <UpgradeConditionsForm traineeId={trainee.id} record={record} /> : null}
+
+                    {/* Tutors only -- the centre's own readiness, not the
+                        assessor's business. Reports what is outstanding; the
+                        release action keeps its own checks. */}
+                    {trainer ? (
+                      <div className="flex flex-col gap-2 rounded-[6px] border border-border bg-card p-5">
+                        <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
+                          Before this grade can be released
+                        </p>
+                        {releaseChecks.map((check) => (
+                          <div
+                            key={check.label}
+                            className="flex items-center justify-between gap-3 border-b border-border-faint py-1.5 last:border-b-0"
+                          >
+                            <span className="text-[12px] text-ink">{check.label}</span>
+                            <span
+                              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                                check.met ? "bg-primary/10 text-primary" : "bg-status-warning-bg text-status-warning-text"
+                              }`}
+                            >
+                              <span className="size-[5px] rounded-full bg-current" />
+                              {check.state}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
 
                     {/* The working position. Copying happens candidate by
                         candidate, so the link has to be here as well as at

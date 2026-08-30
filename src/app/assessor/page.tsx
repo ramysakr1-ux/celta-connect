@@ -812,8 +812,28 @@ export default async function AssessorPage({
                   <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: GOLD_UNDERLINE }}>
                     Assessment timetable
                   </p>
-                  <Link href="/trainer/timetable" style={{ fontSize: 11, fontWeight: 600, color: TEAL, textDecoration: "none" }}>
-                    In the full timetable →
+                  {/* Ramy, 30 Aug 2026: "this arrow in the full timetable is
+                      kind of weird... maybe we can put this in a pill, and
+                      something like click for full timetable or course
+                      timetable. A green one perhaps." A bare arrow beside a
+                      heading reads as decoration; this leaves the pack for a
+                      different screen, so it should look like a control. */}
+                  <Link
+                    href="/trainer/timetable"
+                    className="transition-[filter] duration-150 hover:brightness-110"
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: "oklch(98.5% 0.006 90)",
+                      background: TEAL,
+                      borderRadius: 999,
+                      padding: "4px 12px",
+                      textDecoration: "none",
+                      whiteSpace: "nowrap",
+                      flex: "none",
+                    }}
+                  >
+                    See the course timetable
                   </Link>
                 </div>
                 <div
