@@ -356,7 +356,41 @@ async function main() {
     delivery_mode: "f2f",
     accepting_applications: true,
   });
-  console.log("second branch: Los Angeles, owned by the same person");
+  // Staff at the second branch.
+  //
+  // Ramy, 31 Aug 2026: Los Angeles had a course and nobody at all -- so
+  // switching branches on a screen built to show a two-city owner landed on
+  // an empty centre. A branch with no people is not a second branch, it is a
+  // row in the centres table.
+  //
+  // Deliberately NOT a copy of New York's roster: the point of two branches
+  // is that they differ. LA gets its own manager and its own course
+  // administrator, and no observer -- a smaller branch that has not split
+  // the read-only role out yet, which is a truer picture than symmetry.
+  for (const person of [
+    { email: "demo-la-manager@celtaconnect.com", name: "Rosa Delgado", role: "centre_administrator" },
+    { email: "demo-la-course-admin@celtaconnect.com", name: "Kenji Watanabe", role: "course_administrator" },
+  ]) {
+    const { data: auth, error: authErr } = await supabase.auth.admin.createUser({
+      email: person.email,
+      email_confirm: true,
+    });
+    if (authErr) throw authErr;
+    await supabase.from("profiles").insert({
+      id: auth.user.id,
+      email: person.email,
+      full_name: person.name,
+      role: "admin",
+      center_id: branchTwo.id,
+    });
+    await supabase.from("centre_roles").insert({
+      profile_id: auth.user.id,
+      center_id: branchTwo.id,
+      role: person.role,
+    });
+  }
+
+  console.log("second branch: Los Angeles, owned by the same person, with its own staff");
 
   // The assessor, linked BOTH ways -- because there are two of them.
   //
