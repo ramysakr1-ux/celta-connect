@@ -9,6 +9,7 @@ import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { landingFor } from "@/lib/auth/centre-permissions";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
 
 export default async function DashboardLayout({
@@ -94,6 +95,33 @@ export default async function DashboardLayout({
               </span>
             ) : null}
           </Link>
+
+          {/* The way back to Centre Management.
+          
+              Ramy, 30 Aug 2026: "course admin has no way back to centre
+              management." Correct, and it was a side effect of the right
+              fix: the logo used to link to /dashboard, whose landing
+              preference bounced anyone with a centre role into /centre, so
+              clicking the mark from inside Course Admin kicked you out of
+              it. That was fixed by pinning the logo to /dashboard/admin --
+              which removed the only door, rather than replacing it.
+          
+              Shown only when Centre Management is genuinely this person's
+              home, which is exactly what landingFor() answers: someone
+              holding nothing but course_administrator belongs here and has
+              no Centre Management to return to, so offering them the link
+              would just be a redirect back.
+          
+              Mirrors the pill /centre uses for Centre Owner -- a second
+              place you can go, not a tab of this one. */}
+          {centreCtx && landingFor(centreCtx.roles) === "centre-admin" ? (
+            <Link
+              href="/centre"
+              className="admin-hover-fill shrink-0 rounded-[5px] border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-primary uppercase"
+            >
+              Centre management
+            </Link>
+          ) : null}
           <HeaderDesignerCredit landingPath="/dashboard/admin" />
         </div>
         <div className="container flex items-center justify-end gap-4 pb-2.5 text-sm text-muted">
