@@ -168,6 +168,9 @@ export default async function TodayPage() {
   // the Handbook's own default of a regular assessment.
   const preparationDeadline = centrePreparationDeadline(course?.assessor_visit_date ?? null);
   let assessmentKind: AssessmentKind = "regular";
+  // Same reason as assessment_kind below -- 0256 adds this column and Ramy
+  // runs migrations, so it is read off the `*` row rather than named above.
+  let appianReference: string | null = null;
   let centrePreparation: ReturnType<typeof buildCentrePreparationList> = [];
   let visitDayProblem: string | null = null;
   if (isMct && courseId) {
@@ -188,6 +191,7 @@ export default async function TodayPage() {
         .eq("course_status", "withdrawn"),
     ]);
     assessmentKind = ((kindRow as { assessment_kind?: string } | null)?.assessment_kind ?? "regular") as AssessmentKind;
+    appianReference = (kindRow as { appian_notification_reference?: string | null } | null)?.appian_notification_reference ?? null;
     centrePreparation = buildCentrePreparationList({
       assessmentKind,
       deliveryMode: course?.delivery_mode ?? "f2f",
@@ -623,6 +627,7 @@ export default async function TodayPage() {
           initialEmail={course?.assessor_email ?? null}
           initialVisitDate={course?.assessor_visit_date ?? null}
           initialAssessmentKind={assessmentKind}
+          initialAppianReference={appianReference}
         />
       ) : null}
 

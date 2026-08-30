@@ -12,6 +12,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DesignerCredit } from "@/components/designer-credit";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
 import { buildAssessorRequirements, doubleMarkingPerAssignment, type AssessmentKind } from "@/lib/assessor-requirements";
+import { AppianReference } from "@/app/assessor/appian-reference";
 
 // The design file's own palette, so status colour is not re-invented here.
 // Re-pointed 2026-08-21 per the color audit: gold is reserved for the Pass
@@ -556,6 +557,18 @@ export default async function AssessorPage({
             </div>
           </div>
         </div>
+
+        {/* Handbook 14.1's handover item, and 15.2's precondition for the
+            assessor opening their report. First thing under the figures
+            because an assessor who cannot find it has to email the centre
+            and wait -- which is the delay 14.1's own deadline exists to
+            prevent. Ramy, 30 Aug 2026: "make it clear when they land, so
+            they can copy this course number and use it to access the course
+            on Appian." */}
+        <AppianReference
+          reference={(course as { appian_notification_reference?: string | null }).appian_notification_reference ?? null}
+          appianUrl={center?.appian_url ?? null}
+        />
 
         {(
           <div

@@ -193,6 +193,11 @@ export async function updateAssessorContact(_prevState: AssessorContactState, fo
   const assessmentKindRaw = formData.get("assessment_kind");
   const assessmentKind = assessmentKindRaw === "two_yearly" ? "two_yearly" : "regular";
 
+  // Handbook 14.1's third item -- the string the assessor needs to open their
+  // report at all (15.2). Stored verbatim: Cambridge publishes no format, so
+  // validating the shape could only ever reject a correct reference.
+  const appianReference = (formData.get("appian_notification_reference") as string | null)?.trim() || null;
+
   const { error } = await supabase
     .from("courses")
     .update({
@@ -200,6 +205,7 @@ export async function updateAssessorContact(_prevState: AssessorContactState, fo
       assessor_email: assessorEmail,
       assessor_visit_date: assessorVisitDate,
       assessment_kind: assessmentKind,
+      appian_notification_reference: appianReference,
     } as never)
     .eq("id", trainer.course_id);
   if (error) return { error: "Could not save. Try again." };

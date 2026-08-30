@@ -199,6 +199,17 @@ export function buildCentrePreparationList(input: {
       cite: "14.1",
     },
     { label: "The previous assessor's report", detail: "From the centre's most recent visit.", cite: "14.1" },
+    {
+      // Not a document, but 14.1 puts it on the same 2-3 day deadline as the
+      // documents, and it is the only item on that list that blocks the
+      // assessor outright: 15.2 says they cannot open their report without
+      // it. A centre that forgets it has stopped the assessment without
+      // knowing, which is exactly the failure a checklist is for.
+      label: "Appian course notification reference",
+      detail:
+        "Given to the assessor, not just recorded. Without it they cannot open their Assessor Report at all. Set it on the Assessor card and it appears on their landing page for them to copy.",
+      cite: "14.1 / 15.2",
+    },
     { label: "Any action plan agreed with Cambridge", detail: "A copy, where one is in place -- the assessor checks the measures are being adopted.", cite: "14.1 / 14.2" },
   ];
 

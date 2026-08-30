@@ -19,10 +19,15 @@ export function AssessorCard({
   initialEmail,
   initialVisitDate,
   initialAssessmentKind,
+  initialAppianReference,
 }: {
   initialName: string | null;
   initialEmail: string | null;
   initialVisitDate: string | null;
+  // Handbook 14.1's third handover item, and 15.2's precondition for the
+  // assessor opening their report at all. Held here rather than on Course
+  // Admin's card because it is the MCT who does the handover.
+  initialAppianReference: string | null;
   // Handbook 13.1's two kinds of visit -- it changes how many portfolios the
   // assessor reads (two vs a minimum of four plus every Fail), so the
   // requirement list Connect shows is wrong for the two-yearly visit unless
@@ -34,6 +39,7 @@ export function AssessorCard({
   const [email, setEmail] = useState(initialEmail ?? "");
   const [visitDate, setVisitDate] = useState(initialVisitDate ?? "");
   const [assessmentKind, setAssessmentKind] = useState(initialAssessmentKind);
+  const [appianReference, setAppianReference] = useState(initialAppianReference ?? "");
   const [state, formAction, pending] = useActionState<AssessorContactState, FormData>(async (_prev, formData) => {
     const result = await updateAssessorContact(_prev, formData);
     if (!result.error) setEditing(false);
@@ -56,6 +62,7 @@ export function AssessorCard({
               setName(initialName ?? "");
               setEmail(initialEmail ?? "");
               setVisitDate(initialVisitDate ?? "");
+              setAppianReference(initialAppianReference ?? "");
             }
             setEditing((v) => !v);
           }}
@@ -121,6 +128,24 @@ export function AssessorCard({
               <option value="two_yearly">Two-yearly — four portfolios minimum, plus every Fail</option>
             </select>
           </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="mct_appian_reference" className="text-[11px] text-muted">
+              Appian course notification reference
+            </label>
+            <input
+              id="mct_appian_reference"
+              name="appian_notification_reference"
+              type="text"
+              value={appianReference}
+              onChange={(e) => setAppianReference(e.target.value)}
+              placeholder="From CELTA Admin's course approval email"
+              className="h-9 rounded-[6px] border border-border bg-card px-2.5 text-[13px] text-ink outline-none focus:border-primary"
+            />
+            <p className="text-[11px] leading-[1.45] text-muted">
+              The assessor cannot open their Assessor Report without this. Handbook 14.1 has you give it to them 2&ndash;3 days
+              before the visit; once it is here, it appears on their landing page for them to copy.
+            </p>
+          </div>
           {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
           <div className="mt-1 flex justify-end">
             <button
@@ -137,6 +162,15 @@ export function AssessorCard({
           <p className="text-ink">{name || <span className="text-muted italic">Not set yet</span>}</p>
           {email ? <p className="text-muted">{email}</p> : null}
           <p className="text-muted">{visitDate ? `Visit date: ${visitDate}` : "Visit date not set yet."}</p>
+          {appianReference ? (
+            <p className="text-muted">
+              Appian reference: <span className="font-mono text-ink">{appianReference}</span>
+            </p>
+          ) : (
+            <p className="text-status-warning-text">
+              No Appian reference yet &mdash; the assessor cannot open their report without it.
+            </p>
+          )}
         </div>
       )}
     </div>
