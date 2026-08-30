@@ -790,10 +790,10 @@ export function computeTrajectoryByDimension(
 // "*all criteria not listed below is assumed to be 'To standard'".
 // ============================================================
 
-// Short forms of the criteria. Nothing reads these as of 30 Aug 2026 -- the
-// Grades Report was the one caller and now uses the full wording like every
-// other screen (see formatCriterion). Kept in case a genuinely tight space
-// wants them, but check the decision above before reaching for it.
+// The labels the Grades Report writes. Checked against a real report on
+// 30 Aug 2026 (C10/2026 IH Istanbul): sixteen of eighteen matched exactly,
+// and 4c/4f were trimmed to agree with it. Change one only against a real
+// report, not by eye.
 export const SHORT_CRITERIA_LABELS: Record<string, string> = {
   "1a": "needs awareness",
   "1b": "cultural awareness",
@@ -813,10 +813,10 @@ export const SHORT_CRITERIA_LABELS: Record<string, string> = {
 
   "4a": "stating aims",
   "4b": "staging",
-  "4c": "materials design",
+  "4c": "materials",
   "4d": "materials prep",
   "4e": "procedure",
-  "4f": "interaction patterns",
+  "4f": "interaction",
   "4g": "variety and balance",
   "4h": "timing",
   "4i": "language analysis",
@@ -849,23 +849,16 @@ export interface StrengthsAndActionPoints {
   teachingActionPoints: string[];
 }
 
-// The full Cambridge wording, for consistency with the rest of the app.
+// Cambridge's full wording, for consistency with the rest of the app --
+// Stage 2, Stage 3, TP feedback and the appendices all render
+// CRITERIA_LABELS, and the Grades Report was the only screen abbreviating.
 //
-// This flip-flopped on 30 Aug 2026 and the reason it finally settled is
-// worth recording, because it is not the reason it started.
-//
-// Ramy first said "the criteria has to be word for word Cambridge criteria",
-// then withdrew it -- "I just checked, it doesn't have to be." So the
-// external requirement is gone. What decided it is his next point: "whatever
-// is here should be consistent with whatever the trainer is writing on the
-// course, whatever is in stage three and stage two... this is no longer a
-// Cambridge issue, this is just us deciding to be consistent."
-//
-// And the app is already consistent everywhere else. The CELTA 5 criteria
-// grid for Stage 2 and Stage 3, the TP feedback screen, the appendices and
-// the resources page all render CRITERIA_LABELS. The Grades Report was the
-// single screen abbreviating, so a tutor met one wording while rating a
-// criterion and a different one while reporting it.
+// Ramy's real report (C10/2026 IH Istanbul) writes them short and code-first
+// -- "4a) stating aims" -- and I briefly switched to match it, but he sent
+// that document for its LAYOUT: "treat this only as the headings, I'm only
+// showing you the headings, not the actual grades." So the wording decision
+// stands where he last put it, and the format question is still open rather
+// than answered by a document that was not offered as an answer.
 function formatCriterion(code: string): string {
   return `${CRITERIA_LABELS[code] ?? code} (${code})`;
 }
