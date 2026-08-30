@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { can } from "@/lib/auth/centre-permissions";
 import { CreateCourseForm } from "@/app/dashboard/admin/create-course-form";
 
 // The new-course wizard, on its own screen.
@@ -15,6 +17,22 @@ export default async function NewCoursePage() {
   const session = await getCurrentProfile();
   if (!session?.profile) redirect("/login");
   if (session.profile.role !== "admin" && session.profile.role !== "platform_owner") redirect("/dashboard");
+
+  // Creating a course is a capability, not a job title.
+  //
+  // This page only ever checked profiles.role === "admin", so every member
+  // of the centre-admin family could open the wizard regardless of what the
+  // role builder said -- including Course administrator, whose matrix says
+  // Create courses = None. Found 31 Aug 2026 by opening this URL signed in
+  // as the demo course administrator and getting the full form. Same class
+  // of bug as the import policies: a capability the screen never consulted.
+  //
+  // platform_owner keeps its own route in, as everywhere else -- Command
+  // Center links here with no centre context of its own.
+  if (session.profile.role === "admin") {
+    const ctx = await getCentreRoleContext(session.profile);
+    if (!can(ctx.roles, "course.create", ctx.overrides)) redirect("/dashboard/admin");
+  }
 
   // Command Center's Create menu links here for platform_owner with no
   // centre context of its own -- active_center_id (set by Owner/Invited

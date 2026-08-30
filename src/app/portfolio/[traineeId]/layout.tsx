@@ -464,10 +464,26 @@ export default async function PortfolioLayout({
         </div>
       )}
 
-      <footer className={`mt-auto py-8 text-center text-xs text-muted ${showTraineeNav ? "pb-20 md:pb-8" : ""}`}>
-        {[center?.name, center ? `Cambridge CELTA (Centre ${center.center_number})` : null, `Workspace link ${trainee.id.slice(0, 8)}`]
-          .filter(Boolean)
-          .join(" · ")}
+      <footer className={`mt-auto flex flex-col items-center gap-3 py-8 text-center text-xs text-muted ${showTraineeNav ? "pb-20 md:pb-8" : ""}`}>
+        <span>
+          {[center?.name, center ? `Cambridge CELTA (Centre ${center.center_number})` : null, `Workspace link ${trainee.id.slice(0, 8)}`]
+            .filter(Boolean)
+            .join(" · ")}
+        </span>
+        {/* The always-available install entry, for trainees this time.
+        
+            Ramy: "I want to make sure that the shortcut on your phone, on
+            your desktop, that option is also for the trainees, because I
+            don't see it." He could not: trainees had only the banner
+            variant, gated on beforeinstallprompt -- an event Chrome
+            withholds behind its own heuristics and Firefox and desktop
+            Safari never fire -- so for most people it never appeared. Same
+            fault already fixed for volunteers.
+        
+            Five weeks of daily use is the original reason build-spec §7
+            wanted this offered to trainees at all; the banner stays for the
+            first visit, and this is the way back to it afterwards. */}
+        {showTraineeNav ? <InstallPrompt variant="inline" /> : null}
       </footer>
 
       {showTraineeNav ? <TraineeMobileNav traineeId={trainee.id} /> : null}
