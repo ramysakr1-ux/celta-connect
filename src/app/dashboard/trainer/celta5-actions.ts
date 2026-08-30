@@ -696,6 +696,52 @@ export async function updateUpgradeConditions(
   return { error: null };
 }
 
+// The two fields the assessor actually submits, written by the tutor.
+//
+// Handbook 14.4: "The course tutor must contact the assessor to confirm the
+// final recommended grade for each candidate, providing an update on
+// strengths and areas for development for each candidate and a rationale for
+// each final grade." The assessor then types them into their Appian report.
+//
+// 15.2 on the first of them: "This is a required field in the form and must
+// be completed for all candidates including those being granted an extension
+// or deferral or any withdrawn candidates." On the second: "optional but
+// should be completed for any candidates that were borderline (e.g.,
+// Pass/Fail, Pass/Pass B) so there is a justification recorded for the final
+// recommended grade."
+//
+// Same visibility treatment as the rest of the final report -- gated at the
+// UI layer, since celta5_records has no trainee-self SELECT policy.
+export async function updateFinalReportFields(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireRole("trainer");
+
+  const traineeId = formData.get("trainee_id");
+  if (typeof traineeId !== "string" || !traineeId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("celta5_records")
+    .update({
+      final_update_notes: optionalString(formData.get("final_update_notes")),
+      final_higher_grade_evidence: optionalString(formData.get("final_higher_grade_evidence")),
+      overall_notes: optionalString(formData.get("overall_notes")),
+    } as never)
+    .eq("trainee_id", traineeId);
+
+  if (error) {
+    return { error: "Could not save. Try again." };
+  }
+
+  revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
+  revalidatePath("/trainer/grades-report");
+  return { error: null };
+}
+
 // The "INFORMATION FOR THE CELTA GRADE REVIEW" box -- required when
 // stage3_tutorial_required is true, Cambridge/assessor-facing commentary, never
 // shown to the trainee (same treatment as final_recommended_grade/

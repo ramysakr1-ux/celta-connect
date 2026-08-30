@@ -20,6 +20,7 @@ import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rule
 import { StandardRatingGlyph } from "@/lib/status-pill";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CriteriaRating } from "@/lib/supabase/types";
+import { FinalReportFields } from "@/app/trainer/(hub)/grades-report/final-report-fields";
 
 // Assessor-facing compiled Grades Report -- the whole cohort in one
 // continuous document, matching the shape of a real center's actual
@@ -216,6 +217,20 @@ export default async function GradesReportPage() {
             const teachingStrengths = toLines(curated.teachingStrengths);
             const teachingActionPoints = toLines(curated.teachingActionPoints);
             const wasSlashed = Boolean(record?.provisional_grade_upper);
+            // Handbook 15.2 asks for the evidence field on "any candidates
+            // that were borderline (e.g., Pass/Fail, Pass/Pass B)". A paired
+            // provisional IS that, and covers both of Cambridge's own
+            // examples -- but it misses the other way a grade can be in
+            // question: a straight provisional that the final recommendation
+            // then departs from, which 14.4 requires the MCT and assessor to
+            // discuss and the assessor to explain. Both are borderline in the
+            // sense the field exists for, so both get it.
+            const gradeMoved = Boolean(
+              record?.final_recommended_grade &&
+                record?.provisional_grade &&
+                record.final_recommended_grade !== record.provisional_grade
+            );
+            const isBorderline = wasSlashed || gradeMoved;
             const traineeFeedback = (tpFeedbackRows ?? []).filter((f) => f.trainee_id === trainee.id);
             const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at);
             const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
@@ -347,38 +362,6 @@ export default async function GradesReportPage() {
                       editable={Boolean(trainer)}
                     />
 
-                    {record?.overall_notes && (trainer || record.provisional_approved_at) ? (
-                      <div className="flex flex-col gap-1.5">
-                        <div className="flex items-baseline justify-between gap-3">
-                          <span className="text-[12px] font-semibold text-ink">{wasSlashed ? "Final justification" : "Note"}</span>
-                          <CopyField value={record.overall_notes} label="Note" />
-                        </div>
-                        <p className="rounded-[6px] border border-border bg-card-inset px-3 py-2.5 text-[12px] leading-[1.55] whitespace-pre-wrap text-ink">
-                          {record.overall_notes}
-                        </p>
-                      </div>
-                    ) : (
-                      /* Every candidate is owed one, not only the slashed --
-                         Handbook 14.4's "a rationale for each final grade".
-                         The slashed ones are just more urgent, because the
-                         rationale has to answer the conditions set at the
-                         provisional stage. */
-                      /* Ramy, 30 Aug 2026: "some assessors don't really ask
-                         for a justification for the straight passes, but it
-                         wouldn't hurt to have it there -- just not enforced.
-                         What's enforced is the slash."
-                         
-                         So the field is offered to everyone and nagged about
-                         for nobody, except a slashed candidate, where the
-                         rationale has to answer the conditions the centre
-                         itself set. */
-                      <p className={`text-sm ${wasSlashed ? "text-destructive" : "text-muted"}`}>
-                        {wasSlashed
-                          ? "Slashed at the provisional stage -- a rationale is required, saying whether they met the conditions below."
-                          : "No rationale yet. Optional on a straight grade, though most tutors write a line."}
-                      </p>
-                    )}
-
                     {/* Slash only. Ramy went back and forth on this within
                         one session, and landed here: "this whole box just
                         should not be there if it's a straightforward. It will
@@ -439,6 +422,19 @@ export default async function GradesReportPage() {
                         </div>
                       ) : null}
                     </div>
+
+                    {/* The three things 14.4 has the tutor hand to the
+                        assessor -- the update, the evidence on a borderline
+                        candidate, and the rationale. The rationale used to
+                        sit at the foot of the left column; it belongs here,
+                        with the other two, because they travel together and
+                        the assessor submits all three.
+
+                        Shown to the assessor read-only, with one copy button
+                        for the whole hand-over. */}
+                    {record ? (
+                      <FinalReportFields record={record} editable={Boolean(trainer)} isBorderline={isBorderline} />
+                    ) : null}
 
                     {/* Tutors only -- the centre's own readiness, not the
                         assessor's business. Reports what is outstanding; the
