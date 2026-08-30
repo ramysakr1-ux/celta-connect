@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
-import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 import { updateAssessorVisitDate, updateEntryFormSentAt, updateAssessor } from "@/app/dashboard/admin/courses/[id]/roster-actions";
 import { ApplicationSettingsForm } from "@/app/dashboard/admin/courses/[id]/application-settings-form";
 import { TutorRoleControl } from "@/app/dashboard/admin/courses/[id]/tutor-role-control";
@@ -88,7 +87,20 @@ export default async function CourseAdminDetailPage({
           </p>
           <h1 className="mt-0.5 font-serif text-xl text-ink">{course.name}</h1>
         </div>
-        <DuplicateCourseForm courseId={course.id} suggestedName={`${course.name} (copy)`} />
+        {/* Duplicate is deliberately NOT here.
+        
+            Centre Management's course list states the rule -- "duplicate-
+            course lives on this overview (the course list), not inside an
+            individual course's detail" -- and then this page did it anyway,
+            so the same action appeared in three places with no pattern to
+            it. Ramy, 31 Aug 2026: "you can now duplicate the course from
+            inside the course... it's all connected in it. It's confusing."
+        
+            One rule now: you duplicate a course from wherever courses are
+            listed. Both lists have it (Centre Management's Overview and
+            Course Admin's landing), and neither of the places you go to
+            work ON one course does. Duplicating is a decision about the
+            set of courses, not about the course you are standing in. */}
       </div>
 
       {/* Admissions pipeline */}
