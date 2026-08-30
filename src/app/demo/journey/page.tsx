@@ -432,16 +432,46 @@ export default async function JourneyPage() {
           <Step number={2} title="Gets an acknowledgement" blurb="Sent the moment the form is submitted.">
             <EmailPreview title="We have your application" to={applicantName} html={ackHtml} />
           </Step>
+          {/* Rewritten 30 Aug 2026. This step described passive visibility --
+              "a staff member signs in, and the application is already
+              there" -- when in fact five things fire before anyone opens a
+              laptop. Ramy: "I thought it's all automated, and emails will be
+              sent to various people. So what happens again when a candidate
+              completes a pre-interview task?" He was right; the page was
+              underselling its own product. Sequence below is read off
+              src/app/apply/actions.ts, in the order it actually runs. */}
           <Step
             number={3}
-            title="Lands in the admissions pipeline"
-            blurb="Immediately, and visible to any staff member who signs in -- not just whoever happens to check their email."
+            title="Five things happen before anyone opens a laptop"
+            blurb="The pipeline is not somewhere an application waits to be noticed. Submitting one sets off the acknowledgement, the transcription, the notifications and -- if the centre has the reading turned on -- possibly an interview invitation."
           >
+            <Facts
+              caption="In this order, the moment they press submit"
+              rows={[
+                ["Acknowledgement", "sent at once, to everyone who applies -- deliberately generic, says nothing about the outcome"],
+                ["Speaking task", "transcribed in the background; if that fails it fails silently rather than losing the application"],
+                ["The right people", "email AND browser push to everyone holding admissions.manage -- not a shared inbox nobody owns"],
+                ["Centre Management", "a live indicator lights for anyone with the page open, shared across all of them"],
+                ["The reading", "only if the centre turned shadow mode on -- and it routes, it never rejects"],
+              ]}
+            />
+            <Ripple
+              from="Reading routes it"
+              to={[
+                { where: "Clear", what: "invite queues, sends in 15 min unless cancelled" },
+                { where: "Clear problems", what: "a tutor is notified" },
+                { where: "Borderline", what: "queued for a person" },
+              ]}
+            />
+            <p className="text-xs text-muted">
+              There is no fourth lane. The app never writes a rejection at any confidence &mdash; the worst outcome an
+              automated reading can reach is &ldquo;a person should look at this&rdquo;.
+            </p>
             <div className="flex flex-col gap-2">
-              <p className="text-xs font-semibold text-muted">A staff member signs in --</p>
+              <p className="text-xs font-semibold text-muted">And when a staff member does sign in --</p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/demo-journey/sign-in.png" alt="Connect sign-in page" className="w-full max-w-sm rounded-[6px] border border-border" />
-              <p className="text-xs font-semibold text-muted">-- and the application is already there, alongside everyone else who&apos;s applied.</p>
+              <p className="text-xs font-semibold text-muted">-- it is already there, alongside everyone else who has applied.</p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/demo-journey/admissions-pipeline.png"
