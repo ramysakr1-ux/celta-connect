@@ -120,7 +120,28 @@ export async function proxy(request: NextRequest) {
     // testing the payments bridge: without this, every webhook delivery
     // 307-redirected to /login before the route ever ran, so provider
     // status updates would have silently never applied in production.
-    request.nextUrl.pathname.startsWith("/api/webhooks/");
+    request.nextUrl.pathname.startsWith("/api/webhooks/") ||
+    // The service worker and the web app manifest, which have to be
+    // fetchable with no session at all.
+    //
+    // Found live, 30 Aug 2026, chasing why the install offer never
+    // appeared: /sw.js was 307-redirecting to /login for anyone not signed
+    // in. A service worker registration FAILS OUTRIGHT if the script
+    // request redirects -- the spec forbids following one -- so volunteers,
+    // who never have a Supabase session by design, have never had a
+    // service worker registered at all.
+    //
+    // That silently took two features with it. Install was one. Push was
+    // the other: the volunteer "Enable notifications" button registers this
+    // exact file before subscribing, so a volunteer could never have
+    // received the "your class starts in 30 minutes" reminder no matter how
+    // correctly the VAPID keys and the cron were set up.
+    //
+    // The manifest is here for the same reason -- a manifest that redirects
+    // to a login page is not a manifest, and Chrome silently drops the
+    // install criteria when it cannot read one.
+    request.nextUrl.pathname === "/sw.js" ||
+    request.nextUrl.pathname === "/manifest.webmanifest";
 
   // An assessor carries no real Supabase user at all -- just the
   // assessor_token cookie set by /assessor/[token] (migration 0030). This
