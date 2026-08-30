@@ -17,6 +17,7 @@ import { DesignerCredit } from "@/components/designer-credit";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import { AssessorMeetingCard } from "./assessor-meeting-card";
 import { AssessorPortfolioLanding } from "./assessor-landing";
+import { AssessorViewNotice } from "./assessor-view-notice";
 import { buildDeferralDraft } from "@/lib/letters/deferral";
 import type { FormalLetterInput } from "@/lib/formal-letter-pdf/document";
 import { DeferralLetterSection } from "./deferral-letter-section";
@@ -56,7 +57,23 @@ export default async function CourseStreamPage({
   const { preview } = await searchParams;
   const session = await getCurrentProfile();
   const viewer = session?.profile ?? null;
-  const assessorCourseId = !viewer ? await getAssessorCourseId() : null;
+  // The assessor token, read whether or not someone is signed in. Two
+  // separate questions hang off it and they are NOT the same question:
+  //
+  //   assessorCourseId -- may this sessionless caller read anything, and
+  //                       through which client. Unchanged: a real session
+  //                       always wins, and a token never widens what a
+  //                       signed-in user can reach.
+  //   assessorView     -- which layout to draw. This one follows the token.
+  //
+  // They used to be one variable, and the consequence was that opening the
+  // assessor link while signed in as staff gave you a correct assessor pack
+  // that dropped you into the candidate's Course Stream on the first click.
+  // Ramy, 30 Aug 2026: "I just clicked on Daniel card, the assessor view, and
+  // it took me back to the course stream... get rid of the old stuff so it's
+  // not lingering in the background as a rule."
+  const assessorToken = await getAssessorCourseId();
+  const assessorCourseId = !viewer ? assessorToken : null;
   if (!viewer && !assessorCourseId) notFound();
 
   const supabase = assessorCourseId ? createAdminClient() : await createClient();
@@ -252,9 +269,19 @@ export default async function CourseStreamPage({
   // tutors, wrong for someone who came to read the evidence. Everything else
   // on this route (the rail, the read-only banner, the roster header) is
   // already correct for an assessor and stays as it is.
-  if (assessorCourseId && trainee.course_id) {
+  // Staff only, never a trainee: a stray assessor cookie must not change
+  // what a candidate sees, and the admin client above is still reserved for
+  // the sessionless case, so nothing here widens anyone's access.
+  const assessorView = Boolean(
+    assessorToken && trainee.course_id === assessorToken && (!viewer || isStaff)
+  );
+
+  if (assessorView && trainee.course_id) {
     return (
-      <AssessorPortfolioLanding traineeId={traineeId} courseId={trainee.course_id} />
+      <>
+        {viewer ? <AssessorViewNotice /> : null}
+        <AssessorPortfolioLanding traineeId={traineeId} courseId={trainee.course_id} />
+      </>
     );
   }
 
