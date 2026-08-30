@@ -1257,6 +1257,84 @@ async function main() {
     console.warn("  volunteer attendance: no TP1-3 events matched -- check the title format");
   }
   console.log("volunteer attendance:", attendanceRows.length, "rows");
+
+  // --- Everything below was fixed live on 30 Aug and would have evaporated
+  // on the next rebuild, which is the single thing that caused most of that
+  // day's "it regressed" confusion. Each of these is a screen that looks
+  // broken without its data, not a nice-to-have. ---
+
+  // 1. Rooms. course_timetable_events.detail is where a room number lives,
+  // and the volunteer's card shows it on the Where line. Without it a
+  // volunteer walking to a building is told only "In person at the centre".
+  // One room per subgroup letter, so a group keeps the same room all course.
+  {
+    const { data: tpEvents } = await supabase
+      .from("course_timetable_events")
+      .select("id, title")
+      .eq("course_id", course.id)
+      .eq("type", "tp");
+    const ROOMS = { A: 2, B: 3, C: 4, D: 5, E: 6, F: 7 };
+    for (const e of tpEvents ?? []) {
+      const letter = (e.title.match(/·\s*([A-F])/) || [])[1];
+      await supabase
+        .from("course_timetable_events")
+        .update({ detail: `Room ${ROOMS[letter] ?? 2}` })
+        .eq("id", e.id);
+    }
+    console.log("rooms:", (tpEvents ?? []).length, "TP events");
+  }
+
+  // 2. Amara's remaining two TPs, UNTAUGHT.
+  //
+  // The course runs to TP8 and she was seeded with six, so the trainee
+  // landing page's hero card correctly concluded she had nothing left to
+  // teach and fell back to a three-line "All your TPs are taught" -- which
+  // Ramy read as the card having lost its dimensions. It had not; it had
+  // lost its content. An untaught plan_assignment is what makes the hero
+  // show the lesson, the time, the room and "Open your plan".
+  for (const tp of [
+    { tp_number: 7, short_title: "Giving advice — should and ought to", main_lesson_aim: "By the end of the lesson learners will be better able to give advice using should/ought to in the context of moving to a new city." },
+    { tp_number: 8, short_title: "Reading for gist — city guides", main_lesson_aim: "By the end of the lesson learners will have practised reading for gist and specific information in the context of short city guides." },
+  ]) {
+    await supabase.from("plan_assignments").insert({
+      course_id: course.id,
+      trainee_id: trainees["Amara Okafor"],
+      tp_number: tp.tp_number,
+      short_title: tp.short_title,
+      main_lesson_aim: tp.main_lesson_aim,
+      density_tier: "coaching_prose",
+      class_grouping: "whole_class",
+      assigned_by: trainerId,
+      taught_at: null,
+    });
+  }
+  console.log("Amara: TP7 and TP8 assigned, untaught");
+
+  // 3. Announcements. The trainee landing's middle card is one of three and
+  // read "Nothing posted yet" on every course. Note sent_at: scheduling came
+  // later (migration 0093) and the card filters on it, so an announcement
+  // without sent_at is invisible however good it looks in the table.
+  {
+    const hoursAgo = (n) => new Date(Date.now() - n * 3600000).toISOString();
+    const posts = [
+      { pinned: true, title: "Reading for tomorrow is chapter 4 only, not 4 and 5", body: "Apologies for the confusion in yesterday's handout. Chapter 4 only. If you have already read 5, no harm done.", h: 20 },
+      { pinned: false, title: "Observation slots for Thursday are open", body: "Six slots, first come first served. Sign up on the timetable -- two of you still need a second observation before the end of week 3.", h: 3 },
+      { pinned: false, title: "Assignment 2 briefs are in Resources", body: "Focus on the Learner. The brief, the marking criteria and last course's worked example are all in the Resource Hub.", h: 52 },
+    ];
+    const { error } = await supabase.from("course_broadcasts").insert(
+      posts.map((p) => ({
+        course_id: course.id,
+        author_id: trainerId,
+        title: p.title,
+        body: p.body,
+        pinned: p.pinned,
+        created_at: hoursAgo(p.h),
+        sent_at: hoursAgo(p.h),
+      }))
+    );
+    if (error) console.warn("  announcements:", error.message);
+    else console.log("announcements:", posts.length);
+  }
   // Several shared materials off every one of Amara's TPs, not one apiece --
   // volunteer-view-full-spec.md's own mockup shows a real handout COUNT
   // (2-3, not always 1) on every attended/missed row, and Ramy caught the
