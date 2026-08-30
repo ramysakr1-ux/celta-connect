@@ -11,7 +11,19 @@ export async function GET() {
   const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
   const fallback = () => NextResponse.redirect(new URL("/", siteUrl));
 
-  const { data: demoCenter } = await admin.from("centers").select("id").eq("is_demo", true).maybeSingle();
+  // Oldest demo centre, not "the" demo centre. maybeSingle() throws the
+  // moment a second one exists, and this file already carries a comment
+  // about exactly that failure with volunteers -- the same shape bit again
+  // when a second demo branch was added so a centre owner could hold two.
+  // Ordering by created_at keeps this pointed at the original, richly
+  // seeded branch rather than whichever row came back first.
+  const { data: demoCenter } = await admin
+    .from("centers")
+    .select("id")
+    .eq("is_demo", true)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
   if (!demoCenter) return fallback();
 
   const { data: course } = await admin

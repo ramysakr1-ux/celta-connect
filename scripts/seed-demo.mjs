@@ -260,6 +260,88 @@ async function main() {
   });
   console.log("centre admin:", centreAdminId);
 
+  // The other two centre roles, so the Roles tab is not two-thirds empty.
+  //
+  // Careful with the keys: the built-in role KEYS are legacy and do not
+  // match their on-screen LABELS. role-strip.tsx renders
+  // `centre_administrator` under the heading "Centre manager" (runs
+  // admissions, payments and course setup), and `centre_manager` under
+  // "Centre observer" (read-only). A third value, `centre_observer`, is
+  // accepted by the column but has no entry in that map at all, so anyone
+  // granted it renders nowhere. Granting what the labels say rather than
+  // what the keys say puts people under the wrong heading, or loses them.
+  //
+  // The Roles page argues "that is two roles, not one shared login" and
+  // then showed "Nobody yet" against both of them, which rather undercut
+  // the point.
+  for (const person of [
+    { email: "demo-centre-manager@celtaconnect.com", name: "Priya Raman", role: "centre_administrator" },
+    { email: "demo-centre-observer@celtaconnect.com", name: "Alan Whitfield", role: "centre_manager" },
+  ]) {
+    const { data: auth, error: authErr } = await supabase.auth.admin.createUser({
+      email: person.email,
+      email_confirm: true,
+    });
+    if (authErr) throw authErr;
+    await supabase.from("profiles").insert({
+      id: auth.user.id,
+      email: person.email,
+      full_name: person.name,
+      role: "admin",
+      center_id: center.id,
+    });
+    await supabase.from("centre_roles").insert({
+      profile_id: auth.user.id,
+      center_id: center.id,
+      role: person.role,
+    });
+  }
+  console.log("centre roles: manager and observer granted");
+
+  // The assessor, linked BOTH ways -- because there are two of them.
+  //
+  // courses.assessor_name/assessor_email is free text, and drives the
+  // assessor pack, the Grade form and the visit page. Assessor History
+  // reads something else entirely: course_tutors rows with
+  // tutor_role = 'external_assessor', joined to a real profile. Setting
+  // one leaves the other empty, which is why that screen said "no assessor
+  // has been linked to a course at this centre yet" while every other
+  // screen named one.
+  //
+  // Linked to both demo courses on purpose: two consecutive courses puts
+  // the centre exactly at Handbook 13.3's limit, so the screen shows its
+  // own warning rather than an empty table.
+  const { data: assessorAuth, error: assessorAuthErr } = await supabase.auth.admin.createUser({
+    email: "demo-assessor@celtaconnect.com",
+    email_confirm: true,
+  });
+  if (assessorAuthErr) throw assessorAuthErr;
+  // profiles_course_required_for_trainer_trainee: a trainer profile must
+  // carry a course, so this takes the running one.
+  await supabase.from("profiles").insert({
+    id: assessorAuth.user.id,
+    email: "demo-assessor@celtaconnect.com",
+    full_name: "Dr Helen Marsh",
+    role: "trainer",
+    center_id: center.id,
+    course_id: course.id,
+  });
+  await supabase.from("course_tutors").insert({
+    course_id: course.id,
+    profile_id: assessorAuth.user.id,
+    tutor_role: "external_assessor",
+  });
+  const demoAssessorId = assessorAuth.user.id;
+  await supabase
+    .from("courses")
+    .update({
+      assessor_name: "Dr Helen Marsh",
+      assessor_email: "demo-assessor@celtaconnect.com",
+      appian_notification_reference: "CELTA-2026-08-4471",
+    })
+    .eq("id", course.id);
+  console.log("assessor: linked on courses.assessor_name AND course_tutors");
+
   const { data: courseAdminAuth, error: courseAdminAuthErr } = await supabase.auth.admin.createUser({
     email: "demo-course-admin@celtaconnect.com",
     email_confirm: true,
@@ -1224,6 +1306,14 @@ async function main() {
     profile_id: trainerId,
     tutor_role: "main_course_tutor",
     verified_at: new Date(Date.now() - 150 * 86400000).toISOString(),
+  });
+  // Same assessor as the running course, deliberately: two consecutive
+  // courses is exactly Handbook 13.3's limit, so Assessor History shows
+  // its own warning rather than a one-row table.
+  await supabase.from("course_tutors").insert({
+    course_id: pastCourse.id,
+    profile_id: demoAssessorId,
+    tutor_role: "external_assessor",
   });
   const pastTraineeDefs = [
     { name: "Elena Cruz", email: "demo-elena@celtaconnect.com", grade: "Pass" },

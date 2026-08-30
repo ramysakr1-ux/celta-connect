@@ -16,16 +16,28 @@ export async function mintDemoMagicLink(email: string, next: string | ((profileI
   const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
   const fallback = () => NextResponse.redirect(new URL("/", siteUrl));
 
-  const { data: demoCenter } = await admin.from("centers").select("id").eq("is_demo", true).maybeSingle();
-  if (!demoCenter) return fallback();
-
+  // Look the account up by its email, then confirm the centre it belongs to
+  // is a demo one -- rather than finding "the" demo centre first.
+  //
+  // This used to be .eq("is_demo", true).maybeSingle(), which returns
+  // nothing the moment a second demo centre exists. Adding an Izmir branch
+  // so a centre owner could hold two centres silently took out every demo
+  // entry point at once: no centre, no profile, straight to /login. The
+  // singular assumption was invisible until the day it was false.
   const { data: profile } = await admin
     .from("profiles")
-    .select("id")
-    .eq("center_id", demoCenter.id)
+    .select("id, center_id")
     .eq("email", email)
     .maybeSingle();
-  if (!profile) return fallback();
+  if (!profile?.center_id) return fallback();
+
+  const { data: demoCenter } = await admin
+    .from("centers")
+    .select("id")
+    .eq("id", profile.center_id)
+    .eq("is_demo", true)
+    .maybeSingle();
+  if (!demoCenter) return fallback();
 
   const { data, error } = await admin.auth.admin.generateLink({
     type: "magiclink",
