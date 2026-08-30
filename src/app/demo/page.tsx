@@ -10,7 +10,17 @@ const ENTRIES: { href: string; role: string; blurb: string }[] = [
   {
     href: "/demo/centre-admin",
     role: "Centre management",
-    blurb: "The centre owner's view: courses, payments, staffing and volunteers across the whole centre.",
+    blurb: "Courses, payments, staffing and volunteers across every branch the person holds a role at.",
+  },
+  {
+    // Separate entry, same account. The owner screen is a different place
+    // from Centre Management -- the role builder, the custodial powers, the
+    // branch visibility -- and it was only reachable by knowing to click
+    // through. Ramy: "centre owner link lands in centre management, not
+    // centre owner."
+    href: "/demo/centre-owner",
+    role: "Centre owner",
+    blurb: "The custodial screen: build and reshape the roles at this centre, and decide what each branch can see.",
   },
   {
     href: "/demo/course-admin",
