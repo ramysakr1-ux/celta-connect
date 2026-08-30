@@ -72,8 +72,15 @@ function courseDay(start, n) {
 
 async function main() {
   // --- Clean slate ---
-  const { data: existing } = await supabase.from("centers").select("id").eq("is_demo", true).maybeSingle();
-  if (existing) {
+  // Every demo centre, not "the" demo centre.
+  //
+  // This was .maybeSingle(), which returns nothing once a second demo
+  // centre exists -- so the whole clean-slate block below was skipped
+  // silently, and the run then died trying to create auth users that were
+  // already there. A centre owner holding two branches is a supported
+  // shape, so the seed has to clear all of them.
+  const { data: existingCentres } = await supabase.from("centers").select("id").eq("is_demo", true);
+  for (const existing of existingCentres ?? []) {
     const { data: oldProfiles } = await supabase.from("profiles").select("id").eq("center_id", existing.id);
     for (const p of oldProfiles ?? []) {
       const { error: delUserErr } = await supabase.auth.admin.deleteUser(p.id);
@@ -116,7 +123,7 @@ async function main() {
     // above.
     const { error: hardDeleteErr } = await supabase.rpc("centre_hard_delete", { p_center_id: existing.id });
     if (hardDeleteErr) throw hardDeleteErr;
-    console.log("Removed previous demo centre.");
+    console.log("Removed previous demo centre:", existing.id);
   }
   // Belt and suspenders: an auth user can outlive its profile row if a
   // previous run failed after createUser() but before the profile insert
