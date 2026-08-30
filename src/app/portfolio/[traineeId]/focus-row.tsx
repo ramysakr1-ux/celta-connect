@@ -21,13 +21,7 @@ const FOCUS_ROUTES = [
   // The watch screen itself, not its /task child -- that page is ordinary
   // reading-width content.
   /\/filmed-observation\/[^/]+$/,
-  // Resource Hub used to be here, on Ramy's 29 Aug "once you click, you're
-  // jumping inside a different room" -- but dropping the rail also drops the
-  // trainee's only navigation, and on 30 Aug he saw the consequence: "the
-  // bracket should be on the resource hub... it should be where I came
-  // from." A room you cannot see your way out of is not a room, it is a
-  // dead end. The rail stays; the page still gets the full container width
-  // beside it.
+
   // The timetable's grid is nine time bands wide -- the design file sets a
   // 1280px minimum, so inside the rail and the container it starts scrolling
   // sideways before it has shown a full day. Ramy, 29 Aug 2026, asked for
@@ -39,12 +33,33 @@ const FOCUS_ROUTES = [
   /\/celta5$/,
 ];
 
+// Dropping the rail and going edge-to-edge were one decision, and they
+// should not have been. Resource Hub wants the first and not the second:
+// Ramy, 29 Aug -- "once you click, you're jumping inside a different room"
+// -- then 30 Aug, having seen it do both: "I don't want the side panel to
+// be there all the time... I don't want it to be a full screen. Remember,
+// it's like the room concept."
+//
+// So a room is its own page without the rail, still at reading width. Only
+// the three routes that genuinely need the pixels go full-bleed: the watch
+// screen, the timetable's nine-band grid, and the CELTA 5 document.
+const ROOM_ROUTES = [/\/resources$/];
+
 export function PortfolioFocusRow({ sidebar, children }: { sidebar: React.ReactNode; children: React.ReactNode }) {
   const pathname = usePathname() ?? "";
   const focused = FOCUS_ROUTES.some((r) => r.test(pathname));
+  const room = ROOM_ROUTES.some((r) => r.test(pathname));
 
   if (focused) {
     return <div className="flex-1 px-4 py-6 xl:px-8">{children}</div>;
+  }
+
+  if (room) {
+    return (
+      <div className="container flex flex-1 py-6">
+        <div className="min-w-0 flex-1 p-6">{children}</div>
+      </div>
+    );
   }
 
   return (
