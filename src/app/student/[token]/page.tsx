@@ -9,6 +9,8 @@ import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
 import { DesignerCredit } from "@/components/designer-credit";
 import { Greeting } from "@/app/student/[token]/greeting";
+import type { Metadata } from "next";
+import { InstallPrompt } from "@/components/install-prompt";
 import { getVolunteerIdentityData, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-cross-course";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { resolveTimeBands, toLocalIso, zonedTimeToUtc } from "@/lib/timetable-grid";
@@ -142,6 +144,17 @@ function formatFileSize(bytes: number | null): string | null {
 // resolved entirely from a tokenized, course-scoped, auto-expiring link
 // (migration 0030), every read going through the admin client with
 // explicit scoping (there is no auth.uid() session on this path at all).
+// Overrides the app-wide manifest link for this page only, so a volunteer
+// who installs Connect gets an app that opens on their own page rather than
+// on a login screen they have no account for.
+export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
+  const { token } = await params;
+  return {
+    manifest: `/student/${token}/manifest.webmanifest`,
+    robots: { index: false, follow: false },
+  };
+}
+
 export default async function StudentPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const admin = createAdminClient();
@@ -630,6 +643,21 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-background px-4 py-8 md:py-12">
+      {/* Ramy, 30 Aug 2026: "how do they keep this on their phones and
+          desktop? Just create a shortcut?"
+          
+          Better than a shortcut -- Connect is already a real installable
+          app (manifest + icons + service worker), the offer was just never
+          made to volunteers. It was rendered for trainees only, from
+          build-spec §7's "trainees only (daily use for five weeks)".
+          
+          A volunteer needs it more, not less. A trainee who loses their way
+          back can log in; a volunteer has no account at all and their only
+          route in is a link in an email from weeks ago. An icon on the home
+          screen IS their copy of that link. */}
+      <div className="w-full max-w-[860px]">
+        <InstallPrompt />
+      </div>
       {/* volunteer-view-full-spec.md 1a/1b: the whole page -- header AND
           body -- lives inside ONE bordered/rounded shell floating on the
           page ground (390px/22px-radius on phone, a wider 6px-radius "mat"
