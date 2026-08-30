@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { computeSessionTicks, creditedHours, TICK_THRESHOLD_MINUTES, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-attendance";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
+import { DEFAULT_TIMEZONE, toLocalIso } from "@/lib/timetable-grid";
 
 export { TICK_THRESHOLD_MINUTES, CERTIFICATE_HOURS_THRESHOLD };
 
@@ -20,6 +21,13 @@ export interface VolunteerClassSummary {
   // no room number on the hero card."
   detail: string | null;
   linkedTpNumber: number | null; // for matching volunteer_shared_materials -> tp_plans.tp_number
+  // The centre's own IANA zone, carried per class rather than per page.
+  // A volunteer's identity spans courses, and since multi-centre support
+  // those courses can sit in different cities -- Diane's own two branches
+  // are New York and Los Angeles. "Has this class happened yet" has to be
+  // asked in the zone the class is actually taught in, not in one zone
+  // borrowed from whichever course the token happened to be issued for.
+  timeZone: string;
 }
 
 // Volunteer View.dc.html: "Hours are the unit, never levels or courses" --
@@ -48,11 +56,20 @@ export async function getVolunteerIdentityData(
   const courseIds = [...new Set(members.map((m) => m.course_id))];
 
   const [{ data: courses }, { data: tpEvents }, { data: attendanceRows }] = await Promise.all([
-    admin.from("courses").select("id, name").in("id", courseIds),
+    admin.from("courses").select("id, name, center_id").in("id", courseIds),
     admin.from("course_timetable_events").select("id, event_date, event_time, course_id, zoom_url, detail, linked_tp_number").in("course_id", courseIds).eq("type", "tp"),
     admin.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", memberIds),
   ]);
   const courseNameById = new Map((courses ?? []).map((c) => [c.id, c.name]));
+
+  const centerIds = [...new Set((courses ?? []).map((c) => c.center_id).filter(Boolean))] as string[];
+  const { data: centers } = centerIds.length
+    ? await admin.from("centers").select("id, time_zone").in("id", centerIds)
+    : { data: null };
+  const tzByCenterId = new Map((centers ?? []).map((c) => [c.id, c.time_zone || DEFAULT_TIMEZONE]));
+  const tzByCourseId = new Map(
+    (courses ?? []).map((c) => [c.id, (c.center_id ? tzByCenterId.get(c.center_id) : null) ?? DEFAULT_TIMEZONE])
+  );
   const attendedEventIds = new Set((attendanceRows ?? []).map((a) => a.timetable_event_id));
 
   const sessions = computeSessionTicks(
@@ -62,7 +79,12 @@ export async function getVolunteerIdentityData(
   );
   const hoursCredited = creditedHours(sessions);
 
-  const today = new Date().toISOString().slice(0, 10);
+  // Was `new Date().toISOString().slice(0, 10)` -- the calendar date in
+  // UTC, which is not the calendar date at any centre off UTC. For
+  // Europe/Istanbul (GMT+3, the app default) every class between midnight
+  // and 03:00 local read as still upcoming; for the Los Angeles branch
+  // (GMT-7) an evening class flipped to "past" hours before it was taught.
+  const now = new Date();
   const classes: VolunteerClassSummary[] = (tpEvents ?? [])
     .map((e) => ({
       id: memberIds.find((id) => members.find((m) => m.id === id)?.course_id === e.course_id) ?? volunteerStudentId,
@@ -71,12 +93,19 @@ export async function getVolunteerIdentityData(
       eventId: e.id,
       eventDate: e.event_date,
       eventTime: e.event_time,
-      attended: e.event_date < today ? attendedEventIds.has(e.id) : null,
+      attended: e.event_date < toLocalIso(now, tzByCourseId.get(e.course_id) ?? DEFAULT_TIMEZONE) ? attendedEventIds.has(e.id) : null,
       zoomUrl: e.zoom_url,
       detail: e.detail,
       linkedTpNumber: e.linked_tp_number,
+      timeZone: tzByCourseId.get(e.course_id) ?? DEFAULT_TIMEZONE,
     }))
-    .sort((a, b) => (a.eventDate < b.eventDate ? 1 : -1));
+    // Date only was not enough to order a day that holds several TP rounds
+    // -- 10:00, 10:45, 11:30 all compared equal and kept whatever order the
+    // query happened to return them in.
+    .sort((a, b) => {
+      if (a.eventDate !== b.eventDate) return a.eventDate < b.eventDate ? 1 : -1;
+      return (b.eventTime ?? "").localeCompare(a.eventTime ?? "");
+    });
 
   return { hoursCredited, classes, memberVolunteerStudentIds: memberIds };
 }

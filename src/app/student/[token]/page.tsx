@@ -10,6 +10,8 @@ import { Wordmark } from "@/components/wordmark";
 import { DesignerCredit } from "@/components/designer-credit";
 import { Greeting } from "@/app/student/[token]/greeting";
 import { getVolunteerIdentityData, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-cross-course";
+import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
+import { toLocalIso, zonedTimeToUtc } from "@/lib/timetable-grid";
 import { PushSubscribeButton } from "@/components/push-subscribe-button";
 import { subscribeVolunteerPush, unsubscribeVolunteerPush } from "@/lib/push/actions";
 
@@ -233,10 +235,37 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // Scoped to this token's own course only (not the cross-course list
   // below) -- the decline action re-resolves volunteer_student_id from the
   // token itself, so the class shown here must belong to that same row.
-  const today = new Date().toISOString().slice(0, 10);
+  // Ramy, 30 Aug 2026: "is it gonna change when the next class arrives,
+  // like ten, ten forty-five, etcetera, with a chain, after the break?"
+  //
+  // It was not. This filtered on `eventDate >= today` and sorted on the
+  // DATE alone, so on a day holding several TP rounds every one of them
+  // compared equal: the panel showed whichever row the query returned
+  // first and sat on it until midnight. A volunteer who finished the 10:00
+  // and had another at 10:45 was still being told about the 10:00 -- with
+  // a Join button pointing at a room that had already emptied.
+  //
+  // Two things were wrong at once. `today` was the UTC date rather than
+  // the centre's, and nothing compared the time of day at all.
+  //
+  // Now a class stops being "next" once it has actually finished, so the
+  // panel walks the day forward: 10:00 through to 10:45, then the 10:45
+  // one, then tomorrow's first. Classes with no time set stay current for
+  // the whole of their date -- an untimed row is a day's commitment, and
+  // guessing an hour for it would be worse than showing it all day.
+  const nowMs = Date.now();
   const upcoming = classes
-    .filter((c) => c.courseId === accessToken.course_id && c.eventDate >= today)
-    .sort((a, b) => (a.eventDate < b.eventDate ? -1 : 1));
+    .filter((c) => c.courseId === accessToken.course_id)
+    .filter((c) => {
+      if (!c.eventTime) return c.eventDate >= toLocalIso(new Date(nowMs), c.timeZone);
+      const endMs =
+        zonedTimeToUtc(c.eventDate, c.eventTime, c.timeZone).getTime() + TP_LESSON_LENGTH_MINUTES * 60_000;
+      return endMs > nowMs;
+    })
+    .sort((a, b) => {
+      if (a.eventDate !== b.eventDate) return a.eventDate < b.eventDate ? -1 : 1;
+      return (a.eventTime ?? "").localeCompare(b.eventTime ?? "");
+    });
   const nextClass = upcoming[0] ?? null;
 
   // Ramy, 25 Aug 2026: the Join-online link only activates 10 minutes
@@ -271,7 +300,10 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   if (nextClass?.zoomUrl && nextClass.eventTime) {
     const isFirstTpOfDay = !earlierSameDay || earlierSameDay.length === 0;
     if (isFirstTpOfDay) {
-      const startMs = new Date(`${nextClass.eventDate}T${nextClass.eventTime}`).getTime();
+      // Was `new Date(`${date}T${time}`)`, which parses that string in the
+      // SERVER's zone (UTC on Vercel), not the centre's -- so the Join
+      // button unlocked three hours early for an Istanbul course.
+      const startMs = zonedTimeToUtc(nextClass.eventDate, nextClass.eventTime, nextClass.timeZone).getTime();
       joinActivationIso = new Date(startMs - 10 * 60_000).toISOString();
     }
   }
@@ -419,8 +451,13 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // they are next in, that their recent attendance registered, and where
   // the handouts are. The cards below carry the totals; this is a glance,
   // not a record.
-  const upcomingForList = classes.filter((c) => c.eventDate >= today);
-  const pastForList = classes.filter((c) => c.eventDate < today);
+  // Cross-course, so each class is asked about its own centre's date --
+  // this list can hold a New York class and a Los Angeles one, and on the
+  // three hours between their midnights the same UTC date is "today" in
+  // one and already "tomorrow" in the other.
+  const isPast = (c: (typeof classes)[number]) => c.eventDate < toLocalIso(new Date(nowMs), c.timeZone);
+  const upcomingForList = classes.filter((c) => !isPast(c));
+  const pastForList = classes.filter(isPast);
   const listClasses = [...upcomingForList.slice(-1), ...pastForList.slice(0, 2)];
   const tpKeysNeeded = listClasses.filter((c) => c.linkedTpNumber != null).map((c) => ({ courseId: c.courseId, tpNumber: c.linkedTpNumber as number }));
   const listCourseIds = [...new Set(tpKeysNeeded.map((k) => k.courseId))];
@@ -877,9 +914,16 @@ function NextClassBanner({
           The next class is enough." */}
       <div className="flex items-baseline justify-between gap-3">
         <p className="font-serif text-[21px] font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
+        {/* "Starts", not a bare number. Ramy read the unlabelled pill as a
+            clock and asked why it wasn't moving -- fair, since a lone 10:00
+            in a dark pill at a card corner looks like a widget rather than a
+            fact about the class. Every other fact in this panel is named by
+            the label column; this one sits outside it, so it has to carry
+            its own word. */}
         {nextClass.eventTime ? (
-          <span className="rounded-full bg-primary px-3.5 py-1.5 text-[15px] font-bold text-primary-foreground tabular-nums">
-            {nextClass.eventTime.slice(0, 5)}
+          <span className="inline-flex items-baseline gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-primary-foreground">
+            <span className="text-[10px] font-bold tracking-[0.1em] uppercase opacity-80">Starts</span>
+            <span className="text-[15px] font-bold tabular-nums">{nextClass.eventTime.slice(0, 5)}</span>
           </span>
         ) : null}
       </div>
