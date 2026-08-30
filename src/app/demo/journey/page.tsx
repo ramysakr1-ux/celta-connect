@@ -525,7 +525,20 @@ export default async function JourneyPage() {
           >
             <EmailPreview title="Your place on CELTA Demo Course" to={applicantName} html={offerHtml} />
           </Step>
-          <Step number={9} title="Gets their workspace" blurb="Sent once the centre releases access -- this is the CELTA Connect login link.">
+          {/* The trainee's counterpart to the volunteer journey's step 4.
+              /demo/trainee has existed all along -- it mints a real magic
+              link and lands on Amara Okafor's actual portfolio -- but this
+              page never linked to it, so the trainee journey showed the
+              email announcing the workspace and then never opened it, while
+              the volunteer journey walked you straight in. Ramy, 30 Aug
+              2026: "do the same thing for the trainee." */}
+          <Step
+            number={9}
+            title="Gets their workspace"
+            blurb="Sent once the centre releases access -- this is the CELTA Connect login link."
+            href="/demo/trainee"
+            hrefLabel="Open the real trainee workspace &rarr;"
+          >
             <EmailPreview title="Your CELTA workspace is ready" to={applicantName} html={welcomeHtml} />
           </Step>
           <Step
