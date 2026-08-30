@@ -400,24 +400,25 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // linked_tp_number -> plan_assignments lookup nextClass gets above, just
   // batched across every class in the list (which can span more than one
   // course -- "hours are the unit, never levels or courses").
-  // Twelve rows, but chosen so the volunteer's own record is in them.
+  // Four classes: the next one, then the three most recent.
   //
-  // This was classes.slice(0, 12) on a newest-first list. On a course with
-  // 48 sessions the twelve newest are all still in the future, so every row
-  // read "Upcoming" and the entire attendance history fell off the bottom --
-  // while the card directly beneath it said "you've come to 18 of 36 classes
-  // held so far". The page contradicted itself, and the table was the half
-  // that looked wrong.
+  // Straight from Volunteer View.dc.html, whose own fixture is exactly four
+  // rows -- one upcoming, two attended, one missed. Not a log.
   //
-  // Ramy hit exactly this: the volunteer page looked like an empty shell and
-  // read as a stale build rather than a trimmed list.
+  // It was classes.slice(0, 12), which on a 48-session course meant twelve
+  // rows all reading "Upcoming", directly above a card saying "you've come
+  // to 18 of 36 classes held so far" -- the page contradicting itself. I
+  // then made it twelve MIXED rows, which fixed the contradiction and kept
+  // the real problem. Ramy: "a long line of sessions that you attended or
+  // missed -- that shouldn't be there. It should be the cards."
   //
-  // Three upcoming is enough to answer "what's next" -- the banner above
-  // already answers it properly -- so the rest of the room goes to what they
-  // have actually done.
+  // He is right, and the design says so. A volunteer wants to know when
+  // they are next in, that their recent attendance registered, and where
+  // the handouts are. The cards below carry the totals; this is a glance,
+  // not a record.
   const upcomingForList = classes.filter((c) => c.eventDate >= today);
   const pastForList = classes.filter((c) => c.eventDate < today);
-  const listClasses = [...upcomingForList.slice(-3), ...pastForList].slice(0, 12);
+  const listClasses = [...upcomingForList.slice(-1), ...pastForList.slice(0, 3)];
   const tpKeysNeeded = listClasses.filter((c) => c.linkedTpNumber != null).map((c) => ({ courseId: c.courseId, tpNumber: c.linkedTpNumber as number }));
   const listCourseIds = [...new Set(tpKeysNeeded.map((k) => k.courseId))];
   const { data: listAssignments } = listCourseIds.length
