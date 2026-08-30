@@ -535,6 +535,45 @@ async function main() {
     hours_attended: 6,
   });
 
+  // --- Criteria ratings, so the Grades Report has something to derive ---
+  //
+  // Without these the four criteria lists on the Grades Report read "None"
+  // for every candidate, because they are computed from celta5_matrix: S+
+  // becomes a strength, N an action point, section 4 is planning and the
+  // rest teaching. The seed never wrote a single rating, so the most
+  // substantial screen we have demoed as empty.
+  //
+  // Shaped to each candidate's story rather than sprinkled: Amara is the
+  // strong one four TPs in, Daniel has a not-to-standard TP2 and a failed
+  // assignment, Priya has taught once and has barely been rated yet. Plain
+  // "S" ratings are included deliberately -- they are the ones the report
+  // omits by design ("all criteria not listed below is assumed to be to
+  // standard"), so their absence from the lists is itself worth seeing.
+  const matrixByCandidate = {
+    "Amara Okafor": {
+      "4a": "S+", "4e": "S+", "4i": "S+", "4j": "S", "4g": "N",
+      "2c": "S+", "2e": "S+", "5b": "S", "5i": "S+", "5f": "N", "1d": "S+",
+    },
+    "Daniel Kim": {
+      "4a": "S", "4b": "N", "4e": "S", "4i": "N",
+      "2a": "N", "2c": "S", "5f": "N", "5k": "N", "1d": "S+",
+    },
+    "Priya Sharma": {
+      "4a": "S", "4c": "S+",
+      "1d": "S+", "5j": "S",
+    },
+  };
+  for (const [name, ratings] of Object.entries(matrixByCandidate)) {
+    const rows = Object.entries(ratings).map(([criteria_code, tutor_status_stage2]) => ({
+      course_id: course.id,
+      trainee_id: trainees[name],
+      criteria_code,
+      tutor_status_stage2,
+    }));
+    const { error } = await supabase.from("celta5_matrix").insert(rows);
+    if (error) throw error;
+  }
+
   // --- Plans for the assessor's visit day ---
   //
   // TP7 is what half 1 teaches on assessor_visit_date (start+21), so these
