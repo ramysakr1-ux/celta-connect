@@ -60,6 +60,16 @@ export async function proxy(request: NextRequest) {
     // /offer/[token] is the offer-acceptance link -- inherently
     // unauthenticated, same reasoning as /join/[token].
     request.nextUrl.pathname.startsWith("/offer/") ||
+    // /interview/[token] is the interview-slot picker, and is public for
+    // exactly the same reason /offer/[token] is: an applicant has no
+    // account, and the token IS the credential. It was missing from this
+    // list, so every applicant clicking "book a time" from their invite
+    // email was redirected to a login page they cannot use -- the page
+    // itself never redirects, it renders its own "this link is invalid"
+    // message, so nothing surfaced the cause. Found because
+    // /demo/journey/interview was the one journey link still landing on
+    // /login after everything else was fixed.
+    request.nextUrl.pathname.startsWith("/interview/") ||
     // /forgot-password is how a logged-out user requests a reset link --
     // inherently unauthenticated, same as /login.
     request.nextUrl.pathname.startsWith("/forgot-password") ||

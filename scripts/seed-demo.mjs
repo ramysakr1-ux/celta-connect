@@ -140,7 +140,17 @@ async function main() {
   // --- Centre ---
   const { data: center, error: centerErr } = await supabase
     .from("centers")
-    .insert({ name: "Connect CELTA Demo Centre", center_number: "DEMO", is_demo: true })
+    .insert({
+      name: "Connect CELTA New York",
+      center_number: "DEMO-NY",
+      is_demo: true,
+      address: "Midtown, New York, NY",
+      // A real timezone, and deliberately not the same as the second branch
+      // below: every date helper in the app takes an explicit centre
+      // timezone, so two coasts actually exercise that rather than two
+      // labels that happen to differ.
+      time_zone: "America/New_York",
+    })
     .select("id")
     .single();
   if (centerErr) throw centerErr;
@@ -256,7 +266,7 @@ async function main() {
   await supabase.from("profiles").insert({
     id: centreAdminId,
     email: "demo-centre-admin@celtaconnect.com",
-    full_name: "Layla Fenn",
+    full_name: "Diane Okonkwo",
     role: "admin",
     center_id: center.id,
   });
@@ -304,6 +314,49 @@ async function main() {
     });
   }
   console.log("centre roles: manager and observer granted");
+
+  // A SECOND branch, in another city, owned by the same person.
+  //
+  // Multi-centre was already built -- /centre aggregates across every centre
+  // you hold a role at, courses carry their branch, and the ?branch filter
+  // can only narrow, never widen. It had simply never been demonstrated,
+  // because the owner held a role at exactly one centre. Ramy, 30 Aug 2026:
+  // "can we design this so the centre owner owns two centres in two
+  // different cities?"
+  //
+  // Note this makes TWO rows with is_demo = true. Anything reaching for
+  // "the" demo centre with .maybeSingle() breaks the moment this exists --
+  // which is exactly what happened to mint-magic-link.ts, the volunteer and
+  // assessor demo routes, and this script's own teardown. All four fixed;
+  // the pattern is the bug, not any one of them.
+  const { data: branchTwo } = await supabase
+    .from("centers")
+    .insert({
+      name: "Connect CELTA Los Angeles",
+      center_number: "DEMO-LA",
+      is_demo: true,
+      address: "Silver Lake, Los Angeles, CA",
+      time_zone: "America/Los_Angeles",
+    })
+    .select("id")
+    .single();
+  await supabase.from("centre_roles").insert({
+    profile_id: centreAdminId,
+    center_id: branchTwo.id,
+    role: "centre_owner",
+  });
+  // An upcoming course, so the Overview reads "1 running, 1 upcoming,
+  // 1 closed" across the branches rather than everything being in the past.
+  await supabase.from("courses").insert({
+    center_id: branchTwo.id,
+    name: "CELTA Los Angeles — Autumn",
+    start_date: isoDaysFromNow(14),
+    end_date: isoDaysFromNow(42),
+    total_hours: 120,
+    delivery_mode: "f2f",
+    accepting_applications: true,
+  });
+  console.log("second branch: Los Angeles, owned by the same person");
 
   // The assessor, linked BOTH ways -- because there are two of them.
   //
@@ -1263,6 +1316,25 @@ async function main() {
         stage: "accepted",
         deposit_amount: 500,
         deposit_paid_at: new Date(Date.now() - 35 * 86400000).toISOString(),
+      },
+      {
+        // The applicant the JOURNEY walks -- distinct from the two above,
+        // which exist for the payments views.
+        //
+        // /demo/journey/interview and /demo/journey/offer both look this
+        // person up by email, reset them to a fresh not-yet-booked state and
+        // redirect. With no row to find, both took their fallback and landed
+        // on /login -- two dead links on the page Ramy demos from, failing
+        // silently. Same shape as Grace Adeyemi and the volunteer signup.
+        //
+        // Left at task_returned on purpose: that is the stage the interview
+        // route expects to move them on from, and it is where the journey
+        // picks them up.
+        center_id: center.id,
+        intake_course_id: course.id,
+        full_name: "Tariq Osei",
+        email: "demo-applicant-journey@celtaconnect.com",
+        stage: "task_returned",
       },
     ])
     .select("id, full_name");
