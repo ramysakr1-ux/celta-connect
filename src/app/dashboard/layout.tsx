@@ -9,7 +9,6 @@ import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
-import { landingFor } from "@/lib/auth/centre-permissions";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
 
 export default async function DashboardLayout({
@@ -106,15 +105,23 @@ export default async function DashboardLayout({
               it. That was fixed by pinning the logo to /dashboard/admin --
               which removed the only door, rather than replacing it.
           
-              Shown only when Centre Management is genuinely this person's
-              home, which is exactly what landingFor() answers: someone
-              holding nothing but course_administrator belongs here and has
-              no Centre Management to return to, so offering them the link
-              would just be a redirect back.
+              Shown to anyone holding a centre role, which in this layout is
+              anyone it renders for at all. My first attempt gated it on
+              landingFor() === "centre-admin", reasoning that a pure course
+              administrator has no Centre Management to return to -- but
+              that was wrong, and checking rather than assuming caught it:
+              signed in as the demo course administrator, who holds nothing
+              but course_administrator, /centre renders Centre overview with
+              its tabs, no redirect. The spec says so too -- that role is
+              "everything a centre administrator can do, scoped to named
+              courses... other courses, in outline only", which is a
+              centre-level view by definition. The narrow gate would have
+              hidden the door from precisely the person who complained it
+              was missing.
           
               Mirrors the pill /centre uses for Centre Owner -- a second
               place you can go, not a tab of this one. */}
-          {centreCtx && landingFor(centreCtx.roles) === "centre-admin" ? (
+          {centreCtx && centreCtx.roles.length > 0 ? (
             <Link
               href="/centre"
               className="admin-hover-fill shrink-0 rounded-[5px] border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-primary uppercase"
