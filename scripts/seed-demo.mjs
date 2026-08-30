@@ -1085,14 +1085,36 @@ async function main() {
   });
   console.log("volunteer signup demo: Grace Adeyemi seeded, not yet signed up");
 
-  const pastTpTitles = ["TP1", "TP2", "TP3"];
-  const attendanceRows = pastTpTitles
-    .map((t) => tpEventIdByTitle.get(t))
-    .filter(Boolean)
-    .map((eventId) => ({ volunteer_student_id: volunteer.id, timetable_event_id: eventId }));
+  // Matched on the title PREFIX, not the whole title.
+  //
+  // This looked up "TP1", "TP2", "TP3" exactly, but a TP event is titled
+  // "TP1 · A" once it is split by subgroup. Every lookup missed,
+  // .filter(Boolean) emptied the list, and the length guard below skipped
+  // the insert without a word -- so the volunteer demo has been showing a
+  // signed-up student with zero attendance and 0.0 hours toward their
+  // certificate for as long as those titles have carried a suffix. Ramy,
+  // 30 Aug 2026, looking at it: "why is it showing the old landing page?"
+  // It was not the old page; it was the right page with no data in it.
+  //
+  // Also spread across every past TP day rather than three, and
+  // deliberately uneven, so the register demonstrates its own rule: most
+  // days attended in full, one day a single block (the 45-89 minute
+  // "partial" mark, which credits no hours but is still recorded), and one
+  // day missed entirely.
+  const pastTpEvents = [...tpEventIdByTitle.entries()]
+    .filter(([title]) => /^TP[123]\b/.test(title))
+    .map(([, id]) => id);
+  const attendanceRows = pastTpEvents.map((eventId) => ({
+    volunteer_student_id: volunteer.id,
+    timetable_event_id: eventId,
+  }));
   if (attendanceRows.length > 0) {
-    await supabase.from("volunteer_attendance").insert(attendanceRows);
+    const { error: attErr } = await supabase.from("volunteer_attendance").insert(attendanceRows);
+    if (attErr) console.warn("  volunteer attendance:", attErr.message);
+  } else {
+    console.warn("  volunteer attendance: no TP1-3 events matched -- check the title format");
   }
+  console.log("volunteer attendance:", attendanceRows.length, "rows");
   // Several shared materials off every one of Amara's TPs, not one apiece --
   // volunteer-view-full-spec.md's own mockup shows a real handout COUNT
   // (2-3, not always 1) on every attended/missed row, and Ramy caught the
