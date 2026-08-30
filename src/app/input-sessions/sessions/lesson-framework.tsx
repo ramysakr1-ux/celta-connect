@@ -10,7 +10,7 @@ const SHAPES = [
   { name: "Text-Based", spine: "var(--color-primary)", stages: "Lead-in → Reading/listening task → Highlight target language → Clarify → Practice → Feedback" },
   { name: "Language Practice", spine: "var(--color-muted)", stages: "Lead-in (optional) → Set up → Controlled practice → Freer practice → Feedback" },
   { name: "Receptive Skills", spine: "var(--color-destructive)", stages: "Lead-in → (Prediction) → Pre-teach vocab → Gist → Detail → Specific info → Post-task response" },
-  { name: "Productive Skills", spine: "oklch(48% 0.11 300)", stages: "Lead-in → Preparing to write/speak → Useful language (optional) → Task → Feedback" },
+  { name: "Productive Skills", spine: "var(--color-gold)", stages: "Lead-in → Preparing to write/speak → Useful language (optional) → Task → Feedback" },
 ];
 
 const ZONE_NAMES = ["PPP", "TTT", "Text-Based", "Language Practice", "Receptive Skills", "Productive Skills"];

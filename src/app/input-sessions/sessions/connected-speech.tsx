@@ -233,7 +233,7 @@ export default function ConnectedSpeechSession() {
         { time: "14–22", spine: "var(--color-muted)", title: "Linking · 3 items" },
         { time: "22–30", spine: "var(--color-destructive)", title: "Intrusion · 3 items" },
         { time: "30–39", spine: "var(--color-primary)", title: "Assimilation · 3 items" },
-        { time: "39–47", spine: "var(--color-ink)", title: "Elision · 3 items" },
+        { time: "39–47", spine: "var(--color-gold)", title: "Elision · 3 items" },
         { time: "47–50", spine: "var(--color-destructive)", title: "Close" },
       ]}
     >
