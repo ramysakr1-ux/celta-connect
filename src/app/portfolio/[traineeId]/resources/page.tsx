@@ -510,10 +510,8 @@ export default async function ResourceHubPage({
               that gets you out of the room, and the lowest-contrast thing on
               it. Now a filled pill, which also makes it read as a button
               rather than a caption. */}
-          {/* ?from=resources so the workspace can bracket the door you just came
-              out of, rather than snapping to Course Stream. Ramy, 30 Aug 2026:
-              "when you come out of the room, you're at the door." */}
-          <BackLink href={`/portfolio/${traineeId}?from=/resources`} label="Course stream" />
+          {/* The pill comes from PortfolioFocusRow now -- every room gets one,
+              rather than only the page that happened to have been given one. */}
           <h1 className="mt-1.5 font-serif text-[30px] font-semibold" style={{ color: "oklch(99.2% 0.005 90)" }}>
             Resource Hub
           </h1>

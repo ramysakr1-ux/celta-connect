@@ -1,71 +1,88 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 
-// Ramy, 29 Aug 2026: "why is the toolbar on the side showing? Why does it
-// show the workspace?" -- on the filmed-observation watch screen, where he
-// had already pointed out the video was only a quarter of the screen.
+// The room concept, applied to the whole trainee workspace.
 //
-// The nav rail costs ~180px on the one page that most needs width, and a
-// candidate on that screen is doing one focused thing for 45 minutes with
-// a "← Course stream" link already at the top. So the watch screen drops
-// the rail and the 1280px container both, and everything else keeps them.
+// Ramy, 30 Aug 2026: "can we just apply the room concept to everything since
+// we have a pill that would take us back? So that side panel will only
+// appear when it's the course stream. Otherwise, you go inside the room and
+// you stay inside the room. And then when you come out, you click on that
+// pill... and it takes you back to the entrance that you came from."
 //
-// This replaced a negative-margin full-bleed hack on the page itself,
-// which was subtly wrong: margin-inline: calc(50% - 50vw) only centres
-// when the element is already centred in the viewport, and this content is
-// offset right by the rail -- so it stretched asymmetrically and ran under
-// the nav. Removing the rail is both the correct fix and the one he asked
-// for.
-const FOCUS_ROUTES = [
-  // The watch screen itself, not its /task child -- that page is ordinary
-  // reading-width content.
-  /\/filmed-observation\/[^/]+$/,
-
-  // The timetable's grid is nine time bands wide -- the design file sets a
-  // 1280px minimum, so inside the rail and the container it starts scrolling
-  // sideways before it has shown a full day. Ramy, 29 Aug 2026, asked for
-  // full width here explicitly: "I'll go with full width as well, agreed."
-  /\/timetable$/,
-  // The CELTA 5 is a document, not a page of the app -- an assessor opens it
-  // on the visit and reads it as Cambridge's form. Ramy, 29 Aug 2026: "why
-  // am I seeing the workspace? It should be the full page."
-  /\/celta5$/,
-];
-
-// Dropping the rail and going edge-to-edge were one decision, and they
-// should not have been. Resource Hub wants the first and not the second:
-// Ramy, 29 Aug -- "once you click, you're jumping inside a different room"
-// -- then 30 Aug, having seen it do both: "I don't want the side panel to
-// be there all the time... I don't want it to be a full screen. Remember,
-// it's like the room concept."
+// So the rail belongs to Course Stream alone. Everything else is a room: no
+// rail, and one pill back to the door you came through.
 //
-// So a room is its own page without the rail, still at reading width. Only
-// the three routes that genuinely need the pixels go full-bleed: the watch
-// screen, the timetable's nine-band grid, and the CELTA 5 document.
-const ROOM_ROUTES = [/\/resources$/];
+// The pill is rendered HERE rather than on each page. Only Resource Hub had
+// one; Teaching Practice, Written Assignments, CELTA 5 and Progress had
+// none, because the rail was their way out. Turning them into rooms without
+// this would have made four dead ends -- CELTA 5 was already one on desktop,
+// with no rail, no pill, and its mobile nav hidden above md.
+//
+// Two rooms still take the full width, because their content genuinely needs
+// the pixels rather than because they are rooms: the filmed-observation
+// watch screen (a video) and the timetable (a nine-band grid with a 1280px
+// minimum in the design). Everything else is a room at reading width --
+// Ramy, earlier the same evening: "I don't want it to be a full screen."
 
-export function PortfolioFocusRow({ sidebar, children }: { sidebar: React.ReactNode; children: React.ReactNode }) {
+/** Rooms whose content needs the pixels, not just the focus. */
+const FULL_BLEED = [/\/filmed-observation\/[^/]+$/, /\/timetable$/];
+
+/** Course Stream itself, plus the things that are part of it rather than
+ *  rooms of their own -- a tutorial invite opens in the stream's context. */
+const STREAM_ROUTES = [/\/individual-tutorial\//, /\/stage2-tutorial\//];
+
+/** Which door a room is, so the pill can name it on the way out. Matches
+ *  TraineeSidebarNav's own hrefs, so a tab added there works here. */
+const DOORS = ["/resources", "/tp", "/assignments", "/celta5", "/progress"];
+
+export function PortfolioFocusRow({
+  sidebar,
+  traineeId,
+  children,
+}: {
+  sidebar: React.ReactNode;
+  traineeId: string;
+  children: React.ReactNode;
+}) {
   const pathname = usePathname() ?? "";
-  const focused = FOCUS_ROUTES.some((r) => r.test(pathname));
-  const room = ROOM_ROUTES.some((r) => r.test(pathname));
+  const base = `/portfolio/${traineeId}`;
 
-  if (focused) {
-    return <div className="flex-1 px-4 py-6 xl:px-8">{children}</div>;
-  }
+  const isStream = pathname === base || STREAM_ROUTES.some((r) => r.test(pathname));
+  const fullBleed = FULL_BLEED.some((r) => r.test(pathname));
+  const door = DOORS.find((d) => pathname.startsWith(`${base}${d}`)) ?? null;
 
-  if (room) {
+  if (isStream) {
     return (
-      <div className="container flex flex-1 py-6">
+      <div className="container flex flex-1 gap-6 py-6">
+        {sidebar}
         <div className="min-w-0 flex-1 p-6">{children}</div>
       </div>
     );
   }
 
+  // Inside a room. The pill is the way out, and it carries the door so the
+  // rail can still be standing on it when you arrive back.
+  const back = (
+    <BackLink href={door ? `${base}?from=${door}` : base} label="Course stream" />
+  );
+
+  if (fullBleed) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 px-4 py-6 xl:px-8">
+        <div>{back}</div>
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <div className="container flex flex-1 gap-6 py-6">
-      {sidebar}
-      <div className="min-w-0 flex-1 p-6">{children}</div>
+    <div className="container flex flex-1 py-6">
+      <div className="flex min-w-0 flex-1 flex-col gap-4 p-6">
+        <div>{back}</div>
+        {children}
+      </div>
     </div>
   );
 }

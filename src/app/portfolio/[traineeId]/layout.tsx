@@ -311,7 +311,21 @@ export default async function PortfolioLayout({
               ("one end to the other"), not the same tone as the sheet
               around it -- edge-to-edge, so .container goes inside this
               wrapper rather than carrying the background itself. */}
-          <div style={{ background: "oklch(99.5% 0.004 90)" }}>
+          {/* A trace of teal, not a colour band. Ramy, 30 Aug 2026: "I don't
+              think it needs to be wider since it's just the same colour.
+              Maybe just give it a tiny bit of colour, maybe a tiny bit of
+              teal green or something." So the off-white warms fractionally
+              toward the accent and takes a hairline of it along the top --
+              enough to stop the band reading as another sheet, not enough to
+              compete with the hero card below it. The trainee still has no
+              role colour, deliberately: colour in this app signals scope,
+              and a candidate only ever has one. */}
+          <div
+            style={{
+              background: "color-mix(in oklab, var(--color-primary) 3%, oklch(99.5% 0.004 90))",
+              borderTop: "2px solid color-mix(in oklab, var(--color-primary) 45%, transparent)",
+            }}
+          >
             <div className="container flex h-14 items-center justify-between gap-4">
               <Link href={`/portfolio/${trainee.id}`} className="shrink-0 block">
                 <Wordmark size="header" />
@@ -324,7 +338,7 @@ export default async function PortfolioLayout({
             </div>
           </div>
           <div className="border-t border-border" />
-          <PortfolioFocusRow sidebar={<TraineeSidebarNav traineeId={trainee.id} />}>{children}</PortfolioFocusRow>
+          <PortfolioFocusRow traineeId={trainee.id} sidebar={<TraineeSidebarNav traineeId={trainee.id} />}>{children}</PortfolioFocusRow>
         </div>
       ) : (
         <div className="border-b border-border bg-card">
