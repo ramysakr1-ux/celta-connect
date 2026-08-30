@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -20,6 +19,7 @@ import { StandardRatingGlyph } from "@/lib/status-pill";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import type { CriteriaRating } from "@/lib/supabase/types";
 import { FinalReportFields } from "@/app/trainer/(hub)/grades-report/final-report-fields";
+import { appianHref } from "@/lib/appian";
 
 // Assessor-facing compiled Grades Report -- the whole cohort in one
 // continuous document, matching the shape of a real center's actual
@@ -475,24 +475,20 @@ export default async function GradesReportPage() {
                       {/* Copying happens candidate by candidate, so the link
                           stays per candidate rather than only at the top --
                           Ramy asked for both. */}
-                      {appianUrl ? (
-                        <a
-                          href={appianUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="trainer-hover-fill ml-auto rounded-[6px] border border-border px-3 py-1 text-[11.5px] font-medium text-ink"
-                        >
-                          Open Appian &rarr;
-                        </a>
-                      ) : (
-                        <p className="ml-auto text-[11px] text-muted">
-                          No Appian sign-in link set yet &mdash;{" "}
-                          <Link href="/centre/settings" className="text-primary hover:underline">
-                            add one in Centre Settings
-                          </Link>
-                          .
-                        </p>
-                      )}
+                      {/* Always a link. It used to be replaced by "no Appian
+                          sign-in link set yet" whenever the centre had not
+                          filled in appian_url -- which is both real centres,
+                          so the MCT never saw a link at all. The platform
+                          address is the same for everyone; a centre's own URL
+                          just overrides it. */}
+                      <a
+                        href={appianHref(appianUrl)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="trainer-hover-fill ml-auto rounded-[6px] border border-border px-3 py-1 text-[11.5px] font-medium text-ink"
+                      >
+                        Open Appian &rarr;
+                      </a>
                     </div>
                   ) : null}
                 </div>

@@ -13,6 +13,7 @@ import { DesignerCredit } from "@/components/designer-credit";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
 import { buildAssessorRequirements, doubleMarkingPerAssignment, type AssessmentKind } from "@/lib/assessor-requirements";
 import { AppianReference } from "@/app/assessor/appian-reference";
+import { appianHref } from "@/lib/appian";
 
 // The design file's own palette, so status colour is not re-invented here.
 // Re-pointed 2026-08-21 per the color audit: gold is reserved for the Pass
@@ -472,36 +473,31 @@ export default async function AssessorPage({
               here from beside the readiness stats (Ramy's first verbal
               placement) once he sent the actual spec -- this is where it's
               drawn. */}
-          {center?.appian_url ? (
-            <a
-              href={center.appian_url}
-              target="_blank"
-              rel="noreferrer"
-              className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,oklch(60%_0.11_70)_28%,transparent)]"
-              style={{
-                height: 34, padding: "0 15px", borderRadius: 6,
-                border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 55%, transparent)",
-                background: "color-mix(in oklab, oklch(60% 0.11 70) 16%, transparent)",
-                color: "oklch(94% 0.02 82)", fontSize: 12.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
-                textDecoration: "none",
-              }}
-            >
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
-                <path d="M6 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5V10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M9.5 2H14v4.5M14 2 7.5 8.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Open Appian
-            </a>
-          ) : (
-            /* Was `: null`, so a centre that never set the link saw nothing
-               and never learned it was missing -- and neither did the
-               assessor, who just assumed we don't link to Appian. Course
-               Admin's entry-form card has always said this properly; the
-               pack now does too. Ramy, 30 Aug 2026. */
-            <span style={{ fontSize: 11.5, color: "oklch(76% 0.02 80)" }}>
-              No Appian link set by the centre
-            </span>
-          )}
+          {/* Always shown. This was gated on the centre having set
+              appian_url, which is null on both real centres -- so the
+              assessor saw a "no Appian link set" note where a working
+              link belonged. The platform address is the same for every
+              centre; appian_url only overrides it. See src/lib/appian.ts.
+              Ramy, 30 Aug 2026: "I don't see the Appian link." */}
+          <a
+            href={appianHref(center?.appian_url)}
+            target="_blank"
+            rel="noreferrer"
+            className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,oklch(60%_0.11_70)_28%,transparent)]"
+            style={{
+              height: 34, padding: "0 15px", borderRadius: 6,
+              border: "1px solid color-mix(in oklab, oklch(60% 0.11 70) 55%, transparent)",
+              background: "color-mix(in oklab, oklch(60% 0.11 70) 16%, transparent)",
+              color: "oklch(94% 0.02 82)", fontSize: 12.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 8,
+              textDecoration: "none",
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
+              <path d="M6 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5V10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M9.5 2H14v4.5M14 2 7.5 8.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Open Appian
+          </a>
           <a
             href="/assessor/pack.pdf"
             className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,oklch(97%_0.008_88)_22%,transparent)]"

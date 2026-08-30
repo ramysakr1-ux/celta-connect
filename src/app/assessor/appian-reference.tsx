@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { appianHref } from "@/lib/appian";
 
 // The one thing the centre has to hand over by hand.
 //
@@ -18,12 +19,6 @@ import { useState } from "react";
 // Ramy, 30 Aug 2026: "make it clear when they land, so they can copy this
 // course number and use it to access the course on Appian."
 
-// From the Appian User Guidelines' own access instructions. Used only when a
-// centre has not set its own appian_url -- the guidelines give this as the
-// platform address for every centre, so a missing centre URL should still
-// leave the assessor one click away rather than stranded.
-const APPIAN_FALLBACK = "https://cambridget2.appiancloud.com/suite/";
-
 const GOLD = "oklch(60% 0.11 70)";
 
 export function AppianReference({ reference, appianUrl }: { reference: string | null; appianUrl: string | null }) {
@@ -36,7 +31,7 @@ export function AppianReference({ reference, appianUrl }: { reference: string | 
     return (
       <div
         style={{
-          display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 7,
+          display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "12px 16px", borderRadius: 7,
           background: "color-mix(in oklab, oklch(44% 0.1 68) 8%, var(--color-card))",
           border: "1px solid color-mix(in oklab, oklch(44% 0.1 68) 26%, transparent)",
         }}
@@ -44,10 +39,24 @@ export function AppianReference({ reference, appianUrl }: { reference: string | 
         <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(44% 0.1 68)" }}>
           No Appian reference yet
         </span>
-        <span style={{ fontSize: 12, color: "var(--color-ink)" }}>
+        <span style={{ fontSize: 12, color: "var(--color-ink)", flex: "1 1 240px", minWidth: 220 }}>
           The centre has not recorded the course notification reference number. You will need it from them to open your Assessor
           Report &mdash; Administration Handbook 15.2.
         </span>
+        {/* Still linked. The reference is missing, not Appian -- an assessor
+            may well have it in the centre's email and only need the way in. */}
+        <a
+          href={appianHref(appianUrl)}
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            height: 28, padding: "0 12px", borderRadius: 999, display: "inline-flex", alignItems: "center",
+            border: "1px solid var(--color-border)", background: "var(--color-card)",
+            color: "var(--color-ink)", fontSize: 11.5, fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap",
+          }}
+        >
+          Open Appian &rarr;
+        </a>
       </div>
     );
   }
@@ -95,7 +104,7 @@ export function AppianReference({ reference, appianUrl }: { reference: string | 
       </button>
 
       <a
-        href={appianUrl || APPIAN_FALLBACK}
+        href={appianHref(appianUrl)}
         target="_blank"
         rel="noreferrer"
         style={{
