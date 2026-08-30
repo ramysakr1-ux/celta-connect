@@ -84,6 +84,40 @@ export async function cycleCapabilityOverride(formData: FormData): Promise<void>
   revalidatePath("/centre/roles");
 }
 
+// Puts every capability back to what the code says the role is.
+//
+// Found 2026-08-30 while checking this screen with Ramy: every pill click
+// persists immediately and nothing could undo it, so exploring the role
+// builder permanently reshapes the centre. Both real centres had already
+// drifted into nonsense that way -- "Centre observer", the read-only role,
+// holding full Create courses, Invite/grant centre roles and Centre
+// settings, while Centre manager had been stripped of payments, which the
+// spec says is exclusively its domain. Nobody set out to do that; it is
+// what a screen with a cycle button and no reset produces.
+//
+// Deletes the override rows rather than writing "default" values into them,
+// so the matrix in centre-permissions.ts stays the single source of truth
+// and a later change to a default reaches a reset centre. Logged like every
+// other owner intervention. Custom roles and capabilities are untouched --
+// those are things the owner deliberately created, not drift.
+export async function resetCapabilityOverrides(formData: FormData): Promise<void> {
+  const { profile, centerId } = await requireOwner();
+  const roleKey = formData.get("role_key");
+
+  const admin = createAdminClient();
+  let query = admin.from("centre_permission_overrides").delete().eq("center_id", centerId);
+  // A single column can be reset on its own; no role_key resets the lot.
+  if (typeof roleKey === "string" && roleKey) query = query.eq("role_key", roleKey);
+  const { error } = await query;
+  if (error) return;
+
+  await logOwnerAction(centerId, profile.id, "permission_override.reset", "centre_permission_overrides", {
+    scope: typeof roleKey === "string" && roleKey ? roleKey : "all_roles",
+  });
+  revalidatePath("/centre/owner");
+  revalidatePath("/centre/roles");
+}
+
 export async function addCustomCapability(_prevState: OwnerActionState, formData: FormData): Promise<OwnerActionState> {
   const { profile, centerId } = await requireOwner();
   const label = (formData.get("label") as string | null)?.trim();

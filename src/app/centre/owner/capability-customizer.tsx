@@ -10,6 +10,7 @@ import {
 import { CapabilityPill } from "@/app/centre/owner/capability-pill";
 import { AddCapabilityForm } from "@/app/centre/owner/add-capability-form";
 import { AddRoleForm } from "@/app/centre/owner/add-role-form";
+import { resetCapabilityOverrides } from "@/app/centre/owner/actions";
 
 const BUILT_IN_ROLE_COLOR: Record<string, string> = {
   centre_administrator: "oklch(38% 0.072 195)",
@@ -48,6 +49,10 @@ export function CapabilityCustomizer({
   // describeRoleCapabilities already knows every built-in Capability on its
   // own -- only the genuinely custom rows need passing in, or a built-in
   // label would double up in the preview text.
+  // Only offer the reset when something has actually been changed -- on an
+  // untouched centre the button would be a control for undoing nothing.
+  const customized = Object.values(overrides).some((r) => Object.keys(r ?? {}).length > 0);
+
   const customCapabilitiesOnly = capabilityRows
     .filter((c) => !(c.key in CAPABILITY_LABELS))
     .map((c) => ({ capability_key: c.key, label: c.label }));
@@ -121,10 +126,28 @@ export function CapabilityCustomizer({
           </tbody>
         </table>
       </div>
-      <p className="text-[11px]" style={{ color: "var(--owner-muted)" }}>
-        Click any pill to cycle Full &rarr; View &rarr; None, independently per role -- mix and match freely. Course
-        chat, grading, and candidate work never appear here; no role in this family can ever hold them.
-      </p>
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <p className="max-w-[640px] text-[11px]" style={{ color: "var(--owner-muted)" }}>
+          Click any pill to cycle Full &rarr; View &rarr; None, independently per role -- mix and match freely. Course
+          chat, grading, and candidate work never appear here; no role in this family can ever hold them.
+        </p>
+        {/* Every pill click writes immediately and nothing could undo it, so
+            trying the builder out reshaped the centre for good. Both real
+            centres had already drifted that way -- the read-only role
+            holding full Create courses and Invite/grant roles. A control
+            that changes permissions needs a way back. */}
+        {customized ? (
+          <form action={resetCapabilityOverrides}>
+            <button
+              type="submit"
+              className="shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors"
+              style={{ borderColor: "var(--owner-line)", color: "var(--owner-muted)" }}
+            >
+              Reset all to defaults
+            </button>
+          </form>
+        ) : null}
+      </div>
 
       <AddCapabilityForm roleCols={roleCols} />
 
