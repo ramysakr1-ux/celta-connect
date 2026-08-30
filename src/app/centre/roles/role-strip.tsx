@@ -97,6 +97,32 @@ export function RoleStrip({
   ];
 
   const styleFor = (roleKey: string): RoleStyle => STYLE[roleKey as CentreRole] ?? CUSTOM_ROLE_STYLE;
+
+  // A built-in role's one-liner is written prose -- "wants the numbers,
+  // changes nothing" -- and cannot be generated. A custom role has no such
+  // line, and "a role your centre owner defined" told the reader nothing
+  // they could not see from the fact that it is in the list.
+  //
+  // Ramy, 30 Aug 2026, before demoing this: "if I create a new role as a
+  // centre owner, that new role with the job description will appear in
+  // centre management, right?" It appeared -- but only the placeholder did,
+  // until you clicked through to the detail panel. The Centre Owner screen
+  // promises "the description shown on the Roles tab updates automatically
+  // to match whatever you set here", so the strip has to carry it too.
+  //
+  // Named capabilities, not a count: "sees payments and admissions" is a
+  // job; "3 capabilities" is a number. Three at most, so a broadly-granted
+  // role does not push the strip to three lines.
+  const whoFor = (roleKey: string): string => {
+    if (STYLE[roleKey as CentreRole]) return STYLE[roleKey as CentreRole].who;
+    const full = allCapabilities
+      .filter((c) => grantFor([roleKey], c.key, overrides) === true)
+      .map((c) => c.label.toLowerCase());
+    if (full.length === 0) return "no permissions set yet — set them in Centre owner";
+    const shown = full.slice(0, 3);
+    const rest = full.length - shown.length;
+    return `can ${shown.join(", ")}${rest > 0 ? ` and ${rest} more` : ""}`;
+  };
   const summaryFor = (roleKey: string) => describeRoleCapabilities(roleKey, overrides, customCapabilities);
   const permsFor = (roleKey: string) =>
     allCapabilities.map((cap) => {
@@ -125,7 +151,7 @@ export function RoleStrip({
             >
               <span className={`absolute inset-x-0 top-0 h-[3px] ${active ? s.spine : "bg-transparent"}`} aria-hidden="true" />
               <span className={`block text-[13.5px] font-bold ${s.tone}`}>{roleLabel(role, customRoles)}</span>
-              <span className="mt-0.5 block text-xs text-muted">{s.who}</span>
+              <span className="mt-0.5 block text-xs text-muted">{whoFor(role)}</span>
               {(holders[role] ?? []).length > 0 ? (
                 <span className="mt-1.5 block text-[11px] text-ink">
                   {(holders[role] ?? []).map((h) => h.name).join(", ")}
