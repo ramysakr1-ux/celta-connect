@@ -20,23 +20,17 @@ export const getCurrentProfile = cache(async (): Promise<{
   profile: Profile | null;
 } | null> => {
   const supabase = await createClient();
-  // Ramy, 27 Aug 2026: same fix as proxy.ts -- getUser() always hits
-  // Supabase Auth over the network; getClaims() verifies the JWT's
-  // signature locally against this project's published asymmetric signing
-  // key (confirmed live), only touching the network on an actual refresh.
-  // Traced live via Vercel's request logs: this was a second, fully
-  // redundant network round trip on top of proxy.ts's own check, on every
-  // single page in the app.
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!claims) return null;
+  if (!user) return null;
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
-    .eq("id", claims.sub)
+    .eq("id", user.id)
     .maybeSingle();
 
-  return { userId: claims.sub, email: claims.email, profile: profile ?? null };
+  return { userId: user.id, email: user.email, profile: profile ?? null };
 });
