@@ -6,6 +6,21 @@
 // payload is always a plain { title, body, url } and a click always just
 // focuses/opens that url, nothing fancier needed.
 
+// Chrome will not treat a site as installable -- and so never fires
+// beforeinstallprompt -- unless its service worker has a fetch handler.
+// Without this the "Add to home screen" offer could only ever appear on
+// iOS, which reaches it through Safari's own Share menu and needs no event.
+// Ramy, 30 Aug 2026, after the banner still did not come back: "still don't
+// see the home screen thing."
+//
+// Deliberately a pass-through. This app has no offline mode and caching
+// live course data would be worse than useless -- a volunteer reading a
+// stale room number or a cancelled class is exactly the failure this whole
+// page exists to prevent. So the handler exists to satisfy the criterion
+// and to be the place a real offline strategy would go later, and every
+// request continues straight to the network.
+self.addEventListener("fetch", () => {});
+
 self.addEventListener("push", (event) => {
   let payload = { title: "Connect", body: "" };
   try {

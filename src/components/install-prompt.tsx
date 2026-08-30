@@ -38,6 +38,15 @@ function isIos(): boolean {
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
 }
 
+/** Which manual gesture to describe when the browser gives us no install
+ *  event to fire. Coarse on purpose -- these are three genuinely different
+ *  gestures, and naming the wrong menu is worse than naming none. */
+function manualRoute(): "ios" | "android" | "desktop" {
+  if (isIos()) return "ios";
+  if (typeof navigator !== "undefined" && /android/i.test(navigator.userAgent)) return "android";
+  return "desktop";
+}
+
 /** Is the snooze still running? "1" is the old permanent flag -- treated as
  *  a snooze starting now, so devices carrying it get the offer back rather
  *  than staying silenced forever. */
@@ -86,6 +95,7 @@ export function InstallPrompt({ variant = "banner" }: { variant?: "banner" | "in
   }, []);
 
   const standalone = onClient && isStandalone();
+  const route = onClient ? manualRoute() : "desktop";
   const ios = onClient && isIos();
   const installable = onClient && !standalone && (ios || promptFired);
   // The inline entry is never snoozed -- that is the whole point of it.
@@ -101,11 +111,12 @@ export function InstallPrompt({ variant = "banner" }: { variant?: "banner" | "in
   }
 
   async function handleInstallClick() {
-    if (ios) {
+    // No real prompt to fire -- show the gesture for this browser, rather
+    // than being a button that does nothing.
+    if (!deferredEvent) {
       setShowIosSteps((v) => !v);
       return;
     }
-    if (!deferredEvent) return;
     await deferredEvent.prompt();
     const { outcome } = await deferredEvent.userChoice;
     if (outcome === "accepted") {
@@ -118,27 +129,51 @@ export function InstallPrompt({ variant = "banner" }: { variant?: "banner" | "in
     setSnoozedNow(true);
   }
 
-  if (!installable) return null;
-
-  // A quiet, permanent way in -- sits with the other footer actions, is not
-  // snoozed, and never nags.
+  // A quiet, permanent way in -- sits with the other footer actions, is
+  // never snoozed, and never nags.
+  //
+  // Deliberately NOT gated on beforeinstallprompt. That event is the
+  // browser's decision, not ours: Chrome withholds it behind its own
+  // engagement heuristics and fires it at most once per page load, Firefox
+  // and desktop Safari never fire it at all, and iOS has no install API
+  // whatsoever. Gating on it made the offer invisible in exactly the
+  // situations where somebody would go looking for it -- which is what
+  // Ramy hit. So the line is always here whenever the app is not already
+  // installed; the click uses the real prompt when there is one, and
+  // explains the manual gesture when there is not.
   if (variant === "inline") {
+    if (!onClient || standalone) return null;
     return (
       <div className="flex flex-col items-center gap-1">
         <button type="button" onClick={handleInstallClick} className="text-[11px] text-muted hover:underline">
           Keep Connect on your home screen
         </button>
-        {ios && showIosSteps ? (
-          <p className="max-w-[38ch] text-center text-[11px] leading-[1.5] text-muted">
-            Tap <span className="font-semibold text-ink">Share</span>, then{" "}
-            <span className="font-semibold text-ink">Add to Home Screen</span>.
+        {showIosSteps ? (
+          <p className="max-w-[46ch] text-center text-[11px] leading-[1.5] text-muted">
+            {route === "ios" ? (
+              <>
+                Tap <span className="font-semibold text-ink">Share</span>, then{" "}
+                <span className="font-semibold text-ink">Add to Home Screen</span>.
+              </>
+            ) : route === "android" ? (
+              <>
+                Open your browser&apos;s menu, then{" "}
+                <span className="font-semibold text-ink">Add to Home screen</span>.
+              </>
+            ) : (
+              <>
+                In Chrome or Edge, use the install icon at the right of the address bar, or the browser menu
+                then <span className="font-semibold text-ink">Install page as app</span>. In Safari, use{" "}
+                <span className="font-semibold text-ink">File &rsaquo; Add to Dock</span>.
+              </>
+            )}
           </p>
         ) : null}
       </div>
     );
   }
 
-  if (bannerSnoozed) return null;
+  if (!installable || bannerSnoozed) return null;
 
   return (
     <div className="flex items-center justify-between gap-3 border-b border-border bg-accent/40 px-4 py-2 text-sm text-ink">
