@@ -31,8 +31,11 @@ const LANE_H = 78;
 const COL_W = 232;
 const NODE_W = 190;
 const NODE_H = 46;
-const LEFT = 118;
+const LEFT = 196;   // leaves a real gutter for the lane names
 const TOP = 42;
+
+/** Where the lane names end and the diagram begins. */
+const GUTTER = 86;
 
 const cx = (col: number) => LEFT + col * COL_W;
 const cy = (lane: number) => TOP + lane * LANE_H;
@@ -73,7 +76,14 @@ function JourneyDiagram({
 
           {lanes.map((lane, i) => (
             <g key={lane}>
-              <line x1={0} y1={cy(i) + NODE_H / 2} x2={width} y2={cy(i) + NODE_H / 2} stroke="var(--color-border-faint)" strokeWidth="1" />
+              <line
+                x1={GUTTER}
+                y1={cy(i) + NODE_H / 2}
+                x2={width}
+                y2={cy(i) + NODE_H / 2}
+                stroke="var(--color-border-faint)"
+                strokeWidth="1"
+              />
               <text x={0} y={cy(i) + NODE_H / 2 + 3.5} fontSize="10.5" fontWeight="700" letterSpacing="0.06em" fill="var(--color-muted)">
                 {lane.toUpperCase()}
               </text>
