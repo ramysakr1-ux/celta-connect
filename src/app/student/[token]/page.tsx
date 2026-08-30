@@ -170,7 +170,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
   const [{ data: volunteer }, { data: course }, { data: sharedMaterials }] = await Promise.all([
     admin.from("volunteer_students").select("name, signup_completed_at").eq("id", accessToken.volunteer_student_id).maybeSingle(),
-    admin.from("courses").select("name, end_date, center_id").eq("id", accessToken.course_id).maybeSingle(),
+    admin.from("courses").select("name, start_date, end_date, center_id").eq("id", accessToken.course_id).maybeSingle(),
     admin
       .from("volunteer_shared_materials")
       .select("id, created_at, tp_materials(id, file_name, file_type, slides_url, storage_path, trainee_id, tp_plans(tp_number))")
@@ -545,6 +545,13 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
   const firstName = volunteer.name.split(" ")[0];
   const endDateLabel = course?.end_date ? new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
+  // Ramy, 30 Aug 2026: "maybe you can have the dates instead" -- a run of
+  // dates tells a volunteer how much of the course is left in a way that
+  // "until 4 Sept" alone does not.
+  const startDateLabel = course?.start_date
+    ? new Date(`${course.start_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+    : null;
+  const courseDatesLabel = startDateLabel && endDateLabel ? `${startDateLabel} – ${endDateLabel}` : endDateLabel;
   const headline = nextClass ? `Your next class is ${formatEventDate(nextClass.eventDate).split(",")[0].toLowerCase()}` : "No classes scheduled yet";
   // The room belongs on the card. Ramy: "there's no room number on the hero
   // card." course_timetable_events.detail is the centre's own free text for
@@ -577,15 +584,31 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         <div className="md:rounded-[6px] md:border md:border-border">
           <div className="hidden md:block md:rounded-[6px]" style={{ background: "oklch(99.2% 0.005 90)" }}>
             {/* Header bar */}
+            {/* Two rows, each a pair facing across the page. Ramy, 30 Aug
+                2026: "my credit will be across from Connect, and then the
+                student name with the greeting will be down and bigger, and
+                you have the centre on the other side."
+                
+                So the top row is chrome -- the wordmark and who built it --
+                and the row beneath it is the two things that are actually
+                about this volunteer: which course, and who they are. The
+                greeting drops out of the 12px chrome line it was crammed
+                into and gets to be the size it deserves. */}
             <header className="flex h-[52px] items-center justify-between border-b border-border px-5">
               <Link href="/" className="hover:opacity-80">
                 <Wordmark size="header-compact" />
               </Link>
-              <Greeting name={volunteer.name} suffix="volunteer student" className="text-xs text-muted" />
+              <DesignerCredit pinned={false} className="text-[11px] text-muted" />
             </header>
 
             <div className="flex flex-col gap-5 p-[22px_20px]">
-              <TitleBlock course={course} endDateLabel={endDateLabel} headline={headline} desktop />
+              <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+                <p className="text-[11px] font-bold tracking-[0.08em] text-muted uppercase">
+                  {course?.name ?? "Your course"}
+                  {courseDatesLabel ? ` · ${courseDatesLabel}` : ""}
+                </p>
+                <Greeting name={volunteer.name} suffix="volunteer student" className="font-serif text-[19px] text-ink" />
+              </div>
               {nextClass ? (
                 <NextClassBanner
                   nextClass={nextClass}
@@ -675,6 +698,12 @@ function TitleBlock({
   headline: string;
   desktop: boolean;
 }) {
+  // Desktop no longer uses this -- its header is two facing rows now, and
+  // the "your next class is tomorrow" headline was saying what the panel
+  // directly beneath it already says. Ramy: "remove your next classes
+  // tomorrow because we already have it inside the panel." Phone keeps the
+  // headline, where the panel is further down the scroll and the repetition
+  // does not land as repetition.
   return (
     <div>
       <p className={`font-bold text-muted uppercase ${desktop ? "text-[11px] tracking-[0.08em]" : "text-[10px] tracking-[0.08em]"}`}>
@@ -833,14 +862,14 @@ function NextClassBanner({
         background: "linear-gradient(160deg, color-mix(in oklab, var(--color-primary) 7%, var(--color-card)), var(--color-card) 60%)",
       }}
     >
-      <p className="flex items-center gap-1.5 text-[10px] font-bold tracking-[0.12em] text-primary uppercase">
-        <span aria-hidden className="size-1.5 rounded-full bg-current" />
-        Your next class
-      </p>
+      {/* No eyebrow. The page heading immediately above this card already
+          reads "Your next class is tomorrow", so labelling the card the same
+          thing said it twice in two type sizes. Ramy: "we understand this.
+          The next class is enough." */}
       <div className="flex items-baseline justify-between gap-3">
         <p className="font-serif text-[21px] font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
         {nextClass.eventTime ? (
-          <span className="rounded-full bg-primary px-2.5 py-1 text-[12.5px] font-bold text-primary-foreground tabular-nums">
+          <span className="rounded-full bg-primary px-3.5 py-1.5 text-[15px] font-bold text-primary-foreground tabular-nums">
             {nextClass.eventTime.slice(0, 5)}
           </span>
         ) : null}
@@ -866,13 +895,13 @@ function NextClassBanner({
           <JoinOnlineButton
             zoomUrl={nextClass.zoomUrl}
             activationIso={joinActivationIso}
-            className="trainee-hover-fill flex h-11 flex-1 items-center justify-center gap-2 rounded-[8px] bg-primary text-sm font-semibold text-primary-foreground"
+            className="trainee-hover-fill flex h-[52px] flex-1 items-center justify-center gap-2.5 rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground shadow-[0_2px_10px_-4px_color-mix(in_oklab,var(--color-primary)_70%,transparent)]"
           />
         ) : (
           <span
-            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[8px] text-sm font-semibold"
+            className="flex h-[52px] flex-1 items-center justify-center gap-2.5 rounded-[10px] text-[15px] font-semibold"
             style={{
-              background: "color-mix(in oklab, var(--color-primary) 12%, transparent)",
+              background: "color-mix(in oklab, var(--color-primary) 14%, transparent)",
               color: "var(--color-primary)",
             }}
           >

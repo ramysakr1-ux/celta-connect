@@ -11,9 +11,26 @@ function VideoIcon() {
   );
 }
 
+// mm:ss is right when the class is minutes away -- it was written for the
+// ten-minute activation window, where "8:32" reads as a countdown. It is
+// useless a day out: tomorrow's class rendered as "Join in 1063:07", which
+// is a number nobody can convert. Ramy, 30 Aug 2026, on that button:
+// "the countdown is kind of... squashed inside."
+//
+// So the unit follows the distance. Hours and minutes while it is far off,
+// mm:ss only once it is close enough for seconds to mean something.
 function formatCountdown(ms: number): string {
   const totalSeconds = Math.max(Math.ceil(ms / 1000), 0);
   const minutes = Math.floor(totalSeconds / 60);
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+    if (hours >= 24) {
+      const days = Math.floor(hours / 24);
+      return `${days}d ${hours % 24}h`;
+    }
+    return rest > 0 ? `${hours}h ${rest}m` : `${hours}h`;
+  }
   const seconds = totalSeconds % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
