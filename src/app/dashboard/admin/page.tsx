@@ -9,6 +9,9 @@ import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import { computeApplicantCounts } from "@/lib/admissions-counts";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { can } from "@/lib/auth/centre-permissions";
+import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
 
 // for-claude-code-course-admin-landing-and-admissions.md §1: date-derived
 // "upcoming" alone doesn't tell Course Admin what's actually next for a
@@ -36,6 +39,10 @@ const ENTRY_FORM_WARNING_WINDOW_DAYS = 14;
 
 export default async function AdminDashboardPage() {
   const profile = await requireRole("admin");
+  // Needed for the duplicate control below -- duplicating creates a course,
+  // so it has to ask the same capability /centre's own course list asks.
+  const ctx = await getCentreRoleContext(profile);
+  const mayCreateCourses = can(ctx.roles, "course.create", ctx.overrides);
   const supabase = await createClient();
 
   const [{ data: courses }, center, { data: people }, { data: events }] = await Promise.all([
@@ -209,10 +216,23 @@ export default async function AdminDashboardPage() {
                     className={`card overflow-hidden !p-0 ${groupIndex % 2 === 1 ? "card-garnet" : ""} ${group.group === "running" ? "opacity-80" : ""}`}
                   >
                     {group.courses.map((row) => (
-                      <Link
+                      // Ramy, 31 Aug 2026: "just duplicate courses from
+                      // here. I didn't see a duplicate courses option here."
+                      // It existed on a single course's own page and on
+                      // Centre Management's list -- whose own comment says
+                      // "duplicate-course lives on this overview (the course
+                      // list), not inside an individual course's detail" --
+                      // but not on this list, which is the other course
+                      // list in the app. The row was one big Link, so the
+                      // button becomes a sibling of it rather than nesting
+                      // an action inside a link.
+                      <div
                         key={row.course.id}
+                        className="admin-hover flex items-center gap-3 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+                      >
+                      <Link
                         href={`/dashboard/admin/courses/${row.course.id}`}
-                        className="admin-hover flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+                        className="flex min-w-0 flex-1 items-center justify-between gap-4"
                       >
                         <div className="min-w-0">
                           <p className="truncate text-sm font-semibold text-ink">{row.course.name}</p>
@@ -240,6 +260,10 @@ export default async function AdminDashboardPage() {
                         ) : null}
                         <span className={GROUP_PILL_CLASS[group.group]}>{GROUP_LABEL[group.group]}</span>
                       </Link>
+                      {mayCreateCourses ? (
+                        <DuplicateCourseForm courseId={row.course.id} suggestedName={`${row.course.name} (copy)`} />
+                      ) : null}
+                      </div>
                     ))}
                   </div>
                 </div>
