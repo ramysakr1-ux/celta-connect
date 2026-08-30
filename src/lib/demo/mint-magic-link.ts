@@ -13,6 +13,16 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // the next visitor sees.
 export async function mintDemoMagicLink(email: string, next: string | ((profileId: string) => string)) {
   const admin = createAdminClient();
+  // SITE_URL must be the CANONICAL host, including www where the domain
+  // redirects to it. Every URL below is built from it, so a value of
+  // https://celtaconnect.com (no www) puts an extra 308 in front of every
+  // hop -- measured 30 Aug 2026 at ~300ms each, on a chain that is five
+  // responses long: mint -> confirm -> resolve landing -> land. That is
+  // most of the "why is the demo login so slow" and none of it is the
+  // database being in Singapore.
+  //
+  // It also affects every magic link, invite, offer and interview email,
+  // since they all build their URLs the same way.
   const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
   const fallback = () => NextResponse.redirect(new URL("/", siteUrl));
 
