@@ -11,7 +11,7 @@ import { DesignerCredit } from "@/components/designer-credit";
 import { Greeting } from "@/app/student/[token]/greeting";
 import { getVolunteerIdentityData, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-cross-course";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
-import { toLocalIso, zonedTimeToUtc } from "@/lib/timetable-grid";
+import { resolveTimeBands, toLocalIso, zonedTimeToUtc } from "@/lib/timetable-grid";
 import { PushSubscribeButton } from "@/components/push-subscribe-button";
 import { subscribeVolunteerPush, unsubscribeVolunteerPush } from "@/lib/push/actions";
 
@@ -172,7 +172,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
 
   const [{ data: volunteer }, { data: course }, { data: sharedMaterials }] = await Promise.all([
     admin.from("volunteer_students").select("name, signup_completed_at").eq("id", accessToken.volunteer_student_id).maybeSingle(),
-    admin.from("courses").select("name, start_date, end_date, center_id").eq("id", accessToken.course_id).maybeSingle(),
+    admin.from("courses").select("name, start_date, end_date, center_id, time_bands").eq("id", accessToken.course_id).maybeSingle(),
     admin
       .from("volunteer_shared_materials")
       .select("id, created_at, tp_materials(id, file_name, file_type, slides_url, storage_path, trainee_id, tp_plans(tp_number))")
@@ -253,14 +253,38 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // one, then tomorrow's first. Classes with no time set stay current for
   // the whole of their date -- an untimed row is a day's commitment, and
   // guessing an hour for it would be worse than showing it all day.
+  //
+  // Ramy, 30 Aug 2026: "how would it know the break? The break is not
+  // something in the timetable."
+  //
+  // It doesn't need to, and it does not assume a length either. The
+  // course's own time bands (courses.time_bands, edited in the timetable
+  // settings) carry the END of each band, and the breaks ARE the gaps
+  // between them -- this course runs 10:00-10:45, 10:45-11:30, then
+  // 11:45-12:30, so the quarter hour after 11:30 is a break precisely
+  // because no band covers it. A class is over when its band ends, and
+  // during the gap the panel is already showing the one you are heading
+  // to, which is the thing worth knowing while standing in the corridor.
+  //
+  // The 45-minute constant is only the fallback for an event whose time
+  // matches no band at all -- an off-grid session someone typed by hand.
+  const timeBands = resolveTimeBands(course?.time_bands ?? null);
+  const endOfBandFor = (eventTime: string): number | null => {
+    const band = timeBands.find((b) => b.start === eventTime.slice(0, 5));
+    if (!band) return null;
+    const [h, m] = band.end.split(":").map(Number);
+    return h * 60 + m;
+  };
   const nowMs = Date.now();
   const upcoming = classes
     .filter((c) => c.courseId === accessToken.course_id)
     .filter((c) => {
       if (!c.eventTime) return c.eventDate >= toLocalIso(new Date(nowMs), c.timeZone);
-      const endMs =
-        zonedTimeToUtc(c.eventDate, c.eventTime, c.timeZone).getTime() + TP_LESSON_LENGTH_MINUTES * 60_000;
-      return endMs > nowMs;
+      const startsAt = zonedTimeToUtc(c.eventDate, c.eventTime, c.timeZone);
+      const bandEnd = endOfBandFor(c.eventTime);
+      const [sh, sm] = c.eventTime.slice(0, 5).split(":").map(Number);
+      const runsForMinutes = bandEnd != null ? bandEnd - (sh * 60 + sm) : TP_LESSON_LENGTH_MINUTES;
+      return startsAt.getTime() + runsForMinutes * 60_000 > nowMs;
     })
     .sort((a, b) => {
       if (a.eventDate !== b.eventDate) return a.eventDate < b.eventDate ? -1 : 1;
