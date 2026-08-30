@@ -7,7 +7,7 @@ import {
   describeRoleCapabilities,
   type OverrideMatrix,
 } from "@/lib/auth/centre-permissions";
-import { cycleCapabilityOverride } from "@/app/centre/owner/actions";
+import { CapabilityPill } from "@/app/centre/owner/capability-pill";
 import { AddCapabilityForm } from "@/app/centre/owner/add-capability-form";
 import { AddRoleForm } from "@/app/centre/owner/add-role-form";
 
@@ -19,19 +19,19 @@ const BUILT_IN_ROLE_COLOR: Record<string, string> = {
 };
 const CUSTOM_ROLE_COLOR = "oklch(45% 0.09 155)";
 
-const LEVEL_STYLE: Record<string, React.CSSProperties | undefined> = {
-  full: { background: "oklch(45% 0.09 155)", color: "white", borderColor: "oklch(45% 0.09 155)" },
-  view: { background: "oklch(60% 0.11 70)", color: "white", borderColor: "oklch(60% 0.11 70)" },
-  none: undefined,
-};
-const LEVEL_TEXT: Record<string, string> = { full: "Full", view: "View", none: "None" };
-
 // for-claude-code-centre-owner-role-customizer.md §2: "click any pill to
-// cycle Full -> View -> None." Each pill is its own tiny form rather than
-// client state -- a per-centre override is a real, infrequent, deliberate
-// write, and the live preview text below is generated server-side from the
-// exact same grantFor() the table itself reads, so the two can never drift
-// (the spec's own explicit requirement).
+// cycle Full -> View -> None."
+//
+// The pill is a client component now (capability-pill.tsx), optimistic so it
+// flips on click instead of after a round trip -- it used to be a form per
+// cell, which cost about a second per click on a screen built for mixing and
+// matching a dozen of them.
+//
+// The spec's requirement still holds: the live preview text below is
+// generated server-side from the exact same grantFor() this table reads, so
+// what the preview claims and what the permissions actually are can never
+// drift. Only the pill's own label runs ahead, and only until the write
+// lands.
 export function CapabilityCustomizer({
   overrides,
   customRoles,
@@ -112,14 +112,7 @@ export function CapabilityCustomizer({
                   const level = grantToGrantLevel(grantFor([rc.key], cap.key, overrides));
                   return (
                     <td key={rc.key} className="border-b px-3 py-2.5 text-center" style={{ borderColor: "var(--owner-line)" }}>
-                      <form action={cycleCapabilityOverride} className="inline">
-                        <input type="hidden" name="role_key" value={rc.key} />
-                        <input type="hidden" name="capability_key" value={cap.key} />
-                        <input type="hidden" name="current_level" value={level} />
-                        <button type="submit" className="cap-btn" style={LEVEL_STYLE[level]}>
-                          {LEVEL_TEXT[level]}
-                        </button>
-                      </form>
+                      <CapabilityPill roleKey={rc.key} capabilityKey={cap.key} level={level} />
                     </td>
                   );
                 })}
