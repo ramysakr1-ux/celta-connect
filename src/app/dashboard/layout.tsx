@@ -63,6 +63,11 @@ export default async function DashboardLayout({
             staying pinned to the viewport. Row 2 carries name + sign out,
             which used to collide with the credit when both sat on one line. */}
         <div className="container flex h-14 items-center justify-between gap-6">
+          {/* Left group: where you are, then where else you can go. Without
+              this wrapper the destination pill became a third child of a
+              justify-between row and was flung into the middle of the
+              header, floating between the mark and the credit. */}
+          <div className="flex min-w-0 items-center gap-3.5">
           {/* The logo keeps you in Course Admin. It used to link to /dashboard,
               whose landing preference sends anyone holding a centre role to
               /centre -- so clicking the logo from inside Course Admin kicked
@@ -122,13 +127,23 @@ export default async function DashboardLayout({
               Mirrors the pill /centre uses for Centre Owner -- a second
               place you can go, not a tab of this one. */}
           {centreCtx && centreCtx.roles.length > 0 ? (
-            <Link
-              href="/centre"
-              className="admin-hover-fill shrink-0 rounded-[5px] border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-primary uppercase"
-            >
-              Centre management
-            </Link>
+            <>
+              <span className="h-[18px] w-px shrink-0 bg-border" aria-hidden="true" />
+              {/* Deliberately NOT a twin of the Course admin badge beside
+                  it. That one says where you are; this one is somewhere you
+                  can go, and two identical filled pills side by side read as
+                  two labels for the same screen. Muted and outlined, with an
+                  arrow, so it reads as a door. */}
+              <Link
+                href="/centre"
+                className="admin-hover-fill inline-flex shrink-0 items-center gap-1.5 rounded-[5px] border border-border px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] text-muted uppercase hover:border-primary hover:text-primary"
+              >
+                Centre management
+                <span aria-hidden>&rarr;</span>
+              </Link>
+            </>
           ) : null}
+          </div>
           <HeaderDesignerCredit landingPath="/dashboard/admin" />
         </div>
         <div className="container flex items-center justify-end gap-4 pb-2.5 text-sm text-muted">
