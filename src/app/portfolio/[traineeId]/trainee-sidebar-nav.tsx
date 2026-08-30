@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 // for-claude-code-trainee-assessor-card-system.md / Trainee Walkthrough.dc.html:
 // a left "Workspace" rail, not TraineeTopNav's horizontal tabs -- and a
@@ -41,6 +41,14 @@ const SIDEBAR_TABS = [
 // viewports with its own simpler six-item set.
 export function TraineeSidebarNav({ traineeId }: { traineeId: string }) {
   const pathname = usePathname();
+  // A room (Resource Hub, and any later one) hides this rail entirely, so
+  // there is nothing to bracket while you are inside it. Coming out, the
+  // rail would otherwise snap to Course Stream -- as if you had never been
+  // anywhere. Ramy, 30 Aug 2026: "when you come out of the room, you're at
+  // the door." The room's back link carries ?from=/resources and the
+  // bracket stays on that door for the one render you arrive on; clicking
+  // anything clears it, because by then you have walked away from the door.
+  const cameFrom = useSearchParams()?.get("from") ?? null;
   const base = `/portfolio/${traineeId}`;
 
   return (
@@ -49,8 +57,11 @@ export function TraineeSidebarNav({ traineeId }: { traineeId: string }) {
       {SIDEBAR_TABS.map((tab) => {
         const href = `${base}${tab.href}`;
         const alsoMatch = "alsoMatch" in tab ? tab.alsoMatch : [];
-        const active =
-          tab.href === ""
+        const atThisDoor = cameFrom !== null && cameFrom === tab.href;
+        const anyDoorOpen = cameFrom !== null && SIDEBAR_TABS.some((t) => t.href === cameFrom);
+        const active = anyDoorOpen
+          ? atThisDoor
+          : tab.href === ""
             ? pathname === href || alsoMatch.some((extra) => pathname.startsWith(`${base}${extra}`))
             : pathname.startsWith(href);
         return (
