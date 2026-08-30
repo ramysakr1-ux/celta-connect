@@ -1048,6 +1048,43 @@ async function main() {
     })
     .select("token")
     .single();
+  // Grace Adeyemi -- the OTHER end of the volunteer journey, and the half
+  // that has been broken.
+  //
+  // /demo/journey/volunteer-signup looks her up by name, resets her to
+  // not-yet-signed-up and lands on the real signup form; every volunteer
+  // email on /demo/journey is addressed to her. She was never in this seed,
+  // so the last centre rebuild wiped her and that route has been falling
+  // through to its fallback and dumping people on the login page ever
+  // since -- which is exactly what "I can't see the volunteer journey"
+  // turned out to be.
+  //
+  // See [[feedback_seed_vs_migration_for_demo_content]]: anything the demo
+  // depends on belongs here, where it is recreated on every rebuild, not in
+  // a migration that runs once.
+  //
+  // Deliberately left with signup_completed_at null -- Emeka above shows
+  // the ongoing dashboard of someone already signed up; Grace exists to
+  // show the very first screen, the six written questions and the eight
+  // recording prompts.
+  const { data: graceVolunteer } = await supabase
+    .from("volunteer_students")
+    .insert({
+      course_id: course.id,
+      name: "Grace Adeyemi",
+      level: "Elementary",
+      signup_completed_at: null,
+    })
+    .select("id")
+    .single();
+  await supabase.from("course_access_tokens").insert({
+    course_id: course.id,
+    role: "volunteer_student",
+    volunteer_student_id: graceVolunteer.id,
+    expires_at: new Date(Date.now() + 5 * 365 * 86400000).toISOString(),
+  });
+  console.log("volunteer signup demo: Grace Adeyemi seeded, not yet signed up");
+
   const pastTpTitles = ["TP1", "TP2", "TP3"];
   const attendanceRows = pastTpTitles
     .map((t) => tpEventIdByTitle.get(t))
