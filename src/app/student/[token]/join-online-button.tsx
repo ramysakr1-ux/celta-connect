@@ -89,7 +89,11 @@ export function JoinOnlineButton({ zoomUrl, activationIso, className }: { zoomUr
 
   return (
     <div className="relative">
-      <button type="button" onClick={() => setShowMessage((v) => !v)} className={`${className} opacity-60`}>
+      {/* opacity-60 made the panel's main action look disabled -- a grey
+          slab where the one thing a volunteer came to do should be. It is
+          not disabled, it is early, and those read differently. Full colour,
+          slightly softened, and the countdown does the explaining. */}
+      <button type="button" onClick={() => setShowMessage((v) => !v)} className={`${className} opacity-90`}>
         <VideoIcon />
         Join in {mounted ? formatCountdown(activationMs! - now) : "--:--"}
       </button>

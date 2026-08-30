@@ -768,7 +768,7 @@ function NextClassCard({
         {nextClass.eventTime ? <p className="text-[13px] font-semibold text-primary tabular-nums">{nextClass.eventTime.slice(0, 5)}</p> : null}
       </div>
       <NextClassFacts whereLabel={whereLabel} topicLabel={topicLabel} teachersLabel={teachersLabel} />
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3 pt-1">
         {nextClass.zoomUrl ? (
           <JoinOnlineButton
             zoomUrl={nextClass.zoomUrl}
@@ -857,9 +857,13 @@ function NextClassBanner({
     <div
       className="flex flex-col gap-[13px] rounded-[10px] border border-t-[3px] p-4"
       style={{
-        borderColor: "color-mix(in oklab, var(--color-primary) 32%, transparent)",
+        borderColor: "color-mix(in oklab, var(--color-primary) 34%, transparent)",
         borderTopColor: "var(--color-primary)",
-        background: "linear-gradient(160deg, color-mix(in oklab, var(--color-primary) 7%, var(--color-card)), var(--color-card) 60%)",
+        // Ramy: "play with the panel colour." Deeper at the top where the
+        // date and time sit, fading out before the facts -- so the colour
+        // belongs to the thing you look at first rather than washing the
+        // whole card evenly.
+        background: "linear-gradient(170deg, color-mix(in oklab, var(--color-primary) 13%, var(--color-card)) 0%, var(--color-card) 55%)",
       }}
     >
       {/* No eyebrow. The page heading immediately above this card already
@@ -890,7 +894,7 @@ function NextClassBanner({
           trailed off into "Can't make it?" and nothing else. An in-person
           class now says so in the same slot, with the same size, so the row
           reads as an answer rather than an absence. */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3 pt-1">
         {nextClass.zoomUrl ? (
           <JoinOnlineButton
             zoomUrl={nextClass.zoomUrl}
