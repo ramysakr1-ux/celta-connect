@@ -6,6 +6,7 @@ import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { CentreSettingsCard } from "@/app/centre/settings-card";
+import { CentreHeaderPills } from "@/app/centre/header-pills";
 import { CentreTabs } from "@/app/centre/centre-tabs";
 import { BranchFilter } from "@/app/centre/branch-filter";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -64,50 +65,10 @@ export default async function CentreLayout({ children }: { children: React.React
           <Link href={profile.role === "platform_owner" ? "/platform/command-center" : "/centre"} className="shrink-0 hover:opacity-80">
             <Wordmark size="header" />
           </Link>
-          <span className="h-[18px] w-px bg-border" aria-hidden="true" />
-          <span className="rounded-[5px] border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-primary uppercase">
-            Centre management
-          </span>
-          {/* for-claude-code-centre-owner-role-customizer.md: "a deliberately
-              different register... not a fifth tab that happens to look the
-              same" -- garnet, not teal, and its own destination rather than
-              a CentreTabs entry, so it never reads as just another tab. */}
-          {ctx.roles.includes("centre_owner") ? (
-            <Link
-              href="/centre/owner"
-              className="rounded-[5px] px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-white uppercase"
-              style={{ background: "oklch(42% 0.15 27)" }}
-            >
-              Centre owner
-            </Link>
-          ) : null}
-          {/* The door into Course Admin, matching the one Course Admin now
-              has back to here.
-          
-              Ramy, 31 Aug 2026: "the only way to access Course Admin now is
-              through a separate link. Is that deliberate?" It was not. The
-              only route in from this side was the "New course" button at the
-              foot of the Overview -- gated on course.create, which Course
-              administrator does not hold, and labelled after one action
-              rather than the section it opens. So the person whose own
-              screen it is could not reach it from here at all.
-          
-              Gated on "View course admin screens", which is precisely the
-              capability that means what this link does. Styled as a
-              destination, not as a badge -- the teal pill to its left says
-              where you are. */}
-          {can(ctx.roles, "courseAdmin.view", ctx.overrides) ? (
-            <>
-              <span className="h-[18px] w-px shrink-0 bg-border" aria-hidden="true" />
-              <Link
-                href="/dashboard/admin"
-                className="admin-hover-fill inline-flex shrink-0 items-center gap-1.5 rounded-[5px] border border-border px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] text-muted uppercase hover:border-primary hover:text-primary"
-              >
-                Course admin
-                <span aria-hidden>&rarr;</span>
-              </Link>
-            </>
-          ) : null}
+          <CentreHeaderPills
+            isOwner={ctx.roles.includes("centre_owner")}
+            mayViewCourseAdmin={can(ctx.roles, "courseAdmin.view", ctx.overrides)}
+          />
         </div>
         <HeaderDesignerCredit landingPath="/centre" />
       </div>

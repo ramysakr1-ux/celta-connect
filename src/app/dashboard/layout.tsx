@@ -9,6 +9,7 @@ import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { PILL_ACTIVE, PILL_INACTIVE } from "@/app/centre/header-pill-styles";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
 
 export default async function DashboardLayout({
@@ -92,55 +93,39 @@ export default async function DashboardLayout({
                 accent tint. Centre Admin has the same device at /centre; this
                 screen had none, so it read as the generic dashboard rather
                 than as the course admin's own view. */}
-            {profile?.role === "admin" ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_oklab,var(--color-primary)_28%,transparent)] bg-[color-mix(in_oklab,var(--color-primary)_12%,var(--color-card))] px-2.5 py-0.5 text-[11px] font-bold tracking-[0.06em] text-primary uppercase">
-                <span className="size-[5px] rounded-full bg-current" />
-                Course admin
-              </span>
-            ) : null}
           </Link>
 
-          {/* The way back to Centre Management.
+          {/* The same pill row Centre Management carries, with the teal on
+              this view instead. Ramy, 31 Aug 2026: "this is meant to be a
+              platform with different views, different job descriptions...
+              they need to know where they are."
           
-              Ramy, 30 Aug 2026: "course admin has no way back to centre
-              management." Correct, and it was a side effect of the right
-              fix: the logo used to link to /dashboard, whose landing
-              preference bounced anyone with a centre role into /centre, so
-              clicking the mark from inside Course Admin kicked you out of
-              it. That was fixed by pinning the logo to /dashboard/admin --
-              which removed the only door, rather than replacing it.
+              So it is one row that appears identically in both places and
+              answers "whose screen is this", rather than a badge here and a
+              different-looking link there. The Course admin badge used to be
+              a rounded-full pill with a dot, nested inside the wordmark
+              link; it is the same shape as its neighbours now, and outside
+              the link, since a label is not part of going home.
           
-              Shown to anyone holding a centre role, which in this layout is
-              anyone it renders for at all. My first attempt gated it on
-              landingFor() === "centre-admin", reasoning that a pure course
-              administrator has no Centre Management to return to -- but
-              that was wrong, and checking rather than assuming caught it:
-              signed in as the demo course administrator, who holds nothing
-              but course_administrator, /centre renders Centre overview with
-              its tabs, no redirect. The spec says so too -- that role is
-              "everything a centre administrator can do, scoped to named
-              courses... other courses, in outline only", which is a
-              centre-level view by definition. The narrow gate would have
-              hidden the door from precisely the person who complained it
-              was missing.
-          
-              Mirrors the pill /centre uses for Centre Owner -- a second
-              place you can go, not a tab of this one. */}
-          {centreCtx && centreCtx.roles.length > 0 ? (
+              The way back also had to exist at all: the logo used to link to
+              /dashboard, whose landing preference sends anyone holding a
+              centre role to /centre, so clicking the mark from inside Course
+              Admin kicked you out of it. Pinning the logo to /dashboard/admin
+              fixed that and removed the only door. */}
+          {profile?.role === "admin" ? (
             <>
               <span className="h-[18px] w-px shrink-0 bg-border" aria-hidden="true" />
-              {/* Deliberately NOT a twin of the Course admin badge beside
-                  it. That one says where you are; this one is somewhere you
-                  can go, and two identical filled pills side by side read as
-                  two labels for the same screen. Muted and outlined, with an
-                  arrow, so it reads as a door. */}
-              <Link
-                href="/centre"
-                className="admin-hover-fill inline-flex shrink-0 items-center gap-1.5 rounded-[5px] border border-border px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] text-muted uppercase hover:border-primary hover:text-primary"
-              >
-                Centre management
-                <span aria-hidden>&rarr;</span>
-              </Link>
+              <span className={PILL_ACTIVE}>Course admin</span>
+              {centreCtx && centreCtx.roles.length > 0 ? (
+                <Link href="/centre" className={PILL_INACTIVE}>
+                  Centre management
+                </Link>
+              ) : null}
+              {centreCtx?.roles.includes("centre_owner") ? (
+                <Link href="/centre/owner" className={PILL_INACTIVE}>
+                  Centre owner
+                </Link>
+              ) : null}
             </>
           ) : null}
           </div>
