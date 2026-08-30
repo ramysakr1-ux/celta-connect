@@ -33,12 +33,14 @@ export interface ReleaseCheck {
 
 export function buildReleaseChecklist(input: {
   record: Celta5Record | null;
+  /** A paired provisional -- Fail/Pass, Pass/Pass B, Pass B/Pass A. */
+  wasSlashed?: boolean;
   assignments: Assignment[];
   hoursAssessed: number;
   levels: string[];
   assessorVisitDate: string | null;
 }): ReleaseCheck[] {
-  const { record, assignments, hoursAssessed, levels, assessorVisitDate } = input;
+  const { record, assignments, hoursAssessed, levels, assessorVisitDate, wasSlashed } = input;
 
   // Handbook 9: six hours of assessed teaching, and 10.1's "at least two
   // levels" -- both halves matter, so a candidate with six hours at one level
@@ -102,5 +104,20 @@ export function buildReleaseChecklist(input: {
       : "Not set",
   };
 
-  return [teaching, assignmentsCheck, signatures, visit];
+  // Ramy, 30 Aug 2026: "some assessors don't really ask for a justification
+  // for the straight passes... just not enforced. What's enforced is the
+  // slash." So this line only appears for a slashed candidate. On a straight
+  // grade the rationale is still offered on the page and still welcome -- it
+  // is simply not something the centre is held to.
+  const rationale: ReleaseCheck | null = wasSlashed
+    ? {
+        label: "Rationale for the slashed grade",
+        met: Boolean(record?.overall_notes?.trim()),
+        state: record?.overall_notes?.trim() ? "Met" : "Required",
+      }
+    : null;
+
+  return rationale
+    ? [teaching, assignmentsCheck, signatures, rationale, visit]
+    : [teaching, assignmentsCheck, signatures, visit];
 }
