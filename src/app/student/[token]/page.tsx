@@ -1263,6 +1263,10 @@ function Footer({ endDateLabel, materials, token }: { endDateLabel: string | nul
           Download all my materials
         </a>
       ) : null}
+      {/* The always-available way in, so dismissing the banner can never
+          strand someone who changes their mind. Renders nothing at all on a
+          browser that cannot install, or once installed. */}
+      <InstallPrompt variant="inline" />
       <PushSubscribeButton subscribe={subscribeVolunteerPush.bind(null, token)} unsubscribe={unsubscribeVolunteerPush.bind(null, token)} />
       <a href={`/student/${token}/unsubscribe`} className="text-[11px] text-muted hover:underline">
         Manage reminder emails
