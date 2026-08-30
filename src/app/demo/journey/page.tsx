@@ -42,6 +42,35 @@ import { AiReadingPanel } from "@/app/dashboard/admissions/[id]/ai-reading-panel
 // static (so a renamed real centre still shows up within a few minutes).
 export const revalidate = 300;
 
+// The point of the page, and the point of the product: no step stops at
+// the person taking it. Ramy, 30 Aug 2026: "how each journey is connected
+// to the trainees or to the center management or to the trainers, how it
+// shows, where it shows, when it shows... That's the whole point of
+// Connect. Everything is connected, and it needs to be clearly
+// demonstrated through the journey."
+//
+// Every row below is a real read or write in the codebase, not a claim
+// about intent. Where something is built but has never run against the
+// live third party, it says so rather than implying it is proven.
+function Connects({ rows }: { rows: { who: string; what: string; when: string }[] }) {
+  return (
+    <div className="flex flex-col gap-2 rounded-[6px] border border-primary/30 bg-primary/5 p-3">
+      <p className="text-[11px] font-semibold tracking-[0.08em] text-primary uppercase">
+        What this sets off elsewhere
+      </p>
+      {rows.map((r) => (
+        <div key={r.who + r.what} className="flex flex-col gap-0.5 border-b border-border-faint pb-2 last:border-b-0 last:pb-0">
+          <div className="flex flex-wrap items-baseline gap-x-2">
+            <span className="text-[11px] font-bold tracking-[0.06em] text-ink uppercase">{r.who}</span>
+            <span className="text-[11px] text-muted">{r.when}</span>
+          </div>
+          <p className="text-sm text-ink">{r.what}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Step({
   number,
   title,
@@ -612,6 +641,25 @@ export default async function JourneyPage() {
                 three separate exercises.
               </p>
             </div>
+            <Connects
+              rows={[
+                {
+                  who: "The candidate",
+                  when: "from the moment it saves",
+                  what: "The language they chose becomes their L1 on file -- which is what makes the language-analysis half of Focus on the Learner possible at all. Without it a candidate is guessing at first-language interference.",
+                },
+                {
+                  who: "The tutor",
+                  when: "as soon as transcription finishes",
+                  what: "The written answers and the transcript appear against that volunteer on the Volunteers page, so a tutor can see who is in the room before they walk into it.",
+                },
+                {
+                  who: "Centre Management",
+                  when: "immediately",
+                  what: "They join the centre's volunteer pool, grouped as a person rather than a row per course -- so someone who volunteers on three courses is one human being with a history, not three strangers.",
+                },
+              ]}
+            />
           </Step>
 
           <Step number={2} title="Gets a confirmation" blurb="Sent the moment they submit the form.">
@@ -636,18 +684,113 @@ export default async function JourneyPage() {
             blurb="The same link, now past the signup. Next class, every class with the handouts for it, and hours logged toward a certificate -- with progress markers scaled to whatever threshold the centre has set, not a fixed 40/80/120/160. Joining the class online, declining one, and managing reminder emails all live here rather than as separate pages."
             href="/demo/volunteer"
             hrefLabel="Open the ongoing volunteer view &rarr;"
+          >
+            <Connects
+              rows={[
+                {
+                  who: "The candidate",
+                  when: "the moment they tick 'share' on a TP plan",
+                  what: "The handouts a volunteer sees here are not centre stock -- they are the candidate's own teaching-practice materials, shared straight off their lesson plan. The person being taught gets the actual worksheet the person teaching them made.",
+                },
+                {
+                  who: "The tutor",
+                  when: "when a class is declined",
+                  what: "'Let them know' takes them off that class on the register, so a tutor plans for who is actually coming rather than discovering it in the room. It also suppresses that class's reminders -- nobody is nagged about a class they already said they would miss.",
+                },
+                {
+                  who: "Attendance, automatically",
+                  when: "on joining the Zoom class",
+                  what: "A Zoom webhook records the join against that session -- first join kept, so a rejoin does not reset it -- which credits the hours toward their certificate without anyone ticking a register. Built and wired; it has not yet been exercised against a live Zoom account, so treat it as a demo of the mechanism rather than a proven integration.",
+                },
+                {
+                  who: "Centre Management and the platform owner",
+                  when: "continuously",
+                  what: "Those same attendance rows roll up into the centre's volunteer figures and into Command Center's people view -- one volunteer showing up to one class moves a number on the owner's screen.",
+                },
+                {
+                  who: "Business and admissions staff",
+                  when: "whenever they need it",
+                  what: "They get a no-login register link of their own -- view and add volunteers, nothing else. No account, and no access to the course itself.",
+                },
+              ]}
+            />
+          </Step>
+
+          <Step
+            number={6}
+            title="How the register actually decides they were there"
+            blurb="Worth showing, because it is the one rule everybody assumes and nobody agrees on."
+          >
+            <div className="flex flex-col gap-2 rounded-[6px] border border-border bg-card p-3">
+              <p className="text-sm text-ink">
+                <span className="font-semibold">90 minutes in a day earns a tick, and the tick credits the whole
+                session.</span> Sit through 90 minutes of a 2&frac14;-hour day and you are credited 2&frac14; hours,
+                not 90 minutes. Nothing part-credits.
+              </p>
+              <p className="text-sm text-ink">
+                <span className="font-semibold">Three marks, not two.</span> Under 45 minutes is absent. 45 to 89 is
+                its own mark on the register -- it credits no hours, but it is recorded, because a tutor looking at
+                someone who repeatedly turns up for one lesson has a different problem from someone who never comes,
+                and a two-state register hides that difference.
+              </p>
+              <p className="text-sm text-ink">
+                <span className="font-semibold">Minute-level credit was deliberately not built.</span> A teaching
+                practice slot is a fixed-length block someone is present or absent for; counting attended blocks
+                against the block length reproduces the same rule without pretending to per-minute data nobody
+                actually has.
+              </p>
+              <p className="text-sm text-ink">
+                <span className="font-semibold">Zoom join and leave times are shown, not counted.</span> The webhook
+                fills in the same present/absent row a tutor would tick by hand. The timestamps are there to look at;
+                they are not a second, competing input to the hours.
+              </p>
+              <p className="text-sm text-ink">
+                <span className="font-semibold">The threshold is the centre&apos;s, not ours.</span> 160 hours by
+                default, changed per centre in settings, and the progress markers on the volunteer&apos;s own page
+                rescale to whatever it is set to -- quarters of the real threshold, rather than a hard-coded
+                40/80/120/160 that stops making sense the moment a centre changes it.
+              </p>
+            </div>
+            <Connects
+              rows={[
+                {
+                  who: "The volunteer",
+                  when: "every time the register is marked",
+                  what: "Their own page moves: hours credited, hours remaining, and how far along the four markers they are.",
+                },
+                {
+                  who: "The tutor",
+                  when: "on the register",
+                  what: "Sees present, partial and absent as three distinct marks per session, per volunteer.",
+                },
+                {
+                  who: "Centre Management and Command Center",
+                  when: "continuously",
+                  what: "The same rows aggregate into the centre's volunteer figures and the platform owner's people view.",
+                },
+              ]}
+            />
+          </Step>
+
+          <Step
+            number={7}
+            title="And at the end of a level, a certificate of attendance"
+            blurb="The centre's own document -- its logo, its name, its signatories, and deliberately no Cambridge mark and no Connect mark, because it is a document that leaves the system and carries the centre's brand alone."
+            href="/demo/journey/volunteer-certificate"
+            hrefLabel="Open the certificate &rarr;"
+            caveat="Design only, and shown here from sample data. The cross-course level tracking that would decide a volunteer has finished a level is not built yet, so nothing issues this automatically today."
           />
 
-          <Step number={6} title="Gets a day-before reminder" blurb="20 hours before each class -- not a fixed clock time, and not 24 hours (that would land right at the previous day's class). Skipped if they declined this one, or turned reminder emails off.">
+          <Step number={8} title="Gets a day-before reminder" blurb="20 hours before each class -- not a fixed clock time, and not 24 hours (that would land right at the previous day's class). Skipped if they declined this one, or turned reminder emails off.">
             <EmailPreview title="Your class is tomorrow" to="Grace Adeyemi" html={volunteerDayBeforeHtml} />
           </Step>
 
-          <Step number={7} title="Gets a 30-minute reminder" blurb="Both an email and a browser push, independently -- push needs a permission grant per device, so the email is what actually reaches everyone.">
+          <Step number={9} title="Gets a 30-minute reminder" blurb="Both an email and a browser push, independently -- push needs a permission grant per device, so the email is what actually reaches everyone.">
             <EmailPreview title="Your class starts in 30 minutes" to="Grace Adeyemi" html={volunteer30MinHtml} />
           </Step>
 
           <Step
-            number={8}
+            number={10}
             title="And the candidates write their assignment from all of it"
             blurb="This is what the whole journey feeds. Candidates log a learner's error by tapping that learner from the register mid-observation, Days 2 to 9, into one shared pool -- so the evidence is gathered by the whole group rather than each candidate cornering a volunteer separately. The claim they submit is adjudicated by the system, not queued for a tutor: four soft checks that can be retried immediately, and only two things that actually block -- a duplicate, or genuinely no evidence at all."
             href="/demo/trainee"
@@ -657,6 +800,25 @@ export default async function JourneyPage() {
               Tutors get a spot-check view of their own, showing per-class log counts and flagging any class sitting at
               nearly zero entries -- reachable from the roster&apos;s &quot;FOL pool, by class&quot; row.
             </p>
+            <Connects
+              rows={[
+                {
+                  who: "Every other candidate",
+                  when: "as each error is logged",
+                  what: "One shared pool, not one per candidate. Nobody has to corner a volunteer on their own, and a quiet learner still generates evidence because the whole group is watching.",
+                },
+                {
+                  who: "The tutor",
+                  when: "Days 2 to 9, while it can still be fixed",
+                  what: "The spot-check flags a class sitting at nearly zero entries -- so a group that is not gathering evidence is caught during the course, not at marking.",
+                },
+                {
+                  who: "The assignment, then the CELTA 5",
+                  when: "at submission and at marking",
+                  what: "The claim is adjudicated by the system rather than queued for a tutor: four soft checks a candidate can retry immediately, and only two hard blockers -- a duplicate, or genuinely no evidence. What survives becomes assignment evidence, which becomes a criterion tick on the CELTA 5, which becomes a line on the grade form the assessor reads.",
+                },
+              ]}
+            />
           </Step>
         </div>
       </div>
