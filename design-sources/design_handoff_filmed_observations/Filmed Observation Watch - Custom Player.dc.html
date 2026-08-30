@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 40px; display: flex; flex-direction: column; gap: 18px; width: 1240px; box-sizing: border-box;">
+  <div style="display: flex; flex-direction: column; gap: 4px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · custom player skin, same session</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 26px; font-weight: 600; color: oklch(23.5% 0.017 65);">Filmed lesson — focus set by the trainer per session</div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 340px; gap: 18px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 0;">
+      <div style="position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 10px 10px 0 0; background: oklch(23.5% 0.017 65); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <video style="width: 100%; height: 100%; object-fit: contain;"></video>
+        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; padding: 0 24px; pointer-events: none;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="oklch(72% 0.02 80)" stroke-width="1.6"><rect x="2" y="5" width="15" height="14" rx="2"></rect><path d="m17 10 5-3v10l-5-3z"></path></svg>
+          <div style="font-size: 12px; color: oklch(85% 0.01 85);">No recording loaded</div>
+        </div>
+        <div onClick="{{ togglePlay }}" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <sc-if value="{{ !playing }}" hint-placeholder-val="{{ true }}">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: oklch(98.5% 0.006 90 / 0.9); display: flex; align-items: center; justify-content: center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="oklch(23.5% 0.017 65)"><path d="M8 5v14l11-7z"></path></svg>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="background: oklch(23.5% 0.017 65); border-radius: 0 0 10px 10px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="font-size: 10.5px; color: oklch(80% 0.012 85); font-variant-numeric: tabular-nums; min-width: 34px;">{{ timeLabel }}</div>
+          <div onClick="{{ scrub }}" style="flex: 1; height: 5px; border-radius: 999px; background: oklch(45% 0.017 65); position: relative; cursor: pointer;">
+            <div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{ progressPct }}; border-radius: 999px; background: oklch(60% 0.11 70);"></div>
+            <div style="position: absolute; top: 50%; left: {{ progressPct }}; width: 11px; height: 11px; border-radius: 50%; background: oklch(98.5% 0.006 90); transform: translate(-50%, -50%);"></div>
+            <sc-for list="{{ breakMarkers }}" as="b" hint-placeholder-count="3">
+              <div title="Discussion break" style="position: absolute; top: 50%; left: {{ b.pct }}; width: 3px; height: 11px; border-radius: 2px; background: oklch(72% 0.11 70); transform: translate(-50%, -50%);"></div>
+            </sc-for>
+          </div>
+          <div style="font-size: 10.5px; color: oklch(60% 0.015 85); font-variant-numeric: tabular-nums; min-width: 34px; text-align: right;">{{ durationLabel }}</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div onClick="{{ togglePlay }}" style="cursor: pointer; color: oklch(98.5% 0.006 90); display: flex;">
+              <sc-if value="{{ playing }}" hint-placeholder-val="{{ false }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"></rect><rect x="14" y="5" width="4" height="14"></rect></svg>
+              </sc-if>
+              <sc-if value="{{ !playing }}" hint-placeholder-val="{{ true }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+              </sc-if>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(80% 0.012 85)" stroke-width="2" style="cursor: pointer;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.5 8.5a5 5 0 0 1 0 7"></path></svg>
+            <div style="font-size: 10.5px; color: oklch(80% 0.012 85);">1×</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 10.5px; color: oklch(72% 0.11 70); display: flex; align-items: center; gap: 5px;">
+              <div style="width: 6px; height: 6px; border-radius: 999px; background: currentColor;"></div>
+              3 discussion breaks marked
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(80% 0.012 85)" stroke-width="2" style="cursor: pointer;"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
+          </div>
+        </div>
+      </div>
+      <div style="font-size: 11px; color: oklch(51% 0.017 70); margin-top: 8px;">Custom skin: our own play/pause, scrubber with break markers baked in, speed control, and a fullscreen toggle — instead of relying on the browser's native video chrome.</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; flex-direction: column; gap: 8px; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px; height: 300px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">Group chat</div>
+        <div style="flex: 1;"></div>
+        <div style="display: flex; gap: 6px;">
+          <div style="flex: 1; height: 32px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(96.4% 0.014 85); padding: 0 10px; display: flex; align-items: center; font-size: 12px; color: oklch(51% 0.017 70);">Say something…</div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">My observation notes</div>
+        <div style="min-height: 60px; border: 1px solid oklch(88% 0.016 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 8px 10px; font-size: 11.5px; color: oklch(51% 0.017 70);">Write here…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { playing: false, pct: 32 };
+  togglePlay = () => this.setState(s => ({ playing: !s.playing }));
+  scrub = () => {};
+
+  renderVals() {
+    const { playing, pct } = this.state;
+    const totalSec = 45 * 60;
+    const cur = Math.round(totalSec * (pct / 100));
+    const fmt = (s) => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    return {
+      playing, togglePlay: this.togglePlay, scrub: this.scrub,
+      progressPct: pct + '%',
+      timeLabel: fmt(cur),
+      durationLabel: fmt(totalSec),
+      breakMarkers: [{ pct: '22%' }, { pct: '50%' }, { pct: '78%' }],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

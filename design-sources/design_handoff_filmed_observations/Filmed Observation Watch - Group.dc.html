@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 40px; display: flex; flex-direction: column; gap: 18px; width: 1240px; box-sizing: border-box;">
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · Filmed observation 2 of 4 · group session</div>
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 26px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ lessonFocus }}</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="display: flex; align-items: center;">
+        <sc-for list="{{ presence }}" as="p" hint-placeholder-count="6">
+          <div title="{{ p.name }}" style="width: 26px; height: 26px; border-radius: 50%; margin-left: -6px; border: 2px solid oklch(92.5% 0.012 85); background: {{ p.bg }}; color: {{ p.ink }}; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700;">{{ p.initials }}</div>
+        </sc-for>
+      </div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ joinedLabel }}</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 340px; gap: 18px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 10px; background: oklch(23.5% 0.017 65); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <video controls="{{ !paused }}" style="width: 100%; height: 100%; object-fit: contain;"></video>
+        <sc-if value="{{ showNoSrc }}" hint-placeholder-val="{{ true }}">
+          <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; padding: 0 24px; pointer-events: none;">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="oklch(72% 0.02 80)" stroke-width="1.6"><rect x="2" y="5" width="15" height="14" rx="2"></rect><path d="m17 10 5-3v10l-5-3z"></path></svg>
+            <div style="font-size: 12px; color: oklch(85% 0.01 85);">No recording loaded</div>
+            <div style="font-size: 10.5px; color: oklch(65% 0.015 85); max-width: 260px; line-height: 1.4;">The trainer loads a link to the licensed recording before the session starts.</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ paused }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; inset: 0; background: oklch(23.5% 0.017 65 / 0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 0 40px;">
+            <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(80% 0.01 85);">Paused for discussion · break {{ breakNum }} of {{ breakTotal }}</div>
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 40px; font-weight: 600; color: oklch(98.5% 0.006 90); font-variant-numeric: tabular-nums;">{{ countdownLabel }}</div>
+            <div style="font-size: 13px; line-height: 1.5; color: oklch(88% 0.01 85); max-width: 480px;">{{ breakPrompt }}</div>
+            <div onClick="{{ resumeNow }}" style="margin-top: 4px; height: 32px; padding: 0 16px; border-radius: 999px; border: 1px solid oklch(72% 0.02 85 / 0.5); font-size: 11.5px; font-weight: 600; color: oklch(95% 0.008 90); display: flex; align-items: center; cursor: pointer;">Resume now</div>
+          </div>
+        </sc-if>
+      </div>
+      <div style="font-size: 11px; color: oklch(51% 0.017 70);">Three built-in discussion breaks are scheduled through this recording — this is break {{ breakNum }} of {{ breakTotal }}, a one-minute pause with a group prompt before it auto-resumes.</div>
+      <div style="display: flex; align-items: center; gap: 7px; font-size: 11px; color: oklch(51% 0.017 70);">
+        <div style="width: 6px; height: 6px; border-radius: 50%; background: oklch(45% 0.15 27); flex: none;"></div>
+        Recorded — anyone who misses the live session can log in and watch it in full afterward, same screen, chat history included.
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; flex-direction: column; gap: 8px; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px; height: 300px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">Group chat</div>
+        <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+          <sc-for list="{{ messages }}" as="m" hint-placeholder-count="4">
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+              <div style="font-size: 10.5px; font-weight: 700; color: {{ m.color }};">{{ m.name }}</div>
+              <div style="font-size: 12px; line-height: 1.4; color: oklch(23.5% 0.017 65);">{{ m.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <div style="flex: 1; height: 32px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(96.4% 0.014 85); padding: 0 10px; display: flex; align-items: center; font-size: 12px; color: oklch(51% 0.017 70);">Say something…</div>
+          <div style="height: 32px; padding: 0 12px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 12px; font-weight: 600; display: flex; align-items: center; cursor: pointer;">Send</div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 14px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">Observation task</div>
+        <div style="font-size: 11px; color: oklch(23.5% 0.017 65);">4c · giving clear instructions</div>
+        <div style="min-height: 50px; border: 1px solid oklch(88% 0.016 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 8px 10px; font-size: 11.5px; color: oklch(51% 0.017 70);">Write here…</div>
+        <a href="Filmed Observation Task.dc.html" style="height: 30px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); font-size: 11.5px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; justify-content: center;">See the full task page ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const NAMES = [
+  { name: 'Deniz Aksoy', initials: 'DA', bg: 'oklch(38% 0.072 195)', ink: 'oklch(98.5% 0.006 90)' },
+  { name: 'Mert Kaya', initials: 'MK', bg: 'oklch(93.5% 0.016 85)', ink: 'oklch(51% 0.017 70)' },
+  { name: 'Elif Demir', initials: 'ED', bg: 'oklch(93.5% 0.016 85)', ink: 'oklch(51% 0.017 70)' },
+  { name: 'Sara Yılmaz', initials: 'SY', bg: 'oklch(93.5% 0.016 85)', ink: 'oklch(51% 0.017 70)' },
+  { name: 'Zeynep Arslan', initials: 'ZA', bg: 'oklch(93.5% 0.016 85)', ink: 'oklch(51% 0.017 70)' },
+  { name: 'Can Şahin', initials: 'CŞ', bg: 'oklch(93.5% 0.016 85)', ink: 'oklch(51% 0.017 70)' },
+];
+
+const MESSAGES = [
+  { name: 'Mert Kaya', text: 'Instructions were really short here — noticed she only said it once.', color: 'oklch(38% 0.072 195)' },
+  { name: 'Elif Demir', text: 'Yeah and she demoed it instead of over-explaining', color: 'oklch(60% 0.11 70)' },
+  { name: 'Sara Yılmaz', text: 'good ICQ at 4:20 too', color: 'oklch(45% 0.15 27)' },
+];
+
+const BREAK_PROMPT = 'Discuss with the group: what did you notice about how instructions were given in this stage?';
+
+class Component extends DCLogic {
+  state = { paused: true, secondsLeft: 47, breakNum: 2, breakTotal: 3 };
+
+  componentDidMount() {
+    this._t = setInterval(() => {
+      if (!this.state.paused) return;
+      this.setState(s => s.secondsLeft > 0 ? { secondsLeft: s.secondsLeft - 1 } : { paused: false });
+    }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+  resumeNow = () => this.setState({ paused: false });
+
+  renderVals() {
+    const { paused, secondsLeft, breakNum, breakTotal } = this.state;
+    const m = String(Math.floor(secondsLeft / 60)).padStart(1, '0');
+    const s = String(secondsLeft % 60).padStart(2, '0');
+    return {
+      lessonFocus: 'Filmed lesson — focus set by the trainer per session',
+      presence: NAMES,
+      joinedLabel: NAMES.length + ' of ' + NAMES.length + ' joined',
+      hasSrc: false,
+      showNoSrc: !paused,
+      paused, breakNum, breakTotal,
+      countdownLabel: m + ':' + s,
+      breakPrompt: BREAK_PROMPT,
+      resumeNow: this.resumeNow,
+      messages: MESSAGES,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
