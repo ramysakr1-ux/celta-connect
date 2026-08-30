@@ -50,3 +50,5 @@ supabase/.temp
 /Untitled.pdf
 /*.zip
 /_*.html
+.env.migration
+scripts/migration/rollback-values.json
