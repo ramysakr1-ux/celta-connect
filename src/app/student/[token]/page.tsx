@@ -1197,7 +1197,7 @@ function Footer({ endDateLabel, materials, token }: { endDateLabel: string | nul
         before then.
       </p>
       {materials.length > 0 ? (
-        <a href="#classes" className="text-xs font-semibold text-primary hover:underline">
+        <a href={`/student/${token}/materials`} className="text-xs font-semibold text-primary hover:underline">
           Download all my materials
         </a>
       ) : null}

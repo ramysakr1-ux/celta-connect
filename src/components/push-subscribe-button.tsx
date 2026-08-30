@@ -35,6 +35,37 @@ export function PushSubscribeButton({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
+  // Ramy, 30 Aug 2026: "when I click I don't want notifications and then I
+  // want to return to enable, it says notifications are blocked -- allow
+  // them in your browser site settings. Is this how it's [meant to be]?"
+  //
+  // Half yes. Once you answer the BROWSER's own prompt with no, permission
+  // is "denied" and requestPermission() resolves denied without showing
+  // anything: no site can re-ask itself, anywhere. That part is a browser
+  // rule and not ours to change.
+  //
+  // The two things that were ours, and were wrong:
+  //
+  //  - Dismissing the prompt (clicking away, Esc) leaves permission at
+  //    "default", not "denied" -- clicking again would have worked fine.
+  //    We showed the same "blocked, go to site settings" wall for both,
+  //    sending people digging through browser settings to fix something
+  //    that was not broken.
+  //  - After a real denial the button still read "Enable notifications"
+  //    and invited a click that could never succeed. The state was only
+  //    ever discovered by pressing it.
+  //
+  // Worth being clear that the in-app "turn off" is a different thing
+  // entirely: it drops the push subscription and leaves permission
+  // granted, so turning them back on is one click with no prompt at all.
+  // Read lazily rather than set from inside the effect below, same reason
+  // `supported` is: it is a synchronous property, and assigning it in an
+  // effect costs a second render for a value already known at mount.
+  const [permission, setPermission] = useState<NotificationPermission | null>(
+    () => (typeof window !== "undefined" && "Notification" in window ? Notification.permission : null)
+  );
+  const [dismissed, setDismissed] = useState(false);
+
   useEffect(() => {
     if (!supported) return;
     navigator.serviceWorker
@@ -51,11 +82,16 @@ export function PushSubscribeButton({
       setError("Notifications aren't set up yet.");
       return;
     }
-    const permission = await Notification.requestPermission();
-    if (permission !== "granted") {
-      setError("Notifications are blocked -- allow them in your browser's site settings to turn this on.");
+    const result = await Notification.requestPermission();
+    setPermission(result);
+    if (result !== "granted") {
+      // "default" means the prompt was dismissed rather than refused, and
+      // asking again is allowed -- so say that, instead of sending someone
+      // into browser settings they do not need to open.
+      setDismissed(result === "default");
       return;
     }
+    setDismissed(false);
     const registration = await navigator.serviceWorker.ready;
     const pushSubscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -92,7 +128,19 @@ export function PushSubscribeButton({
   if (!supported || subscribed === null || subscribed === false) {
     // Unsupported entirely, still checking, or checked-and-not-subscribed
     // -- the first two show nothing yet; the last shows the opt-in.
-    return supported && subscribed === false ? (
+    if (!supported || subscribed !== false) return null;
+
+    if (permission === "denied") {
+      return (
+        <p className="max-w-[42ch] text-[11px] leading-[1.55] text-muted">
+          Notifications are turned off for this site in your browser. Only your browser can turn them back
+          on &mdash; use the icon at the left of the address bar, set Notifications to Allow, then reload
+          this page.
+        </p>
+      );
+    }
+
+    return (
       <div className="flex flex-col gap-1">
         <button
           type="button"
@@ -102,9 +150,12 @@ export function PushSubscribeButton({
         >
           {pending ? "Enabling..." : "Enable notifications"}
         </button>
+        {dismissed ? (
+          <p className="text-[11px] text-muted">You closed your browser&apos;s prompt. Click again if you&apos;d like these on.</p>
+        ) : null}
         {error ? <p className="text-xs text-destructive">{error}</p> : null}
       </div>
-    ) : null;
+    );
   }
 
   return (
