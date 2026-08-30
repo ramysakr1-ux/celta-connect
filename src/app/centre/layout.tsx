@@ -6,7 +6,7 @@ import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { CentreSettingsCard } from "@/app/centre/settings-card";
-import { CentreHeaderPills } from "@/app/centre/header-pills";
+import { CentreHeaderPills, CentreOwnerPill } from "@/app/centre/header-pills";
 import { CentreTabs } from "@/app/centre/centre-tabs";
 import { BranchFilter } from "@/app/centre/branch-filter";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -65,12 +65,13 @@ export default async function CentreLayout({ children }: { children: React.React
           <Link href={profile.role === "platform_owner" ? "/platform/command-center" : "/centre"} className="shrink-0 hover:opacity-80">
             <Wordmark size="header" />
           </Link>
-          <CentreHeaderPills
-            isOwner={ctx.roles.includes("centre_owner")}
-            mayViewCourseAdmin={can(ctx.roles, "courseAdmin.view", ctx.overrides)}
-          />
+          <CentreHeaderPills mayViewCourseAdmin={can(ctx.roles, "courseAdmin.view", ctx.overrides)} />
         </div>
-        <HeaderDesignerCredit landingPath="/centre" />
+        {/* Apart from the teal pair, on the right: only the owner sees it. */}
+        <div className="flex items-center gap-3.5">
+          {ctx.roles.includes("centre_owner") ? <CentreOwnerPill /> : null}
+          <HeaderDesignerCredit landingPath="/centre" />
+        </div>
       </div>
       <div className="container flex items-center justify-end gap-4 pt-2 text-[13px] text-muted">
         <BranchFilter branches={switchable} />
