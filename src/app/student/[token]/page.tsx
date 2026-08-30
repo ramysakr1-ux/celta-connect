@@ -682,7 +682,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         </div>
       </div>
 
-      <DesignerCredit pinned={false} className="flex justify-center py-4" />
+      <DesignerCredit pinned={false} className="flex justify-center py-4 md:hidden" />
     </div>
   );
 }
@@ -768,6 +768,11 @@ function NextClassCard({
         {nextClass.eventTime ? <p className="text-[13px] font-semibold text-primary tabular-nums">{nextClass.eventTime.slice(0, 5)}</p> : null}
       </div>
       <NextClassFacts whereLabel={whereLabel} topicLabel={topicLabel} teachersLabel={teachersLabel} />
+      {/* Ramy: "you're making the Zoom pill thicker. It needs to be
+          longer. The width was fine." Making it "bigger" earlier had grown
+          it in the wrong axis -- a 52px slab. Back to a normal pill height,
+          with a floor on its width so it stays the long, obvious thing in
+          the row however short the countdown text gets. */}
       <div className="flex flex-wrap items-center gap-3 pt-1">
         {nextClass.zoomUrl ? (
           <JoinOnlineButton
@@ -894,16 +899,21 @@ function NextClassBanner({
           trailed off into "Can't make it?" and nothing else. An in-person
           class now says so in the same slot, with the same size, so the row
           reads as an answer rather than an absence. */}
+      {/* Ramy: "you're making the Zoom pill thicker. It needs to be
+          longer. The width was fine." Making it "bigger" earlier had grown
+          it in the wrong axis -- a 52px slab. Back to a normal pill height,
+          with a floor on its width so it stays the long, obvious thing in
+          the row however short the countdown text gets. */}
       <div className="flex flex-wrap items-center gap-3 pt-1">
         {nextClass.zoomUrl ? (
           <JoinOnlineButton
             zoomUrl={nextClass.zoomUrl}
             activationIso={joinActivationIso}
-            className="trainee-hover-fill flex h-[52px] flex-1 items-center justify-center gap-2.5 rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground shadow-[0_2px_10px_-4px_color-mix(in_oklab,var(--color-primary)_70%,transparent)]"
+            className="trainee-hover-fill flex h-[42px] min-w-[260px] flex-1 items-center justify-center gap-2.5 rounded-[10px] bg-primary px-6 text-[14.5px] font-semibold text-primary-foreground shadow-[0_2px_10px_-4px_color-mix(in_oklab,var(--color-primary)_70%,transparent)]"
           />
         ) : (
           <span
-            className="flex h-[52px] flex-1 items-center justify-center gap-2.5 rounded-[10px] text-[15px] font-semibold"
+            className="flex h-[42px] min-w-[260px] flex-1 items-center justify-center gap-2.5 rounded-[10px] px-6 text-[14.5px] font-semibold"
             style={{
               background: "color-mix(in oklab, var(--color-primary) 14%, transparent)",
               color: "var(--color-primary)",
