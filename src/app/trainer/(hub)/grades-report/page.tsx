@@ -232,6 +232,7 @@ export default async function GradesReportPage() {
             // course requirements, which is the one worth asking.
             const releaseChecks = buildReleaseChecklist({
               record,
+              wasSlashed,
               assignments: (writtenAssignments ?? []).filter((a) => a.trainee_id === trainee.id),
               hoursAssessed: assessedTp.hoursAssessed,
               levels: assessedTp.levels,
@@ -362,12 +363,67 @@ export default async function GradesReportPage() {
                          The slashed ones are just more urgent, because the
                          rationale has to answer the conditions set at the
                          provisional stage. */
+                      /* Ramy, 30 Aug 2026: "some assessors don't really ask
+                         for a justification for the straight passes, but it
+                         wouldn't hurt to have it there -- just not enforced.
+                         What's enforced is the slash."
+                         
+                         So the field is offered to everyone and nagged about
+                         for nobody, except a slashed candidate, where the
+                         rationale has to answer the conditions the centre
+                         itself set. */
                       <p className={`text-sm ${wasSlashed ? "text-destructive" : "text-muted"}`}>
                         {wasSlashed
-                          ? "Slashed at the provisional stage -- the rationale has to say whether they met the conditions below."
-                          : "No rationale written yet. Handbook 14.4 expects one for every candidate, not only the slashed."}
+                          ? "Slashed at the provisional stage -- a rationale is required, saying whether they met the conditions below."
+                          : "No rationale yet. Optional on a straight grade, though most tutors write a line."}
                       </p>
                     )}
+
+                    {/* Slash only. Ramy went back and forth on this within
+                        one session, and landed here: "this whole box just
+                        should not be there if it's a straightforward. It will
+                        only appear if it's a slash candidate."
+
+                        The middle position -- heading always shown, box left
+                        empty on a straight grade -- came from his C10/2026
+                        report, but that document only ever showed the empty
+                        placeholder because nobody on it was slashed. The
+                        heading itself says "(if applicable)", and applicable
+                        means slashed.
+
+                        The heading reads "pass/higher", not C14_GREEN's "a
+                        higher grade", on his correction the same day: a slash
+                        is not always Pass/Pass B. A Fail/Pass candidate needs
+                        evidence for a PASS, and "higher grade" reads as
+                        nonsense on their report. One heading covers both. */}
+                    {wasSlashed ? (
+                    <div className="flex flex-col gap-1.5 rounded-[6px] border border-border bg-card-inset p-3">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="text-[11px] font-bold tracking-[0.09em] text-muted uppercase">
+                          Evidence needed for a pass/higher (if applicable)
+                        </span>
+                        {record?.provisional_upgrade_conditions ? (
+                          <CopyField value={record.provisional_upgrade_conditions} label="Evidence needed" />
+                        ) : null}
+                      </div>
+                      {trainer ? (
+                        <UpgradeConditionsForm traineeId={trainee.id} record={record} />
+                      ) : record?.provisional_upgrade_conditions && record.provisional_approved_at ? (
+                        record.provisional_upgrade_conditions
+                          .split("\n")
+                          .map((linePart) => linePart.trim())
+                          .filter(Boolean)
+                          .map((linePart, i) => (
+                            <div key={i} className="flex items-start gap-2">
+                              <span className="shrink-0 text-[11px] leading-[1.5] text-gold">&mdash;</span>
+                              <span className="text-[12px] leading-[1.5] text-ink">{linePart}</span>
+                            </div>
+                          ))
+                      ) : (
+                        <p className="text-[12px] text-muted">Not yet set by the centre.</p>
+                      )}
+                    </div>
+                    ) : null}
                   </div>
 
                   <div className="flex flex-col gap-5">
@@ -383,45 +439,6 @@ export default async function GradesReportPage() {
                         </div>
                       ) : null}
                     </div>
-
-                    {trainer ? (
-                      <UpgradeConditionsForm traineeId={trainee.id} record={record} />
-                    ) : wasSlashed && record?.provisional_upgrade_conditions && record.provisional_approved_at ? (
-                      /* Ramy, 30 Aug 2026, looking at the assessor's view:
-                         "if someone is a slash, there should be a separate
-                         box at the bottom -- do we have that?" We had the
-                         data and the tutors' form, but the assessor saw
-                         nothing: this was `: null`.
-                         
-                         It is exactly what they are there to moderate -- a
-                         paired provisional is the centre saying the last two
-                         TPs decide it, and these are the conditions they set.
-                         Read-only, and only once the grade has been
-                         confirmed and sent, same as everything else here. */
-                      <div className="flex flex-col gap-1.5 rounded-[6px] border p-4"
-                        style={{
-                          background: "color-mix(in oklab, var(--color-gold) 10%, var(--color-card))",
-                          borderColor: "color-mix(in oklab, var(--color-gold) 30%, transparent)",
-                        }}
-                      >
-                        <div className="flex items-baseline justify-between gap-3">
-                          <span className="text-[12px] font-semibold text-ink">
-                            In order to deserve the higher grade, they need to
-                          </span>
-                          <CopyField value={record.provisional_upgrade_conditions} label="Upgrade conditions" />
-                        </div>
-                        {record.provisional_upgrade_conditions
-                          .split("\n")
-                          .map((linePart) => linePart.trim())
-                          .filter(Boolean)
-                          .map((linePart, i) => (
-                            <div key={i} className="flex items-start gap-2">
-                              <span className="shrink-0 text-[11px] leading-[1.5] text-gold">—</span>
-                              <span className="text-[12px] leading-[1.5] text-ink">{linePart}</span>
-                            </div>
-                          ))}
-                      </div>
-                    ) : null}
 
                     {/* Tutors only -- the centre's own readiness, not the
                         assessor's business. Reports what is outstanding; the

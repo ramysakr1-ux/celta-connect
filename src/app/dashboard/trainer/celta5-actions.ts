@@ -665,7 +665,7 @@ export async function moveStage3Earlier(_prevState: FormState, formData: FormDat
   return { error: null };
 }
 
-// The tutor's free-text "in order to deserve a higher grade, they need
+// The tutor's free-text "in order to achieve a pass or a higher grade, they need
 // to..." working note (migration 0053) -- one condition per line, gated to
 // release to the candidate only alongside the final report (same UI-layer
 // gate as final_recommended_grade/overall_notes; celta5_records has no
