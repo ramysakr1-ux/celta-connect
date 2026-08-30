@@ -582,6 +582,9 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                   token={token}
                   nextClassDecline={nextClassDecline}
                   joinActivationIso={joinActivationIso}
+                  attended={thisCourseAttended}
+                  missed={Math.max(thisCourseHeldSoFar - thisCourseAttended, 0)}
+                  toCome={Math.max(thisCourseClasses.length - thisCourseHeldSoFar, 0)}
                 />
               ) : null}
               <ClassesTable rows={rows} />
@@ -744,6 +747,26 @@ function NextClassCard({
   );
 }
 
+// The next-class card, rebuilt to Volunteer View.dc.html rather than the
+// full-width strip it had become.
+//
+// The design is a bordered card: date and time on one baseline, then
+// label/value fact rows (62px label column), then a full-width teal "Join
+// online" with a square secondary beside it. What was live instead was a
+// banner spanning the whole page with the facts crushed into one grey
+// sentence -- Ramy: "that top part... it wasn't meant to be, like, the
+// entire page. It was a card. And I think there was something next to it.
+// Where is the part where you click to join Zoom?"
+//
+// The Join button was never missing, only conditional on the class having a
+// zoom_url, and the demo course meets in person. It now says so in a fact
+// row instead of silently rendering nothing, so a volunteer can tell the
+// difference between "no link yet" and "there is no link, come to the
+// building".
+//
+// The attendance counts live here too, per Ramy again: "maybe something on
+// the card, you have missed how many lessons or you have so and so coming.
+// Just put the information there instead of the long line."
 function NextClassBanner({
   nextClass,
   whereLabel,
@@ -752,6 +775,9 @@ function NextClassBanner({
   token,
   nextClassDecline,
   joinActivationIso,
+  attended,
+  missed,
+  toCome,
 }: {
   nextClass: NextClassLike;
   whereLabel: string;
@@ -760,28 +786,86 @@ function NextClassBanner({
   token: string;
   nextClassDecline: { id: string } | null;
   joinActivationIso: string | null;
+  attended: number;
+  missed: number;
+  toCome: number;
 }) {
+  const facts: { label: string; value: string }[] = [
+    { label: "Where", value: whereLabel },
+    ...(topicLabel ? [{ label: "Topic", value: topicLabel }] : []),
+    ...(teachersLabel ? [{ label: "Teacher", value: teachersLabel }] : []),
+    {
+      label: "So far",
+      value: [
+        `${attended} attended`,
+        missed > 0 ? `${missed} missed` : null,
+        toCome > 0 ? `${toCome} still to come` : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    },
+  ];
+
   return (
     <div
-      className="flex flex-wrap items-center justify-between gap-3 rounded-[6px] border p-4"
-      style={{ borderColor: "color-mix(in oklab, var(--color-primary) 30%, transparent)", background: "var(--color-card)" }}
+      className="flex flex-col gap-[13px] rounded-[10px] border border-t-[3px] p-4"
+      style={{
+        borderColor: "color-mix(in oklab, var(--color-primary) 32%, transparent)",
+        borderTopColor: "var(--color-primary)",
+        background: "linear-gradient(160deg, color-mix(in oklab, var(--color-primary) 7%, var(--color-card)), var(--color-card) 60%)",
+      }}
     >
-      <div>
-        <p className="font-serif text-[17px] font-semibold text-ink">
-          {formatEventDate(nextClass.eventDate)}
-          {nextClass.eventTime ? ` · ${nextClass.eventTime.slice(0, 5)}` : ""}
-        </p>
-        <p className="mt-1 text-xs text-muted">{[whereLabel, topicLabel, teachersLabel ? `with ${teachersLabel}` : null].filter(Boolean).join(" · ")}</p>
+      <p className="flex items-center gap-1.5 text-[10px] font-bold tracking-[0.12em] text-primary uppercase">
+        <span aria-hidden className="size-1.5 rounded-full bg-current" />
+        Your next class
+      </p>
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="font-serif text-[21px] font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
+        {nextClass.eventTime ? (
+          <span className="rounded-full bg-primary px-2.5 py-1 text-[12.5px] font-bold text-primary-foreground tabular-nums">
+            {nextClass.eventTime.slice(0, 5)}
+          </span>
+        ) : null}
       </div>
-      <div className="flex items-center gap-3">
-        <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
+
+      <div className="flex flex-col gap-[7px]">
+        {facts.map((f) => (
+          <div key={f.label} className="flex items-baseline gap-2.5">
+            <span className="w-[62px] flex-none text-[10px] font-bold tracking-[0.1em] text-muted uppercase">{f.label}</span>
+            <span className="text-[13px] text-ink">{f.value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* The action row always carries weight. It used to render nothing at
+          all for an in-person class, because Join online is conditional on a
+          zoom_url -- so a volunteer at a face-to-face centre saw a card that
+          trailed off into "Can't make it?" and nothing else. An in-person
+          class now says so in the same slot, with the same size, so the row
+          reads as an answer rather than an absence. */}
+      <div className="flex items-center gap-2">
         {nextClass.zoomUrl ? (
           <JoinOnlineButton
             zoomUrl={nextClass.zoomUrl}
             activationIso={joinActivationIso}
-            className="flex h-[38px] items-center gap-2 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground"
+            className="trainee-hover-fill flex h-11 flex-1 items-center justify-center gap-2 rounded-[8px] bg-primary text-sm font-semibold text-primary-foreground"
           />
-        ) : null}
+        ) : (
+          <span
+            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[8px] text-sm font-semibold"
+            style={{
+              background: "color-mix(in oklab, var(--color-primary) 12%, transparent)",
+              color: "var(--color-primary)",
+            }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            In person at the centre
+          </span>
+        )}
+        <DeclineButton token={token} eventId={nextClass.eventId} alreadyDeclined={Boolean(nextClassDecline)} />
       </div>
     </div>
   );
