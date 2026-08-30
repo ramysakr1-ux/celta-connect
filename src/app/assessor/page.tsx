@@ -491,7 +491,16 @@ export default async function AssessorPage({
               </svg>
               Open Appian
             </a>
-          ) : null}
+          ) : (
+            /* Was `: null`, so a centre that never set the link saw nothing
+               and never learned it was missing -- and neither did the
+               assessor, who just assumed we don't link to Appian. Course
+               Admin's entry-form card has always said this properly; the
+               pack now does too. Ramy, 30 Aug 2026. */
+            <span style={{ fontSize: 11.5, color: "oklch(76% 0.02 80)" }}>
+              No Appian link set by the centre
+            </span>
+          )}
           <a
             href="/assessor/pack.pdf"
             className="transition-colors duration-150 hover:bg-[color-mix(in_oklab,oklch(97%_0.008_88)_22%,transparent)]"

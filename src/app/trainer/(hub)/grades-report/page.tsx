@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -41,6 +42,19 @@ export default async function GradesReportPage() {
   // Shared with the CSV export (export/route.ts) -- one computation, not two.
   // The assessor's copy of the sheet shows only what the MCT has approved
   // and sent -- see computeCohortRows.
+  // Ramy, 30 Aug 2026, on where the Appian link belongs: the pack has one
+  // for the assessor and Course Admin has one for the entry form, but
+  // neither serves the moment this page exists for -- an MCT working down
+  // the cohort copying nine fields per candidate across. Same
+  // centers.appian_url as the other two, so one setting lights them all.
+  const { data: centreForAppian } = await createAdminClient()
+    .from("courses")
+    .select("centers(appian_url)")
+    .eq("id", courseId)
+    .maybeSingle();
+  const appianUrl =
+    (centreForAppian?.centers as unknown as { appian_url: string | null } | null)?.appian_url ?? null;
+
   const { courseName, provisionalDueAt, provisionalDueDerived, rows: cohortRows } = await computeCohortRows(
     supabase,
     courseId,
@@ -136,6 +150,7 @@ export default async function GradesReportPage() {
         canRelease={Boolean(trainer)}
         provisionalDueAt={provisionalDueAt}
         provisionalDueDerived={provisionalDueDerived}
+        appianUrl={appianUrl}
         isMct={isMct}
       />
 
@@ -318,6 +333,33 @@ export default async function GradesReportPage() {
                     </div>
 
                     {trainer ? <UpgradeConditionsForm traineeId={trainee.id} record={record} /> : null}
+
+                    {/* The working position. Copying happens candidate by
+                        candidate, so the link has to be here as well as at
+                        the top -- otherwise it is a scroll to the top of the
+                        page between every one. Ramy asked for both. */}
+                    {trainer && appianUrl ? (
+                      <a
+                        href={appianUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="trainer-hover-fill self-start rounded-[6px] border border-border px-3 py-1.5 text-[12px] font-medium text-ink"
+                      >
+                        Open Appian &rarr;
+                      </a>
+                    ) : trainer ? (
+                      /* Course Admin's entry-form card says this when the URL
+                         is missing rather than hiding itself. A button that
+                         silently vanishes never tells a centre it forgot a
+                         setting -- which is the state both centres are in. */
+                      <p className="text-[11px] text-muted">
+                        No Appian sign-in link set yet &mdash;{" "}
+                        <Link href="/centre/settings" className="text-primary hover:underline">
+                          add one in Centre Settings
+                        </Link>
+                        .
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </div>

@@ -63,6 +63,7 @@ export function CohortSheet({
   canRelease,
   provisionalDueAt,
   provisionalDueDerived,
+  appianUrl,
   isMct,
 }: {
   courseId: string;
@@ -71,6 +72,8 @@ export function CohortSheet({
   canRelease: boolean;
   provisionalDueAt: string | null;
   provisionalDueDerived?: boolean;
+  /** The centre's Appian sign-in page. Null until someone sets it. */
+  appianUrl?: string | null;
   isMct: boolean;
 }) {
   const [state, action, pending] = useActionState(releaseAllFinalReports, initialState);
@@ -95,6 +98,20 @@ export function CohortSheet({
           <h2 className="font-serif text-xl text-ink">Grades report</h2>
         </div>
         <div className="flex items-center gap-2">
+          {/* Ramy: "leave it there exactly." Sits with the other two page
+              actions rather than inventing a new place for it. Links to the
+              sign-in page only -- no deep link, no data ever leaves Connect
+              for Appian, same rule as the pack and Course Admin. */}
+          {appianUrl ? (
+            <a
+              href={appianUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover-fill"
+            >
+              Open Appian &rarr;
+            </a>
+          ) : null}
           <a
             href="/trainer/grades-report/export"
             className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover-fill"
