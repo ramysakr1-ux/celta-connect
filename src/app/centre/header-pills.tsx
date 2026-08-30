@@ -41,40 +41,8 @@ export function CentreHeaderPills({ mayViewCourseAdmin }: { mayViewCourseAdmin: 
   );
 }
 
-// Centre owner, unchanged: garnet, its own register.
-//
-// I had folded this into the teal group. Ramy did not ask for that and said
-// so plainly: "Centre owner should stay red... you keep it exactly as it
-// was. Just put it in a different spot." He is right on the substance too,
-// and it is what the spec already said --
-// for-claude-code-centre-owner-role-customizer.md: "a deliberately
-// different register... not a fifth tab that happens to look the same."
-//
-// It sits apart from the other two now rather than beside them, because it
-// is not a peer of theirs: "the centre owner is the only one that can see
-// it." Only the colour's position on the page changed; the pill itself is
-// exactly as it was.
-//
-// The single change to its behaviour: on /centre/owner it renders as a
-// span rather than a link, so it no longer links to the page you are
-// standing on -- which is the dead click that started this.
-export function CentreOwnerPill() {
-  const pathname = usePathname() ?? "";
-  const onOwner = pathname.startsWith("/centre/owner");
-
-  const className = "shrink-0 rounded-[5px] px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] text-white uppercase";
-  const style = { background: "oklch(42% 0.15 27)" };
-
-  if (onOwner) {
-    return (
-      <span className={className} style={style}>
-        Centre owner
-      </span>
-    );
-  }
-  return (
-    <Link href="/centre/owner" className={`${className} hover:opacity-90`} style={style}>
-      Centre owner
-    </Link>
-  );
-}
+// The garnet Centre owner pill used to live here. It is gone: Connect is
+// the way home now, and for an owner home IS the owner screen, so the pill
+// was a second door to the place the mark already goes. Ramy, 31 Aug 2026:
+// "you're logged in as yourself. You don't need a Centre owner pill. You
+// just click on Connect, and it would take you back."

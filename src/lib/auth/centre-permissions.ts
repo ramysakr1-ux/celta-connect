@@ -367,6 +367,32 @@ export function canOnCourse(
  * alongside Centre manager/observer/owner, not course-scoped the way
  * Course administrator is.
  */
+/**
+ * Where "Connect" takes an admin-family person: their own home.
+ *
+ * Ramy, 31 Aug 2026: "Connect takes you back to your home page. If you're a
+ * trainee it takes you back to your landing page. If you're an ACT, if
+ * you're an MCT, whatever. Same thing for the centre owner. You're logged in
+ * as yourself. You don't need a Centre owner pill -- you just click on
+ * Connect and it takes you back."
+ *
+ * This deliberately supersedes the 27 Aug rule that pinned the logo to
+ * whichever section you were standing in. That rule existed because the logo
+ * used to point at /dashboard, whose landing preference bounced anyone with
+ * a centre role into /centre -- so it fixed the symptom by making the mark
+ * section-local. One consequence, confirmed with him before changing it: an
+ * owner clicking Connect from inside Course Admin now leaves Course Admin,
+ * because that is what going home means.
+ *
+ * Owner first: someone holding centre_owner alongside other roles is an
+ * owner, and the owner screen is theirs. platform_owner is handled by its
+ * callers before this, since Command Center is not a centre screen at all.
+ */
+export function adminHomePath(roles: string[]): string {
+  if (roles.includes("centre_owner")) return "/centre/owner";
+  return landingFor(roles) === "course-admin" ? "/dashboard/admin" : "/centre";
+}
+
 export function landingFor(roles: string[]): "centre-admin" | "course-admin" | null {
   if (roles.length === 0) return null;
   if (roles.every((r) => r === "course_administrator")) return "course-admin";

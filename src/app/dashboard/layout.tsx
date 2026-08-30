@@ -10,7 +10,7 @@ import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { PILL_ACTIVE, PILL_INACTIVE } from "@/app/centre/header-pill-styles";
-import { CentreOwnerPill } from "@/app/centre/header-pills";
+import { adminHomePath } from "@/lib/auth/centre-permissions";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
 
 export default async function DashboardLayout({
@@ -80,10 +80,10 @@ export default async function DashboardLayout({
               same rule trainer/(hub)/layout.tsx already applies. */}
           <Link
             href={
-              profile?.role === "admin"
-                ? "/dashboard/admin"
-                : profile?.role === "platform_owner"
-                  ? "/platform/command-center"
+              profile?.role === "platform_owner"
+                ? "/platform/command-center"
+                : profile?.role === "admin" && centreCtx
+                  ? adminHomePath(centreCtx.roles)
                   : "/dashboard"
             }
             className="flex shrink-0 items-center gap-3 hover:opacity-80"
@@ -125,11 +125,7 @@ export default async function DashboardLayout({
             </>
           ) : null}
           </div>
-          {/* Garnet, apart from the teal pair -- only the owner sees it. */}
-          <div className="flex items-center gap-3.5">
-            {centreCtx?.roles.includes("centre_owner") ? <CentreOwnerPill /> : null}
-            <HeaderDesignerCredit landingPath="/dashboard/admin" />
-          </div>
+          <HeaderDesignerCredit landingPath="/dashboard/admin" />
         </div>
         <div className="container flex items-center justify-end gap-4 pb-2.5 text-sm text-muted">
           <span>{profile?.full_name ?? email}</span>

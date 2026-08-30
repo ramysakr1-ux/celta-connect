@@ -4,9 +4,9 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { signOut } from "@/app/login/actions";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
-import { can } from "@/lib/auth/centre-permissions";
+import { can, adminHomePath } from "@/lib/auth/centre-permissions";
 import { CentreSettingsCard } from "@/app/centre/settings-card";
-import { CentreHeaderPills, CentreOwnerPill } from "@/app/centre/header-pills";
+import { CentreHeaderPills } from "@/app/centre/header-pills";
 import { CentreTabs } from "@/app/centre/centre-tabs";
 import { BranchFilter } from "@/app/centre/branch-filter";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -62,16 +62,18 @@ export default async function CentreLayout({ children }: { children: React.React
               connect, should take me to command center" -- same fixed
               destination as every other layout's logo for platform_owner,
               regardless of which section they entered Centre Management from. */}
-          <Link href={profile.role === "platform_owner" ? "/platform/command-center" : "/centre"} className="shrink-0 hover:opacity-80">
+          <Link
+            href={profile.role === "platform_owner" ? "/platform/command-center" : adminHomePath(ctx.roles)}
+            className="shrink-0 hover:opacity-80"
+          >
             <Wordmark size="header" />
           </Link>
           <CentreHeaderPills mayViewCourseAdmin={can(ctx.roles, "courseAdmin.view", ctx.overrides)} />
         </div>
-        {/* Apart from the teal pair, on the right: only the owner sees it. */}
-        <div className="flex items-center gap-3.5">
-          {ctx.roles.includes("centre_owner") ? <CentreOwnerPill /> : null}
-          <HeaderDesignerCredit landingPath="/centre" />
-        </div>
+        {/* The garnet Centre owner pill is gone: Connect is the way home
+            now, and for an owner home IS the owner screen. Ramy: "you don't
+            need a Centre owner pill. You just click on Connect." */}
+        <HeaderDesignerCredit landingPath="/centre" />
       </div>
       <div className="container flex items-center justify-end gap-4 pt-2 text-[13px] text-muted">
         <BranchFilter branches={switchable} />
