@@ -546,7 +546,17 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   const firstName = volunteer.name.split(" ")[0];
   const endDateLabel = course?.end_date ? new Date(`${course.end_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
   const headline = nextClass ? `Your next class is ${formatEventDate(nextClass.eventDate).split(",")[0].toLowerCase()}` : "No classes scheduled yet";
-  const whereLabel = nextClass?.zoomUrl ? "Online" : "In person at the centre";
+  // The room belongs on the card. Ramy: "there's no room number on the hero
+  // card." course_timetable_events.detail is the centre's own free text for
+  // an event (migration 0229) and is where a room number lives, so it rides
+  // on the Where line rather than inventing a second location row that is
+  // empty for every online class.
+  const whereLabel = [
+    nextClass?.zoomUrl ? "Online" : "In person at the centre",
+    nextClass?.detail || null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   const topicLabel = nextClassTeachers.find((t) => t.topic)?.topic ?? null;
   const teachersLabel = nextClassTeachers.length > 0 ? nextClassTeachers.map((t) => t.name).join(" and ") : null;
 
@@ -697,6 +707,7 @@ interface NextClassLike {
   eventDate: string;
   eventTime: string | null;
   zoomUrl: string | null;
+  detail: string | null;
 }
 
 function NextClassCard({

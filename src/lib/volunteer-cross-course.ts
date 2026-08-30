@@ -15,6 +15,10 @@ export interface VolunteerClassSummary {
   eventTime: string | null;
   attended: boolean | null; // null = date hasn't passed yet (upcoming)
   zoomUrl: string | null;
+  // Free text the centre sets per event (migration 0229) -- in practice the
+  // room, which the volunteer's own card had no way to show. Ramy: "there's
+  // no room number on the hero card."
+  detail: string | null;
   linkedTpNumber: number | null; // for matching volunteer_shared_materials -> tp_plans.tp_number
 }
 
@@ -45,7 +49,7 @@ export async function getVolunteerIdentityData(
 
   const [{ data: courses }, { data: tpEvents }, { data: attendanceRows }] = await Promise.all([
     admin.from("courses").select("id, name").in("id", courseIds),
-    admin.from("course_timetable_events").select("id, event_date, event_time, course_id, zoom_url, linked_tp_number").in("course_id", courseIds).eq("type", "tp"),
+    admin.from("course_timetable_events").select("id, event_date, event_time, course_id, zoom_url, detail, linked_tp_number").in("course_id", courseIds).eq("type", "tp"),
     admin.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", memberIds),
   ]);
   const courseNameById = new Map((courses ?? []).map((c) => [c.id, c.name]));
@@ -69,6 +73,7 @@ export async function getVolunteerIdentityData(
       eventTime: e.event_time,
       attended: e.event_date < today ? attendedEventIds.has(e.id) : null,
       zoomUrl: e.zoom_url,
+      detail: e.detail,
       linkedTpNumber: e.linked_tp_number,
     }))
     .sort((a, b) => (a.eventDate < b.eventDate ? 1 : -1));
