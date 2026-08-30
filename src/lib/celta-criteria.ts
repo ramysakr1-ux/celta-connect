@@ -876,6 +876,57 @@ function formatCriterion(code: string): string {
  * document's split exactly. Unrated ("X"/null) or plain "S" criteria that
  * aren't otherwise notable are omitted, same as the real report.
  */
+export type GradesReportList =
+  | "planningStrengths"
+  | "planningActionPoints"
+  | "teachingStrengths"
+  | "teachingActionPoints";
+
+export type GradesReportListOverrides = Partial<Record<GradesReportList, { add?: string[]; remove?: string[] }>>;
+
+/**
+ * The four lists as the tutor has left them: derived from the matrix, then
+ * their own additions and removals applied.
+ *
+ * Ramy, 30 Aug 2026: "the strengths and action points would be the S pluses
+ * and the N's... or the weak S's." There is no weak-S rating -- the matrix
+ * has S+, S, N and X -- so raising a borderline S is a judgement only a tutor
+ * can make, and the derivation has to be curatable rather than final.
+ *
+ * Codes go in, Cambridge's wording comes out. An added criterion is rendered
+ * from CRITERIA_LABELS exactly like a derived one, so nothing here can
+ * introduce a paraphrase.
+ */
+export function applyGradesReportOverrides(
+  derived: StrengthsAndActionPoints,
+  overrides: GradesReportListOverrides
+): StrengthsAndActionPoints {
+  const out: StrengthsAndActionPoints = {
+    planningStrengths: [],
+    planningActionPoints: [],
+    teachingStrengths: [],
+    teachingActionPoints: [],
+  };
+
+  for (const key of Object.keys(out) as GradesReportList[]) {
+    const { add = [], remove = [] } = overrides[key] ?? {};
+    const removed = new Set(remove.map((c) => formatCriterion(c)));
+    const kept = derived[key].filter((line) => !removed.has(line));
+
+    // An added code that the derivation already produced is a no-op rather
+    // than a duplicate -- a tutor can add a criterion before or after the
+    // rating that would have pulled it in anyway.
+    const added = add
+      .filter((code) => CRITERIA_LABELS[code] || CELTA_CRITERIA_CODES.includes(code))
+      .map((code) => formatCriterion(code))
+      .filter((line) => !kept.includes(line));
+
+    out[key] = [...kept, ...added];
+  }
+
+  return out;
+}
+
 export function computeStrengthsAndActionPoints(
   ratingsByCode: Record<string, "S+" | "S" | "N" | "X" | null | undefined>
 ): StrengthsAndActionPoints {
