@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
+
+const VALID_LISTS = new Set(["planningStrengths", "planningActionPoints", "teachingStrengths", "teachingActionPoints"]);
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
-import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 import { PROVISIONAL_SLOTS } from "@/lib/provisional-grade";
 import { isMctOnCourse } from "@/lib/course-mct";
 import { checkStage1RecordsMilestone, checkFinalGradeMilestone } from "@/lib/cohort-milestones";
@@ -840,4 +842,58 @@ export async function releaseFinalReport(
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   revalidatePath(`/portfolio/${traineeId}/celta5`);
   return { error: null };
+}
+
+// The tutor's curation of the four Grades Report lists. Ramy, 30 Aug 2026:
+// the lists are the S+ and N ratings "in a way, or the weak S's" -- and there
+// is no weak-S rating, so raising a borderline S is a judgement only a tutor
+// can make.
+//
+// Codes only. The wording is always looked up from CRITERIA_LABELS when the
+// line is rendered, so nothing stored here can introduce a variant phrasing.
+// A removal is remembered against the code and survives a later change to
+// that criterion's rating: taking a line out is a decision about this report,
+// and silently reinstating it would undo the tutor's work without telling
+// them.
+export async function setGradesReportListOverride(formData: FormData): Promise<void> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const traineeId = formData.get("trainee_id");
+  const list = formData.get("list");
+  const code = formData.get("code");
+  const op = formData.get("op");
+  if (typeof traineeId !== "string" || typeof list !== "string" || typeof code !== "string") return;
+  if (op !== "add" && op !== "remove") return;
+  if (!VALID_LISTS.has(list)) return;
+  if (!CELTA_CRITERIA_CODES.includes(code)) return;
+
+  const supabase = await createClient();
+  const { data: trainee } = await supabase.from("profiles").select("course_id").eq("id", traineeId).maybeSingle();
+  if (!trainee || trainee.course_id !== trainer.course_id) return;
+
+  const { data: record } = await supabase
+    .from("celta5_records")
+    .select("grades_report_list_overrides")
+    .eq("trainee_id", traineeId)
+    .maybeSingle();
+
+  const overrides = ((record as { grades_report_list_overrides?: unknown } | null)?.grades_report_list_overrides ??
+    {}) as Record<string, { add?: string[]; remove?: string[] }>;
+  const entry = { add: [], remove: [], ...(overrides[list] ?? {}) };
+
+  // Adding cancels a previous removal and vice versa, so a tutor can change
+  // their mind without the two lists fighting each other.
+  if (op === "add") {
+    entry.remove = (entry.remove ?? []).filter((c) => c !== code);
+    if (!(entry.add ?? []).includes(code)) entry.add = [...(entry.add ?? []), code];
+  } else {
+    entry.add = (entry.add ?? []).filter((c) => c !== code);
+    if (!(entry.remove ?? []).includes(code)) entry.remove = [...(entry.remove ?? []), code];
+  }
+
+  await supabase
+    .from("celta5_records")
+    .update({ grades_report_list_overrides: { ...overrides, [list]: entry } } as never)
+    .eq("trainee_id", traineeId);
+
+  revalidatePath("/trainer/grades-report");
 }

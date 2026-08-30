@@ -929,6 +929,16 @@ export function applyGradesReportOverrides(
   return out;
 }
 
+/** A criterion on the report: the code is the identity, the label is derived. */
+export interface CriterionLine {
+  code: string;
+  label: string;
+}
+
+export function criterionLine(code: string): CriterionLine {
+  return { code, label: formatCriterion(code) };
+}
+
 export function computeStrengthsAndActionPoints(
   ratingsByCode: Record<string, "S+" | "S" | "N" | "X" | null | undefined>
 ): StrengthsAndActionPoints {

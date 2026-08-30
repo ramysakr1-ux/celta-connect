@@ -20,11 +20,18 @@ export function ProvisionalGradeForm({
   traineeId,
   record,
   proposedByName,
+  proposedByMeta,
   isMct,
 }: {
   traineeId: string;
   record: Celta5Record | null;
   proposedByName: string | null;
+  /**
+   * The level this candidate's half is teaching now. Ramy, 30 Aug 2026:
+   * "there's no group naming, there's the level of the group and the tutor
+   * name" -- and "there's no group ABC, it's half a group."
+   */
+  proposedByMeta?: string | null;
   isMct: boolean;
 }) {
   const [state, action, pending] = useActionState(updateProvisionalGrade, initialState);
@@ -69,6 +76,7 @@ export function ProvisionalGradeForm({
         <div className="flex items-center justify-between gap-3 rounded-[6px] border border-border-faint bg-surface-muted/40 px-3 py-2">
           <span className="text-xs text-ink">
             {proposedByName ? `Proposed by ${proposedByName}` : "Proposed"}
+            {proposedByMeta ? ` · ${proposedByMeta}` : ""}
           </span>
           {isMct ? (
             <button

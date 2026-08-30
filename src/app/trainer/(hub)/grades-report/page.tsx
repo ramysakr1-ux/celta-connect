@@ -3,7 +3,8 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { computeStrengthsAndActionPoints } from "@/lib/celta-criteria";
+import { computeStrengthsAndActionPoints, applyGradesReportOverrides, criterionLine } from "@/lib/celta-criteria";
+import { CriteriaList, CopyField } from "@/app/trainer/(hub)/grades-report/report-cards";
 import { computeAssessedTpStats } from "@/lib/course-progress";
 import { mapTpFeedbackToGlyphRow } from "@/lib/tp-grades";
 import { computeCohortRows } from "@/lib/grades-report";
@@ -148,12 +149,27 @@ export default async function GradesReportPage() {
           {(trainees ?? []).map((trainee, traineeIndex) => {
             const record = recordByTrainee.get(trainee.id) ?? null;
             const ratings = matrixByTrainee.get(trainee.id) ?? {};
-            const { planningStrengths, planningActionPoints, teachingStrengths, teachingActionPoints } =
-              computeStrengthsAndActionPoints(ratings);
+            const derived = computeStrengthsAndActionPoints(ratings);
+            const curated = applyGradesReportOverrides(
+              derived,
+              ((record as { grades_report_list_overrides?: unknown } | null)?.grades_report_list_overrides ?? {}) as never
+            );
+            const toLines = (labels: string[]) =>
+              labels.map((label) => ({ code: (label.match(/\(([0-9a-z]+)\)\s*$/) ?? [])[1] ?? label, label }));
+            const planningStrengths = toLines(curated.planningStrengths);
+            const planningActionPoints = toLines(curated.planningActionPoints);
+            const teachingStrengths = toLines(curated.teachingStrengths);
+            const teachingActionPoints = toLines(curated.teachingActionPoints);
             const wasSlashed = Boolean(record?.provisional_grade_upper);
             const traineeFeedback = (tpFeedbackRows ?? []).filter((f) => f.trainee_id === trainee.id);
             const taughtAssignments = (planAssignments ?? []).filter((p) => p.trainee_id === trainee.id && p.taught_at);
             const assessedTp = computeAssessedTpStats({ taughtAssignments, tpPointCoursebookById, coursebookLevelById });
+            // Ramy, 30 Aug 2026: the proposed-by line carries "the level of
+            // the group and the tutor name", not a group name -- "there's no
+            // group ABC, it's half a group." Candidates teach two levels
+            // across the course, so the one that matters here is the current
+            // half's: the last level they taught at.
+            const currentLevel = assessedTp.levels.length > 0 ? assessedTp.levels[assessedTp.levels.length - 1] : null;
 
             return (
               <div
@@ -175,50 +191,118 @@ export default async function GradesReportPage() {
                   </div>
                 </div>
 
-                {trainer ? (
-                  <>
-                    <ProvisionalGradeForm
-                      traineeId={trainee.id}
-                      record={record}
-                      proposedByName={record?.provisional_proposed_by ? (tutorNameById.get(record.provisional_proposed_by) ?? null) : null}
-                      isMct={isMct}
-                    />
-                    <UpgradeConditionsForm traineeId={trainee.id} record={record} />
-                  </>
-                ) : null}
+                {/* Ramy's Grades Report design, 1b: two columns, provisional
+                    and everything supporting it on the left, recommended and
+                    its justification on the right -- "because it's the same
+                    thing on Appian, so it needs to look the same." He had to
+                    tell me twice to use his file rather than a design of my
+                    own; the panel padding, the bordered chip box and the
+                    28px pills are all his values.
 
-                <p className="text-xs text-muted">
-                  *All criteria not listed below are assumed to be &ldquo;to standard&rdquo;.
-                </p>
+                    Deliberately NOT here: the release-gates panel and a
+                    "copy all" button. Both were mine, and he cut them --
+                    "I'm not sure what that is... let's just leave it clean,
+                    basically what we agreed on." */}
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start">
+                  <div className="flex flex-col gap-3.5 rounded-[6px] border border-border bg-card p-5">
+                    {trainer ? (
+                      <ProvisionalGradeForm
+                        traineeId={trainee.id}
+                        record={record}
+                        proposedByName={record?.provisional_proposed_by ? (tutorNameById.get(record.provisional_proposed_by) ?? null) : null}
+                        proposedByMeta={currentLevel}
+                        isMct={isMct}
+                      />
+                    ) : record?.provisional_grade ? (
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">Provisional grade</span>
+                        <span className="rounded-full bg-ink px-2.5 py-0.5 text-[11px] font-bold text-card">
+                          {record.provisional_grade}
+                          {record.provisional_grade_upper ? ` / ${record.provisional_grade_upper}` : ""}
+                        </span>
+                      </div>
+                    ) : null}
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <StrengthsColumn title="Planning Strengths" items={planningStrengths} />
-                  <StrengthsColumn title="Planning Action Points" items={planningActionPoints} />
-                  <StrengthsColumn title="Teaching Strengths" items={teachingStrengths} />
-                  <StrengthsColumn title="Teaching Action Points" items={teachingActionPoints} />
-                </div>
-
-                {record?.overall_notes ? (
-                  <div>
-                    <p className="text-sm font-semibold text-ink">
-                      {wasSlashed ? "Final justification" : "Note"}
+                    <p className="text-[11px] text-muted italic">
+                      All criteria not listed below is assumed to be &lsquo;To standard&rsquo;.
                     </p>
-                    <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{record.overall_notes}</p>
+
+                    <CriteriaList
+                      traineeId={trainee.id}
+                      list="planningStrengths"
+                      label="Strengths in planning"
+                      labelClass="text-primary"
+                      source="matrix · S+"
+                      items={planningStrengths}
+                      ratings={ratings}
+                      editable={Boolean(trainer)}
+                    />
+                    <CriteriaList
+                      traineeId={trainee.id}
+                      list="planningActionPoints"
+                      label="Action points in planning"
+                      labelClass="text-status-warning-text"
+                      source="matrix · N"
+                      items={planningActionPoints}
+                      ratings={ratings}
+                      editable={Boolean(trainer)}
+                    />
+                    <CriteriaList
+                      traineeId={trainee.id}
+                      list="teachingStrengths"
+                      label="Strengths in teaching"
+                      labelClass="text-primary"
+                      source="matrix · S+"
+                      items={teachingStrengths}
+                      ratings={ratings}
+                      editable={Boolean(trainer)}
+                    />
+                    <CriteriaList
+                      traineeId={trainee.id}
+                      list="teachingActionPoints"
+                      label="Action points in teaching"
+                      labelClass="text-status-warning-text"
+                      source="matrix · N"
+                      items={teachingActionPoints}
+                      ratings={ratings}
+                      editable={Boolean(trainer)}
+                    />
+
+                    {record?.overall_notes ? (
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-baseline justify-between gap-3">
+                          <span className="text-[12px] font-semibold text-ink">{wasSlashed ? "Final justification" : "Note"}</span>
+                          <CopyField value={record.overall_notes} label="Note" />
+                        </div>
+                        <p className="rounded-[6px] border border-border bg-card-inset px-3 py-2.5 text-[12px] leading-[1.55] whitespace-pre-wrap text-ink">
+                          {record.overall_notes}
+                        </p>
+                      </div>
+                    ) : wasSlashed ? (
+                      <p className="text-sm text-destructive">
+                        This candidate was marked in doubt at the provisional stage -- a final justification is expected
+                        before this record is complete.
+                      </p>
+                    ) : null}
                   </div>
-                ) : wasSlashed ? (
-                  <p className="text-sm text-destructive">
-                    This candidate was marked in doubt at the provisional stage -- a final
-                    justification is expected before this record is complete.
-                  </p>
-                ) : null}
 
-                {trainer && record ? <FinalGradeForm record={record} /> : null}
+                  <div className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-3.5 rounded-[6px] border border-border bg-card p-5">
+                      {trainer && record ? (
+                        <FinalGradeForm record={record} />
+                      ) : record?.final_recommended_grade ? (
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">Recommended grade</span>
+                          <span className="rounded-full bg-ink px-2.5 py-0.5 text-[11px] font-bold text-card">
+                            {record.final_recommended_grade}
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
 
-                {record?.final_recommended_grade ? (
-                  <p className="text-sm font-semibold text-ink">
-                    Recommended Grade: {record.final_recommended_grade}
-                  </p>
-                ) : null}
+                    {trainer ? <UpgradeConditionsForm traineeId={trainee.id} record={record} /> : null}
+                  </div>
+                </div>
               </div>
             );
           })}
