@@ -1,16 +1,36 @@
 "use client";
 
 import { useActionState } from "react";
-import { declineClass, type DeclineState } from "@/app/student/[token]/decline-actions";
+import { declineClass, undoDeclineClass, type DeclineState } from "@/app/student/[token]/decline-actions";
 
 const initialState: DeclineState = { error: null };
 
 export function DeclineButton({ token, eventId, alreadyDeclined }: { token: string; eventId: string; alreadyDeclined: boolean }) {
   const [state, formAction, pending] = useActionState(declineClass, initialState);
-  const declined = alreadyDeclined || state.declined;
+  const [undoState, undoAction, undoPending] = useActionState(undoDeclineClass, initialState);
+
+  // Whichever action ran last wins, so the row can be toggled both ways in
+  // one visit rather than needing a reload between them.
+  const declined = undoState.declined === false ? false : (state.declined ?? alreadyDeclined);
 
   if (declined) {
-    return <p className="text-xs font-medium text-muted">You&apos;ve let them know you can&apos;t make it.</p>;
+    return (
+      <div className="flex flex-wrap items-center gap-2.5">
+        <p className="text-xs font-medium text-muted">You&apos;ve let them know you can&apos;t make it.</p>
+        <form action={undoAction}>
+          <input type="hidden" name="token" value={token} />
+          <input type="hidden" name="event_id" value={eventId} />
+          <button
+            type="submit"
+            disabled={undoPending}
+            className="volunteer-hover-fill h-8 rounded-full border border-border px-3.5 text-xs font-semibold text-ink disabled:opacity-60"
+          >
+            {undoPending ? "Sending…" : "Actually, I can come"}
+          </button>
+        </form>
+        {undoState.error ? <p className="text-xs text-destructive">{undoState.error}</p> : null}
+      </div>
+    );
   }
 
   return (
