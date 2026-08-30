@@ -621,7 +621,7 @@ export default async function JourneyPage() {
             <div className="flex flex-col gap-2 rounded-[6px] border border-border bg-card p-3">
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">What the five screens ask</p>
               <p className="text-sm text-ink">
-                <span className="font-semibold">Their language.</span> Turkish, Arabic, Russian, Persian, Ukrainian or
+                <span className="font-semibold">Their language.</span>{" "}Turkish, Arabic, Russian, Persian, Ukrainian or
                 English, plus &quot;my language is not here&quot;. Whatever they pick becomes their L1 on file, which is
                 what makes the language analysis in the assignment possible at all.
               </p>
@@ -724,7 +724,7 @@ export default async function JourneyPage() {
             <div className="flex flex-col gap-2 rounded-[6px] border border-border bg-card p-3">
               <p className="text-sm text-ink">
                 <span className="font-semibold">90 minutes in a day earns a tick, and the tick credits the whole
-                session.</span> Sit through 90 minutes of a 2&frac14;-hour day and you are credited 2&frac14; hours,
+                session.</span>{" "}Sit through 90 minutes of a 2&frac14;-hour day and you are credited 2&frac14; hours,
                 not 90 minutes. Nothing part-credits.
               </p>
               <p className="text-sm text-ink">
