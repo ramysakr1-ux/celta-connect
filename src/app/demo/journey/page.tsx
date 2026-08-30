@@ -569,31 +569,94 @@ export default async function JourneyPage() {
             The volunteer student&apos;s journey
           </p>
 
+          {/* Rewritten 30 Aug 2026. The old six steps described the signup
+              as "a short form" and stopped at the reminder emails, so the
+              journey never showed the thing the signup exists FOR -- the
+              recording, the transcript, and the pooled evidence a candidate
+              writes their Focus on the Learner assignment from. Ramy, having
+              to say it twice: "the volunteer students also logging online
+              and answering the questions for the assignment for FOL and
+              recording themselves. And then what happens to that recording?
+              Where does it go? Where does it land?"
+
+              Every step below either opens the real page or shows the real
+              email. Nothing here is a mockup, and nothing describes
+              something that is not built. */}
           <Step
             number={1}
-            title="Signs up"
-            blurb="No login, no application review -- a short form, freshly reset to the not-yet-signed-up state."
+            title="Signs up -- and this is where the FOL evidence comes from"
+            blurb="No login and no application review: the link itself is the only auth. Five screens -- their own language first, then data consent, six optional written questions, a separate recording consent, and eight prompts. Freshly reset to the not-yet-signed-up state on every visit."
             href="/demo/journey/volunteer-signup"
-            hrefLabel="Open the real signup form →"
-          />
+            hrefLabel="Open the real signup, from the start &rarr;"
+          >
+            <div className="flex flex-col gap-2 rounded-[6px] border border-border bg-card p-3">
+              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">What the five screens ask</p>
+              <p className="text-sm text-ink">
+                <span className="font-semibold">Their language.</span> Turkish, Arabic, Russian, Persian, Ukrainian or
+                English, plus &quot;my language is not here&quot;. Whatever they pick becomes their L1 on file, which is
+                what makes the language analysis in the assignment possible at all.
+              </p>
+              <p className="text-sm text-ink">
+                <span className="font-semibold">Six written questions, every one optional.</span> A blank answer moves
+                on. Nobody is blocked from volunteering by a form.
+              </p>
+              <p className="text-sm text-ink">
+                <span className="font-semibold">Two separate consents.</span> Data on screen two, recording on screen
+                four. Someone can agree to one and refuse the other.
+              </p>
+              <p className="text-sm text-ink">
+                <span className="font-semibold">Eight prompts, one continuous recording.</span> &quot;Next question&quot;
+                advances the prompt; the recording never stops. The prompts escalate, and each is chosen to elicit a
+                particular tense, form or sound -- so the same two or three minutes serves the learner profile, the
+                language analysis and the pronunciation work at once, instead of asking a volunteer to sit through
+                three separate exercises.
+              </p>
+            </div>
+          </Step>
+
           <Step number={2} title="Gets a confirmation" blurb="Sent the moment they submit the form.">
             <EmailPreview title="Thanks for signing up" to="Grace Adeyemi" html={volunteerHtml} />
           </Step>
-          <Step number={3} title="Gets notified their course is starting" blurb="A one-time email, once their course is within 7 days of starting -- carries their personal link.">
+
+          <Step
+            number={3}
+            title="The recording is transcribed, and lands where a tutor can use it"
+            blurb="The profile row saves immediately with no transcript, so nobody is left watching a spinner after they have already finished talking. Transcription then runs on its own and fills it in. If it fails, it fails silently -- a missing transcript never blocks a signup or loses the audio."
+            href="/demo/journey/volunteer-transcript"
+            hrefLabel="Open the real Volunteers page, where the transcript lands &rarr;"
+          />
+
+          <Step number={4} title="Gets notified their course is starting" blurb="A one-time email, once their course is within 7 days of starting -- carries their personal link.">
             <EmailPreview title="Your free English classes start Monday" to="Grace Adeyemi" html={volunteerClassStartingHtml} />
           </Step>
+
           <Step
-            number={4}
+            number={5}
             title="Sees their ongoing view"
-            blurb="Upcoming sessions, shared materials, hours logged toward a certificate. 'Let them know' (decline a class) and 'Manage reminder emails' both live here too, not as separate pages."
+            blurb="The same link, now past the signup. Next class, every class with the handouts for it, and hours logged toward a certificate -- with progress markers scaled to whatever threshold the centre has set, not a fixed 40/80/120/160. Joining the class online, declining one, and managing reminder emails all live here rather than as separate pages."
             href="/demo/volunteer"
-            hrefLabel="Open the ongoing volunteer view →"
+            hrefLabel="Open the ongoing volunteer view &rarr;"
           />
-          <Step number={5} title="Gets a day-before reminder" blurb="20 hours before each class -- not a fixed clock time, and not 24 hours (that would land right at the previous day's class). Skipped if they declined this one, or turned reminder emails off.">
+
+          <Step number={6} title="Gets a day-before reminder" blurb="20 hours before each class -- not a fixed clock time, and not 24 hours (that would land right at the previous day's class). Skipped if they declined this one, or turned reminder emails off.">
             <EmailPreview title="Your class is tomorrow" to="Grace Adeyemi" html={volunteerDayBeforeHtml} />
           </Step>
-          <Step number={6} title="Gets a 30-minute reminder" blurb="Both an email and a browser push, independently -- push needs a permission grant per device, so the email is what actually reaches everyone.">
+
+          <Step number={7} title="Gets a 30-minute reminder" blurb="Both an email and a browser push, independently -- push needs a permission grant per device, so the email is what actually reaches everyone.">
             <EmailPreview title="Your class starts in 30 minutes" to="Grace Adeyemi" html={volunteer30MinHtml} />
+          </Step>
+
+          <Step
+            number={8}
+            title="And the candidates write their assignment from all of it"
+            blurb="This is what the whole journey feeds. Candidates log a learner's error by tapping that learner from the register mid-observation, Days 2 to 9, into one shared pool -- so the evidence is gathered by the whole group rather than each candidate cornering a volunteer separately. The claim they submit is adjudicated by the system, not queued for a tutor: four soft checks that can be retried immediately, and only two things that actually block -- a duplicate, or genuinely no evidence at all."
+            href="/demo/trainee"
+            hrefLabel="Open a candidate's workspace &rarr;"
+          >
+            <p className="text-xs text-muted">
+              Tutors get a spot-check view of their own, showing per-class log counts and flagging any class sitting at
+              nearly zero entries -- reachable from the roster&apos;s &quot;FOL pool, by class&quot; row.
+            </p>
           </Step>
         </div>
       </div>
