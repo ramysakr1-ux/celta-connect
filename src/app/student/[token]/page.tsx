@@ -854,7 +854,15 @@ function NextClassCard({
     >
       <div className="flex items-baseline justify-between gap-2">
         <p className="font-serif text-[19px] font-semibold text-ink">{formatEventDate(nextClass.eventDate)}</p>
-        {nextClass.eventTime ? <p className="text-[13px] font-semibold text-primary tabular-nums">{nextClass.eventTime.slice(0, 5)}</p> : null}
+        {/* Labelled for the same reason the desktop panel is: a bare time
+            beside a date reads as a clock rather than as when the class
+            begins. */}
+        {nextClass.eventTime ? (
+          <p className="text-[13px] font-semibold text-primary">
+            <span className="text-[10px] font-bold tracking-[0.1em] uppercase opacity-75">Starts </span>
+            <span className="tabular-nums">{nextClass.eventTime.slice(0, 5)}</span>
+          </p>
+        ) : null}
       </div>
       <NextClassFacts whereLabel={whereLabel} topicLabel={topicLabel} teachersLabel={teachersLabel} />
       {/* Ramy: "you're making the Zoom pill thicker. It needs to be
