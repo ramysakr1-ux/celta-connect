@@ -20,6 +20,7 @@ import {
 import { withConnectBranding } from "@/lib/email-layout";
 import Link from "next/link";
 import { EmailPreview } from "@/app/demo/journey/email-preview";
+import { VolunteerJourneyMap } from "@/app/demo/journey/journey-map";
 import { BackToTop } from "@/app/demo/journey/back-to-top";
 import { AiReadingPanel } from "@/app/dashboard/admissions/[id]/ai-reading-panel";
 
@@ -623,6 +624,11 @@ export default async function JourneyPage() {
           <p className="border-b-2 border-destructive pb-2 text-sm font-semibold tracking-[0.1em] text-destructive uppercase">
             The volunteer student&apos;s journey
           </p>
+
+          {/* The whole shape before the steps, so the point lands before
+              anyone starts clicking: one volunteer signing up moves things
+              on four other people's screens. */}
+          <VolunteerJourneyMap />
 
           {/* Rewritten 30 Aug 2026. The old six steps described the signup
               as "a short form" and stopped at the reminder emails, so the
