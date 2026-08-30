@@ -49,7 +49,16 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
   // custom-role/capability pair (previously a THIRD sequential Promise.all,
   // run after the plans/people/payments chain below for no reason) all used
   // to run in up to 4 sequential stages.
-  const [cachedCenter, { data: center }, { data: courses }, { data: grants }, { data: ownerActions }, { data: customRoles }, { data: customCapabilities }] =
+  const [
+    cachedCenter,
+    { data: center },
+    { data: courses },
+    { data: grants },
+    { data: ownerActions },
+    { data: customRoles },
+    { data: customCapabilities },
+    { data: scopeCentres },
+  ] =
     await Promise.all([
       getCachedCenter(centerId),
       admin.from("centers").select("id, name, organisation_id, currency").eq("id", centerId).maybeSingle(),
@@ -58,6 +67,12 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
       admin.from("centre_owner_actions").select("id, created_at").in("center_id", scope),
       admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId),
       admin.from("centre_custom_capabilities").select("capability_key, label").eq("center_id", centerId),
+      // Names for every branch in scope. Built from the scope itself, not
+      // from organisation siblings: a branch that shares an owner but not an
+      // organisation_id is invisible to that query, and the fallback then
+      // printed the CURRENT centre's name against its rows -- so Diane's Los
+      // Angeles grant read "Connect CELTA New York".
+      admin.from("centers").select("id, name").in("id", scope),
     ]);
 
   const timeZone = cachedCenter?.time_zone ?? DEFAULT_TIMEZONE;
@@ -84,10 +99,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
   const nameById = new Map((people ?? []).map((p) => [p.id, p.full_name]));
   // "Who holds what" spans branches now, so each row names its own -- the
   // column used to print the current centre's name against every row.
-  const branchNameById = new Map<string, string>([
-    ...(center ? ([[center.id, center.name]] as [string, string][]) : []),
-    ...((siblings ?? []).map((b) => [b.id, b.name]) as [string, string][]),
-  ]);
+  const branchNameById = new Map<string, string>((scopeCentres ?? []).map((b) => [b.id, b.name]));
   const planIds = (plans ?? []).map((p) => p.id);
   const siblingBranches = siblings ?? [];
 
@@ -175,7 +187,7 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
                   {roleLabel(g.role, customRoles ?? [])}
                 </span>
                 <span className="text-[11px]" style={{ color: "var(--owner-muted)" }}>
-                  {branchNameById.get(g.center_id) ?? center?.name ?? ""}
+                  {branchNameById.get(g.center_id) ?? ""}
                 </span>
               </div>
             ))}
