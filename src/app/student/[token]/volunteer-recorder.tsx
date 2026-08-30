@@ -87,6 +87,19 @@ export function VolunteerRecorder({
     setPromptIndex(0);
     setPaused(false);
     try {
+      // navigator.mediaDevices is undefined outright on a non-secure origin,
+      // so reaching straight for getUserMedia throws a TypeError that the
+      // catch below would report as a permission problem -- sending someone
+      // to check a browser setting that was never the cause.
+      if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+        setStatus("error");
+        setErrorMessage(
+          window.isSecureContext === false
+            ? "Recording needs a secure (https) connection. Open this page over https and try again."
+            : "This browser can't record audio. Safari, Chrome or Edge on a phone or laptop will work."
+        );
+        return;
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       watchLevel(stream);
@@ -117,9 +130,24 @@ export function VolunteerRecorder({
       setStatus("recording");
       setElapsedSeconds(0);
       timerRef.current = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
-    } catch {
+    } catch (err) {
+      // The old catch threw away the error and always blamed permissions.
+      // Ramy, 30 Aug 2026: "I couldn't click on the recording. Said can't
+      // access your microphone. Last time it worked." Four quite different
+      // failures were saying the same wrong thing, so there was no way to
+      // tell a denied permission from a microphone another app had already
+      // taken.
+      const name = err instanceof Error ? err.name : "";
       setStatus("error");
-      setErrorMessage("Couldn't access your microphone. Check your browser's permission for this site and try again.");
+      setErrorMessage(
+        name === "NotAllowedError"
+          ? "Your browser is blocking the microphone for this site. Click the padlock in the address bar, allow the microphone, then try again."
+          : name === "NotFoundError"
+            ? "No microphone found. Plug one in, or check your system sound settings."
+            : name === "NotReadableError"
+              ? "Something else is already using the microphone -- close any other call or recording app and try again."
+              : `Couldn't start recording${name ? ` (${name})` : ""}. Check your browser's microphone permission for this site and try again.`
+      );
     }
   }
 

@@ -42,29 +42,55 @@ import { AiReadingPanel } from "@/app/dashboard/admissions/[id]/ai-reading-panel
 // static (so a renamed real centre still shows up within a few minutes).
 export const revalidate = 300;
 
-// The point of the page, and the point of the product: no step stops at
-// the person taking it. Ramy, 30 Aug 2026: "how each journey is connected
-// to the trainees or to the center management or to the trainers, how it
-// shows, where it shows, when it shows... That's the whole point of
-// Connect. Everything is connected, and it needs to be clearly
-// demonstrated through the journey."
+// Where a step lands, drawn as a chain rather than described in
+// paragraphs. Ramy, 30 Aug 2026: "too much writing. Show, not tell...
+// It's a visual journey, not an essay. I need them to see it, to feel it,
+// to walk the journey with me."
 //
-// Every row below is a real read or write in the codebase, not a claim
-// about intent. Where something is built but has never run against the
-// live third party, it says so rather than implying it is proven.
-function Connects({ rows }: { rows: { who: string; what: string; when: string }[] }) {
+// The first version of this was three paragraphs per step. Nobody reads
+// three paragraphs standing over someone's shoulder. Each link is at most
+// a handful of words and, where the destination is a real page, it opens
+// it.
+// Label and fact, nothing else. Replaces the paragraphs this page used to
+// carry: the same content is here, but scannable while talking over it
+// rather than read aloud.
+function Facts({ caption, rows }: { caption: string; rows: [string, string][] }) {
   return (
-    <div className="flex flex-col gap-2 rounded-[6px] border border-primary/30 bg-primary/5 p-3">
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-primary uppercase">
-        What this sets off elsewhere
-      </p>
-      {rows.map((r) => (
-        <div key={r.who + r.what} className="flex flex-col gap-0.5 border-b border-border-faint pb-2 last:border-b-0 last:pb-0">
-          <div className="flex flex-wrap items-baseline gap-x-2">
-            <span className="text-[11px] font-bold tracking-[0.06em] text-ink uppercase">{r.who}</span>
-            <span className="text-[11px] text-muted">{r.when}</span>
+    <div className="flex flex-col gap-1.5 rounded-[6px] border border-border bg-card p-3">
+      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{caption}</p>
+      {rows.map(([label, fact]) => (
+        <div key={label} className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
+          <span className="shrink-0 text-xs font-bold text-ink sm:w-40">{label}</span>
+          <span className="text-xs text-muted">{fact}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Ripple({ from, to }: { from: string; to: { where: string; what: string; href?: string }[] }) {
+  return (
+    <div className="flex flex-wrap items-stretch gap-2">
+      <div className="flex items-center rounded-[6px] bg-ink px-3 py-2 text-xs font-semibold text-card">{from}</div>
+      {to.map((t) => (
+        <div key={t.where} className="flex items-stretch gap-2">
+          <div className="flex items-center text-sm text-muted" aria-hidden>
+            &rarr;
           </div>
-          <p className="text-sm text-ink">{r.what}</p>
+          {t.href ? (
+            <a
+              href={t.href}
+              className="trainee-hover-fill flex flex-col justify-center rounded-[6px] border border-primary/40 bg-primary/5 px-3 py-2"
+            >
+              <span className="text-[11px] font-bold tracking-[0.06em] text-primary uppercase">{t.where}</span>
+              <span className="text-xs text-ink">{t.what}</span>
+            </a>
+          ) : (
+            <div className="flex flex-col justify-center rounded-[6px] border border-border bg-card px-3 py-2">
+              <span className="text-[11px] font-bold tracking-[0.06em] text-muted uppercase">{t.where}</span>
+              <span className="text-xs text-ink">{t.what}</span>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -618,46 +644,22 @@ export default async function JourneyPage() {
             href="/demo/journey/volunteer-signup"
             hrefLabel="Open the real signup, from the start &rarr;"
           >
-            <div className="flex flex-col gap-2 rounded-[6px] border border-border bg-card p-3">
-              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">What the five screens ask</p>
-              <p className="text-sm text-ink">
-                <span className="font-semibold">Their language.</span>{" "}Turkish, Arabic, Russian, Persian, Ukrainian or
-                English, plus &quot;my language is not here&quot;. Whatever they pick becomes their L1 on file, which is
-                what makes the language analysis in the assignment possible at all.
-              </p>
-              <p className="text-sm text-ink">
-                <span className="font-semibold">Six written questions, every one optional.</span> A blank answer moves
-                on. Nobody is blocked from volunteering by a form.
-              </p>
-              <p className="text-sm text-ink">
-                <span className="font-semibold">Two separate consents.</span> Data on screen two, recording on screen
-                four. Someone can agree to one and refuse the other.
-              </p>
-              <p className="text-sm text-ink">
-                <span className="font-semibold">Eight prompts, one continuous recording.</span> &quot;Next question&quot;
-                advances the prompt; the recording never stops. The prompts escalate, and each is chosen to elicit a
-                particular tense, form or sound -- so the same two or three minutes serves the learner profile, the
-                language analysis and the pronunciation work at once, instead of asking a volunteer to sit through
-                three separate exercises.
-              </p>
-            </div>
-            <Connects
+            <Facts
+              caption="The five screens"
               rows={[
-                {
-                  who: "The candidate",
-                  when: "from the moment it saves",
-                  what: "The language they chose becomes their L1 on file -- which is what makes the language-analysis half of Focus on the Learner possible at all. Without it a candidate is guessing at first-language interference.",
-                },
-                {
-                  who: "The tutor",
-                  when: "as soon as transcription finishes",
-                  what: "The written answers and the transcript appear against that volunteer on the Volunteers page, so a tutor can see who is in the room before they walk into it.",
-                },
-                {
-                  who: "Centre Management",
-                  when: "immediately",
-                  what: "They join the centre's volunteer pool, grouped as a person rather than a row per course -- so someone who volunteers on three courses is one human being with a history, not three strangers.",
-                },
+                ["Their language", "Turkish, Arabic, Russian, Persian, Ukrainian, English -- becomes their L1 on file"],
+                ["Six questions", "all optional; a blank answer moves on"],
+                ["Two consents", "data on screen 2, recording on screen 4 -- one can be refused"],
+                ["Eight prompts", "one continuous recording; each targets a tense, form or sound"],
+                ["Why", "the same 2-3 minutes serves profile, language analysis and pronunciation"],
+              ]}
+            />
+            <Ripple
+              from="Grace records"
+              to={[
+                { where: "Candidate", what: "her L1, for the language analysis" },
+                { where: "Tutor", what: "answers + transcript", href: "/demo/journey/volunteer-transcript" },
+                { where: "Centre", what: "joins the volunteer pool" },
               ]}
             />
           </Step>
@@ -685,33 +687,13 @@ export default async function JourneyPage() {
             href="/demo/volunteer"
             hrefLabel="Open the ongoing volunteer view &rarr;"
           >
-            <Connects
-              rows={[
-                {
-                  who: "The candidate",
-                  when: "the moment they tick 'share' on a TP plan",
-                  what: "The handouts a volunteer sees here are not centre stock -- they are the candidate's own teaching-practice materials, shared straight off their lesson plan. The person being taught gets the actual worksheet the person teaching them made.",
-                },
-                {
-                  who: "The tutor",
-                  when: "when a class is declined",
-                  what: "'Let them know' takes them off that class on the register, so a tutor plans for who is actually coming rather than discovering it in the room. It also suppresses that class's reminders -- nobody is nagged about a class they already said they would miss.",
-                },
-                {
-                  who: "Attendance, automatically",
-                  when: "on joining the Zoom class",
-                  what: "A Zoom webhook records the join against that session -- first join kept, so a rejoin does not reset it -- which credits the hours toward their certificate without anyone ticking a register. Built and wired; it has not yet been exercised against a live Zoom account, so treat it as a demo of the mechanism rather than a proven integration.",
-                },
-                {
-                  who: "Centre Management and the platform owner",
-                  when: "continuously",
-                  what: "Those same attendance rows roll up into the centre's volunteer figures and into Command Center's people view -- one volunteer showing up to one class moves a number on the owner's screen.",
-                },
-                {
-                  who: "Business and admissions staff",
-                  when: "whenever they need it",
-                  what: "They get a no-login register link of their own -- view and add volunteers, nothing else. No account, and no access to the course itself.",
-                },
+            <Ripple
+              from="Grace attends"
+              to={[
+                { where: "Candidate", what: "shares TP handouts to her" },
+                { where: "Tutor", what: "sees declines on the register" },
+                { where: "Zoom", what: "join auto-marks attendance" },
+                { where: "Centre + owner", what: "figures move" },
               ]}
             />
           </Step>
@@ -721,53 +703,22 @@ export default async function JourneyPage() {
             title="How the register actually decides they were there"
             blurb="Worth showing, because it is the one rule everybody assumes and nobody agrees on."
           >
-            <div className="flex flex-col gap-2 rounded-[6px] border border-border bg-card p-3">
-              <p className="text-sm text-ink">
-                <span className="font-semibold">90 minutes in a day earns a tick, and the tick credits the whole
-                session.</span>{" "}Sit through 90 minutes of a 2&frac14;-hour day and you are credited 2&frac14; hours,
-                not 90 minutes. Nothing part-credits.
-              </p>
-              <p className="text-sm text-ink">
-                <span className="font-semibold">Three marks, not two.</span> Under 45 minutes is absent. 45 to 89 is
-                its own mark on the register -- it credits no hours, but it is recorded, because a tutor looking at
-                someone who repeatedly turns up for one lesson has a different problem from someone who never comes,
-                and a two-state register hides that difference.
-              </p>
-              <p className="text-sm text-ink">
-                <span className="font-semibold">Minute-level credit was deliberately not built.</span> A teaching
-                practice slot is a fixed-length block someone is present or absent for; counting attended blocks
-                against the block length reproduces the same rule without pretending to per-minute data nobody
-                actually has.
-              </p>
-              <p className="text-sm text-ink">
-                <span className="font-semibold">Zoom join and leave times are shown, not counted.</span> The webhook
-                fills in the same present/absent row a tutor would tick by hand. The timestamps are there to look at;
-                they are not a second, competing input to the hours.
-              </p>
-              <p className="text-sm text-ink">
-                <span className="font-semibold">The threshold is the centre&apos;s, not ours.</span> 160 hours by
-                default, changed per centre in settings, and the progress markers on the volunteer&apos;s own page
-                rescale to whatever it is set to -- quarters of the real threshold, rather than a hard-coded
-                40/80/120/160 that stops making sense the moment a centre changes it.
-              </p>
-            </div>
-            <Connects
+            <Facts
+              caption="The rule"
               rows={[
-                {
-                  who: "The volunteer",
-                  when: "every time the register is marked",
-                  what: "Their own page moves: hours credited, hours remaining, and how far along the four markers they are.",
-                },
-                {
-                  who: "The tutor",
-                  when: "on the register",
-                  what: "Sees present, partial and absent as three distinct marks per session, per volunteer.",
-                },
-                {
-                  who: "Centre Management and Command Center",
-                  when: "continuously",
-                  what: "The same rows aggregate into the centre's volunteer figures and the platform owner's people view.",
-                },
+                ["90 minutes", "earns a tick -- and the tick credits the whole session, not the minutes"],
+                ["Three marks", "under 45 absent, 45-89 recorded but credits nothing, 90+ credits"],
+                ["Why partial exists", "turning up for one lesson is a different problem from never coming"],
+                ["Zoom times", "shown, never counted -- the webhook fills the same present/absent row"],
+                ["160 hours", "the centre's number; the volunteer's markers rescale to it"],
+              ]}
+            />
+            <Ripple
+              from="Register marked"
+              to={[
+                { where: "Volunteer", what: "hours and markers move" },
+                { where: "Tutor", what: "present / partial / absent" },
+                { where: "Centre + owner", what: "roll-up figures" },
               ]}
             />
           </Step>
@@ -800,23 +751,12 @@ export default async function JourneyPage() {
               Tutors get a spot-check view of their own, showing per-class log counts and flagging any class sitting at
               nearly zero entries -- reachable from the roster&apos;s &quot;FOL pool, by class&quot; row.
             </p>
-            <Connects
-              rows={[
-                {
-                  who: "Every other candidate",
-                  when: "as each error is logged",
-                  what: "One shared pool, not one per candidate. Nobody has to corner a volunteer on their own, and a quiet learner still generates evidence because the whole group is watching.",
-                },
-                {
-                  who: "The tutor",
-                  when: "Days 2 to 9, while it can still be fixed",
-                  what: "The spot-check flags a class sitting at nearly zero entries -- so a group that is not gathering evidence is caught during the course, not at marking.",
-                },
-                {
-                  who: "The assignment, then the CELTA 5",
-                  when: "at submission and at marking",
-                  what: "The claim is adjudicated by the system rather than queued for a tutor: four soft checks a candidate can retry immediately, and only two hard blockers -- a duplicate, or genuinely no evidence. What survives becomes assignment evidence, which becomes a criterion tick on the CELTA 5, which becomes a line on the grade form the assessor reads.",
-                },
+            <Ripple
+              from="Error logged"
+              to={[
+                { where: "Shared pool", what: "every candidate draws on it" },
+                { where: "Tutor", what: "spot-check flags empty classes" },
+                { where: "Assignment", what: "then CELTA 5, then grade form" },
               ]}
             />
           </Step>
