@@ -209,7 +209,7 @@ export default async function TodayPage() {
     if (daysOut <= REMINDER_WINDOW_DAYS && approvedCount < traineeIds.length) {
       alerts.push({
         title: `Provisional grades due ${daysOut <= 0 ? "today" : `in ${daysOut} day${daysOut === 1 ? "" : "s"}`}`,
-        meta: `${approvedCount} of ${traineeIds.length} MCT-approved`,
+        meta: `${approvedCount} of ${traineeIds.length} confirmed by the MCT`,
         href: "/trainer/grades-report",
         destructive: daysOut <= 0,
       });

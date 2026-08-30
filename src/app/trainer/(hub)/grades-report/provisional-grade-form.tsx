@@ -94,7 +94,7 @@ export function ProvisionalGradeForm({
               }`}
             >
               <span className="size-1.5 rounded-full bg-current" />
-              {approvePending ? "Approving…" : approved ? "MCT approved" : "Awaiting MCT approval — approve"}
+              {approvePending ? "Confirming…" : approved ? "Confirmed by the MCT" : "Awaiting MCT confirmation — confirm"}
             </button>
           ) : (
             <span
@@ -103,7 +103,7 @@ export function ProvisionalGradeForm({
               }`}
             >
               <span className="size-1.5 rounded-full bg-current" />
-              {approved ? "MCT approved" : "Awaiting MCT approval"}
+              {approved ? "Confirmed by the MCT" : "Awaiting MCT confirmation"}
             </span>
           )}
         </div>

@@ -108,7 +108,7 @@ export async function renderAssessorPackBuffer(input: AssessorPackInput): Promis
           <View style={styles.figure}>
             <Text style={styles.figureLabel}>Provisional grades</Text>
             <Text style={[styles.figureValue, { color: input.gradesEntered >= input.totalCandidates ? TEAL : AMBER }]}>
-              {input.gradesEntered} of {input.totalCandidates} MCT-approved
+              {input.gradesEntered} of {input.totalCandidates} confirmed
             </Text>
           </View>
         </View>

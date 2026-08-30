@@ -69,7 +69,7 @@ export async function computeCohortRows(
     // Deliberately not "Not set": the difference between a grade nobody has
     // proposed and one the MCT hasn't released yet matters to an assessor
     // reading the sheet before the deadline.
-    if (approvedOnly && !record.provisional_approved_at) return "Not yet sent";
+    if (approvedOnly && !record.provisional_approved_at) return "Not yet confirmed";
     return record.provisional_grade_upper ? `${record.provisional_grade} / ${record.provisional_grade_upper}` : record.provisional_grade;
   }
 

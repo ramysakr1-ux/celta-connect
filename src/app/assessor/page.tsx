@@ -541,7 +541,7 @@ export default async function AssessorPage({
               />
               <Figure
                 label="Provisional grades"
-                value={`${readiness.gradesApprovedCount} of ${readiness.totalCandidates} MCT-approved`}
+                value={`${readiness.gradesApprovedCount} of ${readiness.totalCandidates} confirmed`}
                 ink={readiness.gradesApprovedCount >= readiness.totalCandidates ? TEAL : AMBER}
               />
             </div>

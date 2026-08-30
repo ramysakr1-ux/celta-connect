@@ -58,9 +58,9 @@ export function ProvisionalDeadlineBanner({
         {derived && dueAt
           ? "Two working days before the assessor visit — nobody has set a date, so this is the working assumption until someone does. "
           : ""}
-        Each TP tutor proposes for their own group, the MCT proposes for theirs, then the MCT approves all before
+        Each TP tutor proposes for their own half, the MCT proposes for theirs, then the MCT confirms them all before
         it&apos;s sent and recorded on the assessor visit page.
-        {totalCount > 0 ? ` ${approvedCount} of ${totalCount} MCT-approved.` : ""}
+        {totalCount > 0 ? ` ${approvedCount} of ${totalCount} confirmed by the MCT.` : ""}
       </p>
       {isMct && editing ? (
         <form action={action} className="mt-1 flex items-center gap-2">
