@@ -1002,7 +1002,10 @@ function ClassesList({ rows, attendedCount }: { rows: ClassRow[]; attendedCount:
           <div key={c.eventId} className="flex flex-col gap-2 rounded-[10px] border border-border bg-card px-[14px] py-[13px]">
             <div className="flex items-start justify-between gap-2">
               <p className="text-sm font-semibold text-ink">{c.topic ?? c.courseName}</p>
-              <p className="shrink-0 text-[11px] text-muted">{formatShortDate(c.eventDate)}</p>
+              <p className="shrink-0 text-[11px] text-muted">
+                {formatShortDate(c.eventDate)}
+                {c.eventTime ? <span className="tabular-nums"> · {c.eventTime.slice(0, 5)}</span> : null}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <StatusPill attended={c.attended} />
@@ -1039,7 +1042,14 @@ function ClassesTable({ rows }: { rows: ClassRow[] }) {
             key={c.eventId}
             className={`grid grid-cols-[96px_1fr_128px_150px] items-center px-4 py-2.5 text-xs text-ink ${i > 0 ? "border-t border-border-faint" : ""} ${i === rows.length - 1 ? "rounded-b-[6px]" : ""}`}
           >
-            <div className="text-muted">{formatShortDate(c.eventDate)}</div>
+            {/* Date alone could not tell one lesson from another: a single
+                day runs several TP rounds -- the demo course teaches TP6 at
+                10:00, 10:45 and 11:45 -- and they share a topic, so two
+                rows rendered as the same class listed twice. */}
+            <div className="text-muted">
+              {formatShortDate(c.eventDate)}
+              {c.eventTime ? <span className="tabular-nums"> · {c.eventTime.slice(0, 5)}</span> : null}
+            </div>
             <div className="truncate">{c.topic ?? c.courseName}</div>
             <div>
               <StatusPill attended={c.attended} />
