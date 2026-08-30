@@ -790,6 +790,12 @@ export function computeTrajectoryByDimension(
 // "*all criteria not listed below is assumed to be 'To standard'".
 // ============================================================
 
+// Our own abbreviations of the criteria, kept for a caller that needs a
+// short form in tight UI. Nothing reads it as of 30 Aug 2026: the grades
+// report used to, and now quotes Cambridge verbatim instead (see
+// formatCriterion). Left in place rather than deleted because the map itself
+// is fine -- but do not reach for it in anything an assessor reads. Ramy:
+// "the criteria has to be word for word Cambridge criteria."
 export const SHORT_CRITERIA_LABELS: Record<string, string> = {
   "1a": "needs awareness",
   "1b": "cultural awareness",
@@ -845,8 +851,21 @@ export interface StrengthsAndActionPoints {
   teachingActionPoints: string[];
 }
 
+// Ramy, 30 Aug 2026: "the criteria has to be word for word Cambridge
+// criteria, not a paraphrase of it."
+//
+// This read SHORT_CRITERIA_LABELS -- our own abbreviations ("stating aims",
+// "language analysis"), written for tight UI. Cambridge's exact wording was
+// already in this same file, in CRITERIA_LABELS, and the CELTA 5 criteria
+// grid has always used it. So the grades report was paraphrasing a criterion
+// the booklet quotes verbatim, and the two screens disagreed about what 4a
+// says -- in a document an assessor reads against the real thing.
+//
+// The lines get long: "stating aims (4a)" becomes "identifying and stating
+// appropriate aims/outcomes for individual lessons (4a)". That is what the
+// criterion is, and the real Grades Report writes them out in full too.
 function formatCriterion(code: string): string {
-  return `${SHORT_CRITERIA_LABELS[code] ?? code} (${code})`;
+  return `${CRITERIA_LABELS[code] ?? code} (${code})`;
 }
 
 /**
