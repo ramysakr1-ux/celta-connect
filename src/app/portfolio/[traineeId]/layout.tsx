@@ -344,7 +344,17 @@ export default async function PortfolioLayout({
         <div className="border-b border-border bg-card">
           <div className="container flex h-14 items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <BackLink href="/trainer/roster" label={"Roster"} />
+              {/* An assessor has no trainer roster. This pill sent them
+                  there anyway -- the one control you reach for when you want
+                  out, pointing at a screen they cannot use. Ramy, 30 Aug
+                  2026: "we will need a return pill because there isn't one."
+                  There was one; it just went to the wrong place, which is
+                  the same thing from where the assessor is standing. */}
+              {assessorCourseId ? (
+                <BackLink href="/assessor" label="Assessor pack" />
+              ) : (
+                <BackLink href="/trainer/roster" label={"Roster"} />
+              )}
               <span className="h-5 w-px shrink-0 bg-border" />
               <h1 className="truncate font-serif text-[17px] text-ink">{trainee.full_name}</h1>
               {isCourseStatusReadOnly(trainee.course_status) ? (

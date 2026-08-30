@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { appianHref } from "@/lib/appian";
 
 // The one thing the centre has to hand over by hand.
 //
@@ -21,7 +20,17 @@ import { appianHref } from "@/lib/appian";
 
 const GOLD = "oklch(60% 0.11 70)";
 
-export function AppianReference({ reference, appianUrl }: { reference: string | null; appianUrl: string | null }) {
+// The "Open Appian" buttons that used to sit in this card are gone.
+//
+// Ramy, 30 Aug 2026: "I also don't think we need to open Appian. There's one
+// on top next to Download whole pack, that's enough, and then he also
+// created another pill next to Copy. Not a big deal, but redundant."
+//
+// He is right -- this card's job is the reference number and how to use it,
+// and the way into Appian is already a primary action at the top of the
+// pack. Two doors to the same place, a few hundred pixels apart, is just
+// something else to read.
+export function AppianReference({ reference }: { reference: string | null }) {
   const [copied, setCopied] = useState(false);
 
   // No reference set. Say so plainly rather than hiding the block: an
@@ -43,20 +52,6 @@ export function AppianReference({ reference, appianUrl }: { reference: string | 
           The centre has not recorded the course notification reference number. You will need it from them to open your Assessor
           Report &mdash; Administration Handbook 15.2.
         </span>
-        {/* Still linked. The reference is missing, not Appian -- an assessor
-            may well have it in the centre's email and only need the way in. */}
-        <a
-          href={appianHref(appianUrl)}
-          target="_blank"
-          rel="noreferrer"
-          style={{
-            height: 28, padding: "0 12px", borderRadius: 999, display: "inline-flex", alignItems: "center",
-            border: "1px solid var(--color-border)", background: "var(--color-card)",
-            color: "var(--color-ink)", fontSize: 11.5, fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap",
-          }}
-        >
-          Open Appian &rarr;
-        </a>
       </div>
     );
   }
@@ -103,18 +98,6 @@ export function AppianReference({ reference, appianUrl }: { reference: string | 
         {copied ? "Copied" : "Copy"}
       </button>
 
-      <a
-        href={appianHref(appianUrl)}
-        target="_blank"
-        rel="noreferrer"
-        style={{
-          height: 28, padding: "0 12px", borderRadius: 999, display: "inline-flex", alignItems: "center",
-          border: "1px solid var(--color-border)", background: "var(--color-card)",
-          color: "var(--color-ink)", fontSize: 11.5, fontWeight: 600, textDecoration: "none",
-        }}
-      >
-        Open Appian &rarr;
-      </a>
 
       <span style={{ fontSize: 12, color: "var(--color-muted)", flex: "1 1 240px", minWidth: 220 }}>
         Paste this into Appian to reach your Assessor Report for this course. It opens once the centre has submitted the Centre

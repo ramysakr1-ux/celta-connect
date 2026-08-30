@@ -563,7 +563,6 @@ export default async function AssessorPage({
             on Appian." */}
         <AppianReference
           reference={(course as { appian_notification_reference?: string | null }).appian_notification_reference ?? null}
-          appianUrl={center?.appian_url ?? null}
         />
 
         {(

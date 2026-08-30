@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { usePathname } from "next/navigation";
 
 // for-claude-code-assessor-readonly-banner.md: replaces the bare "← Assessor
@@ -107,17 +108,20 @@ export function AssessorReadOnlyBanner({ subject, portfolioHref }: { subject?: s
           ← {subject ? `${subject}'s portfolio` : "The portfolio"}
         </Link>
       ) : null}
-      <Link
-        href="/assessor"
-        className="flex shrink-0 items-center gap-1.5 rounded-md px-3.5 py-1.5 text-[12.5px] font-semibold no-underline"
-        style={{
-          color: "oklch(97% 0.008 88)",
-          background: "color-mix(in oklab, oklch(97% 0.008 88) 12%, transparent)",
-          border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
-        }}
-      >
-        ← Back to assessor pack
-      </Link>
+      {/* The app's one back control, not a bespoke text link.
+      
+          Ramy, 30 Aug 2026: "we will need a return pill because there isn't
+          one." There was one -- right here -- but it was a "← Back to
+          assessor pack" text link in the banner's own colours, while every
+          other way back in the app is the gold BackLink pill. He was looking
+          for a pill and did not find one, which is what an inconsistent
+          control costs: he had already said "same place, same pill, same
+          colour, so it's easy to spot" and this was the exception.
+      
+          Same destination, same words, recognisable now. */}
+      <div className="shrink-0">
+        <BackLink href="/assessor" label="Assessor pack" />
+      </div>
       </div>
     </div>
   );
