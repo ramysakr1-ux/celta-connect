@@ -13,7 +13,6 @@ import { computeCohortRows } from "@/lib/grades-report";
 import { ProvisionalGradeForm } from "@/app/trainer/(hub)/grades-report/provisional-grade-form";
 import { UpgradeConditionsForm } from "@/app/trainer/(hub)/grades-report/upgrade-conditions-form";
 import { CohortSheet } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
-import { FinalGradeForm } from "@/app/dashboard/trainer/trainees/[id]/celta5/final-grade-form";
 import { CloseOutCard } from "@/app/dashboard/admin/courses/[id]/close-out-card";
 import { CertificateCheckCard, type CertificateCandidate } from "@/app/dashboard/admin/courses/[id]/certificate-check-card";
 import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rules";
@@ -409,89 +408,94 @@ export default async function GradesReportPage() {
                     ) : null}
                   </div>
 
-                  <div className="flex flex-col gap-5">
-                    <div className="flex flex-col gap-3.5 rounded-[6px] border border-border bg-card p-5">
-                      {trainer && record ? (
-                        <FinalGradeForm record={record} showOverallNotes={false} />
-                      ) : record?.final_recommended_grade ? (
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">Recommended grade</span>
-                          <span className="rounded-full bg-ink px-2.5 py-0.5 text-[11px] font-bold text-card">
-                            {record.final_recommended_grade}
-                          </span>
-                        </div>
-                      ) : null}
+                  {/* Structurally identical to the assessor's right-hand
+                      column -- same headings, same order, same three fields.
+                      Ramy, 30 Aug 2026: "can we just make it look like the
+                      same view as the assessor? Why the different from the
+                      assessor view?"
+
+                      He is right that there should be no difference. It is
+                      one report; the only thing that changes between a tutor
+                      and an assessor is whether the boxes are inputs. The
+                      tutor-only furniture -- release state, the Appian link
+                      -- now sits under the table rather than inside the
+                      column, where it was making the two sides look like two
+                      different screens.
+
+                      The grade select moved in here too. It had its own
+                      bordered card above with the descriptors, the teaching
+                      and assignments selects and a second Save button, which
+                      is what tipped the column over: "there's just too many
+                      boxes... it's confusing even for me, and I've been doing
+                      this for fifteen years." The teaching and assignments
+                      grades belong to the CELTA 5 record, not to what the
+                      assessor submits, and they are still on that page. */}
+                  {record ? (
+                    <FinalReportFields record={record} editable={Boolean(trainer)} isBorderline={isBorderline} />
+                  ) : (
+                    <div className="rounded-[6px] border border-border bg-card p-5 text-[12px] text-muted italic">
+                      No CELTA 5 record for this candidate yet.
                     </div>
-
-                    {/* The three things 14.4 has the tutor hand to the
-                        assessor -- the update, the evidence on a borderline
-                        candidate, and the rationale. The rationale used to
-                        sit at the foot of the left column; it belongs here,
-                        with the other two, because they travel together and
-                        the assessor submits all three.
-
-                        Shown to the assessor read-only, with one copy button
-                        for the whole hand-over. */}
-                    {record ? (
-                      <FinalReportFields record={record} editable={Boolean(trainer)} isBorderline={isBorderline} />
-                    ) : null}
-
-                    {/* Tutors only -- the centre's own readiness, not the
-                        assessor's business. Reports what is outstanding; the
-                        release action keeps its own checks. */}
-                    {trainer ? (
-                      <div className="flex flex-col gap-2 rounded-[6px] border border-border bg-card p-5">
-                        <p className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
-                          Before this grade can be released
-                        </p>
-                        {releaseChecks.map((check) => (
-                          <div
-                            key={check.label}
-                            className="flex items-center justify-between gap-3 border-b border-border-faint py-1.5 last:border-b-0"
-                          >
-                            <span className="text-[12px] text-ink">{check.label}</span>
-                            <span
-                              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                                check.met ? "bg-primary/10 text-primary" : "bg-status-warning-bg text-status-warning-text"
-                              }`}
-                            >
-                              <span className="size-[5px] rounded-full bg-current" />
-                              {check.state}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-
-                    {/* The working position. Copying happens candidate by
-                        candidate, so the link has to be here as well as at
-                        the top -- otherwise it is a scroll to the top of the
-                        page between every one. Ramy asked for both. */}
-                    {trainer && appianUrl ? (
-                      <a
-                        href={appianUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="trainer-hover-fill self-start rounded-[6px] border border-border px-3 py-1.5 text-[12px] font-medium text-ink"
-                      >
-                        Open Appian &rarr;
-                      </a>
-                    ) : trainer ? (
-                      /* Course Admin's entry-form card says this when the URL
-                         is missing rather than hiding itself. A button that
-                         silently vanishes never tells a centre it forgot a
-                         setting -- which is the state both centres are in. */
-                      <p className="text-[11px] text-muted">
-                        No Appian sign-in link set yet &mdash;{" "}
-                        <Link href="/centre/settings" className="text-primary hover:underline">
-                          add one in Centre Settings
-                        </Link>
-                        .
-                      </p>
-                    ) : null}
-                  </div>
+                  )}
                 </div>
-              </div>
+
+                  {/* Tutors only, and one line unless something is actually
+                      outstanding. Ramy: "do we need this everywhere, like,
+                      for every final recommended grade we need to have this?"
+                      The checks do vary per candidate -- one can be short on
+                      hours while another is not -- so the information is
+                      per-candidate and has to stay. What does not have to
+                      stay is five rows of "Met" on every card. */}
+                  {trainer ? (
+                    <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border-faint pt-3">
+                      {releaseChecks.every((c) => c.met) ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                          <span className="size-[5px] rounded-full bg-current" />
+                          Ready to release
+                        </span>
+                      ) : (
+                        <>
+                          <span className="text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
+                            Outstanding before release
+                          </span>
+                          {releaseChecks
+                            .filter((c) => !c.met)
+                            .map((check) => (
+                              <span
+                                key={check.label}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-status-warning-bg px-2.5 py-0.5 text-[11px] font-semibold text-status-warning-text"
+                              >
+                                <span className="size-[5px] rounded-full bg-current" />
+                                {check.label} &middot; {check.state}
+                              </span>
+                            ))}
+                        </>
+                      )}
+
+                      {/* Copying happens candidate by candidate, so the link
+                          stays per candidate rather than only at the top --
+                          Ramy asked for both. */}
+                      {appianUrl ? (
+                        <a
+                          href={appianUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="trainer-hover-fill ml-auto rounded-[6px] border border-border px-3 py-1 text-[11.5px] font-medium text-ink"
+                        >
+                          Open Appian &rarr;
+                        </a>
+                      ) : (
+                        <p className="ml-auto text-[11px] text-muted">
+                          No Appian sign-in link set yet &mdash;{" "}
+                          <Link href="/centre/settings" className="text-primary hover:underline">
+                            add one in Centre Settings
+                          </Link>
+                          .
+                        </p>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
             );
           })}
         </div>

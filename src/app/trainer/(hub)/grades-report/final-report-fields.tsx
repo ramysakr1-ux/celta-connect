@@ -49,7 +49,6 @@ export function FinalReportFields({
   };
   const update = r.final_update_notes ?? "";
   const evidence = r.final_higher_grade_evidence ?? "";
-  const rationale = record.overall_notes ?? "";
 
   // What the assessor pastes: the whole hand-over, in the order 14.4 lists
   // it, with only the parts that exist.
@@ -57,7 +56,6 @@ export function FinalReportFields({
     record.final_recommended_grade ? `RECOMMENDED GRADE: ${record.final_recommended_grade}` : null,
     update ? `UPDATE ON STRENGTHS AND AREAS FOR DEVELOPMENT:\n${update}` : null,
     isBorderline && evidence ? `WHAT EVIDENCE WAS PROVIDED FOR A PASS/HIGHER:\n${evidence}` : null,
-    rationale ? `RATIONALE:\n${rationale}` : null,
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -68,11 +66,20 @@ export function FinalReportFields({
     // Appian report.
     return (
       <div className="flex flex-col gap-3.5 rounded-[6px] border border-border bg-card p-5">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">Recommended grade</span>
+          {record.final_recommended_grade ? (
+            <span className="rounded-full bg-ink px-2.5 py-0.5 text-[11px] font-bold text-card">
+              {record.final_recommended_grade}
+            </span>
+          ) : (
+            <span className="text-[12px] text-muted italic">Not yet recorded</span>
+          )}
+        </div>
         <ReadBlock label="Update on strengths and areas for development" value={update} required />
         {isBorderline ? (
           <ReadBlock label="What evidence was provided for a pass/higher" value={evidence} />
         ) : null}
-        <ReadBlock label="Rationale for the final grade" value={rationale} />
         {handover ? (
           <div className="flex justify-start">
             <CopyField value={handover} label="Copy for the Assessor Report" />
@@ -85,6 +92,27 @@ export function FinalReportFields({
   return (
     <form action={action} className="flex flex-col gap-3.5 rounded-[6px] border border-border bg-card p-5">
       <input type="hidden" name="trainee_id" value={record.trainee_id} />
+
+      <div className="flex items-center justify-between gap-3">
+        <label htmlFor={`grd-${record.trainee_id}`} className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">
+          Recommended grade
+        </label>
+        <select
+          id={`grd-${record.trainee_id}`}
+          name="final_recommended_grade"
+          defaultValue={record.final_recommended_grade ?? ""}
+          className="appearance-none rounded-[6px] border border-border bg-card-inset px-3 py-1.5 text-center text-[13px] text-ink outline-none focus:border-primary"
+        >
+          <option value="">Not yet decided</option>
+          <option value="Pass">Pass</option>
+          <option value="Pass B">Pass B</option>
+          <option value="Pass A">Pass A</option>
+          <option value="Fail">Fail</option>
+          <option value="Withdrawn">Withdrawn</option>
+          <option value="Extension">Extension</option>
+          <option value="Deferred">Deferred</option>
+        </select>
+      </div>
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor={`upd-${record.trainee_id}`} className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">
@@ -126,22 +154,6 @@ export function FinalReportFields({
            was not would silently lose what the tutor wrote. */
         <input type="hidden" name="final_higher_grade_evidence" value={evidence} />
       )}
-
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor={`rat-${record.trainee_id}`} className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">
-          Rationale for the final grade
-        </label>
-        <p className="text-[11px] leading-[1.45] text-muted">
-          Handbook 14.4 asks for one per candidate. Enforced here only on a slashed grade.
-        </p>
-        <textarea
-          id={`rat-${record.trainee_id}`}
-          name="overall_notes"
-          rows={3}
-          defaultValue={rationale}
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-[13px] text-ink outline-none focus:border-primary"
-        />
-      </div>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 

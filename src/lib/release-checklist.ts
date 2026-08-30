@@ -109,11 +109,19 @@ export function buildReleaseChecklist(input: {
   // slash." So this line only appears for a slashed candidate. On a straight
   // grade the rationale is still offered on the page and still welcome -- it
   // is simply not something the centre is held to.
+  // Points at final_higher_grade_evidence, not overall_notes. Handbook 15.2:
+  // the evidence field "is optional but should be completed for any
+  // candidates that were borderline (e.g., Pass/Fail, Pass/Pass B) so there
+  // is a justification recorded for the final recommended grade." That IS
+  // the rationale for a borderline candidate, and it is the box the Grade
+  // form now shows -- checking a different column would report a gap the
+  // tutor has no way to close from this page.
+  const evidence = (record as { final_higher_grade_evidence?: string | null } | null)?.final_higher_grade_evidence;
   const rationale: ReleaseCheck | null = wasSlashed
     ? {
-        label: "Rationale for the slashed grade",
-        met: Boolean(record?.overall_notes?.trim()),
-        state: record?.overall_notes?.trim() ? "Met" : "Required",
+        label: "Justification for the borderline grade",
+        met: Boolean(evidence?.trim()),
+        state: evidence?.trim() ? "Met" : "Required",
       }
     : null;
 

@@ -710,32 +710,55 @@ export async function updateUpgradeConditions(
 // Pass/Fail, Pass/Pass B) so there is a justification recorded for the final
 // recommended grade."
 //
+// Deliberately NOT overall_notes. There was a third box here called
+// "rationale for the final grade", and Ramy was right that it made no sense
+// beside the other two: 15.2 says the evidence field exists "so there is a
+// justification recorded for the final recommended grade", which IS the
+// rationale, and for a straight grade Appian has no rationale field at all.
+// overall_notes stays on the CELTA 5 record, where it is the centre's own
+// note rather than something the assessor submits.
+//
 // Same visibility treatment as the rest of the final report -- gated at the
 // UI layer, since celta5_records has no trainee-self SELECT policy.
 export async function updateFinalReportFields(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole("trainer");
+  const trainer = await requireRole("trainer");
 
   const traineeId = formData.get("trainee_id");
   if (typeof traineeId !== "string" || !traineeId) {
     return { error: "Something went wrong. Refresh and try again." };
   }
 
+  // The Grade form sets the recommended grade here rather than through a
+  // second form beside this one. Ramy, 30 Aug 2026, looking at the MCT side:
+  // "there's just too many boxes... it's confusing even for me, and I've
+  // been doing this for fifteen years." Same validation and the same
+  // milestone check as updateFinalGrade, which still serves the CELTA 5
+  // record's own fuller form.
+  const validGrades = ["Pass", "Pass B", "Pass A", "Fail", "Withdrawn", "Extension", "Deferred"] as const;
+  const gradeRaw = formData.get("final_recommended_grade");
+  const grade =
+    typeof gradeRaw === "string" && (validGrades as readonly string[]).includes(gradeRaw)
+      ? (gradeRaw as (typeof validGrades)[number])
+      : null;
+
   const supabase = await createClient();
   const { error } = await supabase
     .from("celta5_records")
     .update({
+      final_recommended_grade: grade,
       final_update_notes: optionalString(formData.get("final_update_notes")),
       final_higher_grade_evidence: optionalString(formData.get("final_higher_grade_evidence")),
-      overall_notes: optionalString(formData.get("overall_notes")),
     } as never)
     .eq("trainee_id", traineeId);
 
   if (error) {
     return { error: "Could not save. Try again." };
   }
+
+  if (grade && trainer.course_id) await checkFinalGradeMilestone(supabase, trainer.course_id, trainer.id);
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   revalidatePath("/trainer/grades-report");
