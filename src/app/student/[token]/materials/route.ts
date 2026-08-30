@@ -16,6 +16,19 @@ import { createZip, safeZipName, type ZipEntry } from "@/lib/zip";
 // identity -- and the same admin-signed storage reads the page itself uses,
 // since a volunteer could never sign a storage URL themselves.
 
+// file_name is a human title -- "Present perfect -- slides" -- and carries
+// no extension; the real one lives on storage_path (and file_type). On the
+// page that never showed, because a signed URL serves its own content type
+// and the browser opens it regardless. Inside a zip it matters completely:
+// an extensionless file lands on the desktop as something no OS will open
+// by double-click, which would have made a working archive useless anyway.
+function withExtension(name: string, storagePath: string | null, fileType: string | null): string {
+  if (/\.[a-z0-9]{2,5}$/i.test(name)) return name;
+  const fromPath = storagePath?.match(/\.([a-z0-9]{2,5})$/i)?.[1];
+  const ext = fromPath ?? (fileType && /^[a-z0-9]{2,5}$/i.test(fileType) ? fileType : null);
+  return ext ? `${name}.${ext.toLowerCase()}` : name;
+}
+
 export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const admin = createAdminClient();
@@ -35,7 +48,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
     admin.from("courses").select("name").eq("id", accessToken.course_id).maybeSingle(),
     admin
       .from("volunteer_shared_materials")
-      .select("created_at, tp_materials(file_name, slides_url, storage_path, tp_plans(tp_number))")
+      .select("created_at, tp_materials(file_name, file_type, slides_url, storage_path, tp_plans(tp_number))")
       .eq("course_id", accessToken.course_id)
       .order("created_at", { ascending: false }),
     admin
@@ -49,7 +62,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
   const { data: sessionRows } = otherEventIds.length
     ? await admin
         .from("session_materials")
-        .select("timetable_event_id, storage_path, file_name, slides_url, created_at")
+        .select("timetable_event_id, storage_path, file_name, file_type, slides_url, created_at")
         .in("timetable_event_id", otherEventIds)
     : { data: [] };
   const eventTitleById = new Map((otherEvents ?? []).map((e) => [e.id, e.title]));
@@ -57,11 +70,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
   // Everything the volunteer can see, flattened to "which folder, what
   // file" -- teaching practice grouped by TP number, other sessions by the
   // event's own title, exactly as the page groups them on screen.
-  const wanted: { folder: string; fileName: string; storagePath: string | null; slidesUrl: string | null; modified: string | null }[] = [];
+  const wanted: { folder: string; fileName: string; fileType: string | null; storagePath: string | null; slidesUrl: string | null; modified: string | null }[] = [];
 
   for (const row of shared ?? []) {
     const m = row.tp_materials as unknown as {
       file_name: string | null;
+      file_type: string | null;
       slides_url: string | null;
       storage_path: string | null;
       tp_plans: { tp_number: number } | null;
@@ -70,6 +84,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
     wanted.push({
       folder: m.tp_plans?.tp_number != null ? `TP${m.tp_plans.tp_number}` : "Teaching practice",
       fileName: m.file_name ?? "Material",
+      fileType: m.file_type,
       storagePath: m.storage_path,
       slidesUrl: m.slides_url,
       modified: row.created_at,
@@ -80,6 +95,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
     wanted.push({
       folder: safeZipName(eventTitleById.get(m.timetable_event_id) ?? "Sessions", "Sessions"),
       fileName: m.file_name ?? "Material",
+      fileType: m.file_type,
       storagePath: m.storage_path,
       slidesUrl: m.slides_url,
       modified: m.created_at,
@@ -110,7 +126,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
       else failed.push(`${w.folder}/${w.fileName}`);
       continue;
     }
-    let name = `${w.folder}/${safeZipName(w.fileName, "Material")}`;
+    let name = `${w.folder}/${withExtension(safeZipName(w.fileName, "Material"), w.storagePath, w.fileType)}`;
     if (usedNames.has(name)) {
       const dot = name.lastIndexOf(".");
       let n = 2;
