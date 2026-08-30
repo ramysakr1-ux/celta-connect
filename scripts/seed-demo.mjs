@@ -440,6 +440,13 @@ async function main() {
     { aim: "Reading for gist and detail: a city life article", grade: "to_standard", days: 9, materialNames: ["Reading for gist and detail -- handout", "Reading for gist -- comprehension questions"] },
     { aim: "Vocabulary: Air Travel", grade: "above_standard", days: 6, materialNames: ["Air Travel vocabulary -- flashcards", "Air Travel -- listening transcript", "Air Travel -- matching worksheet"] },
     { aim: "Functional language: Making suggestions", grade: "to_standard", days: 3, materialNames: ["Making suggestions -- worksheet", "Making suggestions -- role-play cards"] },
+    // Ramy, 30 Aug 2026: "provisional grades are submitted around the end of
+    // TP6, so it doesn't make sense that we have one and two TPs in there --
+    // there should be at least six." The demo had candidates carrying a
+    // provisional grade after one or two TPs, which is not a state a real
+    // course is ever in.
+    { aim: "Receptive skills: listening for specific information", grade: "above_standard", days: 2, materialNames: [] },
+    { aim: "Grammar: second conditional in context", grade: "above_standard", days: 1, materialNames: [] },
   ].entries()) {
     const planId = await seedTaughtTp(trainees["Amara Okafor"], i + 1, {
       aim: cfg.aim,
@@ -485,6 +492,10 @@ async function main() {
   for (const [i, cfg] of [
     { aim: "Grammar: First conditional", grade: "to_standard", days: 10 },
     { aim: "Listening for gist: a podcast about moving abroad", grade: "not_to_standard", days: 4 },
+    { aim: "Vocabulary: describing character", grade: "to_standard", days: 8 },
+    { aim: "Reading for detail: a workplace article", grade: "to_standard", days: 6 },
+    { aim: "Functional language: making arrangements", grade: "to_standard", days: 3 },
+    { aim: "Grammar: past continuous for interrupted actions", grade: "to_standard", days: 1 },
   ].entries()) {
     await seedTaughtTp(trainees["Daniel Kim"], i + 1, {
       aim: cfg.aim,
@@ -521,14 +532,24 @@ async function main() {
     anonymous: false,
   });
 
-  // Priya: early-stage, 1 TP taught
-  await seedTaughtTp(trainees["Priya Sharma"], 1, {
-    aim: "Reading for gist and detail: a workplace article",
-    grade: "to_standard",
-    strengths: ["Warm, confident classroom presence"],
-    actionPoints: ["Give clearer time limits on tasks"],
-    daysAgo: 2,
-  });
+  // Priya: six TPs like the others, but the weakest profile of the three --
+  // a provisional grade only makes sense once the TP cycle is nearly done.
+  for (const [i, cfg] of [
+    { aim: "Reading for gist and detail: a workplace article", grade: "to_standard", days: 12 },
+    { aim: "Vocabulary: food and cooking", grade: "not_to_standard", days: 10 },
+    { aim: "Grammar: comparatives", grade: "to_standard", days: 8 },
+    { aim: "Speaking: giving opinions", grade: "to_standard", days: 6 },
+    { aim: "Listening for gist: a radio interview", grade: "not_to_standard", days: 3 },
+    { aim: "Functional language: apologising", grade: "to_standard", days: 1 },
+  ].entries()) {
+    await seedTaughtTp(trainees["Priya Sharma"], i + 1, {
+      aim: cfg.aim,
+      grade: cfg.grade,
+      strengths: ["Warm, confident classroom presence"],
+      actionPoints: ["Give clearer time limits on tasks"],
+      daysAgo: cfg.days,
+    });
+  }
   await supabase.from("celta5_records").insert({
     course_id: course.id,
     trainee_id: trainees["Priya Sharma"],

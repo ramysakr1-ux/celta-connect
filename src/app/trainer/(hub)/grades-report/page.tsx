@@ -168,11 +168,32 @@ export default async function GradesReportPage() {
       />
 
       <div className="sheet sheet-garnet">
+        {/* Rewritten 30 Aug 2026. Ramy: "provisional grades are submitted
+            around the end of TP6... provisional grades are set by the trainer
+            around stage two -- it's not correct. Final discussion is only
+            needed for candidates who are marked in doubt -- that's all
+            wrong."
+            
+            He is right on both, and the Handbook is explicit. 14.4: "The
+            course tutor must contact the assessor to confirm the final
+            recommended grade for EACH candidate, providing an update on
+            strengths and areas for development for EACH candidate and a
+            rationale for EACH final grade." Not only the slashed ones -- and
+            C14_GREEN bears it out, where all five candidates carry an update,
+            including the four straight passes.
+            
+            Timing: 11.4 has the centre complete the grade form and submit it
+            via Appian BEFORE the assessment, which lands near the end of the
+            course, not at Stage 2. */}
         <p className="mt-2 text-sm text-muted">
-          Provisional grades are set by the trainer around Stage 2 -- if a candidate is genuinely in
-          doubt between two grades, mark them as such below. A final justification is only needed
-          for candidates who were marked in doubt; anyone who simply maintained their provisional
-          trajectory needs no extra comment.
+          Every candidate gets a provisional grade, proposed near the end of the teaching practice cycle and confirmed
+          by the MCT before it goes to the assessor. A straight grade needs nothing further at this stage. A slashed
+          grade &mdash; Fail/Pass, Pass/Pass B, Pass B/Pass A &mdash; means the last TPs decide it, and needs the box
+          below saying what the candidate must do to reach the higher band.
+        </p>
+        <p className="mt-2 text-sm text-muted">
+          At the final grade, every candidate gets a rationale: what they did to reach the higher band, or what they
+          did not (Handbook 14.4).
         </p>
       </div>
 
@@ -335,12 +356,18 @@ export default async function GradesReportPage() {
                           {record.overall_notes}
                         </p>
                       </div>
-                    ) : wasSlashed ? (
-                      <p className="text-sm text-destructive">
-                        This candidate was marked in doubt at the provisional stage -- a final justification is expected
-                        before this record is complete.
+                    ) : (
+                      /* Every candidate is owed one, not only the slashed --
+                         Handbook 14.4's "a rationale for each final grade".
+                         The slashed ones are just more urgent, because the
+                         rationale has to answer the conditions set at the
+                         provisional stage. */
+                      <p className={`text-sm ${wasSlashed ? "text-destructive" : "text-muted"}`}>
+                        {wasSlashed
+                          ? "Slashed at the provisional stage -- the rationale has to say whether they met the conditions below."
+                          : "No rationale written yet. Handbook 14.4 expects one for every candidate, not only the slashed."}
                       </p>
-                    ) : null}
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-5">
@@ -357,7 +384,44 @@ export default async function GradesReportPage() {
                       ) : null}
                     </div>
 
-                    {trainer ? <UpgradeConditionsForm traineeId={trainee.id} record={record} /> : null}
+                    {trainer ? (
+                      <UpgradeConditionsForm traineeId={trainee.id} record={record} />
+                    ) : wasSlashed && record?.provisional_upgrade_conditions && record.provisional_approved_at ? (
+                      /* Ramy, 30 Aug 2026, looking at the assessor's view:
+                         "if someone is a slash, there should be a separate
+                         box at the bottom -- do we have that?" We had the
+                         data and the tutors' form, but the assessor saw
+                         nothing: this was `: null`.
+                         
+                         It is exactly what they are there to moderate -- a
+                         paired provisional is the centre saying the last two
+                         TPs decide it, and these are the conditions they set.
+                         Read-only, and only once the grade has been
+                         confirmed and sent, same as everything else here. */
+                      <div className="flex flex-col gap-1.5 rounded-[6px] border p-4"
+                        style={{
+                          background: "color-mix(in oklab, var(--color-gold) 10%, var(--color-card))",
+                          borderColor: "color-mix(in oklab, var(--color-gold) 30%, transparent)",
+                        }}
+                      >
+                        <div className="flex items-baseline justify-between gap-3">
+                          <span className="text-[12px] font-semibold text-ink">
+                            In order to deserve the higher grade, they need to
+                          </span>
+                          <CopyField value={record.provisional_upgrade_conditions} label="Upgrade conditions" />
+                        </div>
+                        {record.provisional_upgrade_conditions
+                          .split("\n")
+                          .map((linePart) => linePart.trim())
+                          .filter(Boolean)
+                          .map((linePart, i) => (
+                            <div key={i} className="flex items-start gap-2">
+                              <span className="shrink-0 text-[11px] leading-[1.5] text-gold">—</span>
+                              <span className="text-[12px] leading-[1.5] text-ink">{linePart}</span>
+                            </div>
+                          ))}
+                      </div>
+                    ) : null}
 
                     {/* Tutors only -- the centre's own readiness, not the
                         assessor's business. Reports what is outstanding; the
