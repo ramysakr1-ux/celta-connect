@@ -14,7 +14,7 @@ import { BranchVisibilityCard } from "@/app/centre/owner/branch-visibility-card"
 // 'this surface carries real weight,' not a fifth tab that happens to look
 // the same." Ink + garnet, a dark header band, warmer parchment field --
 // see Centre Owner Landing.dc.html for the exact tokens.
-export default async function CentreOwnerPage() {
+export default async function CentreOwnerPage({ searchParams }: { searchParams: Promise<{ branch?: string }> }) {
   const session = await getCurrentProfile();
   if (!session?.profile) redirect("/login");
   const profile = session.profile;
@@ -22,7 +22,24 @@ export default async function CentreOwnerPage() {
   const ctx = await getCentreRoleContext(profile);
   if (!ctx.roles.includes("centre_owner")) redirect("/centre");
 
-  const centerId = ctx.activeCenterId ?? profile.center_id;
+  // The header carries a branch filter (Centre Management's own, from the
+  // shared layout) and this page ignored it -- so it read "All branches"
+  // while every figure below was one branch's, and the eyebrow named that
+  // branch. Ramy saw exactly that on a screen whose whole premise is owning
+  // more than one centre.
+  //
+  // Two different scopes, deliberately:
+  //   - The FIGURES answer "how is my centre doing", so they follow the
+  //     filter and total across every branch when it says All branches.
+  //   - The ROLE BUILDER, custom roles, branch visibility and the overrides
+  //     are per-centre rows. There is no such thing as editing "all
+  //     branches'" permissions at once, so those stay on one branch and the
+  //     card now says which.
+  const { branch } = await searchParams;
+  const mine = ctx.availableCenterIds.filter(Boolean);
+  const scope = branch && mine.includes(branch) ? [branch] : mine.length > 0 ? mine : [profile.center_id];
+  const aggregated = scope.length > 1;
+  const centerId = branch && mine.includes(branch) ? branch : (ctx.activeCenterId ?? profile.center_id);
   const admin = createAdminClient();
 
   // Ramy, 27 Aug 2026 (round 2): every query below only needs centerId,
@@ -35,10 +52,10 @@ export default async function CentreOwnerPage() {
   const [cachedCenter, { data: center }, { data: courses }, { data: grants }, { data: ownerActions }, { data: customRoles }, { data: customCapabilities }] =
     await Promise.all([
       getCachedCenter(centerId),
-      admin.from("centers").select("id, name, organisation_id").eq("id", centerId).maybeSingle(),
-      admin.from("courses").select("id, start_date, end_date").eq("center_id", centerId),
-      admin.from("centre_roles").select("id, profile_id, role").eq("center_id", centerId).is("revoked_at", null),
-      admin.from("centre_owner_actions").select("id, created_at").eq("center_id", centerId),
+      admin.from("centers").select("id, name, organisation_id, currency").eq("id", centerId).maybeSingle(),
+      admin.from("courses").select("id, start_date, end_date").in("center_id", scope),
+      admin.from("centre_roles").select("id, profile_id, role, center_id").in("center_id", scope).is("revoked_at", null),
+      admin.from("centre_owner_actions").select("id, created_at").in("center_id", scope),
       admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId),
       admin.from("centre_custom_capabilities").select("capability_key, label").eq("center_id", centerId),
     ]);
@@ -65,6 +82,12 @@ export default async function CentreOwnerPage() {
       : Promise.resolve({ data: [] as { id: string; name: string }[] }),
   ]);
   const nameById = new Map((people ?? []).map((p) => [p.id, p.full_name]));
+  // "Who holds what" spans branches now, so each row names its own -- the
+  // column used to print the current centre's name against every row.
+  const branchNameById = new Map<string, string>([
+    ...(center ? ([[center.id, center.name]] as [string, string][]) : []),
+    ...((siblings ?? []).map((b) => [b.id, b.name]) as [string, string][]),
+  ]);
   const planIds = (plans ?? []).map((p) => p.id);
   const siblingBranches = siblings ?? [];
 
@@ -102,8 +125,9 @@ export default async function CentreOwnerPage() {
       <div className="owner-header flex items-start justify-between gap-6 px-11 py-9">
         <div>
           <p className="owner-eyebrow" style={{ color: "oklch(78% 0.03 75)" }}>
-            {siblingBranches.length > 0 ? `${siblingBranches.length + 1} branches · ` : ""}
-            {center?.name ?? "Your centre"}
+            {aggregated
+              ? `All branches · ${scope.length} centres`
+              : `${siblingBranches.length > 0 ? `${siblingBranches.length + 1} branches · ` : ""}${center?.name ?? "Your centre"}`}
           </p>
           <h1 className="owner-serif mt-2 text-[33px] font-semibold text-[oklch(98%_0.008_85)]">Centre owner</h1>
           <p className="mt-2 max-w-[480px] text-[13px] leading-relaxed text-[oklch(74%_0.025_75)]">
@@ -117,7 +141,7 @@ export default async function CentreOwnerPage() {
       <div className="flex flex-col gap-[30px] px-11 py-9">
         <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
           <StatCard label="Courses running" value={String(coursesRunning)} />
-          <StatCard label="Outstanding balance" value={formatMoney(outstandingBalance)} accent />
+          <StatCard label="Outstanding balance" value={formatMoney(outstandingBalance, center?.currency)} accent />
           <StatCard label="People with a centre role" value={String(peopleWithRole)} />
           <StatCard label="Owner actions logged" value={String(ownerActionsThisMonth)} suffix="this month" />
         </div>
@@ -126,6 +150,15 @@ export default async function CentreOwnerPage() {
           <BranchVisibilityCard centerId={centerId} centerName={center?.name ?? "This branch"} siblings={siblingBranches} visibilityRows={visibilityRows} />
         ) : null}
 
+        {/* Permissions are per-centre rows, so there is no editing "all
+            branches" at once. When the figures above are totalling several,
+            say plainly which one these pills apply to. */}
+        {aggregated ? (
+          <p className="-mb-4 text-[11.5px]" style={{ color: "var(--owner-muted)" }}>
+            Roles and permissions below apply to <strong>{center?.name ?? "this branch"}</strong>. Pick a branch in
+            the header to configure another.
+          </p>
+        ) : null}
         <CapabilityCustomizer overrides={ctx.overrides} customRoles={customRoles ?? []} capabilityRows={capabilityRows} />
 
         <div className="owner-card flex flex-col gap-4 px-7 py-6">
@@ -142,7 +175,7 @@ export default async function CentreOwnerPage() {
                   {roleLabel(g.role, customRoles ?? [])}
                 </span>
                 <span className="text-[11px]" style={{ color: "var(--owner-muted)" }}>
-                  {center?.name ?? ""}
+                  {branchNameById.get(g.center_id) ?? center?.name ?? ""}
                 </span>
               </div>
             ))}
@@ -199,6 +232,14 @@ function StatCard({ label, value, suffix, accent }: { label: string; value: stri
   );
 }
 
-function formatMoney(amount: number): string {
-  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(amount);
+// Was hard-coded to GBP, so a New York centre's balance read in sterling.
+// centers.currency is the centre's own; sterling stays the fallback for a
+// centre that has not set one rather than guessing from the address.
+function formatMoney(amount: number, currency: string | null | undefined): string {
+  const code = currency && /^[A-Z]{3}$/.test(currency) ? currency : "GBP";
+  return new Intl.NumberFormat(code === "USD" ? "en-US" : "en-GB", {
+    style: "currency",
+    currency: code,
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
