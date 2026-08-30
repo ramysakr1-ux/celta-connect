@@ -400,10 +400,13 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // linked_tp_number -> plan_assignments lookup nextClass gets above, just
   // batched across every class in the list (which can span more than one
   // course -- "hours are the unit, never levels or courses").
-  // Four classes: the next one, then the three most recent.
+  // Three classes: the next one, then the two most recent.
   //
-  // Straight from Volunteer View.dc.html, whose own fixture is exactly four
-  // rows -- one upcoming, two attended, one missed. Not a log.
+  // Volunteer View.dc.html's own fixture is four rows -- one upcoming, two
+  // attended, one missed -- and Ramy trimmed it further once he saw real
+  // data in it: "maybe maximum three, and then the rest will just be on the
+  // card." With a volunteer who has missed a run of classes, four rows of
+  // red is three too many. Not a log.
   //
   // It was classes.slice(0, 12), which on a 48-session course meant twelve
   // rows all reading "Upcoming", directly above a card saying "you've come
@@ -418,7 +421,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
   // not a record.
   const upcomingForList = classes.filter((c) => c.eventDate >= today);
   const pastForList = classes.filter((c) => c.eventDate < today);
-  const listClasses = [...upcomingForList.slice(-1), ...pastForList.slice(0, 3)];
+  const listClasses = [...upcomingForList.slice(-1), ...pastForList.slice(0, 2)];
   const tpKeysNeeded = listClasses.filter((c) => c.linkedTpNumber != null).map((c) => ({ courseId: c.courseId, tpNumber: c.linkedTpNumber as number }));
   const listCourseIds = [...new Set(tpKeysNeeded.map((k) => k.courseId))];
   const { data: listAssignments } = listCourseIds.length
@@ -588,7 +591,11 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                 />
               ) : null}
               <ClassesTable rows={rows} />
-              <div className="grid grid-cols-[2fr_1fr] items-start gap-5">
+              {/* Ramy: the hours card is "almost half the page... make it a bit
+                  smaller, and then this course make it a little bigger."
+                  Closer to even, so the two read as a pair rather than one
+                  card with a footnote beside it. */}
+              <div className="grid grid-cols-[1.35fr_1fr] items-start gap-5">
                 <HoursCard
                   hoursCredited={hoursCredited}
                   hoursRemaining={hoursRemaining}
@@ -999,22 +1006,29 @@ function HoursCard({
 }) {
   return (
     <div
-      className="rounded-[10px] border p-3.5"
-      style={{ borderColor: "color-mix(in oklab, var(--color-primary) 18%, transparent)", background: "color-mix(in oklab, var(--color-primary) 8%, var(--color-card))" }}
+      className="rounded-[10px] border border-t-[3px] p-3.5"
+      style={{
+        borderColor: "color-mix(in oklab, var(--color-primary) 22%, transparent)",
+        borderTopColor: "var(--color-primary)",
+        background: "linear-gradient(160deg, color-mix(in oklab, var(--color-primary) 10%, var(--color-card)), var(--color-card) 70%)",
+      }}
     >
       <div className="flex items-baseline justify-between gap-2.5">
-        <p className="text-[13px] font-semibold text-ink">Your hours</p>
+        <p className="flex items-center gap-1.5 text-[10px] font-bold tracking-[0.1em] text-primary uppercase">
+          <span aria-hidden className="size-1.5 rounded-full bg-current" />
+          Your hours
+        </p>
         <p className="flex items-baseline gap-1">
-          <span className="font-serif text-[21px] font-semibold" style={{ color: "var(--color-ink-warm)" }}>
+          <span className="font-serif text-[26px] leading-none font-semibold text-primary">
             {hoursCredited.toFixed(1)}
           </span>
-          <span className="text-[11px] text-muted">hrs</span>
+          <span className="text-[11px] font-semibold text-primary/70">hrs</span>
         </p>
       </div>
       <p className="mt-1 text-xs text-muted">
         {hoursRemaining > 0 ? `You are ${hoursRemaining.toFixed(1)} hours from your certificate.` : "You've reached the certificate threshold."}
       </p>
-      <div className="mt-2.5 h-[5px] overflow-hidden rounded-full" style={{ background: "oklch(93.5% 0.012 85)" }}>
+      <div className="mt-2.5 h-2 overflow-hidden rounded-full" style={{ background: "color-mix(in oklab, var(--color-primary) 14%, transparent)" }}>
         <div className="h-full rounded-full bg-primary" style={{ width: `${progressPct}%` }} />
       </div>
       <div className="mt-2.5 flex gap-[7px]">
@@ -1036,12 +1050,30 @@ function ThisCourseCard({
   thisCourseHeldSoFar: number;
   thisCourseClasses: { eventId: string; eventDate: string; attended: boolean | null }[];
 }) {
+  // A stat, not a sentence. Ramy: "the scores you've come to blah blah blah
+  // -- make it a stat instead." The number is the thing a volunteer is
+  // looking for; it was buried mid-sentence in muted 12px text while the
+  // sentence around it carried no information they needed.
+  const pct = thisCourseHeldSoFar > 0 ? Math.round((thisCourseAttended / thisCourseHeldSoFar) * 100) : null;
   return (
     <div className="rounded-[10px] border border-border bg-card p-3.5">
-      <p className="text-xs font-semibold text-ink">This course</p>
-      <p className="mt-1 text-xs text-muted">
-        You&apos;ve come to {thisCourseAttended} of {thisCourseHeldSoFar} classes held so far. {thisCourseClasses.length} in total.
-      </p>
+      <p className="text-[10px] font-bold tracking-[0.1em] text-muted uppercase">This course</p>
+      <div className="mt-1.5 flex items-baseline gap-1.5">
+        <span className="font-serif text-[28px] leading-none font-semibold text-ink">{thisCourseAttended}</span>
+        <span className="text-[13px] text-muted">of {thisCourseHeldSoFar} so far</span>
+        {pct !== null ? (
+          <span
+            className="ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold"
+            style={{
+              background: "color-mix(in oklab, var(--color-primary) 12%, transparent)",
+              color: "var(--color-primary)",
+            }}
+          >
+            {pct}%
+          </span>
+        ) : null}
+      </div>
+      <p className="mt-1 text-[11px] text-muted">{thisCourseClasses.length} classes in the course</p>
       <div className="mt-2 flex gap-1">
         {thisCourseClasses
           .slice()
