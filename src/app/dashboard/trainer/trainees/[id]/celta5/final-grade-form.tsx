@@ -3,14 +3,20 @@
 import { useActionState } from "react";
 import { updateFinalGrade, type FormState } from "@/app/dashboard/trainer/celta5-actions";
 import { GRADE_DESCRIPTORS } from "@/lib/celta-criteria";
-import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
 import type { Database } from "@/lib/supabase/types";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 
 const initialState: FormState = { error: null };
 
-export function FinalGradeForm({ record }: { record: Celta5Record }) {
+export function FinalGradeForm({
+  record,
+  showOverallNotes = true,
+}: {
+  record: Celta5Record;
+  /** False on the Grade form, where FinalReportFields owns overall_notes. */
+  showOverallNotes?: boolean;
+}) {
   const [state, action, pending] = useActionState(updateFinalGrade, initialState);
 
   return (
@@ -48,7 +54,13 @@ export function FinalGradeForm({ record }: { record: Celta5Record }) {
         </div>
       </details>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {/* items-end, not the default stretch: "Preparing, planning and
+          practising teaching" wraps to two lines where "Written assignments"
+          takes one, which left the two selects at different heights. Ramy,
+          30 Aug 2026: "can we align them, please?" Bottom-aligning the cells
+          lines the selects up whatever the labels do, which a min-height on
+          the labels would not survive at a narrower column. */}
+      <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <label className="text-sm text-muted">Preparing, planning and practising teaching</label>
           <select
@@ -95,15 +107,34 @@ export function FinalGradeForm({ record }: { record: Celta5Record }) {
         </select>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-sm text-muted">Overall notes</label>
-        <TrainerFeedbackTextarea
-          name="overall_notes"
-          rows={4}
-          defaultValue={record.overall_notes ?? ""}
-          className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
-        />
-      </div>
+      {/* Suppressed on the Grade form, where FinalReportFields owns this
+          column and renders it as "Rationale for the final grade" beside the
+          update and the evidence -- the three things Handbook 14.4 has the
+          tutor hand to the assessor together. Two textareas writing
+          overall_notes on one page is last-save-wins, and silently.
+
+          Plain textarea, no tone rewriter. Ramy, 30 Aug 2026, twice: "we
+          don't need the supportive tone, direct tone thing here." That tool
+          is for feedback a candidate reads; this is a rationale for the
+          assessor. */}
+      {showOverallNotes ? (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={`fg-notes-${record.trainee_id}`} className="text-sm text-muted">
+            Overall notes
+          </label>
+          <textarea
+            id={`fg-notes-${record.trainee_id}`}
+            name="overall_notes"
+            rows={4}
+            defaultValue={record.overall_notes ?? ""}
+            className="rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
+          />
+        </div>
+      ) : (
+        /* Still submitted, so saving a grade here cannot blank a rationale
+           written in the other box. */
+        <input type="hidden" name="overall_notes" value={record.overall_notes ?? ""} />
+      )}
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 

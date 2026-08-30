@@ -9,6 +9,49 @@ type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 
 const initialState: FormState = { error: null };
 
+// Derived, not re-listed: PROVISIONAL_SLOTS stays the one place a valid slot
+// is defined, and is what the server action validates against. A slot added
+// there lands in the right group here without anyone remembering to.
+const STRAIGHT_GRADES = PROVISIONAL_SLOTS.filter((o) => !o.includes("/") && o !== "Withdrawn");
+const BORDERLINE_GRADES = PROVISIONAL_SLOTS.filter((o) => o.includes("/"));
+
+function Divider() {
+  return <span aria-hidden className="mx-0.5 h-4 w-px shrink-0 bg-border" />;
+}
+
+function SlotPill({
+  opt,
+  slot,
+  setSlot,
+}: {
+  opt: string;
+  slot: string;
+  setSlot: (fn: (prev: string) => string) => void;
+}) {
+  const selected = slot === opt;
+  const [lower, upper] = opt.includes("/") ? opt.split("/") : [opt, null];
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={() => setSlot((prev) => (prev === opt ? "" : opt))}
+      className={`shrink-0 rounded-full border px-2.5 py-1 text-[11.5px] font-medium whitespace-nowrap transition-colors ${
+        selected
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border text-muted trainer-hover-fill hover:text-ink"
+      }`}
+    >
+      {lower}
+      {upper ? (
+        <>
+          <span className={selected ? "mx-[3px] opacity-60" : "mx-[3px] opacity-45"}>/</span>
+          {upper}
+        </>
+      ) : null}
+    </button>
+  );
+}
+
 function slotFromRecord(record: Celta5Record | null): string {
   if (!record?.provisional_grade) return "";
   return record.provisional_grade_upper
@@ -44,30 +87,38 @@ export function ProvisionalGradeForm({
       <form action={action} className="flex flex-col gap-2">
         <input type="hidden" name="trainee_id" value={traineeId} />
         <input type="hidden" name="provisional_slot" value={slot} />
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Eight options in one undifferentiated row wrapped onto two lines
+            and read as mush -- Ramy, 30 Aug 2026, reciting it back: "fail
+            pass, fail pass pass, pass b pass pass a withdrawn. Why is it
+            messy?"
+
+            They are not eight equal things. Four are grades, three are the
+            borderlines BETWEEN consecutive grades, and Withdrawn is not a
+            grade at all. So the row is grouped that way, the label moves out
+            of the row to give the options the full width, and the slash in a
+            paired option is dimmed so "Pass B/Pass A" reads as one token
+            rather than two grades sitting next to each other. */}
+        <div className="flex items-center justify-between gap-3">
           <span className="text-xs text-muted">Provisional grade</span>
-          {PROVISIONAL_SLOTS.map((opt) => (
-            <button
-              key={opt}
-              type="button"
-              aria-pressed={slot === opt}
-              onClick={() => setSlot((prev) => (prev === opt ? "" : opt))}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                slot === opt
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border text-muted trainer-hover-fill hover:text-ink"
-              }`}
-            >
-              {opt}
-            </button>
-          ))}
           <button
             type="submit"
             disabled={pending}
-            className="ml-auto rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover-fill disabled:opacity-60"
+            className="rounded-[6px] border border-border px-3 py-1 text-[13px] text-ink trainer-hover-fill disabled:opacity-60"
           >
             {pending ? "Saving..." : "Save"}
           </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5">
+          {STRAIGHT_GRADES.map((opt) => (
+            <SlotPill key={opt} opt={opt} slot={slot} setSlot={setSlot} />
+          ))}
+          <Divider />
+          {BORDERLINE_GRADES.map((opt) => (
+            <SlotPill key={opt} opt={opt} slot={slot} setSlot={setSlot} />
+          ))}
+          <Divider />
+          <SlotPill opt="Withdrawn" slot={slot} setSlot={setSlot} />
         </div>
         {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       </form>

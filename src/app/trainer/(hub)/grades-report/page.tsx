@@ -412,7 +412,7 @@ export default async function GradesReportPage() {
                   <div className="flex flex-col gap-5">
                     <div className="flex flex-col gap-3.5 rounded-[6px] border border-border bg-card p-5">
                       {trainer && record ? (
-                        <FinalGradeForm record={record} />
+                        <FinalGradeForm record={record} showOverallNotes={false} />
                       ) : record?.final_recommended_grade ? (
                         <div className="flex items-center justify-between gap-3">
                           <span className="text-[11px] font-bold tracking-[0.1em] text-gold uppercase">Recommended grade</span>
