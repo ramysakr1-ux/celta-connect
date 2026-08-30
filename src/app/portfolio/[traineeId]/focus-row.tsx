@@ -21,9 +21,13 @@ const FOCUS_ROUTES = [
   // The watch screen itself, not its /task child -- that page is ordinary
   // reading-width content.
   /\/filmed-observation\/[^/]+$/,
-  // Ramy, 29 Aug 2026: "once you click, you're jumping inside a different
-  // room. So the entire page is a resource hub, nothing else there."
-  /\/resources$/,
+  // Resource Hub used to be here, on Ramy's 29 Aug "once you click, you're
+  // jumping inside a different room" -- but dropping the rail also drops the
+  // trainee's only navigation, and on 30 Aug he saw the consequence: "the
+  // bracket should be on the resource hub... it should be where I came
+  // from." A room you cannot see your way out of is not a room, it is a
+  // dead end. The rail stays; the page still gets the full container width
+  // beside it.
   // The timetable's grid is nine time bands wide -- the design file sets a
   // 1280px minimum, so inside the rail and the container it starts scrolling
   // sideways before it has shown a full day. Ramy, 29 Aug 2026, asked for

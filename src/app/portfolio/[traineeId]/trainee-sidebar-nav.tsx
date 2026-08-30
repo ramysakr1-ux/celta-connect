@@ -57,7 +57,12 @@ export function TraineeSidebarNav({ traineeId }: { traineeId: string }) {
           <Link
             key={tab.href}
             href={href}
-            className={`rounded-[6px] border-l-[3px] px-2.5 py-2 text-[13px] ${
+            // trainee-hover-fill, not the ring: these are tab-like bounded
+            // controls, which is the half of the 24 Aug rule that takes a
+            // fill. They had only hover:text-ink, so the rail was the one
+            // part of the trainee's chrome that did not respond to the
+            // pointer at all.
+            className={`trainee-hover-fill rounded-[6px] border-l-[3px] px-2.5 py-2 text-[13px] transition-colors ${
               active ? "border-l-primary font-semibold text-primary" : "border-l-transparent font-medium text-muted hover:text-ink"
             }`}
           >
