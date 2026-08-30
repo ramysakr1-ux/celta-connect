@@ -5,6 +5,7 @@ import { signOut } from "@/app/login/actions";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
+import { CentreSettingsCard } from "@/app/centre/settings-card";
 import { CentreTabs } from "@/app/centre/centre-tabs";
 import { BranchFilter } from "@/app/centre/branch-filter";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -110,22 +111,11 @@ export default async function CentreLayout({ children }: { children: React.React
           is fixed with real height plus its own offset from the screen
           edge -- pb-6 alone left this card underneath it at the bottom of
           the page. */}
-      {can(ctx.roles, "centre.settings.edit", ctx.overrides) ? (
-        <div className="container pb-24">
-          <Link
-            href="/centre/settings"
-            className="admin-hover-fill card flex items-center justify-between gap-4 px-[22px] py-[18px] transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
-          >
-            <div className="flex flex-col gap-[3px]">
-              <span className="font-serif text-[15px] font-semibold text-ink">Centre settings</span>
-              <span className="text-[11.5px] text-muted">
-                Centre profile, Google Drive connection, payment providers, admin roles
-              </span>
-            </div>
-            <span className="shrink-0 text-sm font-medium text-primary">Open settings &rarr;</span>
-          </Link>
-        </div>
-      ) : null}
+      {/* Hides itself on /centre/settings -- this layout wraps that page
+          too, so the bar was inviting you to open the page you were already
+          standing on. The permission check stays here on the server; only
+          "am I already there" needs the client. */}
+      {can(ctx.roles, "centre.settings.edit", ctx.overrides) ? <CentreSettingsCard /> : null}
 
       {adminChatRooms.length > 0 ? <AdminChatBar profileId={profile.id} rooms={adminChatRooms} /> : null}
     </div>
