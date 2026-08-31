@@ -143,6 +143,35 @@ export default async function TpHubPage({
 
   const planByTpNumber = new Map((plans ?? []).map((p) => [p.tp_number, p]));
   const lessonByTpNumber = new Map((lessons ?? []).map((l) => [l.tp_number as number, l]));
+
+  // The real scheduled dates. tp_lessons is a dead table -- the comment
+  // further down has said so for a while -- so every row's metadata line
+  // read "Not yet scheduled" while the header above it said "6 of 8
+  // taught": a screen contradicting itself in one glance.
+  //
+  // Sequential rather than in the batch above because it needs the course
+  // id, which is on the plans themselves.
+  const planCourseId = (plans ?? [])[0]?.course_id ?? null;
+  const { data: tpEvents } = planCourseId
+    ? await supabase
+        .from("course_timetable_events")
+        .select("event_date, linked_tp_number")
+        .eq("course_id", planCourseId)
+        .eq("type", "tp")
+        .not("linked_tp_number", "is", null)
+    : { data: [] as { event_date: string; linked_tp_number: number | null }[] };
+
+  // Earliest timetabled date per TP number -- a TP round runs across two
+  // days in several groups, and the candidate wants the day their own
+  // rotation starts, not the last one in the round.
+  const scheduledByTpNumber = new Map<number, string>();
+  for (const e of tpEvents ?? []) {
+    const n = e.linked_tp_number as number;
+    const prev = scheduledByTpNumber.get(n);
+    if (!prev || e.event_date < prev) scheduledByTpNumber.set(n, e.event_date);
+  }
+  const dayMonth = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   const tpPlanByTpNumber = new Map((tpPlans ?? []).map((p) => [p.tp_number, p]));
   const selfEvalByTpNumber = new Map((selfEvaluations ?? []).map((s) => [s.tp_number, s]));
   const feedbackByTpNumber = new Map((feedbackRows ?? []).map((f) => [f.tp_number, f]));
@@ -344,7 +373,21 @@ export default async function TpHubPage({
                   <div className="flex flex-1 flex-col gap-0.5">
                     <p className="text-sm text-ink">{plan.short_title ?? shortenAim(plan.main_lesson_aim)}</p>
                     <p className="text-xs text-muted">
-                      {[lesson?.lesson_date ?? "Not yet scheduled", lesson?.level, trainerName, lesson?.length_minutes ? `${lesson.length_minutes} mins` : label.name]
+                      {/* taught_at is the real record of when it happened;
+                          the timetable is the answer for one still ahead.
+                          Level and length are dropped rather than shown
+                          blank -- they only ever existed on the dead
+                          table, and an absent fact beats a false one. */}
+                      {[
+                        plan.taught_at
+                          ? dayMonth(plan.taught_at.slice(0, 10))
+                          : scheduledByTpNumber.has(tpNumber)
+                            ? dayMonth(scheduledByTpNumber.get(tpNumber)!)
+                            : "Not yet scheduled",
+                        lesson?.level,
+                        trainerName,
+                        lesson?.length_minutes ? `${lesson.length_minutes} mins` : label.name,
+                      ]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
