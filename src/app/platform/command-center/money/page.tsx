@@ -4,7 +4,20 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 function money(amount: number, currency: string) {
-  return `${currency}${amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  // Was `${currency}${amount...}` -- currency here is an ISO code, so it
+  // rendered "GBP2,000" / "USD2,000" rather than a symbol. Intl knows how to
+  // place the symbol for the locale; an unrecognised code falls back to the
+  // plain number rather than throwing.
+  try {
+    return new Intl.NumberFormat(currency === "USD" ? "en-US" : "en-GB", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
 }
 
 // command-center-full-spec.md's Money section -- billing is Connect's own

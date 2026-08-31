@@ -41,7 +41,7 @@ export default async function CentreOverviewPage({
   const admin = createAdminClient();
   const canSeeAdmissions = canView(ctx.roles, "admissions.view", ctx.overrides);
   const [{ data: centres }, { data: courses }, { data: applicants }, { data: payments }, { count: unreadAdmissionsCount }] = await Promise.all([
-    admin.from("centers").select("id, name, center_number").in("id", mine),
+    admin.from("centers").select("id, name, center_number, currency").in("id", mine),
     admin
       .from("courses")
       .select("id, name, center_id, start_date, end_date, delivery_mode, course_code")
@@ -139,7 +139,24 @@ export default async function CentreOverviewPage({
   const withDeposit = (applicants ?? []).filter((a) => a.deposit_paid_at);
   const depositsHeld = withDeposit.reduce((sum, a) => sum + Number(a.deposit_amount ?? 0), 0);
   const missed = (payments ?? []).filter((p) => p.status === "missed");
-  const currency = (payments ?? [])[0]?.currency ?? "";
+  // Was `(payments ?? [])[0]?.currency ?? ""` -- the ISO code off the first
+  // payment row, then string-concatenated below, which rendered "GBP2,000".
+  // It also ignored centers.currency entirely, so setting the centres to USD
+  // changed nothing here, and a centre with no payments yet showed a bare
+  // "2,000" with no currency at all.
+  //
+  // The centre's own currency is the answer; the first payment row is the
+  // fallback for a centre that has not set one, and GBP behind that.
+  //
+  // Known limitation, unchanged by this: these totals SUM payments without
+  // regard to each row's own currency. That is correct while a centre bills
+  // in one currency (all three do) and wrong the moment one does not -- it
+  // would add dollars to pounds. Converting needs rates and a decision about
+  // which currency to report in, so it is deliberately not guessed here.
+  const currencyCode =
+    (centres ?? []).map((c) => (c as { currency?: string | null }).currency).find((c) => c && /^[A-Z]{3}$/.test(c)) ??
+    (payments ?? [])[0]?.currency ??
+    "GBP";
 
   const stageCounts = new Map<string, number>();
   // "the pipeline is totalled with a per-branch split beneath"
@@ -151,7 +168,12 @@ export default async function CentreOverviewPage({
     stageByBranch.set(a.stage, per);
   }
 
-  const money = (n: number) => `${currency}${n.toLocaleString("en-GB", { maximumFractionDigits: 0 })}`;
+  const moneyFormatter = new Intl.NumberFormat(currencyCode === "USD" ? "en-US" : "en-GB", {
+    style: "currency",
+    currency: currencyCode,
+    maximumFractionDigits: 0,
+  });
+  const money = (n: number) => moneyFormatter.format(n);
   const dateRange = (a: string | null, b: string | null) => {
     const fmt = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
     return a && b ? `${fmt(a)} – ${fmt(b)}` : "Dates not set";
