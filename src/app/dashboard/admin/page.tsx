@@ -30,6 +30,14 @@ const GROUP_LABEL: Record<LandingGroup, string> = {
   running: "Running",
 };
 const GROUP_ORDER: LandingGroup[] = ["interviewing", "launching", "running"];
+
+// Course rows printed raw ISO -- "2026-08-10 → 2026-09-04" -- while Centre
+// Management's own course list reads "10 Aug – 4 Sept". Same courses, two
+// screens, two formats. This matches the readable one.
+function courseDates(start: string | null, end: string | null): string {
+  const fmt = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return start && end ? `${fmt(start)} – ${fmt(end)}` : "Dates not set";
+}
 const GROUP_PILL_CLASS: Record<LandingGroup, string> = {
   interviewing: "status-pill bg-primary/10 text-primary",
   launching: "status-pill bg-primary/10 text-primary",
@@ -158,15 +166,20 @@ export default async function AdminDashboardPage() {
           </p>
           <h1 className="font-serif text-[24px] font-semibold text-ink">Courses</h1>
         </div>
-        {/* The create form already lives in the sidebar, so this jumps to it
-            rather than pointing at a /courses/new route that does not exist --
-            a primary button that 404s is worse than no button. */}
-        <Link
-          href="/dashboard/admin/courses/new"
-          className="flex h-[34px] shrink-0 items-center rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold whitespace-nowrap text-primary-foreground"
-        >
-          New course
-        </Link>
+        {/* Hidden for anyone who cannot create a course.
+        
+            The wizard itself is gated on course.create now, so a Course
+            administrator clicking this was bounced straight back here -- a
+            primary button that refuses you is worse than no button, the same
+            reasoning the comment here already gave about one that 404s. */}
+        {mayCreateCourses ? (
+          <Link
+            href="/dashboard/admin/courses/new"
+            className="flex h-[34px] shrink-0 items-center rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold whitespace-nowrap text-primary-foreground"
+          >
+            New course
+          </Link>
+        ) : null}
       </div>
 
       {center?.center_number.startsWith("PENDING-") ? (
@@ -237,7 +250,7 @@ export default async function AdminDashboardPage() {
                         <div className="min-w-0">
                           <p className="truncate text-sm font-semibold text-ink">{row.course.name}</p>
                           <p className="mt-0.5 text-xs text-muted">
-                            {row.course.start_date} &rarr; {row.course.end_date}
+                            {courseDates(row.course.start_date, row.course.end_date)}
                           </p>
                         </div>
                         {row.counts ? (
