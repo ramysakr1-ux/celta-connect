@@ -70,12 +70,21 @@ export default async function AdminDashboardPage() {
   // Centre material -- shared by every course at this centre, built once
   // and carried forward (mirrors the design's own framing: "the centre
   // owns the shell, the course owns the people").
-  const [tpPoints, briefs, resources, styleExamples, coursebooks] = await Promise.all([
+  // Ramy, 31 Aug 2026, on this being the slowest page left: four sequential
+  // stages, each paying a full round trip before the next begins. The centre
+  // material counts and the what-changed feed depend only on
+  // profile.center_id -- already known before any of them ran -- so they
+  // waited on stage 1 for no reason. Same collapse already applied to
+  // /centre and getCentreRoleContext.
+  const [[tpPoints, briefs, resources, styleExamples, coursebooks], recentChanges] = await Promise.all([
+    Promise.all([
     supabase.from("tp_points").select("id", { count: "exact", head: true }).eq("center_id", profile.center_id),
     supabase.from("assignment_templates").select("id", { count: "exact", head: true }).eq("center_id", profile.center_id),
     supabase.from("resources").select("id", { count: "exact", head: true }).eq("center_id", profile.center_id),
     supabase.from("feedback_style_examples").select("id", { count: "exact", head: true }).eq("center_id", profile.center_id),
     supabase.from("tp_coursebooks").select("id", { count: "exact", head: true }).eq("center_id", profile.center_id),
+    ]),
+    getRecentCentreChanges(profile.center_id),
   ]);
 
   const centreMaterial = [
@@ -95,8 +104,6 @@ export default async function AdminDashboardPage() {
     { label: "Feedback style examples", count: styleExamples.count ?? 0, suffix: "", href: "/dashboard/admin/settings#feedback-style" },
     { label: "Coursebooks", count: coursebooks.count ?? 0, suffix: "", href: "/dashboard/admin/coursebooks" },
   ];
-
-  const recentChanges = await getRecentCentreChanges(profile.center_id);
 
   const eventDatesByCourse = new Map<string, string[]>();
   for (const e of events ?? []) {
