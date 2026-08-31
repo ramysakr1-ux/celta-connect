@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(37.5% 0.058 195); text-decoration: none; }
+  button { font: inherit; cursor: pointer; }
+</style>
+</helmet>
+
+<div style="width: 1400px; box-sizing: border-box; padding: 34px 40px 60px; font-family: Karla, Helvetica, sans-serif; color: oklch(23.5% 0.017 65); display: flex; flex-direction: column; gap: 30px;">
+
+  <div style="display: flex; flex-direction: column; gap: 9px; max-width: 1080px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · leaving mid-course · the administrative half</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">The tutors handle the conversation. This is everything that follows it.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">The teaching side — the letter, the CELTA 5, what carries forward — is drawn already. What sits with the administrator is the fee, the place, the entry to Cambridge, and, for a deferral, a promise the centre has to keep months later.</div>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: baseline; gap: 12px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">{{ caseName }}</div>
+        <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ caseMeta }}</div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <sc-for list="{{ kinds }}" as="k" hint-placeholder-count="3">
+          <button onClick="{{ k.pick }}" style="font-size: 11.5px; font-weight: 600; padding: 8px 14px; border-radius: 6px; border: 1px solid {{ k.border }}; background: {{ k.bg }}; color: {{ k.ink }};">{{ k.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-top: 3px solid {{ spine }}; border-radius: 6px; padding: 20px 22px; display: flex; flex-direction: column; gap: 15px;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 5px; max-width: 860px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: {{ spine }};">{{ kindLabel }}</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 23px; font-weight: 600; line-height: 1.2;">{{ headline }}</div>
+          <div style="font-size: 12.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ headNote }}</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end; flex: none;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">On the record as</div>
+          <div style="font-size: 13px; font-weight: 700; color: {{ spine }}; background: {{ chip }}; border-radius: 99px; padding: 5px 13px;">{{ recordedAs }}</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+        <sc-for list="{{ tasks }}" as="t" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 168px 1fr 92px; gap: 12px; align-items: start; padding: 11px 13px; border: 1px solid oklch(89.5% 0.012 82); border-left: 3px solid {{ t.spine }}; border-radius: 5px;">
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+              <div style="font-size: 12px; font-weight: 600;">{{ t.what }}</div>
+              <div style="font-size: 10px; color: oklch(56% 0.017 70);">{{ t.who }}</div>
+            </div>
+            <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ t.note }}</div>
+            <div style="font-size: 10.5px; font-weight: 600; color: {{ t.spine }}; text-align: right;">{{ t.state }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div id="1b" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">The fee</div>
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-size: 12.5px; line-height: 1.6; color: oklch(38% 0.017 65); text-wrap: pretty;">{{ feeIntro }}</div>
+        <sc-for list="{{ feeRows }}" as="f" hint-placeholder-count="4">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 45%, transparent);">
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+              <div style="font-size: 12px; font-weight: 600;">{{ f.label }}</div>
+              <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ f.note }}</div>
+            </div>
+            <div style="font-size: 12.5px; font-weight: 600; color: {{ f.ink }}; text-align: right; flex: none;">{{ f.value }}</div>
+          </div>
+        </sc-for>
+        <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">Connect never decides a refund. It shows what the centre's own published policy says for this date, and whoever settles it puts their name against the figure.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">{{ rightTitle }}</div>
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid color-mix(in oklab, {{ spine }} 30%, transparent); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-size: 12.5px; line-height: 1.6; color: oklch(38% 0.017 65); text-wrap: pretty;">{{ rightIntro }}</div>
+        <sc-for list="{{ rightRows }}" as="r" hint-placeholder-count="4">
+          <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 10px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 45%, transparent);">
+            <div style="width: 3px; align-self: stretch; border-radius: 99px; background: {{ r.spine }}; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 12.5px; font-weight: 600;">{{ r.title }}</div>
+              <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ r.note }}</div>
+            </div>
+          </div>
+        </sc-for>
+        <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ rightFoot }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+    <sc-for list="{{ notes }}" as="n" hint-placeholder-count="3">
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-left: 3px solid {{ n.spine }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 12.5px; font-weight: 700; color: {{ n.spine }};">{{ n.title }}</div>
+        <div style="font-size: 12px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const GOLD = 'oklch(63% 0.096 72)'; // retired -- see color-consistency legend, unused below
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const CARD = 'oklch(99.5% 0.004 90)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+const T = (what, who, note, state, spine) => ({ what, who, note, state, spine });
+
+class Component extends DCLogic {
+  state = { kind: 'defer' };
+
+  renderVals() {
+    const kind = this.state.kind;
+    const fee = 42000;
+    const money = n => '₺' + n.toLocaleString('en-GB');
+
+    const KINDS = {
+      early: {
+        label: 'Withdrew in week one', spine: MUTED, chipTone: MUTED,
+        recordedAs: 'Withdrawn',
+        headline: 'Left before any assessed teaching',
+        headNote: 'Two days in, no assessed lesson, no assignment submitted. Administratively the cleanest version and the one where a place can genuinely be refilled.',
+        tasks: [
+          T('Cambridge entry', 'Course admin', 'Entry not yet submitted, so the name comes off the list rather than being amended later.', 'Removed', GREEN),
+          T('The place', 'Admissions', 'Offered to the waiting list the same day. Day three is the last point that is fair on the person arriving.', 'Refilled', GREEN),
+          T('Fee', 'Payments', 'Centre policy: full refund less the deposit inside the first week — or no refund and a free place on a later course, if he would rather start again.', 'His choice', MUTED),
+          T('Volunteer class', 'Course admin', 'Group of six becomes five. The halves resplit three and two automatically.', 'Adjusted', TEAL),
+          T('CELTA 5', 'Main tutor', 'Opened and closed with the withdrawal date and the reason. It is not deleted.', 'Closed', TEAL),
+          T('Assessor pack', 'Automatic', 'Withdrawn candidates are included in the pack whatever week they left.', 'Included', TEAL),
+        ],
+        feeIntro: 'Withdrawal inside the first week, under the centre’s published policy.',
+        feeRows: [
+          { label: 'Paid', note: 'in full, 2 March', value: money(fee), ink: INK },
+          { label: 'Deposit retained', note: 'non-refundable in every scenario', value: '− ' + money(10500), ink: MUTED },
+          { label: 'Refund', note: 'settled by Deniz Arslan, 9 April', value: money(fee - 10500), ink: GREEN },
+          { label: 'Or a centre deferral', note: '6.9 · forced out in the first half, starts again from the beginning, no new fee', value: 'Offered', ink: TEAL },
+        ],
+        rightTitle: 'Refilling the place',
+        rightIntro: 'A place freeing in week one is worth a great deal, and there is a narrow window in which taking it is fair on the person offered it.',
+        rightRows: [
+          { spine: GREEN, title: 'Days one to three', note: 'Offerable. They have missed input that can be caught up, and no assessed teaching has happened.' },
+          { spine: MUTED, title: 'Day four onwards', note: 'The app warns. A candidate joining now has missed an assessed lesson they cannot retake, so a tutor decides rather than an administrator.' },
+          { spine: RED, title: 'Week two onwards', note: 'Refused. Six hours of assessed teaching cannot be fitted into what remains, and offering the place would set someone up to fail.' },
+          { spine: TEAL, title: 'Or a centre deferral instead of a refund', note: '6.9 lets a centre offer somebody forced out in the first half a place on a later course from the beginning, without a new fee, carrying any assessment he passed. At the centre’s discretion — but it must be on the table beside the refund, not instead of it.' },
+        ],
+        rightFoot: 'The waiting list surfaces on the course page the moment the withdrawal is recorded — nobody has to remember to look.',
+      },
+      defer: {
+        label: 'Cambridge deferral, week three', spine: TEAL, chipTone: TEAL,
+        recordedAs: 'Deferred',
+        headline: 'More than half the course completed, six months to finish',
+        headNote: 'Illness in week three, after four assessed lessons and two assignments. 6.9 allows it once more than half the course is done, at the centre’s discretion and with Cambridge’s confirmation. Everything freezes where it stands and travels to the course she returns on.',
+        tasks: [
+          T('Cambridge entry', 'Course admin', 'Amended, not withdrawn. The entry moves to the course she completes on.', 'Amended', TEAL),
+          T('The place', 'Admissions', 'Not refilled. Week three is too late for anyone to join and pass.', 'Left empty', MUTED),
+          T('Fee', 'Payments', 'Carried to the new course rather than refunded. Nothing is charged twice.', 'Carried', TEAL),
+          T('Appian form', 'Course admin', 'Submitted to Cambridge with the reasons and the arrangements for re-integration. Cambridge confirms before anything is settled with her.', 'Submitted', TEAL),
+          T('The deadline', 'Centre owner', 'A future course starting no later than 8 November — six months from the end of this course, because this one is full-time.', 'Tracked', MUTED),
+          T('Mode and familiarisation', 'Main tutor', 'Same mode by default. If she agrees in writing to switch, the centre owes her familiarisation activities.', 'Same mode', TEAL),
+          T('Grade this course', 'Main tutor', 'Recorded as deferred on the centre grade form. Not a fail, not blank.', 'Deferred', TEAL),
+          T('Portfolio', 'Main tutor', 'Frozen exactly as it stands, including work mid-marking, and travels with her.', 'Frozen', TEAL),
+        ],
+        feeIntro: 'A deferral is not a refund. The fee follows the candidate to the course she completes on.',
+        feeRows: [
+          { label: 'Paid', note: 'in full, 2 March', value: money(fee), ink: INK },
+          { label: 'Carried to the next course', note: 'held against C5/2026 or C6/2026', value: money(fee), ink: TEAL },
+          { label: 'To pay on return', note: 'nothing, unless the fee has risen and the centre chooses to charge the difference', value: '—', ink: MUTED },
+        ],
+        rightTitle: 'The promise the centre now holds',
+        rightIntro: 'This is where deferrals go wrong. Six months is long enough for the tutor to leave, the fee to change and everybody to forget — and the candidate is still owed a place.',
+        rightRows: [
+          { spine: MUTED, title: 'Six months from the end of this course', note: 'The future course must normally start no later than 8 November. Six months because C3 is full-time — a part-time original course gets twelve. The window is set by the course she left, and it runs from its end date, not from the day she withdrew.' },
+          { spine: TEAL, title: 'Same mode, unless she agrees otherwise in writing', note: '6.9 sets face-to-face to face-to-face as the default. She can agree to change it, and that agreement has to be written down — a verbal yes is not enough.' },
+          { spine: RED, title: 'A change of mode obliges familiarisation', note: 'If she moves from face-to-face to online, 6.9 requires the centre to provide familiarisation activities. Not optional, and not something to remember in week one — it attaches to the deferral when the mode changes.' },
+          { spine: TEAL, title: 'She joins the new course’s entry form', note: 'Added by name and marked deferred, and the assessor of that course is told before the visit — with comments from the previous assessor if there are any.' },
+          { spine: TEAL, title: 'How much carries is the centre’s judgement', note: '6.9 asks the centre to consider how much was completed and what the break will do to the outcome, and to make sure she understands the implications. Connect defaults to hours already assessed; a tutor changes it in writing.' },
+          { spine: RED, title: 'The date passing is not a silent expiry', note: 'If October arrives with nothing arranged, that is a centre failure and the app says so rather than closing the case.' },
+        ],
+        rightFoot: 'Both the centre and the assessor confirm her final grade with CELTA Admin at the end of the course she completes on.',
+      },
+      transfer: {
+        label: 'Centre deferral, week two', spine: GREEN, chipTone: GREEN,
+        recordedAs: 'Centre deferral → C5/2026',
+        headline: 'Starts again from the beginning on a later course',
+        headNote: 'Forced out in the first half — a family illness in week two, one assessed lesson done. The centre’s own arrangement: she is not carrying half a course forward, she is doing the whole thing again on the September intake. 6.9 lets the centre waive a second fee, and Cambridge is not asked to confirm anything.',
+        tasks: [
+          T('The record', 'Course admin', 'Reads “centre deferral from C3/2026 to C5/2026”, on both courses. Never a bare withdrawal on one and a fresh application on the other.', 'Linked', GREEN),
+          T('Cambridge entry', 'Course admin', 'Withdrawn from this course’s entry and entered normally on C5. A new entry, not an amendment — she is starting again.', 'Re-entered', TEAL),
+          T('Fee', 'Payments', '6.9 lets the centre waive a new course fee when somebody is forced out in the first half. The Cambridge entry fee is a separate decision.', 'Waived', GREEN),
+          T('What carries', 'Main tutor', 'Nothing, by default — she repeats the course. Any assessment she passed may be carried at the centre’s discretion, and the choice is recorded.', 'Nothing carried', MUTED),
+          T('The place', 'Admissions', 'Held on C5 from the day the transfer is agreed, so she is not competing with the waiting list for it.', 'Held', TEAL),
+          T('CELTA 5', 'Main tutor', 'This course’s record is closed with the transfer noted. A fresh one opens on C5.', 'Closed', TEAL),
+        ],
+        feeIntro: 'A transfer is not a refund and not a second bill. The course fee follows her; the Cambridge entry fee is the centre’s decision.',
+        feeRows: [
+          { label: 'Paid', note: 'in full, 2 March', value: money(fee), ink: INK },
+          { label: 'Course fee on C5/2026', note: '6.9 · forced out in the first half, at centre discretion', value: 'Waived', ink: GREEN },
+          { label: 'Cambridge entry fee', note: 'a second entry — the centre chooses whether to absorb it', value: 'By decision', ink: MUTED },
+          { label: 'Refund', note: 'none, and none expected — she has a place instead', value: money(0), ink: MUTED },
+        ],
+        rightTitle: 'Centre deferral, or Cambridge deferral',
+        rightIntro: 'Both are called deferral, and the paperwork is entirely different. The app will not let a centre deferral be recorded past the halfway point — above that line it is not the centre’s call.',
+        rightRows: [
+          { spine: GREEN, title: 'Centre deferral · she starts again', note: 'Less than half the course done. The centre decides alone: no Appian form, no Cambridge confirmation, no deferred grade. A withdrawal here and an ordinary entry there, linked so the record reads as one thing.' },
+          { spine: TEAL, title: 'Cambridge deferral · she finishes what she started', note: 'More than half done. Appian form, Cambridge confirms, grade recorded as deferred, and she joins the new entry marked deferred with the assessor told in advance.' },
+          { spine: MUTED, title: 'The halfway point decides which one', note: '6.9 draws the line there. Below it the centre may offer a place on a later course without a new fee; above it, only the Cambridge route exists. A candidate at exactly the midpoint is a conversation, not a calculation.' },
+          { spine: RED, title: 'It still shows in the assessor pack', note: 'She withdrew from this course, so her portfolio is in this course’s pack — however short it is, and whatever she goes on to do in September.' },
+        ],
+        rightFoot: 'Same-mode and familiarisation are Cambridge-deferral rules and do not apply here — she is doing a whole course in one mode, whichever she chooses.',
+      },
+      late: {
+        label: 'Withdrew in week five', spine: RED, chipTone: RED,
+        recordedAs: 'Withdrawn',
+        headline: 'Left with the course almost complete',
+        headNote: 'Four days from the end, five assessed lessons and three assignments in. The hardest one: too far in for a refund, too close to the end for a deferral to be obviously right.',
+        tasks: [
+          T('Cambridge entry', 'Course admin', 'Withdrawn from the entry. If it has been submitted, CELTA Admin is told in writing.', 'Notified', MUTED),
+          T('The place', 'Admissions', 'Nothing to refill. The course ends this week.', 'Not applicable', MUTED),
+          T('Fee', 'Payments', 'No refund under the published policy. This is why the policy has to be published.', 'No refund', RED),
+          T('Deferral offered?', 'Main tutor', 'With this much completed, a deferral is usually the better offer and must at least be discussed.', 'Discussed', MUTED),
+          T('CELTA 5', 'Main tutor', 'Completed to the point she reached, with the final progress record written.', 'Closed', TEAL),
+          T('Assessor pack', 'Automatic', 'Her portfolio must be in the pack. The assessor asks for every withdrawn candidate.', 'Required', RED),
+        ],
+        feeIntro: 'Withdrawal in the final week, under the centre’s published policy.',
+        feeRows: [
+          { label: 'Paid', note: 'in full, 2 March', value: money(fee), ink: INK },
+          { label: 'Refund due', note: 'no refund after the midpoint', value: money(0), ink: RED },
+          { label: 'Discretionary', note: 'the owner may waive part of it — recorded with who agreed and why', value: 'By decision', ink: MUTED },
+        ],
+        rightTitle: 'What the assessor will look for',
+        rightIntro: 'A withdrawal this late is the one an assessor reads carefully, because it usually means something was missed earlier.',
+        rightRows: [
+          { spine: RED, title: 'Her portfolio is in the pack', note: 'Every withdrawn candidate is included, alongside everyone graded Fail or potential Fail. Not a selection the centre makes.' },
+          { spine: MUTED, title: 'The progress records leading to it', note: 'Was she told at Stage 1 and Stage 2 that she was at risk? If the first written warning is week five, the process failed.' },
+          { spine: TEAL, title: 'Whether a deferral was offered', note: 'With most of the course completed, the handbook route is a deferral. Not offering it needs a reason on the record.' },
+        ],
+        rightFoot: 'Close-out will not complete while a withdrawal has an unanswered deferral question or an unsettled fee decision.',
+      },
+    };
+
+    const k = KINDS[kind];
+
+    return {
+      caseName: { defer: 'Sema Yıldız · C3/2026', early: 'Berk Altun · C3/2026', transfer: 'Zeynep Arı · C3/2026', late: 'Hande Kurt · C3/2026' }[kind],
+      caseMeta: { defer: 'week 3 of 5 · 4 assessed lessons · 2 assignments', early: 'day 2 of 20 · nothing assessed', transfer: 'week 2 of 5 · 1 assessed lesson · no assignments', late: 'week 5 of 5 · 5 assessed lessons · 3 assignments' }[kind],
+      kinds: [
+        { key: 'early', label: 'Week one' },
+        { key: 'transfer', label: 'Centre deferral, week two' },
+        { key: 'defer', label: 'Cambridge deferral, week three' },
+        { key: 'late', label: 'Week five' },
+      ].map(x => {
+        const on = x.key === kind;
+        return {
+          label: x.label,
+          pick: () => this.setState({ kind: x.key }),
+          bg: on ? CARD : 'transparent',
+          border: on ? TEAL : 'oklch(89.5% 0.012 82)',
+          ink: on ? TEAL : MUTED,
+        };
+      }),
+
+      spine: k.spine,
+      chip: tint(k.chipTone, 14),
+      kindLabel: k.label,
+      headline: k.headline,
+      headNote: k.headNote,
+      recordedAs: k.recordedAs,
+      tasks: k.tasks,
+      feeIntro: k.feeIntro,
+      feeRows: k.feeRows,
+      rightTitle: k.rightTitle,
+      rightIntro: k.rightIntro,
+      rightRows: k.rightRows,
+      rightFoot: k.rightFoot,
+
+      notes: [
+        { spine: TEAL, title: 'Every task has an owner', text: 'Cambridge entry, the place, the fee, the class, the record. Each sits with a named role, so nothing waits on the person who happens to notice.' },
+        { spine: MUTED, title: 'A deferral is the one with a future in it', text: 'A withdrawal ends. Either deferral creates an obligation months out, which is why both belong in the admin room and not only in the candidate’s file.' },
+        { spine: RED, title: 'Nothing is deleted, ever', text: 'Withdrawn and deferred candidates keep their record, their CELTA 5 and their place in the assessor pack. A course with a tidy roster and no withdrawals is the one that looks wrong.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(37.5% 0.058 195); text-decoration: none; }
+  button { font: inherit; cursor: pointer; }
+</style>
+</helmet>
+
+<div style="width: 1400px; box-sizing: border-box; padding: 34px 40px 60px; font-family: Karla, Helvetica, sans-serif; color: oklch(23.5% 0.017 65); display: flex; flex-direction: column; gap: 30px;">
+
+  <div style="display: flex; flex-direction: column; gap: 9px; max-width: 1080px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · course staffing</div>
+    <div style="font-size: 12px; color: oklch(56% 0.017 70);">The Hub access column is only you — flip it per tutor to control who sees the Connect Hub icon in their header. Off by default.</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">Who is teaching what, across every course that is running.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">The administrator answering this was not on the course and did not set it up. They need the roles, the dates, and who is stretched across two courses at once — and a tutor joining needs a first hour that does not consist of asking people things.</div>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: baseline; gap: 12px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Who is on which course</div>
+        <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ gateMeta }}</div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <sc-for list="{{ courses }}" as="c" hint-placeholder-count="3">
+          <button onClick="{{ c.pick }}" style="font-size: 11.5px; font-weight: 600; padding: 8px 14px; border-radius: 6px; border: 1px solid {{ c.border }}; background: {{ c.bg }}; color: {{ c.ink }};">{{ c.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: 1fr 190px 230px 160px 110px; gap: 16px; padding: 11px 16px; background: oklch(30% 0.042 58); color: oklch(97% 0.008 88); font-size: 11px; font-weight: 600;">
+        <div>Name</div>
+        <div>Role</div>
+        <div>Course</div>
+        <div>Supervising</div>
+        <div>Hub access</div>
+      </div>
+      <sc-for list="{{ staff }}" as="p" hint-placeholder-count="4">
+        <div style="display: grid; grid-template-columns: 1fr 190px 230px 160px 110px; gap: 16px; align-items: center; padding: 12px 16px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 55%, transparent); background: {{ p.bg }};">
+          <div style="display: flex; flex-direction: column; gap: 1px;">
+            <div style="font-size: 13px; font-weight: 600;">{{ p.name }}</div>
+            <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ p.email }}</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start;">
+            <div style="font-size: 10.5px; font-weight: 700; color: {{ p.ink }}; background: {{ p.chip }}; border-radius: 99px; padding: 3px 9px;">{{ p.role }}</div>
+            <div style="font-size: 10px; color: oklch(56% 0.017 70);">{{ p.approval }}</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 1px;">
+            <div style="font-size: 12px; font-weight: 600; color: oklch(38% 0.017 65);">{{ p.courseCode }}</div>
+            <div style="font-size: 10.5px; color: {{ p.modeInk }};">{{ p.courseMeta }}</div>
+          </div>
+          <div style="font-size: 11.5px; font-weight: 600; color: {{ p.superInk }};">{{ p.supervising }}</div>
+          <div onClick="{{ p.toggleHub }}" style="width: 34px; height: 20px; border-radius: 99px; padding: 2px; cursor: pointer; background: {{ p.hubTrackBg }};">
+            <div style="width: 16px; height: 16px; border-radius: 50%; background: white; transform: {{ p.hubKnobTransform }}; transition: transform .15s;"></div>
+          </div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ alsoOn }}" hint-placeholder-val="{{ true }}">
+        <div style="padding: 12px 16px; display: flex; flex-direction: column; gap: 7px; background: oklch(97.8% 0.008 85); border-bottom: 1px solid oklch(89.5% 0.012 82);">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Also teaching elsewhere at the same time</div>
+          <sc-for list="{{ alsoOn }}" as="a" hint-placeholder-count="2">
+            <div style="display: grid; grid-template-columns: 1fr 190px 230px 160px 110px; gap: 16px; align-items: center;">
+              <div style="font-size: 12px; font-weight: 600;">{{ a.name }}</div>
+              <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ a.role }}</div>
+              <div style="display: flex; flex-direction: column; gap: 1px;">
+                <div style="font-size: 11.5px; font-weight: 600;">{{ a.code }}</div>
+                <div style="font-size: 10.5px; color: {{ a.spine }};">{{ a.where }} · {{ a.mode }}</div>
+              </div>
+              <div></div>
+              <div></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display: grid; grid-template-columns: 1fr 190px 230px 160px 110px; gap: 16px; align-items: center; padding: 12px 16px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 55%, transparent); background: oklch(97.8% 0.008 85);">
+        <div style="display: flex; flex-direction: column; gap: 1px;">
+          <div style="font-size: 13px; font-weight: 600;">{{ assessor.name }}</div>
+          <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ assessor.meta }}</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start;">
+          <div style="font-size: 10.5px; font-weight: 700; color: oklch(51% 0.017 70); background: oklch(94% 0.008 85); border-radius: 99px; padding: 3px 9px;">Assessor</div>
+          <div style="font-size: 10px; color: oklch(56% 0.017 70);">Appointed by Cambridge</div>
+        </div>
+        <div style="font-size: 11.5px; font-weight: 600; color: {{ assessor.tone }};">{{ assessor.state }}</div>
+        <div style="font-size: 11px; color: oklch(56% 0.017 70);">No account · link only</div>
+        <div></div>
+      </div>
+      <div style="padding: 12px 16px; font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ staffFoot }}</div>
+    </div>
+  </div>
+
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">What this centre does differently</div>
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid color-mix(in oklab, oklch(63% 0.096 72) 34%, transparent); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-size: 12.5px; line-height: 1.6; color: oklch(38% 0.017 65); text-wrap: pretty;">An experienced tutor does not need CELTA explained. They need to know where this centre differs from the last one — which is the part nobody thinks to tell them.</div>
+        <sc-for list="{{ local }}" as="l" hint-placeholder-count="5">
+          <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 10px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 45%, transparent);">
+            <div style="width: 3px; align-self: stretch; border-radius: 99px; background: {{ l.spine }}; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 12.5px; font-weight: 600;">{{ l.title }}</div>
+              <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ l.note }}</div>
+            </div>
+          </div>
+        </sc-for>
+        <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">Written once by the centre, shown to every tutor who joins, and edited when a course changes it.</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+    <sc-for list="{{ notes }}" as="n" hint-placeholder-count="3">
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-left: 3px solid {{ n.spine }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 12.5px; font-weight: 700; color: {{ n.spine }};">{{ n.title }}</div>
+        <div style="font-size: 12px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const GOLD = 'oklch(63% 0.096 72)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const CARD = 'oklch(99.5% 0.004 90)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+const G = (what, ref, note, state, spine) => ({ what, ref, note, state, spine });
+
+class Component extends DCLogic {
+  state = { who: 'free', course: 'c3', hubAccess: {} };
+
+  renderVals() {
+    const who = this.state.who;
+    const course = this.state.course;
+
+    const COURSES = {
+      c3: { label: 'C3/2026 · April', code: 'C3/2026', dates: '6 Apr – 8 May', mode: 'Full-time', meta: '12 candidates · full-time · starts 6 April', staff: [
+        { name: 'Hakan Şen', email: 'hakan@centre.example', role: 'Main Course Tutor', tone: GREEN, approval: 'Main course tutor', groups: 'ABC and DEF', owns: 'CELTA 5s, grade meeting, the assessor visit', supervising: 'Ayşe Demir', superInk: GOLD },
+        { name: 'Sema Yıldız', email: 'sema@freelance.example', role: 'Assistant Course Tutor', tone: TEAL, approval: 'Freelance', groups: 'ABC', owns: 'TP feedback and assignments 1 and 3', supervising: '—', superInk: MUTED },
+        { name: 'Helen Whitmore', email: 'helen@centre.example', role: 'Assistant Course Tutor', tone: TEAL, approval: 'On staff', groups: 'DEF', owns: 'TP feedback, assignments 2 and 4, tutorials', supervising: '—', superInk: MUTED },
+        { name: 'Ayşe Demir', email: 'ayse@centre.example', role: 'Tutor in training', tone: GOLD, approval: 'Working towards approval', groups: 'Input only', owns: 'Four input sessions · nothing final', supervising: 'Supervised by Hakan', superInk: GOLD },
+      ]},
+      s1: { label: 'S1/2026 · summer', code: 'S1/2026', dates: '6 Jul – 7 Aug', mode: 'Full-time', meta: '12 candidates · full-time · starts 6 July', staff: [
+        { name: 'Helen Whitmore', email: 'helen@centre.example', role: 'Main Course Tutor', tone: GREEN, approval: 'Main course tutor', groups: 'ABC and DEF', owns: 'CELTA 5s, grade meeting, the assessor visit', supervising: '—', superInk: MUTED },
+        { name: 'Ayşe Demir', email: 'ayse@centre.example', role: 'Assistant Course Tutor', tone: TEAL, approval: 'On staff', groups: 'DEF', owns: 'TP feedback and assignments 2 and 4', supervising: '—', superInk: MUTED },
+        { name: 'Not yet assigned', email: 'one tutor short', role: 'Assistant Course Tutor', tone: RED, approval: 'Vacancy', groups: 'ABC', owns: 'TP feedback and assignments 1 and 3', supervising: '—', superInk: MUTED },
+      ]},
+      p2: { label: 'P2/2026 · part-time', code: 'P2/2026', dates: '12 Sep – 5 Dec', mode: 'Part-time', meta: '10 candidates · part-time, twelve weeks · starts 12 September', staff: [
+        { name: 'Hakan Şen', email: 'hakan@centre.example', role: 'Main Course Tutor', tone: GREEN, approval: 'Main course tutor', groups: 'ABC and DEF', owns: '', supervising: '—', superInk: MUTED },
+        { name: 'Sema Yıldız', email: 'sema@freelance.example', role: 'Assistant Course Tutor', tone: TEAL, approval: 'Freelance', groups: 'ABC and DEF', owns: '', supervising: '—', superInk: MUTED },
+      ]},
+    };
+
+    const WHO = {
+      free: {
+        label: 'Sema · freelance', role: 'Freelance tutor · joins for one course', spine: TEAL,
+        headline: 'Approved by Cambridge, new to this centre',
+        headNote: 'Twelve years of CELTA behind her and none of it here. What she does not know is this centre’s deadlines, its assignment briefs and which tutor decides what.',
+        verdict: 'Yes', verdictTone: GREEN,
+        gates: [
+          G('Cambridge approval', 'Handbook 4.2', 'Confirmed by the centre owner, with her approval email attached. Connect cannot check anything with Cambridge — it records who said so and keeps the evidence.', 'Recorded', GREEN),
+          G('Named on this course', '4.2', 'Added to C3/2026 by the centre owner, with the groups she is responsible for.', 'Named', GREEN),
+          G('Staff terms', 'Centre', 'Accepted once for this centre. She will not see it again on the next course.', 'Signed', GREEN),
+          G('Standardisation', '8.2', 'Attended the centre’s session, or watched the recorded one and marked the sample.', 'Done', GREEN),
+          G('Double-marking record', '8.2.3', 'Her first assignment marks are second-marked, as the centre requires of anyone new to it.', 'First course', GOLD),
+          G('DBS or local equivalent', 'Centre policy', 'Held by the centre, not by Connect. The record notes only that it was checked and when.', 'On file', GREEN),
+        ],
+      },
+      main: {
+        label: 'Hakan · main tutor', role: 'Main course tutor · this centre’s own', spine: GREEN,
+        headline: 'Everything already in place, one thing per course',
+        headNote: 'On staff, approved, and has run eleven courses here. Onboarding for him is not induction — it is the two or three things that changed since the last one.',
+        verdict: 'Yes', verdictTone: GREEN,
+        gates: [
+          G('Cambridge approval', 'Handbook 4.2', 'Recorded once when he joined, with his approval document on file. Nobody is asked to type a number they do not know.', 'Recorded', GREEN),
+          G('Named on this course', '4.2', 'Main tutor on C3/2026, responsible for the CELTA 5s.', 'Named', GREEN),
+          G('Staff terms', 'Centre', 'Signed in 2023. Not asked again.', 'Signed', GREEN),
+          G('Standardisation', '8.2', 'Runs it. His attendance is the session.', 'Leads it', GREEN),
+          G('Double-marking record', '8.2.3', 'He is the second marker for anyone new to the centre.', 'Second marker', TEAL),
+          G('What changed', 'Connect', 'Three things since C2: staggered submission, the new LFC brief, and the error log.', '3 to read', GOLD),
+        ],
+      },
+      training: {
+        label: 'Ayşe · in training', role: 'Tutor in training · observed and co-marked', spine: GOLD,
+        headline: 'Not yet approved, so nothing she writes is final',
+        headNote: 'Working towards approval under a supervisor. She teaches input, observes, and writes feedback — and every piece of it is read and released by someone else.',
+        verdict: 'Not alone', verdictTone: GOLD,
+        gates: [
+          G('Cambridge approval', 'Handbook 4.2', 'In progress. Until it is granted she cannot be the tutor of record for any assessment.', 'Pending', RED),
+          G('Supervisor named', 'Centre', 'Helen Whitmore. Every piece of feedback she writes is edited in place and released by Helen.', 'Assigned', GREEN),
+          G('Named on this course', '4.2', 'On C3/2026 as a tutor in training, visible as that to candidates.', 'Named', GREEN),
+          G('Input sessions', 'Centre', 'Three to four across the course, spread rather than clustered, language-focused in the middle.', 'Scheduled', TEAL),
+          G('Blind co-marking', '8.2.3', 'She marks assignments blind alongside the supervisor, and the two are compared.', 'Set up', TEAL),
+          G('The CELTA 5', '4.2', 'She cannot sign one. The supervisor holds every record she contributes to.', 'Blocked', RED),
+        ],
+      },
+    };
+
+    const w = WHO[who];
+
+    return {
+      gateMeta: COURSES[course].meta,
+      courses: Object.keys(COURSES).map(k => {
+        const on = k === course;
+        return {
+          label: COURSES[k].label,
+          pick: () => this.setState({ course: k }),
+          bg: on ? CARD : 'transparent',
+          border: on ? TEAL : 'oklch(89.5% 0.012 82)',
+          ink: on ? TEAL : MUTED,
+        };
+      }),
+      assessor: {
+        c3: { name: 'Not yet notified', meta: 'Cambridge appoints · visit expected week 4', tone: GOLD, state: 'Awaiting Cambridge' },
+        s1: { name: 'Not yet notified', meta: 'Cambridge appoints · course starts 6 July', tone: MUTED, state: 'Too early' },
+        p2: { name: 'Margaret Ellery', meta: 'Visiting Saturday 14 November · online', tone: GREEN, state: 'Confirmed' },
+      }[course],
+      staff: COURSES[course].staff.map(p => Object.assign({}, p, {
+        ink: p.tone, chip: tint(p.tone, 12),
+        bg: p.tone === RED ? tint(RED, 5) : 'transparent',
+        courseCode: COURSES[course].code,
+        courseMeta: COURSES[course].dates + ' · ' + COURSES[course].mode,
+        modeInk: COURSES[course].mode === 'Part-time' ? GOLD : TEAL,
+        hubAccess: !!this.state.hubAccess[p.name],
+        hubTrackBg: this.state.hubAccess[p.name] ? GREEN : 'oklch(89.5% 0.012 82)',
+        hubKnobTransform: this.state.hubAccess[p.name] ? 'translateX(14px)' : 'translateX(0px)',
+        toggleHub: () => this.setState(s => ({ hubAccess: Object.assign({}, s.hubAccess, { [p.name]: !s.hubAccess[p.name] }) })),
+      })),
+      alsoOn: (() => {
+        const here = COURSES[course].staff.map(p => p.name);
+        const rows = [];
+        Object.keys(COURSES).forEach(k => {
+          if (k === course) return;
+          COURSES[k].staff.forEach(p => {
+            if (here.indexOf(p.name) < 0) return;
+            rows.push({ name: p.name, where: COURSES[k].dates, code: COURSES[k].code, role: p.role, mode: COURSES[k].mode, spine: COURSES[k].mode === 'Part-time' ? GOLD : TEAL });
+          });
+        });
+        return rows;
+      })(),
+      staffFoot: course === 's1'
+        ? 'One tutor short with three months to go. A course cannot open with a vacancy, so it sits here in red rather than in somebody’s inbox.'
+        : course === 'p2'
+        ? 'Two tutors across twelve weeks. Hakan runs both this and the April course — the admin needs to see that before agreeing to a third.'
+        : 'Every role named, and a tutor in training shown as supervised by whom. Full-time across part-time is allowed and shown as a load; full-time across full-time is refused — the handbook forbids it, and Connect will not let a course open with it.',
+
+      local: [
+        { spine: GOLD, title: 'Assignments come in on two mornings', note: 'ABC and DEF submit on different days, so you mark six at a time rather than twelve. Your slots are already on your timetable.' },
+        { spine: GOLD, title: 'Met criteria stay met', note: 'On a resubmission you read only what was not met. Do not re-mark the whole thing — the app will not let you take back a criterion that passed.' },
+        { spine: TEAL, title: 'Feedback is written beside the plan', note: 'Not on a separate sheet. Star two action points and they arrive as personal aims in that candidate’s next lesson plan.' },
+        { spine: TEAL, title: 'You cannot mark a lesson you did not watch', note: 'Deliberate. If you cover for a colleague, you observe the next one rather than marking from their notes.' },
+        { spine: RED, title: 'Tutorials are a stage, not a chat', note: 'Stage 1, 2 and 3 each produce something on the record. Stage 3 is a letter. If you think someone is at risk, say so at Stage 1.' },
+      ],
+
+      notes: [
+        { spine: TEAL, title: 'Roles, not credentials', text: 'Connect records what someone does on a course — main tutor, course tutor, in training. It does not hold approval paperwork, because nobody asks a centre for it and a system that stores it invites somebody to keep it up to date.' },
+        { spine: GOLD, title: 'A course cannot start with a gap', text: 'Missing standardisation or an unnamed supervisor blocks the course opening, not a task list somewhere. It is the same pattern as acceptance blocking on a missing written task.' },
+        { spine: RED, title: 'In training means nothing is final', text: 'A tutor in training writes real feedback and it reaches nobody until a supervisor edits it in place and releases it. That edit is the training, and it is visible only to the two of them.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

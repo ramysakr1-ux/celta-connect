@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  button { font: inherit; cursor: pointer; }
+</style>
+</helmet>
+
+<div style="width: 1400px; box-sizing: border-box; padding: 34px 40px 60px; font-family: Karla, Helvetica, sans-serif; color: oklch(23.5% 0.017 65); display: flex; flex-direction: column; gap: 28px;">
+
+  <div style="display: flex; flex-direction: column; gap: 9px; max-width: 1080px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · closing a course</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">Two things happen at the end, and only one of them is an archive.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">The portfolios are exported and kept for six months, because somebody may appeal. Everything else — the timetable, the sessions, the briefs — is not archived at all. It becomes the next course.</div>
+  </div>
+
+  <div id="1a" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;">
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid color-mix(in oklab, oklch(37.5% 0.058 195) 34%, transparent); border-top: 3px solid oklch(37.5% 0.058 195); border-radius: 6px; padding: 20px 22px; display: flex; flex-direction: column; gap: 13px;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(37.5% 0.058 195);">Exported and kept</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; line-height: 1.2;">The portfolios, each with its CELTA 5 inside</div>
+        <div style="font-size: 12.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">One folder per candidate, exported to the centre's own storage. The CELTA 5 is not a separate file — it sits inside the portfolio, because together they are what an appeal is answered with.</div>
+      </div>
+      <sc-for list="{{ exported }}" as="e" hint-placeholder-count="5">
+        <div style="display: grid; grid-template-columns: 1fr 104px; gap: 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 45%, transparent);">
+          <div style="display: flex; flex-direction: column; gap: 1px;">
+            <div style="font-size: 12.5px; font-weight: 600;">{{ e.what }}</div>
+            <div style="font-size: 11px; line-height: 1.45; color: oklch(51% 0.017 70);">{{ e.note }}</div>
+          </div>
+          <div style="font-size: 11px; font-weight: 600; color: {{ e.ink }}; text-align: right;">{{ e.who }}</div>
+        </div>
+      </sc-for>
+      <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">Everyone who was on the course, including withdrawals and deferrals. An export with only the passes in it is the wrong export.</div>
+    </div>
+
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid color-mix(in oklab, oklch(37.5% 0.058 195) 34%, transparent); border-top: 3px solid oklch(37.5% 0.058 195); border-radius: 6px; padding: 20px 22px; display: flex; flex-direction: column; gap: 13px;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(37.5% 0.058 195);">Not archived — duplicated</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; line-height: 1.2;">The course itself becomes the next one</div>
+        <div style="font-size: 12.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">None of this is evidence and none of it needs keeping. It is the centre's working material, and duplicating it is how the next course is set up in an afternoon rather than a fortnight.</div>
+      </div>
+      <sc-for list="{{ carried }}" as="c" hint-placeholder-count="5">
+        <div style="display: grid; grid-template-columns: 1fr 104px; gap: 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 45%, transparent);">
+          <div style="display: flex; flex-direction: column; gap: 1px;">
+            <div style="font-size: 12.5px; font-weight: 600;">{{ c.what }}</div>
+            <div style="font-size: 11px; line-height: 1.45; color: oklch(51% 0.017 70);">{{ c.note }}</div>
+          </div>
+          <div style="font-size: 11px; font-weight: 600; color: {{ c.ink }}; text-align: right;">{{ c.state }}</div>
+        </div>
+      </sc-for>
+      <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">Nothing candidate-specific comes across. Duplicating a course copies its shape, never its people.</div>
+    </div>
+  </div>
+
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Six months, and the reason for it</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">not a filing convention — an appeal window</div>
+    </div>
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 20px 22px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: stretch;">
+        <sc-for list="{{ timeline }}" as="t" hint-placeholder-count="4">
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; padding-right: 18px; border-left: 2px solid {{ t.spine }}; padding-left: 14px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: {{ t.spine }};">{{ t.when }}</div>
+            <div style="font-size: 13.5px; font-weight: 600; line-height: 1.3;">{{ t.what }}</div>
+            <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ t.note }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; border-top: 1px solid oklch(89.5% 0.012 82); padding-top: 15px;">
+        <sc-for list="{{ why }}" as="w" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 12.5px; font-weight: 700; color: {{ w.spine }};">{{ w.title }}</div>
+            <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ w.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div id="1c" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: baseline; gap: 12px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Close the course</div>
+        <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ blockMeta }}</div>
+      </div>
+      <div style="height: 40px; padding: 0 22px; border-radius: 7px; background: {{ btnBg }}; color: {{ btnInk }}; font-size: 13px; font-weight: 600; display: flex; align-items: center; border: 1px solid {{ btnBorder }};">{{ btnLabel }}</div>
+    </div>
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; overflow: hidden;">
+      <sc-for list="{{ blockers }}" as="b" hint-placeholder-count="6">
+        <div style="display: grid; grid-template-columns: 26px 1fr 210px; gap: 14px; align-items: center; padding: 12px 18px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 55%, transparent); background: {{ b.bg }};">
+          <div style="width: 18px; height: 18px; border-radius: 99px; background: {{ b.dot }}; display: flex; align-items: center; justify-content: center; color: oklch(99.5% 0.004 90); font-size: 10px; font-weight: 700;">{{ b.mark }}</div>
+          <div style="display: flex; flex-direction: column; gap: 1px;">
+            <div style="font-size: 12.5px; font-weight: 600;">{{ b.what }}</div>
+            <div style="font-size: 11px; line-height: 1.45; color: oklch(51% 0.017 70);">{{ b.note }}</div>
+          </div>
+          <div style="font-size: 11.5px; font-weight: 600; color: {{ b.ink }}; text-align: right;">{{ b.state }}</div>
+        </div>
+      </sc-for>
+      <div style="padding: 12px 18px; font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">Close-out is refused while anything is open, and it names the thing. A course closed with an unresolved appeal is one whose evidence starts expiring before the appeal is heard.</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+    <sc-for list="{{ notes }}" as="n" hint-placeholder-count="4">
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-left: 3px solid {{ n.spine }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 12.5px; font-weight: 700; color: {{ n.spine }};">{{ n.title }}</div>
+        <div style="font-size: 12px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const GOLD = 'oklch(63% 0.096 72)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const CARD = 'oklch(99.5% 0.004 90)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+class Component extends DCLogic {
+  renderVals() {
+    const blockers = [
+      { what: 'Every CELTA 5 signed', note: 'Tutor and candidate, final day section. Twelve of twelve.', state: 'Done', ok: true },
+      { what: 'Final grades confirmed with the assessor', note: 'Centre and assessor have both told CELTA Admin.', state: 'Done', ok: true },
+      { what: 'End-of-course reports issued', note: 'Held until after the final day, per 13.6, then sent.', state: 'Done', ok: true },
+      { what: 'Grade explanation written for every candidate', note: 'After Cambridge confirms the grade, before the course closes. It cannot be produced afterwards.', state: 'Done', ok: true },
+      { what: 'An open extension', note: 'Aylin Koç has until 14 May to resubmit assignment 4.', state: 'Blocking', ok: false },
+      { what: 'A deferral without a destination', note: 'Sema Yıldız is deferred and has not chosen which course she returns on.', state: 'Blocking', ok: false },
+      { what: 'Appeals', note: 'None open. If one were, close-out would wait for it.', state: 'Clear', ok: true },
+    ];
+    const open = blockers.filter(b => !b.ok).length;
+
+    return {
+      exported: [
+        { what: 'One portfolio per candidate', note: 'Lesson plans, feedback, self-evaluations, assignments and their marks', who: '12 folders', ink: TEAL },
+        { what: 'The CELTA 5, inside each one', note: 'Signed by tutor and candidate. Not exported separately — it lives in the portfolio', who: 'In each', ink: TEAL },
+        { what: 'The grade explanation', note: 'Written once the grade is confirmed, for everyone, not on request', who: 'In each', ink: TEAL },
+        { what: 'Withdrawals and deferrals', note: 'However short the record. An appeal can come from them too', who: '2 more', ink: MUTED },
+        { what: 'Any case that was opened', note: 'Malpractice, appeals, extensions, with their timelines intact', who: '1 case', ink: MUTED },
+        { what: 'Where it goes', note: 'The centre’s own storage. Connect does not hold it after the course closes', who: 'Centre', ink: MUTED },
+      ],
+
+      carried: [
+        { what: 'The timetable', note: 'Five weeks, Fridays off, with every relationship hanging off it', state: 'Duplicated', ink: GREEN },
+        { what: 'Input sessions and materials', note: 'Forty-seven cards with their slides and handouts, attached to their slots', state: 'Duplicated', ink: GREEN },
+        { what: 'Assignment briefs and criteria', note: 'The centre’s own wording, unchanged unless somebody edits it', state: 'Duplicated', ink: GREEN },
+        { what: 'Announcements', note: 'Anchored to events, so they land on the right days of the new course', state: 'Duplicated', ink: GREEN },
+        { what: 'Candidate work', note: 'Never copied forward. A new course starts empty of people', state: 'Not copied', ink: RED },
+      ],
+
+      timeline: [
+        { spine: TEAL, when: 'Final day', what: 'The CELTA 5s are signed', note: 'Tutor and candidate sign the last section. Nothing can be exported before this.' },
+        { spine: TEAL, when: 'Results issued', what: 'The clock starts', note: 'Six months runs from the issuing of results, not from the last teaching day.' },
+        { spine: MUTED, when: 'Then, before closing', what: 'The explanation is written', note: 'Once the grade is confirmed and while the record is still live. The grade meeting is too early — those grades are provisional.' },
+        { spine: MUTED, when: 'Inside six months', what: 'A candidate can appeal', note: 'Stage One goes to the centre, and answering it means the portfolio and the CELTA 5 in it. That is the whole reason for keeping them.' },
+        { spine: RED, when: 'Once the centre confirms receipt', what: 'Connect clears its own copy', note: 'A short grace period, then Connect wipes its working copy. The six-month appeal window runs on the centre\u2019s own Drive export from here, not inside Connect.' },
+      ],
+
+      why: [
+        { spine: TEAL, title: 'Written before it is asked for', text: 'The explanation is generated from the live record, so it has to exist before the course closes — after the grade is confirmed, not at the grade meeting, where the grades are still provisional. Every candidate gets one, and most who do never query anything.' },
+        { spine: MUTED, title: 'Six months is the deadline, not the habit', text: 'Cambridge sets it because that is how long a candidate has. Connect hands off to the centre\u2019s own Drive at close-out and clears its own copy soon after receipt is confirmed \u2014 the six-month clock runs on that Drive copy, not inside Connect.' },
+        { spine: MUTED, title: 'The rest was never evidence', text: 'A timetable and a set of briefs prove nothing about anybody. Treating them as archive material is what turns setting up a course into a fortnight of hunting through old folders.' },
+      ],
+
+      blockMeta: open === 0 ? 'nothing outstanding' : open + ' things still open',
+      btnLabel: open === 0 ? 'Close the course' : 'Cannot close yet',
+      btnBg: open === 0 ? 'oklch(30% 0.042 58)' : 'oklch(94% 0.008 85)',
+      btnInk: open === 0 ? 'oklch(98.5% 0.006 90)' : MUTED,
+      btnBorder: open === 0 ? 'oklch(30% 0.042 58)' : 'oklch(89.5% 0.012 82)',
+
+      blockers: blockers.map(b => ({
+        what: b.what, note: b.note, state: b.state,
+        ink: b.ok ? GREEN : RED,
+        dot: b.ok ? GREEN : RED,
+        mark: b.ok ? '✓' : '!',
+        bg: b.ok ? 'transparent' : tint(RED, 5),
+      })),
+
+      notes: [
+        { spine: TEAL, title: 'The CELTA 5 is not a separate file', text: 'It is a section of the portfolio and exports inside it. A centre that keeps CELTA 5s in one folder and portfolios in another has to reassemble both to answer one appeal.' },
+        { spine: MUTED, title: 'Connect is not part of the appeal', text: 'An appeal is between the candidate, the tutor and Cambridge, months after the course has gone from the app. Connect’s whole job is to hand the centre a folder that can answer it without anybody reassembling anything.' },
+        { spine: GREEN, title: 'Closing a course is how the next one starts', text: 'The duplicate is offered at close-out, not months later from a menu. The moment a centre knows what worked is the moment the course ends.' },
+        { spine: RED, title: 'It will not close over an open case', text: 'An extension, an undecided deferral or a live appeal all block it — because closing starts a six-month clock on evidence that is still being used.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

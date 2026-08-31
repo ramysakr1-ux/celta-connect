@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #F4EAD9; }
+  a { color: #8A6A22; text-decoration: none; }
+  a:hover { color: #1C1710; }
+  input::placeholder { color: rgba(28,23,16,0.38); }
+</style>
+</helmet>
+
+<div style="font-family: 'Instrument Sans', Helvetica, sans-serif; color: #1C1710; width: 1280px; height: 820px; position: relative; overflow: hidden; background: #F7F1E4;">
+
+  <!-- Mock app behind the pill -->
+  <div style="position: absolute; inset: 0; padding: 40px 56px; display: flex; flex-direction: column; gap: 26px;">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: baseline; gap: 8px;">
+        <div style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 24px; color: #B3762B;">Connect</div>
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em;">CELTA</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: rgba(28,23,16,0.45);">TRAINER / TIMETABLE</div>
+        <div style="display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: rgba(28,23,16,0.42);">
+          <div>CHAT RESETS EVERY</div>
+          <sc-for list="{{ retentionOpts }}" as="ro" hint-placeholder-count="3">
+            <div onClick="{{ ro.pick }}" style="padding: 4px 8px; border-radius: 6px; cursor: pointer; background: {{ ro.bg }}; color: {{ ro.ink }}; font-weight: 600;">{{ ro.label }}</div>
+          </sc-for>
+          <input value="{{ customDays }}" onChange="{{ onCustomDays }}" onFocus="{{ pickCustom }}" placeholder="N" style="width: 30px; background: transparent; border: none; border-bottom: 1px solid rgba(28,23,16,0.3); color: rgba(28,23,16,0.7); font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-align: center;">
+          <div>days</div>
+        </div>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; opacity: 0.5;">
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: rgba(28,23,16,0.5);">MON</div>
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: rgba(28,23,16,0.5);">TUE</div>
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: rgba(28,23,16,0.5);">WED</div>
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: rgba(28,23,16,0.5);">THU</div>
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: rgba(28,23,16,0.5);">FRI</div>
+      <sc-for list="{{ grid }}" as="cell" hint-placeholder-count="30">
+        <div style="height: 74px; border-radius: 10px; background: #FFFDF7; border: 1px solid rgba(28,23,16,0.07); padding: 10px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="height: 7px; width: 46%; border-radius: 4px; background: rgba(28,23,16,0.12);"></div>
+          <div style="height: 7px; width: 72%; border-radius: 4px; background: rgba(28,23,16,0.07);"></div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- Chat pill -->
+  <div style="position: absolute; left: 0; right: 0; bottom: 26px; display: flex; justify-content: center; pointer-events: none;">
+    <div onMouseEnter="{{ wake }}" onMouseLeave="{{ idle }}" style="pointer-events: auto; width: 840px; display: flex; flex-direction: column; align-items: stretch; gap: 8px; opacity: {{ pillOpacity }}; transform: translateY({{ pillShift }}); transition: opacity 260ms ease, transform 260ms ease;">
+
+      <!-- Recipient picker -->
+      <sc-if value="{{ pickerOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="align-self: flex-start; width: 300px; background: #FFFDF7; border: 1px solid rgba(28,23,16,0.1); border-radius: 16px; box-shadow: 0 18px 44px rgba(28,23,16,0.14); padding: 8px; display: flex; flex-direction: column; gap: 2px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(28,23,16,0.42); padding: 10px 12px 8px;">CHOOSE A CHANNEL</div>
+          <div style="display: flex; align-items: center; gap: 4px; padding: 0 8px 8px;">
+            <div onClick="{{ setTrainer }}" style="flex: 1; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; cursor: pointer; background: {{ trainerBg }}; color: {{ trainerInk }};">Trainer</div>
+            <div onClick="{{ setTrainee }}" style="flex: 1; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; cursor: pointer; background: {{ traineeBg }}; color: {{ traineeInk }};">Trainee</div>
+          </div>
+          <div style="padding: 0 12px 8px; font-size: 11px; line-height: 1.45; color: rgba(28,23,16,0.5);">{{ roleNote }}</div>
+          <sc-for list="{{ channels }}" as="c" hint-placeholder-count="5">
+            <div onClick="{{ c.pick }}" style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 11px; cursor: pointer; background: {{ c.bg }};" style-hover="background: #EEF4E7;">
+              <div style="width: 26px; height: 26px; border-radius: 8px; background: {{ c.chipBg }}; color: {{ c.chipInk }}; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center;">{{ c.initials }}</div>
+              <div style="flex: 1; font-size: 13px; font-weight: 500;">{{ c.name }}</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(28,23,16,0.4);">{{ c.meta }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- Expanded thread -->
+      <sc-if value="{{ open }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #FFFDF7; border: 1px solid rgba(28,23,16,0.1); border-radius: 20px; box-shadow: 0 18px 44px rgba(28,23,16,0.12); padding: 16px 18px; max-height: 260px; overflow: auto; display: flex; flex-direction: column; gap: 12px;">
+          <sc-for list="{{ thread }}" as="m" hint-placeholder-count="4">
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <div style="width: 24px; height: 24px; border-radius: 8px; background: {{ m.chipBg }}; color: {{ m.chipInk }}; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex: none;">{{ m.initials }}</div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="display: flex; align-items: baseline; gap: 8px;">
+                  <div style="font-size: 12px; font-weight: 600;">{{ m.who }}</div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(28,23,16,0.38);">{{ m.time }}</div>
+                </div>
+                <div style="font-size: 13px; line-height: 1.45; color: rgba(28,23,16,0.82); text-wrap: pretty;">{{ m.text }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- The bar -->
+      <div style="height: 56px; background: #FFFDF7; border: 1px solid rgba(28,23,16,0.1); border-radius: 28px; box-shadow: 0 10px 30px rgba(28,23,16,0.1); display: flex; align-items: center; gap: 12px; padding: 0 10px 0 8px;">
+        <div onClick="{{ togglePicker }}" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px 0 8px; border-radius: 20px; cursor: pointer; background: #EEF4E7; flex: none;" style-hover="background: #E5EEDA;">
+          <div style="width: 24px; height: 24px; border-radius: 8px; background: #6E8F58; color: #FFFDF7; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center;">{{ activeInitials }}</div>
+          <div style="font-size: 13px; font-weight: 600; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ activeName }}</div>
+          <div style="font-size: 9px; color: rgba(28,23,16,0.45);">▾</div>
+        </div>
+
+        <div style="width: 1px; height: 24px; background: rgba(28,23,16,0.1); flex: none;"></div>
+
+        <input value="{{ draft }}" onChange="{{ onDraft }}" onKeyDown="{{ onKey }}" onFocus="{{ wake }}" placeholder="{{ placeholder }}" style="flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-family: 'Instrument Sans', Helvetica, sans-serif; font-size: 14px; color: #1C1710;">
+
+        <div style="display: flex; align-items: center; gap: 6px; flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: rgba(28,23,16,0.4);">
+          <div style="width: 5px; height: 5px; border-radius: 50%; background: #B3762B;"></div>
+          <div>CLEARS IN {{ countdown }}</div>
+        </div>
+
+        <div onClick="{{ toggleOpen }}" style="height: 34px; padding: 0 12px; border-radius: 17px; background: #F1F6EB; color: rgba(28,23,16,0.7); font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 7px; cursor: pointer; flex: none;" style-hover="background: #E5EEDA;">
+          <div>{{ openLabel }}</div>
+          <div style="min-width: 18px; height: 18px; border-radius: 9px; background: #B3762B; color: #FFFDF7; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; padding: 0 5px;">{{ unread }}</div>
+        </div>
+
+        <div onClick="{{ send }}" style="width: 38px; height: 38px; border-radius: 19px; background: #1C1710; color: #FFFDF7; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none; font-size: 14px;" style-hover="background: #B3762B;">↑</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:820}}">
+// Channel rules, agreed 7 Aug 2026.
+// Trainer: course staff room + one-to-one DMs with other tutors on the course.
+// Trainee: their TP group (tutor included) + "Your tutors" (all course tutors,
+//   never a private one-to-one with a single tutor -- two adults always present).
+// No trainee-to-trainee DMs. No chat for volunteer students or assessors.
+// Retention is one centre-wide, per-course setting -- a rolling window in days, set at
+// course setup by the centre admin (Nightly=1 / Weekly=7 shortcuts, or a custom day count
+// for e.g. a part-time course) -- never a fixed calendar cadence, so it never wipes
+// mid-cycle regardless of course length. Applies identically to trainer and trainee chat.
+const CHANNELS = {
+  trainer: [
+    { id: 'staffroom', name: 'Course staff room', initials: 'SR', meta: '4 tutors' },
+    { id: 'nadia', name: 'Nadia Farouk', initials: 'NF', meta: 'tutor · DM' },
+    { id: 'omar', name: 'Omar Reda', initials: 'OR', meta: 'tutor · DM' },
+    { id: 'tpABC', name: 'TP group ABC', initials: 'ABC', meta: 'with candidates' },
+  ],
+  trainee: [
+    { id: 'tpABC', name: 'TP group ABC', initials: 'ABC', meta: '4 + your tutor' },
+    { id: 'tutors', name: 'Your tutors', initials: 'YT', meta: 'all 4 tutors' },
+  ],
+};
+
+const THREADS = {
+  staffroom: [
+    { who: 'Nadia Farouk', initials: 'NF', time: '09:12', text: 'Observation slots for Thursday are open — grab one before the end of today.' },
+    { who: 'Omar Reda', initials: 'OR', time: '09:20', text: 'Taken the 14:00. Room 5 free after lunch?' },
+    { who: 'Nadia Farouk', initials: 'NF', time: '09:22', text: 'Yes, until 16:00.' },
+  ],
+  nadia: [
+    { who: 'Nadia Farouk', initials: 'NF', time: '11:05', text: 'Sara’s TP3 feedback is written up — want to moderate before I release it?' },
+  ],
+  omar: [
+    { who: 'Omar Reda', initials: 'OR', time: '10:31', text: 'Swapping my Wednesday input session with yours, if that works.' },
+  ],
+  tpABC: [
+    { who: 'Nadia Farouk', initials: 'NF', time: '08:40', text: 'Room 5 today, not 6. Same time.' },
+    { who: 'Deniz Aksoy', initials: 'DA', time: '08:58', text: 'Thanks — was heading to the wrong floor.' },
+  ],
+  tutors: [
+    { who: 'Sara Yılmaz', initials: 'SY', time: '10:02', text: 'Is the printer in the staff room okay for me to use before TP?' },
+    { who: 'Omar Reda', initials: 'OR', time: '10:09', text: 'Yes, go ahead.' },
+  ],
+};
+
+// Retention is a rolling window in days -- "clears every N days" -- never a fixed calendar
+// cadence, so a part-time course spread over months isn't wiped mid-cycle. Nightly (1) and
+// weekly (7) are shortcuts onto the same slider; "custom" lets a centre admin enter any N.
+const RETENTION = { nightly: 1, weekly: 7, custom: 30 };
+
+class Component extends DCLogic {
+  state = { role: 'trainer', active: 'staffroom', open: false, pickerOpen: false, draft: '', awake: true, extra: {}, now: new Date(), retention: 'nightly', customDays: '30' };
+
+  componentDidMount() {
+    this.tick = setInterval(() => this.setState({ now: new Date() }), 30000);
+    this.sleep();
+  }
+  componentWillUnmount() { clearInterval(this.tick); clearTimeout(this.t); }
+
+  sleep() { clearTimeout(this.t); this.t = setTimeout(() => this.setState({ awake: false }), 3500); }
+
+  windowDays() {
+    if (this.state.retention === 'custom') return Math.max(1, parseInt(this.state.customDays, 10) || 1);
+    return RETENTION[this.state.retention];
+  }
+
+  countdown() {
+    const days = this.windowDays();
+    if (days === 1) {
+      const n = this.state.now;
+      const h = 23 - n.getHours(), m = 59 - n.getMinutes();
+      return h + 'H ' + String(m).padStart(2, '0') + 'M';
+    }
+    return days + 'D';
+  }
+
+  retentionLabel() {
+    const days = this.windowDays();
+    return days === 1 ? 'clears at midnight' : 'clears every ' + days + ' days';
+  }
+
+  renderVals() {
+    const { role, active, open, pickerOpen, draft, awake, extra } = this.state;
+    const list = CHANNELS[role];
+    const base = THREADS[active] || [];
+    const thread = base.concat(extra[active] || []).map(m => Object.assign({}, m, {
+      chipBg: m.mine ? '#EDE7D8' : '#DCE8D5', // was a bronze highlight for 'mine' -- whose message is layout info, not a status
+      chipInk: m.mine ? '#5C5646' : '#41563A',
+    }));
+    const activeCh = list.find(c => c.id === active) || list[0];
+    const wake = () => { clearTimeout(this.t); if (!this.state.awake) this.setState({ awake: true }); };
+    const setRole = (r) => this.setState({ role: r, active: CHANNELS[r][0].id, pickerOpen: false, open: true, awake: true });
+
+    return {
+      grid: Array.from({ length: 30 }, (_, i) => i),
+      isTrainer: role === 'trainer',
+      isTrainee: role === 'trainee',
+      setTrainer: () => setRole('trainer'),
+      setTrainee: () => setRole('trainee'),
+      trainerBg: role === 'trainer' ? '#6E8F58' : '#F1F6EB',
+      trainerInk: role === 'trainer' ? '#FFFDF7' : 'rgba(28,23,16,0.6)',
+      traineeBg: role === 'trainee' ? '#6E8F58' : '#F1F6EB',
+      traineeInk: role === 'trainee' ? '#FFFDF7' : 'rgba(28,23,16,0.6)',
+      roleNote: role === 'trainer'
+        ? 'Staff room and tutor DMs. Candidates never see either.'
+        : 'TP group and all four tutors together — never a private one-to-one with one tutor. Deadlines and feedback live in your workspace, not here.',
+      placeholder: (role === 'trainer' ? 'Message the group — ' : 'Quick questions — ') + this.retentionLabel(),
+      retentionOpts: ['nightly', 'weekly', 'custom'].map(key => ({
+        label: key === 'nightly' ? 'Nightly' : key === 'weekly' ? 'Weekly' : 'Custom',
+        bg: this.state.retention === key ? '#1C1710' : 'transparent',
+        ink: this.state.retention === key ? '#FFFDF7' : 'rgba(28,23,16,0.42)',
+        pick: () => this.setState({ retention: key }),
+      })),
+      customDays: this.state.customDays,
+      onCustomDays: (e) => this.setState({ retention: 'custom', customDays: e.target.value.replace(/[^0-9]/g, '') }),
+      pickCustom: () => this.setState({ retention: 'custom' }),
+      channels: list.map(c => ({
+        ...c,
+        bg: c.id === active ? '#F1F6EB' : 'transparent',
+        chipBg: c.id === active ? '#6E8F58' : '#DCE8D5',
+        chipInk: c.id === active ? '#FFFDF7' : '#41563A',
+        pick: () => this.setState({ active: c.id, pickerOpen: false, open: true }),
+      })),
+      thread,
+      activeName: activeCh.name,
+      activeInitials: activeCh.initials,
+      unread: String(thread.length),
+      openLabel: open ? 'Hide' : 'Thread',
+      countdown: this.countdown(),
+      draft,
+      pillOpacity: awake || open || pickerOpen ? 1 : 0.4,
+      pillShift: awake || open || pickerOpen ? '0px' : '14px',
+      pickerOpen,
+      open,
+      wake,
+      idle: () => { if (!this.state.open && !this.state.pickerOpen) this.sleep(); },
+      togglePicker: () => { wake(); this.setState(s => ({ pickerOpen: !s.pickerOpen })); },
+      toggleOpen: () => { wake(); this.setState(s => ({ open: !s.open, pickerOpen: false })); },
+      onDraft: (e) => { wake(); this.setState({ draft: e.target.value }); },
+      onKey: (e) => { if (e.key === 'Enter') this.send(); },
+      send: () => this.send(),
+    };
+  }
+
+  send() {
+    const text = this.state.draft.trim();
+    if (!text) return;
+    const now = new Date();
+    const time = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    this.setState(s => {
+      const list = (s.extra[s.active] || []).concat([{ who: 'You', initials: 'YOU', time, text, mine: true }]);
+      return { extra: Object.assign({}, s.extra, { [s.active]: list }), draft: '', open: true, awake: true };
+    });
+  }
+}
+
+</script>
+</body>
+</html>

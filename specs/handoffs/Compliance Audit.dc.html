@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 40px; width: 1500px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 13px; max-width: 940px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · compliance audit · every Cambridge document, read against the design</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 36px; font-weight: 600; line-height: 1.14; color: oklch(23.5% 0.017 65);">Nineteen things the documents require that the design does not yet do.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Read the Administration Handbook, the Syllabus and Assessment Guidelines, a completed CELTA 5, and the AI, plagiarism and netiquette guidance. Pulled every obligation — 134 in the handbook alone — and checked each against the eighty-two designs and the build spec. Most are covered. These are not.</div>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 22px; padding: 18px 22px; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px;">
+    <sc-for list="{{ counts }}" as="c" hint-placeholder-count="4">
+      <div style="display: flex; flex-direction: column; gap: 3px; min-width: 132px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 26px; font-weight: 600; line-height: 1; color: {{ c.ink }};">{{ c.n }}</div>
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ c.label }}</div>
+      </div>
+    </sc-for>
+    <div style="flex: 1;"></div>
+    <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); max-width: 380px; text-wrap: pretty;">Sources: Administration Handbook 2026, Syllabus and Assessment Guidelines 5th edition, CELTA 5 (April 2021 / July 2023 revisions), and the three centre guidance documents.</div>
+  </div>
+
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+    <div id="{{ g.id }}" style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">{{ g.badge }}</div>
+        <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ g.title }}</div>
+        <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ g.sub }}</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="8">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ i.border }}; border-left: 3px solid {{ i.spine }}; border-radius: 7px; padding: 16px 19px; display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: start;">
+            <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0;">
+              <div style="display: flex; align-items: baseline; gap: 10px;">
+                <div style="font-family: Newsreader, Georgia, serif; font-size: 14px; color: oklch(51% 0.017 70); flex: none;">{{ i.n }}</div>
+                <div style="font-size: 13.5px; font-weight: 600; line-height: 1.35; color: oklch(23.5% 0.017 65);">{{ i.title }}</div>
+              </div>
+              <div style="font-size: 12.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ i.what }}</div>
+              <div style="display: flex; align-items: center; gap: 8px; padding-top: 2px;">
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: oklch(93.5% 0.016 85); color: oklch(51% 0.017 70);">{{ i.src }}</div>
+                <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ i.quote }}</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px; padding: 12px 14px; border-radius: 6px; background: {{ i.fixBg }}; border: 1px solid {{ i.fixBorder }};">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: {{ i.fixTone }};">{{ i.fixLabel }}</div>
+              <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ i.fix }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+
+  <div style="max-width: 900px; display: flex; flex-direction: column; gap: 10px; padding-top: 6px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70);">What this audit did not find</div>
+    <div style="font-size: 13.5px; line-height: 1.7; color: oklch(23.5% 0.017 65); text-wrap: pretty;">No contradictions. Everything the design already does is consistent with the documents — the six-hour observation rule with its three-hour filmed cap, two levels, four assignments with one resubmission each, the Stage 1–3 progress records and their triggers, portfolio contents and organisation, six-month retention, the grade meeting, Fail portfolios going to Grade Review, appeals timing, and the AI referencing conventions down to the in-text citation format. The gaps are all omissions rather than errors, and fourteen of the nineteen are validation rules rather than new screens.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1500,&quot;height&quot;:1600}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const AMBER = 'oklch(44% 0.095 68)'; // was GOLD -- "needs attention" badge tone, not brand/grade
+const RED = 'oklch(45% 0.16 27)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+const mix = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, transparent)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+const I = (title, what, src, quote, fix) => ({ title, what, src, quote, fix });
+
+const GROUPS = [
+  {
+    id: '1a', badge: '1a', tone: RED,
+    title: 'Timetable and teaching-practice rules nothing currently checks',
+    sub: 'eight — all validation, all breakable by accident',
+    fixLabel: 'Add as a warning',
+    items: [
+      I('A candidate cannot teach twice in one day',
+        'The reference course never does this, but a centre editing a timetable by hand easily can \u2014 and the same clause adds that tutors are not expected to observe two different groups from the same course in a single day.',
+        'Handbook 8.1.4', '\u201cCandidates cannot teach more than once in a single day\u201d',
+        'Two timetable warnings, alongside the ones already built: a second TP for the same candidate on one day, and a tutor booked to observe both groups on one day.'),
+      I('Five of the six assessed hours must be whole-class teaching',
+        'So at most one assessed hour may be a small group or one-to-one \u2014 and that lesson may not be either of the final two. Nothing tracks the shape of a candidate\u2019s six hours, only the total.',
+        'Handbook 8.1.4', '\u201cFive of the assessed hours must be whole class teaching\u2026 This lesson should not be either of the two final lessons\u201d',
+        'A whole-class flag on each TP slot, a running total on the TP record, and a warning when the non-whole-class lesson lands in TP7 or TP8. And a dependency: scheduling a one-to-one or small-group lesson makes the “Teaching one to one” input session required rather than optional, timetabled before the lesson it prepares — the same shape as the asynchronous-input rule below.'),
+      I('Half the teaching practice needs classes averaging eight students',
+        'The register already records who attended. Nothing computes the average, so a centre cannot see where it stands.',
+        'Handbook 8.1.3', '\u201ca minimum of 50% of teaching practice must be with classes of an average of eight students\u201d',
+        'Derive it from the register and show it as a live figure. Do not enforce it — a centre cannot make volunteers turn up, and the honest answer to an assessor is the register itself. Showing the number is the whole job.'),
+      I('Teaching practice must be split evenly between the two tutors',
+        'Two verified tutors are required and their share of TP must be even. The design assigns tutors but never compares their loads.',
+        'Handbook 2.4', '\u201cThe distribution of teaching practice between the two tutors must be even\u201d',
+        'A per-tutor TP count on the timetable, and a warning when the split drifts past a tolerance. Pairs with the existing rule that each candidate is observed by at least two tutors.'),
+      I('Intensive TP blocks need a break, and a length cap',
+        'Any course with an intensive block of TP must have a two-day minimum break midway and no more than six consecutive TP days. Relevant to part-time and non-standard shapes rather than the reference course.',
+        'Handbook 8.1.4', '\u201chave a two-day (minimum) break mid-way\u2026 no more than 6 consecutive days of TP before the break\u201d',
+        'Count consecutive TP days when a timetable is published and refuse past six. Also flag a TP block ending on the final day, which the handbook advises against.'),
+      I('Mixed-mode borderline candidates: final two lessons in one mode',
+        'If a mixed-mode candidate receives a Stage 3 tutorial and is borderline Pass/Fail, their last two assessed lessons must both be online or both face to face. A precise rule the app is well placed to enforce and currently ignores.',
+        'Handbook 9.2', '\u201cthe final two assessed TP lessons must be in the same mode of delivery\u201d',
+        'When Stage 3 is recorded on a mixed-mode course with a borderline provisional, lock the mode on the candidate\u2019s remaining two TP slots and warn if the timetable disagrees.'),
+      I('Assignment materials cannot become TP lesson materials',
+        'Materials prepared for the language related task or the language skills task must not be the basis of an assessed lesson, or the other way round. Both live in Connect, so the overlap is detectable.',
+        'Handbook 8.2', '\u201cshould not be used as the basis for assessed TP lessons, or vice versa\u201d',
+        'Compare the material attached to an assignment against the material on that candidate\u2019s lesson plans, and raise it as a note to the tutor \u2014 not an accusation, the same treatment as a scanner finding.'),
+      I('End-of-course reports must not be issued before the final day',
+        'The report is written earlier in practice. Sending it early is an easy mistake with no way back.',
+        'Handbook 13.6', '\u201cEnd-of-course reports should not be issued until after the final day of the course\u201d',
+        'Hold the send action until the course close date passes, and say why rather than greying out a button.'),
+    ],
+  },
+  {
+    id: '1b', badge: '1b', tone: AMBER,
+    title: 'Administrative deadlines and eligibility nothing tracks',
+    sub: 'four \u2014 each one a date or a count somebody currently keeps in their head',
+    fixLabel: 'Add to the centre',
+    items: [
+      I('Course dates must reach Cambridge before the course exists',
+        'Four weeks ahead for Moodle courses, two weeks for everything else. Miss it and platform access is delayed \u2014 which is a course that cannot start.',
+        'Handbook 3.1', '\u201cat least four weeks prior\u2026 at least two weeks prior to their intended start date\u201d',
+        'Derive the submission deadline from the start date and the delivery mode when a course is created, and put it in the admin room as a dated task.'),
+      I('Certificates must be checked against the recommended grades',
+        'On arrival, and Cambridge contacted immediately if one is wrong. Nothing in the close-out asks for this, and by then everyone has moved on.',
+        'Handbook 10.5', '\u201ccheck the results issued against the final recommended grades and immediately contact CELTA Admin\u201d',
+        'A close-out step that reappears when certificates arrive, listing the recommended grade beside a field for what the certificate says.'),
+      I('A tutor cannot work on two concurrent full-time courses',
+        'Stated as a wellbeing and quality rule. The app knows every tutor\u2019s courses and dates, so it can see the clash before a centre commits to it.',
+        'Handbook 2.4', '\u201cTutors must not be engaged to work on more than one full-time course concurrently\u201d',
+        'Check for overlap when assigning a tutor, and warn at the point of assignment rather than in a report.'),
+      I('Assessor limits: two consecutive, two concurrent',
+        'The same assessor must not be used for more than two consecutive courses, and may not assess more than two concurrent courses at one centre.',
+        'Handbook 12.3', '\u201cthe same assessor must not be used for more than two consecutive courses\u201d',
+        'Not enforced. A centre does not choose its assessor, and repeat visits are common. Keep the assessor history per centre so it can be seen, and leave it at that.'),
+    ],
+  },
+  {
+    id: '1c', badge: '1c', tone: TEAL,
+    title: 'Things candidates are owed that no screen provides',
+    sub: 'seven \u2014 small, and two of them change existing designs',
+    fixLabel: 'Add to the course',
+    items: [
+      I('Candidates must be able to raise concerns with the assessor',
+        'Not with a tutor \u2014 with the assessor, during the assessment. The handbook does not say how, and in practice it is the meeting the assessor holds with candidates on the day.',
+        'Handbook 14.2', '\u201cCandidates must be given an opportunity to raise any concerns they have with the assessor\u201d',
+        'The meeting, on the timetable, with its time announced in advance. No written channel \u2014 the assessor has no access to chat and a form invites a complaints box nobody asked for. What candidates need is an announcement a few days out saying the assessor is coming to assess the course, that there is nothing for them to worry about, that their files should be complete, and when the meeting is. This is the one gap with a confidentiality requirement attached.'),
+      I('Two of the four assignments must be in academic prose',
+        'A format requirement on the assignments themselves. The briefs prescribe sections and tables but never say which two must be continuous prose.',
+        'Syllabus, assessment requirements', '\u201ctwo of the assignments must be written in academic prose\u201d',
+        'Mark the format on each brief, and check the pair adds up when a centre edits its briefs.'),
+      I('Consultation time is a named component of the 120 hours',
+        'The syllabus lists it alongside input, planning, TP, feedback and peer observation. The reference timetable has tutorials and self-study but no band called consultation.',
+        'Syllabus, course programmes', '\u201cfeedback on teaching \u00b7 peer observation \u00b7 observation of experienced teachers \u00b7 consultation time\u201d',
+        'Name it in the timetable bands so the 120-hour breakdown a centre shows an assessor matches the syllabus\u2019s own list.'),
+      I('Asynchronous input needs live follow-up',
+        'Recorded sessions and Moodle content always have to be paired with live discussion. Input session cards hold recordings without asking whether a live slot follows.',
+        'Handbook 2.2', '\u201cmust always be combined with opportunities for live follow-up discussion\u201d',
+        'On an asynchronous input card, require a linked live slot before it can be published.'),
+      I('The electronic candidate information sheet',
+        'The CELTA 5 opens by sending candidates to complete one. Nothing in the design collects it, so it stays a separate form outside the app.',
+        'CELTA 5, front matter', '\u201ccomplete the electronic candidate information sheet here\u201d',
+        'Fold it into the enrolment forms already designed, and populate the CELTA 5 header from it \u2014 including the Unique Learner Number where a UK centre needs one.'),
+      I('The syllabus and handbook must be available on request',
+        'Along with displaying the Centre Authorisation Certificate. Cambridge\u2019s own documents are the one category missing from the resource hub.',
+        'CELTA 5, centre responsibilities', '\u201censure that the CELTA Syllabus and the CELTA Administration Handbook are available on request\u201d',
+        'A Cambridge documents shelf at organisation level \u2014 syllabus, handbook, authorisation certificate, appeals procedure. One copy, every course reads it.'),
+      I('Netiquette cuts against our own chat design',
+        'The centre\u2019s guidance tells candidates not to contact tutors late at night. But a part-time course teaches until 21:30, so \u201clate\u201d is not a fixed hour \u2014 it depends on the course.',
+        'Centre netiquette guidance', '\u201cAvoid contacting your instructors at inappropriate times (e.g. late at night)\u201d',
+        'Quiet hours derive from the timetable, like everything else: messages are ordinary until an hour after the last timetabled session that day, and held until morning after it. A full-time course goes quiet in the early evening; a part-time one does not go quiet until half past ten.'),
+    ],
+  },
+];
+
+// What each fix actually costs, read off the fix text itself.
+// v = validation or warning only · b = validation plus a new field or figure
+// ui = new interface only · d = an open decision, not a fix
+const KINDS = ['v','b','b','b','v','v','v','v', 'ui','ui','v','v', 'ui','b','ui','v','ui','ui','d'];
+const KIND_LABEL = { v: 'Validation', b: 'Validation + field', ui: 'New interface', d: 'Decision' };
+const KIND_TONE = { v: GREEN, b: AMBER, ui: TEAL, d: RED };
+const WORD = ['no','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
+
+class Component extends DCLogic {
+  renderVals() {
+    const total = GROUPS.reduce((a, g) => a + g.items.length, 0);
+    const n = (k) => KINDS.filter(x => x === k).length;
+    const anyValidation = n('v') + n('b');
+    const anyUI = n('ui') + n('b');
+    let flat = -1;
+    return {
+      counts: [
+        { n: String(total), label: 'gaps found', ink: INK },
+        { n: String(n('v')), label: 'validation only', ink: GREEN },
+        { n: String(anyUI), label: 'need new interface', ink: TEAL },
+        { n: String(n('d')), label: 'open decision', ink: RED },
+      ],
+      summary: 'No contradictions. Everything the design already does is consistent with the documents — the six-hour observation rule with its three-hour filmed cap, two levels, four assignments with one resubmission each, the Stage 1–3 progress records and their triggers, portfolio contents and organisation, six-month retention, the grade meeting, Fail portfolios going to Grade Review, appeals timing, and the AI referencing conventions down to the in-text citation format. All ' + WORD[total] + ' gaps are omissions rather than errors. ' + WORD[n('v')].charAt(0).toUpperCase() + WORD[n('v')].slice(1) + ' are validation rules alone; ' + WORD[anyUI] + ' need new interface or a new field, ' + WORD[n('ui')] + ' of those needing nothing but interface; and ' + WORD[n('d')] + ' is a decision rather than a fix.',
+      groups: GROUPS.map(g => ({
+        id: g.id, badge: g.badge, title: g.title, sub: g.sub,
+        items: g.items.map((it, k) => {
+          flat += 1;
+          const kind = KINDS[flat];
+          return Object.assign({}, it, {
+            n: String(k + 1),
+            spine: g.tone,
+            border: mix(g.tone, 26),
+            fixLabel: KIND_LABEL[kind],
+            fixTone: KIND_TONE[kind],
+            fixBg: tint(KIND_TONE[kind], 7),
+            fixBorder: mix(KIND_TONE[kind], 24),
+          });
+        }),
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>
