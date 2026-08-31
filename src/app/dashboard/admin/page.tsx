@@ -354,6 +354,14 @@ export default async function AdminDashboardPage() {
               so it reads as the shared shell rather than a link in the header."
               This panel's own rows are the real entry points now, per that note
               -- and Settings needs a way in too, since nothing else here reaches it. */}
+          {/* The one sentence worth keeping from the deleted "Course material"
+              card. It belongs here, next to the shared library it is about,
+              rather than under a heading that implied a choice to make. */}
+          <p className="text-[11px] leading-relaxed text-muted">
+            Want a head start closer to a specific past course? Use &quot;Duplicate this course&quot; from that
+            course&apos;s own page. TP points and assignment briefs are already shared centre-wide, so there is
+            nothing to copy there.
+          </p>
           <Link href="/dashboard/admin/settings" className="text-xs font-medium text-primary hover:underline">
             Settings →
           </Link>
@@ -375,43 +383,21 @@ export default async function AdminDashboardPage() {
           the whole course -- see its own copy ("Your centre-wide TP
           Points Library and assignment briefs are already shared
           automatically, nothing to copy there"). */}
-      <LaptopOnlyGate task="Course material">
-        <div className="card flex flex-col gap-3 border-t-[3px] border-t-primary p-6">
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-serif text-lg text-ink">Course material</h2>
-            <span className="rounded-[5px] bg-primary/10 px-2 py-0.5 text-[10.5px] font-bold tracking-[0.08em] text-primary uppercase">
-              Optional head start
-            </span>
-          </div>
-          <p className="max-w-[700px] text-sm text-muted">
-            Give any course a starting set of assignment briefs, TP points, and coursebooks from the centre&apos;s
-            shared library -- before the MCT even logs in.
-          </p>
-          <div className="mt-1 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Link
-              href="/dashboard/admin/coursebooks"
-              className="admin-hover-fill flex flex-col gap-1.5 rounded-[7px] border border-border p-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
-            >
-              <span className="text-[12.5px] font-semibold text-ink">Build from the shared library</span>
-              <span className="text-[11px] leading-relaxed text-muted">
-                Browse the centre&apos;s TP points, briefs, resources, and coursebooks.
-              </span>
-              <span className="mt-1 text-[11.5px] font-medium text-primary">Open library &rarr;</span>
-            </Link>
-            <div className="flex flex-col gap-1.5 rounded-[7px] border border-border p-3.5">
-              <span className="text-[12.5px] font-semibold text-ink">Leave for the MCT</span>
-              <span className="text-[11px] leading-relaxed text-muted">
-                The default. The MCT sets material up themselves once the course begins.
-              </span>
-            </div>
-          </div>
-          <p className="mt-1 text-xs text-muted">
-            Want a head start closer to a specific past course? Use &quot;Duplicate this course&quot; from that
-            course&apos;s own page -- it copies the timetable and any course-specific Resource Hub files. TP points
-            and assignment briefs are already shared centre-wide, so there&apos;s nothing to duplicate there.
-          </p>
-        </div>
-      </LaptopOnlyGate>
+      {/* The "Course material" card that used to sit here is gone.
+          Ramy, 31 Aug 2026: "we said something about this being redundant."
+          He was right, and more so than he remembered. It offered two
+          choices: "Build from the shared library", which linked to
+          /dashboard/admin/coursebooks -- the same page two rows of Centre
+          material above already link to, giving that one destination three
+          links on a single screen -- and "Leave for the MCT", which was a
+          static box with no link and no action, describing doing nothing.
+
+          A duplicate link plus a card that says "or don't" is not a choice,
+          and presenting it as one implies a decision has to be made here when
+          the honest answer is that the MCT will handle it. The only real
+          content was the closing sentence about duplicating a course, which
+          now sits under Centre material where the shared library actually
+          lives. */}
     </div>
   );
 }

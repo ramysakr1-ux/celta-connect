@@ -116,12 +116,27 @@ export default async function DashboardLayout({
           {profile?.role === "admin" ? (
             <>
               <span className="h-[18px] w-px shrink-0 bg-border" aria-hidden="true" />
-              <span className={PILL_ACTIVE}>Course admin</span>
+              {/* Centre management FIRST, then Course admin -- the same order
+                  CentreHeaderPills uses, and the order never changes.
+
+                  It used to put whichever section you were in first, so the
+                  pair read [Course admin][Centre management] here and
+                  [Centre management][Course admin] over there. Both the teal
+                  and the position moved at once, which cancels the signal:
+                  the leftmost pill meant something different depending on
+                  where you already were, so it could not tell you where you
+                  were. Ramy walked into exactly that on 31 Aug 2026 -- "I was
+                  in course admin, not centre management" -- having asked for
+                  the opposite back on the 30th: "when one pill is active, the
+                  other one is inactive, so that the green teal is sort of
+                  jumping between them." Teal can only jump between two things
+                  that hold still. */}
               {centreCtx && centreCtx.roles.length > 0 ? (
                 <Link href="/centre" className={PILL_INACTIVE}>
                   Centre management
                 </Link>
               ) : null}
+              <span className={PILL_ACTIVE}>Course admin</span>
             </>
           ) : null}
           </div>
