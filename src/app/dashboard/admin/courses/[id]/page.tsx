@@ -237,7 +237,13 @@ export default async function CourseAdminDetailPage({
                   </p>
                   <p className="text-xs text-muted">{t.email}</p>
                 </div>
-                <TutorRoleControl courseTutorId={t.courseTutorId} courseId={course.id} current={t.role} />
+                <TutorRoleControl
+                  courseTutorId={t.courseTutorId}
+                  courseId={course.id}
+                  current={t.role}
+                  courseRunning={courseState === "running"}
+                  tutorName={t.name}
+                />
               </div>
             ))}
           </div>

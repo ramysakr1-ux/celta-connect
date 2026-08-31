@@ -2,6 +2,8 @@
 
 import "server-only";
 import { revalidatePath } from "next/cache";
+import { logManagementAction, tutorRoleLabel } from "@/lib/activity-log";
+import { isCourseRunning, notifyCourseTutorsOfChange } from "@/lib/course-change-notice";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireCapabilityOrTrainer } from "@/lib/auth/require-capability";
 import { isMctOnCourse } from "@/lib/course-mct";
@@ -191,16 +193,39 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
   const nextRole = (nextRoleRaw || null) as TutorRole | null;
 
   const admin = createAdminClient();
-  const { data: course } = await admin.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
+  const { data: course } = await admin
+    .from("courses")
+    .select("id, center_id, name, start_date, end_date")
+    .eq("id", courseId)
+    .maybeSingle();
   if (!course || course.center_id !== profile.center_id) return { error: "Course not found." };
   if (profile.role === "trainer" && !(await isMctOnCourse(admin, courseId, profile.id))) {
     return { error: "Only the main course tutor can do this." };
   }
 
+  // Read the state we are about to overwrite, so the log can say what it was
+  // as well as what it became. Ramy, 31 Aug 2026: shared management "should
+  // leave a digital footprint" -- and a footprint without the previous value
+  // only records that something happened, not what changed.
+  const { data: subject } = await admin
+    .from("course_tutors")
+    .select("profile_id, tutor_role")
+    .eq("id", courseTutorId)
+    .maybeSingle();
+
   if (nextRole === "main_course_tutor") {
     // Step the current MCT down to assistant course tutor rather than to
     // nothing: they are still a tutor on the course, and blanking the field
     // would lose that.
+    const { data: outgoing } = await admin
+      .from("course_tutors")
+      .select("profile_id")
+      .eq("course_id", courseId)
+      .eq("tutor_role", "main_course_tutor")
+      .is("left_at", null)
+      .neq("id", courseTutorId)
+      .maybeSingle();
+
     const { error: demoteError } = await admin
       .from("course_tutors")
       .update({ tutor_role: "assistant_course_tutor" })
@@ -209,6 +234,22 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
       .is("left_at", null)
       .neq("id", courseTutorId);
     if (demoteError) return { error: "Could not move the main course tutor role. Nothing was changed." };
+
+    // Logged as its own entry: the outgoing MCT was changed too, and reading
+    // only the promotion would leave their demotion unexplained.
+    if (outgoing?.profile_id) {
+      await logManagementAction({
+        centerId: profile.center_id,
+        actorId: profile.id,
+        courseId,
+        action: "tutor.role_changed",
+        targetTable: "course_tutors",
+        targetId: outgoing.profile_id,
+        previousValue: tutorRoleLabel("main_course_tutor"),
+        newValue: tutorRoleLabel("assistant_course_tutor"),
+        detail: { reason: "stepped down when another tutor was made main course tutor" },
+      });
+    }
   }
 
   const { error } = await admin
@@ -217,6 +258,35 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
     .eq("id", courseTutorId)
     .eq("course_id", courseId);
   if (error) return { error: "Could not change the role. Try again." };
+
+  await logManagementAction({
+    centerId: profile.center_id,
+    actorId: profile.id,
+    courseId,
+    action: "tutor.role_changed",
+    targetTable: "course_tutors",
+    targetId: subject?.profile_id ?? null,
+    previousValue: tutorRoleLabel(subject?.tutor_role),
+    newValue: tutorRoleLabel(nextRole),
+  });
+
+  // On a course that has already started, the people teaching it are told.
+  // Ramy, 31 Aug 2026: "people on the course should know... in case someone
+  // does change something by accident." Only while running -- a change made
+  // during setup is just setup, and pinging tutors about it would train them
+  // to ignore the ones that matter.
+  const { data: centre } = await admin.from("centers").select("time_zone").eq("id", course.center_id).maybeSingle();
+  if (isCourseRunning(course, centre?.time_zone)) {
+    const { data: who } = subject?.profile_id
+      ? await admin.from("profiles").select("full_name").eq("id", subject.profile_id).maybeSingle()
+      : { data: null };
+    await notifyCourseTutorsOfChange(admin, {
+      courseId,
+      actorId: profile.id,
+      title: `${course.name}: tutor role changed`,
+      body: `${who?.full_name ?? "A tutor"} is now ${tutorRoleLabel(nextRole)?.toLowerCase() ?? nextRole}. Changed by ${profile.full_name}.`,
+    });
+  }
 
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
   return { error: null };

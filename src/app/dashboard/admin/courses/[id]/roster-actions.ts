@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { logManagementAction } from "@/lib/activity-log";
 import { syncAssessorMeetingEvent } from "@/lib/assessor-day";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -144,13 +145,33 @@ export async function updateEntryFormSentAt(formData: FormData): Promise<void> {
   if (typeof courseId !== "string") return;
 
   const supabase = await createClient();
-  const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
+  const { data: course } = await supabase
+    .from("courses")
+    .select("id, center_id, entry_form_sent_at")
+    .eq("id", courseId)
+    .maybeSingle();
   if (!course || course.center_id !== admin.center_id) return;
 
-  await supabase
-    .from("courses")
-    .update({ entry_form_sent_at: entryFormSentAt ? new Date(entryFormSentAt).toISOString() : null })
-    .eq("id", courseId);
+  const next = entryFormSentAt ? new Date(entryFormSentAt).toISOString() : null;
+  await supabase.from("courses").update({ entry_form_sent_at: next }).eq("id", courseId);
+
+  // Both the Course Administrator and the MCT can set this, and it is the
+  // date that later decides whether a withdrawal is internal or reportable to
+  // Cambridge. Two people who can write one field is exactly the shared
+  // responsibility Ramy meant: the record should say which of them did it.
+  const asDate = (v: string | null) => (v ? v.slice(0, 10) : null);
+  if (asDate(course.entry_form_sent_at) !== asDate(next)) {
+    await logManagementAction({
+      centerId: admin.center_id,
+      actorId: admin.id,
+      courseId,
+      action: next ? "entry_form.marked_sent" : "entry_form.cleared",
+      targetTable: "courses",
+      targetId: courseId,
+      previousValue: asDate(course.entry_form_sent_at),
+      newValue: asDate(next),
+    });
+  }
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
 }
 
