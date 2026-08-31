@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  button { font: inherit; cursor: pointer; }
+</style>
+</helmet>
+
+<div style="width: 1400px; box-sizing: border-box; padding: 34px 40px 60px; font-family: Karla, Helvetica, sans-serif; color: oklch(23.5% 0.017 65); display: flex; flex-direction: column; gap: 26px;">
+
+  <div style="display: flex; flex-direction: column; gap: 9px; max-width: 1080px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · marking guidance · tutors and the assessor</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">There is no answer key. There is a line, and it needs to be in the same place for everyone.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">An assignment has many right answers, which is exactly why two tutors mark the same script differently. What settles it is not a model answer but agreement about what is enough — written down by this centre, argued over at standardisation, and sitting beside the criterion while somebody marks.</div>
+  </div>
+
+  <div style="display: flex; gap: 9px;">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+      <button onClick="{{ t.pick }}" style="flex: 1; text-align: left; background: {{ t.bg }}; border: 1px solid {{ t.border }}; border-top: 3px solid {{ t.spine }}; border-radius: 6px; padding: 11px 14px; display: flex; flex-direction: column; gap: 2px;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: {{ t.numInk }};">{{ t.n }}</div>
+        <div style="font-size: 13px; font-weight: 700; color: {{ t.ink }};">{{ t.label }}</div>
+      </button>
+    </sc-for>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: baseline; gap: 12px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600;">{{ title }}</div>
+        <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ meta }}</div>
+      </div>
+      <div style="font-size: 11.5px; font-weight: 600; color: oklch(63% 0.096 72);">Tutors and the assessor · never candidates</div>
+    </div>
+
+    <sc-for list="{{ criteria }}" as="c" hint-placeholder-count="3">
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-left: 3px solid oklch(37.5% 0.058 195); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+          <div style="font-size: 11px; font-weight: 700; color: oklch(37.5% 0.058 195); flex: none; padding-top: 2px;">{{ c.n }}</div>
+          <div style="font-size: 14.5px; font-weight: 600; line-height: 1.4; text-wrap: pretty;">{{ c.text }}</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(48% 0.09 150);">Enough to meet it</div>
+            <sc-for list="{{ c.met }}" as="m" hint-placeholder-count="3">
+              <div style="font-size: 12px; line-height: 1.55; color: oklch(38% 0.017 65); padding-left: 11px; border-left: 2px solid color-mix(in oklab, oklch(48% 0.09 150) 40%, transparent); text-wrap: pretty;">{{ m }}</div>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(63% 0.096 72);">Centre judgement</div>
+            <sc-for list="{{ c.grey }}" as="g" hint-placeholder-count="3">
+              <div style="font-size: 12px; line-height: 1.55; color: oklch(38% 0.017 65); padding-left: 11px; border-left: 2px solid color-mix(in oklab, oklch(63% 0.096 72) 45%, transparent); text-wrap: pretty;">{{ g }}</div>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(45% 0.15 27);">Not yet</div>
+            <sc-for list="{{ c.not }}" as="x" hint-placeholder-count="3">
+              <div style="font-size: 12px; line-height: 1.55; color: oklch(38% 0.017 65); padding-left: 11px; border-left: 2px solid color-mix(in oklab, oklch(45% 0.15 27) 40%, transparent); text-wrap: pretty;">{{ x }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: flex-start; background: oklch(96.8% 0.008 85); border-radius: 5px; padding: 11px 13px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: oklch(51% 0.017 70); flex: none; padding-top: 1px;">Agreed</div>
+          <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ c.agreed }}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div id="1b" style="display: grid; grid-template-columns: 1.25fr 1fr; gap: 14px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; align-items: baseline; gap: 12px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">{{ samplesTitle }}</div>
+        <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">anonymised, with the tutor's reasoning</div>
+      </div>
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; overflow: hidden;">
+        <sc-for list="{{ samples }}" as="s" hint-placeholder-count="4">
+          <div style="display: grid; grid-template-columns: 132px 1fr 104px; gap: 14px; align-items: start; padding: 13px 17px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 55%, transparent);">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 12px; font-weight: 700; color: {{ s.ink }};">{{ s.verdict }}</div>
+              <div style="font-size: 10.5px; color: oklch(56% 0.017 70);">{{ s.from }}</div>
+            </div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ s.why }}</div>
+            <div style="font-size: 11px; font-weight: 600; color: oklch(37.5% 0.058 195); text-align: right;">Open</div>
+          </div>
+        </sc-for>
+        <div style="padding: 12px 17px; font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">Kept with the candidate's permission and their name removed. A borderline script with the tutor's reasoning beside it teaches more than two clear passes.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Where the guidance comes from</div>
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid color-mix(in oklab, oklch(63% 0.096 72) 34%, transparent); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-size: 12.5px; line-height: 1.6; color: oklch(38% 0.017 65); text-wrap: pretty;">Not from Cambridge and not from Connect. Every line is the centre's own, written after a disagreement about a real script, which is the only thing that produces guidance anybody follows.</div>
+        <sc-for list="{{ source }}" as="s" hint-placeholder-count="4">
+          <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 10px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 45%, transparent);">
+            <div style="width: 3px; align-self: stretch; border-radius: 99px; background: {{ s.spine }}; flex: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 12.5px; font-weight: 600;">{{ s.title }}</div>
+              <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ s.note }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div id="1c" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 21px; font-weight: 600;">Centre judgement, all five at once</div>
+      <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">everything the centre has agreed to accept, on one page</div>
+    </div>
+    <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; overflow: hidden;">
+      <sc-for list="{{ all }}" as="a" hint-placeholder-count="5">
+        <div style="display: grid; grid-template-columns: 190px 1fr; gap: 18px; padding: 14px 20px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 55%, transparent); background: {{ a.bg }};">
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 12.5px; font-weight: 700; color: oklch(37.5% 0.058 195);">{{ a.n }}</div>
+            <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ a.label }}</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <sc-for list="{{ a.rows }}" as="r" hint-placeholder-count="4">
+              <div style="display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: baseline;">
+                <div style="font-size: 11px; font-weight: 700; color: oklch(63% 0.096 72);">{{ r.n }}</div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(38% 0.017 65); text-wrap: pretty;">{{ r.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+      <div style="padding: 12px 20px; font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">Read end to end this is the centre's marking character — what it is relaxed about and what it will not move on. Useful at standardisation, and the thing an assessor is really asking to see.</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+    <sc-for list="{{ notes }}" as="n" hint-placeholder-count="4">
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-left: 3px solid {{ n.spine }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 12.5px; font-weight: 700; color: {{ n.spine }};">{{ n.title }}</div>
+        <div style="font-size: 12px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1400}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const GOLD = 'oklch(63% 0.096 72)';
+const RED = 'oklch(45% 0.15 27)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const CARD = 'oklch(99.5% 0.004 90)';
+
+const A = {
+  a1: {
+    label: 'Focus on the learner', n: 'Assignment 1',
+    title: 'Focus on the learner', meta: 'four criteria · the one tutors most often disagree on is the last',
+    criteria: [
+      { n: 'i', text: 'Showing awareness of how a learner’s background, previous learning experience and learning preferences affect learning.',
+        met: [
+          'Names something specific to this learner — the country, the schooling, the reason for studying — and says what follows for teaching them.',
+          'One well-drawn connection is enough. Three vague ones are not.',
+        ],
+        grey: [
+          'Generalising from nationality (“Turkish learners struggle with articles”) is accepted if the candidate has evidence from this learner and does not stop there.',
+          'Learning-style language (“she is a visual learner”) passes if it leads to a teaching decision, even though the underlying idea is contested.',
+        ],
+        not: [
+          'A biography. Age, job and hometown with nothing drawn from any of it.',
+          'Claims about the learner with no source — not the interview, not the lesson, not the written work.',
+        ],
+        agreed: 'The test is whether a stranger could teach this learner better having read it. Standardised February 2026 after a split decision.' },
+
+      { n: 'ii', text: 'Identifying the learner’s language/skills needs.',
+        met: [
+          'Two or three needs, each with the evidence that produced it — a quoted error, something they said in the interview, a gap in the written sample.',
+          'Skills and language both considered, even if only one is pursued.',
+        ],
+        grey: [
+          'Listing more needs than they analyse is accepted. Breadth first, depth on a few, is a reasonable shape at this stage.',
+          'A need drawn only from what the learner said about themselves is accepted if it is labelled as such.',
+        ],
+        not: [
+          'Needs asserted without evidence, however plausible.',
+          'Only errors. A learner’s needs are not exhausted by their mistakes.',
+        ],
+        agreed: 'Evidence must be quoted, not summarised. “She has problems with tenses” is not a need; the sentence she wrote is.' },
+
+      { n: 'iii', text: 'Correctly using terminology relating to the description of language systems and skills.',
+        met: [
+          'Terms used accurately in the places they are used, whether or not the candidate reaches for many.',
+          'A plain-English explanation alongside a term is a good sign, not a weakness.',
+        ],
+        grey: [
+          'Older or regional terminology (“present continuous” vs “present progressive”) is accepted if used consistently.',
+          'One slip in an otherwise accurate script does not fail this. Two or three do.',
+        ],
+        not: [
+          'Terms used as decoration, where removing them would not change the meaning.',
+          'Confusing form with function, or naming a tense wrongly.',
+        ],
+        agreed: 'Wrong terminology is a fail here even when the observation underneath it is sound — the criterion is about the terminology.' },
+
+      { n: 'iv', text: 'Selecting appropriate material and activities, and providing a rationale for their selection.',
+        met: [
+          'A named activity, at the right level, with a reason tied to a need identified earlier in the assignment.',
+          'The rationale is what is marked. A perfect activity with no reason does not meet it.',
+        ],
+        grey: [
+          'A published coursebook page rather than something written from scratch is fine, provided the choice is justified.',
+          'An activity a tutor would not choose themselves is accepted if the reasoning holds.',
+        ],
+        not: [
+          'Activities that answer a need never identified in the assignment.',
+          '“Because it is communicative” — a rationale that would fit any activity is not a rationale.',
+        ],
+        agreed: 'This is the criterion most often marked Not Yet on round one, almost always because the rationale is missing rather than wrong.' },
+    ],
+    samples: [
+      { verdict: 'Met, clearly', from: 'C1/2026', tone: 'g', why: 'One learner, one well-drawn connection between her schooling and her reluctance to speak. Useful because it is short — length is not what carries this assignment.' },
+      { verdict: 'Met, borderline', from: 'C1/2026', tone: 'y', why: 'Strong needs analysis, thin rationale for the activities. Passed after discussion; the note records that the rationale was judged just sufficient rather than good.' },
+      { verdict: 'Not yet, round one', from: 'C2/2026', tone: 'r', why: 'A biography with activities attached. Shows what criterion i looks like when the learner is described rather than analysed.' },
+      { verdict: 'Met, after resubmission', from: 'C2/2026', tone: 't', why: 'The same script with a rationale added to each activity. Both rounds kept so a tutor can see how small the repair usually is.' },
+    ],
+  },
+
+  a2: {
+    label: 'Language related tasks', n: 'Assignment 2',
+    title: 'Language related tasks', meta: 'the assignment with many right answers — and the one that needs this page most',
+    criteria: [
+      { n: 'i', text: 'Analyses language correctly.',
+        met: [
+          'Meaning, form and pronunciation each addressed for each item, at a level of detail a learner could be taught from.',
+          'An analysis that differs from the tutor’s own but is defensible from a grammar reference.',
+        ],
+        grey: [
+          'Following a different grammar than the centre’s usual reference is accepted if it is applied consistently — say which, and mark against it.',
+          'Simplifying for a specific level is not an error. “Used for future arrangements” is adequate at elementary even though it is incomplete.',
+          'A British or an American model — including the connected speech that follows from it — is accepted, provided one is chosen and held to across the item.',
+          'Omitting weak forms in the pronunciation section is accepted at this stage unless the item makes them central.',
+        ],
+        not: [
+          'Meaning that is wrong, however elegantly written.',
+          'Form given as a bare label — “present perfect” with no structure.',
+          'Copying a coursebook explanation without adapting it to the item in the brief.',
+        ],
+        agreed: 'Mark the analysis a learner would receive, not the one the tutor would write. Two defensible analyses both pass.' },
+
+      { n: 'ii', text: 'Uses terminology correctly.',
+        met: [
+          'Terms correct and consistent within the script.',
+          'Phonemic symbols correct where used.',
+        ],
+        grey: [
+          '“Verb 3” or “V3” rather than past participle. Widely taught, understood by learners, and accepted if used consistently.',
+          'Mixing metalanguage traditions across items is accepted if each item is internally consistent.',
+          'A missing stress mark is a slip, not a failed criterion.',
+        ],
+        not: [
+          'Phonemic transcription with wrong symbols — it will be copied onto a board.',
+          'Naming a form wrongly, even if the analysis around it is right.',
+        ],
+        agreed: 'Transcription errors are always flagged, never overlooked as typos.' },
+
+      { n: 'iii', text: 'Anticipates problems learners may have with the language and suggests solutions.',
+        met: [
+          'Problems specific to the item and plausible for the level, with a solution that would actually address them.',
+          'One problem per area — meaning, form, pronunciation — is a sound shape.',
+        ],
+        grey: [
+          'Problems drawn from the candidate’s own L1 rather than the class’s is accepted if reasoned.',
+          '“Learners may confuse it with X” passes if X is named and the confusion is explained.',
+        ],
+        not: [
+          'Problems that could apply to any language point at all.',
+          'Solutions that restate the problem (“I will explain the difference”).',
+        ],
+        agreed: 'A solution must be something the candidate could do on Monday, in a room, with these learners.' },
+    ],
+    samples: [
+      { verdict: 'Met, clearly', from: 'C1/2026', tone: 'g', why: 'Three items analysed at different depths, all defensible. Useful because the pronunciation section is thinner than tutors expect and still passes.' },
+      { verdict: 'Met, borderline', from: 'C1/2026', tone: 'y', why: 'Passed on a second reading after two tutors disagreed about a meaning statement. The note records why it went that way, which is the whole value of keeping it.' },
+      { verdict: 'Not yet, round one', from: 'C2/2026', tone: 'r', why: 'Meaning correct throughout, form given as labels only. The commonest single reason this assignment comes back.' },
+      { verdict: 'Met, after resubmission', from: 'C2/2026', tone: 't', why: 'The same script with the form sections rewritten. Both rounds kept together so a tutor can see what a sufficient repair looks like.' },
+    ],
+  },
+
+  a3: {
+    label: 'Language skills', n: 'Assignment 3',
+    title: 'Language skills related tasks', meta: 'three criteria · the text choice decides most of it',
+    criteria: [
+      { n: 'i', text: 'Identifying receptive/productive skills that could be practised in relation to the text.',
+        met: [
+          'A named receptive sub-skill and a productive task that follows from the text rather than being bolted on.',
+          'The link between the two made explicit.',
+        ],
+        grey: [
+          'A text a tutor considers too hard is accepted if the tasks are graded to the level.',
+          'Choosing only one receptive sub-skill and doing it properly is better than listing four.',
+        ],
+        not: [
+          'Comprehension questions labelled as a sub-skill.',
+          'A productive task unrelated to the text.',
+        ],
+        agreed: 'The text must be authentic as the brief requires; a coursebook reading passage is refused at submission, not at marking.' },
+
+      { n: 'ii', text: 'Correctly using terminology that relates to language skills and sub-skills.',
+        met: ['Sub-skills named accurately — gist, specific information, detail, inference.'],
+        grey: ['“Skimming” and “scanning” are accepted alongside the newer terms, provided their use is correct.'],
+        not: ['Using “skills” and “sub-skills” interchangeably throughout.'],
+        agreed: 'Same standard as assignment 2 criterion ii. Deliberately consistent.' },
+
+      { n: 'iii', text: 'Providing a rationale for the choice of text and tasks.',
+        met: [
+          'Why this text for these learners, and why these tasks in this order.',
+          'Level, interest and length all addressed somewhere.',
+        ],
+        grey: ['A rationale largely about learner interest is accepted if the level is also justified.'],
+        not: ['A rationale that describes the tasks rather than justifying them.'],
+        agreed: 'As with assignment 1, the rationale carries the criterion. Describing is not justifying.' },
+    ],
+    samples: [
+      { verdict: 'Met, clearly', from: 'C1/2026', tone: 'g', why: 'A news article most tutors would call slightly too hard, with tasks graded carefully enough that the level objection falls away.' },
+      { verdict: 'Met, borderline', from: 'C2/2026', tone: 'y', why: 'Sub-skills named correctly but the productive task only loosely tied to the text. Passed with a comment; kept because it sits exactly on the line.' },
+      { verdict: 'Refused at submission', from: 'C2/2026', tone: 'r', why: 'A coursebook reading passage rather than an authentic text. Never reached marking — shown so tutors recognise it early.' },
+      { verdict: 'Met, after resubmission', from: 'C2/2026', tone: 't', why: 'Rationale rewritten to justify rather than describe. The single most common repair on this assignment.' },
+    ],
+  },
+
+  a5: {
+    label: 'Plagiarism reflection', n: 'The fifth',
+    title: 'The plagiarism reflection', meta: 'no Cambridge criteria — the centre’s own, marked by the case tutor',
+    criteria: [
+      { n: 'i', text: 'Describes honestly what was done, in their own account.',
+        met: [
+          'A plain account of what happened, specific enough that somebody who was not there understands it.',
+          'Owning the decision rather than the outcome — “I copied it” rather than “it was flagged”.',
+        ],
+        grey: [
+          'Explaining the pressure they were under is accepted, and usually true. Context is not the same as excuse.',
+          'Disagreeing that it was serious, while accepting that it happened, is accepted here — criterion iii is where that matters.',
+        ],
+        not: [
+          'Passive throughout. “Text was included” with no author anywhere in the sentence.',
+          'An account that contradicts the evidence in the case.',
+        ],
+        agreed: 'This section cannot be copied from anywhere, which is the reason it is first. Read it before the other three.' },
+
+      { n: 'ii', text: 'Identifies the rule breached, quoting the centre policy and the Cambridge guidance.',
+        met: [
+          'The applicable clause quoted from the centre’s malpractice policy, and why it applies to what they did.',
+          'The relevant line from the Cambridge AI guidance or the candidate agreement they accepted at account setup.',
+        ],
+        grey: [
+          'Quoting a clause that is nearly but not exactly the right one is accepted if the reasoning is sound — most candidates have never read a policy document before.',
+        ],
+        not: [
+          'Paraphrasing the policy without quoting it. The task is to go and read it.',
+          'Quoting the policy with no account of how it applies to them.',
+        ],
+        agreed: 'Both documents are in the resource hub and one of them they signed. Not finding them is not a defence.' },
+
+      { n: 'iii', text: 'Explains why it matters for a teacher in particular.',
+        met: [
+          'An argument connecting their own honesty to the classroom — assessing learners, modelling what they ask of learners, or the value of the certificate they will hold.',
+          'Short is fine. This is the shortest section and the most general.',
+        ],
+        grey: [
+          'An argument mostly about fairness to other candidates is accepted, though the teaching connection is stronger.',
+        ],
+        not: [
+          'A general essay on academic honesty that could have been written by anybody about any course.',
+        ],
+        agreed: 'This is the only section that could be copied, and it is deliberately the shortest. Weight the other three.' },
+
+      { n: 'iv', text: 'Says what they will do differently, concretely.',
+        met: [
+          'Something they can do on the next assignment — a way of taking notes, a point at which they will ask, a change to how they use sources.',
+          'Realistic given how much course is left.',
+        ],
+        grey: [
+          '“I will ask my tutor if unsure” is accepted if it names when they would ask.',
+        ],
+        not: [
+          'A promise not to do it again with no method attached.',
+          'Actions that would not have prevented what actually happened.',
+        ],
+        agreed: 'Judge it against the case. If the plan would not have stopped this incident, it is not yet met.' },
+    ],
+    samples: [
+      { verdict: 'Met, clearly', from: 'C1/2026', tone: 'g', why: 'Short, direct and uncomfortable to read, which is what a genuine one looks like. Useful because new markers expect length.' },
+      { verdict: 'Met, borderline', from: 'C2/2026', tone: 'y', why: 'Strong account, policy paraphrased rather than quoted. Passed after the candidate added the quotation; the note records that section 2 was the only thing missing.' },
+      { verdict: 'Not yet, round one', from: 'C2/2026', tone: 'r', why: 'Written entirely in the passive with no admission in it. Shows what criterion i looks like when somebody is still defending themselves.' },
+      { verdict: 'Not upheld — no reflection', from: 'C1/2026', tone: 't', why: 'The case was investigated and dismissed, so nothing was set. Kept so tutors see that a case on file does not mean an assignment was written.' },
+    ],
+  },
+
+  a4: {
+    label: 'Professional development', n: 'Assignment 4',
+    title: 'Lessons from the classroom', meta: 'the most personal assignment, and the hardest to mark consistently',
+    criteria: [
+      { n: 'i', text: 'Noting their own strengths and weaknesses in the light of feedback from learners, other teachers and tutors.',
+        met: [
+          'Specific moments from their own teaching, named, with what the feedback said about them.',
+          'Both strengths and weaknesses — a script that is only self-criticism does not meet it.',
+        ],
+        grey: [
+          'Disagreeing with feedback they were given is accepted, and often a good sign, provided the disagreement is reasoned.',
+          'Heavy focus on one lesson is fine if the reflection is deep.',
+        ],
+        not: [
+          'Generic self-assessment that could have been written before the course started.',
+          'Listing feedback received without engaging with any of it.',
+        ],
+        agreed: 'Look for evidence they read their feedback, not that they agreed with it.' },
+
+      { n: 'ii', text: 'Identifying which EFL areas of knowledge and skills they need further development in.',
+        met: ['Two or three areas, specific enough to act on, drawn from what they wrote in the first criterion.'],
+        grey: ['“Grammar” alone is too broad, but “grammar for teaching at higher levels” is accepted.'],
+        not: ['Areas that contradict the strengths and weaknesses they just described.'],
+        agreed: 'This criterion fails most often for vagueness, not for wrong self-assessment.' },
+
+      { n: 'iii', text: 'Identifying a realistic action plan and the means of achieving it.',
+        met: [
+          'Actions with something concrete attached — a named course, a book, a plan to observe a colleague.',
+          'Realistic for their circumstances as described.',
+        ],
+        grey: [
+          '“Read more” passes if a title is named.',
+          'A plan built entirely around further study rather than classroom practice is accepted, though worth a comment.',
+        ],
+        not: [
+          'A plan with no timeframe and no named resource.',
+          'Aspirations disconnected from the development areas above.',
+        ],
+        agreed: 'Realistic is judged against their situation, not an ideal one. Somebody teaching in a remote school cannot observe colleagues weekly.' },
+    ],
+    samples: [
+      { verdict: 'Met, clearly', from: 'C1/2026', tone: 'g', why: 'Disagrees with a piece of tutor feedback and argues the point well. Kept because new markers often read disagreement as a weakness.' },
+      { verdict: 'Met, borderline', from: 'C1/2026', tone: 'y', why: 'Honest reflection, development areas too broad. Passed because criterion ii was judged just specific enough — a decision worth being able to point at.' },
+      { verdict: 'Not yet, round one', from: 'C2/2026', tone: 'r', why: 'Self-assessment that could have been written in week one, with no reference to any feedback received.' },
+      { verdict: 'Met, after resubmission', from: 'C2/2026', tone: 't', why: 'Action plan rewritten with two named resources and a timeframe. Shows what “realistic” was taken to mean.' },
+    ],
+  },
+};
+
+class Component extends DCLogic {
+  state = { a: 'a2' };
+
+  renderVals() {
+    const a = this.state.a;
+    const cur = A[a];
+
+    return {
+      tabs: ['a1', 'a2', 'a3', 'a4', 'a5'].map(k => {
+        const on = k === a;
+        return {
+          n: A[k].n, label: A[k].label,
+          pick: () => this.setState({ a: k }),
+          bg: on ? CARD : 'transparent',
+          border: on ? TEAL : 'oklch(89.5% 0.012 82)',
+          spine: on ? TEAL : 'transparent',
+          ink: on ? INK : MUTED,
+          numInk: on ? TEAL : MUTED,
+        };
+      }),
+
+      title: cur.title,
+      meta: cur.meta,
+      criteria: cur.criteria,
+
+      all: ['a1', 'a2', 'a3', 'a4', 'a5'].map((k, i) => ({
+        n: A[k].n, label: A[k].label,
+        bg: i % 2 ? 'oklch(97.8% 0.008 85)' : 'transparent',
+        rows: A[k].criteria.reduce((acc, c) => acc.concat(c.grey.map(g => ({ n: c.n, text: g }))), []),
+      })),
+
+      samplesTitle: 'Last cohort’s scripts — ' + cur.n.toLowerCase(),
+      samples: cur.samples.map(x => Object.assign({}, x, {
+        from: x.from + ' · ' + cur.n.replace('Assignment ', 'A'),
+        ink: { g: GREEN, y: GOLD, r: RED, t: TEAL }[x.tone],
+      })),
+
+      source: [
+        { spine: GOLD, title: 'A disagreement at standardisation', note: 'Two tutors mark the same script differently, the group settles it, and the line they agreed becomes a line on this page with the date on it.' },
+        { spine: TEAL, title: 'A resubmission that should not have been', note: 'When a candidate is asked to resubmit and the second marker would have passed round one, the reason goes here so it does not happen again.' },
+        { spine: TEAL, title: 'The assessor’s comments', note: 'If an assessor questions a marking decision, what the centre concluded is written down rather than remembered.' },
+        { spine: MUTED, title: 'Never from Connect', note: 'The app holds the guidance and shows it beside the criterion. It does not write it, and it does not suggest a mark.' },
+      ],
+
+      notes: [
+        { spine: TEAL, title: 'It sits beside the criterion while marking', text: 'Not in a folder a tutor remembers to open. When a marker is deciding whether something is met, the centre’s agreed line is on the same screen — which is the only moment it changes anything.' },
+        { spine: GOLD, title: 'The middle column is the point', text: 'Nobody argues about whether a definition is wrong or a structure misnamed — those are yes or no. The arguments are about nuance: verb 3 against past participle, a British model against an American one, how much detail a low level needs. Which is why the column is the centre’s judgement rather than any individual marker’s.' },
+        { spine: MUTED, title: 'The criteria are Cambridge’s, the columns are not', text: 'Every criterion on this page is the syllabus wording, unchanged — the same text that appears in the briefs. What the centre owns is the three columns beneath each one and the agreed line under those, which is where its own marking character lives.' },
+        { spine: RED, title: 'Candidates never see it — the assessor does', text: 'To a candidate it would become a checklist to write against, and the assignment would stop testing anything. To an assessor it is the plainest evidence a centre standardises its marking (8.2), so it sits in the visit pack rather than being asked for.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

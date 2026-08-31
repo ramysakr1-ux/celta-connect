@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(37.5% 0.058 195); text-decoration: none; }
+  a:hover { color: oklch(30% 0.042 58); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 40px; width: 1500px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 11px; max-width: 920px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · plagiarism and malpractice · Admin Handbook 8.2.4</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(30% 0.042 58);">An allegation is a process, not a verdict.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">The handbook asks centres to guide candidates on what plagiarism is, hold an internal policy stating the penalties, and require candidates to confirm in writing that assignments are their own work. What it does not give you is anywhere to record what happened when something goes wrong — which is what an assessor will ask about.</div>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 11px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(63% 0.096 72); color: oklch(20% 0.02 65);">1a</div>
+      <div style="font-size: 14px; font-weight: 600; color: oklch(30% 0.042 58);">The scanner</div>
+      <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">runs on submission · seen by tutors only · never by the candidate</div>
+    </div>
+
+    <div style="width: 1380px; box-sizing: border-box; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Assignment 2 · Language Related Tasks · 8 submissions</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 25px; font-weight: 600; color: oklch(30% 0.042 58);">Two worth a look</div>
+        </div>
+        <div style="font-size: 12px; color: oklch(51% 0.017 70);">Scanned 22 Nov, 23:59 · 1.4 seconds</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+        <sc-for list="{{ scanStats }}" as="st" hint-placeholder-count="4">
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid {{ st.border }}; border-radius: 6px; padding: 13px 15px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: {{ st.labelInk }};">{{ st.label }}</div>
+            <div style="display: flex; align-items: baseline; gap: 7px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 24px; font-weight: 600; color: {{ st.figInk }}; line-height: 1;">{{ st.n }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ st.sub }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 1.5fr 1.1fr 2.4fr 128px; padding: 11px 18px; border-bottom: 1px solid oklch(89.5% 0.012 82);">
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Candidate</div>
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Matched against</div>
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">What the scanner found</div>
+          <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70); text-align: right;">Tutor action</div>
+        </div>
+        <sc-for list="{{ hits }}" as="h" hint-placeholder-count="4">
+          <div style="display: grid; grid-template-columns: 1.5fr 1.1fr 2.4fr 128px; align-items: start; gap: 14px; padding: 13px 18px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent);">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <div style="width: 3px; align-self: stretch; border-radius: 2px; background: {{ h.rule }}; flex: none;"></div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 13px; font-weight: {{ h.weight }}; color: oklch(23.5% 0.017 65);">{{ h.name }}</div>
+                <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ h.section }}</div>
+              </div>
+            </div>
+            <div style="font-size: 12px; line-height: 1.45; color: oklch(23.5% 0.017 65);">{{ h.against }}</div>
+            <div style="font-size: 12.5px; line-height: 1.5; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ h.found }}</div>
+            <div style="display: flex; justify-content: flex-end;">
+              <div style="font-size: 11.5px; font-weight: 600; color: {{ h.actionInk }}; text-align: right;">{{ h.action }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+        <sc-for list="{{ scanNotes }}" as="n" hint-placeholder-count="3">
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid {{ n.border }}; border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: {{ n.labelInk }};">{{ n.label }}</div>
+            <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 11px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.5% 0.004 90);">1b</div>
+      <div style="font-size: 14px; font-weight: 600; color: oklch(30% 0.042 58);">Raising it</div>
+      <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">from the assignment being marked</div>
+    </div>
+
+    <div style="width: 1380px; box-sizing: border-box; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 24px; display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px; align-items: start;">
+
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 20px 22px; display: flex; flex-direction: column; gap: 15px;">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;">
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70);">Assignment 2 · Language Related Tasks · Emre Doğan</div>
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; color: oklch(30% 0.042 58);">Raise a concern about this submission</div>
+          </div>
+          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: oklch(94.5% 0.065 85); color: oklch(44% 0.095 68); font-size: 11px; font-weight: 600; flex: none;">
+            <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+            <div>Marking paused</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">What kind of concern is this?</div>
+          <sc-for list="{{ kinds }}" as="k" hint-placeholder-count="4">
+            <div onClick="{{ k.pick }}" style="display: flex; align-items: flex-start; gap: 11px; padding: 11px 13px; border-radius: 6px; border: 1px solid {{ k.border }}; background: {{ k.bg }}; cursor: pointer;">
+              <div style="width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid {{ k.dotBorder }}; background: {{ k.dotBg }}; flex: none; margin-top: 2px;"></div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 12.5px; font-weight: {{ k.weight }}; color: oklch(23.5% 0.017 65);">{{ k.label }}</div>
+                <div style="font-size: 11.5px; line-height: 1.45; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ k.hint }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">What have you found?</div>
+          <div style="min-height: 90px; border: 1px solid color-mix(in oklab, oklch(37.5% 0.058 195) 40%, transparent); border-radius: 6px; background: oklch(99.5% 0.004 90); padding: 11px 13px; font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">Section 4, Vocabulary 2 — the paragraph beginning “The learner’s difficulty with the present perfect stems from…” — is identical to a paragraph in Sara Yılmaz’s submission of 21 November. Both differ in register from the rest of the writing around them.</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">Evidence attached</div>
+          <sc-for list="{{ evidence }}" as="e" hint-placeholder-count="3">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 6px; background: oklch(97.8% 0.008 85); border: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 70%, transparent);">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(51% 0.017 70); flex: none;"></div>
+              <div style="flex: 1; font-size: 12px; color: oklch(23.5% 0.017 65);">{{ e.text }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70); flex: none;">{{ e.meta }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 9px; padding-top: 4px;">
+          <div style="height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid oklch(89.5% 0.012 82); background: oklch(99.5% 0.004 90); font-size: 13px; font-weight: 500; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer;">Save as a note, no case</div>
+          <div style="height: 36px; padding: 0 15px; border-radius: 6px; background: oklch(37.5% 0.058 195); color: oklch(98.5% 0.006 90); font-size: 13px; font-weight: 600; display: flex; align-items: center; cursor: pointer;">Open a case</div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <sc-for list="{{ raiseNotes }}" as="n" hint-placeholder-count="4">
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid {{ n.border }}; border-radius: 6px; padding: 15px 16px; display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: {{ n.labelInk }};">{{ n.label }}</div>
+            <div style="font-size: 12.5px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div id="1c" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 11px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.5% 0.004 90);">1c</div>
+      <div style="font-size: 14px; font-weight: 600; color: oklch(30% 0.042 58);">The case</div>
+      <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">a record an assessor can read end to end</div>
+    </div>
+
+    <div style="width: 1380px; box-sizing: border-box; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Case MP-2024-02 · opened 24 November by Hakan Şen</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 25px; font-weight: 600; color: oklch(30% 0.042 58);">Emre Doğan · Assignment 2</div>
+        </div>
+        <div style="display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; border-radius: 999px; background: oklch(93.5% 0.008 85); color: oklch(23.5% 0.017 65); font-size: 12px; font-weight: 600;">
+          <div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>
+          <div>Closed · not upheld</div>
+        </div>
+      </div>
+
+      <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; overflow: hidden;">
+        <sc-for list="{{ timeline }}" as="t" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 118px 150px 1fr 150px; gap: 16px; padding: 14px 20px; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent); align-items: start;">
+            <div style="font-size: 11.5px; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">{{ t.date }}</div>
+            <div style="font-size: 12px; font-weight: 600; color: {{ t.stepInk }};">{{ t.step }}</div>
+            <div style="font-size: 12.5px; line-height: 1.55; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ t.text }}</div>
+            <div style="font-size: 11.5px; color: oklch(51% 0.017 70); text-align: right;">{{ t.who }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px;">
+        <sc-for list="{{ caseNotes }}" as="n" hint-placeholder-count="3">
+          <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+            <div style="font-size: 12px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div id="1d" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 11px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(30% 0.042 58); color: oklch(99.5% 0.004 90);">1d</div>
+      <div style="font-size: 14px; font-weight: 600; color: oklch(30% 0.042 58);">Prevention, which is most of the work</div>
+      <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">the handbook asks for three things before anything goes wrong</div>
+    </div>
+
+    <div style="width: 1380px; box-sizing: border-box; background: oklch(97.8% 0.008 85); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start;">
+      <sc-for list="{{ prevention }}" as="p" hint-placeholder-count="3">
+        <div style="background: oklch(99.5% 0.004 90); border: 1px solid oklch(89.5% 0.012 82); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(63% 0.096 72);">{{ p.label }}</div>
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; line-height: 1.25; color: oklch(30% 0.042 58); text-wrap: pretty;">{{ p.title }}</div>
+          </div>
+          <sc-for list="{{ p.rows }}" as="r" hint-placeholder-count="3">
+            <div style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, oklch(89.5% 0.012 82) 42%, transparent);">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(37.5% 0.058 195); margin-top: 6px; flex: none;"></div>
+              <div style="font-size: 12.5px; line-height: 1.5; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ r }}</div>
+            </div>
+          </sc-for>
+          <div style="font-size: 11.5px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ p.foot }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1500,&quot;height&quot;:2000}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const GOLD = 'oklch(63% 0.096 72)';
+const RED = 'oklch(45% 0.15 27)';
+const AMBER = 'oklch(44% 0.095 68)';
+const BORDER = 'oklch(89.5% 0.012 82)';
+const CARD = 'oklch(99.5% 0.004 90)';
+
+const KINDS = [
+  { label: 'Unattributed source', hint: 'Text taken from a book, website or model answer without acknowledgement.' },
+  { label: 'Collaboration beyond preparation', hint: 'Two submissions substantially similar. Joint preparation and discussion are allowed; substantially similar assignments are not.' },
+  { label: 'Undeclared AI use', hint: 'Generated text where no declaration was made, or the conversation cannot be produced.' },
+  { label: 'Something else', hint: 'Impersonation, falsified attendance, or anything not covered above.' },
+];
+
+class Component extends DCLogic {
+  state = { kind: 1 };
+
+  renderVals() {
+    const { kind } = this.state;
+    return {
+      kinds: KINDS.map((k, i) => ({
+        ...k,
+        weight: i === kind ? '600' : '400',
+        bg: i === kind ? 'color-mix(in oklab, ' + TEAL + ' 7%, ' + CARD + ')' : CARD,
+        border: i === kind ? 'color-mix(in oklab, ' + TEAL + ' 40%, transparent)' : BORDER,
+        dotBorder: i === kind ? TEAL : BORDER,
+        dotBg: i === kind ? TEAL : 'transparent',
+        pick: () => this.setState({ kind: i }),
+      })),
+      scanStats: [
+        { label: 'Submissions', n: '8', sub: 'all in', labelInk: MUTED, figInk: INK, border: BORDER },
+        { label: 'Nothing found', n: '6', sub: 'no action', labelInk: MUTED, figInk: MUTED, border: BORDER },
+        { label: 'Worth a look', n: '2', sub: 'tutor decides', labelInk: AMBER, figInk: AMBER, border: 'color-mix(in oklab, ' + AMBER + ' 30%, transparent)' },
+        { label: 'Cases open', n: '0', sub: 'none yet', labelInk: MUTED, figInk: MUTED, border: BORDER },
+      ],
+      hits: [
+        {
+          name: 'Emre Doğan', section: 'Section 4, one paragraph', weight: '600', rule: AMBER,
+          against: 'Sara Yılmaz, this course',
+          found: '94 words identical to Sara Yılmaz’s submission of 21 Nov, and both differ in register from the writing around them. Both cite the same coursebook page.',
+          action: 'Read both', actionInk: TEAL,
+        },
+        {
+          name: 'Aylin Koç', section: 'Section 1, two sentences', weight: '400', rule: MUTED,
+          against: 'Cohort C1/2024, filed',
+          found: 'A definition of “concept checking” matching one submitted last March. Twelve words, and it reads like a textbook definition.',
+          action: 'Read once', actionInk: TEAL,
+        },
+        {
+          name: 'Sara Yılmaz', section: '—', weight: '400', rule: 'transparent',
+          against: 'Everything available',
+          found: 'Nothing beyond shared quotations from the brief itself, which every candidate has.',
+          action: 'None', actionInk: MUTED,
+        },
+        {
+          name: '5 others', section: '—', weight: '400', rule: 'transparent',
+          against: 'Everything available',
+          found: 'Nothing.',
+          action: 'None', actionInk: MUTED,
+        },
+      ],
+      scanNotes: [
+        { label: 'What it compares against', labelInk: TEAL, border: 'color-mix(in oklab, ' + TEAL + ' 26%, transparent)',
+          text: 'Other submissions on this course, the centre’s own archive of previous cohorts, the assignment brief, and any model answers the centre holds. Not the open web — a general web check is a different product, and a centre that wants one should buy one.' },
+        { label: 'It never produces a percentage', labelInk: MUTED, border: BORDER,
+          text: 'No similarity score. A number invites a threshold, a threshold becomes a rule, and “31% similar” has decided plenty of cases it should not have. The scanner shows the matched passage, what it matched, and how long — and a person reads both.' },
+        { label: 'Tutors only, always', labelInk: MUTED, border: BORDER,
+          text: 'The candidate never sees this, and a flag is not a case. Six of eight had nothing; of the two that did, one is twelve words of a textbook definition. Most flags are noise, which is exactly why a person has to look before anything is said.' },
+      ],
+      evidence: [
+        { text: 'Emre Doğan — Assignment 2, section 4', meta: 'submitted 22 Nov' },
+        { text: 'Sara Yılmaz — Assignment 2, section 4', meta: 'submitted 21 Nov' },
+        { text: 'Both candidates’ AI declarations', meta: 'from account setup' },
+      ],
+      raiseNotes: [
+        { label: 'It pauses marking', labelInk: AMBER, border: 'color-mix(in oklab, ' + AMBER + ' 30%, transparent)',
+          text: 'Opening a case freezes the assignment where it is. No outcome is recorded, no resubmission is consumed, and the candidate sees “with your tutors” rather than a grade or an accusation.' },
+        { label: 'Nothing is visible to the candidate yet', labelInk: MUTED, border: BORDER,
+          text: 'A concern is not an allegation. They are told when the centre decides to put it to them, in person, not by a status change appearing in their workspace overnight.' },
+        { label: 'A note is not a case', labelInk: MUTED, border: BORDER,
+          text: 'Most concerns are nothing — a coincidence of phrasing, a shared source both cited. The first button saves what was noticed against the assignment without opening anything. If it happens twice, the second tutor sees the first note.' },
+        { label: 'The wording is the handbook’s', labelInk: MUTED, border: BORDER,
+          text: '8.2.3: joint preparation and discussion are allowed; candidates should not collaborate to the extent of submitting substantially similar assignments. The second option says exactly that, so a tutor is not inventing the line.' },
+      ],
+      timeline: [
+        { date: '24 Nov, 14:20', step: 'Concern raised', stepInk: INK, text: 'Section 4 substantially similar to Sara Yılmaz’s submission of 21 Nov. Marking paused; assignment frozen.', who: 'Hakan Şen' },
+        { date: '24 Nov, 17:05', step: 'Case opened', stepInk: INK, text: 'Reviewed with the main course tutor. Judged serious enough to put to both candidates.', who: 'Hakan Şen · Ramy Sakr' },
+        { date: '25 Nov, 09:30', step: 'Put to candidate', stepInk: INK, text: 'Met both candidates separately, in person. Shown the two passages. Told the process and that no outcome had been decided.', who: 'Ramy Sakr' },
+        { date: '25 Nov, 09:55', step: 'Candidate’s account', stepInk: INK, text: 'Both prepared section 4 together in the library, working from the same coursebook page, and wrote up separately the same evening. Neither had seen the other’s final text.', who: 'Emre Doğan · Sara Yılmaz' },
+        { date: '26 Nov, 11:00', step: 'Decision', stepInk: INK, text: 'Not upheld. Joint preparation is permitted, and the rest of both assignments is clearly individual. Both reminded where the line sits and asked to write up separately in future.', who: 'Ramy Sakr · Hakan Şen' },
+        { date: '26 Nov, 11:10', step: 'Closed', stepInk: MUTED, text: 'Marking resumed. No penalty. Case retained in both candidates’ files and in the assessor pack.', who: 'System' },
+      ],
+      caseNotes: [
+        { title: 'Outcomes are named, not scored', text: 'Not upheld · Upheld, no penalty with a written warning · Upheld, assignment failed · Upheld, referred to the centre’s malpractice procedure. The penalties come from the centre’s own policy, which 8.2.4 requires it to hold — the app never invents one.' },
+        { title: 'The candidate always gets to answer', text: 'A case cannot be decided without a recorded account from the candidate, in their own words. In this one their account is what resolved it: joint preparation is allowed, and knowing that changed the outcome.' },
+        { title: 'It goes in the assessor pack', text: 'Every case, upheld or not, with the full timeline. An assessor asking “have you had any plagiarism this course” should be handed a record rather than a recollection — and a not-upheld case is evidence the centre looks properly.' },
+      ],
+      prevention: [
+        {
+          label: 'Handbook 8.2.4 · first requirement',
+          title: 'Guidance on what plagiarism is and how to avoid it',
+          rows: [
+            'Lives in the Resource hub under Forms and documents, and is linked from every assignment brief rather than sent once in week one.',
+            'The AI guidance sits beside it — Cambridge’s own, which candidates already accepted at account setup.',
+            'Referencing conventions the centre expects, with an example of a properly acknowledged source.',
+          ],
+          foot: 'Most plagiarism at this level is not dishonesty. It is someone who has never been taught how to cite, writing at midnight in their second language.',
+        },
+        {
+          label: 'Handbook 8.2.4 · second requirement',
+          title: 'An internal policy making the penalties clear',
+          rows: [
+            'Uploaded by the centre at setup, like the appeals procedure. The app does not supply one; penalties differ by institution and by local law.',
+            'Its outcome list populates the decision options on a case, so what a tutor can choose is what the centre’s policy actually says.',
+            'Shown to candidates at enrolment, with the acceptance timestamped.',
+          ],
+          foot: 'The one thing the app must not do is invent a penalty. It records the centre’s decision under the centre’s own policy.',
+        },
+        {
+          label: 'Handbook 8.2.3 · third requirement',
+          title: 'Written confirmation that the work is their own',
+          rows: [
+            'Already in the system: the candidate agreement at account setup, and the declaration on each assignment cover sheet.',
+            'The cover sheet declaration is per assignment, so it is renewed four times rather than signed once and forgotten.',
+            'The AI declaration is part of it — use declared, conversation available if asked.',
+          ],
+          foot: 'This is the part that makes a case possible at all. Without a written confirmation there is nothing to have breached.',
+        },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

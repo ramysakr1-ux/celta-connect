@@ -11,6 +11,16 @@ Six design sources that had no copy in a handoff folder. Originals live at the p
 | `Course Staffing.dc.html` | `Centre-Admin-Complete-Spec.md`, `for-claude-code-four-roles-job-descriptions.md` | Role definitions and staffing constraints |
 | `Course Close-Out.dc.html` | `Course Close-Out and Appeals.md`, `admissions-and-close-out.md` | Appeals timelines and close-out sequence |
 
+## Cited design sources (second batch)
+
+| File | Citations | What it's holding up |
+| --- | --- | --- |
+| `Malpractice.dc.html` | 6 | Malpractice outcomes and actions — Cambridge-facing |
+| `Criteria by Stage.dc.html` | 1 | Sits behind `celta-criteria.ts` — the 41 criteria codes |
+| `Marking Guidance.dc.html` | 1 | The assessor's marking guidance screen |
+| `Appeals.dc.html` | 2 | Appeals in the assessor pack and close-out export |
+| `Observation Tasks.dc.html` | 2 | CELTA 5 + level definitions |
+
 Related root files not copied here (variants, not the cited source): `Withdrawal Form.dc.html`, `Withdrawal and Handover.dc.html`, `Volunteer View - standalone.html`.
 
 `support.js` is included so the `.dc.html` files open directly in a browser from this folder.
