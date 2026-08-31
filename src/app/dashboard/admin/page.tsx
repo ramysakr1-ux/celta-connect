@@ -102,7 +102,12 @@ export default async function AdminDashboardPage() {
     },
     { label: "Resource hub", count: resources.count ?? 0, suffix: "items", href: "/trainer/resource-hub" },
     { label: "Feedback style examples", count: styleExamples.count ?? 0, suffix: "", href: "/dashboard/admin/settings#feedback-style" },
-    { label: "Coursebooks", count: coursebooks.count ?? 0, suffix: "", href: "/dashboard/admin/coursebooks" },
+    // Coursebooks is a SECTION of the TP Points Library page, not a page of
+    // its own -- so this row and the "TP points library" row above it led to
+    // the same doorway. One door, two seats: the anchor lands you on the part
+    // the row is actually about. Ramy, 31 Aug 2026: "too many doors to the
+    // same room."
+    { label: "Coursebooks", count: coursebooks.count ?? 0, suffix: "", href: "/dashboard/admin/coursebooks#coursebooks" },
   ];
 
   const eventDatesByCourse = new Map<string, string[]>();

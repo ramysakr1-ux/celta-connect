@@ -30,7 +30,7 @@ export default async function AdminCoursebooksPage() {
       </div>
 
       <div>
-        <h2 className="font-serif text-lg text-ink">Coursebooks</h2>
+        <h2 id="coursebooks" className="scroll-mt-6 font-serif text-lg text-ink">Coursebooks</h2>
         <div className="mt-3">
           <CoursebookList coursebooks={coursebooks ?? []} basePath="/dashboard/admin/coursebooks" />
         </div>
