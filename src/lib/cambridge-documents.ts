@@ -28,7 +28,31 @@ export interface CambridgeDocumentView {
   /** Set when this slot is being answered by a Resource Hub upload rather
    *  than by a cambridge_documents row -- the reader is told which file. */
   fromHubTitle?: string | null;
+  /** Set when this slot is answered by a SECTION of another document rather
+   *  than by a file of its own, e.g. appeals living inside the Handbook. */
+  withinDocumentNote?: string | null;
 }
+
+// Slots that are a section of another document rather than a file of their
+// own.
+//
+// Ramy, 31 Aug 2026: "just get it from the handbook." He is right -- the
+// Cambridge appeals procedure is not a separate publication, it is section
+// 16 of the Administration Handbook (16.1 candidate concerns, 16.2 appeal
+// stage one, 16.3 appeal stage two, 16.4 additional information). Confirmed
+// against the June 2025 PDF's own contents rather than assumed.
+//
+// Left as its own slot rather than deleted: a candidate looking for "how do
+// I appeal" should find that phrase on the shelf, not be expected to know it
+// is buried in a handbook. It now points at the handbook and says where in
+// it to look, instead of reading "Not uploaded" for a document that will
+// never exist.
+const SECTION_OF: Partial<Record<CambridgeDocType, { host: CambridgeDocType; note: string }>> = {
+  appeals_procedure: {
+    host: "admin_handbook",
+    note: "Section 16 of the Administration Handbook",
+  },
+};
 
 // Which Resource Hub titles answer which slot.
 //
@@ -99,15 +123,24 @@ export async function getCambridgeDocuments(
           .filter((r) => HUB_TITLE_PATTERNS[docType].test(r.title))
           .sort((a, b) => b.title.localeCompare(a.title))[0];
 
+    // Nothing of its own? It may live inside another document.
+    const section = !row && !hubMatch ? SECTION_OF[docType] : undefined;
+    const host = section
+      ? (hubRows ?? [])
+          .filter((r) => HUB_TITLE_PATTERNS[section.host].test(r.title))
+          .sort((a, b) => b.title.localeCompare(a.title))[0]
+      : undefined;
+
     return {
       docType,
       label: CAMBRIDGE_DOC_LABELS[docType],
       orgLevel: isOrgLevel,
-      url: row?.file_url ?? hubMatch?.file_url ?? null,
-      storagePath: row?.storage_path ?? hubMatch?.storage_path ?? null,
+      url: row?.file_url ?? hubMatch?.file_url ?? host?.file_url ?? null,
+      storagePath: row?.storage_path ?? hubMatch?.storage_path ?? host?.storage_path ?? null,
       scopeId: scopeIsOrg ? organisationId! : centerId,
       scopeIsOrg,
-      fromHubTitle: hubMatch?.title ?? null,
+      fromHubTitle: hubMatch?.title ?? host?.title ?? null,
+      withinDocumentNote: host ? section!.note : null,
     };
   });
 }

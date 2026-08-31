@@ -34,6 +34,15 @@ function DocCard({ doc, editable }: { doc: DocRow; editable: boolean }) {
         <div>
           <p className="text-sm font-semibold text-ink">{doc.label}</p>
           <p className="text-xs text-muted">{doc.orgLevel && doc.scopeIsOrg ? "Organisation-wide -- one copy, every branch" : "This centre"}</p>
+          {/* Where the answer actually came from. A slot filled by a hub
+              upload, or by a section of another document, should say so --
+              otherwise "Open" on the Appeals slot silently hands you the
+              Handbook and looks like the wrong file. */}
+          {doc.withinDocumentNote ? (
+            <p className="mt-0.5 text-[11px] text-muted">{doc.withinDocumentNote}</p>
+          ) : doc.fromHubTitle ? (
+            <p className="mt-0.5 text-[11px] text-muted">{doc.fromHubTitle}</p>
+          ) : null}
         </div>
         {hasDoc ? (
           <a
