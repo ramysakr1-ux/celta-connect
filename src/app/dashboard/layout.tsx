@@ -10,7 +10,7 @@ import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { PILL_ACTIVE, PILL_INACTIVE } from "@/app/centre/header-pill-styles";
-import { adminHomePath } from "@/lib/auth/centre-permissions";
+import { adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
 
 export default async function DashboardLayout({
@@ -46,6 +46,12 @@ export default async function DashboardLayout({
   // page.tsx). centreCtx itself stays -- adminChatRooms below still needs
   // its availableCenterIds.
   const centreCtx = profile?.role === "admin" ? await getCentreRoleContext(profile) : null;
+  // Which role this person is acting as, for the header. First held role: a
+  // person with several sees the one that decides their landing page, which is
+  // the one this section belongs to. roleLabel() covers owner-defined custom
+  // roles too, so a centre that invents "Admissions lead" sees that word.
+  const actingRoleLabel =
+    centreCtx && centreCtx.roles.length > 0 ? roleLabel(centreCtx.roles[0], centreCtx.customRoles ?? []) : null;
 
   // §12: one room per centre, not per course. Membership follows the role
   // grants, so this covers every branch the person administers.
@@ -143,7 +149,17 @@ export default async function DashboardLayout({
           <HeaderDesignerCredit landingPath="/dashboard/admin" />
         </div>
         <div className="container flex items-center justify-end gap-4 pb-2.5 text-sm text-muted">
-          <span>{profile?.full_name ?? email}</span>
+          {/* The role sits next to the name rather than on a line of its own.
+              Ramy, 31 Aug 2026, asked whether the header was needed: the
+              identity already prints here, so a separate "Signed in as..."
+              strip would have said the name twice. What was missing is only
+              which role you are acting as -- someone can hold several -- so
+              that is the single word added, where people already look to see
+              who they are. */}
+          <span>
+            {profile?.full_name ?? email}
+            {actingRoleLabel ? <span className="text-muted"> &middot; {actingRoleLabel}</span> : null}
+          </span>
           <form action={signOut}>
             <button type="submit" className="hover:text-ink">
               Sign out

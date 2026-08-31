@@ -22,4 +22,18 @@ const BASE =
   "shrink-0 rounded-[5px] border px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] uppercase transition-colors duration-150";
 
 export const PILL_ACTIVE = `${BASE} border-primary/25 bg-primary/10 text-primary`;
+
+// Centre Management wears garnet, Course Admin wears teal, and neither ever
+// changes. Ramy, 31 Aug 2026: "the colour thing is definitely a good idea."
+//
+// The point is recognition before reading: the two landings are structurally
+// similar -- both open on courses -- so a page-level colour tells you which
+// one you are on before you have read a word. Garnet is already the
+// decorative half of the teal/garnet alternation, so this spends an existing
+// system rather than introducing a colour.
+//
+// Kept distinct from --color-destructive on purpose, which sits at a very
+// similar hue: a whole view in the error colour would read as "something is
+// wrong". Worth watching once it is on screen at full size.
+export const PILL_ACTIVE_GARNET = `${BASE} border-garnet/30 bg-garnet/10 text-garnet`;
 export const PILL_INACTIVE = `${BASE} admin-hover-fill border-border text-muted hover:border-primary hover:text-primary`;

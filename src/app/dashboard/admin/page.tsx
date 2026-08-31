@@ -182,7 +182,11 @@ export default async function AdminDashboardPage() {
             {center?.name ?? "Your centre"}
             {center?.center_number ? ` · Centre ${center.center_number}` : ""}
           </p>
-          <h1 className="font-serif text-[24px] font-semibold text-ink">Courses</h1>
+          {/* Names the job, not the noun. "Courses" was the same word Centre
+              Management uses for its own list, so the two screens rhymed at
+              the largest text on the page -- which is how Ramy came to be in
+              Course Admin believing he was in Centre Management. */}
+          <h1 className="font-serif text-[24px] font-semibold text-ink">Course administration</h1>
         </div>
         {/* Hidden for anyone who cannot create a course.
         

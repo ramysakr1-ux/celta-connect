@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PILL_ACTIVE, PILL_INACTIVE } from "@/app/centre/header-pill-styles";
+import { PILL_ACTIVE_GARNET, PILL_INACTIVE } from "@/app/centre/header-pill-styles";
 
 // The two same-family pills beside the wordmark: Centre Management and
 // Course Admin. Same size, next to each other, teal on whichever view you
@@ -30,7 +30,7 @@ export function CentreHeaderPills({ mayViewCourseAdmin }: { mayViewCourseAdmin: 
           Centre management
         </Link>
       ) : (
-        <span className={PILL_ACTIVE}>Centre management</span>
+        <span className={PILL_ACTIVE_GARNET}>Centre management</span>
       )}
       {mayViewCourseAdmin ? (
         <Link href="/dashboard/admin" className={PILL_INACTIVE}>
