@@ -160,7 +160,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tra
         return {
           assignmentType: a.assignment_type as AssignmentTypeValue,
           finalGrade: a.final_grade,
-          passedOnResubmission: a.final_grade === "Pass" && !firstPassed,
+          // Case-insensitive: the seed wrote "pass" while every read
+          // compared against "Pass", so two demo assignments silently
+          // rendered as not-passed-on-resubmission. The data is corrected,
+          // but a document Cambridge reads should not hinge on the casing a
+          // writer happened to use.
+          passedOnResubmission: a.final_grade?.toLowerCase() === "pass" && !firstPassed,
           candidateSignatureName: signedName ?? (confirmedRound ? trainee.full_name : null),
         };
       }),

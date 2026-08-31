@@ -132,7 +132,24 @@ async function returnAssignment(
     resubmission_outcome: isResubmission ? (decision === "fail" ? "fail" : "pass") : reflectionFirstRoundFail ? "fail" : undefined,
     second_marker_id: isResubmission ? (secondMarkerId as string) : undefined,
     second_marker_recorded_at: isResubmission ? new Date().toISOString() : undefined,
-    final_grade: grade,
+    // A fail is written, not inferred.
+    //
+    // final_grade used to be set only on a pass, so a failed assignment kept
+    // final_grade = null forever and the Fail column on CELTA 5 page 14 --
+    // Pass 1st / Pass 2nd / Fail -- could never be ticked. Every reader had
+    // to infer the fail from the ABSENCE of a pass, and one export that
+    // forgot the rule would silently print a blank where a fail belongs.
+    // Ramy, 31 Aug 2026, choosing this over deriving it: "right fail for the
+    // assignments... one fail, they cannot get an A. Two fail assignments,
+    // they fail."
+    //
+    // Which decisions are final fails: a fail on a RESUBMISSION (the second
+    // and last chance), and a first-round fail of the Plagiarism Reflection,
+    // which gets only one chance by design. A first-round
+    // "resubmission_required" is NOT a fail -- it is the candidate's second
+    // chance being issued, and writing Fail there would condemn work that
+    // may well pass.
+    final_grade: grade ?? (isResubmission && decision === "fail" ? "Fail" : reflectionFirstRoundFail ? "Fail" : undefined),
   };
 
   const { error } = await supabase.from("assignments").update(update).eq("id", assignmentId);

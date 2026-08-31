@@ -661,7 +661,7 @@ async function main() {
       first_english_grade: "pass",
       first_submitted_at: new Date(Date.now() - 10 * 86400000).toISOString(),
       marker_id: trainerId,
-      final_grade: "pass",
+      final_grade: "Pass", // capital P: reads compare against "Pass" exactly
     },
     {
       course_id: course.id,
@@ -672,7 +672,7 @@ async function main() {
       first_english_grade: "pass",
       first_submitted_at: new Date(Date.now() - 5 * 86400000).toISOString(),
       marker_id: trainerId,
-      final_grade: "pass",
+      final_grade: "Pass", // capital P: reads compare against "Pass" exactly
     },
   ]);
 
