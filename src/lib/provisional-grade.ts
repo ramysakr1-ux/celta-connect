@@ -40,11 +40,32 @@ export const PROVISIONAL_SLOTS = [
  * it out too.
  */
 export function assignmentGradeCeiling(
-  assignments: { final_grade?: string | null; resubmission_outcome?: string | null }[]
-): { failCount: number; blocked: string[]; reason: string | null } {
+  assignments: { final_grade?: string | null; resubmission_outcome?: string | null }[],
+  /**
+   * A recorded manual override (celta5_records.assignment_fail_override_reason,
+   * migration 0262). Ramy, 31 Aug 2026: "everything should be potentially
+   * subject to manual override" -- the grades meeting is where a case the
+   * rules describe badly gets decided, and the assessor has the final say
+   * anyway. The ceiling still reports the fail count, so the record shows
+   * what was overridden rather than hiding it.
+   */
+  overrideReason?: string | null
+): { failCount: number; blocked: string[]; reason: string | null; overridden: boolean } {
   const failCount = assignments.filter(
     (a) => a.final_grade?.toLowerCase() === "fail" || a.resubmission_outcome?.toLowerCase() === "fail"
   ).length;
+
+  if (overrideReason && overrideReason.trim() !== "") {
+    return {
+      failCount,
+      blocked: [],
+      reason:
+        failCount > 0
+          ? `${failCount} failed written assignment${failCount === 1 ? "" : "s"} — ceiling overridden: ${overrideReason.trim()}`
+          : null,
+      overridden: true,
+    };
+  }
 
   if (failCount > 1) {
     return {
@@ -53,6 +74,7 @@ export function assignmentGradeCeiling(
       // Fail, and that is a different rule in the same list.
       blocked: PROVISIONAL_SLOTS.filter((o) => o !== "Fail" && o !== "Withdrawn"),
       reason: `${failCount} failed written assignments — not eligible for a Pass (Handbook eligibility).`,
+      overridden: false,
     };
   }
   if (failCount === 1) {
@@ -60,7 +82,8 @@ export function assignmentGradeCeiling(
       failCount,
       blocked: ["Pass A", "Pass B/Pass A"],
       reason: "One failed written assignment — a Pass may still be recommended, but not Pass A.",
+      overridden: false,
     };
   }
-  return { failCount: 0, blocked: [], reason: null };
+  return { failCount: 0, blocked: [], reason: null, overridden: false };
 }

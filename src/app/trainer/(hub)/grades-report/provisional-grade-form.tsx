@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import { updateProvisionalGrade, approveProvisionalGrade, type FormState } from "@/app/dashboard/trainer/celta5-actions";
+import { AssignmentFailOverride } from "@/app/trainer/(hub)/grades-report/assignment-fail-override";
 import { PROVISIONAL_SLOTS } from "@/lib/provisional-grade";
 import type { Database } from "@/lib/supabase/types";
 
@@ -73,6 +74,8 @@ export function ProvisionalGradeForm({
   proposedByMeta,
   isMct,
   eligibility,
+  overrideReason,
+  overriddenByName,
 }: {
   traineeId: string;
   record: Celta5Record | null;
@@ -85,7 +88,10 @@ export function ProvisionalGradeForm({
   proposedByMeta?: string | null;
   isMct: boolean;
   /** Grades this candidate's written assignments have ruled out, and why. */
-  eligibility?: { blocked: string[]; reason: string | null };
+  eligibility?: { blocked: string[]; reason: string | null; overridden?: boolean };
+  /** A recorded manual override of that ceiling, and who recorded it. */
+  overrideReason?: string | null;
+  overriddenByName?: string | null;
 }) {
   const [state, action, pending] = useActionState(updateProvisionalGrade, initialState);
   const [slot, setSlot] = useState(() => slotFromRecord(record));
@@ -136,7 +142,17 @@ export function ProvisionalGradeForm({
             not available are simply not available, and the reason is on the
             screen rather than in a tooltip alone. */}
         {eligibility?.reason ? (
-          <p className="text-[11.5px] leading-relaxed text-status-warning-text">{eligibility.reason}</p>
+          <p
+            className={`text-[11.5px] leading-relaxed ${eligibility.overridden ? "text-muted" : "text-status-warning-text"}`}
+          >
+            {eligibility.reason}
+          </p>
+        ) : null}
+        {/* The override lives beside the reason it sets aside, so the two are
+            read together. MCT only -- it is the MCT who runs the grades
+            meeting -- and only when there is actually a fail to talk about. */}
+        {isMct && (eligibility?.reason || overrideReason) ? (
+          <AssignmentFailOverride traineeId={traineeId} overrideReason={overrideReason ?? null} overriddenByName={overriddenByName ?? null} />
         ) : null}
         {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       </form>

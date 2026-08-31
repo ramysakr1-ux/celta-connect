@@ -11,6 +11,18 @@ import { mapTpFeedbackToGlyphRow } from "@/lib/tp-grades";
 import { computeCohortRows } from "@/lib/grades-report";
 import { ProvisionalGradeForm } from "@/app/trainer/(hub)/grades-report/provisional-grade-form";
 import { assignmentGradeCeiling } from "@/lib/provisional-grade";
+
+// celta5_records gained assignment_fail_override_* in migration 0262; the
+// generated Supabase types have not been regenerated since, so these are read
+// through a narrow cast rather than widening the row type everywhere.
+type Celta5OverrideCols = {
+  assignment_fail_override_reason?: string | null;
+  assignment_fail_override_by?: string | null;
+};
+const overrideOf = (r: unknown): string | null =>
+  (r as Celta5OverrideCols | null)?.assignment_fail_override_reason ?? null;
+const overrideByOf = (r: unknown): string | null =>
+  (r as Celta5OverrideCols | null)?.assignment_fail_override_by ?? null;
 import { UpgradeConditionsForm } from "@/app/trainer/(hub)/grades-report/upgrade-conditions-form";
 import { CohortSheet } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
 import { CloseOutCard } from "@/app/dashboard/admin/courses/[id]/close-out-card";
@@ -296,8 +308,13 @@ export default async function GradesReportPage() {
                         proposedByMeta={currentLevel}
                         isMct={isMct}
                         eligibility={assignmentGradeCeiling(
-                          (writtenAssignments ?? []).filter((a) => a.trainee_id === trainee.id)
+                          (writtenAssignments ?? []).filter((a) => a.trainee_id === trainee.id),
+                          overrideOf(record)
                         )}
+                        overrideReason={overrideOf(record)}
+                        overriddenByName={
+                          overrideByOf(record) ? (tutorNameById.get(overrideByOf(record)!) ?? null) : null
+                        }
                       />
                     ) : record?.provisional_grade && record.provisional_approved_at ? (
                       <div className="flex items-center justify-between gap-3">

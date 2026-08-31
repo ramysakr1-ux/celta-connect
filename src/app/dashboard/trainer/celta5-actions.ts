@@ -508,11 +508,19 @@ export async function updateProvisionalGrade(
   // written assignment means no Pass at all; exactly one means a Pass may
   // still be recommended, but never Pass A.
   {
-    const { data: written } = await (await createClient())
-      .from("assignments")
-      .select("final_grade, resubmission_outcome")
-      .eq("trainee_id", traineeId);
-    const { blocked, reason } = assignmentGradeCeiling(written ?? []);
+    const client = await createClient();
+    // The ceiling is a default, not an absolute -- migration 0262. Ramy,
+    // 31 Aug 2026: "everything should be potentially subject to manual
+    // override." A recorded override lifts it; the reason travels with the
+    // record so the assessor sees what was set aside and why.
+    const [{ data: written }, { data: overrideRow }] = await Promise.all([
+      client.from("assignments").select("final_grade, resubmission_outcome").eq("trainee_id", traineeId),
+      client.from("celta5_records").select("assignment_fail_override_reason").eq("trainee_id", traineeId).maybeSingle(),
+    ]);
+    const { blocked, reason } = assignmentGradeCeiling(
+      written ?? [],
+      (overrideRow as { assignment_fail_override_reason?: string | null } | null)?.assignment_fail_override_reason ?? null
+    );
     if (blocked.includes(slot)) {
       return { error: reason ?? "That grade is not available for this candidate." };
     }
@@ -560,6 +568,64 @@ export async function updateProvisionalGrade(
 // all of them before anything is sent" -- proposing stays open to any
 // trainer (unchanged above), but approval is the one action gated to the
 // single MCT on the course.
+/**
+ * Set aside, or restore, the automatic consequences of a failed written
+ * assignment: the grade ceiling and the Stage Three trigger.
+ *
+ * Ramy, 31 Aug 2026: "There is, of course, an option to edit the provisional
+ * grades after the grades meeting. So everything should be potentially
+ * subject to manual override" -- and generally, override should exist "with
+ * the exception of things that are hardcore built into the system."
+ *
+ * MCT only, and never silent. A reason is required and stored with the author
+ * and timestamp (migration 0262 enforces all three together at the database),
+ * because the assessor reads this record after the course has ended and an
+ * unexplained override is indistinguishable from a mistake.
+ *
+ * The fail itself is untouched -- the assignment record still says Fail, the
+ * ceiling still reports the count. What changes is only whether that fact
+ * blocks a grade and demands a Stage Three.
+ */
+export async function setAssignmentFailOverride(_prev: FormState, formData: FormData): Promise<FormState> {
+  const trainer = await requireRole("trainer");
+  if (!trainer.course_id) return { error: "No course assigned." };
+
+  const traineeId = formData.get("trainee_id");
+  if (typeof traineeId !== "string" || !traineeId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  const supabase = await createClient();
+  if (!(await isMctOnCourse(supabase, trainer.course_id, trainer.id))) {
+    return { error: "Only the Main Course Tutor can override assignment consequences." };
+  }
+
+  const raw = formData.get("reason");
+  const reason = typeof raw === "string" ? raw.trim() : "";
+  const clearing = formData.get("clear") === "1";
+
+  if (!clearing && reason.length < 10) {
+    return { error: "Give a reason of at least a few words -- the assessor reads this months later." };
+  }
+
+  const { error } = await supabase
+    .from("celta5_records")
+    .update(
+      (clearing
+        ? { assignment_fail_override_reason: null, assignment_fail_override_by: null, assignment_fail_override_at: null }
+        : {
+            assignment_fail_override_reason: reason,
+            assignment_fail_override_by: trainer.id,
+            assignment_fail_override_at: new Date().toISOString(),
+          }) as never
+    )
+    .eq("trainee_id", traineeId);
+  if (error) return { error: "Could not save the override. Try again." };
+
+  revalidatePath("/trainer/grades-report");
+  return { error: null };
+}
+
 export async function approveProvisionalGrade(formData: FormData): Promise<FormState> {
   const trainer = await requireRole("trainer");
   if (!trainer.course_id) return { error: "No course assigned." };

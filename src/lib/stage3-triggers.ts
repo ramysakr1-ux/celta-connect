@@ -114,10 +114,17 @@ export function stage3Expected(triggers: Stage3Trigger[]): boolean {
  * "Failed" means terminally failed -- after the one resubmission, the same
  * test isAssignmentWarningTriggered() uses. A resubmission still owed is not
  * a fail yet.
+ *
+ * A recorded manual override (migration 0262) sets this aside, the same one
+ * that lifts the grade ceiling: both consequences come from the same fact,
+ * so a tutor who decided that fact was handled at the grades meeting decided
+ * it for both.
  */
 export function assignmentFailRequiresStage3(
-  assignments: { terminallyFailed: boolean; passed: boolean }[]
+  assignments: { terminallyFailed: boolean; passed: boolean }[],
+  overrideReason?: string | null
 ): boolean {
+  if (overrideReason && overrideReason.trim() !== "") return false;
   const failed = assignments.filter((a) => a.terminallyFailed).length;
   if (failed === 0) return false;
   const passed = assignments.filter((a) => a.passed).length;
