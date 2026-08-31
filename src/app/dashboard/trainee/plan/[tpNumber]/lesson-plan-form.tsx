@@ -35,6 +35,31 @@ function emptyProcedureRow(): PlanProcedureRow {
   return { stage: "", aim: "", procedure: "", interaction: "", time: "" };
 }
 
+// Was `new Date(submitted_at).toLocaleString()` -- no locale, no timeZone.
+// In a client component that renders on the server too, that is two
+// different strings: the server formats in ITS locale and zone (UTC on
+// Vercel), the browser in the reader's. React then reports a hydration
+// mismatch, and this was the only console error anywhere in the app --
+// React #418 on every TP lesson-plan page. Found 31 Aug 2026 in the
+// pre-demo sweep.
+//
+// It also produced the third date format in one workspace: "8/29/2026,
+// 4:10:40 PM" beside "31 Aug" and "2026-08-25".
+//
+// Fixed locale and an explicit UTC zone makes both renders identical, and
+// the format now matches the rest of the app. UTC rather than the centre's
+// zone only because this component is not given one; a submission
+// timestamp to the day is what the sentence needs, and the exact minute
+// never was.
+function formatSubmittedAt(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function LessonPlanForm({
   tpNumber,
   plan,
@@ -129,7 +154,7 @@ export function LessonPlanForm({
           <span className="status-pill status-pill-on-track">Submitted -- locked</span>
         </div>
         <p className="mt-1 text-sm text-muted">
-          Submitted {plan!.submitted_at ? new Date(plan!.submitted_at).toLocaleString() : ""}. This is now your
+          Submitted {plan!.submitted_at ? formatSubmittedAt(plan!.submitted_at) : ""}. This is now your
           record of the lesson -- ask your trainer if it needs reopening.
         </p>
         <div className="mt-4 flex flex-col gap-4">

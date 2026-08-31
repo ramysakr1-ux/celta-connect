@@ -22,7 +22,15 @@ export function BackLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-1.5 rounded-full px-3 py-[5px] text-[12px] font-bold transition-colors hover:brightness-95"
+      // self-start and w-fit because inline-flex does not protect a flex
+      // ITEM from stretching: dropped straight into a `flex flex-col`
+      // parent -- which is how the TP lesson-plan pages use it -- the pill
+      // stretched to the container's full width and rendered as a
+      // full-width gold bar, while the identical pill above it sat at its
+      // natural 127px. Found 31 Aug 2026 in the pre-demo sweep. Fixed here
+      // rather than by wrapping each call site, so it cannot happen again
+      // the next time someone drops it into a column.
+      className="inline-flex w-fit shrink-0 self-start items-center gap-1.5 rounded-full px-3 py-[5px] text-[12px] font-bold transition-colors hover:brightness-95"
       style={{ background: "oklch(60% 0.11 70)", color: "oklch(23.5% 0.017 65)" }}
     >
       <ArrowLeft className="size-3.5" aria-hidden="true" />
