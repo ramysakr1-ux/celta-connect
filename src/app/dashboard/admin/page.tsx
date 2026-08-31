@@ -9,6 +9,7 @@ import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 import { computeApplicantCounts } from "@/lib/admissions-counts";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { ASSIGNMENT_ORDER } from "@/lib/assignment-info";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import { DuplicateCourseForm } from "@/app/dashboard/admin/courses/[id]/duplicate-course-form";
@@ -79,7 +80,17 @@ export default async function AdminDashboardPage() {
 
   const centreMaterial = [
     { label: "TP points library", count: tpPoints.count ?? 0, suffix: "points", href: "/dashboard/admin/coursebooks" },
-    { label: "Assignment briefs", count: briefs.count ?? 0, suffix: "", href: "/dashboard/admin/assignment-briefs" },
+    // "of 4", because the four CELTA assignments always exist -- the briefs
+    // page itself maps over ASSIGNMENT_ORDER and lists all four whatever is
+    // uploaded. This row counts uploaded BRIEF DOCUMENTS, and a bare "0"
+    // read as "this centre has no assignments", which is never true.
+    // Ramy, 31 Aug 2026: "we have all four assignments. So take a look."
+    {
+      label: "Assignment briefs",
+      count: briefs.count ?? 0,
+      suffix: `of ${ASSIGNMENT_ORDER.length} uploaded`,
+      href: "/dashboard/admin/assignment-briefs",
+    },
     { label: "Resource hub", count: resources.count ?? 0, suffix: "items", href: "/trainer/resource-hub" },
     { label: "Feedback style examples", count: styleExamples.count ?? 0, suffix: "", href: "/dashboard/admin/settings#feedback-style" },
     { label: "Coursebooks", count: coursebooks.count ?? 0, suffix: "", href: "/dashboard/admin/coursebooks" },
