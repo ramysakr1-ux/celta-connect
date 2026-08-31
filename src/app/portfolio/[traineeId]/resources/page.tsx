@@ -263,7 +263,17 @@ export default async function ResourceHubPage({
 
   const cambridgeAdmin = createAdminClient();
   const { data: cambridgeCentre } = await cambridgeAdmin.from("centers").select("organisation_id").eq("id", trainee.center_id).maybeSingle();
-  const cambridgeDocsRaw = await getCambridgeDocuments(cambridgeAdmin, trainee.center_id, cambridgeCentre?.organisation_id ?? null);
+  // The slots fall back to the Resource Hub, and most of the Cambridge set
+  // is staff-only -- so this page passes who is actually looking. Anyone
+  // seeing the trainee's own view (including a tutor previewing as one, via
+  // canSeeTrainerOnly) gets only trainee-visible uploads, so the fallback
+  // cannot become a way round the flag the centre set on each file.
+  const cambridgeDocsRaw = await getCambridgeDocuments(
+    cambridgeAdmin,
+    trainee.center_id,
+    cambridgeCentre?.organisation_id ?? null,
+    canSeeTrainerOnly ? "staff" : "trainee"
+  );
   const cambridgeDocs = await Promise.all(
     cambridgeDocsRaw.map(async (doc) => ({
       ...doc,
