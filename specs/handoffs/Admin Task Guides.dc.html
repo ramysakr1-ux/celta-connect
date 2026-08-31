@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 42px; width: 1520px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 13px; max-width: 940px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · admin help · seven task guides</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 36px; font-weight: 600; line-height: 1.14; color: oklch(23.5% 0.017 65);">Anyone can find the field. Nobody can guess what changing it breaks.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Each guide opens from the screen it is about, keeps a bar at the top of that screen while it runs, and hands you to the next step when you mark one done. No screenshots anywhere — they go stale within a release and then teach the wrong thing.</div>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">The seven guides</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">click one to open it</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 330px 1fr; gap: 22px; align-items: start;">
+
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <sc-for list="{{ guides }}" as="g" hint-placeholder-count="7">
+          <div onClick="{{ g.pick }}" style="padding: 13px 15px; border-radius: 7px; border: 1px solid {{ g.border }}; border-left: 3px solid {{ g.spine }}; background: {{ g.bg }}; cursor: pointer; display: flex; flex-direction: column; gap: 3px;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+              <div style="font-size: 13px; font-weight: 600; color: {{ g.ink }};">{{ g.title }}</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: {{ g.tagInk }}; flex: none;">{{ g.tag }}</div>
+            </div>
+            <div style="font-size: 11.5px; line-height: 1.45; color: {{ g.subInk }}; text-wrap: pretty;">{{ g.when }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; overflow: hidden;">
+
+        <div style="height: 40px; background: oklch(30% 0.042 58); display: flex; align-items: center; justify-content: space-between; padding: 0 16px;">
+          <div style="display: flex; align-items: center; gap: 11px;">
+            <div style="font-size: 12px; color: oklch(98.5% 0.006 90); opacity: 0.72;">Back to the guide</div>
+            <div style="width: 1px; height: 14px; background: oklch(98.5% 0.006 90); opacity: 0.24;"></div>
+            <div style="font-size: 12px; font-weight: 600; color: oklch(98.5% 0.006 90);">{{ guide.barStep }}</div>
+          </div>
+          <div style="font-size: 12px; font-weight: 600; padding: 5px 13px; border-radius: 5px; background: oklch(98.5% 0.006 90); color: oklch(30% 0.042 58);">Done</div>
+        </div>
+
+        <div style="padding: 24px 26px; display: flex; flex-direction: column; gap: 18px;">
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 23px; font-weight: 600; line-height: 1.2; color: oklch(23.5% 0.017 65);">{{ guide.title }}</div>
+            <div style="font-size: 13px; line-height: 1.6; color: oklch(51% 0.017 70); max-width: 720px; text-wrap: pretty;">{{ guide.intro }}</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 9px;">
+            <sc-for list="{{ guide.steps }}" as="s" hint-placeholder-count="4">
+              <div style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: 1px solid oklch(88% 0.016 82); border-radius: 7px; background: oklch(96.4% 0.014 85);">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: oklch(30% 0.042 58); color: oklch(98.5% 0.006 90); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">{{ s.n }}</div>
+                <div style="display: flex; flex-direction: column; gap: 5px; min-width: 0;">
+                  <div style="font-size: 13.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ s.title }}</div>
+                  <div style="font-size: 12.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ s.text }}</div>
+                  <sc-if value="{{ s.warn }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; align-items: flex-start; gap: 9px; margin-top: 3px; padding: 10px 12px; border-radius: 6px; background: color-mix(in oklab, oklch(60% 0.11 70) 9%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 30%, transparent);">
+                      <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(60% 0.11 70); margin-top: 6px; flex: none;"></div>
+                      <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ s.warn }}</div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 13px; padding-top: 2px;">
+            <div style="padding: 10px 18px; border-radius: 6px; background: oklch(30% 0.042 58); color: oklch(98.5% 0.006 90); font-size: 13px; font-weight: 600;">{{ guide.cta }}</div>
+            <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ guide.next }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1b</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">How the guides behave</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;">
+      <sc-for list="{{ rules }}" as="r" hint-placeholder-count="6">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ r.border }}; border-left: 3px solid {{ r.spine }}; border-radius: 7px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ r.title }}</div>
+          <div style="font-size: 12px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ r.text }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1520,&quot;height&quot;:1250}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.16 27)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+const mix = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, transparent)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+const S = (title, text, warn) => ({ title, text, warn: warn || '' });
+
+const GUIDES = [
+  {
+    tag: 'Setup', tone: TEAL, title: 'Setting up a new course',
+    when: 'Once per intake, often months ahead',
+    barIndex: 3,
+    intro: 'Six steps. The first three are one sitting and let you take applications. The rest happen weeks apart, as tutors are confirmed and levels are known.',
+    steps: [
+      S('Dates and course code', 'The Cambridge course number and your own reference. Both appear on every form the assessor sees, so they cannot be changed once anyone is enrolled.'),
+      S('Delivery mode', 'Face to face, online, or mixed.', 'Changing this later rebuilds the timetable from scratch. Online and mixed courses also require an online-experience record for every tutor.'),
+      S('Applications and fees', 'Fee, deposit, and how long an offer stays open. This is the last thing needed before you can take an application, which is why it sits third rather than last.'),
+      S('Tutors', 'Assign a lead trainer and any others. A trainer in training is added here too, with the competencies they are working on.'),
+      S('Levels and groups', 'Two levels, two groups. Everything downstream reads this — the day-one activity sets, the TP class register, and which learners a candidate interviews.'),
+      S('Timetable', 'Duplicate a reference course rather than building from scratch. Every deadline, marking slot and reminder comes with it, already anchored.', 'A timetable built by hand has to get around forty relationships right. A duplicated one inherits them.'),
+    ],
+    cta: 'Open Applications and fees', next: 'Step 4 opens automatically when you mark this done',
+  },
+  {
+    tag: 'Admissions', tone: GOLD, title: 'Taking an application through to enrolment',
+    when: 'Continuously, from the day applications open',
+    barIndex: 2,
+    intro: 'Six stages from enquiry to paid. Most of it is waiting, so the guide is mainly about which waits are yours and which are theirs.',
+    steps: [
+      S('Log the enquiry', 'Name, email, and where they came from. Source matters more than it looks — it is the only way to know which of your channels is worth paying for.'),
+      S('Send the pre-interview task', 'Cambridge\u2019s language awareness task. Mark it before the interview, not after.'),
+      S('Interview', 'Notes go on the application, not in a document. They travel if the applicant is later referred to another branch.'),
+      S('Make the offer', 'Fee, deposit and an expiry date.', 'An offer with no expiry never converts and never closes. Set the date even when you expect to extend it.'),
+      S('Take the deposit', 'The place is not held until this clears. Thirteen deposits and nine full payments is the gap that costs the most money.'),
+      S('Enrol', 'Creates the Connect invitation. Nothing is sent until you send it.', 'After day one begins, nobody can be enrolled — a candidate missing one day of twenty falls under the 120-hour minimum.'),
+    ],
+    cta: 'Open the applications list', next: 'Or jump to any stage from the pipeline',
+  },
+  {
+    tag: 'People', tone: TEAL, title: 'Inviting people to Connect',
+    when: 'Each time someone new joins a course or the centre',
+    barIndex: 1,
+    intro: 'Every code is issued to one email address and burns when it is used. Forwarding it does not work, by design.',
+    steps: [
+      S('Choose a role', 'Centre owner and centre admin up front. Centre manager and course admin sit behind "more roles" — most centres never need them.', 'Only the centre owner can invite an administrator. Admins invite trainers, candidates and volunteers.'),
+      S('Enter the email', 'The code is checked against this address. Someone else cannot use it even if it is forwarded to them.'),
+      S('Send', 'One email, one code, one account. Roles are visible to everyone once they join, and only the owner can change them.', 'Volunteers are the exception — an open sign-up link creates a volunteer and nothing else, so you can post it publicly.'),
+    ],
+    cta: 'Open the invitation screen', next: 'Bulk invitations are on the roster instead',
+  },
+  {
+    tag: 'Import', tone: GOLD, title: 'Importing existing records',
+    when: 'Once, when a centre first moves to Connect',
+    barIndex: 3,
+    intro: 'Nothing is written until you have seen the whole thing laid out with its problems on top. And no invitations go out afterwards.',
+    steps: [
+      S('Upload the file', 'A spreadsheet of people. Any column order — you map them in the next step.'),
+      S('Map the columns', 'Name, email and status are the three that matter. Status is the one Connect can never guess, because every centre uses different words for the same stage.'),
+      S('Review', 'Duplicates and missing emails are listed first, above the rows that are fine. Fix them here or import without them.'),
+      S('Import', 'Records only. Nobody receives anything.', 'An import that silently emails forty people is the fastest way to lose a centre in its first hour. Invitations are a separate, deliberate action.'),
+    ],
+    cta: 'Open the importer', next: 'Imported people appear on the roster as records',
+  },
+  {
+    tag: 'Timetable', tone: TEAL, title: 'Publishing and changing a timetable',
+    when: 'Once before the course, then whenever something moves',
+    barIndex: 2,
+    intro: 'A timetable is the spine of the course. Assignment deadlines, marking slots, filmed observations, reminders and the divergence session all derive from it.',
+    steps: [
+      S('Duplicate a reference course', 'Four-week, five-week with Fridays off, or part-time. Change the start date and everything re-anchors.'),
+      S('Check the warnings', 'Each one is a rule stated at the moment it is broken.', 'Connect will not publish a timetable whose deadline falls before the evidence for it exists — FOL cannot be due before the divergence session, for instance.'),
+      S('Publish', 'Candidates see their own dates only. Staggered submissions mean two dates per assignment, and a candidate never sees the other group\u2019s.'),
+      S('Change something afterwards', 'Moving a deadline moves its marking slot and resubmission window with it. Everyone affected is told; nobody has to notice.', 'Nothing can be resubmitted after the course closes. An assignment that cannot fit its resubmission was set too late.'),
+    ],
+    cta: 'Open the timetable', next: 'Warnings are also shown while dragging',
+  },
+  {
+    tag: 'Course', tone: GOLD, title: 'Preparing for the assessor visit',
+    when: 'Two to three weeks before the visit',
+    barIndex: 2,
+    intro: 'The assessor never browses the hub. They get a pack built for one visit, and your job is to check what is in it rather than assemble it.',
+    steps: [
+      S('Confirm the date and the session', 'On a part-time course there is no spare day, so the visit lands inside a teaching session and the candidates teaching it are told weeks ahead.'),
+      S('Check the pack', 'Timetable, tutor records, candidate portfolios, assignment records with both submission dates, and the trainer-in-training arrangement if there is one.', 'Two dates for one assignment looks like an error to anyone who has not been told. The pack labels them by group.'),
+      S('Fill the gaps', 'Anything missing is listed with a link to where it is created. Usually an unsigned CELTA 5 or a tutorial record nobody wrote up.'),
+      S('Send', 'The pack is a point-in-time export. Later changes do not alter a pack already sent, which is why the send date is on it.'),
+    ],
+    cta: 'Open the assessor pack', next: 'Gaps can be fixed and the pack rebuilt',
+  },
+  {
+    tag: 'Close', tone: GREEN, title: 'Closing a course',
+    when: 'The final week, and the fortnight after',
+    barIndex: 3,
+    intro: 'Closing is mostly checking that what should already exist does. Nothing here should be a surprise if the course ran properly.',
+    steps: [
+      S('Check all submissions are in', 'Including resubmissions. Nothing can be resubmitted after close, so anything outstanding needs an approved extension or it is a fail.'),
+      S('Complete the portfolios', 'Each candidate\u2019s record of lessons taught, feedback received, assignments and tutorials. Assembled as the course ran, not at the end.'),
+      S('Grades and CELTA 5s', 'The grade meeting produces the recommendation; the CELTA 5 records it. Both need signatures, and the signature is the typed-name kind used everywhere else.', 'A fail letter can be sent before the Stage 3 tutorial, but the tutorial still has to happen and the candidate still has to sign.'),
+      S('Send the results', 'Candidates are told in a tutorial first, never by email first.'),
+      S('Archive', 'The course becomes read-only. Chat channels close, and the record stays available to the centre and to any assessor who asks later.'),
+    ],
+    cta: 'Open the grade sheet', next: 'Archiving is the last step and is reversible for 30 days',
+  },
+];
+
+class Component extends DCLogic {
+  state = { g: 0 };
+
+  renderVals() {
+    const g = GUIDES[this.state.g];
+    return {
+      guides: GUIDES.map((x, k) => {
+        const on = k === this.state.g;
+        return {
+          title: x.title, tag: x.tag, when: x.when,
+          pick: () => this.setState({ g: k }),
+          bg: on ? tint(x.tone, 8) : CARD,
+          border: on ? mix(x.tone, 34) : BORDER,
+          spine: on ? x.tone : mix(INK, 12),
+          ink: INK, tagInk: on ? x.tone : MUTED,
+          subInk: MUTED,
+        };
+      }),
+      guide: {
+        title: g.title, cta: g.cta, next: g.next,
+        intro: g.intro.replace(/^Six stages/, ['', 'One stage', 'Two stages', 'Three stages', 'Four stages', 'Five stages', 'Six stages', 'Seven stages'][g.steps.length]),
+        barStep: 'Step ' + g.barIndex + ' of ' + g.steps.length + ' · ' + g.steps[g.barIndex - 1].title,
+        steps: g.steps.map((s, k) => Object.assign({ n: String(k + 1) }, s)),
+      },
+      rules: [
+        { title: 'Opened from the screen it is about', spine: TEAL, border: mix(TEAL, 28),
+          text: 'A guide never explains a screen you cannot see. It opens the real thing and keeps a bar at the top of it while it runs.' },
+        { title: 'No screenshots, ever', spine: RED, border: mix(RED, 28),
+          text: 'A screenshot goes stale within a release and then confidently teaches the wrong thing. The guide points at the live screen instead.' },
+        { title: 'The warning is the value', spine: GOLD, border: mix(GOLD, 28),
+          text: 'Anyone can find the delivery-mode field. Nobody can guess that changing it rebuilds the timetable. Every step that has a consequence says so.' },
+        { title: 'Marking one done opens the next', spine: TEAL, border: mix(TEAL, 28),
+          text: 'Six steps is six clicks, not six navigations and six attempts to find your way back to where you were.' },
+        { title: 'It offers itself when it is plausible', spine: TEAL, border: mix(TEAL, 28),
+          text: 'Six weeks since the last course setup and the guide offers itself. Two days, and it stays quiet. No dismiss button, because there is nothing to dismiss.' },
+        { title: 'Leaving half-finished is fine', spine: GREEN, border: mix(GREEN, 28),
+          text: 'Progress is kept per guide. Course setup genuinely spans weeks, so a guide that expected one sitting would be wrong about the job.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 44px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 12px; max-width: 960px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · TP points library and assignment</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Three points per round, three teachers per day. The rotation decides who gets which.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">A group of six splits in half — three teach one day, three the next, because three lessons is a day's worth. Your generator already makes exactly three points per TP number. So a candidate's position in the day <span style="font-weight: 600; color: oklch(23.5% 0.017 65);">is</span> which lesson they get, and rotating the order rotates the main aim. That only works if the three points for a round have genuinely different aims — which is the thing to check on the way to publishing, not after.</div>
+  </div>
+
+  <div id="2a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">2a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">The round as a candidate sees it</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">yours in full, the other two clearly not yours, audio attached to the point</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Round 4 · Group DEF · released 27 Nov · you teach Wednesday 29 Nov</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">Your TP4 point, and the two your group teach the same day</div>
+        </div>
+        <div style="height: 32px; padding: 0 14px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 12px; font-weight: 600; display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Start your lesson plan</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.28fr 1fr 1fr; gap: 14px; align-items: start;">
+        <sc-for list="{{ candidateView }}" as="c" hint-placeholder-count="3">
+          <div style="position: relative; overflow: hidden; background: {{ c.bg }}; border: 1px solid {{ c.border }}; border-radius: 6px; padding: 18px 19px; display: flex; flex-direction: column; gap: 12px;">
+
+            <sc-if value="{{ c.notYours }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-24deg); font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: color-mix(in oklab, oklch(45% 0.16 27) 16%, transparent); white-space: nowrap; pointer-events: none; user-select: none;">Not your lesson</div>
+            </sc-if>
+
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: {{ c.whoInk }};">{{ c.who }}</div>
+                <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ c.slot }}</div>
+              </div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: {{ c.tagBg }}; color: {{ c.tagInk }}; flex: none;">{{ c.tag }}</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 11px; font-weight: 600; color: {{ c.aimInk }};">{{ c.aim }}</div>
+              <div style="font-family: Newsreader, Georgia, serif; font-size: {{ c.titleSize }}; font-weight: 600; line-height: 1.22; color: {{ c.ink }}; text-wrap: pretty;">{{ c.title }}</div>
+            </div>
+
+            <sc-if value="{{ c.yours }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 13px; border-radius: 5px; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82);">
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: oklch(51% 0.017 70);">Main aim</div>
+                <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ c.main }}</div>
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: oklch(51% 0.017 70); padding-top: 3px;">Sub aim</div>
+                <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ c.sub }}</div>
+              </div>
+            </sc-if>
+
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ c.matLabel }}</div>
+              <sc-for list="{{ c.materials }}" as="m" hint-placeholder-count="2">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 5px; background: {{ m.bg }}; border: 1px solid {{ m.border }};">
+                  <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: {{ m.kindBg }}; color: {{ m.kindInk }}; flex: none; width: 38px; text-align: center;">{{ m.kind }}</div>
+                  <div style="font-size: 12px; color: {{ m.ink }}; flex: 1; min-width: 0;">{{ m.text }}</div>
+                  <div style="font-size: 11px; font-weight: 600; color: {{ m.actionInk }}; flex: none;">{{ m.action }}</div>
+                </div>
+              </sc-for>
+
+              <sc-if value="{{ c.hasAudio }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 5px; background: color-mix(in oklab, oklch(38% 0.072 195) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 26%, transparent);">
+                  <div style="width: 28px; height: 28px; border-radius: 50%; background: oklch(38% 0.072 195); display: flex; align-items: center; justify-content: center; flex: none; cursor: pointer;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="oklch(98.5% 0.006 90)"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0;">
+                    <div style="font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ c.audioTitle }}</div>
+                    <div style="height: 3px; border-radius: 999px; background: color-mix(in oklab, oklch(38% 0.072 195) 22%, transparent);">
+                      <div style="width: 0%; height: 3px; border-radius: 999px; background: oklch(38% 0.072 195);"></div>
+                    </div>
+                  </div>
+                  <div style="font-size: 11px; font-variant-numeric: tabular-nums; color: oklch(51% 0.017 70); flex: none;">{{ c.audioLength }}</div>
+                </div>
+              </sc-if>
+            </div>
+
+            <div style="font-size: 11px; font-style: italic; line-height: 1.5; color: {{ c.footInk }}; text-wrap: pretty;">{{ c.foot }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;">
+        <sc-for list="{{ candidateNotes }}" as="n" hint-placeholder-count="3">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ n.border }}; border-radius: 6px; padding: 13px 15px; display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 12px; font-weight: 700; color: {{ n.labelInk }};">{{ n.label }}</div>
+            <div style="font-size: 12px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1a -->
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">The library — review and publish, by round</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Empower B1 · 18 points · {{ tierLine }}</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">TP Points Library</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="height: 32px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 12px; font-weight: 500; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Upload a coursebook</div>
+          <div style="height: 32px; padding: 0 13px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 12px; font-weight: 600; display: flex; align-items: center; cursor: pointer; white-space: nowrap;">{{ publishLabel }}</div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+          <div onClick="{{ t.pick }}" style="height: 46px; padding: 0 14px; border-radius: 6px; border: 1px solid {{ t.border }}; background: {{ t.bg }}; display: flex; flex-direction: column; justify-content: center; gap: 2px; cursor: pointer; min-width: 120px;">
+            <div style="font-size: 12px; font-weight: 700; color: {{ t.ink }};">{{ t.label }}</div>
+            <div style="font-size: 10px; color: oklch(51% 0.017 70);">{{ t.tier }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;">
+        <sc-for list="{{ points }}" as="p" hint-placeholder-count="3">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ p.cardBorder }}; border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 11px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 22px; height: 22px; border-radius: 6px; background: oklch(93.5% 0.012 85); font-size: 11px; font-weight: 700; color: oklch(51% 0.017 70); display: flex; align-items: center; justify-content: center;">{{ p.seq }}</div>
+                <div style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; background: {{ p.aimBg }}; color: {{ p.aimInk }};">{{ p.aimType }}</div>
+              </div>
+              <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: {{ p.statusInk }};">
+                <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+                <div>{{ p.status }}</div>
+              </div>
+            </div>
+
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; line-height: 1.3; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ p.title }}</div>
+
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Main aim</div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ p.mainAim }}</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Sub aim</div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ p.subAim }}</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Materials</div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ p.materials }}</div>
+              </div>
+            </div>
+
+            <div style="padding: 10px 11px; border-radius: 6px; background: oklch(96.4% 0.014 85); border: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent); display: flex; flex-direction: column; gap: 5px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ p.procLabel }}</div>
+                <div style="font-size: 10px; color: oklch(51% 0.017 70);">{{ p.procMeta }}</div>
+              </div>
+              <sc-for list="{{ p.stages }}" as="st" hint-placeholder-count="3">
+                <div style="display: flex; align-items: baseline; gap: 8px;">
+                  <div style="width: 5px; height: 5px; border-radius: 50%; background: color-mix(in srgb, oklch(51% 0.017 70) 45%, transparent); flex: none;"></div>
+                  <div style="font-size: 11px; line-height: 1.45; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ st }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="height: 30px; flex: 1; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="border-color: oklch(38% 0.072 195);">Edit</div>
+              <div style="height: 30px; flex: 1; border-radius: 6px; background: {{ p.ctaBg }}; border: 1px solid {{ p.ctaBorder }}; font-size: 12px; font-weight: 600; color: {{ p.ctaInk }}; display: flex; align-items: center; justify-content: center; cursor: pointer;">{{ p.cta }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ spreadBorder }}; border-radius: 6px; padding: 15px 17px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; align-items: center; gap: 11px;">
+          <div style="width: 6px; height: 6px; border-radius: 50%; background: {{ spreadDot }}; flex: none;"></div>
+          <div style="font-size: 13px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ spreadText }}</div>
+        </div>
+        <div style="font-size: 12px; color: oklch(51% 0.017 70); flex: none;">Checked before publishing, not after</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1b -->
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1b</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Assigning a round — six candidates, two days, three points</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Nadia Farouk's group · 6 candidates · TP4</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">Assign TP4</div>
+        </div>
+        <div style="height: 34px; padding: 0 15px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 13px; font-weight: 600; display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Release to all six</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <sc-for list="{{ days }}" as="d" hint-placeholder-count="2">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+            <div style="padding: 12px 16px; background: oklch(96.4% 0.014 85); border-bottom: 1px solid oklch(88% 0.016 82); display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ d.half }}</div>
+                <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ d.date }}</div>
+              </div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ d.class }}</div>
+            </div>
+            <sc-for list="{{ d.slots }}" as="s" hint-placeholder-count="3">
+              <div style="padding: 13px 16px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent); display: flex; flex-direction: column; gap: 7px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 22px; height: 22px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">{{ s.pos }}</div>
+                  <div style="flex: 1; font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ s.name }}</div>
+                  <div style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; background: {{ s.aimBg }}; color: {{ s.aimInk }}; flex: none;">{{ s.aimType }}</div>
+                </div>
+                <div style="padding-left: 32px; display: flex; flex-direction: column; gap: 3px;">
+                  <div style="font-size: 12px; line-height: 1.45; color: oklch(23.5% 0.017 65);">{{ s.point }}</div>
+                  <div style="font-size: 11px; color: {{ s.noteInk }};">{{ s.note }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 17px 18px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 14px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; font-weight: 600; color: oklch(23.5% 0.017 65);">Main aims so far</div>
+          <div style="font-size: 12px; color: oklch(51% 0.017 70);">Every candidate must meet a range of aims across their eight lessons</div>
+        </div>
+
+        <div style="border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+          <div style="display: grid; grid-template-columns: 160px repeat(5, 1fr) 120px; background: oklch(96.4% 0.014 85); border-bottom: 1px solid oklch(88% 0.016 82);">
+            <div style="padding: 9px 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">Candidate</div>
+            <sc-for list="{{ aimTypes }}" as="a" hint-placeholder-count="5">
+              <div style="padding: 9px 8px; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ a }}</div>
+            </sc-for>
+            <div style="padding: 9px 12px; text-align: right; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">Spread</div>
+          </div>
+          <sc-for list="{{ coverage }}" as="c" hint-placeholder-count="6">
+            <div style="display: grid; grid-template-columns: 160px repeat(5, 1fr) 120px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent); align-items: center;">
+              <div style="padding: 10px 12px; font-size: 12px; color: oklch(23.5% 0.017 65); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ c.name }}</div>
+              <sc-for list="{{ c.cells }}" as="cell" hint-placeholder-count="5">
+                <div style="padding: 8px; display: flex; align-items: center; justify-content: center; gap: 3px;">
+                  <sc-for list="{{ cell.dots }}" as="dot" hint-placeholder-count="2">
+                    <div style="width: 7px; height: 7px; border-radius: 50%; background: {{ dot.color }};"></div>
+                  </sc-for>
+                  <sc-if value="{{ cell.empty }}" hint-placeholder-val="{{ false }}">
+                    <div style="width: 7px; height: 1px; background: color-mix(in srgb, oklch(51% 0.017 70) 35%, transparent);"></div>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <div style="padding: 10px 12px; text-align: right; font-size: 11px; font-weight: 600; color: {{ c.spreadInk }};">{{ c.spread }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; align-items: flex-start; gap: 10px; padding: 11px 13px; border-radius: 6px; background: color-mix(in oklab, oklch(60% 0.11 70) 11%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 28%, transparent);">
+          <div style="width: 6px; height: 6px; border-radius: 50%; background: oklch(60% 0.11 70); margin-top: 5px; flex: none;"></div>
+          <div style="font-size: 12px; line-height: 1.55; color: oklch(23.5% 0.017 65);">Mert Kaya would take a third grammar lesson at position 2. Swapping him with Elif Demir keeps the rotation fair and gives them both an aim they have not taught — the swap is one click because the point follows the position, not the person.</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        <sc-for list="{{ notes }}" as="n" hint-placeholder-count="6">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 5px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: {{ n.dot }};"></div>
+              <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+            </div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:1900}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const BORDER = 'oklch(88% 0.016 82)';
+
+const AIM_STYLE = {
+  Grammar: { bg: 'color-mix(in oklab, ' + TEAL + ' 12%, oklch(99.2% 0.005 90))', ink: TEAL, dot: TEAL },
+  Lexis: { bg: 'color-mix(in oklab, ' + GOLD + ' 15%, oklch(99.2% 0.005 90))', ink: GOLD, dot: GOLD },
+  Function: { bg: 'oklch(93% 0.045 235)', ink: 'oklch(42% 0.095 250)', dot: 'oklch(42% 0.095 250)' },
+  Receptive: { bg: 'oklch(93.5% 0.008 85)', ink: GREEN, dot: GREEN },
+  Productive: { bg: 'oklch(93.5% 0.012 85)', ink: MUTED, dot: MUTED },
+};
+
+// getDensityTier, src/lib/tp-density.ts
+const TIERS = { 1: 'Scripted', 2: 'Scripted', 3: 'Framework', 4: 'Framework', 5: 'Coaching prose', 6: 'Minimal' };
+
+const POINTS = {
+  1: [
+    { seq: 1, aim: 'Grammar', title: 'Present perfect for life experience',
+      main: 'By the end of the lesson, Ss will be better able to use the present perfect to talk about life experience in the context of travel.', sub: 'By the end of the lesson, Ss will have practised speaking for fluency in the same context.',
+      materials: 'Empower B1 · Unit 1A · pp. 8–9, ex. 1–6',
+      framework: 'Full script', stages: ['LEAD IN · 5 min · Show two photos and ask which trip they would choose. Take two or three answers only.', 'TEST 1 (DIAGNOSTIC) · 8 min · Ss do ex. 2 alone, then check in pairs.', 'TEACH · 12 min · Board two sentences from the text. Elicit form, then check meaning with concept checking questions (CCQs).'],
+      analysis: 'Scripted · timing and instructions per stage', status: 'Published' },
+    { seq: 2, aim: 'Receptive', title: 'Reading for gist and detail: a city life article',
+      main: 'By the end of the lesson, Ss will be better able to read an article about city life for gist and for specific detail.', sub: 'By the end of the lesson, Ss will have met vocabulary for describing places.',
+      materials: 'Empower B1 · Unit 1C · pp. 12–13, text + ex. 2–4',
+      framework: 'Full script', stages: ['LEAD IN · 5 min · Write your city on the board. Ask what one visitor should see.', 'GIST TASK · 7 min · Set one question before handing out the text (T).', 'DETAIL TASK · 10 min · Ss do ex. 3, then check in pairs before whole-class feedback.'],
+      analysis: 'Scripted · timing and instructions per stage', status: 'Published' },
+    { seq: 3, aim: 'Lexis', title: 'Vocabulary for daily routines',
+      main: 'By the end of the lesson, Ss will be better able to use eight expressions for daily routines in the context of a working day.', sub: 'By the end of the lesson, Ss will have practised listening for detail.',
+      materials: 'Empower B1 · Unit 1B · pp. 10–11, ex. 1–4 + audio 1.3',
+      framework: 'Full script', stages: ['LEAD IN · 4 min · Mime one routine and let Ss guess it.', 'PRESENTATION · 10 min · Match task, ex. 1. Drill the target language (TL) chorally then individually.', 'CONTROLLED PRACTICE · 10 min · ex. 3, p. 11, checked in pairs.'],
+      analysis: 'Scripted · timing and instructions per stage', status: 'Needs review' },
+  ],
+  2: [
+    { seq: 1, aim: 'Function', title: 'Making and responding to invitations',
+      main: 'By the end of the lesson, Ss will be better able to make and respond to invitations in the context of arranging an evening out.', sub: 'By the end of the lesson, Ss will have practised speaking for fluency.',
+      materials: 'Empower B1 · Unit 2B · pp. 22–23, ex. 1–5 + audio 2.2',
+      framework: 'Full script', stages: ['LEAD IN · 5 min · Ask what they are doing this weekend. Two answers only.', 'PRESENTATION · 12 min · Play audio 2.2. Ss note the phrases used to invite and to refuse politely.', 'FREER PRACTICE · 12 min · Mingle: invite three people, refuse two.'],
+      analysis: 'Scripted · timing and instructions per stage', status: 'Published' },
+    { seq: 2, aim: 'Grammar', title: 'Comparative adjectives',
+      main: 'By the end of the lesson, Ss will be better able to use comparative adjectives in the context of comparing two places to live.', sub: 'By the end of the lesson, Ss will have practised writing a short comparison.',
+      materials: 'Empower B1 · Unit 2A · pp. 20–21, ex. 2–6',
+      framework: 'Full script', stages: ['LEAD IN · 5 min · Two photos of cities. Which would you live in and why?', 'TEST 1 (DIAGNOSTIC) · 8 min · ex. 2, p. 20, alone then paired.', 'TEACH · 12 min · Board the rules Ss got wrong. Drill the weak form of than.'],
+      analysis: 'Scripted · timing and instructions per stage', status: 'Published' },
+    { seq: 3, aim: 'Productive', title: 'Speaking: describing a place you know well',
+      main: 'By the end of the lesson, Ss will be better able to describe a familiar place in the context of recommending somewhere to a visitor.', sub: 'By the end of the lesson, Ss will have revised vocabulary for places.',
+      materials: 'Empower B1 · Unit 2C · p. 24, ex. 1–3',
+      framework: 'Full script', stages: ['LEAD IN · 4 min · Name one place you would take a visitor.', 'PREPARATION · 10 min · Ss plan alone with the prompts in ex. 1.', 'SPEAKING TASK · 14 min · Pairs, then swap partners and repeat.'],
+      analysis: 'Scripted · timing and instructions per stage', status: 'Published' },
+  ],
+  3: [
+    { seq: 1, aim: 'Lexis', title: 'Vocabulary: Food and cooking',
+      main: 'Vocabulary: food and cooking', sub: 'Speaking',
+      materials: 'Empower B1 · Unit 4A · pp. 42–43, ex. 1–4',
+      framework: 'Test–Teach–Test', stages: ['TEST 1 · ex. 1, p. 42', 'TEACH · form, stress, collocation', 'TEST 2 · ex. 4, p. 43'],
+      analysis: 'Vocabulary Analysis', status: 'Published' },
+    { seq: 2, aim: 'Receptive', title: 'Listening for detail: a radio interview',
+      main: 'Listening: a radio interview', sub: 'Vocabulary in context',
+      materials: 'Empower B1 · Unit 4B · p. 44, audio 4.1 + ex. 2–3',
+      framework: 'Receptive Skills', stages: ['LEAD IN', 'GIST TASK', 'DETAIL TASK · ex. 3'],
+      analysis: 'Language Analysis', status: 'Published' },
+    { seq: 3, aim: 'Grammar', title: 'Grammar: Will and going to',
+      main: 'Grammar: will and going to', sub: 'Speaking',
+      materials: 'Empower B1 · Unit 4C · pp. 46–47, ex. 2–5',
+      framework: 'Guided Discovery', stages: ['LEAD IN', 'DISCOVERY · ex. 2, p. 46', 'CLARIFY · form and meaning'],
+      analysis: 'Grammar Analysis', status: 'Needs review' },
+  ],
+  5: [
+    { seq: 1, aim: 'Receptive', title: 'Reading: a profile article',
+      main: 'Reading: a profile article', sub: 'Speaking',
+      materials: 'Empower B2 · Unit 1C · pp. 14–15 — level changes here',
+      framework: 'Coaching guidance', stages: ['Choose your own gist task — one question the whole text answers, not three.', 'Decide which four items to pre-teach and which to leave for the text to carry.', 'You can run this as reading-into-speaking or reading-into-writing. Pick one and shape the last twelve minutes around it.'],
+      analysis: 'No stage list — you design the lesson', status: 'Published' },
+    { seq: 2, aim: 'Grammar', title: 'Grammar: Third conditional',
+      main: 'Grammar: third conditional', sub: 'Writing',
+      materials: 'Empower B2 · Unit 2A · pp. 20–21',
+      framework: 'Coaching guidance', stages: ['Decide whether to lead with the form or the context — both work here, and the choice changes your first ten minutes.', 'Plan how you will check meaning. A timeline alone will not distinguish this from the second conditional.', 'Freer practice can be spoken or written. Written gives you something to give feedback on.'],
+      analysis: 'No stage list — you design the lesson', status: 'Published' },
+    { seq: 3, aim: 'Function', title: 'Functional language: Disagreeing politely',
+      main: 'Functional language: disagreeing politely', sub: 'Listening',
+      materials: 'Empower B2 · Unit 2B · pp. 22–23 + audio 2.1',
+      framework: 'Coaching guidance', stages: ['The audio carries the target language, so decide whether Ss meet it by ear or on the page first.', 'Intonation does more work than the words here. Plan how you will drill it.', 'Give the freer stage a reason to disagree — a ranking task works better than an open discussion.'],
+      analysis: 'No stage list — you design the lesson', status: 'Needs review' },
+  ],
+  6: [
+    { seq: 1, aim: 'Productive', title: 'Speaking: a formal complaint',
+      main: 'Speaking: a formal complaint', sub: 'You choose — and say in your plan why it follows from the main aim.',
+      materials: 'Empower B2 · Unit 3B · p. 34, ex. 1–3',
+      framework: 'No procedure', stages: [], analysis: 'Aim and materials only', status: 'Published' },
+    { seq: 2, aim: 'Lexis', title: 'Vocabulary: Work and careers',
+      main: 'Vocabulary: work and careers', sub: 'You choose — and say in your plan why it follows from the main aim.',
+      materials: 'Empower B2 · Unit 3A · pp. 32–33, ex. 1–5',
+      framework: 'No procedure', stages: [], analysis: 'Aim and materials only', status: 'Published' },
+    { seq: 3, aim: 'Receptive', title: 'Listening: two colleagues negotiating',
+      main: 'Listening: two colleagues negotiating', sub: 'You choose — and say in your plan why it follows from the main aim.',
+      materials: 'Empower B2 · Unit 3C · p. 36, audio 3.2 + ex. 2–4',
+      framework: 'No procedure', stages: [], analysis: 'Aim and materials only', status: 'Published' },
+  ],
+  4: [
+    { seq: 1, aim: 'Grammar', title: 'Grammar: Past simple vs past continuous',
+      main: 'Grammar: past simple and past continuous', sub: 'You choose — and say in your plan why it follows from the main aim.',
+      materials: 'Empower B1 · Unit 6A · pp. 62–63, ex. 1–5',
+      framework: 'Test–Teach–Test', stages: ['TEST 1 · ex. 2, p. 62', 'TEACH · timeline + CCQs', 'TEST 2 · ex. 5, p. 63'],
+      analysis: 'Grammar Analysis', status: 'Published' },
+    { seq: 2, aim: 'Lexis', title: 'Vocabulary: Air travel',
+      main: 'Vocabulary: air travel', sub: 'You choose — and say in your plan why it follows from the main aim.',
+      materials: 'Empower B1 · Unit 6B · p. 64, ex. 1–3 + audio 6.2',
+      framework: 'Guided Discovery', stages: ['LEAD IN · airport photos', 'DISCOVERY · ex. 1, p. 64', 'CLARIFY · form and stress'],
+      analysis: 'Vocabulary Analysis', status: 'Published' },
+    { seq: 3, aim: 'Receptive', title: 'Reading for gist and detail: a city life article',
+      main: 'Reading: a city life article', sub: 'You choose — and say in your plan why it follows from the main aim.',
+      materials: 'Empower B1 · Unit 6C · pp. 66–67, text + ex. 2–4',
+      framework: 'Receptive Skills', stages: ['LEAD IN', 'GIST TASK · one question', 'DETAIL TASK · ex. 3, p. 67'],
+      analysis: 'Language Analysis', status: 'Needs review' },
+  ],
+};
+
+const GROUP = ['Sara Yılmaz', 'Deniz Aksoy', 'Mert Kaya', 'Elif Demir', 'Can Şahin', 'Zeynep Arslan'];
+
+// aims each candidate has already taught, TP1-3
+const HISTORY = {
+  'Sara Yılmaz': ['Grammar', 'Receptive', 'Lexis'],
+  'Deniz Aksoy': ['Lexis', 'Grammar', 'Productive'],
+  'Mert Kaya': ['Grammar', 'Grammar', 'Receptive'],
+  'Elif Demir': ['Receptive', 'Lexis', 'Function'],
+  'Can Şahin': ['Productive', 'Receptive', 'Grammar'],
+  'Zeynep Arslan': ['Function', 'Productive', 'Lexis'],
+};
+
+class Component extends DCLogic {
+  state = { tp: 4 };
+
+  renderVals() {
+    const { tp } = this.state;
+    const points = POINTS[tp];
+    const CARD = 'oklch(99.2% 0.005 90)';
+    const RED = 'oklch(45% 0.16 27)';
+    const cmix = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, transparent)';
+    const ctint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+    const mat = (kind, text, action, dim) => ({
+      kind, text, action,
+      bg: dim ? 'oklch(96.4% 0.014 85)' : CARD,
+      border: BORDER,
+      kindBg: kind === 'Audio' ? ctint(TEAL, 14) : 'oklch(93.5% 0.008 85)',
+      kindInk: kind === 'Audio' ? TEAL : MUTED,
+      ink: dim ? MUTED : INK,
+      actionInk: dim ? MUTED : TEAL,
+    });
+
+    const aimTypes = ['Grammar', 'Lexis', 'Function', 'Receptive', 'Productive'];
+    const uniqueAims = new Set(points.map(p => p.aim)).size;
+
+    const slot = (name, pos, point, note, warn) => ({
+      name, pos: String(pos),
+      point: point.title,
+      aimType: point.aim,
+      aimBg: AIM_STYLE[point.aim].bg,
+      aimInk: AIM_STYLE[point.aim].ink,
+      note,
+      noteInk: warn ? GOLD : MUTED,
+    });
+
+    return {
+      candidateView: [
+        { who: 'Your lesson', whoInk: TEAL, slot: 'Wed 29 Nov · 09:30 · 45 min · first of three',
+          tag: 'Yours', tagBg: ctint(TEAL, 14), tagInk: TEAL,
+          yours: true, notYours: false,
+          bg: CARD, border: cmix(TEAL, 40), ink: INK, titleSize: '19px',
+          aim: 'Lexis', aimInk: GOLD,
+          title: 'Vocabulary for daily routines',
+          main: 'Vocabulary: daily routines',
+          sub: 'You choose — and say in your plan why it follows from the main aim.',
+          matLabel: 'Your materials',
+          materials: [
+            mat('Scan', 'Empower B1 · pp. 10–11, ex. 1–4', 'Open'),
+            mat('Doc', 'Vocabulary analysis sheet', 'Open'),
+          ],
+          hasAudio: true, audioTitle: 'Class audio 1.3 — a working day', audioLength: '1:52',
+          foot: 'Everything you need is here. The audio is attached to the point, so you never go looking for it in the library.',
+          footInk: MUTED },
+
+        { who: 'Elif Demir teaches this', whoInk: MUTED, slot: 'Wed 29 Nov · 10:25 · second of three',
+          tag: 'Not yours', tagBg: ctint(RED, 10), tagInk: RED,
+          yours: false, notYours: true,
+          bg: 'oklch(97.2% 0.010 85)', border: BORDER, ink: MUTED, titleSize: '17px',
+          aim: 'Receptive', aimInk: MUTED,
+          title: 'Reading for gist and detail: a city life article',
+          matLabel: 'Her pages — read, do not plan',
+          materials: [mat('Scan', 'Empower B1 · pp. 12–13', 'View', true)],
+          hasAudio: false,
+          foot: 'Shown so you know what the class will already have done by the time you teach — and so nobody plans the same page twice.',
+          footInk: MUTED },
+
+        { who: 'Mert Kaya teaches this', whoInk: MUTED, slot: 'Wed 29 Nov · 11:20 · third of three',
+          tag: 'Not yours', tagBg: ctint(RED, 10), tagInk: RED,
+          yours: false, notYours: true,
+          bg: 'oklch(97.2% 0.010 85)', border: BORDER, ink: MUTED, titleSize: '17px',
+          aim: 'Grammar', aimInk: MUTED,
+          title: 'Present perfect for life experience',
+          matLabel: 'His pages — read, do not plan',
+          materials: [mat('Scan', 'Empower B1 · pp. 8–9', 'View', true)],
+          hasAudio: false,
+          foot: 'Same round, same class, different point. His audio and analysis sheets are not shown — you do not need them.',
+          footInk: MUTED },
+      ],
+      candidateNotes: [
+        { label: 'The watermark is the whole point', labelInk: RED, border: cmix(RED, 26),
+          text: 'A candidate who plans a classmate\u2019s page has lost a day. The mark sits behind the card at low contrast so the text stays readable — you are meant to read it, just not teach it.' },
+        { label: 'Audio travels with the point', labelInk: TEAL, border: cmix(TEAL, 26),
+          text: 'A track attaches to a point once, in the library, and then appears wherever the point appears — here, and in the lesson plan. Candidates never open the Audio Library; it is a tutor-facing bank for building points.' },
+        { label: 'Their materials are thinner than yours', labelInk: MUTED, border: BORDER,
+          text: 'Classmates\u2019 cards show the pages and nothing else — no aims, no analysis sheets, no audio. Enough to know what the class has met, not enough to mistake it for a brief.' },
+      ],
+      tabs: [1, 2, 3, 4, 5, 6].map(n => ({
+        label: 'TP' + n,
+        tier: TIERS[n],
+        pick: () => this.setState({ tp: n }),
+        bg: n === tp ? 'oklch(99.2% 0.005 90)' : 'transparent',
+        border: n === tp ? TEAL : BORDER,
+        ink: n === tp ? TEAL : INK,
+      })),
+      points: points.map(p => ({
+        seq: String(p.seq),
+        aimType: p.aim,
+        aimBg: AIM_STYLE[p.aim].bg,
+        aimInk: AIM_STYLE[p.aim].ink,
+        title: p.title,
+        mainAim: p.main,
+        subAim: p.sub,
+        materials: p.materials,
+        procLabel: p.framework,
+        procMeta: p.analysis,
+        stages: p.stages,
+        status: p.status,
+        statusInk: p.status === 'Published' ? GREEN : GOLD,
+        cardBorder: p.status === 'Published' ? BORDER : 'color-mix(in oklab, ' + GOLD + ' 40%, transparent)',
+        cta: p.status === 'Published' ? 'Unpublish' : 'Publish',
+        ctaBg: p.status === 'Published' ? 'transparent' : TEAL,
+        ctaInk: p.status === 'Published' ? MUTED : 'oklch(98.5% 0.006 90)',
+        ctaBorder: p.status === 'Published' ? BORDER : TEAL,
+      })),
+      publishLabel: 'Publish TP' + tp,
+      tierLine: 'TP' + tp + ' · ' + TIERS[tp] + ' tier',
+      spreadText: uniqueAims === 3
+        ? 'Three different main aims across the three points — whoever teaches first, second or third gets a different kind of lesson.'
+        : 'Two of these three points share a main aim, so two candidates will teach the same kind of lesson this round.',
+      spreadDot: uniqueAims === 3 ? GREEN : GOLD,
+      spreadBorder: uniqueAims === 3 ? BORDER : 'color-mix(in oklab, ' + GOLD + ' 40%, transparent)',
+
+      days: [
+        {
+          half: 'First half', date: 'Tue 21 Nov', class: 'Elementary class · Room 5',
+          slots: [
+            slot('Sara Yılmaz', 1, points[0], 'First grammar lesson since TP1', false),
+            slot('Deniz Aksoy', 2, points[1], 'Second lexis lesson — fine at this stage', false),
+            slot('Mert Kaya', 3, points[2], 'Balances two grammar lessons already taught', false),
+          ],
+        },
+        {
+          half: 'Second half', date: 'Wed 22 Nov', class: 'Intermediate class · Room 6',
+          slots: [
+            slot('Elif Demir', 1, points[0], 'First grammar lesson', false),
+            slot('Can Şahin', 2, points[1], 'First lexis lesson', false),
+            slot('Zeynep Arslan', 3, points[2], 'First receptive skills lesson', false),
+          ],
+        },
+      ],
+
+      aimTypes,
+      coverage: GROUP.map(name => {
+        const taught = HISTORY[name];
+        const cells = aimTypes.map(type => {
+          const count = taught.filter(t => t === type).length;
+          return {
+            dots: Array.from({ length: count }, () => ({ color: AIM_STYLE[type].dot })),
+            empty: count === 0,
+          };
+        });
+        const distinct = new Set(taught).size;
+        return {
+          name, cells,
+          spread: distinct + ' of 5 kinds',
+          spreadInk: distinct >= 3 ? MUTED : GOLD,
+        };
+      }),
+
+      notes: [
+        { dot: GOLD, title: 'Aims are theirs from TP3', text: 'TP1 and TP2 carry the aim written out in full, because the plan is supplied. From TP3 the point gives the area only — “Vocabulary: food and cooking” — and the candidate words the aim themselves. At TP4 the sub aim goes too. TP5 hands it back for one round only, because the level changes there and nobody should be choosing aims for learners they met yesterday. From TP6 both are theirs again. Criteria 4a and 4b open at TP3 for exactly this reason, and nothing before it can be marked against them.' },
+        { dot: TEAL, title: 'Three points, three positions', text: 'POINTS_PER_TP is 3 and a day holds three lessons. Position in the day can simply be the point you get — no separate assignment step, and rotating the order rotates the aim.' },
+        { dot: TEAL, title: 'The aim spread is checked before publishing', text: 'If two of a round’s three points share a main aim, two candidates teach the same kind of lesson. That is worth catching in the library, where it can be regenerated, not on the morning of the TP.' },
+        { dot: TEAL, title: 'Coverage is per candidate, not per group', text: 'Eight lessons, five kinds of aim. The matrix shows what each person has actually taught, so a third grammar lesson is visible before it is assigned.' },
+        { dot: GOLD, title: 'Six rounds generated, eight taught', text: 'The generator produces TP1–6 and the density tiers stop at 6, but candidates teach eight. Either two rounds reuse earlier points or the generator needs to cover 7 and 8.' },
+        { dot: GOLD, title: 'Halves need different classes', text: 'The two halves teach on different days, usually at different levels. The point is the same but the class is not — the assignment should record which class, since it is evidence for the range-of-levels requirement.' },
+        { dot: TEAL, title: 'A swap is one click', text: 'Because the point follows the position, fixing an aim clash means swapping two candidates in the order — not re-picking lessons for either of them.' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

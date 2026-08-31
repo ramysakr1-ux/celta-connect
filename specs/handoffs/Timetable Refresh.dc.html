@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(37.5% 0.058 195); text-decoration: none; }
+  a:hover { color: oklch(30% 0.042 58); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 22px; width: 1500px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 12px; max-width: 980px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · trainer · timetable</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 30px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Rebuilt to match the live drag-board — the transposed time-band grid this file used to show is retired.</div>
+    <div style="font-size: 13.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Code moved on: a week of day-cards, events as draggable tiles, drop a tile on any other day to reschedule instantly. Time bands still exist underneath (a course can set its own daily band shape) but they no longer render as grid columns — they just bucket which band an event's time falls into. This screen is traced from the real component, not a fresh mockup.</div>
+  </div>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 16px; border-bottom: 1px solid oklch(88% 0.016 82);">
+    <div>
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: oklch(23.5% 0.017 65);">Course timetable</div>
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65); margin-top: 2px;">3 August – 28 August</div>
+      <div style="font-size: 12.5px; color: oklch(51% 0.017 70); margin-top: 6px; max-width: 640px;">The single source of truth for the course clock — This Week, due dates, and TP dates all read from this.</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; flex: none;">
+      <div style="height: 38px; padding: 0 14px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer;">Recompute due dates</div>
+      <div style="height: 38px; padding: 0 16px; border-radius: 6px; background: oklch(38% 0.072 195); color: white; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(44% 0.1 68);"></div>
+        Lock timetable
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 4px; border-left: 3px solid oklch(44% 0.1 68); padding-left: 14px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(44% 0.1 68);">Laptop-only — adding events, generating the skeleton, time bands, Stage 2 booking</div>
+    <div style="font-size: 12.5px; color: oklch(51% 0.017 70); line-height: 1.55;">Everything below the board — Add event, Generate skeleton, Time bands, Stage 1/2/3 booking sheets — is gated to a larger screen. The board itself and marking attendance stay available on a phone.</div>
+  </div>
+
+  <sc-for list="{{ weeks }}" as="week" hint-placeholder-count="4">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; color: oklch(51% 0.017 70);">{{ week.label }}</div>
+      <div style="display: grid; grid-template-columns: repeat({{ week.cols }}, 1fr); gap: 8px;">
+        <sc-for list="{{ week.days }}" as="day" hint-placeholder-count="7">
+          <div style="min-height: 128px; display: flex; flex-direction: column; gap: 6px; border-radius: 8px; padding: 10px; box-sizing: border-box; border-width: {{ day.borderWidth }}; border-style: solid; border-color: {{ day.borderColor }}; background: {{ day.bg }};">
+            <div style="display: flex; align-items: baseline; gap: 6px;">
+              <span style="font-family: Newsreader, Georgia, serif; font-size: 16px; color: oklch(23.5% 0.017 65);">{{ day.dayOfMonth }}</span>
+              <span style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: oklch(51% 0.017 70);">{{ day.weekday }}</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <sc-for list="{{ day.events }}" as="ev" hint-placeholder-count="1">
+                <div onClick="{{ ev.select }}" style="cursor: pointer; border-radius: 6px; padding: 5px 8px; border-left: 3px solid {{ ev.spine }}; background: {{ ev.tileBg }};">
+                  <div style="display: flex; align-items: center; gap: 4px;">
+                    <sc-if value="{{ ev.hasZoom }}" hint-placeholder-val="{{ false }}">
+                      <svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="oklch(23.5% 0.017 65)" stroke-width="2"><path d="M15 10l4.5-2.5v9L15 14"></path><rect x="3" y="6" width="12" height="12" rx="2"></rect></svg>
+                    </sc-if>
+                    <span style="font-size: 11px; font-weight: 500; color: oklch(23.5% 0.017 65); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ ev.title }}</span>
+                  </div>
+                  <sc-if value="{{ ev.time }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size: 9px; color: oklch(51% 0.017 70); margin-top: 1px;">{{ ev.time }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 18px; font-size: 11px; color: oklch(51% 0.017 70);">
+    <sc-for list="{{ legend }}" as="l" hint-placeholder-count="3">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <div style="width: 10px; height: 10px; border-radius: 3px; background: {{ l.color }};"></div>
+        {{ l.label }}
+      </div>
+    </sc-for>
+  </div>
+
+  <div id="1b" style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: white;">1b</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Clicking a tile opens this detail panel — shown here for TP4</div>
+    </div>
+    <div style="width: 640px; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 18px; font-weight: 600; color: oklch(23.5% 0.017 65);">TP4</div>
+        <div style="font-size: 18px; color: oklch(51% 0.017 70); cursor: pointer;">×</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; font-size: 13px;">
+        <div style="color: oklch(51% 0.017 70);">Type</div><div style="color: oklch(23.5% 0.017 65);">tp</div>
+        <div style="color: oklch(51% 0.017 70);">Date</div><div style="color: oklch(23.5% 0.017 65);">Monday, 10 August</div>
+        <div style="color: oklch(51% 0.017 70);">Time</div><div style="color: oklch(23.5% 0.017 65);">09:30</div>
+        <div style="color: oklch(51% 0.017 70);">TP number</div><div style="color: oklch(23.5% 0.017 65);">TP4</div>
+      </div>
+      <details open style="margin-top: 2px;">
+        <summary style="cursor: pointer; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Mode: Face-to-face</summary>
+        <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+          <select style="height: 32px; border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 0 8px; font-size: 12px; color: oklch(23.5% 0.017 65);"><option>Face-to-face</option></select>
+          <div style="align-self: flex-start; height: 28px; padding: 0 12px; border: 1px solid oklch(88% 0.016 82); border-radius: 6px; font-size: 12px; display: flex; align-items: center; cursor: pointer;">Save</div>
+        </div>
+      </details>
+      <details open>
+        <summary style="cursor: pointer; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Attendance 4/6</summary>
+        <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: oklch(23.5% 0.017 65);">
+          <label style="display: flex; gap: 6px; align-items: center;"><input type="checkbox" checked> Sara Yılmaz</label>
+          <label style="display: flex; gap: 6px; align-items: center;"><input type="checkbox" checked> Mert Kaya</label>
+          <label style="display: flex; gap: 6px; align-items: center;"><input type="checkbox"> Elif Demir</label>
+          <div style="align-self: flex-start; margin-top: 4px; height: 28px; padding: 0 12px; border: 1px solid oklch(88% 0.016 82); border-radius: 6px; font-size: 12px; display: flex; align-items: center; cursor: pointer;">Save</div>
+        </div>
+      </details>
+      <div style="font-size: 12px; color: oklch(45% 0.16 27); cursor: pointer; margin-top: 4px;">Delete this event</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(37.5% 0.058 195)';
+const INKWARM = 'oklch(30% 0.042 58)';
+const CARD = 'white';
+const BORDER = 'oklch(88% 0.016 82)';
+
+const TILE = { ink: INKWARM, teal: TEAL, muted: MUTED };
+const smix = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, white)';
+
+function ev(title, cat, opts) {
+  opts = opts || {};
+  return {
+    title, hasZoom: !!opts.zoom, time: opts.time || '',
+    spine: TILE[cat], tileBg: smix(TILE[cat], 12),
+    select: () => {},
+  };
+}
+
+const WEEKS = [
+  { label: '3 August – 9 August', cols: 6, days: [
+    { dayOfMonth: 3, weekday: 'Mon', events: [ev('Focus on Learner due', 'muted')] },
+    { dayOfMonth: 4, weekday: 'Tue', events: [ev('TP2', 'ink')] },
+    { dayOfMonth: 5, weekday: 'Wed', events: [] },
+    { dayOfMonth: 6, weekday: 'Thu', events: [] },
+    { dayOfMonth: 7, weekday: 'Fri', events: [ev('TP3', 'ink')] },
+    { dayOfMonth: 8, weekday: 'Sat', events: [ev('Receptive Skills Methodology', 'teal', { zoom: true }), ev('LRT due', 'muted')] },
+  ]},
+  { label: '10 August – 16 August', cols: 5, days: [
+    { dayOfMonth: 10, weekday: 'Mon', events: [ev('TP4', 'ink', { time: '09:30' })] },
+    { dayOfMonth: 11, weekday: 'Tue', events: [] },
+    { dayOfMonth: 12, weekday: 'Wed', events: [] },
+    { dayOfMonth: 13, weekday: 'Thu', events: [] },
+    { dayOfMonth: 14, weekday: 'Fri', events: [] },
+  ]},
+  { label: '17 August – 23 August', cols: 5, days: [
+    { dayOfMonth: 17, weekday: 'Mon', events: [] },
+    { dayOfMonth: 18, weekday: 'Tue', events: [ev('Teaching Vocabulary', 'teal', { zoom: true })] },
+    { dayOfMonth: 19, weekday: 'Wed', events: [] },
+    { dayOfMonth: 20, weekday: 'Thu', events: [ev('TP6', 'ink')] },
+    { dayOfMonth: 21, weekday: 'Fri', events: [] },
+  ]},
+  { label: '24 August – 30 August', cols: 4, days: [
+    { dayOfMonth: 24, weekday: 'Mon', events: [] },
+    { dayOfMonth: 25, weekday: 'Tue', events: [] },
+    { dayOfMonth: 26, weekday: 'Wed', events: [] },
+    { dayOfMonth: 27, weekday: 'Thu', events: [ev('Course ends — final feedback', 'muted')] },
+  ]},
+];
+
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      weeks: WEEKS.map(w => ({
+        label: w.label, cols: w.cols,
+        days: w.days.map(d => ({
+          dayOfMonth: d.dayOfMonth, weekday: d.weekday,
+          borderWidth: '1px', borderColor: BORDER, bg: CARD,
+          events: d.events,
+        })),
+      })),
+      legend: [
+        { color: INKWARM, label: 'TP / room-based teaching sessions' },
+        { color: TEAL, label: 'Whole-group Zoom input sessions' },
+        { color: MUTED, label: 'Individual / bookable — consultations, tutorials, late starts' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

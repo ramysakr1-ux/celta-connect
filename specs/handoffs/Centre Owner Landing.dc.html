@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  /* Owner identity: a deliberately different register from the rest of Connect.
+     Ink + garnet instead of the app's teal/gold, a dark custodial header band,
+     and a warmer parchment field — signals "this surface carries real weight,"
+     not a fifth tab that happens to look the same. */
+  :root {
+    --owner-ink: oklch(20% 0.014 55);
+    --owner-garnet: oklch(42% 0.15 27);
+    --owner-garnet-soft: oklch(42% 0.15 27 / 0.08);
+    --owner-parchment: oklch(94% 0.014 78);
+    --owner-paper: oklch(99% 0.006 80);
+    --owner-line: oklch(85% 0.018 75);
+    --owner-muted: oklch(48% 0.02 65);
+  }
+  body { margin: 0; background: var(--owner-parchment); font-family: Karla, Helvetica, sans-serif; color: var(--owner-ink); }
+  .cap-btn { font-size: 10.5px; font-weight: 700; letter-spacing: 0.01em; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--owner-line); cursor: pointer; display: inline-block; min-width: 50px; text-align: center; transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease; background: var(--owner-paper); color: var(--owner-muted); }
+  .cap-btn:hover { transform: translateY(-1px); filter: brightness(0.97); box-shadow: 0 3px 10px -4px rgba(30,10,10,0.35); }
+  .cap-btn:active { transform: translateY(0); }
+  .surface-card { background: var(--owner-paper); border: 1px solid var(--owner-line); border-radius: 10px; box-shadow: 0 1px 2px rgba(30,15,10,0.03), 0 14px 32px -20px rgba(30,15,10,0.28); }
+  .row-hover { transition: background-color 0.12s ease; }
+  .row-hover:hover { background-color: var(--owner-garnet-soft); }
+  .howto-list { list-style: none; margin: 0; padding: 0; counter-reset: howto; display: flex; flex-direction: column; gap: 9px; }
+  .howto-list li { counter-increment: howto; position: relative; padding-left: 30px; font-size: 12.5px; line-height: 1.55; color: var(--owner-ink); }
+  .howto-list li::before { content: counter(howto); position: absolute; left: 0; top: 0.5px; width: 20px; height: 20px; border-radius: 50%; background: var(--owner-garnet); color: white; font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  table.cap-table th, table.cap-table td { transition: background-color 0.12s ease; }
+  table.cap-table tbody tr:nth-child(even) { background: color-mix(in oklab, var(--owner-garnet) 2.5%, transparent); }
+  table.cap-table tbody tr:hover { background: var(--owner-garnet-soft); }
+  .owner-eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+  .owner-serif { font-family: Newsreader, Georgia, serif; }
+</style>
+</helmet>
+
+<div style="width: 1360px; box-sizing: border-box; display: flex; flex-direction: column;">
+
+  <!-- Owner header band: dark ink, garnet keyline — the one place in Connect that reads this way. -->
+  <div style="background: var(--owner-ink); padding: 40px 44px 34px; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; border-bottom: 3px solid var(--owner-garnet);">
+    <div>
+      <p class="owner-eyebrow" style="margin: 0; color: oklch(78% 0.03 75);">2 branches · Meridian Group</p>
+      <h1 class="owner-serif" style="margin: 8px 0 0; font-size: 33px; font-weight: 600; letter-spacing: -0.01em; color: oklch(98% 0.008 85);">Centre owner</h1>
+      <p style="margin: 8px 0 0; font-size: 13px; line-height: 1.6; color: oklch(74% 0.025 75); max-width: 480px;">Full oversight, custodial powers over every course, and the ability to shape exactly how each role at your centre works.</p>
+    </div>
+    <span style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 16px; border-radius: 3px; background: var(--owner-garnet); color: oklch(98% 0.006 85); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; flex-shrink: 0;">Centre Owner</span>
+  </div>
+
+  <div style="padding: 34px 44px 44px; display: flex; flex-direction: column; gap: 30px;">
+
+  <!-- Overview snapshot -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+    <div class="surface-card" style="padding: 18px 20px; border-left: 3px solid var(--owner-garnet);">
+      <p class="owner-eyebrow" style="margin: 0; color: var(--owner-muted);">Courses running</p>
+      <p class="owner-serif" style="margin: 7px 0 0; font-size: 28px; font-variant-numeric: tabular-nums;">5</p>
+    </div>
+    <div class="surface-card" style="padding: 18px 20px; border-left: 3px solid var(--owner-garnet);">
+      <p class="owner-eyebrow" style="margin: 0; color: var(--owner-muted);">Outstanding balance</p>
+      <p class="owner-serif" style="margin: 7px 0 0; font-size: 28px; color: var(--owner-garnet); font-variant-numeric: tabular-nums;">£4,200</p>
+    </div>
+    <div class="surface-card" style="padding: 18px 20px; border-left: 3px solid var(--owner-garnet);">
+      <p class="owner-eyebrow" style="margin: 0; color: var(--owner-muted);">People with a centre role</p>
+      <p class="owner-serif" style="margin: 7px 0 0; font-size: 28px; font-variant-numeric: tabular-nums;">11</p>
+    </div>
+    <div class="surface-card" style="padding: 18px 20px; border-left: 3px solid var(--owner-garnet);">
+      <p class="owner-eyebrow" style="margin: 0; color: var(--owner-muted);">Owner actions logged</p>
+      <p class="owner-serif" style="margin: 7px 0 0; font-size: 28px; font-variant-numeric: tabular-nums;">3 <span style="font-family: Karla, sans-serif; font-size: 12px; font-weight: 400; color: var(--owner-muted);">this month</span></p>
+    </div>
+  </div>
+
+  <!-- Cross-centre access -->
+  <div class="surface-card" style="border-top: 3px solid var(--owner-garnet); padding: 26px 28px; display: flex; flex-direction: column; gap: 16px;">
+    <div>
+      <h2 class="owner-serif" style="margin: 0; font-size: 19px;">Cross-branch visibility</h2>
+      <p style="margin: 6px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--owner-muted); max-width: 720px;">Only you control this. Decide whether people at one branch can see what's happening at the other — never edit, view only.</p>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--owner-line); border-radius: 8px; padding: 13px 18px; background: var(--owner-paper);">
+        <div>
+          <span style="font-size: 13px; font-weight: 600;">Meridian — Downtown</span>
+          <span style="font-size: 12px; color: var(--owner-muted);"> can see </span>
+          <span style="font-size: 13px; font-weight: 600;">Meridian — Riverside</span>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <span class="cap-btn" style="background: var(--owner-ink); color: white; border-color: var(--owner-ink);">View only</span>
+          <span class="cap-btn">Blocked</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--owner-line); border-radius: 8px; padding: 13px 18px; background: var(--owner-paper);">
+        <div>
+          <span style="font-size: 13px; font-weight: 600;">Meridian — Riverside</span>
+          <span style="font-size: 12px; color: var(--owner-muted);"> can see </span>
+          <span style="font-size: 13px; font-weight: 600;">Meridian — Downtown</span>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <span class="cap-btn">View only</span>
+          <span class="cap-btn" style="background: var(--owner-garnet); color: white; border-color: var(--owner-garnet);">Blocked</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Role permission customizer -->
+  <div class="surface-card" style="border-top: 3px solid var(--owner-garnet); padding: 28px 30px; display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+      <div>
+        <h2 class="owner-serif" style="margin: 0; font-size: 21px;">Customize what each role can do</h2>
+        <p style="margin: 7px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--owner-muted); max-width: 780px;">Defaults are sensible out of the box — change only what your centre runs differently. The description shown on the Roles tab updates automatically to match whatever you set here.</p>
+      </div>
+      <span style="flex-shrink: 0; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: white; background: var(--owner-garnet); padding: 6px 12px; border-radius: 3px;">Role builder</span>
+    </div>
+
+    <div style="background: var(--owner-garnet-soft); border: 1px solid var(--owner-line); border-radius: 8px; padding: 17px 20px;">
+      <p class="owner-eyebrow" style="margin: 0 0 10px; color: var(--owner-garnet);">How to use this</p>
+      <ol class="howto-list">
+        <li><strong>Adjust an existing role:</strong> click any pill in the table to cycle it Full → View → None. Each cell is independent, so mix and match freely.</li>
+        <li><strong>Add a capability that isn't listed:</strong> type its name in "Add a capability…", pick who should get it, then click Add capability.</li>
+        <li><strong>Add a whole new role</strong> (e.g. Centre Director): type its name under "Add a new role" and click Add role — it appears as a new column, starting at None everywhere, ready to configure the same way.</li>
+        <li><strong>Check your work:</strong> the "Preview" cards below update live to show exactly what each role's description will read on the Roles tab.</li>
+        <li>Nothing here can ever grant course chat, grading, or candidate work — those stay trainer-only no matter what you set.</li>
+      </ol>
+    </div>
+
+    <div class="surface-card" style="overflow: hidden; box-shadow: none;">
+      <div style="overflow-x: auto;">
+      <table class="cap-table" style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+        <thead>
+          <tr>
+            <th style="text-align: left; padding: 12px 16px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--owner-muted); background: var(--owner-parchment); border-bottom: 1px solid var(--owner-line);">Capability</th>
+            <sc-for list="{{ roleCols }}" as="rc" hint-placeholder-count="3">
+              <th style="text-align: center; padding: 12px 12px; font-size: 11px; font-weight: 700; color: {{ rc.color }}; background: var(--owner-parchment); border-bottom: 1px solid var(--owner-line);">{{ rc.label }}</th>
+            </sc-for>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ capRows }}" as="row" hint-placeholder-count="5">
+            <tr>
+              <td style="padding: 10px 16px; border-bottom: 1px solid var(--owner-line);">{{ row.label }}</td>
+              <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="3">
+                <td style="text-align: center; padding: 10px 12px; border-bottom: 1px solid var(--owner-line);">
+                  <span class="cap-btn" style="{{ cell.style }}" onClick="{{ cell.cycle }}">{{ cell.value }}</span>
+                </td>
+              </sc-for>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    <p style="margin: 0; font-size: 11px; color: var(--owner-muted);">Click any pill to cycle Full → View → None, independently per role — mix and match freely. Course chat, grading, and candidate work never appear here; no role in this family can ever hold them.</p>
+
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <input value="{{ newCapName }}" onChange="{{ setNewCapName }}" placeholder="Add a capability not on this list…" style="flex: 1; height: 37px; border-radius: 6px; border: 1px solid var(--owner-line); padding: 0 13px; font-size: 12.5px; background: var(--owner-paper);" />
+      <span style="font-size: 11.5px; color: var(--owner-muted);">Give it to:</span>
+      <select value="{{ newCapRole }}" onChange="{{ setNewCapRole }}" style="height: 37px; border-radius: 6px; border: 1px solid var(--owner-line); font-size: 11.5px; padding: 0 10px; background: var(--owner-paper);">
+        <sc-for list="{{ roleCols }}" as="rc" hint-placeholder-count="3">
+          <option value="{{ rc.key }}">{{ rc.label }}</option>
+        </sc-for>
+      </select>
+      <span class="cap-btn" style="background: var(--owner-ink); color: white; border-color: var(--owner-ink); padding: 9px 15px;" onClick="{{ addCap }}">Add capability</span>
+    </div>
+
+    <div style="display: flex; gap: 8px; align-items: center; border-top: 1px dashed var(--owner-line); padding-top: 15px;">
+      <input value="{{ newRoleName }}" onChange="{{ setNewRoleName }}" placeholder="Add a new role — e.g. Centre Director, Across-course Administrator…" style="flex: 1; height: 37px; border-radius: 6px; border: 1px solid var(--owner-line); padding: 0 13px; font-size: 12.5px; background: var(--owner-paper);" />
+      <span class="cap-btn" style="background: var(--owner-garnet); color: white; border-color: var(--owner-garnet); padding: 9px 15px;" onClick="{{ addRole }}">Add role</span>
+    </div>
+
+    <div style="margin-top: 4px; border-top: 1px dashed var(--owner-line); padding-top: 17px; display: flex; flex-direction: column; gap: 11px;">
+      <p class="owner-eyebrow" style="margin: 0; color: var(--owner-muted);">Preview — what shows on the Roles tab</p>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div style="border: 1px solid var(--owner-line); border-radius: 8px; padding: 15px 17px; background: var(--owner-parchment);">
+          <p style="margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--owner-garnet);">Centre manager</p>
+          <p style="margin: 0; font-size: 11.5px; line-height: 1.5; color: var(--owner-ink);">{{ managerDescription }}</p>
+        </div>
+        <div style="border: 1px solid var(--owner-line); border-radius: 8px; padding: 15px 17px; background: var(--owner-parchment);">
+          <p style="margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--owner-muted);">Centre observer</p>
+          <p style="margin: 0; font-size: 11.5px; line-height: 1.5; color: var(--owner-ink);">{{ observerDescription }}</p>
+        </div>
+        <div style="border: 1px solid var(--owner-line); border-radius: 8px; padding: 15px 17px; background: var(--owner-parchment);">
+          <p style="margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--owner-ink);">Course administrator</p>
+          <p style="margin: 0; font-size: 11.5px; line-height: 1.5; color: var(--owner-ink);">{{ courseAdminDescription }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign people -->
+  <div class="surface-card" style="padding: 26px 28px; display: flex; flex-direction: column; gap: 15px;">
+    <h2 class="owner-serif" style="margin: 0; font-size: 20px;">Who holds what</h2>
+    <div style="display: flex; flex-direction: column;">
+      <div class="row-hover" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 13px 12px; border-bottom: 1px solid var(--owner-line); align-items: center; border-radius: 4px;">
+        <span style="font-size: 12.5px; font-weight: 600;">Sofia Reyes</span>
+        <span style="font-size: 11.5px; color: var(--owner-garnet); font-weight: 600;">Centre manager</span>
+        <span style="font-size: 11px; color: var(--owner-muted);">Both branches</span>
+      </div>
+      <div class="row-hover" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 13px 12px; border-bottom: 1px solid var(--owner-line); align-items: center; border-radius: 4px;">
+        <span style="font-size: 12.5px; font-weight: 600;">Amir Farah</span>
+        <span style="font-size: 11.5px; color: var(--owner-ink); font-weight: 600;">Course administrator</span>
+        <span style="font-size: 11px; color: var(--owner-muted);">Downtown · UK205 C2/2024</span>
+      </div>
+      <div class="row-hover" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 13px 12px; align-items: center; border-radius: 4px;">
+        <span style="font-size: 12.5px; font-weight: 600; color: var(--owner-muted);">Priya Desai</span>
+        <span style="font-size: 11.5px; color: var(--owner-muted); font-weight: 600;">Centre observer</span>
+        <span style="font-size: 11px; color: var(--owner-muted);">Riverside</span>
+      </div>
+    </div>
+    <div style="height: 37px; padding: 0 17px; border-radius: 5px; background: var(--owner-garnet); color: white; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; width: fit-content; box-shadow: 0 5px 14px -5px color-mix(in oklab, var(--owner-garnet) 65%, transparent); cursor: pointer;">Invite someone</div>
+  </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    newCapName: "",
+    newCapRole: "manager",
+    newRoleName: "",
+    roles: [
+      { key: "manager", label: "Centre manager", color: "oklch(38% 0.072 195)" },
+      { key: "observer", label: "Centre observer", color: "oklch(51% 0.017 70)" },
+      { key: "courseAdmin", label: "Course administrator", color: "oklch(45% 0.1 68)" },
+    ],
+    // Full capability list transcribed from src/lib/auth/centre-permissions.ts's
+    // Capability type + MATRIX, so nothing the live system already checks is left off.
+    caps: [
+      { key: "course.create", label: "Create courses", manager: "Full", observer: "None", courseAdmin: "None" },
+      { key: "course.editRecord", label: "Edit course record", manager: "Full", observer: "View", courseAdmin: "Full" },
+      { key: "course.restoreDeleted", label: "Restore a deleted course", manager: "None", observer: "None", courseAdmin: "None" },
+      { key: "course.reassignUnowned", label: "Reassign an unowned course", manager: "None", observer: "None", courseAdmin: "None" },
+      { key: "roles.grant", label: "Invite / grant centre roles", manager: "None", observer: "None", courseAdmin: "None" },
+      { key: "centre.settings.edit", label: "Centre settings & Drive", manager: "Full", observer: "None", courseAdmin: "None" },
+      { key: "payments.view", label: "View payments", manager: "Full", observer: "View", courseAdmin: "None" },
+      { key: "payments.edit", label: "Edit payments", manager: "Full", observer: "None", courseAdmin: "None" },
+      { key: "admissions.view", label: "View admissions", manager: "Full", observer: "View", courseAdmin: "Full" },
+      { key: "admissions.manage", label: "Manage admissions", manager: "Full", observer: "None", courseAdmin: "Full" },
+      { key: "volunteers.view", label: "View volunteers", manager: "Full", observer: "View", courseAdmin: "Full" },
+      { key: "volunteers.manage", label: "Manage volunteers", manager: "Full", observer: "None", courseAdmin: "Full" },
+      { key: "enrolment.view", label: "Enrolment & completion figures", manager: "Full", observer: "View", courseAdmin: "Full" },
+      { key: "import.run", label: "Import candidates", manager: "Full", observer: "None", courseAdmin: "None" },
+      { key: "assessorPack.export", label: "Export assessor pack", manager: "Full", observer: "None", courseAdmin: "Full" },
+      { key: "courseAdmin.view", label: "View course admin screens", manager: "Full", observer: "View", courseAdmin: "Full" },
+      { key: "courseAdmin.invite", label: "Invite people to a course", manager: "Full", observer: "None", courseAdmin: "Full" },
+      { key: "courseAdmin.groups", label: "Form TP groups", manager: "Full", observer: "None", courseAdmin: "Full" },
+      { key: "courseAdmin.settings", label: "Course-level settings", manager: "Full", observer: "None", courseAdmin: "Full" },
+      { key: "timetable.publish", label: "Publish timetable", manager: "Full", observer: "None", courseAdmin: "Full" },
+    ],
+  };
+
+  cycle(val) {
+    const order = ["Full", "View", "None"];
+    return order[(order.indexOf(val) + 1) % order.length];
+  }
+
+  styleFor(val) {
+    if (val === "Full") return "background: oklch(45% 0.09 155); color: white; border-color: oklch(45% 0.09 155);";
+    if (val === "View") return "background: oklch(60% 0.11 70); color: white; border-color: oklch(60% 0.11 70);";
+    return "";
+  }
+
+  addCap() {
+    const name = this.state.newCapName.trim();
+    if (!name) return;
+    const key = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const row = { key, label: name };
+    for (const r of this.state.roles) row[r.key] = "None";
+    row[this.state.newCapRole] = "Full";
+    this.setState((s) => ({ caps: [...s.caps, row], newCapName: "" }));
+  }
+
+  addRole() {
+    const name = this.state.newRoleName.trim();
+    if (!name) return;
+    const key = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    this.setState((s) => ({
+      roles: [...s.roles, { key, label: name, color: "oklch(45% 0.09 155)" }],
+      caps: s.caps.map((r) => ({ ...r, [key]: "None" })),
+      newRoleName: "",
+    }));
+  }
+
+  toggle(rowKey, col) {
+    this.setState((s) => ({
+      caps: s.caps.map((r) => (r.key === rowKey ? { ...r, [col]: this.cycle(r[col]) } : r)),
+    }));
+  }
+
+  describeRole(col) {
+    const fulls = this.state.caps.filter((r) => r[col] === "Full").map((r) => r.label);
+    const views = this.state.caps.filter((r) => r[col] === "View").map((r) => r.label);
+    let text = "";
+    text += fulls.length ? `Full access: ${fulls.join(", ")}. ` : "";
+    text += views.length ? `View only: ${views.join(", ")}. ` : "";
+    if (!fulls.length && !views.length) text = "No access to anything on this list.";
+    return text;
+  }
+
+  renderVals() {
+    const caps = this.state.caps.map((row) => ({
+      label: row.label,
+      cells: this.state.roles.map((r) => ({
+        value: row[r.key] ?? "None",
+        style: this.styleFor(row[r.key] ?? "None"),
+        cycle: () => this.toggle(row.key, r.key),
+      })),
+    }));
+    return {
+      newCapName: this.state.newCapName,
+      setNewCapName: (e) => this.setState({ newCapName: e.target.value }),
+      newCapRole: this.state.newCapRole,
+      setNewCapRole: (e) => this.setState({ newCapRole: e.target.value }),
+      addCap: () => this.addCap(),
+      newRoleName: this.state.newRoleName,
+      setNewRoleName: (e) => this.setState({ newRoleName: e.target.value }),
+      addRole: () => this.addRole(),
+      roleCols: this.state.roles,
+      capRows: caps,
+      managerDescription: this.describeRole("manager"),
+      observerDescription: this.describeRole("observer"),
+      courseAdminDescription: this.describeRole("courseAdmin"),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 44px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 12px; max-width: 940px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · teaching practice rotation</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Halves of three, alternating days — read down for the day, across for the candidate.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">A group of six teaches as two halves of three, and the halves alternate TP days. So the question a tutor asks — who teaches Thursday, in what order, and which of their eight is it — has three parts, and today they live on three different cards.</div>
+  </div>
+
+  <!-- 1a -->
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">The board — one group, every TP day</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">ITI Istanbul C/4 · group ABC · tutor Ramy Sakr · 6 candidates · 16 TP days</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">Teaching practice rotation</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="height: 32px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 12px; font-weight: 500; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Swap two candidates</div>
+          <div style="height: 32px; padding: 0 13px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 12px; font-weight: 600; display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Release next day</div>
+          <a href="#" style="height: 32px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); font-size: 12px; font-weight: 600; display: flex; align-items: center; white-space: nowrap;">Manual override →</a>
+        </div>
+      </div>
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+
+        <div style="display: grid; grid-template-columns: 208px repeat(16, 1fr); border-bottom: 1px solid oklch(88% 0.016 82);">
+          <div style="padding: 10px 14px; display: flex; align-items: flex-end;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Candidate</div>
+          </div>
+          <sc-for list="{{ days }}" as="d" hint-placeholder-count="16">
+            <div style="padding: 8px 5px; border-left: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent); background: {{ d.headBg }}; display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 11px; font-weight: 700; color: {{ d.headInk }};">{{ d.date }}</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: {{ d.halfInk }};">{{ d.half }}</div>
+              <div style="font-size: 10px; color: oklch(51% 0.017 70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ d.level }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-for list="{{ halves }}" as="h" hint-placeholder-count="2">
+          <div style="display: grid; grid-template-columns: 208px repeat(16, 1fr); background: {{ h.bandBg }}; border-bottom: 1px solid oklch(88% 0.016 82);">
+            <div style="padding: 8px 14px; display: flex; align-items: center; gap: 9px;">
+              <div style="width: 3px; height: 13px; border-radius: 2px; background: {{ h.color }};"></div>
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(23.5% 0.017 65);">{{ h.label }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ h.daysNote }}</div>
+            </div>
+            <div style="grid-column: span 16;"></div>
+          </div>
+
+          <sc-for list="{{ h.people }}" as="p" hint-placeholder-count="3">
+            <div style="display: grid; grid-template-columns: 208px repeat(16, 1fr); border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent);">
+              <div style="padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                <div style="font-size: 13px; color: oklch(23.5% 0.017 65);">{{ p.name }}</div>
+                <div style="font-size: 11px; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">{{ p.taught }}</div>
+              </div>
+              <sc-for list="{{ p.cells }}" as="c" hint-placeholder-count="16">
+                <div style="border-left: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent); background: {{ c.bg }}; padding: 8px 3px; display: flex; align-items: center; justify-content: center;">
+                  <sc-if value="{{ c.on }}" hint-placeholder-val="{{ true }}">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                      <div style="width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: {{ c.chipBg }}; color: {{ c.chipInk }};">{{ c.pos }}</div>
+                      <div style="font-size: 9px; font-weight: 600; letter-spacing: 0.04em; color: {{ c.tpInk }};">{{ c.tp }}</div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 22px; flex-wrap: wrap;">
+        <sc-for list="{{ legend }}" as="l" hint-placeholder-count="4">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 16px; height: 16px; border-radius: 5px; background: {{ l.bg }}; border: 1px solid {{ l.border }};"></div>
+            <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ l.label }}</div>
+          </div>
+        </sc-for>
+        <div style="font-size: 11px; color: oklch(51% 0.017 70);">Number in the cell is the teaching position that day. Blank means the other half is teaching.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1b -->
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1b</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">One day, and how the order is derived</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: grid; grid-template-columns: 1fr 400px; gap: 18px; align-items: start;">
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Thursday 30 Nov · half B · pre-intermediate (A2+)</div>
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: oklch(23.5% 0.017 65);">Running order</div>
+            </div>
+            <div style="display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; border-radius: 999px; background: color-mix(in oklab, oklch(60% 0.11 70) 15%, oklch(99.2% 0.005 90)); color: oklch(60% 0.11 70); font-size: 12px; font-weight: 600;">
+              <div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>
+              <div>Next TP day</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column;">
+            <sc-for list="{{ order }}" as="o" hint-placeholder-count="3">
+              <div style="display: grid; grid-template-columns: 40px 1fr 116px 128px 108px; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent);">
+                <div style="width: 26px; height: 26px; border-radius: 7px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;">{{ o.pos }}</div>
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                  <div style="font-size: 14px; color: oklch(23.5% 0.017 65);">{{ o.name }}</div>
+                  <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ o.focus }}</div>
+                </div>
+                <div style="font-size: 12px; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">{{ o.slot }}</div>
+                <div style="display: flex;">
+                  <div style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{ o.pillBg }}; color: {{ o.pillInk }};">
+                    <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+                    <div>{{ o.state }}</div>
+                  </div>
+                </div>
+                <div style="font-size: 12px; text-align: right; color: {{ o.actionInk }}; cursor: pointer;">{{ o.action }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+            <div style="font-size: 12px; color: oklch(51% 0.017 70);">Positions come from the base order, rotated once for every day this half has taught.</div>
+            <div style="height: 32px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Override this day</div>
+          </div>
+        </div>
+
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; font-weight: 600; color: oklch(23.5% 0.017 65);">Base order — half B</div>
+          <div style="font-size: 12px; color: oklch(51% 0.017 70);">Move a name and every later day recalculates. Days already taught keep the order they ran in.</div>
+          <div style="display: flex; flex-direction: column;">
+            <sc-for list="{{ base }}" as="b" hint-placeholder-count="3">
+              <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent);">
+                <div style="font-size: 11px; font-weight: 700; color: oklch(51% 0.017 70); width: 18px; font-variant-numeric: tabular-nums;">{{ b.n }}</div>
+                <div style="flex: 1; font-size: 13px; color: oklch(23.5% 0.017 65);">{{ b.name }}</div>
+                <div style="font-size: 10px; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">{{ b.positions }}</div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <div style="width: 24px; height: 24px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); display: flex; align-items: center; justify-content: center; font-size: 11px; color: oklch(51% 0.017 70); cursor: pointer;">↑</div>
+                  <div style="width: 24px; height: 24px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); display: flex; align-items: center; justify-content: center; font-size: 11px; color: oklch(51% 0.017 70); cursor: pointer;">↓</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 11px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Fairness check</div>
+          <sc-for list="{{ fairness }}" as="f" hint-placeholder-count="3">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent);">
+              <div style="font-size: 12px; color: oklch(23.5% 0.017 65);">{{ f.name }}</div>
+              <div style="font-size: 11px; color: {{ f.ink }}; font-variant-numeric: tabular-nums;">{{ f.spread }}</div>
+            </div>
+          </sc-for>
+          <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70);">Eight turns over a half of three does not divide evenly — two positions come up three times, one twice. The board should say who carries which, rather than leaving a tutor to count.</div>
+        </div>
+
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">What the board fixes</div>
+          <sc-for list="{{ notes }}" as="n" hint-placeholder-count="5">
+            <div style="display: flex; align-items: flex-start; gap: 9px; padding: 6px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent);">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: {{ n.dot }}; margin-top: 6px; flex: none;"></div>
+              <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ n.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:1500}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const AMBER = 'oklch(44% 0.095 68)'; // was GOLD: "next TP day" is an attention/upcoming highlight, not a grade or brand mark
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+
+const HALF_A = ['Sara Yılmaz', 'Deniz Aksoy', 'Mert Kaya'];
+const HALF_B = ['Elif Demir', 'Can Şahin', 'Zeynep Arslan'];
+
+// Alternating TP days: A, B, A, B ... each half teaches every other TP day.
+const DAY_DATES = ['Mon 13','Tue 14','Wed 15','Thu 16','Mon 20','Tue 21','Wed 22','Thu 23','Mon 27','Tue 28','Wed 29','Thu 30','Mon 4','Tue 5','Wed 6','Thu 7'];
+const DAYS = DAY_DATES.map((date, i) => ({
+  date,
+  half: i % 2 === 0 ? 'A' : 'B',
+  level: i < 8 ? 'Intermediate' : 'Pre-Int (A2+)',
+}));
+
+const TODAY_INDEX = 11; // Thu 30, half B's 6th turn — the next TP day
+const ORDINAL = ['1st', '2nd', '3rd'];
+
+// One expression, used by the board, the running order, the base list and
+// the fairness check -- base position rotated once per turn the half has taken.
+const positionFor = (baseIndex, turn, size) => ((baseIndex + turn) % size) + 1;
+const turnIndexAt = (dayIndex, letter) =>
+  DAYS.slice(0, dayIndex + 1).filter((d) => d.half === letter).length - 1;
+
+class Component extends DCLogic {
+  renderVals() {
+    const build = (people, letter, color, bandBg) => {
+      // Which of this half's turns each day is: 1st, 2nd, 3rd...
+      let turn = -1;
+      const turnByDay = DAYS.map(d => (d.half === letter ? ++turn : null));
+
+      return {
+        label: 'Half ' + letter,
+        color,
+        bandBg,
+        daysNote: letter === 'A' ? 'Mon and Wed' : 'Tue and Thu',
+        people: people.map((name, i) => {
+          let taughtCount = 0;
+          const cells = DAYS.map((d, di) => {
+            const t = turnByDay[di];
+            if (t === null) return { on: false, bg: 'transparent', pos: '', tp: '', chipBg: '', chipInk: '', tpInk: '' };
+            // base position rotated once per turn this half has taken
+            const pos = positionFor(i, t, people.length);
+            const tpNumber = t + 1;
+            const done = di < TODAY_INDEX;
+            const next = di === TODAY_INDEX;
+            if (done) taughtCount += 1;
+            return {
+              on: true,
+              bg: next ? 'color-mix(in oklab, ' + AMBER + ' 10%, ' + CARD + ')' : 'transparent',
+              pos: String(pos),
+              tp: 'TP' + tpNumber,
+              chipBg: done ? 'color-mix(in oklab, ' + GREEN + ' 15%, ' + CARD + ')' : next ? AMBER : 'oklch(94.5% 0.012 85)',
+              chipInk: done ? GREEN : next ? CARD : MUTED,
+              tpInk: next ? AMBER : MUTED,
+            };
+          });
+          return { name, cells, taught: taughtCount + ' of 8' };
+        }),
+      };
+    };
+
+    const todayTurn = turnIndexAt(TODAY_INDEX, 'B');
+    const turns = [0, 1, 2, 3, 4, 5, 6, 7];
+    const SLOTS = ['09:30–10:15', '10:15–11:00', '11:15–12:00'];
+    const STATES = [
+      { focus: 'receptive skills — reading', state: 'Plan in', pillBg: 'oklch(93.5% 0.008 85)', pillInk: GREEN, action: 'Open plan' },
+      { focus: 'grammar — past forms', state: 'Plan due', pillBg: 'oklch(93.5% 0.08 85)', pillInk: 'oklch(44% 0.1 68)', action: 'Remind' },
+      { focus: 'not yet assigned', state: 'No points', pillBg: 'oklch(93.5% 0.008 85)', pillInk: MUTED, action: 'Assign points' },
+    ];
+    const orderToday = HALF_B
+      .map((name, i) => ({ name, pos: positionFor(i, todayTurn, HALF_B.length) }))
+      .sort((a, b) => a.pos - b.pos)
+      .map((row, idx) => ({
+        pos: String(row.pos),
+        name: row.name,
+        focus: 'TP' + (todayTurn + 1) + ' · ' + STATES[idx].focus,
+        slot: SLOTS[idx],
+        state: STATES[idx].state,
+        pillBg: STATES[idx].pillBg,
+        pillInk: STATES[idx].pillInk,
+        action: STATES[idx].action,
+        actionInk: TEAL,
+      }));
+
+    return {
+      days: DAYS.map((d, i) => ({
+        date: d.date,
+        half: 'Half ' + d.half,
+        level: d.level,
+        headBg: i === TODAY_INDEX ? 'color-mix(in oklab, ' + AMBER + ' 12%, ' + CARD + ')' : 'transparent',
+        headInk: i === TODAY_INDEX ? AMBER : INK,
+        halfInk: d.half === 'A' ? TEAL : 'oklch(45% 0.1 300)',
+      })),
+      halves: [
+        build(HALF_A, 'A', TEAL, 'color-mix(in oklab, ' + TEAL + ' 5%, ' + CARD + ')'),
+        build(HALF_B, 'B', 'oklch(45% 0.1 300)', 'color-mix(in oklab, oklch(45% 0.1 300) 5%, ' + CARD + ')'),
+      ],
+      legend: [
+        { label: 'Taught', bg: 'color-mix(in oklab, ' + GREEN + ' 15%, ' + CARD + ')', border: 'color-mix(in oklab, ' + GREEN + ' 30%, transparent)' },
+        { label: 'Next TP day', bg: AMBER, border: AMBER },
+        { label: 'Scheduled', bg: 'oklch(94.5% 0.012 85)', border: BORDER },
+      ],
+      order: orderToday,
+      base: HALF_B.map((name, i) => ({
+        n: String(i + 1),
+        name,
+        positions: 'turns ' + turns.map((t) => positionFor(i, t, HALF_B.length)).join(' · '),
+      })),
+      fairness: HALF_B.map((name, i) => {
+        const counts = [0, 0, 0];
+        turns.forEach((t) => { counts[positionFor(i, t, HALF_B.length) - 1] += 1; });
+        return { name, spread: counts.map((c, p) => ORDINAL[p] + ' ×' + c).join(' · '), ink: MUTED };
+      }),
+      notes: [
+        { text: 'The halves are visible as bands, so it is obvious at a glance that a blank cell means “not their day”, not “unassigned”.', dot: TEAL },
+        { text: 'Each cell carries both the position that day and which of the candidate’s eight it is — the two numbers a tutor keeps conflating.', dot: TEAL },
+        { text: 'The next TP day is a column, not a card: who teaches, in what order, and what is missing before it can run.', dot: AMBER },
+        { text: 'Level sits in the day header, because the level changes partway through and it drives the plan.', dot: TEAL },
+        { text: 'Reordering the base recalculates future days only. Days already taught keep the order they actually ran in.', dot: AMBER },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

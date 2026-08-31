@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600;1,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+  @keyframes vp-mark-spin { 0%, 11.11% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+  .mark-stage { perspective: 400px; }
+  .mark-spin { animation: vp-mark-spin 54s linear infinite; transform-origin: 50% 50%; transform-style: preserve-3d; }
+  @media (prefers-reduced-motion: reduce) { .mark-spin { animation: none; } }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 40px 56px 60px; display: flex; flex-direction: column; gap: 22px; width: 900px; box-sizing: border-box;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <div class="mark-stage" style="width: 32px; height: 32px; border-radius: 8px; background: oklch(23.5% 0.017 65); display: flex; align-items: center; justify-content: center; flex: none;">
+        <svg class="mark-spin" width="20" height="12" viewBox="8 30 104 60" fill="none"><path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(70% 0.12 72)" stroke-width="12" stroke-linecap="round"></path><path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(97% 0.008 88)" stroke-width="12" stroke-linecap="round"></path></svg>
+      </div>
+      <div style="font-family: Newsreader, serif; font-style: italic; font-size: 18px; color: oklch(23.5% 0.017 65);">Connect</div>
+      <div style="width: 1px; height: 18px; background: oklch(88% 0.016 82);"></div>
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(38% 0.072 195); background: color-mix(in oklab, oklch(38% 0.072 195) 10%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 26%, transparent); padding: 4px 10px; border-radius: 5px;">Centre admin</div>
+    </div>
+    <a href="./Centre Admin.dc.html" style="font-size: 12.5px; font-weight: 600;">&larr; Overview</a>
+  </div>
+
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;">
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Centre overview &middot; volunteers</div>
+      <div style="font-family: Newsreader, serif; font-size: 24px; font-weight: 600; color: oklch(23.5% 0.017 65);">Volunteer pool</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 8px; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82);">
+      <sc-for list="{{ roleOptions }}" as="r" hint-placeholder-count="2">
+        <div onClick="{{ r.pick }}" style="padding: 6px 12px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer; background: {{ r.bg }}; color: {{ r.ink }};">{{ r.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 10px; overflow: hidden;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid oklch(88% 0.016 82);">
+      <div style="font-family: Newsreader, serif; font-size: 16px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ personCount }} {{ personLabel }}</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ registrationCount }} registrations across the centre</div>
+    </div>
+
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+      <div style="border-bottom: 1px solid oklch(92% 0.012 82);">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 20px;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-size: 13.5px; color: oklch(23.5% 0.017 65);">{{ g.name }}</div>
+            <div style="display: flex; align-items: center; gap: 7px;">
+              <div style="font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: color-mix(in oklab, {{ g.levelColor }} 14%, transparent); color: {{ g.levelColor }};">{{ g.level }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ g.courseCode }}</div>
+            </div>
+            <sc-if value="{{ g.multi }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ g.toggle }}" style="font-size: 11px; font-weight: 600; color: oklch(38% 0.072 195); cursor: pointer;">Linked &middot; {{ g.count }} courses {{ g.chevron }}</div>
+            </sc-if>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="font-size: 12px; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">{{ g.hours }} hrs</div>
+            <sc-if value="{{ g.showLinkButton }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ g.openLink }}" style="font-size: 11px; font-weight: 600; color: oklch(38% 0.072 195); cursor: pointer;">Same person as&hellip;</div>
+            </sc-if>
+            <sc-if value="{{ g.showLinkSelect }}" hint-placeholder-val="{{ false }}">
+              <select onChange="{{ g.onPick }}" style="height: 28px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 11.5px; color: oklch(23.5% 0.017 65); padding: 0 6px;">
+                <option value="">Choose who&hellip;</option>
+                <sc-for list="{{ g.linkOptions }}" as="o" hint-placeholder-count="2">
+                  <option value="{{ o.id }}">{{ o.name }}</option>
+                </sc-for>
+              </select>
+            </sc-if>
+          </div>
+        </div>
+        <sc-if value="{{ g.expanded }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; padding: 0 20px 12px 34px; gap: 6px;">
+            <sc-for list="{{ g.members }}" as="m" hint-placeholder-count="2">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 7px;">
+                  <div style="font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: color-mix(in oklab, {{ m.levelColor }} 14%, transparent); color: {{ m.levelColor }};">{{ m.level }}</div>
+                  <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ m.courseCode }}</div>
+                </div>
+                <sc-if value="{{ m.showUnlink }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ m.unlink }}" style="font-size: 11px; font-weight: 600; color: oklch(45% 0.16 27); cursor: pointer;">Unlink</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+
+    <div style="padding: 13px 20px; font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70);">Linked automatically when a signup&rsquo;s email matches one already on file; otherwise link them yourself above &mdash; never guessed from name alone. Hours accumulate across every course a volunteer&rsquo;s linked records span.</div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:900},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;administrator&quot;,&quot;tsType&quot;:&quot;'administrator'|'manager'&quot;,&quot;options&quot;:[&quot;administrator&quot;,&quot;manager&quot;]}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const RED = 'oklch(45% 0.16 27)';
+const GOLD = 'oklch(60% 0.11 70)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const CARD = 'oklch(99.2% 0.005 90)';
+// Category palette (CEFR level), deliberately separate from status colors (red/amber/teal/gold) so level and status never share a hue.
+const LEVEL_COLOR = { A1: 'oklch(38% 0.072 195)', A2: 'oklch(42% 0.095 250)', B1: 'oklch(50% 0.085 150)', B2: 'oklch(50% 0.07 30)' };
+
+// Mirrors src/app/centre/page.tsx + volunteer-pool-row.tsx: each registration
+// (volunteer_students row) belongs to one course; rows sharing a
+// volunteer_person_id group into one person. An unlinked row is its own
+// group of one, keyed by its own id.
+const INITIAL_ROWS = [
+  { id: 'v5', name: 'Volunteer 5', courseCode: 'C4/2026', level: 'A2', hours: 0.0, personId: null },
+  { id: 'v6', name: 'Volunteer 6', courseCode: 'C4/2026', level: 'A2', hours: 0.0, personId: null },
+  { id: 'v7', name: 'Volunteer 7', courseCode: 'C4/2026', level: 'A2', hours: 0.0, personId: null },
+  { id: 'v8', name: 'Volunteer 8', courseCode: 'C4/2026', level: 'A2', hours: 0.0, personId: null },
+];
+
+class Component extends DCLogic {
+  state = { role: this.props.role ?? 'administrator', rows: INITIAL_ROWS, expanded: {}, linkOpen: null };
+
+  link(keyA, keyB) {
+    this.setState((s) => {
+      const rows = s.rows;
+      const groupOf = (key) => rows.filter((r) => (r.personId ?? r.id) === key);
+      const a = groupOf(keyA);
+      const b = groupOf(keyB);
+      const newPersonId = b[0].personId ?? b[0].id;
+      const targetIds = new Set([...a, ...b].map((r) => r.id));
+      return { rows: rows.map((r) => (targetIds.has(r.id) ? { ...r, personId: newPersonId } : r)), linkOpen: null };
+    });
+  }
+
+  unlink(memberId) {
+    this.setState((s) => ({ rows: s.rows.map((r) => (r.id === memberId ? { ...r, personId: null } : r)) }));
+  }
+
+  renderVals() {
+    const canEdit = this.state.role === 'administrator';
+
+    const map = new Map();
+    for (const r of this.state.rows) {
+      const key = r.personId ?? r.id;
+      if (!map.has(key)) map.set(key, { key, name: r.name, members: [] });
+      map.get(key).members.push(r);
+    }
+    let groups = [...map.values()]
+      .map((g) => ({ ...g, hours: g.members.reduce((s, m) => s + m.hours, 0) }))
+      .sort((a, b) => b.hours - a.hours);
+
+    return {
+      roleOptions: [
+        { key: 'administrator', label: 'Administrator' },
+        { key: 'manager', label: 'Manager (read-only)' },
+      ].map((o) => ({
+        label: o.label,
+        pick: () => this.setState({ role: o.key }),
+        bg: this.state.role === o.key ? TEAL : 'transparent',
+        ink: this.state.role === o.key ? CARD : MUTED,
+      })),
+      personCount: groups.length,
+      personLabel: groups.length === 1 ? 'person' : 'people',
+      registrationCount: this.state.rows.length,
+      groups: groups.map((g) => {
+        const expanded = !!this.state.expanded[g.key];
+        const isMulti = g.members.length > 1;
+        return {
+          name: g.name,
+          hours: g.hours.toFixed(1),
+          multi: isMulti,
+          count: g.members.length,
+          chevron: expanded ? '▲' : '▼',
+          expanded,
+          toggle: () => this.setState((s) => ({ expanded: { ...s.expanded, [g.key]: !s.expanded[g.key] } })),
+          showLinkButton: canEdit && !isMulti && this.state.linkOpen !== g.key,
+          showLinkSelect: canEdit && !isMulti && this.state.linkOpen === g.key,
+          openLink: () => this.setState({ linkOpen: g.key }),
+          onPick: (e) => {
+            const otherKey = e.target.value;
+            if (otherKey) this.link(g.key, otherKey);
+          },
+          linkOptions: groups.filter((o) => o.key !== g.key).map((o) => ({ id: o.key, name: o.name })),
+          courseCode: g.members[0].courseCode,
+          level: g.members[0].level,
+          levelColor: LEVEL_COLOR[g.members[0].level] ?? MUTED,
+          members: g.members.map((m) => ({
+            courseCode: m.courseCode,
+            level: m.level,
+            levelColor: LEVEL_COLOR[m.level] ?? MUTED,
+            showUnlink: canEdit && isMulti,
+            unlink: () => this.unlink(m.id),
+          })),
+        };
+      }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

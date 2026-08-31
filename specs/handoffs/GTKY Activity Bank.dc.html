@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+<script src="./image-slot.js"></script>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 46px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 13px; max-width: 960px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · day one · getting to know you</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 36px; font-weight: 600; line-height: 1.14; color: oklch(23.5% 0.017 65);">Twenty minutes each, assigned before the course, and nobody has to invent anything.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Each candidate gets three activities to choose from, matched to the level they will teach, waiting for them in Connect with their turn in the running order. Twenty minutes each, unassessed, and the tutor is not in the room — but every activity here also happens to make learners talk about themselves, which is where the assignment evidence starts.</div>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">The bank</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">filter by level</div>
+    </div>
+
+    <div style="background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 20px 22px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 7px;">
+            <sc-for list="{{ levels }}" as="l" hint-placeholder-count="4">
+              <div onClick="{{ l.pick }}" style="height: 36px; padding: 0 15px; border-radius: 6px; border: 1px solid {{ l.border }}; background: {{ l.bg }}; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <div style="font-size: 12.5px; font-weight: 600; color: {{ l.ink }};">{{ l.label }}</div>
+                <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ l.count }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="width: 1px; height: 24px; background: oklch(88% 0.016 82);"></div>
+          <div style="display: flex; align-items: center; gap: 7px;">
+            <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
+              <div onClick="{{ m.pick }}" style="height: 36px; padding: 0 15px; border-radius: 6px; border: 1px solid {{ m.border }}; background: {{ m.bg }}; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <div style="font-size: 12.5px; font-weight: 600; color: {{ m.ink }};">{{ m.label }}</div>
+                <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ m.count }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ bankNote }}</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <sc-for list="{{ activities }}" as="a" hint-placeholder-count="6">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-left: 3px solid {{ a.spine }}; border-radius: 7px; padding: 17px 19px; display: flex; flex-direction: column; gap: 11px;">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;">
+              <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+                <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ a.name }}</div>
+                <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">{{ a.meta }}</div>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none;">
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: {{ a.chipBg }}; color: {{ a.chipInk }}; border: 1px solid {{ a.chipBorder }};">{{ a.level }}</div>
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 999px; background: {{ a.modeBg }}; color: {{ a.modeInk }}; border: 1px solid {{ a.modeBorder }};">{{ a.modeLabel }}</div>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <sc-for list="{{ a.steps }}" as="s" hint-placeholder-count="3">
+                <div style="display: flex; align-items: flex-start; gap: 9px;">
+                  <div style="font-size: 11px; font-weight: 700; color: oklch(51% 0.017 70); flex: none; width: 12px;">{{ s.n }}</div>
+                  <div style="font-size: 12.5px; line-height: 1.5; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ s.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ a.hasOnline }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; align-items: flex-start; gap: 9px; padding: 10px 12px; border-radius: 5px; background: color-mix(in oklab, oklch(60% 0.11 70) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 26%, transparent);">
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: oklch(46% 0.11 62); flex: none; padding-top: 1px;">Online</div>
+                <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ a.online }}</div>
+              </div>
+            </sc-if>
+
+            <div style="display: flex; align-items: flex-start; gap: 9px; padding-top: 9px; border-top: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: oklch(38% 0.072 195); flex: none; padding-top: 1px;">Afterwards</div>
+              <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ a.reveals }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1b</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Who does what, and when — waiting in Connect, linked from the Friday email</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.25fr 1fr; gap: 18px; align-items: start;">
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <sc-for list="{{ sets }}" as="s" hint-placeholder-count="7">
+          <sc-if value="{{ s.isGap }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 9px 16px; border-radius: 6px; background: oklch(96.4% 0.014 85); border: 1px dashed oklch(88% 0.016 82);">
+              <div style="font-size: 11.5px; font-weight: 600; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">{{ s.time }}</div>
+              <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ s.who }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ s.isSet }}" hint-placeholder-val="{{ true }}">
+            <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-left: 3px solid {{ s.spine }}; border-radius: 7px; padding: 15px 17px; display: flex; flex-direction: column; gap: 11px;">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 14px;">
+                <div style="display: flex; align-items: baseline; gap: 11px;">
+                  <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; color: {{ s.spine }};">{{ s.n }}</div>
+                  <div style="font-size: 13.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ s.who }}</div>
+                  <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ s.level }}</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: {{ s.chipBg }}; color: {{ s.chipInk }}; border: 1px solid {{ s.chipBorder }};">Choose one</div>
+                  <div style="font-size: 11.5px; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">{{ s.time }}</div>
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                <sc-for list="{{ s.options }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="border: 1px solid {{ o.border }}; border-radius: 6px; background: {{ o.bg }}; padding: 11px 13px; display: flex; flex-direction: column; gap: 4px; cursor: pointer;">
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
+                      <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ o.name }}</div>
+                      <div style="width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid {{ o.dot }}; flex: none; margin-top: 1px; display: flex; align-items: center; justify-content: center;">
+                        <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}">
+                          <div style="width: 7px; height: 7px; border-radius: 50%; background: {{ o.dotFill }};"></div>
+                        </sc-if>
+                      </div>
+                    </div>
+                    <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ o.meta }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 13px;">
+        <sc-for list="{{ notes }}" as="n" hint-placeholder-count="5">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ n.border }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 12px; font-weight: 700; color: {{ n.labelInk }};">{{ n.label }}</div>
+            <div style="font-size: 12px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>  <div id="1c" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1c</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">The handout a candidate gets</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">one page, in Connect · drop images onto the slots</div>
+    </div>
+
+    <div style="display: flex; gap: 20px; align-items: flex-start;">
+      <div style="width: 720px; flex: none; background: oklch(99.6% 0.003 90); border: 1px solid oklch(88% 0.016 82); border-radius: 4px; padding: 44px 48px; display: flex; flex-direction: column; gap: 22px; box-shadow: 0 1px 3px color-mix(in oklab, oklch(23.5% 0.017 65) 7%, transparent);">
+
+        <div style="display: flex; flex-direction: column; gap: 6px; padding-bottom: 15px; border-bottom: 2px solid oklch(23.5% 0.017 65);">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: oklch(51% 0.017 70);">Your day-one activity · unassessed · nobody is watching</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 30px; font-weight: 600; line-height: 1.12; color: oklch(23.5% 0.017 65);">{{ handout.name }}</div>
+          <div style="font-size: 13px; color: oklch(51% 0.017 70);">{{ handout.meta }}</div>
+        </div>
+
+        <div style="display: flex; align-items: flex-start; gap: 11px; padding: 13px 15px; border-radius: 5px; background: color-mix(in oklab, oklch(38% 0.072 195) 8%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 26%, transparent);">
+          <div style="width: 6px; height: 6px; border-radius: 50%; background: oklch(38% 0.072 195); margin-top: 6px; flex: none;"></div>
+          <div style="font-size: 13px; line-height: 1.55; color: oklch(23.5% 0.017 65);">{{ handout.slot }}</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 11px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">What to do</div>
+          <sc-for list="{{ handout.steps }}" as="s" hint-placeholder-count="3">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; line-height: 1.2; color: oklch(38% 0.072 195); flex: none; width: 20px;">{{ s.n }}</div>
+              <div style="font-size: 14px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ s.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">What it looks like</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div style="height: 176px; border-radius: 5px; overflow: hidden;">
+              <image-slot id="gtky-star-board" shape="rounded" radius="5" placeholder="Photo of a six-pointed star drawn on the board, name in the middle"></image-slot>
+            </div>
+            <div style="height: 176px; border-radius: 5px; overflow: hidden;">
+              <image-slot id="gtky-star-pairs" shape="rounded" radius="5" placeholder="Photo of two learners asking each other about their stars"></image-slot>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Bring with you</div>
+          <sc-for list="{{ handout.bring }}" as="b" hint-placeholder-count="3">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(51% 0.017 70); margin-top: 8px; flex: none;"></div>
+              <div style="font-size: 13.5px; line-height: 1.55; color: oklch(23.5% 0.017 65);">{{ b }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding-top: 14px; border-top: 1px solid oklch(88% 0.016 82); font-size: 12.5px; line-height: 1.6; color: oklch(51% 0.017 70);">Your tutor will go through all of this on the first morning. Nothing to prepare beyond drawing your own star, and no need to reply to this.</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 13px; flex: 1;">
+        <sc-for list="{{ handoutNotes }}" as="n" hint-placeholder-count="3">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ n.border }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 12px; font-weight: 700; color: {{ n.labelInk }};">{{ n.label }}</div>
+            <div style="font-size: 12px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:1700}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+const mix = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, transparent)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+const A = (name, level, meta, steps, reveals) => ({ name, level, meta, steps, reveals });
+
+const BANK = [
+  A('Ball Game', 'a1', 'Whole class · 20 min · a soft ball, or mime one', [
+    'Stand everyone in a circle and say your own name as you throw.',
+    'Whoever catches says their name, then throws to someone else.',
+    'Second round: throw and ask one question — where are you from, what do you do.',
+  ], 'Names, obviously. But also who volunteers to catch and who avoids eye contact — that is your first read on who will speak in class.'),
+
+  A('Find Someone Who', 'elem', 'Mingle · 20 min · one grid each, printed', [
+    'Give everyone the grid: find someone who has a cat, who drives, who likes coffee.',
+    'They stand up and ask each other until every line has a name against it.',
+    'Sit down and check three or four as a class.',
+  ], 'Question formation at its most basic — do you, have you, can you. You will hear exactly which ones collapse.'),
+
+  A('Line Up According To…', 'elem', 'Whole class · 20 min · nothing', [
+    'Ask them to stand in a line by birthday, January at one end, December at the other.',
+    'They have to talk to each other to work out where they go.',
+    'Do it again by the first letter of their name, or how far they travelled today.',
+  ], 'Numbers, months and dates — and it gets everyone moving and talking within ninety seconds, which matters more on day one than anything linguistic.'),
+
+  A('Find Your Other Half', 'elem', 'Mingle · 20 min · word-pair cards', [
+    'Hand out cards, each with half a familiar pair — salt and pepper, happy and birthday.',
+    'They mingle and find their partner, then sit down together.',
+    'Each pair tells the class their two words.',
+  ], 'Vocabulary they already have, and how they handle not knowing — do they ask, guess, or wait to be found.'),
+
+  A('Draw Your Name', 'elem', 'Mingle · 20 min · paper and pens', [
+    'On the board, draw a picture for each letter of your name — Claire becomes cat, lemon, apple, ice cream, rabbit, envelope.',
+    'Elicit each picture, write the word, circle the first letters, and let them work out your name.',
+    'They do the same for their own name, then mingle showing their drawings while others guess.',
+  ], 'Spelling, initial sounds and vocabulary they already own. Also the quietest activity here, which suits a nervous elementary group.'),
+
+  A('Speaking Corners', 'elem', 'Whole class · 20 min · nothing', [
+    'Each corner of the room is a type of music — jazz, classical, pop, rock.',
+    'Clap, and everyone moves to the corner that fits them, then explains why to someone else there.',
+    'Stop, take quick feedback, and run it again with seasons, films, or favourite thing about Istanbul.',
+  ], 'Preferences and short justifications, repeated four or five times. You see who talks unprompted and who waits to be asked.'),
+
+  A('Star Facts', 'inter', 'Pairs or mingle · 20 min · paper', [
+    'Draw a six-pointed star on the board, your name in the middle, one word or number in each point — Mexico, 1978, 2, Emma.',
+    'They ask yes/no questions to work out why each one matters. Were you born in Mexico? Did you live there?',
+    'They draw their own star and do the same with each other.',
+  ], 'Yes/no question forms and auxiliaries, which is where intermediate learners quietly fall apart. Also gives you their biography for free.'),
+
+  A('A Minute of Questions', 'inter', 'Small groups · 20 min · nothing', [
+    'Tell them they have one minute to fire as many questions at you as they can — you will not answer yet.',
+    'After the minute, answer the ones you remember or feel like answering.',
+    'Groups of three or four, taking turns, one person listening then responding.',
+  ], 'Question formation at speed, and what they are actually curious about — which is more useful for choosing texts than any needs analysis form.'),
+
+  A('Hunt the Teacher', 'inter', 'Whole class · 20 min · six paragraphs, printed', [
+    'Before the lesson, get a paragraph about themselves from each of your colleagues, plus your own.',
+    'Write true/false statements based on all six, and give them out as a handout.',
+    'Stick the paragraphs round the walls; they get up, read, and check their answers.',
+  ], 'Reading for specific information, and it introduces all six candidates at once — the class meets everyone who will teach them in one activity.'),
+
+  A('Mime Your Hobby', 'a1', 'Whole class · 20 min · nothing', [
+    'Mime something you do at the weekend until somebody names it. Cooking. Swimming.',
+    'Each learner mimes theirs; the class calls out guesses in English.',
+    'Write each hobby on the board as it is guessed, and let anyone who does the same put their hand up.',
+  ], 'Verbs of everyday activity, and it produces speech from learners who cannot yet build a sentence — a guess is one word and still counts as talking.'),
+
+  A('What Is in My Bag', 'a1', 'Whole class · 20 min · their own bag', [
+    'Take three things out of your bag one at a time and name each.',
+    'Learners do the same — three objects, named, held up.',
+    'Ask who else has the same. Hands up, and count them out loud together.',
+  ], 'Concrete nouns they need daily, plus numbers when you count the hands. Nothing has to be prepared and nobody has to invent content.'),
+
+  A('The Same as Me', 'a1', 'Whole class · 20 min · nothing', [
+    'Say a short sentence about yourself. I have a sister. I drink tea. I live near here.',
+    'Anyone the same stands up, or raises a hand if you are online.',
+    'Learners then take turns saying their own sentence and seeing who stands.',
+  ], 'The most controlled possible production — one sentence, modelled, repeated by everyone. You hear each learner say one thing and can already tell who has a verb ending problem.'),
+
+  A('Draw and Guess', 'a1', 'Whole class · 20 min · paper, or a shared whiteboard', [
+    'Draw something you like on paper. Food, a place, an animal. No words.',
+    'Hold it up; the class guesses what it is and why you like it.',
+    'Anyone who likes the same thing shows their drawing next to it.',
+  ], 'Vocabulary they recognise before they can produce it, and drawing removes the language barrier entirely for the first two minutes — which for a nervous A1 group is the whole battle.'),
+
+  A('My Name Starts With', 'a1', 'Whole class · 20 min · nothing', [
+    'Say your name and one thing you like beginning with the same letter. Ali — apples.',
+    'Go round the circle; each person adds theirs.',
+    'Second time round, see how many pairs the class can remember together.',
+  ], 'The alphabet and initial sounds, which A1 learners mix up constantly, plus names — and the repetition means everyone hears every name four or five times.'),
+
+  A('Where Are You From', 'a1', 'Whole class · 20 min · a map on screen or on the wall', [
+    'Point to where you are from on the map and say the city and country.',
+    'Each learner does the same — pointing is allowed instead of speaking if they need it.',
+    'Ask who is furthest away, who is nearest, and count how many countries the class covers.',
+  ], 'Country and city names, and comparatives introduced by you rather than produced by them. Works with a class that shares no common language at all.'),
+
+  A('Numbers Bingo About Us', 'a1', 'Whole class · 20 min · a grid of numbers, printed or on screen', [
+    'Everyone gets a grid of nine numbers between one and thirty.',
+    'Learners take turns saying a number that means something to them — my age, my floor, my bus.',
+    'Cross it off if you have it. First to three in a row calls out.',
+  ], 'Numbers heard and produced with a reason to listen, and every number comes with a fragment of personal information attached.'),
+
+  A('Picture of My Week', 'a1', 'Pairs · 20 min · phones', [
+    'Show one photo from your phone from the last week and say two words about it.',
+    'Their partner asks one question. Where? Who?',
+    'Swap partners once and do it again with the same photo — it comes out better the second time.',
+  ], 'Real content they care about, minimum language, and the repeat tells you exactly how much they gain from a second attempt — which is useful for the assignment.'),
+
+  A('Stand Up If You Can', 'a1', 'Whole class · 20 min · nothing', [
+    'Say things people might be able to do. I can drive. I can cook. I can swim.',
+    'Anyone who can, stands up or shows a hand.',
+    'Then let learners call out their own — accept two words and help with the rest.',
+  ], 'Can and cannot, which is the first modal an A1 learner needs and the one that unlocks asking for help in class.'),
+
+  A('Show Me One Thing', 'a1', 'Whole class · 20 min · whatever is on their desk', [
+    'Hold up something near you and say two sentences. This is my cup. I drink tea every morning.',
+    'Everyone finds one object and holds it to the camera in turn.',
+    'Second round: someone else asks one question about it. Is it old? Do you use it every day?',
+  ], 'Concrete vocabulary they actually own, present simple, and — because everyone is holding something up — the first moment nobody is hiding behind a switched-off camera.'),
+
+  A('Numbers About Me', 'a1', 'Whole class · 20 min · the chat box', [
+    'Type four numbers about yourself in the chat. 3, 1998, 12, 2.',
+    'Everyone copies the idea and posts their own four numbers.',
+    'Pick one person\u2019s numbers and let the class ask yes/no questions until they work each one out.',
+  ], 'Numbers, ages and dates — the thing A1 learners have drilled and cannot use. Yes/no questions with almost no vocabulary load.'),
+
+  A('Where I Am Right Now', 'a1', 'Whole class · 20 min · their own room', [
+    'Show the class one corner of the room you are in and name three things in it.',
+    'Each learner does the same — camera round the room, three things named.',
+    'Anyone who spots something they also have says so.',
+  ], 'Everyday object vocabulary and there is / I have. Also the gentlest possible way to get cameras on, because the camera is pointing away from their face.'),
+
+  A('Three Emojis', 'a1', 'Whole class · 20 min · the chat box', [
+    'Post three emojis in the chat that say something about you. Nothing else.',
+    'Everyone posts theirs. Read them all out loud.',
+    'Take one person at a time — the class guesses why, in English, and they say yes or no.',
+  ], 'Almost no language to produce, a great deal of language to understand. Works with a group who genuinely cannot form a sentence yet, and they still end up talking.'),
+
+  A('Thumbs Up, Thumbs Down', 'a1', 'Whole class · 20 min · reactions', [
+    'Say a short sentence. I like coffee. I get up early. I have a cat.',
+    'Everyone shows thumbs up or thumbs down — the reaction button or their actual hand.',
+    'Pick one person each round and ask why, and accept two words as an answer.',
+  ], 'Listening comprehension with a visible answer, so you can see instantly who understood. The best diagnostic in the set for a true beginner group.'),
+
+  A('True or False', 'inter', 'Mingle · 20 min · a slip of paper each', [
+    'Everyone writes three sentences about themselves — two true, one false.',
+    'They mingle, read their sentences out, and the other person guesses the lie.',
+    'Keep going until they have spoken to at least six people.',
+  ], 'Past simple and present simple under pressure, and vocabulary they reach for when describing their own life.'),
+
+  A('Onion Rings', 'inter', 'Two circles · 20 min · nothing', [
+    'Two circles, inner facing outer, everyone with a partner.',
+    'Give a topic — what you did last night — and they talk for one minute.',
+    'Outer circle moves one place left, new partner, new topic. Repeat six times.',
+  ], 'Fluency across six short bursts. You hear the same person start six times, which shows what they can produce without preparation.'),
+
+  A('3 Things in Common', 'inter', 'Mingle · 20 min · nothing', [
+    'They must find two people with whom they share three things.',
+    'Not age, nationality or hair colour — hobbies, where they live, what they studied.',
+    'When they have found them, they sit together as a group.',
+  ], 'Real conversation rather than a drill, and it forms the pairs and groups you will use for the rest of the day.'),
+
+  A('2-Minute Topics', 'inter', 'Small groups · 20 min · topic cards', [
+    'Four or five per table, cards face down in the middle — family, music, food, travel.',
+    'One person turns a card and the group talks about it for two minutes.',
+    'Next person, next card, until the cards run out.',
+  ], 'Which topics they open up on and which they shut down. Useful for choosing texts and tasks later.'),
+
+  A('Call My Bluff', 'upper', 'Teams · 20 min · three unusual words', [
+    'Each team gets an unusual word and writes three definitions — one true, two invented.',
+    'They read all three out, straight-faced, and the other team votes.',
+    'A point for guessing right, a point for fooling them.',
+  ], 'Register and hedging — the language of sounding confident about something you do not know, which upper-intermediate learners consistently lack.'),
+
+  A('Just a Minute', 'upper', 'Whole class · 20 min · a timer', [
+    'One person speaks on a topic for sixty seconds.',
+    'No hesitation, no repetition, no going off the subject.',
+    'Anyone can challenge; if the challenge is fair they take over the topic.',
+  ], 'Hesitation, fillers and self-correction all made audible on purpose. A goldmine for the assignment, and genuinely funny.'),
+
+  A('Question Swap', 'upper', 'Mingle · 20 min · a card each', [
+    'Everyone writes one interesting question on a card — not yes or no.',
+    'Ask your question, answer theirs, then swap cards and find someone new.',
+    'Keep swapping so each question travels around the room.',
+  ], 'Question formation at a level where it usually goes wrong — indirect questions, tenses in the second clause.'),
+
+  A('Five Points About Me', 'upper', 'Pairs · 20 min · a sheet each', [
+    'Write one word in each corner of the page and one in the middle — five things that matter to you.',
+    'Swap with a partner, who has to guess why each one is there by asking questions.',
+    'Then swap partners and do it again with the same page.',
+  ], 'Explanation and justification, told twice — the second telling is always more fluent, which is worth pointing out to them.'),
+  A('Colour of My Day', 'a1', 'Whole class · 20 min · nothing', [
+    'Say a colour and one word about why. Blue — sea.',
+    'Each learner gives their colour and their word.',
+    'Group everyone by colour and see who chose the same.',
+  ], 'Colours and simple nouns, with a reason attached so it is not a vocabulary drill.'),
+  A('Point and Name', 'a1', 'Whole class · 20 min · the room, or their room', [
+    'Point at five things and name them together as a class.',
+    'Learners take turns pointing at something and naming it.',
+    'Anything nobody knows goes on the board — that is the class\u2019s first word list.',
+  ], 'What they can and cannot name in a room, which is the fastest vocabulary diagnostic there is.'),
+  A('Yes, No, Maybe', 'a1', 'Whole class · 20 min · three cards each', [
+    'Everyone holds three cards: yes, no, maybe.',
+    'Ask simple questions. Do you like coffee? Do you drive?',
+    'They hold up a card, then you ask one person to say a word about why.',
+  ], 'Comprehension with a visible answer, and maybe gives cautious learners somewhere to stand.'),
+
+  A('Two Lies and a Truth', 'elem', 'Small groups · 20 min · paper', [
+    'Write three short sentences about yourself — two false, one true.',
+    'Read them to your group; they ask questions and guess the true one.',
+    'Each group reports the best lie to the class.',
+  ], 'Present and past simple in very short sentences, and question forms in the guessing.'),
+  A('My Weekend in Three Pictures', 'elem', 'Pairs · 20 min · phones or drawings', [
+    'Choose three photos, or draw three quick pictures, of your last weekend.',
+    'Show your partner and say one sentence about each.',
+    'Swap partners and do it again.',
+  ], 'Past simple with concrete support, and the second telling shows what they retain.'),
+  A('Guess My Job', 'elem', 'Whole class · 20 min · nothing', [
+    'Mime or describe your job without naming it.',
+    'The class asks yes/no questions until they get it.',
+    'Write each job on the board as it is guessed.',
+  ], 'Work vocabulary, which every adult class needs on day one, plus yes/no question forms.'),
+  A('Food I Love, Food I Hate', 'elem', 'Mingle · 20 min · nothing', [
+    'Say one food you love and one you cannot stand.',
+    'Mingle and find someone who agrees with you about either.',
+    'Report the strangest disagreement to the class.',
+  ], 'Like and dislike structures, and it produces genuine argument in a way nothing else at this level does.'),
+  A('Classroom Survey', 'elem', 'Mingle · 20 min · a question each', [
+    'Everyone writes one question they will ask the whole class.',
+    'Mingle, ask everyone, keep a tally.',
+    'Report your results as numbers. Six people drive. Four people have a cat.',
+  ], 'Question forms and numbers together, and the tally gives you a written record of the class.'),
+  A('My Favourite Place', 'elem', 'Pairs · 20 min · nothing', [
+    'Describe a place you love without naming it. Where is it? What can you see?',
+    'Your partner guesses the kind of place — beach, city, village.',
+    'Swap and repeat, then tell the class about your partner\u2019s place.',
+  ], 'Descriptive vocabulary and there is / there are, plus reporting in the third person at the end.'),
+  A('The Day in Order', 'elem', 'Pairs · 20 min · slips of paper', [
+    'Write five things you did yesterday on separate slips, out of order.',
+    'Your partner puts them in order by asking questions.',
+    'Check together and see who got closest.',
+  ], 'Past simple and time expressions, with the ordering doing the work rather than a gap-fill.'),
+  A('Who Is It', 'elem', 'Whole class · 20 min · paper', [
+    'Everyone writes three sentences describing themselves — no names.',
+    'Collect, shuffle, redistribute.',
+    'Read one out; the class guesses who wrote it.',
+  ], 'Descriptive language and listening, and it is the quietest way to hear every learner\u2019s writing at once.'),
+  A('Shopping List Memory', 'elem', 'Whole class · 20 min · nothing', [
+    'I went to the market and I bought bread.',
+    'Each person repeats everything before them and adds one item.',
+    'See how far round the class you get before it collapses.',
+  ], 'Food vocabulary, past simple of buy, and memory pressure that reveals who is quietly lost.'),
+  A('Would You Rather', 'elem', 'Two sides of the room · 20 min · nothing', [
+    'Would you rather live in a city or the countryside? Move to one side.',
+    'Talk to someone on your side about why.',
+    'Two people from each side report back.',
+  ], 'Preference and simple justification, with movement doing the choosing so nobody has to speak first.'),
+  A('Find the Fib', 'elem', 'Small groups · 20 min · nothing', [
+    'Your group agrees three facts about one member — two true, one invented.',
+    'Present them to the class as a group.',
+    'The class votes on the invention.',
+  ], 'Third-person forms, which elementary learners drop constantly, and the group prep means nobody is exposed alone.'),
+  A('Alphabet Race', 'elem', 'Teams · 20 min · board or shared doc', [
+    'Give a category — food, jobs, places.',
+    'Teams race to write one word for as many letters of the alphabet as they can.',
+    'Read out and score; a wrong spelling scores nothing.',
+  ], 'Vocabulary breadth and spelling under time pressure, and the arguments are in English.'),
+  A('Family in Five Words', 'elem', 'Pairs · 20 min · paper', [
+    'Write five words about your family. Names, jobs, places, numbers.',
+    'Your partner asks questions to work out what each word means.',
+    'Introduce your partner\u2019s family to the class.',
+  ], 'Family vocabulary and possessives, and the reporting stage forces a change of person.'),
+
+  A('My Three Firsts', 'pre', 'Pairs · 20 min · nothing', [
+    'Tell your partner about your first job, your first trip abroad and your first English lesson.',
+    'They ask two questions about whichever interests them most.',
+    'Swap, then tell the class your partner\u2019s best first.',
+  ], 'Past simple across three short narratives, with the reporting stage forcing third person.'),
+  A('Ranking Pyramid', 'pre', 'Pairs then fours · 20 min · a list of five', [
+    'Rank five things that make a good teacher, best at the top.',
+    'Compare with a partner and agree one ranking between you.',
+    'Join another pair and agree again.',
+  ], 'Comparatives and agreeing language, with the pressure rising each time the group doubles.'),
+  A('Guess the Photo', 'pre', 'Pairs · 20 min · phones', [
+    'Choose a photo on your phone but do not show it.',
+    'Describe it until your partner can draw or describe it back.',
+    'Show the photo and compare.',
+  ], 'Present continuous and prepositions of place, with an immediate check on whether the description worked.'),
+  A('Weekend Plans Mingle', 'pre', 'Mingle · 20 min · nothing', [
+    'Everyone thinks of two things they are doing this weekend.',
+    'Mingle and find someone doing something similar.',
+    'Report the most unusual plan you heard.',
+  ], 'Present continuous for future and going to, which pre-intermediate learners use interchangeably and shouldn\u2019t.'),
+  A('Question Dice', 'pre', 'Small groups · 20 min · one dice per group', [
+    'Each number on the dice is a question type — where, when, who, why, what, how.',
+    'Roll, then ask anyone in the group a question starting with that word.',
+    'Keep going until everyone has asked four.',
+  ], 'Question words in isolation, which is where the errors are — why questions with no auxiliary, how questions with no adjective.'),
+  A('What Happened Next', 'pre', 'Whole class · 20 min · nothing', [
+    'Start a story about your journey to class today. Stop after one sentence.',
+    'The next person adds a sentence, and so on round the room.',
+    'When it gets silly, start again with someone else\u2019s journey.',
+  ], 'Past simple and sequencing words, and the chain means nobody speaks for more than ten seconds.'),
+  A('My Perfect Day', 'pre', 'Pairs · 20 min · nothing', [
+    'Describe your perfect day from waking up to going to bed.',
+    'Your partner asks about anything they would change.',
+    'Find one thing you would both do.',
+  ], 'Present simple routines plus would, and a natural bridge into conditionals without teaching them.'),
+  A('Two Countries', 'pre', 'Pairs · 20 min · nothing', [
+    'Name three differences between where you grew up and where you live now.',
+    'Your partner asks which you prefer and why.',
+    'Report one difference to the class.',
+  ], 'Comparatives with real content, and it works just as well when both learners are from the same city.'),
+  A('Advice Corner', 'pre', 'Small groups · 20 min · paper', [
+    'Write one small problem on a slip. I always forget vocabulary.',
+    'Swap slips around the group; everyone gives advice.',
+    'Read out the best advice you received.',
+  ], 'Should and could, and the problems tell you what they think is wrong with their own English.'),
+  A('Memory Lane', 'pre', 'Pairs · 20 min · phones or description', [
+    'Describe a photo from your childhood, or find one on your phone.',
+    'Your partner asks three questions about it.',
+    'Say one thing that has changed since.',
+  ], 'Past simple and used to, and the change question opens present perfect naturally.'),
+  A('Would You Ever', 'pre', 'Mingle · 20 min · nothing', [
+    'Think of three things you would never do. Skydiving. Eating snails.',
+    'Mingle and find someone who has done one of them.',
+    'Report the bravest thing you found.',
+  ], 'Present perfect for experience against would for hypothesis, side by side, which is exactly the pair that confuses them.'),
+  A('Class Records', 'pre', 'Whole class · 20 min · nothing', [
+    'Find who has travelled furthest, studied English longest, has the most siblings.',
+    'Everyone asks everyone, then the class agrees each record.',
+    'Write the records on the board.',
+  ], 'Superlatives and present perfect, produced by the task rather than drilled.'),
+  A('The Ideal Flatmate', 'pre', 'Small groups · 20 min · nothing', [
+    'Name four qualities of a good flatmate.',
+    'Agree the four most important as a group.',
+    'Present to the class and see which group is strictest.',
+  ], 'Adjectives of personality and agreeing language, with a topic that produces genuine strong opinions.'),
+  A('Before and After', 'pre', 'Pairs · 20 min · nothing', [
+    'Think of one thing that changed your daily life — a job, a move, a child.',
+    'Describe how life was before and how it is now.',
+    'Your partner asks whether it was for the better.',
+  ], 'Used to against present simple, which is the cleanest contrast available at this level.'),
+  A('Job Interview Lite', 'pre', 'Pairs · 20 min · nothing', [
+    'Interview your partner for a job they would hate.',
+    'Three questions only, and they must answer seriously.',
+    'Decide whether you would hire them and say why.',
+  ], 'Question forms and short justifications, with the absurd premise removing the anxiety of a real interview.'),
+  A('Spot the Liar', 'pre', 'Small groups · 20 min · nothing', [
+    'Everyone tells a short story about themselves — true or invented.',
+    'The group asks three questions before voting.',
+    'Liars who survive get a point.',
+  ], 'Sustained past narrative under questioning, which is where invented detail falls apart grammatically.'),
+  A('Six Things in the Room', 'pre', 'Whole class · 20 min · the room', [
+    'Name six things in this room you would not find in a classroom at home.',
+    'Compare with two other people.',
+    'Agree the three most surprising as a class.',
+  ], 'Object vocabulary plus comparison, and it surfaces cultural difference on the first day without asking about it directly.'),
+  A('The Recommendation', 'pre', 'Mingle · 20 min · nothing', [
+    'Think of one thing you would recommend to a visitor — a place, a dish, a habit.',
+    'Mingle and collect three recommendations from others.',
+    'Report the one you will actually try.',
+  ], 'Recommending and reasons, and it gives the class a shared list to come back to later in the course.'),
+
+  A('Desert Island Three', 'inter', 'Small groups · 20 min · nothing', [
+    'Name three things you would take to a desert island and why.',
+    'Groups compare and agree on the three best choices.',
+    'Each group defends its list to the class.',
+  ], 'Justification and disagreement, and you hear which learners can hold a position under mild pressure.'),
+  A('The Interview Swap', 'inter', 'Pairs · 20 min · nothing', [
+    'Interview your partner for four minutes — anything you like.',
+    'Swap and be interviewed.',
+    'Introduce your partner to the class as though they were famous.',
+  ], 'Question forms, then reported speech and third person in the introduction. Two grammar areas from one activity.'),
+  A('My Life in Six Objects', 'inter', 'Pairs · 20 min · nothing', [
+    'Name six objects that tell the story of your life.',
+    'Your partner asks about each one until they understand why it matters.',
+    'Report the most surprising object to the class.',
+  ], 'Narrative past and explanation, with the objects preventing the vagueness this kind of task usually produces.'),
+  A('Common Ground Race', 'inter', 'Small groups · 20 min · a timer', [
+    'In four minutes, find as many things as you can that everyone in your group has in common.',
+    'Nothing visible — not gender, age or nationality.',
+    'Longest genuine list wins; the class can challenge any item.',
+  ], 'Rapid question forms under time pressure, and the challenge round produces real argument.'),
+  A('Two Sides', 'inter', 'Two lines · 20 min · nothing', [
+    'Two lines facing each other. Give a statement — homework is useless.',
+    'One line argues for, one against, for ninety seconds.',
+    'Lines shift one place, new partner, new statement, swap sides.',
+  ], 'Agreeing and disagreeing, repeated against several partners so you hear the same learner argue both ways.'),
+  A('Guess Who Wrote It', 'inter', 'Whole class · 20 min · paper', [
+    'Everyone writes one unusual sentence about their life.',
+    'Collect, shuffle, and read each aloud.',
+    'The class questions three suspects before guessing.',
+  ], 'Written production you can read afterwards, plus questioning strategies in the guessing round.'),
+  A('Time Capsule', 'inter', 'Small groups · 20 min · paper', [
+    'Your group chooses five things to put in a capsule opened in fifty years.',
+    'Agree on all five — no vetoes without a reason.',
+    'Present and justify to the class.',
+  ], 'Negotiating language and future forms, and the veto rule forces full sentences rather than nodding.'),
+  A('The Story of My Name', 'inter', 'Small groups · 20 min · nothing', [
+    'Tell the group where your name comes from and whether you like it.',
+    'Anyone with a similar story says so.',
+    'Report the best story to the class.',
+  ], 'Personal narrative with genuine content, and it works in a multilingual group where little else does.'),
+  A('Bucket List Bingo', 'inter', 'Mingle · 20 min · a grid each', [
+    'Write six things you want to do one day in a grid.',
+    'Mingle and find someone who wants the same, or has already done it.',
+    'Cross off as you go; first to four calls out.',
+  ], 'Want to and present perfect together, which is exactly the pair intermediate learners confuse.'),
+  A('Fact or Opinion', 'inter', 'Whole class · 20 min · statement cards', [
+    'Read out a statement about the city, the language, the weather.',
+    'Learners decide whether it is fact or opinion and say why.',
+    'They write two of their own and try them on the class.',
+  ], 'Hedging and certainty language, and it surfaces cultural assumptions worth knowing about early.'),
+  A('Speed Friending', 'inter', 'Rotating pairs · 20 min · a timer', [
+    'Three minutes per pair. One question each, then free conversation.',
+    'Rotate on the bell — five rounds.',
+    'Each person names one thing they learned about each partner.',
+  ], 'Fluency across repeated fresh starts, and the recall at the end tests listening rather than speaking.'),
+
+  A('Devil\u2019s Advocate', 'upper', 'Pairs · 20 min · nothing', [
+    'State an opinion you genuinely hold.',
+    'Your partner argues the opposite as convincingly as they can.',
+    'Swap, then say which argument was hardest to answer.',
+  ], 'Concession and counter-argument, which is where upper-intermediate fluency usually stalls.'),
+  A('The Unpopular Opinion', 'upper', 'Whole class · 20 min · nothing', [
+    'Everyone offers one mild opinion they expect the room to disagree with.',
+    'Anyone who agrees stands with them.',
+    'The largest minority defends itself.',
+  ], 'Hedging, softening and polite disagreement, all under real social pressure rather than simulated.'),
+  A('Alibi', 'upper', 'Pairs then class · 20 min · nothing', [
+    'In pairs, invent where you both were last night. Agree the details.',
+    'Separate the pair; the class questions each one alone.',
+    'Compare answers and find the contradictions.',
+  ], 'Past continuous and past simple in sustained narrative, and the contradictions are always in the tenses.'),
+  A('Six Degrees', 'upper', 'Small groups · 20 min · nothing', [
+    'Find a connection between two people in your group in as few steps as possible.',
+    'The connection must be real and explained aloud.',
+    'Shortest genuine chain wins.',
+  ], 'Relative clauses, which upper-intermediate learners avoid rather than get wrong.'),
+  A('Three Headlines', 'upper', 'Small groups · 20 min · nothing', [
+    'Write three headlines that could describe your life so far.',
+    'Your group asks about each one.',
+    'Choose the group\u2019s best headline and explain it to the class.',
+  ], 'Compression and register — headlines force choices about what matters, which is harder than it sounds.'),
+  A('Life Advice', 'upper', 'Mingle · 20 min · paper', [
+    'Write one piece of advice you were given and never took.',
+    'Mingle and find someone who was given something similar.',
+    'Report whether either of you should have listened.',
+  ], 'Third conditional and regret structures, arrived at through content rather than a grammar exercise.'),
+  A('The Missing Year', 'upper', 'Pairs · 20 min · nothing', [
+    'Choose one year of your life and describe it without saying which year.',
+    'Your partner works out roughly when it was and what changed.',
+    'Swap and repeat.',
+  ], 'Narrative tense control across a long turn, which is where fluency and accuracy start competing.'),
+  A('Persuade Me', 'upper', 'Pairs · 20 min · a timer', [
+    'Two minutes to persuade your partner that your city, food or team is better.',
+    'Your partner must be genuinely persuaded or say why not.',
+    'Report the most convincing argument you heard.',
+  ], 'Persuasive register and emphasis, and the requirement to concede makes it a conversation rather than a speech.'),
+  A('What Would You Change', 'upper', 'Small groups · 20 min · nothing', [
+    'Name one thing you would change about the place you live.',
+    'The group decides which change would matter most.',
+    'Defend the choice to the class.',
+  ], 'Second conditional and prioritising language, and the group stage forces comparison rather than a list.'),
+  A('Cultural Iceberg', 'upper', 'Small groups · 20 min · nothing', [
+    'Name three things visitors notice about your country and three they never do.',
+    'Compare across the group.',
+    'Report the most surprising invisible one.',
+  ], 'Abstract description, and in a multinational class it produces the best conversation of the day.'),
+  A('The Turning Point', 'upper', 'Pairs · 20 min · nothing', [
+    'Describe a small decision that changed something big.',
+    'Your partner asks what would have happened otherwise.',
+    'Swap, then tell the class about your partner\u2019s.',
+  ], 'Third conditional and reported speech together, with content strong enough that they forget to be careful.'),
+  A('Job Swap', 'upper', 'Pairs · 20 min · nothing', [
+    'Explain your job to your partner well enough that they could do it badly.',
+    'They explain it back; you correct them.',
+    'They introduce themselves to the class as you.',
+  ], 'Explanation, correction and register shift, plus vocabulary from a field nobody else in the room knows.'),
+  A('Two-Minute Debate', 'upper', 'Teams · 20 min · a timer', [
+    'Two teams, one motion, two minutes each way.',
+    'No preparation time — the motion is announced as you start.',
+    'The class votes, then argues about the vote.',
+  ], 'Spontaneous structured argument, which is the hardest thing on this list and the most revealing.'),
+  A('Hypotheticals', 'upper', 'Mingle · 20 min · question cards', [
+    'Take a card. If you could live in any decade, which?',
+    'Ask three people, then answer it yourself.',
+    'Find the two people whose answers were furthest apart and let them argue.',
+  ], 'Second conditional across many short turns rather than one long one, so you hear it repeatedly from everyone.'),
+];
+
+// Most of these survive the move online with one change. Three do not: they need
+// bodies moving through a shared physical space, and a Zoom substitute is worse
+// than a different activity.
+const MODE = {
+  'Ball Game': 'f2f',
+  'Line Up According To…': 'f2f',
+  'Speaking Corners': 'f2f',
+  'Mime Your Hobby': 'both',
+  'What Is in My Bag': 'both',
+  'The Same as Me': 'both',
+  'Draw and Guess': 'both',
+  'My Name Starts With': 'both',
+  'Where Are You From': 'both',
+  'Numbers Bingo About Us': 'both',
+  'Picture of My Week': 'both',
+  'Stand Up If You Can': 'both',
+  'Show Me One Thing': 'both',
+  'Numbers About Me': 'both',
+  'Where I Am Right Now': 'online',
+  'Three Emojis': 'both',
+  'Thumbs Up, Thumbs Down': 'both',
+  'Find Someone Who': 'both',
+  'Find Your Other Half': 'both',
+  'Draw Your Name': 'both',
+  'True or False': 'both',
+  'Onion Rings': 'both',
+  '3 Things in Common': 'both',
+  '2-Minute Topics': 'both',
+  'Star Facts': 'both',
+  'A Minute of Questions': 'both',
+  'Hunt the Teacher': 'both',
+  'Call My Bluff': 'both',
+  'Just a Minute': 'both',
+  'Question Swap': 'both',
+  'Five Points About Me': 'both',
+};
+
+const ONLINE = {
+  'Mime Your Hobby': 'Works on camera unchanged and is genuinely funnier — the frame crops the mime, so people over-act. Guesses go in the chat so everyone answers at once.',
+  'What Is in My Bag': 'Better online, because everyone is at home surrounded by their own things. Ask them to fetch three objects before you start.',
+  'The Same as Me': 'Reaction buttons or hands to the camera instead of standing. Slower to read than a room, so pause a beat longer before moving on.',
+  'Draw and Guess': 'Paper held to the camera beats the annotate tool — faster, and everyone sees all the drawings at once when you ask them to hold up together.',
+  'My Name Starts With': 'Go in the order of the participant list so nobody is unsure whose turn it is. Type each pair in the chat as it comes, and the list becomes the class register.',
+  'Where Are You From': 'Share a map on screen and let them drop annotation pins, or just say the place while you point. Pins are better — a learner who cannot say it can still show it.',
+  'Numbers Bingo About Us': 'Grid on a shared slide, or they draw their own nine squares on paper. Numbers called out loud, crossed off at home.',
+  'Picture of My Week': 'The strongest A1 online activity in the set — the photo is already on the phone they are holding. Breakout pairs, remade once.',
+  'Stand Up If You Can': 'Hands to camera rather than standing, or the reaction buttons. Ask them to keep the hand up for three seconds so you can count.',
+  'Show Me One Thing': 'Designed for the camera — everyone is already sitting next to their own things. In the room it works too, but people have less around them.',
+  'Numbers About Me': 'The chat box is the whole activity. Everyone posts at once, nobody waits their turn, and you have a written record of every learner\u2019s numbers to come back to.',
+  'Where I Am Right Now': 'Online only, and one of the few activities that is genuinely better on Zoom than in a classroom. Ask permission first and let anyone decline without explaining.',
+  'Three Emojis': 'Chat box. Everyone posts simultaneously, which removes the turn-taking that makes A1 learners freeze.',
+  'Thumbs Up, Thumbs Down': 'Reaction buttons, or hands to the camera. Reactions are faster to read but hands are more fun — let them use either.',
+  'Find Someone Who': 'Grid in a shared document everyone can type into. Breakout rooms of three, swapped twice, rather than a free mingle.',
+  'Find Your Other Half': 'Send each learner their half by private chat. They post theirs in the main chat and claim their partner, then you pair them into a breakout room.',
+  'Draw Your Name': 'They draw on paper and hold it to the camera, or use the annotate tool on a blank shared screen. Holding paper up is better — it is faster and everyone can see at once.',
+  'True or False': 'Breakout rooms of three or four rather than a mingle. Fewer partners, so ask for four sentences instead of three.',
+  'Onion Rings': 'Breakout pairs, remade every ninety seconds. Zoom will re-randomise pairs for you, so the rotation is one click rather than a circle shuffling.',
+  '3 Things in Common': 'Breakout rooms of three. They report their three in the main chat, which also gives you a written record of the whole class in two minutes.',
+  '2-Minute Topics': 'Topics on a shared slide, one breakout room per group, and a timer on screen so nobody has to watch the clock.',
+  'Star Facts': 'Draw the star on a shared whiteboard, or hold paper to the camera. Yes/no questions work better online than almost anything else — no crosstalk.',
+  'A Minute of Questions': 'Questions go in the chat rather than shouted, which is quieter but also gives you a transcript of what they wanted to know.',
+  'Hunt the Teacher': 'Paragraphs in a shared document instead of on walls. They scroll rather than walk, and the true/false handout is a second tab.',
+  'Call My Bluff': 'Teams in breakout rooms to write their definitions, then back to the main room to perform. Voting by reaction or in the chat.',
+  'Just a Minute': 'Works unchanged, and arguably better — the timer is on screen and challenges come through the chat, so the interruption is visible without anybody shouting.',
+  'Question Swap': 'Questions in the chat, then paired breakouts. The swap is you re-randomising the rooms.',
+  'Five Points About Me': 'Paper to camera or a shared slide each. Pairs in breakout rooms, remade once so they tell it twice.',
+};
+
+const LEVELS = [
+  { key: 'all', label: 'All levels' },
+  { key: 'a1', label: 'Beginner' },
+  { key: 'elem', label: 'Elementary' },
+  { key: 'pre', label: 'Pre-intermediate' },
+  { key: 'inter', label: 'Intermediate' },
+  { key: 'upper', label: 'Upper-intermediate' },
+];
+
+const TONE = {
+  a1: { c: 'oklch(45% 0.10 262)', label: 'Beginner' },
+  elem: { c: GREEN, label: 'Elementary' },
+  pre: { c: 'oklch(48% 0.11 300)', label: 'Pre-intermediate' },
+  inter: { c: TEAL, label: 'Intermediate' },
+  upper: { c: GOLD, label: 'Upper-int' },
+};
+
+class Component extends DCLogic {
+  state = { level: 'all', mode: 'all' };
+
+  renderVals() {
+    const lv = this.state.level;
+    const md = this.state.mode;
+    const modeOf = (a) => MODE[a.name] || 'both';
+    // Level is guidance, not a rule. A pre-intermediate group can happily take an
+    // elementary activity or an intermediate one, so selecting a level shows its
+    // neighbours too — the tag says where an activity sits best, not where it is allowed.
+    // Two real bands. Below elementary the language genuinely constrains what can
+    // be run; from pre-intermediate up almost anything works with any group, so
+    // those three share one pool rather than pretending to be distinct.
+    const HIGH = ['pre', 'inter', 'upper'];
+    const high = (k) => HIGH.indexOf(k) !== -1;
+    const near = (level, sel) => high(sel) ? high(level) : !high(level);
+    const levelOk = (a) => lv === 'all' || near(a.level, lv);
+    const shown = BANK.filter(a => levelOk(a) && (md === 'all' || modeOf(a) === 'both' || modeOf(a) === md));
+
+    return {
+      levels: LEVELS.map(l => {
+        const on = l.key === lv;
+        const n = l.key === 'all' ? BANK.length : BANK.filter(a => near(a.level, l.key)).length;
+        return {
+          label: l.label, count: n,
+          pick: () => this.setState({ level: l.key }),
+          bg: on ? CARD : 'transparent',
+          border: on ? TEAL : BORDER,
+          ink: on ? TEAL : INK,
+        };
+      }),
+      bankNote: 'Two real bands: beginner and elementary are constrained by language, everything above shares one pool.',
+      modes: [
+        { key: 'all', label: 'Either mode' },
+        { key: 'f2f', label: 'Face-to-face' },
+        { key: 'online', label: 'Online' },
+      ].map(m => {
+        const on = m.key === md;
+        const n = m.key === 'all' ? BANK.length : BANK.filter(a => modeOf(a) === 'both' || modeOf(a) === m.key).length;
+        return {
+          label: m.label, count: n,
+          pick: () => this.setState({ mode: m.key }),
+          bg: on ? CARD : 'transparent',
+          border: on ? GOLD : BORDER,
+          ink: on ? 'oklch(46% 0.11 62)' : INK,
+        };
+      }),
+      activities: shown.map(a => {
+        const t = TONE[a.level];
+        const m = modeOf(a);
+        const on = ONLINE[a.name];
+        return {
+          name: a.name, meta: a.meta, level: t.label, reveals: a.reveals,
+          spine: t.c, chipBg: tint(t.c, 13), chipInk: t.c, chipBorder: mix(t.c, 34),
+          steps: a.steps.map((s, i) => ({ n: (i + 1) + '.', text: s })),
+          modeLabel: m === 'f2f' ? 'In the room only' : 'Either mode',
+          modeBg: m === 'f2f' ? tint('oklch(45% 0.16 27)', 10) : tint(GOLD, 11),
+          modeInk: m === 'f2f' ? 'oklch(45% 0.16 27)' : 'oklch(46% 0.11 62)',
+          modeBorder: m === 'f2f' ? mix('oklch(45% 0.16 27)', 30) : mix(GOLD, 30),
+          hasOnline: !!on && md !== 'f2f',
+          online: on || '',
+        };
+      }),
+      handoutNotes: [
+        { label: 'No “Reveals” line', labelInk: 'oklch(45% 0.16 27)', border: mix('oklch(45% 0.16 27)', 26),
+          text: 'That column stays in the tutor\u2019s copy. A candidate told to watch for yes/no question forms will run a grammar test instead of a game, and the learners will feel it.' },
+        { label: 'The pictures are the instructions', labelInk: TEAL, border: mix(TEAL, 26),
+          text: 'A photograph of a star on a board explains the activity faster than the three steps above it. Two slots per handout — the set-up and the thing happening — filled from photos taken on previous courses. Drop images straight onto them.' },
+        { label: 'It says nobody is watching, twice', labelInk: MUTED, border: BORDER,
+          text: 'Top of the page and again at the bottom. It is the single most reassuring fact about day one and the one candidates most often fail to believe until a tutor says it out loud.' },
+      ],
+      sets: (() => {
+        const byName = {};
+        BANK.forEach(a => { byName[a.name] = a; });
+        const chosen = this.state.chosen || {};
+        const short = (a) => (a ? a.meta.split(' · ').slice(0, 2).join(' · ') : '');
+        const SETS = [
+          { n: '1', who: 'Sara Yılmaz', level: 'Beginner', time: '14:00', tone: 'oklch(45% 0.10 262)',
+            options: ['Ball Game', 'Mime Your Hobby', 'The Same as Me'] },
+          { n: '2', who: 'Elif Demir', level: 'Beginner', time: '14:25', tone: 'oklch(45% 0.10 262)',
+            options: ['What Is in My Bag', 'Draw and Guess', 'Show Me One Thing'] },
+          { n: '3', who: 'Mert Kaya', level: 'Beginner', time: '14:50', tone: 'oklch(45% 0.10 262)',
+            options: ['My Name Starts With', 'Where Are You From', 'Stand Up If You Can'] },
+          { gap: true, time: '15:15', who: 'Class changeover — the beginners leave, the intermediate group arrives' },
+          { n: '4', who: 'Aylin Koç', level: 'Intermediate', time: '15:30', tone: TEAL,
+            options: ['Star Facts', 'True or False', '3 Things in Common'] },
+          { n: '5', who: 'Deniz Aksöy', level: 'Intermediate', time: '15:55', tone: TEAL,
+            options: ['A Minute of Questions', 'Onion Rings', '2-Minute Topics'] },
+          { n: '6', who: 'Emre Toprak', level: 'Intermediate', time: '16:20', tone: TEAL,
+            options: ['Hunt the Teacher', 'Question Swap', 'Just a Minute'] },
+        ];
+        return SETS.map(s => {
+          if (s.gap) return { isGap: true, isSet: false, time: s.time, who: s.who, options: [] };
+          const pickedName = chosen[s.n] || s.options[0];
+          return {
+            isGap: false, isSet: true,
+            n: s.n, who: s.who, level: s.level, time: s.time, spine: s.tone,
+            chipBg: tint(s.tone, 12), chipInk: s.tone, chipBorder: mix(s.tone, 32),
+            options: s.options.map(name => {
+              const on = name === pickedName;
+              return {
+                name, meta: short(byName[name]), on,
+                bg: on ? tint(s.tone, 8) : CARD,
+                border: on ? s.tone : BORDER,
+                dot: on ? s.tone : mix(INK, 32),
+                dotFill: s.tone,
+                pick: () => this.setState(st => ({ chosen: Object.assign({}, st.chosen, { [s.n]: name }) })),
+              };
+            }),
+          };
+        });
+      })(),
+      rotaHead: ['#', 'Candidate', 'Activity', 'Time'],
+      rota: [
+        { n: '1', who: 'Sara Yılmaz', activity: 'Ball Game', group: 'Elementary · whole class', time: '14:00' },
+        { n: '2', who: 'Elif Demir', activity: 'Find Someone Who', group: 'Elementary · mingle', time: '14:25' },
+        { n: '3', who: 'Mert Kaya', activity: 'Speaking Corners', group: 'Elementary · whole class', time: '14:50' },
+        { n: '—', who: 'Class changeover', activity: 'Elementary group leaves, intermediate arrives', group: '', time: '15:15', gap: true },
+        { n: '4', who: 'Aylin Koç', activity: 'Star Facts', group: 'Intermediate · pairs', time: '15:30' },
+        { n: '5', who: 'Deniz Aksöy', activity: 'A Minute of Questions', group: 'Intermediate · small groups', time: '15:55' },
+        { n: '6', who: 'Emre Toprak', activity: 'Hunt the Teacher', group: 'Intermediate · whole class', time: '16:20' },
+      ].map((r, i) => Object.assign({}, r, {
+        bg: r.gap ? 'oklch(96.4% 0.014 85)' : (i % 2 ? 'oklch(97.6% 0.009 85)' : CARD),
+        numInk: r.gap ? MUTED : TEAL,
+      })),
+      handout: (() => {
+        const a = BANK.filter(x => x.name === 'Star Facts')[0];
+        return {
+          name: a.name,
+          steps: a.steps.map((s, i) => ({ n: (i + 1) + '.', text: s })),
+          meta: 'Intermediate · pairs, then mingle · 20 minutes',
+          slot: 'You are fourth. 15:30, straight after the class changeover.',
+          bring: ['A sheet of paper for every learner', 'Board pens, or a shared whiteboard if you are online', 'Your own star, drawn before you arrive'],
+        };
+      })(),
+      notes: [
+        { label: 'Three each, and they pick one', labelInk: TEAL, border: mix(TEAL, 26),
+          text: 'Eighteen activities dealt into six sets of three, so no two candidates can land on the same one. Their set is waiting in Connect and the Friday-before email links to it — not the pre-course pack, which goes out at sign-up before levels or groups exist. They choose whichever appeals and tell the tutor on the first morning. A choice of three is enough to feel like a decision and small enough that nobody spends an evening reading the whole bank.' },
+        { label: 'The sets never overlap', labelInk: 'oklch(45% 0.16 27)', border: mix('oklch(45% 0.16 27)', 26),
+          text: 'Every activity appears in exactly one set. That is what makes “choose one” safe to say without a booking system — whatever six candidates pick, the learners never see the same activity twice in an afternoon.' },
+        { label: 'There are really only two bands', labelInk: TEAL, border: mix(TEAL, 26),
+          text: 'From pre-intermediate upwards almost any of these works with almost any group — the difference between a pre-intermediate and an upper-intermediate class here is how long the answers are, not which activity you run. Those three share one pool of fifty-four. Beginner and elementary share the other thirty-six, because not enough language to mingle, question or argue rules most of the pool out rather than merely making it harder. Picking any level in a band shows the whole band, whichever chip you click.' },
+        { label: 'Beginner is its own level, not the bottom of elementary', labelInk: 'oklch(45% 0.10 262)', border: mix('oklch(45% 0.10 262)', 30),
+          text: 'A true beginner cannot mingle, cannot form a question, and on Zoom will not turn a camera on. Eighteen activities are built for exactly that: hold up an object, post four numbers, show one corner of your room, three emojis, thumbs up or down, and the ball game in the room. Each needs almost no language to produce and still gets everyone talking. Elementary keeps the ones that assume a question can be formed — Find Someone Who, lining up, speaking corners — which is precisely what an A1 group cannot do yet.' },
+        { label: 'Three do not survive going online', labelInk: 'oklch(45% 0.16 27)', border: mix('oklch(45% 0.16 27)', 26),
+          text: 'The ball game, lining up and speaking corners all need bodies moving through a shared space. There are Zoom substitutes and they are all worse than simply picking a different activity. On an online or mixed-mode course they never appear in the pool — the filter does it rather than a candidate discovering it on the day.' },
+        { label: 'Matched to the level they will teach', labelInk: TEAL, border: mix(TEAL, 26),
+          text: 'Elementary candidates get activities that work without much language; upper-intermediate ones get activities that would bore a beginner. Nobody has to adapt anything on the day.' },
+        { label: 'The tutor is not in the room', labelInk: MUTED, border: BORDER,
+          text: 'Nobody is watching and nothing is recorded. It is the only time on the course a candidate stands in front of learners unobserved, and that is the point — the first experience of teaching should not also be the first experience of being judged.' },
+        { label: 'Twenty minutes each, five to change over', labelInk: MUTED, border: BORDER,
+          text: 'Six candidates fills an afternoon, with a fifteen-minute break in the middle while one class leaves and the other arrives. Change the length or the group size and the running order recalculates — nobody redoes the sums by hand.' },
+        { label: 'The tutor answers questions on the first morning', labelInk: MUTED, border: BORDER,
+          text: 'Not before. The pack says so explicitly, which is what stops eleven emails in the week before the course about whether a soft ball is really necessary.' },
+        { label: 'It is a game, not a diagnostic', labelInk: 'oklch(45% 0.16 27)', border: mix('oklch(45% 0.16 27)', 26),
+          text: 'The Afterwards line is written for the tutor and never appears on a candidate\u2019s handout. Tell a candidate to watch for present perfect and they will run a grammar test with a smile on it — the learners will feel the difference and the whole point of the afternoon is lost. What a tutor notices afterwards is a by-product of an enjoyable twenty minutes, never its aim.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&amp;family=Newsreader:ital,wght@0,500;0,600&amp;display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<template id="__bundler_thumbnail" data-bg-color="#3d3a32">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <text x="600" y="420" font-size="180" fill="#f4efe6" font-family="Georgia, serif" text-anchor="middle">AH</text>
+  </svg>
+</template>
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 32px; width: 100%; max-width: 1180px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 13px; max-width: 820px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Meridian Language Centre · compliance · visible only, not enforced</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.14; color: oklch(23.5% 0.017 65);">Assessor history</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Handbook 12.3: the same assessor must not be used for more than two consecutive courses, and may not assess more than two courses concurrently at one centre. A centre does not choose its assessor and repeat visits are common, so this is not enforced &mdash; it is kept visible so a centre administrator can see the pattern.</div>
+  </div>
+
+  <sc-for list="{{ assessors }}" as="a" hint-placeholder-count="3">
+    <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px;">
+
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+        <div style="display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 19px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ a.name }}</div>
+          <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ a.courseCount }} courses assessed at this centre</div>
+        </div>
+        <div style="display: flex; gap: 20px; flex: none;">
+          <div style="display: flex; flex-direction: column; gap: 2px; text-align: right;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; color: {{ a.streakInk }};">{{ a.currentStreak }}</div>
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">Consecutive streak</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 2px; text-align: right;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; color: {{ a.peakInk }};">{{ a.peakConcurrent }}</div>
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">Peak concurrent</div>
+          </div>
+        </div>
+      </div>
+
+      <sc-if value="{{ a.flag }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; align-items: flex-start; gap: 9px; padding: 10px 14px; border-radius: 6px; background: color-mix(in oklab, oklch(44% 0.095 68) 10%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(44% 0.095 68) 30%, transparent);">
+          <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(44% 0.095 68); margin-top: 6px; flex: none;"></div>
+          <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ a.flagText }}</div>
+        </div>
+      </sc-if>
+
+      <div style="border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 96px 1fr minmax(0, 160px) 96px; padding: 9px 12px; background: oklch(96.4% 0.014 85); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70); gap: 8px;">
+          <div>Dates</div>
+          <div>Course</div>
+          <div>Overlap</div>
+          <div>Status</div>
+        </div>
+        <sc-for list="{{ a.courses }}" as="c" hint-placeholder-count="2">
+          <div style="display: grid; grid-template-columns: 96px 1fr minmax(0, 160px) 96px; padding: 11px 12px; align-items: center; border-top: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent); font-size: 12.5px; color: oklch(23.5% 0.017 65); gap: 8px;">
+            <div style="color: oklch(51% 0.017 70); font-size: 12px;">{{ c.dates }}</div>
+            <div style="font-weight: 600;">{{ c.name }}</div>
+            <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ c.overlap }}</div>
+            <div>
+              <div style="display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{ c.statusBg }}; color: {{ c.statusInk }};">{{ c.status }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const INK = 'oklch(23.5% 0.017 65)';
+    const MUTED = 'oklch(51% 0.017 70)';
+    const AMBER = 'oklch(44% 0.095 68)';
+    const RED = 'oklch(45% 0.16 27)';
+    const GREEN = 'oklch(48% 0.09 152)';
+
+    const statusStyle = (status) => {
+      if (status === 'Active') return { statusBg: 'color-mix(in oklab, ' + GREEN + ' 14%, oklch(99.2% 0.005 90))', statusInk: GREEN };
+      return { statusBg: 'oklch(96.4% 0.014 85)', statusInk: MUTED };
+    };
+
+    const course = (dates, name, overlap, status) => ({ dates, name, overlap, status, ...statusStyle(status) });
+
+    const assessors = [
+      {
+        name: 'Priya Anand',
+        courseCount: 4,
+        currentStreak: 3,
+        peakConcurrent: 1,
+        flag: true,
+        flagText: 'Three consecutive courses at this centre \u2014 one over the two-course guidance in Handbook 12.3. Not blocked; a centre does not choose its assessor.',
+        streakInk: RED,
+        peakInk: INK,
+        courses: [
+          course('4\u201322 Aug 2026', 'CELTA Aug/Sep 2026 \u2014 Full-time', '\u2014', 'Active'),
+          course('7\u201325 Jul 2026', 'CELTA Jul 2026 \u2014 Full-time', '\u2014', 'Completed'),
+          course('2\u201320 Jun 2026', 'CELTA Jun 2026 \u2014 Part-time', '\u2014', 'Completed'),
+          course('14 Apr\u20132 May 2026', 'CELTA Apr/May 2026 \u2014 Full-time', '\u2014', 'Completed'),
+        ],
+      },
+      {
+        name: 'Daniel Whitfield',
+        courseCount: 3,
+        currentStreak: 1,
+        peakConcurrent: 2,
+        flag: true,
+        flagText: 'Assessed two courses concurrently in Jun\u2013Jul 2026 \u2014 at the two-course concurrent limit in Handbook 12.3.',
+        streakInk: INK,
+        peakInk: AMBER,
+        courses: [
+          course('4\u201322 Aug 2026', 'CELTA Aug/Sep 2026 \u2014 Full-time', '\u2014', 'Active'),
+          course('9 Jun\u201318 Jul 2026', 'CELTA Jun/Jul 2026 \u2014 Part-time', 'Overlapped below', 'Completed'),
+          course('16 Jun\u20134 Jul 2026', 'CELTA Jun 2026 \u2014 Full-time', 'Overlapped above', 'Completed'),
+        ],
+      },
+      {
+        name: 'Fatima Ilyas',
+        courseCount: 2,
+        currentStreak: 0,
+        peakConcurrent: 1,
+        flag: false,
+        flagText: '',
+        streakInk: MUTED,
+        peakInk: INK,
+        courses: [
+          course('12\u201330 May 2026', 'CELTA May 2026 \u2014 Full-time', '\u2014', 'Completed'),
+          course('3\u201321 Feb 2026', 'CELTA Feb 2026 \u2014 Full-time', '\u2014', 'Completed'),
+        ],
+      },
+    ];
+
+    return { assessors };
+  }
+}
+</script>
+</body>
+</html>

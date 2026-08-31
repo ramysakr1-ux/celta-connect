@@ -21,7 +21,6 @@
 > was written when the design files were current. It still holds for the
 > handoffs that were never lost; it does **not** hold for the files below.
 
-
 Six design sources that had no copy in a handoff folder. Originals live at the project root; these are the archived copies that pair with the cited specs in `specs/`.
 
 | Design source | Paired spec(s) in `specs/` | What only the spec holds |
@@ -42,6 +41,19 @@ Six design sources that had no copy in a handoff folder. Originals live at the p
 | `Marking Guidance.dc.html` | 1 | The assessor's marking guidance screen |
 | `Appeals.dc.html` | 2 | Appeals in the assessor pack and close-out export |
 | `Observation Tasks.dc.html` | 2 | CELTA 5 + level definitions |
+
+## Cited design sources (third batch)
+
+| File | Citations |
+| --- | --- |
+| `Centre Owner Landing.dc.html` | 4 — the owner screen and its capability model |
+| `Volunteer Pool.dc.html` | 4 |
+| `Rotation.dc.html` | 3 — TP group board, running order |
+| `Timetable Refresh.dc.html` | 3 — the timetable skeleton and assignment due dates |
+| `TP Points.dc.html` | 3 |
+| `GTKY Activity Bank.dc.html` | 3 |
+
+**Missing:** `App Redesign.dc.html` (4 citations — the trainee portfolio layout, "Checkpoint 2 … 1d") is not in this project. No file of that name exists and no file contains the "Checkpoint 2" string. It needs recovering from elsewhere.
 
 Related root files not copied here (variants, not the cited source): `Withdrawal Form.dc.html`, `Withdrawal and Handover.dc.html`, `Volunteer View - standalone.html`.
 

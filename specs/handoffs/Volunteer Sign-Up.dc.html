@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 40px; width: 1500px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 13px; max-width: 940px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · volunteer sign-up · on a phone</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 36px; font-weight: 600; line-height: 1.14; color: oklch(23.5% 0.017 65);">The one person here who owes you nothing.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">A volunteer learner is doing the centre a favour, on a phone, in a language they are still learning. Six questions and two minutes of talking. No Zoom, no app, no account until the end — and the word test appears nowhere, because it is not one.</div>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 7px; flex-wrap: wrap;">
+    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="5">
+      <div onClick="{{ n.pick }}" style="height: 38px; padding: 0 14px; border-radius: 6px; border: 1px solid {{ n.border }}; background: {{ n.bg }}; display: flex; align-items: center; gap: 9px; cursor: pointer;">
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 15px; line-height: 1; color: {{ n.numInk }};">{{ n.n }}</div>
+        <div style="font-size: 12.5px; font-weight: 600; color: {{ n.ink }};">{{ n.label }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div id="1a" style="display: grid; grid-template-columns: 380px 1fr; gap: 26px; align-items: start;">
+
+    <div style="width: 380px; background: oklch(23.5% 0.017 65); border-radius: 34px; padding: 10px; box-shadow: 0 18px 44px color-mix(in oklab, oklch(23.5% 0.017 65) 18%, transparent);">
+      <div style="background: oklch(99.6% 0.003 90); border-radius: 26px; overflow: hidden; min-height: 690px; display: flex; flex-direction: column;">
+
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 8px;">
+          <div style="font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65);">9:41</div>
+          <div style="width: 16px; height: 8px; border-radius: 2px; border: 1px solid oklch(60% 0.017 70);"></div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 20px 13px; border-bottom: 1px solid oklch(93.5% 0.008 85);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 20px; height: 20px; border-radius: 5px; background: oklch(30% 0.042 58); display: flex; align-items: center; justify-content: center;">
+              <div style="width: 8px; height: 8px; border-radius: 2px; background: oklch(72% 0.13 78);"></div>
+            </div>
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(23.5% 0.017 65);">Connect</div>
+          </div>
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ s.step }}</div>
+        </div>
+
+        <div style="flex: 1; padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 16px;">
+
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 23px; font-weight: 600; line-height: 1.2; color: oklch(23.5% 0.017 65);">{{ s.heading }}</div>
+            <div style="font-size: 13.5px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ s.body }}</div>
+          </div>
+
+          <sc-if value="{{ s.isLang }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+              <sc-for list="{{ langs }}" as="l" hint-placeholder-count="5">
+                <div onClick="{{ l.pick }}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 15px; border-radius: 9px; border: 1px solid {{ l.border }}; background: {{ l.bg }}; cursor: pointer;">
+                  <div style="display: flex; flex-direction: column; gap: 1px;">
+                    <div style="font-size: 14.5px; font-weight: 600; color: {{ l.ink }};">{{ l.native }}</div>
+                    <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ l.english }}</div>
+                  </div>
+                  <div style="font-size: 15px; color: {{ l.tickInk }};">{{ l.tick }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s.isConsent }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+              <sc-for list="{{ terms }}" as="t" hint-placeholder-count="4">
+                <div style="display: flex; align-items: flex-start; gap: 11px; padding: 12px 14px; border-radius: 8px; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82);">
+                  <div style="width: 16px; height: 16px; border-radius: 4px; background: oklch(30% 0.042 58); flex: none; margin-top: 1px; display: flex; align-items: center; justify-content: center; color: oklch(98.5% 0.006 90); font-size: 10px;">✓</div>
+                  <div style="font-size: 12.5px; line-height: 1.55; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ t }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s.isForm }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 13px;">
+              <sc-for list="{{ questions }}" as="q" hint-placeholder-count="3">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ q.q }}</div>
+                  <div style="min-height: {{ q.h }}; border: 1px solid oklch(88% 0.016 82); border-radius: 8px; background: oklch(96.4% 0.014 85); padding: 10px 12px; font-size: 13px; line-height: 1.5; color: {{ q.ink }}; font-style: {{ q.style }};">{{ q.a }}</div>
+                </div>
+              </sc-for>
+              <div style="font-size: 11.5px; color: oklch(51% 0.017 70);">3 of 6 · you can stop and come back</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s.isRec }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 16px; align-items: center; padding-top: 6px;">
+              <div style="width: 100%; padding: 14px 15px; border-radius: 9px; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); display: flex; flex-direction: column; gap: 5px;">
+                <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Question 2 of 8</div>
+                <div style="font-size: 19px; line-height: 1.4; color: oklch(23.5% 0.017 65);">What is your job?</div>
+                <div style="font-size: 14px; line-height: 1.45; color: oklch(51% 0.017 70);">Tell me a little about it.</div>
+              </div>
+              <div style="width: 82px; height: 82px; border-radius: 50%; background: oklch(45% 0.16 27); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 8px color-mix(in oklab, oklch(45% 0.16 27) 14%, transparent);">
+                <div style="width: 26px; height: 26px; border-radius: 5px; background: oklch(98.5% 0.006 90);"></div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 9px;">
+                <sc-for list="{{ bars }}" as="b" hint-placeholder-count="9">
+                  <div style="width: 3px; height: {{ b }}; border-radius: 2px; background: oklch(45% 0.16 27);"></div>
+                </sc-for>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 7px; height: 7px; border-radius: 50%; background: oklch(45% 0.16 27);"></div>
+                <div style="font-size: 12.5px; font-weight: 600; color: oklch(45% 0.16 27);">Recording · 0:08</div>
+              </div>
+              <div style="width: 100%; height: 50px; border-radius: 9px; background: oklch(30% 0.042 58); color: oklch(98.5% 0.006 90); font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 9px; cursor: pointer;">
+                <div>Next question</div>
+                <div style="font-size: 15px;">→</div>
+              </div>
+
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s.isDone }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 13px;">
+              <sc-for list="{{ done }}" as="d" hint-placeholder-count="3">
+                <div style="display: flex; align-items: flex-start; gap: 11px; padding: 13px 15px; border-radius: 8px; background: {{ d.bg }}; border: 1px solid {{ d.border }};">
+                  <div style="width: 6px; height: 6px; border-radius: 50%; background: {{ d.ink }}; margin-top: 7px; flex: none;"></div>
+                  <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <div style="font-size: 12.5px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ d.title }}</div>
+                    <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ d.text }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="margin-top: auto; display: flex; flex-direction: column; gap: 9px; padding-top: 14px;">
+            <div style="height: 48px; border-radius: 9px; background: {{ s.ctaBg }}; color: {{ s.ctaInk }}; border: 1px solid {{ s.ctaBorder }}; font-size: 14.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer;">{{ s.cta }}</div>
+            <sc-if value="{{ s.sub }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 11.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-align: center; text-wrap: pretty;">{{ s.sub }}</div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 7px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: oklch(51% 0.017 70);">This screen</div>
+        <div style="font-size: 13px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ s.where }}</div>
+      </div>
+      <sc-if value="{{ s.prompts }}" hint-placeholder-val="{{ false }}">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 7px; overflow: hidden;">
+          <div style="padding: 13px 17px 12px; border-bottom: 1px solid oklch(89.5% 0.010 85); display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: oklch(51% 0.017 70);">The eight prompts</div>
+            <div style="font-size: 11px; color: oklch(51% 0.017 70);">what each one is for</div>
+          </div>
+          <sc-for list="{{ s.prompts }}" as="p" hint-placeholder-count="8">
+            <div style="padding: 11px 17px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, oklch(99.2% 0.005 90) 60%); display: flex; align-items: flex-start; gap: 11px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 14px; color: oklch(51% 0.017 70); width: 12px; flex: none; padding-top: 1px;">{{ p.n }}</div>
+              <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1;">
+                <div style="font-size: 12.5px; font-weight: 600; line-height: 1.4; color: oklch(23.5% 0.017 65);">{{ p.q }}</div>
+                <div style="font-size: 11px; line-height: 1.45; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ p.why }}</div>
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 6px; border-radius: 4px; align-self: flex-start; background: color-mix(in oklab, oklch(38% 0.072 195) 12%, oklch(99.2% 0.005 90)); color: oklch(38% 0.072 195); margin-top: 2px;">{{ p.elicits }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-for list="{{ s.notes }}" as="n" hint-placeholder-count="3">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ n.border }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-size: 12px; font-weight: 700; color: {{ n.labelInk }};">{{ n.label }}</div>
+          <div style="font-size: 12px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ n.text }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1500,&quot;height&quot;:900}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.16 27)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const WARM = 'oklch(30% 0.042 58)';
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+const mix = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, transparent)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+const N = (label, text, ink) => ({ label, text, labelInk: ink || MUTED, border: ink ? mix(ink, 28) : BORDER });
+const PR = (n, q, why, elicits) => ({ n, q, why, elicits });
+
+const SCREENS = [
+  { key: 'lang', label: 'Language', step: '1 of 5', isLang: true,
+    heading: 'Hoş geldiniz', body: 'Hangi dilde okumak istersiniz? — Which language would you like to read in?',
+    cta: 'Devam et · Continue', ctaTone: 'primary', sub: 'You will answer in English, but everything we explain is in your language.',
+    where: 'The very first screen, before anything is asked. Only the wrapper is translated — the greeting, the explanation and the consent. Everything after that is in English, because the English is the point.',
+    notes: [
+      N('Three things get translated, not the questions', 'Hello and why we are asking; what you are agreeing to; and the line saying answer in English from here. That is a handful of sentences, translated properly once, with nothing to keep in sync.', TEAL),
+      N('The language becomes their L1 on file', 'Candidates need it anyway — first-language interference is half of what a Focus on the Learner assignment is about.', MUTED),
+      N('Nobody hits a wall on screen one', 'A sixth option reads “my language is not here” and continues in English, saying the centre can help in person. The worst place to lose a volunteer is the first screen, and the list of five will never cover everyone who walks in.', GOLD),
+      N('The list grows with the intake', 'Adding a language is a handful of sentences now that only the consent is translated — not a new flow. A language earns a place once a few learners have used the fallback.', TEAL),
+    ] },
+
+  { key: 'consent', label: 'Consent', step: '2 of 5', isConsent: true,
+    heading: 'Before we start', body: 'Please read this. It is short, and it is in Turkish because it matters that you understand it.',
+    cta: 'Kabul ediyorum · I agree', ctaTone: 'primary', sub: 'You can withdraw at any time by emailing the centre.',
+    where: 'The one screen with legal weight, and the one that must be word-perfect in their language. Translated once by a human, then never touched.',
+    notes: [
+      N('It says what it is for, plainly', 'Shared with the centre for teacher training. Used by trainee teachers in their coursework. Not shared with anyone else, not published, not sold.', TEAL),
+      N('And what it is not', 'It is never called a test, here or anywhere. No result comes back, no level is produced, and nothing decides which class they join.', RED),
+      N('Recording consent is separate, and moves', 'Agreeing to the questions is not agreeing to be recorded. This screen carries the data consent only \u2014 the recording tick belongs above the first prompt on screen 4, where the red dot is about to start. Two consents, two moments, each where the thing actually happens.', GOLD),
+    ] },
+
+  { key: 'form', label: 'Six questions', step: '3 of 5', isForm: true,
+    heading: 'About you', body: 'Six short questions. Answer in English — anything you can manage is fine.',
+    cta: 'Next', ctaTone: 'primary', sub: 'Nothing here is marked. Nobody is checking your grammar.',
+    where: 'The six background questions. This is the only source in the whole system for criterion (a) — background, previous learning experience and learning preferences — which is why they exist at all.',
+    notes: [
+      N('Six, and no more', 'How long, where, why now, what is hardest, what you enjoy, and what you want to use English for. Everything else a candidate can find out by watching them in class.', TEAL),
+      N('Answered in English on purpose', 'A beginner writing “for my job, my boss speak English” has told a candidate two things at once — their motivation and their English. Both are useful.', GOLD),
+      N('It saves as they go', 'Nobody fills six boxes on a phone in one sitting. Leaving and coming back is normal, and the screen says so rather than losing their work.', MUTED),
+    ] },
+
+  { key: 'rec', label: 'Recording', step: '4 of 5', isRec: true,
+    heading: 'Now just talk', body: 'Eight questions. Answer out loud in English. Stop when you want.',
+    cta: 'Stop and finish', ctaTone: 'danger', sub: 'Two to three minutes altogether. You can listen back and record again.',
+    where: 'Eight prompts that escalate. Each one is chosen to elicit something a candidate will need later — a tense, a form, a set of sounds — so two or three minutes of talking serves the learner profile, the language analysis and the pronunciation work at once.',
+    prompts: [
+      PR('1', 'What is your name? Where are you from?', 'Nobody is defeated by question one', 'warm-up'),
+      PR('2', 'What is your job? Tell me a little about it.', 'Occupation — the one background fact a candidate cannot observe in class', 'present simple'),
+      PR('3', 'What do you do on a normal day?', 'Habits and routine', 'present simple, frequency, third person -s'),
+      PR('4', 'What did you do yesterday?', 'A narrative in the past', 'past simple, regular -ed endings'),
+      PR('5', 'Tell me about a place you like.', 'Description at length', 'adjectives, there is / there are'),
+      PR('6', 'What are you doing next week?', 'Plans', 'future forms, going to, present continuous'),
+      PR('7', 'Why do you want to learn English?', 'Motivation, in their own words', 'reasons, because, want to'),
+      PR('8', 'If you could change one thing about your city, what would it be?', 'The hardest one, and where most people stop \u2014 concrete enough that nobody is stuck for a subject', 'second conditional'),
+    ],
+    notes: [
+      N('It escalates rather than being chosen', 'The prompts get harder in order and they stop where they stop. One recording does the whole job, and nobody has to decide a level before recording someone.', TEAL),
+      N('Two birds', 'The prompts are not small talk. Each elicits a specific tense or form, so the same two minutes gives a candidate their learner profile, natural samples of grammar for language analysis, and connected speech to work on for pronunciation.', TEAL),
+      N('No transcription, and not by us', 'Speech recognition normalises errors — “my boss speak English very good” comes back repaired, and the repaired version is useless. The recording is the evidence. Candidates transcribe the parts they quote, which is the noticing the assignment asks for. Each prompt is a marker on the timeline, with loop-a-selection and slow playback, because that is what transcribing actually needs.', RED),
+      N('One button, and no instruction', 'Next question is the only control, and it answers both cases at once — finished, or stuck. A line reading “don\u2019t know? say next” was doing nothing the button did not already do, and every extra sentence on this screen is one more thing an A1 learner has to decode while a red dot counts up at them.', RED),
+      N('One recording, seven questions', 'It records continuously from the first tap to the last — one file, not seven. Nothing has to detect when an answer has finished, which is the part that goes wrong on a phone in a noisy room. The Next button advances the question on screen; the recording never stops.', TEAL),
+      N('The first question is genuinely easy', 'Name and where you are from. Nobody is defeated by question one, which matters more than what it tests — the recording only works if they get past the first prompt and hear their own voice.', TEAL),
+      N('Re-recordable, forever', 'They can listen back and do it again as many times as they like. A first attempt nobody is happy with helps nobody.', MUTED),
+    ] },
+
+  { key: 'done', label: 'Done', step: '5 of 5', isDone: true,
+    heading: 'That is everything', body: 'Thank you. We will email you when a class is starting near you.',
+    cta: 'Close', ctaTone: 'plain', sub: '',
+    where: 'The end, and deliberately anticlimactic. No account was created, no password chosen, nothing to remember — they are a person on a list, not a user.',
+    notes: [
+      N('No account, no password', 'A volunteer never logs in. They get an email with a Zoom link or a room number when a class needs them, and that is the whole relationship.', TEAL),
+      N('Sign up once, ever', 'The six answers stay on file at the centre and are never asked again. Returning volunteers record two fresh minutes and nothing else, because their English has moved on and their background has not.', GOLD),
+      N('No result, deliberately', 'They are not told a level, a score or how they did — there is nothing to tell. Anything else would make it the test it is not.', RED),
+    ] },
+];
+
+const LANGS = [
+  { key: 'tr', native: 'Türkçe', english: 'Turkish' },
+  { key: 'ar', native: 'العربية', english: 'Arabic' },
+  { key: 'ru', native: 'Русский', english: 'Russian' },
+  { key: 'fa', native: 'فارسی', english: 'Persian' },
+  { key: 'uk', native: 'Українська', english: 'Ukrainian' },
+  { key: 'en', native: 'English', english: 'English' },
+  { key: 'other', native: 'My language is not here', english: 'Continue in English · the centre can help you in person', fallback: true },
+];
+
+class Component extends DCLogic {
+  state = { i: 3, lang: 'tr' };
+
+  renderVals() {
+    const i = this.state.i;
+    const s = SCREENS[i];
+    const CTA = {
+      primary: { ctaBg: WARM, ctaInk: 'oklch(98.5% 0.006 90)', ctaBorder: WARM },
+      danger: { ctaBg: RED, ctaInk: 'oklch(98.5% 0.006 90)', ctaBorder: RED },
+      plain: { ctaBg: CARD, ctaInk: INK, ctaBorder: BORDER },
+    };
+
+    return {
+      nav: SCREENS.map((x, k) => {
+        const on = k === i;
+        return {
+          n: String(k + 1), label: x.label,
+          pick: () => this.setState({ i: k }),
+          bg: on ? CARD : 'transparent',
+          border: on ? TEAL : BORDER,
+          ink: on ? TEAL : INK,
+          numInk: on ? TEAL : MUTED,
+        };
+      }),
+      s: Object.assign({}, s, CTA[s.ctaTone], {
+        isLang: !!s.isLang, isConsent: !!s.isConsent, isForm: !!s.isForm,
+        isRec: !!s.isRec, isDone: !!s.isDone, sub: s.sub || '', prompts: s.prompts || null,
+      }),
+      langs: LANGS.map(l => {
+        const on = l.key === this.state.lang;
+        return {
+          native: l.native, english: l.english,
+          pick: () => this.setState({ lang: l.key }),
+          bg: on ? tint(WARM, 8) : CARD,
+          border: on ? WARM : BORDER,
+          ink: on ? WARM : INK,
+          tick: on ? '✓' : '',
+          tickInk: WARM,
+        };
+      }),
+      terms: [
+        'Bu kayıt, öğretmen adaylarının eğitimi için merkez tarafından kullanılacaktır. — This recording will be used by the centre for teacher training.',
+        'Öğretmen adayları ödevlerinde kullanabilir. Başka kimseyle paylaşılmaz. — Trainee teachers may use it in their coursework. It is not shared with anyone else.',
+        'Bu bir sınav değildir. Sonuç verilmez. — This is not a test. No result is given.',
+        'Ses kaydı için ayrıca onay veriyorum. — I separately agree to being recorded.',
+      ],
+      questions: [
+        { q: 'How long have you studied English?', a: 'Six years at school, and one year at a course.', h: '46px', ink: INK, style: 'normal' },
+        { q: 'Why are you learning English now?', a: 'My company opened an office in Rotterdam. I am afraid of the video calls.', h: '62px', ink: INK, style: 'normal' },
+        { q: 'What do you find hardest?', a: 'Type here…', h: '46px', ink: 'oklch(72% 0.012 85)', style: 'italic' },
+      ],
+      bars: ['9px', '17px', '26px', '14px', '31px', '21px', '11px', '24px', '8px'],
+      done: [
+        { title: 'Nothing to remember', text: 'No account, no password. We will email you.', ink: TEAL, bg: tint(TEAL, 6), border: mix(TEAL, 24) },
+        { title: 'You can change your mind', text: 'Email the centre and we will delete everything.', ink: MUTED, bg: 'oklch(96.4% 0.014 85)', border: BORDER },
+        { title: 'Thank you, genuinely', text: 'Teachers learn to teach because people like you turn up.', ink: GOLD, bg: tint(GOLD, 7), border: mix(GOLD, 26) },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

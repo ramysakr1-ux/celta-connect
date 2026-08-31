@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+<div style="position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: oklch(45% 0.15 27); color: oklch(99.5% 0.004 90); font-family: Karla, Helvetica, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; padding: 10px 20px; display: flex; align-items: center; gap: 14px;">
+  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: oklch(99.5% 0.004 90); color: oklch(45% 0.15 27); flex: none;">SUPERSEDED — do not build from this</div>
+  <div style="font-weight: 400;">Replaced by <strong style="font-weight: 700;">Assignment Flow.dc.html and AI Marking.dc.html</strong>. Kept as history. See specs/design-files.md.</div>
+</div>
+<div style="height: 40px;"></div>
+
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 44px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 12px; max-width: 940px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · written assignments · marking and resubmission</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">Mark section by section, and show the resubmission beside the original.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Two screens: the tutor marking a first submission, and a trainee's resubmission where what changed has to be obvious. Section titles, instructions and status labels are your own — <span style="font-weight: 600;">Pass</span>, <span style="font-weight: 600;">Resubmission required</span>, <span style="font-weight: 600;">Under Review</span>, <span style="font-weight: 600;">Draft</span>.</div>
+  </div>
+
+  <!-- 1a -->
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Tutor marking — first submission</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Sara Yılmaz · Assignment 2 · first submission · 842 words</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">Language Related Tasks</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; border-radius: 999px; background: oklch(93% 0.045 235); color: oklch(42% 0.095 250); font-size: 12px; font-weight: 600;">
+            <div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>
+            <div>Under Review</div>
+          </div>
+          <div style="font-size: 12px; color: oklch(51% 0.017 70);">Submitted 22 Nov · due 22 Nov</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 420px; gap: 16px; align-items: start;">
+
+        <div style="display: flex; flex-direction: column; gap: 12px; min-width: 0;">
+          <sc-for list="{{ sections }}" as="s" hint-placeholder-count="2">
+            <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 11px;">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 14px;">
+                <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; line-height: 1.25; color: oklch(23.5% 0.017 65);">{{ s.title }}</div>
+                <div style="display: flex; align-items: center; gap: 10px; flex: none;">
+                  <div style="font-size: 11px; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">{{ s.words }} words</div>
+                  <div style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{ s.markBg }}; color: {{ s.markInk }}; cursor: pointer;">
+                    <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+                    <div>{{ s.mark }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="font-size: 12px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty; padding: 11px 13px; border-radius: 6px; background: oklch(96.4% 0.014 85); border: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 60%, transparent);">{{ s.response }}</div>
+
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                  <div style="font-size: 12px; color: oklch(51% 0.017 70);">Comment on this section</div>
+                  <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="height: 22px; padding: 0 9px; border-radius: 999px; border: 1px solid oklch(88% 0.016 82); font-size: 10px; font-weight: 600; color: oklch(51% 0.017 70); display: flex; align-items: center; cursor: pointer;">Direct</div>
+                    <div style="height: 22px; padding: 0 9px; border-radius: 999px; border: 1px solid oklch(88% 0.016 82); font-size: 10px; font-weight: 600; color: oklch(51% 0.017 70); display: flex; align-items: center; cursor: pointer;">Supportive</div>
+                    <div title="Dictate" style="width: 22px; height: 22px; border-radius: 999px; border: 1px solid oklch(88% 0.016 82); display: flex; align-items: center; justify-content: center; color: oklch(51% 0.017 70); cursor: pointer;">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 19v3"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><rect x="9" y="2" width="6" height="13" rx="3"></rect>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                <div style="min-height: 56px; border: 1px solid {{ s.commentBorder }}; border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 8px 10px; font-size: 12px; line-height: 1.5; color: {{ s.commentInk }};">{{ s.comment }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; position: sticky; top: 0;">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Assessment criteria · 1st submission</div>
+            <sc-for list="{{ progress }}" as="p" hint-placeholder-count="2">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent);">
+                <div style="font-size: 12px; color: oklch(23.5% 0.017 65); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ p.title }}</div>
+                <div style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{ p.bg }}; color: {{ p.ink }}; flex: none;">{{ p.state }}</div>
+              </div>
+            </sc-for>
+            <div style="font-size: 11px; font-style: italic; line-height: 1.5; color: oklch(51% 0.017 70);">Any criterion Not met on the first submission means Resubmission Needed. These ticks are what the cover sheet prints.</div>
+          </div>
+
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 32%, transparent); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; color: oklch(23.5% 0.017 65);">Return this assignment</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <sc-for list="{{ outcomes }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ o.pick }}" style="padding: 11px 12px; border-radius: 6px; border: 1px solid {{ o.border }}; background: {{ o.bg }}; display: flex; flex-direction: column; gap: 3px; cursor: pointer;">
+                  <div style="display: flex; align-items: center; gap: 9px;">
+                    <div style="width: 13px; height: 13px; border-radius: 999px; border: 1px solid {{ o.dotBorder }}; background: {{ o.dotBg }}; flex: none;"></div>
+                    <div style="font-size: 13px; font-weight: 600; color: {{ o.ink }};">{{ o.label }}</div>
+                  </div>
+                  <div style="font-size: 11px; line-height: 1.45; color: oklch(51% 0.017 70); padding-left: 22px;">{{ o.note }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ showGradeNote }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="font-size: 12px; color: oklch(51% 0.017 70);">Final grade note</div>
+                <div style="height: 36px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 0 11px; display: flex; align-items: center; font-size: 12px; color: oklch(23.5% 0.017 65);">Pass</div>
+              </div>
+            </sc-if>
+
+            <div style="height: 36px; border-radius: 6px; background: {{ ctaBg }}; color: oklch(98.5% 0.006 90); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer;">{{ cta }}</div>
+            <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70);">{{ ctaNote }}</div>
+          </div>
+
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 15px 16px; display: flex; flex-direction: column; gap: 9px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">The rules, on the screen</div>
+            <sc-for list="{{ rules }}" as="r" hint-placeholder-count="4">
+              <div style="display: flex; align-items: flex-start; gap: 9px;">
+                <div style="width: 5px; height: 5px; border-radius: 50%; background: {{ r.dot }}; margin-top: 6px; flex: none;"></div>
+                <div style="font-size: 11px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ r.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1b -->
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1b</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Trainee resubmitting — original beside the rewrite</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Assignment 2 · resubmission · one opportunity only</div>
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">Language Related Tasks</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; border-radius: 999px; background: oklch(93% 0.055 25); color: oklch(45% 0.16 27); font-size: 12px; font-weight: 600;">
+            <div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>
+            <div>Resubmission required</div>
+          </div>
+          <div style="height: 32px; padding: 0 14px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 12px; font-weight: 600; display: flex; align-items: center; cursor: pointer;">Submit resubmission</div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: flex-start; gap: 11px; padding: 12px 14px; border-radius: 6px; background: color-mix(in oklab, oklch(60% 0.11 70) 11%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 28%, transparent);">
+        <div style="width: 6px; height: 6px; border-radius: 50%; background: oklch(60% 0.11 70); margin-top: 6px; flex: none;"></div>
+        <div style="font-size: 13px; line-height: 1.6; color: oklch(23.5% 0.017 65);">Use the green boxes for your second submission — the white boxes and your tutor’s comments stay exactly as they were. Whether you pass on first or second submission does not affect your certificate grade in any way, but you must pass 3 out of 4 assignments to be eligible for a PASS.</div>
+      </div>
+
+      <sc-for list="{{ resub }}" as="s" hint-placeholder-count="2">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 14px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ s.title }}</div>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{ s.bg }}; color: {{ s.ink }}; flex: none;">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: currentColor;"></div>
+              <div>{{ s.state }}</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start;">
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">1st submission</div>
+              <div style="min-height: 84px; padding: 10px 12px; border-radius: 6px; background: oklch(96.4% 0.014 85); border: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent); font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70);">{{ s.first }}</div>
+              <sc-if value="{{ s.comment }}" hint-placeholder-val="{{ false }}">
+                <div style="padding: 10px 12px; border-radius: 6px; background: color-mix(in oklab, oklch(92% 0.028 190) 35%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 20%, transparent); display: flex; flex-direction: column; gap: 3px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(38% 0.072 195);">Tutor comment</div>
+                    <div style="display: inline-flex; align-items: center; gap: 5px; padding: 1px 7px; border-radius: 999px; background: oklch(99.2% 0.005 90); border: 1px solid color-mix(in oklab, oklch(38% 0.072 195) 25%, transparent); font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(38% 0.072 195);">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                      <div>Read-only</div>
+                    </div>
+                  </div>
+                  <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ s.comment }}</div>
+                </div>
+              </sc-if>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: {{ s.rewriteLabelInk }};">{{ s.rewriteLabel }}</div>
+                <div style="font-size: 11px; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">{{ s.words }}</div>
+              </div>
+              <div style="min-height: 84px; padding: 10px 12px; border-radius: 6px; background: oklch(96.4% 0.014 85); border: 1px solid {{ s.rewriteBorder }}; font-size: 12px; line-height: 1.55; color: {{ s.rewriteInk }};">{{ s.rewrite }}</div>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+        <sc-for list="{{ notes }}" as="n" hint-placeholder-count="8">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 13px 15px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1c -->
+  <div id="1c" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1c</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">All four assignments — one layout, four section sets</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+
+      <div style="font-size: 13px; line-height: 1.6; color: oklch(51% 0.017 70); max-width: 940px; text-wrap: pretty;">The screen is one component driven by the published template's own sections, so all four render identically — section title, instruction, response box, per-section comment. What differs is the section set and, for three of them, one thing the section list alone doesn't carry.</div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; align-items: start;">
+        <sc-for list="{{ assignments }}" as="a" hint-placeholder-count="4">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ a.border }}; border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ a.code }}</div>
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 17px; font-weight: 600; line-height: 1.2; color: oklch(23.5% 0.017 65);">{{ a.name }}</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <sc-for list="{{ a.sections }}" as="s" hint-placeholder-count="4">
+                <div style="display: flex; align-items: flex-start; gap: 9px; padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent);">
+                  <div style="font-size: 11px; font-weight: 600; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums; flex: none;">{{ s.n }}</div>
+                  <div style="font-size: 12px; line-height: 1.45; color: oklch(23.5% 0.017 65);">{{ s.title }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="padding: 11px 12px; border-radius: 6px; background: {{ a.noteBg }}; border: 1px solid {{ a.noteBorder }}; display: flex; flex-direction: column; gap: 4px;">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: {{ a.noteInk }};">{{ a.noteLabel }}</div>
+              <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ a.note }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+        <sc-for list="{{ typeNotes }}" as="n" hint-placeholder-count="3">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 13px 15px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1d -->
+  <div id="1d" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1d</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Assignment cover sheet — assembled, not typed</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">the page that goes in the portfolio</div>
+      <div style="display: flex; align-items: center; gap: 4px; margin-left: 8px;">
+        <sc-for list="{{ sheetTabs }}" as="t" hint-placeholder-count="4">
+          <div onClick="{{ t.pick }}" style="height: 26px; padding: 0 11px; border-radius: 999px; display: flex; align-items: center; font-size: 11px; font-weight: 600; cursor: pointer; background: {{ t.bg }}; color: {{ t.ink }}; border: 1px solid {{ t.border }};">{{ t.label }}</div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: grid; grid-template-columns: 794px 1fr; gap: 20px; align-items: start;">
+
+      <div style="width: 794px; box-sizing: border-box; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); padding: 44px 52px 40px; display: flex; flex-direction: column; gap: 22px;">
+
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding-bottom: 16px; border-bottom: 1px solid oklch(23.5% 0.017 65);">
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: oklch(51% 0.017 70);">Cambridge CELTA · written assignment</div>
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 25px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">{{ sheetTitle }}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 3px; flex: none; padding-top: 4px;">
+            <svg width="30" height="17" viewBox="8 30 104 60" fill="none">
+              <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(60% 0.11 70)" stroke-width="9" stroke-linecap="round"></path>
+              <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(23.5% 0.017 65)" stroke-width="9" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 28px;">
+          <sc-for list="{{ coverFacts }}" as="f" hint-placeholder-count="6">
+            <div style="display: flex; align-items: baseline; gap: 10px; padding: 6px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+              <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70); width: 116px; flex: none;">{{ f.label }}</div>
+              <div style="font-size: 12px; color: oklch(23.5% 0.017 65);">{{ f.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Assessment criteria</div>
+          <div style="border: 1px solid oklch(88% 0.016 82);">
+            <div style="display: grid; grid-template-columns: 1fr 84px 84px; background: oklch(96.4% 0.014 85); border-bottom: 1px solid oklch(88% 0.016 82);">
+              <div style="padding: 7px 10px; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">Criterion</div>
+              <div style="padding: 7px 10px; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70); text-align: center; line-height: 1.3;">1st sub<br>(Met/Not met)</div>
+              <div style="padding: 7px 10px; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70); text-align: center; line-height: 1.3;">2nd sub<br>(Met/Not met)</div>
+            </div>
+            <sc-for list="{{ coverCriteria }}" as="c" hint-placeholder-count="5">
+              <div style="display: grid; grid-template-columns: 1fr 84px 84px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 50%, transparent);">
+                <div style="padding: 9px 10px; font-size: 11px; line-height: 1.45; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ c.text }}</div>
+                <div style="padding: 9px 10px; font-size: 11px; font-weight: 600; text-align: center; color: {{ c.firstInk }}; border-left: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 50%, transparent);">{{ c.first }}</div>
+                <div style="padding: 9px 10px; font-size: 11px; font-weight: 600; text-align: center; color: {{ c.secondInk }}; background: {{ c.secondBg }}; border-left: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 50%, transparent);">{{ c.second }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size: 10px; color: oklch(51% 0.017 70);">Green column = second submission, as in the Word original.</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; border: 1px solid oklch(88% 0.016 82);">
+          <sc-for list="{{ coverSignRow }}" as="r" hint-placeholder-count="3">
+            <div style="padding: 9px 11px; border-right: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 50%, transparent); display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ r.label }}</div>
+              <div style="font-size: 11px; color: {{ r.ink }};">{{ r.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Outcome</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 7px;">
+            <sc-for list="{{ coverOutcomes }}" as="o" hint-placeholder-count="4">
+              <div style="display: flex; align-items: center; gap: 9px; padding: 8px 11px; border: 1px solid {{ o.border }}; background: {{ o.bg }};">
+                <div style="width: 13px; height: 13px; border: 1px solid {{ o.boxBorder }}; background: {{ o.boxBg }}; display: flex; align-items: center; justify-content: center; flex: none;">
+                  <sc-if value="{{ o.ticked }}" hint-placeholder-val="{{ false }}">
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="oklch(99.2% 0.005 90)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                  </sc-if>
+                </div>
+                <div style="font-size: 11px; font-weight: {{ o.weight }}; color: {{ o.ink }};">{{ o.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Overall comment on 1st submission</div>
+          <div style="border: 1px solid oklch(88% 0.016 82);">
+            <sc-for list="{{ coverItemComments }}" as="c" hint-placeholder-count="4">
+              <div style="display: grid; grid-template-columns: 128px 1fr; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 50%, transparent);">
+                <div style="padding: 9px 11px; font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); background: oklch(96.4% 0.014 85);">{{ c.label }}</div>
+                <div style="padding: 9px 11px; font-size: 11px; line-height: 1.5; color: {{ c.ink }}; border-left: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 50%, transparent);">{{ c.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Overall comment on 2nd submission</div>
+          <div style="min-height: 52px; padding: 10px 12px; border: 1px solid oklch(88% 0.016 82); background: color-mix(in oklab, oklch(93.5% 0.008 85) 22%, oklch(99.2% 0.005 90)); font-size: 11px; line-height: 1.55; color: oklch(23.5% 0.017 65);">{{ coverSecondComment }}</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Declaration</div>
+          <sc-for list="{{ coverDeclaration }}" as="d" hint-placeholder-count="6">
+            <div style="display: flex; align-items: flex-start; gap: 9px;">
+              <div style="width: 11px; height: 11px; border: 1px solid oklch(23.5% 0.017 65); background: oklch(23.5% 0.017 65); margin-top: 3px; flex: none; display: flex; align-items: center; justify-content: center;">
+                <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="oklch(99.2% 0.005 90)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+              </div>
+              <div style="font-size: 11px; line-height: 1.5; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ d }}</div>
+            </div>
+          </sc-for>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22px; padding-top: 14px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="height: 26px; border-bottom: 1px solid oklch(23.5% 0.017 65); display: flex; align-items: flex-end; font-size: 12px; color: oklch(23.5% 0.017 65);">Accepted online · 22 Nov 2023, 18:41</div>
+              <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Candidate</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="height: 26px; border-bottom: 1px solid oklch(23.5% 0.017 65); display: flex; align-items: flex-end; font-size: 12px; color: oklch(23.5% 0.017 65);">Ramy Sakr · 24 Nov 2023</div>
+              <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Tutor</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; font-weight: 600; color: oklch(23.5% 0.017 65);">Nothing on it is typed twice</div>
+          <sc-for list="{{ coverSources }}" as="s" hint-placeholder-count="5">
+            <div style="display: flex; align-items: flex-start; gap: 9px; padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 40%, transparent);">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(38% 0.072 195); margin-top: 6px; flex: none;"></div>
+              <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ s }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 9px;">
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Worth deciding</div>
+          <sc-for list="{{ coverQuestions }}" as="q" hint-placeholder-count="3">
+            <div style="display: flex; align-items: flex-start; gap: 9px;">
+              <div style="width: 5px; height: 5px; border-radius: 50%; background: oklch(60% 0.11 70); margin-top: 6px; flex: none;"></div>
+              <div style="font-size: 12px; line-height: 1.5; color: oklch(23.5% 0.017 65);">{{ q }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="height: 36px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer;">Export cover sheet + assignment PDF</div>
+        <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70);">Cover sheet first, then the submitted work, then the resubmission if there was one — one file per assignment for the portfolio.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:2000}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)'; // reserved: brand mark + above-standard grade only
+const AMBER = 'oklch(44% 0.095 68)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const RED = 'oklch(45% 0.16 27)';
+const AMBER = 'oklch(44% 0.1 68)';
+const CARD = 'oklch("99.2% 0.005 90")';
+const BORDER = 'oklch(88% 0.016 82)';
+
+// Criteria and comment slots verbatim from the 2024 briefs' cover sheets.
+const SHEETS = {
+  fol: {
+    tab: '1 · FOL', title: 'Focus on the Learner',
+    assignment: '1 · Focus on the Learner',
+    criteria: [
+      { text: 'Showing awareness of how a learner’s background, previous learning experience and learning preferences affect learning.', first: 'Met', second: '—' },
+      { text: 'Identifying the learner’s language/skills needs', first: 'Met', second: '—' },
+      { text: 'Correctly using terminology relating to the description of language systems and language skills.', first: 'Met', second: '—' },
+      { text: 'Selecting appropriate material and/or resources (at least one of which must be from published materials) to aid the learners’ language development.', first: 'Met', second: '—' },
+      { text: 'Providing a rationale for using specific activities with the learners in mind.', first: 'Met', second: '—' },
+      { text: 'Finding, selecting and referencing information from one or more sources, within the body of the assignment.', first: 'Met', second: '—' },
+      { text: 'Using written language that is clear, accurate and appropriate to the task', first: 'Met', second: '—' },
+      { text: 'The assignment meets the 750-1,000-word count requirement', first: 'Met', second: '—' },
+    ],
+    slots: [
+      { label: 'Learner profile', text: 'A clear picture of the learner, and the learning-preference section is genuinely observed rather than generic.' },
+      { label: 'Grammar difficulty', text: 'Two good examples from TP2 and TP3. Name the source you consulted for the analysis.' },
+      { label: 'Pronunciation difficulty', text: 'Well chosen — the /θ/ substitution is a real pattern for this learner, not a one-off.' },
+      { label: 'Activities & rationale', text: 'The published activity is credited properly. The rationale for the second could say more about this learner specifically.' },
+    ],
+    outcome: 'pass',
+  },
+  lrt: {
+    tab: '2 · LRT', title: 'Language Related Tasks',
+    assignment: '2 · Language Related Tasks',
+    criteria: [
+      { text: 'Analyses language correctly', first: 'Met', second: '—' },
+      { text: 'Uses terminology correctly', first: 'Met', second: '—' },
+      { text: 'Shows evidence of having accessed appropriate reference materials, i.e. give the name of at least one book that you have used to research the area', first: 'Not met', second: 'Met' },
+      { text: 'Uses clear, accurate and appropriate language', first: 'Not met', second: 'Met' },
+      { text: 'The assignment meets the 750-1,000-word count requirement', first: 'Met', second: 'Met' },
+    ],
+    slots: [
+      { label: 'Grammar', text: 'Accurate analysis, and the timeline is the right level of detail.' },
+      { label: 'Functional language', text: 'Register is addressed but the exponent needs a context to sit in.' },
+      { label: 'Vocabulary 1', text: 'Good — the separability note on “take up” is exactly right.' },
+      { label: 'Vocabulary 2', text: 'Transcription is right; add the gradable/ungradable point you made in class.' },
+    ],
+    outcome: 'resub',
+  },
+  srt: {
+    tab: '3 · SRT', title: 'Skills Related Task',
+    assignment: '3 · Skills Related Task',
+    criteria: [
+      { text: 'Identifying receptive/productive skills that could be practised in relation to the text', first: 'Met', second: '—' },
+      { text: 'Correctly using terminology that relates to language skills and sub-skills', first: 'Met', second: '—' },
+      { text: 'Designing tasks in relation to the text with a rationale', first: 'Met', second: '—' },
+      { text: 'Finding, selecting and showing evidence of background reading in the topic area i.e. at least one sourced quote in the body of the assignment.', first: 'Met', second: '—' },
+      { text: 'Using written language that is clear, accurate and appropriate to the task', first: 'Met', second: '—' },
+      { text: 'The assignment meets the 750-1,000-word count requirement', first: 'Met', second: '—' },
+    ],
+    slots: [
+      { label: 'Text & rationale', text: 'Sensible choice for the level, and the rationale names the sub-skills it lends itself to.' },
+      { label: 'Reading task 1', text: 'A proper gist task — the time limit does the work.' },
+      { label: 'Reading task 2', text: 'Detail task follows on well. The answer key is in the appendix, as asked.' },
+      { label: 'Productive follow-up', text: 'The speaking task grows out of the text rather than being bolted on.' },
+    ],
+    outcome: 'pass',
+  },
+  lfc: {
+    tab: '4 · LFC', title: 'Lessons from the Classroom',
+    assignment: '4 · Lessons from the Classroom',
+    criteria: [
+      { text: 'Show (convincing) evidence of an ability to identify their own teaching strengths and weaknesses in the light of feedback from learners, teachers and tutors.', first: 'Met', second: '—' },
+      { text: 'Show convincing understanding of how their strengths/weaknesses can affect the learners.', first: 'Met', second: '—' },
+      { text: 'Identify ways of improving their weaknesses (one or two practical solutions).', first: 'Met', second: '—' },
+      { text: 'Show reflection on their observation of other teachers in relation to their weaknesses.', first: 'Met', second: '—' },
+      { text: 'Describe in a specific way how to develop ELT knowledge and skills beyond the course (professional development post-CELTA).', first: 'Met', second: '—' },
+      { text: 'Able to write in clear, accurate and appropriate language.', first: 'Met', second: '—' },
+      { text: 'The assignment meets the 750-1,000-word count requirement and there is clear reference to the sources used.', first: 'Met', second: '—' },
+    ],
+    slots: [
+      { label: 'Strengths', text: 'Drawn from real feedback rather than self-assessment alone — the TP3 rapport point is well evidenced.' },
+      { label: 'Areas to develop', text: 'Honest, and you connect instruction-checking to what it costs the learners.' },
+      { label: 'From observation', text: 'The point about wait time taken from the experienced-teacher observation is the strongest paragraph here.' },
+      { label: 'Post-CELTA development', text: 'Specific: a named qualification, a timeframe and a reading list. This is what the criterion asks for.' },
+    ],
+    outcome: 'pass',
+  },
+};
+const SHEET_KEYS = ['fol', 'lrt', 'srt', 'lfc'];
+
+class Component extends DCLogic {
+  state = { outcome: 'pass', sheet: 'lrt' };
+
+  renderVals() {
+    const { outcome } = this.state;
+    const pass = outcome === 'pass';
+
+    const outcome_ = (key, label, note, ink) => {
+      const on = key === outcome;
+      return {
+        label, note,
+        pick: () => this.setState({ outcome: key }),
+        ink: on ? INK : MUTED,
+        bg: on ? 'color-mix(in oklab, ' + ink + ' 9%, oklch(99.2% 0.005 90))' : 'transparent',
+        border: on ? 'color-mix(in oklab, ' + ink + ' 38%, transparent)' : BORDER,
+        dotBg: on ? ink : 'transparent',
+        dotBorder: on ? ink : BORDER,
+      };
+    };
+
+    return {
+      // The four items the 2024 LRT brief asks for: 1 grammar, 1 functional
+      // exponent, 2 vocabulary — and the cover sheet's four comment slots.
+      sections: [
+        {
+          title: 'Grammar · used to + infinitive',
+          words: '236',
+          mark: 'Pre-intermediate',
+          markBg: 'oklch(93% 0.012 85)', markInk: MUTED,
+          response: 'Used to + infinitive describes a past habit or state that is no longer true. Timeline: a bar across past time, stopping before now. Form: used to + bare infinitive, negative didn’t use to. Phonology: /ˈjuːstə/ — the weak form is what learners miss, and the /d/ disappears entirely.',
+          comment: 'Accurate analysis, and the timeline is the right level of detail.',
+          commentInk: INK,
+          commentBorder: BORDER,
+        },
+        {
+          title: 'Functional language · “Would you mind if I…?”',
+          words: '198',
+          mark: 'Intermediate',
+          markBg: 'oklch(93% 0.012 85)', markInk: MUTED,
+          response: 'Used to ask permission politely, more tentative than “Can I…?”. Form: Would you mind if I + past simple. Answering it is the trap — “no” grants permission.',
+          comment: 'Register is addressed but the exponent needs a context to sit in.',
+          commentInk: INK,
+          commentBorder: 'color-mix(in oklab, ' + AMBER + ' 40%, transparent)',
+        },
+        {
+          title: 'Vocabulary 1 · take up (a hobby)',
+          words: '221',
+          mark: 'Intermediate',
+          markBg: 'oklch(93% 0.012 85)', markInk: MUTED,
+          response: 'To start doing something regularly — a hobby, a sport, an instrument. Not “pick up”, which a learner at this level reaches for first. Separable when the object is a pronoun: take it up. /ˈteɪk ʌp/, stress on take.',
+          comment: 'Good — the separability note on “take up” is exactly right.',
+          commentInk: INK,
+          commentBorder: BORDER,
+        },
+        {
+          title: 'Vocabulary 2 · exhausted',
+          words: '187',
+          mark: 'Elementary',
+          markBg: 'oklch(93% 0.012 85)', markInk: MUTED,
+          response: 'Extremely tired — a gradable/ungradable distinction worth checking, since it takes absolutely rather than very. /ɪɡˈzɔːstɪd/, stress on the second syllable.',
+          comment: 'Write or dictate…',
+          commentInk: MUTED,
+          commentBorder: 'color-mix(in oklab, ' + AMBER + ' 40%, transparent)',
+        },
+      ],
+      progress: [
+        { title: 'Analyses language correctly', state: 'Met', bg: 'oklch(93.5% 0.008 85)', ink: GREEN },
+        { title: 'Uses terminology correctly', state: 'Met', bg: 'oklch(93.5% 0.008 85)', ink: GREEN },
+        { title: 'Accessed reference materials', state: 'Not met', bg: 'oklch(93.5% 0.08 85)', ink: AMBER },
+        { title: 'Clear, accurate, appropriate language', state: 'Not met', bg: 'oklch(93.5% 0.08 85)', ink: AMBER },
+        { title: '750–1,000 words · 842', state: 'Met', bg: 'oklch(93.5% 0.008 85)', ink: GREEN },
+      ],
+      outcomes: [
+        outcome_('pass', 'Return with a pass', 'Marks this round approved. The trainee sees your comments and the grade note.', GREEN),
+        outcome_('resub', 'Return for resubmission', 'Opens one resubmission — the only one allowed. Your comments carry across beside the original.', AMBER),
+        outcome_('fail', 'Record a fail', 'Only after a resubmission. Still unsatisfactory at this point and the assignment is graded Fail — it cannot be reopened.', RED),
+      ],
+      showGradeNote: pass,
+      cta: outcome === 'pass' ? 'Return with a pass' : outcome === 'resub' ? 'Return for resubmission' : 'Record a fail',
+      ctaBg: outcome === 'pass' ? TEAL : outcome === 'resub' ? 'oklch(23.5% 0.017 65)' : RED,
+      ctaNote: outcome === 'pass'
+        ? 'Releases your comments and the grade note to the trainee.'
+        : outcome === 'resub'
+          ? 'The trainee gets one rewrite. Sections you did not comment on carry over untouched.'
+          : 'Fail one assignment and a Pass A is no longer available; fail two and no Pass grade can be awarded. Double-marked before recording.',
+      rules: [
+        { text: 'Every criterion is marked Met or Not met, separately for the 1st and 2nd submission.', dot: TEAL },
+        { text: 'Word count is a criterion in its own right: 750–1,000 words.', dot: TEAL },
+        { text: 'One resubmission per assignment — Pass on Resubmission or Fail on Resubmission.', dot: MUTED },
+        { text: 'Passing on first or second submission does not affect the certificate grade.', dot: MUTED },
+        { text: 'A candidate must pass 3 out of 4 assignments to be eligible for a PASS.', dot: RED },
+      ],
+      resub: [
+        {
+          title: 'Functional language · “Would you mind if I…?”',
+          state: 'Needs rewriting', bg: 'oklch(93% 0.055 25)', ink: RED,
+          first: 'Used to ask permission politely, more tentative than “Can I…?”. Form: Would you mind if I + past simple.',
+          comment: 'Register is addressed but the exponent needs a context to sit in, and no published source is named anywhere in the assignment.',
+          rewriteLabel: 'Your resubmission', rewriteLabelInk: TEAL,
+          rewrite: 'Write or dictate…', rewriteInk: MUTED,
+          rewriteBorder: 'color-mix(in oklab, ' + TEAL + ' 38%, transparent)',
+          words: '0 words',
+        },
+        {
+          title: 'Vocabulary 1 · take up (a hobby)',
+          state: 'Carried over', bg: 'oklch(93.5% 0.008 85)', ink: GREEN,
+          first: 'To start doing something regularly — a hobby, a sport, an instrument. Separable when the object is a pronoun: take it up.',
+          comment: '',
+          rewriteLabel: 'Unchanged', rewriteLabelInk: MUTED,
+          rewrite: 'This section passed and carries over as written. You can still edit it if you want to.',
+          rewriteInk: MUTED,
+          rewriteBorder: 'color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent)',
+          words: '468 words',
+        },
+      ],
+      assignments: [
+        {
+          code: 'Assignment 1', name: 'Focus on the Learner',
+          border: BORDER,
+          sections: ['Learner profile', 'Needs and motivation', 'Diagnosis of difficulties', 'Remedial activities'].map((title, i) => ({ n: String(i + 1), title })),
+          noteLabel: 'Needs one addition', noteInk: TEAL,
+          noteBg: 'color-mix(in oklab, oklch(92% 0.028 190) 30%, oklch(99.2% 0.005 90))',
+          noteBorder: 'color-mix(in oklab, ' + TEAL + ' 20%, transparent)',
+          note: 'Written about a real learner. The screen should name who, and let the candidate attach their interview notes or diagnostic sample as evidence.',
+        },
+        {
+          code: 'Assignment 2', name: 'Language Related Tasks',
+          border: 'color-mix(in oklab, ' + TEAL + ' 30%, transparent)',
+          sections: ['Per target item: meaning, form and phonology analysis', 'Anticipated problems and solutions per item'].map((title, i) => ({ n: String(i + 1), title })),
+          noteLabel: 'Shown in 1a and 1b', noteInk: MUTED,
+          noteBg: 'oklch(96.4% 0.014 85)', noteBorder: 'color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent)',
+          note: 'Two sections, both repeated per target item. The one case where a section is really a repeating block — worth a “+ Add item” inside each section rather than one long box.',
+        },
+        {
+          code: 'Assignment 3', name: 'Language Skills Related Tasks',
+          border: BORDER,
+          sections: ['Text rationale and justification', 'Receptive skills tasks', 'Productive skills tasks'].map((title, i) => ({ n: String(i + 1), title })),
+          noteLabel: 'Needs one addition', noteInk: TEAL,
+          noteBg: 'color-mix(in oklab, oklch(92% 0.028 190) 30%, oklch(99.2% 0.005 90))',
+          noteBorder: 'color-mix(in oklab, ' + TEAL + ' 20%, transparent)',
+          note: 'Built on an authentic text the candidate chooses. The text itself has to be attached and readable beside the tasks — a tutor cannot mark task design without it.',
+        },
+        {
+          code: 'Assignment 4', name: 'Lessons from the Classroom',
+          border: 'color-mix(in oklab, ' + AMBER + ' 30%, transparent)',
+          sections: ['Strengths', 'Areas to develop', 'Action plan'].map((title, i) => ({ n: String(i + 1), title })),
+          noteLabel: 'Different in kind', noteInk: AMBER,
+          noteBg: 'color-mix(in oklab, ' + AMBER + ' 10%, oklch(99.2% 0.005 90))',
+          noteBorder: 'color-mix(in oklab, ' + AMBER + ' 26%, transparent)',
+          note: 'Reflective, written at the end. Everything it draws on already lives here — TP feedback, self-evaluations, observations, the CELTA 5. Offer those alongside the boxes instead of asking a candidate to remember four weeks.',
+        },
+      ],
+      coverFacts: [
+        { label: 'Candidate', value: 'Sara Yılmaz' },
+        { label: 'Centre', value: 'ITI Istanbul · IT060' },
+        { label: 'Assignment', value: SHEETS[this.state.sheet].assignment },
+        { label: 'Course', value: 'C2/2024 · 6 Nov – 7 Dec 2023' },
+        { label: 'Submitted', value: SHEETS[this.state.sheet].outcome === 'resub' ? '22 Nov 2023 (1st) · 29 Nov 2023 (resubmission)' : '22 Nov 2023' },
+        { label: 'Tutor', value: 'Ramy Sakr' },
+      ],
+      sheetTitle: SHEETS[this.state.sheet].title,
+      sheetTabs: SHEET_KEYS.map(k => {
+        const on = k === this.state.sheet;
+        return {
+          label: SHEETS[k].tab,
+          pick: () => this.setState({ sheet: k }),
+          bg: on ? INK : 'transparent',
+          ink: on ? 'oklch(99.2% 0.005 90)' : MUTED,
+          border: on ? INK : BORDER,
+        };
+      }),
+      // Assessment criteria verbatim from each 2024 brief's cover sheet
+      coverCriteria: SHEETS[this.state.sheet].criteria.map(c => ({
+        text: c.text,
+        first: c.first, second: c.second,
+        firstInk: c.first === 'Not met' ? AMBER : c.first === 'Met' ? GREEN : MUTED,
+        secondInk: c.second === 'Not met' ? AMBER : c.second === 'Met' ? GREEN : MUTED,
+        secondBg: 'color-mix(in oklab, oklch(93.5% 0.008 85) 20%, oklch(99.2% 0.005 90))',
+      })),
+      coverSignRow: [
+        { label: 'Date', value: SHEETS[this.state.sheet].outcome === 'resub' ? '24 Nov 2023 · 1 Dec 2023' : '24 Nov 2023', ink: INK },
+        { label: '1st marker', value: 'Ramy Sakr', ink: INK },
+        { label: '2nd marker', value: 'Ayşe Demir', ink: INK },
+      ],
+      coverOutcomes: [
+        { label: 'Pass', ticked: SHEETS[this.state.sheet].outcome === 'pass' },
+        { label: 'Resubmission Needed', ticked: SHEETS[this.state.sheet].outcome === 'resub' },
+        { label: 'Pass on Resubmission', ticked: SHEETS[this.state.sheet].outcome === 'resub' },
+        { label: 'Fail on Resubmission', ticked: false },
+      ].map(o => ({
+        label: o.label, ticked: o.ticked,
+        weight: o.ticked ? '600' : '500',
+        ink: o.ticked ? INK : MUTED,
+        bg: o.ticked ? 'color-mix(in oklab, ' + TEAL + ' 7%, oklch(99.2% 0.005 90))' : 'transparent',
+        border: o.ticked ? 'color-mix(in oklab, ' + TEAL + ' 35%, transparent)' : BORDER,
+        boxBg: o.ticked ? TEAL : 'transparent',
+        boxBorder: o.ticked ? TEAL : 'oklch(51% 0.017 70)',
+      })),
+      // Each brief's own comment slots
+      coverItemComments: SHEETS[this.state.sheet].slots.map(s => ({ label: s.label, text: s.text, ink: INK })),
+      coverSecondComment: SHEETS[this.state.sheet].outcome === 'resub'
+        ? 'Reference now given (Scrivener, 2011) and the functional exponent has a context. Both outstanding criteria are met.'
+        : 'Not used — this assignment passed on first submission.',
+      coverDeclaration: [
+        'I confirm that I have read the instructions above.',
+        'I confirm that this assignment is my own work.',
+        'I confirm that I have referenced all resources used, including AI tools, in accordance with the guidelines above.',
+        'I hereby attach the link to the assignment-related AI conversation used for generating ideas and/or proofreading.',
+        'If AI or AI-assisted tools were used to proofread this assignment, I confirm that I have also submitted the original, unproofread draft.',
+        'I understand that any unacknowledged use of resources, including AI, will result in a failing grade for the assignment on first submission.',
+        'I confirm that my work is between 750–1,000 words.',
+      ],
+      rounds: [
+        { round: '1st submission', marker: 'Ramy Sakr', secondMarker: '', content: 'Pass', english: 'Not yet to standard', outcome: 'Resubmission', contentInk: INK, englishInk: AMBER, outcomeInk: AMBER },
+        { round: 'Resubmission', marker: 'Ramy Sakr', secondMarker: 'Ayşe Demir', content: 'Pass', english: 'Pass', outcome: 'Pass', contentInk: INK, englishInk: INK, outcomeInk: GREEN },
+      ],
+      outcomeLegend: [
+        { label: 'Pass', dot: GREEN },
+        { label: 'Resubmission required', dot: AMBER },
+        { label: 'Fail', dot: RED },
+      ],
+      coverComments: [
+        { section: '1st submission · Anticipated problems and solutions per item', text: 'Content is there, but the phonology needs full transcription and one problem per item rather than one for the set.' },
+        { section: 'Resubmission · Anticipated problems and solutions per item', text: 'Rewritten properly — each item now carries its own problem and a clarification you could actually use in class.' },
+        { section: 'Overall', text: 'A thorough analysis. The separability note on “take up” is exactly the level of detail this assignment asks for.' },
+      ],
+      coverSources: [
+        'Criteria come from the assignment’s own brief — each of the four has its own list, in its own order.',
+        'Met / Not met per criterion, per round, is what the tutor actually ticks while marking.',
+        'The outcome box follows from the criteria: any Not met on the 1st submission means Resubmission Needed.',
+        'Date, 1st marker and 2nd marker are recorded as the marking happens, not typed at the end.',
+        'The declaration is the acceptance taken at submission, with its own timestamp and AI link.',
+      ],
+      coverQuestions: [
+        'The white/green box convention is doing real work in Word. On screen I would keep the colour but let the second column stay empty until a resubmission exists.',
+        'When is a 2nd marker required — every resubmission, every fail, or a sample?',
+        'The AI declaration needs a real field: a link box, and an upload slot for the unproofread draft. Should submission be blocked without them when AI is declared?',
+        'Word count is a criterion, so the app should count it and refuse a submission outside 750–1,000 rather than let it fail on that alone.',
+      ],
+      typeNotes: [
+        { title: 'Problem/solution items get the same bullet as the lesson plan', text: 'Assignment 2\u2019s and Assignment 3\u2019s per-item anticipated problem and solution fields auto-start each line with \u2022 and carry it on at Enter, same behaviour as Procedure and Marker Sentence(s) on the lesson plan \u2014 these are genuinely one-per-item lists, not prose. The rest of each item\u2019s analysis (meaning, form, phonology) stays plain prose.' },
+        { title: 'One component, four templates', text: 'Nothing about the marking screen is per-assignment: the sections come from the published template, so a centre that rewords its briefs changes the content without touching the UI.' },
+        { title: 'Attachments are the real difference', text: 'Two of the four are written about something external — a learner, a text. Those need a materials slot beside the sections; the other two do not.' },
+        { title: 'Lessons from the Classroom is the odd one', text: 'It is the only assignment assessed on reflection rather than analysis, and the only one that can be pre-populated from work already in the system. Same layout, but the sidebar earns its place.' },
+      ],
+      notes: [
+        { title: 'The repo template predates the 2024 brief', text: 'The code’s LRT skeleton has two generic sections; the brief asks for four named items — 1 grammar, 1 functional exponent, 2 vocabulary, chosen from a list with level constraints (2 lower, 2 intermediate). These screens follow the brief, and the item picker with its level rule still needs building.' },
+        { title: 'Marking is per criterion, not per section', text: 'Ticking the brief’s own criteria Met/Not met is what the cover sheet prints. Per-item comments are separate, and land in the sheet’s Grammar / Functional language / Vocabulary slots.' },
+        { title: 'The outcome is a choice, not two buttons', text: 'Two submit buttons side by side make a one-way, one-chance decision look symmetrical. One radio pair, then one button that says what it will do.' },
+        { title: 'The grade note appears only when it applies', text: 'Today the field is always there with “(only used for Return with a pass)” in its label. Show it when pass is selected and the label can just say what it is.' },
+        { title: 'Cambridge’s rules sit on the screen', text: 'One resubmission; fail one and no Pass A; fail two and no Pass. A tutor deciding between the two outcomes should not have to remember which consequence they are triggering.' },
+        { title: 'Resubmission shows both sides', text: 'Original left, rewrite right, tutor comment under the original. Today the first submission and its comment sit stacked above the new box, so nothing lines up.' },
+        { title: 'Passed sections say they carry over', text: 'A trainee resubmitting needs to know which sections are done. Marking them “carried over” and dimming them keeps the whole assignment visible without inviting a pointless rewrite.' },
+        { title: 'Tutor comments are read-only to the trainee', text: 'They can read every comment on their own work but never edit one — the comment panel carries a read-only lock so it is obvious at a glance which side of the screen belongs to whom.' },
+        { title: 'Submitting locks the responses', text: 'Once submitted, a trainee’s boxes lock until the tutor returns the round. On a resubmission the first submission is permanently read-only — it is the record of what was originally handed in.' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

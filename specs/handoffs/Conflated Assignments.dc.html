@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 52px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 13px; max-width: 980px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · assignments in parts</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 36px; font-weight: 600; line-height: 1.14; color: oklch(23.5% 0.017 65);">Criteria are what pass or fail. Parts are only how the work arrives.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">To pass an assignment a candidate must meet every criterion, and each assignment may be resubmitted once. Staging Assignment 1 into a learner profile and then the tasks changes when the work lands, not how it is judged — the outcome is one verdict over one criteria set, and a resubmission addresses the criteria that were not met, wherever in the document they sit.</div>
+  </div>
+
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">The tutor's view, through four states</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70);">click through them</div>
+    </div>
+
+    <div style="background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 22px 24px; display: flex; flex-direction: column; gap: 18px;">
+
+      <div style="display: flex; align-items: center; gap: 9px;">
+        <sc-for list="{{ stages }}" as="s" hint-placeholder-count="4">
+          <div onClick="{{ s.pick }}" style="padding: 10px 15px; border-radius: 6px; border: 1px solid {{ s.border }}; background: {{ s.bg }}; display: flex; flex-direction: column; gap: 2px; cursor: pointer;">
+            <div style="font-size: 12.5px; font-weight: 700; color: {{ s.ink }};">{{ s.label }}</div>
+            <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ s.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; align-items: start;">
+
+        <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 8px; padding: 22px 24px; display: flex; flex-direction: column; gap: 17px;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid oklch(88% 0.016 82);">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Assignment 1 · Focus on the Learner</div>
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">Aylin Koç</div>
+              <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">IT059 C2/2026 · Group B</div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: none;">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: {{ head.chipBg }}; color: {{ head.chipInk }}; border: 1px solid {{ head.chipBorder }};">{{ head.chip }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70); text-align: right;">{{ head.chipSub }}</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 11px;">
+            <sc-for list="{{ parts }}" as="p" hint-placeholder-count="2">
+              <div style="border: 1px solid {{ p.border }}; border-left: 3px solid {{ p.spine }}; border-radius: 6px; background: {{ p.bg }}; padding: 15px 17px; display: flex; flex-direction: column; gap: 11px;">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+                  <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: {{ p.eyebrowInk }};">{{ p.eyebrow }}</div>
+                    <div style="font-size: 15px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ p.title }}</div>
+                    <div style="font-size: 12px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ p.meta }}</div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none;">
+                    <div style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: {{ p.stateBg }}; color: {{ p.stateInk }}; border: 1px solid {{ p.stateBorder }};">{{ p.state }}</div>
+                    <div style="font-size: 10.5px; color: oklch(51% 0.017 70);">{{ p.stateSub }}</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                  <sc-for list="{{ p.criteria }}" as="c" hint-placeholder-count="3">
+                    <div style="font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 4px; background: {{ c.bg }}; color: {{ c.ink }}; border: 1px solid {{ c.border }};">{{ c.label }}</div>
+                  </sc-for>
+                </div>
+
+                <sc-if value="{{ p.hasFeedback }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding-top: 9px; border-top: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 60%, transparent); font-size: 12px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ p.feedback }}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 9px; padding: 15px 17px; border-radius: 6px; background: {{ outcome.bg }}; border: 1px solid {{ outcome.border }};">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: {{ outcome.ink }};">{{ outcome.head }}</div>
+            <div style="font-size: 13px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ outcome.text }}</div>
+            <div style="display: flex; align-items: center; gap: 10px; padding-top: 4px;">
+              <div style="height: 32px; padding: 0 15px; border-radius: 6px; background: {{ outcome.ctaBg }}; color: {{ outcome.ctaInk }}; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; cursor: {{ outcome.ctaCursor }}; border: 1px solid {{ outcome.ctaBorder }};">{{ outcome.cta }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ outcome.ctaNote }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 17px 19px; display: flex; flex-direction: column; gap: 11px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: oklch(51% 0.017 70);">Where this stands</div>
+            <sc-for list="{{ portfolio }}" as="p" hint-placeholder-count="4">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent);">
+                <div style="font-size: 12px; color: oklch(23.5% 0.017 65);">{{ p.k }}</div>
+                <div style="font-size: 12px; font-weight: 600; color: {{ p.ink }}; text-align: right;">{{ p.v }}</div>
+              </div>
+            </sc-for>
+            <div style="font-size: 11.5px; font-style: italic; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">One row in the portfolio, both parts attached to it. The count of four assignments never changes.</div>
+          </div>
+
+          <sc-for list="{{ notes }}" as="n" hint-placeholder-count="4">
+            <div style="background: oklch(99.2% 0.005 90); border: 1px solid {{ n.border }}; border-radius: 6px; padding: 15px 17px; display: flex; flex-direction: column; gap: 6px;">
+              <div style="font-size: 12px; font-weight: 700; color: {{ n.labelInk }};">{{ n.label }}</div>
+              <div style="font-size: 12px; line-height: 1.6; color: oklch(23.5% 0.017 65); text-wrap: pretty;">{{ n.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width: 1020px; display: flex; flex-direction: column; gap: 11px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(51% 0.017 70);">Why it is modelled this way</div>
+    <div style="font-size: 14px; line-height: 1.75; color: oklch(23.5% 0.017 65); text-wrap: pretty;">Because criteria are the unit Cambridge assesses and parts are a centre's scheduling convenience, the app stores one criteria set, one verdict and one resubmission per assignment — and treats parts as an attribute of each criterion rather than a thing with a verdict of its own. That means a centre can stage an assignment, un-stage it, or move a criterion between parts without any of it touching how the assignment is marked or reported.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:1180}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const AMBER = 'oklch(44% 0.095 68)'; // was AMBER -- "in progress/awaiting" is an attention state, not a grade or brand mark
+const RED = 'oklch(45% 0.16 27)';
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const CARD = 'oklch(99.2% 0.005 90)';
+const BORDER = 'oklch(88% 0.016 82)';
+const mix = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, transparent)';
+const tint = (c, p) => 'color-mix(in oklab, ' + c + ' ' + p + '%, ' + CARD + ')';
+
+const crit = (label, tone) => ({
+  label,
+  bg: tone === 'met' ? tint(GREEN, 12) : tone === 'not' ? tint(RED, 12) : CARD,
+  ink: tone === 'met' ? GREEN : tone === 'not' ? RED : MUTED,
+  border: tone === 'met' ? mix(GREEN, 34) : tone === 'not' ? mix(RED, 34) : BORDER,
+});
+
+const TONE = {
+  waiting: { bg: CARD, border: BORDER, spine: 'oklch(90% 0.010 85)', eyebrowInk: MUTED,
+             stateBg: CARD, stateInk: MUTED, stateBorder: BORDER },
+  in: { bg: tint(AMBER, 8), border: mix(AMBER, 30), spine: AMBER, eyebrowInk: 'oklch(46% 0.11 62)',
+        stateBg: tint(AMBER, 15), stateInk: 'oklch(46% 0.11 62)', stateBorder: mix(AMBER, 38) },
+  pass: { bg: tint(GREEN, 8), border: mix(GREEN, 30), spine: GREEN, eyebrowInk: GREEN,
+          stateBg: tint(GREEN, 14), stateInk: GREEN, stateBorder: mix(GREEN, 36) },
+  fail: { bg: tint(RED, 8), border: mix(RED, 32), spine: RED, eyebrowInk: RED,
+          stateBg: tint(RED, 13), stateInk: RED, stateBorder: mix(RED, 38) },
+};
+
+const P1 = { eyebrow: 'Part 1 · due 17 Nov', title: 'Learner profile' };
+const P2 = { eyebrow: 'Part 2 · due 24 Nov', title: 'Tasks chosen for the learner' };
+const C1 = ['1a Background', '1b Needs and strengths', '1c Evidence'];
+const C2 = ['1d Task choice', '1e Rationale'];
+
+const STAGES = {
+  waiting: {
+    label: 'Part 1 in', sub: 'Part 2 not yet due',
+    chip: 'Awaiting Part 2', chipTone: 'amber', chipSub: '3 of 5 criteria submitted',
+    parts: [
+      Object.assign({}, P1, { tone: 'in', meta: 'Submitted 16 Nov, 21:04 · 782 words · plagiarism check clear',
+        state: '3 criteria', stateSub: 'evidence in', criteria: C1.map(c => crit(c, 'pending')) }),
+      Object.assign({}, P2, { tone: 'waiting', meta: 'Not yet submitted · 6 days remaining',
+        state: '2 criteria', stateSub: 'no evidence yet', criteria: C2.map(c => crit(c, 'pending')) }),
+    ],
+    outcome: { tone: 'amber', head: 'Nothing is judged until all five criteria have evidence',
+      text: 'A tutor can read the profile now and note where it stands, but no criterion is marked met or not met while two of the five have nothing to judge. The profile can only be evaluated properly once the tasks it was supposed to inform are visible.',
+      cta: 'Marking opens 24 Nov', ctaTone: 'disabled', ctaNote: 'Unlocks the moment Part 2 is submitted.' },
+    portfolio: [
+      { k: 'Criteria with evidence', v: '3 of 5', ink: INK },
+      { k: 'Part 2', v: 'Due in 6 days', ink: MUTED },
+      { k: 'Assignment outcome', v: 'Not yet marked', ink: MUTED },
+      { k: 'Resubmissions used', v: '0 of 1', ink: MUTED },
+    ],
+    notes: [
+      { label: 'Late on Part 1 still needs chasing', labelInk: RED, border: mix(RED, 26),
+        text: 'The assignment is not due until the 24th, but a candidate with no profile in is already behind. Deadline warnings run per part — that is what parts are for, and the only thing they are for.' },
+      { label: 'Parts stage the work, not the judgement', labelInk: TEAL, border: mix(TEAL, 26),
+        text: 'The tutor sees two documents on two dates. Cambridge sees one assignment against five criteria. Nothing in the marking model knows that the work arrived in two pieces.' },
+      { label: 'One row, two files', labelInk: MUTED, border: BORDER,
+        text: 'The portfolio still lists four assignments. This one has two documents attached to a single row.' },
+    ],
+  },
+  split: {
+    label: 'Marked', sub: 'two criteria not met',
+    chip: 'Not to standard', chipTone: 'red', chipSub: 'resubmit once',
+    parts: [
+      Object.assign({}, P1, { tone: 'pass', meta: 'Submitted 16 Nov · marked by Nazlı Aydın, 26 Nov',
+        state: '3 of 3 met', stateSub: 'nothing to redo here', criteria: C1.map(c => crit(c, 'met')),
+        hasFeedback: true, feedback: 'A careful profile with real evidence from the needs analysis.' }),
+      Object.assign({}, P2, { tone: 'fail', meta: 'Submitted 24 Nov · marked by Nazlı Aydın, 26 Nov',
+        state: '0 of 2 met', stateSub: 'both criteria', criteria: [crit('1d Task choice', 'not'), crit('1e Rationale', 'not')],
+        hasFeedback: true, feedback: 'The tasks are sound in themselves but do not follow from the profile you wrote — the learner\u2019s stated difficulty with connected speech is not addressed by either. Rework 1d and 1e against your own Part 1.' }),
+    ],
+    outcome: { tone: 'red', head: 'Not to standard — two criteria unmet',
+      text: 'Passing means meeting all five. The resubmission addresses 1d and 1e, which happen to sit in Part 2, and the candidate is told exactly those two. Criteria already met are not reopened and the profile is not rewritten.',
+      cta: 'Return for resubmission', ctaTone: 'danger', ctaNote: 'One notification, naming 1d and 1e.' },
+    portfolio: [
+      { k: 'Criteria met', v: '3 of 5', ink: RED },
+      { k: 'To address', v: '1d, 1e', ink: RED },
+      { k: 'Assignment outcome', v: 'Not to standard', ink: RED },
+      { k: 'Resubmissions used', v: '0 of 1', ink: MUTED },
+    ],
+    notes: [
+      { label: 'The unmet criteria are the instruction', labelInk: RED, border: mix(RED, 26),
+        text: 'A candidate should never be told to redo Part 2 — they are told 1d and 1e are not met and why. If an unmet criterion had sat in Part 1, that is what would come back instead.' },
+      { label: 'The failure is usually about the join', labelInk: MUTED, border: BORDER,
+        text: 'Tasks that do not follow from the profile is the standard Assignment 1 failure, and it is only visible with both halves side by side — which is the argument for one assignment rather than two.' },
+      { label: 'Met criteria are closed', labelInk: TEAL, border: mix(TEAL, 26),
+        text: '1a to 1c stand. The tutor is not asked to re-read the profile on resubmission, and nothing in the new version can take those three away.' },
+    ],
+  },
+  resub: {
+    label: 'Resubmitted', sub: 'second and final attempt',
+    chip: 'Resubmitted', chipTone: 'amber', chipSub: '30 Nov · 1d and 1e',
+    parts: [
+      Object.assign({}, P1, { tone: 'pass', meta: 'Marked 26 Nov · not resubmitted',
+        state: '3 of 3 met', stateSub: 'closed', criteria: C1.map(c => crit(c, 'met')) }),
+      Object.assign({}, P2, { tone: 'in', meta: 'Resubmitted 30 Nov, 14:12 · plagiarism check clear',
+        state: '1d, 1e', stateSub: 'awaiting marking', criteria: C2.map(c => crit(c, 'pending')),
+        hasFeedback: true, feedback: 'Marked against 1d and 1e only. The tutor sees the original, the feedback given, and the new version together.' }),
+    ],
+    outcome: { tone: 'amber', head: 'The one resubmission, now spent',
+      text: 'Each assignment may be resubmitted once. If 1d and 1e are still unmet the assignment fails — and while a candidate can fail one assignment and still pass the course, a second failed assignment ends it.',
+      cta: 'Mark 1d and 1e', ctaTone: 'primary', ctaNote: 'The three met criteria are not re-read.' },
+    portfolio: [
+      { k: 'Criteria met', v: '3 of 5', ink: INK },
+      { k: 'Under review', v: '1d, 1e', ink: 'oklch(46% 0.11 62)' },
+      { k: 'Assignment outcome', v: 'Not yet', ink: MUTED },
+      { k: 'Resubmissions used', v: '1 of 1', ink: RED },
+    ],
+    notes: [
+      { label: 'One resubmission per assignment', labelInk: RED, border: mix(RED, 26),
+        text: 'Not per part and not per criterion. However many criteria came back, and wherever they sat in the document, this is the single second attempt Assignment 1 is entitled to.' },
+      { label: 'The tutor sees all three documents', labelInk: TEAL, border: mix(TEAL, 26),
+        text: 'The original, the feedback that was given, and the new version. Marking a resubmission blind to what was asked for is how a candidate gets failed twice for the same thing.' },
+      { label: 'No grade above standard', labelInk: MUTED, border: BORDER,
+        text: 'Assignments are met or not met. Passing at the second attempt is recorded but carries no penalty in the assignment outcome itself.' },
+    ],
+  },
+  passed: {
+    label: 'Passed', sub: 'all five criteria met',
+    chip: 'To standard', chipTone: 'green', chipSub: 'at the second attempt',
+    parts: [
+      Object.assign({}, P1, { tone: 'pass', meta: 'Marked 26 Nov · first attempt',
+        state: '3 of 3 met', stateSub: 'first attempt', criteria: C1.map(c => crit(c, 'met')) }),
+      Object.assign({}, P2, { tone: 'pass', meta: 'Marked 2 Dec · second attempt',
+        state: '2 of 2 met', stateSub: 'second attempt', criteria: C2.map(c => crit(c, 'met')),
+        hasFeedback: true, feedback: 'The rationale now traces each task back to the profile. Both criteria met.' }),
+    ],
+    outcome: { tone: 'green', head: 'Assignment 1 is to standard',
+      text: 'All five criteria are met, so the assignment is met. The final report records one assignment to standard — the two parts and the two dates are how this centre runs the work, and Cambridge is not told about either.',
+      cta: 'Assignment closed', ctaTone: 'disabled', ctaNote: 'Counts as one of the four.' },
+    portfolio: [
+      { k: 'Criteria met', v: '5 of 5', ink: GREEN },
+      { k: 'Assignment outcome', v: 'To standard', ink: GREEN },
+      { k: 'Attempts', v: '2', ink: MUTED },
+      { k: 'Resubmissions used', v: '1 of 1', ink: MUTED },
+    ],
+    notes: [
+      { label: 'The report says one assignment', labelInk: TEAL, border: mix(TEAL, 26),
+        text: 'Parts are a centre\u2019s way of staging the work. The final report and assessor pack show Assignment 1, to standard — not two half-assignments with separate histories.' },
+      { label: 'The resubmission is spent', labelInk: MUTED, border: BORDER,
+        text: 'For this assignment only. The other three each carry their own single resubmission, untouched. Two failed assignments would fail the course.' },
+      { label: 'The criteria history is kept', labelInk: MUTED, border: BORDER,
+        text: 'An assessor asking why this took two attempts sees which criteria were unmet at the first marking and what the tutor wrote. The detail stays on file even though the outcome is one line.' },
+    ],
+  },
+};
+
+const HEADCHIP = {
+  amber: { chipBg: tint(AMBER, 15), chipInk: 'oklch(46% 0.11 62)', chipBorder: mix(AMBER, 38) },
+  red: { chipBg: tint(RED, 13), chipInk: RED, chipBorder: mix(RED, 38) },
+  green: { chipBg: tint(GREEN, 14), chipInk: GREEN, chipBorder: mix(GREEN, 36) },
+};
+
+const OUT = {
+  amber: { bg: tint(AMBER, 9), border: mix(AMBER, 30), ink: 'oklch(46% 0.11 62)' },
+  red: { bg: tint(RED, 8), border: mix(RED, 30), ink: RED },
+  green: { bg: tint(GREEN, 8), border: mix(GREEN, 28), ink: GREEN },
+};
+
+const CTA = {
+  primary: { ctaBg: TEAL, ctaInk: 'oklch(98.5% 0.006 90)', ctaBorder: TEAL, ctaCursor: 'pointer' },
+  danger: { ctaBg: RED, ctaInk: 'oklch(98.5% 0.006 90)', ctaBorder: RED, ctaCursor: 'pointer' },
+  disabled: { ctaBg: 'oklch(96.4% 0.014 85)', ctaInk: 'oklch(72% 0.012 85)', ctaBorder: BORDER, ctaCursor: 'default' },
+};
+
+class Component extends DCLogic {
+  state = { stage: 'split' };
+
+  renderVals() {
+    const key = this.state.stage;
+    const s = STAGES[key];
+
+    return {
+      stages: Object.keys(STAGES).map(k => ({
+        label: STAGES[k].label, sub: STAGES[k].sub,
+        pick: () => this.setState({ stage: k }),
+        bg: k === key ? CARD : 'transparent',
+        border: k === key ? TEAL : BORDER,
+        ink: k === key ? TEAL : INK,
+      })),
+      head: Object.assign({ chip: s.chip, chipSub: s.chipSub }, HEADCHIP[s.chipTone]),
+      parts: s.parts.map(p => Object.assign({}, p, TONE[p.tone])),
+      outcome: Object.assign({ head: s.outcome.head, text: s.outcome.text, cta: s.outcome.cta, ctaNote: s.outcome.ctaNote },
+        OUT[s.outcome.tone], CTA[s.outcome.ctaTone]),
+      portfolio: s.portfolio,
+      notes: s.notes,
+    };
+  }
+}
+</script>
+</body>
+</html>
