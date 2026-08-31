@@ -288,13 +288,22 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
             <dt className="text-xs text-muted">Date of birth</dt>
             <dd className="text-sm text-ink">
               {applicant.date_of_birth ?? "--"}
-              {/* Handbook 7.3: 18 is the floor, 20 is the recommendation, and
-                  18-20 "can be accepted at the centre's discretion". Under-18
-                  never reaches here -- /apply refuses it -- so the only band
-                  worth saying out loud is the discretionary one, and it is
-                  said where the decision is actually made. */}
+              {/* Handbook 7.3 governs SELECTION, not application -- "applicants
+                  should be selected for the course only if they meet the
+                  following entry requirements". So nothing is refused at the
+                  form; both bands are said here, where selecting actually
+                  happens. Under-18 is stated as the bar it is; 18-20 is
+                  stated as the discretion the Handbook expressly grants. */}
               {(() => {
                 const { band, age } = celtaAgeBand(applicant.date_of_birth, intake?.start_date ?? null);
+                if (band === "under_18") {
+                  return (
+                    <span className="mt-1 block text-[11.5px] leading-relaxed font-semibold text-destructive">
+                      {age} at the course start. Cambridge requires candidates to be at least 18 — this applicant
+                      must not be selected for the course (Handbook 7.3).
+                    </span>
+                  );
+                }
                 return band === "discretionary_18_20" ? (
                   <span className="mt-1 block text-[11.5px] leading-relaxed text-status-warning-text">
                     {age} at the course start. Cambridge recommends 20 or over; 18–20 is accepted at your

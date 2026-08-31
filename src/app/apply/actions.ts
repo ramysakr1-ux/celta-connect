@@ -86,45 +86,25 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
     return { error: "You need to acknowledge the mixed-mode teaching practice demand to apply.", submitted: false };
   }
 
-  // Cambridge's entry requirement, Administration Handbook (June 2025)
-  // section 7.3, quoted from the real PDF rather than remembered:
+  // No age gate here, deliberately.
   //
-  //   "applicants must be at least 18. It is generally recommended that
-  //    candidates should be aged 20 or over, but candidates aged between 18
-  //    and 20 can be accepted at the centre's discretion."
+  // Handbook (June 2025) 7.3 reads: "applicants SHOULD BE SELECTED for the
+  // course only if they meet the following entry requirements: applicants
+  // must be at least 18. It is generally recommended that candidates should
+  // be aged 20 or over, but candidates aged between 18 and 20 can be
+  // accepted at the centre's discretion."
   //
-  // Two rules, not one. Under 18 is a hard refusal -- "must". Between 18 and
-  // 20 is explicitly allowed "at the centre's discretion", so the app must
-  // NOT block it; it flags it instead, because a discretion the centre never
-  // sees is not a discretion.
+  // That governs SELECTION -- who a centre may accept onto a course -- not
+  // who may submit an application. I first built it as a refusal at this
+  // form; Ramy: "it be flagged but not enforced. Check the handbook as well
+  // first." Checking is what settled it: refusing the form is stricter than
+  // Cambridge asks, and the same sentence carries the C1/C2 language level
+  // and the computer-equipment requirement, neither of which this form
+  // blocks on either. Flagging is the consistent treatment.
   //
-  // Date of birth was captured and stored here and never validated at all.
-  //
-  // Measured at the COURSE START, not at application: the requirement is
-  // about who may be a candidate on the course, and someone who turns 18 the
-  // week before it begins meets it.
-  const dobRaw = formData.get("date_of_birth");
-  let ageBand: "under_18" | "discretionary_18_20" | "ok" = "ok";
-  if (typeof dobRaw === "string" && dobRaw) {
-    const dob = new Date(`${dobRaw}T00:00:00Z`);
-    const reference = course.start_date ? new Date(`${course.start_date}T00:00:00Z`) : new Date();
-    if (!Number.isNaN(dob.getTime())) {
-      let age = reference.getUTCFullYear() - dob.getUTCFullYear();
-      const beforeBirthday =
-        reference.getUTCMonth() < dob.getUTCMonth() ||
-        (reference.getUTCMonth() === dob.getUTCMonth() && reference.getUTCDate() < dob.getUTCDate());
-      if (beforeBirthday) age -= 1;
-      if (age < 18) ageBand = "under_18";
-      else if (age < 20) ageBand = "discretionary_18_20";
-    }
-  }
-  if (ageBand === "under_18") {
-    return {
-      error:
-        "Cambridge requires candidates to be at least 18 by the time the course starts, so we can't accept this application. Do get in touch with the centre if you think that's wrong.",
-      submitted: false,
-    };
-  }
+  // So the age is recorded, and both bands are surfaced to the centre on the
+  // applicant, where selection actually happens -- see celtaAgeBand() and
+  // dashboard/admissions/[id]/page.tsx.
 
   // Recomputed server-side from the real course dates rather than trusted
   // from the client's hidden field -- what an applicant is recorded as
