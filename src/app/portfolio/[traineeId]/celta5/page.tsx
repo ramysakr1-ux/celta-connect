@@ -51,7 +51,7 @@ import { WrittenAssignmentsRecord } from "@/app/portfolio/[traineeId]/celta5/boo
 import { CriteriaGrid, StageLocked, type CriterionRow, type Mark } from "@/app/portfolio/[traineeId]/celta5/booklet/criteria-grid";
 import { Appendix1, Appendix2 } from "@/app/portfolio/[traineeId]/celta5/booklet/appendices";
 import { computeSignatureLedger } from "@/lib/celta5-signatures";
-import { computeStage3Triggers, stage3Expected, isStage3Mandatory, STAGE3_TRIGGER_LABELS } from "@/lib/stage3-triggers";
+import { computeStage3Triggers, stage3Expected, isStage3Mandatory, assignmentFailRequiresStage3, STAGE3_TRIGGER_LABELS } from "@/lib/stage3-triggers";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 
 // CELTA 5's own wording for the overall-progress options (p.19, p.24).
@@ -166,7 +166,7 @@ export default async function PortfolioCelta5Page({
       supabase
         .from("assignments")
         .select(
-          "assignment_type, first_status, resubmission_status, final_grade, first_own_work_confirmed, resubmission_own_work_confirmed, first_outcome_signature_name, first_outcome_signed_at, resubmission_outcome_signature_name, resubmission_outcome_signed_at"
+          "assignment_type, first_status, resubmission_status, resubmission_outcome, final_grade, first_own_work_confirmed, resubmission_own_work_confirmed, first_outcome_signature_name, first_outcome_signed_at, resubmission_outcome_signature_name, resubmission_outcome_signed_at"
         )
         .eq("trainee_id", traineeId),
       viewer?.course_id
@@ -450,10 +450,20 @@ export default async function PortfolioCelta5Page({
     const postStage2TpOutcomes = (plans ?? [])
       .filter((p) => p.taught_at && (!stage2TutorialDate || p.taught_at > stage2TutorialDate))
       .map(() => null as null);
+    // A terminally failed assignment pulls the candidate into Stage Three --
+    // Ramy's rule of 31 Aug 2026 -- unless three assignments are already
+    // passed, which assignmentFailRequiresStage3() decides.
+    const assignmentFailed = assignmentFailRequiresStage3(
+      (assignments ?? []).map((a) => ({
+        terminallyFailed: a.resubmission_status === "approved" && a.resubmission_outcome === "fail",
+        passed: a.first_status === "approved" || a.resubmission_outcome === "pass",
+      }))
+    );
     const stage3Triggers = computeStage3Triggers({
       stage2TutorOverall: record.stage2_tutor_overall ?? null,
       postStage2TpOutcomes,
       higherGradeIndicated: false,
+      assignmentFailed,
       centreGivesStage3ToAll: center?.stage3_for_all_candidates ?? false,
     });
     const stage3IsExpected = stage3Expected(stage3Triggers) || record.stage3_tutorial_required;
