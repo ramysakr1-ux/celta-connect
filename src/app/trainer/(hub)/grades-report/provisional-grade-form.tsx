@@ -23,22 +23,29 @@ function SlotPill({
   opt,
   slot,
   setSlot,
+  blockedReason,
 }: {
   opt: string;
   slot: string;
   setSlot: (fn: (prev: string) => string) => void;
+  blockedReason?: string | null;
 }) {
   const selected = slot === opt;
+  const blocked = Boolean(blockedReason);
   const [lower, upper] = opt.includes("/") ? opt.split("/") : [opt, null];
   return (
     <button
       type="button"
       aria-pressed={selected}
+      disabled={blocked}
+      title={blockedReason ?? undefined}
       onClick={() => setSlot((prev) => (prev === opt ? "" : opt))}
       className={`shrink-0 rounded-full border px-2.5 py-1 text-[11.5px] font-medium whitespace-nowrap transition-colors ${
-        selected
-          ? "border-primary bg-primary text-primary-foreground"
-          : "border-border text-muted trainer-hover-fill hover:text-ink"
+        blocked
+          ? "cursor-not-allowed border-border-faint text-muted/50 line-through"
+          : selected
+            ? "border-primary bg-primary text-primary-foreground"
+            : "border-border text-muted trainer-hover-fill hover:text-ink"
       }`}
     >
       {lower}
@@ -65,6 +72,7 @@ export function ProvisionalGradeForm({
   proposedByName,
   proposedByMeta,
   isMct,
+  eligibility,
 }: {
   traineeId: string;
   record: Celta5Record | null;
@@ -76,6 +84,8 @@ export function ProvisionalGradeForm({
    */
   proposedByMeta?: string | null;
   isMct: boolean;
+  /** Grades this candidate's written assignments have ruled out, and why. */
+  eligibility?: { blocked: string[]; reason: string | null };
 }) {
   const [state, action, pending] = useActionState(updateProvisionalGrade, initialState);
   const [slot, setSlot] = useState(() => slotFromRecord(record));
@@ -111,15 +121,23 @@ export function ProvisionalGradeForm({
 
         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5">
           {STRAIGHT_GRADES.map((opt) => (
-            <SlotPill key={opt} opt={opt} slot={slot} setSlot={setSlot} />
+            <SlotPill key={opt} opt={opt} slot={slot} setSlot={setSlot} blockedReason={eligibility?.blocked.includes(opt) ? eligibility.reason : null} />
           ))}
           <Divider />
           {BORDERLINE_GRADES.map((opt) => (
-            <SlotPill key={opt} opt={opt} slot={slot} setSlot={setSlot} />
+            <SlotPill key={opt} opt={opt} slot={slot} setSlot={setSlot} blockedReason={eligibility?.blocked.includes(opt) ? eligibility.reason : null} />
           ))}
           <Divider />
-          <SlotPill opt="Withdrawn" slot={slot} setSlot={setSlot} />
+          <SlotPill opt="Withdrawn" slot={slot} setSlot={setSlot} blockedReason={eligibility?.blocked.includes("Withdrawn") ? eligibility.reason : null} />
         </div>
+        {/* Says WHY, rather than leaving a struck-through pill unexplained.
+            Cambridge's rule caps what may be recommended; it never says which
+            grade is right, so nothing is chosen here -- the options that are
+            not available are simply not available, and the reason is on the
+            screen rather than in a tooltip alone. */}
+        {eligibility?.reason ? (
+          <p className="text-[11.5px] leading-relaxed text-status-warning-text">{eligibility.reason}</p>
+        ) : null}
         {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       </form>
 

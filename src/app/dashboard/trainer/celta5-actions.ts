@@ -6,7 +6,7 @@ import { CELTA_CRITERIA_CODES } from "@/lib/celta-criteria";
 const VALID_LISTS = new Set(["planningStrengths", "planningActionPoints", "teachingStrengths", "teachingActionPoints"]);
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
-import { PROVISIONAL_SLOTS } from "@/lib/provisional-grade";
+import { assignmentGradeCeiling, PROVISIONAL_SLOTS } from "@/lib/provisional-grade";
 import { isMctOnCourse } from "@/lib/course-mct";
 import { checkStage1RecordsMilestone, checkFinalGradeMilestone } from "@/lib/cohort-milestones";
 import type { CriteriaRating, StandardRating } from "@/lib/supabase/types";
@@ -496,6 +496,26 @@ export async function updateProvisionalGrade(
   }
   if (typeof slot !== "string" || !(PROVISIONAL_SLOTS as readonly string[]).includes(slot)) {
     return { error: "Something went wrong. Refresh and try again." };
+  }
+
+  // Cambridge's written-assignment eligibility, checked HERE and not only in
+  // the picker. The form struck the ineligible pills through, but a disabled
+  // button is not a check -- the same lesson as the nine action files gated
+  // on a job title rather than a capability. This is the one that would end
+  // up on a report Cambridge reads.
+  //
+  // Handbook eligibility, quoted in celta-criteria.ts: more than one failed
+  // written assignment means no Pass at all; exactly one means a Pass may
+  // still be recommended, but never Pass A.
+  {
+    const { data: written } = await (await createClient())
+      .from("assignments")
+      .select("final_grade, resubmission_outcome")
+      .eq("trainee_id", traineeId);
+    const { blocked, reason } = assignmentGradeCeiling(written ?? []);
+    if (blocked.includes(slot)) {
+      return { error: reason ?? "That grade is not available for this candidate." };
+    }
   }
 
   let grade: (typeof PROVISIONAL_GRADES)[number] | null = null;

@@ -12,3 +12,55 @@ export const PROVISIONAL_SLOTS = [
   "Pass A",
   "Withdrawn",
 ] as const;
+
+/**
+ * Which provisional grades a candidate's WRITTEN ASSIGNMENTS have ruled out.
+ *
+ * Cambridge's eligibility rules, already quoted verbatim in
+ * celta-criteria.ts's `eligibility` array, but until now only ever SHOWN to
+ * a tutor as prose. Ramy, 31 Aug 2026: "one fail, they cannot get an A. Two
+ * fail assignments, they fail."
+ *
+ *   Fail more than one written assignment -> not eligible for a Pass at all.
+ *   Fail exactly one -> a Pass may still be recommended if there is
+ *     sufficient other evidence, but not Pass A.
+ *
+ * Enforceable only since fails started being recorded: final_grade used to
+ * be written on a pass alone, so a failed assignment was indistinguishable
+ * from an unmarked one and this function would have had nothing to read.
+ *
+ * Deliberately returns the blocked options and the reason rather than
+ * choosing a grade. The rule caps what may be recommended; it never says
+ * which grade IS right, and the second rule is explicit that a Pass "may
+ * still be recommended if there is sufficient other evidence" -- that
+ * judgement is the tutor's and the assessor's, not this function's.
+ *
+ * A borderline pair is blocked when its UPPER half is: "Pass B/Pass A" is a
+ * recommendation that could land on Pass A, so one failed assignment rules
+ * it out too.
+ */
+export function assignmentGradeCeiling(
+  assignments: { final_grade?: string | null; resubmission_outcome?: string | null }[]
+): { failCount: number; blocked: string[]; reason: string | null } {
+  const failCount = assignments.filter(
+    (a) => a.final_grade?.toLowerCase() === "fail" || a.resubmission_outcome?.toLowerCase() === "fail"
+  ).length;
+
+  if (failCount > 1) {
+    return {
+      failCount,
+      // Withdrawn stays available: a missing portfolio is Withdrawn, not
+      // Fail, and that is a different rule in the same list.
+      blocked: PROVISIONAL_SLOTS.filter((o) => o !== "Fail" && o !== "Withdrawn"),
+      reason: `${failCount} failed written assignments — not eligible for a Pass (Handbook eligibility).`,
+    };
+  }
+  if (failCount === 1) {
+    return {
+      failCount,
+      blocked: ["Pass A", "Pass B/Pass A"],
+      reason: "One failed written assignment — a Pass may still be recommended, but not Pass A.",
+    };
+  }
+  return { failCount: 0, blocked: [], reason: null };
+}

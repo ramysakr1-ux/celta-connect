@@ -10,6 +10,7 @@ import { computeAssessedTpStats } from "@/lib/course-progress";
 import { mapTpFeedbackToGlyphRow } from "@/lib/tp-grades";
 import { computeCohortRows } from "@/lib/grades-report";
 import { ProvisionalGradeForm } from "@/app/trainer/(hub)/grades-report/provisional-grade-form";
+import { assignmentGradeCeiling } from "@/lib/provisional-grade";
 import { UpgradeConditionsForm } from "@/app/trainer/(hub)/grades-report/upgrade-conditions-form";
 import { CohortSheet } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
 import { CloseOutCard } from "@/app/dashboard/admin/courses/[id]/close-out-card";
@@ -294,6 +295,9 @@ export default async function GradesReportPage() {
                         proposedByName={record?.provisional_proposed_by ? (tutorNameById.get(record.provisional_proposed_by) ?? null) : null}
                         proposedByMeta={currentLevel}
                         isMct={isMct}
+                        eligibility={assignmentGradeCeiling(
+                          (writtenAssignments ?? []).filter((a) => a.trainee_id === trainee.id)
+                        )}
                       />
                     ) : record?.provisional_grade && record.provisional_approved_at ? (
                       <div className="flex items-center justify-between gap-3">
