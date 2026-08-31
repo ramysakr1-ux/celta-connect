@@ -54,7 +54,14 @@ The pack must contain, in addition to portfolios:
 - the **double-marking record** (9.2.3)
 - face-to-face only: map and accommodation details
 
-Portfolio selection — a minimum of four, made up of:
+Portfolio selection — **how many depends on which kind of assessment this is**, corrected 31 Aug 2026 against the real Administration Handbook (June 2025) 14.2:
+
+- **regular assessment** (remote by default, the usual case): **two** portfolios read in full. Where more than two candidates are Fail, the assessor focuses on the borderline cases.
+- **two-yearly face-to-face assessment**: **a minimum of four**, plus every portfolio provisionally graded Fail or potential Fail.
+
+This line previously said "a minimum of four" flat, which is the two-yearly rule stated as though it were universal. The app already models the distinction — `courses.assessment_kind`, read by `src/lib/assessor-requirements.ts` — so the spec was the only thing left saying otherwise.
+
+Whichever the count, the selection is made up of:
 - **mandatory:** every candidate the assessor observes teaching; every candidate provisionally graded **Fail or potential Fail**; every **withdrawn** candidate (the assessor must check the file and comment in their report)
 - **recommended:** candidates graded **Pass A or potential Pass A**
 - the course admin picks the remainder. The app should propose the mandatory set automatically and let the admin complete it.
