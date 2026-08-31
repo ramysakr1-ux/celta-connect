@@ -303,6 +303,10 @@ export interface Database {
           assessor_email: string | null;
           assessor_notified_at: string | null;
           entry_form_sent_at: string | null;
+          // migration 0264 -- when the entry form reminder was last pushed, so
+          // the daily sweep warns once before the deadline and weekly after,
+          // rather than every day until someone acts.
+          entry_form_reminder_sent_at: string | null;
           cambridge_grades_confirmed_at: string | null;
           cambridge_grades_confirmed_by: string | null;
           application_cap: number | null;
@@ -1804,6 +1808,11 @@ export interface Database {
           stage2_moved_earlier_reason: string | null;
           stage2_moved_earlier_by: string | null;
           stage3_tutorial_required: boolean;
+          // migration 0262 -- a manual override of a failed assignment's
+          // consequences. All three set together or none; the DB enforces it.
+          assignment_fail_override_reason: string | null;
+          assignment_fail_override_by: string | null;
+          assignment_fail_override_at: string | null;
           stage3_tutorial_given: boolean;
           stage3_hours_taught: number | null;
           stage3_tutor_overall: StandardRating | null;
@@ -2883,6 +2892,12 @@ export interface Database {
           action: string;
           target_table: string | null;
           target_id: string | null;
+          // migration 0263 -- the log now covers course-level management
+          // too, and records what a value was before, not only that it
+          // changed.
+          course_id: string | null;
+          previous_value: string | null;
+          new_value: string | null;
           detail: Record<string, unknown>;
           created_at: string;
         };
