@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireRole } from "@/lib/auth/require-role";
+import { requireCapability } from "@/lib/auth/require-capability";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export interface FormState {
@@ -19,7 +19,7 @@ export async function updateCenterProfile(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
 
   const name = (formData.get("name") as string | null)?.trim();
   const centerNumber = (formData.get("center_number") as string | null)?.trim();
@@ -69,7 +69,7 @@ export async function updateCenterProfile(
 // disable-able in settings". Plain checkbox toggle, no confirm state
 // needed (unlike name/number, there's nothing to validate).
 export async function updateAutoTagCriteria(formData: FormData): Promise<void> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
   const enabled = formData.get("auto_tag_criteria_enabled") === "on";
 
   const admin = createAdminClient();
@@ -82,7 +82,7 @@ export async function updateGoogleDriveTargets(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
 
   const templateDocId = (formData.get("template_doc_id") as string) || null;
   const outputFolderId = (formData.get("output_folder_id") as string) || null;
@@ -102,7 +102,7 @@ export async function updateGoogleDriveTargets(
 }
 
 export async function disconnectGoogleDrive(): Promise<void> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
   const admin = createAdminClient();
   await admin.from("center_google_connections").delete().eq("center_id", profile.center_id);
   revalidatePath("/dashboard/admin/settings");
@@ -116,7 +116,7 @@ export async function disconnectGoogleDrive(): Promise<void> {
 // can also revoke from their own Zoom App Marketplace management page if
 // they want the authorization gone on Zoom's side too.
 export async function disconnectZoom(): Promise<void> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
   const admin = createAdminClient();
   await admin.from("centre_zoom_connections").delete().eq("center_id", profile.center_id);
   revalidatePath("/centre/settings");
@@ -126,7 +126,7 @@ export async function addStyleExample(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
 
   const tone = formData.get("tone");
   const exampleText = (formData.get("example_text") as string | null)?.trim();
@@ -157,7 +157,7 @@ export async function updateStyleExample(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
 
   const id = formData.get("id") as string | null;
   const exampleText = (formData.get("example_text") as string | null)?.trim();
@@ -197,11 +197,14 @@ const TUTOR_ROLES = [
 // what happens to their access to their old course (profiles.course_id is
 // still the single source RLS reads for "which course is this login
 // scoped to" today), not something to guess at here.
+// Staffing a course is not a centre setting -- it lives in this file only
+// because the form does. courseAdmin.invite is the capability that means
+// "put people on a course".
 export async function updateCourseTutor(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("courseAdmin.invite");
 
   const id = formData.get("id") as string | null;
   const tutorRole = formData.get("tutor_role") as string | null;
@@ -249,7 +252,7 @@ export async function updateCourseTutor(
 }
 
 export async function deleteStyleExample(formData: FormData): Promise<void> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
   const id = formData.get("id") as string | null;
   if (!id) return;
 
@@ -270,7 +273,7 @@ export async function addMalpracticeOutcomeOption(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
 
   const label = (formData.get("label") as string | null)?.trim();
   if (!label) return { error: "Enter the outcome as your policy names it." };
@@ -290,7 +293,7 @@ export async function addMalpracticeOutcomeOption(
 }
 
 export async function deleteMalpracticeOutcomeOption(formData: FormData): Promise<void> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
   const id = formData.get("id") as string | null;
   if (!id) return;
 
@@ -312,7 +315,7 @@ const ASSIGNMENT_TYPES = ["Focus on Learner", "LRT", "Skills", "LfC", "Plagiaris
 // / resubmission_criteria_marks are keyed by `key`, so a trainee's already-
 // recorded marks must never point at a row that no longer exists.
 export async function addAssignmentCriterion(_prevState: FormState, formData: FormData): Promise<FormState> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
   const assignmentType = formData.get("assignment_type") as string | null;
   const text = (formData.get("criterion_text") as string | null)?.trim();
   if (!assignmentType || !ASSIGNMENT_TYPES.includes(assignmentType as (typeof ASSIGNMENT_TYPES)[number])) {
@@ -350,7 +353,7 @@ export async function addAssignmentCriterion(_prevState: FormState, formData: Fo
 }
 
 export async function toggleAssignmentCriterionActive(formData: FormData): Promise<void> {
-  const profile = await requireRole("admin");
+  const profile = await requireCapability("centre.settings.edit");
   const id = formData.get("id") as string | null;
   const active = formData.get("active") === "true";
   if (!id) return;
