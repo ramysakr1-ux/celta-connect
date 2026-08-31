@@ -27,6 +27,19 @@ export async function proxy(request: NextRequest) {
 
   // Refreshes the session cookie if expired. Required for Server Components,
   // which can only read cookies, not write them.
+  //
+  // Ramy, 27 Aug 2026: tried switching this to getClaims() (local JWT
+  // verification, same fix as get-profile.ts below) to avoid getUser()'s
+  // network round trip -- measured live via Vercel's request logs and it
+  // was a WASH here: this proxy's execution context doesn't seem to keep
+  // getClaims()'s JWKS cache warm between requests the way the main
+  // function does, so it ended up calling out to
+  // /auth/v1/.well-known/jwks.json on every request anyway, and that call
+  // measured slower (360-500ms) than getUser()'s own auth/v1/user call
+  // (~215ms). Reverted to getUser() here specifically -- proven, not worse.
+  // The real, confirmed win was removing get-profile.ts's SECOND,
+  // redundant auth check that ran on top of this one; that's real and
+  // stays.
   const {
     data: { user },
   } = await supabase.auth.getUser();

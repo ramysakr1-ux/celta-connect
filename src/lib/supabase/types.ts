@@ -3882,6 +3882,27 @@ export interface Database {
         Args: { p_assignment_id: string };
         Returns: void;
       };
+      // Migration 0232: collapses getCentreRoleContext's up to 6 separate
+      // Supabase round trips (grants, invites, course-admin scope,
+      // overrides, custom roles, custom capabilities) into one. Returns raw
+      // rows only -- no authorization decisions, those stay in
+      // src/lib/auth/centre-roles.ts exactly as before.
+      get_centre_role_data: {
+        Args: {
+          p_profile_id: string;
+          p_center_id: string;
+          p_active_center_id_requested: string | null;
+          p_is_platform_owner: boolean;
+        };
+        Returns: {
+          grants: { id: string; center_id: string; role: string }[];
+          invites: { center_id: string }[];
+          course_admin_scope: { centre_role_id: string; course_id: string }[];
+          overrides: { center_id: string; role_key: string; capability_key: string; granted_level: string }[];
+          custom_roles: { center_id: string; role_key: string; label: string }[];
+          custom_capabilities: { center_id: string; capability_key: string; label: string }[];
+        };
+      };
     };
   };
 }
