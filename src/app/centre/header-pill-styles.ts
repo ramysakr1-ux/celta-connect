@@ -23,7 +23,7 @@ const BASE =
 
 export const PILL_ACTIVE = `${BASE} border-primary/25 bg-primary/10 text-primary`;
 
-// Centre Management wears garnet, Course Admin wears teal, and neither ever
+// Centre Management wears bronze, Course Admin wears teal, and neither ever
 // changes. Ramy, 31 Aug 2026: "the colour thing is definitely a good idea."
 //
 // The point is recognition before reading: the two landings are structurally
@@ -32,8 +32,12 @@ export const PILL_ACTIVE = `${BASE} border-primary/25 bg-primary/10 text-primary
 // decorative half of the teal/garnet alternation, so this spends an existing
 // system rather than introducing a colour.
 //
-// Kept distinct from --color-destructive on purpose, which sits at a very
-// similar hue: a whole view in the error colour would read as "something is
-// wrong". Worth watching once it is on screen at full size.
-export const PILL_ACTIVE_GARNET = `${BASE} border-garnet/30 bg-garnet/10 text-garnet`;
+// Bronze rather than garnet, corrected 31 Aug 2026 before it shipped wide:
+// garnet is already the ACT's colour in the trainer hub, and reusing it here
+// would have meant one hue naming two unrelated things. --color-bronze is
+// described in globals.css as "the third accent, from the Centre Admin design
+// system" -- it was made for this section. It also sits further from
+// --color-destructive than garnet does, so a whole view of it is less likely
+// to read as "something is wrong".
+export const PILL_ACTIVE_BRONZE = `${BASE} border-bronze/30 bg-bronze/10 text-bronze`;
 export const PILL_INACTIVE = `${BASE} admin-hover-fill border-border text-muted hover:border-primary hover:text-primary`;

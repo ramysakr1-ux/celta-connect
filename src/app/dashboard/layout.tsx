@@ -62,7 +62,14 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="border-b border-border">
+      {/* A 3px rule in the view's own colour, the same device the trainer
+          hub, the centre owner screen and the volunteer pool already use --
+          each of those is a coloured band with a contrasting underline. This
+          is the quieter half of that pattern: the header keeps its light
+          ground and gains the rule, so the view is recognisable before a word
+          is read. Only for the admin side; a trainee or trainer under
+          /dashboard keeps the neutral hairline. */}
+      <header className={profile?.role === "admin" ? "border-b-[3px] border-b-primary" : "border-b border-border"}>
         {/* Two rows on the right (Ramy, 23 Aug 2026): row 1 carries the
             credit via HeaderDesignerCredit, which checks the live pathname
             itself and renders nothing off /dashboard/admin -- landing-only,
