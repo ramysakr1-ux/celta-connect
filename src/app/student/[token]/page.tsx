@@ -728,6 +728,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                 <ThisCourseCard thisCourseAttended={thisCourseAttended} thisCourseHeldSoFar={thisCourseHeldSoFar} thisCourseClasses={thisCourseClasses} />
               </div>
               <MaterialsPanel lessonCards={lessonCards} />
+              <NeverShowsPanel />
             </div>
             <Footer endDateLabel={endDateLabel} materials={materials} token={token} />
           </div>
@@ -1255,6 +1256,43 @@ function ThisCourseCard({
             />
           ))}
       </div>
+    </div>
+  );
+}
+
+function NeverShowsPanel() {
+  // volunteer-view-full-spec.md, desktop-only addition (1b): "A 'What this
+  // link never shows' panel, always visible, listing exactly what's
+  // excluded."
+  //
+  // The four lines are the designer's own words, lifted verbatim from the
+  // `never:` array in Volunteer View.dc.html. That array is declared in the
+  // mockup and then never rendered by it -- which is exactly why this panel
+  // was specified in August and still did not exist: the copy was written,
+  // the frame around it never was.
+  //
+  // Deliberately quiet. It is reassurance for someone who has been handed a
+  // link into a teacher-training platform and may reasonably wonder what
+  // else it opens; a loud panel would raise the question rather than settle
+  // it. Phone omits it per the spec -- 1a is already scroll-heavy, and this
+  // is the one piece of content a volunteer reads once and never again.
+  const never = [
+    "No candidate names beyond who is teaching them that day.",
+    "No lesson plans, feedback, grades or assessment of any kind.",
+    "No other volunteer\u2019s details, and no attendance but their own.",
+    "No account, no password, nothing to sign in to.",
+  ];
+  return (
+    <div className="rounded-[10px] border border-border bg-card p-3.5">
+      <p className="text-[10px] font-bold tracking-[0.12em] text-muted uppercase">What this link never shows</p>
+      <ul className="mt-2.5 grid grid-cols-2 gap-x-5 gap-y-1.5">
+        {never.map((line) => (
+          <li key={line} className="flex items-start gap-2 text-[11.5px] leading-[1.5] text-muted">
+            <span aria-hidden className="mt-[6px] size-[3px] shrink-0 rounded-full bg-border" />
+            {line}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
