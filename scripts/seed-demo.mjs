@@ -633,12 +633,24 @@ async function main() {
     });
     amaraTpPlanIds.push({ planId, materialNames: cfg.materialNames });
   }
-  await supabase.from("celta5_records").insert({
-    course_id: course.id,
-    trainee_id: trainees["Amara Okafor"],
-    hours_attended: 24,
-    provisional_grade: "Pass B",
-  });
+  // EVERY candidate gets a CELTA 5 record, not just the one with a
+  // provisional grade. In the real app it is created the moment they join
+  // (join/[token]/actions.ts) -- the seed writes profiles directly, so it
+  // has to do the same thing that path does.
+  //
+  // Found 31 Aug 2026 in the pre-demo sweep: only Amara had one, so opening
+  // any other candidate's workspace showed "No CELTA 5 record exists for
+  // this trainee yet... an admin will need to add it manually", and their
+  // Progress tab said "check CELTA 5" -- pointing at the thing that did not
+  // exist. Amara keeps her grade; the others start empty, which is what a
+  // record looks like before the grades meeting.
+  await supabase.from("celta5_records").insert(
+    Object.entries(trainees).map(([name, id]) =>
+      name === "Amara Okafor"
+        ? { course_id: course.id, trainee_id: id, hours_attended: 24, provisional_grade: "Pass B" }
+        : { course_id: course.id, trainee_id: id }
+    )
+  );
   await supabase.from("assignments").insert([
     {
       course_id: course.id,
