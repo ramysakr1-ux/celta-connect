@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BackLink } from "@/components/back-link";
+import { celtaAgeBand } from "@/lib/admissions-counts";
 import { notFound } from "next/navigation";
 import { requireAdmissionsHandler, canDecideAdmissions } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
@@ -41,7 +42,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
     { data: questions },
     { data: interviewRecord },
   ] = await Promise.all([
-      supabase.from("courses").select("name, delivery_mode").eq("id", applicant.intake_course_id).maybeSingle(),
+      supabase.from("courses").select("name, delivery_mode, start_date").eq("id", applicant.intake_course_id).maybeSingle(),
       applicant.writing_task_prompt_id
         ? supabase.from("application_writing_prompts").select("prompt_type, prompt_text").eq("id", applicant.writing_task_prompt_id).maybeSingle()
         : Promise.resolve({ data: null }),
@@ -285,7 +286,23 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <dt className="text-xs text-muted">Date of birth</dt>
-            <dd className="text-sm text-ink">{applicant.date_of_birth ?? "--"}</dd>
+            <dd className="text-sm text-ink">
+              {applicant.date_of_birth ?? "--"}
+              {/* Handbook 7.3: 18 is the floor, 20 is the recommendation, and
+                  18-20 "can be accepted at the centre's discretion". Under-18
+                  never reaches here -- /apply refuses it -- so the only band
+                  worth saying out loud is the discretionary one, and it is
+                  said where the decision is actually made. */}
+              {(() => {
+                const { band, age } = celtaAgeBand(applicant.date_of_birth, intake?.start_date ?? null);
+                return band === "discretionary_18_20" ? (
+                  <span className="mt-1 block text-[11.5px] leading-relaxed text-status-warning-text">
+                    {age} at the course start. Cambridge recommends 20 or over; 18–20 is accepted at your
+                    discretion (Handbook 7.3).
+                  </span>
+                ) : null;
+              })()}
+            </dd>
           </div>
           <div>
             <dt className="text-xs text-muted">Phone</dt>
