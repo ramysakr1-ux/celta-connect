@@ -284,7 +284,8 @@ export default async function PortfolioLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      {/* Checkpoint 2 (App Redesign.dc.html 1d) -- collapses the old 2-block
+      {/* Checkpoint 2 (App Redesign.dc.html 1d -- not in the archive, see the
+          note in trainer/(hub)/page.tsx) -- collapses the old 2-block
           header (14px wordmark bar + a separate .sheet identity block with
           avatar/3 StatBars/trajectory pill) into one 56px bar: back-link +
           name + trajectory-status pill on the left, "Preview as trainee" on

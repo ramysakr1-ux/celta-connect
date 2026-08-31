@@ -81,7 +81,8 @@ function shortenAim(aim: string): string {
 }
 
 // §6 -- TP1-8 table (checkpoint 2 restyle: was a card grid, App Redesign.dc.html
-// 1d shows a table). Every slot is always visible so a trainee can see the
+// 1d shows a table -- that file is not in the archive, see the note in
+// trainer/(hub)/page.tsx). Every slot is always visible so a trainee can see the
 // shape of the course from day one; a slot with no plan_assignments row yet
 // renders as a locked row, except TP7/8 which link out to the self-select
 // syllabus planning grid. Reuses the exact same status state machine

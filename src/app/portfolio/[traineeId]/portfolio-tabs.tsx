@@ -31,7 +31,8 @@ export interface PortfolioSidebarMeta {
   progress: string;
 }
 
-// Was a horizontal top tab bar; checkpoint 2 (App Redesign.dc.html 1d)
+// Was a horizontal top tab bar; checkpoint 2 (App Redesign.dc.html 1d --
+// see the note in trainer/(hub)/page.tsx: that file is not in the archive)
 // moves this into a 232px left sidebar with a meta count per item. Kept the
 // filename/TABS shape as the source of truth to avoid an import-path churn
 // across the layout.

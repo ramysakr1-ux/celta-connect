@@ -22,6 +22,21 @@ import { findMaterialsOverlaps } from "@/lib/materials-overlap";
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
 // App Redesign.dc.html 1a: today's schedule (from the real timetable),
 // what needs a trainer's attention right now, and the cohort at a glance.
+//
+// NOTE ON App Redesign.dc.html -- it is not in specs/handoffs/ and Ramy
+// confirmed on 31 Aug 2026 that no file by that name exists to recover. Every
+// other design source cited in this codebase was found and archived that day;
+// this one is a dead reference, so do not go looking for it.
+//
+// The citations are kept rather than stripped because the redesign itself was
+// real and its results are load-bearing. "Checkpoint 2" was a pass that
+// changed four screens: this page (hero + card grid -> Today), the trainee
+// tabs (top bar -> 232px sidebar), the trainee header (two blocks -> one 56px
+// bar) and the TP1-8 view (card grid -> table). Deleting the attribution would
+// leave four deliberate design decisions looking like somebody's preference.
+//
+// So: treat these as provenance for WHY the screens changed, never as a
+// specification to check the code against. There is nothing to check against.
 export default async function TodayPage() {
   const session = await getCurrentProfile();
   const trainer =
