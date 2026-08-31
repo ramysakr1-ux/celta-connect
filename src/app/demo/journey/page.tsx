@@ -246,21 +246,38 @@ export default async function JourneyPage() {
       recipientName: "Jordan Blake",
       applicantName,
       courseName,
-      when: "Wednesday 27 August, 10:00",
+      when: "Wednesday 22 July, 10:00",
       markedTaskUrl: "https://celtaconnect.com/dashboard/admissions/<applicant>",
     }),
     centreName
   );
+  // Every date below is one timeline, anchored on the course the rest of the
+  // app actually runs: Monday 10 August to Friday 4 September 2026.
+  //
+  // It used to contradict itself in five ways at once, all visible on one
+  // screen during a demo. "Monday 7 August" -- 7 Aug 2026 is a Friday, and
+  // the course starts on the 10th everywhere else in the app. "Wednesday 27
+  // August" -- a Thursday, and after the course had started. A deposit due 7
+  // September and a balance due 1 October, i.e. three days and a month AFTER
+  // the course finished. A waiting-list email saying a course that began 24
+  // days ago "starts in 6 days", with a reply deadline four weeks after the
+  // start. And the course was "at London" while the centre it belongs to is
+  // Connect CELTA New York.
+  //
+  // Now: interview Wed 22 July, deposit Fri 24 July, balance Mon 3 August,
+  // waiting-list reply Tue 4 August (six days out, as its own copy claims),
+  // course starts Mon 10 August at 09:30 -- one time, not 9:00 in one email
+  // and 09:30 in another.
   const offerHtml = withConnectBranding(
     acceptancePlaceEmailHtml({
       candidateName: applicantName,
       courseName,
-      courseDates: "7 August – 4 September 2026",
-      centreLocation: "London",
+      courseDates: "10 August – 4 September 2026",
+      centreLocation: "New York",
       feeAmount: "£2,000",
       depositAmount: "£500",
-      depositBy: "7 September 2026",
-      balanceBy: "1 October 2026",
+      depositBy: "24 July 2026",
+      balanceBy: "3 August 2026",
       payUrl: null,
       officeContact: "admissions@celtaconnect.com",
       depositAlreadyPaid: false,
@@ -281,7 +298,7 @@ export default async function JourneyPage() {
       centreName,
       tutorNames: ["Jordan Blake", "Marcus Webb"],
       courseFact: "7 Aug – 4 Sept 2026, full-time",
-      startsFact: "Monday 7 August, 9:00",
+      startsFact: "Monday 10 August, 09:30",
       preCourseTaskFact: "Due before day one",
       setupUrl: "https://celtaconnect.com/join/<token>",
       readingListUrl: null,
@@ -302,7 +319,7 @@ export default async function JourneyPage() {
       candidateName: applicantName,
       courseName,
       startTime: "09:30",
-      startDay: "Monday 7 August",
+      startDay: "Monday 10 August",
       room: `at ${centreName}`,
       groupName: "ABC",
       levelName: "intermediate",
@@ -331,7 +348,7 @@ export default async function JourneyPage() {
   const rejectionAfterInterviewHtml = withConnectBranding(
     rejectionAfterInterviewEmailHtml({
       applicantName: "Daniel Kim",
-      interviewDate: "Wednesday 27 August",
+      interviewDate: "Wednesday 22 July",
       reason:
         "We talked through how you'd handle being observed teaching from week one, and I don't think this course's pace is the right fit yet -- come back to it once you've had more time in front of a class.",
     }),
@@ -347,10 +364,10 @@ export default async function JourneyPage() {
     placeFreedEmailHtml({
       applicantName: "Priya Sharma",
       courseName,
-      courseDates: "7 August to 4 September",
+      courseDates: "10 August to 4 September",
       startsInPhrase: "in 6 days",
       feeLine: "The fee is as set for this course;",
-      respondBy: "Wednesday 2 September, 17:00 UTC",
+      respondBy: "Tuesday 4 August, 17:00 UTC",
       offerUrl: "https://celtaconnect.com/offer/<token>",
       hoursLeftLabel: "Accept your place",
       nextCourseName: null,
@@ -376,7 +393,7 @@ export default async function JourneyPage() {
       centreName,
       levelName: "B1",
       classFact: courseName,
-      whenFact: "Monday 7 August, 09:30",
+      whenFact: "Monday 10 August, 09:30",
       joinUrl: "https://celtaconnect.com/student/<token>",
     }),
     centreName
@@ -639,7 +656,7 @@ export default async function JourneyPage() {
             title="Gets notified the course starts Monday"
             blurb="Sent the Friday immediately before start -- the first moment groups and levels actually exist, so this is also the first message carrying their real group and the link to the day-one activity."
           >
-            <EmailPreview title={`${courseName} starts Monday 7 August`} to={applicantName} html={startsMondayHtml} />
+            <EmailPreview title={`${courseName} starts Monday 10 August`} to={applicantName} html={startsMondayHtml} />
           </Step>
           <Step
             number={12}

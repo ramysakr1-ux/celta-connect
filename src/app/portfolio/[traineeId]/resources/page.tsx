@@ -787,11 +787,18 @@ export default async function ResourceHubPage({
                     separate." Coursebook-linked video has no real data
                     source yet (tp_video_library has no book/level tie --
                     it's the generic external-link shelf below), so this
-                    group is an honest empty state, not invented content. */}
+                    group is an honest empty state, not invented content.
+
+                    The copy used to read "flagged for Ramy, not fabricated"
+                    -- a note to the developer, rendered on a candidate's own
+                    Resource Hub. Found 31 Aug 2026 in the pre-demo sweep. The
+                    reasoning belongs in this comment; the candidate needs to
+                    know the shelf is empty and what to do about it. */}
                 <div>
                   <h4 className="text-sm font-medium text-ink">Video</h4>
                   <p className="sheet mt-2 border-dashed text-sm text-muted">
-                    No coursebook-linked video source built yet — flagged for Ramy, not fabricated.
+                    No video linked to this coursebook yet. Your tutor can add one, and the general video
+                    shelf below is available in the meantime.
                   </p>
                 </div>
                 <div>
