@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireRole } from "@/lib/auth/require-role";
+import { requireCapability } from "@/lib/auth/require-capability";
 import type { CarriedAssignmentSnapshot } from "@/lib/supabase/types";
 
 // specs/build-spec.md §3 "First-half withdrawal with a restart" -- the
@@ -17,7 +17,7 @@ import type { CarriedAssignmentSnapshot } from "@/lib/supabase/types";
 // there's no guarantee worth trusting blindly for an otherwise-irreversible
 // portfolio-carrying action.
 export async function linkRestartTransfer(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("admissions.manage");
   const transferId = formData.get("transfer_id");
   const destinationTraineeId = formData.get("destination_trainee_id");
   const courseId = formData.get("course_id");

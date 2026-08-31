@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { requireRole } from "@/lib/auth/require-role";
+import { requireCapability } from "@/lib/auth/require-capability";
 import { createClient } from "@/lib/supabase/server";
 import { createCoursebookRecord } from "@/lib/tp-library/upload";
 import { AIM_TYPES, type AimType } from "@/lib/aim-type";
@@ -21,7 +21,7 @@ export async function adminCreateCoursebookRecord(input: {
   storagePath: string;
   originalFilename: string;
 }): Promise<{ error: string | null }> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("courseAdmin.settings");
 
   const result = await createCoursebookRecord({
     centerId: admin.center_id,
@@ -40,7 +40,7 @@ export async function updateTpPoint(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("courseAdmin.settings");
 
   const pointId = formData.get("point_id");
   const coursebookId = formData.get("coursebook_id");
@@ -73,7 +73,7 @@ export async function updateTpPoint(
 }
 
 export async function setTpPointStatus(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("courseAdmin.settings");
 
   const pointId = formData.get("point_id");
   const coursebookId = formData.get("coursebook_id");

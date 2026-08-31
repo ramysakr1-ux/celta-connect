@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireRole } from "@/lib/auth/require-role";
+import { requireCapability } from "@/lib/auth/require-capability";
 import type {
   DeferredAssignmentSnapshot,
   CarriedTpSnapshot,
@@ -19,7 +19,7 @@ import type {
 // left to the trainer's Manual Override, not the automatic rotation
 // board), CELTA5 criteria, and tutorial record content.
 export async function linkDeferralTransfer(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("admissions.manage");
   const transferId = formData.get("transfer_id");
   const destinationTraineeId = formData.get("destination_trainee_id");
   const courseId = formData.get("course_id");

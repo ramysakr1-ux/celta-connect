@@ -3,7 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireRole } from "@/lib/auth/require-role";
+import { requireCapabilityOrTrainer } from "@/lib/auth/require-capability";
 import { isMctOnCourse } from "@/lib/course-mct";
 
 // Named invitations, and the tutor role that travels with them.
@@ -28,7 +28,7 @@ const TUTOR_ROLES = [
 type TutorRole = (typeof TUTOR_ROLES)[number];
 
 export async function inviteToCourse(_prev: InviteState, formData: FormData): Promise<InviteState> {
-  const profile = await requireRole(["admin", "trainer"]);
+  const profile = await requireCapabilityOrTrainer("courseAdmin.invite");
 
   const courseId = formData.get("course_id");
   const email = (formData.get("email") as string | null)?.trim().toLowerCase();
@@ -145,7 +145,7 @@ export async function inviteToCourse(_prev: InviteState, formData: FormData): Pr
 
 /** Withdraw an invitation that hasn't been taken up. */
 export async function revokeInvitation(_prev: InviteState, formData: FormData): Promise<InviteState> {
-  const profile = await requireRole(["admin", "trainer"]);
+  const profile = await requireCapabilityOrTrainer("courseAdmin.invite");
   const id = formData.get("invitation_id");
   const courseId = formData.get("course_id");
   if (typeof id !== "string" || typeof courseId !== "string") return { error: "Something went wrong." };
@@ -181,7 +181,7 @@ export async function revokeInvitation(_prev: InviteState, formData: FormData): 
  * to every tutor, because that check fails open.
  */
 export async function changeTutorRole(_prev: InviteState, formData: FormData): Promise<InviteState> {
-  const profile = await requireRole(["admin", "trainer"]);
+  const profile = await requireCapabilityOrTrainer("courseAdmin.invite");
   const courseTutorId = formData.get("course_tutor_id");
   const courseId = formData.get("course_id");
   const nextRoleRaw = (formData.get("tutor_role") as string | null) || null;
@@ -230,7 +230,7 @@ const ASSIGNMENT_TYPES = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
 // fields." Visibility only -- marking itself stays open to any trainer on
 // the course, same as today; this doesn't gate who's allowed to mark.
 export async function updateOwnedAssignmentTypes(formData: FormData): Promise<void> {
-  const profile = await requireRole(["admin", "trainer"]);
+  const profile = await requireCapabilityOrTrainer("courseAdmin.invite");
   const courseTutorId = formData.get("course_tutor_id");
   const courseId = formData.get("course_id");
   if (typeof courseTutorId !== "string" || typeof courseId !== "string") return;

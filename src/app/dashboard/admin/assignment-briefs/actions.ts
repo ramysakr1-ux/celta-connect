@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { requireRole } from "@/lib/auth/require-role";
+import { requireCapability } from "@/lib/auth/require-capability";
 import { createClient } from "@/lib/supabase/server";
 import { upsertAssignmentTemplateRecord } from "@/lib/assignment-templates/upload";
 import type { AssignmentTypeValue, TemplateSection } from "@/lib/assignment-templates/content";
@@ -16,7 +16,7 @@ export async function adminUploadAssignmentBrief(input: {
   storagePath: string;
   originalFilename: string;
 }): Promise<{ error: string | null }> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("courseAdmin.settings");
 
   const result = await upsertAssignmentTemplateRecord({
     centerId: admin.center_id,
@@ -35,7 +35,7 @@ export async function updateAssignmentTemplateSections(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole("admin");
+  await requireCapability("courseAdmin.settings");
 
   const templateId = formData.get("template_id");
   const sectionsRaw = formData.get("sections");
@@ -74,7 +74,7 @@ export async function updateAssignmentTemplateSections(
 // before all 4 exist and are published, so earlier publishes never trip
 // this even if the running count looks off mid-setup.
 export async function publishAssignmentTemplate(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("courseAdmin.settings");
   const templateId = formData.get("template_id");
   if (typeof templateId !== "string") return;
 
@@ -105,7 +105,7 @@ export async function publishAssignmentTemplate(formData: FormData): Promise<voi
 }
 
 export async function unpublishAssignmentTemplate(formData: FormData): Promise<void> {
-  await requireRole("admin");
+  await requireCapability("courseAdmin.settings");
   const templateId = formData.get("template_id");
   if (typeof templateId !== "string") return;
 

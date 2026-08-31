@@ -43,3 +43,33 @@ export async function requireCapability(capability: string) {
   }
   return profile;
 }
+
+/**
+ * The same check, for actions a TRAINER may also perform.
+ *
+ * Most course-level actions -- forming subgroups, inviting candidates,
+ * editing the roster, assigning tutors -- were gated
+ * `requireRole(["trainer", "admin"])`, because a tutor genuinely does these
+ * on their own course. A trainer holds no centre role at all, so requiring a
+ * centre capability outright would have blocked the very people the action
+ * exists for, and traded a permissions hole for a broken workflow.
+ *
+ * So the trainer path is untouched and the admin path is tightened: an
+ * admin now needs the capability their role actually grants, rather than
+ * passing on the strength of the flat `admin` value that every member of
+ * the family shares -- read-only Centre observer included.
+ *
+ * Course-scoped enforcement for trainers is a separate question, handled
+ * where it already is (course_tutors membership); this only decides who may
+ * reach the action at all.
+ */
+export async function requireCapabilityOrTrainer(capability: string) {
+  const profile = await requireRole(["trainer", "admin"]);
+  if (profile.role === "trainer" || profile.role === "platform_owner") return profile;
+
+  const ctx = await getCentreRoleContext(profile);
+  if (!can(ctx.roles, capability, ctx.overrides)) {
+    throw new Error("Your role at this centre does not allow that.");
+  }
+  return profile;
+}

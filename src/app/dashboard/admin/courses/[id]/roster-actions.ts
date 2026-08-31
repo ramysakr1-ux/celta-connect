@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { syncAssessorMeetingEvent } from "@/lib/assessor-day";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireRole } from "@/lib/auth/require-role";
+import { requireCapability, requireCapabilityOrTrainer } from "@/lib/auth/require-capability";
 import { isMctOnCourse } from "@/lib/course-mct";
 import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
@@ -18,7 +18,7 @@ const VALID_DELIVERY_MODES: DeliveryMode[] = ["f2f", "online", "mixed"];
 // ("asked once, read everywhere -- the timetable, observation log and
 // pre-course task all read this field"), same weight as chat retention.
 export async function updateDeliveryMode(formData: FormData): Promise<void> {
-  const staff = await requireRole(["trainer", "admin"]);
+  const staff = await requireCapabilityOrTrainer("courseAdmin.invite");
 
   const courseId = formData.get("course_id");
   const deliveryMode = formData.get("delivery_mode");
@@ -48,7 +48,7 @@ export async function updateDeliveryMode(formData: FormData): Promise<void> {
 // same weight as chat retention, not a day-to-day teaching action like
 // subgroups.
 export async function updateTpMaterialPoolEnabled(formData: FormData): Promise<void> {
-  const staff = await requireRole(["trainer", "admin"]);
+  const staff = await requireCapabilityOrTrainer("courseAdmin.invite");
 
   const courseId = formData.get("course_id");
   const enabled = formData.get("enabled");
@@ -68,7 +68,7 @@ export async function updateTpMaterialPoolEnabled(formData: FormData): Promise<v
 // list it. Off/null by default (migration 0082) so nothing is exposed
 // accidentally.
 export async function updateApplicationSettings(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("courseAdmin.invite");
   const courseId = formData.get("course_id");
   const accepting = formData.get("accepting_applications") === "on";
   const capRaw = formData.get("application_cap");
@@ -91,11 +91,11 @@ export async function updateApplicationSettings(formData: FormData): Promise<voi
 // Admin, configured by the MCT per course" (Ramy, 18 Aug) already said the
 // MCT owns this; only the page it lived on has changed, now that Course
 // Admin's own page no longer covers anything course-running-related. Same
-// requireRole(["trainer","admin"]) + isMctOnCourse() gate as every other
+// requireCapabilityOrTrainer("courseAdmin.invite") + isMctOnCourse() gate as every other
 // MCT-only trainer-hub action (see close-out-actions.ts's
 // requireMctCloseOutAccess for the precedent this copies).
 export async function updateChatRetentionDays(formData: FormData): Promise<void> {
-  const staff = await requireRole(["trainer", "admin"]);
+  const staff = await requireCapabilityOrTrainer("courseAdmin.invite");
   const courseId = formData.get("course_id");
   const modeRaw = formData.get("chat_retention_mode");
   const mode = modeRaw === "course" ? "course" : "days";
@@ -117,7 +117,7 @@ export async function updateChatRetentionDays(formData: FormData): Promise<void>
 }
 
 export async function updateAssessorVisitDate(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("courseAdmin.invite");
   const courseId = formData.get("course_id");
   const assessorVisitDate = (formData.get("assessor_visit_date") as string | null) || null;
   if (typeof courseId !== "string") return;
@@ -138,7 +138,7 @@ export async function updateAssessorVisitDate(formData: FormData): Promise<void>
 // that comes from Cambridge's calendar, not the timetable. Setting it here
 // is what later decides whether a withdrawal is internal or reportable.
 export async function updateEntryFormSentAt(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("courseAdmin.invite");
   const courseId = formData.get("course_id");
   const entryFormSentAt = (formData.get("entry_form_sent_at") as string | null) || null;
   if (typeof courseId !== "string") return;
@@ -160,7 +160,7 @@ export async function updateEntryFormSentAt(formData: FormData): Promise<void> {
 // sees." This is the Course-Admin-side write path; the MCT-side one
 // (inside the course, once running) reuses the same two columns.
 export async function updateAssessor(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("courseAdmin.invite");
   const courseId = formData.get("course_id");
   const assessorName = (formData.get("assessor_name") as string | null)?.trim() || null;
   const assessorEmail = (formData.get("assessor_email") as string | null)?.trim().toLowerCase() || null;
@@ -175,7 +175,7 @@ export async function updateAssessor(formData: FormData): Promise<void> {
 }
 
 export async function regenerateJoinLink(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("courseAdmin.invite");
 
   const courseId = formData.get("course_id");
   const role = formData.get("role");
@@ -200,7 +200,7 @@ export async function regenerateJoinLink(formData: FormData): Promise<void> {
 }
 
 export async function removeRosterMember(formData: FormData): Promise<void> {
-  const admin = await requireRole("admin");
+  const admin = await requireCapability("courseAdmin.invite");
 
   const memberId = formData.get("member_id");
   const courseId = formData.get("course_id");
@@ -235,7 +235,7 @@ export async function sendJoinLinkEmail(
   // candidate" action. Regenerating/removing stays admin-only (those are
   // destructive to an already-shared link); sending a fresh invite email
   // isn't, so it's safe to widen just this one action.
-  const staff = await requireRole(["trainer", "admin"]);
+  const staff = await requireCapabilityOrTrainer("courseAdmin.invite");
 
   const courseId = formData.get("course_id");
   const role = formData.get("role");

@@ -3,7 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireRole } from "@/lib/auth/require-role";
+import { requireCapabilityOrTrainer } from "@/lib/auth/require-capability";
 import { isMctOnCourse } from "@/lib/course-mct";
 import { TUTOR_ROLES, type TutorRole } from "@/lib/tutor-roles";
 import { checkConcurrentCourseAssignment, type CourseWindow } from "@/lib/concurrent-course-check";
@@ -21,7 +21,7 @@ export interface AssignTutorState {
 }
 
 export async function assignExistingTutor(_prev: AssignTutorState, formData: FormData): Promise<AssignTutorState> {
-  const admin = await requireRole(["admin", "trainer"]);
+  const admin = await requireCapabilityOrTrainer("courseAdmin.invite");
   const courseId = formData.get("course_id");
   const profileId = formData.get("profile_id");
   const tutorRoleRaw = formData.get("tutor_role");
@@ -130,7 +130,7 @@ export async function assignExistingTutor(_prev: AssignTutorState, formData: For
  * untouched.
  */
 export async function leaveSecondaryCourse(formData: FormData): Promise<void> {
-  const admin = await requireRole(["admin", "trainer"]);
+  const admin = await requireCapabilityOrTrainer("courseAdmin.invite");
   const courseId = formData.get("course_id");
   const profileId = formData.get("profile_id");
   if (typeof courseId !== "string" || typeof profileId !== "string") return;

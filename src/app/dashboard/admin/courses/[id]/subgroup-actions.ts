@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireRole } from "@/lib/auth/require-role";
+import { requireCapabilityOrTrainer } from "@/lib/auth/require-capability";
 import { syncAssignmentDueDates } from "@/lib/assignment-due-dates";
 
 export interface FormState {
@@ -30,7 +30,7 @@ export async function createSubgroup(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole(["trainer", "admin"]);
+  await requireCapabilityOrTrainer("courseAdmin.groups");
 
   const courseId = formData.get("course_id");
   const name = formData.get("name");
@@ -53,7 +53,7 @@ export async function addSubgroupMember(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  await requireRole(["trainer", "admin"]);
+  await requireCapabilityOrTrainer("courseAdmin.groups");
 
   const subgroupId = formData.get("subgroup_id");
   const traineeId = formData.get("trainee_id");
@@ -113,7 +113,7 @@ export async function addSubgroupMember(
 }
 
 export async function removeSubgroupMember(formData: FormData): Promise<void> {
-  await requireRole(["trainer", "admin"]);
+  await requireCapabilityOrTrainer("courseAdmin.groups");
 
   const memberId = formData.get("member_id");
   const courseId = formData.get("course_id");
@@ -132,7 +132,7 @@ export async function removeSubgroupMember(formData: FormData): Promise<void> {
 // specs/build-spec.md and src/lib/rotation.ts). The combined-6 cap is
 // re-checked atomically inside pair_subgroups() itself, not just here.
 export async function pairSubgroups(_prevState: FormState, formData: FormData): Promise<FormState> {
-  await requireRole(["trainer", "admin"]);
+  await requireCapabilityOrTrainer("courseAdmin.groups");
 
   const courseId = formData.get("course_id");
   const name = formData.get("name");
@@ -174,7 +174,7 @@ export async function pairSubgroups(_prevState: FormState, formData: FormData): 
 // RPC/atomicity concern here -- plain updates plus a delete, same shape as
 // removeSubgroupMember.
 export async function unpairTpGroup(formData: FormData): Promise<void> {
-  await requireRole(["trainer", "admin"]);
+  await requireCapabilityOrTrainer("courseAdmin.groups");
 
   const tpGroupId = formData.get("tp_group_id");
   const courseId = formData.get("course_id");
@@ -204,7 +204,7 @@ export async function unpairTpGroup(formData: FormData): Promise<void> {
  * distinction governs announcements, not teaching.
  */
 export async function setTpGroupTutor(_prevState: FormState, formData: FormData): Promise<FormState> {
-  const profile = await requireRole(["trainer", "admin"]);
+  const profile = await requireCapabilityOrTrainer("courseAdmin.groups");
 
   const groupId = formData.get("group_id");
   const courseId = formData.get("course_id");
