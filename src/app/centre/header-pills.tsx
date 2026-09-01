@@ -18,7 +18,13 @@ import { PILL_ACTIVE, PILL_INACTIVE } from "@/app/centre/header-pill-styles";
 // than positional, so on /centre/owner "Centre management" was a plain span
 // with no way back, and "Centre owner" was a link to the page you were
 // already standing on.
-export function CentreHeaderPills({ mayViewCourseAdmin }: { mayViewCourseAdmin: boolean }) {
+export function CentreHeaderPills({
+  mayViewCourseAdmin,
+  mayViewAdmissions,
+}: {
+  mayViewCourseAdmin: boolean;
+  mayViewAdmissions: boolean;
+}) {
   const pathname = usePathname() ?? "";
   const onOwner = pathname.startsWith("/centre/owner");
 
@@ -35,6 +41,14 @@ export function CentreHeaderPills({ mayViewCourseAdmin }: { mayViewCourseAdmin: 
       {mayViewCourseAdmin ? (
         <Link href="/dashboard/admin" className={PILL_INACTIVE}>
           Course admin
+        </Link>
+      ) : null}
+      {/* Admissions is its own room, so it appears here too and the row reads
+          the same in every header. Ramy, 1 Sep 2026: "admissions should have
+          their own room, across the board." */}
+      {mayViewAdmissions ? (
+        <Link href="/dashboard/admissions" className={PILL_INACTIVE}>
+          Admissions
         </Link>
       ) : null}
     </>

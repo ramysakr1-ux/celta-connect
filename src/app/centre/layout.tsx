@@ -72,7 +72,10 @@ export default async function CentreLayout({ children }: { children: React.React
           >
             <Wordmark size="header" />
           </Link>
-          <CentreHeaderPills mayViewCourseAdmin={can(ctx.roles, "courseAdmin.view", ctx.overrides)} />
+          <CentreHeaderPills
+            mayViewCourseAdmin={can(ctx.roles, "courseAdmin.view", ctx.overrides)}
+            mayViewAdmissions={can(ctx.roles, "admissions.manage", ctx.overrides)}
+          />
         </div>
         {/* The garnet Centre owner pill is gone: Connect is the way home
             now, and for an owner home IS the owner screen. Ramy: "you don't

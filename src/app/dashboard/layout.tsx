@@ -9,7 +9,8 @@ import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
-import { PILL_ACTIVE, PILL_INACTIVE } from "@/app/centre/header-pill-styles";
+import { PILL_INACTIVE } from "@/app/centre/header-pill-styles";
+import { SectionPills } from "@/components/section-pills";
 import { AreaTheme, AreaHeaderRule } from "@/components/area-theme";
 import { adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
@@ -151,7 +152,17 @@ export default async function DashboardLayout({
                   Centre management
                 </Link>
               ) : null}
-              <span className={PILL_ACTIVE}>Course admin</span>
+              {/* Three rooms in a fixed order, only the fill moving. Admissions
+                  earns its own pill because it is its own room -- Ramy, 1 Sep
+                  2026: "admissions could be for more than one course, so they
+                  can[not] be part of Course Admin. Admissions should have their
+                  own room, across the board."
+
+                  Without it, standing in Admissions lit the Course Admin pill,
+                  so the rose rule under the header and the signage above it
+                  disagreed about which room you were in -- worse than having
+                  neither. */}
+              <SectionPills />
             </>
           ) : null}
           </div>
