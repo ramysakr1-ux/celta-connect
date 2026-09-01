@@ -4,8 +4,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { signOut } from "@/app/login/actions";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
-import { can, adminHomePath } from "@/lib/auth/centre-permissions";
-import { CentreSettingsCard } from "@/app/centre/settings-card";
+import { can, canView, adminHomePath } from "@/lib/auth/centre-permissions";
 import { RoomPills } from "@/components/room-pills";
 import { AreaTheme } from "@/components/area-theme";
 import { CentreTabs } from "@/app/centre/centre-tabs";
@@ -52,12 +51,21 @@ export default async function CentreLayout({ children }: { children: React.React
 
   // Same four rooms as the /dashboard side, gated on what this person can
   // actually reach, so nobody is shown a door that will bounce them.
+  //
+  // The volunteer pool was hardcoded in alongside Centre management, so an
+  // owner-defined custom role -- whose baseline is "none" until the owner
+  // grants something -- was shown a door into it regardless. Built-in roles
+  // all hold volunteers.view, so this changes nothing for them; it is the
+  // custom roles the owner invents that it protects.
   const visibleRooms = [
     "centre",
-    "volunteers",
+    ...(canView(ctx.roles, "volunteers.view", ctx.overrides) ? ["volunteers"] : []),
     ...(can(ctx.roles, "courseAdmin.view", ctx.overrides) ? ["course-admin"] : []),
     ...(can(ctx.roles, "admissions.manage", ctx.overrides) ? ["admissions"] : []),
   ];
+
+  // Settings follows the capability its own page enforces.
+  const canSettings = can(ctx.roles, "centre.settings.edit", ctx.overrides);
 
   return (
     /* Picks the room by path rather than hardcoding, because /centre holds
@@ -114,10 +122,6 @@ export default async function CentreLayout({ children }: { children: React.React
           and one hue should not mean two unrelated things. globals.css calls
           --color-bronze "the third accent, from the Centre Admin design
           system" -- it was made for this section. */}
-      <div className="container pt-5">
-        <CentreTabs />
-      </div>
-
       {/* The pills sit on the page, not in the header. Measured before moving
           them: the dropped pill was 132px right of the page edge and 57px above
           the surface it is meant to be attached to, because it was inline with
@@ -127,24 +131,17 @@ export default async function CentreLayout({ children }: { children: React.React
         <RoomPills visible={visibleRooms} />
       </div>
 
+      {/* Under the pills, not above them: you choose a room, then a page
+          within it. The tabs used to come first, which put a room's inner
+          navigation on top of the control that picks the room. */}
+      <div className="container pt-4">
+        <CentreTabs canSettings={canSettings} />
+      </div>
+
       <main className="container w-full flex-1 pb-6">
         <div className="frame room-surface p-6">{children}</div>
       </main>
 
-      {/* Centre Admin.dc.html: a full-width bar under every tab (Overview,
-          Roles, and Import alike), not scoped to any one tab's content --
-          it sits after the closing of all three tab blocks in the design's
-          own markup. */}
-      {/* Ramy, 26 Aug 2026: "we need to push centre settings up because the
-          chat pill is at the bottom fixed, and it's covering it." The pill
-          is fixed with real height plus its own offset from the screen
-          edge -- pb-6 alone left this card underneath it at the bottom of
-          the page. */}
-      {/* Hides itself on /centre/settings -- this layout wraps that page
-          too, so the bar was inviting you to open the page you were already
-          standing on. The permission check stays here on the server; only
-          "am I already there" needs the client. */}
-      {can(ctx.roles, "centre.settings.edit", ctx.overrides) ? <CentreSettingsCard /> : null}
 
       {adminChatRooms.length > 0 ? <AdminChatBar profileId={profile.id} rooms={adminChatRooms} /> : null}
     </AreaTheme>

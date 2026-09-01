@@ -11,7 +11,7 @@ import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { RoomPills } from "@/components/room-pills";
 import { AreaTheme } from "@/components/area-theme";
-import { adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
+import { can, canView, adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
 
 export default async function DashboardLayout({
@@ -54,11 +54,30 @@ export default async function DashboardLayout({
   // Which rooms this person may enter. Course Admin and Admissions are the two
   // that live under /dashboard; Centre Management and the Volunteer pool appear
   // when they hold a centre role, since that is what reaches them.
-  const visibleRooms = [
-    ...(centreCtx && centreCtx.roles.length > 0 ? ["centre", "volunteers"] : []),
-    "course-admin",
-    "admissions",
-  ];
+  //
+  // Course admin and Admissions used to be unconditional strings here. This
+  // layout also wraps nine pages that belong to the course side and were
+  // never moved out of /dashboard -- eight trainer pages and the trainee's
+  // TP7/8 syllabus grid -- so a trainer, and a trainee picking her own topic,
+  // were both shown two doors into centre administration. They would have
+  // been bounced on click, but they should not have been looking at them.
+  // Ramy, 1 Sep 2026: "Why would a trainee even get there? This has nothing
+  // to do with the course. It's a completely separate building."
+  //
+  // centreCtx is null for anyone who is not an admin, which is what closes
+  // that leak; the capability checks below then match the ones the /centre
+  // layout already used, so the two layouts stop disagreeing about who may
+  // see which room. roles.length === 0 is the legacy flat-admin case the
+  // rest of the codebase already treats as full access.
+  const flatAdmin = centreCtx !== null && centreCtx.roles.length === 0;
+  const visibleRooms = centreCtx
+    ? [
+        ...(centreCtx.roles.length > 0 ? ["centre"] : []),
+        ...(canView(centreCtx.roles, "volunteers.view", centreCtx.overrides) ? ["volunteers"] : []),
+        ...(flatAdmin || can(centreCtx.roles, "courseAdmin.view", centreCtx.overrides) ? ["course-admin"] : []),
+        ...(flatAdmin || can(centreCtx.roles, "admissions.manage", centreCtx.overrides) ? ["admissions"] : []),
+      ]
+    : [];
 
   const isCentreOwner = centreCtx?.roles.includes("centre_owner") ?? false;
   const actingRoleLabel =
