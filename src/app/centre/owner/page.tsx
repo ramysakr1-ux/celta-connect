@@ -10,6 +10,7 @@ import { roleLabel, CAPABILITY_LABELS, type Capability } from "@/lib/auth/centre
 import { CapabilityCustomizer } from "@/app/centre/owner/capability-customizer";
 import { BranchVisibilityCard } from "@/app/centre/owner/branch-visibility-card";
 import { TransferOwnershipCard, DeleteCentreCard } from "@/app/centre/settings/danger-zone";
+import { UnownedCoursesCard } from "@/app/centre/owner/unowned-courses-card";
 
 // for-claude-code-centre-owner-role-customizer.md: "This screen is
 // deliberately a different register from the rest of Connect... signals
@@ -64,7 +65,8 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
     await Promise.all([
       getCachedCenter(centerId),
       admin.from("centers").select("id, name, organisation_id, currency").eq("id", centerId).maybeSingle(),
-      admin.from("courses").select("id, start_date, end_date").in("center_id", scope),
+      // name/center_id added for the unowned-course backstop below.
+      admin.from("courses").select("id, name, center_id, start_date, end_date").in("center_id", scope),
       admin.from("centre_roles").select("id, profile_id, role, center_id").in("center_id", scope).is("revoked_at", null),
       admin.from("centre_owner_actions").select("id, created_at").in("center_id", scope),
       admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId),
@@ -112,6 +114,30 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
   // pointed at New York. Naming the real target here is what makes the
   // type-the-name confirmation mean something: you type the name of the
   // centre that will actually be destroyed.
+  // A course nobody administers: no course_administrator_scope row pointing
+  // at a grant that is still live. Ramy, 1 Sep 2026, on why this is the
+  // owner's and not Course Admin's: "as a last line of defence." The person
+  // who would normally fix it is precisely the person who is gone.
+  const scopeRows = courseIds.length
+    ? (await admin.from("course_administrator_scope").select("course_id, centre_role_id").in("course_id", courseIds)).data ?? []
+    : [];
+  const liveGrantIds = new Set(
+    (grants ?? []).filter((g) => g.role === "course_administrator").map((g) => g.id)
+  );
+  const ownedCourseIds = new Set(scopeRows.filter((r) => liveGrantIds.has(r.centre_role_id)).map((r) => r.course_id));
+  const unownedCourses = (courses ?? [])
+    .filter((c) => !ownedCourseIds.has(c.id))
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      branchName: branchNameById.get(c.center_id) ?? null,
+      startDate: c.start_date,
+    }));
+  // Somebody to hand it to: a live course_administrator grant at this centre.
+  const assignCandidates = (grants ?? [])
+    .filter((g) => g.role === "course_administrator" && g.center_id === centerId)
+    .map((g) => ({ centreRoleId: g.id, name: nameById.get(g.profile_id) ?? "Unknown" }));
+
   const custodialId = ctx.activeCenterId ?? profile.center_id;
   const custodialName = branchNameById.get(custodialId) ?? center?.name ?? "this centre";
   const custodialIsElsewhere = custodialId !== centerId;
@@ -220,6 +246,8 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
             ))}
           </div>
         </div>
+
+        <UnownedCoursesCard courses={unownedCourses} candidates={assignCandidates} />
 
         {/* Ramy, 1 Sep 2026: "the danger zone should also be inside the
             centre owner's page." It was the only owner-gated thing in

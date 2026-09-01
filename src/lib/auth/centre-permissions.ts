@@ -47,7 +47,6 @@ export type Capability =
   // -- Centre level
   | "course.create"
   | "course.editRecord"
-  | "course.restoreDeleted"
   | "course.reassignUnowned"
   | "roles.grant"
   | "centre.settings.edit"
@@ -212,6 +211,14 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
   // deleted course within 30 days, reassign an unowned course, and appoint or
   // remove administrators.
   //
+  // "Restore a deleted course" is NOT here, removed 1 Sep 2026. There is no
+  // soft delete anywhere in the schema -- no deleted_at column, on courses or
+  // anything else -- so the capability was a toggle in the owner's role
+  // builder that granted a power nothing in the app could check. A permission
+  // that grants nothing is worse than an absent one: it reads as a promise.
+  // Reinstating it means adding soft delete and changing what deletion means
+  // everywhere it happens, which is a decision, not a rename.
+  //
   // DELIBERATE DIVERGENCE, on Ramy's instruction (2026-08-16): the owner is
   // **read-only on course administration**. His words -- "the centre owner is
   // read only for the course admin, but not for the rest... the rest, the
@@ -228,7 +235,6 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
     // Custodial powers over a course's EXISTENCE and ownership -- explicitly
     // the owner's in the spec, and distinct from running one. These are what
     // the role exists for: somebody left, somebody is off sick.
-    "course.restoreDeleted": true,
     "course.reassignUnowned": true,
     "roles.grant": true,
     // Centre level: may intervene, and every one of these is logged.
@@ -279,7 +285,6 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
 export const LOGGED_FOR_OWNER: Capability[] = [
   "course.create",
   "course.editRecord",
-  "course.restoreDeleted",
   "course.reassignUnowned",
   "roles.grant",
   "centre.settings.edit",
@@ -417,7 +422,6 @@ export function capabilityLabel(capabilityKey: string, customCapabilities: { cap
 export const CAPABILITY_LABELS: Record<Capability, string> = {
   "course.create": "Create courses",
   "course.editRecord": "Edit course record",
-  "course.restoreDeleted": "Restore a deleted course",
   "course.reassignUnowned": "Reassign an unowned course",
   "roles.grant": "Invite / grant centre roles",
   "centre.settings.edit": "Centre settings & Drive",

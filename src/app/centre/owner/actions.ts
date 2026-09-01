@@ -11,7 +11,7 @@ async function requireOwner() {
   const ctx = await getCentreRoleContext(profile);
   if (!ctx.roles.includes("centre_owner")) throw new Error("Only the Centre owner can do this.");
   const centerId = ctx.activeCenterId ?? profile.center_id;
-  return { profile, centerId };
+  return { profile, centerId, ctx };
 }
 
 async function logOwnerAction(centerId: string, actorId: string, action: string, targetTable: string, detail: Record<string, unknown>) {
@@ -166,4 +166,83 @@ export async function addCustomRole(_prevState: OwnerActionState, formData: Form
   revalidatePath("/centre/owner");
   revalidatePath("/centre/roles");
   return { error: null };
+}
+
+export interface ReassignState {
+  error: string | null;
+  ok: string | null;
+}
+
+/**
+ * Hand an orphaned course to a course administrator.
+ *
+ * The owner stays read-only on course administration -- this writes a scope
+ * row saying WHO administers a course, and touches nothing inside it. Ramy,
+ * 1 Sep 2026: "reassign, then, if it's like a last line of defence."
+ *
+ * Guarded three ways beyond owner-only: the course must belong to a centre
+ * this owner actually holds, the grant must be a live course_administrator
+ * grant at that same centre, and the course must still be unowned when the
+ * write happens -- two owners in two tabs must not both hand out the same
+ * course, and the check-then-write is only atomic if the last check is here
+ * rather than in the render that drew the button.
+ */
+export async function reassignUnownedCourse(_prev: ReassignState, formData: FormData): Promise<ReassignState> {
+  // ctx comes back from requireOwner rather than being fetched again --
+  // getCentreRoleContext is a real round trip, and it has already run.
+  const { profile, ctx } = await requireOwner();
+  const courseId = formData.get("courseId");
+  const centreRoleId = formData.get("centreRoleId");
+  if (typeof courseId !== "string" || typeof centreRoleId !== "string" || !courseId || !centreRoleId) {
+    return { error: "Pick a course and somebody to hand it to.", ok: null };
+  }
+
+  const admin = createAdminClient();
+  const mine = ctx.availableCenterIds.filter(Boolean);
+
+  const { data: course } = await admin.from("courses").select("id, name, center_id").eq("id", courseId).maybeSingle();
+  if (!course || !mine.includes(course.center_id)) {
+    return { error: "That course is not at a centre you own.", ok: null };
+  }
+
+  const { data: grant } = await admin
+    .from("centre_roles")
+    .select("id, profile_id, role, center_id, revoked_at")
+    .eq("id", centreRoleId)
+    .maybeSingle();
+  if (!grant || grant.revoked_at || grant.role !== "course_administrator" || grant.center_id !== course.center_id) {
+    return { error: "That person no longer holds a Course administrator role at this centre.", ok: null };
+  }
+
+  // Re-check emptiness at write time, not at render time.
+  const { data: existing } = await admin
+    .from("course_administrator_scope")
+    .select("id, centre_role_id")
+    .eq("course_id", courseId);
+  const liveRoleIds = (existing ?? []).map((r) => r.centre_role_id);
+  if (liveRoleIds.length > 0) {
+    const { data: live } = await admin
+      .from("centre_roles")
+      .select("id")
+      .in("id", liveRoleIds)
+      .is("revoked_at", null);
+    if ((live ?? []).length > 0) {
+      return { error: "Somebody has already been given this course.", ok: null };
+    }
+  }
+
+  const { error } = await admin
+    .from("course_administrator_scope")
+    .insert({ centre_role_id: centreRoleId, course_id: courseId });
+  if (error) return { error: "Could not assign the course. Nothing was changed.", ok: null };
+
+  const { data: person } = await admin.from("profiles").select("full_name").eq("id", grant.profile_id).maybeSingle();
+  await logOwnerAction(course.center_id, profile.id, "course.reassign_unowned", "course_administrator_scope", {
+    course_id: courseId,
+    course_name: course.name,
+    assigned_to: grant.profile_id,
+  });
+
+  revalidatePath("/centre/owner");
+  return { error: null, ok: `${course.name} is now administered by ${person?.full_name ?? "them"}.` };
 }
