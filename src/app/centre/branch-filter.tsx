@@ -32,12 +32,47 @@ export function BranchFilter({ branches }: { branches: Branch[] }) {
 
   if (branches.length < 2) return null;
 
+  // On the owner's own screen the branches stop being a filter control and
+  // start being the thing the screen is about. Ramy, 1 Sep 2026: "it should
+  // be a sign of wealth. The centre owner is proud of their centres, so it
+  // kind of needs to pop a bit." Same buttons, same behaviour -- read at
+  // reading size, in the serif, on the garnet the rest of that screen uses,
+  // and named, so the row says whose centres these are.
+  const proud = pathname === "/centre/owner" || pathname.startsWith("/centre/owner/");
+
   const set = (id: string | null) => {
     const next = new URLSearchParams(params.toString());
     if (id) next.set("branch", id);
     else next.delete("branch");
     router.push(`${pathname}?${next.toString()}`);
   };
+
+  if (proud) {
+    const garnet = "oklch(42% 0.15 27)";
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-[10.5px] font-bold tracking-[0.16em] text-muted uppercase">Your centres</span>
+        {[{ id: null as string | null, name: "All branches" }, ...branches.map((b) => ({ id: b.id, name: b.name }))].map((b) => {
+          const isActive = b.id === null ? !current : current === b.id;
+          return (
+            <button
+              key={b.id ?? "all"}
+              type="button"
+              onClick={() => set(b.id)}
+              className="rounded-[4px] border px-3.5 py-1.5 font-serif text-[13.5px] transition-colors duration-150"
+              style={
+                isActive
+                  ? { background: garnet, borderColor: garnet, color: "oklch(98% 0.006 85)" }
+                  : { borderColor: "oklch(85% 0.018 75)", color: "oklch(38% 0.02 60)" }
+              }
+            >
+              {b.name}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-1.5">

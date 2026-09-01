@@ -147,7 +147,13 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
             your centre works.
           </p>
         </div>
-        <span className="owner-pill shrink-0">Centre Owner</span>
+        {/* The pill used to repeat the words already set in 33px serif a
+            few pixels to its left. Ramy, 1 Sep 2026: "there's a big Centre
+            owner writing on the left in the black screen. So instead of
+            'Centre owner' lying on the right inside the red pill, we keep
+            the red pill, and we write down the centre owner's name."
+            The role is the heading; the pill is who holds it. */}
+        <span className="owner-pill owner-pill-name owner-serif shrink-0">{profile.full_name}</span>
       </div>
 
       <div className="flex flex-col gap-[30px] px-11 py-9">
@@ -214,6 +220,13 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
           display: inline-flex; align-items: center; gap: 7px; padding: 7px 16px; border-radius: 3px;
           background: var(--owner-garnet); color: oklch(98% 0.006 85); font-size: 11px; font-weight: 700;
           letter-spacing: 0.1em; text-transform: uppercase;
+        }
+        /* A person's name is not a label: dropping the caps and the tracking,
+           and setting it in the serif at reading size, is what stops it
+           reading as another badge and starts it reading as someone. */
+        .owner-pill-name {
+          padding: 9px 18px; font-size: 15px; font-weight: 600;
+          letter-spacing: 0.005em; text-transform: none;
         }
         .owner-card {
           background: var(--owner-paper); border: 1px solid var(--owner-line); border-radius: 10px;

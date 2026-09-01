@@ -8,7 +8,7 @@ import { can, canView, adminHomePath } from "@/lib/auth/centre-permissions";
 import { RoomPills } from "@/components/room-pills";
 import { AreaTheme } from "@/components/area-theme";
 import { CentreTabs } from "@/app/centre/centre-tabs";
-import { BranchFilter } from "@/app/centre/branch-filter";
+import { CentreHeaderMeta } from "@/app/centre/header-meta";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
@@ -96,15 +96,11 @@ export default async function CentreLayout({ children }: { children: React.React
         <HeaderDesignerCredit landingPath="/centre" />
       </div>
       <div className="container flex items-center justify-end gap-4 pt-2 text-[13px] text-muted">
-        <BranchFilter branches={switchable} />
-        <span>{profile.full_name}</span>
-        {/* The owner's second way back to their own screen -- see the note in
-            dashboard/layout.tsx. Hidden when already there. */}
-        {ctx.roles.includes("centre_owner") ? (
-          <Link href="/centre/owner" className="text-muted underline-offset-2 hover:text-ink hover:underline">
-            Centre owner
-          </Link>
-        ) : null}
+        <CentreHeaderMeta
+          branches={switchable}
+          fullName={profile.full_name}
+          isOwner={ctx.roles.includes("centre_owner")}
+        />
         <form action={signOut}>
           <button type="submit" className="hover:text-ink">
             Sign out
