@@ -4,8 +4,12 @@
 // The Administration Handbook (June 2025) fixes what an assessor must do on a
 // visit, and the counts are easy to misremember -- I had to look them up, and
 // the one number people half-remember as scaling with course size (three /
-// four / five) is the DOUBLE-MARKING table in section 11, which is the
-// centre's job and a different mechanism entirely. So both live here, derived
+// four / five) is the DOUBLE-MARKING table in section 9.2.3, page 27, which
+// is the centre's job and a different mechanism entirely. (This comment said
+// "section 11" until 1 Sep 2026, checked against the PDF itself: section 11
+// is Candidate assessment. The table reads "Up to nine candidates: three of
+// each assignment... 10-16: four... 17-24: five", and the sample must include
+// any fail assignments.) So both live here, derived
 // against the real course rather than printed as a static list, and each
 // carries the section it comes from so nobody has to take this file's word
 // for it.
