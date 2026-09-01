@@ -614,17 +614,17 @@ h6 {
     --area-rule: oklch(42% 0.058 195);
     --area-hover-fill: oklch(93% 0.019 195);
   }
+  .area-volunteers {
+    --area-rule-width: 3px;
+    --area-accent: oklch(42% 0.075 155);
+    --area-rule: oklch(42% 0.075 155);
+    --area-hover-fill: oklch(93% 0.02 155);
+  }
   .area-admissions {
     --area-rule-width: 3px;
     --area-accent: oklch(42% 0.12 350);
     --area-rule: oklch(42% 0.12 350);
     --area-hover-fill: oklch(93% 0.028 350);
-  }
-  .area-staff-chat {
-    --area-rule-width: 3px;
-    --area-accent: oklch(42% 0.09 255);
-    --area-rule: oklch(42% 0.09 255);
-    --area-hover-fill: oklch(93% 0.023 255);
   }
 
   /* Assessor's own accent -- garnet, a plain fixed color rather than a

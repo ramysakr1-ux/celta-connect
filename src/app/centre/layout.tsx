@@ -7,6 +7,7 @@ import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, adminHomePath } from "@/lib/auth/centre-permissions";
 import { CentreSettingsCard } from "@/app/centre/settings-card";
 import { CentreHeaderPills } from "@/app/centre/header-pills";
+import { AreaTheme } from "@/components/area-theme";
 import { CentreTabs } from "@/app/centre/centre-tabs";
 import { BranchFilter } from "@/app/centre/branch-filter";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -50,11 +51,10 @@ export default async function CentreLayout({ children }: { children: React.React
   const switchable = (switchableRaw.data ?? []).map((c) => ({ id: c.id, name: c.name, centerNumber: c.center_number }));
 
   return (
-    /* area-centre carries Centre Management's identity -- bronze accent,
-       teal rule, pale bronze hover -- to everything inside, including the
-       ~150 .admin-hover-fill call sites that would otherwise need editing
-       one by one. */
-    <div className="area-centre flex min-h-full flex-1 flex-col">
+    /* Picks the room by path rather than hardcoding, because /centre holds
+       more than one: the volunteer pool is its own room with its own colour,
+       and everything else is Centre Management. */
+    <AreaTheme className="flex min-h-full flex-1 flex-col">
       {/* Header: 32px mark + wordmark, a hairline divider, then the pill.
           Two rows on the right (Ramy, 23 Aug 2026): row 1 leaves headroom
           for the fixed DesignerCredit badge (rendered from centre/page.tsx
@@ -127,6 +127,6 @@ export default async function CentreLayout({ children }: { children: React.React
       {can(ctx.roles, "centre.settings.edit", ctx.overrides) ? <CentreSettingsCard /> : null}
 
       {adminChatRooms.length > 0 ? <AdminChatBar profileId={profile.id} rooms={adminChatRooms} /> : null}
-    </div>
+    </AreaTheme>
   );
 }

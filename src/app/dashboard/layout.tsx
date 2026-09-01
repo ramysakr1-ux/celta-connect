@@ -10,7 +10,7 @@ import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { PILL_ACTIVE, PILL_INACTIVE } from "@/app/centre/header-pill-styles";
-import { AreaTheme, AreaHeaderRule } from "@/app/dashboard/area-theme";
+import { AreaTheme, AreaHeaderRule } from "@/components/area-theme";
 import { adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
 

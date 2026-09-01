@@ -7,7 +7,6 @@ import { can, canView } from "@/lib/auth/centre-permissions";
 import { computeSessionTicks } from "@/lib/volunteer-attendance";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { VolunteerPoolRow } from "@/app/centre/volunteer-pool-row";
-import { Wordmark } from "@/components/wordmark";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
@@ -124,31 +123,21 @@ export default async function CentreVolunteersPage({
   const canEdit = can(ctx.roles, "centre.settings.edit", ctx.overrides);
 
   return (
-    <div className="volunteer-surface -m-6 flex flex-col">
-      {/* for-claude-code-volunteer-pool-header.md: a dedicated sage/coral
-          header, same full-bleed break-out (-m-6 cancelling the shared
-          centre/layout.tsx frame's own p-6) as /centre/owner's dark header
-          -- the shared Centre Admin header/tabs above stay exactly as they
-          are; this is this one page's own band, not a layout-wide change. */}
-      <div className="volunteer-header flex h-[60px] shrink-0 items-center justify-between px-8">
-        <div className="flex items-center gap-3">
-          <Wordmark size="header" onDark tileBg="color-mix(in oklab, oklch(97% 0.008 88) 22%, transparent)" />
-          <span className="h-4 w-px" style={{ background: "color-mix(in oklab, oklch(97% 0.008 88) 25%, transparent)" }} aria-hidden="true" />
-          <span
-            className="rounded-[5px] px-2.5 py-1 text-[11px] font-bold tracking-[0.1em] uppercase"
-            style={{
-              color: "oklch(97% 0.008 88)",
-              background: "color-mix(in oklab, oklch(97% 0.008 88) 14%, transparent)",
-              border: "1px solid color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent)",
-            }}
-          >
-            Centre Management
-          </span>
-        </div>
-        <Link href="/centre" className="text-[12.5px] font-semibold no-underline" style={{ color: "oklch(97% 0.008 88)", opacity: 0.8 }}>
-          ← Overview
-        </Link>
-      </div>
+    <div className="flex flex-col">
+      {/* This page used to carry its own full-bleed sage band, with a SECOND
+        Connect mark reversed onto it and its own "Centre Management" pill --
+        so the page showed the wordmark twice, and the copy on the band had a
+        tinted tile.
+
+        Both are now against the rules. Ramy, 1 Sep 2026: "Connect does not
+        change... it stands on top above all... always the same everywhere."
+        And the volunteer pool is a room like any other, so it wears its colour
+        the way the others do -- a rule under the shared header, its accent on
+        the active pill, its wash on hovers -- rather than a band of its own.
+
+        Sage is kept: it was this room's colour before any of this and there is
+        no reason to take it away. */}
+
 
       <div className="flex flex-col gap-5 p-8">
         <div className="flex flex-col gap-[3px]">
@@ -198,13 +187,6 @@ export default async function CentreVolunteersPage({
         </div>
       </div>
 
-      <style>{`
-        .volunteer-surface {
-          --vol-sage: oklch(35% 0.075 155);
-          --vol-coral: oklch(58% 0.14 25);
-        }
-        .volunteer-header { background: var(--vol-sage); border-bottom: 3px solid var(--vol-coral); }
-      `}</style>
     </div>
   );
 }

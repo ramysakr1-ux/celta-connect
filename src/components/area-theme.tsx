@@ -21,13 +21,19 @@ import { usePathname } from "next/navigation";
  * --area-hover-fill with their old literals as fallbacks. An area with no
  * entry below simply looks the way it always did.
  */
+// Staff chat is deliberately absent. It has no page of its own -- it is a
+// drawer that floats over whichever room you are already in -- so giving it a
+// colour would put two room identities on screen at once, which is the exact
+// confusion this system exists to remove. Confirmed by /dashboard/staff-chat
+// returning a 404: the folder holds a drawer component, not a route.
 const AREA_BY_PREFIX: { prefix: string; className: string }[] = [
+  { prefix: "/centre/volunteers", className: "area-volunteers" },
   { prefix: "/dashboard/admissions", className: "area-admissions" },
-  { prefix: "/dashboard/staff-chat", className: "area-staff-chat" },
-  // Last, because /dashboard/admin is a prefix of nothing else here but the
-  // list is matched in order and a shorter prefix would swallow the others if
-  // one were ever added beneath it.
   { prefix: "/dashboard/admin", className: "area-course-admin" },
+  // /centre LAST: it is a prefix of /centre/volunteers, and the list is
+  // matched in order, so a shorter prefix placed earlier would swallow the
+  // rooms beneath it.
+  { prefix: "/centre", className: "area-centre" },
 ];
 
 export function areaClassFor(pathname: string): string | null {
