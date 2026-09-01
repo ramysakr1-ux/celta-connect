@@ -555,6 +555,49 @@ h6 {
     background-color: var(--area-hover-fill, oklch(93% 0.019 190)) !important;
   }
 
+  /* The page surface a dropped pill sits on. Its top edge is the room's
+     colour, so the pill and the page read as one piece rather than a button
+     floating above a panel. Falls back to the plain frame border in a room
+     with no colour. */
+  .frame.room-surface {
+    border-top: 3px solid var(--area-accent, var(--color-border));
+    border-top-left-radius: 0;
+  }
+
+  /* ---- The room pills -------------------------------------------------
+     Four rooms across the top; click one and it drops to a row beneath,
+     keeping its own colour, with the page's top edge in that colour so it
+     reads as the front of it. The other three close up and left-align.
+
+     Ramy, 1 Sep 2026, on an earlier version that left a gap where the active
+     pill had been: "I don't want Course admin to drop down and then there's a
+     blank underneath... they should align." And on the colour: "Centre
+     management should also hold its colour, should not change colour when it
+     drops down."
+
+     Positional rather than stylistic: three things you can click, one thing
+     you are standing on, told apart by where they are rather than by reading
+     a shade. */
+  .room-pill {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 5px 11px; border-radius: 6px; white-space: nowrap;
+    border: 1px solid color-mix(in oklab, var(--pill-c) 30%, var(--color-border));
+    background: color-mix(in oklab, var(--pill-c) 10%, var(--color-background));
+    color: var(--pill-c);
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+  .room-pill:hover {
+    background: color-mix(in oklab, var(--pill-c) 20%, var(--color-background));
+    border-color: var(--pill-c);
+  }
+  .room-pill-here {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 6px 13px 7px; border-radius: 6px 6px 0 0; white-space: nowrap;
+    background: var(--pill-c); color: oklch(97% 0.008 88);
+    border: 1px solid var(--pill-c); border-bottom: none;
+    position: relative; top: 1px;
+  }
+
   /* The active section pill, wearing whichever room it is in.
      Written here rather than as Tailwind arbitrary values: a nested
      var(--a, var(--b)) inside text-[...] does not survive Tailwind's
@@ -638,9 +681,9 @@ h6 {
      teal properly. */
   .area-volunteers {
     --area-rule-width: 3px;
-    --area-accent: oklch(45% 0.09 125);
-    --area-rule: oklch(45% 0.09 125);
-    --area-hover-fill: oklch(93% 0.024 125);
+    --area-accent: oklch(45% 0.10 260);
+    --area-rule: oklch(45% 0.10 260);
+    --area-hover-fill: oklch(93% 0.024 260);
   }
   /* Magenta, moved off rose. Ramy spotted it in a mockup: "Centre management
      and volunteer pool have the same colour, and Course admin and admissions
@@ -658,9 +701,9 @@ h6 {
      they were chosen deliberately and they were never the problem. */
   .area-admissions {
     --area-rule-width: 3px;
-    --area-accent: oklch(42% 0.12 320);
-    --area-rule: oklch(42% 0.12 320);
-    --area-hover-fill: oklch(93% 0.028 320);
+    --area-accent: oklch(42% 0.10 320);
+    --area-rule: oklch(42% 0.10 320);
+    --area-hover-fill: oklch(93% 0.026 320);
   }
 
   /* Assessor's own accent -- garnet, a plain fixed color rather than a

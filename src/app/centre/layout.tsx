@@ -6,7 +6,7 @@ import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can, adminHomePath } from "@/lib/auth/centre-permissions";
 import { CentreSettingsCard } from "@/app/centre/settings-card";
-import { CentreHeaderPills } from "@/app/centre/header-pills";
+import { RoomPills } from "@/components/room-pills";
 import { AreaTheme } from "@/components/area-theme";
 import { CentreTabs } from "@/app/centre/centre-tabs";
 import { BranchFilter } from "@/app/centre/branch-filter";
@@ -50,6 +50,15 @@ export default async function CentreLayout({ children }: { children: React.React
   ]);
   const switchable = (switchableRaw.data ?? []).map((c) => ({ id: c.id, name: c.name, centerNumber: c.center_number }));
 
+  // Same four rooms as the /dashboard side, gated on what this person can
+  // actually reach, so nobody is shown a door that will bounce them.
+  const visibleRooms = [
+    "centre",
+    "volunteers",
+    ...(can(ctx.roles, "courseAdmin.view", ctx.overrides) ? ["course-admin"] : []),
+    ...(can(ctx.roles, "admissions.manage", ctx.overrides) ? ["admissions"] : []),
+  ];
+
   return (
     /* Picks the room by path rather than hardcoding, because /centre holds
        more than one: the volunteer pool is its own room with its own colour,
@@ -72,10 +81,6 @@ export default async function CentreLayout({ children }: { children: React.React
           >
             <Wordmark size="header" />
           </Link>
-          <CentreHeaderPills
-            mayViewCourseAdmin={can(ctx.roles, "courseAdmin.view", ctx.overrides)}
-            mayViewAdmissions={can(ctx.roles, "admissions.manage", ctx.overrides)}
-          />
         </div>
         {/* The garnet Centre owner pill is gone: Connect is the way home
             now, and for an owner home IS the owner screen. Ramy: "you don't
@@ -102,16 +107,21 @@ export default async function CentreLayout({ children }: { children: React.React
           and one hue should not mean two unrelated things. globals.css calls
           --color-bronze "the third accent, from the Centre Admin design
           system" -- it was made for this section. */}
-      <div className="container pt-4">
-        <div className="h-[3px] w-full rounded-full" style={{ background: "var(--area-rule)" }} aria-hidden="true" />
-      </div>
-
       <div className="container pt-5">
         <CentreTabs />
       </div>
 
-      <main className="container w-full flex-1 pt-8 pb-6">
-        <div className="frame p-6">{children}</div>
+      {/* The pills sit on the page, not in the header. Measured before moving
+          them: the dropped pill was 132px right of the page edge and 57px above
+          the surface it is meant to be attached to, because it was inline with
+          the wordmark. Ramy: "they should align... aligned, obviously, with the
+          page. So on the left." */}
+      <div className="container pt-5">
+        <RoomPills visible={visibleRooms} />
+      </div>
+
+      <main className="container w-full flex-1 pb-6">
+        <div className="frame room-surface p-6">{children}</div>
       </main>
 
       {/* Centre Admin.dc.html: a full-width bar under every tab (Overview,

@@ -9,9 +9,8 @@ import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
-import { PILL_INACTIVE } from "@/app/centre/header-pill-styles";
-import { SectionPills } from "@/components/section-pills";
-import { AreaTheme, AreaHeaderRule } from "@/components/area-theme";
+import { RoomPills } from "@/components/room-pills";
+import { AreaTheme } from "@/components/area-theme";
 import { adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
 
@@ -52,6 +51,15 @@ export default async function DashboardLayout({
   // person with several sees the one that decides their landing page, which is
   // the one this section belongs to. roleLabel() covers owner-defined custom
   // roles too, so a centre that invents "Admissions lead" sees that word.
+  // Which rooms this person may enter. Course Admin and Admissions are the two
+  // that live under /dashboard; Centre Management and the Volunteer pool appear
+  // when they hold a centre role, since that is what reaches them.
+  const visibleRooms = [
+    ...(centreCtx && centreCtx.roles.length > 0 ? ["centre", "volunteers"] : []),
+    "course-admin",
+    "admissions",
+  ];
+
   const actingRoleLabel =
     centreCtx && centreCtx.roles.length > 0 ? roleLabel(centreCtx.roles[0], centreCtx.customRoles ?? []) : null;
 
@@ -131,38 +139,6 @@ export default async function DashboardLayout({
               fixed that and removed the only door. */}
           {profile?.role === "admin" ? (
             <>
-              <span className="h-[18px] w-px shrink-0 bg-border" aria-hidden="true" />
-              {/* Centre management FIRST, then Course admin -- the same order
-                  CentreHeaderPills uses, and the order never changes.
-
-                  It used to put whichever section you were in first, so the
-                  pair read [Course admin][Centre management] here and
-                  [Centre management][Course admin] over there. Both the teal
-                  and the position moved at once, which cancels the signal:
-                  the leftmost pill meant something different depending on
-                  where you already were, so it could not tell you where you
-                  were. Ramy walked into exactly that on 31 Aug 2026 -- "I was
-                  in course admin, not centre management" -- having asked for
-                  the opposite back on the 30th: "when one pill is active, the
-                  other one is inactive, so that the green teal is sort of
-                  jumping between them." Teal can only jump between two things
-                  that hold still. */}
-              {centreCtx && centreCtx.roles.length > 0 ? (
-                <Link href="/centre" className={PILL_INACTIVE}>
-                  Centre management
-                </Link>
-              ) : null}
-              {/* Three rooms in a fixed order, only the fill moving. Admissions
-                  earns its own pill because it is its own room -- Ramy, 1 Sep
-                  2026: "admissions could be for more than one course, so they
-                  can[not] be part of Course Admin. Admissions should have their
-                  own room, across the board."
-
-                  Without it, standing in Admissions lit the Course Admin pill,
-                  so the rose rule under the header and the signage above it
-                  disagreed about which room you were in -- worse than having
-                  neither. */}
-              <SectionPills />
             </>
           ) : null}
           </div>
@@ -187,10 +163,18 @@ export default async function DashboardLayout({
           </form>
         </div>
       </header>
-      <AreaHeaderRule />
 
-      <main className="container w-full flex-1 py-8">
-        <div className="frame p-6">{children}</div>
+      {/* The pills sit on the page, not in the header. Measured before moving
+          them: the dropped pill was 132px right of the page edge and 57px above
+          the surface it is meant to be attached to, because it was inline with
+          the wordmark. Ramy: "they should align... aligned, obviously, with the
+          page. So on the left." */}
+      <div className="container pt-5">
+        <RoomPills visible={visibleRooms} />
+      </div>
+
+      <main className="container w-full flex-1 pb-8">
+        <div className="frame room-surface p-6">{children}</div>
       </main>
 
       {profile && staffChat ? (
