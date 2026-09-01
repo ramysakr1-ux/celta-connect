@@ -546,6 +546,54 @@ h6 {
     background-color: var(--area-hover-fill, oklch(93% 0.019 190)) !important;
   }
 
+  /* ---- The header band ------------------------------------------------
+     A room with a colour gets a full band and a contrasting 3px rule; a room
+     without one keeps the plain light header and hairline it always had.
+     That difference is expressed entirely through variable fallbacks, so
+     nothing needs to know which room it is in.
+
+     This is the treatment the centre owner screen, the volunteer pool and
+     both trainer-hub headers already use. Centre Management and Course Admin
+     were the only staff rooms still on a plain header. */
+  .app-header {
+    background: var(--area-band, transparent);
+    border-bottom: var(--area-rule-width, 1px) solid var(--area-rule, var(--color-border));
+  }
+
+  /* Reversing the contents onto the band. Only two text tokens appear up
+     there, so both are remapped rather than blanket-whitening everything --
+     the muted/ink distinction still has to read. */
+  /* !important because Tailwind v4 orders layers above specificity: a plain
+     .app-header.on-band .text-muted rule loses to the .text-muted utility no
+     matter how specific it is. Measured before fixing -- "Tom Ridley" was
+     rendering at 1.03:1 against the teal band, which is invisible, not merely
+     low. The same layer trap already forced !important onto .admin-hover-fill.
+
+     Raised to 88% from 72% at the same time: 72% cleared garnet but not the
+     lighter teal, and a value that only works on some bands is not a value. */
+  .app-header.on-band .text-ink { color: oklch(97% 0.008 88) !important; }
+  .app-header.on-band .text-muted { color: color-mix(in oklab, oklch(97% 0.008 88) 88%, transparent) !important; }
+  .app-header.on-band a { color: oklch(97% 0.008 88); }
+  .app-header.on-band button { color: color-mix(in oklab, oklch(97% 0.008 88) 88%, transparent) !important; }
+  .app-header.on-band button:hover { color: oklch(97% 0.008 88) !important; }
+
+  /* The inactive pill outlines itself in the band's own text colour. */
+  .app-header.on-band .pill-inactive {
+    border-color: color-mix(in oklab, oklch(97% 0.008 88) 30%, transparent);
+    color: color-mix(in oklab, oklch(97% 0.008 88) 82%, transparent);
+  }
+  .app-header.on-band .pill-inactive:hover {
+    border-color: oklch(97% 0.008 88);
+    color: oklch(97% 0.008 88);
+  }
+  /* The active pill inverts: solid light, with the band's own colour as its
+     text. On a band, a 10% tint of the band colour would be invisible. */
+  .app-header.on-band .pill-active {
+    background: oklch(97% 0.008 88);
+    border-color: transparent;
+    color: var(--area-band);
+  }
+
   /* The active section pill, wearing whichever room it is in.
      Written here rather than as Tailwind arbitrary values: a nested
      var(--a, var(--b)) inside text-[...] does not survive Tailwind's
@@ -586,12 +634,14 @@ h6 {
      directly: "they never really collide because they never meet. They are not
      the same people. They operate in completely different arenas." */
   .area-course-admin {
+    --area-rule-width: 3px;
     --area-band: oklch(42% 0.13 27);
     --area-rule: oklch(63% 0.096 72);
     --area-accent: oklch(42% 0.13 27);
     --area-hover-fill: oklch(93% 0.028 27);
   }
   .area-centre {
+    --area-rule-width: 3px;
     --area-band: oklch(37.5% 0.058 195);
     --area-rule: oklch(63% 0.096 72);
     --area-accent: oklch(37.5% 0.058 195);
@@ -601,6 +651,7 @@ h6 {
      clears it on the band. Not yet applied -- Admissions gets its identity in
      the next pass. */
   .area-admissions {
+    --area-rule-width: 3px;
     --area-band: oklch(38% 0.075 62);
     --area-rule: oklch(37.5% 0.058 195);
     --area-accent: oklch(50% 0.09 62);

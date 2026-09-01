@@ -41,20 +41,15 @@ export function AreaTheme({ children, className }: { children: React.ReactNode; 
 }
 
 /**
- * The 3px rule under the header, in the area's own colour.
+ * The header element, wearing the room's band when there is one.
  *
- * Rendered inside the header rather than as a border on it, because the
- * header is a server component in a shared layout and only this client
- * component knows which area is showing. Renders nothing at all in an area
- * without an identity, leaving the plain hairline the header already has.
+ * A client component because /dashboard's layout is shared by Course Admin,
+ * Admissions, staff chat and the trainee and trainer dashboards, and the
+ * server cannot tell which of those is showing. Adds .on-band only when a
+ * colour exists, so an uncoloured room keeps its light header and every text
+ * token inside it stays as it was.
  */
-export function AreaHeaderRule() {
-  const pathname = usePathname() ?? "";
-  const areaClass = areaClassFor(pathname);
-  if (!areaClass) return null;
-  return (
-    <div className={areaClass} aria-hidden="true">
-      <div className="h-[3px] w-full" style={{ background: "var(--area-rule)" }} />
-    </div>
-  );
+export function AreaHeaderBand({ children }: { children: React.ReactNode }) {
+  const onBand = areaClassFor(usePathname() ?? "") !== null;
+  return <header className={`app-header${onBand ? " on-band" : ""}`}>{children}</header>;
 }

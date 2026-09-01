@@ -60,7 +60,13 @@ export default async function CentreLayout({ children }: { children: React.React
           for the fixed DesignerCredit badge (rendered from centre/page.tsx
           itself, landing-page-only); row 2 carries the branch filter, name
           and sign out, which used to collide with the credit on one line. */}
-      <div className="container flex items-center justify-between gap-6 pt-10">
+      {/* Always a band here: unlike /dashboard this layout serves exactly one
+          room, so no path check is needed and .on-band can be stated outright.
+          Wraps both rows -- mark and pills, then branch filter, name and sign
+          out -- so the whole header is the band rather than a stripe above the
+          rest of it. */}
+      <header className="app-header on-band">
+      <div className="container flex items-center justify-between gap-6 pt-7">
         <div className="flex items-center gap-3.5">
           {/* Ramy, 27 Aug 2026: "except for my home screen, which if I click
               connect, should take me to command center" -- same fixed
@@ -70,7 +76,7 @@ export default async function CentreLayout({ children }: { children: React.React
             href={profile.role === "platform_owner" ? "/platform/command-center" : adminHomePath(ctx.roles)}
             className="shrink-0 hover:opacity-80"
           >
-            <Wordmark size="header" />
+            <Wordmark size="header" onDark tileBg="color-mix(in oklab, oklch(97% 0.008 88) 22%, transparent)" />
           </Link>
           <CentreHeaderPills mayViewCourseAdmin={can(ctx.roles, "courseAdmin.view", ctx.overrides)} />
         </div>
@@ -79,7 +85,7 @@ export default async function CentreLayout({ children }: { children: React.React
             need a Centre owner pill. You just click on Connect." */}
         <HeaderDesignerCredit landingPath="/centre" />
       </div>
-      <div className="container flex items-center justify-end gap-4 pt-2 text-[13px] text-muted">
+      <div className="container flex items-center justify-end gap-4 pt-2 pb-5 text-[13px] text-muted">
         <BranchFilter branches={switchable} />
         <span>{profile.full_name}</span>
         <form action={signOut}>
@@ -88,20 +94,7 @@ export default async function CentreLayout({ children }: { children: React.React
           </button>
         </form>
       </div>
-
-      {/* Centre Management's own 3px rule, in bronze -- the quieter half of
-          the coloured-band pattern the owner screen, the volunteer pool and
-          the trainer hub already use. This header is two container rows
-          sitting on the page ground rather than a bar, so the rule goes under
-          the whole block instead of on a header element.
-
-          Bronze, not garnet: garnet already names the ACT in the trainer hub,
-          and one hue should not mean two unrelated things. globals.css calls
-          --color-bronze "the third accent, from the Centre Admin design
-          system" -- it was made for this section. */}
-      <div className="container pt-4">
-        <div className="h-[3px] w-full rounded-full" style={{ background: "var(--area-rule)" }} aria-hidden="true" />
-      </div>
+      </header>
 
       <div className="container pt-5">
         <CentreTabs />
