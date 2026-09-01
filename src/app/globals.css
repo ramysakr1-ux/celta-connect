@@ -657,12 +657,30 @@ h6 {
   .area-course-admin {
     --area-rule-width: 3px;
     --area-accent: oklch(42% 0.13 27);
+    /* Everything inside the room that used to be teal is now the room's
+       colour: 110 Tailwind utilities across the app are pinned to
+       --color-primary -- hover:border-primary, text-primary,
+       hover:bg-[color-mix(...--color-primary...)] and so on -- and they bypass
+       --area-accent entirely. Ramy, 1 Sep 2026: "the hovering is not keeping
+       true to the colour, it's all kind of teal green inside Course admin."
+       Redefining the token inside the room fixes every one of them at once,
+       rather than editing 110 call sites and missing some. */
+    --color-primary: oklch(42% 0.13 27);
     --area-rule: oklch(42% 0.13 27);
     --area-hover-fill: oklch(93% 0.028 27);
   }
   .area-centre {
     --area-rule-width: 3px;
     --area-accent: oklch(45% 0.10 160);
+    /* Everything inside the room that used to be teal is now the room's
+       colour: 110 Tailwind utilities across the app are pinned to
+       --color-primary -- hover:border-primary, text-primary,
+       hover:bg-[color-mix(...--color-primary...)] and so on -- and they bypass
+       --area-accent entirely. Ramy, 1 Sep 2026: "the hovering is not keeping
+       true to the colour, it's all kind of teal green inside Course admin."
+       Redefining the token inside the room fixes every one of them at once,
+       rather than editing 110 call sites and missing some. */
+    --color-primary: oklch(45% 0.10 160);
     --area-rule: oklch(45% 0.10 160);
     --area-hover-fill: oklch(93% 0.022 160);
   }
@@ -682,6 +700,15 @@ h6 {
   .area-volunteers {
     --area-rule-width: 3px;
     --area-accent: oklch(45% 0.10 260);
+    /* Everything inside the room that used to be teal is now the room's
+       colour: 110 Tailwind utilities across the app are pinned to
+       --color-primary -- hover:border-primary, text-primary,
+       hover:bg-[color-mix(...--color-primary...)] and so on -- and they bypass
+       --area-accent entirely. Ramy, 1 Sep 2026: "the hovering is not keeping
+       true to the colour, it's all kind of teal green inside Course admin."
+       Redefining the token inside the room fixes every one of them at once,
+       rather than editing 110 call sites and missing some. */
+    --color-primary: oklch(45% 0.10 260);
     --area-rule: oklch(45% 0.10 260);
     --area-hover-fill: oklch(93% 0.024 260);
   }
@@ -702,6 +729,15 @@ h6 {
   .area-admissions {
     --area-rule-width: 3px;
     --area-accent: oklch(42% 0.10 320);
+    /* Everything inside the room that used to be teal is now the room's
+       colour: 110 Tailwind utilities across the app are pinned to
+       --color-primary -- hover:border-primary, text-primary,
+       hover:bg-[color-mix(...--color-primary...)] and so on -- and they bypass
+       --area-accent entirely. Ramy, 1 Sep 2026: "the hovering is not keeping
+       true to the colour, it's all kind of teal green inside Course admin."
+       Redefining the token inside the room fixes every one of them at once,
+       rather than editing 110 call sites and missing some. */
+    --color-primary: oklch(42% 0.10 320);
     --area-rule: oklch(42% 0.10 320);
     --area-hover-fill: oklch(93% 0.026 320);
   }
