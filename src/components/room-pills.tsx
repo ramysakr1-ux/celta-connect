@@ -70,9 +70,31 @@ export function RoomPills({ visible }: { visible: string[] }) {
           second time today I have made that exact mistake. */}
       {here ? (
         <div className="-mb-px mt-2 flex">
-          <span className="room-pill-here" style={{ "--pill-c": here.colour } as React.CSSProperties}>
-            {here.label}
-          </span>
+          {/* Clickable unless you are already standing on the room's own
+              landing page, in which case it is just a label.
+
+              Ramy, 1 Sep 2026: "once you click on one of the courses, there's
+              no way to go back to Course admin because you can't click on
+              Course admin." The dropped pill was a span, so a room's deeper
+              pages had exactly one way out -- the Connect mark, which leaves
+              the room entirely. Now it is both "you are here" and "back to the
+              top of here", which is how a tab normally behaves.
+
+              Not a separate back pill: that would be a fifth thing in a row
+              whose whole point is that there are four. */}
+          {pathname === here.href ? (
+            <span className="room-pill-here" style={{ "--pill-c": here.colour } as React.CSSProperties}>
+              {here.label}
+            </span>
+          ) : (
+            <Link
+              href={here.href}
+              className="room-pill-here hover:brightness-110"
+              style={{ "--pill-c": here.colour } as React.CSSProperties}
+            >
+              {here.label}
+            </Link>
+          )}
         </div>
       ) : null}
     </div>

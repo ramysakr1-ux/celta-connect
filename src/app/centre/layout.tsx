@@ -90,6 +90,13 @@ export default async function CentreLayout({ children }: { children: React.React
       <div className="container flex items-center justify-end gap-4 pt-2 text-[13px] text-muted">
         <BranchFilter branches={switchable} />
         <span>{profile.full_name}</span>
+        {/* The owner's second way back to their own screen -- see the note in
+            dashboard/layout.tsx. Hidden when already there. */}
+        {ctx.roles.includes("centre_owner") ? (
+          <Link href="/centre/owner" className="text-muted underline-offset-2 hover:text-ink hover:underline">
+            Centre owner
+          </Link>
+        ) : null}
         <form action={signOut}>
           <button type="submit" className="hover:text-ink">
             Sign out

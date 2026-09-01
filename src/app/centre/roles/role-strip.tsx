@@ -146,7 +146,7 @@ export function RoleStrip({
               className={`relative px-5 py-4 text-left transition-colors duration-150 ${i < allRoleKeys.length - 1 ? "lg:border-r lg:border-border" : ""} ${
                 active
                   ? "bg-[color-mix(in_oklab,var(--color-primary)_42%,var(--color-card))]"
-                  : "bg-surface-muted/40 hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))] admin-hover-fill"
+                  : "bg-surface-muted/40 admin-hover-fill"
               }`}
             >
               <span className={`absolute inset-x-0 top-0 h-[3px] ${active ? s.spine : "bg-transparent"}`} aria-hidden="true" />
@@ -169,7 +169,7 @@ export function RoleStrip({
 
         <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1.5 sm:grid-cols-2">
           {permsFor(selected).map((p) => (
-            <div key={p.text} className="admin-hover flex items-start gap-2.5 rounded-[6px] bg-surface-muted/60 px-3 py-2">
+            <div key={p.text} className="admin-hover flex items-start gap-2.5 rounded-[6px] bg-surface-muted/60 px-3 py-2 admin-hover-fill">
               <span className="mt-px shrink-0 text-sm">
                 <Mark grant={p.grant} />
               </span>

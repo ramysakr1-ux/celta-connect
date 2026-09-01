@@ -38,7 +38,7 @@ export default async function ClosedCoursesPage() {
             <Link
               key={course.id}
               href={`/dashboard/admin/courses/${course.id}`}
-              className="admin-hover flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+              className="admin-hover flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none admin-hover-fill"
             >
               <p className="truncate text-sm font-semibold text-ink">{course.name}</p>
               <span className="shrink-0 text-xs text-muted">Ended {course.end_date}</span>

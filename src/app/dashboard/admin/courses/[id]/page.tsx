@@ -131,7 +131,7 @@ export default async function CourseAdminDetailPage({
               <Link
                 key={row.id}
                 href={`/dashboard/admissions/${row.id}`}
-                className="admin-hover grid grid-cols-[1fr_auto_auto] items-center gap-3 border-b border-border-faint py-2.5 transition-colors duration-150 hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+                className="admin-hover grid grid-cols-[1fr_auto_auto] items-center gap-3 border-b border-border-faint py-2.5 transition-colors duration-150 admin-hover-fill"
               >
                 <span className="truncate text-sm font-medium text-ink">{row.fullName}</span>
                 <span className="text-xs text-muted">{row.stageLabel}</span>

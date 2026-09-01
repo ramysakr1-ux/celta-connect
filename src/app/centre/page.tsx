@@ -424,7 +424,7 @@ export default async function CentreOverviewPage({
           {canView(ctx.roles, "volunteers.view", ctx.overrides) ? (
             <Link
               href="/centre/volunteers"
-              className="admin-hover-fill card flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+              className="admin-hover-fill card flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary"
             >
               <div className="flex flex-col gap-0.5">
                 <h2 className="font-serif text-base text-ink">Volunteer pool</h2>
@@ -440,7 +440,7 @@ export default async function CentreOverviewPage({
           {canView(ctx.roles, "courseAdmin.view", ctx.overrides) && assessorHistory.length > 0 ? (
             <Link
               href="/centre/assessor-history"
-              className="admin-hover-fill card card-gold flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,var(--color-card))]"
+              className="admin-hover-fill card card-gold flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:border-primary"
             >
               <div className="flex flex-col gap-0.5">
                 <h2 className="font-serif text-base text-ink">Assessor history</h2>

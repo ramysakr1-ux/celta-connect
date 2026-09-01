@@ -60,6 +60,7 @@ export default async function DashboardLayout({
     "admissions",
   ];
 
+  const isCentreOwner = centreCtx?.roles.includes("centre_owner") ?? false;
   const actingRoleLabel =
     centreCtx && centreCtx.roles.length > 0 ? roleLabel(centreCtx.roles[0], centreCtx.customRoles ?? []) : null;
 
@@ -154,7 +155,25 @@ export default async function DashboardLayout({
               who they are. */}
           <span>
             {profile?.full_name ?? email}
-            {actingRoleLabel ? <span className="text-muted"> &middot; {actingRoleLabel}</span> : null}
+            {/* For an owner the role label is a link to their own screen.
+                Ramy, 1 Sep 2026, noticing the gap: the owner screen is not one
+                of the four rooms, so the Connect mark was its ONLY entrance --
+                one unlabelled door to the page that belongs to them. Their own
+                name and role is the honest second one: it says what it is, and
+                needs no new furniture. Everyone else keeps a plain label,
+                because a course administrator's home is already a pill. */}
+            {actingRoleLabel ? (
+              isCentreOwner ? (
+                <>
+                  {" "}&middot;{" "}
+                  <Link href="/centre/owner" className="text-muted underline-offset-2 hover:text-ink hover:underline">
+                    {actingRoleLabel}
+                  </Link>
+                </>
+              ) : (
+                <span className="text-muted"> &middot; {actingRoleLabel}</span>
+              )
+            ) : null}
           </span>
           <form action={signOut}>
             <button type="submit" className="hover:text-ink">
