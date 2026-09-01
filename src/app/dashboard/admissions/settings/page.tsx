@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { createClient } from "@/lib/supabase/server";
@@ -59,6 +60,23 @@ export default async function AdmissionsSettingsPage() {
           Extended writing task prompts and the fixed interview question bank. Imported once, edited any time, carried
           into every future course.
         </p>
+        {/* Email preview and delivery used to hang off the Admissions
+            landing page as two more text links in a row of seven. They are
+            things you check rather than daily work, so they sit here with
+            the rest of what you set once. Ramy, 1 Sep 2026: six tabs was
+            too many, "I'd fold Email delivery under Settings".
+
+            Preview still lives under /dashboard/admin -- it was moved there
+            before Admissions was its own room, and moving the route is a
+            separate job from giving it a door. */}
+        <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-border-faint pt-3">
+          <Link href="/dashboard/admissions/emails" className="text-sm font-medium text-primary hover:underline">
+            Email delivery &rarr;
+          </Link>
+          <Link href="/dashboard/admin/email-preview" className="text-sm text-muted hover:text-ink">
+            Preview candidate emails
+          </Link>
+        </div>
       </div>
 
       {/* Purely decorative teal/garnet alternation down this page's stack of

@@ -170,41 +170,11 @@ export default async function AdmissionsPage() {
           <h1 className="font-serif text-xl text-ink">Admissions</h1>
           <p className="mt-2 text-muted">The applicant pipeline for every course at your centre.</p>
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard/admissions/pipeline" className="text-sm font-semibold text-primary hover:underline">
-            Pipeline →
-          </Link>
-          <Link href="/dashboard/admissions/this-week" className="text-sm text-muted hover:text-ink">
-            This week&apos;s interviews
-          </Link>
-          <Link href="/dashboard/admissions/referral-requests" className="text-sm text-muted hover:text-ink">
-            Referral requests
-            {pendingReferralCount ? (
-              <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
-                {pendingReferralCount}
-              </span>
-            ) : null}
-          </Link>
-          {/* Applicants are created here, so bulk-creating them is here too.
-              Moved out of Centre Management's Import tab, 1 Sep 2026. */}
-          <Link href="/dashboard/admissions/import" className="text-sm text-muted hover:text-ink">
-            Import
-          </Link>
-          <Link href="/dashboard/admissions/settings" className="text-sm text-muted hover:text-ink">
-            Settings
-          </Link>
-          {/* Was a Course Admin tab (dashboard/layout.tsx) -- moved here
-              2026-08-20: it's candidate-email preview, which
-              for-claude-code-course-admin.md explicitly excludes from
-              Course Admin ("Do not build these into Course Admin"). This
-              is its real home. */}
-          <Link href="/dashboard/admin/email-preview" className="text-sm text-muted hover:text-ink">
-            Emails
-          </Link>
-          <Link href="/dashboard/admissions/emails" className="text-sm text-muted hover:text-ink">
-            Delivery
-          </Link>
-        </div>
+        {/* The five links that used to sit here are the room's tab row now
+            (admissions-tabs.tsx). They were listed on this page alone, and
+            none of the five repeated them, so every one of them was a dead
+            end. Email preview and delivery moved into Settings -- they are
+            things you check, not a daily job. */}
       </div>
 
       {/* Purely decorative teal/garnet alternation down this page's stack of
