@@ -33,4 +33,8 @@ export const TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG: Record<string, string> = {
   "Lesson planning": "lesson-planning",
   "Providing models -- drilling": "drilling-techniques",
   "Reflective Practice & Professional Development": "professional-development",
+  // Confirmed by Ramy, 1 Sep 2026. The registry calls this one "2 of 2 --
+  // pairs with Drilling Techniques", and the timetable carries that drilling
+  // session two rows away, so the pair is the same pair.
+  "Staging controlled practice": "language-practice",
 };

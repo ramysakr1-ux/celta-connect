@@ -903,3 +903,36 @@ export function buildSkeletonEvents(
     };
   });
 }
+
+
+/**
+ * Input-session titles on this skeleton that have no interactive session
+ * behind them.
+ *
+ * Ramy, 1 Sep 2026: "anything that doesn't have an interactive session is not
+ * a real input session. If you can delete them, then just maybe stick them at
+ * the bottom, and I'll delete them later."
+ *
+ * Not deleted here, and the reason is worth knowing before anyone does it:
+ * these 11 titles occupy 22 of the skeleton's 44 input-session slots -- each
+ * appears twice, once per half -- so removing them takes out half the input
+ * sessions on a five-week course and leaves the timetable with holes rather
+ * than a shorter timetable. Whoever removes them has to decide what those
+ * slots become, which is a course-design decision, not a deletion.
+ *
+ * The other 11 titles are real: they match an entry in
+ * src/app/input-sessions/registry.ts, via TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG.
+ */
+export const PLACEHOLDER_INPUT_SESSION_TITLES = [
+  "Adapting materials for level",
+  "Classroom arrangements and material use",
+  "Classroom management",
+  "Focus on the Learner -- the assignment session",
+  "Giving feedback on tasks",
+  "Portfolio and record-keeping",
+  "Productive skills -- writing",
+  "Self-evaluation and responding to feedback",
+  "Syllabus planning",
+  "Teaching a new level -- needs analysis",
+  "Teaching speaking",
+] as const;
