@@ -669,6 +669,18 @@ h6 {
     --area-rule: oklch(42% 0.13 27);
     --area-hover-fill: color-mix(in oklab, oklch(42% 0.13 27) 30%, var(--color-card));
   }
+  /* Not a room: the centre owner's screen, which had its own ink-and-garnet
+     register long before the rooms existed. Same 30% mix as everywhere else,
+     so the hover reads as the darker relative of the header band rather than
+     as a fifth room colour. */
+  .area-owner {
+    --area-rule-width: 3px;
+    --area-accent: oklch(42% 0.15 27);
+    --color-primary: oklch(42% 0.15 27);
+    --area-rule: oklch(42% 0.15 27);
+    --area-hover-fill: color-mix(in oklab, oklch(42% 0.15 27) 30%, var(--color-card));
+  }
+
   .area-centre {
     --area-rule-width: 3px;
     --area-accent: oklch(45% 0.10 160);

@@ -27,6 +27,13 @@ import { usePathname } from "next/navigation";
 // confusion this system exists to remove. Confirmed by /dashboard/staff-chat
 // returning a 404: the folder holds a drawer component, not a route.
 const AREA_BY_PREFIX: { prefix: string; className: string }[] = [
+  // The owner's screen is not one of the four rooms -- it is where the four
+  // are handed out -- and it has had its own register since it was built:
+  // ink ground, garnet rule. It was still picking up Centre Management's
+  // green below, so every hover on a garnet screen came back green. Ramy,
+  // 1 Sep 2026: "can we make sure the hovering is relevant to the colour?
+  // That sort of darker hover colour that matches the header."
+  { prefix: "/centre/owner", className: "area-owner" },
   { prefix: "/centre/volunteers", className: "area-volunteers" },
   { prefix: "/dashboard/admissions", className: "area-admissions" },
   { prefix: "/dashboard/admin", className: "area-course-admin" },

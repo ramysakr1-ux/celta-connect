@@ -9,6 +9,7 @@ import { RoomPills } from "@/components/room-pills";
 import { AreaTheme } from "@/components/area-theme";
 import { CentreTabs } from "@/app/centre/centre-tabs";
 import { CentreHeaderMeta } from "@/app/centre/header-meta";
+import { OwnerBranchRow } from "@/app/centre/owner-branch-row";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
@@ -118,6 +119,8 @@ export default async function CentreLayout({ children }: { children: React.React
           and one hue should not mean two unrelated things. globals.css calls
           --color-bronze "the third accent, from the Centre Admin design
           system" -- it was made for this section. */}
+      <OwnerBranchRow branches={switchable} />
+
       {/* The pills sit on the page, not in the header. Measured before moving
           them: the dropped pill was 132px right of the page edge and 57px above
           the surface it is meant to be attached to, because it was inline with

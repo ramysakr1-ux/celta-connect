@@ -234,7 +234,10 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
           box-shadow: 0 1px 2px rgba(30,15,10,0.03), 0 14px 32px -20px rgba(30,15,10,0.28);
         }
         .owner-row-hover { transition: background-color 0.12s ease; }
-        .owner-row-hover:hover { background-color: var(--owner-garnet-soft); }
+        /* Was --owner-garnet-soft, an 8% wash you had to look for. The
+           shared fill is the same one every other surface uses, so a row
+           here highlights as firmly as a row anywhere else. */
+        .owner-row-hover:hover { background-color: var(--area-hover-fill, var(--owner-garnet-soft)); }
       `}</style>
     </div>
   );

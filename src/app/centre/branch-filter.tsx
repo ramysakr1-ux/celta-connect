@@ -49,17 +49,42 @@ export function BranchFilter({ branches }: { branches: Branch[] }) {
 
   if (proud) {
     const garnet = "oklch(42% 0.15 27)";
+    // A group's branches almost always share a prefix -- "Connect CELTA New
+    // York", "Connect CELTA Los Angeles" -- so printing it on every button
+    // spends the row's width on the one part that never distinguishes
+    // anything. Ten branches wrapped each name over three lines because of
+    // it. The shared words are dropped from the label and kept in the
+    // tooltip; if the names have nothing in common, nothing is dropped.
+    const words = branches.map((b) => b.name.trim().split(/\s+/));
+    let shared = 0;
+    if (branches.length > 1) {
+      const first = words[0];
+      while (
+        shared < first.length - 1 &&
+        words.every((w) => w.length > shared + 1 && w[shared].toLowerCase() === first[shared].toLowerCase())
+      ) {
+        shared++;
+      }
+    }
+    const shortName = (b: Branch) => (shared > 0 ? b.name.trim().split(/\s+/).slice(shared).join(" ") : b.name);
+
     return (
-      <div className="flex items-center gap-2">
-        <span className="text-[10.5px] font-bold tracking-[0.16em] text-muted uppercase">Your centres</span>
-        {[{ id: null as string | null, name: "All branches" }, ...branches.map((b) => ({ id: b.id, name: b.name }))].map((b) => {
+      // Wrapping on the row, never inside a button: a name that breaks over
+      // three lines reads as a squeezed control, and the whole point of this
+      // row is that the branches look like something you are pleased to own.
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="shrink-0 text-[10.5px] font-bold tracking-[0.16em] text-muted uppercase">
+          {shared > 0 ? branches[0].name.trim().split(/\s+/).slice(0, shared).join(" ") : "Your centres"}
+        </span>
+        {[{ id: null as string | null, name: "All branches", full: "All branches" }, ...branches.map((b) => ({ id: b.id, name: shortName(b), full: b.name }))].map((b) => {
           const isActive = b.id === null ? !current : current === b.id;
           return (
             <button
               key={b.id ?? "all"}
               type="button"
               onClick={() => set(b.id)}
-              className="rounded-[4px] border px-3.5 py-1.5 font-serif text-[13.5px] transition-colors duration-150"
+              title={b.full}
+              className="shrink-0 rounded-[4px] border px-3.5 py-1.5 font-serif text-[13.5px] whitespace-nowrap transition-colors duration-150"
               style={
                 isActive
                   ? { background: garnet, borderColor: garnet, color: "oklch(98% 0.006 85)" }

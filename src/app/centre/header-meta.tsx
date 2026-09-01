@@ -32,9 +32,13 @@ export function CentreHeaderMeta({
   const pathname = usePathname() ?? "";
   const onOwnerScreen = pathname === "/centre/owner" || pathname.startsWith("/centre/owner/");
 
+  // The owner's branches move out of this cramped right-aligned line and
+  // onto a row of their own (OwnerBranchRow), so that a centre group with
+  // nine branches reads as nine branches rather than as an overflowing
+  // control squeezed against Sign out.
   return (
     <>
-      <BranchFilter branches={branches} />
+      {onOwnerScreen ? null : <BranchFilter branches={branches} />}
       {onOwnerScreen ? null : (
         <>
           <span>{fullName}</span>
