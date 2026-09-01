@@ -662,9 +662,9 @@ h6 {
   }
   .area-centre {
     --area-rule-width: 3px;
-    --area-accent: oklch(42% 0.058 195);
-    --area-rule: oklch(42% 0.058 195);
-    --area-hover-fill: oklch(93% 0.019 195);
+    --area-accent: oklch(45% 0.10 160);
+    --area-rule: oklch(45% 0.10 160);
+    --area-hover-fill: oklch(93% 0.022 160);
   }
   /* The second colour in every room's card rhythm. One quiet warm grey rather
      than a per-room second hue: two hues per room would mean eight colours
