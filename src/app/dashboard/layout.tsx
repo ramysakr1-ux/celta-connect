@@ -10,6 +10,7 @@ import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { PILL_ACTIVE, PILL_INACTIVE } from "@/app/centre/header-pill-styles";
+import { AreaTheme, AreaHeaderRule } from "@/app/dashboard/area-theme";
 import { adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
 
@@ -62,14 +63,13 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      {/* A 3px rule in the view's own colour, the same device the trainer
-          hub, the centre owner screen and the volunteer pool already use --
-          each of those is a coloured band with a contrasting underline. This
-          is the quieter half of that pattern: the header keeps its light
-          ground and gains the rule, so the view is recognisable before a word
-          is read. Only for the admin side; a trainee or trainer under
-          /dashboard keeps the neutral hairline. */}
-      <header className={profile?.role === "admin" ? "border-b-[3px] border-b-primary" : "border-b border-border"}>
+      {/* The rule is per AREA now, not per role. Applying it on
+          `role === "admin"` -- which is what shipped on 31 Aug -- was wrong:
+          that condition is true across this entire layout, so Course Admin,
+          Admissions and staff chat all turned teal and three rooms shared one
+          identity. AreaHeaderRule below knows which room is actually showing
+          and draws nothing in a room that has no colour yet. */}
+      <header className="border-b border-border">
         {/* Two rows on the right (Ramy, 23 Aug 2026): row 1 carries the
             credit via HeaderDesignerCredit, which checks the live pathname
             itself and renders nothing off /dashboard/admin -- landing-only,
@@ -174,9 +174,15 @@ export default async function DashboardLayout({
           </form>
         </div>
       </header>
+      <AreaHeaderRule />
 
       <main className="container w-full flex-1 py-8">
-        <div className="frame p-6">{children}</div>
+        {/* AreaTheme sets --area-accent and --area-hover-fill for whichever
+            room this is, so every .admin-hover / .admin-hover-fill inside
+            picks up the area's colour without being edited. */}
+        <AreaTheme>
+          <div className="frame p-6">{children}</div>
+        </AreaTheme>
       </main>
 
       {profile && staffChat ? (

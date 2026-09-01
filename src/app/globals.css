@@ -520,14 +520,58 @@ h6 {
   .admin-hover {
     transition: box-shadow 150ms ease;
   }
+  /* Both of these read --area-accent / --area-hover-fill, falling back to the
+     teal they were hardcoded to. Ramy, 1 Sep 2026: "everything inside that
+     [area], all the hovering will carry the same colour."
+
+     The variable is the whole point. Setting it once on an area's wrapper
+     re-colours every hover inside it -- around 150 call sites across Centre
+     Management, Course Admin, Admissions, staff chat and Platform -- without
+     touching any of them. The alternative was splitting this class per area
+     and editing every usage, which is hours of mechanical change and a
+     guaranteed straggler. The trainer hub already works this way with
+     --hub-hover-accent; this is the same trick one level up.
+
+     Fallbacks are the previous literal values on purpose: any area that has
+     not been given a colour yet looks exactly as it did before. */
   .admin-hover:hover {
-    box-shadow: inset 0 0 0 1px var(--color-primary), 0 3px 8px -3px color-mix(in oklab, var(--color-primary) 45%, transparent);
+    box-shadow:
+      inset 0 0 0 1px var(--area-accent, var(--color-primary)),
+      0 3px 8px -3px color-mix(in oklab, var(--area-accent, var(--color-primary)) 45%, transparent);
   }
   .admin-hover-fill {
     transition: background-color 150ms ease;
   }
   .admin-hover-fill:hover {
-    background-color: oklch(93% 0.019 190) !important;
+    background-color: var(--area-hover-fill, oklch(93% 0.019 190)) !important;
+  }
+
+  /* ---- Area identities -------------------------------------------------
+     One colour per room, carried through the room. Each sets four values:
+     the band behind the header, a contrasting rule under it, the accent for
+     pills and focus rings, and the pale wash for row hovers.
+
+     Bands are dark because white text sits on them; hover fills are pale
+     because dark text sits on them. Same hue, opposite ends -- which is why
+     they cannot be one value.
+
+     Existing areas keep the colours they already shipped with: the centre
+     owner screen (ink/garnet, migration-era) and the volunteer pool
+     (sage/coral) define theirs locally and are untouched here. */
+  .area-course-admin {
+    --area-band: oklch(37.5% 0.058 195);
+    --area-rule: oklch(63% 0.096 72);
+    --area-accent: oklch(37.5% 0.058 195);
+    --area-hover-fill: oklch(93% 0.019 190);
+  }
+  .area-centre {
+    /* Bronze, darkened from --color-bronze's oklch(50% 0.09 62) so white text
+       clears it comfortably on the band. The rule is teal, which is the only
+       accent far enough round the wheel from bronze to read as deliberate. */
+    --area-band: oklch(38% 0.075 62);
+    --area-rule: oklch(37.5% 0.058 195);
+    --area-accent: oklch(50% 0.09 62);
+    --area-hover-fill: oklch(93% 0.022 62);
   }
 
   /* Assessor's own accent -- garnet, a plain fixed color rather than a

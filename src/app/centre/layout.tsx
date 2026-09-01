@@ -50,7 +50,11 @@ export default async function CentreLayout({ children }: { children: React.React
   const switchable = (switchableRaw.data ?? []).map((c) => ({ id: c.id, name: c.name, centerNumber: c.center_number }));
 
   return (
-    <div className="flex min-h-full flex-1 flex-col">
+    /* area-centre carries Centre Management's identity -- bronze accent,
+       teal rule, pale bronze hover -- to everything inside, including the
+       ~150 .admin-hover-fill call sites that would otherwise need editing
+       one by one. */
+    <div className="area-centre flex min-h-full flex-1 flex-col">
       {/* Header: 32px mark + wordmark, a hairline divider, then the pill.
           Two rows on the right (Ramy, 23 Aug 2026): row 1 leaves headroom
           for the fixed DesignerCredit badge (rendered from centre/page.tsx
@@ -96,7 +100,7 @@ export default async function CentreLayout({ children }: { children: React.React
           --color-bronze "the third accent, from the Centre Admin design
           system" -- it was made for this section. */}
       <div className="container pt-4">
-        <div className="h-[3px] w-full rounded-full bg-bronze" aria-hidden="true" />
+        <div className="h-[3px] w-full rounded-full" style={{ background: "var(--area-rule)" }} aria-hidden="true" />
       </div>
 
       <div className="container pt-5">
