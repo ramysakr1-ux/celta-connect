@@ -1,5 +1,6 @@
 "use client";
 
+import { initials } from "@/lib/initials";
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
@@ -170,7 +171,7 @@ export const MessageThread = forwardRef<
                       mine ? "bg-surface-muted text-ink" : "bg-accent text-accent-foreground"
                     }`}
                   >
-                    {(mine ? "Me" : (nameById.get(m.sender_id) ?? "?")).slice(0, 2).toUpperCase()}
+                    {initials(mine ? "Me" : (nameById.get(m.sender_id) ?? "?"))}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="flex items-baseline gap-1.5 text-xs font-semibold text-ink">

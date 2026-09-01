@@ -1,18 +1,11 @@
 "use client";
 
+import { initials } from "@/lib/initials";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { MessageThread, type MessageThreadHandle, type Message } from "@/app/dashboard/staff-chat/message-thread";
 import type { ChannelSummary, Coworker } from "@/lib/staff-chat";
-
-function initials(name: string, isDm: boolean): string {
-  if (isDm) {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase();
-}
 
 function channelMeta(type: ChannelSummary["type"]): string {
   if (type === "dm") return "trainer";
@@ -299,7 +292,7 @@ export function StaffChatDrawer({
                     groupChannel.id === selectedId ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
                   }`}
                 >
-                  {initials(groupChannel.name, false)}
+                  {initials(groupChannel.name)}
                 </span>
                 <span className="flex-1 truncate text-[13px] font-medium text-ink">{groupChannel.name}</span>
                 <span className="shrink-0 text-[10px] text-muted">{channelMeta(groupChannel.type)}</span>
@@ -322,7 +315,7 @@ export function StaffChatDrawer({
                       isSelected ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
                     }`}
                   >
-                    {initials(c.full_name, true)}
+                    {initials(c.full_name)}
                   </span>
                   <span className="flex-1 truncate text-[13px] font-medium text-ink">{c.full_name}</span>
                   <span className="shrink-0 text-[10px] text-muted">trainer</span>
@@ -377,7 +370,7 @@ export function StaffChatDrawer({
             }`}
           >
             <span className="flex size-6 shrink-0 items-center justify-center rounded-[8px] bg-primary text-[9px] font-semibold text-primary-foreground">
-              {selected ? initials(selected.name, selected.type === "dm") : "+"}
+              {selected ? initials(selected.name) : "+"}
             </span>
             <span className="max-w-[70px] truncate text-[13px] font-semibold text-ink sm:max-w-[130px]">
               {selected ? selected.name : nobodyToMessage ? "No chat yet" : "Pick who to message"}

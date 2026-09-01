@@ -1,5 +1,6 @@
 "use client";
 
+import { initials } from "@/lib/initials";
 import { useRef, useState } from "react";
 import { ArrowUp, ChevronDown } from "lucide-react";
 import { MessageThread, type MessageThreadHandle } from "@/app/dashboard/staff-chat/message-thread";
@@ -88,7 +89,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
                     r.channelId === selected.channelId ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
                   }`}
                 >
-                  {r.name.slice(0, 2).toUpperCase()}
+                  {initials(r.name)}
                 </span>
                 <span className="flex-1 truncate text-[13px] font-medium text-ink">{r.name}</span>
               </button>
@@ -126,7 +127,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
             }`}
           >
             <span className="flex size-6 shrink-0 items-center justify-center rounded-[8px] bg-primary text-[9px] font-semibold text-primary-foreground">
-              {selected.name.slice(0, 2).toUpperCase()}
+              {initials(selected.name)}
             </span>
             <span className="max-w-[70px] truncate text-[13px] font-semibold text-ink sm:max-w-[130px]">{selected.name}</span>
             {rooms.length > 1 ? <ChevronDown className="size-[9px] shrink-0 text-muted" aria-hidden="true" /> : null}
