@@ -153,14 +153,6 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     inputSessionCriteria: ["1a", "1b", "1c"],
     detail: "The assignment session",
   },
-  {
-    type: "input_session",
-    title: "Classroom arrangements and material use",
-    position: pos(0),
-    time: "15:30",
-    tag: "whole_group",
-    inputSessionCriteria: ["5a", "5e", "4d"],
-  },
 
   // Day 1-2 (Tue/Wed) -- TP1, one half each day.
   { type: "tp", title: "TP1 -- Half A", position: pos(1), time: "10:00", tag: "individual", linkedTpNumber: 1 },
@@ -286,14 +278,6 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     inputSessionCriteria: ["2g"],
   },
-  {
-    type: "input_session",
-    title: "Portfolio and record-keeping",
-    position: pos(6),
-    time: "16:00",
-    tag: "whole_group",
-    inputSessionCriteria: ["5l"],
-  },
   { type: "milestone", title: "Filmed observation 3", position: pos(6), time: "17:00", tag: "individual", detail: "With task" },
   {
     type: "assignment_due",
@@ -307,27 +291,6 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // Day 7-8 (Wed/Thu) -- TP4. Half B's Skills due lands the day after
   // their own TP3, which is Half A's TP4 day.
   { type: "tp", title: "TP4 -- Half A", position: pos(7), time: "10:00", tag: "individual", linkedTpNumber: 4 },
-  {
-    type: "input_session",
-    title: "Self-evaluation and responding to feedback",
-    position: pos(7),
-    time: "14:30",
-    tag: "whole_group",
-    inputSessionCriteria: ["5m", "5n"],
-  },
-  {
-    // "Second pass -- 4c already introduced day 4" (Ramy, Text-based
-    // teaching). Recorded again here so criteriaForTpDate() picks it up
-    // as the live focus for TPs from this point on, per the "gate on the
-    // first session, but each session's own row still reflects what it
-    // itself reinforces" reading of the mapping.
-    type: "input_session",
-    title: "Adapting materials for level",
-    position: pos(7),
-    time: "16:00",
-    tag: "whole_group",
-    inputSessionCriteria: ["4c"],
-  },
   {
     type: "assignment_due",
     title: "Language Skills Related Tasks -- due 9am (Half B)",
@@ -344,16 +307,6 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // session (comparing pooled notes before claiming), LRT due for both
   // groups at once since neither is teaching TP that day.
   { type: "milestone", title: "Demo lesson 2 -- new level", position: pos(9), time: "10:00", tag: "whole_group" },
-  {
-    // "Second pass for the level change" (Ramy) -- pairs naturally with
-    // the demo-lesson-2/new-level milestone already on this day.
-    type: "input_session",
-    title: "Teaching a new level -- needs analysis",
-    position: pos(9),
-    time: "11:00",
-    tag: "whole_group",
-    inputSessionCriteria: ["1a", "1c"],
-  },
   { type: "milestone", title: "FOL divergence session", position: pos(9), time: "14:30", tag: "whole_group" },
   {
     type: "assignment_due",
@@ -551,17 +504,6 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     linkedAssignmentType: "Focus on Learner",
     inputSessionCriteria: ["1a", "1b", "1c"],
   },
-  {
-    // Full-time's day-0 order has this LAST, after Focus on the Learner --
-    // kept in that same relative order here, on the last shared day before
-    // groups split for TP1.
-    type: "input_session",
-    title: "Classroom arrangements and material use",
-    position: partTimePos(1),
-    time: "15:00",
-    tag: "whole_group",
-    inputSessionCriteria: ["5a", "5e", "4d"],
-  },
 
   { type: "tp", title: "TP1 -- Group ABC", position: partTimePos(2), time: "10:00", tag: "individual", linkedTpNumber: 1 },
   { type: "milestone", title: "Language Skills Related Tasks released", position: partTimePos(2), time: "17:00", tag: "whole_group", linkedAssignmentType: "Skills" },
@@ -666,16 +608,6 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
 
   // No TP this week -- level change, mirroring every other shape's own gap.
   { type: "milestone", title: "Demo lesson 2 -- new level", position: partTimePos(10), time: "10:00", tag: "whole_group" },
-  {
-    // Same pairing as full-time's own day-9: this session sits right
-    // alongside the new-level demo lesson, before FOL divergence.
-    type: "input_session",
-    title: "Teaching a new level -- needs analysis",
-    position: partTimePos(10),
-    time: "11:00",
-    tag: "whole_group",
-    inputSessionCriteria: ["1a", "1c"],
-  },
   { type: "milestone", title: "FOL divergence session", position: partTimePos(10), time: "13:45", tag: "whole_group" },
   {
     type: "assignment_due",
@@ -729,14 +661,6 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
   },
   { type: "tp", title: "TP6 -- Group DEF", position: partTimePos(15), time: "10:00", tag: "individual", linkedTpNumber: 6 },
   { type: "milestone", title: "Filmed observation 3", position: partTimePos(15), time: "17:00", tag: "individual", detail: "With task" },
-  {
-    type: "input_session",
-    title: "Portfolio and record-keeping",
-    position: partTimePos(15),
-    time: "13:45",
-    tag: "whole_group",
-    inputSessionCriteria: ["5l"],
-  },
 
   { type: "tp", title: "TP7 -- Group ABC", position: partTimePos(16), time: "10:00", tag: "individual", linkedTpNumber: 7 },
   {
@@ -747,26 +671,8 @@ export const PART_TIME_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     linkedAssignmentType: "Skills",
   },
-  {
-    type: "input_session",
-    title: "Self-evaluation and responding to feedback",
-    position: partTimePos(16),
-    time: "13:45",
-    tag: "whole_group",
-    inputSessionCriteria: ["5m", "5n"],
-  },
   { type: "tp", title: "TP7 -- Group DEF", position: partTimePos(17), time: "10:00", tag: "individual", linkedTpNumber: 7 },
   { type: "milestone", title: "Lessons from the Classroom released", position: partTimePos(17), time: "17:00", tag: "whole_group", linkedAssignmentType: "LfC" },
-  {
-    // Second pass -- 4c already introduced in Text-based teaching above,
-    // same reinforcing-pass reasoning as full-time.
-    type: "input_session",
-    title: "Adapting materials for level",
-    position: partTimePos(17),
-    time: "13:45",
-    tag: "whole_group",
-    inputSessionCriteria: ["4c"],
-  },
 
   // TP8 -- the final assessed lesson for each group.
   { type: "tp", title: "TP8 -- Group ABC, final assessed", position: partTimePos(18), time: "10:00", tag: "individual", linkedTpNumber: 8 },
@@ -905,36 +811,25 @@ export function buildSkeletonEvents(
 }
 
 
-/**
- * Input-session titles on THIS SKELETON with no interactive session behind
- * them.
+/*
+ * Five titles were removed from this skeleton on 1 Sep 2026: "Adapting
+ * materials for level", "Classroom arrangements and material use",
+ * "Portfolio and record-keeping", "Self-evaluation and responding to
+ * feedback" and "Teaching a new level -- needs analysis".
  *
- * Ramy's rule, 1 Sep 2026: "anything that doesn't have an interactive session
- * is not a real input session."
+ * Ramy: "All the input sessions that we built were interactive... the
+ * placeholders, they're not in our timetable. Just get rid of them." Those
+ * five appear on no real timetable -- they are not in scripts/seed-demo.mjs,
+ * which is where the real four-week course comes from -- and no interactive
+ * session was ever built for them. They stood for sessions nobody runs.
  *
- * Read this list with care -- it describes the skeleton, not a running
- * course. Checked against a real candidate's timetable on production the
- * same day, the live titles turned out to differ from the skeleton's, and
- * nearly every session this list would have condemned does exist there under
- * a slightly different name ("Drilling technique", not "Providing models --
- * drilling"). So this is a list of titles the SEED invents, not of sessions
- * that were never built.
+ * They carried the only mapping to criteria 4d, 5a, 5e, 5l, 5m and 5n, so a
+ * generated skeleton no longer tags those. Nothing enforces coverage -- the
+ * criteria are per-event and a trainer sets them from the timetable board --
+ * but it is worth knowing before someone asks where those strands went.
  *
- * Not deleted: these 11 titles occupy 22 of the skeleton's 44 input-session
- * slots, each appearing once per half, so removing them takes out half the
- * input sessions on a five-week course and leaves holes rather than a
- * shorter timetable. What those slots become is a course-design decision.
+ * The rest of this skeleton's input sessions are real: they are the same
+ * sessions as the seed's, under older wording ("Providing models --
+ * drilling" is the seed's "Drilling technique"), and both spellings are
+ * mapped in src/lib/input-session-registry-links.ts.
  */
-export const PLACEHOLDER_INPUT_SESSION_TITLES = [
-  "Adapting materials for level",
-  "Classroom arrangements and material use",
-  "Classroom management",
-  "Focus on the Learner -- the assignment session",
-  "Giving feedback on tasks",
-  "Portfolio and record-keeping",
-  "Productive skills -- writing",
-  "Self-evaluation and responding to feedback",
-  "Syllabus planning",
-  "Teaching a new level -- needs analysis",
-  "Teaching speaking",
-] as const;
