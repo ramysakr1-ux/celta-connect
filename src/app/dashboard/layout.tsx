@@ -62,7 +62,9 @@ export default async function DashboardLayout({
 
 
   return (
-    <div className="flex min-h-full flex-1 flex-col">
+    // Wraps header AND main: the section pills live in the header, and they
+    // should wear the room's colour like everything else inside it.
+    <AreaTheme className="flex min-h-full flex-1 flex-col">
       {/* The rule is per AREA now, not per role. Applying it on
           `role === "admin"` -- which is what shipped on 31 Aug -- was wrong:
           that condition is true across this entire layout, so Course Admin,
@@ -177,18 +179,13 @@ export default async function DashboardLayout({
       <AreaHeaderRule />
 
       <main className="container w-full flex-1 py-8">
-        {/* AreaTheme sets --area-accent and --area-hover-fill for whichever
-            room this is, so every .admin-hover / .admin-hover-fill inside
-            picks up the area's colour without being edited. */}
-        <AreaTheme>
-          <div className="frame p-6">{children}</div>
-        </AreaTheme>
+        <div className="frame p-6">{children}</div>
       </main>
 
       {profile && staffChat ? (
         <StaffChatDrawer profileId={profile.id} initialChannels={staffChat.channels} coworkers={staffChat.coworkers} />
       ) : null}
       {profile && adminChatRooms ? <AdminChatBar profileId={profile.id} rooms={adminChatRooms} /> : null}
-    </div>
+    </AreaTheme>
   );
 }

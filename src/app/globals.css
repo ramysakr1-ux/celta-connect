@@ -546,6 +546,18 @@ h6 {
     background-color: var(--area-hover-fill, oklch(93% 0.019 190)) !important;
   }
 
+  /* The active section pill, wearing whichever room it is in.
+     Written here rather than as Tailwind arbitrary values: a nested
+     var(--a, var(--b)) inside text-[...] does not survive Tailwind's
+     arbitrary-value parsing -- it silently produced no rule at all, and the
+     pill rendered near-black with no fill. Caught by reading the computed
+     style in the browser rather than looking at the screenshot. */
+  .pill-active {
+    border-color: color-mix(in oklab, var(--area-accent, var(--color-primary)) 25%, transparent);
+    background-color: color-mix(in oklab, var(--area-accent, var(--color-primary)) 10%, transparent);
+    color: var(--area-accent, var(--color-primary));
+  }
+
   /* ---- Area identities -------------------------------------------------
      One colour per room, carried through the room. Each sets four values:
      the band behind the header, a contrasting rule under it, the accent for
@@ -558,16 +570,37 @@ h6 {
      Existing areas keep the colours they already shipped with: the centre
      owner screen (ink/garnet, migration-era) and the volunteer pool
      (sage/coral) define theirs locally and are untouched here. */
+  /* Course Admin is garnet, Centre Management teal. Ramy, 1 Sep 2026: "can we
+     make the Course Admin garnet? I like garnet, and most of the time I'm the
+     course admin."
+
+     Which then decided Centre Management's colour rather than leaving it at
+     bronze. These two rooms are the pair that actually get confused with each
+     other, so they should be the pair that looks least alike: garnet at hue 27
+     and teal at 195 are nearly opposite. Bronze sits at 62 -- only 35 degrees
+     from garnet and warm like it -- which is close for the one pairing where
+     distance matters most. Bronze moves to Admissions, where being warm costs
+     nothing.
+
+     Garnet is also the ACT's colour in the trainer hub. Ramy ruled on that
+     directly: "they never really collide because they never meet. They are not
+     the same people. They operate in completely different arenas." */
   .area-course-admin {
+    --area-band: oklch(42% 0.13 27);
+    --area-rule: oklch(63% 0.096 72);
+    --area-accent: oklch(42% 0.13 27);
+    --area-hover-fill: oklch(93% 0.028 27);
+  }
+  .area-centre {
     --area-band: oklch(37.5% 0.058 195);
     --area-rule: oklch(63% 0.096 72);
     --area-accent: oklch(37.5% 0.058 195);
     --area-hover-fill: oklch(93% 0.019 190);
   }
-  .area-centre {
-    /* Bronze, darkened from --color-bronze's oklch(50% 0.09 62) so white text
-       clears it comfortably on the band. The rule is teal, which is the only
-       accent far enough round the wheel from bronze to read as deliberate. */
+  /* Bronze, darkened from --color-bronze's oklch(50% 0.09 62) so white text
+     clears it on the band. Not yet applied -- Admissions gets its identity in
+     the next pass. */
+  .area-admissions {
     --area-band: oklch(38% 0.075 62);
     --area-rule: oklch(37.5% 0.058 195);
     --area-accent: oklch(50% 0.09 62);

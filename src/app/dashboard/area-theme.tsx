@@ -34,10 +34,10 @@ export function areaClassFor(pathname: string): string | null {
   return AREA_BY_PREFIX.find((a) => pathname.startsWith(a.prefix))?.className ?? null;
 }
 
-export function AreaTheme({ children }: { children: React.ReactNode }) {
+export function AreaTheme({ children, className }: { children: React.ReactNode; className?: string }) {
   const pathname = usePathname() ?? "";
   const areaClass = areaClassFor(pathname);
-  return <div className={areaClass ?? undefined}>{children}</div>;
+  return <div className={[className, areaClass].filter(Boolean).join(" ") || undefined}>{children}</div>;
 }
 
 /**
