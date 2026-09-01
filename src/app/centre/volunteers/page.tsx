@@ -140,9 +140,20 @@ export default async function CentreVolunteersPage({
 
 
       <div className="flex flex-col gap-5 p-8">
-        <div className="flex flex-col gap-[3px]">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Centre overview &middot; volunteers</p>
-          <h1 className="font-serif text-2xl text-ink">Volunteer pool</h1>
+        <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-col gap-[3px]">
+            <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Centre overview &middot; volunteers</p>
+            <h1 className="font-serif text-2xl text-ink">Volunteer pool</h1>
+          </div>
+          {/* Bulk-adding volunteers is this room's job, not Centre
+              Management's -- see the note on SpreadsheetImportSection. The
+              importer moved here on 1 Sep 2026 and this is its only door,
+              so it is gated on the same capability the page enforces. */}
+          {can(ctx.roles, "volunteers.manage", ctx.overrides) ? (
+            <Link href="/centre/volunteers/import" className="text-sm font-semibold text-primary hover:underline">
+              Import from a spreadsheet &rarr;
+            </Link>
+          ) : null}
         </div>
 
         <div className="card rounded-[9px] border-t-[var(--vol-sage)]">

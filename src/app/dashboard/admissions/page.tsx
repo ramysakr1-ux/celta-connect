@@ -185,6 +185,11 @@ export default async function AdmissionsPage() {
               </span>
             ) : null}
           </Link>
+          {/* Applicants are created here, so bulk-creating them is here too.
+              Moved out of Centre Management's Import tab, 1 Sep 2026. */}
+          <Link href="/dashboard/admissions/import" className="text-sm text-muted hover:text-ink">
+            Import
+          </Link>
           <Link href="/dashboard/admissions/settings" className="text-sm text-muted hover:text-ink">
             Settings
           </Link>

@@ -1,12 +1,15 @@
 "use client";
 
 import { useActionState } from "react";
-import { undoVolunteerImport, type UndoVolunteerImportState } from "@/app/centre/import/volunteer-actions";
+import { undoImport, type UndoImportState } from "@/components/import/actions";
 
-const initial: UndoVolunteerImportState = {};
+const initial: UndoImportState = {};
 
-export function UndoVolunteerImportButton({ importId }: { importId: string }) {
-  const [state, action, pending] = useActionState(undoVolunteerImport, initial);
+// Undo is destructive and bulk, so it asks first. The server re-checks the
+// seven-day window and the invited/paid conditions regardless of what the
+// button thinks -- this is a courtesy, not the guard.
+export function UndoImportButton({ importId }: { importId: string }) {
+  const [state, action, pending] = useActionState(undoImport, initial);
 
   if (state.removed) {
     return <span className="text-xs text-muted">Removed {state.removed}</span>;
@@ -16,7 +19,7 @@ export function UndoVolunteerImportButton({ importId }: { importId: string }) {
     <form
       action={action}
       onSubmit={(e) => {
-        if (!confirm("Remove every volunteer this import created? Anyone who has already signed up is kept.")) {
+        if (!confirm("Remove everyone this import created? People invited or paid since are kept.")) {
           e.preventDefault();
         }
       }}
