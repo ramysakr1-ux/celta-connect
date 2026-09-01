@@ -585,26 +585,46 @@ h6 {
      Garnet is also the ACT's colour in the trainer hub. Ramy ruled on that
      directly: "they never really collide because they never meet. They are not
      the same people. They operate in completely different arenas." */
+  /* Three values per room: the rule under the header, the accent for the
+     active pill, and the pale wash for hovers.
+
+     NOT the wordmark. Ramy, 1 Sep 2026: "Connect does not change. Connect
+     doesn't change... it stands on top above all... Connect is always the same
+     everywhere. Same as my credit." The mark is the platform's logo, not a
+     surface for the room's colour -- the centre's own logo and name sit
+     beneath it, and that is where a centre's identity belongs.
+
+     Which retires option B for good, and for a better reason than the one I
+     was arguing. I had it as a contrast problem, solvable by darkening the
+     tile. It is not a contrast problem: a logo that changes colour by page is
+     not a logo. The measurements were beside the point.
+
+     Colours here are the accent at 42% lightness -- 7.4 to 8.2:1 against the
+     card, comfortably readable -- and the hover wash at 93%, which keeps body
+     text above 13:1. Both measured. */
   .area-course-admin {
-    --area-band: oklch(42% 0.13 27);
-    --area-rule: oklch(63% 0.096 72);
+    --area-rule-width: 3px;
     --area-accent: oklch(42% 0.13 27);
+    --area-rule: oklch(42% 0.13 27);
     --area-hover-fill: oklch(93% 0.028 27);
   }
   .area-centre {
-    --area-band: oklch(37.5% 0.058 195);
-    --area-rule: oklch(63% 0.096 72);
-    --area-accent: oklch(37.5% 0.058 195);
-    --area-hover-fill: oklch(93% 0.019 190);
+    --area-rule-width: 3px;
+    --area-accent: oklch(42% 0.058 195);
+    --area-rule: oklch(42% 0.058 195);
+    --area-hover-fill: oklch(93% 0.019 195);
   }
-  /* Bronze, darkened from --color-bronze's oklch(50% 0.09 62) so white text
-     clears it on the band. Not yet applied -- Admissions gets its identity in
-     the next pass. */
   .area-admissions {
-    --area-band: oklch(38% 0.075 62);
-    --area-rule: oklch(37.5% 0.058 195);
-    --area-accent: oklch(50% 0.09 62);
-    --area-hover-fill: oklch(93% 0.022 62);
+    --area-rule-width: 3px;
+    --area-accent: oklch(42% 0.12 350);
+    --area-rule: oklch(42% 0.12 350);
+    --area-hover-fill: oklch(93% 0.028 350);
+  }
+  .area-staff-chat {
+    --area-rule-width: 3px;
+    --area-accent: oklch(42% 0.09 255);
+    --area-rule: oklch(42% 0.09 255);
+    --area-hover-fill: oklch(93% 0.023 255);
   }
 
   /* Assessor's own accent -- garnet, a plain fixed color rather than a

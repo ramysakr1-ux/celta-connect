@@ -22,12 +22,12 @@ import { usePathname } from "next/navigation";
  * entry below simply looks the way it always did.
  */
 const AREA_BY_PREFIX: { prefix: string; className: string }[] = [
+  { prefix: "/dashboard/admissions", className: "area-admissions" },
+  { prefix: "/dashboard/staff-chat", className: "area-staff-chat" },
+  // Last, because /dashboard/admin is a prefix of nothing else here but the
+  // list is matched in order and a shorter prefix would swallow the others if
+  // one were ever added beneath it.
   { prefix: "/dashboard/admin", className: "area-course-admin" },
-  // Admissions and staff chat deliberately have no colour yet. Until 1 Sep
-  // they inherited Course Admin's teal by accident -- the rule was applied on
-  // `role === "admin"`, which is true across this whole layout -- so three
-  // rooms shared one identity. Neutral is the honest state until each is
-  // given its own.
 ];
 
 export function areaClassFor(pathname: string): string | null {
