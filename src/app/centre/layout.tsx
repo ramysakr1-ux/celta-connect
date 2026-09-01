@@ -67,7 +67,16 @@ export default async function CentreLayout({ children }: { children: React.React
     // itself let them straight in -- access with no door, the mirror of the
     // doors-with-no-access we removed this morning.
     ...(canView(ctx.roles, "courseAdmin.view", ctx.overrides) ? ["course-admin"] : []),
-    ...(can(ctx.roles, "admissions.manage", ctx.overrides) ? ["admissions"] : []),
+    // canView on admissions.view, not can() on admissions.manage. The
+    // Centre observer is read-only across the whole centre and holds
+    // admissions.view at read level, so gating the door on "can act" hid
+    // the room from the one role defined by looking at it.
+    //
+    // It also caused a regression I introduced this morning: this centre
+    // grants that role import.run by override, and moving the applicant
+    // importer into Admissions left them holding the capability with no
+    // door to it -- they had one while Import was a Centre Management tab.
+    ...(canView(ctx.roles, "admissions.view", ctx.overrides) ? ["admissions"] : []),
   ];
 
   // Settings follows the capability its own page enforces.
