@@ -8,6 +8,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { roleLabel, CAPABILITY_LABELS, type Capability } from "@/lib/auth/centre-permissions";
 import { CapabilityCustomizer } from "@/app/centre/owner/capability-customizer";
 import { BranchVisibilityCard } from "@/app/centre/owner/branch-visibility-card";
+import { TransferOwnershipCard, DeleteCentreCard } from "@/app/centre/settings/danger-zone";
 
 // for-claude-code-centre-owner-role-customizer.md: "This screen is
 // deliberately a different register from the rest of Connect... signals
@@ -72,7 +73,11 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
       // organisation_id is invisible to that query, and the fallback then
       // printed the CURRENT centre's name against its rows -- so Diane's Los
       // Angeles grant read "Connect CELTA New York".
-      admin.from("centers").select("id, name").in("id", scope),
+      // `mine`, not `scope`: the custodial cards below act on the centre this
+      // owner is signed in against, which the branch filter does not move, so
+      // its name has to be resolvable even while the page is filtered to a
+      // different branch.
+      admin.from("centers").select("id, name").in("id", mine.length > 0 ? mine : [centerId]),
     ]);
 
   const timeZone = cachedCenter?.time_zone ?? DEFAULT_TIMEZONE;
@@ -100,6 +105,16 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
   // "Who holds what" spans branches now, so each row names its own -- the
   // column used to print the current centre's name against every row.
   const branchNameById = new Map<string, string>((scopeCentres ?? []).map((b) => [b.id, b.name]));
+  // Transferring ownership and deleting a centre run against
+  // ctx.activeCenterId, which the ?branch filter deliberately does not
+  // change -- so with the filter on Los Angeles, the delete card was still
+  // pointed at New York. Naming the real target here is what makes the
+  // type-the-name confirmation mean something: you type the name of the
+  // centre that will actually be destroyed.
+  const custodialId = ctx.activeCenterId ?? profile.center_id;
+  const custodialName = branchNameById.get(custodialId) ?? center?.name ?? "this centre";
+  const custodialIsElsewhere = custodialId !== centerId;
+
   const planIds = (plans ?? []).map((p) => p.id);
   const siblingBranches = siblings ?? [];
 
@@ -198,6 +213,31 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Ramy, 1 Sep 2026: "the danger zone should also be inside the
+            centre owner's page." It was the only owner-gated thing in
+            Centre Management's Settings -- a custodial power filed under
+            configuration. Transferring or destroying a centre is exactly
+            what this screen is for. */}
+        <div className="owner-card flex flex-col gap-4 px-7 py-6" style={{ borderTop: "3px solid var(--owner-garnet)" }}>
+          <div className="flex flex-col gap-1">
+            <h2 className="owner-serif text-[19px]">Danger zone</h2>
+            <p className="text-[12.5px]" style={{ color: "var(--owner-muted)" }}>
+              {custodialIsElsewhere ? (
+                <>
+                  These act on <strong>{custodialName}</strong>, the centre you are signed in against &mdash; not on the
+                  branch shown above. Neither can be undone.
+                </>
+              ) : (
+                <>
+                  These act on <strong>{custodialName}</strong>, and neither can be undone.
+                </>
+              )}
+            </p>
+          </div>
+          <TransferOwnershipCard centreName={custodialName} />
+          <DeleteCentreCard centreName={custodialName} />
         </div>
       </div>
 

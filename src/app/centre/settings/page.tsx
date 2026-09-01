@@ -9,7 +9,6 @@ import { createClient } from "@/lib/supabase/server";
 import { ProfileDriveForm } from "@/app/centre/settings/profile-drive-form";
 import { ZoomConnectionForm } from "@/app/centre/settings/zoom-connection-form";
 import { AdminRoster, type RosterRow } from "@/app/centre/settings/admin-roster";
-import { TransferOwnershipCard, DeleteCentreCard } from "@/app/centre/settings/danger-zone";
 import { SettingsTabs } from "@/app/centre/settings/settings-tabs";
 import { SupportAccessTab, type SupportGrantRow } from "@/app/centre/settings/support-access-tab";
 import { PlatformAccessTab, type PlatformAccessRow, type AccessLogRow } from "@/app/centre/settings/platform-access-tab";
@@ -206,14 +205,6 @@ export default async function CentreSettingsPage({
         }
         support={<SupportAccessTab canGrantBilling={canGrantBilling} grants={supportGrantRows} />}
         platform={<PlatformAccessTab invite={platformInviteRow} accessLog={platformAccessLogRows} />}
-        danger={
-          isOwner ? (
-            <div className="flex flex-col gap-4">
-              <TransferOwnershipCard centreName={center.name} />
-              <DeleteCentreCard centreName={center.name} />
-            </div>
-          ) : null
-        }
       />
     </div>
   );

@@ -10,7 +10,7 @@ const TABS = [
   { key: "support", label: "Support access" },
   { key: "platform", label: "Connect access" },
 ] as const;
-type TabKey = (typeof TABS)[number]["key"] | "danger";
+type TabKey = (typeof TABS)[number]["key"];
 
 // for-claude-code-centre-settings.md: "State: one section key... controlling
 // which tab's content renders, same tab-switch pattern as Centre Admin."
@@ -23,17 +23,17 @@ export function SettingsTabs({
   people,
   support,
   platform,
-  danger,
 }: {
   profile: ReactNode;
   payments: ReactNode;
   people: ReactNode;
   support: ReactNode;
   platform: ReactNode;
-  danger: ReactNode | null;
 }) {
   const [section, setSection] = useState<TabKey>("profile");
-  const allTabs = danger ? [...TABS, { key: "danger" as const, label: "Danger zone" }] : TABS;
+  // Danger zone moved to the centre owner's screen, 1 Sep 2026 -- it was the
+  // one owner-only thing in a page everyone with a centre role can open.
+  const allTabs = TABS;
 
   const content =
     section === "profile"
@@ -44,9 +44,7 @@ export function SettingsTabs({
           ? people
           : section === "support"
             ? support
-            : section === "platform"
-              ? platform
-              : danger;
+            : platform;
 
   return (
     <div className="flex flex-col gap-5">
@@ -58,9 +56,7 @@ export function SettingsTabs({
             onClick={() => setSection(tab.key)}
             className={`admin-hover-fill -mb-[3px] border-b-2 px-3 pb-2 text-sm font-medium ${
               section === tab.key
-                ? tab.key === "danger"
-                  ? "border-destructive text-destructive"
-                  : "border-primary text-primary"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted hover:text-ink"
             }`}
           >
