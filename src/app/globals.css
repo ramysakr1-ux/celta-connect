@@ -633,17 +633,34 @@ h6 {
     --area-alt: oklch(70% 0.022 70);
   }
 
+  /* Green, moved off sage: sage at 155 sat only 32 from teal at 195, so the
+     two read as one colour. 125 keeps it recognisably green while clearing
+     teal properly. */
   .area-volunteers {
     --area-rule-width: 3px;
-    --area-accent: oklch(42% 0.075 155);
-    --area-rule: oklch(42% 0.075 155);
-    --area-hover-fill: oklch(93% 0.02 155);
+    --area-accent: oklch(45% 0.09 125);
+    --area-rule: oklch(45% 0.09 125);
+    --area-hover-fill: oklch(93% 0.024 125);
   }
+  /* Magenta, moved off rose. Ramy spotted it in a mockup: "Centre management
+     and volunteer pool have the same colour, and Course admin and admissions
+     have the same colour now."
+
+     He was right, and it was a real palette fault rather than a rendering
+     one. I had measured every colour against the BACKGROUND and never against
+     the OTHERS, so I picked two pairs of near-neighbours: garnet 27 with rose
+     350, teal 195 with sage 155. Measured as RGB distance, the weakest pair
+     was 32 where garnet-to-teal is 130.
+
+     Repicked by measuring all six pairs across candidate sets and taking the
+     one with the largest MINIMUM separation: magenta 320 and green 125 give a
+     weakest pair of 76, more than double. Garnet and teal stay as they are --
+     they were chosen deliberately and they were never the problem. */
   .area-admissions {
     --area-rule-width: 3px;
-    --area-accent: oklch(42% 0.12 350);
-    --area-rule: oklch(42% 0.12 350);
-    --area-hover-fill: oklch(93% 0.028 350);
+    --area-accent: oklch(42% 0.12 320);
+    --area-rule: oklch(42% 0.12 320);
+    --area-hover-fill: oklch(93% 0.028 320);
   }
 
   /* Assessor's own accent -- garnet, a plain fixed color rather than a
