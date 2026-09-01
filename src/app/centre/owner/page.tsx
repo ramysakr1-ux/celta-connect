@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -176,7 +177,12 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
           <StatCard label="Courses running" value={String(coursesRunning)} />
           <StatCard label="Outstanding balance" value={formatMoney(outstandingBalance, center?.currency)} accent />
           <StatCard label="People with a centre role" value={String(peopleWithRole)} />
-          <StatCard label="Owner actions logged" value={String(ownerActionsThisMonth)} suffix="this month" />
+          {/* The one figure here that was a dead end: it counted rows whose
+              only rendering was six lines in another room. Now it opens
+              them. */}
+          <Link href={`/centre/owner/log${branch ? `?branch=${branch}` : ""}`} className="owner-row-hover rounded-[10px]">
+            <StatCard label="Owner actions logged" value={String(ownerActionsThisMonth)} suffix="this month" />
+          </Link>
         </div>
 
         {siblingBranches.length > 0 ? (
