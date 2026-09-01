@@ -37,4 +37,30 @@ export const TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG: Record<string, string> = {
   // pairs with Drilling Techniques", and the timetable carries that drilling
   // session two rows away, so the pair is the same pair.
   "Staging controlled practice": "language-practice",
+
+  // --- The live course's own titles, read off a real candidate's Resources
+  // tab on production, 1 Sep 2026 ---
+  //
+  // Everything above was matched against src/lib/timetable-skeleton.ts. That
+  // was the wrong source: the skeleton seeds a course, but the titles on the
+  // real timetable differ from it, so most of these lookups never fired and
+  // 34 of 41 cards would not open. Ramy: "some of them work, some of them
+  // don't... I can't click on all of them."
+  //
+  // With these, 20 of the 21 interactive sessions are reachable from the
+  // timetable. The skeleton keys are kept above rather than deleted, since a
+  // course seeded from it carries those titles instead.
+  "Teaching literacy": "teaching-literacy",
+  "Professional development and career advice": "professional-development",
+  "Drilling technique": "drilling-techniques",
+  "Language practice": "language-practice",
+  "Guided discovery": "guided-discovery",
+  "Functional language": "functional-language",
+  "Teaching listening": "listening",
+  "Connected speech": "connected-speech",
+  "Stress and intonation": "stress-and-intonation",
+  "MFP": "mfp",
+  "Language analysis": "language-analysis",
+  "Lesson framework": "lesson-framework",
+  "Test-Teach-Test": "test-teach-test",
 };
