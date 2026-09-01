@@ -18,4 +18,19 @@ export const TIMETABLE_TITLE_TO_INPUT_SESSION_SLUG: Record<string, string> = {
   "Text-based teaching": "text-based-teaching",
   "Sounds": "sounds",
   "Language analysis 1": "language-analysis",
+  // Added 1 Sep 2026, after Ramy found that most cards on a candidate's
+  // Resources tab could not be opened: "some of them work, some of them
+  // don't... I can't click on all of them." Only 8 of the 22 timetable
+  // sessions were mapped, so 14 rendered inert by design and read as broken.
+  //
+  // These three are the ones I could confirm the same way the eight above
+  // were -- title against registry title, not a fuzzy match:
+  //   "Lesson planning" is the same session as "Lesson planning input",
+  //   which was already mapped here under its longer name.
+  //   "Providing models -- drilling" is the registry's "Drilling techniques".
+  //   "Reflective Practice & Professional Development" is the registry's
+  //   "Professional development & career advice".
+  "Lesson planning": "lesson-planning",
+  "Providing models -- drilling": "drilling-techniques",
+  "Reflective Practice & Professional Development": "professional-development",
 };

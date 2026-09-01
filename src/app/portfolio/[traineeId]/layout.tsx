@@ -475,7 +475,16 @@ export default async function PortfolioLayout({
         </div>
       )}
 
-      <footer className={`mt-auto flex flex-col items-center gap-3 py-8 text-center text-xs text-muted ${showTraineeNav ? "pb-20 md:pb-8" : ""}`}>
+      {/* Ramy, 1 Sep 2026: "Keep this on your home screen... it's totally
+          hidden behind the chat pill."
+
+          The padding cleared the mobile nav and nothing else. The chat pill
+          is fixed at bottom-6 on desktop and bottom-20 on mobile, and is
+          roughly 44-52px tall, so it occupies 24-68px up on desktop against
+          32px of padding, and 80-132px up on mobile against 80px. The last
+          thing in this footer sat underneath it in both. Same fault, and the
+          same fix, as the Centre settings bar on 26 Aug. */}
+      <footer className={`mt-auto flex flex-col items-center gap-3 py-8 text-center text-xs text-muted ${showTraineeNav ? "pb-40 md:pb-24" : ""}`}>
         <span>
           {[center?.name, center ? `Cambridge CELTA (Centre ${center.center_number})` : null, `Workspace link ${trainee.id.slice(0, 8)}`]
             .filter(Boolean)
