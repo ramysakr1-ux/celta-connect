@@ -28,4 +28,4 @@ const BASE =
 // value and silently emits nothing.
 export const PILL_ACTIVE = `${BASE} pill-active`;
 
-export const PILL_INACTIVE = `${BASE} pill-inactive admin-hover-fill border-border text-muted hover:border-primary hover:text-primary`;
+export const PILL_INACTIVE = `${BASE} admin-hover-fill border-border text-muted hover:border-primary hover:text-primary`;

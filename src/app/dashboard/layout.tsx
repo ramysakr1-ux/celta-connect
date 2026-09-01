@@ -10,8 +10,7 @@ import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { PILL_ACTIVE, PILL_INACTIVE } from "@/app/centre/header-pill-styles";
-import { AreaTheme, AreaHeaderBand } from "@/app/dashboard/area-theme";
-import { AreaWordmark } from "@/app/dashboard/area-wordmark";
+import { AreaTheme, AreaHeaderRule } from "@/app/dashboard/area-theme";
 import { adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
 
@@ -66,11 +65,13 @@ export default async function DashboardLayout({
     // Wraps header AND main: the section pills live in the header, and they
     // should wear the room's colour like everything else inside it.
     <AreaTheme className="flex min-h-full flex-1 flex-col">
-      {/* .app-header reads --area-band and --area-rule, so a room with a
-          colour gets a full band and a 3px rule while a room without one keeps
-          the plain light header it always had -- no condition needed here.
-          AreaHeaderBand adds .on-band, which reverses the contents. */}
-      <AreaHeaderBand>
+      {/* The rule is per AREA now, not per role. Applying it on
+          `role === "admin"` -- which is what shipped on 31 Aug -- was wrong:
+          that condition is true across this entire layout, so Course Admin,
+          Admissions and staff chat all turned teal and three rooms shared one
+          identity. AreaHeaderRule below knows which room is actually showing
+          and draws nothing in a room that has no colour yet. */}
+      <header className="border-b border-border">
         {/* Two rows on the right (Ramy, 23 Aug 2026): row 1 carries the
             credit via HeaderDesignerCredit, which checks the live pathname
             itself and renders nothing off /dashboard/admin -- landing-only,
@@ -102,7 +103,7 @@ export default async function DashboardLayout({
             }
             className="flex shrink-0 items-center gap-3 hover:opacity-80"
           >
-            <AreaWordmark size="header" />
+            <Wordmark size="header" />
             {/* Course Admin.dc.html's own header carries a role pill beside
                 the mark: 11px/700 uppercase at 0.06em with a 5px dot, on a 12%
                 accent tint. Centre Admin has the same device at /centre; this
@@ -174,7 +175,8 @@ export default async function DashboardLayout({
             </button>
           </form>
         </div>
-      </AreaHeaderBand>
+      </header>
+      <AreaHeaderRule />
 
       <main className="container w-full flex-1 py-8">
         <div className="frame p-6">{children}</div>
