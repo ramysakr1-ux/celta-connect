@@ -40,7 +40,26 @@ export const ROOMS: Room[] = [
   { key: "volunteers", label: "Volunteer pool", href: "/centre/volunteers", match: "/centre/volunteers", colour: "oklch(45% 0.10 260)" },
 ];
 
+/**
+ * Paths that sit inside a room's prefix but are not that room.
+ *
+ * The centre owner's screen lives at /centre/owner, so the longest-prefix
+ * match below read it as Centre Management: the Centre management pill
+ * dropped beneath the other three, and the surface took Centre Management's
+ * colour, on a screen that is not one of the four rooms. Ramy, 1 Sep 2026:
+ * "I think all four tabs should be next to each other in order. I don't know
+ * why centre management is sitting below."
+ *
+ * The owner screen stands above the rooms rather than beside them -- it is
+ * where the four are handed out -- which is why its own design is a
+ * different register entirely (ink and garnet, a dark band). With no active
+ * room, all four pills stay in the top row, which is the honest answer to
+ * "which room am I in": none of them.
+ */
+const NOT_A_ROOM = ["/centre/owner"];
+
 export function activeRoomKey(pathname: string): string | null {
+  if (NOT_A_ROOM.some((p) => pathname === p || pathname.startsWith(p + "/"))) return null;
   // Longest match wins: /centre/volunteers is inside /centre, and the room you
   // are in is the more specific one.
   const hit = ROOMS.filter((r) => pathname.startsWith(r.match)).sort((a, b) => b.match.length - a.match.length)[0];
