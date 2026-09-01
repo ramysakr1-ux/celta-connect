@@ -74,7 +74,7 @@ export default async function DashboardLayout({
     ? [
         ...(centreCtx.roles.length > 0 ? ["centre"] : []),
         ...(canView(centreCtx.roles, "volunteers.view", centreCtx.overrides) ? ["volunteers"] : []),
-        ...(flatAdmin || can(centreCtx.roles, "courseAdmin.view", centreCtx.overrides) ? ["course-admin"] : []),
+        ...(flatAdmin || canView(centreCtx.roles, "courseAdmin.view", centreCtx.overrides) ? ["course-admin"] : []),
         ...(flatAdmin || can(centreCtx.roles, "admissions.manage", centreCtx.overrides) ? ["admissions"] : []),
       ]
     : [];

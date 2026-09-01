@@ -61,7 +61,12 @@ export default async function CentreLayout({ children }: { children: React.React
   const visibleRooms = [
     "centre",
     ...(canView(ctx.roles, "volunteers.view", ctx.overrides) ? ["volunteers"] : []),
-    ...(can(ctx.roles, "courseAdmin.view", ctx.overrides) ? ["course-admin"] : []),
+    // canView, not can: this capability is called .view, and an owner who
+    // grants a role read-level Course admin means them to be able to look at
+    // it. Gated on can() the pill vanished at read level while the page
+    // itself let them straight in -- access with no door, the mirror of the
+    // doors-with-no-access we removed this morning.
+    ...(canView(ctx.roles, "courseAdmin.view", ctx.overrides) ? ["course-admin"] : []),
     ...(can(ctx.roles, "admissions.manage", ctx.overrides) ? ["admissions"] : []),
   ];
 

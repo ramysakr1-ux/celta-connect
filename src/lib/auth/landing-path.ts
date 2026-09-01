@@ -1,6 +1,6 @@
 import "server-only";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
-import { landingFor } from "@/lib/auth/centre-permissions";
+import { landingFor, adminHomePath } from "@/lib/auth/centre-permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/types";
 
@@ -33,9 +33,16 @@ export async function resolveLandingPath(profile: Profile): Promise<string> {
 
   if (profile.role === "admin") {
     const ctx = await getCentreRoleContext(profile);
-    const landing = landingFor(ctx.roles);
-    if (landing === "centre-admin") return "/centre";
-    if (landing === "course-admin") return "/dashboard/admin";
+    // adminHomePath, not a second copy of the rule. This function had its
+    // own version that never mentioned centre_owner, so signing in as an
+    // owner landed you in Centre Management while the Connect mark -- which
+    // does use adminHomePath -- took you to /centre/owner. Two functions,
+    // two answers to "where is home", and the one that ran first won.
+    //
+    // Ramy, 1 Sep 2026, after we had rebuilt the owner's landing page:
+    // "it's not the landing page for the centre owner... so it's the wrong
+    // page." It was: he was being landed somewhere else entirely.
+    if (ctx.roles.length > 0) return adminHomePath(ctx.roles);
   }
 
   return `/dashboard/${profile.role}`;
