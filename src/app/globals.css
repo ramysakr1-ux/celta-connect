@@ -174,14 +174,14 @@ h6 {
   .card {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-top: 3px solid var(--color-primary);
+    border-top: 3px solid var(--area-accent, var(--color-primary));
     border-radius: var(--radius-card);
   }
 
   .card-interactive {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-top: 3px solid var(--color-primary);
+    border-top: 3px solid var(--area-accent, var(--color-primary));
     border-radius: var(--radius-card);
     transition:
       background-color 150ms ease,
@@ -221,8 +221,17 @@ h6 {
      pile a second, unrelated reason for the same color onto ACT screens
      specifically -- gold there instead gives ACT the same "not monotone"
      effect without doubling up on its own role color. */
+  /* Ramy, 1 Sep 2026, on finding a teal card bar inside the garnet room:
+     "go with two" -- alternate between the room's own accent and a neutral,
+     rather than between teal and garnet.
+
+     The rhythm he asked for on 27 Aug ("so it's not all green") survives; what
+     stops is teal meaning Centre Management in the header and decoration
+     everywhere else. Outside a coloured room the pair falls back to the
+     original teal/garnet, so the trainer hub and the assessor screens are
+     untouched. */
   .card-garnet {
-    border-top-color: var(--hub-decorative-accent, var(--color-garnet));
+    border-top-color: var(--area-alt, var(--hub-decorative-accent, var(--color-garnet)));
   }
   /* .sheet-garnet itself is declared further down (after .sheet/.sheet-accent
      and friends) -- .sheet's own border-top shorthand is declared below this
@@ -234,11 +243,11 @@ h6 {
      .trainee-header already uses), same two-color alternation. */
   .card-side-teal {
     border-top: none;
-    border-left: 4px solid var(--color-primary);
+    border-left: 4px solid var(--area-accent, var(--color-primary));
   }
   .card-side-garnet {
     border-top: none;
-    border-left: 4px solid var(--color-garnet);
+    border-left: 4px solid var(--area-alt, var(--color-garnet));
   }
   .card-side-amber {
     border-top: none;
@@ -381,7 +390,7 @@ h6 {
   .sheet {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-top: 3px solid var(--color-primary);
+    border-top: 3px solid var(--area-accent, var(--color-primary));
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
@@ -393,7 +402,7 @@ h6 {
   .sheet-interactive {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-top: 3px solid var(--color-primary);
+    border-top: 3px solid var(--area-accent, var(--color-primary));
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
@@ -614,6 +623,16 @@ h6 {
     --area-rule: oklch(42% 0.058 195);
     --area-hover-fill: oklch(93% 0.019 195);
   }
+  /* The second colour in every room's card rhythm. One quiet warm grey rather
+     than a per-room second hue: two hues per room would mean eight colours
+     doing navigation work, which is more than anyone can hold. */
+  .area-course-admin,
+  .area-centre,
+  .area-admissions,
+  .area-volunteers {
+    --area-alt: oklch(70% 0.022 70);
+  }
+
   .area-volunteers {
     --area-rule-width: 3px;
     --area-accent: oklch(42% 0.075 155);
@@ -692,7 +711,7 @@ h6 {
   .sheet-accent {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-top: 3px solid var(--color-primary);
+    border-top: 3px solid var(--area-accent, var(--color-primary));
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
@@ -704,7 +723,7 @@ h6 {
   .sheet-entry {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-top: 3px solid var(--color-primary);
+    border-top: 3px solid var(--area-accent, var(--color-primary));
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
@@ -714,7 +733,7 @@ h6 {
   .sheet-gold {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-top: 3px solid var(--color-primary);
+    border-top: 3px solid var(--area-accent, var(--color-primary));
     border-radius: var(--radius-card);
     padding: 16px;
     box-shadow: none;
@@ -744,7 +763,7 @@ h6 {
      plain teal when this lived up near .card-garnet, because .sheet's own
      border-top shorthand came later in the file and silently won. */
   .sheet-garnet {
-    border-top-color: var(--hub-decorative-accent, var(--color-garnet));
+    border-top-color: var(--area-alt, var(--hub-decorative-accent, var(--color-garnet)));
   }
 
   .pill {
