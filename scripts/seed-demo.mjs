@@ -568,6 +568,21 @@ async function main() {
 
   // --- TP feedback helper -- returns the tp_plans.id so callers can attach
   // shared materials to a specific plan. ---
+  // Criteria the seeded feedback wording actually evidences. Planning codes
+  // are what the PLAN showed; teaching codes are what the LESSON showed.
+  const PLANNING_CODES = {
+    "Clear instructions": ["4e"],                       // procedure described in sufficient detail
+    "Good rapport with learners": ["1a"],               // aware of the needs and interests of the group
+    "Effective concept checking": ["4i", "4j"],         // language analysed; difficulties anticipated
+    "Vary interaction patterns a little more": ["4f"],  // interaction patterns appropriate to the activity
+  };
+  const TEACHING_CODES = {
+    "Clear instructions": ["5f"],                       // instructions made clear to learners
+    "Good rapport with learners": ["1d"],               // rapport, learners fully involved
+    "Effective concept checking": ["5g", "2e"],         // questions for checking; meaning and form clarified
+    "Vary interaction patterns a little more": ["5b"],  // setting up and managing group activities
+  };
+
   async function seedTaughtTp(traineeId, tpNumber, { aim, grade, strengths, actionPoints, daysAgo }) {
     await supabase.from("plan_assignments").insert({
       course_id: course.id,
@@ -603,10 +618,18 @@ async function main() {
       tp_number: tpNumber,
       trainer_id: trainerId,
       grade,
-      strengths_planning: strengths.map((s) => ({ text: s, starred: false, criteria_codes: [] })),
-      action_points_planning: actionPoints.map((s) => ({ text: s, starred: false, criteria_codes: [] })),
-      strengths_teaching: strengths.map((s) => ({ text: s, starred: false, criteria_codes: [] })),
-      action_points_teaching: actionPoints.map((s) => ({ text: s, starred: false, criteria_codes: [] })),
+      // Every point carried criteria_codes: [] until 2 Sep 2026, so the
+      // "Criteria evidenced" panel on a candidate's TP page said "No criteria
+      // tagged in this lesson's feedback" on every lesson, for every
+      // candidate -- the panel exists precisely to show that tagging, and it
+      // was demonstrating the opposite. The codes below are the real ones the
+      // wording points at, and the same point is coded differently under
+      // planning and teaching because that is the distinction CELTA 5 draws:
+      // 4x is what the plan shows, 5x is what the lesson shows.
+      strengths_planning: strengths.map((s) => ({ text: s, starred: false, criteria_codes: PLANNING_CODES[s] ?? [] })),
+      action_points_planning: actionPoints.map((s) => ({ text: s, starred: false, criteria_codes: PLANNING_CODES[s] ?? [] })),
+      strengths_teaching: strengths.map((s) => ({ text: s, starred: false, criteria_codes: TEACHING_CODES[s] ?? [] })),
+      action_points_teaching: actionPoints.map((s) => ({ text: s, starred: false, criteria_codes: TEACHING_CODES[s] ?? [] })),
       overall_comment: "A confident, well-paced lesson overall -- keep building on this.",
       submitted_at: new Date(Date.now() - daysAgo * 86400000).toISOString(),
     });
