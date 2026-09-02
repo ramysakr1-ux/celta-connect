@@ -48,7 +48,11 @@ export async function toggleObservedSession(_prevState: FormState, formData: For
       { tit_record_id: titRecordId, timetable_event_id: timetableEventId, asynchronous },
       { onConflict: "tit_record_id,timetable_event_id" }
     );
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:toggleObservedSession]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -77,7 +81,11 @@ export async function addTask12Stage1(_prevState: FormState, formData: FormData)
     timetable_event_id: timetableEventId,
     handout_description: handoutDescription,
   });
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:addTask12Stage1]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -109,7 +117,11 @@ export async function addDeliveredSession(_prevState: FormState, formData: FormD
   const { error } = await supabase
     .from("tit_delivered_sessions")
     .insert({ tit_record_id: titRecordId, title, delivered_at: deliveredAt, self_designed_attested_at: new Date().toISOString() });
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:addDeliveredSession]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -125,7 +137,11 @@ export async function updateDeliveredSessionSelfEval(_prevState: FormState, form
     .from("tit_delivered_sessions")
     .update({ self_evaluation: text, self_evaluation_at: new Date().toISOString() })
     .eq("id", id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:updateDeliveredSessionSelfEval]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -156,7 +172,11 @@ export async function updateDeliveredSessionSupervisorFeedback(_prevState: FormS
     .from("tit_delivered_sessions")
     .update({ supervisor_feedback: text, supervisor_feedback_at: new Date().toISOString() })
     .eq("id", id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:updateDeliveredSessionSupervisorFeedback]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -180,7 +200,11 @@ export async function addFeedbackSession(_prevState: FormState, formData: FormDa
     conducted_at: conductedAt,
     observed_by_supervisor: observedBySupervisor,
   });
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:addFeedbackSession]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -196,7 +220,11 @@ export async function saveFeedbackDraft(_prevState: FormState, formData: FormDat
 
   const supabase = await createClient();
   const { error } = await supabase.from("tit_feedback_sessions").update({ private_draft: text }).eq("id", id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:saveFeedbackDraft]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -216,7 +244,11 @@ export async function finalizeFeedbackSession(_prevState: FormState, formData: F
     .from("tit_feedback_sessions")
     .update({ supervisor_discussion_notes: notes, finalized_at: new Date().toISOString() })
     .eq("id", id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:finalizeFeedbackSession]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -234,7 +266,11 @@ export async function saveFeedbackOnFeedback(_prevState: FormState, formData: Fo
     .from("tit_feedback_sessions")
     .update({ feedback_on_feedback_notes: notes, feedback_on_feedback_at: new Date().toISOString() })
     .eq("id", id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:saveFeedbackOnFeedback]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -278,7 +314,11 @@ export async function updateCandidateNotes(_prevState: FormState, formData: Form
   const update =
     stage === "beginning" ? { notes_beginning: notes } : stage === "middle" ? { notes_middle: notes } : { notes_end: notes };
   const { error } = await supabase.from("tit_candidates_followed").update(update).eq("id", id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:updateCandidateNotes]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -300,7 +340,11 @@ export async function addShadowMarking(_prevState: FormState, formData: FormData
     supervisor_grade: supervisorGrade,
     agreed,
   });
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:addShadowMarking]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -320,7 +364,11 @@ export async function addShadowDay(_prevState: FormState, formData: FormData): P
 
   const supabase = await createClient();
   const { error } = await supabase.from("tit_shadow_days").insert({ tit_record_id: titRecordId, mode, shadowed_at: shadowedAt, note });
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:addShadowDay]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -333,7 +381,11 @@ export async function updateTaskRecordItem(_prevState: FormState, formData: Form
 
   const supabase = await createClient();
   const { error } = await supabase.from("tit_task_record_items").update({ label }).eq("id", id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:updateTaskRecordItem]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -378,7 +430,11 @@ export async function updateReflectiveEssay(_prevState: FormState, formData: For
 
   const supabase = await createClient();
   const { error } = await supabase.from("tit_records").update({ reflective_essay: text }).eq("id", titRecordId);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:updateReflectiveEssay]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -405,7 +461,11 @@ export async function submitReflectiveEssay(_prevState: FormState, formData: For
     .from("tit_records")
     .update({ reflective_essay: text, reflective_essay_submitted_at: new Date().toISOString() })
     .eq("id", titRecordId);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:submitReflectiveEssay]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }
@@ -483,7 +543,11 @@ export async function setOutcome(_prevState: FormState, formData: FormData): Pro
     .from("tit_records")
     .update({ outcome, outcome_note: note, outcome_decided_at: new Date().toISOString() })
     .eq("id", titRecordId);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/trainer-in-training:setOutcome]", error);
+    return { error: "Could not save. Try again." };
+  }
   revalidateWorkspace();
   return { error: null };
 }

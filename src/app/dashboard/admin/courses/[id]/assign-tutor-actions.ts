@@ -115,7 +115,11 @@ export async function assignExistingTutor(_prev: AssignTutorState, formData: For
       { course_id: courseId, profile_id: profileId, tutor_role: tutorRole, left_at: null, joined_at: new Date().toISOString() },
       { onConflict: "course_id,profile_id" }
     );
-  if (error) return { error: "Could not assign them to this course. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/admin/courses/[id]/assign-tutor-actions.ts:assignExistingTutor]", error);
+    return { error: "Could not assign them to this course. Try again." };
+  }
 
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
   return { error: null, warning, assigned: trainer.full_name };

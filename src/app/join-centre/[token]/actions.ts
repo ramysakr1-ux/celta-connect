@@ -74,8 +74,10 @@ export async function joinCentre(_prevState: JoinCentreState, formData: FormData
     terms_accepted_at: new Date().toISOString(),
   });
   if (profileError) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[join-centre/[token]:joinCentre]", profileError);
     return { error: "Could not finish setting up your account. Try again." };
-  }
+}
 
   const { error: roleError } = await admin.from("centre_roles").insert({
     profile_id: created.user.id,
@@ -84,8 +86,10 @@ export async function joinCentre(_prevState: JoinCentreState, formData: FormData
     granted_by: invite.created_by,
   });
   if (roleError) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[join-centre/[token]:joinCentre]", roleError);
     return { error: "Could not finish setting up your role. Try again." };
-  }
+}
 
   await admin
     .from("centre_admin_invites")

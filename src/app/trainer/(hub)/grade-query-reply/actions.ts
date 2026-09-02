@@ -150,8 +150,10 @@ export async function updateGradeQueryReplyDraft(
     .is("filed_at", null); // drafts only -- a filed reply is a signed record, not editable (also guarded in the UI, which stops rendering this form once filed_at is set)
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/grade-query-reply:updateGradeQueryReplyDraft]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/trainer/grade-query-reply/${traineeId}/${replyId}`);
   return { error: null };
@@ -192,8 +194,10 @@ export async function fileGradeQueryReply(
     .is("filed_at", null); // no-op if another request already filed it first
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/grade-query-reply:fileGradeQueryReply]", error);
     return { error: "Could not file. Try again." };
-  }
+}
 
   revalidatePath(`/trainer/grade-query-reply/${traineeId}/${replyId}`);
   revalidatePath(`/trainer/grade-query-reply/${traineeId}`);

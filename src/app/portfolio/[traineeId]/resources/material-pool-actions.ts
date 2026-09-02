@@ -48,9 +48,11 @@ export async function claimMaterialItem(_prevState: ClaimState, formData: FormDa
     trainee_id: trainee.id,
   });
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/resources/material-pool-actions.ts:claimMaterialItem]", error);
     if (error.code === "23505") return { error: "Someone in your TP group just claimed this -- pick another." };
     return { error: "Could not claim it. Try again." };
-  }
+}
 
   revalidatePath(`/portfolio/${trainee.id}/resources`);
   return { error: null };

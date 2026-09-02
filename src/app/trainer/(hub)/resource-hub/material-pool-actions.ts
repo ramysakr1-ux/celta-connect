@@ -28,7 +28,11 @@ export async function uploadMaterialPoolItem(_prevState: MaterialPoolState, form
   const { error: uploadError } = await admin.storage
     .from("resource-hub-files")
     .upload(path, file, { contentType: file.type || "application/octet-stream" });
-  if (uploadError) return { error: "Could not upload the file. Try again." };
+  if (uploadError) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/resource-hub/material-pool-actions.ts:uploadMaterialPoolItem]", uploadError);
+    return { error: "Could not upload the file. Try again." };
+  }
 
   const { error } = await admin.from("tp_material_pool_items").insert({
     center_id: trainer.center_id,
@@ -38,7 +42,11 @@ export async function uploadMaterialPoolItem(_prevState: MaterialPoolState, form
     storage_path: path,
     added_by: trainer.id,
   });
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/resource-hub/material-pool-actions.ts:uploadMaterialPoolItem]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/trainer/resource-hub");
   return { error: null };

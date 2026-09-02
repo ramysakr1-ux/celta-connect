@@ -54,7 +54,11 @@ export async function updateCentreProfile(_prevState: FormState, formData: FormD
       films_tp_sessions: filmsTpSessions,
     })
     .eq("id", centerId);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[centre/settings:updateCentreProfile]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/centre/settings");
   return { error: null };
@@ -108,10 +112,12 @@ export async function transferCentreOwnership(_prevState: TransferOwnershipState
     .from("centre_roles")
     .insert({ center_id: centerId, profile_id: newOwner.id, role: "centre_owner", granted_by: profile.id });
   if (grantError) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[centre/settings:transferCentreOwnership]", grantError);
     // Roll back the revoke rather than leaving the centre ownerless.
     await admin.from("centre_roles").update({ revoked_at: null }).eq("id", currentGrant.id);
     return { error: "Could not complete the transfer. Try again." };
-  }
+}
 
   await admin.from("centre_owner_actions").insert({
     center_id: centerId,
@@ -170,8 +176,10 @@ export async function requestCentreDeleteCode(_prevState: RequestDeleteCodeState
     type: "centre_delete_code",
   });
   if (sendError) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[centre/settings:requestCentreDeleteCode]", sendError);
     return { error: "Could not send the email. Try again.", sent: false };
-  }
+}
 
   return { error: null, sent: true };
 }

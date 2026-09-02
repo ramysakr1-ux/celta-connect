@@ -72,8 +72,10 @@ export async function withdrawTrainee(
     })
     .eq("id", traineeId);
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/status-actions.ts:withdrawTrainee]", error);
     return { error: "Could not withdraw this candidate. Try again." };
-  }
+}
 
   // Marks the candidate's own self-serve request (if this withdrawal
   // actioned one) as done -- best-effort, never blocks the withdrawal
@@ -421,8 +423,10 @@ export async function grantExtension(
     })
     .eq("id", traineeId);
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/status-actions.ts:grantExtension]", error);
     return { error: "Could not record the extension. Try again." };
-  }
+}
 
   revalidatePath(`/portfolio/${traineeId}`);
   revalidatePath("/trainer/roster");
@@ -470,7 +474,11 @@ export async function reportOwnAbsence(_prevState: AbsenceFormState, formData: F
     reason: reason.trim(),
     work_made_up: typeof formData.get("work_made_up") === "string" ? (formData.get("work_made_up") as string).trim() || null : null,
   });
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/status-actions.ts:reportOwnAbsence]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath(`/portfolio/${trainee.id}/celta5`);
   return { error: null };
@@ -541,7 +549,11 @@ export async function signAssignmentOutcome(_prevState: AbsenceFormState, formDa
       : { resubmission_outcome_signed_at: now, resubmission_outcome_signature_name: name };
 
   const { error } = await supabase.from("assignments").update(patch).eq("id", assignmentId).eq("trainee_id", trainee.id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/status-actions.ts:signAssignmentOutcome]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath(`/portfolio/${trainee.id}/assignments/${assignmentId}`);
   revalidatePath(`/portfolio/${trainee.id}/celta5`);
@@ -589,7 +601,11 @@ export async function confirmCelta5Section(_prevState: AbsenceFormState, formDat
   }
 
   const { error } = await supabase.from("celta5_records").update(patch).eq("trainee_id", trainee.id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/status-actions.ts:confirmCelta5Section]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath(`/portfolio/${trainee.id}/celta5`);
   return { error: null };

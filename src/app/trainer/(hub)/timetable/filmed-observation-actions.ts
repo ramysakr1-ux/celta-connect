@@ -61,7 +61,11 @@ export async function saveFilmedObservationSession(_prevState: FormState, formDa
     },
     { onConflict: "timetable_event_id" }
   );
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/timetable/filmed-observation-actions.ts:saveFilmedObservationSession]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath(`/trainer/timetable/filmed-observation/${eventId}`);
   revalidatePath("/trainer/timetable");
@@ -108,7 +112,11 @@ export async function addFilmedObservationBreak(_prevState: FormState, formData:
     duration_seconds: durationSeconds,
     prompt,
   });
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/timetable/filmed-observation-actions.ts:addFilmedObservationBreak]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/trainer/timetable/filmed-observation");
   return { error: null };
@@ -179,7 +187,11 @@ export async function saveFilmedObservationTask(_prevState: FormState, formData:
     },
     { onConflict: "session_id" }
   );
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/timetable/filmed-observation-actions.ts:saveFilmedObservationTask]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/trainer/timetable/filmed-observation");
   return { error: null };

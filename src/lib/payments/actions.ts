@@ -88,7 +88,11 @@ export async function createPaymentPlan(_prevState: PaymentFormState, formData: 
     });
   }
   const { error: paymentsError } = await supabase.from("payments").insert(rows);
-  if (paymentsError) return { error: "Plan created, but could not create its instalments. Contact support." };
+  if (paymentsError) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[src/lib/payments:createPaymentPlan]", paymentsError);
+    return { error: "Plan created, but could not create its instalments. Contact support." };
+  }
 
   revalidatePath(`/dashboard/admissions/${applicantId}`);
   return { error: null };

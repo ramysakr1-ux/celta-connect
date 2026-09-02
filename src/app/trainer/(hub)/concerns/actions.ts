@@ -27,7 +27,11 @@ export async function replyToConcern(_prevState: FormState, formData: FormData):
     .update({ response, responded_at: new Date().toISOString(), responded_by: trainer.id })
     .eq("id", concernId)
     .eq("course_id", trainer.course_id ?? "");
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/concerns:replyToConcern]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/trainer/concerns");
   return { error: null };

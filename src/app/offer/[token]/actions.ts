@@ -117,7 +117,11 @@ export async function acceptOffer(_prevState: AcceptOfferState, formData: FormDa
     uln,
     terms_accepted_at: new Date().toISOString(),
   });
-  if (profileError) return { error: "Could not finish setting up your account. Try again." };
+  if (profileError) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[offer/[token]:acceptOffer]", profileError);
+    return { error: "Could not finish setting up your account. Try again." };
+  }
 
   const assignmentTypes = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
   const defaultMarkers = await defaultMarkerIdsForCourse(admin, applicant.intake_course_id);

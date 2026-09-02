@@ -41,8 +41,10 @@ export async function reorderSubgroup(
   });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/rotation:reorderSubgroup]", error);
     return { error: "Could not save the new order. Try again." };
-  }
+}
 
   revalidatePath("/trainer/rotation");
   return { error: null };
@@ -71,8 +73,10 @@ export async function setTpSchedule(
   );
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/rotation:setTpSchedule]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath("/trainer/rotation");
   return { error: null };

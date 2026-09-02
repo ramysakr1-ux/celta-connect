@@ -30,7 +30,11 @@ export async function invitePlatformOwner(_prev: PlatformAccessFormState, formDa
   if (existing) return { error: "Ramy already has standing access to this centre." };
 
   const { error } = await admin.from("platform_owner_invites").insert({ center_id: centerId, invited_by: session.profile.id, note });
-  if (error) return { error: "Could not send the invite. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[centre/settings/platform-access-actions.ts:invitePlatformOwner]", error);
+    return { error: "Could not send the invite. Try again." };
+  }
 
   revalidatePath("/centre/settings");
   return { error: null };

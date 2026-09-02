@@ -51,7 +51,11 @@ export async function uploadCambridgeDocument(_prevState: CambridgeDocState, for
     const { error: uploadError } = await admin.storage
       .from("resource-hub-files")
       .upload(path, file, { contentType: file.type || "application/octet-stream", upsert: true });
-    if (uploadError) return { error: "Could not upload the file. Try again." };
+    if (uploadError) {
+      // The message above is what the person reads; this is what we read.
+      console.error("[trainer/(hub)/resource-hub/cambridge-actions.ts:uploadCambridgeDocument]", uploadError);
+      return { error: "Could not upload the file. Try again." };
+    }
     storagePath = path;
     fileUrl = null;
   }
@@ -70,7 +74,11 @@ export async function uploadCambridgeDocument(_prevState: CambridgeDocState, for
     },
     { onConflict: isOrgLevel ? "organisation_id,doc_type" : "center_id,doc_type" }
   );
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/resource-hub/cambridge-actions.ts:uploadCambridgeDocument]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/trainer/resource-hub");
   revalidatePath("/portfolio", "layout");

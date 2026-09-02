@@ -30,9 +30,11 @@ export async function createMaterialRecord(input: {
   });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainee/plan/[tpNumber]/materials-actions.ts:createMaterialRecord]", error);
     await supabase.storage.from("tp-materials").remove([input.storagePath]);
     return { error: "Could not save the material. It may already be locked." };
-  }
+}
 
   revalidatePath(`/dashboard/trainee/plan`);
   return { error: null };
@@ -53,7 +55,11 @@ export async function addSlidesLink(input: {
     file_name: input.fileName ?? null,
   });
 
-  if (error) return { error: "Could not save the link. It may already be locked." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/trainee/plan/[tpNumber]/materials-actions.ts:addSlidesLink]", error);
+    return { error: "Could not save the link. It may already be locked." };
+  }
 
   revalidatePath(`/dashboard/trainee/plan`);
   return { error: null };

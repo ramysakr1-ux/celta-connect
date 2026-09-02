@@ -70,9 +70,11 @@ export async function createTpLesson(
   });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer:createTpLesson]", error);
     if (error.code === "23505") {
       return { error: `This trainee already has a lesson logged for TP${tpNumber} -- edit that entry instead.` };
-    }
+}
     return { error: "Could not save the lesson. Try again." };
   }
 
@@ -128,9 +130,11 @@ export async function updateTpLesson(
     .eq("id", lessonId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer:updateTpLesson]", error);
     if (error.code === "23505") {
       return { error: `This trainee already has a lesson logged for TP${tpNumber} -- edit that entry instead.` };
-    }
+}
     return { error: "Could not save. Try again." };
   }
 
@@ -183,8 +187,10 @@ export async function addCriteriaTag(
   });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer:addCriteriaTag]", error);
     return { error: "Could not save the tag. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
@@ -207,8 +213,10 @@ export async function removeCriteriaTag(
   const { error } = await supabase.from("tp_lesson_criteria_tags").delete().eq("id", tagId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer:removeCriteriaTag]", error);
     return { error: "Could not remove the tag. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
@@ -259,8 +267,10 @@ export async function updateAssignment(
     .eq("id", assignmentId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer:updateAssignment]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}`);
   revalidatePath("/dashboard/trainer");

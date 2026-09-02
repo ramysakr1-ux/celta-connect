@@ -208,7 +208,11 @@ export async function updateAssessorContact(_prevState: AssessorContactState, fo
       appian_notification_reference: appianReference,
     } as never)
     .eq("id", trainer.course_id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/assessor-actions.ts:updateAssessorContact]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   // The candidates' half of the visit day, put on their timetable. Ramy, 30
   // Aug 2026: "we do include the assessor meeting, which is basically the

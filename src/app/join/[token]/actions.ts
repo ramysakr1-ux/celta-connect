@@ -160,8 +160,10 @@ export async function joinCourse(
   });
 
   if (profileError) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[join/[token]:joinCourse]", profileError);
     return { error: "Could not finish setting up your account. Try again." };
-  }
+}
 
   if (role === "trainer") {
     // migration 0051's own comment flagged this as the gap: the one-off

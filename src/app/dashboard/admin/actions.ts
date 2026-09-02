@@ -102,8 +102,10 @@ export async function createCourse(
   }).select("id").single();
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/admin:createCourse]", error);
     return { error: "Could not create the course. Try again." };
-  }
+}
 
   // Step 5's tutor invitation, sent through the same named-invitation path the
   // roster uses -- one code path, one email, one record. A failure here never

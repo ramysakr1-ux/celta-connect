@@ -135,10 +135,12 @@ export async function inviteToCourse(_prev: InviteState, formData: FormData): Pr
       }),
     });
     if (sendError) {
+      // The message below is what the person reads; this is what we read.
+      console.error("[dashboard/admin/courses/[id]/invitation-actions.ts:inviteToCourse]", sendError);
       // The invitation exists either way -- it is a real record, and the link
       // can still be copied by hand. Saying so beats pretending it failed.
       return { error: `Invitation created, but the email didn't send: ${sendError}`, sent: null };
-    }
+}
   }
 
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
@@ -163,7 +165,11 @@ export async function revokeInvitation(_prev: InviteState, formData: FormData): 
     .eq("id", id)
     .eq("center_id", profile.center_id)
     .is("accepted_at", null);
-  if (error) return { error: "Could not withdraw the invitation." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/admin/courses/[id]/invitation-actions.ts:revokeInvitation]", error);
+    return { error: "Could not withdraw the invitation." };
+  }
 
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
   return { error: null };
@@ -233,7 +239,11 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
       .eq("tutor_role", "main_course_tutor")
       .is("left_at", null)
       .neq("id", courseTutorId);
-    if (demoteError) return { error: "Could not move the main course tutor role. Nothing was changed." };
+    if (demoteError) {
+      // The message above is what the person reads; this is what we read.
+      console.error("[dashboard/admin/courses/[id]/invitation-actions.ts:changeTutorRole]", demoteError);
+      return { error: "Could not move the main course tutor role. Nothing was changed." };
+    }
 
     // Logged as its own entry: the outgoing MCT was changed too, and reading
     // only the promotion would leave their demotion unexplained.
@@ -257,7 +267,11 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
     .update({ tutor_role: nextRole })
     .eq("id", courseTutorId)
     .eq("course_id", courseId);
-  if (error) return { error: "Could not change the role. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/admin/courses/[id]/invitation-actions.ts:changeTutorRole]", error);
+    return { error: "Could not change the role. Try again." };
+  }
 
   await logManagementAction({
     centerId: profile.center_id,

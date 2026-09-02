@@ -138,7 +138,11 @@ export async function addCustomCapability(_prevState: OwnerActionState, formData
   const { error: overrideError } = await admin
     .from("centre_permission_overrides")
     .insert({ center_id: centerId, role_key: grantToRole, capability_key: capabilityKey, granted_level: "full", set_by: profile.id });
-  if (overrideError) return { error: "Added the capability, but couldn't grant it -- try setting it from the table below." };
+  if (overrideError) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[centre/owner:addCustomCapability]", overrideError);
+    return { error: "Added the capability, but couldn't grant it -- try setting it from the table below." };
+  }
 
   await logOwnerAction(centerId, profile.id, "custom_capability.add", "centre_custom_capabilities", { capabilityKey, label, grantToRole });
   revalidatePath("/centre/owner");

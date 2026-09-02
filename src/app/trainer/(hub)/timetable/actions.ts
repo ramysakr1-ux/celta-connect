@@ -115,7 +115,11 @@ export async function addTimetableEvent(_prevState: FormState, formData: FormDat
     created_by: trainer.id,
   });
 
-  if (error) return { error: "Could not save the event. It may already be locked." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/timetable:addTimetableEvent]", error);
+    return { error: "Could not save the event. It may already be locked." };
+  }
 
   revalidatePath("/trainer/timetable");
   return { error: null };
@@ -249,7 +253,11 @@ export async function generateTimetableSkeleton(_prevState: FormState, formData:
   }));
 
   const { error } = await supabase.from("course_timetable_events").insert(events);
-  if (error) return { error: "Could not generate the skeleton. It may already be locked." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/timetable:generateTimetableSkeleton]", error);
+    return { error: "Could not generate the skeleton. It may already be locked." };
+  }
 
   // The one point in the app where full-time vs part-time is ever actually
   // chosen -- persisted here so it survives past this one form (see
@@ -278,7 +286,11 @@ export async function moveTimetableEvent(eventId: string, newDate: string): Prom
     .eq("id", eventId)
     .eq("course_id", trainer.course_id);
 
-  if (error) return { error: "Could not move the event -- the timetable may be locked." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/timetable:moveTimetableEvent]", error);
+    return { error: "Could not move the event -- the timetable may be locked." };
+  }
 
   revalidatePath("/trainer/timetable");
   return { error: null };
@@ -441,7 +453,11 @@ export async function setTimeBands(_prevState: FormState, formData: FormData): P
   }
 
   const { error } = await accessCheckClient.from("courses").update({ time_bands: bands }).eq("id", trainer.course_id);
-  if (error) return { error: "Could not save the time bands." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/timetable:setTimeBands]", error);
+    return { error: "Could not save the time bands." };
+  }
 
   revalidatePath("/trainer/timetable");
   return { error: null };

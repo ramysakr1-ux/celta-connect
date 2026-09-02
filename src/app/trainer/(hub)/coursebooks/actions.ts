@@ -63,8 +63,10 @@ export async function updateTpPoint(
     .eq("id", pointId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/coursebooks:updateTpPoint]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   if (typeof coursebookId === "string") {
     revalidatePath(`/trainer/coursebooks/${coursebookId}`);

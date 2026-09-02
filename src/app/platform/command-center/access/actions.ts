@@ -36,7 +36,11 @@ export async function generateDemoLoginLink(_prev: GenerateLinkState, formData: 
     created_by: profile.id,
     expires_at: expiresAt,
   });
-  if (error) return { error: "Could not generate the link. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[platform/command-center/access:generateDemoLoginLink]", error);
+    return { error: "Could not generate the link. Try again." };
+  }
 
   revalidatePath("/platform/command-center/access");
   return { error: null };
@@ -46,7 +50,11 @@ export async function revokeDemoLoginLink(linkId: string): Promise<{ error: stri
   await requireRole("platform_owner");
   const admin = createAdminClient();
   const { error } = await admin.from("platform_demo_login_links").update({ revoked_at: new Date().toISOString() }).eq("id", linkId);
-  if (error) return { error: "Could not revoke the link. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[platform/command-center/access:revokeDemoLoginLink]", error);
+    return { error: "Could not revoke the link. Try again." };
+  }
   revalidatePath("/platform/command-center/access");
   return { error: null };
 }

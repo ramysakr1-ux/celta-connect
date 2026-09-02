@@ -65,7 +65,11 @@ export async function submitVolunteerSignupProfile(_prevState: VolunteerSignupSt
   const { error: uploadError } = await admin.storage.from("volunteer-signup-audio").upload(storagePath, audioFile, {
     contentType: audioFile.type || "audio/webm",
   });
-  if (uploadError) return { error: "Could not upload the recording. Try again." };
+  if (uploadError) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[src/lib/fol/volunteer-signup-actions.ts:submitVolunteerSignupProfile]", uploadError);
+    return { error: "Could not upload the recording. Try again." };
+  }
 
   // Ramy, 25 Aug 2026: "why does it take so long?" -- transcription is a
   // real OpenAI API call (seconds, not milliseconds), and it was awaited

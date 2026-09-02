@@ -55,8 +55,10 @@ export async function updateAttendance(
     .eq("trainee_id", traineeId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:updateAttendance]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   return { error: null };
@@ -100,8 +102,10 @@ export async function addAbsence(
   });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:addAbsence]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   return { error: null };
@@ -137,8 +141,10 @@ export async function updateStage1(
     .eq("trainee_id", traineeId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:updateStage1]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   if (completed && trainer.course_id) await checkStage1RecordsMilestone(supabase, trainer.course_id, trainer.id);
 
@@ -183,7 +189,11 @@ export async function setStage1Release(_prevState: FormState, formData: FormData
     .from("celta5_records")
     .update({ stage1_released_at: release ? new Date().toISOString() : null })
     .eq("trainee_id", traineeId);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:setStage1Release]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   revalidatePath(`/portfolio/${traineeId}/celta5`);
@@ -256,8 +266,10 @@ export async function updateStage2Overall(
     .eq("trainee_id", traineeId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:updateStage2Overall]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   return { error: null };
@@ -329,8 +341,10 @@ export async function updateStage3Overall(
     .eq("trainee_id", traineeId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:updateStage3Overall]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   return { error: null };
@@ -372,8 +386,10 @@ export async function updateAdminGrant(
     .eq("trainee_id", traineeId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:updateAdminGrant]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   return { error: null };
@@ -405,8 +421,10 @@ export async function finalizeRecord(
     .eq("trainee_id", traineeId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:finalizeRecord]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   return { error: null };
@@ -452,8 +470,10 @@ export async function updateFinalGrade(
     .eq("trainee_id", traineeId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:updateFinalGrade]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   if (grade && trainer.course_id) await checkFinalGradeMilestone(supabase, trainer.course_id, trainer.id);
 
@@ -556,8 +576,10 @@ export async function updateProvisionalGrade(
     .eq("trainee_id", traineeId);
 
   if (provisionalError) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:updateProvisionalGrade]", provisionalError);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   revalidatePath("/trainer/grades-report");
@@ -620,7 +642,11 @@ export async function setAssignmentFailOverride(_prev: FormState, formData: Form
           }) as never
     )
     .eq("trainee_id", traineeId);
-  if (error) return { error: "Could not save the override. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:setAssignmentFailOverride]", error);
+    return { error: "Could not save the override. Try again." };
+  }
 
   revalidatePath("/trainer/grades-report");
   return { error: null };
@@ -653,7 +679,11 @@ export async function approveProvisionalGrade(formData: FormData): Promise<FormS
     .from("celta5_records")
     .update({ provisional_approved_at: new Date().toISOString(), provisional_approved_by: trainer.id })
     .eq("trainee_id", traineeId);
-  if (error) return { error: "Could not approve. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:approveProvisionalGrade]", error);
+    return { error: "Could not approve. Try again." };
+  }
 
   revalidatePath("/trainer/grades-report");
   return { error: null };
@@ -678,7 +708,11 @@ export async function setProvisionalGradesDueDate(_prevState: FormState, formDat
     .from("courses")
     .update({ provisional_grades_due_at: dueDate ? new Date(`${dueDate}T23:59:59`).toISOString() : null })
     .eq("id", trainer.course_id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:setProvisionalGradesDueDate]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/trainer/grades-report");
   revalidatePath("/trainer");
@@ -714,7 +748,11 @@ export async function moveStage2Earlier(_prevState: FormState, formData: FormDat
     .from("celta5_records")
     .update({ stage2_moved_earlier_at: new Date().toISOString(), stage2_moved_earlier_reason: reason.trim(), stage2_moved_earlier_by: trainer.id })
     .eq("trainee_id", traineeId);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:moveStage2Earlier]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/trainer/roster");
   return { error: null };
@@ -745,7 +783,11 @@ export async function moveStage3Earlier(_prevState: FormState, formData: FormDat
     .from("celta5_records")
     .update({ stage3_moved_earlier_at: new Date().toISOString(), stage3_moved_earlier_reason: reason.trim(), stage3_moved_earlier_by: trainer.id })
     .eq("trainee_id", traineeId);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:moveStage3Earlier]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/trainer/roster");
   return { error: null };
@@ -774,8 +816,10 @@ export async function updateUpgradeConditions(
     .eq("trainee_id", traineeId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:updateUpgradeConditions]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   revalidatePath("/trainer/grades-report");
@@ -841,8 +885,10 @@ export async function updateFinalReportFields(
     .eq("trainee_id", traineeId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:updateFinalReportFields]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   if (grade && trainer.course_id) await checkFinalGradeMilestone(supabase, trainer.course_id, trainer.id);
 
@@ -873,8 +919,10 @@ export async function updateGradeReviewComments(
     .eq("trainee_id", traineeId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:updateGradeReviewComments]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   revalidatePath(`/portfolio/${traineeId}/celta5`);
@@ -946,8 +994,10 @@ export async function releaseAllFinalReports(_prevState: FormState, formData: Fo
     .is("final_report_released_at", null);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:releaseAllFinalReports]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath("/trainer/grades-report");
   return { error: null };
@@ -991,8 +1041,10 @@ export async function releaseFinalReport(
     .not("trainer_signoff_final_at", "is", null);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/celta5-actions.ts:releaseFinalReport]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/celta5`);
   revalidatePath(`/portfolio/${traineeId}/celta5`);

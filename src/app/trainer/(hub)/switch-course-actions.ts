@@ -37,7 +37,11 @@ export async function switchActiveCourse(courseId: string): Promise<SwitchCourse
   if (!link) return { error: "You're not linked to that course." };
 
   const { error } = await admin.from("profiles").update({ course_id: courseId }).eq("id", profile.id);
-  if (error) return { error: "Could not switch courses. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/switch-course-actions.ts:switchActiveCourse]", error);
+    return { error: "Could not switch courses. Try again." };
+  }
 
   revalidatePath("/trainer", "layout");
   return { error: null };

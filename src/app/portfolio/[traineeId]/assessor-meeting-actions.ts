@@ -47,7 +47,11 @@ export async function requestAssessorMeeting(
       .update({ withdrawn_at: new Date().toISOString() })
       .eq("course_id", profile.course_id)
       .eq("trainee_id", profile.id);
-    if (error) return { error: "Could not withdraw the request. Try again." };
+    if (error) {
+      // The message above is what the person reads; this is what we read.
+      console.error("[portfolio/[traineeId]/assessor-meeting-actions.ts:requestAssessorMeeting]", error);
+      return { error: "Could not withdraw the request. Try again." };
+    }
   } else {
     // upsert, because the unique constraint is (course_id, trainee_id): asking
     // again after withdrawing should revive the row, not fail.
@@ -60,7 +64,11 @@ export async function requestAssessorMeeting(
       },
       { onConflict: "course_id,trainee_id" }
     );
-    if (error) return { error: "Could not send the request. Try again." };
+    if (error) {
+      // The message above is what the person reads; this is what we read.
+      console.error("[portfolio/[traineeId]/assessor-meeting-actions.ts:requestAssessorMeeting]", error);
+      return { error: "Could not send the request. Try again." };
+    }
   }
 
   revalidatePath(`/portfolio/${profile.id}`);

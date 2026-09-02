@@ -69,7 +69,11 @@ export async function openCase(_prevState: FormState, formData: FormData): Promi
     .from("assignments")
     .update({ open_case_id: newCase.id })
     .eq("id", assignmentId);
-  if (pauseError) return { error: "Case was opened but the assignment could not be paused. Refresh and check." };
+  if (pauseError) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/malpractice:openCase]", pauseError);
+    return { error: "Case was opened but the assignment could not be paused. Refresh and check." };
+  }
 
   if (typeof findingId === "string" && findingId) {
     await supabase.from("plagiarism_scanner_findings").update({ case_id: newCase.id }).eq("id", findingId);
@@ -96,7 +100,11 @@ export async function recordCandidateAccount(_prevState: FormState, formData: Fo
     .update({ candidate_account: account.trim(), candidate_account_recorded_at: new Date().toISOString() })
     .eq("id", caseId)
     .eq("status", "open");
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/malpractice:recordCandidateAccount]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath(`/trainer/malpractice/${caseId}`);
   return { error: null };
@@ -181,7 +189,11 @@ export async function decideCase(_prevState: FormState, formData: FormData): Pro
       .from("assignments")
       .update(assignmentUpdate)
       .eq("id", openCaseRow.assignment_id);
-    if (failError) return { error: "Could not update the linked assignment. Try again." };
+    if (failError) {
+      // The message above is what the person reads; this is what we read.
+      console.error("[trainer/(hub)/malpractice:decideCase]", failError);
+      return { error: "Could not update the linked assignment. Try again." };
+    }
 
     // Ensure this centre has the Plagiarism Reflection type + a published
     // system template for it (idempotent -- most cases after the first
@@ -253,7 +265,11 @@ export async function decideCase(_prevState: FormState, formData: FormData): Pro
       reflection_assignment_id: reflectionAssignmentId,
     })
     .eq("id", caseId);
-  if (decideError) return { error: "Could not record the decision. Try again." };
+  if (decideError) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/malpractice:decideCase]", decideError);
+    return { error: "Could not record the decision. Try again." };
+  }
 
   revalidatePath(`/trainer/malpractice/${caseId}`);
   revalidatePath(`/portfolio/${openCaseRow.trainee_id}/assignments/${openCaseRow.assignment_id}`);
@@ -311,7 +327,11 @@ export async function saveConcernNote(_prevState: FormState, formData: FormData)
     findings: findings.trim(),
     raised_by: trainer.id,
   });
-  if (error) return { error: "Could not save the note. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/malpractice:saveConcernNote]", error);
+    return { error: "Could not save the note. Try again." };
+  }
 
   revalidatePath(`/portfolio/${assignment.trainee_id}/assignments/${assignmentId}`);
   return { error: null, saved: true };

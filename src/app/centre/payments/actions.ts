@@ -81,7 +81,11 @@ export async function disconnectProvider(_prev: ConnectProviderState, formData: 
     .from("centers")
     .update({ payment_provider: null, payment_provider_connected_at: null, payment_provider_connected_by: null })
     .eq("id", centerId);
-  if (error) return { error: "Could not disconnect." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[centre/payments:disconnectProvider]", error);
+    return { error: "Could not disconnect." };
+  }
 
   revalidatePath("/centre/payments");
   return { notice: "Disconnected. Card payment is off; the other three methods are unaffected." };

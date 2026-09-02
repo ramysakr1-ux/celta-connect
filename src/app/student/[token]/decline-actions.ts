@@ -34,7 +34,11 @@ export async function declineClass(_prevState: DeclineState, formData: FormData)
   const { error } = await admin
     .from("volunteer_declines")
     .upsert({ volunteer_student_id: accessToken.volunteer_student_id, timetable_event_id: eventId }, { onConflict: "volunteer_student_id,timetable_event_id" });
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[student/[token]/decline-actions.ts:declineClass]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath(`/student/${token}`);
   return { error: null, declined: true };
@@ -74,7 +78,11 @@ export async function undoDeclineClass(_prevState: DeclineState, formData: FormD
     .delete()
     .eq("volunteer_student_id", accessToken.volunteer_student_id)
     .eq("timetable_event_id", eventId);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[student/[token]/decline-actions.ts:undoDeclineClass]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath(`/student/${token}`);
   return { error: null, declined: false };

@@ -115,7 +115,11 @@ export async function postBroadcast(_prevState: FormState, formData: FormData): 
     sent_at: anchorEventId ? null : new Date().toISOString(),
   });
 
-  if (error) return { error: "Could not post the announcement." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/stream-actions.ts:postBroadcast]", error);
+    return { error: "Could not post the announcement." };
+  }
 
   revalidateBroadcastPages();
   return { error: null };
@@ -237,7 +241,11 @@ export async function editBroadcast(_prevState: FormState, formData: FormData): 
     .eq("course_id", trainer.course_id ?? "")
     .is("sent_at", null);
 
-  if (error) return { error: "Could not save the changes." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/stream-actions.ts:editBroadcast]", error);
+    return { error: "Could not save the changes." };
+  }
   if (count === 0) return { error: "This announcement already sent -- it can no longer be edited." };
 
   revalidateBroadcastPages();

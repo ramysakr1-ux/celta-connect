@@ -59,8 +59,10 @@ export async function updateAssignmentTemplateSections(
   const { error } = await supabase.from("assignment_templates").update({ sections, format }).eq("id", templateId);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/assignment-briefs:updateAssignmentTemplateSections]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/assignment-briefs/${templateId}`);
   return { error: null };

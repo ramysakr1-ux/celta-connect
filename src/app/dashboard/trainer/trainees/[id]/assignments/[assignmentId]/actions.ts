@@ -153,7 +153,11 @@ async function returnAssignment(
   };
 
   const { error } = await supabase.from("assignments").update(update).eq("id", assignmentId);
-  if (error) return { error: "Could not update the assignment. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/trainees/[id]/assignments/[assignmentId]:action]", error);
+    return { error: "Could not update the assignment. Try again." };
+  }
 
   // for-claude-code-announcements-list.md table B (system-event, personal
   // scope): "an assignment is marked / feedback returned -> the one

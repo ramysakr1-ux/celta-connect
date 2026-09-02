@@ -43,7 +43,11 @@ export async function addVolunteerStudent(_prevState: FormState, formData: FormD
     expires_at: expiresAt,
   });
 
-  if (tokenError) return { error: "Added the student, but could not create their link. Try again." };
+  if (tokenError) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/volunteers:addVolunteerStudent]", tokenError);
+    return { error: "Added the student, but could not create their link. Try again." };
+  }
 
   revalidatePath("/trainer/volunteers");
   return { error: null };

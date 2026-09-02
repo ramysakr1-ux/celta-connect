@@ -81,7 +81,11 @@ export async function createStage2Block(_prevState: FormState, formData: FormDat
     p_block_id: block.id,
     p_slot_count: slotCountFromDuration(duration),
   });
-  if (rpcError) return { error: "Could not generate booking positions." };
+  if (rpcError) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/timetable/stage2-actions.ts:createStage2Block]", rpcError);
+    return { error: "Could not generate booking positions." };
+  }
 
   const siteUrl = process.env.SITE_URL;
   const sheetUrl = siteUrl ? `${siteUrl}/trainer/timetable/stage2/${block.id}` : null;
@@ -170,7 +174,11 @@ export async function bookStage2Slot(_prevState: BookState, formData: FormData):
     .eq("id", openSlot.id)
     .is("trainee_id", null);
 
-  if (error) return { error: "Could not book -- try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/timetable/stage2-actions.ts:bookStage2Slot]", error);
+    return { error: "Could not book -- try again." };
+  }
   if (count === 0) return { error: "Someone just took that position -- try again." };
 
   revalidatePath(`/portfolio/[traineeId]/stage2-tutorial/[blockId]`, "layout");

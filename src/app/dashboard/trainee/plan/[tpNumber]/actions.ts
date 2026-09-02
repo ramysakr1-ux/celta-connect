@@ -102,7 +102,11 @@ async function savePlan(formData: FormData, lock: boolean): Promise<FormState> {
       },
       { onConflict: "tp_plan_id" }
     );
-    if (laError) return { error: "Could not save the language analysis. Try again." };
+    if (laError) {
+      // The message above is what the person reads; this is what we read.
+      console.error("[dashboard/trainee/plan/[tpNumber]:action]", laError);
+      return { error: "Could not save the language analysis. Try again." };
+    }
   }
 
   const anticipatedProblems = parseJsonField<ProblemSolutionPair[]>(formData, "anticipated_problems", []);
@@ -124,8 +128,10 @@ async function savePlan(formData: FormData, lock: boolean): Promise<FormState> {
     .eq("id", planId);
 
   if (planError) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainee/plan/[tpNumber]:action]", planError);
     return { error: "Could not save the lesson plan. It may already be locked." };
-  }
+}
 
   revalidatePath(`/dashboard/trainee/plan/${tpNumber}`);
   revalidatePath("/dashboard/trainee/plan");

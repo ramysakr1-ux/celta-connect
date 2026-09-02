@@ -78,12 +78,14 @@ export async function addResource(traineeId: string | null, _prevState: FormStat
   });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/resources:addResource]", error);
     // The upload already happened -- clean up the orphaned Storage object
     // rather than leaving a file with no record pointing at it, same
     // rollback shape as createAudioRecord.
     if (storagePath) await supabase.storage.from("resource-hub-files").remove([storagePath]);
     return { error: "Could not add the resource. Try again." };
-  }
+}
 
   if (traineeId) revalidatePath(`/portfolio/${traineeId}/resources`);
   revalidatePath("/trainer/resource-hub");
@@ -104,7 +106,11 @@ export async function updateCoursebookAccessNotes(_prevState: FormState, formDat
     .update({ access_notes: accessNotes })
     .eq("id", coursebookId)
     .eq("center_id", trainer.center_id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/resources:updateCoursebookAccessNotes]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/trainer/resource-hub");
   return { error: null };

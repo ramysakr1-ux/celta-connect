@@ -25,7 +25,11 @@ export async function createObservationTask(_prevState: FormState, formData: For
     created_by: trainer.id,
   });
 
-  if (error) return { error: "Could not save the task." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/observation-tasks:createObservationTask]", error);
+    return { error: "Could not save the task." };
+  }
 
   revalidatePath("/trainer/observation-tasks");
   revalidatePath("/trainer/roster");

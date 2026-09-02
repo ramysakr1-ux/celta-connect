@@ -37,7 +37,11 @@ export async function submitConcern(_prevState: ConcernFormState, formData: Form
     body,
     anonymous,
   });
-  if (error) return { error: "Could not send. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/concern-actions.ts:submitConcern]", error);
+    return { error: "Could not send. Try again." };
+  }
 
   return { error: null, sent: true };
 }

@@ -64,8 +64,10 @@ async function saveFeedback(formData: FormData, lock: boolean): Promise<FormStat
       });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainer/trainees/[id]/tp/[tpNumber]:action]", error);
     return { error: "Could not save the feedback. Try again." };
-  }
+}
 
   revalidatePath(`/dashboard/trainer/trainees/${traineeId}/tp/${tpNumber}`);
   return { error: null };

@@ -94,8 +94,10 @@ export async function updateGoogleDriveTargets(
     .eq("center_id", profile.center_id);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/admin/settings:updateGoogleDriveTargets]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath("/dashboard/admin/settings");
   return { error: null };
@@ -146,8 +148,10 @@ export async function addStyleExample(
   });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/admin/settings:addStyleExample]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath("/dashboard/admin/settings");
   return { error: null };
@@ -173,8 +177,10 @@ export async function updateStyleExample(
     .eq("center_id", profile.center_id);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/admin/settings:updateStyleExample]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath("/dashboard/admin/settings");
   return { error: null };
@@ -244,8 +250,10 @@ export async function updateCourseTutor(
     .eq("id", id);
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/admin/settings:updateCourseTutor]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath("/dashboard/admin/settings");
   return { error: null };
@@ -286,7 +294,11 @@ export async function addMalpracticeOutcomeOption(
     flagged_for_referral: formData.get("flagged_for_referral") === "on",
   });
 
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/admin/settings:addMalpracticeOutcomeOption]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/dashboard/admin/settings");
   return { error: null };
@@ -346,7 +358,11 @@ export async function addAssignmentCriterion(_prevState: FormState, formData: Fo
     criterion_text: text,
     sort_order: nextOrder,
   });
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/admin/settings:addAssignmentCriterion]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/dashboard/admin/settings");
   return { error: null };

@@ -42,8 +42,10 @@ export async function createSubgroup(
   const { error } = await supabase.from("course_subgroups").insert({ course_id: courseId, name });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/admin/courses/[id]/subgroup-actions.ts:createSubgroup]", error);
     return { error: "Could not create subgroup. Try again." };
-  }
+}
 
   revalidatePath("/trainer/rotation");
   return { error: null };
@@ -105,8 +107,10 @@ export async function addSubgroupMember(
   });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/admin/courses/[id]/subgroup-actions.ts:addSubgroupMember]", error);
     return { error: "Could not add trainee. Are they already in a subgroup?" };
-  }
+}
 
   revalidatePath("/trainer/rotation");
   return { error: null };
@@ -238,7 +242,11 @@ export async function setTpGroupTutor(_prevState: FormState, formData: FormData)
     .update({ tutor_profile_id: tutorId, meeting_days: meetingDays })
     .eq("id", groupId)
     .eq("course_id", courseId);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/admin/courses/[id]/subgroup-actions.ts:setTpGroupTutor]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/trainer/rotation");
   return { error: null };

@@ -184,9 +184,11 @@ export async function submitFolClaim(_prevState: FolFormState, formData: FormDat
     source: source as "pooled_log" | "signup_recording",
   });
   if (insertError) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[src/lib/fol:submitFolClaim]", insertError);
     if (insertError.code === "23505") {
       return { error: "That problem's already been claimed. Pick a different specific structure or sound.", warning: null };
-    }
+}
     return { error: "Could not save the claim. Try again.", warning: null };
   }
 

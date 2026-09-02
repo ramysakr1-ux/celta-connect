@@ -46,8 +46,10 @@ export async function submitStage2SelfAssessment(
   });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainee:submitStage2SelfAssessment]", error);
     return { error: "Could not submit. Try again." };
-  }
+}
 
   revalidatePath("/dashboard/trainee/celta5");
   return { error: null };
@@ -95,8 +97,10 @@ export async function signOffFinal(_prevState: FormState, formData: FormData): P
   });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainee:signOffFinal]", error);
     return { error: "Could not sign off -- make sure all five confirmations are checked." };
-  }
+}
 
   revalidatePath("/dashboard/trainee/celta5");
   revalidatePath("/portfolio", "layout");
@@ -140,8 +144,10 @@ export async function saveObservation(
         });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainee:saveObservation]", error);
     return { error: "Could not save. Try again." };
-  }
+}
 
   revalidatePath("/dashboard/trainee/celta5");
   return { error: null };
@@ -202,13 +208,15 @@ export async function submitObservationTask(
   });
 
   if (submissionError) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[dashboard/trainee:submitObservationTask]", submissionError);
     // Roll back the observation row -- otherwise a failed submission
     // (e.g. already submitted, unique constraint) would still silently
     // count toward the trainee's observation hours with no visible task
     // response attached to it.
     await supabase.from("observations").delete().eq("id", observation.id);
     return { error: "Could not submit -- you may have already submitted this task." };
-  }
+}
 
   revalidatePath("/portfolio", "layout");
   return { error: null };

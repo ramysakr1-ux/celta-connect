@@ -109,8 +109,10 @@ export async function signIn(
   const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[login:signIn]", error);
     return { error: "Incorrect email or password." };
-  }
+}
 
   // Redirect straight to the real landing page instead of through
   // /dashboard -- that page just re-fetches this same profile and runs

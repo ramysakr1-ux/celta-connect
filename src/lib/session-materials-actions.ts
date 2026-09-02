@@ -35,9 +35,11 @@ export async function createSessionMaterial(input: {
   });
 
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[src/lib/session-materials-actions.ts:createSessionMaterial]", error);
     await supabase.storage.from("tp-materials").remove([input.storagePath]);
     return { error: "Could not save the material. Try again." };
-  }
+}
 
   revalidatePath(input.revalidate);
   return { error: null };

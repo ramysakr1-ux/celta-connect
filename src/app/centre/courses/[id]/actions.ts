@@ -52,7 +52,11 @@ export async function updateCoursePricing(_prevState: FormState, formData: FormD
     .from("courses")
     .update({ fee_amount: feeAmount, deposit_amount: depositAmount, fee_currency: feeCurrency, deposit_due_days: depositDueDays })
     .eq("id", courseId);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[centre/courses/[id]:updateCoursePricing]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath(`/centre/courses/${courseId}`);
   return { error: null };

@@ -193,7 +193,11 @@ export async function revokeCentreAdminInvite(_prev: RevokeInviteState, formData
   if (!invite) return { error: "That invite isn't in this centre." };
 
   const { error } = await admin.from("centre_admin_invites").update({ revoked_at: new Date().toISOString() }).eq("id", inviteId);
-  if (error) return { error: "Could not withdraw that invite." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[centre/roles:revokeCentreAdminInvite]", error);
+    return { error: "Could not withdraw that invite." };
+  }
 
   await logOwnerAction(centerId, profile.id, "roles.invite.revoke", { role: invite.role });
 

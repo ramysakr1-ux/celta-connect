@@ -85,13 +85,21 @@ export async function createOrUpdateIndividualTutorialInvite(_prevState: FormSta
       .from("course_timetable_events")
       .update({ event_date: eventDate, event_time: eventTime })
       .eq("id", existing.timetable_event_id);
-    if (eventError) return { error: "Could not move the timetable slot." };
+    if (eventError) {
+      // The message above is what the person reads; this is what we read.
+      console.error("[trainer/(hub)/timetable/individual-tutorial-actions.ts:createOrUpdateIndividualTutorialInvite]", eventError);
+      return { error: "Could not move the timetable slot." };
+    }
 
     const { error: inviteError } = await supabase
       .from("individual_tutorial_invites")
       .update({ confirmed_at: null })
       .eq("id", existing.id);
-    if (inviteError) return { error: "Could not reschedule the invite." };
+    if (inviteError) {
+      // The message above is what the person reads; this is what we read.
+      console.error("[trainer/(hub)/timetable/individual-tutorial-actions.ts:createOrUpdateIndividualTutorialInvite]", inviteError);
+      return { error: "Could not reschedule the invite." };
+    }
   } else {
     const { data: event, error: eventError } = await supabase
       .from("course_timetable_events")
@@ -115,7 +123,11 @@ export async function createOrUpdateIndividualTutorialInvite(_prevState: FormSta
       timetable_event_id: event.id,
       created_by: trainer.id,
     });
-    if (inviteError) return { error: "Could not create the invite." };
+    if (inviteError) {
+      // The message above is what the person reads; this is what we read.
+      console.error("[trainer/(hub)/timetable/individual-tutorial-actions.ts:createOrUpdateIndividualTutorialInvite]", inviteError);
+      return { error: "Could not create the invite." };
+    }
 
     // Personal, not group-scoped -- reuses the exact visible_to_trainee_id
     // shape the assignment-feedback announcement already uses (migration
@@ -207,7 +219,11 @@ export async function confirmIndividualTutorialInvite(_prevState: ConfirmState, 
     .update({ confirmed_at: new Date().toISOString() })
     .eq("id", inviteId)
     .eq("trainee_id", user.id);
-  if (error) return { error: "Could not confirm -- try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/timetable/individual-tutorial-actions.ts:confirmIndividualTutorialInvite]", error);
+    return { error: "Could not confirm -- try again." };
+  }
 
   revalidatePath("/portfolio/[traineeId]", "layout");
   return { error: null };

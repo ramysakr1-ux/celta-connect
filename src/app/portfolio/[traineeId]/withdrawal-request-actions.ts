@@ -64,7 +64,11 @@ export async function submitWithdrawalRequest(_prevState: WithdrawalRequestFormS
     confirmations: confirmed,
     signed_name: signedName,
   });
-  if (error) return { error: "Could not send. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/withdrawal-request-actions.ts:submitWithdrawalRequest]", error);
+    return { error: "Could not send. Try again." };
+  }
 
   revalidatePath(`/portfolio/${traineeId}/withdrawal-request`);
   return { error: null, sent: true };

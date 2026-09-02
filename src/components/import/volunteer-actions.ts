@@ -144,13 +144,15 @@ export async function commitVolunteerImport(_prev: CommitVolunteerImportState, f
     }))
   );
   if (tokenError) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[src/components/import/volunteer-actions.ts:commitVolunteerImport]", tokenError);
     // The volunteer rows themselves are still valid even if their join
     // tokens failed to insert -- don't roll back people over that, but do
     // surface it so it can be re-run (the tokens table has no unique
     // constraint stopping a retry from adding a second token for the same
     // volunteer, so this is safe to just report rather than auto-retry).
     return { error: `${inserted.length} volunteers were added, but their join links could not be created. Try again or add links individually.` };
-  }
+}
 
   revalidatePath("/centre/volunteers");
   revalidatePath("/centre/import");

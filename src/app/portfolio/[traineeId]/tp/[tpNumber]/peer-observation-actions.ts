@@ -138,8 +138,10 @@ export async function savePeerNote(_prevState: PeerNoteFormState, formData: Form
     { onConflict: "sheet_id,observer_id" }
   );
   if (error) {
+    // The message below is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/tp/[tpNumber]/peer-observation-actions.ts:savePeerNote]", error);
     return { error: "Could not save your note. Try again." };
-  }
+}
 
   revalidatePath(`/portfolio/${observedTraineeId}/tp/${tpNumber}`);
   return { error: null };

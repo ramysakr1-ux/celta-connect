@@ -33,7 +33,11 @@ async function setRemindersOptedOut(token: string, optedOut: boolean): Promise<U
   }
 
   const { error } = await admin.from("volunteer_students").update({ reminders_opted_out: optedOut }).eq("id", accessToken.volunteer_student_id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[student/[token]/unsubscribe-actions.ts:action]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   return { error: null, done: true, optedOut };
 }

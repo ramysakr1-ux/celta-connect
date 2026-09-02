@@ -39,7 +39,11 @@ export async function addVideoRecord(_prevState: FormState, formData: FormData):
     video_url: videoUrl,
     added_by: trainer.id,
   });
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/video:addVideoRecord]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/trainer/video");
   return { error: null };

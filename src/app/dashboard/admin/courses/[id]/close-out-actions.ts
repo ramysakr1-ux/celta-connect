@@ -95,7 +95,11 @@ export async function recordCertificateGrade(_prevState: FormState, formData: Fo
     )
     .eq("course_id", courseId)
     .eq("trainee_id", traineeId);
-  if (error) return { error: "Could not record the certificate grade." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/admin/courses/[id]/close-out-actions.ts:recordCertificateGrade]", error);
+    return { error: "Could not record the certificate grade." };
+  }
 
   revalidatePath("/trainer/grades-report");
   return { error: null };

@@ -204,7 +204,11 @@ export async function markFilmedObservationTaskComplete(_prevState: FormState, f
     .update({ completed_at: new Date().toISOString(), observation_id: observation.id })
     .eq("task_id", taskId)
     .eq("trainee_id", user.id);
-  if (error) return { error: "Could not save. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[portfolio/[traineeId]/filmed-observation-actions.ts:markFilmedObservationTaskComplete]", error);
+    return { error: "Could not save. Try again." };
+  }
 
   revalidatePath("/portfolio/[traineeId]/filmed-observation/[sessionId]", "page");
   revalidatePath("/portfolio/[traineeId]/filmed-observation/[sessionId]/task", "page");

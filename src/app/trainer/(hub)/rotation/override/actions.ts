@@ -79,7 +79,11 @@ export async function overrideTpPoint(_prevState: FormState, formData: FormData)
     },
     { onConflict: "trainee_id,tp_number" }
   );
-  if (error) return { error: "Could not assign. Try again." };
+  if (error) {
+    // The message above is what the person reads; this is what we read.
+    console.error("[trainer/(hub)/rotation/override:overrideTpPoint]", error);
+    return { error: "Could not assign. Try again." };
+  }
 
   revalidatePath("/trainer/rotation");
   return { error: null };
