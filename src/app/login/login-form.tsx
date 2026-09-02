@@ -31,8 +31,13 @@ export function LoginForm({ next }: { next?: string }) {
             <label htmlFor="password" className="text-sm text-muted">
               Password
             </label>
+            {/* "Forgot?" excluded the people who need it most. Most accounts
+                here have never had a password -- they were created for
+                sign-in links -- so someone setting one for the first time
+                read "Forgot?" as not meant for them and never clicked it.
+                Ramy lost an evening to exactly that, 2 Sep 2026. */}
             <a href="/forgot-password" className="text-xs text-muted hover:text-ink">
-              Forgot?
+              Set or reset
             </a>
           </div>
           <input

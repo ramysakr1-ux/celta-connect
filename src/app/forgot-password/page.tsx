@@ -13,9 +13,9 @@ export default function ForgotPasswordPage() {
         <Link href="/" className="inline-block hover:opacity-80">
           <Wordmark size="hero" />
         </Link>
-        <h1 className="mt-4 font-serif text-2xl text-ink">Reset your password</h1>
-        <p className="mt-1 text-sm text-muted">Enter your email and we&apos;ll send you a reset link.</p>
-        <p className="mt-2 text-xs text-muted">Only staff accounts have passwords. If you hold a workspace or assessor link, use that instead.</p>
+        <h1 className="mt-4 font-serif text-2xl text-ink">Set or reset your password</h1>
+        <p className="mt-1 text-sm text-muted">Enter your email and we&apos;ll send you a link to set one. Works whether you have a password already or have never had one.</p>
+        <p className="mt-2 text-xs text-muted">Most accounts sign in by emailed link and never need a password &mdash; setting one is optional. If you hold a workspace or assessor link, use that instead.</p>
         <ForgotPasswordForm />
       </div>
       </div>
