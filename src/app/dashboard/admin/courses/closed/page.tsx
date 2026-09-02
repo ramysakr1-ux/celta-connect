@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { requireRole } from "@/lib/auth/require-role";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveBranchScope } from "@/lib/branch-scope";
 import { computeCourseState } from "@/lib/course-progress";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -11,16 +12,24 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 // list itself only shows a single summary row for Closed; this is where
 // that row links to -- a plain list, since there's nothing left to
 // action on any of them, just a way back in if someone needs one.
-export default async function ClosedCoursesPage() {
+export default async function ClosedCoursesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ branch?: string }>;
+}) {
   const profile = await requireRole("admin");
-  const supabase = await createClient();
+  // Branch-aware like the Course Admin landing it is reached from; see the
+  // note there on why the read moves to the admin client.
+  const { branch } = await searchParams;
+  const { scope } = await resolveBranchScope(profile, branch);
+  const supabase = createAdminClient();
   const timeZone = (await getCachedCenter(profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
 
   const { data: courses } = await supabase
     .from("courses")
     .select("id, name, start_date, end_date")
-    .eq("center_id", profile.center_id)
+    .in("center_id", scope)
     .order("end_date", { ascending: false });
 
   const closedCourses = (courses ?? []).filter((c) => computeCourseState(c.start_date, c.end_date, today) === "closed");

@@ -53,10 +53,12 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       supabase
         .from("interview_slots")
         .select("id, slot_date, slot_time, mode, panel, interviewer_id")
+        // single-centre: one applicant, already found by id -- this is the guard that they belong to this centre, not a listing
         .eq("center_id", staff.center_id)
         .eq("intake_course_id", applicant.intake_course_id)
         .is("booked_applicant_id", null)
         .order("slot_date"),
+      // single-centre: one applicant, already found by id -- this is the guard that they belong to this centre, not a listing
       supabase.from("interview_questions").select("id, question_text, coverage_area").eq("center_id", staff.center_id).eq("active", true),
       supabase.from("interview_records").select("*").eq("applicant_id", id).maybeSingle(),
     ]);

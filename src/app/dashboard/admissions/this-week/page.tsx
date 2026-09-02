@@ -1,6 +1,7 @@
 import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveBranchScope } from "@/lib/branch-scope";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
@@ -29,9 +30,18 @@ function mondayOfIso(todayIso: string): string {
 // current Mon-Fri, open and booked side by side, plus the same
 // "no_interview_slots" flag the auto-triage/self-booking flow already
 // writes to admissions_notifications -- this is that feed's first reader.
-export default async function ThisWeeksInterviewsPage() {
+export default async function ThisWeeksInterviewsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ branch?: string }>;
+}) {
   const staff = await requireAdmissionsHandler();
-  const supabase = await createClient();
+  // Branch-aware for the same reason as the Admissions landing: RLS resolves
+  // "my centre" to one centre and cannot express "every branch I hold", so the
+  // read goes through the admin client and every query carries the scope.
+  const { branch } = await searchParams;
+  const { scope } = await resolveBranchScope(staff, branch);
+  const supabase = createAdminClient();
 
   const timeZone = (await getCachedCenter(staff.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const weekStart = mondayOfIso(toLocalIso(new Date(), timeZone));
@@ -41,7 +51,7 @@ export default async function ThisWeeksInterviewsPage() {
     supabase
       .from("interview_slots")
       .select("id, slot_date, slot_time, mode, panel, interviewer_id, second_interviewer_id, booked_applicant_id")
-      .eq("center_id", staff.center_id)
+      .in("center_id", scope)
       .gte("slot_date", weekStart)
       .lte("slot_date", weekEnd)
       .order("slot_date")
@@ -49,7 +59,7 @@ export default async function ThisWeeksInterviewsPage() {
     supabase
       .from("admissions_notifications")
       .select("applicant_id")
-      .eq("center_id", staff.center_id)
+      .in("center_id", scope)
       .eq("type", "no_interview_slots")
       .is("read_at", null),
   ]);

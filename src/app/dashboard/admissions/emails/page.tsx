@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveBranchScope } from "@/lib/branch-scope";
 
 const STATUS_LABEL: Record<string, string> = {
   sent: "Sent",
@@ -41,16 +42,20 @@ function formatDate(iso: string | null): string {
 export default async function EmailDeliveryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ course?: string }>;
+  searchParams: Promise<{ course?: string; branch?: string }>;
 }) {
   const staff = await requireAdmissionsHandler();
-  const { course: selectedCourseId } = await searchParams;
-  const supabase = await createClient();
+  // Branch-aware for the same reason as the Admissions landing: RLS resolves
+  // "my centre" to one centre and cannot express "every branch I hold", so the
+  // read goes through the admin client and every query carries the scope.
+  const { course: selectedCourseId, branch } = await searchParams;
+  const { scope } = await resolveBranchScope(staff, branch);
+  const supabase = createAdminClient();
 
   const { data: courses } = await supabase
     .from("courses")
     .select("id, course_code, name, start_date")
-    .eq("center_id", staff.center_id)
+    .in("center_id", scope)
     .order("start_date", { ascending: false });
 
   if (!courses || courses.length === 0) {
@@ -79,7 +84,7 @@ export default async function EmailDeliveryPage({
   const { data: bounceTasks } = await supabase
     .from("email_bounce_tasks")
     .select("id, applicant_id, email_address, reason, consecutive_bounces")
-    .eq("center_id", staff.center_id)
+    .in("center_id", scope)
     .is("resolved_at", null)
     .in("applicant_id", applicantIds.length ? applicantIds : ["00000000-0000-0000-0000-000000000000"]);
 

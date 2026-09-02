@@ -31,6 +31,7 @@ export default async function AdminAssignmentBriefDetailPage({
   const { data: allTemplates } = await supabase
     .from("assignment_templates")
     .select("id, format")
+    // single-centre: per-centre brief wording; a branch owns its own
     .eq("center_id", admin.center_id);
   const proseCount = (allTemplates ?? []).filter((t) => t.format === "prose").length;
   const formatWarning =

@@ -2,6 +2,7 @@ import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveBranchScope } from "@/lib/branch-scope";
 import { ReferralRequestRow } from "@/app/dashboard/admissions/referral-requests/referral-request-row";
 
 // build-spec.md §14: "Where nobody spans the two, it becomes a request the
@@ -10,7 +11,11 @@ import { ReferralRequestRow } from "@/app/dashboard/admissions/referral-requests
 // let a sibling branch send. current_center_id()'s app-side mirror
 // (getCentreRoleContext) decides which branch's requests this viewer sees,
 // same as everywhere else "the active branch" is asked.
-export default async function ReferralRequestsPage() {
+export default async function ReferralRequestsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ branch?: string }>;
+}) {
   const staff = await requireAdmissionsHandler();
   if (staff.role !== "admin") {
     return (
@@ -20,22 +25,26 @@ export default async function ReferralRequestsPage() {
     );
   }
 
-  const ctx = await getCentreRoleContext(staff);
-  const centerId = ctx.activeCenterId ?? staff.center_id;
+  // Referrals move candidates BETWEEN branches, so this page of all of them
+  // should not be pinned to one: an owner holding two branches wants both
+  // sides of the conversation. Already on the admin client, so this is a
+  // scope change rather than a client change.
+  const { branch } = await searchParams;
+  const { scope } = await resolveBranchScope(staff, branch);
 
   const admin = createAdminClient();
   const [{ data: incoming }, { data: sent }, { data: courses }] = await Promise.all([
     admin
       .from("branch_referral_requests")
       .select("*")
-      .eq("to_center_id", centerId)
+      .in("to_center_id", scope)
       .order("requested_at", { ascending: false }),
     admin
       .from("branch_referral_requests")
       .select("*")
-      .eq("from_center_id", centerId)
+      .in("from_center_id", scope)
       .order("requested_at", { ascending: false }),
-    admin.from("courses").select("id, name").eq("center_id", centerId).order("start_date", { ascending: false }),
+    admin.from("courses").select("id, name").in("center_id", scope).order("start_date", { ascending: false }),
   ]);
 
   const allRequests = [...(incoming ?? []), ...(sent ?? [])];

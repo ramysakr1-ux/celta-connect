@@ -42,8 +42,11 @@ export default async function AdmissionsSettingsPage() {
     .maybeSingle();
 
   const [{ data: prompts }, { data: speakingPrompts }, { data: questions }] = await Promise.all([
+    // single-centre: per-centre configuration; there is no editing every branch's prompts at once
     supabase.from("application_writing_prompts").select("*").eq("center_id", staff.center_id).order("prompt_type"),
+    // single-centre: per-centre configuration; there is no editing every branch's prompts at once
     supabase.from("speaking_task_prompts").select("*").eq("center_id", staff.center_id).order("created_at"),
+    // single-centre: per-centre configuration; there is no editing every branch's prompts at once
     supabase.from("interview_questions").select("*").eq("center_id", staff.center_id).order("coverage_area"),
   ]);
 

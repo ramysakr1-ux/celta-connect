@@ -13,6 +13,7 @@ export default async function AdminAssignmentBriefsPage() {
   const { data: templates } = await supabase
     .from("assignment_templates")
     .select("*")
+    // single-centre: per-centre brief wording; a branch owns its own
     .eq("center_id", admin.center_id);
 
   const templateByType = new Map((templates ?? []).map((t) => [t.assignment_type, t]));

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveBranchScope } from "@/lib/branch-scope";
 import { createInterviewSlot } from "@/app/dashboard/admissions/actions";
 import { OfferNextPlaceForm } from "@/app/dashboard/admissions/offer-next-place-form";
 import { InterviewAvailabilityPanel, type PatternRow, type BlockRow } from "@/app/dashboard/admissions/interview-availability-panel";
@@ -23,9 +24,24 @@ const STAGE_LABEL: Record<string, string> = {
 // "Selection lives outside the course, and outside course roles" -- this
 // is the centre-level pipeline, not scoped to one course, though slot
 // creation asks which intake a given interview is for.
-export default async function AdmissionsPage() {
+export default async function AdmissionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ branch?: string }>;
+}) {
   const staff = await requireAdmissionsHandler();
-  const supabase = await createClient();
+  // Admissions ignored the ?branch filter that Centre Management has honoured
+  // since build-spec.md §13, so somebody holding two branches saw everything
+  // in one room and one branch in this one, with nothing on screen saying so.
+  //
+  // Reads go through the admin client for the same reason /centre's do: RLS
+  // resolves "my centre" to exactly one centre (current_center_id()) and
+  // cannot express "every branch I hold". Isolation therefore has to be
+  // enforced here instead -- every query below carries .in("center_id", scope),
+  // and `scope` can only ever contain centres this person actually holds.
+  const { branch } = await searchParams;
+  const { scope, aggregated, nameById } = await resolveBranchScope(staff, branch);
+  const supabase = createAdminClient();
 
   // Ramy, 28 Aug 2026: "admission pipeline takes forever" -- traced the same
   // way as Centre Management. This page ran its main 7-query batch, then
@@ -48,38 +64,38 @@ export default async function AdmissionsPage() {
   ] = await Promise.all([
     supabase
       .from("applicants")
-      .select("id, full_name, email, stage, intake_course_id, created_at, deposit_amount, deposit_paid_at, ai_reading_lane, marketing_source")
-      .eq("center_id", staff.center_id)
+      .select("id, center_id, full_name, email, stage, intake_course_id, created_at, deposit_amount, deposit_paid_at, ai_reading_lane, marketing_source")
+      .in("center_id", scope)
       .order("created_at", { ascending: false }),
     supabase
       .from("courses")
       .select("id, name")
-      .eq("center_id", staff.center_id)
+      .in("center_id", scope)
       .eq("accepting_applications", true)
       .order("start_date"),
     supabase
       .from("interview_slots")
       .select("id, intake_course_id, slot_date, slot_time, mode, panel, booked_applicant_id")
-      .eq("center_id", staff.center_id)
+      .in("center_id", scope)
       .is("booked_applicant_id", null)
       .order("slot_date"),
-    supabase.from("profiles").select("id, full_name").eq("center_id", staff.center_id).in("role", ["admin", "trainer"]).order("full_name"),
-    supabase.from("interview_availability_patterns").select("*").eq("center_id", staff.center_id).eq("active", true),
-    supabase.from("interview_blocks").select("*").eq("center_id", staff.center_id).order("start_date"),
+    supabase.from("profiles").select("id, full_name").in("center_id", scope).in("role", ["admin", "trainer"]).order("full_name"),
+    supabase.from("interview_availability_patterns").select("*").in("center_id", scope).eq("active", true),
+    supabase.from("interview_blocks").select("*").in("center_id", scope).order("start_date"),
     supabase
       .from("centers")
       .select("interview_slot_minutes, interview_gap_minutes, interview_weeks_ahead, interview_cutoff_hours")
-      .eq("id", staff.center_id)
+      .eq("id", scope[0])
       .maybeSingle(),
     // "The area owner is notified... a statement, so they are not told by a
     // candidate." A count here is that statement for referral requests --
     // the dedicated page (referral-requests/page.tsx) is where they're
     // actually decided.
-    supabase.from("branch_referral_requests").select("id", { count: "exact", head: true }).eq("to_center_id", staff.center_id).eq("status", "pending"),
+    supabase.from("branch_referral_requests").select("id", { count: "exact", head: true }).in("to_center_id", scope).eq("status", "pending"),
     // Waiting-list counts per intake -- fetched independent of the
     // "accepting_applications" intakes above, since a course can still have
     // a waiting list after being closed to new applications.
-    supabase.from("applicants").select("intake_course_id").eq("center_id", staff.center_id).eq("stage", "waiting_list").eq("waiting_list_opt_out", false),
+    supabase.from("applicants").select("intake_course_id").in("center_id", scope).eq("stage", "waiting_list").eq("waiting_list_opt_out", false),
   ]);
 
   const intakeNameById = new Map((intakes ?? []).map((i) => [i.id, i.name]));
@@ -128,10 +144,10 @@ export default async function AdmissionsPage() {
   // other, so they run together instead of one after the other.
   const [{ data: waitingIntakeCourses }, { data: marketingCourses }] = await Promise.all([
     waitingIntakeIds.length > 0
-      ? supabase.from("courses").select("id, name").in("id", waitingIntakeIds)
+      ? supabase.from("courses").select("id, name").in("id", waitingIntakeIds).in("center_id", scope)
       : Promise.resolve({ data: [] as { id: string; name: string }[] }),
     marketingCourseIds.length > 0
-      ? supabase.from("courses").select("id, name").in("id", marketingCourseIds)
+      ? supabase.from("courses").select("id, name").in("id", marketingCourseIds).in("center_id", scope)
       : Promise.resolve({ data: [] as { id: string; name: string }[] }),
   ]);
   const waitingIntakeNameById = new Map((waitingIntakeCourses ?? []).map((c) => [c.id, c.name]));
@@ -200,6 +216,12 @@ export default async function AdmissionsPage() {
                     <Link href={`/dashboard/admissions/${a.id}`} className="font-medium text-ink hover:underline">
                       {a.full_name}
                     </Link>
+                    {/* Which branch this person applied to. Only when more
+                        than one is in view -- naming the branch on every row
+                        of a single-branch centre is noise. */}
+                    {aggregated && nameById.get(a.center_id) ? (
+                      <span className="ml-2 text-[11px] text-muted">{nameById.get(a.center_id)}</span>
+                    ) : null}
                     {a.ai_reading_lane === "clear_problems" ? (
                       // "A tutor is notified... in-app flag, not push/email"
                       // -- this table is the surface a tutor or admissions

@@ -10,6 +10,8 @@ import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { Wordmark } from "@/components/wordmark";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { RoomPills } from "@/components/room-pills";
+import { BranchFilter } from "@/app/centre/branch-filter";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { AreaTheme } from "@/components/area-theme";
 import { can, canView, adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
 import { HeaderDesignerCredit } from "@/components/designer-credit";
@@ -78,6 +80,17 @@ export default async function DashboardLayout({
         ...(flatAdmin || canView(centreCtx.roles, "admissions.view", centreCtx.overrides) ? ["admissions"] : []),
       ]
     : [];
+
+  // The same branch list /centre builds, so the filter offers exactly the same
+  // branches in both places. Only loaded when there is more than one to narrow
+  // between -- build-spec.md §13, "a single-centre customer never sees it".
+  // Admissions and Course Admin now honour ?branch, so the control is no
+  // longer a lie here.
+  const switchableRaw =
+    centreCtx && centreCtx.availableCenterIds.length > 1
+      ? await createAdminClient().from("centers").select("id, name, center_number").in("id", centreCtx.availableCenterIds)
+      : { data: [] as { id: string; name: string; center_number: string | null }[] };
+  const switchable = (switchableRaw.data ?? []).map((c) => ({ id: c.id, name: c.name, centerNumber: c.center_number }));
 
   const isCentreOwner = centreCtx?.roles.includes("centre_owner") ?? false;
   const actingRoleLabel =
@@ -165,6 +178,7 @@ export default async function DashboardLayout({
           <HeaderDesignerCredit landingPath="/dashboard/admin" />
         </div>
         <div className="container flex items-center justify-end gap-4 pb-2.5 text-sm text-muted">
+          <BranchFilter branches={switchable} />
           {/* The role sits next to the name rather than on a line of its own.
               Ramy, 31 Aug 2026, asked whether the header was needed: the
               identity already prints here, so a separate "Signed in as..."

@@ -48,6 +48,7 @@ export default async function AdminSettingsPage({
   const { data: connection } = await admin
     .from("center_google_connections")
     .select("center_id, template_doc_id, output_folder_id, connected_at")
+    // single-centre: per-centre configuration; there is no editing every branch's settings at once
     .eq("center_id", profile.center_id)
     .maybeSingle();
 
@@ -56,6 +57,7 @@ export default async function AdminSettingsPage({
   const { data: driveRow } = await admin
     .from("center_google_connections")
     .select("center_id")
+    // single-centre: per-centre configuration; there is no editing every branch's settings at once
     .eq("center_id", profile.center_id)
     .maybeSingle();
   const driveConnected = Boolean(driveRow);
@@ -63,18 +65,21 @@ export default async function AdminSettingsPage({
   const { data: styleExamples } = await admin
     .from("feedback_style_examples")
     .select("*")
+    // single-centre: per-centre configuration; there is no editing every branch's settings at once
     .eq("center_id", profile.center_id)
     .order("created_at", { ascending: false });
 
   const { data: malpracticeOutcomes } = await admin
     .from("malpractice_outcome_options")
     .select("*")
+    // single-centre: per-centre configuration; there is no editing every branch's settings at once
     .eq("center_id", profile.center_id)
     .order("created_at", { ascending: true });
 
   const { data: assignmentCriteria } = await admin
     .from("centre_assignment_criteria")
     .select("*")
+    // single-centre: per-centre configuration; there is no editing every branch's settings at once
     .eq("center_id", profile.center_id)
     .order("sort_order", { ascending: true });
 
@@ -85,6 +90,7 @@ export default async function AdminSettingsPage({
   const { data: centerCourses } = await admin
     .from("courses")
     .select("id, name, delivery_mode")
+    // single-centre: per-centre configuration; there is no editing every branch's settings at once
     .eq("center_id", profile.center_id)
     .order("start_date", { ascending: false });
   const courseIds = (centerCourses ?? []).map((c) => c.id);
@@ -97,6 +103,7 @@ export default async function AdminSettingsPage({
           .in("course_id", courseIds)
           .is("left_at", null)
       : Promise.resolve({ data: [] }),
+    // single-centre: per-centre configuration; there is no editing every branch's settings at once
     admin.from("profiles").select("id, full_name").eq("center_id", profile.center_id).eq("role", "trainer"),
   ]);
 

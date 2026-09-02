@@ -13,6 +13,7 @@ export default async function AdminCoursebooksPage() {
   const { data: coursebooks } = await supabase
     .from("tp_coursebooks")
     .select("*")
+    // single-centre: per-centre coursebook shelf; a branch owns its own
     .eq("center_id", admin.center_id)
     .order("created_at", { ascending: false });
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveBranchScope } from "@/lib/branch-scope";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getRecentCentreChanges } from "@/lib/what-changed";
@@ -46,18 +47,30 @@ const GROUP_PILL_CLASS: Record<LandingGroup, string> = {
 };
 const ENTRY_FORM_WARNING_WINDOW_DAYS = 14;
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ branch?: string }>;
+}) {
   const profile = await requireRole("admin");
   // Needed for the duplicate control below -- duplicating creates a course,
   // so it has to ask the same capability /centre's own course list asks.
   const ctx = await getCentreRoleContext(profile);
   const mayCreateCourses = can(ctx.roles, "course.create", ctx.overrides);
-  const supabase = await createClient();
+  // Course Admin scoped hard to profiles.center_id and so ignored the ?branch
+  // filter entirely -- an owner with two branches saw everything in Centre
+  // Management and one branch here, with nothing on screen admitting it.
+  // Reads move to the admin client for the reason /centre already did: RLS
+  // resolves "my centre" to exactly one centre. Isolation is enforced here
+  // instead, and `scope` can only contain centres this person holds.
+  const { branch } = await searchParams;
+  const { scope, aggregated, nameById, primaryCenterId } = await resolveBranchScope(profile, branch);
+  const supabase = createAdminClient();
 
   const [{ data: courses }, center, { data: people }, { data: events }] = await Promise.all([
-    supabase.from("courses").select("*").eq("center_id", profile.center_id).order("start_date", { ascending: false }),
-    getCachedCenter(profile.center_id),
-    supabase.from("profiles").select("course_id, role").eq("center_id", profile.center_id).not("course_id", "is", null),
+    supabase.from("courses").select("*").in("center_id", scope).order("start_date", { ascending: false }),
+    getCachedCenter(primaryCenterId),
+    supabase.from("profiles").select("course_id, role").in("center_id", scope).not("course_id", "is", null),
     supabase.from("course_timetable_events").select("course_id, event_date"),
   ]);
   const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
@@ -78,13 +91,13 @@ export default async function AdminDashboardPage() {
   // /centre and getCentreRoleContext.
   const [[tpPoints, briefs, resources, styleExamples, coursebooks], recentChanges] = await Promise.all([
     Promise.all([
-    supabase.from("tp_points").select("id", { count: "exact", head: true }).eq("center_id", profile.center_id),
-    supabase.from("assignment_templates").select("id", { count: "exact", head: true }).eq("center_id", profile.center_id),
-    supabase.from("resources").select("id", { count: "exact", head: true }).eq("center_id", profile.center_id),
-    supabase.from("feedback_style_examples").select("id", { count: "exact", head: true }).eq("center_id", profile.center_id),
-    supabase.from("tp_coursebooks").select("id", { count: "exact", head: true }).eq("center_id", profile.center_id),
+    supabase.from("tp_points").select("id", { count: "exact", head: true }).in("center_id", scope),
+    supabase.from("assignment_templates").select("id", { count: "exact", head: true }).in("center_id", scope),
+    supabase.from("resources").select("id", { count: "exact", head: true }).in("center_id", scope),
+    supabase.from("feedback_style_examples").select("id", { count: "exact", head: true }).in("center_id", scope),
+    supabase.from("tp_coursebooks").select("id", { count: "exact", head: true }).in("center_id", scope),
     ]),
-    getRecentCentreChanges(profile.center_id),
+    getRecentCentreChanges(primaryCenterId),
   ]);
 
   const centreMaterial = [
@@ -275,7 +288,15 @@ export default async function AdminDashboardPage() {
                         className="flex min-w-0 flex-1 items-center justify-between gap-4"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-ink">{row.course.name}</p>
+                          <p className="truncate text-sm font-semibold text-ink">
+                            {row.course.name}
+                            {/* Which branch runs it. Shown only when more than
+                                one branch is in view -- naming it on every row
+                                of a single-branch centre is noise. */}
+                            {aggregated && nameById.get(row.course.center_id) ? (
+                              <span className="ml-2 text-[11px] font-normal text-muted">{nameById.get(row.course.center_id)}</span>
+                            ) : null}
+                          </p>
                           <p className="mt-0.5 text-xs text-muted">
                             {courseDates(row.course.start_date, row.course.end_date)}
                           </p>

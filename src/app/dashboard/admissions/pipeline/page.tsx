@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { requireAdmissionsHandler } from "@/lib/admissions-access";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveBranchScope } from "@/lib/branch-scope";
 import { computeApplicantPaymentState } from "@/lib/payments/applicant-payment-state";
 import { computeFunnel, computeFunnelAlerts, type FunnelApplicant } from "@/lib/admissions-pipeline";
 import { PipelineFunnel, type PipelinePerson } from "@/app/dashboard/admissions/pipeline/pipeline-funnel";
@@ -16,18 +17,22 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 export default async function AdmissionsPipelinePage({
   searchParams,
 }: {
-  searchParams: Promise<{ course?: string }>;
+  searchParams: Promise<{ course?: string; branch?: string }>;
 }) {
   const staff = await requireAdmissionsHandler();
-  const { course: selectedCourseId } = await searchParams;
-  const supabase = await createClient();
+  // Branch-aware for the same reason as the Admissions landing: RLS resolves
+  // "my centre" to one centre and cannot express "every branch I hold", so the
+  // read goes through the admin client and every query carries the scope.
+  const { course: selectedCourseId, branch } = await searchParams;
+  const { scope } = await resolveBranchScope(staff, branch);
+  const supabase = createAdminClient();
   const timeZone = (await getCachedCenter(staff.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
 
   const { data: courses } = await supabase
     .from("courses")
     .select("id, course_code, name, start_date, application_cap, cohort_size")
-    .eq("center_id", staff.center_id)
+    .in("center_id", scope)
     .eq("accepting_applications", true)
     .order("start_date");
 
