@@ -633,6 +633,28 @@ async function main() {
       overall_comment: "A confident, well-paced lesson overall -- keep building on this.",
       submitted_at: new Date(Date.now() - daysAgo * 86400000).toISOString(),
     });
+
+    // The CELTA 5 "Record of assessed teaching practice" reads tp_lessons,
+    // which nothing seeded -- so that page of the booklet said "No assessed
+    // teaching practice recorded yet" for every candidate, including one with
+    // eight graded lessons behind her. Found 2 Sep 2026 sweeping the demo for
+    // empty panels after the criteria one turned up by luck.
+    //
+    // Written from the same facts as the feedback above rather than invented:
+    // the form is a record of what happened, so it must agree with it. The
+    // level changes at TP5, matching the timetable's "Level & tutor change".
+    await supabase.from("tp_lessons").insert({
+      course_id: course.id,
+      trainee_id: traineeId,
+      trainer_id: trainerId,
+      tp_number: tpNumber,
+      lesson_date: new Date(Date.now() - daysAgo * 86400000).toISOString().slice(0, 10),
+      length_minutes: 45,
+      level: tpNumber <= 4 ? "Intermediate (B1+)" : "Elementary (A2)",
+      learner_count: tpNumber <= 4 ? 11 : 9,
+      lesson_focus: aim,
+      tutor_assessment: grade,
+    });
     return plan.id;
   }
 
