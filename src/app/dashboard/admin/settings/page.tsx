@@ -43,6 +43,7 @@ export default async function AdminSettingsPage({
     .select(
       "name, center_number, is_uk_centre, auto_tag_criteria_enabled, admissions_email, volunteer_certificate_hours_threshold, application_response_hours"
     )
+    // single-centre: the centre row whose settings this page edits
     .eq("id", profile.center_id)
     .maybeSingle();
   const { data: connection } = await admin

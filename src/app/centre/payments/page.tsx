@@ -33,18 +33,21 @@ export default async function PaymentProvidersPage() {
     supabase
       .from("refunds")
       .select("id, amount, currency, reason, status, settlement, agreed_at, applicant_id")
+      // single-centre: a branch's own payment records and notifications
       .eq("center_id", profile.center_id)
       .order("agreed_at", { ascending: false })
       .limit(40),
     // runMissedInstalmentsCron (src/lib/payments-cron.ts) has been writing
     // these on every overdue instalment with nothing anywhere reading them
     // back -- first reader.
+    // single-centre: a branch's own payment records and notifications
     supabase.from("payment_notifications").select("id, message, created_at").eq("center_id", centerId).is("read_at", null).order("created_at", { ascending: false }),
     // payment_provider_transactions logs every Stripe webhook event purely
     // for idempotency (migration 0087) -- nothing anywhere read it back.
     supabase
       .from("payment_provider_transactions")
       .select("id, provider, event_type, amount, currency, received_at")
+      // single-centre: a branch's own payment records and notifications
       .eq("center_id", centerId)
       .order("received_at", { ascending: false })
       .limit(30),

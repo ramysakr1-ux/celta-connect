@@ -40,6 +40,7 @@ export default async function CourseAdminDetailPage({
   if (!course || course.center_id !== admin.center_id) notFound();
 
   const [{ data: center }, { data: tutorRows }, { data: applicants }] = await Promise.all([
+    // single-centre: the Appian URL of the centre this course belongs to
     supabase.from("centers").select("appian_url").eq("id", admin.center_id).maybeSingle(),
     supabase.from("course_tutors").select("id, profile_id, tutor_role, verified_at").eq("course_id", id).is("left_at", null),
     supabase.from("applicants").select("id, full_name, stage, special_requirements").eq("intake_course_id", id),

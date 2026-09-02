@@ -38,6 +38,7 @@ export default async function AdmissionsSettingsPage() {
   const { data: center } = await supabase
     .from("centers")
     .select("admissions_ai_shadow_mode_enabled, admissions_ai_autobook_enabled")
+    // single-centre: the centre row whose interview settings this page edits
     .eq("id", staff.center_id)
     .maybeSingle();
 

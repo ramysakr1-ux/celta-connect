@@ -61,24 +61,32 @@ export default async function CentreSettingsPage({
       )
       .eq("id", centerId)
       .maybeSingle(),
+    // single-centre: per-centre configuration and its connections; there is no editing every branch at once
     admin.from("center_google_connections").select("connected_at, template_doc_id, output_folder_id").eq("center_id", centerId).maybeSingle(),
+    // single-centre: per-centre configuration and its connections; there is no editing every branch at once
     admin.from("centre_zoom_connections").select("connected_at, zoom_account_email").eq("center_id", centerId).maybeSingle(),
+    // single-centre: per-centre configuration and its connections; there is no editing every branch at once
     admin.from("centre_roles").select("id, role, profile_id").eq("center_id", centerId).is("revoked_at", null).order("granted_at"),
     mayAppoint
       ? admin
           .from("centre_admin_invites")
           .select("id, role, created_at")
+          // single-centre: per-centre configuration and its connections; there is no editing every branch at once
           .eq("center_id", centerId)
           .is("used_at", null)
           .is("revoked_at", null)
           .order("created_at", { ascending: false })
       : Promise.resolve({ data: [] }),
+    // single-centre: per-centre configuration and its connections; there is no editing every branch at once
     admin.from("platform_support_grants").select("*").eq("center_id", centerId).order("granted_at", { ascending: false }),
+    // single-centre: per-centre configuration and its connections; there is no editing every branch at once
     admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId),
     // Ramy, 27 Aug 2026: these two (previously their own Promise.all,
     // further down) only need centerId too -- folded in here alongside
     // customRoles for the same reason.
+    // single-centre: per-centre configuration and its connections; there is no editing every branch at once
     admin.from("platform_owner_invites").select("id, invited_at, note, revoked_at").eq("center_id", centerId).order("invited_at", { ascending: false }).limit(1).maybeSingle(),
+    // single-centre: per-centre configuration and its connections; there is no editing every branch at once
     admin.from("platform_owner_access_log").select("id, accessed_at, page").eq("center_id", centerId).order("accessed_at", { ascending: false }).limit(50),
   ]);
 

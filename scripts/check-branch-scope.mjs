@@ -19,8 +19,21 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const ROOMS = ["src/app/dashboard/admissions", "src/app/dashboard/admin"];
-const OFFENDING = /\.eq\(\s*["'](?:to_|from_)?center_id["']/;
+// /centre and the volunteer pool were already branch-aware; they are covered
+// so they cannot drift back the way these two did.
+const ROOMS = ["src/app/dashboard/admissions", "src/app/dashboard/admin", "src/app/centre"];
+
+// Any way of narrowing a query to one centre, not just .eq(). The first
+// version of this check knew only .eq(), and .match({center_id}),
+// .filter("center_id", ...) and .or("center_id.eq...") all walked past it --
+// three ways to write the same bug that the lock would not have caught.
+// A quote or brace after the paren: that is a query filter. Array.filter()
+// takes a callback, and flagging those was the first thing this stricter
+// version got wrong.
+const NARROWING = /\.(eq|filter|or|contains|overlaps)\s*\(\s*["'`]|\.match\s*\(\s*\{/;
+const MENTIONS_CENTRE = /\b(?:to_|from_)?center_id\b/;
+// Passing the resolved scope is the correct shape, in any of its spellings.
+const SCOPED = /\bscope\b|availableCenterIds|\bmine\b/;
 const EXEMPT = /\/\/\s*single-centre:/;
 
 /** Writes act on one centre by definition -- you save to a branch, not to all of them. */
@@ -41,7 +54,8 @@ for (const room of ROOMS) {
     if (isWriteFile(file)) continue;
     const lines = readFileSync(file, "utf8").split("\n");
     lines.forEach((line, i) => {
-      if (!OFFENDING.test(line)) return;
+      if (!(MENTIONS_CENTRE.test(line) && NARROWING.test(line))) return;
+      if (SCOPED.test(line)) return;
       const prev = lines[i - 1] ?? "";
       if (EXEMPT.test(line) || EXEMPT.test(prev)) return;
       problems.push(`${file}:${i + 1}\n    ${line.trim().slice(0, 110)}`);
@@ -50,7 +64,7 @@ for (const room of ROOMS) {
 }
 
 if (problems.length) {
-  console.error(`\n✗ ${problems.length} single-centre read${problems.length > 1 ? "s" : ""} in a branch-aware room:\n`);
+  console.error(`\n✗ ${problems.length} unexplained single-centre read${problems.length > 1 ? "s" : ""} in a branch-aware room:\n`);
   for (const p of problems) console.error("  " + p + "\n");
   console.error(`  These rooms must read every branch the person holds. Use:\n`);
   console.error(`      const { scope } = await resolveBranchScope(profile, branch);`);
@@ -59,4 +73,4 @@ if (problems.length) {
   console.error(`      // single-centre: <reason>\n`);
   process.exit(1);
 }
-console.log("✓ branch scope: no single-centre reads in Admissions or Course Admin");
+console.log("✓ branch scope: no unexplained single-centre reads in Admissions, Course Admin or Centre Management");

@@ -32,11 +32,13 @@ export default async function CentreRolesPage() {
   const admin = createAdminClient();
   const supabase = await createClient();
   const [{ data: grants }, { data: log }, { data: invites }] = await Promise.all([
+    // single-centre: role grants belong to one branch; you appoint someone AT a centre
     admin.from("centre_roles").select("id, role, profile_id").eq("center_id", centerId).is("revoked_at", null).order("granted_at"),
     mayAppoint
       ? admin
           .from("centre_owner_actions")
           .select("action, created_at, actor_profile_id")
+          // single-centre: role grants belong to one branch; you appoint someone AT a centre
           .eq("center_id", centerId)
           .order("created_at", { ascending: false })
           .limit(6)
@@ -45,6 +47,7 @@ export default async function CentreRolesPage() {
       ? admin
           .from("centre_admin_invites")
           .select("id, role, created_at, email")
+          // single-centre: role grants belong to one branch; you appoint someone AT a centre
           .eq("center_id", centerId)
           .is("used_at", null)
           .is("revoked_at", null)
@@ -68,6 +71,7 @@ export default async function CentreRolesPage() {
       ? admin
           .from("applicant_emails")
           .select("to_email, status, created_at")
+          // single-centre: role grants belong to one branch; you appoint someone AT a centre
           .eq("center_id", centerId)
           .eq("type", "centre_admin_invite")
           .in("to_email", inviteEmails)

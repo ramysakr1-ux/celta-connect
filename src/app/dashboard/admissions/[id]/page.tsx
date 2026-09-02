@@ -135,6 +135,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
   } | null = null;
   if (staff.role === "admin" && !applicant.referred_to_center_id) {
     const admin = createAdminClient();
+    // single-centre: resolving this centre's organisation to find its sibling branches
     const { data: ownCentre } = await admin.from("centers").select("organisation_id").eq("id", staff.center_id).maybeSingle();
     if (ownCentre?.organisation_id) {
       const [{ data: grants }, { data: siblingCentres }] = await Promise.all([
@@ -145,6 +146,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           .is("revoked_at", null)
           .in("role", ["centre_administrator", "centre_owner"])
           .neq("center_id", staff.center_id),
+        // single-centre: resolving this centre's organisation to find its sibling branches
         admin.from("centers").select("id, name").eq("organisation_id", ownCentre.organisation_id).neq("id", staff.center_id),
       ]);
       const siblingNameById = new Map((siblingCentres ?? []).map((c) => [c.id, c.name]));

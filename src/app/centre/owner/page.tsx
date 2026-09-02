@@ -69,7 +69,9 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
       admin.from("courses").select("id, name, center_id, start_date, end_date").in("center_id", scope),
       admin.from("centre_roles").select("id, profile_id, role, center_id").in("center_id", scope).is("revoked_at", null),
       admin.from("centre_owner_actions").select("id, created_at").in("center_id", scope),
+      // single-centre: the owner's role builder edits one branch's roles -- the page says which
       admin.from("centre_custom_roles").select("role_key, label").eq("center_id", centerId),
+      // single-centre: the owner's role builder edits one branch's roles -- the page says which
       admin.from("centre_custom_capabilities").select("capability_key, label").eq("center_id", centerId),
       // Names for every branch in scope. Built from the scope itself, not
       // from organisation siblings: a branch that shares an owner but not an
