@@ -214,7 +214,7 @@ export default async function AdminDashboardPage({
             reasoning the comment here already gave about one that 404s. */}
         {mayCreateCourses ? (
           <Link
-            href="/dashboard/admin/courses/new"
+            href="/centre/courses/new"
             className="flex h-[34px] shrink-0 items-center rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold whitespace-nowrap text-primary-foreground"
           >
             New course

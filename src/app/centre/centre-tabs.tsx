@@ -68,7 +68,7 @@ export function CentreTabs({ canSettings, canCreateCourse }: { canSettings: bool
       </div>
       {canCreateCourse ? (
         <Link
-          href="/dashboard/admin/courses/new"
+          href="/centre/courses/new"
           className="mb-1 shrink-0 rounded-[6px] bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground hover:brightness-110"
         >
           New course

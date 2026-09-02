@@ -16,7 +16,7 @@ const BORDER = "oklch(0.895 0.012 82)";
 // than linking somewhere that doesn't exist yet.
 const ACTIONS = [
   { label: "Add a centre", href: "/platform" },
-  { label: "Create a course", href: "/dashboard/admin/courses/new" },
+  { label: "Create a course", href: "/centre/courses/new" },
   { label: "Invite a trainer/tutor", href: null },
   { label: "Invite an assessor", href: null },
   { label: "Create a support reply/ticket", href: null },
