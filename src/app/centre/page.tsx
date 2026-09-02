@@ -457,30 +457,9 @@ export default async function CentreOverviewPage({
         </div>
       </div>
 
-      {/* This button said "New course" and went to /dashboard/admin -- the
-          Course Admin landing, not the wizard. Same label, same teal primary
-          styling and same shape as the real "New course" in Course Admin, so
-          two identical-looking buttons did two different things: one created
-          a course, one moved you to another section and left you there.
+      {/* "New course" moved to the tab row, 2 Sep 2026 -- it was the only
+          action on this page and it sat below the assessor history. */}
 
-          That is almost certainly what happened to Ramy on 31 Aug 2026. He
-          pressed this, arrived in Course Admin, and read the screen as Centre
-          Management -- because he had never chosen to change rooms. The pills
-          flipping then confirmed the wrong answer instead of catching it.
-
-          It points at the wizard now. The capability guarding it has always
-          been course.create, so creating a course was the intent all along;
-          the href simply never caught up. */}
-      {can(ctx.roles, "course.create", ctx.overrides) ? (
-        <div>
-          <Link
-            href="/dashboard/admin/courses/new"
-            className="inline-block rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-          >
-            New course
-          </Link>
-        </div>
-      ) : null}
 
     </div>
   );

@@ -81,6 +81,7 @@ export default async function CentreLayout({ children }: { children: React.React
 
   // Settings follows the capability its own page enforces.
   const canSettings = can(ctx.roles, "centre.settings.edit", ctx.overrides);
+  const canCreateCourse = can(ctx.roles, "course.create", ctx.overrides);
 
   return (
     /* Picks the room by path rather than hardcoding, because /centre holds
@@ -148,7 +149,7 @@ export default async function CentreLayout({ children }: { children: React.React
           within it. The tabs used to come first, which put a room's inner
           navigation on top of the control that picks the room. */}
       <div className="container pt-4">
-        <CentreTabs canSettings={canSettings} />
+        <CentreTabs canSettings={canSettings} canCreateCourse={canCreateCourse} />
       </div>
 
       <main className="container w-full flex-1 pb-6">

@@ -26,7 +26,7 @@ const TABS = [
   { href: "/centre/settings", label: "Settings" },
 ] as const;
 
-export function CentreTabs({ canSettings }: { canSettings: boolean }) {
+export function CentreTabs({ canSettings, canCreateCourse }: { canSettings: boolean; canCreateCourse: boolean }) {
   const pathname = usePathname() ?? "";
 
   // Only inside Centre Management. This nav used to render on every route
@@ -43,8 +43,14 @@ export function CentreTabs({ canSettings }: { canSettings: boolean }) {
   const tabs = TABS.filter((t) => t.href !== "/centre/settings" || canSettings);
   if (tabs.length === 0) return null;
 
+  // Ramy, 2 Sep 2026: "Why is New course at the bottom? It should be on top...
+  // so you have Roles, Settings, and then on the other end of the screen, New
+  // course." It was the only action on the page and it sat below everything,
+  // after the assessor history -- you had to scroll past the whole centre to
+  // find the one thing you came to do.
   return (
-    <nav className="flex gap-2 border-b border-border pb-0.5">
+    <nav className="flex items-center justify-between gap-4 border-b border-border pb-0.5">
+      <div className="flex gap-2">
       {tabs.map((tab) => {
         const active = pathname.startsWith(tab.href);
         return (
@@ -59,6 +65,15 @@ export function CentreTabs({ canSettings }: { canSettings: boolean }) {
           </Link>
         );
       })}
+      </div>
+      {canCreateCourse ? (
+        <Link
+          href="/dashboard/admin/courses/new"
+          className="mb-1 shrink-0 rounded-[6px] bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground hover:brightness-110"
+        >
+          New course
+        </Link>
+      ) : null}
     </nav>
   );
 }
