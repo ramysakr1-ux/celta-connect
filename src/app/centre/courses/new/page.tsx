@@ -66,16 +66,20 @@ export default async function NewCoursePage() {
           to do, especially if it's the first time... I want it there."
           Verbatim from Course Admin.dc.html, not paraphrased. */}
       <div className="flex flex-col gap-3">
-        <p className="text-[11px] font-bold tracking-[0.14em] text-muted uppercase">Connect · course admin</p>
+        {/* The heading travelled with the file when this moved out of Course
+            Admin, so the wizard sat in Centre Management describing a role
+            the person opening it does not hold -- the very thing the move was
+            meant to stop. It says what it is now: the act of bringing a
+            course into existence, which is Centre Management's. */}
+        <p className="text-[11px] font-bold tracking-[0.14em] text-muted uppercase">Connect · centre management</p>
         <h1 className="font-serif text-[34px] leading-[1.15] font-semibold text-ink">
-          Course admin — the CELTA trainer&apos;s own credentials to run a course.
+          A new course, from dates to first tutor.
         </h1>
         <p className="max-w-[62ch] text-sm leading-relaxed text-muted text-pretty">
-          Distinct from Centre Management — a separate role and a separate link, covering payments and volunteer
-          students (built elsewhere). This is the main course tutor&apos;s own view: setting up a course, its
-          roster, groups, invitations, and course-level settings. Everything reusable — TP points, assignment
-          briefs, resources, feedback examples, the Drive connection — is shared by every course this trainer runs.
-          Everything about a person is course-level and leaves at close-out.
+          Five steps: what the course is, how teaching practice is delivered, its dates and weekly pattern, a first
+          tutor, then a review before you launch. Creating a course is the centre&apos;s decision — running it is
+          the course administrator&apos;s, and it passes to them the moment this is launched. Nothing here is
+          final: everything except the delivery mode can be changed afterwards.
         </p>
       </div>
 
