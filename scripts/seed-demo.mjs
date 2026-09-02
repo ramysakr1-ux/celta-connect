@@ -504,6 +504,30 @@ async function main() {
   }
   console.log("trainees:", trainees);
 
+  // --- Getting to know you: each trainee is offered three activities ---
+  //
+  // Without a gtky_assignments row the GTKY page calls notFound(), so
+  // /demo/trainee-gtky returned a 404 for everyone -- found 2 Sep 2026 while
+  // walking the demo journeys, with zero rows in the table centre-wide. The
+  // activities themselves live in code (src/lib/gtky-activities.ts), so only
+  // the offer needs seeding. Different trios per trainee, because the real
+  // assigner avoids giving one TP group the same activity twice.
+  const GTKY_OFFERS = [
+    ["ball_game", "find_someone_who", "line_up_according_to"],
+    ["find_your_other_half", "draw_your_name", "ball_game"],
+    ["line_up_according_to", "find_your_other_half", "find_someone_who"],
+  ];
+  await supabase.from("gtky_assignments").insert(
+    Object.values(trainees).map((traineeId, i) => ({
+      center_id: center.id,
+      course_id: course.id,
+      trainee_id: traineeId,
+      level_band: "inter",
+      offered_slugs: GTKY_OFFERS[i % GTKY_OFFERS.length],
+    }))
+  );
+  console.log("gtky assignments: offered to", Object.keys(trainees).length, "trainees");
+
   // --- TP subgroup, which is what actually switches the chat on ---
   //
   // Ramy, 29 Aug 2026: "I don't see those options where you can have TP
