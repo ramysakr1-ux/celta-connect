@@ -315,6 +315,25 @@ async function main() {
   }
   console.log("centre roles: manager and observer granted");
 
+  // --- A pipeline that looks like a centre actually recruiting ---
+  //
+  // Ramy, 2 Sep 2026, looking at the demo he was about to show: "it just seems
+  // like they're not doing very well. Zero money collected... very few
+  // admissions. They could have made things look a little better." He was
+  // right -- New York had three applicants, Los Angeles none at all, so every
+  // money figure read zero and switching branches went from three rows to an
+  // empty page.
+  //
+  // Run separately by scripts/seed-demo-pipeline.mjs so it can also be applied
+  // to an existing demo centre without a full rebuild.
+  await import("node:child_process").then(({ execFileSync }) => {
+    try {
+      execFileSync("node", ["scripts/seed-demo-pipeline.mjs"], { stdio: "inherit", env: process.env });
+    } catch (e) {
+      console.warn("  pipeline seed did not run:", e.message);
+    }
+  });
+
   // A SECOND branch, in another city, owned by the same person.
   //
   // Multi-centre was already built -- /centre aggregates across every centre
