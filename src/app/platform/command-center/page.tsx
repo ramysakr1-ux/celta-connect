@@ -206,23 +206,35 @@ export default async function CommandCenterOverviewPage() {
               </Link>
             </div>
             <div>
-              <div className="grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr]">
+              <div className="grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] border-b border-border">
                 {["Centre", "Active course", "Trainees", ""].map((h) => (
-                  <div key={h} className="border-b border-border px-5 py-3 text-[10.5px] font-bold uppercase tracking-wide text-muted">
+                  <div key={h} className="px-5 py-3 text-[10.5px] font-bold uppercase tracking-wide text-muted">
                     {h}
                   </div>
                 ))}
               </div>
+              {/* The rule belongs to the ROW, not to the four cells. Each cell
+                  used to carry its own border-b while the row was
+                  items-center, so a cell only as tall as its text drew its
+                  border higher than the cell holding a pill: one rule
+                  rendering as four staggered segments. Ramy, 3 Sep 2026: "the
+                  lines are broken... I just don't like looking at the centre
+                  cards." last:border-b-0 because the footer below draws its
+                  own border-t, and the two together doubled the rule at the
+                  bottom of the table. */}
               {centersList.map((c) => {
                 const access = ownedCenterIds.has(c.id) ? "Owner" : invitedByCenterId.has(c.id) ? "Invited" : null;
                 const running = runningCourseByCenterId.get(c.id) ?? false;
                 return (
-                  <div key={c.id} className="admin-hover grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] items-center">
-                    <div className="border-b border-border px-5 py-[15px] text-[13.5px] font-semibold text-ink">
+                  <div
+                    key={c.id}
+                    className="admin-hover grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] items-center border-b border-border last:border-b-0"
+                  >
+                    <div className="px-5 py-[15px] text-[13.5px] font-semibold text-ink">
                       {c.name}
                       {c.is_demo ? <span className="ml-2 text-[11px] font-normal text-muted">(demo)</span> : null}
                     </div>
-                    <div className="border-b border-border px-5 py-[15px]">
+                    <div className="px-5 py-[15px]">
                       <span
                         className={`inline-block rounded-full px-[11px] py-1 text-[11.5px] font-bold ${
                           running ? "bg-status-on-track-bg text-status-on-track-text" : "bg-surface-muted text-muted"
@@ -231,10 +243,10 @@ export default async function CommandCenterOverviewPage() {
                         {running ? (courseLabelByCenterId.get(c.id) ?? "Active course now") : "No active course"}
                       </span>
                     </div>
-                    <div className="border-b border-border px-5 py-[15px] text-[13.5px] text-ink">
+                    <div className="px-5 py-[15px] text-[13.5px] text-ink">
                       {access && traineeCountByCenterId.has(c.id) ? traineeCountByCenterId.get(c.id) : "—"}
                     </div>
-                    <div className="border-b border-border px-5 py-[15px] text-right">
+                    <div className="px-5 py-[15px] text-right">
                       {access ? (
                         <>
                           <span className={`mr-3 text-[11px] font-bold ${access === "Owner" ? "text-primary" : "text-muted"}`}>{access}</span>

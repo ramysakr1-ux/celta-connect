@@ -112,13 +112,18 @@ export default async function CommandCenterPeoplePage() {
 
       <div className="card !p-0">
         <h2 className="px-5 pt-[18px] pb-1.5 font-serif text-lg text-ink">By course</h2>
-        <div className="grid grid-cols-[1.4fr_0.8fr_0.7fr_0.7fr_1.2fr]">
+        <div className="grid grid-cols-[1.4fr_0.8fr_0.7fr_0.7fr_1.2fr] border-b border-border">
           {["Centre / course", "Status", "Trainees", "Trainers", "Volunteer attendance"].map((h) => (
-            <div key={h} className="border-b border-border px-5 py-3 text-[10.5px] font-bold uppercase tracking-wide text-muted">
+            <div key={h} className="px-5 py-3 text-[10.5px] font-bold uppercase tracking-wide text-muted">
               {h}
             </div>
           ))}
         </div>
+        {/* One rule per ROW. Each cell used to draw its own border-b under an
+            items-center row, so the taller cells (the status pill, the
+            two-line centre/course name) put their borders lower than the
+            plain number cells and the rule broke into segments -- the same
+            bug as the Centres table on Overview. */}
         {coursesList.map((c) => {
           const courseToday = todayFor(c.center_id);
           const running = c.start_date <= courseToday && c.end_date >= courseToday;
@@ -129,19 +134,22 @@ export default async function CommandCenterPeoplePage() {
           const possible = volunteerCount * sessionsSoFar;
           const attendancePct = possible > 0 ? Math.round((attended / possible) * 100) : null;
           return (
-            <div key={c.id} className="admin-hover grid grid-cols-[1.4fr_0.8fr_0.7fr_0.7fr_1.2fr] items-center">
-              <div className="border-b border-border px-5 py-[13px] text-[13px] font-semibold text-ink">
+            <div
+              key={c.id}
+              className="admin-hover grid grid-cols-[1.4fr_0.8fr_0.7fr_0.7fr_1.2fr] items-center border-b border-border last:border-b-0"
+            >
+              <div className="px-5 py-[13px] text-[13px] font-semibold text-ink">
                 {centerNameById.get(c.center_id) ?? "Unknown centre"}
                 <div className="text-[11px] font-normal text-muted">{c.name}</div>
               </div>
-              <div className="border-b border-border px-5 py-[13px]">
+              <div className="px-5 py-[13px]">
                 <span className={`status-pill ${running ? "status-pill-on-track" : ended ? "bg-status-neutral-bg text-muted" : "status-pill-pending"}`}>
                   {running ? "Running" : ended ? "Ended" : "Upcoming"}
                 </span>
               </div>
-              <div className="border-b border-border px-5 py-[13px] text-[13px] tabular-nums text-ink">{traineeCountByCourse.get(c.id) ?? 0}</div>
-              <div className="border-b border-border px-5 py-[13px] text-[13px] tabular-nums text-ink">{trainerCountByCourse.get(c.id) ?? 0}</div>
-              <div className="border-b border-border px-5 py-[13px] text-[13px] text-ink">
+              <div className="px-5 py-[13px] text-[13px] tabular-nums text-ink">{traineeCountByCourse.get(c.id) ?? 0}</div>
+              <div className="px-5 py-[13px] text-[13px] tabular-nums text-ink">{trainerCountByCourse.get(c.id) ?? 0}</div>
+              <div className="px-5 py-[13px] text-[13px] text-ink">
                 {volunteerCount === 0 ? (
                   <span className="text-muted">No volunteers</span>
                 ) : attendancePct === null ? (
