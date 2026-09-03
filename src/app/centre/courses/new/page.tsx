@@ -45,18 +45,40 @@ export default async function NewCoursePage() {
     if (!can(ctx.roles, "course.create", ctx.overrides)) redirect("/centre");
   }
 
-  // Command Center's Create menu links here for platform_owner with no
-  // centre context of its own -- active_center_id (set by Owner/Invited
-  // entry, same field switchActiveCourse's counterpart already uses) is
-  // the best guess of which centre they mean; falls back to their own home
-  // centre rather than a dead end when neither is set.
-  const targetCenterId = session.profile.active_center_id ?? session.profile.center_id;
+  // Which centre is this course for? Ramy, 3 Sep 2026, from Command Center:
+  // "Can I create a course from my command center or not?... Should be able
+  // to without having to go to a centre that I created."
+  //
+  // He could open this page, but not say which centre he meant: it resolved
+  // active_center_id ?? center_id and never asked. For a platform owner with
+  // no stake in any one centre that is a guess -- whichever centre they last
+  // entered -- and a course created at the wrong centre is not a small
+  // mistake. So the page offers the choice whenever there is more than one,
+  // defaulting to that same guess.
+  const admin = createAdminClient();
+  const defaultCenterId = session.profile.active_center_id ?? session.profile.center_id;
 
-  const { data: center } = await createAdminClient()
+  // A platform owner may create at any centre; anyone else, only where they
+  // actually hold course.create. The action re-checks this -- the list here
+  // is what to OFFER, never what authorises the write.
+  let selectableIds: string[];
+  if (session.profile.role === "platform_owner") {
+    const { data: all } = await admin.from("centers").select("id");
+    selectableIds = (all ?? []).map((c) => c.id);
+  } else {
+    const ctx = await getCentreRoleContext(session.profile);
+    selectableIds = ctx.availableCenterIds;
+  }
+  if (defaultCenterId && !selectableIds.includes(defaultCenterId)) selectableIds = [defaultCenterId, ...selectableIds];
+
+  const { data: centreRows } = await admin
     .from("centers")
-    .select("name, center_number")
-    .eq("id", targetCenterId)
-    .maybeSingle();
+    .select("id, name, center_number")
+    .in("id", selectableIds.length > 0 ? selectableIds : ["00000000-0000-0000-0000-000000000000"])
+    .order("name", { ascending: true });
+
+  const centres = (centreRows ?? []).map((c) => ({ id: c.id, name: c.name, centerNumber: c.center_number }));
+  const center = centres.find((c) => c.id === defaultCenterId) ?? centres[0] ?? null;
 
   return (
     <div className="flex flex-col gap-[22px]">
@@ -85,7 +107,7 @@ export default async function NewCoursePage() {
 
       {/* 1.15fr / 1fr, the design's split for the setup screen. */}
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[1.15fr_1fr]">
-        <CreateCourseForm centerNumber={center?.center_number ?? null} />
+        <CreateCourseForm centres={centres} defaultCentreId={center?.id ?? ""} />
 
         <div className="flex flex-col gap-4">
           <div className="card p-5">
@@ -106,9 +128,18 @@ export default async function NewCoursePage() {
         </div>
       </div>
 
-      <Link href="/centre" className="text-sm text-muted underline">
-        Back to centre management
-      </Link>
+      {/* A platform owner reaching this from Command Center may hold no
+          centre role at all, and /centre would bounce them to /dashboard --
+          a back link that does not go back. They return the way they came. */}
+      {session.profile.role === "platform_owner" ? (
+        <Link href="/platform/command-center" className="text-sm text-muted underline">
+          Back to command center
+        </Link>
+      ) : (
+        <Link href="/centre" className="text-sm text-muted underline">
+          Back to centre management
+        </Link>
+      )}
     </div>
   );
 }

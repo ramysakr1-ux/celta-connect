@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
@@ -24,12 +25,34 @@ export async function createCourse(
   formData: FormData
 ): Promise<FormState> {
   const admin = await requireRole("admin");
-  // Command Center's Create menu can reach this for a platform_owner with
-  // no home-centre stake in the course being made -- active_center_id
-  // (set by Owner/Invited entry) is which centre they actually mean, same
-  // resolution the wizard's own landing page already uses; falls back to
-  // their home centre so this never silently targets the wrong one.
-  const targetCenterId = admin.active_center_id ?? admin.center_id;
+
+  // The wizard now ASKS which centre, instead of resolving it silently from
+  // active_center_id -- a platform owner creating a course from Command
+  // Center was getting whichever centre they last entered. Ramy, 3 Sep 2026:
+  // "should be able to without having to go to a centre that I created."
+  //
+  // The posted id is checked here rather than trusted: the form is the offer,
+  // this is the authorisation. A platform owner may create at any centre; a
+  // centre admin only where they actually hold course.create, which is the
+  // same capability the wizard page itself enforces. Falls back to the old
+  // resolution when nothing is posted, so any other caller still works.
+  const postedCenterId = formData.get("center_id");
+  const fallbackCenterId = admin.active_center_id ?? admin.center_id;
+  let targetCenterId = fallbackCenterId;
+
+  if (typeof postedCenterId === "string" && postedCenterId && postedCenterId !== fallbackCenterId) {
+    if (admin.role === "platform_owner") {
+      const { data: exists } = await createAdminClient().from("centers").select("id").eq("id", postedCenterId).maybeSingle();
+      if (!exists) return { error: "That centre no longer exists." };
+      targetCenterId = postedCenterId;
+    } else {
+      const ctx = await getCentreRoleContext(admin);
+      if (!ctx.availableCenterIds.includes(postedCenterId)) {
+        return { error: "You cannot create a course at that centre." };
+      }
+      targetCenterId = postedCenterId;
+    }
+  }
 
   const name = formData.get("name");
   const startDate = formData.get("start_date");

@@ -42,7 +42,21 @@ const MODE_LABEL: Record<DeliveryMode, string> = {
  * be skipped at step 4. Only step 1's name and dates are required, because
  * a course record without them is not a course.
  */
-export function CreateCourseForm({ centerNumber }: { centerNumber?: string | null }) {
+export interface WizardCentre {
+  id: string;
+  name: string;
+  centerNumber: string | null;
+}
+
+export function CreateCourseForm({ centres, defaultCentreId }: { centres: WizardCentre[]; defaultCentreId: string }) {
+  // Which centre this course is for. It used to be resolved silently from
+  // active_center_id, so a platform owner creating a course from Command
+  // Center got whichever centre they last entered, with no way to say
+  // otherwise. Ramy, 3 Sep 2026: "should be able to without having to go to
+  // a centre that I created."
+  const [centreId, setCentreId] = useState(defaultCentreId);
+  const centre = centres.find((c) => c.id === centreId) ?? null;
+  const centerNumber = centre?.centerNumber ?? null;
   const [state, action, pending] = useActionState(createCourse, initialState);
   const router = useRouter();
 
@@ -115,11 +129,41 @@ export function CreateCourseForm({ centerNumber }: { centerNumber?: string | nul
       <div className={step === 1 ? "flex flex-col gap-4" : "hidden"}>
         {stepHeader(1, "Course details", "The centre number and course code print on every certificate and report — get them right here.")}
 
+        {/* One centre: state it and post it hidden -- no choice to make.
+            More than one: ask, because creating a course at the wrong centre
+            is not a small mistake. The action re-checks whichever id arrives
+            here against what this person may actually create at. */}
+        {centres.length > 1 ? (
+          <div className="flex flex-col gap-1">
+            <label htmlFor="center_id" className="text-[13px] font-semibold text-ink">
+              Which centre is this course for?
+            </label>
+            <select
+              id="center_id"
+              name="center_id"
+              value={centreId}
+              onChange={(e) => setCentreId(e.target.value)}
+              className="h-9 rounded-[6px] border border-input bg-card px-2.5 text-sm text-ink"
+            >
+              {centres.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                  {c.centerNumber ? ` · ${c.centerNumber}` : ""}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-muted">The course, its trainees and everything it generates belong to this centre.</p>
+          </div>
+        ) : (
+          <input type="hidden" name="center_id" value={centreId} />
+        )}
+
         <div className="flex flex-col gap-1">
           <label className="text-[13px] font-semibold text-ink">Cambridge centre number</label>
           <p className="text-sm text-ink">{centerNumber ?? "Not set"}</p>
           <p className="text-xs text-muted">
-            Prefilled from the centre profile and locked here — change it in Centre Management, not per course.
+            Prefilled from {centres.length > 1 ? "the centre you chose" : "the centre profile"} and locked here — change it in Centre
+            Management, not per course.
           </p>
         </div>
 
