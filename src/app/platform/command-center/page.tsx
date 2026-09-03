@@ -206,7 +206,7 @@ export default async function CommandCenterOverviewPage() {
               </Link>
             </div>
             <div>
-              <div className="grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] border-b border-border">
+              <div className="grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] border-b border-rule-gold">
                 {["Centre", "Active course", "Trainees", ""].map((h) => (
                   <div key={h} className="px-5 py-3 text-[10.5px] font-bold uppercase tracking-wide text-muted">
                     {h}
@@ -228,7 +228,7 @@ export default async function CommandCenterOverviewPage() {
                 return (
                   <div
                     key={c.id}
-                    className="admin-hover grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] items-center border-b border-border last:border-b-0"
+                    className="admin-hover grid grid-cols-[1.4fr_1.2fr_0.8fr_1.2fr] items-center border-b border-rule-gold-soft last:border-b-0"
                   >
                     <div className="px-5 py-[15px] text-[13.5px] font-semibold text-ink">
                       {c.name}
@@ -262,7 +262,7 @@ export default async function CommandCenterOverviewPage() {
                 );
               })}
             </div>
-            <div className="border-t border-border px-5 py-3 text-[11px] text-muted">
+            <div className="border-t border-rule-gold px-5 py-3 text-[11px] text-muted">
               Owner access is disclosed to the centre on their side. Centres you haven&apos;t been invited into show only what they&apos;ve chosen to make
               visible — no silent viewing.
             </div>

@@ -46,6 +46,14 @@
   --color-gold: oklch(63% 0.096 72); /* brass/gold accent, used sparingly */
   --color-gold-foreground: oklch(99% 0.005 90);
   --color-ink-warm: oklch(30% 0.042 58); /* warm dark brown, one step lighter/warmer than --color-ink -- the wordmark tile, and headings/primary buttons/checkboxes on entry surfaces (rename-to-connect.md) */
+  /* Command Center's own gold, at two strengths, for the rules inside its
+     tables. Ramy, 3 Sep 2026: "make those lines between centres... a nice
+     sort of gold line." Same hue as the three rules in its header
+     (oklch(62% 0.14 68)), so a table reads as part of that section rather
+     than as generic neutral chrome. Alpha rather than a lighter oklch so the
+     rule tints whatever card sits behind it. */
+  --color-rule-gold: oklch(62% 0.14 68 / 0.55);
+  --color-rule-gold-soft: oklch(62% 0.14 68 / 0.3);
   --color-bronze: oklch(50% 0.09 62); /* third accent, from the Centre Admin design system -- consultation-time timetable category, distinct from primary/gold/ink at a glance */
   --color-garnet: oklch(42% 0.13 27); /* same hue as the trainer hub's ACT-side garnet -- Ramy, 27 Aug 2026: card top/side accent bars should alternate teal/garnet "so it's not all green," purely decorative, not a semantic status color like --color-destructive (very similar hue, kept separate on purpose -- reusing the error color for plain decoration would risk a garnet card silently reading as "something's wrong"). */
   --color-destructive: oklch(45% 0.15 27);
@@ -107,6 +115,8 @@
   --color-gold: var(--color-gold);
   --color-gold-foreground: var(--color-gold-foreground);
   --color-ink-warm: var(--color-ink-warm);
+  --color-rule-gold: var(--color-rule-gold);
+  --color-rule-gold-soft: var(--color-rule-gold-soft);
   --color-bronze: var(--color-bronze);
   --color-garnet: var(--color-garnet);
   --color-destructive: var(--color-destructive);
