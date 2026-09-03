@@ -23,7 +23,13 @@ export const CC_SECTIONS = [
   { label: "Overview", href: "/platform/command-center", colour: "oklch(62% 0.14 68)" },
   { label: "People", href: "/platform/command-center/people", colour: "oklch(45% 0.10 227)" },
   { label: "Money", href: "/platform/command-center/money", colour: "oklch(45% 0.10 111)" },
-  { label: "Access", href: "/platform/command-center/access", colour: "oklch(44% 0.12 353)" },
+  // "Demo links", not "Access". Ramy, 3 Sep 2026: "that's all it does. Demo
+  // links. I can call it demo links." The old label promised the room where
+  // access is granted, so he kept going there looking for course creation --
+  // signage describing a bigger room than the one behind the door. The
+  // section holds demo login links and nothing else, so it says so. The URL
+  // stays /access; renaming the route would break any link already saved.
+  { label: "Demo links", href: "/platform/command-center/access", colour: "oklch(44% 0.12 353)" },
 ] as const;
 
 const SAND = "oklch(93.5% 0.012 82)";

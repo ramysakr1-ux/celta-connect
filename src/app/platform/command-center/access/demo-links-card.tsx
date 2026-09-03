@@ -25,6 +25,10 @@ function hoursLeft(expiresAt: string): string {
   const ms = new Date(expiresAt).getTime() - Date.now();
   if (ms <= 0) return "Expired";
   const hrs = Math.round(ms / 3_600_000);
+  // A permanent link is dated a century out; counting the hours to it would
+  // read as "Expires in 876000h", which is technically true and useless.
+  if (hrs > 24 * 365) return "No expiry — revoke to end it";
+  if (hrs > 48) return `Expires in ${Math.round(hrs / 24)} days`;
   return hrs <= 0 ? "Expires soon" : `Expires in ${hrs}h`;
 }
 
@@ -61,7 +65,7 @@ export function DemoLinksCard({ centres, activeLinks }: { centres: { id: string;
         <div className="text-[11px] text-muted">24h expiry</div>
       </div>
       <div className="text-[11.5px] leading-normal text-muted">
-        Sign in as any role at a demo centre — each link is single-purpose and expires automatically. Demo centres only: these links sign
+        Sign in as any role at a demo centre — each link is single-purpose, and expires when you say. Demo centres only: these links sign
         someone in without an account, which is safe only where the database blocks every write. Not the same as Owner/Invited access, and not
         how a real assessor gets in — their link is issued by the course tutor. Generating one here is always logged.
       </div>
@@ -89,6 +93,11 @@ export function DemoLinksCard({ centres, activeLinks }: { centres: { id: string;
             ))}
           </select>
         </div>
+        <select name="lifetime" defaultValue="day" className={selectClass}>
+          <option value="day">Lasts 24 hours</option>
+          <option value="week">Lasts 7 days</option>
+          <option value="permanent">No expiry — until revoked</option>
+        </select>
         <button
           type="submit"
           disabled={pending}

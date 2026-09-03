@@ -33,7 +33,21 @@ export async function generateDemoLoginLink(_prev: GenerateLinkState, formData: 
   if (!centre) return { error: "That centre no longer exists." };
   if (!centre.is_demo) return { error: "Demo centres only — these links sign someone in without an account." };
 
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  // Ramy, 3 Sep 2026: "can I create, like, a permanent one or only magic
+  // one?" Three lifetimes now, 24h still the default. "Permanent" is a date
+  // a century out rather than a null, because every query here filters on
+  // expires_at > now and a null would drop the row out of its own list.
+  // Revoking still works on it, which is what actually ends a link.
+  const lifetime = formData.get("lifetime");
+  const hours = lifetime === "week" ? 24 * 7 : lifetime === "permanent" ? null : 24;
+  const expiresAt =
+    hours === null
+      ? (() => {
+          const d = new Date();
+          d.setFullYear(d.getFullYear() + 100);
+          return d.toISOString();
+        })()
+      : new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
 
   const { error } = await admin.from("platform_demo_login_links").insert({
     center_id: centerId,
