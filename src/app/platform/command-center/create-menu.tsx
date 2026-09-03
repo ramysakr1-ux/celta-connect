@@ -33,16 +33,23 @@ const BORDER = "oklch(0.895 0.012 82)";
 // sits directly above the list it adds to; his call: "we can leave it there
 // where the centre cards are."
 //
-// The three still without a href stay visible (so the menu isn't a lie about
-// what's coming) but inert -- muted, not clickable -- rather than linking
-// somewhere that doesn't exist yet.
-const ACTIONS = [
+// The three inert items are gone. Ramy, 3 Sep 2026: "we'll remove anything
+// that is not active." They had been kept visible-but-muted so the menu
+// wasn't a lie about what was coming, but three of five entries advertising
+// things you cannot do is its own kind of lie -- and each had a reason it
+// would never be built here: a tutor is invited on a course, not on the
+// platform; a support ticket system does not exist and overlaps staff chat;
+// and a platform-wide announcement has nobody to announce to.
+//
+// The href:null branch below stays. It costs nothing and the next unbuilt
+// item can use it.
+// Typed rather than `as const`: with every href a string, TypeScript narrows
+// the list and the href:null branch below becomes unreachable. Keeping the
+// annotation keeps that branch valid for the next unbuilt item.
+const ACTIONS: { label: string; href: string | null }[] = [
   { label: "Create a course", href: "/centre/courses/new" },
-  { label: "Invite a trainer/tutor", href: null },
-  { label: "Create a support reply/ticket", href: null },
-  { label: "Add a platform announcement", href: null },
   { label: "Add a role/permission", href: "/centre/roles" },
-] as const;
+];
 
 export function CreateMenu() {
   const [open, setOpen] = useState(false);
