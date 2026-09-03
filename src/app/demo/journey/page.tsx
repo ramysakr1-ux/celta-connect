@@ -591,6 +591,9 @@ export default async function JourneyPage() {
             number={7}
             title="The interview itself"
             blurb="Seven fixed questions from the centre's own bank, plus two more drawn per applicant from whatever the task reading flagged as weak. Both the interviewer and the candidate sign the record afterward."
+            href="/demo/journey/interview-record"
+            hrefLabel="Open the real interview record →"
+            caveat="Opens as demo admissions staff, on the demo applicant's own page -- the questions drawn for them, the scoring and both signatures."
           >
             {interviewQuestions && interviewQuestions.length > 0 ? (
               <div className="flex flex-col gap-2">
