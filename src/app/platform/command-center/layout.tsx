@@ -1,4 +1,6 @@
 import { requireRole } from "@/lib/auth/require-role";
+import { getCentreRoleContext } from "@/lib/auth/centre-roles";
+import { adminHomePath } from "@/lib/auth/centre-permissions";
 import { getPlatformOwnerGreeting } from "@/lib/platform-owner-greeting";
 import { checkPlatformHealth } from "@/lib/platform-health";
 import { getPulseStripStats } from "@/app/platform/command-center/pulse-strip-data";
@@ -29,11 +31,16 @@ const MUTED = "oklch(0.51 0.017 70)";
 
 export default async function CommandCenterLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireRole("platform_owner");
-  const [greeting, health, pulseStats] = await Promise.all([
+  const [greeting, health, pulseStats, centreCtx] = await Promise.all([
     getPlatformOwnerGreeting(profile.full_name),
     checkPlatformHealth(),
     getPulseStripStats(profile.id),
+    // For the product switcher's "Connect" row. A platform owner may hold no
+    // centre role at all, in which case /centre would bounce them to
+    // /dashboard anyway -- so go there directly rather than through a redirect.
+    getCentreRoleContext(profile),
   ]);
+  const connectHref = centreCtx.roles.length > 0 ? adminHomePath(centreCtx.roles) : "/dashboard";
 
   return (
     <div style={{ fontFamily: "Karla, Helvetica, sans-serif", background: SAND, minHeight: "100vh" }}>
@@ -58,7 +65,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
             />
             <span style={{ fontSize: 12, color: MUTED }}>{health.label}</span>
           </div>
-          <ProductSwitcher />
+          <ProductSwitcher connectHref={connectHref} />
           <CreateMenu />
         </div>
       </div>

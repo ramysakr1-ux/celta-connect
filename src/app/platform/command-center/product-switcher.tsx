@@ -8,17 +8,21 @@ const INK = "oklch(0.235 0.017 65)";
 const MUTED = "oklch(0.51 0.017 70)";
 const HOVER = "oklch(0.96 0.012 82)";
 
-const PRODUCTS = [
-  { name: "Connect Hub", href: "https://ramysakr1-ux.github.io/connect-Hub/", color: "oklch(0.45 0.15 27)", initial: "H" },
-  { name: "Connect", href: "/app", color: "oklch(0.38 0.072 195)", initial: "C" },
-  { name: "Affina", href: "https://app.affina.com.tr", color: "oklch(0.5 0.11 155)", initial: "A" },
-] as const;
+// command-center-full-spec.md: "Extensible for future projects."
+//
+// Connect's own row pointed at /app, the literal target the spec named. There
+// is no /app route -- it 307'd to /login, so the one product in this list that
+// is actually this product was the one row that went nowhere. It now takes the
+// destination the layout works out, the same adminHomePath() rule the wordmark
+// follows everywhere else, so "Connect" means the same front door here as it
+// does from every other screen.
+export function ProductSwitcher({ connectHref }: { connectHref: string }) {
+  const products = [
+    { name: "Connect Hub", href: "https://ramysakr1-ux.github.io/connect-Hub/", color: "oklch(0.45 0.15 27)", initial: "H" },
+    { name: "Connect", href: connectHref, color: "oklch(0.38 0.072 195)", initial: "C" },
+    { name: "Affina", href: "https://app.affina.com.tr", color: "oklch(0.5 0.11 155)", initial: "A" },
+  ];
 
-// command-center-full-spec.md: "Extensible for future projects." Connect's
-// own row links to /app -- a placeholder, since Command Center itself lives
-// under /platform, not a dedicated /app; kept as the literal spec target
-// rather than guessing a real destination that isn't built.
-export function ProductSwitcher() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -44,7 +48,7 @@ export function ProductSwitcher() {
       {open ? (
         <div style={{ position: "absolute", top: 42, right: 0, width: 210, background: CARD, borderRadius: 8, boxShadow: "0 4px 20px -4px rgba(0,0,0,0.35)", overflow: "hidden", zIndex: 30 }}>
           <div style={{ padding: "8px 14px", background: HOVER, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>Your products</div>
-          {PRODUCTS.map((p) => (
+          {products.map((p) => (
             <a
               key={p.name}
               href={p.href}
