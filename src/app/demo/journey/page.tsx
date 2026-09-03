@@ -442,10 +442,24 @@ export default async function JourneyPage() {
             number={1}
             title="Applies"
             blurb="The public application form -- name, an extended writing task, a recorded speaking task, and a language-awareness check, plus the acknowledgements. Together these three are the pre-interview task."
-            href="/apply"
-            hrefLabel="Open the real application form →"
-            caveat={`This is the live form for ${realCenter?.name ?? "the real centre"} -- the same one real applicants use. Look, don't submit.`}
-          />
+            href="/demo/journey/apply"
+            hrefLabel="Apply — record yourself and submit →"
+            caveat="The same form, the same recorder, the same server action, pointed at the demo centre. Submitting is safe: it lands in the demo pipeline and is wiped on the next rebuild."
+          >
+            {/* Ramy, 3 Sep 2026: "the recording part, the actual recording. I
+                wanna be able to record myself... the whole process should be
+                in the journey." The step above used to open Elmswood's LIVE
+                form, captioned "look, don't submit" -- so the first
+                interactive step of the journey was the one nobody could
+                actually take. The demo form leads now; the live one stays
+                below, for seeing a real centre's own prompts and branding. */}
+            <a
+              href="/apply"
+              className="trainee-hover-fill inline-flex w-fit items-center rounded-[6px] border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted"
+            >
+              Or see {realCenter?.name ?? "the real centre"}&apos;s live form → (don&apos;t submit that one)
+            </a>
+          </Step>
           <Step number={2} title="Gets an acknowledgement" blurb="Sent the moment the form is submitted.">
             <EmailPreview title="We have your application" to={applicantName} html={ackHtml} />
           </Step>

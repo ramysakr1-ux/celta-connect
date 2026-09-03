@@ -25,6 +25,51 @@ const ny = centres.find((c) => /New York/.test(c.name));
 const la = centres.find((c) => /Los Angeles/.test(c.name));
 const { data: courses } = await supabase.from("courses").select("id, name, center_id").in("center_id", [ny.id, la.id]);
 
+// The application form's own prompts. Ramy, 3 Sep 2026: "the recording part,
+// the actual recording. I wanna be able to record myself." He couldn't -- the
+// form only renders the recorder when the centre has an active speaking
+// prompt, and BOTH demo centres had zero writing prompts and zero speaking
+// prompts. So the only application form with a recorder on it was Elmswood's
+// live one, which the journey rightly labels "look, don't submit".
+//
+// Seeded here rather than in a migration: a migration runs once and the next
+// centre rebuild destroys what it wrote.
+const WRITING = [
+  ["narrative", "Describe a time you learned something difficult, and what actually helped."],
+  ["descriptive", "Describe a teacher who taught you well, and what they actually did."],
+  ["argumentative", "Can anyone learn a language as an adult? Take a position and defend it."],
+];
+const SPEAKING = [
+  "Tell us about a time you had to adapt your communication style for a new audience.",
+  "Describe how you would explain your job to a stranger.",
+  "Talk about a meal you know how to cook well.",
+];
+
+let writingAdded = 0, speakingAdded = 0;
+for (const centre of [ny, la]) {
+  for (const [prompt_type, prompt_text] of WRITING) {
+    const { data: exists } = await supabase
+      .from("application_writing_prompts")
+      .select("id").eq("center_id", centre.id).eq("prompt_text", prompt_text).maybeSingle();
+    if (exists) continue;
+    const { error } = await supabase
+      .from("application_writing_prompts")
+      .insert({ center_id: centre.id, prompt_type, prompt_text, active: true });
+    if (error) console.warn("  writing prompt:", error.message); else writingAdded++;
+  }
+  for (const prompt_text of SPEAKING) {
+    const { data: exists } = await supabase
+      .from("speaking_task_prompts")
+      .select("id").eq("center_id", centre.id).eq("prompt_text", prompt_text).maybeSingle();
+    if (exists) continue;
+    const { error } = await supabase
+      .from("speaking_task_prompts")
+      .insert({ center_id: centre.id, prompt_text, active: true });
+    if (error) console.warn("  speaking prompt:", error.message); else speakingAdded++;
+  }
+}
+console.log(`writing prompts added: ${writingAdded}   speaking prompts added: ${speakingAdded}`);
+
 let added = 0, plans = 0, collected = 0;
 for (const [centre, course, names] of [
   [ny, courses.find((c) => c.name === "CELTA Demo Course"), NY],
