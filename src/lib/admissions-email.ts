@@ -14,6 +14,11 @@ export type ApplicantEmailType =
   | "acknowledgement"
   | "task_waiting"
   | "interview_invitation"
+  // Ramy, 3 Sep 2026: "be good to send them a one hour reminder before the
+  // interview." Sent by src/lib/interview-reminder-cron.ts.
+  | "interview_reminder"
+  // Staff notification when an applicant moves their own interview.
+  | "interview_rescheduled"
   // The decision
   | "offer"
   | "rejection"
@@ -91,6 +96,10 @@ export const EMAIL_REPLY_TO: Record<ApplicantEmailType, EmailReplyTo> = {
   acknowledgement: "noreply",
   task_waiting: "noreply",
   interview_invitation: "admissions",
+  // Admissions, not noreply: an applicant who cannot make it an hour from
+  // now needs a reply-to that reaches a person.
+  interview_reminder: "admissions",
+  interview_rescheduled: "admissions",
   offer: "admissions",
   rejection: "tutor",
   rejection_after_interview: "tutor",
@@ -459,6 +468,58 @@ export function applicationSubmittedEmailHtml(input: {
 // Ramy, 27 Aug 2026: fires the moment an interview record is saved --
 // "a decision is needed" is the same admissions_notifications row this
 // mirrors, just actually delivered now.
+// The one-hour reminder. Ramy, 3 Sep 2026: "be good to send them a one hour
+// reminder before the interview."
+//
+// The time comes in pre-formatted by interviewWhen(), which says it in the
+// applicant's own zone first and the centre's second -- the whole reason the
+// reminder is worth sending to someone who applied from another country.
+export function interviewRescheduledEmailHtml(input: {
+  recipientName: string;
+  applicantName: string;
+  courseName: string;
+  previousWhen: string;
+  reviewUrl: string;
+}): string {
+  return emailShell({
+    heading: "An applicant moved their interview",
+    tone: "amber",
+    body:
+      p(`Dear ${input.recipientName},`) +
+      p(`${input.applicantName} has released their interview slot for ${input.courseName} and is choosing a new time.`) +
+      rawP(`<strong>They were booked for:</strong> ${esc(input.previousWhen)}`) +
+      p("That slot is free again and available to other applicants. They can only do this once -- if they need to move it a second time they have been told to contact you.") +
+      rawP(`Their application is here: <a href="${input.reviewUrl}">${esc(input.reviewUrl)}</a>`),
+    footnote: "This is an automatic notification -- nothing needs confirming.",
+  });
+}
+
+export function interviewReminderEmailHtml(input: {
+  applicantName: string;
+  courseName: string;
+  centerName: string;
+  when: string;
+  mode: "online" | "face_to_face";
+  joinNote: string | null;
+  rescheduleUrl: string | null;
+}): string {
+  return emailShell({
+    heading: "Your interview is in about an hour",
+    tone: "teal",
+    body:
+      p(`Dear ${input.applicantName},`) +
+      p(`A reminder that your interview for ${input.courseName} at ${input.centerName} is coming up.`) +
+      rawP(`<strong>When:</strong> ${esc(input.when)}`) +
+      rawP(`<strong>Where:</strong> ${input.mode === "online" ? "Online" : `In person at ${esc(input.centerName)}`}`) +
+      (input.joinNote ? p(input.joinNote) : "") +
+      p("There is nothing to prepare. Bring yourself and any questions you have about the course.") +
+      (input.rescheduleUrl
+        ? rawP(`If something has come up, you can <a href="${input.rescheduleUrl}">change your interview time</a>.`)
+        : ""),
+    footnote: "This is an automatic reminder -- there is no need to reply to it.",
+  });
+}
+
 export function interviewCompletedEmailHtml(input: {
   recipientName: string;
   applicantName: string;

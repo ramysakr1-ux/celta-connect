@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { esc } from "@/lib/email-layout";
+import { interviewWhen, interviewInstant } from "@/lib/interview-time";
+import { getAdmissionsHandlerProfileIds } from "@/lib/admissions-notify";
 
 export interface ClaimSlotState {
   error: string | null;
@@ -91,8 +93,8 @@ async function notifyStaffOfPickerBooking(
   try {
     const [{ data: slot }, { data: applicant }, { data: center }] = await Promise.all([
       admin.from("interview_slots").select("slot_date, slot_time, mode, interviewer_id").eq("id", input.slotId).maybeSingle(),
-      admin.from("applicants").select("full_name, intake_course_id").eq("id", input.applicantId).maybeSingle(),
-      admin.from("centers").select("name, admissions_email").eq("id", input.centerId).maybeSingle(),
+      admin.from("applicants").select("full_name, intake_course_id, time_zone").eq("id", input.applicantId).maybeSingle(),
+      admin.from("centers").select("name, admissions_email, time_zone").eq("id", input.centerId).maybeSingle(),
     ]);
     if (!slot || !applicant || !center) return;
 
@@ -105,12 +107,14 @@ async function notifyStaffOfPickerBooking(
     const { data: people } = await admin.from("profiles").select("full_name, email").in("id", [...new Set(ids)]);
     if (!people?.length) return;
 
-    const when = `${new Date(`${slot.slot_date}T${slot.slot_time}`).toLocaleString("en-GB", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      hour: "2-digit",
-      minute: "2-digit",
+    // Both zones, centre first for staff -- they are reading a rota. Was a
+    // bare toLocaleString with no timeZone option, so it printed in whatever
+    // zone the server ran in and named none.
+    const when = `${interviewWhen({
+      slot: { slotDate: slot.slot_date, slotTime: slot.slot_time },
+      centreTimeZone: center.time_zone,
+      applicantTimeZone: applicant.time_zone,
+      centreName: center.name,
     })} (${slot.mode === "online" ? "online" : "in person"})`;
 
     const { sendApplicantEmail } = await import("@/lib/admissions-email");
@@ -130,5 +134,153 @@ async function notifyStaffOfPickerBooking(
     }
   } catch {
     // A notification failure must not undo a booking that already happened.
+  }
+}
+
+// Rescheduling, once, by the applicant themselves.
+//
+// Ramy, 3 Sep 2026, asked whether there was a rescheduling option. There was
+// not: the only way a booked slot got freed was a staff member clearing it by
+// hand, so an applicant whose circumstances changed had to email and wait. He
+// chose self-service, one change only, with a cutoff.
+//
+// Three guards, all re-checked here rather than trusted from the page that
+// rendered the button:
+//   - they must actually be booked
+//   - they must not have moved it before (applicants.interview_rescheduled_at)
+//   - it must not be inside the cutoff below
+//
+// This does NOT rebook them. It frees the slot and returns them to the
+// picker, so the same claim-on-click race protection applies to their new
+// choice as to their first one -- and the slot they gave up is immediately
+// available to somebody else.
+const RESCHEDULE_CUTOFF_HOURS = 24;
+
+export interface RescheduleState {
+  error: string | null;
+}
+
+export async function rescheduleInterview(_prevState: RescheduleState, formData: FormData): Promise<RescheduleState> {
+  const token = formData.get("token");
+  if (typeof token !== "string" || !token) return { error: "Something went wrong. Refresh and try again." };
+
+  const admin = createAdminClient();
+  const { data: applicant } = await admin
+    .from("applicants")
+    .select("id, full_name, center_id, intake_course_id, stage, time_zone, interview_rescheduled_at")
+    .eq("interview_invite_token", token)
+    .maybeSingle();
+
+  if (!applicant) return { error: "This link is invalid." };
+  if (applicant.stage !== "interview_booked") return { error: "You don't have an interview booked to move." };
+  if (applicant.interview_rescheduled_at) {
+    return { error: "You've already moved your interview once. Please contact the centre if you need to change it again." };
+  }
+
+  const { data: slot } = await admin
+    .from("interview_slots")
+    .select("id, slot_date, slot_time, mode")
+    .eq("booked_applicant_id", applicant.id)
+    .maybeSingle();
+  if (!slot) return { error: "We couldn't find your booking. Please contact the centre." };
+
+  const { data: center } = await admin
+    .from("centers")
+    .select("name, admissions_email, time_zone")
+    .eq("id", applicant.center_id)
+    .maybeSingle();
+
+  const startsAt = interviewInstant({ slotDate: slot.slot_date, slotTime: slot.slot_time }, center?.time_zone ?? null);
+  const hoursAway = (startsAt.getTime() - Date.now()) / 3_600_000;
+  if (hoursAway < RESCHEDULE_CUTOFF_HOURS) {
+    return {
+      error: `Your interview is less than ${RESCHEDULE_CUTOFF_HOURS} hours away, so it can't be moved here. Please contact the centre.`,
+    };
+  }
+
+  const previousWhen = interviewWhen({
+    slot: { slotDate: slot.slot_date, slotTime: slot.slot_time },
+    centreTimeZone: center?.time_zone ?? null,
+    applicantTimeZone: applicant.time_zone,
+    centreName: center?.name,
+  });
+
+  // Free the slot first. If the stage update below failed after this, they
+  // would be un-booked and able to pick again -- recoverable. The other order
+  // would leave them stage-shifted with their old slot still held, which
+  // blocks somebody else from taking it.
+  const { error: freeError } = await admin
+    .from("interview_slots")
+    .update({ booked_applicant_id: null })
+    .eq("id", slot.id)
+    .eq("booked_applicant_id", applicant.id);
+  if (freeError) return { error: "Could not release your slot. Please try again." };
+
+  // Back to the stage the picker serves from, and the stamp that spends
+  // their one change.
+  await admin
+    .from("applicants")
+    .update({ stage: "task_returned", interview_rescheduled_at: new Date().toISOString() })
+    .eq("id", applicant.id);
+
+  await notifyStaffOfReschedule({
+    centerId: applicant.center_id,
+    applicantId: applicant.id,
+    applicantName: applicant.full_name,
+    intakeCourseId: applicant.intake_course_id,
+    previousWhen,
+    centerName: center?.name ?? "the centre",
+    centerAdmissionsEmail: center?.admissions_email ?? null,
+  });
+
+  revalidatePath(`/interview/${token}`);
+  return { error: null };
+}
+
+async function notifyStaffOfReschedule(input: {
+  centerId: string;
+  applicantId: string;
+  applicantName: string;
+  intakeCourseId: string;
+  previousWhen: string;
+  centerName: string;
+  centerAdmissionsEmail: string | null;
+}): Promise<void> {
+  // A notification failure must never undo a reschedule that already happened
+  // -- same rule as the booking notifications above it.
+  try {
+    const admin = createAdminClient();
+    const { data: course } = await admin.from("courses").select("name").eq("id", input.intakeCourseId).maybeSingle();
+    const profileIds = await getAdmissionsHandlerProfileIds(admin, input.centerId);
+    if (profileIds.length === 0) return;
+
+    const { data: people } = await admin.from("profiles").select("full_name, email").in("id", profileIds);
+    if (!people?.length) return;
+
+    const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.celtaconnect.com";
+    const { sendApplicantEmail, interviewRescheduledEmailHtml } = await import("@/lib/admissions-email");
+
+    for (const person of people) {
+      if (!person.email) continue;
+      await sendApplicantEmail({
+        centerName: input.centerName,
+        centerAdmissionsEmail: input.centerAdmissionsEmail,
+        to: person.email,
+        subject: "An applicant moved their interview",
+        centerId: input.centerId,
+        applicantId: input.applicantId,
+        type: "interview_rescheduled",
+        recipientName: person.full_name,
+        html: interviewRescheduledEmailHtml({
+          recipientName: person.full_name,
+          applicantName: input.applicantName,
+          courseName: course?.name ?? "the course",
+          previousWhen: input.previousWhen,
+          reviewUrl: `${base}/dashboard/admissions/${input.applicantId}`,
+        }),
+      });
+    }
+  } catch {
+    // Deliberately swallowed, as above.
   }
 }

@@ -527,6 +527,10 @@ export interface Database {
           email: string;
           phone: string | null;
           date_of_birth: string | null;
+          /** migration 0265 -- IANA zone chosen on the application form; null for anyone who applied before 3 Sep 2026. */
+          time_zone: string | null;
+          /** migration 0265 -- when they moved their own interview; set once, then the link is withdrawn. */
+          interview_rescheduled_at: string | null;
           education_summary: string | null;
           elt_experience_summary: string | null;
           special_requirements: string | null;
@@ -676,6 +680,8 @@ export interface Database {
           booked_applicant_id: string | null;
           created_by: string | null;
           created_at: string;
+          /** migration 0265 -- when the one-hour reminder went out; cleared by trigger when the slot is freed. */
+          reminder_sent_at: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["interview_slots"]["Row"]> & {
           center_id: string;
@@ -2522,6 +2528,8 @@ export interface Database {
             | "acknowledgement"
             | "task_waiting"
             | "interview_invitation"
+            | "interview_reminder"
+            | "interview_rescheduled"
             | "offer"
             | "rejection"
             | "rejection_after_interview"

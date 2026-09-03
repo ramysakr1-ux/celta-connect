@@ -16,6 +16,7 @@ import {
 import { offerNextWaitingListPlace } from "@/lib/admissions-waiting-list";
 import { regenerateSlotsForInterviewer } from "@/lib/interview-availability";
 import type { Database } from "@/lib/supabase/types";
+import { interviewWhen } from "@/lib/interview-time";
 
 /** "You are second on the waiting list" -- the design spells the rank out. */
 const ORDINAL_WORD: Record<number, string> = {
@@ -323,8 +324,8 @@ async function notifyInterviewBooked(input: { applicantId: string; slotId: strin
         .select("slot_date, slot_time, mode, interviewer_id, second_interviewer_id")
         .eq("id", input.slotId)
         .maybeSingle(),
-      admin.from("applicants").select("full_name, intake_course_id").eq("id", input.applicantId).maybeSingle(),
-      admin.from("centers").select("name, admissions_email").eq("id", input.centerId).maybeSingle(),
+      admin.from("applicants").select("full_name, intake_course_id, time_zone").eq("id", input.applicantId).maybeSingle(),
+      admin.from("centers").select("name, admissions_email, time_zone").eq("id", input.centerId).maybeSingle(),
     ]);
     if (!slot || !applicant || !center) return;
 
@@ -345,12 +346,14 @@ async function notifyInterviewBooked(input: { applicantId: string; slotId: strin
     const { data: people } = await admin.from("profiles").select("id, full_name, email").in("id", [...new Set(ids)]);
     if (!people?.length) return;
 
-    const when = `${new Date(`${slot.slot_date}T${slot.slot_time}`).toLocaleString("en-GB", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      hour: "2-digit",
-      minute: "2-digit",
+    // Both zones, centre first for staff -- they are reading a rota. Was a
+    // bare toLocaleString with no timeZone option, so it printed in whatever
+    // zone the server ran in and named none.
+    const when = `${interviewWhen({
+      slot: { slotDate: slot.slot_date, slotTime: slot.slot_time },
+      centreTimeZone: center.time_zone,
+      applicantTimeZone: applicant.time_zone,
+      centreName: center.name,
     })} (${slot.mode === "online" ? "online" : "in person"})`;
 
     const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://celtaconnect.com";
@@ -900,7 +903,7 @@ export async function rejectApplicant(_prevState: FormState, formData: FormData)
   let emailError: string | null = null;
   const [{ data: course }, { data: center }] = await Promise.all([
     supabase.from("courses").select("name").eq("id", applicant.intake_course_id).maybeSingle(),
-    supabase.from("centers").select("name, admissions_email").eq("id", staff.center_id).maybeSingle(),
+    supabase.from("centers").select("name, admissions_email, time_zone").eq("id", staff.center_id).maybeSingle(),
   ]);
   // Two different emails, not one with a variable. All Emails.dc.html lists
   // "Not suitable - after task" and "Not suitable - after interview"
@@ -1026,7 +1029,7 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
         .select("name, start_date, end_date, deposit_amount, fee_currency")
         .eq("id", applicant.intake_course_id)
         .maybeSingle(),
-      supabase.from("centers").select("name, admissions_email").eq("id", staff.center_id).maybeSingle(),
+      supabase.from("centers").select("name, admissions_email, time_zone").eq("id", staff.center_id).maybeSingle(),
       supabase
         .from("course_tutors")
         .select("profiles(full_name)")
@@ -1161,7 +1164,7 @@ export async function addToWaitingList(formData: FormData): Promise<void> {
   if (!error) {
     const [{ data: course }, { data: center }] = await Promise.all([
       supabase.from("courses").select("name").eq("id", applicant.intake_course_id).maybeSingle(),
-      supabase.from("centers").select("name, admissions_email").eq("id", staff.center_id).maybeSingle(),
+      supabase.from("centers").select("name, admissions_email, time_zone").eq("id", staff.center_id).maybeSingle(),
     ]);
     await sendApplicantEmail({
       centerName: center?.name ?? "Your centre",
@@ -1346,7 +1349,7 @@ export async function releaseWorkspace(_prevState: FormState, formData: FormData
       .select("name, start_date, end_date, delivery_mode")
       .eq("id", applicant.intake_course_id)
       .maybeSingle(),
-    admin.from("centers").select("name, admissions_email").eq("id", staff.center_id).maybeSingle(),
+    admin.from("centers").select("name, admissions_email, time_zone").eq("id", staff.center_id).maybeSingle(),
   ]);
 
   // Tutor names for "Your tutors are ..." -- the email says it plainly, so an

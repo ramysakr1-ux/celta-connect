@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { Wordmark } from "@/components/wordmark";
 import { getPickerTimeOptions, hasBookableOption, flagNoInterviewSlots } from "@/lib/interview-slot-picker";
 import { SlotPicker } from "@/app/interview/[token]/slot-picker";
+import { interviewWhen } from "@/lib/interview-time";
+import { RescheduleButton } from "@/app/interview/[token]/reschedule-button";
 
 const TERMINAL_STAGES = new Set([
   "rejected_before_interview",
@@ -25,7 +27,7 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
 
   const { data: applicant } = await admin
     .from("applicants")
-    .select("id, full_name, center_id, intake_course_id, stage")
+    .select("id, full_name, center_id, intake_course_id, stage, time_zone, interview_rescheduled_at")
     .eq("interview_invite_token", token)
     .maybeSingle();
 
@@ -41,7 +43,7 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
 
   const [{ data: course }, { data: center }] = await Promise.all([
     admin.from("courses").select("name").eq("id", applicant.intake_course_id).maybeSingle(),
-    admin.from("centers").select("name").eq("id", applicant.center_id).maybeSingle(),
+    admin.from("centers").select("name, time_zone").eq("id", applicant.center_id).maybeSingle(),
   ]);
 
   if (applicant.stage === "interview_booked") {
@@ -57,14 +59,28 @@ export default async function InterviewPickerPage({ params }: { params: Promise<
         </p>
         {bookedSlot ? (
           <p className="mt-2 text-sm text-ink">
-            {new Date(`${bookedSlot.slot_date}T${bookedSlot.slot_time}`).toLocaleString("en-GB", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              hour: "2-digit",
-              minute: "2-digit",
+            {/* Both zones, theirs first. This used to be a bare toLocaleString
+                with no timeZone option at all, so it printed the time in
+                whatever zone the server ran in and named no zone -- the same
+                "10:00" whether the applicant was in Lima or Seoul. */}
+            {interviewWhen({
+              slot: { slotDate: bookedSlot.slot_date, slotTime: bookedSlot.slot_time },
+              centreTimeZone: center?.time_zone ?? null,
+              applicantTimeZone: applicant.time_zone,
+              centreName: center?.name ?? undefined,
             })}{" "}
             ({bookedSlot.mode === "online" ? "online" : "in person"}).
+          </p>
+        ) : null}
+        {/* Offered only while there is a change left to make and the cutoff
+            has not passed; the action re-checks both. Someone who has used
+            their one change is told to contact the centre instead of being
+            shown a button that will refuse them. */}
+        {bookedSlot && !applicant.interview_rescheduled_at ? (
+          <RescheduleButton token={token} />
+        ) : bookedSlot ? (
+          <p className="mt-5 text-xs text-muted">
+            You have already moved this interview once. Contact the centre if you need to change it again.
           </p>
         ) : null}
       </Shell>

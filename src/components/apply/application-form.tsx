@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { MARKETING_SOURCE_OPTIONS } from "@/lib/marketing-source";
 import { submitApplication, type ApplyFormState } from "@/app/apply/actions";
@@ -10,6 +10,7 @@ import {
   buildCourseCommitments,
 } from "@/lib/course-commitments";
 import { DELIVERY_MODE_LABEL } from "@/lib/delivery-mode";
+import { TIMEZONE_OPTIONS } from "@/lib/timezones";
 import { Wordmark } from "@/components/wordmark";
 
 interface Intake {
@@ -72,6 +73,24 @@ export function ApplicationForm({
   const [selectedPromptId, setSelectedPromptId] = useState(
     prompts[0]?.id ?? "",
   );
+  // Ramy, 3 Sep 2026: applicants "do it from different countries, different
+  // time zones... we need a way to track down their time zone."
+  //
+  // Empty on the server and filled from the browser after mount, NOT read at
+  // render: Intl.DateTimeFormat().resolvedOptions().timeZone answers UTC on
+  // the server and Europe/Istanbul in the applicant's browser, and a value
+  // that differs between the two is a hydration mismatch. Same rule as never
+  // randomising in an initial render. They can change whatever we guess.
+  const [timeZone, setTimeZone] = useState("");
+  useEffect(() => {
+    try {
+      const guess = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (guess) setTimeZone((current) => current || guess);
+    } catch {
+      // A browser that will not tell us leaves the applicant to pick.
+    }
+  }, []);
+
   const [selectedSpeakingPromptId, setSelectedSpeakingPromptId] = useState(
     speakingPrompts[0]?.id ?? "",
   );
@@ -206,6 +225,35 @@ export function ApplicationForm({
                 className={inputClass}
               />
             </div>
+          </div>
+
+          {/* Asked here rather than at interview stage, because the interview
+              invitation is the first thing that needs it. */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="time_zone" className="text-sm text-muted">
+              Your time zone
+            </label>
+            <select
+              id="time_zone"
+              name="time_zone"
+              required
+              value={timeZone}
+              onChange={(e) => setTimeZone(e.target.value)}
+              className={inputClass}
+            >
+              <option value="" disabled>
+                Choose your time zone
+              </option>
+              {TIMEZONE_OPTIONS.map((tz) => (
+                <option key={tz.value} value={tz.value}>
+                  {tz.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-muted">
+              We have guessed this from your device. Interview times will be sent in your time zone as well as the
+              centre&apos;s, so it is worth correcting if it is wrong.
+            </p>
           </div>
 
           <div className="flex flex-col gap-1.5">

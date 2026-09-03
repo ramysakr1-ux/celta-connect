@@ -3,6 +3,7 @@
 import "server-only";
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isSupportedTimeZone } from "@/lib/interview-time";
 import { inferCourseCommitmentsMode, buildCourseCommitments, courseCommitmentsToPlainText } from "@/lib/course-commitments";
 import { MARKETING_SOURCES, type MarketingSource } from "@/lib/marketing-source";
 import { transcribeAudio } from "@/lib/openai/transcribe";
@@ -140,6 +141,13 @@ export async function submitApplication(_prevState: ApplyFormState, formData: Fo
       email,
       phone: (formData.get("phone") as string | null)?.trim() || null,
       date_of_birth: (formData.get("date_of_birth") as string | null) || null,
+      // Validated against what this runtime will actually accept, not
+      // trusted: it arrives from a public form, and a junk zone would throw
+      // inside Intl every time an interview time was formatted afterwards.
+      time_zone: (() => {
+        const posted = (formData.get("time_zone") as string | null)?.trim();
+        return posted && isSupportedTimeZone(posted) ? posted : null;
+      })(),
       education_summary: (formData.get("education_summary") as string | null)?.trim() || null,
       elt_experience_summary: (formData.get("elt_experience_summary") as string | null)?.trim() || null,
       special_requirements: (formData.get("special_requirements") as string | null)?.trim() || null,
