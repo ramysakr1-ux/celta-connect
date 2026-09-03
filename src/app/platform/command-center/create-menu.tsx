@@ -10,18 +10,38 @@ const INK = "oklch(0.235 0.017 65)";
 const MUTED = "oklch(0.51 0.017 70)";
 const BORDER = "oklch(0.895 0.012 82)";
 
-// command-center-full-spec.md's own "known gaps": only Create a course has
-// a real destination today. The other six stay visible (so the menu isn't
-// a lie about what's coming) but inert -- muted, not clickable -- rather
-// than linking somewhere that doesn't exist yet.
+// command-center-full-spec.md's own "known gaps". Add a role/permission was
+// listed among them, but the screen it wants already exists: /centre/roles is
+// where areas of responsibility are assigned and owner-defined custom roles
+// are created. It was a real door standing shut, so it opens now. Centre-
+// scoped, like Create a course above it.
+//
+// "Invite an assessor" is gone entirely, and not because it was unbuilt.
+// Ramy, 3 Sep 2026: "why do we need to invite an assessor? Assessor only uses
+// links for a certain period of time, and that's it." There is no assessor
+// account to invite. The real link already exists and is issued by the course
+// tutor from the trainer hub (getOrCreateAssessorToken), gated on assessor
+// readiness and expiring with the course -- a course-level act by the person
+// running the course, not something a platform owner creates from here. I
+// briefly pointed this item at Access instead; that was wrong too, since
+// "Access only creates magic links, not real invites."
+//
+// "Add a centre" is gone from here too. It pointed at /platform, the exact
+// same destination as the green "+ Add a centre" pill on the Centres card --
+// two doors to one room, and Ramy spotted it: "what's the difference?" One
+// room, one door [[project_one_room_one_door]]. The pill stays, because it
+// sits directly above the list it adds to; his call: "we can leave it there
+// where the centre cards are."
+//
+// The three still without a href stay visible (so the menu isn't a lie about
+// what's coming) but inert -- muted, not clickable -- rather than linking
+// somewhere that doesn't exist yet.
 const ACTIONS = [
-  { label: "Add a centre", href: "/platform" },
   { label: "Create a course", href: "/centre/courses/new" },
   { label: "Invite a trainer/tutor", href: null },
-  { label: "Invite an assessor", href: null },
   { label: "Create a support reply/ticket", href: null },
   { label: "Add a platform announcement", href: null },
-  { label: "Add a role/permission", href: null },
+  { label: "Add a role/permission", href: "/centre/roles" },
 ] as const;
 
 export function CreateMenu() {
