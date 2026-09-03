@@ -43,7 +43,11 @@ export async function GET() {
   const token = crypto.randomUUID();
   const { error } = await admin
     .from("applicants")
-    .update({ stage: "task_returned", interview_invite_token: token })
+    // interview_rescheduled_at cleared too: the demo applicant's one
+    // reschedule was spent the day it was built (3 Sep 2026, testing it
+    // live), and without this the journey showed "you have already moved
+    // this interview once" on every visit afterwards. A reset is a reset.
+    .update({ stage: "task_returned", interview_invite_token: token, interview_rescheduled_at: null })
     .eq("id", applicant.id);
   if (error) return fallback();
 
