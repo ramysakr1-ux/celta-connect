@@ -60,7 +60,6 @@ export async function runInterviewReminderCron(): Promise<{ slotsChecked: number
   const applicantById = new Map((applicants ?? []).map((a) => [a.id, a]));
   const courseById = new Map((courses ?? []).map((c) => [c.id, c]));
 
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.celtaconnect.com";
   let reminded = 0;
 
   for (const slot of slots) {
@@ -104,7 +103,6 @@ export async function runInterviewReminderCron(): Promise<{ slotsChecked: number
           slot.mode === "online"
             ? "The centre will send you the joining link if you do not already have it."
             : null,
-        rescheduleUrl: applicant.interview_invite_token ? `${base}/interview/${applicant.interview_invite_token}` : null,
       }),
     });
 
@@ -139,7 +137,6 @@ export async function runInterviewReminderCron(): Promise<{ slotsChecked: number
             joinNote: `You are interviewing ${applicant.full_name}.${
               applicant.time_zone ? ` Their local time zone is ${applicant.time_zone}.` : ""
             }`,
-            rescheduleUrl: null,
           }),
         });
       } catch {

@@ -17,6 +17,7 @@ import { offerNextWaitingListPlace } from "@/lib/admissions-waiting-list";
 import { regenerateSlotsForInterviewer } from "@/lib/interview-availability";
 import type { Database } from "@/lib/supabase/types";
 import { interviewWhen } from "@/lib/interview-time";
+import { sendInterviewConfirmationToApplicant } from "@/lib/interview-confirmation";
 
 /** "You are second on the waiting list" -- the design spells the rank out. */
 const ORDINAL_WORD: Record<number, string> = {
@@ -227,6 +228,10 @@ export async function bookInterviewSlot(formData: FormData): Promise<void> {
   await supabase.from("interview_slots").update({ booked_applicant_id: applicantId }).eq("id", slotId);
   await supabase.from("applicants").update({ stage: "interview_booked" }).eq("id", applicantId).eq("center_id", staff.center_id);
 
+  // The applicant hears about it too -- they never did. Before the staff
+  // echo, so a staff-side failure cannot stand between them and their own
+  // confirmation.
+  await sendInterviewConfirmationToApplicant(createAdminClient(), { applicantId, slotId, centerId: staff.center_id });
   await notifyInterviewBooked({ applicantId, slotId, centerId: staff.center_id });
 
   revalidatePath(`/dashboard/admissions/${applicantId}`);

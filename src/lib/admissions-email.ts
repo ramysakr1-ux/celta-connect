@@ -17,6 +17,8 @@ export type ApplicantEmailType =
   // Ramy, 3 Sep 2026: "be good to send them a one hour reminder before the
   // interview." Sent by src/lib/interview-reminder-cron.ts.
   | "interview_reminder"
+  // The applicant's own confirmation when a slot is booked, by either route.
+  | "interview_confirmation"
   // Staff notification when an applicant moves their own interview.
   | "interview_rescheduled"
   // The decision
@@ -99,6 +101,7 @@ export const EMAIL_REPLY_TO: Record<ApplicantEmailType, EmailReplyTo> = {
   // Admissions, not noreply: an applicant who cannot make it an hour from
   // now needs a reply-to that reaches a person.
   interview_reminder: "admissions",
+  interview_confirmation: "admissions",
   interview_rescheduled: "admissions",
   offer: "admissions",
   rejection: "tutor",
@@ -494,6 +497,33 @@ export function interviewRescheduledEmailHtml(input: {
   });
 }
 
+export function interviewConfirmationEmailHtml(input: {
+  applicantName: string;
+  courseName: string;
+  centerName: string;
+  when: string;
+  mode: "online" | "face_to_face";
+  rescheduleUrl: string | null;
+}): string {
+  return emailShell({
+    heading: "Your interview is booked",
+    tone: "teal",
+    body:
+      p(`Dear ${input.applicantName},`) +
+      p(`Your interview for ${input.courseName} at ${input.centerName} is confirmed.`) +
+      rawP(`<strong>When:</strong> ${esc(input.when)}`) +
+      rawP(`<strong>Where:</strong> ${input.mode === "online" ? "Online -- the centre will send the joining link." : `In person at ${esc(input.centerName)}`}`) +
+      p("The interview takes about 45 minutes. There is nothing to prepare -- it is a conversation about the course and about you.") +
+      p("We will send a short reminder about an hour beforehand.") +
+      (input.rescheduleUrl
+        ? rawP(
+            `If something comes up, you can <a href="${input.rescheduleUrl}">move your interview</a> once, up to 24 hours before it. After that, or a second time, please contact the centre directly.`
+          )
+        : ""),
+    footnote: "Replies to this email reach the admissions team.",
+  });
+}
+
 export function interviewReminderEmailHtml(input: {
   applicantName: string;
   courseName: string;
@@ -501,7 +531,6 @@ export function interviewReminderEmailHtml(input: {
   when: string;
   mode: "online" | "face_to_face";
   joinNote: string | null;
-  rescheduleUrl: string | null;
 }): string {
   return emailShell({
     heading: "Your interview is in about an hour",
@@ -512,10 +541,22 @@ export function interviewReminderEmailHtml(input: {
       rawP(`<strong>When:</strong> ${esc(input.when)}`) +
       rawP(`<strong>Where:</strong> ${input.mode === "online" ? "Online" : `In person at ${esc(input.centerName)}`}`) +
       (input.joinNote ? p(input.joinNote) : "") +
-      p("There is nothing to prepare. Bring yourself and any questions you have about the course.") +
-      (input.rescheduleUrl
-        ? rawP(`If something has come up, you can <a href="${input.rescheduleUrl}">change your interview time</a>.`)
-        : ""),
+      // Ramy, 3 Sep 2026: "the reminder should always also read something
+      // like: if your interview is in one hour, please make sure you're in a
+      // quiet place, good connection." Said differently for each mode -- a
+      // good connection means nothing to someone walking into the building.
+      (input.mode === "online"
+        ? rawP(
+            "<strong>Before it starts:</strong> find a quiet place where you will not be interrupted, check your internet connection, and make sure your camera and microphone work. Have the joining link open a few minutes early so any technical problems are sorted before the interview rather than during it."
+          )
+        : rawP(
+            "<strong>Before it starts:</strong> aim to arrive a few minutes early and let reception know you are here for a CELTA interview. Bring a form of ID."
+          )) +
+      p("There is nothing else to prepare. It is a conversation about the course and about you, and any questions you have are welcome.") +
+      // No reschedule link here. Ramy, 3 Sep 2026: "that should be done
+      // earlier." An hour out is inside the 24-hour cutoff, so the link was a
+      // promise the page would refuse; the confirmation carries it instead.
+      p("If you cannot make it, reply to this email straight away and the centre will be in touch."),
     footnote: "This is an automatic reminder -- there is no need to reply to it.",
   });
 }

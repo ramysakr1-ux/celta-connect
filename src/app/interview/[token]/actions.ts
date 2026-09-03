@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { esc } from "@/lib/email-layout";
 import { interviewWhen, interviewInstant } from "@/lib/interview-time";
 import { getAdmissionsHandlerProfileIds } from "@/lib/admissions-notify";
+import { sendInterviewConfirmationToApplicant } from "@/lib/interview-confirmation";
 
 export interface ClaimSlotState {
   error: string | null;
@@ -76,6 +77,11 @@ export async function claimInterviewSlot(_prevState: ClaimSlotState, formData: F
 
   await admin.from("applicants").update({ stage: "interview_booked" }).eq("id", applicant.id);
 
+  await sendInterviewConfirmationToApplicant(admin, {
+    applicantId: applicant.id,
+    slotId: leastLoaded.id,
+    centerId: applicant.center_id,
+  });
   await notifyStaffOfPickerBooking(admin, { applicantId: applicant.id, slotId: leastLoaded.id, centerId: applicant.center_id });
 
   revalidatePath(`/interview/${token}`);

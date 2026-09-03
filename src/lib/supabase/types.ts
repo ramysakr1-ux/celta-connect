@@ -2529,6 +2529,7 @@ export interface Database {
             | "task_waiting"
             | "interview_invitation"
             | "interview_reminder"
+            | "interview_confirmation"
             | "interview_rescheduled"
             | "offer"
             | "rejection"
