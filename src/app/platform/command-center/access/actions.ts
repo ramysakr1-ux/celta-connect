@@ -14,10 +14,8 @@ export interface GenerateLinkState {
 // for-claude-code-demo-login-links.md: real persistence, real 24h expiry,
 // real revoke, real audit (created_by/created_at) -- generating one is
 // genuinely logged, matching "generating one here is always logged."
-// What's NOT built yet (command-center-full-spec.md's own flagged gap):
-// the actual sign-in redemption -- synthetic_profile_id/course_access_
-// token stay null, so the copied link doesn't sign anyone in for real
-// today. That's the deliberate scope line, not an oversight.
+// Redemption is real as of 3 Sep 2026 -- see demo-login/[token]/route.ts --
+// and is scoped to demo centres, which is what this action now enforces too.
 export async function generateDemoLoginLink(_prev: GenerateLinkState, formData: FormData): Promise<GenerateLinkState> {
   const profile = await requireRole("platform_owner");
   const centerId = formData.get("center_id");
@@ -27,6 +25,14 @@ export async function generateDemoLoginLink(_prev: GenerateLinkState, formData: 
   if (typeof roleKey !== "string" || !ROLE_KEYS.includes(roleKey as DemoLoginRoleKey)) return { error: "Choose a role." };
 
   const admin = createAdminClient();
+
+  // Checked here, not just filtered out of the dropdown: the centre id
+  // arrives in a form post, so the restriction has to hold against a posted
+  // value the UI never offered.
+  const { data: centre } = await admin.from("centers").select("is_demo").eq("id", centerId).maybeSingle();
+  if (!centre) return { error: "That centre no longer exists." };
+  if (!centre.is_demo) return { error: "Demo centres only — these links sign someone in without an account." };
+
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
   const { error } = await admin.from("platform_demo_login_links").insert({

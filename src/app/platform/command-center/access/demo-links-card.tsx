@@ -61,8 +61,9 @@ export function DemoLinksCard({ centres, activeLinks }: { centres: { id: string;
         <div className="text-[11px] text-muted">24h expiry</div>
       </div>
       <div className="text-[11.5px] leading-normal text-muted">
-        Sign in as any role on any centre for a demo — each link is single-purpose and expires automatically. Not the same as Owner/Invited access;
-        generating one here is always logged.
+        Sign in as any role at a demo centre — each link is single-purpose and expires automatically. Demo centres only: these links sign
+        someone in without an account, which is safe only where the database blocks every write. Not the same as Owner/Invited access, and not
+        how a real assessor gets in — their link is issued by the course tutor. Generating one here is always logged.
       </div>
 
       <form action={formAction} className="flex flex-col gap-2 rounded-[6px] bg-card-inset p-3.5">

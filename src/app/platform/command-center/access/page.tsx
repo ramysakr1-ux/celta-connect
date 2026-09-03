@@ -7,7 +7,7 @@ export default async function CommandCenterAccessPage() {
   const admin = createAdminClient();
 
   const [{ data: centers }, { data: links }] = await Promise.all([
-    admin.from("centers").select("id, name").order("name", { ascending: true }),
+    admin.from("centers").select("id, name, is_demo").order("name", { ascending: true }),
     admin
       .from("platform_demo_login_links")
       .select("id, center_id, role_key, login_token, expires_at, revoked_at")
@@ -16,6 +16,9 @@ export default async function CommandCenterAccessPage() {
       .order("created_at", { ascending: false }),
   ]);
 
+  // Every centre names the rows in the active list -- including a live one a
+  // link was generated for before this was restricted -- so nothing already
+  // issued displays as "Unknown centre".
   const centerNameById = new Map((centers ?? []).map((c) => [c.id, c.name]));
   const activeLinks: ActiveLinkRow[] = (links ?? []).map((l) => ({
     id: l.id,
@@ -25,5 +28,11 @@ export default async function CommandCenterAccessPage() {
     expiresAt: l.expires_at,
   }));
 
-  return <DemoLinksCard centres={(centers ?? []).map((c) => ({ id: c.id, name: c.name }))} activeLinks={activeLinks} />;
+  // But only demo centres can be CHOSEN. The dropdown used to list every
+  // centre, so you could generate a link for a live one that redemption can
+  // only ever refuse -- a control offering something it will not do. Ramy,
+  // 3 Sep 2026: "Access only creates magic links, not real invites."
+  const selectable = (centers ?? []).filter((c) => c.is_demo).map((c) => ({ id: c.id, name: c.name }));
+
+  return <DemoLinksCard centres={selectable} activeLinks={activeLinks} />;
 }
