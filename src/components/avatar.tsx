@@ -21,6 +21,11 @@ import { initials } from "@/lib/initials";
 // initials() itself already existed and is good (it carries the 1 Sep fix for
 // channel names reading "CO" instead of "CC"); it lived only inside the three
 // chat files, styled inline in each. This is that tile lifted out.
+//
+// Strengthened 4 Sep 2026, same evening it shipped. The first version used a
+// 14% tint at 32px, and Ramy looked straight at a roster carrying three of
+// them and asked where they were. A mark that has to be pointed out is not
+// doing its job, so: 30% tint, a firmer ring, and every size up one step.
 
 /**
  * Ten tones at one lightness and one chroma, evenly spaced around the wheel.
@@ -59,9 +64,9 @@ export function toneForName(name: string): string {
 }
 
 const SIZE_CLASS = {
-  xs: "size-6 text-[9px] rounded-[7px]",
-  sm: "size-8 text-[11px] rounded-[9px]",
-  md: "size-10 text-[13px] rounded-[11px]",
+  xs: "size-7 text-[10px] rounded-[8px]",
+  sm: "size-9 text-[12.5px] rounded-[10px]",
+  md: "size-11 text-[15px] rounded-[12px]",
   lg: "size-14 text-[18px] rounded-[16px]",
 } as const;
 
@@ -98,8 +103,8 @@ export function Avatar({
       className={`inline-flex shrink-0 items-center justify-center font-serif font-semibold ${SIZE_CLASS[size]} ${className}`}
       style={{
         color: c,
-        background: `color-mix(in oklab, ${c} 14%, var(--color-card))`,
-        boxShadow: ring ? `inset 0 0 0 1.5px color-mix(in oklab, ${c} 45%, transparent)` : undefined,
+        background: `color-mix(in oklab, ${c} 30%, var(--color-card))`,
+        boxShadow: ring ? `inset 0 0 0 1.5px color-mix(in oklab, ${c} 55%, transparent)` : undefined,
       }}
     >
       {initials(name)}
