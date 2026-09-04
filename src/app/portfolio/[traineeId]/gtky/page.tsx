@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GTKY_BANK } from "@/lib/gtky-activities";
 import { GtkyPickForm } from "@/app/portfolio/[traineeId]/gtky/pick-form";
 import { SessionMaterialsSection } from "@/components/session-materials-section";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
 // design_handoff_open_items_batch, GTKY Activity Bank.dc.html §1c -- the
 // candidate's own handout, one page, three options. Access is
@@ -25,6 +26,12 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
     .eq("trainee_id", traineeId)
     .maybeSingle();
   if (!assignment) notFound();
+
+  // Same demo rule as the pre-course task: a signed-in write at a demo
+  // centre is refused by the database (migration 0079), so say so instead
+  // of offering a button that does nothing.
+  const { data: traineeRow } = await supabase.from("profiles").select("center_id").eq("id", traineeId).maybeSingle();
+  const isDemo = traineeRow ? Boolean((await getCachedCenter(traineeRow.center_id))?.is_demo) : false;
 
   const bySlug = new Map(GTKY_BANK.map((a) => [a.slug, a]));
   const activities = assignment.offered_slugs.map((s) => bySlug.get(s)).filter((a): a is NonNullable<typeof a> => !!a);
@@ -63,7 +70,13 @@ export default async function GtkyChoicePage({ params }: { params: Promise<{ tra
         </p>
       </div>
 
-      <GtkyPickForm activities={activities} chosenSlug={assignment.chosen_slug} />
+      {isDemo && !assignment.chosen_slug ? (
+        <p className="rounded-[8px] border border-border bg-card-inset px-4 py-3 text-sm text-ink">
+          <span className="font-semibold">Demo: read-only.</span> On a real course you would choose one of these three here. This is a shared
+          sample account, so the choice cannot be saved.
+        </p>
+      ) : null}
+      <GtkyPickForm activities={activities} chosenSlug={assignment.chosen_slug} readOnly={isDemo} />
 
       <div className="card rounded-[9px] border-t-[var(--trainee-plum)] p-6">
         <h2 className="font-serif text-lg text-ink">Materials</h2>

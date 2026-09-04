@@ -73,8 +73,15 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
   // reasoning as assignment gating.
   // Ramy, 28 Aug 2026: "the logic behind everything" -- was the server's
   // UTC date, wrong for this real trainee-facing eligibility gate.
-  const timeZone = (await getCachedCenter(trainee.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const centre = await getCachedCenter(trainee.center_id);
+  const timeZone = centre?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
+  // Migration 0079 refuses every signed-in write at a demo centre, and this
+  // page's autosave never checked the refusal -- it promised "saves as you
+  // go" and lost everything typed. Ramy, 5 Sep 2026: fix it. The honest
+  // version: read-only, and say so. (Routing the writes through the service
+  // role would have every demo visitor overwriting one shared account.)
+  const demoReadOnly = isTraineeViewer && Boolean(centre?.is_demo);
   const answerKeyUnlocked = !isTraineeViewer || (course?.start_date ? today >= answerKeyOpensOn(course.start_date) : false);
 
   return (
@@ -83,11 +90,18 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
         <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
         <h2 className="font-serif text-2xl text-ink">Cambridge&apos;s Pre-Course Task, plus your centre&apos;s supplement</h2>
         <p className="mt-1 text-sm text-muted">
-          You answer it here and it saves as you go. It is not graded and not counted as coursework, but your tutor
+          {demoReadOnly ? "On a real course you answer it here and it saves as you go." : "You answer it here and it saves as you go."} It is not graded and not counted as coursework, but your tutor
           reads it before day one. Work through it in several sittings rather than one; that is Cambridge&apos;s own
           advice, and the grammar section rewards it.
         </p>
       </div>
+
+      {demoReadOnly ? (
+        <p className="rounded-[8px] border border-border bg-card-inset px-4 py-3 text-sm text-ink">
+          <span className="font-semibold">Demo: read-only.</span> This is a shared sample account, so answers cannot be saved here. You can read
+          every task and, once the course starts, the answer key.
+        </p>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <PreCourseTaskSections
@@ -95,7 +109,7 @@ export default async function PreCourseTaskPage({ params }: { params: Promise<{ 
           supplementSections={supplementSections}
           itemsBySection={itemsBySection}
           answerKeyUnlocked={answerKeyUnlocked}
-          isEditable={isTraineeViewer}
+          isEditable={isTraineeViewer && !demoReadOnly}
           responsesByItemId={responsesByItemId}
         />
         <ScavengerHuntPanel foundKeys={huntFoundKeys} />

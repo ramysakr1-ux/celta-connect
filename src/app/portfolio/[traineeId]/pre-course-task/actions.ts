@@ -21,7 +21,7 @@ export async function savePreCourseTaskAnswer(formData: FormData): Promise<void>
   const responseKind = kindRaw === "json" ? "json" : "text";
 
   const supabase = await createClient();
-  await supabase.from("pre_course_task_responses").upsert(
+  const { error } = await supabase.from("pre_course_task_responses").upsert(
     {
       item_id: itemId,
       trainee_id: trainee.id,
@@ -31,4 +31,8 @@ export async function savePreCourseTaskAnswer(formData: FormData): Promise<void>
     },
     { onConflict: "item_id,trainee_id" }
   );
+  // Never silent again (5 Sep 2026): a refused autosave used to vanish. The
+  // demo centre is now read-only before it gets here; anything else that
+  // lands here is a real fault worth seeing in the logs.
+  if (error) console.error("[portfolio/[traineeId]/pre-course-task/actions.ts:savePreCourseTaskAnswer]", error);
 }

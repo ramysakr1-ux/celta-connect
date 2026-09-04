@@ -6,7 +6,16 @@ import type { GtkyActivity } from "@/lib/gtky-activities";
 // Deliberately no "reveals" field here -- that column stays in the
 // tutor's copy. "Tell a candidate to watch for present perfect and they
 // will run a grammar test with a smile on it."
-export function GtkyPickForm({ activities, chosenSlug }: { activities: GtkyActivity[]; chosenSlug: string | null }) {
+export function GtkyPickForm({
+  activities,
+  chosenSlug,
+  readOnly = false,
+}: {
+  activities: GtkyActivity[];
+  chosenSlug: string | null;
+  /** Demo centre: the database refuses the write, so no button is offered. */
+  readOnly?: boolean;
+}) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       {activities.map((a) => {
@@ -41,7 +50,7 @@ export function GtkyPickForm({ activities, chosenSlug }: { activities: GtkyActiv
                   Your choice
                 </span>
               ) : null
-            ) : (
+            ) : readOnly ? null : (
               <form action={chooseGtkyActivity} className="mt-auto">
                 <input type="hidden" name="slug" value={a.slug} />
                 <button
