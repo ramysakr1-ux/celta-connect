@@ -5,9 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchRosterRows } from "@/lib/roster";
-import { categorize, isEventLive, toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
-import { CATEGORY_ACCENT } from "@/app/trainer/(hub)/timetable/event-cell";
 import { computeWeekOf } from "@/lib/course-progress";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { DesignerCredit } from "@/components/designer-credit";
@@ -18,6 +17,9 @@ import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentK
 import { assessorVisitDayProblem } from "@/lib/assessor-day";
 import { findMaterialsOverlaps } from "@/lib/materials-overlap";
 import { Avatar } from "@/components/avatar";
+import { NeedsYou, type TodayAlert } from "@/app/trainer/(hub)/needs-you";
+import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
+import { sixHoursProblems, doubleMarkingProblems, entryFormProblems, type ComplianceProblem } from "@/lib/course-compliance";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -81,7 +83,7 @@ export default async function TodayPage() {
     await Promise.all([
       supabase
         .from("courses")
-        .select("name, start_date, end_date, assessor_visit_date, provisional_grades_due_at, assessor_name, assessor_email, assessor_notified_at, delivery_mode")
+        .select("name, start_date, end_date, assessor_visit_date, provisional_grades_due_at, assessor_name, assessor_email, assessor_notified_at, delivery_mode, entry_form_sent_at")
         .eq("id", courseId)
         .maybeSingle(),
       supabase
@@ -131,8 +133,11 @@ export default async function TodayPage() {
   // same bare-count, no-names treatment as the plagiarism line above.
   const materialsOverlapCount = new Set(materialsOverlaps.map((f) => f.assignmentId)).size;
 
-  // "Needs you" -- capped at 3 total, this priority order.
-  type Alert = { title: string; meta: string; href: string; destructive?: boolean };
+  // "Needs you" -- every one of them, in this priority order. It used to be
+  // capped at three: the header said 17 and the body showed 3, and the other
+  // fourteen had no route. Ramy, 4 Sep 2026: "it's a panel announcing work
+  // and then hiding it." kind/badge/due feed the filter and the row layout.
+  type Alert = TodayAlert;
   const alerts: Alert[] = [];
 
   // Enrolment Forms.dc.html 1c -- "the centre replies to every concern."
@@ -146,6 +151,9 @@ export default async function TodayPage() {
       .is("response", null);
     if (openConcernCount && openConcernCount > 0) {
       alerts.push({
+        kind: "admin",
+        badge: "CN",
+        due: "Now",
         title: `${openConcernCount} concern${openConcernCount === 1 ? "" : "s"} awaiting a reply`,
         meta: "Raised through the internal complaints route",
         href: "/trainer/concerns",
@@ -228,6 +236,9 @@ export default async function TodayPage() {
     const REMINDER_WINDOW_DAYS = 4;
     if (daysOut <= REMINDER_WINDOW_DAYS && approvedCount < traineeIds.length) {
       alerts.push({
+        kind: "marking",
+        badge: "PG",
+        due: daysOut <= 0 ? "Today" : `${daysOut}d`,
         title: `Provisional grades due ${daysOut <= 0 ? "today" : `in ${daysOut} day${daysOut === 1 ? "" : "s"}`}`,
         meta: `${approvedCount} of ${traineeIds.length} confirmed by the MCT`,
         href: "/trainer/grades-report",
@@ -245,9 +256,14 @@ export default async function TodayPage() {
   // separate notified_at flag to track and clear.
   if (isMct && course?.assessor_name && !course.assessor_visit_date) {
     alerts.push({
+      kind: "admin",
+      badge: "AV",
+      due: "Soon",
       title: `Assessor named -- ${course.assessor_name}`,
       meta: course.assessor_email ?? "No email on file",
-      href: "/trainer",
+      // Used to link to "/trainer" -- this page, a loop. The assessor card
+      // below is where the visit date gets set.
+      href: "#assessor",
     });
   }
 
@@ -280,6 +296,9 @@ export default async function TodayPage() {
       if (finalizedCount < traineeIds.length) {
         const daysSince = Math.ceil((new Date(`${today}T00:00:00`).getTime() - new Date(`${lastTpDate}T00:00:00`).getTime()) / 86400000);
         alerts.push({
+          kind: "marking",
+          badge: "FG",
+          due: daysSince > 3 ? "Now" : "Today",
           title: `Final grades -- ${daysSince <= 0 ? "last TP day" : `${daysSince} day${daysSince === 1 ? "" : "s"} since the last TP`}`,
           meta: `${finalizedCount} of ${traineeIds.length} recommended`,
           href: "/trainer/grades-report",
@@ -306,6 +325,9 @@ export default async function TodayPage() {
     const names = [...unsentByTrainee.keys()].map((id) => nameById.get(id) ?? "Unknown");
     const latestDate = [...unsentByTrainee.values()].sort().at(-1);
     alerts.push({
+      kind: "tp",
+      badge: "TP",
+      due: "Today",
       title: `TP feedback unsent — ${unsentByTrainee.size} candidate${unsentByTrainee.size === 1 ? "" : "s"}`,
       meta: `${names.join(", ")} · taught ${latestDate}`,
       // This alert has just worked out exactly who is outstanding, and used
@@ -342,9 +364,12 @@ export default async function TodayPage() {
     .order("event_date", { ascending: false });
   for (const session of unloggedSessions ?? []) {
     alerts.push({
+      kind: "tp",
+      badge: "RG",
+      due: "Today",
       title: `Register not logged — ${session.title}`,
       meta: session.event_date,
-      href: "/trainer/timetable",
+      href: "/trainer/volunteers",
     });
   }
 
@@ -356,7 +381,16 @@ export default async function TodayPage() {
     dueByType.set(a.assignment_type, entry);
   }
   for (const [type, { total, submitted }] of dueByType) {
-    alerts.push({ title: `${type} due today`, meta: `${submitted} of ${total} submitted`, href: "/trainer/roster" });
+    // Used to dump on the roster. The marking queue is where submissions
+    // are opened; it lists exactly these.
+    alerts.push({
+      kind: "marking",
+      badge: type.replace(/[^A-Za-z0-9]/g, "").slice(0, 3).toUpperCase() || "AS",
+      due: "Today",
+      title: `${type} due today`,
+      meta: `${submitted} of ${total} submitted`,
+      href: "/trainer/tp",
+    });
   }
 
   // master-backlog #1 -- 3 streams (back-to-back fails, missing must-submit
@@ -365,6 +399,9 @@ export default async function TodayPage() {
   const flaggedRows = rows.filter((r) => r.atRiskReasons.length > 0);
   for (const r of flaggedRows) {
     alerts.push({
+      kind: "candidate",
+      badge: "AR",
+      due: "Now",
       title: `At risk — ${r.name}`,
       meta: r.atRiskReasons.map((reason) => AT_RISK_LABELS[reason]).join(" · "),
       href: `/portfolio/${r.id}`,
@@ -375,6 +412,9 @@ export default async function TodayPage() {
   const atRisk = rows.filter((r) => r.attendancePct < 80);
   for (const r of atRisk) {
     alerts.push({
+      kind: "candidate",
+      badge: `${Math.round(r.attendancePct)}%`,
+      due: "Now",
       title: `Attendance below 80% — ${r.name}`,
       meta: `${r.attendancePct}%`,
       href: `/portfolio/${r.id}`,
@@ -382,34 +422,115 @@ export default async function TodayPage() {
     });
   }
 
-  const visibleAlerts = alerts.slice(0, 3);
+  // ---- Scope: an ACT sees their own group's people and sessions; the MCT
+  // sees the course. A group is "theirs" when course_tp_groups names them as
+  // its tutor. If no group on the course is staffed yet (tutor_profile_id
+  // null everywhere), scope stays the whole course rather than an empty
+  // page -- honest about the setup rather than hiding it.
+  let scopedTraineeIds: Set<string> | null = null;
+  let scopedGroupIds: Set<string> | null = null;
+  if (trainer && !isMct) {
+    const admin = createAdminClient();
+    const { data: myGroups } = await admin.from("course_tp_groups").select("id").eq("course_id", courseId).eq("tutor_profile_id", trainer.id);
+    if (myGroups && myGroups.length > 0) {
+      scopedGroupIds = new Set(myGroups.map((g) => g.id));
+      const { data: subs } = await admin.from("course_subgroups").select("id").eq("course_id", courseId).in("tp_group_id", [...scopedGroupIds]);
+      const subIds = (subs ?? []).map((x) => x.id);
+      const { data: members } = subIds.length ? await admin.from("course_subgroup_members").select("trainee_id").in("subgroup_id", subIds) : { data: [] };
+      scopedTraineeIds = new Set((members ?? []).map((m) => m.trainee_id));
+    }
+  }
+  const inScope = (traineeId: string) => !scopedTraineeIds || scopedTraineeIds.has(traineeId);
 
-  const cohort = rows.slice(0, 6);
+  // Alerts about a specific candidate follow the scope; course-wide ones do
+  // not (a concern or a grades deadline is everyone's).
+  const scopedAlerts = alerts.filter((a) => {
+    const m = a.href.match(/^\/portfolio\/([^/]+)/);
+    return m ? inScope(m[1]) : true;
+  });
 
-  // The one conflict Ramy's 2026-08-16 diff turned up between the trainer-
-  // homepage spec and what's live: the spec drew a bespoke "3 / 8" taught
-  // count here. Per specs/for-claude-code-unified-tracking.md, tracked
-  // activities have exactly ONE source -- the Roster Standing table -- so
-  // this reads that table's own TP-stages rollup instead of recomputing.
-  // Keep this in step with roster-row.tsx's TP stages cell; if that cell's
-  // meaning changes, this changes with it.
-  const stageStatus = (r: (typeof rows)[number]) =>
-    r.tpStagesTaught === 0
-      ? { label: "No TPs yet", className: "text-muted" }
-      : r.tpStagesBehind > 0
-        ? { label: "Behind", className: "text-status-warning-text font-semibold" }
-        : { label: "On track", className: "text-muted" };
+  // ---- Flagged: only who is in trouble. rows.slice(0, 6) -- the first six
+  // of the roster -- is gone; Ramy, 4 Sep 2026: "if something is flagged, it
+  // should be in the cohort. Otherwise just use the roster."
+  const flagged = rows
+    .filter((r) => inScope(r.id))
+    .map((r) => {
+      const reasons: { text: string; tone: "red" | "gold" }[] = [];
+      if (r.attendancePct < 80) reasons.push({ text: `Attendance ${Math.round(r.attendancePct)}% · below threshold`, tone: "red" });
+      if (r.atRiskReasons.length > 0) reasons.push({ text: r.atRiskReasons.map((x) => AT_RISK_LABELS[x]).join(" · "), tone: "red" });
+      if (r.tpStagesBehind > 0) reasons.push({ text: `Behind — ${r.tpStagesBehind} TP stage${r.tpStagesBehind === 1 ? "" : "s"}`, tone: "gold" });
+      return { id: r.id, name: r.name, reasons };
+    })
+    .filter((r) => r.reasons.length > 0);
+
+  // ---- Your day: only what this tutor is on. Every timetable row used to
+  // render -- on the last demo day that was "Course close" six times and a
+  // lunch break. Milestones, due-dates and lunch are the timetable's, not a
+  // person's; TP rows follow the group scope. Events carry no tutor of their
+  // own, so input and supervised sessions are shown to every tutor.
+  const serverNowMs = Date.now();
+  const SLOT_MINUTES: Record<string, number> = { tp: 3 * 60, input_session: 60, supervised_session: 60 };
+  const daySlots: DaySlot[] = (todayEvents ?? [])
+    .filter((e) => e.event_time && (e.type === "tp" || e.type === "input_session" || e.type === "supervised_session") && e.tag !== "lunch")
+    .filter((e) => !(e.type === "tp" && scopedGroupIds && e.tp_group_scope_id && !scopedGroupIds.has(e.tp_group_scope_id)))
+    .map((e) => {
+      const start = zonedTimeToUtc(e.event_date, e.event_time!, timeZone).getTime();
+      return {
+        id: e.id,
+        time: e.event_time!.slice(0, 5),
+        title: e.title,
+        sub: e.detail,
+        startsAtMs: start,
+        endsAtMs: start + (SLOT_MINUTES[e.type] ?? 60) * 60_000,
+        zoomUrl: e.zoom_url,
+      };
+    });
+
+  // ---- The banner: what the course cannot satisfy as planned.
+  const problems: ComplianceProblem[] = [];
+  if (visitDayProblem) {
+    problems.push({ tag: "Assessor visit", message: visitDayProblem, detail: "Nothing to observe", href: "/trainer/timetable?mode=edit", cite: "14.2" });
+  }
+  {
+    const { data: futureTps } = await supabase
+      .from("course_timetable_events")
+      .select("linked_tp_number")
+      .eq("course_id", courseId)
+      .eq("type", "tp")
+      .gt("event_date", today)
+      .not("linked_tp_number", "is", null);
+    const futureTpNumbers = [...new Set((futureTps ?? []).map((t) => t.linked_tp_number as number))];
+    problems.push(
+      ...sixHoursProblems({
+        candidates: rows.filter((r) => inScope(r.id) && r.courseStatus === "active").map((r) => ({ id: r.id, name: r.name, assessedHrs: r.assessedHrs, tpStagesTaught: r.tpStagesTaught })),
+        futureTpNumbers,
+      })
+    );
+  }
+  if (isMct) {
+    const { data: marked } = await supabase.from("assignments").select("assignment_type, second_marker_recorded_at").eq("course_id", courseId);
+    const byType = new Map<string, number>();
+    const types = new Set<string>();
+    for (const a of marked ?? []) {
+      types.add(a.assignment_type);
+      if (a.second_marker_recorded_at) byType.set(a.assignment_type, (byType.get(a.assignment_type) ?? 0) + 1);
+    }
+    problems.push(...doubleMarkingProblems({ candidateCount: rows.length, today, endDate: course?.end_date ?? null, doubleMarkedByType: byType, assignmentTypes: [...types] }));
+    problems.push(...entryFormProblems({ today, startDate: course?.start_date ?? null, deliveryMode: course?.delivery_mode ?? null, entryFormSentAt: course?.entry_form_sent_at ?? null }));
+  }
+
+  // v4's role accent: MCT garnet, ACT gold. The hub header still carries its
+  // older ink/garnet pairing -- restyling that bar is Phase 4 work on the
+  // layout, not this page.
+  const accent = isMct ? "oklch(42% 0.13 27)" : "oklch(60% 0.11 70)";
+  const accentDeep = isMct ? "oklch(36% 0.12 27)" : "oklch(50% 0.11 65)";
 
   const weekOf =
     course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
 
-  // Spec's eyebrow reads "... · 6 Nov – 1 Dec · week 2 of 4" -- these were
-  // rendering as raw ISO dates.
-  const shortDate = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   const overline = [
     course?.name,
-    course?.start_date && course?.end_date ? `${shortDate(course.start_date)} – ${shortDate(course.end_date)}` : null,
+    isMct ? "cohort" : scopedGroupIds ? "your group" : "all groups",
     weekOf,
   ]
     .filter(Boolean)
@@ -421,202 +542,143 @@ export default async function TodayPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-1.5">
-          <p className="text-[10.5px] font-bold tracking-[0.1em] text-muted uppercase">{overline}</p>
-          <h1
-            className="font-serif text-[24px] font-semibold"
-            style={{ color: isMct ? "oklch(30% 0.042 58)" : "oklch(42% 0.13 27)" }}
-          >
+    <div className="flex flex-col gap-[18px]">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">{overline}</p>
+          <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">
             {todayHeading}
+            <LiveClock timeZone={timeZone} serverNowMs={serverNowMs} accent={accentDeep} />
           </h1>
         </div>
-        {/* for-claude-code-assessor-tour-mode.md: a tour is view-only, "no
-            functional purpose beyond letting them see" -- these are staff
-            write actions, not something a touring assessor should be
-            invited to click (every one of them would fail closed anyway,
-            since requireRole() never authorizes a cookie-only session, but
-            offering a button that always fails is a worse look than
-            omitting it). */}
         {trainer ? (
-        <div className="flex flex-wrap items-center gap-2">
-          {/* specs/build-spec.md §7: the one trainer surface meant to be
-              genuinely usable on a phone mid-lesson -- kept first/most
-              prominent in this row for that reason. Not in trainer-
-              homepage-mct-act-header-spec.md (postdates it) -- kept, just
-              brought to the same h-8/13px/12px dimensions as the two
-              buttons that are in spec, for consistency across the row. */}
-          <Link
-            href="/trainer/capture"
-            className="trainer-hover-fill flex h-8 items-center rounded-[6px] border border-primary bg-transparent px-[13px] text-xs font-medium text-primary"
-          >
-            Capture a point
-          </Link>
-          {/* for-claude-code-mct-only-announcements.md: hidden, not just
-              disabled, for a non-MCT trainer -- announcements/page.tsx
-              itself is now MCT-only too (the real gate), this just keeps
-              the quick link from pointing an ACT at a page with nothing
-              they can do. */}
-          {isMct ? (
-            <Link
-              href="/trainer/announcements"
-              className="trainer-hover-fill flex h-8 items-center rounded-[6px] border border-border bg-card px-[13px] text-xs font-medium text-ink"
-            >
-              Post announcement
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/trainer/capture" className="trainer-hover-fill flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-[13px] font-medium text-ink">
+              Capture a point
             </Link>
-          ) : null}
-          {/* /trainer/tp, not /trainer/roster. Ramy, 4 Sep 2026: "write TP
-              feedback, click, and it takes me to some kind of admissions
-              roster. Definitely doesn't take me to write feedback." He was
-              right -- the roster is a table of hours and TPs passed. The TP
-              page is headed "N lessons waiting on you" and every row clicks
-              into the feedback form itself. */}
-          <Link
-            href="/trainer/tp"
-            className="flex h-8 items-center rounded-[6px] px-[13px] text-xs font-semibold text-primary-foreground"
-            style={{ background: isMct ? "oklch(37.5% 0.058 195)" : "oklch(42% 0.13 27)" }}
-          >
-            Write TP feedback
-          </Link>
-        </div>
+            {isMct ? (
+              <Link href="/trainer/announcements" className="trainer-hover-fill flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-[13px] font-medium text-ink">
+                Post announcement
+              </Link>
+            ) : null}
+            <Link
+              href="/trainer/tp"
+              className="flex h-10 items-center rounded-[8px] px-[18px] text-[13.5px] font-bold text-primary-foreground transition-[filter] hover:brightness-110"
+              style={{ background: accent }}
+            >
+              Write TP feedback
+            </Link>
+          </div>
         ) : null}
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.15fr_1fr_1.1fr]">
-        {/* Today's schedule. The spec gives each panel a 3px top accent and a
-            label in the matching colour, so the three read as distinct at a
-            glance: teal = the day's material, gold = a system rule is in force
-            (globals.css reserves gold for exactly that), ink = plain content. */}
-        <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-primary">
-          <div className="flex items-baseline justify-between">
-            <p
-              className="text-[10.5px] font-bold tracking-[0.12em] uppercase"
-              style={{ color: isMct ? "oklch(37.5% 0.058 195)" : "oklch(42% 0.13 27)" }}
-            >
-              Today&apos;s schedule
-            </p>
-            <p className="text-[11px] text-muted">from the timetable</p>
-          </div>
-          <div className="flex flex-col">
-            {(todayEvents ?? []).length === 0 ? (
-              <p className="py-2 text-sm text-muted">Nothing on the timetable today.</p>
-            ) : (
-              (todayEvents ?? []).map((event, i) => {
-                const category = categorize(event);
-                const live = event.type === "tp" && isEventLive(event, new Date(), timeZone);
-                return (
-                  <div
-                    key={event.id}
-                    className={`flex gap-2.5 py-2 ${i > 0 ? "border-t border-border-faint" : ""}`}
+      {problems.map((pr) => (
+        <Link
+          key={pr.tag + pr.message}
+          href={pr.href}
+          className="flex flex-wrap items-center gap-3.5 rounded-[10px] px-[18px] py-3.5 text-primary-foreground transition-[filter] hover:brightness-110"
+          style={{ background: accent }}
+        >
+          <span className="rounded-[5px] bg-white/[0.18] px-2 py-1 text-[10.5px] font-bold tracking-[0.08em] uppercase whitespace-nowrap">{pr.tag}</span>
+          <span className="flex-1 text-[14px] font-semibold">{pr.message}</span>
+          <span className="text-[12.5px] opacity-80 whitespace-nowrap">
+            {pr.detail} &middot; &sect;{pr.cite} &rarr;
+          </span>
+        </Link>
+      ))}
+
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_360px]">
+        <div className="flex flex-col gap-5">
+          <NeedsYou alerts={scopedAlerts} accent={accentDeep} />
+
+          {flagged.length > 0 ? (
+            <section className="flex flex-col rounded-[14px] border border-border bg-frame">
+              <div className="flex items-center justify-between gap-3 px-[18px] pt-4 pb-2">
+                <div className="flex items-baseline gap-2.5">
+                  <h3 className="font-serif text-[20px] font-semibold text-ink-warm">Flagged candidates</h3>
+                  <span className="text-[12.5px] text-muted">
+                    {flagged.length} of {rows.filter((r) => inScope(r.id)).length}
+                  </span>
+                </div>
+                <Link href="/trainer/roster" className="text-[12.5px] text-muted hover:underline">
+                  Full roster &rarr;
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 px-3.5 pb-4 sm:grid-cols-2">
+                {flagged.map((f) => (
+                  <Link
+                    key={f.id}
+                    href={`/portfolio/${f.id}`}
+                    className="trainer-hover flex items-center gap-3 rounded-[10px] border border-border bg-card px-3 py-[11px]"
                   >
-                    <span
-                      className="w-[42px] shrink-0 border-l-[3px] pl-2 text-[11.5px] font-semibold text-muted tabular-nums"
-                      style={{ borderLeftColor: CATEGORY_ACCENT[category] }}
-                    >
-                      {event.event_time?.slice(0, 5)}
-                    </span>
-                    <div className="flex flex-1 flex-col gap-1.5">
-                      {/* Spec: a live TP session gets a bold row and a teal
-                          "Live" pill. Kept as a link when there's a Zoom URL
-                          to open -- the pill is the affordance that was
-                          already here, only its label and weight change. */}
-                      <p className={`text-[12.5px] text-ink ${live ? "font-semibold" : ""}`}>{event.title}</p>
-                      {live && event.zoom_url ? (
-                        <a
-                          href={event.zoom_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-primary-foreground"
-                        >
-                          <span className="size-[5px] shrink-0 rounded-full bg-primary-foreground" />
-                          Join now
-                        </a>
-                      ) : live ? (
-                        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-primary">
-                          <span className="size-[5px] shrink-0 rounded-full bg-primary" />
-                          Live
+                    <Avatar name={f.name} size="sm" />
+                    <span className="min-w-0">
+                      <span className="block text-[13.5px] font-semibold text-ink">{f.name}</span>
+                      {f.reasons.map((rs) => (
+                        <span key={rs.text} className={`block truncate text-[12px] ${rs.tone === "red" ? "text-destructive" : "text-status-warning-text"}`}>
+                          {rs.text}
                         </span>
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* Needs you */}
-        <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-status-warning-text">
-          <p className="text-[10.5px] font-bold tracking-[0.12em] uppercase" style={{ color: "oklch(60% 0.1 70)" }}>
-            Needs you · {alerts.length}
-          </p>
-          <div className="flex flex-col">
-            {visibleAlerts.length === 0 ? (
-              <p className="py-2 text-sm text-muted">Nothing needs you right now.</p>
-            ) : (
-              visibleAlerts.map((alert, i) => (
-                <Link
-                  key={i}
-                  href={alert.href}
-                  className={`trainer-hover -mx-[6px] flex flex-col gap-0.5 rounded-[5px] px-[6px] py-[7px] ${i > 0 ? "border-t border-border-faint" : ""}`}
-                >
-                  <p className={`text-[12.5px] font-semibold ${alert.destructive ? "text-destructive" : "text-ink"}`}>{alert.title}</p>
-                  <p className="text-xs text-muted">{alert.meta}</p>
-                </Link>
-              ))
-            )}
-          </div>
-          {assignmentsWithFindings > 0 ? (
-            <Link
-              href="/trainer/roster"
-              className="border-t border-border-faint pt-2.5 text-xs text-muted hover:text-primary"
-            >
-              {assignmentsWithFindings} assignment{assignmentsWithFindings === 1 ? "" : "s"} have scanner findings
-            </Link>
+                      ))}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
           ) : null}
-          {materialsOverlapCount > 0 ? (
-            <Link
-              href="/trainer/roster"
-              className="border-t border-border-faint pt-2.5 text-xs text-muted hover:text-primary"
-            >
-              {materialsOverlapCount} assignment{materialsOverlapCount === 1 ? "" : "s"} share wording with a TP&apos;s materials
-            </Link>
+
+          {assignmentsWithFindings > 0 || materialsOverlapCount > 0 ? (
+            <p className="px-1 text-[12px] text-muted">
+              {assignmentsWithFindings > 0 ? `${assignmentsWithFindings} assignment${assignmentsWithFindings === 1 ? "" : "s"} have scanner findings` : null}
+              {assignmentsWithFindings > 0 && materialsOverlapCount > 0 ? " · " : null}
+              {materialsOverlapCount > 0 ? `${materialsOverlapCount} share wording with a TP's materials` : null}
+              {" — "}
+              <Link href="/trainer/roster" className="underline hover:text-ink">
+                roster
+              </Link>
+            </p>
           ) : null}
         </div>
 
-        {/* Cohort */}
-        <div className="sheet flex flex-col gap-3.5 border-t-[3px] border-t-gold">
-          <div className="flex items-baseline justify-between">
-            <p className="text-[11px] font-semibold tracking-[0.12em] text-ink-warm uppercase">Cohort · {rows.length}</p>
-            <Link href="/trainer/roster" className="text-[11px] text-primary">
-              Full roster →
-            </Link>
-          </div>
-          <div className="flex flex-col">
-            {cohort.map((r, i) => {
-              const status = stageStatus(r);
-              const flagged = r.atRiskReasons.length > 0;
-              return (
-                <Link
-                  key={r.id}
-                  href={`/portfolio/${r.id}`}
-                  className={`trainer-hover -mx-2 flex items-center gap-3 rounded-[6px] px-2 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}
-                >
-                  {/* Was a fifth separate initials implementation, with hues
-                      indexed by POSITION IN THE LIST -- so a candidate's
-                      colour changed when the order did, and the same person
-                      looked different here and on the roster. The shared
-                      Avatar derives its colour from the name instead, which
-                      is the whole point of it. A flagged candidate still
-                      overrides to the alert red, because that IS semantic. */}
-                  <Avatar name={r.name} size="sm" tone={flagged ? "var(--color-destructive)" : undefined} />
-                  <span className="flex-1 truncate text-sm text-ink">{r.name}</span>
-                  <span className={`shrink-0 text-xs ${status.className}`}>{status.label}</span>
+        <div className="flex flex-col gap-5">
+          <YourDay slots={daySlots} serverNowMs={serverNowMs} accent={accentDeep} />
+
+          {isMct && course?.assessor_visit_date ? (
+            <a
+              href="#assessor"
+              className="flex flex-col gap-1.5 rounded-[14px] px-[18px] py-4 text-[oklch(96%_0.008_85)] transition-[filter] hover:brightness-[1.13]"
+              style={{ background: "var(--color-ink-warm)" }}
+            >
+              <span className="flex justify-between text-[10.5px] font-bold tracking-[0.11em] text-gold uppercase">
+                <span>Assessor visit</span>
+                <span>
+                  {(() => {
+                    const d = Math.ceil((Date.parse(`${course.assessor_visit_date}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86400000);
+                    return d < 0 ? "visited" : d === 0 ? "today" : `in ${d} day${d === 1 ? "" : "s"}`;
+                  })()}
+                </span>
+              </span>
+              <span className="font-serif text-[18px] font-semibold">
+                {new Date(`${course.assessor_visit_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
+                {course.assessor_name ? ` · ${course.assessor_name}` : ""}
+              </span>
+              <span className="text-[12px] opacity-80">
+                {centrePreparation.length} preparation item{centrePreparation.length === 1 ? "" : "s"}
+                {preparationDeadline ? ` · ready by ${new Date(`${preparationDeadline}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}
+              </span>
+              <span className="text-[12.5px] font-semibold text-gold">What the assessor needs &darr;</span>
+            </a>
+          ) : null}
+
+          {isMct ? (
+            <div className="flex flex-col gap-2">
+              <span className="text-[10.5px] font-bold tracking-[0.11em] text-muted uppercase">Also under Today</span>
+              <div className="flex flex-wrap gap-1.5">
+                <Link href="/trainer/announcements" className="rounded-full border border-border px-2.5 py-1 text-[12px] text-muted transition-colors hover:border-current hover:text-ink">
+                  Announcements &rarr;
                 </Link>
-              );
-            })}
-          </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -629,42 +691,19 @@ export default async function TodayPage() {
       ) : null}
 
       {isMct ? (
-        <AssessorCard
-          initialName={course?.assessor_name ?? null}
-          initialEmail={course?.assessor_email ?? null}
-          initialVisitDate={course?.assessor_visit_date ?? null}
-          initialAssessmentKind={assessmentKind}
-          initialAppianReference={appianReference}
-        />
-      ) : null}
-
-      {/* Ramy, 30 Aug 2026: "there should be somewhere where the MCT is
-          preparing the assessor pack... they should just be suggested by
-          Connect depending on the course size... depending on the course mode
-          and the course size." Handbook 14.1's list, with the items that
-          depend on this course's mode, size or circumstances marked, so the
-          MCT can see WHY a line is there rather than working from a generic
-          checklist. MCT-only, same as the card above it -- preparing the pack
-          is their job, not every tutor's. */}
-      {/* A visit date with no teaching on it can't deliver Handbook 14.2's
-          "co-observe two candidates", and nothing said so -- Elmswood's
-          November course had a visit booked for the 30th with not one event
-          on the day. Sits above the preparation list because no amount of
-          preparing fixes a day with nothing to observe. */}
-      {isMct && visitDayProblem ? (
-        <div className="flex flex-col gap-1 rounded-[8px] border border-status-warning-text/25 bg-status-warning-bg px-[22px] py-4">
-          <p className="text-[11px] font-bold tracking-[0.12em] text-status-warning-text uppercase">
-            The assessor visit needs a look
-          </p>
-          <p className="text-sm text-status-warning-text">{visitDayProblem}</p>
-          <Link href="/trainer/timetable?mode=edit" className="mt-1 self-start text-[12.5px] font-semibold text-status-warning-text underline">
-            Open the timetable
-          </Link>
+        <div id="assessor" className="scroll-mt-6">
+          <AssessorCard
+            initialName={course?.assessor_name ?? null}
+            initialEmail={course?.assessor_email ?? null}
+            initialVisitDate={course?.assessor_visit_date ?? null}
+            initialAssessmentKind={assessmentKind}
+            initialAppianReference={appianReference}
+          />
         </div>
       ) : null}
 
       {isMct && centrePreparation.length > 0 ? (
-        <div className="flex flex-col gap-4 rounded-[8px] border border-border border-t-[3px] border-t-gold bg-card px-[22px] py-5">
+        <div className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
           <div className="flex flex-col gap-[3px]">
             <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">What the assessor needs from you</p>
             <p className="text-sm text-muted">
@@ -680,9 +719,7 @@ export default async function TodayPage() {
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="text-[13px] font-semibold text-ink">
                     {item.label}
-                    {item.conditional ? (
-                      <span className="ml-2 text-[10px] font-bold tracking-[0.08em] text-gold uppercase">This course</span>
-                    ) : null}
+                    {item.conditional ? <span className="ml-2 text-[10px] font-bold tracking-[0.08em] text-gold uppercase">This course</span> : null}
                   </p>
                   <span className="shrink-0 text-[10px] font-semibold text-muted tabular-nums">§{item.cite}</span>
                 </div>
