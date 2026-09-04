@@ -92,10 +92,23 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
     candidateCount: rows.length,
     withdrawnCount: withdrawnCount ?? 0,
   });
-  const [visitDayProblem, readiness] = await Promise.all([
+  const [visitDayProblem, readiness, { data: liveToken }] = await Promise.all([
     assessorVisitDayProblem(supabase, courseId, visitDate),
     computeAssessorReadiness(supabase, courseId),
+    supabase
+      .from("course_access_tokens")
+      .select("token")
+      .eq("course_id", courseId)
+      .eq("role", "assessor")
+      .gt("expires_at", new Date().toISOString())
+      .limit(1)
+      .maybeSingle(),
   ]);
+  // The readiness gate applies to MINTING a link (getOrCreateAssessorToken).
+  // Once one exists the pack is out -- copying, emailing and previewing all
+  // reuse it -- so the page says so rather than showing a "not ready" the
+  // buttons would contradict.
+  const packOpens = readiness.ready || Boolean(liveToken);
 
   const { data: selectionRows } =
     rows.length > 0 ? await supabase.from("profiles").select("id, selected_for_assessor_visit").in("id", rows.map((r) => r.id)) : { data: [] };
@@ -183,7 +196,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
               >
                 Grade form &rarr;
               </Link>
-              {readiness.ready ? (
+              {packOpens ? (
                 <a
                   href="/trainer/assessor/preview"
                   className="rounded-[6px] px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-[filter] hover:brightness-[1.12]"
@@ -197,7 +210,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
                 </span>
               )}
             </div>
-            {!readiness.ready ? (
+            {!packOpens ? (
               <div className={`rounded-[10px] px-4 py-3 text-xs ${preview === "not-ready" ? "bg-card-inset text-ink" : "text-muted"}`}>
                 <p className="font-semibold">The pack cannot open yet -- the link, the email and the preview all wait for this:</p>
                 <ul className="mt-1.5 flex flex-col gap-1">
@@ -210,6 +223,9 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
               </div>
             ) : (
               <p className="text-xs text-muted">
+                {liveToken && !readiness.ready
+                  ? `The link is already issued, so it, the email and the preview all open -- but ${readiness.issues.length} portfolio item${readiness.issues.length === 1 ? " is" : "s are"} still incomplete: ${readiness.issues.map((i) => `${i.traineeName}: ${i.reason}`).join("; ")}. `
+                  : ""}
                 The preview opens the pack through the same link the assessor gets, without accepting the terms on their behalf. &ldquo;Exit
                 preview&rdquo; at the top brings you back here.
               </p>
