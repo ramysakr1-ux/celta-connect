@@ -470,7 +470,7 @@ export default async function TodayPage() {
   // own, so input and supervised sessions are shown to every tutor.
   const serverNowMs = Date.now();
   const SLOT_MINUTES: Record<string, number> = { tp: 3 * 60, input_session: 60, supervised_session: 60 };
-  const daySlots: DaySlot[] = (todayEvents ?? [])
+  const rawSlots: DaySlot[] = (todayEvents ?? [])
     .filter((e) => e.event_time && (e.type === "tp" || e.type === "input_session" || e.type === "supervised_session") && e.tag !== "lunch")
     .filter((e) => !(e.type === "tp" && scopedGroupIds && e.tp_group_scope_id && !scopedGroupIds.has(e.tp_group_scope_id)))
     .map((e) => {
@@ -485,6 +485,23 @@ export default async function TodayPage() {
         zoomUrl: e.zoom_url,
       };
     });
+  // Consecutive slots with the same title collapse to one row spanning them.
+  // The demo's last day is "Course close" six times over; a real course can
+  // repeat a block the same way. Six rows say less than one that reads
+  // "10:00–15:15 · × 6".
+  const daySlots: DaySlot[] = [];
+  for (const slot of rawSlots) {
+    const last = daySlots[daySlots.length - 1];
+    if (last && last.title === slot.title && last.sub === slot.sub) {
+      const n = (last as DaySlot & { _n?: number })._n ?? 1;
+      (last as DaySlot & { _n?: number })._n = n + 1;
+      last.endsAtMs = slot.endsAtMs;
+      last.time = `${last.time.split("–")[0]}–${slot.time}`;
+      last.sub = `× ${n + 1}`;
+    } else {
+      daySlots.push({ ...slot });
+    }
+  }
 
   // ---- The banner: what the course cannot satisfy as planned.
   const problems: ComplianceProblem[] = [];
@@ -518,6 +535,27 @@ export default async function TodayPage() {
     problems.push(...doubleMarkingProblems({ candidateCount: rows.length, today, endDate: course?.end_date ?? null, doubleMarkedByType: byType, assignmentTypes: [...types] }));
     problems.push(...entryFormProblems({ today, startDate: course?.start_date ?? null, deliveryMode: course?.delivery_mode ?? null, entryFormSentAt: course?.entry_form_sent_at ?? null }));
   }
+
+  // Same-tag problems collapse to one row. Seen live on the demo course:
+  // three "cannot reach 6 hrs" banners in a stack, one per candidate, where
+  // a single line saying "3 candidates" is the same fact told once. The
+  // rule -- one row per impossibility -- holds; "everyone is short" is one
+  // impossibility, not three.
+  const problemsByTag = new Map<string, ComplianceProblem[]>();
+  for (const pr of problems) problemsByTag.set(pr.tag, [...(problemsByTag.get(pr.tag) ?? []), pr]);
+  const shownProblems: ComplianceProblem[] = [...problemsByTag.values()].map((group) => {
+    if (group.length === 1) return group[0];
+    const first = group[0];
+    if (first.tag === "Cannot reach 6 hrs") {
+      const names = group.map((g) => g.message.replace(/ cannot reach six assessed hours.*$/, ""));
+      return {
+        ...first,
+        message: `${group.length} candidates cannot reach six assessed hours on the current timetable`,
+        detail: names.join(", "),
+      };
+    }
+    return { ...first, message: `${group.length} × ${first.message}`, detail: group.map((g) => g.detail).join(" · ") };
+  });
 
   // v4's role accent: MCT garnet, ACT gold. The hub header still carries its
   // older ink/garnet pairing -- restyling that bar is Phase 4 work on the
@@ -572,7 +610,7 @@ export default async function TodayPage() {
         ) : null}
       </div>
 
-      {problems.map((pr) => (
+      {shownProblems.map((pr) => (
         <Link
           key={pr.tag + pr.message}
           href={pr.href}

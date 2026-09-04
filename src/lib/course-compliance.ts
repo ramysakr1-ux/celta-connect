@@ -119,7 +119,7 @@ export function entryFormProblems(input: {
     {
       tag: "Entry form",
       message: "The entry form has not been sent to Cambridge and its deadline has passed",
-      detail: `Due ${deadline} · ${daysLate} day${daysLate === 1 ? "" : "s"} late`,
+      detail: `Due ${new Date(`${deadline}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · ${daysLate} day${daysLate === 1 ? "" : "s"} late`,
       href: "/dashboard/admin",
       cite: "4.1",
     },
