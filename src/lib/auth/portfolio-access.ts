@@ -18,6 +18,19 @@ export const ASSESSOR_COOKIE = "assessor_token";
 // instead of it), so it can't outlive or substitute for the real session.
 export const ASSESSOR_TOUR_COOKIE = "assessor_tour_mode";
 
+// The MCT's own preview of the pack (Assessor tab, "Preview as the
+// assessor"). Set by /trainer/assessor/preview alongside ASSESSOR_COOKIE
+// (the real, readiness-gated token -- the preview shows exactly what the
+// assessor's link shows, nothing more). Its one effect: the "Before you
+// open the pack" terms gate is skipped, so the MCT's look never stamps
+// terms_accepted_at on the assessor's behalf. Cleared by /assessor/exit.
+export const ASSESSOR_PREVIEW_COOKIE = "assessor_preview";
+
+export async function isAssessorPreview(): Promise<boolean> {
+  const cookieStore = await cookies();
+  return cookieStore.get(ASSESSOR_PREVIEW_COOKIE)?.value === "1";
+}
+
 export async function isAssessorTourMode(): Promise<boolean> {
   const cookieStore = await cookies();
   return cookieStore.get(ASSESSOR_TOUR_COOKIE)?.value === "1";

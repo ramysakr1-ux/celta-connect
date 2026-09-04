@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus } from "@/lib/auth/portfolio-access";
+import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus, isAssessorPreview } from "@/lib/auth/portfolio-access";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
 import { halfOwningDate, halfTpDates, rotationPosition } from "@/lib/rotation";
 import { resolveProvisionalDeadline } from "@/lib/provisional-deadline";
@@ -75,7 +75,8 @@ export default async function AssessorPage({
   if (!cookieStore.get(ASSESSOR_COOKIE)?.value) redirect("/login");
   const termsStatus = await getAssessorTermsStatus();
   if (!termsStatus) redirect("/login?error=assessor_link_invalid");
-  if (!termsStatus.accepted) redirect("/assessor/gate");
+  const preview = await isAssessorPreview();
+  if (!termsStatus.accepted && !preview) redirect("/assessor/gate");
   const courseId = await getAssessorCourseId();
   if (!courseId) redirect("/login?error=assessor_link_invalid");
 
@@ -416,10 +417,15 @@ export default async function AssessorPage({
         }}
       >
         <span style={{ fontSize: 12.5, fontWeight: 500 }}>
-          Assessor access — read-only. Nothing you open here can be edited, and no action you take is recorded
-          against a candidate.
+          {preview
+            ? "Preview — this is the pack exactly as the assessor's link opens it. Nothing you do here is recorded."
+            : "Assessor access — read-only. Nothing you open here can be edited, and no action you take is recorded against a candidate."}
         </span>
-        {accessToken ? (
+        {preview ? (
+          <a href="/assessor/exit" style={{ fontSize: 12, fontWeight: 700, color: GOLD, flex: "none", textDecoration: "underline" }}>
+            Exit preview →
+          </a>
+        ) : accessToken ? (
           <span style={{ fontSize: 11.5, color: "oklch(76% 0.02 80)", flex: "none" }}>
             Link expires {accessToken.expires_at.slice(0, 10)}
           </span>

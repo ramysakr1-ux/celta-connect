@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus } from "@/lib/auth/portfolio-access";
+import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus, isAssessorPreview } from "@/lib/auth/portfolio-access";
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { getMarkingGuidance } from "@/lib/marking-guidance";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
@@ -21,7 +21,7 @@ export default async function AssessorMarkingGuidancePage() {
   if (!cookieStore.get(ASSESSOR_COOKIE)?.value) redirect("/login");
   const termsStatus = await getAssessorTermsStatus();
   if (!termsStatus) redirect("/login?error=assessor_link_invalid");
-  if (!termsStatus.accepted) redirect("/assessor/gate");
+  if (!termsStatus.accepted && !(await isAssessorPreview())) redirect("/assessor/gate");
   const courseId = await getAssessorCourseId();
   if (!courseId) redirect("/login?error=assessor_link_invalid");
 

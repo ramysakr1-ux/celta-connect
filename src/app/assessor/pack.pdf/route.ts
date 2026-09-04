@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus } from "@/lib/auth/portfolio-access";
+import { ASSESSOR_COOKIE, getAssessorCourseId, getAssessorTermsStatus, isAssessorPreview } from "@/lib/auth/portfolio-access";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
 import { hasMarkingGuidance } from "@/lib/marking-guidance";
@@ -25,7 +25,7 @@ export async function GET() {
     return NextResponse.json({ error: "This link is not valid." }, { status: 401 });
   }
   const termsStatus = await getAssessorTermsStatus();
-  if (!termsStatus?.accepted) {
+  if (!termsStatus?.accepted && !(await isAssessorPreview())) {
     return NextResponse.json({ error: "Accept the terms of access first." }, { status: 401 });
   }
   const courseId = await getAssessorCourseId();

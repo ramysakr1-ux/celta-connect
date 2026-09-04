@@ -437,10 +437,6 @@ h6 {
   :root {
     --hub-row-shadow: inset 0 0 0 1px var(--color-primary), 0 3px 8px -3px color-mix(in oklab, var(--color-primary) 45%, transparent);
   }
-  .trainer-header {
-    background: var(--hub-header-bg);
-    border-bottom: 3px solid var(--hub-header-underline);
-  }
   .trainer-hover {
     transition: box-shadow 150ms ease;
   }

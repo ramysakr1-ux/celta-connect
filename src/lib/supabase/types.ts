@@ -2233,6 +2233,27 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["tit_records"]["Row"]>;
         Relationships: [];
       };
+      // migration 0267 -- who else the MCT has let in to a TinT record.
+      tit_access_grants: {
+        Row: {
+          id: string;
+          course_tutors_id: string;
+          grantee_profile_id: string;
+          granted_by_profile_id: string;
+          reason: string;
+          granted_at: string;
+          revoked_at: string | null;
+          revoked_by_profile_id: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["tit_access_grants"]["Row"]> & {
+          course_tutors_id: string;
+          grantee_profile_id: string;
+          granted_by_profile_id: string;
+          reason: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tit_access_grants"]["Row"]>;
+        Relationships: [];
+      };
       tit_pre_course_tasks: {
         Row: {
           id: string;

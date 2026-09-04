@@ -11,6 +11,7 @@ import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 import { AssessorSelectionButton } from "@/app/trainer/(hub)/roster/assessor-selection-button";
 import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
 import { assessorVisitDayProblem } from "@/lib/assessor-day";
+import { computeAssessorReadiness } from "@/lib/assessor-pack";
 import { DesignerCredit } from "@/components/designer-credit";
 
 // The assessor's room. MCT only.
@@ -30,7 +31,8 @@ function fmtDate(iso: string, opts: Intl.DateTimeFormatOptions) {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", opts);
 }
 
-export default async function AssessorPage() {
+export default async function AssessorPage({ searchParams }: { searchParams: Promise<{ preview?: string }> }) {
+  const { preview } = await searchParams;
   const session = await getCurrentProfile();
   const trainer =
     session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner"
@@ -90,7 +92,10 @@ export default async function AssessorPage() {
     candidateCount: rows.length,
     withdrawnCount: withdrawnCount ?? 0,
   });
-  const visitDayProblem = await assessorVisitDayProblem(supabase, courseId, visitDate);
+  const [visitDayProblem, readiness] = await Promise.all([
+    assessorVisitDayProblem(supabase, courseId, visitDate),
+    computeAssessorReadiness(supabase, courseId),
+  ]);
 
   const { data: selectionRows } =
     rows.length > 0 ? await supabase.from("profiles").select("id, selected_for_assessor_visit").in("id", rows.map((r) => r.id)) : { data: [] };
@@ -178,7 +183,37 @@ export default async function AssessorPage() {
               >
                 Grade form &rarr;
               </Link>
+              {readiness.ready ? (
+                <a
+                  href="/trainer/assessor/preview"
+                  className="rounded-[6px] px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-[filter] hover:brightness-[1.12]"
+                  style={{ background: "var(--hub-accent)" }}
+                >
+                  Preview as the assessor &rarr;
+                </a>
+              ) : (
+                <span className="rounded-[6px] border border-dashed border-border px-3 py-1.5 text-sm text-muted" title="Complete the portfolios first">
+                  Preview not ready
+                </span>
+              )}
             </div>
+            {!readiness.ready ? (
+              <div className={`rounded-[10px] px-4 py-3 text-xs ${preview === "not-ready" ? "bg-card-inset text-ink" : "text-muted"}`}>
+                <p className="font-semibold">The pack cannot open yet -- the link, the email and the preview all wait for this:</p>
+                <ul className="mt-1.5 flex flex-col gap-1">
+                  {readiness.issues.map((i, n) => (
+                    <li key={n}>
+                      {i.traineeName}: {i.reason}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-xs text-muted">
+                The preview opens the pack through the same link the assessor gets, without accepting the terms on their behalf. &ldquo;Exit
+                preview&rdquo; at the top brings you back here.
+              </p>
+            )}
           </section>
         </div>
 

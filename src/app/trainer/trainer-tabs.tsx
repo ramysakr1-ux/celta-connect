@@ -22,14 +22,14 @@ const TABS = [
   // /audio and /coursebooks keep working as direct routes (linked from the
   // hub's own cards) -- only the top-nav tab itself moved.
   { href: "/resource-hub", label: "Resource hub", alsoMatch: ["/audio"] },
-  { href: "/trainer-in-training", label: "Trainer-in-Training" },
 ] as const;
 
-// Trainer-in-Training isn't in Trainer Homepage - MCT vs ACT.dc.html's
-// 7-tab list, and got dropped over that same day (24 Aug 2026) while
-// chasing the doc's exact spec -- but the tighter tab row built for that
-// spec (11.5px, 16px gaps) turned out to have enough headroom for it
-// anyway. Ramy confirmed via a side-by-side preview and asked for it back.
+// Visible only to the people the record concerns: the trainer-in-training,
+// their supervisor, the MCT, anyone the MCT has granted, and a touring
+// assessor (view-only). Ramy, 4 Sep 2026: "trainer in training will only
+// appear if there is one" -- and only to those people. The (hub) layout
+// decides (`tint` prop); migration 0267's tit_access_grants is the source.
+const TINT_TAB = { href: "/trainer-in-training", label: "Trainer-in-Training" } as const;
 
 // Grades Report is assessor-facing material, not an operational trainer
 // tool -- unlike the rest of TABS, it stays visible for assessor sessions
@@ -54,42 +54,40 @@ const ASSESSOR_TAB = { href: "/assessor", label: "Assessor" } as const;
 // for-claude-code-assessor-tour-mode.md: a touring assessor gets the real
 // trainer tab set, not the pack's own trimmed one -- but only for the
 // areas actually widened for an assessor session (Today, Roster,
-// Timetable, Volunteers, Resource hub, Grades Report). Teaching Practice
-// and Trainer-in-Training aren't in that list on purpose -- they were never
-// widened to accept an assessor session, and a tour tab that dead-ends at
-// a login redirect would be worse than one that's just not there.
+// Timetable, Volunteers, Resource hub, Grades Report, and
+// Trainer-in-Training when the course has one). Teaching Practice isn't in
+// that list on purpose -- it was never widened to accept an assessor
+// session, and a tour tab that dead-ends at a login redirect would be
+// worse than one that's just not there.
+//
+// Look: design_handoff_trainer_homepage_v4 README, "Header (56px, white,
+// 1px bottom border)": tabs 13px, padding 7px 11px, radius 6px, nowrap;
+// active = cream bg + role accent-deep text, 700; hover = cream bg. The
+// container hides overflow so the row never wraps. Role accent comes from
+// the (hub) layout's --hub-accent-deep (garnet for MCT, gold for ACT, teal
+// for an assessor session).
 export function TrainerTabs({
   rosterOnly = false,
   tourMode = false,
-  dark = false,
   mct = false,
+  tint = false,
 }: {
   rosterOnly?: boolean;
   tourMode?: boolean;
   /** Main course tutor on the open course: adds the Assessor tab. */
   mct?: boolean;
-  // for-claude-code-trainer-role-color-system-final.md: active tab is full-
-  // opacity white + white underline, inactive ~65% opacity white, hover
-  // reads --hub-hover-accent (set per-role by the (hub) layout) -- only for
-  // the real MCT/ACT header, which is now a dark ink/garnet band. An
-  // assessor session's header stays the plain light one this component
-  // already rendered before that change, so it keeps the old primary/muted
-  // treatment untouched.
-  dark?: boolean;
+  /** This person may see the course's trainer-in-training record. */
+  tint?: boolean;
 }) {
   const pathname = usePathname();
   const tabs = rosterOnly
     ? [TABS[0], ATTENDANCE_REGISTER_TAB, GRADES_REPORT_TAB]
     : tourMode
-      ? [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[4], GRADES_REPORT_TAB]
-      : [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[3], ...(mct ? [ASSESSOR_TAB] : []), TABS[4], TABS[5], GRADES_REPORT_TAB];
+      ? [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[4], ...(tint ? [TINT_TAB] : []), GRADES_REPORT_TAB]
+      : [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[3], ...(mct ? [ASSESSOR_TAB] : []), TABS[4], ...(tint ? [TINT_TAB] : []), GRADES_REPORT_TAB];
 
-  // No wrapper bar of its own any more -- this is now inlined directly into
-  // the (hub) shell's single header (see (hub)/layout.tsx), which supplies
-  // the h-full/items-stretch row this relies on to make the active tab's
-  // 2px underline land flush with the header's own bottom hairline.
   return (
-    <div className={`flex h-full items-center ${dark ? "gap-4" : "gap-6"}`}>
+    <div className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
       {tabs.map((tab) => {
         const href = `/trainer${tab.href}`;
         const alsoMatch = "alsoMatch" in tab ? tab.alsoMatch : [];
@@ -105,21 +103,10 @@ export function TrainerTabs({
           <Link
             key={tab.href}
             href={href}
-            // Trainer Homepage - MCT vs ACT.dc.html's tab row: 11.5px,
-            // border-bottom 2px, active = bold + full color, inactive =
-            // 500 weight + 65% opacity -- tighter than the light variant's
-            // text-sm, which is what let 8 tabs crowd the old single row.
-            className={
-              dark
-                ? `flex items-center pt-[11px] pb-[9px] border-b-2 text-[11.5px] transition-colors duration-150 hover:text-[var(--hub-hover-accent)] hover:border-[var(--hub-hover-accent)] ${
-                    active
-                      ? "border-white font-bold text-white"
-                      : "border-transparent font-medium text-[color-mix(in_oklab,white_65%,transparent)]"
-                  }`
-                : `flex h-full items-center border-b-2 text-sm font-medium transition-colors duration-150 ${
-                    active ? "border-primary text-primary" : "border-transparent text-muted hover:border-primary/40 hover:text-primary"
-                  }`
-            }
+            className={`shrink-0 rounded-[6px] px-[11px] py-[7px] text-[13px] whitespace-nowrap transition-colors duration-150 ${
+              active ? "bg-card-inset font-bold" : "font-medium text-muted hover:bg-card-inset hover:text-ink"
+            }`}
+            style={active ? { color: "var(--hub-accent-deep)" } : undefined}
           >
             {tab.label}
           </Link>

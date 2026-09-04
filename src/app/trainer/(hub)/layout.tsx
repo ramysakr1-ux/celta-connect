@@ -10,6 +10,7 @@ import { getInitialStaffChatData } from "@/lib/staff-chat";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { CourseSwitcher, type SwitcherCourse } from "@/app/trainer/(hub)/course-switcher";
+import { canSeeTrainerInTraining } from "@/lib/tit-access";
 
 // The operational "Command Centre" -- roster/timetable/volunteers/TP
 // rotation/TP points library/grades report. Deliberately separate from
@@ -75,36 +76,41 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // this spec never asked us to re-skin; only the header/tabs/logo
   // themselves stay isRealStaff-gated below, at their own point of use.
   const isMct = Boolean(profile && (profile.role === "admin" || currentCourseTutorRole === "main_course_tutor"));
-  const HUB_INK = "oklch(23.5% 0.017 65)"; // = --color-ink
-  const HUB_TEAL = "oklch(37.5% 0.058 195)"; // = --color-primary, written literally so this doesn't drift if that token ever does
+  // Trainer-in-Training tab: only for the people the record concerns, and
+  // only when the course has one. A touring assessor sees it view-only.
+  const assessorCourseId = isAssessor ? await getAssessorCourseId() : null;
+  const tintVisible = await canSeeTrainerInTraining({
+    courseId: profile?.course_id ?? assessorCourseId ?? null,
+    profile: profile ? { id: profile.id, role: profile.role, isMct } : null,
+    assessorTour: tourMode,
+  });
+  // design_handoff_trainer_homepage_v4, Design Tokens: "MCT accent -- garnet
+  // oklch(42% 0.13 27), deep oklch(36% 0.12 27); ACT accent -- gold
+  // oklch(60% 0.11 70), deep oklch(50% 0.11 65)". The accent is the role
+  // pill, the active tab, the primary button and the NOW state; the header
+  // itself is no longer a coloured band (was ink for MCT, garnet for ACT
+  // until 5 Sep 2026) but the same light bar for everyone. An assessor
+  // session, which v4 does not restyle, keeps Connect's teal as its accent.
   const HUB_GARNET = "oklch(42% 0.13 27)";
-  const HUB_GARNET_BRIGHT = "oklch(70% 0.16 27)"; // ACT-side hover accent -- brighter than the header's own garnet fill, so it reads against light card rows
-  // Ramy, 2026-08-27: "make the hovering for MCT and ACT matching their
-  // header's [color]" -- was previously HUB_GARNET_BRIGHT for MCT and
-  // HUB_TEAL for ACT (matching each other's header UNDERLINE, not their own
-  // header background), which is the opposite of what he wants. MCT's own
-  // header is ink, not a saturated hue, so its hover accent is a brightened
-  // version of the same ink hue rather than borrowing ACT's garnet.
-  const HUB_INK_BRIGHT = "oklch(70% 0.03 65)"; // MCT-side hover accent -- brightened version of the header's own ink hue
-  const HUB_GOLD = "oklch(63% 0.096 72)"; // = --color-gold
-  const headerInk = isMct ? "oklch(96% 0.008 85)" : "oklch(97% 0.006 85)";
+  const HUB_GARNET_DEEP = "oklch(36% 0.12 27)";
+  const HUB_GOLD = "oklch(60% 0.11 70)";
+  const HUB_GOLD_DEEP = "oklch(50% 0.11 65)";
+  const HUB_TEAL = "oklch(37.5% 0.058 195)"; // = --color-primary
+  const accent = !isRealStaff ? HUB_TEAL : isMct ? HUB_GARNET : HUB_GOLD;
+  const accentDeep = !isRealStaff ? HUB_TEAL : isMct ? HUB_GARNET_DEEP : HUB_GOLD_DEEP;
   const hubVars = {
-    "--hub-header-bg": isMct ? HUB_INK : HUB_GARNET,
-    "--hub-header-underline": isMct ? HUB_GARNET : HUB_TEAL,
-    "--hub-hover-accent": isMct ? HUB_INK_BRIGHT : HUB_GARNET_BRIGHT,
-    "--hub-row-shadow": isMct
-      ? `inset 0 0 0 1px ${HUB_INK_BRIGHT}, 0 3px 8px -3px oklch(70% 0.03 65 / 0.35)`
-      : `inset 0 0 0 1px ${HUB_GARNET_BRIGHT}, 0 3px 8px -3px color-mix(in oklab, ${HUB_GARNET_BRIGHT} 45%, transparent)`,
-    "--hub-tile-bg": `color-mix(in oklab, ${headerInk} 22%, transparent)`,
+    "--hub-accent": accent,
+    "--hub-accent-deep": accentDeep,
+    // .trainer-hover-fill (buttons) and .trainer-hover (rows) in globals.css
+    // read these -- Ramy, 27 Aug 2026: hover matches the role's own colour.
+    "--hub-hover-accent": accent,
+    "--hub-row-shadow": `inset 0 0 0 1px ${accent}, 0 3px 8px -3px color-mix(in oklab, ${accent} 45%, transparent)`,
     // Ramy, 27 Aug 2026: the decorative teal/garnet card alternation
-    // (.card-garnet/.sheet-garnet, unrelated to the role hover/header
-    // system above) would otherwise pile a second, unrelated reason for
-    // garnet onto ACT screens specifically, since ACT's own header/hover
-    // is already garnet -- gold instead gives ACT the same "not monotone"
-    // effect without doubling up on its own role color. MCT keeps garnet,
-    // since MCT's theme (dark ink) has no garnet anywhere else to collide
-    // with.
-    "--hub-decorative-accent": isMct ? HUB_GARNET : HUB_GOLD,
+    // (.card-garnet/.sheet-garnet, unrelated to the role hover system
+    // above) would otherwise pile a second, unrelated reason for garnet
+    // onto ACT screens specifically -- gold instead gives ACT the same
+    // "not monotone" effect without doubling up on its own role colour.
+    "--hub-decorative-accent": isMct ? HUB_GARNET : "oklch(63% 0.096 72)",
   } as React.CSSProperties;
 
   let isDemo = false;
@@ -151,69 +157,43 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   return (
     <div className="flex min-h-full flex-1 flex-col" style={hubVars}>
       {isDemo ? <DemoModeBanner /> : null}
-      {/* Trainer Homepage - MCT vs ACT.dc.html: a lean logo row (just the
-          mark + a single MCT/ACT badge) with the tabs as their own second
-          row underneath, border-topped -- fixes the crowding of the old
-          single 56px row that carried the logo AND every tab AND the
-          course pill/Command center pill/name at once. Ramy, 24 Aug 2026:
-          "make the bar wider" -- full width (px-6) rather than the same
-          1280px .container the tabs used to share with the page's own
-          content sheet below; nothing about the header needs to line up
-          with that. Command center pill dropped entirely per Ramy same
-          day: for a platform_owner, the logo itself now IS that link --
-          "connect will actually connect me to my command center, but only
-          me" -- everyone else keeps its normal go-to-my-course-Today
-          behavior. */}
-      <header className={isRealStaff ? "trainer-header" : "border-b border-border bg-card"}>
-        <div className="flex h-12 items-center justify-between px-[18px]">
+      {/* design_handoff_trainer_homepage_v4 README, "Header (56px, white,
+          1px bottom border)": one row -- mark, tab row, then the right
+          cluster (role pill in the accent, name, Settings). Replaces the
+          two-row dark ink/garnet band of 24-27 Aug; Ramy approved the v4
+          look on the build mock, 5 Sep 2026. Full width, not the page's
+          1280px container -- nothing here needs to line up with the sheet
+          below. For a platform_owner the logo IS the Command Center link
+          ("connect will actually connect me to my command center, but
+          only me"); everyone else gets their course's Today. */}
+      <header className="border-b border-border bg-frame">
+        <div className="flex h-14 items-center gap-[18px] px-[22px]">
           <Link
             href={profile?.role === "platform_owner" ? "/platform/command-center" : isAssessor ? "/assessor" : "/trainer"}
             className="block shrink-0"
           >
-            <Wordmark
-              size="header-compact"
-              onDark={isRealStaff}
-              tileBg={isRealStaff ? "var(--hub-tile-bg)" : undefined}
-              wordColor={isRealStaff ? "oklch(60% 0.11 70)" : undefined}
-              gapPx={isRealStaff ? 9 : undefined}
-            />
+            <Wordmark size="header-compact" gapPx={9} />
           </Link>
-          {isRealStaff ? (
-            <span
-              className="rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-[0.1em] uppercase"
-              style={{
-                color: headerInk,
-                background: isMct
-                  ? `color-mix(in oklab, ${HUB_TEAL} 55%, ${HUB_INK})`
-                  : `color-mix(in oklab, black 20%, ${HUB_GARNET})`,
-              }}
-            >
-              {isMct ? "MCT" : "ACT"}
-            </span>
-          ) : null}
-        </div>
-        <div
-          className={`flex items-stretch justify-between gap-6 border-t px-[18px] ${isRealStaff ? "border-[color-mix(in_oklab,white_15%,transparent)]" : "border-border"}`}
-        >
-          <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} dark={isRealStaff} mct={isMct && !isAssessor} />
-          <div className="flex shrink-0 items-center gap-3">
+          <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} mct={isMct && !isAssessor} tint={tintVisible} />
+          <div className="flex shrink-0 items-center gap-[11px]">
+            {isRealStaff ? (
+              <span
+                className="rounded-full px-[9px] py-1 text-[10.5px] font-bold tracking-[0.09em] text-primary-foreground uppercase"
+                style={{ background: accent }}
+              >
+                {isMct ? "MCT" : "ACT"}
+              </span>
+            ) : null}
             {switcherCourses.length > 1 && profile?.course_id ? (
               <CourseSwitcher courses={switcherCourses} activeCourseId={profile.course_id} />
             ) : courseCode ? (
-              <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground">
-                {courseCode}
-              </span>
+              <span className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-ink">{courseCode}</span>
             ) : null}
-            <span className={`text-sm ${isRealStaff ? "text-[color-mix(in_oklab,white_85%,transparent)]" : "text-muted"}`}>
-              {profile?.full_name ?? session?.email}
-            </span>
-            {/* v4 handoff draws "Settings" here. The tutor's own
-                preferences (feedback assist) live behind it, off Today. */}
+            <span className="text-[13px] font-semibold text-ink">{profile?.full_name ?? session?.email}</span>
+            {/* v4 draws "Settings" here. The tutor's own preferences
+                (feedback assist) live behind it, off Today. */}
             {isRealStaff ? (
-              <Link
-                href="/trainer/settings"
-                className="text-[12px] font-medium text-[color-mix(in_oklab,white_65%,transparent)] transition-colors hover:text-[var(--hub-hover-accent)]"
-              >
+              <Link href="/trainer/settings" className="text-[12.5px] text-muted transition-colors hover:text-ink hover:underline">
                 Settings
               </Link>
             ) : null}

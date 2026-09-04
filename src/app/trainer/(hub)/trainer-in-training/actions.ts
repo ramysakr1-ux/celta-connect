@@ -560,3 +560,45 @@ export async function submitPortfolio(formData: FormData): Promise<void> {
   await supabase.from("tit_records").update({ portfolio_submitted_at: new Date().toISOString() }).eq("id", titRecordId);
   revalidateWorkspace();
 }
+
+// ---- Who may see this record (migration 0267, tit_access_grants) ----
+//
+// Ramy, 4 Sep 2026: "the MCT should grant access to the ACT." RLS is the
+// boundary again: the insert policy only passes for the course's MCT (or
+// centre admin), and stamps the caller as granted_by; the update policy
+// only lets a live grant be revoked, by the same people, attributed. So
+// neither action re-derives the check -- Postgres refuses anyone else.
+
+export async function grantTitAccess(formData: FormData): Promise<void> {
+  const me = await requireRole(["trainer", "admin", "platform_owner"]);
+  const courseTutorsId = formData.get("course_tutors_id");
+  const granteeProfileId = formData.get("grantee_profile_id");
+  const reason = formData.get("reason");
+  if (typeof courseTutorsId !== "string" || typeof granteeProfileId !== "string" || typeof reason !== "string" || !reason.trim()) return;
+
+  const supabase = await createClient();
+  await supabase.from("tit_access_grants").insert({
+    course_tutors_id: courseTutorsId,
+    grantee_profile_id: granteeProfileId,
+    granted_by_profile_id: me.id,
+    reason: reason.trim(),
+  });
+  revalidateWorkspace();
+  // The tab itself appears or disappears for the grantee.
+  revalidatePath("/trainer", "layout");
+}
+
+export async function revokeTitAccess(formData: FormData): Promise<void> {
+  const me = await requireRole(["trainer", "admin", "platform_owner"]);
+  const id = formData.get("id");
+  if (typeof id !== "string") return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("tit_access_grants")
+    .update({ revoked_at: new Date().toISOString(), revoked_by_profile_id: me.id })
+    .eq("id", id)
+    .is("revoked_at", null);
+  revalidateWorkspace();
+  revalidatePath("/trainer", "layout");
+}

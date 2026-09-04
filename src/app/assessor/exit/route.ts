@@ -1,6 +1,7 @@
 import "server-only";
 import { NextResponse } from "next/server";
-import { ASSESSOR_COOKIE, ASSESSOR_TOUR_COOKIE } from "@/lib/auth/portfolio-access";
+import { cookies } from "next/headers";
+import { ASSESSOR_COOKIE, ASSESSOR_PREVIEW_COOKIE, ASSESSOR_TOUR_COOKIE } from "@/lib/auth/portfolio-access";
 
 // Leaves the assessor view.
 //
@@ -10,8 +11,11 @@ import { ASSESSOR_COOKIE, ASSESSOR_TOUR_COOKIE } from "@/lib/auth/portfolio-acce
 // A real assessor never needs it and never sees the control that points here.
 export async function GET(request: Request) {
   const origin = new URL(request.url).origin;
-  const response = NextResponse.redirect(`${origin}/trainer`);
-  for (const name of [ASSESSOR_COOKIE, ASSESSOR_TOUR_COOKIE]) {
+  // An MCT leaving their own preview goes back to the Assessor tab they
+  // started from; anyone else lands on Today.
+  const wasPreview = (await cookies()).get(ASSESSOR_PREVIEW_COOKIE)?.value === "1";
+  const response = NextResponse.redirect(`${origin}${wasPreview ? "/trainer/assessor" : "/trainer"}`);
+  for (const name of [ASSESSOR_COOKIE, ASSESSOR_TOUR_COOKIE, ASSESSOR_PREVIEW_COOKIE]) {
     response.cookies.set(name, "", { httpOnly: true, path: "/", maxAge: 0 });
   }
   return response;
