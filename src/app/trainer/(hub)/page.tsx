@@ -17,6 +17,7 @@ import { AssessorCard } from "@/app/trainer/(hub)/assessor-card";
 import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
 import { assessorVisitDayProblem } from "@/lib/assessor-day";
 import { findMaterialsOverlaps } from "@/lib/materials-overlap";
+import { Avatar } from "@/components/avatar";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -385,18 +386,6 @@ export default async function TodayPage() {
 
   const cohort = rows.slice(0, 6);
 
-  // Spec's per-candidate avatar hues -- explicitly decorative, "for visual
-  // variety, not semantic", so they're indexed by position rather than
-  // derived from anything meaningful. A flagged candidate drops its hue for
-  // the alert red instead, which IS semantic.
-  const AVATAR_HUES = [
-    "oklch(52% 0.1 260)", // blue
-    "oklch(55% 0.11 25)", // terracotta
-    "oklch(58% 0.1 145)", // green
-    "oklch(60% 0.1 300)", // purple
-    "var(--color-gold)",
-  ] as const;
-
   // The one conflict Ramy's 2026-08-16 diff turned up between the trainer-
   // homepage spec and what's live: the spec drew a bespoke "3 / 8" taught
   // count here. Per specs/for-claude-code-unified-tracking.md, tracked
@@ -410,14 +399,6 @@ export default async function TodayPage() {
       : r.tpStagesBehind > 0
         ? { label: "Behind", className: "text-status-warning-text font-semibold" }
         : { label: "On track", className: "text-muted" };
-
-  const initialsOf = (name: string) =>
-    name
-      .split(" ")
-      .map((p) => p[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
 
   const weekOf =
     course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
@@ -622,13 +603,14 @@ export default async function TodayPage() {
                   href={`/portfolio/${r.id}`}
                   className={`trainer-hover -mx-2 flex items-center gap-3 rounded-[6px] px-2 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-primary-foreground"
-                    style={{ backgroundColor: flagged ? "var(--color-destructive)" : AVATAR_HUES[i % AVATAR_HUES.length] }}
-                  >
-                    {initialsOf(r.name)}
-                  </span>
+                  {/* Was a fifth separate initials implementation, with hues
+                      indexed by POSITION IN THE LIST -- so a candidate's
+                      colour changed when the order did, and the same person
+                      looked different here and on the roster. The shared
+                      Avatar derives its colour from the name instead, which
+                      is the whole point of it. A flagged candidate still
+                      overrides to the alert red, because that IS semantic. */}
+                  <Avatar name={r.name} size="sm" tone={flagged ? "var(--color-destructive)" : undefined} />
                   <span className="flex-1 truncate text-sm text-ink">{r.name}</span>
                   <span className={`shrink-0 text-xs ${status.className}`}>{status.label}</span>
                 </Link>
