@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { DesignerCredit } from "@/components/designer-credit";
+import { Avatar } from "@/components/avatar";
 
 // Ramy, 2026-08-24: only the bare landing route gets the credit pill (same
 // self-gating pattern as TraineeNameBanner, which the credit sits directly
@@ -14,11 +15,11 @@ import { DesignerCredit } from "@/components/designer-credit";
 // show yet), same as computeCourseDayProgress's own contract.
 export function TraineeHeaderCorner({
   traineeId,
-  traineeInitials,
+  traineeName,
   courseDayProgress,
 }: {
   traineeId: string;
-  traineeInitials: string;
+  traineeName: string;
   courseDayProgress: { currentDay: number; totalDays: number } | null;
 }) {
   const pathname = usePathname();
@@ -33,9 +34,11 @@ export function TraineeHeaderCorner({
           Day {courseDayProgress.currentDay} of {courseDayProgress.totalDays}
         </span>
       ) : null}
-      <div className="flex size-[26px] shrink-0 items-center justify-center rounded-[8px]" style={{ background: "oklch(93% 0.019 190)" }}>
-        <span className="text-[9px] font-bold" style={{ color: "oklch(32% 0.05 195)" }}>{traineeInitials}</span>
-      </div>
+      {/* Was a hardcoded teal tile with initials computed in the layout --
+          one of four separate initials implementations in the app. All of
+          them are this component now, and the colour comes from the name
+          rather than being the same teal for everyone. */}
+      <Avatar name={traineeName} size="xs" />
     </div>
   );
 }

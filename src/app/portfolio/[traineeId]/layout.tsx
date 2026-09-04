@@ -33,6 +33,7 @@ import { computeQuietHoursNote, toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timet
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { getPeerGroupMembers } from "@/lib/peer-observation";
 import { computeCourseDayProgress } from "@/lib/course-day";
+import { Avatar } from "@/components/avatar";
 
 // §3 -- shared shell for every /portfolio/:traineeId/* tab. A trainee can
 // only ever land on their own :traineeId (redirected home otherwise);
@@ -116,13 +117,6 @@ export default async function PortfolioLayout({
   // existing PortfolioTabs sidebar, a deliberately different tool for
   // browsing one candidate's whole record rather than a daily briefing.
   const showTraineeNav = !isStaffView;
-
-  const traineeInitials = trainee.full_name
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 
   // TraineeNameBanner's own "week N" -- only fetched for the showTraineeNav
   // branch's landing page, same course_id already used above. Ramy,
@@ -333,7 +327,7 @@ export default async function PortfolioLayout({
               </Link>
               <TraineeHeaderCorner
                 traineeId={trainee.id}
-                traineeInitials={traineeInitials}
+                traineeName={trainee.full_name}
                 courseDayProgress={courseDayProgress}
               />
             </div>
@@ -357,6 +351,7 @@ export default async function PortfolioLayout({
                 <BackLink href="/trainer/roster" label={"Roster"} />
               )}
               <span className="h-5 w-px shrink-0 bg-border" />
+              <Avatar name={trainee.full_name} size="sm" />
               <h1 className="truncate font-serif text-[17px] text-ink">{trainee.full_name}</h1>
               {isCourseStatusReadOnly(trainee.course_status) ? (
                 <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-destructive/12 px-2.5 py-0.5 text-[11px] font-semibold text-destructive">

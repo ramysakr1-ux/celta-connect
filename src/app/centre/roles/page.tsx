@@ -10,6 +10,7 @@ import { roleLabel } from "@/lib/auth/centre-permissions";
 import { AREAS, AREA_LABELS } from "@/lib/auth/areas";
 import { getAreaHolders } from "@/lib/auth/area-holders";
 import { DELIVERY_LABEL, DELIVERY_PILL_CLASS, type EmailDeliveryStatus } from "@/lib/email-delivery-status";
+import { Avatar } from "@/components/avatar";
 
 // Centre Admin's Roles tab. Layout per the 2026-08-16 visual spec: a headline
 // and subhead, then the four-segment selector strip, then the selected role's
@@ -169,9 +170,12 @@ export default async function CentreRolesPage() {
               <div className="mt-2 flex flex-col gap-1.5">
                 {(grants ?? []).map((g) => (
                   <div key={g.id} className="flex items-center justify-between gap-3">
-                    <span className="text-xs text-ink">
-                      {nameOf.get(g.profile_id) ?? "Unknown"}{" "}
-                      <span className="text-muted">{roleLabel(g.role, ctx.customRoles)}</span>
+                    <span className="flex items-center gap-2 text-xs text-ink">
+                      <Avatar name={nameOf.get(g.profile_id) ?? "Unknown"} size="xs" />
+                      <span>
+                        {nameOf.get(g.profile_id) ?? "Unknown"}{" "}
+                        <span className="text-muted">{roleLabel(g.role, ctx.customRoles)}</span>
+                      </span>
                     </span>
                     <RevokeRoleButton grantId={g.id} />
                   </div>

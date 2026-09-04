@@ -10,6 +10,7 @@ import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { ordinal } from "@/lib/stage2-tutorials";
 import { moveStage2Earlier, moveStage3Earlier, type FormState } from "@/app/dashboard/trainer/celta5-actions";
+import { Avatar } from "@/components/avatar";
 
 const moveEarlierInitialState: FormState = { error: null };
 
@@ -132,7 +133,8 @@ export function RosterRowView({
     return (
       <tr className="trainer-hover cursor-pointer opacity-70" onClick={() => router.push(`/portfolio/${row.id}`)}>
         <td>
-          <Link href={`/portfolio/${row.id}`} className="text-ink hover:text-primary">
+          <Link href={`/portfolio/${row.id}`} className="flex items-center gap-2.5 text-ink hover:text-primary">
+            <Avatar name={row.name} size="sm" />
             {row.name}
           </Link>
         </td>
@@ -152,10 +154,13 @@ export function RosterRowView({
   return (
     <tr className="trainer-hover cursor-pointer" onClick={() => router.push(`/portfolio/${row.id}`)}>
       <td>
-        <Link href={`/portfolio/${row.id}`} className="text-ink hover:text-primary">
+        {/* The mark sits inside the link so the whole name cell stays one
+            target -- Ramy, 4 Sep 2026. */}
+        <Link href={`/portfolio/${row.id}`} className="flex items-center gap-2.5 text-ink hover:text-primary">
+          <Avatar name={row.name} size="sm" />
           {row.name}
+          {row.courseStatus === "extension" ? <span className="pill pill-info">Extension</span> : null}
         </Link>
-        {row.courseStatus === "extension" ? <span className="pill pill-info ml-2">Extension</span> : null}
       </td>
       {showContact ? <ContactCell row={row} courseCode={courseCode} /> : <td />}
       <td className={`text-right tabular-nums ${row.assessedHrs < 6 ? "text-status-warning-text" : "text-ink"}`}>
