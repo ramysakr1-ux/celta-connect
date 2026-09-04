@@ -2090,6 +2090,30 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["tp_points"]["Row"]>;
         Relationships: [];
       };
+      // migration 0268 -- the tutor plan per TP group ("Nadia from TP1,
+      // Marcus from TP4"); course_tp_groups.tutor_profile_id is derived from it.
+      course_tp_group_tutors: {
+        Row: {
+          id: string;
+          course_id: string;
+          tp_group_id: string;
+          tutor_profile_id: string;
+          from_tp_number: number;
+          set_by_profile_id: string | null;
+          set_at: string;
+          note: string | null;
+          superseded_at: string | null;
+          superseded_by_profile_id: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_tp_group_tutors"]["Row"]> & {
+          course_id: string;
+          tp_group_id: string;
+          tutor_profile_id: string;
+          from_tp_number: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_tp_group_tutors"]["Row"]>;
+        Relationships: [];
+      };
       course_subgroups: {
         Row: {
           id: string;
@@ -3820,6 +3844,8 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      current_tp_number: { Args: { p_course_id: string }; Returns: number };
+      sync_tp_group_tutors: { Args: { p_course_id: string }; Returns: undefined };
       centre_hard_delete: {
         Args: { p_center_id: string };
         Returns: void;

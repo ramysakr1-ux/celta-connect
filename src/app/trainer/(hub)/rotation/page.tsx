@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { rotationPosition, distinctTpDates, halfOwningDate, checkIntensiveTpBreaks, tpBlockEndsOnFinalDay } from "@/lib/rotation";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -47,6 +48,24 @@ export default async function TrainerRotationPage() {
     .eq("course_id", courseId)
     .eq("role", "trainer")
     .order("full_name");
+
+  // The tutor plan per group (migration 0268) and where the course is in
+  // its TPs, for the "now" line. Admin client for the plan: set_by names
+  // can be tutors no longer on the course.
+  const [{ data: tutorPlanRows }, { data: currentTpRaw }] = await Promise.all([
+    createAdminClient()
+      .from("course_tp_group_tutors")
+      .select("id, tp_group_id, tutor_profile_id, from_tp_number, set_by_profile_id, set_at, note")
+      .eq("course_id", courseId)
+      .is("superseded_at", null),
+    supabase.rpc("current_tp_number", { p_course_id: courseId }),
+  ]);
+  const currentTp = typeof currentTpRaw === "number" ? currentTpRaw : 0;
+  const planPeopleIds = [...new Set((tutorPlanRows ?? []).flatMap((r) => [r.tutor_profile_id, r.set_by_profile_id]).filter((x): x is string => Boolean(x)))];
+  const { data: planPeople } = planPeopleIds.length
+    ? await createAdminClient().from("profiles").select("id, full_name").in("id", planPeopleIds)
+    : { data: [] };
+  const planNameById = new Map((planPeople ?? []).map((p) => [p.id, p.full_name]));
 
   const { data: members } = await supabase
     .from("course_subgroup_members")
@@ -279,7 +298,19 @@ export default async function TrainerRotationPage() {
                   groupId={tpGroup.id}
                   courseId={courseId}
                   tutors={(courseTutorsForGroups ?? []).map((t) => ({ id: t.id, name: t.full_name }))}
-                  currentTutorId={tpGroup.tutor_profile_id}
+                  assignments={(tutorPlanRows ?? [])
+                    .filter((r) => r.tp_group_id === tpGroup.id)
+                    .map((r) => ({
+                      id: r.id,
+                      tutorId: r.tutor_profile_id,
+                      tutorName: planNameById.get(r.tutor_profile_id) ?? "Unknown",
+                      fromTp: r.from_tp_number,
+                      setByName: r.set_by_profile_id ? (planNameById.get(r.set_by_profile_id) ?? null) : null,
+                      setAt: r.set_at,
+                      note: r.note,
+                    }))}
+                  currentTutorName={tpGroup.tutor_profile_id ? (planNameById.get(tpGroup.tutor_profile_id) ?? (courseTutorsForGroups ?? []).find((t) => t.id === tpGroup.tutor_profile_id)?.full_name ?? null) : null}
+                  currentTp={currentTp}
                   currentMeetingDays={tpGroup.meeting_days}
                 />
               </div>

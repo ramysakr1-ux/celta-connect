@@ -195,59 +195,109 @@ export async function unpairTpGroup(formData: FormData): Promise<void> {
 }
 
 /**
- * Assign a tutor to a TP group, and record when it meets.
+ * The tutor plan for a TP group (migration 0268): who has the group from
+ * which TP number. course_tp_groups.tutor_profile_id is derived from these
+ * rows by the database, so nothing here writes that field directly.
  *
- * The group is the unit a tutor actually owns -- they observe it, feed back on
- * it, and sign its candidates' CELTA 5s -- so "who has Group ABC" is a
- * question the app should be able to answer. Until migration 0121 it could
- * not.
+ * Ramy, 5 Sep 2026: tutors swap groups mid-course and Connect had no way to
+ * know -- "if we have four tutors, how would the rotation be recognised?"
+ * The plan is written once, at setup, and every ACT-scoped screen follows
+ * it as the calendar reaches each TP.
  *
- * Deliberately permissive about who can hold it: any trainer on the course,
- * with no tutor_role requirement. A TP tutor, an assistant course tutor and
- * the MCT can all own a group, and Ramy was clear that the MCT/ACT
- * distinction governs announcements, not teaching.
+ * Deliberately permissive about who can hold a group: any trainer on the
+ * course, with no tutor_role requirement -- "the MCT/ACT distinction
+ * governs announcements, not teaching."
  */
-export async function setTpGroupTutor(_prevState: FormState, formData: FormData): Promise<FormState> {
-  const profile = await requireCapabilityOrTrainer("courseAdmin.groups");
+async function checkGroupAndCourse(profileCenterId: string | null, groupId: string, courseId: string): Promise<string | null> {
+  const admin = createAdminClient();
+  const { data: course } = await admin.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
+  if (!course || course.center_id !== profileCenterId) return "Course not found.";
+  const { data: group } = await admin.from("course_tp_groups").select("id").eq("id", groupId).eq("course_id", courseId).maybeSingle();
+  if (!group) return "Group not found.";
+  return null;
+}
 
+export async function addTpGroupTutorAssignment(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const profile = await requireCapabilityOrTrainer("courseAdmin.groups");
   const groupId = formData.get("group_id");
   const courseId = formData.get("course_id");
   const tutorId = (formData.get("tutor_profile_id") as string | null) || null;
-  const meetingDays = (formData.get("meeting_days") as string | null)?.trim() || null;
+  const fromTp = Number(formData.get("from_tp_number"));
+  const note = (formData.get("note") as string | null)?.trim() || null;
+  if (typeof groupId !== "string" || typeof courseId !== "string") return { error: "Something went wrong. Refresh and try again." };
+  if (!tutorId) return { error: "Choose a tutor." };
+  if (!Number.isInteger(fromTp) || fromTp < 1 || fromTp > 8) return { error: "Choose which TP the tutor takes over from." };
 
-  if (typeof groupId !== "string" || typeof courseId !== "string") {
-    return { error: "Something went wrong. Refresh and try again." };
-  }
+  const problem = await checkGroupAndCourse(profile.center_id, groupId, courseId);
+  if (problem) return { error: problem };
 
   const admin = createAdminClient();
-  const { data: course } = await admin.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== profile.center_id) return { error: "Course not found." };
-
   // A tutor from another course would look plausible in the dropdown and be
   // wrong in every downstream screen, so the link is checked rather than
   // trusted.
-  if (tutorId) {
-    const { data: onCourse } = await admin
-      .from("profiles")
-      .select("id")
-      .eq("id", tutorId)
-      .eq("course_id", courseId)
-      .eq("role", "trainer")
-      .maybeSingle();
-    if (!onCourse) return { error: "That tutor isn't on this course." };
-  }
+  const { data: onCourse } = await admin.from("profiles").select("id").eq("id", tutorId).eq("course_id", courseId).eq("role", "trainer").maybeSingle();
+  if (!onCourse) return { error: "That tutor isn't on this course." };
 
-  const { error } = await admin
-    .from("course_tp_groups")
-    .update({ tutor_profile_id: tutorId, meeting_days: meetingDays })
-    .eq("id", groupId)
-    .eq("course_id", courseId);
+  // One live row per (group, from TP): a second plan for the same TP
+  // supersedes the first rather than replacing it -- the old row stays as
+  // the record of what was planned before.
+  await admin
+    .from("course_tp_group_tutors")
+    .update({ superseded_at: new Date().toISOString(), superseded_by_profile_id: profile.id })
+    .eq("tp_group_id", groupId)
+    .eq("from_tp_number", fromTp)
+    .is("superseded_at", null);
+  const { error } = await admin.from("course_tp_group_tutors").insert({
+    course_id: courseId,
+    tp_group_id: groupId,
+    tutor_profile_id: tutorId,
+    from_tp_number: fromTp,
+    set_by_profile_id: profile.id,
+    note,
+  });
   if (error) {
-    // The message above is what the person reads; this is what we read.
+    console.error("[dashboard/admin/courses/[id]/subgroup-actions.ts:addTpGroupTutorAssignment]", error);
+    return { error: "Could not save. Try again." };
+  }
+  revalidatePath("/trainer/rotation");
+  revalidatePath("/trainer", "layout");
+  return { error: null };
+}
+
+export async function removeTpGroupTutorAssignment(formData: FormData): Promise<void> {
+  const profile = await requireCapabilityOrTrainer("courseAdmin.groups");
+  const id = formData.get("assignment_id");
+  const groupId = formData.get("group_id");
+  const courseId = formData.get("course_id");
+  if (typeof id !== "string" || typeof groupId !== "string" || typeof courseId !== "string") return;
+  if (await checkGroupAndCourse(profile.center_id, groupId, courseId)) return;
+
+  const admin = createAdminClient();
+  await admin
+    .from("course_tp_group_tutors")
+    .update({ superseded_at: new Date().toISOString(), superseded_by_profile_id: profile.id })
+    .eq("id", id)
+    .eq("tp_group_id", groupId)
+    .is("superseded_at", null);
+  revalidatePath("/trainer/rotation");
+  revalidatePath("/trainer", "layout");
+}
+
+/** Meeting days only now -- the tutor lives in the plan above. */
+export async function setTpGroupTutor(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const profile = await requireCapabilityOrTrainer("courseAdmin.groups");
+  const groupId = formData.get("group_id");
+  const courseId = formData.get("course_id");
+  const meetingDays = (formData.get("meeting_days") as string | null)?.trim() || null;
+  if (typeof groupId !== "string" || typeof courseId !== "string") return { error: "Something went wrong. Refresh and try again." };
+  const problem = await checkGroupAndCourse(profile.center_id, groupId, courseId);
+  if (problem) return { error: problem };
+
+  const { error } = await createAdminClient().from("course_tp_groups").update({ meeting_days: meetingDays }).eq("id", groupId).eq("course_id", courseId);
+  if (error) {
     console.error("[dashboard/admin/courses/[id]/subgroup-actions.ts:setTpGroupTutor]", error);
     return { error: "Could not save. Try again." };
   }
-
   revalidatePath("/trainer/rotation");
   return { error: null };
 }
