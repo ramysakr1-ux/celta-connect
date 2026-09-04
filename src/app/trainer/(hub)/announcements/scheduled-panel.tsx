@@ -21,6 +21,8 @@ interface TimetableEventOption {
 
 export interface ScheduledRowData {
   id: string;
+  /** Per row: the MCT manages every row, an ACT only what they authored. */
+  canManage?: boolean;
   title: string;
   body: string | null;
   pinned: boolean;
@@ -86,7 +88,7 @@ export function ScheduledPanel({
                 key={row.id}
                 row={row}
                 justSaved={savedId === row.id}
-                canManage={canManage}
+                canManage={row.canManage ?? canManage}
                 onEdit={() => setEditingId(row.id)}
               />
             )

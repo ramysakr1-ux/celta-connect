@@ -566,7 +566,11 @@ async function main() {
   // leave the teaching card contradicting it.
   const { data: tpGroup, error: tpGroupErr } = await supabase
     .from("course_tp_groups")
-    .insert({ course_id: course.id, name: "Group A" })
+    // The ACT (Marcus Webb) is the group's tutor -- what makes the ACT demo
+    // show a group of their own rather than the whole course, and lets them
+    // post a group-scoped announcement (5 Sep 2026). Set on the live demo
+    // course the same day; this keeps it so on every rebuild.
+    .insert({ course_id: course.id, name: "Group A", tutor_profile_id: trainer2Id })
     .select("id")
     .single();
   if (tpGroupErr) throw tpGroupErr;

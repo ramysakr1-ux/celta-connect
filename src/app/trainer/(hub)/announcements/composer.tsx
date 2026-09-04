@@ -44,6 +44,7 @@ export function AnnouncementComposer({
   traineeCount,
   trainerCount,
   groups,
+  cohortAllowed,
 }: {
   timetableEvents: TimetableEventOption[];
   showAssessorTemplate: boolean;
@@ -52,6 +53,8 @@ export function AnnouncementComposer({
   traineeCount: number;
   trainerCount: number;
   groups: GroupOption[];
+  /** MCT: may send to the whole cohort. An ACT sends to their own group only. */
+  cohortAllowed: boolean;
 }) {
   const [state, formAction, pending] = useActionState(postBroadcast, initialState);
   const [linkedEventId, setLinkedEventId] = useState("");
@@ -59,7 +62,7 @@ export function AnnouncementComposer({
   const [body, setBody] = useState("");
   const [timing, setTiming] = useState<"now" | "anchored">("now");
   const [offsetDays, setOffsetDays] = useState("-2");
-  const [groupScopeId, setGroupScopeId] = useState("");
+  const [groupScopeId, setGroupScopeId] = useState(cohortAllowed ? "" : (groups[0]?.id ?? ""));
   const selectedGroup = groups.find((g) => g.id === groupScopeId) ?? null;
 
   return (
@@ -88,7 +91,13 @@ export function AnnouncementComposer({
         </button>
       ) : null}
 
-      {groups.length > 0 ? (
+      {!cohortAllowed && groups.length === 1 ? (
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs text-muted">Send to</label>
+          <p className="text-sm font-semibold text-ink">{groups[0].name} only</p>
+          <input type="hidden" name="visible_to_tp_group_id" value={groups[0].id} />
+        </div>
+      ) : groups.length > 0 ? (
         <div className="flex flex-col gap-1.5">
           <label className="text-xs text-muted">Send to</label>
           <select
@@ -96,7 +105,7 @@ export function AnnouncementComposer({
             onChange={(e) => setGroupScopeId(e.target.value)}
             className="h-10 rounded-[6px] border border-input bg-card px-3 text-sm text-ink outline-none focus:border-primary"
           >
-            <option value="">Whole cohort</option>
+            {cohortAllowed ? <option value="">Whole cohort</option> : null}
             {groups.map((g) => (
               <option key={g.id} value={g.id}>
                 {g.name} only

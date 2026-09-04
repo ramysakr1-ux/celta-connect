@@ -76,6 +76,13 @@ export default async function AnnouncementsPage() {
       .maybeSingle();
     isMct = !mct || mct.profile_id === trainer.id;
   }
+  // Ramy, 5 Sep 2026: an ACT posts to their own group. "Own" = the group
+  // course_tp_groups names them tutor of today.
+  const { data: myGroupRows } = isMct
+    ? { data: [] as { id: string }[] }
+    : await supabase.from("course_tp_groups").select("id").eq("course_id", courseId).eq("tutor_profile_id", trainer.id);
+  const myGroupIds = new Set((myGroupRows ?? []).map((g) => g.id));
+  const canCompose = isMct || myGroupIds.size > 0;
   const subgroupIdsByTpGroup = new Map<string, string[]>();
   for (const s of subgroups ?? []) {
     if (!s.tp_group_id) continue;
@@ -92,11 +99,14 @@ export default async function AnnouncementsPage() {
   for (const m of subgroupMembers ?? []) {
     memberCountBySubgroup.set(m.subgroup_id, (memberCountBySubgroup.get(m.subgroup_id) ?? 0) + 1);
   }
-  const composerGroups = (tpGroups ?? []).map((g) => ({
-    id: g.id,
-    name: g.name,
-    memberCount: (subgroupIdsByTpGroup.get(g.id) ?? []).reduce((sum, sid) => sum + (memberCountBySubgroup.get(sid) ?? 0), 0),
-  }));
+  const composerGroups = (tpGroups ?? [])
+    .filter((g) => isMct || myGroupIds.has(g.id))
+    .map((g) => ({
+      id: g.id,
+      name: g.name,
+      memberCount: (subgroupIdsByTpGroup.get(g.id) ?? []).reduce((sum, sid) => sum + (memberCountBySubgroup.get(sid) ?? 0), 0),
+    }));
+  const groupNameById = new Map((tpGroups ?? []).map((g) => [g.id, g.name]));
 
   const authorIds = [...new Set((broadcasts ?? []).map((b) => b.author_id))];
   const { data: authors } = authorIds.length > 0 ? await supabase.from("profiles").select("id, full_name").in("id", authorIds) : { data: [] };
@@ -160,6 +170,7 @@ export default async function AnnouncementsPage() {
       anchorOffsetDays: b.anchor_offset_days ?? 0,
       fireDate,
       heldAt: b.held_at,
+      canManage: isMct || b.author_id === trainer.id,
     };
   });
 
@@ -174,26 +185,27 @@ export default async function AnnouncementsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        {isMct ? (
+        {canCompose ? (
           <AnnouncementComposer
             timetableEvents={composerEvents}
-            showAssessorTemplate={showAssessorTemplate}
+            showAssessorTemplate={showAssessorTemplate && isMct}
             assessorMeetingEventId={assessorMeetingEvent?.id ?? null}
             traineeCount={traineeCount ?? 0}
             trainerCount={trainerCount ?? 0}
             groups={composerGroups}
+            cohortAllowed={isMct}
           />
         ) : (
           <div className="sheet flex flex-col gap-2">
             <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Write an announcement</p>
             <p className="text-sm text-muted">
-              Announcements are sent by the main course tutor. To reach your own TP group informally, use the chat
-              pill instead.
+              Whole-cohort announcements are sent by the main course tutor. You can post to a TP group once you are named
+              its tutor on Rotation; until then, the chat pill reaches your candidates informally.
             </p>
           </div>
         )}
 
-        <ScheduledPanel scheduled={scheduledRows} timetableEvents={editPickerEvents} canManage={isMct} />
+        <ScheduledPanel scheduled={scheduledRows} timetableEvents={editPickerEvents} canManage={canCompose} />
 
         <div className="rounded-[6px] border border-border">
           <p className="border-b border-border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
@@ -211,6 +223,7 @@ export default async function AnnouncementsPage() {
                   </div>
                   <p className="text-xs text-muted">
                     {authorNameById.get(b.author_id) ?? "Unknown"} · {(b.sent_at ?? b.created_at).slice(0, 10)}
+                    {b.visible_to_tp_group_id ? ` · ${groupNameById.get(b.visible_to_tp_group_id) ?? "one group"} only` : ""}
                   </p>
                 </div>
               ))}

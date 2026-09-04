@@ -37,6 +37,29 @@ async function requireMctForBroadcastManagement(
   return !mct || mct.profile_id === trainer.id;
 }
 
+// Ramy, 5 Sep 2026, reopening the 23 Aug decision for one case: an ACT may
+// post to their OWN TP group -- "Group B, bring your coursebook tomorrow"
+// -- without going through the MCT. Whole-cohort stays the MCT's. "Own"
+// means course_tp_groups.tutor_profile_id names them today; when the
+// tutors swap groups mid-course, the MCT changes that field on Rotation
+// and this follows.
+async function myTpGroupIds(supabase: Awaited<ReturnType<typeof createClient>>, trainerId: string, courseId: string): Promise<Set<string>> {
+  const { data } = await supabase.from("course_tp_groups").select("id").eq("course_id", courseId).eq("tutor_profile_id", trainerId);
+  return new Set((data ?? []).map((g) => g.id));
+}
+
+// Managing a row: the MCT for any row, or the author for their own group
+// post (an ACT can hold, edit or delete what they themselves scheduled).
+async function canManageBroadcast(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  trainer: { role: string; id: string; course_id: string | null },
+  broadcastId: string
+): Promise<boolean> {
+  if (await requireMctForBroadcastManagement(supabase, trainer)) return true;
+  const { data: row } = await supabase.from("course_broadcasts").select("author_id").eq("id", broadcastId).maybeSingle();
+  return row?.author_id === trainer.id;
+}
+
 export async function postBroadcast(_prevState: FormState, formData: FormData): Promise<FormState> {
   const trainer = await requireRole(["trainer", "admin"]);
   if (!trainer.course_id) return { error: "No course assigned." };
@@ -79,8 +102,11 @@ export async function postBroadcast(_prevState: FormState, formData: FormData): 
   // group). Still fails OPEN if no MCT is assigned yet (tutor_role is
   // frequently null on real courses), so the course is never left unable to
   // broadcast; admin is never blocked.
-  if (!(await requireMctForBroadcastManagement(supabase, trainer))) {
-    return { error: "Announcements are sent by the main course tutor." };
+  const isMct = await requireMctForBroadcastManagement(supabase, trainer);
+  if (!isMct) {
+    const mine = await myTpGroupIds(supabase, trainer.id, trainer.course_id);
+    if (mine.size === 0) return { error: "Announcements are sent by the main course tutor." };
+    if (!groupScopeId || !mine.has(groupScopeId)) return { error: "You can send to your own TP group only -- whole-cohort announcements are the main course tutor's." };
   }
   if (groupScopeId) {
     const { data: group } = await supabase
@@ -131,7 +157,7 @@ export async function deleteBroadcast(formData: FormData): Promise<void> {
   if (typeof broadcastId !== "string") return;
 
   const supabase = await createClient();
-  if (!(await requireMctForBroadcastManagement(supabase, trainer))) return;
+  if (!(await canManageBroadcast(supabase, trainer, broadcastId))) return;
   await supabase
     .from("course_broadcasts")
     .delete()
@@ -148,7 +174,7 @@ export async function postBroadcastNow(formData: FormData): Promise<void> {
   if (typeof broadcastId !== "string") return;
 
   const supabase = await createClient();
-  if (!(await requireMctForBroadcastManagement(supabase, trainer))) return;
+  if (!(await canManageBroadcast(supabase, trainer, broadcastId))) return;
   await supabase
     .from("course_broadcasts")
     .update({ sent_at: new Date().toISOString() })
@@ -168,7 +194,7 @@ export async function holdBroadcast(formData: FormData): Promise<void> {
   if (typeof broadcastId !== "string") return;
 
   const supabase = await createClient();
-  if (!(await requireMctForBroadcastManagement(supabase, trainer))) return;
+  if (!(await canManageBroadcast(supabase, trainer, broadcastId))) return;
   await supabase
     .from("course_broadcasts")
     .update({ held_at: new Date().toISOString() })
@@ -185,7 +211,7 @@ export async function resumeBroadcast(formData: FormData): Promise<void> {
   if (typeof broadcastId !== "string") return;
 
   const supabase = await createClient();
-  if (!(await requireMctForBroadcastManagement(supabase, trainer))) return;
+  if (!(await canManageBroadcast(supabase, trainer, broadcastId))) return;
   await supabase
     .from("course_broadcasts")
     .update({ held_at: null })
@@ -221,7 +247,7 @@ export async function editBroadcast(_prevState: FormState, formData: FormData): 
   }
 
   const supabase = await createClient();
-  if (!(await requireMctForBroadcastManagement(supabase, trainer))) {
+  if (!(await canManageBroadcast(supabase, trainer, broadcastId))) {
     return { error: "Announcements are managed by the main course tutor." };
   }
   const { error, count } = await supabase

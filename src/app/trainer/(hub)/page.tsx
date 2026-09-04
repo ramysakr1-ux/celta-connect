@@ -428,6 +428,8 @@ export default async function TodayPage() {
     }
   }
   const inScope = (traineeId: string) => !scopedTraineeIds || scopedTraineeIds.has(traineeId);
+  // Ramy, 5 Sep 2026: an ACT may post announcements to their own group.
+  const canAnnounce = isMct || (scopedGroupIds?.size ?? 0) > 0;
 
   // Alerts about a specific candidate follow the scope; course-wide ones do
   // not (a concern or a grades deadline is everyone's).
@@ -581,7 +583,7 @@ export default async function TodayPage() {
             <Link href="/trainer/capture" className="trainer-hover-fill flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-[13px] font-medium text-ink">
               Capture a point
             </Link>
-            {isMct ? (
+            {canAnnounce ? (
               <Link href="/trainer/announcements" className="trainer-hover-fill flex h-10 items-center rounded-[8px] border border-border bg-card px-3.5 text-[13px] font-medium text-ink">
                 Post announcement
               </Link>
@@ -702,7 +704,7 @@ export default async function TodayPage() {
             <AlsoUnder
               tab="Today"
               links={[
-                ...(isMct ? [{ href: "/trainer/announcements", label: "Announcements" }] : []),
+                ...(canAnnounce ? [{ href: "/trainer/announcements", label: "Announcements" }] : []),
                 { href: "/trainer/concerns", label: "Concerns" },
                 ...(isMct ? [{ href: "/trainer/support-access", label: "Support access" }] : []),
               ]}
