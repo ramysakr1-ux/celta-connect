@@ -6,6 +6,7 @@ import { createInterviewSlot } from "@/app/dashboard/admissions/actions";
 import { OfferNextPlaceForm } from "@/app/dashboard/admissions/offer-next-place-form";
 import { InterviewAvailabilityPanel, type PatternRow, type BlockRow } from "@/app/dashboard/admissions/interview-availability-panel";
 import { MARKETING_SOURCE_LABEL, type MarketingSource } from "@/lib/marketing-source";
+import { Avatar } from "@/components/avatar";
 
 const STAGE_LABEL: Record<string, string> = {
   submitted: "Submitted",
@@ -213,7 +214,8 @@ export default async function AdmissionsPage({
               stale.map((a) => (
                 <tr key={a.id} className="admin-hover">
                   <td>
-                    <Link href={`/dashboard/admissions/${a.id}`} className="font-medium text-ink hover:underline">
+                    <Link href={`/dashboard/admissions/${a.id}`} className="inline-flex items-center gap-2.5 font-medium text-ink hover:underline">
+                      <Avatar name={a.full_name} size="sm" />
                       {a.full_name}
                     </Link>
                     {/* Which branch this person applied to. Only when more

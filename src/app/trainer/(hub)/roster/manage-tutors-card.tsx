@@ -7,6 +7,7 @@ import { OwnedAssignmentsControl } from "@/app/dashboard/admin/courses/[id]/owne
 import { revokeInvitation, type InviteState } from "@/app/dashboard/admin/courses/[id]/invitation-actions";
 import { leaveSecondaryCourse } from "@/app/dashboard/admin/courses/[id]/assign-tutor-actions";
 import { tutorRoleLabel } from "@/lib/tutor-roles";
+import { Avatar } from "@/components/avatar";
 
 const initial: InviteState = { error: null };
 
@@ -56,11 +57,14 @@ export function ManageTutorsCard({
       <div className="flex flex-col gap-2">
         {tutors.map((t) => (
           <div key={t.courseTutorId} className="flex flex-wrap items-center justify-between gap-3 border-t border-border-faint pt-2 first:border-none first:pt-0">
-            <div>
-              <p className="text-sm text-ink">
-                {t.name} {!t.joined ? <span className="text-xs text-muted">(invited)</span> : null}
-              </p>
-              <p className="text-xs text-muted">{t.email}</p>
+            <div className="flex items-center gap-2.5">
+              <Avatar name={t.name} size="sm" />
+              <div>
+                <p className="text-sm text-ink">
+                  {t.name} {!t.joined ? <span className="text-xs text-muted">(invited)</span> : null}
+                </p>
+                <p className="text-xs text-muted">{t.email}</p>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <OwnedAssignmentsControl courseTutorId={t.courseTutorId} courseId={courseId} owned={t.ownedAssignmentTypes} />

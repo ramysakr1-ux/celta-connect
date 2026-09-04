@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { unlinkVolunteerAction } from "@/app/centre/actions";
 import { LinkVolunteerControl } from "@/app/centre/link-volunteer-control";
 import { extractLevelCode, levelPillClass } from "@/lib/levels";
+import { Avatar } from "@/components/avatar";
 
 export function VolunteerPoolRow({
   name,
@@ -34,7 +35,8 @@ export function VolunteerPoolRow({
   return (
     <div className="admin-hover border-b border-border-faint px-5 py-2.5 last:border-none">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex flex-col gap-[3px]">
+        <Avatar name={name} size="sm" className="self-start" />
+        <div className="flex flex-1 flex-col gap-[3px]">
           <span className="text-sm text-ink">{name}</span>
           <div className="flex items-center gap-2">
             <LevelTag level={primary.level} courseName={primary.courseName} />
