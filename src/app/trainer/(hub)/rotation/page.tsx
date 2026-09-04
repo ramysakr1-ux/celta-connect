@@ -233,6 +233,39 @@ export default async function TrainerRotationPage() {
     </>
   );
 
+  // The Group tutor card: who has the group and from when (migration
+  // 0268). Rendered for EVERY TP group -- it used to live only under the
+  // paired (two-halves) board, so a group with a single half (the demo,
+  // and any centre running one small group) had no way to name its tutor
+  // at all. Found 5 Sep 2026 verifying the tutor plan on the demo course.
+  const tutorCard = (tpGroup: { id: string; tutor_profile_id: string | null; meeting_days: string | null }, showUnpair: boolean) => (
+            <div className="sheet flex flex-wrap items-end justify-between gap-3 p-4">
+              <div className="flex-1">
+                <p className="mb-1 text-xs font-semibold tracking-[0.08em] text-muted uppercase">Group tutor</p>
+                <GroupTutorForm
+                  groupId={tpGroup.id}
+                  courseId={courseId}
+                  tutors={(courseTutorsForGroups ?? []).map((t) => ({ id: t.id, name: t.full_name }))}
+                  assignments={(tutorPlanRows ?? [])
+                    .filter((r) => r.tp_group_id === tpGroup.id)
+                    .map((r) => ({
+                      id: r.id,
+                      tutorId: r.tutor_profile_id,
+                      tutorName: planNameById.get(r.tutor_profile_id) ?? "Unknown",
+                      fromTp: r.from_tp_number,
+                      setByName: r.set_by_profile_id ? (planNameById.get(r.set_by_profile_id) ?? null) : null,
+                      setAt: r.set_at,
+                      note: r.note,
+                    }))}
+                  currentTutorName={tpGroup.tutor_profile_id ? (planNameById.get(tpGroup.tutor_profile_id) ?? (courseTutorsForGroups ?? []).find((t) => t.id === tpGroup.tutor_profile_id)?.full_name ?? null) : null}
+                  currentTp={currentTp}
+                  currentMeetingDays={tpGroup.meeting_days}
+                />
+              </div>
+              {showUnpair ? <UnpairButton courseId={courseId} tpGroupId={tpGroup.id} /> : null}
+            </div>
+  );
+
   const boardSection = (
     <>
       <div className="sheet p-6">
@@ -251,17 +284,22 @@ export default async function TrainerRotationPage() {
           // Not reachable via the admin UI today, but the DB doesn't
           // prevent it -- fall back to the plain per-subgroup board rather
           // than assuming both halves exist.
-          return halves.map((g) => (
-            <UnpairedSubgroupBoard
-              key={g.id}
-              courseId={courseId}
-              subgroupId={g.id}
-              name={g.name}
-              members={buildMembers(g.id)}
-              availableTrainees={availableTrainees}
-              planByTraineeAndTp={planByTraineeAndTp}
-            />
-          ));
+          return (
+            <div key={tpGroup.id} className="flex flex-col gap-4">
+              {halves.map((g) => (
+                <UnpairedSubgroupBoard
+                  key={g.id}
+                  courseId={courseId}
+                  subgroupId={g.id}
+                  name={g.name}
+                  members={buildMembers(g.id)}
+                  availableTrainees={availableTrainees}
+                  planByTraineeAndTp={planByTraineeAndTp}
+                />
+              ))}
+              {tutorCard(tpGroup, false)}
+            </div>
+          );
         }
 
         const boardHalves = halves.map((g) => ({
@@ -291,31 +329,7 @@ export default async function TrainerRotationPage() {
               today={today}
             />
 
-            <div className="sheet flex flex-wrap items-end justify-between gap-3 p-4">
-              <div className="flex-1">
-                <p className="mb-1 text-xs font-semibold tracking-[0.08em] text-muted uppercase">Group tutor</p>
-                <GroupTutorForm
-                  groupId={tpGroup.id}
-                  courseId={courseId}
-                  tutors={(courseTutorsForGroups ?? []).map((t) => ({ id: t.id, name: t.full_name }))}
-                  assignments={(tutorPlanRows ?? [])
-                    .filter((r) => r.tp_group_id === tpGroup.id)
-                    .map((r) => ({
-                      id: r.id,
-                      tutorId: r.tutor_profile_id,
-                      tutorName: planNameById.get(r.tutor_profile_id) ?? "Unknown",
-                      fromTp: r.from_tp_number,
-                      setByName: r.set_by_profile_id ? (planNameById.get(r.set_by_profile_id) ?? null) : null,
-                      setAt: r.set_at,
-                      note: r.note,
-                    }))}
-                  currentTutorName={tpGroup.tutor_profile_id ? (planNameById.get(tpGroup.tutor_profile_id) ?? (courseTutorsForGroups ?? []).find((t) => t.id === tpGroup.tutor_profile_id)?.full_name ?? null) : null}
-                  currentTp={currentTp}
-                  currentMeetingDays={tpGroup.meeting_days}
-                />
-              </div>
-              <UnpairButton courseId={courseId} tpGroupId={tpGroup.id} />
-            </div>
+            {tutorCard(tpGroup, true)}
 
             {nextHalf && nextDate && nextTpNumber >= 1 && nextTpNumber <= 6 ? (
               <RunningOrderPanel
