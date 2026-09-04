@@ -10,9 +10,6 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeWeekOf } from "@/lib/course-progress";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { DesignerCredit } from "@/components/designer-credit";
-import { getFeedbackAssistState } from "@/lib/feedback-assist";
-import { FeedbackAssistCard } from "@/app/trainer/(hub)/feedback-assist-card";
-import { AssessorCard } from "@/app/trainer/(hub)/assessor-card";
 import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
 import { assessorVisitDayProblem } from "@/lib/assessor-day";
 import { findMaterialsOverlaps } from "@/lib/materials-overlap";
@@ -68,12 +65,6 @@ export default async function TodayPage() {
   const centerId = trainer?.center_id ?? (await supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle()).data?.center_id;
   const timeZone = (centerId ? (await getCachedCenter(centerId))?.time_zone : null) ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
-
-  // Feedback assist (design_handoff_feedback_assist, 2026-08-17) is a
-  // trainer's own tool, not a course-admin one -- "whoever runs course admin
-  // may not be the person writing feedback" -- so admins previewing /trainer
-  // don't get the card at all.
-  const feedbackAssist = trainer?.role === "trainer" ? await getFeedbackAssistState(courseId, trainer.id) : null;
 
   const rows = await fetchRosterRows(supabase, courseId);
   const nameById = new Map(rows.map((r) => [r.id, r.name]));
@@ -192,9 +183,6 @@ export default async function TodayPage() {
   // the Handbook's own default of a regular assessment.
   const preparationDeadline = centrePreparationDeadline(course?.assessor_visit_date ?? null);
   let assessmentKind: AssessmentKind = "regular";
-  // Same reason as assessment_kind below -- 0256 adds this column and Ramy
-  // runs migrations, so it is read off the `*` row rather than named above.
-  let appianReference: string | null = null;
   let centrePreparation: ReturnType<typeof buildCentrePreparationList> = [];
   let visitDayProblem: string | null = null;
   if (isMct && courseId) {
@@ -215,7 +203,6 @@ export default async function TodayPage() {
         .eq("course_status", "withdrawn"),
     ]);
     assessmentKind = ((kindRow as { assessment_kind?: string } | null)?.assessment_kind ?? "regular") as AssessmentKind;
-    appianReference = (kindRow as { appian_notification_reference?: string | null } | null)?.appian_notification_reference ?? null;
     centrePreparation = buildCentrePreparationList({
       assessmentKind,
       deliveryMode: course?.delivery_mode ?? "f2f",
@@ -261,9 +248,8 @@ export default async function TodayPage() {
       due: "Soon",
       title: `Assessor named -- ${course.assessor_name}`,
       meta: course.assessor_email ?? "No email on file",
-      // Used to link to "/trainer" -- this page, a loop. The assessor card
-      // below is where the visit date gets set.
-      href: "#assessor",
+      // The Assessor tab is where the visit date gets set.
+      href: "/trainer/assessor",
     });
   }
 
@@ -681,8 +667,8 @@ export default async function TodayPage() {
           <YourDay slots={daySlots} serverNowMs={serverNowMs} accent={accentDeep} />
 
           {isMct && course?.assessor_visit_date ? (
-            <a
-              href="#assessor"
+            <Link
+              href="/trainer/assessor"
               className="flex flex-col gap-1.5 rounded-[14px] px-[18px] py-4 text-[oklch(96%_0.008_85)] transition-[filter] hover:brightness-[1.13]"
               style={{ background: "var(--color-ink-warm)" }}
             >
@@ -703,8 +689,8 @@ export default async function TodayPage() {
                 {centrePreparation.length} preparation item{centrePreparation.length === 1 ? "" : "s"}
                 {preparationDeadline ? ` · ready by ${new Date(`${preparationDeadline}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}
               </span>
-              <span className="text-[12.5px] font-semibold text-gold">What the assessor needs &darr;</span>
-            </a>
+              <span className="text-[12.5px] font-semibold text-gold">Open the Assessor tab &rarr;</span>
+            </Link>
           ) : null}
 
           {isMct ? (
@@ -719,54 +705,6 @@ export default async function TodayPage() {
           ) : null}
         </div>
       </div>
-
-      {feedbackAssist ? (
-        <FeedbackAssistCard
-          initialEnabled={feedbackAssist.enabled}
-          initialDirect={feedbackAssist.direct}
-          initialSupportive={feedbackAssist.supportive}
-        />
-      ) : null}
-
-      {isMct ? (
-        <div id="assessor" className="scroll-mt-6">
-          <AssessorCard
-            initialName={course?.assessor_name ?? null}
-            initialEmail={course?.assessor_email ?? null}
-            initialVisitDate={course?.assessor_visit_date ?? null}
-            initialAssessmentKind={assessmentKind}
-            initialAppianReference={appianReference}
-          />
-        </div>
-      ) : null}
-
-      {isMct && centrePreparation.length > 0 ? (
-        <div className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
-          <div className="flex flex-col gap-[3px]">
-            <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">What the assessor needs from you</p>
-            <p className="text-sm text-muted">
-              Administration Handbook §14.1.{" "}
-              {preparationDeadline
-                ? `Available by ${new Date(`${preparationDeadline}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} — two to three days before the visit, so the assessor can read it.`
-                : "Set a visit date above and Connect will date this list for you."}
-            </p>
-          </div>
-          <ul className="flex flex-col gap-2.5">
-            {centrePreparation.map((item) => (
-              <li key={item.label} className="flex flex-col gap-[2px] border-t border-border-faint pt-2.5 first:border-t-0 first:pt-0">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-[13px] font-semibold text-ink">
-                    {item.label}
-                    {item.conditional ? <span className="ml-2 text-[10px] font-bold tracking-[0.08em] text-gold uppercase">This course</span> : null}
-                  </p>
-                  <span className="shrink-0 text-[10px] font-semibold text-muted tabular-nums">§{item.cite}</span>
-                </div>
-                <p className="text-xs text-muted">{item.detail}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
 
       <DesignerCredit />
     </div>

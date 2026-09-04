@@ -195,7 +195,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
         <div
           className={`flex items-stretch justify-between gap-6 border-t px-[18px] ${isRealStaff ? "border-[color-mix(in_oklab,white_15%,transparent)]" : "border-border"}`}
         >
-          <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} dark={isRealStaff} />
+          <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} dark={isRealStaff} mct={isMct && !isAssessor} />
           <div className="flex shrink-0 items-center gap-3">
             {switcherCourses.length > 1 && profile?.course_id ? (
               <CourseSwitcher courses={switcherCourses} activeCourseId={profile.course_id} />
@@ -207,6 +207,16 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             <span className={`text-sm ${isRealStaff ? "text-[color-mix(in_oklab,white_85%,transparent)]" : "text-muted"}`}>
               {profile?.full_name ?? session?.email}
             </span>
+            {/* v4 handoff draws "Settings" here. The tutor's own
+                preferences (feedback assist) live behind it, off Today. */}
+            {isRealStaff ? (
+              <Link
+                href="/trainer/settings"
+                className="text-[12px] font-medium text-[color-mix(in_oklab,white_65%,transparent)] transition-colors hover:text-[var(--hub-hover-accent)]"
+              >
+                Settings
+              </Link>
+            ) : null}
           </div>
         </div>
       </header>

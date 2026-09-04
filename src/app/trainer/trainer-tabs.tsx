@@ -44,6 +44,13 @@ const GRADES_REPORT_TAB = { href: "/grades-report", label: "Grade form" } as con
 // identical URL rather than reusing TABS[2]'s.
 const ATTENDANCE_REGISTER_TAB = { href: "/volunteers", label: "Attendance register" } as const;
 
+// MCT only. The assessor visit is the main course tutor's to run -- an ACT
+// has no assessor contact to set and no pack to hand over -- so the tab is
+// absent rather than present-and-empty for them (Ramy, 5 Sep 2026: "the
+// assessor is just for the MCT"). Sits between Teaching Practice and
+// Resource hub, the order he set: "assessor, resource hub, grade form".
+const ASSESSOR_TAB = { href: "/assessor", label: "Assessor" } as const;
+
 // for-claude-code-assessor-tour-mode.md: a touring assessor gets the real
 // trainer tab set, not the pack's own trimmed one -- but only for the
 // areas actually widened for an assessor session (Today, Roster,
@@ -55,9 +62,12 @@ export function TrainerTabs({
   rosterOnly = false,
   tourMode = false,
   dark = false,
+  mct = false,
 }: {
   rosterOnly?: boolean;
   tourMode?: boolean;
+  /** Main course tutor on the open course: adds the Assessor tab. */
+  mct?: boolean;
   // for-claude-code-trainer-role-color-system-final.md: active tab is full-
   // opacity white + white underline, inactive ~65% opacity white, hover
   // reads --hub-hover-accent (set per-role by the (hub) layout) -- only for
@@ -72,7 +82,7 @@ export function TrainerTabs({
     ? [TABS[0], ATTENDANCE_REGISTER_TAB, GRADES_REPORT_TAB]
     : tourMode
       ? [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[4], GRADES_REPORT_TAB]
-      : [TODAY_TAB, ...TABS, GRADES_REPORT_TAB];
+      : [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[3], ...(mct ? [ASSESSOR_TAB] : []), TABS[4], TABS[5], GRADES_REPORT_TAB];
 
   // No wrapper bar of its own any more -- this is now inlined directly into
   // the (hub) shell's single header (see (hub)/layout.tsx), which supplies

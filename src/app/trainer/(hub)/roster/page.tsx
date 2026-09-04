@@ -7,8 +7,6 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { fetchRosterRows } from "@/lib/roster";
 import { RosterTable } from "@/app/trainer/(hub)/roster/roster-table";
 import { AddCandidateButton } from "@/app/trainer/(hub)/roster/add-candidate-button";
-import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
-import { AssessorSelectionButton } from "@/app/trainer/(hub)/roster/assessor-selection-button";
 import { toggleFilmingConsent } from "@/app/trainer/(hub)/roster/filming-consent-actions";
 import { ManageTutorsCard } from "@/app/trainer/(hub)/roster/manage-tutors-card";
 import { AssignTutorPanel, type AssignableTrainer } from "@/app/dashboard/admin/courses/[id]/assign-tutor-panel";
@@ -96,22 +94,6 @@ export default async function TrainerRosterPage() {
   const bccMailto = isRegisteredTutor
     ? `mailto:?bcc=${rows.map((r) => encodeURIComponent(r.email)).join(",")}&subject=${encodeURIComponent(courseCode)}`
     : null;
-
-  // for-claude-code-assessor-pack-decisions.md §1: a second query rather
-  // than folding into fetchRosterRows/RosterRow, same reasoning as
-  // filmsTpSessions above -- only the assessor-selection panel needs this,
-  // not the CSV export or the assessor's own read of this same page.
-  let selectedForAssessorById = new Map<string, boolean>();
-  if (trainer && rows.length > 0) {
-    const { data: selectionRows } = await supabase
-      .from("profiles")
-      .select("id, selected_for_assessor_visit")
-      .in(
-        "id",
-        rows.map((r) => r.id)
-      );
-    selectedForAssessorById = new Map((selectionRows ?? []).map((r) => [r.id, r.selected_for_assessor_visit]));
-  }
 
   // for-claude-code-course-admin.md's "Course workspace -- invitations and
   // roster": already live for Course Admin (dashboard/admin/courses/[id]);
@@ -227,12 +209,9 @@ export default async function TrainerRosterPage() {
               Email all candidates
             </a>
           ) : null}
-          {trainer ? <AssessorLinkButton /> : null}
-          {trainer ? (
-            <AssessorSelectionButton
-              candidates={rows.map((r) => ({ id: r.id, name: r.name, selected: selectedForAssessorById.get(r.id) ?? true }))}
-            />
-          ) : null}
+          {/* Share link, email and candidate selection for the assessor
+              visit moved to the Assessor tab (5 Sep 2026) -- one room, one
+              door. */}
           {/* The overnight session moved ViewSwitcherPill here out of the
               header; Ramy then confirmed (2026-08-16, against design-files.md
               and the remaining-screens spec) that the switcher is retired
