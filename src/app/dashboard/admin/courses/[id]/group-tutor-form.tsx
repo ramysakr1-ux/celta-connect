@@ -12,7 +12,9 @@ export interface TutorAssignmentView {
   tutorName: string;
   fromTp: number;
   setByName: string | null;
-  setAt: string;
+  /** Already formatted on the server, in the centre's zone -- a Date formatted
+   *  here would differ between server and browser and break hydration. */
+  setAtLabel: string;
   note: string | null;
 }
 
@@ -69,7 +71,7 @@ export function GroupTutorForm({
               </span>
               <span className="font-medium text-ink">{a.tutorName}</span>
               <span className="text-muted">
-                · set{a.setByName ? ` by ${a.setByName}` : ""} {new Date(a.setAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                · set{a.setByName ? ` by ${a.setByName}` : ""} {a.setAtLabel}
                 {a.note ? ` · ${a.note}` : ""}
               </span>
               <form action={removeTpGroupTutorAssignment}>

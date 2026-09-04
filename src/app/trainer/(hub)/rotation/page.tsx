@@ -254,7 +254,7 @@ export default async function TrainerRotationPage() {
                       tutorName: planNameById.get(r.tutor_profile_id) ?? "Unknown",
                       fromTp: r.from_tp_number,
                       setByName: r.set_by_profile_id ? (planNameById.get(r.set_by_profile_id) ?? null) : null,
-                      setAt: r.set_at,
+                      setAtLabel: new Date(r.set_at).toLocaleDateString("en-GB", { timeZone, day: "numeric", month: "short" }),
                       note: r.note,
                     }))}
                   currentTutorName={tpGroup.tutor_profile_id ? (planNameById.get(tpGroup.tutor_profile_id) ?? (courseTutorsForGroups ?? []).find((t) => t.id === tpGroup.tutor_profile_id)?.full_name ?? null) : null}
