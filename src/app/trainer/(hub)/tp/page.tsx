@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { buildMarkingQueue, meetingDaysLabel, type QueueStatus } from "@/lib/tp-marking-queue";
@@ -87,38 +88,21 @@ export default async function TeachingPracticeQueuePage() {
         <div>
           <h1 className="font-serif text-2xl text-ink">{queue.length} lesson{queue.length === 1 ? "" : "s"} waiting on you</h1>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Link
-            href="/trainer/coursebooks"
-            className="rounded-[6px] border border-border bg-card px-3.5 py-2 text-sm font-medium text-ink trainer-hover-fill"
-          >
-            TP points library
-          </Link>
-          {/* A "Write feedback" button used to sit here, linking to the
-              roster -- on the page headed "N lessons waiting on you", whose
-              every row already opens the feedback form. It led away from the
-              queue you are standing in. Removed 4 Sep 2026. */}
-        </div>
       </div>
 
-      {/* for-claude-code-roster-column-crowding.md point 2: these four were
-          navigation to other pages, not roster actions -- moved here from
-          Roster's own header, same "just links, not page content" treatment
-          coursebooks/rotation already get above. */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
-        <Link href="/trainer/pre-course-task" className="text-xs font-semibold text-primary hover:underline">
-          Pre-course tasks →
-        </Link>
-        <Link href="/trainer/observation-tasks" className="text-xs font-semibold text-primary hover:underline">
-          Observation tasks →
-        </Link>
-        <Link href="/trainer/observation-hours" className="text-xs font-semibold text-primary hover:underline">
-          Observation hours →
-        </Link>
-        <Link href="/trainer/gtky" className="text-xs font-semibold text-primary hover:underline">
-          Day-one activities →
-        </Link>
-      </div>
+      {/* The tab's occasional pages, one door each (the "TP points
+          library" header button and the four text links this replaces
+          were the same doors in two styles). */}
+      <AlsoUnder
+        tab="Teaching Practice"
+        links={[
+          { href: "/trainer/coursebooks", label: "TP points library" },
+          { href: "/trainer/pre-course-task", label: "Pre-course tasks" },
+          { href: "/trainer/observation-tasks", label: "Observation tasks" },
+          { href: "/trainer/observation-hours", label: "Observation hours" },
+          { href: "/trainer/gtky", label: "Day-one activities" },
+        ]}
+      />
 
       <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-[1.4fr_1fr]">
         {/* Waiting on you */}

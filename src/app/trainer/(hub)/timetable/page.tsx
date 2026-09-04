@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { BackLink } from "@/components/back-link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -487,10 +488,8 @@ export default async function TrainerTimetablePage({
               same glass-card design as the trainee's read-only board
               (for-claude-code-timetable-view.md), reused as-is. */}
           {trainer ? (
-            <div className="flex justify-end gap-4">
-              <Link href="/trainer/session-materials" className="text-sm font-medium text-primary hover:underline">
-                Share session materials &rarr;
-              </Link>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <AlsoUnder tab="Timetable" links={[{ href: "/trainer/session-materials", label: "Share session materials" }]} />
               {isMct ? (
                 <Link href="/trainer/timetable?mode=edit" className="text-sm font-medium text-primary hover:underline">
                   Edit timetable &rarr;

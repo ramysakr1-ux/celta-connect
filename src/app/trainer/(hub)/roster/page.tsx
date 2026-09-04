@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { fetchRosterRows } from "@/lib/roster";
 import { RosterTable } from "@/app/trainer/(hub)/roster/roster-table";
+import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { AddCandidateButton } from "@/app/trainer/(hub)/roster/add-candidate-button";
 import { toggleFilmingConsent } from "@/app/trainer/(hub)/roster/filming-consent-actions";
 import { ManageTutorsCard } from "@/app/trainer/(hub)/roster/manage-tutors-card";
@@ -222,6 +223,8 @@ export default async function TrainerRosterPage() {
           {trainer ? <AddCandidateButton courseId={courseId} joinUrl={joinUrl} /> : null}
         </div>
       </div>
+
+      {trainer ? <AlsoUnder tab="Roster" links={[{ href: "/trainer/fol-spot-check", label: "Error log spot check" }]} /> : null}
 
       {folByClass.length > 0 ? (
         <div className="sheet flex flex-wrap items-center gap-3 p-4">

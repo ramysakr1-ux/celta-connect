@@ -15,6 +15,7 @@ import { assessorVisitDayProblem } from "@/lib/assessor-day";
 import { findMaterialsOverlaps } from "@/lib/materials-overlap";
 import { Avatar } from "@/components/avatar";
 import { NeedsYou, type TodayAlert } from "@/app/trainer/(hub)/needs-you";
+import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
 import { sixHoursProblems, doubleMarkingProblems, entryFormProblems, type ComplianceProblem } from "@/lib/course-compliance";
 
@@ -693,15 +694,19 @@ export default async function TodayPage() {
             </Link>
           ) : null}
 
-          {isMct ? (
-            <div className="flex flex-col gap-2">
-              <span className="text-[10.5px] font-bold tracking-[0.11em] text-muted uppercase">Also under Today</span>
-              <div className="flex flex-wrap gap-1.5">
-                <Link href="/trainer/announcements" className="rounded-full border border-border px-2.5 py-1 text-[12px] text-muted transition-colors hover:border-current hover:text-ink">
-                  Announcements &rarr;
-                </Link>
-              </div>
-            </div>
+          {/* Only what has no other home (settled with Ramy, 4 Sep 2026):
+              Announcements and platform-support access are the MCT's;
+              Concerns is every tutor's. Support access used to be an
+              orphan route nobody linked to. */}
+          {trainer ? (
+            <AlsoUnder
+              tab="Today"
+              links={[
+                ...(isMct ? [{ href: "/trainer/announcements", label: "Announcements" }] : []),
+                { href: "/trainer/concerns", label: "Concerns" },
+                ...(isMct ? [{ href: "/trainer/support-access", label: "Support access" }] : []),
+              ]}
+            />
           ) : null}
         </div>
       </div>
