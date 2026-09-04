@@ -94,12 +94,10 @@ export default async function TeachingPracticeQueuePage() {
           >
             TP points library
           </Link>
-          <Link
-            href="/trainer/roster"
-            className="rounded-[6px] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
-          >
-            Write feedback
-          </Link>
+          {/* A "Write feedback" button used to sit here, linking to the
+              roster -- on the page headed "N lessons waiting on you", whose
+              every row already opens the feedback form. It led away from the
+              queue you are standing in. Removed 4 Sep 2026. */}
         </div>
       </div>
 

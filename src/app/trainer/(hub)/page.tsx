@@ -307,7 +307,11 @@ export default async function TodayPage() {
     alerts.push({
       title: `TP feedback unsent — ${unsentByTrainee.size} candidate${unsentByTrainee.size === 1 ? "" : "s"}`,
       meta: `${names.join(", ")} · taught ${latestDate}`,
-      href: "/trainer/roster",
+      // This alert has just worked out exactly who is outstanding, and used
+      // to discard that and drop you on the roster. The TP queue is the page
+      // that lists them with a "Feedback due" pill and clicks straight into
+      // the form.
+      href: "/trainer/tp",
     });
   }
 
@@ -481,8 +485,14 @@ export default async function TodayPage() {
               Post announcement
             </Link>
           ) : null}
+          {/* /trainer/tp, not /trainer/roster. Ramy, 4 Sep 2026: "write TP
+              feedback, click, and it takes me to some kind of admissions
+              roster. Definitely doesn't take me to write feedback." He was
+              right -- the roster is a table of hours and TPs passed. The TP
+              page is headed "N lessons waiting on you" and every row clicks
+              into the feedback form itself. */}
           <Link
-            href="/trainer/roster"
+            href="/trainer/tp"
             className="flex h-8 items-center rounded-[6px] px-[13px] text-xs font-semibold text-primary-foreground"
             style={{ background: isMct ? "oklch(37.5% 0.058 195)" : "oklch(42% 0.13 27)" }}
           >
