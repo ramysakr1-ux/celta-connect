@@ -1,5 +1,7 @@
 "use client";
 
+import { HUB_PRIMARY, HUB_PRIMARY_STYLE } from "@/app/trainer/(hub)/page-head";
+
 import { useActionState, useState } from "react";
 import {
   sendJoinLinkEmail,
@@ -32,7 +34,7 @@ export function AddCandidateButton({ courseId, joinUrl }: { courseId: string; jo
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+        className={HUB_PRIMARY} style={HUB_PRIMARY_STYLE}
       >
         Add candidate
       </button>

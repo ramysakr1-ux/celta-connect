@@ -7,6 +7,7 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { fetchRosterRows } from "@/lib/roster";
 import { RosterTable } from "@/app/trainer/(hub)/roster/roster-table";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
+import { PageHead, HUB_BUTTON } from "@/app/trainer/(hub)/page-head";
 import { AddCandidateButton } from "@/app/trainer/(hub)/roster/add-candidate-button";
 import { toggleFilmingConsent } from "@/app/trainer/(hub)/roster/filming-consent-actions";
 import { ManageTutorsCard } from "@/app/trainer/(hub)/roster/manage-tutors-card";
@@ -179,50 +180,24 @@ export default async function TrainerRosterPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-1.5">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Roster</p>
-          <h1 className="font-serif text-2xl text-ink">{rows.length} candidates</h1>
-        </div>
-        <div className="flex items-center gap-5">
-          {/* for-claude-code-roster-column-crowding.md point 2: these four
-              were navigation to other pages, not roster actions -- moved to
-              Teaching Practice's own "More tools" row alongside the other
-              drill-down links that already live there (coursebooks/
-              rotation), per the nav spec's "Rotation, Portfolio and
-              Announcements are not tabs -- they're reached by drilling into
-              Teaching Practice." Roster's own header keeps just the four
-              actions that are actually about the roster itself. */}
-          <p className="text-xs text-muted">Click a row to open a portfolio</p>
-          <a
-            href="/trainer/roster/export"
-            className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink trainer-hover-fill"
-          >
-            Export CSV
+    <div className="flex flex-col gap-[18px]">
+      <PageHead
+        eyebrow={`${courseCode} · Roster · click a row to open a portfolio`}
+        title={`${rows.length} candidate${rows.length === 1 ? "" : "s"}`}
+      >
+        {/* Only the actions that are about the roster itself. Navigation to
+            other pages lives in the "Also under" row below (one door each);
+            the assessor controls moved to the Assessor tab on 5 Sep 2026. */}
+        <a href="/trainer/roster/export" className={HUB_BUTTON}>
+          Export CSV
+        </a>
+        {bccMailto ? (
+          <a href={bccMailto} title="Outside Connect -- urgent only. Opens your mail client with every candidate BCC'd." className={HUB_BUTTON}>
+            Email all candidates
           </a>
-          {bccMailto ? (
-            <a
-              href={bccMailto}
-              title="Outside Connect -- urgent only. Opens your mail client with every candidate BCC'd."
-              className="rounded-[6px] border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink trainer-hover-fill"
-            >
-              Email all candidates
-            </a>
-          ) : null}
-          {/* Share link, email and candidate selection for the assessor
-              visit moved to the Assessor tab (5 Sep 2026) -- one room, one
-              door. */}
-          {/* The overnight session moved ViewSwitcherPill here out of the
-              header; Ramy then confirmed (2026-08-16, against design-files.md
-              and the remaining-screens spec) that the switcher is retired
-              outright, not relocated -- "no global toggle anymore". Candidate
-              preview is a per-candidate "Preview as trainee" button on the
-              Portfolio screen, and the volunteers register has its own nav
-              tab, so both of its live segments now have real homes. */}
-          {trainer ? <AddCandidateButton courseId={courseId} joinUrl={joinUrl} /> : null}
-        </div>
-      </div>
+        ) : null}
+        {trainer ? <AddCandidateButton courseId={courseId} joinUrl={joinUrl} /> : null}
+      </PageHead>
 
       {trainer ? <AlsoUnder tab="Roster" links={[{ href: "/trainer/fol-spot-check", label: "Error log spot check" }]} /> : null}
 

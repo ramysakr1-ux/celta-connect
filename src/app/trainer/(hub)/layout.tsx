@@ -217,7 +217,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
           added when the bar actually renders below, so a session with no
           chat (assessor view) doesn't carry the extra space for nothing. */}
       <div className={`container flex-1 pt-8 ${profile && staffChat ? "pb-28" : "pb-8"}`}>
-        <div className="frame p-6">{children}</div>
+        <div className="frame hub-v4 p-6">{children}</div>
       </div>
 
       {profile && staffChat ? (

@@ -437,6 +437,20 @@ h6 {
   :root {
     --hub-row-shadow: inset 0 0 0 1px var(--color-primary), 0 3px 8px -3px color-mix(in oklab, var(--color-primary) 45%, transparent);
   }
+  /* design_handoff_trainer_homepage_v4, Phase 4: "Panel weight: one shadowed
+     card (Needs you); others flat with border. Drop the 3px top stripes."
+     Scoped to the trainer hub's content column (.hub-v4, set by the (hub)
+     layout) so the sitewide .sheet/.card -- and the teal/garnet top-rule
+     alternation trainee and admin screens still use -- are untouched. */
+  .hub-v4 .sheet,
+  .hub-v4 .sheet-interactive,
+  .hub-v4 .card,
+  .hub-v4 .card-interactive,
+  .hub-v4 .card-garnet,
+  .hub-v4 .sheet-garnet {
+    border-top: 1px solid var(--color-border);
+    border-radius: 14px;
+  }
   .trainer-hover {
     transition: box-shadow 150ms ease;
   }
