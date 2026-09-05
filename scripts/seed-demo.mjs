@@ -574,6 +574,17 @@ async function main() {
     .select("id")
     .single();
   if (tpGroupErr) throw tpGroupErr;
+  // The tutor plan (migration 0268) is what the Rotation card shows; the
+  // field above is derived from it on real courses, so the demo gets the
+  // matching "from TP1" row rather than a field with no plan behind it.
+  const { error: tutorPlanErr } = await supabase.from("course_tp_group_tutors").insert({
+    course_id: course.id,
+    tp_group_id: tpGroup.id,
+    tutor_profile_id: trainer2Id,
+    from_tp_number: 1,
+    note: "Seeded demo plan",
+  });
+  if (tutorPlanErr) throw tutorPlanErr;
   const { data: subgroup, error: subgroupErr } = await supabase
     .from("course_subgroups")
     .insert({ course_id: course.id, name: "Group A -- Half A", tp_group_id: tpGroup.id, half_order: 1 })
