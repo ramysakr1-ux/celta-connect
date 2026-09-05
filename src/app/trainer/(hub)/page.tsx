@@ -74,20 +74,53 @@ export default async function TodayPage() {
   // on another's result. The course row is read once (it used to be read
   // three times), the timetable once (five times), assignments once
   // (three times) -- the rest is derived below in memory.
+  // One round trip for the page's own datasets (migration 0274) alongside
+  // the roster's (0273); the query list below stays as the fallback until
+  // the function exists, and as the readable definition of the bundle.
+  type T = Database["public"]["Tables"];
+  interface TodayBundle {
+    course: T["courses"]["Row"] & { assessment_kind?: string; appian_notification_reference?: string | null };
+    events: T["course_timetable_events"]["Row"][];
+    lessons: Pick<T["plan_assignments"]["Row"], "trainee_id" | "tp_number" | "taught_at">[];
+    assignments: Pick<T["assignments"]["Row"], "id" | "assignment_type" | "due_date" | "first_submitted_at" | "second_marker_recorded_at">[];
+    open_concerns: number;
+    tp_groups: Pick<T["course_tp_groups"]["Row"], "id" | "name" | "tutor_profile_id">[];
+    subgroups: Pick<T["course_subgroups"]["Row"], "id" | "tp_group_id">[];
+    schedule: { tp_number: number; tp_coursebook_id: string | null }[];
+    feedback: { trainee_id: string; tp_number: number; submitted_at: string | null }[];
+    unreviewed_findings: { assignment_id: string }[];
+    celta5: { provisional_grade: string | null; provisional_approved_at: string | null; final_recommended_grade: string | null }[];
+    members: { subgroup_id: string; trainee_id: string }[];
+    books: { id: string; level: string }[];
+  }
+  const [rows, todayBundle, materialsOverlaps, isMct] = await Promise.all([
+    fetchRosterRows(supabase, courseId),
+    supabase.rpc("hub_today_bundle", { p_course_id: courseId }),
+    findMaterialsOverlaps(supabase, courseId),
+    trainer ? isMctOfCourse(trainer, courseId) : Promise.resolve(false),
+  ]);
+  const TB: TodayBundle | null = !todayBundle.error && todayBundle.data ? (todayBundle.data as unknown as TodayBundle) : null;
   const [
-    rows,
     { data: courseRow },
     { data: allEvents },
     { data: lessons },
     { data: courseAssignments },
-    materialsOverlaps,
     { count: openConcernCount },
-    isMct,
     { data: tpGroups },
     { data: subgroups },
     { data: schedule },
-  ] = await Promise.all([
-    fetchRosterRows(supabase, courseId),
+  ] = TB
+    ? [
+        { data: TB.course },
+        { data: TB.events },
+        { data: TB.lessons },
+        { data: TB.assignments },
+        { count: TB.open_concerns },
+        { data: TB.tp_groups },
+        { data: TB.subgroups },
+        { data: TB.schedule },
+      ]
+    : await Promise.all([
     supabase.from("courses").select("*").eq("id", courseId).maybeSingle(),
     supabase.from("course_timetable_events").select("*").eq("course_id", courseId).order("event_date").order("event_time"),
     // NOT `tp_lessons` -- that table is permanently empty on live courses
@@ -95,11 +128,9 @@ export default async function TodayPage() {
     // `plan_assignments.taught_at` is the real taught signal.
     supabase.from("plan_assignments").select("trainee_id, tp_number, taught_at").eq("course_id", courseId).not("taught_at", "is", null),
     supabase.from("assignments").select("id, assignment_type, due_date, first_submitted_at, second_marker_recorded_at").eq("course_id", courseId),
-    findMaterialsOverlaps(supabase, courseId),
     trainer?.course_id
       ? supabase.from("concerns").select("id", { count: "exact", head: true }).eq("course_id", trainer.course_id).is("response", null)
       : Promise.resolve({ count: 0 }),
-    trainer ? isMctOfCourse(trainer, courseId) : Promise.resolve(false),
     admin.from("course_tp_groups").select("id, name, tutor_profile_id").eq("course_id", courseId),
     admin.from("course_subgroups").select("id, tp_group_id").eq("course_id", courseId),
     admin.from("course_tp_schedule").select("tp_number, tp_coursebook_id").eq("course_id", courseId),
@@ -120,8 +151,17 @@ export default async function TodayPage() {
   const bookIds = [...new Set((schedule ?? []).map((x) => x.tp_coursebook_id).filter((x): x is string => Boolean(x)))];
 
   // ---- Wave 2: the few that need wave 1's ids.
-  const [{ data: feedbackRows }, { data: unreviewedFindings }, { data: celta5Rows }, visitDayProblemRaw, { data: members }, { data: books }] =
-    await Promise.all([
+  const visitDayPromise = isMct ? assessorVisitDayProblem(supabase, courseId, course?.assessor_visit_date ?? null) : Promise.resolve(null);
+  const [{ data: feedbackRows }, { data: unreviewedFindings }, { data: celta5Rows }, visitDayProblemRaw, { data: members }, { data: books }] = TB
+    ? await Promise.all([
+        Promise.resolve({ data: TB.feedback }),
+        Promise.resolve({ data: TB.unreviewed_findings }),
+        Promise.resolve({ data: isMct ? TB.celta5 : [] }),
+        visitDayPromise,
+        Promise.resolve({ data: TB.members }),
+        Promise.resolve({ data: TB.books }),
+      ])
+    : await Promise.all([
       // tp_feedback has no course_id column -- scope by this course's trainee ids instead.
       traineeIds.length > 0
         ? supabase.from("tp_feedback").select("trainee_id, tp_number, submitted_at").in("trainee_id", traineeIds)
@@ -135,7 +175,7 @@ export default async function TodayPage() {
       isMct && traineeIds.length > 0
         ? supabase.from("celta5_records").select("provisional_grade, provisional_approved_at, final_recommended_grade").in("trainee_id", traineeIds)
         : Promise.resolve({ data: [] as { provisional_grade: string | null; provisional_approved_at: string | null; final_recommended_grade: string | null }[] }),
-      isMct ? assessorVisitDayProblem(supabase, courseId, course?.assessor_visit_date ?? null) : Promise.resolve(null),
+      visitDayPromise,
       subIds.length > 0
         ? admin.from("course_subgroup_members").select("subgroup_id, trainee_id").in("subgroup_id", subIds)
         : Promise.resolve({ data: [] as { subgroup_id: string; trainee_id: string }[] }),
