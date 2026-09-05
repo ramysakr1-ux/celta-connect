@@ -442,6 +442,20 @@ h6 {
      Scoped to the trainer hub's content column (.hub-v4, set by the (hub)
      layout) so the sitewide .sheet/.card -- and the teal/garnet top-rule
      alternation trainee and admin screens still use -- are untouched. */
+  /* In the hub, "primary" IS the role colour. Every solid form button the
+     hub's 37 client components render with bg-primary (Add student, Save,
+     Release final reports, Create subgroup...) follows the MCT garnet / ACT
+     gold set by the (hub) layout, so a page never shows a teal solid next
+     to a garnet one. Teal stays for TP items and text links, per v4. */
+  .hub-v4 .bg-primary {
+    background-color: var(--hub-accent) !important;
+  }
+  .hub-v4 .border-primary {
+    border-color: var(--hub-accent) !important;
+  }
+  .hub-v4 .hover\:bg-primary\/90:hover {
+    background-color: color-mix(in oklab, var(--hub-accent) 90%, transparent) !important;
+  }
   .hub-v4 .sheet,
   .hub-v4 .sheet-interactive,
   .hub-v4 .card,
