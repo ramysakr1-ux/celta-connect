@@ -50,7 +50,8 @@ export default async function GradeQueryReplyDetailPage({
 
       <div className="sheet flex flex-col gap-1 p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="font-serif text-xl text-ink">Grade query reply -- {trainee?.full_name}</h1>
+          <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Roster</p>
+          <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Grade query reply -- {trainee?.full_name}</h1>
           <span className={`pill ${reply.filed_at ? "pill-success" : "pill-neutral"}`}>
             {reply.filed_at ? "Filed" : "Draft -- not filed"}
           </span>

@@ -178,7 +178,8 @@ export default async function AnnouncementsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-serif text-2xl text-ink">Announcements</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Today</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Announcements</h1>
         <p className="mt-1 text-sm text-muted">
           The only way to reach the whole cohort at once -- there&apos;s no cohort chat channel. Candidates see these on
           their home screen, above their to-do list.

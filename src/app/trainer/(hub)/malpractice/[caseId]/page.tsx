@@ -46,7 +46,8 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
 
       <div className="sheet flex flex-col gap-1">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="font-serif text-xl text-ink">Malpractice case</h1>
+          <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Roster</p>
+          <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Malpractice case</h1>
           <span className={`pill ${caseRow.status === "open" ? "pill-warning" : "pill-neutral"}`}>
             {caseRow.status === "open" ? "Open — marking paused" : `Decided — ${caseRow.outcome}`}
           </span>

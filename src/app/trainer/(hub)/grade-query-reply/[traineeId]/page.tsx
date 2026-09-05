@@ -39,7 +39,8 @@ export default async function GradeQueryReplyListPage({
       <BackLink href={`/dashboard/trainer/trainees/${traineeId}/celta5`} label={`${trainee.full_name}\u2019s CELTA 5 record`} />
 
       <div className="sheet flex flex-col gap-2 p-6">
-        <h1 className="font-serif text-xl text-ink">Grade query reply -- {trainee.full_name}</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Roster</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Grade query reply -- {trainee.full_name}</h1>
         <p className="text-sm text-muted">
           Generated but never sent automatically. Draws entirely from the record -- grade descriptors, TP
           outcomes, criteria met, assignment rounds, tutorial dates, and the provisional slash justification if

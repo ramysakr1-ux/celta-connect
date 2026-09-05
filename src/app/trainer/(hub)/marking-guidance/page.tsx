@@ -48,8 +48,8 @@ export default async function MarkingGuidancePage({
   return (
     <div className="flex flex-col gap-6">
       <div className="card flex flex-col gap-2 p-6">
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Marking guidance</p>
-        <h1 className="font-serif text-2xl text-ink">There is no answer key. There is a line.</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Marking guidance</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">There is no answer key. There is a line.</h1>
         <p className="max-w-2xl text-sm text-muted">
           An assignment has many right answers, which is why two tutors can mark the same script differently. This
           page is where this centre writes down where the line sits for each criterion — agreed at standardisation,

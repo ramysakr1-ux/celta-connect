@@ -19,7 +19,8 @@ export default async function TrainerAssignmentBriefsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">Assignment Briefs</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Resource hub</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Assignment Briefs</h1>
         <p className="mt-2 text-muted">
           Upload your centre&apos;s own brief for each written assignment as a PDF -- Claude splits it
           into sections you can review and edit before publishing it to trainees.

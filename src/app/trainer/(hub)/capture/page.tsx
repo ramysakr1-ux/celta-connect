@@ -39,7 +39,8 @@ export default async function CapturePage() {
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6">
       <div className="sheet">
-        <h1 className="font-serif text-xl text-ink">Capture a point</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Today</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Capture a point</h1>
         <p className="mt-2 text-sm text-muted">
           Quick, typed or dictated, tagged and timestamped -- pull it into the real feedback form later, on your
           laptop.

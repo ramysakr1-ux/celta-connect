@@ -458,7 +458,8 @@ export default async function TrainerRotationPage() {
     <div className="flex flex-col gap-6">
       <div className="sheet flex items-start justify-between gap-4 p-6">
         <div>
-          <h1 className="font-serif text-xl text-ink">Teaching Practice rotation</h1>
+          <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Teaching Practice</p>
+          <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Teaching Practice rotation</h1>
           <p className="mt-2 text-muted">
             Manage each subgroup&apos;s rotation order, schedule which coursebook feeds each TP
             number, and assign a round once library content is published.

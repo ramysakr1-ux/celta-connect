@@ -50,7 +50,8 @@ export default async function FilmedObservationSetupPage({ params }: { params: P
 
       <div className="sheet">
         <p className="text-xs text-muted">Filmed observation · group watch session</p>
-        <h1 className="mt-0.5 font-serif text-xl text-ink">{event.title}</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Timetable</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">{event.title}</h1>
         <p className="mt-1 text-sm text-muted">
           {new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", weekday: "long" })}
           {event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}

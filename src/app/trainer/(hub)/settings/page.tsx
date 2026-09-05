@@ -28,8 +28,8 @@ export default async function TrainerSettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <p className="text-[10.5px] font-bold tracking-[0.12em] text-muted uppercase">{trainer.full_name ?? "Trainer"} &middot; This course</p>
-        <h1 className="font-serif text-[30px] font-semibold text-ink-warm">Settings</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">{trainer.full_name ?? "Trainer"} &middot; This course</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Settings</h1>
         <p className="max-w-[62ch] text-sm text-muted">Your own preferences for this course. Nothing here changes what candidates or other tutors see.</p>
       </div>
 

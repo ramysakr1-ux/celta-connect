@@ -24,7 +24,8 @@ export default async function TrainerVideoLibraryPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="sheet p-6">
-        <h1 className="font-serif text-xl text-ink">Video Library</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Resource hub</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Video Library</h1>
         <p className="mt-2 text-muted">
           Training and observation videos -- hosted wherever you like, linked here. Not the same as a candidate&apos;s
           own filmed observation (that&apos;s tied to a real timetable session and a task); this is a plain, browsable

@@ -91,8 +91,8 @@ export default async function TrainerPreCourseTaskPage() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
-        <h1 className="font-serif text-2xl text-ink">Who&apos;s answered what</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Pre-course task</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Who&apos;s answered what</h1>
         <p className="mt-1 text-sm text-muted">
           Answered in Connect and never submitted -- candidates type into the task itself and it saves as they go.
           This counts tasks actually answered per section; open a name to read their answers.

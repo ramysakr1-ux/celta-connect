@@ -38,8 +38,8 @@ export default async function ObservationTasksPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Observation tasks</p>
-        <h1 className="font-serif text-2xl text-ink">{(tasks ?? []).length} assigned</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Observation tasks</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">{(tasks ?? []).length} assigned</h1>
         <p className="mt-1 text-sm text-muted">
           Directed observation tasks for the whole cohort. A submission counts toward each candidate&apos;s 6-hour
           requirement the same way a self-logged observation does.

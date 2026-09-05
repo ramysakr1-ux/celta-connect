@@ -63,7 +63,8 @@ export default async function TrainerCoursebookDetailPage({
     <div className="flex flex-col gap-6">
       <div className="sheet flex flex-col gap-6 p-6">
         <div>
-          <h1 className="font-serif text-xl text-ink">
+          <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Teaching Practice</p>
+          <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">
             {coursebook.title} ({coursebook.level})
           </h1>
           <p className="mt-2 text-muted">Status: {coursebook.generation_status}</p>

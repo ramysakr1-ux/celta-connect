@@ -28,7 +28,8 @@ export default async function TrainerAssignmentBriefDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="card p-6">
-        <h1 className="font-serif text-xl text-ink">{ASSIGNMENT_INFO[template.assignment_type].title}</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Resource hub</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">{ASSIGNMENT_INFO[template.assignment_type].title}</h1>
         <p className="mt-2 text-muted">Status: {template.generation_status}</p>
         {template.generation_error ? <p className="mt-2 text-sm text-destructive">{template.generation_error}</p> : null}
         {template.generation_status === "pending" || template.generation_status === "failed" ? (

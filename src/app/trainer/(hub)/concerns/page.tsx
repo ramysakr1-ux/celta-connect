@@ -27,7 +27,8 @@ export default async function ConcernsInboxPage() {
     <div className="flex flex-col gap-6">
       <div className="sheet">
         <p className="text-xs text-muted">{(concerns ?? []).length} total</p>
-        <h1 className="mt-0.5 font-serif text-xl text-ink">Concerns</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Today</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Concerns</h1>
         <p className="mt-1 text-sm text-muted">
           Admin Handbook requires an internal complaints route with recourse beyond the tutors. The centre replies to
           every concern.

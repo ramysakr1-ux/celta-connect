@@ -21,7 +21,8 @@ export default async function TrainerCoursebooksPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="sheet p-6">
-        <h1 className="font-serif text-xl text-ink">TP Points Library</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Teaching Practice</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">TP Points Library</h1>
         <p className="mt-2 text-muted">
           Upload coursebook PDFs to generate a reusable bank of TP points, tiered by density band.
         </p>

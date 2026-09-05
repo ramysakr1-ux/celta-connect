@@ -23,7 +23,8 @@ export default async function TrainerAudioLibraryPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="sheet p-6">
-        <h1 className="font-serif text-xl text-ink">Audio Library</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Resource hub</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Audio Library</h1>
         <p className="mt-2 text-muted">
           Real coursebook Class/Workbook audio, browsable by level and coursebook. Not linked to individual TP
           points or stages yet -- that&rsquo;s a planned follow-up once enough tracks are named consistently.

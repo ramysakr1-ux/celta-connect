@@ -46,8 +46,8 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Timetable · session materials</p>
-        <h1 className="font-serif text-2xl text-ink">Share materials for a session</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Timetable · session materials</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Share materials for a session</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted">
           For anything that isn&apos;t a graded TP -- a demo lesson. Volunteer students see whatever the session is titled on the
           timetable, with whatever you attach here.

@@ -122,10 +122,10 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <p className="text-[10.5px] font-bold tracking-[0.12em] text-muted uppercase">
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">
           {course?.name ?? "Course"} &middot; Assessor visit
         </p>
-        <h1 className="font-serif text-[30px] font-semibold text-ink-warm">Assessor</h1>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Assessor</h1>
         <p className="max-w-[62ch] text-sm text-muted">
           Who is coming, which candidates they will see, and what the centre owes them before they arrive. Administration Handbook §14.
         </p>

@@ -27,7 +27,8 @@ export default async function Stage2BlockPage({ params }: { params: Promise<{ bl
     <div className="flex flex-col gap-6">
       <div className="sheet">
         <p className="text-xs text-muted">Stage 2 tutorials</p>
-        <h1 className="font-serif text-xl text-ink">
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Timetable</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">
           {event?.event_date} {event?.event_time?.slice(0, 5)}
         </h1>
         <p className="mt-2 text-sm text-muted">

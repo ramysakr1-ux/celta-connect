@@ -142,8 +142,8 @@ export default async function ObservationHoursPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">Observation hours</p>
-        <h1 className="font-serif text-2xl text-ink">{rows.length} candidates</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Observation hours</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">{rows.length} candidates</h1>
         <p className="mt-1 text-sm text-muted">
           Every observation source in one place -- self-logged, directed tasks, and filmed cohort sessions all feed
           the same {OBSERVATION_HOURS_REQUIRED}-hour requirement (filmed capped at 3 of those hours). Peer

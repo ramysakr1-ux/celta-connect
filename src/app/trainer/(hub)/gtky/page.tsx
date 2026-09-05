@@ -37,7 +37,8 @@ export default async function GtkyPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-serif text-2xl text-ink">Getting to know you -- day one</h1>
+        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Teaching Practice</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Getting to know you -- day one</h1>
         <p className="mt-1 text-sm text-muted">
           Twenty minutes each, unassessed, the tutor not in the room. Three activities offered per candidate, matched
           to the level they will teach; they pick one in Connect. Anyone who hasn&apos;t by Monday, pick for them below.
