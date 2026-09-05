@@ -12,7 +12,6 @@ import type { RosterRow } from "@/lib/roster";
 // toggle, so nothing a trainer relies on gets removed sight-unseen, only
 // decluttered by default.
 export const CORE_COLUMN_COUNT = 7; // Assessed hrs, TPs, Assignments, Criteria, Attendance, Provisional, At risk
-export const DETAIL_COLUMN_COUNT = 11; // TP stages, Supervised review, Observation hrs, Stage 1, Stage 2/3, CELTA 5, FOL, Standing, Obs. tasks, Pre-course, Filmed obs
 
 // Ramy, 5 Sep 2026: "I just don't like the way those headlines are
 // written... the progress detail, they're kind of too bulky." Short
@@ -41,7 +40,7 @@ export function RosterTable({
 }) {
   const [showDetail, setShowDetail] = useState(false);
   const NAME_AND_CONTACT_COLS = 2; // name th + contact th always render (contact th is just blank when hidden)
-  const totalColCount = NAME_AND_CONTACT_COLS + CORE_COLUMN_COUNT + (showDetail ? DETAIL_COLUMN_COUNT : 0);
+  const totalColCount = NAME_AND_CONTACT_COLS + CORE_COLUMN_COUNT;
 
   return (
     <div className="flex flex-col gap-2">
@@ -58,7 +57,7 @@ export function RosterTable({
         {/* Detail mode: tighter padding, smaller type, and no cell may wrap --
             a wrapped "6 /" over "8" made every row taller and the table no
             narrower (Ramy, 5 Sep 2026). */}
-        <table className={`table-plain w-full [&_td]:whitespace-nowrap [&_td:first-child]:whitespace-nowrap ${showDetail ? "text-[13px] [&_td]:px-2 [&_th]:px-2" : ""}`}>
+        <table className="table-plain w-full [&_td]:whitespace-nowrap [&_tr:has(+tr.detail-line)]:border-b-0">
           <thead>
             <tr>
               <Th>{"Candidate"}</Th>
@@ -70,21 +69,6 @@ export function RosterTable({
               <Th center>{"Attendance"}</Th>
               <Th center>{"Provisional"}</Th>
               <Th center>{"At\nrisk"}</Th>
-              {showDetail ? (
-                <>
-                  <Th center>{"TP\nstages"}</Th>
-                  <Th center>{"Supervised"}</Th>
-                  <Th center>{"Obs.\nhrs"}</Th>
-                  <Th center>{"Stage 1"}</Th>
-                  <Th center>{"Stage\n2/3"}</Th>
-                  <Th center>{"CELTA 5\nsign-off"}</Th>
-                  <Th center>{"FOL"}</Th>
-                  <Th center>{"Standing"}</Th>
-                  <Th center>{"Obs.\ntasks"}</Th>
-                  <Th center>{"Pre-\ncourse"}</Th>
-                  <Th center>{"Filmed\nobs"}</Th>
-                </>
-              ) : null}
             </tr>
           </thead>
           <tbody>

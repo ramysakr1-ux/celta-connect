@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TrajectoryBarCompact } from "@/components/trajectory-gradient-bar";
 import type { RosterRow } from "@/lib/roster";
-import { CORE_COLUMN_COUNT, DETAIL_COLUMN_COUNT } from "@/app/trainer/(hub)/roster/roster-table";
+import { CORE_COLUMN_COUNT } from "@/app/trainer/(hub)/roster/roster-table";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { ordinal } from "@/lib/stage2-tutorials";
@@ -19,6 +19,16 @@ const moveEarlierInitialState: FormState = { error: null };
 // earlier -- [reason]' under the badge." Inline in the cell rather than an
 // absolute-positioned popover -- this table already scrolls horizontally
 // inside its own container, and a popover would clip against that.
+/** One item on the detail line: a small uppercase label, then the value. */
+function Chip({ label, title, className, children }: { label: string; title?: string; className?: string; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-baseline gap-1.5 text-[12.5px] whitespace-nowrap" title={title}>
+      <span className="text-[9.5px] font-bold tracking-[0.08em] text-muted uppercase">{label}</span>
+      <span className={className}>{children}</span>
+    </span>
+  );
+}
+
 function MoveEarlierControl({
   traineeId,
   stage,
@@ -149,7 +159,7 @@ export function RosterRowView({
             one before "Filmed obs" was added. The name and contact cells
             are rendered separately above, hence the -1 for the name; the
             contact cell is inside CORE's own count of what follows it. */}
-        <td colSpan={CORE_COLUMN_COUNT + 1 + (showDetail ? DETAIL_COLUMN_COUNT : 0)} className="text-center">
+        <td colSpan={CORE_COLUMN_COUNT + 1} className="text-center">
           <span className="pill pill-neutral">{COURSE_STATUS_LABEL[row.courseStatus]}</span>
         </td>
       </tr>
@@ -157,6 +167,7 @@ export function RosterRowView({
   }
 
   return (
+    <>
     <tr className="trainer-hover cursor-pointer"
       // The colour that follows the person (avatar.tsx) runs across their
       // whole row, faintly -- Ramy, 5 Sep 2026: "avatar will run through
@@ -206,9 +217,19 @@ export function RosterRowView({
           </span>
         ) : null}
       </td>
-      {showDetail ? (
-        <>
-          <td className="text-center tabular-nums">
+    </tr>
+    {showDetail ? (
+      // Detail as a second line under the candidate, not eleven more
+      // columns -- Ramy, 5 Sep 2026: "can we make it two lines?" The table
+      // never grows wider; each row grows a little taller.
+      <tr
+        className="detail-line"
+        style={{ background: `color-mix(in oklab, ${toneForName(row.name)} 9%, var(--color-card))` }}
+        onClick={() => router.push(`/portfolio/${row.id}`)}
+      >
+        <td colSpan={CORE_COLUMN_COUNT + 2} className="!pt-0 !whitespace-normal">
+          <div className="flex flex-wrap gap-x-5 gap-y-1.5 pl-12">
+          <Chip label="TP stages" className="tabular-nums">
             {row.tpStagesTaught > 0 ? (
               <Link
                 href={`/portfolio/${row.id}/tp`}
@@ -221,8 +242,8 @@ export function RosterRowView({
             ) : (
               <span className="text-muted">--</span>
             )}
-          </td>
-          <td className="text-center tabular-nums">
+          </Chip>
+          <Chip label="Supervised" className="tabular-nums">
             {row.supervisedTotal > 0 ? (
               <Link
                 href={`/portfolio/${row.id}/timetable`}
@@ -235,8 +256,8 @@ export function RosterRowView({
             ) : (
               <span className="text-muted">--</span>
             )}
-          </td>
-          <td className="text-center tabular-nums">
+          </Chip>
+          <Chip label="Obs. hrs" className="tabular-nums">
             <Link
               href={`/portfolio/${row.id}/celta5`}
               onClick={(e) => e.stopPropagation()}
@@ -244,8 +265,8 @@ export function RosterRowView({
             >
               {row.observationHoursCounted.toFixed(1)}/6
             </Link>
-          </td>
-          <td className="text-center">
+          </Chip>
+          <Chip label="Stage 1">
             <Link
               href={`/portfolio/${row.id}/celta5`}
               onClick={(e) => e.stopPropagation()}
@@ -254,8 +275,8 @@ export function RosterRowView({
             >
               {row.stage1Filed ? "Filed" : "Not yet"}
             </Link>
-          </td>
-          <td className="text-center">
+          </Chip>
+          <Chip label="Stage 2/3">
             {/* Two short tokens -- "3rd · done" -- with the full state in the
                 tooltip. It used to spell out "Not booked · Stage 3 N/A" and
                 the moved-earlier reasons in full, which made the detail
@@ -292,8 +313,8 @@ export function RosterRowView({
                 {row.stage3CanMoveEarlier && !row.stage3MovedEarlierReason ? <MoveEarlierControl traineeId={row.id} stage="stage3" /> : null}
               </div>
             ) : null}
-          </td>
-          <td className="text-center">
+          </Chip>
+          <Chip label="CELTA 5">
             <Link
               href={`/portfolio/${row.id}/celta5`}
               onClick={(e) => e.stopPropagation()}
@@ -301,19 +322,17 @@ export function RosterRowView({
             >
               {CELTA5_SIGNOFF_LABEL[row.celta5SignoffStatus]}
             </Link>
-          </td>
-          <td
-            className={`text-center tabular-nums ${row.folEntriesLow ? "text-status-warning-text" : "text-ink"}`}
-            title={row.folEntriesLow ? "Below half the cohort's average -- may be under-logging" : "FOL entries logged this course"}
-          >
+          </Chip>
+          <Chip label="FOL" className={`tabular-nums ${row.folEntriesLow ? "text-status-warning-text" : "text-ink"}`}
+            title={row.folEntriesLow ? "Below half the cohort's average -- may be under-logging" : "FOL entries logged this course"}>
             {row.folEntriesLogged}
-          </td>
-          <td className="text-center">
+          </Chip>
+          <Chip label="Standing">
             <div className="ml-auto">
               <TrajectoryBarCompact value={row.trajectory} />
             </div>
-          </td>
-          <td className="text-center tabular-nums">
+          </Chip>
+          <Chip label="Obs. tasks" className="tabular-nums">
             {row.obsTasksTotal > 0 ? (
               <Link
                 href={`/portfolio/${row.id}/celta5`}
@@ -325,8 +344,8 @@ export function RosterRowView({
             ) : (
               <span className="text-muted">--</span>
             )}
-          </td>
-          <td className="text-center tabular-nums">
+          </Chip>
+          <Chip label="Pre-course" className="tabular-nums">
             {row.preCourseTaskTotal > 0 ? (
               <Link
                 href={`/portfolio/${row.id}/pre-course-task`}
@@ -338,8 +357,8 @@ export function RosterRowView({
             ) : (
               <span className="text-muted">--</span>
             )}
-          </td>
-          <td className="text-center tabular-nums">
+          </Chip>
+          <Chip label="Filmed obs" className="tabular-nums">
             {row.filmedObsTotal > 0 ? (
               <Link
                 href={`/portfolio/${row.id}/resources`}
@@ -351,9 +370,11 @@ export function RosterRowView({
             ) : (
               <span className="text-muted">--</span>
             )}
-          </td>
-        </>
-      ) : null}
-    </tr>
+          </Chip>
+          </div>
+        </td>
+      </tr>
+    ) : null}
+    </>
   );
 }
