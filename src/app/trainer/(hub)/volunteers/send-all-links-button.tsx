@@ -18,7 +18,7 @@ export function SendAllLinksButton() {
         title="Sends the class-starting email with their own join link to every volunteer with an email on file"
         className={`${HUB_BUTTON} disabled:opacity-60`}
       >
-        {pending ? "Sending..." : state.sentCount !== null ? `Sent to ${state.sentCount}` : "Send links"}
+        {pending ? "Sending…" : state.sentCount !== null ? `Emailed ${state.sentCount}` : "Email all links"}
       </button>
       {state.error ? <p className="text-[11px] text-destructive">{state.error}</p> : null}
     </form>

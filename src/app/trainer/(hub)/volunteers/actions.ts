@@ -82,7 +82,9 @@ export async function getOrCreateRegisterViewToken(): Promise<{ token: string | 
     .select("token")
     .single();
 
-  if (error || !created) return { token: null, error: "Could not create the link. Try again." };
+  // The real reason, not "try again": on the shared demo course the
+  // database refuses every write and says so, and a tutor should read that.
+  if (error || !created) return { token: null, error: error?.message ?? "Could not create the link." };
   return { token: created.token, error: null };
 }
 

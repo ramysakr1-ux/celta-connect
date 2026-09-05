@@ -7,12 +7,15 @@ import { getOrCreateRegisterViewToken } from "@/app/trainer/(hub)/volunteers/act
 
 export function RegisterLinkButton() {
   const [state, setState] = useState<"idle" | "loading" | "copied" | "error">("idle");
+  const [message, setMessage] = useState<string | null>(null);
 
   async function handleClick() {
     setState("loading");
+    setMessage(null);
     const { token, error } = await getOrCreateRegisterViewToken();
     if (error || !token) {
       setState("error");
+      setMessage(error ?? "Could not create the link.");
       return;
     }
     await navigator.clipboard.writeText(`${window.location.origin}/register/${token}`);
@@ -21,13 +24,17 @@ export function RegisterLinkButton() {
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={state === "loading"}
-      className={`${HUB_BUTTON} disabled:opacity-60`}
-    >
-      {state === "loading" ? "Getting link…" : state === "copied" ? "Copied!" : state === "error" ? "Try again" : "Share register view"}
-    </button>
+    <div className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={state === "loading"}
+        title="Copies a read-only link to the attendance register for someone who is not a tutor -- centre staff, the assessor"
+        className={`${HUB_BUTTON} disabled:opacity-60`}
+      >
+        {state === "loading" ? "Getting link…" : state === "copied" ? "Link copied" : "Share register view"}
+      </button>
+      {message ? <p className="max-w-[260px] text-right text-[11px] text-destructive">{message}</p> : null}
+    </div>
   );
 }
