@@ -7,6 +7,7 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { fetchRosterRows } from "@/lib/roster";
 import { RosterTable } from "@/app/trainer/(hub)/roster/roster-table";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
+import { isMctOfCourse } from "@/lib/course-tutor-role";
 import { PageHead, HUB_BUTTON } from "@/app/trainer/(hub)/page-head";
 import { AddCandidateButton } from "@/app/trainer/(hub)/roster/add-candidate-button";
 import { toggleFilmingConsent } from "@/app/trainer/(hub)/roster/filming-consent-actions";
@@ -32,40 +33,51 @@ export default async function TrainerRosterPage() {
     return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
   }
 
-  const rows = await fetchRosterRows(supabase, courseId);
-  const isMct = trainer?.tutor_role === "main_course_tutor";
+  // Wave 1: the roster and everything that needs only the course or the
+  // trainer, together. Perf audit 5 Sep 2026: this page ran ~35 queries in
+  // 21 one-after-another steps. isMct now comes from the cache()'d
+  // course_tutors helper the layout already paid for -- the old
+  // profiles.tutor_role guess is the stale column layout.tsx warns about.
+  const adminClient = createAdminClient();
+  const [rows, isMct, filmsTpSessions, { data: subgroupsForFol }, { data: classErrorRows }, { data: courseRow }, { data: tutorRows }, { data: invitationRows }, { data: centreTrainers }] =
+    await Promise.all([
+      fetchRosterRows(supabase, courseId),
+      trainer ? isMctOfCourse(trainer, courseId) : Promise.resolve(false),
+      // specs/admissions-and-close-out.md §10 -- "only used if a centre films."
+      trainer?.center_id ? supabase.from("centers").select("films_tp_sessions").eq("id", trainer.center_id).maybeSingle().then((r) => Boolean(r.data?.films_tp_sessions)) : Promise.resolve(false),
+      supabase.from("course_subgroups").select("name").eq("course_id", courseId),
+      supabase.from("class_error_log").select("tp_class").eq("course_id", courseId),
+      trainer
+        ? adminClient.from("courses").select("trainee_join_token, course_code, name, chat_retention_days, chat_retention_mode, delivery_mode").eq("id", courseId).maybeSingle()
+        : Promise.resolve({ data: null }),
+      trainer
+        ? adminClient.from("course_tutors").select("id, profile_id, tutor_role, verified_at, owned_assignment_types").eq("course_id", courseId).is("left_at", null)
+        : Promise.resolve({ data: [] as { id: string; profile_id: string; tutor_role: string | null; verified_at: string | null; owned_assignment_types: string[] }[] }),
+      trainer
+        ? adminClient.from("course_invitations").select("id, email, full_name, tutor_role").eq("course_id", courseId).eq("role", "trainer").is("revoked_at", null).is("accepted_at", null)
+        : Promise.resolve({ data: [] as { id: string; email: string; full_name: string | null; tutor_role: string | null }[] }),
+      trainer
+        ? adminClient.from("profiles").select("id, full_name, email, course_id").eq("role", "trainer").eq("center_id", trainer.center_id)
+        : Promise.resolve({ data: [] as { id: string; full_name: string; email: string; course_id: string | null }[] }),
+    ]);
 
-  // specs/admissions-and-close-out.md §10 -- "only used if a centre films."
-  // A second query rather than folding into fetchRosterRows/RosterRow:
-  // every other caller of that shared function (the CSV export) has no use
-  // for this, and it's centre-conditional besides.
-  const { data: filmingCentre } = await supabase.from("centers").select("films_tp_sessions").eq("id", trainer?.center_id ?? "").maybeSingle();
-  const filmsTpSessions = filmingCentre?.films_tp_sessions ?? false;
-  const { data: consentRows } =
+  // Wave 2: the three that need wave 1's ids.
+  const tutorProfileIds = (tutorRows ?? []).map((t) => t.profile_id);
+  const otherTrainers = (centreTrainers ?? []).filter((p) => !tutorProfileIds.includes(p.id));
+  const homeCourseIds = [...new Set(otherTrainers.map((p) => p.course_id).filter((id): id is string => Boolean(id)))];
+  const [{ data: consentRows }, { data: tutorProfiles }, { data: homeCourses }] = await Promise.all([
     filmsTpSessions && rows.length > 0
-      ? await supabase
-          .from("profiles")
-          .select("id, filming_consent_confirmed_at")
-          .in(
-            "id",
-            rows.map((r) => r.id)
-          )
-      : { data: [] };
+      ? supabase.from("profiles").select("id, filming_consent_confirmed_at").in("id", rows.map((r) => r.id))
+      : Promise.resolve({ data: [] as { id: string; filming_consent_confirmed_at: string | null }[] }),
+    tutorProfileIds.length
+      ? adminClient.from("profiles").select("id, full_name, email, course_id").in("id", tutorProfileIds)
+      : Promise.resolve({ data: [] as { id: string; full_name: string; email: string; course_id: string | null }[] }),
+    homeCourseIds.length
+      ? adminClient.from("courses").select("id, name").in("id", homeCourseIds)
+      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+  ]);
   const consentConfirmedById = new Map((consentRows ?? []).map((r) => [r.id, !!r.filming_consent_confirmed_at]));
 
-  // for-claude-code-fol-pooled-evidence.md, "Trainer UX / Days 2-9": "a
-  // spot-check view showing per-class log counts (flagging classes with
-  // ~0 entries) is useful but not required for v1." roster.ts already
-  // tallies class_error_log per CANDIDATE (folEntriesLogged); this is the
-  // per-CLASS view named separately in the spec -- which class isn't
-  // logging, not which candidate. tp_class is free text at the point of
-  // logging (fol/actions.ts), not a foreign key, so every real class name
-  // comes from course_subgroups -- classes with zero log rows still need
-  // to show, which a plain group-by on class_error_log alone would miss.
-  const [{ data: subgroupsForFol }, { data: classErrorRows }] = await Promise.all([
-    supabase.from("course_subgroups").select("name").eq("course_id", courseId),
-    supabase.from("class_error_log").select("tp_class").eq("course_id", courseId),
-  ]);
   const folCountByClass = new Map<string, number>();
   for (const s of subgroupsForFol ?? []) folCountByClass.set(s.name, 0);
   for (const r of classErrorRows ?? []) folCountByClass.set(r.tp_class, (folCountByClass.get(r.tp_class) ?? 0) + 1);
@@ -83,10 +95,9 @@ export default async function TrainerRosterPage() {
   let joinUrl: string | null = null;
   let courseCode = "";
   if (trainer) {
-    const { data: course } = await supabase.from("courses").select("trainee_join_token, course_code, name").eq("id", courseId).maybeSingle();
     const siteUrl = process.env.SITE_URL;
-    joinUrl = siteUrl && course?.trainee_join_token ? `${siteUrl}/join/${course.trainee_join_token}` : null;
-    courseCode = course?.course_code || course?.name || "";
+    joinUrl = siteUrl && courseRow?.trainee_join_token ? `${siteUrl}/join/${courseRow.trainee_join_token}` : null;
+    courseCode = courseRow?.course_code || courseRow?.name || "";
   }
 
   // §18 "Emailing the whole group" -- BCC only, never To/Cc, and the app
@@ -110,35 +121,10 @@ export default async function TrainerRosterPage() {
   let chatRetentionMode: "days" | "course" = "days";
   let deliveryMode: DeliveryMode = "f2f";
   if (isMct && trainer) {
-    const adminClient = createAdminClient();
-    const { data: courseRetention } = await adminClient
-      .from("courses")
-      .select("chat_retention_days, chat_retention_mode, delivery_mode")
-      .eq("id", courseId)
-      .maybeSingle();
-    chatRetentionDays = courseRetention?.chat_retention_days ?? 1;
-    chatRetentionMode = courseRetention?.chat_retention_mode ?? "days";
-    deliveryMode = courseRetention?.delivery_mode ?? "f2f";
+    chatRetentionDays = courseRow?.chat_retention_days ?? 1;
+    chatRetentionMode = courseRow?.chat_retention_mode ?? "days";
+    deliveryMode = courseRow?.delivery_mode ?? "f2f";
 
-    const [{ data: tutorRows }, { data: invitationRows }] = await Promise.all([
-      adminClient
-        .from("course_tutors")
-        .select("id, profile_id, tutor_role, verified_at, owned_assignment_types")
-        .eq("course_id", courseId)
-        .is("left_at", null),
-      adminClient
-        .from("course_invitations")
-        .select("id, email, full_name, tutor_role")
-        .eq("course_id", courseId)
-        .eq("role", "trainer")
-        .is("revoked_at", null)
-        .is("accepted_at", null),
-    ]);
-
-    const tutorProfileIds = (tutorRows ?? []).map((t) => t.profile_id);
-    const { data: tutorProfiles } = tutorProfileIds.length
-      ? await adminClient.from("profiles").select("id, full_name, email, course_id").in("id", tutorProfileIds)
-      : { data: [] };
     const profileById = new Map((tutorProfiles ?? []).map((p) => [p.id, p]));
     rosterTutors = (tutorRows ?? []).map((t) => ({
       courseTutorId: t.id,
@@ -160,16 +146,6 @@ export default async function TrainerRosterPage() {
     // Same-centre tutors not already on this course -- assign-tutor-actions.ts's
     // own comment: "adding a trainer to a second course adds to their
     // assignments -- it does not remove them from the first."
-    const { data: centreTrainers } = await adminClient
-      .from("profiles")
-      .select("id, full_name, email, course_id")
-      .eq("role", "trainer")
-      .eq("center_id", trainer.center_id);
-    const otherTrainers = (centreTrainers ?? []).filter((p) => !tutorProfileIds.includes(p.id));
-    const homeCourseIds = [...new Set(otherTrainers.map((p) => p.course_id).filter((id): id is string => Boolean(id)))];
-    const { data: homeCourses } = homeCourseIds.length
-      ? await adminClient.from("courses").select("id, name").in("id", homeCourseIds)
-      : { data: [] };
     const courseNameById = new Map((homeCourses ?? []).map((c) => [c.id, c.name]));
     assignableTrainers = otherTrainers.map((p) => ({
       id: p.id,

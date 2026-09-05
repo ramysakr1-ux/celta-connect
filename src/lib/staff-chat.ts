@@ -32,40 +32,12 @@ import type { Database } from "@/lib/supabase/types";
 // trainer/course chat... this admin channel stores its history
 // indefinitely." Excluded from the sweep entirely, never just given a
 // long retention number.
-async function deleteStaleStaffMessages(centerId: string): Promise<void> {
-  const admin = createAdminClient();
-
-  const { data: channels } = await admin
-    .from("staff_channels")
-    .select("id, course_id")
-    .eq("center_id", centerId)
-    .neq("type", "centre_admin");
-  if (!channels || channels.length === 0) return;
-
-  const courseIds = [...new Set(channels.map((c) => c.course_id).filter((id): id is string => !!id))];
-  const { data: courses } =
-    courseIds.length > 0
-      ? await admin.from("courses").select("id, chat_retention_days, chat_retention_mode").in("id", courseIds)
-      : { data: [] };
-  const retentionByCourseId = new Map((courses ?? []).map((c) => [c.id, c]));
-
-  // "course" mode (migration 0174) has no rolling cutoff at all -- it's
-  // cleared at close-out instead (course-close-out/wipe.ts), not swept here.
-  const channelIdsByRetention = new Map<number, string[]>();
-  for (const channel of channels) {
-    const course = channel.course_id ? retentionByCourseId.get(channel.course_id) : null;
-    if (course?.chat_retention_mode === "course") continue;
-    const days = course?.chat_retention_days ?? 1;
-    const list = channelIdsByRetention.get(days) ?? [];
-    list.push(channel.id);
-    channelIdsByRetention.set(days, list);
-  }
-
-  for (const [days, channelIds] of channelIdsByRetention) {
-    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-    await admin.from("staff_messages").delete().in("channel_id", channelIds).lt("created_at", cutoff.toISOString());
-  }
-}
+// The retention sweep itself now runs in the database, hourly (migration
+// 0271, pg_cron "staff-chat-retention-sweep"). It used to fire from here on
+// EVERY hub page load for every tutor -- two lookups and a delete per
+// distinct retention value, per request -- and stale messages were only
+// ever cleared when somebody happened to open a page (perf audit, 5 Sep
+// 2026).
 
 export type RetentionLabel = "nightly" | "days" | "course" | "permanent";
 
@@ -134,10 +106,6 @@ export async function getInitialStaffChatData(
     supabase.from("profiles").select("center_id, course_id, role").eq("id", profileId).maybeSingle(),
     supabase.from("staff_channel_members").select("channel_id").eq("profile_id", profileId),
   ]);
-
-  if (profile?.center_id) {
-    deleteStaleStaffMessages(profile.center_id).catch((err) => console.error("deleteStaleStaffMessages failed", err));
-  }
 
   // Who this person may start a conversation with.
   //

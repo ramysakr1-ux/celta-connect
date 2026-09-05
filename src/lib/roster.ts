@@ -103,26 +103,28 @@ export async function fetchRosterRows(
   supabase: SupabaseClient<Database>,
   courseId: string
 ): Promise<RosterRow[]> {
-  const { data: trainees } = await supabase
-    .from("profiles")
-    .select("id, full_name, email, phone, course_status")
-    .eq("course_id", courseId)
-    .eq("role", "trainee")
-    .order("full_name");
+  // Wave 1: the roster, plus everything that needs only the course. Perf
+  // audit 5 Sep 2026: this function ran 12 one-after-another waves; the
+  // course-only lookups (stage 2 blocks, tutorial invites, filmed-obs
+  // events and sessions, pre-course sections) waited behind the trainee
+  // list for no reason. Three waves now.
+  const [{ data: trainees }, { data: stage2Blocks }, { data: tutorialInvites }, { data: filmedObsEvents }, { data: filmedObsSessions }, { data: courseForCentre }] =
+    await Promise.all([
+      supabase.from("profiles").select("id, full_name, email, phone, course_status").eq("course_id", courseId).eq("role", "trainee").order("full_name"),
+      // Stage 2 blocks are scoped by course first (stage2_tutorial_slots has
+      // no course_id of its own -- it only reaches the course through its block).
+      supabase.from("stage2_tutorial_blocks").select("id").eq("course_id", courseId),
+      supabase.from("individual_tutorial_invites").select("trainee_id, stage, confirmed_at").eq("course_id", courseId),
+      // Denominator is the course's scheduled filmed-observation slots, not
+      // the sessions a trainer has set up -- a slot with no recording attached
+      // is still one the candidate will owe.
+      supabase.from("course_timetable_events").select("id").eq("course_id", courseId).eq("type", "milestone").ilike("title", "Filmed observation%"),
+      supabase.from("filmed_observation_sessions").select("id").eq("course_id", courseId),
+      supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle(),
+    ]);
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
-
-  // Stage 2 blocks are scoped by course first, same two-step pattern the
-  // Timetable page already uses (stage2_tutorial_slots has no course_id of
-  // its own -- it only reaches the course through its block).
-  const { data: stage2Blocks } =
-    traineeIds.length > 0 ? await supabase.from("stage2_tutorial_blocks").select("id").eq("course_id", courseId) : { data: [] };
   const stage2BlockIds = (stage2Blocks ?? []).map((b) => b.id);
-
-  const { data: tutorialInvites } =
-    traineeIds.length > 0
-      ? await supabase.from("individual_tutorial_invites").select("trainee_id, stage, confirmed_at").eq("course_id", courseId)
-      : { data: [] };
 
   const [
     { data: taughtPlans },
@@ -206,23 +208,25 @@ export async function fetchRosterRows(
   const supervisedTotal = (supervisedEvents ?? []).length;
 
   const totalHours = course?.total_hours ?? 120;
-  const center = course ? await getCachedCenter(course.center_id) : null;
+  const centerId = course?.center_id ?? courseForCentre?.center_id ?? null;
 
-  // Pre-course task lives on the CENTRE, not the course -- sections are
-  // seeded per centre and shared by every course it runs, so the total is
-  // one number for the whole roster rather than per-candidate.
-  const { data: pctSections } =
-    course && traineeIds.length > 0
-      ? await supabase.from("pre_course_task_sections").select("id").eq("center_id", course.center_id)
-      : { data: [] };
-  const pctSectionIds = (pctSections ?? []).map((s) => s.id);
-  const { data: pctItems } =
-    pctSectionIds.length > 0 ? await supabase.from("pre_course_task_items").select("id").in("section_id", pctSectionIds) : { data: [] };
-  const preCourseTaskTotal = (pctItems ?? []).length;
-  const { data: pctResponses } =
-    preCourseTaskTotal > 0
-      ? await supabase.from("pre_course_task_responses").select("trainee_id, response").in("trainee_id", traineeIds)
-      : { data: [] };
+  // Wave 3: what needs wave 2's ids -- and the pre-course task, which lives
+  // on the CENTRE (sections are seeded per centre and shared by every
+  // course it runs, so the total is one number for the whole roster). The
+  // sections come with their items in one embedded read.
+  const [center, { data: pctSectionsWithItems }, { data: pctResponses }, { data: filmedObsTasks }] = await Promise.all([
+    centerId ? getCachedCenter(centerId) : Promise.resolve(null),
+    centerId && traineeIds.length > 0
+      ? supabase.from("pre_course_task_sections").select("id, pre_course_task_items(id)").eq("center_id", centerId)
+      : Promise.resolve({ data: [] as { id: string; pre_course_task_items: { id: string }[] }[] }),
+    traineeIds.length > 0
+      ? supabase.from("pre_course_task_responses").select("trainee_id, response").in("trainee_id", traineeIds)
+      : Promise.resolve({ data: [] as { trainee_id: string; response: string }[] }),
+    (filmedObsSessions ?? []).length > 0
+      ? supabase.from("filmed_observation_tasks").select("id").in("session_id", (filmedObsSessions ?? []).map((x) => x.id))
+      : Promise.resolve({ data: [] as { id: string }[] }),
+  ]);
+  const preCourseTaskTotal = (pctSectionsWithItems ?? []).reduce((n, sec) => n + (sec.pre_course_task_items?.length ?? 0), 0);
   // Shares responseIsAnswered with the task page itself, so the roster and
   // the candidate's own progress bar can never disagree about what counts
   // -- a structured task saves JSON, and an empty shell of one must not
@@ -231,25 +235,7 @@ export async function fetchRosterRows(
   // sessions a trainer has set up -- a slot with no recording attached is
   // still one the candidate will owe, and counting only prepared sessions
   // would make the target shrink and grow as staff work through setup.
-  const { data: filmedObsEvents } = await supabase
-    .from("course_timetable_events")
-    .select("id")
-    .eq("course_id", courseId)
-    .eq("type", "milestone")
-    .ilike("title", "Filmed observation%");
   const filmedObsTotal = (filmedObsEvents ?? []).length;
-  const { data: filmedObsSessions } =
-    filmedObsTotal > 0 ? await supabase.from("filmed_observation_sessions").select("id").eq("course_id", courseId) : { data: [] };
-  const { data: filmedObsTasks } =
-    (filmedObsSessions ?? []).length > 0
-      ? await supabase
-          .from("filmed_observation_tasks")
-          .select("id")
-          .in(
-            "session_id",
-            (filmedObsSessions ?? []).map((x) => x.id)
-          )
-      : { data: [] };
   const { data: filmedObsResponses } =
     (filmedObsTasks ?? []).length > 0 && traineeIds.length > 0
       ? await supabase

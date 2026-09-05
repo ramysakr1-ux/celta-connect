@@ -7,7 +7,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isMctOnCourse } from "@/lib/course-mct";
+import { isMctOfCourse } from "@/lib/course-tutor-role";
 import { setTimetableLock, recomputeAssignmentDueDates } from "@/app/trainer/(hub)/timetable/actions";
 import { AddEventForm } from "@/app/trainer/(hub)/timetable/add-event-form";
 import { GenerateSkeletonForm } from "@/app/trainer/(hub)/timetable/generate-skeleton-form";
@@ -116,20 +116,11 @@ export default async function TrainerTimetablePage({
   // volunteers... attending" -- aggregate only, no names. Total is fixed
   // per course; only the per-event decline count varies.
   const volunteerIds = (volunteers ?? []).map((v) => v.id);
-  const { data: volunteerDeclines } =
-    volunteerIds.length > 0
-      ? await supabase.from("volunteer_declines").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
-      : { data: [] };
-  const declinedCountByEvent = new Map<string, number>();
-  for (const d of volunteerDeclines ?? []) {
-    declinedCountByEvent.set(d.timetable_event_id, (declinedCountByEvent.get(d.timetable_event_id) ?? 0) + 1);
-  }
-
   // Ramy, 2026-08-23: ACT doesn't make changes to the timetable, so doesn't
   // need to see those options -- mirrors actions.ts' requireTimetableEditAccess
   // exactly (same isMctOnCourse() check, admin bypass), so the UI never
   // offers a control the server would then reject.
-  const isMct = Boolean(trainer) && (trainer!.role === "admin" || (await isMctOnCourse(supabase, courseId, trainer!.id)));
+  const isMct = Boolean(trainer) && (await isMctOfCourse(trainer!, courseId));
   // Non-MCT trying to force ?mode=edit just falls back to the view -- there
   // is no separate "disabled" edit mode to render, and nothing to explain.
   const editMode = mode === "edit" && isMct;
@@ -152,8 +143,13 @@ export default async function TrainerTimetablePage({
     return first === last ? fmt(first) : `${fmt(first)} – ${fmt(last)}`;
   })();
 
+  // Wave 2: everything that needs only wave 1's ids, together. Perf audit
+  // 5 Sep 2026: these used to be three separate batches plus two stragglers.
+  // course_subgroup_members is scoped through this course's subgroups --
+  // it used to be read with no filter at all, which on the assessor path
+  // (admin client, no RLS) meant every subgroup member in the database.
   const tpEventIds = allEvents.filter((e) => e.type === "tp").map((e) => e.id);
-  const [{ data: attendanceRows }, { data: unmatchedRows }] = await Promise.all([
+  const [{ data: attendanceRows }, { data: unmatchedRows }, { data: volunteerDeclines }, { data: subgroups }, { data: tpGroups }, { data: blocks }, { data: activeTrainees }, { data: stage3Records }, { data: invites }] = await Promise.all([
     tpEventIds.length > 0
       ? supabase.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id, source").in("timetable_event_id", tpEventIds)
       : Promise.resolve({ data: [] }),
@@ -166,7 +162,24 @@ export default async function TrainerTimetablePage({
           .in("timetable_event_id", tpEventIds)
           .is("resolved_at", null)
       : Promise.resolve({ data: [] }),
+    volunteerIds.length > 0
+      ? supabase.from("volunteer_declines").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
+      : Promise.resolve({ data: [] as { volunteer_student_id: string; timetable_event_id: string }[] }),
+    supabase.from("course_subgroups").select("id, name, tp_group_id, half_order").eq("course_id", courseId).order("created_at"),
+    supabase.from("course_tp_groups").select("id, name, tutor_profile_id").eq("course_id", courseId),
+    supabase.from("stage2_tutorial_blocks").select("id, tp_group_id, subgroup_id, timetable_event_id").eq("course_id", courseId),
+    supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee").eq("course_status", "active").order("full_name"),
+    supabase.from("celta5_records").select("trainee_id, stage3_tutorial_required").eq("course_id", courseId),
+    supabase.from("individual_tutorial_invites").select("id, trainee_id, stage, timetable_event_id, confirmed_at").eq("course_id", courseId),
   ]);
+  const { data: subgroupMembers } =
+    (subgroups ?? []).length > 0
+      ? await supabase.from("course_subgroup_members").select("subgroup_id, trainee_id").in("subgroup_id", (subgroups ?? []).map((g) => g.id))
+      : { data: [] as { subgroup_id: string; trainee_id: string }[] };
+  const declinedCountByEvent = new Map<string, number>();
+  for (const d of volunteerDeclines ?? []) {
+    declinedCountByEvent.set(d.timetable_event_id, (declinedCountByEvent.get(d.timetable_event_id) ?? 0) + 1);
+  }
   const attendedByEvent = new Map<string, Set<string>>();
   const attendanceSourceByEvent = new Map<string, Map<string, "manual" | "zoom">>();
   for (const row of attendanceRows ?? []) {
@@ -188,15 +201,6 @@ export default async function TrainerTimetablePage({
   // own paired-tp-group / unpaired-subgroup enumeration exactly, and blocks
   // aren't gated by timetable_locked_at: tutorials get scheduled as the
   // course actually progresses, well after the base shape is locked.
-  const [{ data: subgroups }, { data: tpGroups }, { data: blocks }, { data: subgroupMembers }] = await Promise.all([
-    supabase.from("course_subgroups").select("id, name, tp_group_id, half_order").eq("course_id", courseId).order("created_at"),
-    supabase.from("course_tp_groups").select("id, name, tutor_profile_id").eq("course_id", courseId),
-    supabase
-      .from("stage2_tutorial_blocks")
-      .select("id, tp_group_id, subgroup_id, timetable_event_id")
-      .eq("course_id", courseId),
-    supabase.from("course_subgroup_members").select("subgroup_id, trainee_id"),
-  ]);
 
   // for-claude-code-timetable-page-priority.md (revised): "Stage 2 group
   // tutorial booking and Stage 1/3 individual invites: per-TP-tutor, not
@@ -246,20 +250,6 @@ export default async function TrainerTimetablePage({
   // unlike Stage 2's group sheet above. Stage 3 only offers candidates the
   // trainer has actually flagged (celta5_records.stage3_tutorial_required) -- it's
   // conditional per-candidate, not a whole-cohort checkpoint like Stage 1.
-  const [{ data: activeTrainees }, { data: stage3Records }, { data: invites }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, full_name")
-      .eq("course_id", courseId)
-      .eq("role", "trainee")
-      .eq("course_status", "active")
-      .order("full_name"),
-    supabase.from("celta5_records").select("trainee_id, stage3_tutorial_required").eq("course_id", courseId),
-    supabase
-      .from("individual_tutorial_invites")
-      .select("id, trainee_id, stage, timetable_event_id, confirmed_at")
-      .eq("course_id", courseId),
-  ]);
   const traineeNameById = new Map((activeTrainees ?? []).map((t) => [t.id, t.full_name]));
   const stage3EligibleIds = new Set((stage3Records ?? []).filter((r) => r.stage3_tutorial_required).map((r) => r.trainee_id));
   const allCandidates = (activeTrainees ?? [])
