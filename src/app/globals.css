@@ -56,7 +56,7 @@
   --color-rule-gold-soft: oklch(62% 0.14 68 / 0.3);
   --color-bronze: oklch(50% 0.09 62); /* third accent, from the Centre Admin design system -- consultation-time timetable category, distinct from primary/gold/ink at a glance */
   --color-garnet: oklch(42% 0.13 27); /* same hue as the trainer hub's ACT-side garnet -- Ramy, 27 Aug 2026: card top/side accent bars should alternate teal/garnet "so it's not all green," purely decorative, not a semantic status color like --color-destructive (very similar hue, kept separate on purpose -- reusing the error color for plain decoration would risk a garnet card silently reading as "something's wrong"). */
-  --color-destructive: oklch(45% 0.15 27);
+  --color-destructive: oklch(52% 0.19 32); /* Danger, sitewide. Was oklch(45% 0.15 27) -- a wine red almost identical to the MCT's garnet role accent, so on the MCT's Today a banner, a button and an at-risk badge all read as one red (Ramy, 5 Sep 2026: "red is danger... is it a theme or random?"). Warmer and brighter now, so alarm is one recognisable colour on both role screens and garnet stays garnet. */
   --color-input: oklch(88.8% 0.013 82);
   --color-accent: oklch(93% 0.019 190); /* pale teal-green, the "green hover" wash */
   --color-accent-foreground: oklch(32% 0.05 195);
