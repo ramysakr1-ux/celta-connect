@@ -297,31 +297,43 @@ export function VolunteersV2({
   const hoursLabel = fractionHours(rule.sessionHours);
 
   return (
-    <div className="flex flex-col gap-[18px]">
-      <PageHead
-        eyebrow={`Volunteers · ${rows.length} student${rows.length === 1 ? "" : "s"} · ${byClass.length} class${byClass.length === 1 ? "" : "es"}`}
-        title={
-          <span className="flex items-center gap-3">
-            Volunteer students
-            <span className="rounded-[5px] border border-border bg-card px-2 py-[3px] font-sans text-[11px] font-bold tracking-[0.08em] text-muted">{roleLabel}</span>
-          </span>
-        }
-        lede={`Each student has a no-login link to their materials and hours. Present means ${rule.need} of a session's ${rule.lessons} lessons and banks the whole ${hoursLabel} h; certificate at ${rule.target} h across all courses.`}
-      >
-        <a href="/api/filming-consent.pdf" className={HUB_BUTTON}>
-          Filming consent form
-        </a>
-        <RegisterLinkButton />
-        <button type="button" onClick={() => setAddOpen((v) => !v)} className={HUB_PRIMARY} style={HUB_PRIMARY_STYLE}>
-          {addOpen ? "Cancel" : "Add student"}
-        </button>
-      </PageHead>
+    <div className="flex flex-col gap-4">
+      {/* The design's own compact header (Ramy, 6 Sep 2026: the hub
+          PageHead I first used here spent twice the height the design
+          does) -- 22px title + role pill, two-line sub, three 34px
+          actions on the right. */}
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+        <div className="flex max-w-[700px] flex-col gap-[5px]">
+          <div className="flex items-center gap-2.5">
+            <h1 className="font-serif text-[22px] leading-tight font-semibold text-ink-warm">Volunteer students</h1>
+            <span className="rounded-[5px] border border-border bg-card px-2 py-[3px] text-[11px] font-bold tracking-[0.08em] text-muted">{roleLabel}</span>
+          </div>
+          <p className="text-[13px] leading-[1.55] text-muted">
+            Each student has a no-login link to their materials and hours. Present means {rule.need} of a session&apos;s {rule.lessons} lessons and banks the whole{" "}
+            {fractionHours(rule.sessionHours)} h; certificate at {rule.target} h across all courses.
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <a href="/api/filming-consent.pdf" className="trainer-hover-fill inline-flex h-[34px] items-center rounded-[6px] border border-border bg-card px-3 text-[12px] font-semibold whitespace-nowrap text-ink">
+            Filming consent form
+          </a>
+          <RegisterLinkButton small />
+          <button
+            type="button"
+            onClick={() => setAddOpen((v) => !v)}
+            className="inline-flex h-[34px] items-center rounded-[6px] px-3.5 text-[12px] font-semibold whitespace-nowrap text-primary-foreground transition-[filter] hover:brightness-110"
+            style={{ background: "var(--hub-accent)" }}
+          >
+            {addOpen ? "Cancel" : "Add student"}
+          </button>
+        </div>
+      </div>
 
       {addOpen ? <AddRow classes={classes} onDone={() => setAddOpen(false)} /> : null}
 
       {todayInfo ? (
         <div className="sheet flex flex-col gap-1 !p-0">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-faint px-5 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-faint px-4 py-2.5">
             <div className="flex flex-wrap items-baseline gap-2.5">
               <span className="text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: TEAL }}>
                 {todayInfo.isToday ? "Today" : "Next class"}
@@ -341,7 +353,7 @@ export function VolunteersV2({
             const cInRoom = c.members.filter((r) => r.todayState === "in_room").length;
             const cNoReply = c.members.length - cComing - cCant;
             return (
-              <div key={c.label} className="grid grid-cols-1 items-center gap-3 border-b border-border-faint px-5 py-3 last:border-b-0 lg:grid-cols-[280px_1fr_auto]">
+              <div key={c.label} className="grid grid-cols-1 items-center gap-3 border-b border-border-faint px-4 py-2 last:border-b-0 lg:grid-cols-[280px_1fr_auto]">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[13px] font-semibold text-ink">{c.label}</span>
                   {todayInfo.startTime ? (
