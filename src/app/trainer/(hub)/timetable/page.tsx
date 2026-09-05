@@ -18,8 +18,10 @@ import { resolveTimeBands, toLocalIso, DEFAULT_TIMEZONE, type TimetableEvent, ty
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { halfOwningDate, type TpTimetableEvent } from "@/lib/rotation";
 import { ReadOnlyTimetableBoard, type EventMeta } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
-import { Stage2Section } from "@/app/trainer/(hub)/timetable/stage2-section";
-import { IndividualTutorialSection } from "@/app/trainer/(hub)/timetable/individual-tutorial-section";
+import { TutorialsSection } from "@/app/trainer/(hub)/timetable/tutorials-section";
+import { shortDate, shortTime, stageForWeek, type GridCell, type GroupSummary, type BlockSummary, type GridRow, type TutorialsSectionData } from "@/lib/tutorials-section";
+import { computeWeekOf } from "@/lib/course-progress";
+import { ordinal } from "@/lib/stage2-tutorials";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
 
 // for-claude-code-timetable-edit-vs-view.md: DragBoard (editing) and the
@@ -64,7 +66,7 @@ export default async function TrainerTimetablePage({
   }
 
   const [{ data: course }, { data: events }, { data: volunteers }] = await Promise.all([
-    supabase.from("courses").select("name, timetable_locked_at, time_bands, delivery_mode, center_id, assessor_visit_date").eq("id", courseId).maybeSingle(),
+    supabase.from("courses").select("name, timetable_locked_at, time_bands, delivery_mode, center_id, assessor_visit_date, start_date, end_date").eq("id", courseId).maybeSingle(),
     supabase
       .from("course_timetable_events")
       .select("*")
@@ -149,7 +151,19 @@ export default async function TrainerTimetablePage({
   // it used to be read with no filter at all, which on the assessor path
   // (admin client, no RLS) meant every subgroup member in the database.
   const tpEventIds = allEvents.filter((e) => e.type === "tp").map((e) => e.id);
-  const [{ data: attendanceRows }, { data: unmatchedRows }, { data: volunteerDeclines }, { data: subgroups }, { data: tpGroups }, { data: blocks }, { data: activeTrainees }, { data: stage3Records }, { data: invites }] = await Promise.all([
+  const [
+    { data: attendanceRows },
+    { data: unmatchedRows },
+    { data: volunteerDeclines },
+    { data: subgroups },
+    { data: tpGroups },
+    { data: blocks },
+    { data: activeTrainees },
+    { data: stage3Records },
+    { data: invites },
+    { data: consultationBlocks },
+    { data: traineeAssignments },
+  ] = await Promise.all([
     tpEventIds.length > 0
       ? supabase.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id, source").in("timetable_event_id", tpEventIds)
       : Promise.resolve({ data: [] }),
@@ -169,8 +183,25 @@ export default async function TrainerTimetablePage({
     supabase.from("course_tp_groups").select("id, name, tutor_profile_id").eq("course_id", courseId),
     supabase.from("stage2_tutorial_blocks").select("id, tp_group_id, subgroup_id, timetable_event_id").eq("course_id", courseId),
     supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee").eq("course_status", "active").order("full_name"),
-    supabase.from("celta5_records").select("trainee_id, stage3_tutorial_required").eq("course_id", courseId),
+    supabase.from("celta5_records").select("trainee_id, stage3_tutorial_required, stage1_completed_at, stage3_finalized_at").eq("course_id", courseId),
     supabase.from("individual_tutorial_invites").select("id, trainee_id, stage, timetable_event_id, confirmed_at").eq("course_id", courseId),
+    // Consultation blocks (migration 0275) -- the tutorials section below.
+    supabase.from("consultation_blocks").select("id, tutor_profile_id, timetable_event_id, slot_length_minutes").eq("course_id", courseId),
+    supabase.from("assignments").select("trainee_id, assignment_type, first_submitted_at").eq("course_id", courseId),
+  ]);
+  // Wave 3: the positions behind every sheet, and the tutors' names.
+  const stage2BlockIds = (blocks ?? []).map((b) => b.id);
+  const consultationBlockIds = (consultationBlocks ?? []).map((b) => b.id);
+  const tutorIds = [...new Set([...(tpGroups ?? []).map((g) => g.tutor_profile_id), ...(consultationBlocks ?? []).map((b) => b.tutor_profile_id)].filter((id): id is string => Boolean(id)))];
+  const [{ data: stage2Slots }, { data: consultationSlots }, { data: tutorProfiles }, { data: courseTutors }] = await Promise.all([
+    stage2BlockIds.length > 0
+      ? supabase.from("stage2_tutorial_slots").select("block_id, position, trainee_id").in("block_id", stage2BlockIds)
+      : Promise.resolve({ data: [] as { block_id: string; position: number; trainee_id: string | null }[] }),
+    consultationBlockIds.length > 0
+      ? supabase.from("consultation_slots").select("block_id, position, trainee_id").in("block_id", consultationBlockIds)
+      : Promise.resolve({ data: [] as { block_id: string; position: number; trainee_id: string | null }[] }),
+    tutorIds.length > 0 ? supabase.from("profiles").select("id, full_name").in("id", tutorIds) : Promise.resolve({ data: [] as { id: string; full_name: string }[] }),
+    supabase.from("course_tutors").select("profile_id, profiles!inner(full_name)").eq("course_id", courseId).is("left_at", null),
   ]);
   const { data: subgroupMembers } =
     (subgroups ?? []).length > 0
@@ -213,64 +244,197 @@ export default async function TrainerTimetablePage({
   const isAdmin = trainer?.role === "admin";
   const ownedGroupIds = new Set((tpGroups ?? []).filter((g) => trainer && g.tutor_profile_id === trainer.id).map((g) => g.id));
   const pairedTpGroupIds = new Set((subgroups ?? []).filter((s) => s.tp_group_id).map((s) => s.tp_group_id));
-  const stage2Groups = [
-    ...(tpGroups ?? [])
-      .filter((g) => pairedTpGroupIds.has(g.id) && (isAdmin || ownedGroupIds.has(g.id)))
-      .map((g) => ({ kind: "tpgroup" as const, id: g.id, name: g.name })),
-    ...(subgroups ?? []).filter((s) => !s.tp_group_id).map((s) => ({ kind: "subgroup" as const, id: s.id, name: s.name })),
-  ];
-  const visibleGroupIds = new Set(stage2Groups.map((g) => g.id));
   const blockEventById = new Map(allEvents.map((e) => [e.id, e]));
-  const stage2Blocks = (blocks ?? [])
-    .filter((b) => (b.tp_group_id ? visibleGroupIds.has(b.tp_group_id) : visibleGroupIds.has(b.subgroup_id ?? "")))
-    .map((b) => {
-      const event = blockEventById.get(b.timetable_event_id);
-      const group = stage2Groups.find((g) => (b.tp_group_id ? g.id === b.tp_group_id : g.id === b.subgroup_id));
-      return { id: b.id, groupName: group?.name ?? "Unknown group", eventDate: event?.event_date ?? "" };
-    });
 
   // Same per-tutor scoping for Stage 1/3: a candidate is "the trainer's own"
   // if they're a member of a subgroup belonging to a TP group the trainer
   // tutors. A trainee in an unpaired subgroup has no owning tutor to test
-  // against (same gap as above) -- left visible to every trainer. And
-  // before any subgroup exists at all (course not yet organized into TP
-  // groups -- true of every course early on), there's nothing to scope by
-  // full stop; fails open rather than showing an empty "no candidates" for
-  // a course that just hasn't set up groups yet.
-  const noSubgroupStructureYet = (subgroups ?? []).length === 0;
+  // against (same gap as above) -- left visible to every trainer.
   const ownedSubgroupIds = new Set((subgroups ?? []).filter((s) => s.tp_group_id && ownedGroupIds.has(s.tp_group_id)).map((s) => s.id));
   const unpairedSubgroupIds = new Set((subgroups ?? []).filter((s) => !s.tp_group_id).map((s) => s.id));
-  const ownTraineeIds = new Set(
-    (subgroupMembers ?? [])
-      .filter((m) => isAdmin || ownedSubgroupIds.has(m.subgroup_id) || unpairedSubgroupIds.has(m.subgroup_id))
-      .map((m) => m.trainee_id)
-  );
 
-  // Stage 1 / Stage 3 individualized invites -- one candidate, one time,
-  // unlike Stage 2's group sheet above. Stage 3 only offers candidates the
-  // trainer has actually flagged (celta5_records.stage3_tutorial_required) -- it's
-  // conditional per-candidate, not a whole-cohort checkpoint like Stage 1.
+  // ---- Tutorials and consultations (design_handoff_tutorials_consultations) ----
+  // Everything below the board, built here as plain data for the client
+  // section: one summary row per group per stage, the consultation blocks,
+  // and one grid row per candidate with a cell per stage + consultations.
+  const tutorNameById = new Map((tutorProfiles ?? []).map((t) => [t.id, t.full_name]));
   const traineeNameById = new Map((activeTrainees ?? []).map((t) => [t.id, t.full_name]));
-  const stage3EligibleIds = new Set((stage3Records ?? []).filter((r) => r.stage3_tutorial_required).map((r) => r.trainee_id));
-  const allCandidates = (activeTrainees ?? [])
-    .filter((t) => noSubgroupStructureYet || ownTraineeIds.has(t.id))
-    .map((t) => ({ id: t.id, name: t.full_name }));
-  const stage3Candidates = allCandidates.filter((t) => stage3EligibleIds.has(t.id));
+  const subgroupById = new Map((subgroups ?? []).map((s) => [s.id, s]));
+  const tpGroupById = new Map((tpGroups ?? []).map((g) => [g.id, g]));
+  const membershipByTrainee = new Map((subgroupMembers ?? []).map((m) => [m.trainee_id, m.subgroup_id]));
+  const celta5ByTrainee = new Map((stage3Records ?? []).map((r) => [r.trainee_id, r]));
+  const inviteByTraineeStage = new Map((invites ?? []).map((i) => [`${i.trainee_id}:${i.stage}`, i]));
+  const stage2SlotsByBlock = new Map<string, { position: number; trainee_id: string | null }[]>();
+  for (const sl of stage2Slots ?? []) stage2SlotsByBlock.set(sl.block_id, [...(stage2SlotsByBlock.get(sl.block_id) ?? []), sl]);
+  const consultationSlotsByBlock = new Map<string, { position: number; trainee_id: string | null }[]>();
+  for (const sl of consultationSlots ?? []) consultationSlotsByBlock.set(sl.block_id, [...(consultationSlotsByBlock.get(sl.block_id) ?? []), sl]);
+  const submittedByTrainee = new Map<string, string[]>();
+  for (const a of traineeAssignments ?? []) {
+    if (a.first_submitted_at) submittedByTrainee.set(a.trainee_id, [...(submittedByTrainee.get(a.trainee_id) ?? []), a.assignment_type]);
+  }
+  const whenLabel = (eventId: string, minutes?: number) => {
+    const ev = blockEventById.get(eventId);
+    if (!ev) return "";
+    return `${shortDate(ev.event_date)} · ${shortTime(ev.event_time)}${minutes ? ` · ${minutes} min` : ""}`;
+  };
 
-  const inviteSummaries = (invites ?? []).map((i) => {
-    const event = blockEventById.get(i.timetable_event_id);
+  // Every group a candidate can belong to: paired TP groups (both halves)
+  // and unpaired subgroups, each with its tutor (if any).
+  type GroupDef = { scope: string; kind: "tpgroup" | "subgroup"; id: string; name: string; tutorId: string | null; own: boolean; memberIds: string[] };
+  const groupDefs: GroupDef[] = [
+    ...(tpGroups ?? [])
+      .filter((g) => pairedTpGroupIds.has(g.id))
+      .map((g) => ({
+        scope: `tpgroup:${g.id}`,
+        kind: "tpgroup" as const,
+        id: g.id,
+        name: g.name,
+        tutorId: g.tutor_profile_id,
+        own: isAdmin || ownedGroupIds.has(g.id),
+        memberIds: (subgroupMembers ?? []).filter((m) => subgroupById.get(m.subgroup_id)?.tp_group_id === g.id).map((m) => m.trainee_id),
+      })),
+    ...(subgroups ?? [])
+      .filter((sg) => !sg.tp_group_id)
+      .map((sg) => ({
+        scope: `subgroup:${sg.id}`,
+        kind: "subgroup" as const,
+        id: sg.id,
+        name: sg.name,
+        tutorId: null,
+        own: true,
+        memberIds: (subgroupMembers ?? []).filter((m) => m.subgroup_id === sg.id).map((m) => m.trainee_id),
+      })),
+  ];
+  const activeIds = new Set((activeTrainees ?? []).map((t) => t.id));
+  const stage2BlockByScope = new Map((blocks ?? []).map((b) => [b.tp_group_id ? `tpgroup:${b.tp_group_id}` : `subgroup:${b.subgroup_id}`, b]));
+
+  const groupSummaries: GroupSummary[] = groupDefs.map((g) => {
+    const members = g.memberIds.filter((id) => activeIds.has(id));
+    const filed = members.filter((id) => celta5ByTrainee.get(id)?.stage1_completed_at).length;
+    const confirmed = members.filter((id) => !celta5ByTrainee.get(id)?.stage1_completed_at && inviteByTraineeStage.get(`${id}:stage1`)?.confirmed_at).length;
+    const pending = members.filter((id) => !celta5ByTrainee.get(id)?.stage1_completed_at && inviteByTraineeStage.has(`${id}:stage1`) && !inviteByTraineeStage.get(`${id}:stage1`)?.confirmed_at).length;
+    const block = stage2BlockByScope.get(g.scope);
+    const slots = block ? (stage2SlotsByBlock.get(block.id) ?? []) : [];
     return {
-      id: i.id,
-      stage: i.stage,
-      traineeId: i.trainee_id,
-      traineeName: traineeNameById.get(i.trainee_id) ?? "Unknown",
-      eventDate: event?.event_date ?? "",
-      eventTime: event?.event_time ?? null,
-      confirmed: Boolean(i.confirmed_at),
+      scope: g.scope,
+      name: g.name,
+      own: g.own,
+      stage1: { total: members.length, filed, confirmed, pending, notInvited: members.length - filed - confirmed - pending },
+      stage2: block
+        ? { blockId: block.id, when: whenLabel(block.timetable_event_id, slots.length * 15), booked: slots.filter((x) => x.trainee_id).length, total: slots.length, href: `/trainer/timetable/stage2/${block.id}` }
+        : null,
+      stage3: {
+        flagged: members
+          .filter((id) => celta5ByTrainee.get(id)?.stage3_tutorial_required && !celta5ByTrainee.get(id)?.stage3_finalized_at)
+          .map((id) => ({ id, name: traineeNameById.get(id) ?? "Unknown", invited: inviteByTraineeStage.has(`${id}:stage3`) })),
+      },
     };
   });
-  const stage1Invites = inviteSummaries.filter((i) => i.stage === "stage1");
-  const stage3Invites = inviteSummaries.filter((i) => i.stage === "stage3");
+
+  const blockSummaries: BlockSummary[] = (consultationBlocks ?? [])
+    .map((b) => {
+      const slots = consultationSlotsByBlock.get(b.id) ?? [];
+      return {
+        id: b.id,
+        tutorId: b.tutor_profile_id,
+        tutorName: tutorNameById.get(b.tutor_profile_id) ?? "Tutor",
+        when: whenLabel(b.timetable_event_id, slots.length * b.slot_length_minutes),
+        booked: slots.filter((x) => x.trainee_id).length,
+        total: slots.length,
+        href: `/trainer/timetable/consultation/${b.id}`,
+        mine: Boolean(trainer) && b.tutor_profile_id === trainer!.id,
+      };
+    })
+    .sort((a, b) => a.when.localeCompare(b.when));
+
+  const inviteCell = (traineeId: string, name: string, stage: "stage1" | "stage3", own: boolean): GridCell => {
+    const invite = inviteByTraineeStage.get(`${traineeId}:${stage}`);
+    const ev = invite ? blockEventById.get(invite.timetable_event_id) : null;
+    const action = {
+      type: "invite" as const,
+      stage,
+      traineeId,
+      traineeName: name,
+      inviteId: invite?.id ?? null,
+      date: ev?.event_date ?? null,
+      time: ev?.event_time ? ev.event_time.slice(0, 5) : null,
+    };
+    if (!invite) return { kind: "move", main: stage === "stage1" ? "Invite" : "Flagged · invite", sub: stage === "stage1" ? "not yet invited" : "needs a Stage 3", action, viewOnly: !own };
+    const main = ev ? `${shortDate(ev.event_date)} · ${shortTime(ev.event_time)}` : "Time set";
+    return invite.confirmed_at ? { kind: "booked", main, sub: "confirmed", action, viewOnly: !own } : { kind: "waiting", main, sub: "awaiting confirmation", action, viewOnly: !own };
+  };
+
+  const gridRows: GridRow[] = (activeTrainees ?? []).map((t) => {
+    const subgroupId = membershipByTrainee.get(t.id);
+    const sg = subgroupId ? subgroupById.get(subgroupId) : null;
+    const group = sg ? groupDefs.find((g) => (sg.tp_group_id ? g.id === sg.tp_group_id : g.id === sg.id)) : null;
+    const tutorId = group?.tutorId ?? null;
+    const own = isAdmin || !group || group.own;
+    const record = celta5ByTrainee.get(t.id);
+
+    // Stage 1: filed on the CELTA 5 beats any invite state.
+    const stage1: GridCell = record?.stage1_completed_at
+      ? { kind: "done", main: "Filed", sub: shortDate(record.stage1_completed_at.slice(0, 10)) }
+      : inviteCell(t.id, t.full_name, "stage1", own);
+
+    // Stage 2: the group's sheet, and this candidate's position on it.
+    const block = group ? stage2BlockByScope.get(group.scope) : null;
+    const slots = block ? (stage2SlotsByBlock.get(block.id) ?? []) : [];
+    const mine = slots.find((x) => x.trainee_id === t.id);
+    const openLeft = slots.filter((x) => !x.trainee_id).length;
+    const blockEvent = block ? blockEventById.get(block.timetable_event_id) : null;
+    const stage2: GridCell = !group
+      ? { kind: "none", main: "—", sub: "no TP group yet" }
+      : !block
+        ? { kind: "move", main: "No sheet yet", sub: `${group.name} sheet not placed`, action: { type: "place-sheet", scope: group.scope, label: group.name }, viewOnly: !own }
+        : mine
+          ? { kind: "booked", main: `${ordinal(mine.position)} · ${blockEvent ? shortDate(blockEvent.event_date) : ""}`, sub: `${group.name} sheet`, href: `/trainer/timetable/stage2/${block.id}` }
+          : { kind: "waiting", main: "Not booked", sub: openLeft > 0 ? `sheet open, ${openLeft} position${openLeft === 1 ? "" : "s"} left` : "sheet full", href: `/trainer/timetable/stage2/${block.id}` };
+
+    // Stage 3: only for candidates the tutor has flagged.
+    const stage3: GridCell = !record?.stage3_tutorial_required
+      ? { kind: "none", main: "—", sub: "not flagged" }
+      : record.stage3_finalized_at
+        ? { kind: "done", main: "Done", sub: shortDate(record.stage3_finalized_at.slice(0, 10)) }
+        : inviteCell(t.id, t.full_name, "stage3", own);
+
+    // Consultations: this candidate's bookings across every block.
+    const bookings = (consultationBlocks ?? [])
+      .flatMap((b) => (consultationSlotsByBlock.get(b.id) ?? []).filter((x) => x.trainee_id === t.id).map(() => b))
+      .map((b) => ({ b, date: blockEventById.get(b.timetable_event_id)?.event_date ?? "" }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const upcoming = bookings.find((x) => x.date >= today) ?? bookings[bookings.length - 1];
+    const submitted = submittedByTrainee.get(t.id) ?? [];
+    const consult: GridCell = upcoming
+      ? {
+          kind: "booked",
+          main: whenLabel(upcoming.b.timetable_event_id),
+          sub: `with ${(tutorNameById.get(upcoming.b.tutor_profile_id) ?? "tutor").split(" ")[0]}${bookings.length > 1 ? ` · ${bookings.length - 1} more` : ""}`,
+          href: `/trainer/timetable/consultation/${upcoming.b.id}`,
+        }
+      : { kind: "none", main: "None yet", sub: submitted.length > 0 ? `${submitted.join(", ")} submitted · own tutor only` : "any tutor until first submission" };
+
+    return {
+      id: t.id,
+      name: t.full_name,
+      groupName: group?.name ?? "No group",
+      tutorName: tutorId ? (tutorNameById.get(tutorId) ?? "Tutor") : "No tutor",
+      own,
+      cells: [stage1, stage2, stage3, consult],
+    };
+  });
+
+  const weekLabel = course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
+  const tutorialsData: TutorialsSectionData = {
+    viewerRole: isAdmin ? "admin" : isMct ? "mct" : "act",
+    viewerId: trainer?.id ?? "",
+    viewerName: trainer?.full_name ?? "",
+    currentStage: stageForWeek(weekLabel),
+    groups: groupSummaries,
+    blocks: blockSummaries,
+    rows: gridRows,
+    tutors: (courseTutors ?? []).map((ct) => ({ id: ct.profile_id, name: (ct as unknown as { profiles: { full_name: string } }).profiles.full_name })),
+  };
 
   // Glass-card view's "Mine" involvement, trainer-shaped: read-only-board.tsx
   // was built for a TRAINEE viewer (one specific lettered TP slot); a trainer
@@ -310,6 +474,10 @@ export default async function TrainerTimetablePage({
   // in src/lib/timetable-skeleton.ts, and today-tab.tsx already matches the
   // same way.
 
+  const sheetHrefByEventId = new Map<string, string>([
+    ...(blocks ?? []).map((b) => [b.timetable_event_id, `/trainer/timetable/stage2/${b.id}`] as [string, string]),
+    ...(consultationBlocks ?? []).map((b) => [b.timetable_event_id, `/trainer/timetable/consultation/${b.id}`] as [string, string]),
+  ]);
   const eventMeta: Record<string, EventMeta> = {};
   for (const event of allEvents) {
     const mine = isAssessorViewer
@@ -328,7 +496,9 @@ export default async function TrainerTimetablePage({
       event.type === "tp" && volunteerIds.length > 0
         ? { total: volunteerIds.length, expected: volunteerIds.length - (declinedCountByEvent.get(event.id) ?? 0) }
         : null;
-    eventMeta[event.id] = { mine, ownTpSlot: false, teachingLetters: null, volunteerAttendance };
+    eventMeta[event.id] = { mine, ownTpSlot: false, teachingLetters: null, volunteerAttendance,
+      sheetHref: sheetHrefByEventId.get(event.id) ?? null,
+    };
   }
 
   return (
@@ -519,13 +689,7 @@ export default async function TrainerTimetablePage({
           visitor to click. */}
       {trainer ? (
       <LaptopOnlyGate task="Stage 2 group booking and Stage 1/3 individual invites">
-      {/* In course order -- Ramy, 5 Sep 2026: "why are they 2, 1, 3?"
-          (Stage 2 used to come first because it is the group sheet and the
-          other two are individual invites; that is a difference of kind,
-          not of order, and reads as a mistake.) */}
-      <IndividualTutorialSection stage="stage1" candidates={allCandidates} invites={stage1Invites} />
-      <Stage2Section groups={stage2Groups} blocks={stage2Blocks} />
-      <IndividualTutorialSection stage="stage3" candidates={stage3Candidates} invites={stage3Invites} />
+      <TutorialsSection data={tutorialsData} />
       </LaptopOnlyGate>
       ) : null}
     </div>

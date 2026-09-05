@@ -1243,6 +1243,67 @@ async function main() {
     .select("id, title");
   const tpEventIdByTitle = new Map((timetableRows ?? []).filter((r) => r.title.startsWith("TP")).map((r) => [r.title, r.id]));
 
+  // --- Tutorials and consultations (design_handoff_tutorials_consultations,
+  // 5 Sep 2026) --- Without these the section under the timetable is empty
+  // cards on every walkthrough: a Stage 2 sheet for Group A with two
+  // bookings, Stage 1 invites in two states, Priya flagged for Stage 3, and
+  // a consultation block per tutor with one booking (migration 0275).
+  const tutorialAt = (n, band) => ({ event_date: courseDay(courseStart, n), event_time: BAND_TIMES[band - 1] });
+  const stamp = new Date().toISOString();
+  const { data: s2Event } = await supabase
+    .from("course_timetable_events")
+    .insert({ course_id: course.id, type: "milestone", tag: "stage2_tutorial", title: "Stage 2 tutorials — Group A", ...tutorialAt(12, 6), created_by: trainer2Id })
+    .select("id")
+    .single();
+  const { data: s2Block } = await supabase
+    .from("stage2_tutorial_blocks")
+    .insert({ course_id: course.id, timetable_event_id: s2Event.id, tp_group_id: tpGroup.id, created_by: trainer2Id })
+    .select("id")
+    .single();
+  await supabase.rpc("set_stage2_slot_count", { p_block_id: s2Block.id, p_slot_count: 6 });
+  await supabase.from("stage2_tutorial_slots").update({ trainee_id: trainees["Amara Okafor"], booked_at: stamp }).eq("block_id", s2Block.id).eq("position", 1);
+  await supabase.from("stage2_tutorial_slots").update({ trainee_id: trainees["Priya Sharma"], booked_at: stamp }).eq("block_id", s2Block.id).eq("position", 2);
+  for (const [name, day, confirmed] of [
+    ["Amara Okafor", 6, true],
+    ["Daniel Kim", 7, false],
+  ]) {
+    const { data: ev } = await supabase
+      .from("course_timetable_events")
+      .insert({ course_id: course.id, type: "milestone", tag: "stage1_tutorial", title: `Stage 1 tutorial — ${name}`, ...tutorialAt(day, 8), created_by: trainer2Id })
+      .select("id")
+      .single();
+    await supabase.from("individual_tutorial_invites").insert({
+      course_id: course.id,
+      trainee_id: trainees[name],
+      stage: "stage1",
+      timetable_event_id: ev.id,
+      confirmed_at: confirmed ? stamp : null,
+      created_by: trainer2Id,
+    });
+  }
+  await supabase.from("celta5_records").update({ stage3_tutorial_required: true }).eq("trainee_id", trainees["Priya Sharma"]).eq("course_id", course.id);
+  for (const [tutorId, tutorName, day, band, slotCount, bookedBy] of [
+    [trainerId, "Jordan Blake", 13, 7, 4, ["Amara Okafor"]],
+    [trainer2Id, "Marcus Webb", 14, 4, 3, []],
+  ]) {
+    const { data: ev } = await supabase
+      .from("course_timetable_events")
+      .insert({ course_id: course.id, type: "milestone", tag: "consultation", title: `Consultation — ${tutorName}`, detail: "Bookable", ...tutorialAt(day, band), created_by: tutorId })
+      .select("id")
+      .single();
+    const { data: cb } = await supabase
+      .from("consultation_blocks")
+      .insert({ course_id: course.id, tutor_profile_id: tutorId, timetable_event_id: ev.id, created_by: tutorId })
+      .select("id")
+      .single();
+    await supabase.rpc("set_consultation_slot_count", { p_block_id: cb.id, p_slot_count: slotCount });
+    let position = 1;
+    for (const who of bookedBy) {
+      await supabase.from("consultation_slots").update({ trainee_id: trainees[who], booked_at: stamp }).eq("block_id", cb.id).eq("position", position++);
+    }
+  }
+  console.log("tutorials: Stage 2 sheet 2 of 6 booked, 2 Stage 1 invites, Priya flagged for Stage 3, 2 consultation blocks");
+
 
   // --- Filmed observations -------------------------------------------------
   // The five recordings, their three auto-pauses each, and the four

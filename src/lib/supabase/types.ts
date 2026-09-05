@@ -2202,6 +2202,40 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["individual_tutorial_invites"]["Row"]>;
         Relationships: [];
       };
+      consultation_blocks: {
+        Row: {
+          id: string;
+          course_id: string;
+          tutor_profile_id: string;
+          timetable_event_id: string;
+          slot_length_minutes: number;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["consultation_blocks"]["Row"]> & {
+          course_id: string;
+          tutor_profile_id: string;
+          timetable_event_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["consultation_blocks"]["Row"]>;
+        Relationships: [];
+      };
+      consultation_slots: {
+        Row: {
+          id: string;
+          block_id: string;
+          position: number;
+          trainee_id: string | null;
+          assignment_type: string | null;
+          booked_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["consultation_slots"]["Row"]> & {
+          block_id: string;
+          position: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["consultation_slots"]["Row"]>;
+        Relationships: [];
+      };
       course_tutors: {
         Row: {
           id: string;
@@ -3861,6 +3895,10 @@ export interface Database {
         Returns: void;
       };
       set_stage2_slot_count: {
+        Args: { p_block_id: string; p_slot_count: number };
+        Returns: void;
+      };
+      set_consultation_slot_count: {
         Args: { p_block_id: string; p_slot_count: number };
         Returns: void;
       };

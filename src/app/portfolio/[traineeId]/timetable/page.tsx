@@ -177,12 +177,24 @@ export default async function TraineeTimetablePage({
 
   // Functions can't cross the server/client component boundary -- precompute
   // per-event involvement here and pass plain data down instead.
+  // Booking sheets behind tiles: the candidate's own group's Stage 2 sheet
+  // (RLS returns only blocks they are a member of) and every consultation
+  // block on the course (migration 0275).
+  const [{ data: stage2Blocks }, { data: consultationBlocks }] = await Promise.all([
+    supabase.from("stage2_tutorial_blocks").select("id, timetable_event_id").eq("course_id", trainee.course_id),
+    supabase.from("consultation_blocks").select("id, timetable_event_id").eq("course_id", trainee.course_id),
+  ]);
+  const sheetHrefByEventId = new Map<string, string>([
+    ...(stage2Blocks ?? []).map((b) => [b.timetable_event_id, `/portfolio/${traineeId}/stage2-tutorial/${b.id}`] as [string, string]),
+    ...(consultationBlocks ?? []).map((b) => [b.timetable_event_id, `/portfolio/${traineeId}/consultation/${b.id}`] as [string, string]),
+  ]);
   const eventMeta: Record<
     string,
-    { mine: boolean; ownTpSlot: boolean; teachingLetters: string | null; volunteerAttendance: { expected: number; total: number } | null }
+    { mine: boolean; ownTpSlot: boolean; teachingLetters: string | null; volunteerAttendance: { expected: number; total: number } | null; sheetHref: string | null }
   > = {};
   for (const event of allEvents) {
     eventMeta[event.id] = {
+      sheetHref: sheetHrefByEventId.get(event.id) ?? null,
       mine: isMineEvent(event),
       ownTpSlot: isOwnTpSlot(event),
       teachingLetters: teachingLettersFor(event),
