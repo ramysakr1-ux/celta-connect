@@ -45,6 +45,8 @@ export interface VolunteerRowData {
   expiresAt: string | null;
   consentAt: string | null;
   transcript: string | null;
+  /** Signed URL for their sign-up recording, when one exists. */
+  audioUrl: string | null;
   sessions: SessionMark[];
   totalDays: number;
   hoursHere: number;
@@ -640,6 +642,14 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
           <p className="rounded-[6px] px-2.5 py-2 text-[11px]" style={{ background: `color-mix(in oklab, ${GOLD_BAR} 10%, var(--color-card))`, color: AMBER }}>
             Never opened — the link probably didn&apos;t arrive. Re-issue and hand it over in class.
           </p>
+        ) : null}
+        {row.audioUrl ? (
+          <div className="flex flex-col gap-1 border-t border-border-faint pt-2">
+            <span className="text-[10.5px] font-bold tracking-[0.1em] text-muted uppercase">Listen · their sign-up recording</span>
+            {/* preload none -- eight prompts of audio shouldn't download for
+                every card click, only when Listen is actually pressed. */}
+            <audio src={row.audioUrl} controls preload="none" className="h-9 w-full" />
+          </div>
         ) : null}
         {row.signupCompleted && !row.transcript ? (
           <form action={saveVolunteerTranscript} className="flex items-end gap-2 border-t border-border-faint pt-2">

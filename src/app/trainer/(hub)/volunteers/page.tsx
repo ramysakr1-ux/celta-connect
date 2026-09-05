@@ -61,7 +61,7 @@ export default async function VolunteersPage() {
       : Promise.resolve({ data: [] }),
     !trainer || volunteerIds.length === 0
       ? Promise.resolve({ data: [] })
-      : supabase.from("volunteer_signup_profiles").select("volunteer_student_id, transcript, recording_consent_given_at").in("volunteer_student_id", volunteerIds),
+      : supabase.from("volunteer_signup_profiles").select("volunteer_student_id, transcript, recording_consent_given_at, audio_url").in("volunteer_student_id", volunteerIds),
     todayEventIds.length > 0 && volunteerIds.length > 0
       ? supabase.from("volunteer_confirmations").select("volunteer_student_id, timetable_event_id").in("timetable_event_id", todayEventIds)
       : Promise.resolve({ data: [] }),
@@ -119,6 +119,18 @@ export default async function VolunteersPage() {
   // ---- shape everything for the client component ----
   const tokenByVolunteer = new Map((tokens ?? []).map((t) => [t.volunteer_student_id, t]));
   const profileByVolunteer = new Map((signupProfiles ?? []).map((p) => [p.volunteer_student_id, p]));
+  // "Listen" on the student card (Ramy, 5 Sep 2026) -- a signed hour-long
+  // URL per recording; the bucket is private, same pattern as the
+  // admissions speaking task.
+  const audioUrlByVolunteer = new Map<string, string>();
+  await Promise.all(
+    (signupProfiles ?? [])
+      .filter((p) => p.audio_url)
+      .map(async (p) => {
+        const { data: signed } = await admin.storage.from("volunteer-signup-audio").createSignedUrl(p.audio_url!, 3600);
+        if (signed?.signedUrl) audioUrlByVolunteer.set(p.volunteer_student_id, signed.signedUrl);
+      })
+  );
   const confirmedSet = new Set((confirmations ?? []).map((c) => c.volunteer_student_id));
   const declinedSet = new Set((declines ?? []).map((d) => d.volunteer_student_id));
   const attendedByVolunteer = new Map<string, Set<string>>();
@@ -181,6 +193,7 @@ export default async function VolunteersPage() {
       expiresAt: tok?.expires_at ?? null,
       consentAt: prof?.recording_consent_given_at ?? null,
       transcript: prof?.transcript ?? null,
+      audioUrl: audioUrlByVolunteer.get(v.id) ?? null,
       sessions: ticks.map((t) => ({
         date: t.date,
         dayNumber: teachingDayNumber(tpDates, t.date),
