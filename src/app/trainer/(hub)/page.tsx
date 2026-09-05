@@ -4,6 +4,8 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isMctOfCourse } from "@/lib/course-tutor-role";
+import type { Database } from "@/lib/supabase/types";
 import { fetchRosterRows } from "@/lib/roster";
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE, resolveTimeBands, bandIndexFor } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -60,65 +62,81 @@ export default async function TodayPage() {
   if (!courseId) {
     return <div className="sheet text-sm text-muted">No course assigned.</div>;
   }
+  const admin = createAdminClient();
 
-  // trainer is null for an assessor session -- courseId is still known
-  // though (from the assessor token), just not trainer.center_id.
-  const centerId = trainer?.center_id ?? (await supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle()).data?.center_id;
+  // ---- Wave 1: everything that needs only the course, all at once, and
+  // the roster alongside it. Perf audit, 5 Sep 2026: this page ran ~55
+  // queries in 30 one-after-another steps; only a handful genuinely depend
+  // on another's result. The course row is read once (it used to be read
+  // three times), the timetable once (five times), assignments once
+  // (three times) -- the rest is derived below in memory.
+  const [
+    rows,
+    { data: courseRow },
+    { data: allEvents },
+    { data: lessons },
+    { data: courseAssignments },
+    materialsOverlaps,
+    { count: openConcernCount },
+    isMct,
+    { data: tpGroups },
+    { data: subgroups },
+    { data: schedule },
+  ] = await Promise.all([
+    fetchRosterRows(supabase, courseId),
+    supabase.from("courses").select("*").eq("id", courseId).maybeSingle(),
+    supabase.from("course_timetable_events").select("*").eq("course_id", courseId).order("event_date").order("event_time"),
+    // NOT `tp_lessons` -- that table is permanently empty on live courses
+    // (1 row DB-wide vs. 90 real taught plans, checked 2026-08-16).
+    // `plan_assignments.taught_at` is the real taught signal.
+    supabase.from("plan_assignments").select("trainee_id, tp_number, taught_at").eq("course_id", courseId).not("taught_at", "is", null),
+    supabase.from("assignments").select("id, assignment_type, due_date, first_submitted_at, second_marker_recorded_at").eq("course_id", courseId),
+    findMaterialsOverlaps(supabase, courseId),
+    trainer?.course_id
+      ? supabase.from("concerns").select("id", { count: "exact", head: true }).eq("course_id", trainer.course_id).is("response", null)
+      : Promise.resolve({ count: 0 }),
+    trainer ? isMctOfCourse(trainer, courseId) : Promise.resolve(false),
+    admin.from("course_tp_groups").select("id, name, tutor_profile_id").eq("course_id", courseId),
+    admin.from("course_subgroups").select("id, tp_group_id").eq("course_id", courseId),
+    admin.from("course_tp_schedule").select("tp_number, tp_coursebook_id").eq("course_id", courseId),
+  ]);
+  const course = courseRow as
+    | (Database["public"]["Tables"]["courses"]["Row"] & { assessment_kind?: string; appian_notification_reference?: string | null })
+    | null;
+  const centerId = trainer?.center_id ?? course?.center_id ?? null;
   const timeZone = (centerId ? (await getCachedCenter(centerId))?.time_zone : null) ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
 
-  const rows = await fetchRosterRows(supabase, courseId);
   const nameById = new Map(rows.map((r) => [r.id, r.name]));
   const traineeIds = rows.map((r) => r.id);
+  const events = allEvents ?? [];
+  const todayEvents = events.filter((e) => e.event_date === today);
+  const dueAssignments = (courseAssignments ?? []).filter((a) => a.due_date === today);
+  const subIds = (subgroups ?? []).map((g) => g.id);
+  const bookIds = [...new Set((schedule ?? []).map((x) => x.tp_coursebook_id).filter((x): x is string => Boolean(x)))];
 
-  const [{ data: course }, { data: todayEvents }, { data: lessons }, { data: feedbackRows }, { data: dueAssignments }] =
+  // ---- Wave 2: the few that need wave 1's ids.
+  const [{ data: feedbackRows }, { data: unreviewedFindings }, { data: celta5Rows }, visitDayProblemRaw, { data: members }, { data: books }] =
     await Promise.all([
-      supabase
-        .from("courses")
-        .select("name, start_date, end_date, assessor_visit_date, provisional_grades_due_at, assessor_name, assessor_email, assessor_notified_at, delivery_mode, entry_form_sent_at, timetable_locked_at, time_bands")
-        .eq("id", courseId)
-        .maybeSingle(),
-      supabase
-        .from("course_timetable_events")
-        .select("*")
-        .eq("course_id", courseId)
-        .eq("event_date", today)
-        .order("event_time"),
-      // NOT `tp_lessons` -- that table is permanently empty on live courses
-      // (1 row DB-wide vs. 90 real taught plans, checked 2026-08-16) and this
-      // panel's whole "TP feedback unsent" alert was silently dead because of
-      // it. `plan_assignments.taught_at` is the real taught signal; same bug
-      // already fixed in roster.ts, tp/page.tsx and portfolio layout.tsx.
-      supabase
-        .from("plan_assignments")
-        .select("trainee_id, tp_number, taught_at")
-        .eq("course_id", courseId)
-        .not("taught_at", "is", null),
       // tp_feedback has no course_id column -- scope by this course's trainee ids instead.
       traineeIds.length > 0
         ? supabase.from("tp_feedback").select("trainee_id, tp_number, submitted_at").in("trainee_id", traineeIds)
-        : Promise.resolve({ data: [] }),
-      supabase.from("assignments").select("assignment_type, first_submitted_at").eq("course_id", courseId).eq("due_date", today),
+        : Promise.resolve({ data: [] as { trainee_id: string; tp_number: number; submitted_at: string | null }[] }),
+      // build-spec.md: "A line on the marking tutor's Today screen -- '2
+      // assignments have scanner findings' -- visible to that tutor only,
+      // with no candidate names." A bare count only, never a list here.
+      (courseAssignments ?? []).length > 0
+        ? supabase.from("plagiarism_scanner_findings").select("assignment_id").in("assignment_id", (courseAssignments ?? []).map((a) => a.id)).is("reviewed_at", null)
+        : Promise.resolve({ data: [] as { assignment_id: string }[] }),
+      isMct && traineeIds.length > 0
+        ? supabase.from("celta5_records").select("provisional_grade, provisional_approved_at, final_recommended_grade").in("trainee_id", traineeIds)
+        : Promise.resolve({ data: [] as { provisional_grade: string | null; provisional_approved_at: string | null; final_recommended_grade: string | null }[] }),
+      isMct ? assessorVisitDayProblem(supabase, courseId, course?.assessor_visit_date ?? null) : Promise.resolve(null),
+      subIds.length > 0
+        ? admin.from("course_subgroup_members").select("subgroup_id, trainee_id").in("subgroup_id", subIds)
+        : Promise.resolve({ data: [] as { subgroup_id: string; trainee_id: string }[] }),
+      bookIds.length > 0 ? admin.from("tp_coursebooks").select("id, level").in("id", bookIds) : Promise.resolve({ data: [] as { id: string; level: string }[] }),
     ]);
-
-  // build-spec.md: "A line on the marking tutor's Today screen -- '2
-  // assignments have scanner findings' -- visible to that tutor only,
-  // with no candidate names." A bare count only, never a list here.
-  const [{ data: courseAssignmentIds }, materialsOverlaps] = await Promise.all([
-    supabase.from("assignments").select("id").eq("course_id", courseId),
-    findMaterialsOverlaps(supabase, courseId),
-  ]);
-  const { data: unreviewedFindings } =
-    (courseAssignmentIds ?? []).length > 0
-      ? await supabase
-          .from("plagiarism_scanner_findings")
-          .select("assignment_id")
-          .in(
-            "assignment_id",
-            (courseAssignmentIds ?? []).map((a) => a.id)
-          )
-          .is("reviewed_at", null)
-      : { data: [] };
   const assignmentsWithFindings = new Set((unreviewedFindings ?? []).map((f) => f.assignment_id)).size;
 
   // Handbook 9.2: "raise as a note to the tutor, never an accusation" --
@@ -136,11 +154,6 @@ export default async function TodayPage() {
   // Surfaced to any trainer, not routed to just the one named recipient
   // (see migration 0140's own reasoning).
   if (trainer?.course_id) {
-    const { count: openConcernCount } = await supabase
-      .from("concerns")
-      .select("id", { count: "exact", head: true })
-      .eq("course_id", trainer.course_id)
-      .is("response", null);
     if (openConcernCount && openConcernCount > 0) {
       alerts.push({
         kind: "admin",
@@ -164,18 +177,6 @@ export default async function TodayPage() {
   // isMct hit, and a platform_owner never has it set at all. course_tutors.
   // tutor_role for the course they're actually on (courseId) is the live
   // source both places now agree on.
-  let isMct = trainer?.role === "admin";
-  if (trainer && !isMct) {
-    const admin = createAdminClient();
-    const { data: tutorLink } = await admin
-      .from("course_tutors")
-      .select("tutor_role")
-      .eq("course_id", courseId)
-      .eq("profile_id", trainer.id)
-      .is("left_at", null)
-      .maybeSingle();
-    isMct = tutorLink?.tutor_role === "main_course_tutor";
-  }
 
   // Handbook 14.1's preparation list, sized to this course. Only computed for
   // the MCT, since that's the only person it renders for -- see the card
@@ -193,31 +194,17 @@ export default async function TodayPage() {
     // the whole row's generated type. `*` returns whatever exists, so this
     // compiles and runs correctly either side of the migration, falling back
     // to the Handbook's own default of a regular assessment.
-    const [{ data: kindRow }, { count: candidateCount }, { count: withdrawnCount }] = await Promise.all([
-      supabase.from("courses").select("*").eq("id", courseId).maybeSingle(),
-      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("course_id", courseId).eq("role", "trainee"),
-      supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("course_id", courseId)
-        .eq("role", "trainee")
-        .eq("course_status", "withdrawn"),
-    ]);
-    assessmentKind = ((kindRow as { assessment_kind?: string } | null)?.assessment_kind ?? "regular") as AssessmentKind;
+    assessmentKind = (course?.assessment_kind ?? "regular") as AssessmentKind;
     centrePreparation = buildCentrePreparationList({
       assessmentKind,
       deliveryMode: course?.delivery_mode ?? "f2f",
-      candidateCount: candidateCount ?? 0,
-      withdrawnCount: withdrawnCount ?? 0,
+      candidateCount: rows.length,
+      withdrawnCount: rows.filter((r) => r.courseStatus === "withdrawn").length,
     });
-    visitDayProblem = await assessorVisitDayProblem(supabase, courseId, course?.assessor_visit_date ?? null);
+    visitDayProblem = visitDayProblemRaw;
   }
   if (isMct && course?.provisional_grades_due_at) {
-    const { data: records } =
-      traineeIds.length > 0
-        ? await supabase.from("celta5_records").select("provisional_grade, provisional_approved_at").in("trainee_id", traineeIds)
-        : { data: [] };
-    const withProvisional = (records ?? []).filter((r) => r.provisional_grade);
+    const withProvisional = (celta5Rows ?? []).filter((r) => r.provisional_grade);
     const approvedCount = withProvisional.filter((r) => r.provisional_approved_at).length;
     const dueDate = course.provisional_grades_due_at.slice(0, 10);
     const daysOut = Math.ceil((new Date(`${dueDate}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000);
@@ -265,21 +252,12 @@ export default async function TodayPage() {
     // own linked_tp_number, not just whichever event happens to carry the
     // latest date) -- Ramy, 2026-08-17: "the final TP on the course rather
     // than TP eight," since not every course is guaranteed to run exactly 8.
-    const { data: tpEvents } = await supabase
-      .from("course_timetable_events")
-      .select("event_date, linked_tp_number")
-      .eq("course_id", courseId)
-      .eq("type", "tp")
-      .not("linked_tp_number", "is", null)
-      .order("linked_tp_number", { ascending: false })
-      .limit(1);
-    const lastTpDate = tpEvents?.[0]?.event_date ?? null;
+    const lastTpDate =
+      events
+        .filter((e) => e.type === "tp" && e.linked_tp_number !== null)
+        .sort((a, b) => (b.linked_tp_number ?? 0) - (a.linked_tp_number ?? 0))[0]?.event_date ?? null;
     if (lastTpDate && lastTpDate <= today) {
-      const { data: finalRecords } =
-        traineeIds.length > 0
-          ? await supabase.from("celta5_records").select("final_recommended_grade").in("trainee_id", traineeIds)
-          : { data: [] };
-      const finalizedCount = (finalRecords ?? []).filter((r) => r.final_recommended_grade).length;
+      const finalizedCount = (celta5Rows ?? []).filter((r) => r.final_recommended_grade).length;
       if (finalizedCount < traineeIds.length) {
         const daysSince = Math.ceil((new Date(`${today}T00:00:00`).getTime() - new Date(`${lastTpDate}T00:00:00`).getTime()) / 86400000);
         alerts.push({
@@ -340,15 +318,9 @@ export default async function TodayPage() {
     d.setDate(d.getDate() - REGISTER_LOOKBACK_DAYS);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   })();
-  const { data: unloggedSessions } = await supabase
-    .from("course_timetable_events")
-    .select("id, title, event_date")
-    .eq("course_id", courseId)
-    .eq("type", "tp")
-    .lt("event_date", today)
-    .gte("event_date", lookbackDate)
-    .is("register_submitted_at", null)
-    .order("event_date", { ascending: false });
+  const unloggedSessions = events
+    .filter((e) => e.type === "tp" && e.event_date < today && e.event_date >= lookbackDate && !e.register_submitted_at)
+    .sort((a, b) => (a.event_date < b.event_date ? 1 : a.event_date > b.event_date ? -1 : 0));
   for (const session of unloggedSessions ?? []) {
     alerts.push({
       kind: "tp",
@@ -417,14 +389,12 @@ export default async function TodayPage() {
   let scopedTraineeIds: Set<string> | null = null;
   let scopedGroupIds: Set<string> | null = null;
   if (trainer && !isMct) {
-    const admin = createAdminClient();
-    const { data: myGroups } = await admin.from("course_tp_groups").select("id").eq("course_id", courseId).eq("tutor_profile_id", trainer.id);
-    if (myGroups && myGroups.length > 0) {
-      scopedGroupIds = new Set(myGroups.map((g) => g.id));
-      const { data: subs } = await admin.from("course_subgroups").select("id").eq("course_id", courseId).in("tp_group_id", [...scopedGroupIds]);
-      const subIds = (subs ?? []).map((x) => x.id);
-      const { data: members } = subIds.length ? await admin.from("course_subgroup_members").select("trainee_id").in("subgroup_id", subIds) : { data: [] };
-      scopedTraineeIds = new Set((members ?? []).map((m) => m.trainee_id));
+    const myGroups = (tpGroups ?? []).filter((g) => g.tutor_profile_id === trainer.id);
+    if (myGroups.length > 0) {
+      const mine = new Set(myGroups.map((g) => g.id));
+      scopedGroupIds = mine;
+      const mySubIds = new Set((subgroups ?? []).filter((x) => x.tp_group_id && mine.has(x.tp_group_id)).map((x) => x.id));
+      scopedTraineeIds = new Set((members ?? []).filter((m) => mySubIds.has(m.subgroup_id)).map((m) => m.trainee_id));
     }
   }
   const inScope = (traineeId: string) => !scopedTraineeIds || scopedTraineeIds.has(traineeId);
@@ -498,14 +468,7 @@ export default async function TodayPage() {
     problems.push({ tag: "Assessor visit", message: visitDayProblem, detail: "Nothing to observe", href: "/trainer/timetable?mode=edit", cite: "14.2" });
   }
   {
-    const { data: futureTps } = await supabase
-      .from("course_timetable_events")
-      .select("linked_tp_number")
-      .eq("course_id", courseId)
-      .eq("type", "tp")
-      .gt("event_date", today)
-      .not("linked_tp_number", "is", null);
-    const futureTpNumbers = [...new Set((futureTps ?? []).map((t) => t.linked_tp_number as number))];
+    const futureTpNumbers = [...new Set(events.filter((e) => e.type === "tp" && e.event_date > today && e.linked_tp_number !== null).map((e) => e.linked_tp_number as number))];
     problems.push(
       ...sixHoursProblems({
         candidates: rows.filter((r) => inScope(r.id) && r.courseStatus === "active").map((r) => ({ id: r.id, name: r.name, assessedHrs: r.assessedHrs, tpStagesTaught: r.tpStagesTaught })),
@@ -514,10 +477,9 @@ export default async function TodayPage() {
     );
   }
   if (isMct) {
-    const { data: marked } = await supabase.from("assignments").select("assignment_type, second_marker_recorded_at").eq("course_id", courseId);
     const byType = new Map<string, number>();
     const types = new Set<string>();
-    for (const a of marked ?? []) {
+    for (const a of courseAssignments ?? []) {
       types.add(a.assignment_type);
       if (a.second_marker_recorded_at) byType.set(a.assignment_type, (byType.get(a.assignment_type) ?? 0) + 1);
     }
@@ -527,27 +489,17 @@ export default async function TodayPage() {
     // The last three of the plan's seven (unpacking-the-kitchen-sink.md):
     // group size, levels, contact hours. All three are about the course as
     // planned, so they are the MCT's.
-    const admin = createAdminClient();
-    const [{ data: tpGroups }, { data: subgroups }, { data: schedule }, { data: allEvents }] = await Promise.all([
-      admin.from("course_tp_groups").select("id, name").eq("course_id", courseId),
-      admin.from("course_subgroups").select("id, tp_group_id").eq("course_id", courseId),
-      admin.from("course_tp_schedule").select("tp_number, tp_coursebook_id").eq("course_id", courseId),
-      admin.from("course_timetable_events").select("type, event_time, tag").eq("course_id", courseId),
-    ]);
-    const subIds = (subgroups ?? []).map((g) => g.id);
-    const { data: members } = subIds.length ? await admin.from("course_subgroup_members").select("subgroup_id, trainee_id").in("subgroup_id", subIds) : { data: [] };
     const activeIds = new Set(rows.filter((r) => r.courseStatus === "active").map((r) => r.id));
+    const tpGroupBySubgroup = new Map((subgroups ?? []).map((g) => [g.id, g.tp_group_id]));
     const sizeByGroup = new Map<string, number>();
     for (const m of members ?? []) {
       if (!activeIds.has(m.trainee_id)) continue;
-      const tpGroupId = (subgroups ?? []).find((g) => g.id === m.subgroup_id)?.tp_group_id;
+      const tpGroupId = tpGroupBySubgroup.get(m.subgroup_id);
       if (!tpGroupId) continue;
       sizeByGroup.set(tpGroupId, (sizeByGroup.get(tpGroupId) ?? 0) + 1);
     }
     problems.push(...tpGroupSizeProblems({ groups: (tpGroups ?? []).map((g) => ({ id: g.id, name: g.name, size: sizeByGroup.get(g.id) ?? 0 })) }));
 
-    const bookIds = [...new Set((schedule ?? []).map((x) => x.tp_coursebook_id).filter((x): x is string => Boolean(x)))];
-    const { data: books } = bookIds.length ? await admin.from("tp_coursebooks").select("id, level").in("id", bookIds) : { data: [] };
     const levelByBook = new Map((books ?? []).map((b) => [b.id, b.level]));
     problems.push(
       ...tpLevelProblems({
@@ -565,7 +517,7 @@ export default async function TodayPage() {
       return Math.max(0, eh * 60 + em - (sh * 60 + sm));
     };
     let contactMinutes = 0;
-    for (const e of allEvents ?? []) {
+    for (const e of events) {
       if (e.tag === "lunch") continue;
       if (e.type === "tp") contactMinutes += 180;
       else if (e.type === "input_session" || e.type === "supervised_session") contactMinutes += bandMinutes(e.event_time);

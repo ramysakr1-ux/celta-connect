@@ -11,6 +11,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { CourseSwitcher, type SwitcherCourse } from "@/app/trainer/(hub)/course-switcher";
 import { canSeeTrainerInTraining } from "@/lib/tit-access";
+import { getCourseTutorRole } from "@/lib/course-tutor-role";
 
 // The operational "Command Centre" -- roster/timetable/volunteers/TP
 // rotation/TP points library/grades report. Deliberately separate from
@@ -35,30 +36,26 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // whole point is letting them see how the platform actually works.
   const tourMode = isAssessor && (await isAssessorTourMode());
 
-  // Chat is trainer-only, no admin exception -- see migration 0039's
-  // "you cannot be on the course unless registered as a trainer" rule.
-  const staffChat = profile?.role === "trainer" ? await getInitialStaffChatData(profile.id) : null;
-
-  // profiles.tutor_role is set once at signup for a trainer's first course
-  // and never re-synced when an admin later changes their role on a
-  // specific course (changeTutorRole only touches course_tutors.tutor_role)
-  // -- and a platform_owner never goes through signup at all, so that field
-  // is always null for them regardless of which course they're actually
-  // linked into. course_tutors.tutor_role for the course they're CURRENTLY
-  // on (profile.course_id) is the one place this is never stale, so that's
-  // what decides MCT-vs-ACT coloring below, not the profiles column.
-  let currentCourseTutorRole: string | null = null;
-  if (profile?.course_id) {
-    const admin = createAdminClient();
-    const { data: link } = await admin
-      .from("course_tutors")
-      .select("tutor_role")
-      .eq("course_id", profile.course_id)
-      .eq("profile_id", profile.id)
-      .is("left_at", null)
-      .maybeSingle();
-    currentCourseTutorRole = link?.tutor_role ?? null;
-  }
+  // Everything the frame needs that depends only on the profile, in ONE
+  // wave. Perf audit, 5 Sep 2026: this used to be four stacked round-trip
+  // waves (chat, then tutor role, then TinT access, then centre/course/
+  // links) on every hub page -- about half a second before the page's own
+  // work began. The tutor role now comes from the cache()'d helper Today,
+  // Assessor and the TinT page share, so it is fetched once per request.
+  const admin = createAdminClient();
+  const wantsTutorLinks = profile?.role === "trainer" || profile?.role === "platform_owner";
+  const [staffChat, currentCourseTutorRole, center, courseResult, tutorLinksResult] = await Promise.all([
+    // Chat is trainer-only, no admin exception -- see migration 0039's
+    // "you cannot be on the course unless registered as a trainer" rule.
+    profile?.role === "trainer" ? getInitialStaffChatData(profile.id) : Promise.resolve(null),
+    // course_tutors.tutor_role for the course CURRENTLY open is the one
+    // place the role is never stale (profiles.tutor_role is set once at
+    // signup and never re-synced; a platform_owner never has it at all).
+    profile?.course_id ? getCourseTutorRole(profile.course_id, profile.id) : Promise.resolve(null),
+    profile ? getCachedCenter(profile.center_id) : Promise.resolve(null),
+    profile?.course_id ? admin.from("courses").select("name").eq("id", profile.course_id).maybeSingle() : Promise.resolve({ data: null }),
+    profile && wantsTutorLinks ? admin.from("course_tutors").select("course_id").eq("profile_id", profile.id).is("left_at", null) : Promise.resolve({ data: null }),
+  ]);
 
   // for-claude-code-trainer-role-color-system-final.md: every trainer-hub
   // page gets a role-colored header band -- ink for the MCT (whole-cohort
@@ -125,18 +122,6 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // same reason switchActiveCourse does.
   let switcherCourses: SwitcherCourse[] = [];
   if (profile) {
-    const admin = createAdminClient();
-    const wantsTutorLinks = profile.role === "trainer" || profile.role === "platform_owner";
-    // None of these three depend on each other's results -- center is now
-    // cross-request cached (is_demo essentially never changes), course
-    // only needs profile.course_id, tutorLinks only needs profile.id. Was
-    // 2-3 stacked sequential round trips on every single page under
-    // /trainer/(hub)/*, now effectively free (center) or one batch.
-    const [center, courseResult, tutorLinksResult] = await Promise.all([
-      getCachedCenter(profile.center_id),
-      profile.course_id ? admin.from("courses").select("name").eq("id", profile.course_id).maybeSingle() : Promise.resolve({ data: null }),
-      wantsTutorLinks ? admin.from("course_tutors").select("course_id").eq("profile_id", profile.id).is("left_at", null) : Promise.resolve({ data: null }),
-    ]);
     isDemo = center?.is_demo ?? false;
     courseCode = courseResult.data?.name ?? null;
 
