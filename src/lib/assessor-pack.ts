@@ -1,6 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/supabase/types";
+import type { CourseStatus, Database } from "@/lib/supabase/types";
 import { computeAssessedTpStats } from "@/lib/course-progress";
 
 export interface ReadinessIssue {
@@ -137,6 +137,13 @@ export interface CandidateCardData {
   flaggedIssue: string | null;
   // for-claude-code-assessor-pack-decisions.md §1
   selectedForAssessorVisit: boolean;
+  // design_handoff_assessor_landing_v2: the wall groups by these two as
+  // well -- a withdrawn candidate gets its own muted section, and the card
+  // names the group so the assessor can tie a card to the day's schedule.
+  courseStatus: CourseStatus;
+  groupName: string | null;
+  /** When the status was set -- the withdrawal date, for a withdrawn candidate. */
+  courseStatusSetAt: string | null;
 }
 
 // The card grid's own per-candidate status dots -- same three dimensions
@@ -148,7 +155,7 @@ export async function buildCandidateCards(
 ): Promise<CandidateCardData[]> {
   const { data: trainees } = await supabase
     .from("profiles")
-    .select("id, full_name, course_status, selected_for_assessor_visit")
+    .select("id, full_name, course_status, course_status_set_at, selected_for_assessor_visit")
     .eq("course_id", courseId)
     .eq("role", "trainee")
     .order("full_name");
@@ -156,12 +163,26 @@ export async function buildCandidateCards(
   const traineeIds = (trainees ?? []).map((t) => t.id);
   if (traineeIds.length === 0) return [];
 
-  const [{ data: records }, { data: assignments }, { data: matrixRows }, { data: planAssignments }] = await Promise.all([
+  const [{ data: records }, { data: assignments }, { data: matrixRows }, { data: planAssignments }, { data: subgroups }, { data: tpGroups }] = await Promise.all([
     supabase.from("celta5_records").select("*").eq("course_id", courseId),
     supabase.from("assignments").select("*").in("trainee_id", traineeIds),
     supabase.from("celta5_matrix").select("trainee_id, criteria_code, tutor_status_stage2").eq("course_id", courseId),
     supabase.from("plan_assignments").select("trainee_id, tp_point_id, taught_at").eq("course_id", courseId),
+    supabase.from("course_subgroups").select("id, name, tp_group_id").eq("course_id", courseId),
+    supabase.from("course_tp_groups").select("id, name").eq("course_id", courseId),
   ]);
+  const { data: subgroupMembers } =
+    (subgroups ?? []).length > 0
+      ? await supabase.from("course_subgroup_members").select("subgroup_id, trainee_id").in("subgroup_id", (subgroups ?? []).map((g) => g.id))
+      : { data: [] as { subgroup_id: string; trainee_id: string }[] };
+  const tpGroupNameById = new Map((tpGroups ?? []).map((g) => [g.id, g.name]));
+  const subgroupById = new Map((subgroups ?? []).map((g) => [g.id, g]));
+  const groupNameByTrainee = new Map(
+    (subgroupMembers ?? []).map((m) => {
+      const sg = subgroupById.get(m.subgroup_id);
+      return [m.trainee_id, sg ? (sg.tp_group_id ? (tpGroupNameById.get(sg.tp_group_id) ?? sg.name) : sg.name) : null];
+    })
+  );
   const { data: tpPoints } = await supabase.from("tp_points").select("id, tp_coursebook_id");
   const { data: coursebooks } = await supabase.from("tp_coursebooks").select("id, level");
   const tpPointCoursebookById = new Map((tpPoints ?? []).map((p) => [p.id, p.tp_coursebook_id]));
@@ -223,6 +244,9 @@ export async function buildCandidateCards(
       assignmentsComplete,
       flaggedIssue,
       selectedForAssessorVisit: trainee.selected_for_assessor_visit,
+      courseStatus: trainee.course_status,
+      groupName: groupNameByTrainee.get(trainee.id) ?? null,
+      courseStatusSetAt: trainee.course_status_set_at,
     };
   });
 }

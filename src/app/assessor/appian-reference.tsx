@@ -30,8 +30,47 @@ const GOLD = "oklch(60% 0.11 70)";
 // and the way into Appian is already a primary action at the top of the
 // pack. Two doors to the same place, a few hundred pixels apart, is just
 // something else to read.
-export function AppianReference({ reference }: { reference: string | null }) {
+export function AppianReference({ reference, compact = false }: { reference: string | null; compact?: boolean }) {
   const [copied, setCopied] = useState(false);
+
+  // design_handoff_assessor_landing_v2 moves this under the header buttons as
+  // a single 11.5px line: label, the reference in mono, Copy. Same number,
+  // same clipboard, a tenth of the room -- the v2 page has no banners on it
+  // at all, and a tinted card here would be the only one.
+  if (compact) {
+    return (
+      <div className="flex items-baseline justify-end gap-2 text-[11.5px] text-muted">
+        <span>Course notification</span>
+        {reference ? (
+          <>
+            <code className="font-mono text-[12.5px] tracking-[0.03em] text-ink select-all">{reference}</code>
+            <button
+              type="button"
+              className="cursor-pointer font-semibold text-primary"
+              onClick={() => {
+                navigator.clipboard.writeText(reference).then(
+                  () => {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1800);
+                  },
+                  () => undefined
+                );
+              }}
+            >
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </>
+        ) : (
+          // Said plainly rather than hidden: without it the assessor cannot
+          // open their report at all (Handbook 15.2), and someone who knows
+          // it is missing can ask the centre for it.
+          <span className="font-semibold" style={{ color: "oklch(44% 0.1 68)" }}>
+            not given by the centre yet — you need it to open your report (§15.2)
+          </span>
+        )}
+      </div>
+    );
+  }
 
   // No reference set. Say so plainly rather than hiding the block: an
   // assessor who knows the number is missing can ask for it, where one shown
