@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrajectoryBarCompact } from "@/components/trajectory-gradient-bar";
+import { TrajectoryBarInline } from "@/components/trajectory-gradient-bar";
 import type { RosterRow } from "@/lib/roster";
-import { CORE_COLUMN_COUNT } from "@/app/trainer/(hub)/roster/roster-table";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { ordinal } from "@/lib/stage2-tutorials";
@@ -14,20 +13,12 @@ import { Avatar, toneForName } from "@/components/avatar";
 
 const moveEarlierInitialState: FormState = { error: null };
 
-// Grade Pipeline handoff: "a 'Move earlier' link appears next to a
-// not-yet-given Stage 2/3 badge; confirming with a reason shows 'Moved
-// earlier -- [reason]' under the badge." Inline in the cell rather than an
-// absolute-positioned popover -- this table already scrolls horizontally
-// inside its own container, and a popover would clip against that.
-/** One item on the detail line: a small uppercase label, then the value. */
-function Chip({ label, title, className, children }: { label: string; title?: string; className?: string; children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-baseline gap-1.5 text-[12.5px] whitespace-nowrap" title={title}>
-      <span className="text-[9.5px] font-bold tracking-[0.08em] text-muted uppercase">{label}</span>
-      <span className={className}>{children}</span>
-    </span>
-  );
-}
+// design_handoff_trainer_roster: one grid for the header row and every
+// candidate row, so the columns line up without a <table>. Candidate ·
+// six glance columns · At risk · Contact.
+export const ROSTER_COLS = "grid gap-x-2 grid-cols-[300px_repeat(6,minmax(0,1fr))_96px_110px]";
+
+const NUM = "text-center text-[14px] font-medium tabular-nums";
 
 function MoveEarlierControl({
   traineeId,
@@ -56,11 +47,7 @@ function MoveEarlierControl({
   }
 
   return (
-    <form
-      action={formAction}
-      onClick={(e) => e.stopPropagation()}
-      className="mt-1 flex flex-col gap-1"
-    >
+    <form action={formAction} onClick={(e) => e.stopPropagation()} className="mt-1 flex flex-col gap-1">
       <input type="hidden" name="trainee_id" value={traineeId} />
       <input
         type="text"
@@ -91,290 +78,330 @@ function formatSupervisedTime(totalSeconds: number): string {
   return m > 0 ? `${m} min` : "under a minute";
 }
 
-const CELTA5_SIGNOFF_LABEL: Record<RosterRow["celta5SignoffStatus"], string> = {
+// Shortened so a strip cell never wraps (handoff: "Cand. signed").
+const CELTA5_SIGNOFF_SHORT: Record<RosterRow["celta5SignoffStatus"], string> = {
   not_started: "Not started",
-  candidate_signed: "Candidate signed",
+  candidate_signed: "Cand. signed",
   both_signed: "Both signed",
 };
+const CELTA5_SIGNOFF_LONG: Record<RosterRow["celta5SignoffStatus"], string> = {
+  not_started: "CELTA 5 sign-off not started",
+  candidate_signed: "CELTA 5 signed by the candidate, not yet by the tutor",
+  both_signed: "CELTA 5 signed by both",
+};
+
+/** One cell of the progress strip: tiny uppercase label over a bold value. */
+function Cell({
+  label,
+  warn = false,
+  first = false,
+  children,
+}: {
+  label: string;
+  warn?: boolean;
+  first?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`flex min-h-10 min-w-0 flex-col items-center justify-center gap-1 px-1.5 ${first ? "" : "border-l border-black/[0.08]"}`}
+    >
+      <span className="text-[9.5px] font-bold tracking-[0.08em] whitespace-nowrap text-muted uppercase">{label}</span>
+      <span className={`text-[12.5px] font-semibold tabular-nums whitespace-nowrap ${warn ? "text-status-warning-text" : "text-ink"}`}>
+        {children}
+      </span>
+    </div>
+  );
+}
+
+function stop(e: React.MouseEvent) {
+  e.stopPropagation();
+}
+
+const CELL_LINK = "hover:underline";
+
+// The eleven fields the flat table used to carry as columns, now a strip
+// inside the row (handoff, "Progress detail strip"): margin 0 20px 12px
+// 68px so its left edge sits under the name, past the avatar. Same row
+// element as the glance columns, so the hover ring wraps both.
+function DetailStrip({ row, isMct }: { row: RosterRow; isMct: boolean }) {
+  const s3 = !row.stage3Required
+    ? { short: "n/a", long: "Stage 3 not required for this candidate" }
+    : row.stage3Done
+      ? { short: "done", long: "Stage 3 done" }
+      : row.stage3TutorialConfirmed === null
+        ? { short: "pend.", long: "Stage 3 pending" }
+        : row.stage3TutorialConfirmed
+          ? { short: "conf.", long: "Stage 3 tutorial confirmed" }
+          : { short: "invited", long: "Stage 3 tutorial invited" };
+  const s2 = row.stage2BookedPosition
+    ? { short: ordinal(row.stage2BookedPosition), long: `Stage 2 tutorial booked, ${ordinal(row.stage2BookedPosition)} slot` }
+    : { short: "--", long: "Stage 2 tutorial not booked" };
+  const moved = [
+    row.stage2MovedEarlierReason ? `Stage 2 moved earlier: ${row.stage2MovedEarlierReason}` : null,
+    row.stage3MovedEarlierReason ? `Stage 3 moved earlier: ${row.stage3MovedEarlierReason}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const stageWarn = !row.stage2BookedPosition || (row.stage3Required && !row.stage3Done);
+
+  return (
+    <div className="mr-5 mb-3 ml-[68px] grid grid-cols-[repeat(11,minmax(0,1fr))] items-start rounded-[8px] bg-black/[0.035] px-1 py-2">
+      <Cell label="TP stages" first warn={row.tpStagesBehind > 0}>
+        {row.tpStagesTaught > 0 ? (
+          <Link
+            href={`/portfolio/${row.id}/tp`}
+            onClick={stop}
+            title="Taught TPs with plan + self-evaluation + feedback all submitted"
+            className={CELL_LINK}
+          >
+            {row.tpStagesTaught - row.tpStagesBehind}/{row.tpStagesTaught}
+          </Link>
+        ) : (
+          <span className="text-muted">--</span>
+        )}
+      </Cell>
+      <Cell label="Supervised" warn={row.supervisedTotal > 0 && row.supervisedDone < row.supervisedTotal}>
+        {row.supervisedTotal > 0 ? (
+          <Link
+            href={`/portfolio/${row.id}/timetable`}
+            onClick={stop}
+            title={`${formatSupervisedTime(row.supervisedSecondsSpent)} spent -- click to see per-session status on their timetable`}
+            className={CELL_LINK}
+          >
+            {row.supervisedDone}/{row.supervisedTotal}
+          </Link>
+        ) : (
+          <span className="text-muted">--</span>
+        )}
+      </Cell>
+      <Cell label="Obs. hrs" warn={row.observationHoursShort}>
+        <Link href={`/portfolio/${row.id}/celta5`} onClick={stop} className={CELL_LINK}>
+          {row.observationHoursCounted.toFixed(1)}/6
+        </Link>
+      </Cell>
+      <Cell label="Stage 1" warn={!row.stage1Filed}>
+        <Link
+          href={`/portfolio/${row.id}/celta5`}
+          onClick={stop}
+          title={
+            row.stage1Filed
+              ? "Stage 1 record filed"
+              : row.stage1TutorialConfirmed === null
+                ? "Stage 1 record not filed"
+                : row.stage1TutorialConfirmed
+                  ? "Not filed -- tutorial confirmed"
+                  : "Not filed -- tutorial invited"
+          }
+          className={CELL_LINK}
+        >
+          {row.stage1Filed ? "Filed" : "Not yet"}
+        </Link>
+      </Cell>
+      <Cell label="Stage 2/3" warn={stageWarn}>
+        <Link
+          href={`/portfolio/${row.id}/celta5`}
+          onClick={stop}
+          title={[s2.long, s3.long, moved].filter(Boolean).join(" · ")}
+          className={CELL_LINK}
+        >
+          {s2.short} · {s3.short}
+          {moved ? (
+            <span className="ml-1" aria-label="moved earlier">
+              *
+            </span>
+          ) : null}
+        </Link>
+        {isMct && (row.stage2CanMoveEarlier || row.stage3CanMoveEarlier) ? (
+          <span className="mt-1 flex flex-col items-center gap-1">
+            {row.stage2CanMoveEarlier && !row.stage2MovedEarlierReason ? <MoveEarlierControl traineeId={row.id} stage="stage2" /> : null}
+            {row.stage3CanMoveEarlier && !row.stage3MovedEarlierReason ? <MoveEarlierControl traineeId={row.id} stage="stage3" /> : null}
+          </span>
+        ) : null}
+      </Cell>
+      <Cell label="CELTA 5" warn={row.celta5SignoffStatus !== "both_signed"}>
+        <Link href={`/portfolio/${row.id}/celta5`} onClick={stop} title={CELTA5_SIGNOFF_LONG[row.celta5SignoffStatus]} className={CELL_LINK}>
+          {CELTA5_SIGNOFF_SHORT[row.celta5SignoffStatus]}
+        </Link>
+      </Cell>
+      <Cell label="FOL" warn={row.folEntriesLow}>
+        <span title={row.folEntriesLow ? "Below half the cohort's average -- may be under-logging" : "FOL entries logged this course"}>
+          {row.folEntriesLogged}
+        </span>
+      </Cell>
+      <Cell label="Standing">
+        <TrajectoryBarInline value={row.trajectory} />
+      </Cell>
+      <Cell label="Obs. tasks" warn={row.obsTasksTotal > 0 && row.obsTasksDone < row.obsTasksTotal}>
+        {row.obsTasksTotal > 0 ? (
+          <Link href={`/portfolio/${row.id}/celta5`} onClick={stop} className={CELL_LINK}>
+            {row.obsTasksDone}/{row.obsTasksTotal}
+          </Link>
+        ) : (
+          <span className="text-muted">--</span>
+        )}
+      </Cell>
+      <Cell label="Pre-course" warn={row.preCourseTaskTotal > 0 && row.preCourseTaskAnswered < row.preCourseTaskTotal}>
+        {row.preCourseTaskTotal > 0 ? (
+          <Link href={`/portfolio/${row.id}/pre-course-task`} onClick={stop} className={CELL_LINK}>
+            {row.preCourseTaskAnswered}/{row.preCourseTaskTotal}
+          </Link>
+        ) : (
+          <span className="text-muted">--</span>
+        )}
+      </Cell>
+      <Cell label="Filmed obs" warn={row.filmedObsTotal > 0 && row.filmedObsDone < row.filmedObsTotal}>
+        {row.filmedObsTotal > 0 ? (
+          <Link href={`/portfolio/${row.id}/resources`} onClick={stop} className={CELL_LINK}>
+            {row.filmedObsDone}/{row.filmedObsTotal}
+          </Link>
+        ) : (
+          <span className="text-muted">--</span>
+        )}
+      </Cell>
+    </div>
+  );
+}
 
 // build-spec.md §18 -- "Visibility follows the chat rule: tutors registered
 // on that course, nobody else. No admin exception." A real trainer viewer
 // only, never role==='admin' even when scoped to the same course.
-function ContactCell({ row, courseCode }: { row: RosterRow; courseCode: string }) {
+function ContactCell({ row, courseCode, show }: { row: RosterRow; courseCode: string; show: boolean }) {
+  if (!show) return <div />;
   return (
-    <td className="text-center text-xs" onClick={(e) => e.stopPropagation()}>
-      <div className="flex justify-center gap-2">
-        <a href={`mailto:${row.email}?subject=${encodeURIComponent(courseCode)}`} className="text-primary hover:underline">
-          Email
+    <div className="flex justify-end gap-2.5 text-[12.5px] font-medium" onClick={stop}>
+      <a href={`mailto:${row.email}?subject=${encodeURIComponent(courseCode)}`} className="text-primary hover:underline">
+        Email
+      </a>
+      {row.phone ? (
+        <a href={`tel:${row.phone}`} className="text-primary hover:underline">
+          Call
         </a>
-        {row.phone ? (
-          <a href={`tel:${row.phone}`} className="text-primary hover:underline">
-            Call
-          </a>
-        ) : null}
-      </div>
-    </td>
+      ) : null}
+    </div>
   );
 }
 
 // build-spec.md §8 bug 3 -- rows carried cursor-pointer but only the name
-// cell actually navigated. Whole row now pushes to the portfolio; the
-// name keeps its own <Link> too, for keyboard nav and hover color.
+// cell actually navigated. Whole row pushes to the portfolio; the name
+// keeps its own <Link> too, for keyboard nav and hover colour.
 export function RosterRowView({
   row,
   isMct,
   showContact,
   courseCode,
   showDetail,
+  frozenSub,
 }: {
   row: RosterRow;
   isMct: boolean;
   showContact: boolean;
   courseCode: string;
   showDetail: boolean;
+  /** "Left week N · record kept" for a withdrawn/deferred candidate, when the date is known. */
+  frozenSub?: string;
 }) {
   const router = useRouter();
 
   // §3 -- a withdrawn/deferred/etc. candidate is "present in the roster"
-  // but their working columns (hrs, TPs, etc.) stop meaning anything once
-  // frozen, so this row collapses to name + status rather than showing
-  // stale numbers next to the others' live ones.
-  if (isCourseStatusReadOnly(row.courseStatus)) {
-    return (
-      <tr className="trainer-hover cursor-pointer opacity-70"
-      // The colour that follows the person (avatar.tsx) runs across their
-      // whole row, faintly -- Ramy, 5 Sep 2026: "avatar will run through
-      // the whole line", neighbouring rows naturally different shades.
-      style={{ background: `color-mix(in oklab, ${toneForName(row.name)} 9%, var(--color-card))` }}
-      onClick={() => router.push(`/portfolio/${row.id}`)}>
-        <td>
-          <Link href={`/portfolio/${row.id}`} className="flex items-center gap-2.5 text-ink hover:text-[var(--hub-accent-deep)]">
-            <Avatar name={row.name} size="sm" />
-            {row.name}
-          </Link>
-        </td>
-        {showContact ? <ContactCell row={row} courseCode={courseCode} /> : <td />}
-        {/* Derived, not hardcoded: this was 16 against a table of 9 core
-            + 10 detail columns, so the status pill already under-spanned by
-            one before "Filmed obs" was added. The name and contact cells
-            are rendered separately above, hence the -1 for the name; the
-            contact cell is inside CORE's own count of what follows it. */}
-        <td colSpan={CORE_COLUMN_COUNT + 1} className="text-center">
-          <span className="pill pill-neutral">{COURSE_STATUS_LABEL[row.courseStatus]}</span>
-        </td>
-      </tr>
-    );
-  }
+  // but their working columns stop meaning anything once frozen, so this
+  // row collapses to name + status rather than showing stale numbers next
+  // to the others' live ones.
+  const frozen = isCourseStatusReadOnly(row.courseStatus);
+  const sub = frozen
+    ? (frozenSub ?? "Record kept")
+    : `${row.stage1Filed ? "Stage 1 filed" : "Stage 1 not filed"} · ${row.folEntriesLogged} FOL ${row.folEntriesLogged === 1 ? "entry" : "entries"}`;
 
   return (
-    <>
-    <tr className="trainer-hover cursor-pointer"
+    <div
+      className={`roster-row cursor-pointer border-b border-[oklch(90%_0.012_82)] last:border-b-0 ${frozen ? "opacity-60" : ""}`}
       // The colour that follows the person (avatar.tsx) runs across their
       // whole row, faintly -- Ramy, 5 Sep 2026: "avatar will run through
       // the whole line", neighbouring rows naturally different shades.
       style={{ background: `color-mix(in oklab, ${toneForName(row.name)} 9%, var(--color-card))` }}
-      onClick={() => router.push(`/portfolio/${row.id}`)}>
-      <td>
-        {/* The mark sits inside the link so the whole name cell stays one
-            target -- Ramy, 4 Sep 2026. */}
-        <Link href={`/portfolio/${row.id}`} className="flex items-center gap-2.5 text-ink hover:text-[var(--hub-accent-deep)]">
+      onClick={() => router.push(`/portfolio/${row.id}`)}
+    >
+      <div className={`${ROSTER_COLS} min-h-[58px] items-center px-5 py-2.5`}>
+        <div className="flex min-w-0 items-center gap-3">
           <Avatar name={row.name} size="sm" />
-          {row.name}
-          {row.courseStatus === "extension" ? <span className="pill pill-info">Extension</span> : null}
-        </Link>
-      </td>
-      {showContact ? <ContactCell row={row} courseCode={courseCode} /> : <td />}
-      <td className={`text-center tabular-nums ${row.assessedHrs < 6 ? "text-status-warning-text" : "text-ink"}`}>
-        {row.assessedHrs.toFixed(2)}
-      </td>
-      <td className="text-center tabular-nums text-ink">{row.tpsPassed}/8</td>
-      <td className="text-center tabular-nums text-ink">
-        {row.assignmentsTotal > 0 ? (
-          <Link
-            href={`/portfolio/${row.id}/assignments`}
-            onClick={(e) => e.stopPropagation()}
-            title={row.assignmentsResubmitted ? "Includes a resubmission" : "No resubmissions used"}
-            className="hover:underline"
-          >
-            {row.assignmentsPassed}/{row.assignmentsTotal}
-            {row.assignmentsResubmitted ? <sup className="ml-0.5 text-status-warning-text">R</sup> : null}
-          </Link>
-        ) : (
-          <span className="text-muted">--</span>
-        )}
-      </td>
-      <td className="text-center tabular-nums text-ink">{row.criteriaPct}%</td>
-      <td className={`text-center tabular-nums ${row.attendancePct < 80 ? "font-semibold text-destructive" : "text-ink"}`}>
-        {row.attendancePct}%
-      </td>
-      <td className={`text-center ${row.provisionalSlashed ? "font-bold text-destructive" : "text-ink"}`}>
-        {row.provisionalLabel ?? <span className="text-muted">Not set</span>}
-      </td>
-      <td className="text-center">
-        {row.atRiskReasons.length > 0 ? (
-          <span title={row.atRiskReasons.map((r) => AT_RISK_LABELS[r]).join(" · ")} className="pill pill-danger">
-            At risk
-          </span>
-        ) : null}
-      </td>
-    </tr>
-    {showDetail ? (
-      // Detail as a second line under the candidate, not eleven more
-      // columns -- Ramy, 5 Sep 2026: "can we make it two lines?" The table
-      // never grows wider; each row grows a little taller.
-      <tr
-        className="detail-line"
-        style={{ background: `color-mix(in oklab, ${toneForName(row.name)} 9%, var(--color-card))` }}
-        onClick={() => router.push(`/portfolio/${row.id}`)}
-      >
-        <td colSpan={CORE_COLUMN_COUNT + 2} className="!pt-0 !whitespace-normal">
-          <div className="flex flex-wrap gap-x-5 gap-y-1.5 pl-12">
-          <Chip label="TP stages" className="tabular-nums">
-            {row.tpStagesTaught > 0 ? (
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <div className="flex items-center gap-2">
               <Link
-                href={`/portfolio/${row.id}/tp`}
-                onClick={(e) => e.stopPropagation()}
-                title="Taught TPs with plan + self-evaluation + feedback all submitted"
-                className={`hover:underline ${row.tpStagesBehind > 0 ? "text-status-warning-text" : "text-ink"}`}
+                href={`/portfolio/${row.id}`}
+                onClick={stop}
+                className="text-[14px] font-semibold whitespace-nowrap text-ink hover:text-[var(--hub-accent-deep)]"
               >
-                {row.tpStagesTaught - row.tpStagesBehind}/{row.tpStagesTaught}
+                {row.name}
               </Link>
-            ) : (
-              <span className="text-muted">--</span>
-            )}
-          </Chip>
-          <Chip label="Supervised" className="tabular-nums">
-            {row.supervisedTotal > 0 ? (
-              <Link
-                href={`/portfolio/${row.id}/timetable`}
-                onClick={(e) => e.stopPropagation()}
-                title={`${formatSupervisedTime(row.supervisedSecondsSpent)} spent -- click to see per-session status on their timetable`}
-                className={`hover:underline ${row.supervisedDone < row.supervisedTotal ? "text-status-warning-text" : "text-ink"}`}
-              >
-                {row.supervisedDone}/{row.supervisedTotal}
-              </Link>
-            ) : (
-              <span className="text-muted">--</span>
-            )}
-          </Chip>
-          <Chip label="Obs. hrs" className="tabular-nums">
-            <Link
-              href={`/portfolio/${row.id}/celta5`}
-              onClick={(e) => e.stopPropagation()}
-              className={`hover:underline ${row.observationHoursShort ? "text-status-warning-text" : "text-ink"}`}
-            >
-              {row.observationHoursCounted.toFixed(1)}/6
-            </Link>
-          </Chip>
-          <Chip label="Stage 1">
-            <Link
-              href={`/portfolio/${row.id}/celta5`}
-              onClick={(e) => e.stopPropagation()}
-              title={row.stage1Filed ? "Stage 1 record filed" : row.stage1TutorialConfirmed === null ? "Stage 1 record not filed" : row.stage1TutorialConfirmed ? "Not filed -- tutorial confirmed" : "Not filed -- tutorial invited"}
-              className={`hover:underline ${row.stage1Filed ? "text-ink" : "text-status-warning-text"}`}
-            >
-              {row.stage1Filed ? "Filed" : "Not yet"}
-            </Link>
-          </Chip>
-          <Chip label="Stage 2/3">
-            {/* Two short tokens -- "3rd · done" -- with the full state in the
-                tooltip. It used to spell out "Not booked · Stage 3 N/A" and
-                the moved-earlier reasons in full, which made the detail
-                view a wall (Ramy, 5 Sep 2026). */}
-            {(() => {
-              const s3 = !row.stage3Required
-                ? { short: "n/a", long: "Stage 3 not required for this candidate" }
-                : row.stage3Done
-                  ? { short: "done", long: "Stage 3 done" }
-                  : row.stage3TutorialConfirmed === null
-                    ? { short: "pending", long: "Stage 3 pending" }
-                    : row.stage3TutorialConfirmed
-                      ? { short: "confirmed", long: "Stage 3 tutorial confirmed" }
-                      : { short: "invited", long: "Stage 3 tutorial invited" };
-              const s2 = row.stage2BookedPosition ? { short: ordinal(row.stage2BookedPosition), long: `Stage 2 tutorial booked, ${ordinal(row.stage2BookedPosition)} slot` } : { short: "--", long: "Stage 2 tutorial not booked" };
-              const moved = [row.stage2MovedEarlierReason ? `Stage 2 moved earlier: ${row.stage2MovedEarlierReason}` : null, row.stage3MovedEarlierReason ? `Stage 3 moved earlier: ${row.stage3MovedEarlierReason}` : null].filter(Boolean).join(" · ");
-              return (
-                <Link
-                  href={`/portfolio/${row.id}/celta5`}
-                  onClick={(e) => e.stopPropagation()}
-                  title={[s2.long, s3.long, moved].filter(Boolean).join(" · ")}
-                  className="whitespace-nowrap hover:underline text-ink"
+              {row.courseStatus === "extension" ? (
+                <span
+                  className="rounded-full px-2 py-px text-[10.5px] font-bold whitespace-nowrap"
+                  style={{ background: "oklch(93.5% 0.033 235)", color: "oklch(42% 0.09 250)" }}
                 >
-                  <span className={row.stage2BookedPosition ? "" : "text-status-warning-text"}>{s2.short}</span>
-                  {" · "}
-                  <span className={row.stage3Required && !row.stage3Done ? "text-status-warning-text" : ""}>{s3.short}</span>
-                  {moved ? <span className="ml-1 text-status-warning-text" aria-label="moved earlier">*</span> : null}
-                </Link>
-              );
-            })()}
-            {isMct && (row.stage2CanMoveEarlier || row.stage3CanMoveEarlier) ? (
-              <div className="mt-1 flex flex-col items-center gap-1">
-                {row.stage2CanMoveEarlier && !row.stage2MovedEarlierReason ? <MoveEarlierControl traineeId={row.id} stage="stage2" /> : null}
-                {row.stage3CanMoveEarlier && !row.stage3MovedEarlierReason ? <MoveEarlierControl traineeId={row.id} stage="stage3" /> : null}
-              </div>
-            ) : null}
-          </Chip>
-          <Chip label="CELTA 5">
-            <Link
-              href={`/portfolio/${row.id}/celta5`}
-              onClick={(e) => e.stopPropagation()}
-              className={`hover:underline ${row.celta5SignoffStatus === "both_signed" ? "text-ink" : "text-status-warning-text"}`}
-            >
-              {CELTA5_SIGNOFF_LABEL[row.celta5SignoffStatus]}
-            </Link>
-          </Chip>
-          <Chip label="FOL" className={`tabular-nums ${row.folEntriesLow ? "text-status-warning-text" : "text-ink"}`}
-            title={row.folEntriesLow ? "Below half the cohort's average -- may be under-logging" : "FOL entries logged this course"}>
-            {row.folEntriesLogged}
-          </Chip>
-          <Chip label="Standing">
-            <div className="ml-auto">
-              <TrajectoryBarCompact value={row.trajectory} />
+                  Extension
+                </span>
+              ) : null}
             </div>
-          </Chip>
-          <Chip label="Obs. tasks" className="tabular-nums">
-            {row.obsTasksTotal > 0 ? (
-              <Link
-                href={`/portfolio/${row.id}/celta5`}
-                onClick={(e) => e.stopPropagation()}
-                className={`hover:underline ${row.obsTasksDone < row.obsTasksTotal ? "text-status-warning-text" : "text-ink"}`}
-              >
-                {row.obsTasksDone}/{row.obsTasksTotal}
-              </Link>
-            ) : (
-              <span className="text-muted">--</span>
-            )}
-          </Chip>
-          <Chip label="Pre-course" className="tabular-nums">
-            {row.preCourseTaskTotal > 0 ? (
-              <Link
-                href={`/portfolio/${row.id}/pre-course-task`}
-                onClick={(e) => e.stopPropagation()}
-                className={`hover:underline ${row.preCourseTaskAnswered < row.preCourseTaskTotal ? "text-status-warning-text" : "text-ink"}`}
-              >
-                {row.preCourseTaskAnswered}/{row.preCourseTaskTotal}
-              </Link>
-            ) : (
-              <span className="text-muted">--</span>
-            )}
-          </Chip>
-          <Chip label="Filmed obs" className="tabular-nums">
-            {row.filmedObsTotal > 0 ? (
-              <Link
-                href={`/portfolio/${row.id}/resources`}
-                onClick={(e) => e.stopPropagation()}
-                className={`hover:underline ${row.filmedObsDone < row.filmedObsTotal ? "text-status-warning-text" : "text-ink"}`}
-              >
-                {row.filmedObsDone}/{row.filmedObsTotal}
-              </Link>
-            ) : (
-              <span className="text-muted">--</span>
-            )}
-          </Chip>
+            <p className="truncate text-[12px] text-muted">{sub}</p>
           </div>
-        </td>
-      </tr>
-    ) : null}
-    </>
+        </div>
+
+        {frozen ? (
+          <div className="col-span-7 text-center">
+            <span
+              className="rounded-full px-2.5 py-[3px] text-[11px] font-semibold"
+              style={{ background: "oklch(93.5% 0.008 85)", color: "oklch(44% 0.014 70)" }}
+            >
+              {COURSE_STATUS_LABEL[row.courseStatus]}
+            </span>
+          </div>
+        ) : (
+          <>
+            {/* Warn threshold is the roster's own (< 6 of the 6 assessed
+                hours), not the handoff's illustrative "< 4". */}
+            <div className={`${NUM} ${row.assessedHrs < 6 ? "text-status-warning-text" : "text-ink"}`}>{row.assessedHrs.toFixed(2)}</div>
+            <div className={`${NUM} text-ink`}>
+              {row.tpsPassed}
+              <span className="font-normal text-muted">/8</span>
+            </div>
+            <div className={`${NUM} text-ink`}>
+              {row.assignmentsTotal > 0 ? (
+                <Link
+                  href={`/portfolio/${row.id}/assignments`}
+                  onClick={stop}
+                  title={row.assignmentsResubmitted ? "Includes a resubmission" : "No resubmissions used"}
+                  className="hover:underline"
+                >
+                  {row.assignmentsPassed}/{row.assignmentsTotal}
+                  {row.assignmentsResubmitted ? <sup className="ml-0.5 text-[9px] text-status-warning-text">R</sup> : null}
+                </Link>
+              ) : (
+                <span className="text-muted">--</span>
+              )}
+            </div>
+            <div className={`${NUM} text-ink`}>{row.criteriaPct}%</div>
+            <div className={`${NUM} ${row.attendancePct < 80 ? "font-bold text-destructive" : "text-ink"}`}>{row.attendancePct}%</div>
+            <div className={`text-center text-[13px] ${row.provisionalSlashed ? "font-bold text-destructive" : "font-medium text-ink"}`}>
+              {row.provisionalLabel ?? <span className="font-normal text-muted">Not set</span>}
+            </div>
+            <div className="text-center">
+              {row.atRiskReasons.length > 0 ? (
+                <span
+                  title={row.atRiskReasons.map((r) => AT_RISK_LABELS[r]).join(" · ")}
+                  onClick={stop}
+                  className="inline-flex items-center gap-1.5 rounded-full px-[9px] py-[3px] text-[11px] font-semibold whitespace-nowrap"
+                  style={{ background: "oklch(94% 0.043 25)", color: "oklch(45% 0.15 27)" }}
+                >
+                  <span className="block size-1.5 rounded-full bg-current" />
+                  At risk
+                </span>
+              ) : null}
+            </div>
+          </>
+        )}
+        <ContactCell row={row} courseCode={courseCode} show={showContact} />
+      </div>
+      {showDetail && !frozen ? <DetailStrip row={row} isMct={isMct} /> : null}
+    </div>
   );
 }

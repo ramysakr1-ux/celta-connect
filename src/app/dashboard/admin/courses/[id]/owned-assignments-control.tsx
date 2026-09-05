@@ -18,24 +18,35 @@ export function OwnedAssignmentsControl({
   courseTutorId,
   courseId,
   owned,
+  variant = "checkboxes",
 }: {
   courseTutorId: string;
   courseId: string;
   owned: string[];
+  /** "chips": cream chip per owned assignment, faint dashed chip when not owned -- the trainer hub's roster. Still a checkbox underneath. */
+  variant?: "checkboxes" | "chips";
 }) {
   return (
-    <form action={updateOwnedAssignmentTypes} className="flex flex-wrap items-center gap-2">
+    <form action={updateOwnedAssignmentTypes} className={`flex flex-wrap items-center ${variant === "chips" ? "gap-1" : "gap-2"}`}>
       <input type="hidden" name="course_tutor_id" value={courseTutorId} />
       <input type="hidden" name="course_id" value={courseId} />
       {ASSIGNMENT_TYPES.map((type) => (
-        <label key={type} className="flex items-center gap-1 text-[11px] text-muted">
+        <label
+          key={type}
+          title={variant === "chips" ? `${type} -- click to ${owned.includes(type) ? "stop" : "start"} marking this assignment` : undefined}
+          className={
+            variant === "chips"
+              ? "cursor-pointer rounded-[6px] border border-dashed border-border px-2 py-[3px] text-[10.5px] font-bold whitespace-nowrap text-muted/70 has-[:checked]:border-transparent has-[:checked]:bg-card-inset has-[:checked]:text-[oklch(44%_0.014_70)]"
+              : "flex items-center gap-1 text-[11px] text-muted"
+          }
+        >
           <input
             type="checkbox"
             name="owned_assignment_types"
             value={type}
             defaultChecked={owned.includes(type)}
             onChange={(e) => e.currentTarget.form?.requestSubmit()}
-            className="size-3"
+            className={variant === "chips" ? "sr-only" : "size-3"}
           />
           {SHORT_LABEL[type]}
         </label>

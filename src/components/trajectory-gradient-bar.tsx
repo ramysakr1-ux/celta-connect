@@ -94,3 +94,20 @@ export function TrajectoryBarCompact({ value }: { value: Trajectory }) {
     </div>
   );
 }
+
+// Strip variant for the roster's progress detail (design_handoff_trainer_
+// roster, "Standing" cell): a 44x5 track with the marker, standing spelled
+// out to its right. Same tracks and marker positions as the bars above.
+export function TrajectoryBarInline({ value }: { value: Trajectory }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="relative block h-[5px] w-11 shrink-0 rounded-full" style={{ background: trackBackground(value) }}>
+        <span
+          className="absolute top-1/2 block size-2.5 rounded-full border-2 border-card shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
+          style={{ left: `${MARKER_POSITION[value]}%`, transform: "translate(-50%, -50%)", backgroundColor: MARKER_COLOR[value] }}
+        />
+      </span>
+      <span className="text-[12.5px] font-semibold whitespace-nowrap text-ink">{STANDING_LABEL[value]}</span>
+    </span>
+  );
+}

@@ -38,6 +38,7 @@ export function TutorRoleControl({
   current,
   courseRunning = false,
   tutorName,
+  selectClassName,
 }: {
   courseTutorId: string;
   courseId: string;
@@ -46,6 +47,8 @@ export function TutorRoleControl({
   courseRunning?: boolean;
   /** Whose role this is, so the confirmation can name them. */
   tutorName?: string | null;
+  /** Styling override for the select (the trainer hub's roster uses its own sizes). */
+  selectClassName?: string;
 }) {
   const [state, action, pending] = useActionState(changeTutorRole, initial);
   const [staged, setStaged] = useState<string | null>(null);
@@ -73,7 +76,7 @@ export function TutorRoleControl({
           }
           setStaged(e.currentTarget.value);
         }}
-        className="h-8 rounded-[6px] border border-input bg-card-inset px-2 text-xs text-ink outline-none focus:border-primary disabled:opacity-60"
+        className={selectClassName ?? "h-8 rounded-[6px] border border-input bg-card-inset px-2 text-xs text-ink outline-none focus:border-primary disabled:opacity-60"}
       >
         <option value="">Role not set</option>
         {Object.entries(TUTOR_ROLE_LABEL).map(([k, v]) => (
