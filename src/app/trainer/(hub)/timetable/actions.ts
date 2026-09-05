@@ -176,6 +176,41 @@ export async function setEventDetail(formData: FormData): Promise<void> {
   revalidatePath("/trainer/timetable");
 }
 
+// Whether volunteer students can see what is attached to this session --
+// "I don't want it to read lunch for the trainees" (Ramy, 25 Aug 2026).
+// Until 5 Sep 2026 this flag could only be ticked while ADDING an event,
+// so nothing already on a timetable (every seeded or generated session)
+// could ever be shared: the Share materials page listed nothing and said
+// "no non-TP sessions", which Ramy rightly called untrue. It is now a
+// switch on that page, for any non-TP event.
+export async function setEventSharesMaterials(_prev: FormState, formData: FormData): Promise<FormState> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  if (!trainer.course_id) return { error: "No course assigned." };
+
+  const eventId = formData.get("event_id");
+  if (typeof eventId !== "string") return { error: "No session chosen." };
+  const shares = formData.get("shares_materials") === "true";
+
+  const supabase = await createClient();
+  const { data: event } = await supabase
+    .from("course_timetable_events")
+    .select("id, course_id, type")
+    .eq("id", eventId)
+    .maybeSingle();
+  if (!event || event.course_id !== trainer.course_id) return { error: "That session is not on your course." };
+  if (event.type === "tp") return { error: "TP lessons share materials through the trainee's own TP page." };
+
+  // Surfaced rather than swallowed: on the shared demo course a database
+  // trigger refuses every write ("This is a shared demo -- changes are not
+  // saved"), and a switch that quietly springs back reads as broken.
+  const { error } = await supabase.from("course_timetable_events").update({ shares_materials: shares }).eq("id", eventId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/trainer/session-materials");
+  revalidatePath("/trainer/timetable");
+  return { error: null };
+}
+
 // specs/course-modes.md §2/§4, mixed-mode delivery: which mode this TP
 // round is in. Manual per-round tag (Ramy, 2026-08-19) -- only meaningful
 // on a mixed-mode course, but not enforced here since a course changing

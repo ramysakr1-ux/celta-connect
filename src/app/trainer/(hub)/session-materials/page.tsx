@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { SessionMaterialsSection } from "@/components/session-materials-section";
+import { PageHead } from "@/app/trainer/(hub)/page-head";
+import { ShareToggle } from "@/app/trainer/(hub)/session-materials/share-toggle";
 
 // Ramy, 25 Aug 2026: "why can't the trainers upload their demo lesson...
 // it would read demo lesson, and then the next one would read getting to
@@ -10,9 +12,14 @@ import { SessionMaterialsSection } from "@/components/session-materials-section"
 // trainee-owned tp_plans row a trainer teaching a demo lesson never has.
 // This shares session_materials with the trainee-facing GTKY page (same
 // component, same action) -- the only real difference is which calendar
-// event the upload attaches to, picked here from a plain dropdown rather
-// than matched by title, since a trainer isn't tied to one specific event
-// the way GTKY is tied to "whichever milestone is titled like GTKY."
+// event the upload attaches to, picked here from a plain dropdown.
+//
+// 5 Sep 2026: the dropdown lists EVERY non-TP session on the timetable.
+// It used to list only sessions flagged `shares_materials`, and that flag
+// could only be ticked while adding a new event -- so on any timetable
+// that was seeded or generated (every real one) the list was empty and
+// the page claimed "no non-TP sessions", with a Demo lesson sitting right
+// there on the timetable. The flag is now a switch on the chosen session.
 export default async function SessionMaterialsPage({ searchParams }: { searchParams: Promise<{ event?: string }> }) {
   const session = await getCurrentProfile();
   const profile = session?.profile;
@@ -25,34 +32,31 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
   const supabase = await createClient();
   const { event: eventId } = await searchParams;
 
-  // Only events a trainer explicitly opted in via the "shares materials"
-  // checkbox on the timetable form -- "I don't want it to read lunch for
-  // the trainees. That would be ridiculous." (Ramy, 25 Aug 2026). TP has
-  // its own tp_materials system already and is excluded regardless.
+  // TP has its own tp_materials system and is excluded regardless.
   const { data: events } = await supabase
     .from("course_timetable_events")
-    .select("id, title, event_date")
+    .select("id, title, event_date, event_time, type, shares_materials")
     .eq("course_id", courseId)
-    .eq("shares_materials", true)
-    .order("event_date");
+    .neq("type", "tp")
+    .order("event_date")
+    .order("event_time");
 
   const selectedEvent = eventId ? (events ?? []).find((e) => e.id === eventId) : null;
   const { data: materials } = selectedEvent
     ? await supabase.from("session_materials").select("id, file_name, file_type, storage_path, slides_url, uploaded_by").eq("timetable_event_id", selectedEvent.id).order("created_at")
     : { data: [] };
 
-  const dateLabel = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const dateLabel = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  const timeLabel = (t: string | null) => (t ? ` ${t.slice(0, 5)}` : "");
+  const sharedCount = (events ?? []).filter((e) => e.shares_materials).length;
 
   return (
     <div className="flex flex-col gap-5">
-      <div>
-        <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Timetable · session materials</p>
-        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Share materials for a session</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted">
-          For anything that isn&apos;t a graded TP -- a demo lesson. Volunteer students see whatever the session is titled on the
-          timetable, with whatever you attach here.
-        </p>
-      </div>
+      <PageHead
+        eyebrow="Timetable · session materials"
+        title="Share materials for a session"
+        lede="For anything that isn't a graded TP -- a demo lesson, the unassessed teach, an introduction. Volunteer students see whatever the session is titled on the timetable, with whatever you attach here, once sharing is switched on for it."
+      />
 
       <form method="get" className="sheet flex flex-wrap items-end gap-3">
         <div className="flex flex-1 flex-col gap-1.5">
@@ -61,7 +65,9 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
             <option value="">Choose a session…</option>
             {(events ?? []).map((e) => (
               <option key={e.id} value={e.id}>
-                {dateLabel(e.event_date)} — {e.title}
+                {dateLabel(e.event_date)}
+                {timeLabel(e.event_time)} — {e.title}
+                {e.shares_materials ? " · shared" : ""}
               </option>
             ))}
           </select>
@@ -71,12 +77,26 @@ export default async function SessionMaterialsPage({ searchParams }: { searchPar
         </button>
       </form>
 
-      {(events ?? []).length === 0 ? <p className="text-sm text-muted">No non-TP sessions on the timetable yet.</p> : null}
+      {(events ?? []).length === 0 ? (
+        <p className="text-sm text-muted">Nothing on the timetable yet apart from TP. Add sessions on the Timetable tab first.</p>
+      ) : (
+        <p className="text-xs text-muted">
+          {sharedCount === 0
+            ? "No session is shared with volunteer students yet -- pick one and switch sharing on."
+            : `${sharedCount} session${sharedCount === 1 ? "" : "s"} currently shared with volunteer students (marked "shared" in the list).`}
+        </p>
+      )}
 
       {selectedEvent ? (
-        <div className="card rounded-[9px] p-6">
-          <h2 className="font-serif text-lg text-ink">{selectedEvent.title}</h2>
-          <p className="mt-1 mb-4 text-sm text-muted">{dateLabel(selectedEvent.event_date)}</p>
+        <div className="sheet flex flex-col gap-4 p-6">
+          <div>
+            <h2 className="font-serif text-lg text-ink">{selectedEvent.title}</h2>
+            <p className="mt-1 text-sm text-muted">
+              {dateLabel(selectedEvent.event_date)}
+              {timeLabel(selectedEvent.event_time)}
+            </p>
+          </div>
+          <ShareToggle eventId={selectedEvent.id} shares={Boolean(selectedEvent.shares_materials)} />
           <SessionMaterialsSection
             timetableEventId={selectedEvent.id}
             courseId={courseId}

@@ -989,10 +989,10 @@ async function main() {
   const BAND_TIMES = ["10:00", "10:45", "11:45", "12:45", "13:30", "14:15", "15:15", "16:15", "17:15"];
 
   const designSessions = [
-    { d: 1, b: 1, type: "input_session", title: "Course introduction", tag: "whole_group", detail: "Timetable, CELTA 5, portfolio", linked: null, tp: null },
-    { d: 1, b: 2, type: "supervised_session", title: "Demo lesson", tag: "group_room", detail: "Observation task", linked: null, tp: null },
-    { d: 1, b: 3, type: "supervised_session", title: "Demo lesson", tag: "group_room", detail: "Observation task", linked: null, tp: null },
-    { d: 1, b: 4, type: "supervised_session", title: "Unassessed teach", tag: "group_room", detail: "All six meet the learners", linked: null, tp: null },
+    { d: 1, b: 1, type: "input_session", title: "Course introduction", tag: "whole_group", detail: "Timetable, CELTA 5, portfolio", linked: null, tp: null, shares: true },
+    { d: 1, b: 2, type: "supervised_session", title: "Demo lesson", tag: "group_room", detail: "Observation task", linked: null, tp: null, shares: true },
+    { d: 1, b: 3, type: "supervised_session", title: "Demo lesson", tag: "group_room", detail: "Observation task", linked: null, tp: null, shares: true },
+    { d: 1, b: 4, type: "supervised_session", title: "Unassessed teach", tag: "group_room", detail: "All six meet the learners", linked: null, tp: null, shares: true },
     { d: 1, b: 5, type: "milestone", title: "Lunch", tag: "lunch", detail: null, linked: null, tp: null },
     { d: 1, b: 6, type: "supervised_session", title: "Lesson planning", tag: "group_room", detail: "Supervised", linked: null, tp: null },
     { d: 1, b: 7, type: "input_session", title: "Classroom management", tag: "whole_group", detail: null, linked: null, tp: null },
@@ -1207,6 +1207,7 @@ async function main() {
     detail: x.detail,
     linked: x.linked,
     tpNumber: x.tp,
+    shares: x.shares ?? false,
     zoomUrl:
       x.title === "TP6 \u00b7 A" || x.title === "TP6 \u00b7 D" ? "https://zoom.us/j/5551234567" : null,
   }));
@@ -1224,6 +1225,10 @@ async function main() {
         linked_assignment_type: e.linked ?? null,
         linked_tp_number: e.tpNumber ?? null,
         zoom_url: e.zoomUrl ?? null,
+        // Which non-TP sessions volunteer students may see materials for --
+        // the demo lesson, the unassessed teach and the introduction, so the
+        // Share materials page has something to show (5 Sep 2026).
+        shares_materials: e.type !== "tp" && Boolean(e.shares),
         // Real trainer-facing timetable events link a TP calendar day to its
         // rotation number (course_timetable_events.linked_tp_number) so the
         // volunteer view and portfolio pages can resolve a topic/materials
