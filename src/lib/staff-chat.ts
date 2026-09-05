@@ -102,82 +102,58 @@ export async function getInitialStaffChatData(
   // side effect) -- it was blocking the ENTIRE page response regardless.
   // Fired without awaiting instead: stale messages get swept by the next
   // load instead of gating this one.
-  const [{ data: profile }, { data: memberships }] = await Promise.all([
+  // Perf audit 5 Sep 2026: four waves became two. Membership, channel and
+  // the channel's course retention come back in ONE embedded read (the
+  // foreign keys staff_channel_members.channel_id -> staff_channels and
+  // staff_channels.course_id -> courses carry the join), so the channel
+  // lookup and the retention lookup no longer wait on each other.
+  const [{ data: profile }, { data: membershipRows }] = await Promise.all([
     supabase.from("profiles").select("center_id, course_id, role").eq("id", profileId).maybeSingle(),
-    supabase.from("staff_channel_members").select("channel_id").eq("profile_id", profileId),
+    supabase
+      .from("staff_channel_members")
+      .select("channel_id, staff_channels(*, courses(id, chat_retention_days, chat_retention_mode))")
+      .eq("profile_id", profileId),
   ]);
+  type ChannelRow = Database["public"]["Tables"]["staff_channels"]["Row"] & {
+    courses: { id: string; chat_retention_days: number | null; chat_retention_mode: string } | null;
+  };
+  const channels: ChannelRow[] = (membershipRows ?? [])
+    .map((m) => (m as unknown as { staff_channels: ChannelRow | null }).staff_channels)
+    .filter((c): c is ChannelRow => Boolean(c));
 
   // Who this person may start a conversation with.
   //
   // An ADMIN may message other admins, and nobody on a course. Ramy,
   // 2026-08-16: "they can only message people from the centre admin, but not
-  // course tutors." Previously this read "trainers on the same course" for
-  // everyone, so an admin who happened to have a course_id was offered that
-  // course's tutors -- the exact thing the trainer-only rule exists to
-  // prevent, and it would have looked like a feature rather than a leak.
-  //
-  // A TRAINER may message registered trainers on the same course -- "you
-  // cannot be on the course unless registered as one of the trainers on the
-  // course," no admin exception, ever (migration 0039).
+  // course tutors." A TRAINER may message registered trainers on the same
+  // course -- "you cannot be on the course unless registered as one of the
+  // trainers on the course," no admin exception, ever (migration 0039).
   const isAdmin = profile?.role === "admin";
+  const dmChannelIds = channels.filter((c) => c.type === "dm").map((c) => c.id);
 
-  // coworkerRowsPromise only needs `profile`, already resolved above -- it
-  // runs alongside the whole channels chain below instead of waiting for it.
-  const coworkerRowsPromise: PromiseLike<{ data: { id: string; full_name: string }[] | null }> = isAdmin
-    ? profile?.center_id
-      ? supabase.from("profiles").select("id, full_name").eq("center_id", profile.center_id).eq("role", "admin").neq("id", profileId).order("full_name")
-      : Promise.resolve({ data: [] })
-    : profile?.course_id
-      ? supabase.from("profiles").select("id, full_name").eq("course_id", profile.course_id).eq("role", "trainer").neq("id", profileId).order("full_name")
-      : Promise.resolve({ data: [] });
-
-  // This used to `return { channels: [], coworkers: [] }` when someone had
-  // no channel memberships, which quietly took the DM list away with it.
-  // Ramy, 29 Aug 2026: "I don't see those options where you can have TP
-  // group or DM with tutor." A trainee is only put in a channel by being
-  // put in a subgroup (migration 0041), so any trainee not yet assigned to
-  // one -- every trainee on a course whose groups haven't been drawn up
-  // yet, which is the whole first days of every course -- lost the ability
-  // to message their tutor at exactly the point they'd most want it. The
-  // two lookups are independent; only the channel half short-circuits now.
-  const channelIds = (memberships ?? []).map((m) => m.channel_id);
-
-  const { data: channels } =
-    channelIds.length > 0
-      ? await supabase.from("staff_channels").select("*").in("id", channelIds)
-      : { data: [] };
-
-  const channelCourseIds = [...new Set((channels ?? []).map((c) => c.course_id).filter((id): id is string => !!id))];
-  const dmChannelIds = (channels ?? []).filter((c) => c.type === "dm").map((c) => c.id);
-
-  // channelCourses and dmOtherMembers both only depend on `channels`,
-  // already resolved -- no reason they ran one after the other.
-  const [{ data: channelCourses }, { data: dmOtherMembers }] = await Promise.all([
-    channelCourseIds.length > 0
-      ? supabase.from("courses").select("id, chat_retention_days, chat_retention_mode").in("id", channelCourseIds)
-      : Promise.resolve({ data: [] as { id: string; chat_retention_days: number | null; chat_retention_mode: string }[] }),
+  // Wave 2: the DM partners (with their names embedded) and the coworker
+  // list, together.
+  const [{ data: dmOtherMembers }, { data: coworkerRows }] = await Promise.all([
     dmChannelIds.length > 0
-      ? supabase.from("staff_channel_members").select("channel_id, profile_id").in("channel_id", dmChannelIds).neq("profile_id", profileId)
-      : Promise.resolve({ data: [] as { channel_id: string; profile_id: string }[] }),
+      ? supabase.from("staff_channel_members").select("channel_id, profile_id, profiles(full_name)").in("channel_id", dmChannelIds).neq("profile_id", profileId)
+      : Promise.resolve({ data: [] as { channel_id: string; profile_id: string; profiles: { full_name: string } | null }[] }),
+    isAdmin
+      ? profile?.center_id
+        ? supabase.from("profiles").select("id, full_name").eq("center_id", profile.center_id).eq("role", "admin").neq("id", profileId).order("full_name")
+        : Promise.resolve({ data: [] as { id: string; full_name: string }[] })
+      : profile?.course_id
+        ? supabase.from("profiles").select("id, full_name").eq("course_id", profile.course_id).eq("role", "trainer").neq("id", profileId).order("full_name")
+        : Promise.resolve({ data: [] as { id: string; full_name: string }[] }),
   ]);
-  const retentionByCourseId = new Map((channelCourses ?? []).map((c) => [c.id, c]));
-
-  const otherProfileIds = (dmOtherMembers ?? []).map((m) => m.profile_id);
-  // otherProfiles (needs otherProfileIds, just resolved) and coworkerRows
-  // (needed nothing from this chain at all) run together here too.
-  const [{ data: otherProfiles }, { data: coworkerRows }] = await Promise.all([
-    otherProfileIds.length > 0
-      ? supabase.from("profiles").select("id, full_name").in("id", otherProfileIds)
-      : Promise.resolve({ data: [] as { id: string; full_name: string }[] }),
-    coworkerRowsPromise,
-  ]);
+  const retentionByCourseId = new Map(channels.filter((c) => c.courses).map((c) => [c.courses!.id, c.courses!]));
+  const otherProfiles = (dmOtherMembers ?? []).map((m) => ({ id: m.profile_id, full_name: (m as { profiles?: { full_name: string } | null }).profiles?.full_name ?? "Unknown" }));
 
   const nameByProfileId = new Map((otherProfiles ?? []).map((p) => [p.id, p.full_name]));
   const dmNameByChannelId = new Map(
     (dmOtherMembers ?? []).map((m) => [m.channel_id, nameByProfileId.get(m.profile_id) ?? "Unknown"])
   );
 
-  const summaries: ChannelSummary[] = (channels ?? [])
+  const summaries: ChannelSummary[] = channels
     .map((c) => {
       const retention = resolveRetention(c.course_id, retentionByCourseId);
       return {
