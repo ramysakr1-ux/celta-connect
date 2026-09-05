@@ -38,10 +38,10 @@ export function RegisterLinkButton() {
         type="button"
         onClick={handleClick}
         disabled={state === "loading"}
-        title="Copies a read-only link to the attendance register for someone who is not a tutor -- centre staff, the assessor"
+        title="Copies a link to the register for someone without a Connect account -- reception can see attendance and add walk-ins, nothing else"
         className={`${HUB_BUTTON} disabled:opacity-60`}
       >
-        {state === "loading" ? "Getting link…" : state === "copied" ? "Link copied" : "Share register view"}
+        {state === "loading" ? "Getting link…" : state === "copied" ? "Link copied" : "Front-desk link"}
       </button>
       {message ? <p className="absolute top-full right-0 z-10 mt-1 w-max max-w-[280px] rounded-[6px] bg-card px-2 py-1 text-right text-[11px] text-destructive shadow-sm">{message}</p> : null}
     </div>
