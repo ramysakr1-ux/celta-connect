@@ -8,7 +8,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isMctOfCourse } from "@/lib/course-tutor-role";
+import { isMctView } from "@/lib/act-preview";
 import { setTimetableLock, recomputeAssignmentDueDates } from "@/app/trainer/(hub)/timetable/actions";
 import { AddEventForm } from "@/app/trainer/(hub)/timetable/add-event-form";
 import { GenerateSkeletonForm } from "@/app/trainer/(hub)/timetable/generate-skeleton-form";
@@ -122,7 +122,7 @@ export default async function TrainerTimetablePage({
   // need to see those options -- mirrors actions.ts' requireTimetableEditAccess
   // exactly (same isMctOnCourse() check, admin bypass), so the UI never
   // offers a control the server would then reject.
-  const isMct = Boolean(trainer) && (await isMctOfCourse(trainer!, courseId));
+  const isMct = Boolean(trainer) && (await isMctView(trainer!, courseId));
   // Non-MCT trying to force ?mode=edit just falls back to the view -- there
   // is no separate "disabled" edit mode to render, and nothing to explain.
   const editMode = mode === "edit" && isMct;

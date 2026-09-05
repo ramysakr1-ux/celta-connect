@@ -77,6 +77,10 @@ export default async function AnnouncementsPage() {
       .maybeSingle();
     isMct = !mct || mct.profile_id === trainer.id;
   }
+  // MCT → ACT preview: compose as an ACT would (their own group, or not at
+  // all). postBroadcast keeps its own real-role gate.
+  const { isActPreview } = await import("@/lib/act-preview");
+  if (isMct && (await isActPreview())) isMct = false;
   // Ramy, 5 Sep 2026: an ACT posts to their own group. "Own" = the group
   // course_tp_groups names them tutor of today.
   const { data: myGroupRows } = isMct

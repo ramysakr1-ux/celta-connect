@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/wordmark";
 import { TrainerTabs } from "@/app/trainer/trainer-tabs";
+import { isActPreview } from "@/lib/act-preview";
+import { enterActPreview, exitActPreview } from "@/app/trainer/(hub)/act-preview-actions";
 import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
@@ -72,7 +74,11 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // ACT-shaped default there is a fine, unobtrusive fallback for a session
   // this spec never asked us to re-skin; only the header/tabs/logo
   // themselves stay isRealStaff-gated below, at their own point of use.
-  const isMct = Boolean(profile && (profile.role === "admin" || currentCourseTutorRole === "main_course_tutor"));
+  const isMctReal = Boolean(profile && (profile.role === "admin" || currentCourseTutorRole === "main_course_tutor"));
+  // MCT → ACT preview (Ramy, 5 Sep 2026): the cookie only dims the DISPLAY
+  // role -- every write action keeps checking the real one. One way only.
+  const actPreview = isMctReal && (await isActPreview());
+  const isMct = isMctReal && !actPreview;
   // Trainer-in-Training tab: only for the people the record concerns, and
   // only when the course has one. A touring assessor sees it view-only.
   const assessorCourseId = isAssessor ? await getAssessorCourseId() : null;
@@ -161,12 +167,25 @@ export default async function TrainerHubLayout({ children }: { children: React.R
           </Link>
           <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} mct={isMct && !isAssessor} tint={tintVisible} />
           <div className="flex shrink-0 items-center gap-[11px]">
-            {isRealStaff ? (
+            {isRealStaff && isMctReal ? (
+              // The pill is the preview toggle for a real MCT -- one click
+              // into the ACT view, one click back (Ramy, 5 Sep 2026).
+              <form action={actPreview ? exitActPreview : enterActPreview}>
+                <button
+                  type="submit"
+                  title={actPreview ? "Viewing as an ACT -- click to switch back to your MCT view" : "Click to preview the hub as an ACT sees it"}
+                  className="cursor-pointer rounded-full px-[9px] py-1 text-[10.5px] font-bold tracking-[0.09em] text-primary-foreground uppercase transition-[filter] hover:brightness-110"
+                  style={{ background: accent }}
+                >
+                  {actPreview ? "ACT · preview" : "MCT"}
+                </button>
+              </form>
+            ) : isRealStaff ? (
               <span
                 className="rounded-full px-[9px] py-1 text-[10.5px] font-bold tracking-[0.09em] text-primary-foreground uppercase"
                 style={{ background: accent }}
               >
-                {isMct ? "MCT" : "ACT"}
+                ACT
               </span>
             ) : null}
             {switcherCourses.length > 1 && profile?.course_id ? (

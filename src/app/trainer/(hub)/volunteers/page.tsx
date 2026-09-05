@@ -9,7 +9,7 @@ import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { computeSessionTicks, creditedHours, blocksNeededForPresent, CERTIFICATE_HOURS_THRESHOLD, teachingDayNumber } from "@/lib/volunteer-attendance";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
-import { isMctOfCourse } from "@/lib/course-tutor-role";
+import { isMctView } from "@/lib/act-preview";
 
 // §14 + design_handoff_volunteer_students_v2 (Ramy, 5 Sep 2026). The
 // trainer-side register: Today strip (RSVP replies + Zoom presence),
@@ -222,7 +222,7 @@ export default async function VolunteersPage() {
     };
   });
 
-  const roleLabel = trainer.role !== "trainer" ? "Admin · whole course" : (await isMctOfCourse(trainer, courseId)) ? "MCT · whole course" : "ACT · whole course";
+  const roleLabel = trainer.role !== "trainer" ? "Admin · whole course" : (await isMctView(trainer, courseId)) ? "MCT · whole course" : "ACT · whole course";
 
   const classes: ClassLabel[] = [...new Set(rows.map((r) => r.level ?? ""))].sort().map((level) => ({
     level: level || null,

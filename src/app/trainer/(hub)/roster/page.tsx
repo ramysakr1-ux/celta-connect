@@ -6,7 +6,7 @@ import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { fetchRosterRows } from "@/lib/roster";
 import { RosterTable } from "@/app/trainer/(hub)/roster/roster-table";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
-import { isMctOfCourse } from "@/lib/course-tutor-role";
+import { isMctView } from "@/lib/act-preview";
 import { PageHead, HUB_BUTTON } from "@/app/trainer/(hub)/page-head";
 import { AddCandidateButton } from "@/app/trainer/(hub)/roster/add-candidate-button";
 import { FilmingConsentCard } from "@/app/trainer/(hub)/roster/filming-consent-card";
@@ -46,7 +46,7 @@ export default async function TrainerRosterPage() {
   const [rows, isMct, filmsTpSessions, { data: courseRow }, { data: tutorRows }, { data: invitationRows }, { data: centreTrainers }] =
     await Promise.all([
       fetchRosterRows(supabase, courseId),
-      trainer ? isMctOfCourse(trainer, courseId) : Promise.resolve(false),
+      trainer ? isMctView(trainer, courseId) : Promise.resolve(false),
       // specs/admissions-and-close-out.md §10 -- "only used if a centre films."
       trainer?.center_id ? supabase.from("centers").select("films_tp_sessions").eq("id", trainer.center_id).maybeSingle().then((r) => Boolean(r.data?.films_tp_sessions)) : Promise.resolve(false),
       trainer

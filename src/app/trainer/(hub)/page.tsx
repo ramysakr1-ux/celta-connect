@@ -5,7 +5,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isMctOfCourse } from "@/lib/course-tutor-role";
+import { isMctView } from "@/lib/act-preview";
 import type { Database } from "@/lib/supabase/types";
 import { fetchRosterRows } from "@/lib/roster";
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE, resolveTimeBands, bandIndexFor } from "@/lib/timetable-grid";
@@ -97,7 +97,7 @@ export default async function TodayPage() {
     fetchRosterRows(supabase, courseId),
     supabase.rpc("hub_today_bundle", { p_course_id: courseId }),
     findMaterialsOverlaps(supabase, courseId),
-    trainer ? isMctOfCourse(trainer, courseId) : Promise.resolve(false),
+    trainer ? isMctView(trainer, courseId) : Promise.resolve(false),
   ]);
   const TB: TodayBundle | null = !todayBundle.error && todayBundle.data ? (todayBundle.data as unknown as TodayBundle) : null;
   const [

@@ -59,6 +59,10 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
     isMct = tutorLink?.tutor_role === "main_course_tutor";
   }
   if (!isMct) redirect("/trainer");
+  // MCT → ACT preview: the tab is hidden and the direct URL bounces, same
+  // as for a real ACT. Display only -- nothing below writes.
+  const { isActPreview } = await import("@/lib/act-preview");
+  if (await isActPreview()) redirect("/trainer");
 
   const supabase = hubReadClient(trainer, courseId);
   const timeZone = (trainer.center_id ? (await getCachedCenter(trainer.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;

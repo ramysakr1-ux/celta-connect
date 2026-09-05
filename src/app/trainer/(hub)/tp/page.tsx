@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { buildMarkingQueue, meetingDaysLabel, type QueueStatus } from "@/lib/tp-marking-queue";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
-import { isMctOfCourse } from "@/lib/course-tutor-role";
+import { isMctView } from "@/lib/act-preview";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 const RULE_COLOR: Record<QueueStatus, string> = {
@@ -53,7 +53,7 @@ export default async function TeachingPracticeQueuePage() {
     supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee"),
     supabase.from("plan_assignments").select("trainee_id, tp_number, taught_at, main_lesson_aim, short_title").eq("course_id", courseId),
     supabase.from("course_timetable_events").select("*").eq("course_id", courseId).eq("type", "tp").order("event_date"),
-    isMctOfCourse(trainer, courseId),
+    isMctView(trainer, courseId),
     supabase.from("course_tp_groups").select("id, tutor_profile_id").eq("course_id", courseId),
   ]);
   // Ramy, 5 Sep 2026: "the ACT doesn't need to see anything other than
