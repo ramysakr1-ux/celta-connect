@@ -5,7 +5,8 @@ import type { AimType } from "@/lib/aim-type";
 // one question -- "which lessons do I owe written feedback on" -- so the
 // old three-bucket row list becomes: owed cards (each showing what is
 // already on the tutor's desk to write from), today's session as a
-// timeline, tomorrow as one line. Supersedes tp-marking-queue.ts.
+// timeline, tomorrow as one line. Replaces tp-marking-queue.ts, deleted
+// 6 Sep 2026 once nothing imported it.
 //
 // Everything here is derived; nothing on the tab is entered.
 
