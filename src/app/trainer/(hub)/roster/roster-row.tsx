@@ -93,7 +93,7 @@ const CELTA5_SIGNOFF_LABEL: Record<RosterRow["celta5SignoffStatus"], string> = {
 function ContactCell({ row, courseCode }: { row: RosterRow; courseCode: string }) {
   return (
     <td className="text-center text-xs" onClick={(e) => e.stopPropagation()}>
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-center gap-2">
         <a href={`mailto:${row.email}?subject=${encodeURIComponent(courseCode)}`} className="text-primary hover:underline">
           Email
         </a>
