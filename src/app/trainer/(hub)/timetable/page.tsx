@@ -519,8 +519,12 @@ export default async function TrainerTimetablePage({
           visitor to click. */}
       {trainer ? (
       <LaptopOnlyGate task="Stage 2 group booking and Stage 1/3 individual invites">
-      <Stage2Section groups={stage2Groups} blocks={stage2Blocks} />
+      {/* In course order -- Ramy, 5 Sep 2026: "why are they 2, 1, 3?"
+          (Stage 2 used to come first because it is the group sheet and the
+          other two are individual invites; that is a difference of kind,
+          not of order, and reads as a mistake.) */}
       <IndividualTutorialSection stage="stage1" candidates={allCandidates} invites={stage1Invites} />
+      <Stage2Section groups={stage2Groups} blocks={stage2Blocks} />
       <IndividualTutorialSection stage="stage3" candidates={stage3Candidates} invites={stage3Invites} />
       </LaptopOnlyGate>
       ) : null}
