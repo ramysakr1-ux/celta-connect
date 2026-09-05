@@ -193,7 +193,7 @@ export function VolunteerSignupForm({ token, questions }: { token: string; quest
           </div>
           <VolunteerRecorder
             prompts={RECORDING_PROMPTS}
-            recordingConsentLine={t?.recordingConsentLine ?? "I agree to being recorded for training purposes."}
+            recordingConsentLine={t?.recordingConsentLine ?? "I agree to being recorded, in sound or on video, during this sign-up and in lessons, for teacher-training purposes only."}
             onStatusChange={setRecorderStatus}
           />
           {state.error ? <p className="text-sm text-red-700">{state.error}</p> : null}

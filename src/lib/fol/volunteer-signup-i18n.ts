@@ -54,7 +54,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "Kabul ediyorum",
     answerInEnglishNote: "İngilizce cevap vereceksiniz, ancak açıkladığımız her şey kendi dilinizde.",
-    recordingConsentLine: "Eğitim amaçlı kaydedilmeyi kabul ediyorum.",
+    recordingConsentLine: "Bu kayıt sırasında ve derslerde ses veya görüntü olarak kaydedilmeyi, yalnızca öğretmen eğitimi amacıyla, kabul ediyorum.",
   },
   ar: {
     greeting: "مرحبًا",
@@ -70,7 +70,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "أوافق",
     answerInEnglishNote: "ستجيب باللغة الإنجليزية، لكن كل ما نشرحه هو بلغتك.",
-    recordingConsentLine: "أوافق على التسجيل لأغراض تدريبية.",
+    recordingConsentLine: "أوافق على تسجيلي صوتًا أو صورةً أثناء هذا التسجيل وفي الدروس، لأغراض تدريب المعلمين فقط.",
   },
   ru: {
     greeting: "Добро пожаловать",
@@ -86,7 +86,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "Я согласен",
     answerInEnglishNote: "Вы будете отвечать по-английски, но всё, что мы объясняем, — на вашем языке.",
-    recordingConsentLine: "Я согласен на аудиозапись в учебных целях.",
+    recordingConsentLine: "Я согласен на аудио- или видеозапись во время этой регистрации и на занятиях, исключительно в целях подготовки преподавателей.",
   },
   fa: {
     greeting: "خوش آمدید",
@@ -102,7 +102,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "موافقم",
     answerInEnglishNote: "شما به انگلیسی پاسخ خواهید داد، اما هرچه توضیح می‌دهیم به زبان شماست.",
-    recordingConsentLine: "من با ضبط صدا برای اهداف آموزشی موافقم.",
+    recordingConsentLine: "من با ضبط صدا یا تصویر خودم در طول این ثبت‌نام و در کلاس‌ها، صرفاً برای اهداف آموزش معلمان، موافقم.",
   },
   uk: {
     greeting: "Ласкаво просимо",
@@ -118,7 +118,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "Погоджуюсь",
     answerInEnglishNote: "Ви відповідатимете англійською, але все, що ми пояснюємо, — вашою мовою.",
-    recordingConsentLine: "Я погоджуюсь на аудіозапис із навчальною метою.",
+    recordingConsentLine: "Я погоджуюсь на аудіо- або відеозапис під час цієї реєстрації та на заняттях, виключно з метою підготовки викладачів.",
   },
   en: {
     greeting: "Welcome",
@@ -134,7 +134,7 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "I agree",
     answerInEnglishNote: "You will answer in English throughout.",
-    recordingConsentLine: "I agree to being recorded for training purposes.",
+    recordingConsentLine: "I agree to being recorded, in sound or on video, during this sign-up and in lessons, for teacher-training purposes only.",
   },
   other: {
     greeting: "Welcome",
@@ -150,6 +150,6 @@ export const SIGNUP_TRANSLATIONS: Record<string, SignupTranslation> = {
     ],
     agreeLabel: "I agree",
     answerInEnglishNote: "You will answer in English throughout.",
-    recordingConsentLine: "I agree to being recorded for training purposes.",
+    recordingConsentLine: "I agree to being recorded, in sound or on video, during this sign-up and in lessons, for teacher-training purposes only.",
   },
 };
