@@ -49,9 +49,10 @@ export default async function ConsultationBlockPage({ params }: { params: Promis
         lede={`${event ? `${shortDate(event.event_date)} · ${shortTime(event.event_time)}` : ""} · ${total} position${total === 1 ? "" : "s"} of ${slotMinutes} min. The candidate books the next open position; this sheet is the source of truth, nothing pings per booking.`}
       />
 
+      {/* The accent tint for every sheet, in the viewer's role colour (Ramy, 5 Sep 2026: "go with the ACT's"). */}
       <div
         className="flex flex-col gap-3.5 rounded-[14px] border-[1.5px] px-6 py-5"
-        style={mine ? { background: "color-mix(in oklab, var(--hub-accent) 9%, var(--color-card))", borderColor: "var(--hub-accent)" } : { background: "var(--color-card)", borderColor: "var(--color-border)" }}
+        style={{ background: "color-mix(in oklab, var(--hub-accent) 9%, var(--color-card))", borderColor: "var(--hub-accent)" }}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-2.5">

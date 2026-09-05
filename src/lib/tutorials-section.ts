@@ -24,11 +24,27 @@ export interface PlaceSheetAction {
   label: string;
 }
 
+/** A sheet the section can open in place at the bottom left. */
+export interface SheetRef {
+  kind: "stage2" | "consultation";
+  id: string;
+}
+
+export interface SheetSlot {
+  position: number;
+  time: string;
+  traineeId: string | null;
+  traineeName: string | null;
+  about: string | null;
+}
+
 export interface GridCell {
   kind: CellKind;
   main: string;
   sub: string;
   href?: string;
+  /** Opens the sheet in place instead of leaving the page. */
+  sheet?: SheetRef;
   action?: InviteAction | PlaceSheetAction;
   /** An ACT looking at another tutor's candidate: state shown, nothing to click. */
   viewOnly?: boolean;
@@ -49,7 +65,7 @@ export interface GroupSummary {
   name: string;
   own: boolean;
   stage1: { total: number; filed: number; confirmed: number; pending: number; notInvited: number };
-  stage2: { blockId: string; when: string; booked: number; total: number; href: string } | null;
+  stage2: { blockId: string; when: string; booked: number; total: number; href: string; slots: SheetSlot[] } | null;
   stage3: { flagged: { id: string; name: string; invited: boolean }[] };
 }
 
@@ -62,6 +78,8 @@ export interface BlockSummary {
   total: number;
   href: string;
   mine: boolean;
+  slotMinutes: number;
+  slots: SheetSlot[];
 }
 
 export interface TutorialsSectionData {
@@ -74,6 +92,16 @@ export interface TutorialsSectionData {
   rows: GridRow[];
   /** Tutors on the course, for the MCT's "Add block" tutor select. */
   tutors: { id: string; name: string }[];
+  /** The booking rule's worked example, from real data when there is one. */
+  ruleExample: string | null;
+}
+
+/** "15:30" for position N of a block starting at event_time. */
+export function positionTime(eventTime: string | null | undefined, position: number, slotMinutes: number): string {
+  if (!eventTime) return "";
+  const start = Number(eventTime.slice(0, 2)) * 60 + Number(eventTime.slice(3, 5));
+  const m = start + (position - 1) * slotMinutes;
+  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
 
 export function shortDate(iso: string): string {

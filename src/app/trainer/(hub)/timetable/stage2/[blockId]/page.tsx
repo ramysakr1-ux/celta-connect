@@ -52,9 +52,10 @@ export default async function Stage2BlockPage({ params }: { params: Promise<{ bl
         lede={`${event ? `${shortDate(event.event_date)} · ${shortTime(event.event_time)}` : ""} · ${total} position${total === 1 ? "" : "s"} of about ${slotMinutes}–20 min, running a few minutes over is normal. Each candidate books the next open position, one booking each, and can release it back to open. Only this group sees this sheet; one announcement went out when it was placed, none per booking.`}
       />
 
+      {/* The accent tint for every sheet, in the viewer's role colour (Ramy, 5 Sep 2026: "go with the ACT's"). */}
       <div
         className="flex flex-col gap-3.5 rounded-[14px] border-[1.5px] px-6 py-5"
-        style={mine ? { background: "color-mix(in oklab, var(--hub-accent) 9%, var(--color-card))", borderColor: "var(--hub-accent)" } : { background: "var(--color-card)", borderColor: "var(--color-border)" }}
+        style={{ background: "color-mix(in oklab, var(--hub-accent) 9%, var(--color-card))", borderColor: "var(--hub-accent)" }}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-2.5">

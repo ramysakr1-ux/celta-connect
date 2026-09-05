@@ -19,7 +19,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { halfOwningDate, type TpTimetableEvent } from "@/lib/rotation";
 import { ReadOnlyTimetableBoard, type EventMeta } from "@/app/portfolio/[traineeId]/timetable/read-only-board";
 import { TutorialsSection } from "@/app/trainer/(hub)/timetable/tutorials-section";
-import { shortDate, shortTime, stageForWeek, type GridCell, type GroupSummary, type BlockSummary, type GridRow, type TutorialsSectionData } from "@/lib/tutorials-section";
+import { shortDate, shortTime, stageForWeek, positionTime, type SheetSlot, type GridCell, type GroupSummary, type BlockSummary, type GridRow, type TutorialsSectionData } from "@/lib/tutorials-section";
 import { computeWeekOf } from "@/lib/course-progress";
 import { ordinal } from "@/lib/stage2-tutorials";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
@@ -195,11 +195,11 @@ export default async function TrainerTimetablePage({
   const tutorIds = [...new Set([...(tpGroups ?? []).map((g) => g.tutor_profile_id), ...(consultationBlocks ?? []).map((b) => b.tutor_profile_id)].filter((id): id is string => Boolean(id)))];
   const [{ data: stage2Slots }, { data: consultationSlots }, { data: tutorProfiles }, { data: courseTutors }] = await Promise.all([
     stage2BlockIds.length > 0
-      ? supabase.from("stage2_tutorial_slots").select("block_id, position, trainee_id").in("block_id", stage2BlockIds)
+      ? supabase.from("stage2_tutorial_slots").select("block_id, position, trainee_id").in("block_id", stage2BlockIds).order("position")
       : Promise.resolve({ data: [] as { block_id: string; position: number; trainee_id: string | null }[] }),
     consultationBlockIds.length > 0
-      ? supabase.from("consultation_slots").select("block_id, position, trainee_id").in("block_id", consultationBlockIds)
-      : Promise.resolve({ data: [] as { block_id: string; position: number; trainee_id: string | null }[] }),
+      ? supabase.from("consultation_slots").select("block_id, position, trainee_id, assignment_type").in("block_id", consultationBlockIds).order("position")
+      : Promise.resolve({ data: [] as { block_id: string; position: number; trainee_id: string | null; assignment_type: string | null }[] }),
     tutorIds.length > 0 ? supabase.from("profiles").select("id, full_name").in("id", tutorIds) : Promise.resolve({ data: [] as { id: string; full_name: string }[] }),
     supabase.from("course_tutors").select("profile_id, profiles!inner(full_name)").eq("course_id", courseId).is("left_at", null),
   ]);
@@ -259,6 +259,19 @@ export default async function TrainerTimetablePage({
   // and one grid row per candidate with a cell per stage + consultations.
   const tutorNameById = new Map((tutorProfiles ?? []).map((t) => [t.id, t.full_name]));
   const traineeNameById = new Map((activeTrainees ?? []).map((t) => [t.id, t.full_name]));
+  const bookedIds = [...new Set([...(stage2Slots ?? []), ...(consultationSlots ?? [])].map((x) => x.trainee_id).filter((id): id is string => Boolean(id) && !traineeNameById.has(id as string)))];
+  if (bookedIds.length > 0) {
+    const { data: others } = await supabase.from("profiles").select("id, full_name").in("id", bookedIds);
+    for (const o of others ?? []) traineeNameById.set(o.id, o.full_name);
+  }
+  const toSheetSlots = (rows: { position: number; trainee_id: string | null; assignment_type?: string | null }[], eventTime: string | null | undefined, slotMinutes: number): SheetSlot[] =>
+    rows.map((x) => ({
+      position: x.position,
+      time: positionTime(eventTime, x.position, slotMinutes),
+      traineeId: x.trainee_id,
+      traineeName: x.trainee_id ? (traineeNameById.get(x.trainee_id) ?? "Unknown") : null,
+      about: x.assignment_type ?? null,
+    }));
   const subgroupById = new Map((subgroups ?? []).map((s) => [s.id, s]));
   const tpGroupById = new Map((tpGroups ?? []).map((g) => [g.id, g]));
   const membershipByTrainee = new Map((subgroupMembers ?? []).map((m) => [m.trainee_id, m.subgroup_id]));
@@ -266,7 +279,7 @@ export default async function TrainerTimetablePage({
   const inviteByTraineeStage = new Map((invites ?? []).map((i) => [`${i.trainee_id}:${i.stage}`, i]));
   const stage2SlotsByBlock = new Map<string, { position: number; trainee_id: string | null }[]>();
   for (const sl of stage2Slots ?? []) stage2SlotsByBlock.set(sl.block_id, [...(stage2SlotsByBlock.get(sl.block_id) ?? []), sl]);
-  const consultationSlotsByBlock = new Map<string, { position: number; trainee_id: string | null }[]>();
+  const consultationSlotsByBlock = new Map<string, { position: number; trainee_id: string | null; assignment_type: string | null }[]>();
   for (const sl of consultationSlots ?? []) consultationSlotsByBlock.set(sl.block_id, [...(consultationSlotsByBlock.get(sl.block_id) ?? []), sl]);
   const submittedByTrainee = new Map<string, string[]>();
   for (const a of traineeAssignments ?? []) {
@@ -321,7 +334,14 @@ export default async function TrainerTimetablePage({
       own: g.own,
       stage1: { total: members.length, filed, confirmed, pending, notInvited: members.length - filed - confirmed - pending },
       stage2: block
-        ? { blockId: block.id, when: whenLabel(block.timetable_event_id, slots.length * 15), booked: slots.filter((x) => x.trainee_id).length, total: slots.length, href: `/trainer/timetable/stage2/${block.id}` }
+        ? {
+            blockId: block.id,
+            when: whenLabel(block.timetable_event_id, slots.length * 15),
+            booked: slots.filter((x) => x.trainee_id).length,
+            total: slots.length,
+            href: `/trainer/timetable/stage2/${block.id}`,
+            slots: toSheetSlots(slots, blockEventById.get(block.timetable_event_id)?.event_time, 15),
+          }
         : null,
       stage3: {
         flagged: members
@@ -343,6 +363,8 @@ export default async function TrainerTimetablePage({
         total: slots.length,
         href: `/trainer/timetable/consultation/${b.id}`,
         mine: Boolean(trainer) && b.tutor_profile_id === trainer!.id,
+        slotMinutes: b.slot_length_minutes,
+        slots: toSheetSlots(slots, blockEventById.get(b.timetable_event_id)?.event_time, b.slot_length_minutes),
       };
     })
     .sort((a, b) => a.when.localeCompare(b.when));
@@ -388,8 +410,8 @@ export default async function TrainerTimetablePage({
       : !block
         ? { kind: "move", main: "No sheet yet", sub: `${group.name} sheet not placed`, action: { type: "place-sheet", scope: group.scope, label: group.name }, viewOnly: !own }
         : mine
-          ? { kind: "booked", main: `${ordinal(mine.position)} · ${blockEvent ? shortDate(blockEvent.event_date) : ""}`, sub: `${group.name} sheet`, href: `/trainer/timetable/stage2/${block.id}` }
-          : { kind: "waiting", main: "Not booked", sub: openLeft > 0 ? `sheet open, ${openLeft} position${openLeft === 1 ? "" : "s"} left` : "sheet full", href: `/trainer/timetable/stage2/${block.id}` };
+          ? { kind: "booked", main: `${ordinal(mine.position)} · ${blockEvent ? shortDate(blockEvent.event_date) : ""}`, sub: `${group.name} sheet`, sheet: { kind: "stage2", id: block.id } }
+          : { kind: "waiting", main: "Not booked", sub: openLeft > 0 ? `sheet open, ${openLeft} position${openLeft === 1 ? "" : "s"} left` : "sheet full", sheet: { kind: "stage2", id: block.id } };
 
     // Stage 3: only for candidates the tutor has flagged.
     const stage3: GridCell = !record?.stage3_tutorial_required
@@ -410,7 +432,7 @@ export default async function TrainerTimetablePage({
           kind: "booked",
           main: whenLabel(upcoming.b.timetable_event_id),
           sub: `with ${(tutorNameById.get(upcoming.b.tutor_profile_id) ?? "tutor").split(" ")[0]}${bookings.length > 1 ? ` · ${bookings.length - 1} more` : ""}`,
-          href: `/trainer/timetable/consultation/${upcoming.b.id}`,
+          sheet: { kind: "consultation", id: upcoming.b.id },
         }
       : { kind: "none", main: "None yet", sub: submitted.length > 0 ? `${submitted.join(", ")} submitted · own tutor only` : "any tutor until first submission" };
 
@@ -425,6 +447,21 @@ export default async function TrainerTimetablePage({
   });
 
   const weekLabel = course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
+  // The booking rule's worked example: a candidate who has submitted
+  // something, named against a tutor who is not their own.
+  const ruleExample = (() => {
+    for (const t of activeTrainees ?? []) {
+      const submitted = submittedByTrainee.get(t.id);
+      if (!submitted?.length) continue;
+      const sg = membershipByTrainee.get(t.id) ? subgroupById.get(membershipByTrainee.get(t.id)!) : null;
+      const ownTutorId = sg?.tp_group_id ? (tpGroupById.get(sg.tp_group_id)?.tutor_profile_id ?? null) : null;
+      const other = (consultationBlocks ?? []).find((b) => b.tutor_profile_id !== ownTutorId);
+      if (!ownTutorId || !other) continue;
+      return `${t.full_name} has submitted ${submitted[0]}, so ${tutorNameById.get(other.tutor_profile_id) ?? "another tutor"}'s sheet is closed to them for it and ${tutorNameById.get(ownTutorId) ?? "their own tutor"}'s is open.`;
+    }
+    return null;
+  })();
+
   const tutorialsData: TutorialsSectionData = {
     viewerRole: isAdmin ? "admin" : isMct ? "mct" : "act",
     viewerId: trainer?.id ?? "",
@@ -434,6 +471,7 @@ export default async function TrainerTimetablePage({
     blocks: blockSummaries,
     rows: gridRows,
     tutors: (courseTutors ?? []).map((ct) => ({ id: ct.profile_id, name: (ct as unknown as { profiles: { full_name: string } }).profiles.full_name })),
+    ruleExample,
   };
 
   // Glass-card view's "Mine" involvement, trainer-shaped: read-only-board.tsx

@@ -6,7 +6,7 @@ import { Avatar, toneForName } from "@/components/avatar";
 import { createStage2Block, type FormState } from "@/app/trainer/(hub)/timetable/stage2-actions";
 import { createConsultationBlock } from "@/app/trainer/(hub)/timetable/consultation-actions";
 import { createOrUpdateIndividualTutorialInvite, cancelIndividualTutorialInvite } from "@/app/trainer/(hub)/timetable/individual-tutorial-actions";
-import type { TutorialsSectionData, GridCell, CellKind, InviteAction, BlockSummary } from "@/lib/tutorials-section";
+import type { TutorialsSectionData, GridCell, CellKind, InviteAction, BlockSummary, SheetRef, SheetSlot } from "@/lib/tutorials-section";
 
 const initialState: FormState = { error: null };
 
@@ -173,6 +173,12 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
   const [blockForm, setBlockForm] = useState(false);
   const [openCell, setOpenCell] = useState<string | null>(null);
   const [openTutor, setOpenTutor] = useState<string | null>(null);
+  // The sheet opened in place at the bottom left (handoff, "Opened sheet"):
+  // the viewer's own next consultation block by default, else the first.
+  const [sheet, setSheet] = useState<SheetRef | null>(() => {
+    const own = data.blocks.find((b) => b.mine) ?? data.blocks[0];
+    return own ? { kind: "consultation", id: own.id } : null;
+  });
 
   const isMct = data.viewerRole !== "act";
   const ownGroups = data.groups.filter((g) => g.own || isMct);
@@ -271,10 +277,10 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
               ) : stage === 2 ? (
                 g.stage2 ? (
                   <>
-                    <Link href={g.stage2.href} className="flex min-w-0 flex-col gap-[5px] hover:underline">
+                    <button type="button" onClick={() => setSheet({ kind: "stage2", id: g.stage2!.blockId })} className="flex min-w-0 flex-col gap-[5px] text-left hover:underline">
                       <span className="text-[12.5px] whitespace-nowrap text-ink/80 tabular-nums">{g.stage2.when}</span>
                       <Segments booked={g.stage2.booked} total={g.stage2.total} max={34} />
-                    </Link>
+                    </button>
                     <CountPill booked={g.stage2.booked} total={g.stage2.total} />
                   </>
                 ) : (
@@ -360,24 +366,25 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
                     </button>
                     {open
                       ? blocks.map((b) => (
-                          <Link key={b.id} href={b.href} className="grid grid-cols-[150px_1fr_150px] items-center gap-3.5 border-t border-border-faint py-2 pl-9 hover:bg-[color-mix(in_oklab,var(--hub-accent)_5%,transparent)]">
-                            <span className="text-[12.5px] text-muted">Open sheet</span>
+                          <button key={b.id} type="button" onClick={() => setSheet({ kind: "consultation", id: b.id })} className="grid w-full grid-cols-[150px_1fr_150px] items-center gap-3.5 border-t border-border-faint py-2 pl-9 text-left hover:bg-[color-mix(in_oklab,var(--hub-accent)_5%,transparent)]">
+                            <span className="text-[12.5px] text-muted">{sheet?.id === b.id ? "Open below" : "Open sheet"}</span>
                             <span className="flex min-w-0 flex-col gap-[5px]">
                               <span className="text-[12.5px] whitespace-nowrap text-ink/80 tabular-nums">{b.when}</span>
                               <Segments booked={b.booked} total={b.total} max={34} />
                             </span>
                             <CountPill booked={b.booked} total={b.total} />
-                          </Link>
+                          </button>
                         ))
                       : null}
                   </div>
                 );
               })
             : data.blocks.map((b) => (
-                <Link
+                <button
                   key={b.id}
-                  href={b.href}
-                  className="-mx-2 grid grid-cols-[120px_1fr_150px] items-center gap-3.5 rounded-[8px] border-t border-border-faint px-2 py-2.5 hover:bg-[color-mix(in_oklab,var(--hub-accent)_5%,transparent)]"
+                  type="button"
+                  onClick={() => setSheet({ kind: "consultation", id: b.id })}
+                  className="-mx-2 grid grid-cols-[120px_1fr_150px] items-center gap-3.5 rounded-[8px] border-t border-border-faint px-2 py-2.5 text-left hover:bg-[color-mix(in_oklab,var(--hub-accent)_5%,transparent)]"
                   style={b.mine ? { background: "color-mix(in oklab, var(--hub-accent) 9%, transparent)", boxShadow: "inset 0 0 0 1.5px var(--hub-accent)" } : undefined}
                 >
                   <span className="flex min-w-0 items-center gap-2.5">
@@ -392,7 +399,7 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
                     <Segments booked={b.booked} total={b.total} max={34} />
                   </span>
                   <CountPill booked={b.booked} total={b.total} />
-                </Link>
+                </button>
               ))}
           {blockForm ? <ConsultationBlockForm data={data} onDone={() => setBlockForm(false)} /> : null}
         </div>
@@ -433,17 +440,137 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
               </div>
               {r.cells.map((c, i) => {
                 const key = `${r.id}:${i}`;
-                return <GridCellView key={key} cell={c} open={openCell === key} onToggle={() => setOpenCell(openCell === key ? null : key)} />;
+                return <GridCellView key={key} cell={c} open={openCell === key} onToggle={() => setOpenCell(openCell === key ? null : key)} onOpenSheet={setSheet} />;
               })}
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Bottom row (handoff): the opened sheet on the left, the booking rule on the right. */}
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+        <OpenedSheet data={data} sheet={sheet} isMct={isMct} />
+        <div className="flex flex-col gap-2 rounded-[14px] border px-6 py-5" style={{ background: `color-mix(in oklab, ${GOLD_BAR} 10%, var(--color-card))`, borderColor: `color-mix(in oklab, ${GOLD_BAR} 40%, transparent)` }}>
+          <p className="text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "oklch(40% 0.09 68)" }}>
+            Booking rule
+          </p>
+          <p className="text-[13px] leading-[1.5] text-ink">
+            Before an assignment&apos;s first submission a candidate may book consultation with any tutor. Once they have submitted it, consultation on that assignment is with
+            their own tutor only. Connect applies this when the candidate books, against the assignment they name.
+          </p>
+          {data.ruleExample ? <p className="text-[12.5px] leading-[1.5] text-muted">{data.ruleExample}</p> : null}
         </div>
       </div>
     </section>
   );
 }
 
-function GridCellView({ cell, open, onToggle }: { cell: GridCell; open: boolean; onToggle: () => void }) {
+function OpenedSheet({ data, sheet, isMct }: { data: TutorialsSectionData; sheet: SheetRef | null; isMct: boolean }) {
+  let title = "";
+  let sub = "";
+  let slots: SheetSlot[] = [];
+  let mine = false;
+  let href = "";
+  if (sheet?.kind === "consultation") {
+    const b = data.blocks.find((x) => x.id === sheet.id);
+    if (b) {
+      // The handoff's MCT view has no "Yours" tint or title -- the MCT edits
+      // everything, so nothing is singled out as theirs.
+      mine = b.mine && !isMct;
+      title = mine ? "Your consultation sheet" : `Consultation sheet · ${b.tutorName}`;
+      sub = `${b.when.replace(/ · \d+ min$/, "")} · ${b.total} position${b.total === 1 ? "" : "s"} of ${b.slotMinutes} min · opened from the list above${isMct ? " · MCT can edit" : ""}`;
+      slots = b.slots;
+      href = b.href;
+    }
+  } else if (sheet?.kind === "stage2") {
+    const g = data.groups.find((x) => x.stage2?.blockId === sheet.id);
+    if (g?.stage2) {
+      mine = g.own && !isMct;
+      title = `Stage 2 sheet · ${g.name}`;
+      sub = `${g.stage2.when.replace(/ · \d+ min$/, "")} · ${g.stage2.total} position${g.stage2.total === 1 ? "" : "s"} of 15 min · opened from the list above`;
+      slots = g.stage2.slots;
+      href = g.stage2.href;
+    }
+  }
+  if (!title) {
+    return (
+      <div className="rounded-[14px] border border-border bg-card px-6 py-5">
+        <p className="font-serif text-[20px] font-semibold text-ink-warm">Sheet</p>
+        <p className="mt-1 text-[12.5px] text-muted">Click a block above, or a booked cell, and its sheet opens here.</p>
+      </div>
+    );
+  }
+  const booked = slots.filter((x) => x.traineeId).length;
+  const full = slots.length > 0 && booked === slots.length;
+  return (
+    // Ramy, 5 Sep 2026: "the ACT and the MCT consultation sheets have
+    // different colours. Let's go with the ACT's" -- the accent tint for
+    // every opened sheet, in the viewer's own role colour.
+    <div
+      className="flex flex-col gap-3.5 rounded-[14px] border-[1.5px] px-6 py-5"
+      style={{ background: "color-mix(in oklab, var(--hub-accent) 9%, var(--color-card))", borderColor: "var(--hub-accent)" }}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2.5">
+            <h3 className="font-serif text-[20px] font-semibold text-ink-warm">{title}</h3>
+            {mine ? (
+              <span className="rounded-full px-[7px] py-[2px] text-[10px] font-bold tracking-[0.06em] text-primary-foreground uppercase" style={{ background: "var(--hub-accent)" }}>
+                Yours
+              </span>
+            ) : null}
+          </div>
+          <p className="text-[12.5px] text-muted">{sub}</p>
+        </div>
+        <span className={`${PILL} shrink-0`} style={full ? KIND_STYLE.booked : booked === 0 ? KIND_STYLE.done : KIND_STYLE.waiting}>
+          <span className="block size-1.5 rounded-full bg-current" />
+          {booked} of {slots.length} booked
+        </span>
+      </div>
+      <div className="flex flex-col">
+        {slots.map((x) => (
+          <div key={x.position} className="grid grid-cols-[44px_56px_1fr_auto] items-center gap-3.5 border-t border-border-faint py-2.5">
+            <span className="text-[11px] font-bold tracking-[0.08em] text-muted uppercase">{ordinalLabel(x.position)}</span>
+            <span className="text-[14px] font-semibold tabular-nums text-ink">{x.time}</span>
+            {x.traineeName ? (
+              <span className="flex items-center gap-2.5">
+                <Avatar name={x.traineeName} size="xs" />
+                <span className="text-[13.5px] font-semibold text-ink">{x.traineeName}</span>
+                {x.about ? <span className="text-[12px] text-muted">· about {x.about}</span> : null}
+              </span>
+            ) : (
+              <span className="flex items-center gap-2.5">
+                <span className="block size-7 rounded-[8px] border-[1.5px] border-dashed border-[oklch(80%_0.014_82)]" />
+                <span className="text-[13.5px] text-muted italic">Open</span>
+              </span>
+            )}
+            <span className="inline-flex h-6 items-center gap-1.5 rounded-full px-[9px] text-[11px] font-bold" style={x.traineeId ? KIND_STYLE.booked : KIND_STYLE.done}>
+              <span className="block size-1.5 rounded-full bg-current" />
+              {x.traineeId ? "Booked" : "Open"}
+            </span>
+          </div>
+        ))}
+        {slots.length === 0 ? <p className="py-2 text-[12.5px] text-muted">No positions yet.</p> : null}
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-faint pt-3">
+        <p className="text-[11.5px] text-muted">
+          {sheet?.kind === "stage2" ? "One booking each: " : "Same sheet as Stage 2: "}the candidate books the next open position, the sheet is the source of truth, nothing pings per booking.
+        </p>
+        <Link href={href} className="text-[12px] font-semibold text-primary hover:underline">
+          Full page and length
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function ordinalLabel(n: number): string {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return `${n}${s[(v - 20) % 10] ?? s[v] ?? s[0]}`;
+}
+
+function GridCellView({ cell, open, onToggle, onOpenSheet }: { cell: GridCell; open: boolean; onToggle: () => void; onOpenSheet: (s: SheetRef) => void }) {
   const body = (
     <>
       <Pill kind={cell.kind}>{cell.main}</Pill>
@@ -456,6 +583,14 @@ function GridCellView({ cell, open, onToggle }: { cell: GridCell; open: boolean;
   const box = "-mx-2 flex min-w-0 flex-col items-start gap-1 rounded-[10px] px-2 py-1.5 text-left";
   const hover = cell.viewOnly ? "" : "hover:bg-[color-mix(in_oklab,var(--hub-accent)_7%,transparent)] hover:shadow-[inset_0_0_0_1px_var(--hub-accent)]";
 
+  if (cell.sheet) {
+    const ref = cell.sheet;
+    return (
+      <button type="button" onClick={() => onOpenSheet(ref)} title={`${title} · opens the sheet below`} className={`${box} ${hover} w-full`}>
+        {body}
+      </button>
+    );
+  }
   if (cell.href && !cell.viewOnly) {
     return (
       <Link href={cell.href} title={title} className={`${box} ${hover}`}>
