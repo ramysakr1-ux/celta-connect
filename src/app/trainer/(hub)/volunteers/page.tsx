@@ -9,6 +9,7 @@ import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { computeSessionTicks, creditedHours, blocksNeededForPresent, CERTIFICATE_HOURS_THRESHOLD, teachingDayNumber } from "@/lib/volunteer-attendance";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { isMctOfCourse } from "@/lib/course-tutor-role";
 
 // §14 + design_handoff_volunteer_students_v2 (Ramy, 5 Sep 2026). The
 // trainer-side register: Today strip (RSVP replies + Zoom presence),
@@ -48,7 +49,14 @@ export default async function VolunteersPage() {
   ]);
   const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
-  const todayEvents = (tpEvents ?? []).filter((e) => e.event_date === today);
+  // The strip covers today's session -- or, on a day with none, the NEXT
+  // one (Ramy, 5 Sep 2026): the RSVP email lands ~20h before a class, so
+  // the replies are exactly what a tutor wants to see the evening before,
+  // not only once the day arrives.
+  const todaysEvents = (tpEvents ?? []).filter((e) => e.event_date === today);
+  const nextDate = todaysEvents.length > 0 ? today : ((tpEvents ?? []).find((e) => e.event_date > today)?.event_date ?? null);
+  const todayEvents = nextDate ? (tpEvents ?? []).filter((e) => e.event_date === nextDate) : [];
+  const stripIsToday = nextDate === today;
   const todayEventIds = todayEvents.map((e) => e.id);
   const certificateHoursThreshold = centerSettings?.volunteer_certificate_hours_threshold ?? CERTIFICATE_HOURS_THRESHOLD;
 
@@ -139,7 +147,7 @@ export default async function VolunteersPage() {
     const set = attendedByVolunteer.get(a.volunteer_student_id) ?? new Set<string>();
     set.add(a.timetable_event_id);
     attendedByVolunteer.set(a.volunteer_student_id, set);
-    if (todayEventIds.includes(a.timetable_event_id) && a.joined_at && !a.left_at) liveByVolunteer.add(a.volunteer_student_id);
+    if (stripIsToday && todayEventIds.includes(a.timetable_event_id) && a.joined_at && !a.left_at) liveByVolunteer.add(a.volunteer_student_id);
   }
 
   const tpDates = [...new Set((tpEvents ?? []).map((e) => e.event_date))].sort();
@@ -148,7 +156,7 @@ export default async function VolunteersPage() {
   // "Underway" = the first of today's TP blocks has started, on the
   // centre's own clock (event_date already matched "today" in that zone).
   const localNow = new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hour12: false }).format(now);
-  const todayUnderway = Boolean(todayStart) && localNow >= (todayStart ?? "").slice(0, 5);
+  const todayUnderway = stripIsToday && Boolean(todayStart) && localNow >= (todayStart ?? "").slice(0, 5);
 
   // The rule line's numbers come from the course's own typical day.
   const blocksPerDay = new Map<string, number>();
@@ -214,6 +222,8 @@ export default async function VolunteersPage() {
     };
   });
 
+  const roleLabel = trainer.role !== "trainer" ? "Admin · whole course" : (await isMctOfCourse(trainer, courseId)) ? "MCT · whole course" : "ACT · whole course";
+
   const classes: ClassLabel[] = [...new Set(rows.map((r) => r.level ?? ""))].sort().map((level) => ({
     level: level || null,
     label: level || "No class set",
@@ -224,10 +234,11 @@ export default async function VolunteersPage() {
       rows={rows}
       classes={classes}
       todayInfo={
-        todayEvents.length > 0
+        todayEvents.length > 0 && nextDate
           ? {
-              dateLabel: new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" }),
-              classNumber: teachingDayNumber(tpDates, today),
+              isToday: stripIsToday,
+              dateLabel: new Date(`${nextDate}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" }),
+              classNumber: teachingDayNumber(tpDates, nextDate),
               totalClasses: tpDates.length,
               startTime: todayStart ? todayStart.slice(0, 5) : null,
               underway: todayUnderway,
@@ -235,6 +246,7 @@ export default async function VolunteersPage() {
             }
           : null
       }
+      roleLabel={roleLabel}
       rule={{ need: blocksNeededForPresent(typicalBlocks), lessons: typicalBlocks, sessionHours, target: certificateHoursThreshold }}
       courseEndDate={course?.end_date ?? null}
       siteOrigin={process.env.SITE_URL ?? "https://www.celtaconnect.com"}

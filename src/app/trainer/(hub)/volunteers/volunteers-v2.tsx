@@ -65,6 +65,8 @@ export interface ClassLabel {
 }
 
 export interface TodayInfo {
+  /** False = the next class, shown on a day with no session. */
+  isToday: boolean;
   dateLabel: string;
   classNumber: number;
   totalClasses: number;
@@ -270,6 +272,7 @@ export function VolunteersV2({
   rows,
   classes,
   todayInfo,
+  roleLabel,
   rule,
   courseEndDate,
   siteOrigin,
@@ -277,6 +280,7 @@ export function VolunteersV2({
   rows: VolunteerRowData[];
   classes: ClassLabel[];
   todayInfo: TodayInfo | null;
+  roleLabel: string;
   rule: RuleInfo;
   courseEndDate: string | null;
   siteOrigin: string;
@@ -296,7 +300,12 @@ export function VolunteersV2({
     <div className="flex flex-col gap-[18px]">
       <PageHead
         eyebrow={`Volunteers · ${rows.length} student${rows.length === 1 ? "" : "s"} · ${byClass.length} class${byClass.length === 1 ? "" : "es"}`}
-        title="Volunteer students"
+        title={
+          <span className="flex items-center gap-3">
+            Volunteer students
+            <span className="rounded-[5px] border border-border bg-card px-2 py-[3px] font-sans text-[11px] font-bold tracking-[0.08em] text-muted">{roleLabel}</span>
+          </span>
+        }
         lede={`Each student has a no-login link to their materials and hours. Present means ${rule.need} of a session's ${rule.lessons} lessons and banks the whole ${hoursLabel} h; certificate at ${rule.target} h across all courses.`}
       >
         <a href="/api/filming-consent.pdf" className={HUB_BUTTON}>
@@ -315,7 +324,7 @@ export function VolunteersV2({
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-faint px-5 py-3">
             <div className="flex flex-wrap items-baseline gap-2.5">
               <span className="text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: TEAL }}>
-                Today
+                {todayInfo.isToday ? "Today" : "Next class"}
               </span>
               <span className="text-[13px] font-semibold text-ink">
                 {todayInfo.dateLabel} · Class {todayInfo.classNumber} of {todayInfo.totalClasses}
@@ -362,7 +371,7 @@ export function VolunteersV2({
                   {todayInfo.underway
                     ? `Underway · present at ${rule.need} of ${todayInfo.lessonsToday} lesson${todayInfo.lessonsToday === 1 ? "" : "s"}`
                     : todayInfo.startTime
-                      ? `Starts ${todayInfo.startTime} · nothing logged yet`
+                      ? `${todayInfo.isToday ? "Starts" : `${todayInfo.dateLabel} ·`} ${todayInfo.startTime}${todayInfo.isToday ? " · nothing logged yet" : ""}`
                       : "Nothing logged yet"}
                 </span>
               </div>
@@ -379,7 +388,7 @@ export function VolunteersV2({
             const neverOpened = c.members.filter((r) => !r.lastOpenedAt).length;
             const meta = [
               `${c.members.length} student${c.members.length === 1 ? "" : "s"}`,
-              todayInfo?.startTime ? `today ${todayInfo.startTime}` : null,
+              todayInfo?.startTime ? `${todayInfo.isToday ? "today" : todayInfo.dateLabel} ${todayInfo.startTime}` : null,
               drifting > 0 ? `${drifting} drifting` : null,
               neverOpened > 0 ? `${neverOpened} never opened link` : null,
             ]
