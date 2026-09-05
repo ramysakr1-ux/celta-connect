@@ -133,7 +133,7 @@ export function RosterRowView({
     return (
       <tr className="trainer-hover cursor-pointer opacity-70" onClick={() => router.push(`/portfolio/${row.id}`)}>
         <td>
-          <Link href={`/portfolio/${row.id}`} className="flex items-center gap-2.5 text-ink hover:text-primary">
+          <Link href={`/portfolio/${row.id}`} className="flex items-center gap-2.5 text-ink hover:text-[var(--hub-accent-deep)]">
             <Avatar name={row.name} size="sm" />
             {row.name}
           </Link>
@@ -156,7 +156,7 @@ export function RosterRowView({
       <td>
         {/* The mark sits inside the link so the whole name cell stays one
             target -- Ramy, 4 Sep 2026. */}
-        <Link href={`/portfolio/${row.id}`} className="flex items-center gap-2.5 text-ink hover:text-primary">
+        <Link href={`/portfolio/${row.id}`} className="flex items-center gap-2.5 text-ink hover:text-[var(--hub-accent-deep)]">
           <Avatar name={row.name} size="sm" />
           {row.name}
           {row.courseStatus === "extension" ? <span className="pill pill-info">Extension</span> : null}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
+import { PageHead, HUB_BUTTON, HUB_PRIMARY, HUB_PRIMARY_STYLE } from "@/app/trainer/(hub)/page-head";
 import { BackLink } from "@/components/back-link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -63,7 +64,7 @@ export default async function TrainerTimetablePage({
   }
 
   const [{ data: course }, { data: events }, { data: volunteers }] = await Promise.all([
-    supabase.from("courses").select("timetable_locked_at, time_bands, delivery_mode, center_id, assessor_visit_date").eq("id", courseId).maybeSingle(),
+    supabase.from("courses").select("name, timetable_locked_at, time_bands, delivery_mode, center_id, assessor_visit_date").eq("id", courseId).maybeSingle(),
     supabase
       .from("course_timetable_events")
       .select("*")
@@ -344,25 +345,25 @@ export default async function TrainerTimetablePage({
     <div className="flex flex-col gap-6">
       {editMode ? (
         <>
-          <div className="sheet flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3">
-                <BackLink href="/trainer/timetable" label="View timetable" />
-              </div>
-              <h1 className="mt-1 font-serif text-xl text-ink">Edit timetable</h1>
-              {weekRange ? <p className="mt-1 font-serif text-2xl text-ink">{weekRange}</p> : null}
-              <p className="mt-2 text-muted">
-                The single source of truth for the course clock -- This Week, due dates, and TP
-                dates all read from this.
-              </p>
-            </div>
-            <div className="hidden items-center gap-2 md:flex">
+          <div className="flex flex-col gap-3">
+            <BackLink href="/trainer/timetable" label="View timetable" />
+            <PageHead
+              eyebrow={`${course?.name ?? "Course"} · Timetable · editing`}
+              title="Edit timetable"
+              lede={
+                <>
+                  {weekRange ? <span className="font-serif text-lg text-ink">{weekRange}. </span> : null}
+                  The single source of truth for the course clock -- This Week, due dates, and TP dates all read from this.
+                </>
+              }
+            >
+              <div className="hidden flex-wrap items-center gap-2 md:flex">
               {locked ? (
                 <form action={recomputeAssignmentDueDates}>
                   <button
                     type="submit"
                     title="Re-resolve Skills/LfC due dates against the current TP rotation and group pairing"
-                    className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover-fill"
+                    className={HUB_BUTTON}
                   >
                     Recompute due dates
                   </button>
@@ -372,17 +373,15 @@ export default async function TrainerTimetablePage({
                 <input type="hidden" name="lock" value={(!locked).toString()} />
                 <button
                   type="submit"
-                  className={`flex items-center gap-2 rounded-[6px] border px-4 py-2 text-sm font-medium ${
-                    locked
-                      ? "border-border text-ink trainer-hover-fill"
-                      : "border-primary bg-primary text-primary-foreground"
-                  }`}
+                  className={locked ? HUB_BUTTON : HUB_PRIMARY}
+                  style={locked ? undefined : HUB_PRIMARY_STYLE}
                 >
                   {!locked ? <span className="size-[5px] shrink-0 rounded-full bg-status-warning-text" /> : null}
                   {locked ? "Unlock timetable" : "Lock timetable"}
                 </button>
               </form>
-            </div>
+              </div>
+            </PageHead>
           </div>
 
           {locked ? (
@@ -487,16 +486,14 @@ export default async function TrainerTimetablePage({
               trainer lands on now -- the day-to-day glance/join screen,
               same glass-card design as the trainee's read-only board
               (for-claude-code-timetable-view.md), reused as-is. */}
-          {trainer ? (
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <AlsoUnder tab="Timetable" links={[{ href: "/trainer/session-materials", label: "Share session materials" }]} />
-              {isMct ? (
-                <Link href="/trainer/timetable?mode=edit" className="text-sm font-medium text-primary hover:underline">
-                  Edit timetable &rarr;
-                </Link>
-              ) : null}
-            </div>
-          ) : null}
+          <PageHead eyebrow={`${course?.name ?? "Course"} · Timetable`} title={weekRange ?? "Timetable"}>
+            {isMct ? (
+              <Link href="/trainer/timetable?mode=edit" className={HUB_PRIMARY} style={HUB_PRIMARY_STYLE}>
+                Edit timetable
+              </Link>
+            ) : null}
+          </PageHead>
+          {trainer ? <AlsoUnder tab="Timetable" links={[{ href: "/trainer/session-materials", label: "Share session materials" }]} /> : null}
 
           {allEvents.length === 0 ? (
             <div className="sheet text-sm text-muted">No events yet.</div>
