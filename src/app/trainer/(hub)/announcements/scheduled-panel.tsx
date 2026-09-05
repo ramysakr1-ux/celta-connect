@@ -1,5 +1,6 @@
 "use client";
 
+import { eventOptionLabel } from "@/lib/event-option-label";
 import { useActionState, useEffect, useRef, useState } from "react";
 import {
   deleteBroadcast,
@@ -228,7 +229,7 @@ function EditRow({
           >
             {timetableEvents.map((event) => (
               <option key={event.id} value={event.id}>
-                {event.title} — {event.event_date}
+                {eventOptionLabel(event)}
               </option>
             ))}
           </select>

@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { postBroadcast, type FormState } from "@/app/portfolio/[traineeId]/stream-actions";
+import { eventOptionLabel } from "@/lib/event-option-label";
 
 const initialState: FormState = { error: null };
 
@@ -160,8 +161,7 @@ export function AnnouncementComposer({
             <option value="">None — ad-hoc Zoom link below</option>
             {timetableEvents.map((event) => (
               <option key={event.id} value={event.id}>
-                {event.title} — {event.event_date}
-                {event.event_time ? ` ${event.event_time}` : ""}
+                {eventOptionLabel(event)}
               </option>
             ))}
           </select>
