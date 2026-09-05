@@ -55,7 +55,10 @@ export function RosterTable({
         {showDetail ? "Hide progress detail" : "Show progress detail"}
       </button>
       <div className="sheet overflow-x-auto !p-0">
-        <table className="table-plain w-full">
+        {/* Detail mode: tighter padding, smaller type, and no cell may wrap --
+            a wrapped "6 /" over "8" made every row taller and the table no
+            narrower (Ramy, 5 Sep 2026). */}
+        <table className={`table-plain w-full [&_td]:whitespace-nowrap [&_td:first-child]:whitespace-nowrap ${showDetail ? "text-[13px] [&_td]:px-2 [&_th]:px-2" : ""}`}>
           <thead>
             <tr>
               <Th>{"Candidate"}</Th>

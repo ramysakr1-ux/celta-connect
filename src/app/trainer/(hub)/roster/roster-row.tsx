@@ -176,7 +176,7 @@ export function RosterRowView({
       <td className={`text-center tabular-nums ${row.assessedHrs < 6 ? "text-status-warning-text" : "text-ink"}`}>
         {row.assessedHrs.toFixed(2)}
       </td>
-      <td className="text-center tabular-nums text-ink">{row.tpsPassed} / 8</td>
+      <td className="text-center tabular-nums text-ink">{row.tpsPassed}/8</td>
       <td className="text-center tabular-nums text-ink">
         {row.assignmentsTotal > 0 ? (
           <Link
@@ -185,7 +185,7 @@ export function RosterRowView({
             title={row.assignmentsResubmitted ? "Includes a resubmission" : "No resubmissions used"}
             className="hover:underline"
           >
-            {row.assignmentsPassed} / {row.assignmentsTotal}
+            {row.assignmentsPassed}/{row.assignmentsTotal}
             {row.assignmentsResubmitted ? <sup className="ml-0.5 text-status-warning-text">R</sup> : null}
           </Link>
         ) : (
@@ -216,7 +216,7 @@ export function RosterRowView({
                 title="Taught TPs with plan + self-evaluation + feedback all submitted"
                 className={`hover:underline ${row.tpStagesBehind > 0 ? "text-status-warning-text" : "text-ink"}`}
               >
-                {row.tpStagesTaught - row.tpStagesBehind} / {row.tpStagesTaught}
+                {row.tpStagesTaught - row.tpStagesBehind}/{row.tpStagesTaught}
               </Link>
             ) : (
               <span className="text-muted">--</span>
@@ -230,7 +230,7 @@ export function RosterRowView({
                 title={`${formatSupervisedTime(row.supervisedSecondsSpent)} spent -- click to see per-session status on their timetable`}
                 className={`hover:underline ${row.supervisedDone < row.supervisedTotal ? "text-status-warning-text" : "text-ink"}`}
               >
-                {row.supervisedDone} / {row.supervisedTotal}
+                {row.supervisedDone}/{row.supervisedTotal}
               </Link>
             ) : (
               <span className="text-muted">--</span>
@@ -242,7 +242,7 @@ export function RosterRowView({
               onClick={(e) => e.stopPropagation()}
               className={`hover:underline ${row.observationHoursShort ? "text-status-warning-text" : "text-ink"}`}
             >
-              {row.observationHoursCounted.toFixed(1)} / 6
+              {row.observationHoursCounted.toFixed(1)}/6
             </Link>
           </td>
           <td className="text-center">
@@ -320,7 +320,7 @@ export function RosterRowView({
                 onClick={(e) => e.stopPropagation()}
                 className={`hover:underline ${row.obsTasksDone < row.obsTasksTotal ? "text-status-warning-text" : "text-ink"}`}
               >
-                {row.obsTasksDone} / {row.obsTasksTotal}
+                {row.obsTasksDone}/{row.obsTasksTotal}
               </Link>
             ) : (
               <span className="text-muted">--</span>
@@ -333,7 +333,7 @@ export function RosterRowView({
                 onClick={(e) => e.stopPropagation()}
                 className={`hover:underline ${row.preCourseTaskAnswered < row.preCourseTaskTotal ? "text-status-warning-text" : "text-ink"}`}
               >
-                {row.preCourseTaskAnswered} / {row.preCourseTaskTotal}
+                {row.preCourseTaskAnswered}/{row.preCourseTaskTotal}
               </Link>
             ) : (
               <span className="text-muted">--</span>
@@ -346,7 +346,7 @@ export function RosterRowView({
                 onClick={(e) => e.stopPropagation()}
                 className={`hover:underline ${row.filmedObsDone < row.filmedObsTotal ? "text-status-warning-text" : "text-ink"}`}
               >
-                {row.filmedObsDone} / {row.filmedObsTotal}
+                {row.filmedObsDone}/{row.filmedObsTotal}
               </Link>
             ) : (
               <span className="text-muted">--</span>
