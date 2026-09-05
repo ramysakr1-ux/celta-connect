@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { saveMarkingGuidanceEntry, type FormState } from "@/app/dashboard/trainer/marking-guidance/actions";
+import { saveMarkingGuidanceEntry, type FormState } from "@/app/trainer/(hub)/marking-guidance/actions";
 import type { AssignmentCriterion } from "@/lib/assignment-criteria";
 import type { Database } from "@/lib/supabase/types";
 

@@ -201,8 +201,8 @@ export default async function TrainerResourceHubPage() {
     { id: "link-tp-points-library", title: "TP points library", subtitle: "Full centre-wide library", href: "/trainer/coursebooks" },
     { id: "link-multimedia", title: "Multimedia", subtitle: "Coursebook audio tracks", href: "/trainer/audio" },
     { id: "link-video-library", title: "Video Library", subtitle: "Training and observation videos", href: "/trainer/video" },
-    { id: "link-assignment-briefs", title: "Assignment briefs", subtitle: "Upload and publish briefs", href: "/dashboard/trainer/assignment-briefs" },
-    { id: "link-marking-guidance", title: "Marking guidance", subtitle: "Centre standardisation reference", href: "/dashboard/trainer/marking-guidance" },
+    { id: "link-assignment-briefs", title: "Assignment briefs", subtitle: "Upload and publish briefs", href: "/trainer/assignment-briefs" },
+    { id: "link-marking-guidance", title: "Marking guidance", subtitle: "Centre standardisation reference", href: "/trainer/marking-guidance" },
     ...tpPointRows.map((p) => ({ id: `tp-${p.id}`, title: p.title, subtitle: `TP points -- ${p.source}`, href: "#tp-points" })),
     ...(coursebooks ?? []).map((c) => ({ id: `cb-${c.id}`, title: c.title, subtitle: c.level ? `Coursebook -- ${c.level}` : "Coursebook", href: "#coursebooks" })),
     ...(inputSessionResources ?? []).map((r) => ({ id: `is-${r.id}`, title: r.title, subtitle: "Input sessions", href: "#input-sessions" })),
@@ -231,8 +231,8 @@ export default async function TrainerResourceHubPage() {
           { href: "#coursebooks", label: "Coursebooks", count: sectionCounts.coursebooks },
           { href: "/trainer/audio", label: "Multimedia", count: sectionCounts.multimedia },
           { href: "/trainer/video", label: "Video Library", count: sectionCounts.videoLibrary },
-          { href: "/dashboard/trainer/assignment-briefs", label: "Assignment briefs", count: sectionCounts.assignmentBriefs },
-          { href: "/dashboard/trainer/marking-guidance", label: "Marking guidance", count: sectionCounts.markingGuidance },
+          { href: "/trainer/assignment-briefs", label: "Assignment briefs", count: sectionCounts.assignmentBriefs },
+          { href: "/trainer/marking-guidance", label: "Marking guidance", count: sectionCounts.markingGuidance },
           { href: "#input-sessions", label: "Input sessions", count: sectionCounts.inputSessions },
           { href: "#forms-and-documents", label: "Forms and documents", count: sectionCounts.forms },
           { href: "#centre-documents", label: "Centre documents", count: sectionCounts.centreDocuments },
@@ -285,11 +285,11 @@ export default async function TrainerResourceHubPage() {
           <p className="font-serif text-lg text-ink">Video Library →</p>
           <p className="text-xs text-muted">Training and observation videos, linked not uploaded. Trainees can watch from their portfolio.</p>
         </Link>
-        <Link href="/dashboard/trainer/assignment-briefs" className="trainer-hover sheet flex flex-col gap-1 p-5">
+        <Link href="/trainer/assignment-briefs" className="trainer-hover sheet flex flex-col gap-1 p-5">
           <p className="font-serif text-lg text-ink">Assignment briefs →</p>
           <p className="text-xs text-muted">Upload and publish briefs. Trainees browse published sections from their portfolio.</p>
         </Link>
-        <Link href="/dashboard/trainer/marking-guidance" className="trainer-hover sheet flex flex-col gap-1 p-5">
+        <Link href="/trainer/marking-guidance" className="trainer-hover sheet flex flex-col gap-1 p-5">
           <p className="font-serif text-lg text-ink">Marking guidance →</p>
           <p className="text-xs text-muted">Where this centre&apos;s line sits per criterion. Tutors and the assessor only -- never trainees.</p>
         </Link>

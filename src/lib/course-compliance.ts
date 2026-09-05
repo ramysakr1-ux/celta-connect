@@ -125,3 +125,78 @@ export function entryFormProblems(input: {
     },
   ];
 }
+
+/**
+ * A TP group outside four to six candidates.
+ *
+ * Handbook §9.1.1: teaching practice groups of four to six. A group here is
+ * course_tp_groups with both halves counted -- the six candidates who share
+ * one class on alternate days. Judged on active candidates only; a
+ * withdrawn one has already left the group.
+ */
+export function tpGroupSizeProblems(input: { groups: { id: string; name: string; size: number }[] }): ComplianceProblem[] {
+  return input.groups
+    .filter((g) => g.size > 0 && (g.size < 4 || g.size > 6))
+    .map((g) => ({
+      tag: "TP group size",
+      message: `${g.name} has ${g.size} candidate${g.size === 1 ? "" : "s"} -- a TP group is four to six`,
+      detail: g.size < 4 ? `${4 - g.size} short` : `${g.size - 6} over`,
+      href: "/trainer/rotation",
+      cite: "9.1.1",
+    }));
+}
+
+/**
+ * The coursebook schedule cannot give candidates two significantly different
+ * levels with one below intermediate.
+ *
+ * Handbook §9.1.2. Below intermediate = an A-level coursebook (A1, A2, A2+);
+ * significantly different = an A-level and a B-or-above level, not two
+ * shades of the same band. Only judged once every rotation-assigned TP (1-6)
+ * has a coursebook -- until then the schedule is unfinished, not wrong.
+ */
+export function tpLevelProblems(input: { schedule: { tpNumber: number; level: string | null }[]; requiredTps?: number[] }): ComplianceProblem[] {
+  const required = input.requiredTps ?? [1, 2, 3, 4, 5, 6];
+  const byTp = new Map(input.schedule.map((s) => [s.tpNumber, s.level]));
+  if (!required.every((n) => byTp.get(n))) return [];
+  const levels = required.map((n) => (byTp.get(n) as string).trim().toUpperCase());
+  const below = levels.filter((l) => l.startsWith("A"));
+  const atOrAbove = levels.filter((l) => !l.startsWith("A"));
+  if (below.length > 0 && atOrAbove.length > 0) return [];
+  const distinct = [...new Set(levels)].join(", ");
+  return [
+    {
+      tag: "TP levels",
+      message:
+        below.length === 0
+          ? "No TP is scheduled below intermediate level"
+          : "Every TP is scheduled below intermediate -- candidates need two significantly different levels",
+      detail: `TP1-6: ${distinct}`,
+      href: "/trainer/rotation",
+      cite: "9.1.2",
+    },
+  ];
+}
+
+/**
+ * A locked timetable under 120 contact hours.
+ *
+ * Handbook §3.1. Judged only once the timetable is locked -- before that it
+ * is a draft. Hours come from the timetable's own bands: each input or
+ * supervised session is its band's length, each TP session is the three
+ * lessons plus feedback the rest of the app already treats it as.
+ */
+export function contactHoursProblems(input: { locked: boolean; contactHours: number }): ComplianceProblem[] {
+  if (!input.locked) return [];
+  if (input.contactHours + 1e-9 >= 120) return [];
+  const short = 120 - input.contactHours;
+  return [
+    {
+      tag: "Contact hours",
+      message: `The locked timetable gives ${input.contactHours.toFixed(1).replace(/\.0$/, "")} contact hours, under the 120 minimum`,
+      detail: `${short.toFixed(1).replace(/\.0$/, "")} h short`,
+      href: "/trainer/timetable?mode=edit",
+      cite: "3.1",
+    },
+  ];
+}

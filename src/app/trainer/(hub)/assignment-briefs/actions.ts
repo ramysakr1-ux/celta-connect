@@ -28,7 +28,7 @@ export async function trainerUploadAssignmentBrief(input: {
     return { error: result.error };
   }
 
-  redirect(`/dashboard/trainer/assignment-briefs/${result.id}`);
+  redirect(`/trainer/assignment-briefs/${result.id}`);
 }
 
 export async function updateAssignmentTemplateSections(
@@ -60,11 +60,11 @@ export async function updateAssignmentTemplateSections(
 
   if (error) {
     // The message below is what the person reads; this is what we read.
-    console.error("[dashboard/trainer/assignment-briefs:updateAssignmentTemplateSections]", error);
+    console.error("[trainer/(hub)/assignment-briefs:updateAssignmentTemplateSections]", error);
     return { error: "Could not save. Try again." };
 }
 
-  revalidatePath(`/dashboard/trainer/assignment-briefs/${templateId}`);
+  revalidatePath(`/trainer/assignment-briefs/${templateId}`);
   return { error: null };
 }
 
@@ -79,8 +79,8 @@ export async function publishAssignmentTemplate(formData: FormData): Promise<voi
     .update({ published_at: new Date().toISOString() })
     .eq("id", templateId);
 
-  revalidatePath(`/dashboard/trainer/assignment-briefs/${templateId}`);
-  revalidatePath("/dashboard/trainer/assignment-briefs");
+  revalidatePath(`/trainer/assignment-briefs/${templateId}`);
+  revalidatePath("/trainer/assignment-briefs");
 }
 
 export async function unpublishAssignmentTemplate(formData: FormData): Promise<void> {
@@ -91,6 +91,6 @@ export async function unpublishAssignmentTemplate(formData: FormData): Promise<v
   const supabase = await createClient();
   await supabase.from("assignment_templates").update({ published_at: null }).eq("id", templateId);
 
-  revalidatePath(`/dashboard/trainer/assignment-briefs/${templateId}`);
-  revalidatePath("/dashboard/trainer/assignment-briefs");
+  revalidatePath(`/trainer/assignment-briefs/${templateId}`);
+  revalidatePath("/trainer/assignment-briefs");
 }

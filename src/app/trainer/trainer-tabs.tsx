@@ -21,7 +21,9 @@ const TABS = [
   // build-spec.md: "Replace the Audio Library tab with a Resource hub tab."
   // /audio and /coursebooks keep working as direct routes (linked from the
   // hub's own cards) -- only the top-nav tab itself moved.
-  { href: "/resource-hub", label: "Resource hub", alsoMatch: ["/audio"] },
+  // Assignment briefs and marking guidance moved in from /dashboard/trainer
+  // on 5 Sep 2026; Resource hub is their owning tab.
+  { href: "/resource-hub", label: "Resource hub", alsoMatch: ["/audio", "/assignment-briefs", "/marking-guidance"] },
 ] as const;
 
 // Visible only to the people the record concerns: the trainer-in-training,

@@ -4,7 +4,7 @@ import { getMarkingGuidance } from "@/lib/marking-guidance";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { getAllAssignmentCriteria } from "@/lib/assignment-criteria";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
-import { MarkingGuidanceTabs, type SerializedGuidance } from "@/app/dashboard/trainer/marking-guidance/tabs";
+import { MarkingGuidanceTabs, type SerializedGuidance } from "@/app/trainer/(hub)/marking-guidance/tabs";
 
 // design_handoff_teaching_and_assignments/assignments -- "Marking guidance
 // lives inside Marking Guidance.dc.html itself -- there's no separate

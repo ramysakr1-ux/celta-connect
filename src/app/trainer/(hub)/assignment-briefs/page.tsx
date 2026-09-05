@@ -3,7 +3,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { ASSIGNMENT_ORDER, ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { AssignmentBriefUploadForm } from "@/components/assignment-templates/upload-form";
-import { trainerUploadAssignmentBrief } from "@/app/dashboard/trainer/assignment-briefs/actions";
+import { trainerUploadAssignmentBrief } from "@/app/trainer/(hub)/assignment-briefs/actions";
 
 export default async function TrainerAssignmentBriefsPage() {
   const trainer = await requireRole("trainer");
@@ -40,7 +40,7 @@ export default async function TrainerAssignmentBriefsPage() {
 
             {template ? (
               <Link
-                href={`/dashboard/trainer/assignment-briefs/${template.id}`}
+                href={`/trainer/assignment-briefs/${template.id}`}
                 className="mt-3 inline-block rounded-[6px] border border-border px-4 py-2 text-sm text-ink hover:border-primary"
               >
                 Review brief

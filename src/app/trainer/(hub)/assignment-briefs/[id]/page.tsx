@@ -7,7 +7,7 @@ import {
   publishAssignmentTemplate,
   unpublishAssignmentTemplate,
   updateAssignmentTemplateSections,
-} from "@/app/dashboard/trainer/assignment-briefs/actions";
+} from "@/app/trainer/(hub)/assignment-briefs/actions";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 
 export default async function TrainerAssignmentBriefDetailPage({

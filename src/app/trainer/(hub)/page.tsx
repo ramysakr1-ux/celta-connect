@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchRosterRows } from "@/lib/roster";
-import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE, resolveTimeBands, bandIndexFor } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeWeekOf } from "@/lib/course-progress";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
@@ -17,7 +17,7 @@ import { Avatar } from "@/components/avatar";
 import { NeedsYou, type TodayAlert } from "@/app/trainer/(hub)/needs-you";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
-import { sixHoursProblems, doubleMarkingProblems, entryFormProblems, type ComplianceProblem } from "@/lib/course-compliance";
+import { sixHoursProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpLevelProblems, contactHoursProblems, type ComplianceProblem } from "@/lib/course-compliance";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -75,7 +75,7 @@ export default async function TodayPage() {
     await Promise.all([
       supabase
         .from("courses")
-        .select("name, start_date, end_date, assessor_visit_date, provisional_grades_due_at, assessor_name, assessor_email, assessor_notified_at, delivery_mode, entry_form_sent_at")
+        .select("name, start_date, end_date, assessor_visit_date, provisional_grades_due_at, assessor_name, assessor_email, assessor_notified_at, delivery_mode, entry_form_sent_at, timetable_locked_at, time_bands")
         .eq("id", courseId)
         .maybeSingle(),
       supabase
@@ -523,6 +523,54 @@ export default async function TodayPage() {
     }
     problems.push(...doubleMarkingProblems({ candidateCount: rows.length, today, endDate: course?.end_date ?? null, doubleMarkedByType: byType, assignmentTypes: [...types] }));
     problems.push(...entryFormProblems({ today, startDate: course?.start_date ?? null, deliveryMode: course?.delivery_mode ?? null, entryFormSentAt: course?.entry_form_sent_at ?? null }));
+
+    // The last three of the plan's seven (unpacking-the-kitchen-sink.md):
+    // group size, levels, contact hours. All three are about the course as
+    // planned, so they are the MCT's.
+    const admin = createAdminClient();
+    const [{ data: tpGroups }, { data: subgroups }, { data: schedule }, { data: allEvents }] = await Promise.all([
+      admin.from("course_tp_groups").select("id, name").eq("course_id", courseId),
+      admin.from("course_subgroups").select("id, tp_group_id").eq("course_id", courseId),
+      admin.from("course_tp_schedule").select("tp_number, tp_coursebook_id").eq("course_id", courseId),
+      admin.from("course_timetable_events").select("type, event_time, tag").eq("course_id", courseId),
+    ]);
+    const subIds = (subgroups ?? []).map((g) => g.id);
+    const { data: members } = subIds.length ? await admin.from("course_subgroup_members").select("subgroup_id, trainee_id").in("subgroup_id", subIds) : { data: [] };
+    const activeIds = new Set(rows.filter((r) => r.courseStatus === "active").map((r) => r.id));
+    const sizeByGroup = new Map<string, number>();
+    for (const m of members ?? []) {
+      if (!activeIds.has(m.trainee_id)) continue;
+      const tpGroupId = (subgroups ?? []).find((g) => g.id === m.subgroup_id)?.tp_group_id;
+      if (!tpGroupId) continue;
+      sizeByGroup.set(tpGroupId, (sizeByGroup.get(tpGroupId) ?? 0) + 1);
+    }
+    problems.push(...tpGroupSizeProblems({ groups: (tpGroups ?? []).map((g) => ({ id: g.id, name: g.name, size: sizeByGroup.get(g.id) ?? 0 })) }));
+
+    const bookIds = [...new Set((schedule ?? []).map((x) => x.tp_coursebook_id).filter((x): x is string => Boolean(x)))];
+    const { data: books } = bookIds.length ? await admin.from("tp_coursebooks").select("id, level").in("id", bookIds) : { data: [] };
+    const levelByBook = new Map((books ?? []).map((b) => [b.id, b.level]));
+    problems.push(
+      ...tpLevelProblems({
+        schedule: (schedule ?? []).map((x) => ({ tpNumber: x.tp_number, level: x.tp_coursebook_id ? (levelByBook.get(x.tp_coursebook_id) ?? null) : null })),
+      })
+    );
+
+    const bands = resolveTimeBands(course?.time_bands ?? null);
+    const bandMinutes = (t: string | null) => {
+      const i = bandIndexFor(t, bands);
+      const b = i >= 0 ? bands[i] : null;
+      if (!b) return 45;
+      const [sh, sm] = b.start.split(":").map(Number);
+      const [eh, em] = b.end.split(":").map(Number);
+      return Math.max(0, eh * 60 + em - (sh * 60 + sm));
+    };
+    let contactMinutes = 0;
+    for (const e of allEvents ?? []) {
+      if (e.tag === "lunch") continue;
+      if (e.type === "tp") contactMinutes += 180;
+      else if (e.type === "input_session" || e.type === "supervised_session") contactMinutes += bandMinutes(e.event_time);
+    }
+    problems.push(...contactHoursProblems({ locked: Boolean(course?.timetable_locked_at), contactHours: contactMinutes / 60 }));
   }
 
   // Same-tag problems collapse to one row. Seen live on the demo course:

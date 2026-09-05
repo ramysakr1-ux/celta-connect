@@ -121,7 +121,7 @@ export function AssignmentReviewForm({
               Assessment criteria · {isResubmission ? "resubmission" : "1st submission"}
             </p>
             <a
-              href={`/dashboard/trainer/marking-guidance?type=${encodeURIComponent(assignmentType)}`}
+              href={`/trainer/marking-guidance?type=${encodeURIComponent(assignmentType)}`}
               target="_blank"
               rel="noreferrer"
               className="shrink-0 text-[11px] font-medium text-primary hover:underline"

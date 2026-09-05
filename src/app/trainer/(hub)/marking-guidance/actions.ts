@@ -40,6 +40,6 @@ export async function saveMarkingGuidanceEntry(_prevState: FormState, formData: 
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/trainer/marking-guidance");
+  revalidatePath("/trainer/marking-guidance");
   return { error: null };
 }
