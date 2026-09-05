@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireCapability, requireCapabilityOrTrainer } from "@/lib/auth/require-capability";
 import { isMctOnCourse } from "@/lib/course-mct";
+import { isMctOfCourse } from "@/lib/course-tutor-role";
 import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
 import { esc } from "@/lib/email-layout";
@@ -261,6 +262,14 @@ export async function sendJoinLinkEmail(
   const courseId = formData.get("course_id");
   const role = formData.get("role");
   const toEmail = formData.get("to_email");
+
+  // Ramy, 5 Sep 2026: adding a candidate is the main course tutor's, not
+  // any tutor's. Course Admin keeps its capability path; a trainer must be
+  // the MCT of the course (the Roster hides the button for an ACT, and
+  // this is what makes the hiding real).
+  if (staff.role === "trainer" && typeof courseId === "string" && !(await isMctOfCourse(staff, courseId))) {
+    return { error: "Only the main course tutor can add candidates.", sent: false };
+  }
 
   if (
     typeof courseId !== "string" ||

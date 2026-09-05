@@ -172,7 +172,8 @@ export default async function TrainerRosterPage() {
             Email all candidates
           </a>
         ) : null}
-        {trainer ? <AddCandidateButton courseId={courseId} joinUrl={joinUrl} /> : null}
+        {/* MCT only -- Ramy, 5 Sep 2026: adding a candidate is the main course tutor's, not any tutor's. */}
+        {trainer && isMct ? <AddCandidateButton courseId={courseId} joinUrl={joinUrl} /> : null}
       </PageHead>
 
       {trainer ? <AlsoUnder tab="Roster" links={[{ href: "/trainer/fol-spot-check", label: "Error log spot check" }]} /> : null}
