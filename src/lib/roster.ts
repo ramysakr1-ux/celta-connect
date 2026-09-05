@@ -99,17 +99,54 @@ export interface RosterRow {
 // Single source of truth for what a roster row means -- both the roster
 // page and its CSV export call this, so the two can never disagree on a
 // column's definition (checkpoint 2, per Ramy's build-spec.md).
+type T = Database["public"]["Tables"];
+/** What hub_roster_bundle() (migration 0273) returns: the same 24 datasets, same columns, one round trip. */
+interface RosterBundle {
+  trainees: Pick<T["profiles"]["Row"], "id" | "full_name" | "email" | "phone" | "course_status">[];
+  stage2_blocks: { id: string }[];
+  tutorial_invites: Pick<T["individual_tutorial_invites"]["Row"], "trainee_id" | "stage" | "confirmed_at">[];
+  filmed_events: { id: string }[];
+  filmed_sessions: { id: string }[];
+  course: Pick<T["courses"]["Row"], "total_hours" | "center_id"> | null;
+  taught_plans: Pick<T["plan_assignments"]["Row"], "trainee_id" | "tp_number">[];
+  feedback: Pick<T["tp_feedback"]["Row"], "trainee_id" | "tp_number" | "grade" | "submitted_at" | "strengths_planning" | "strengths_teaching" | "action_points_planning" | "action_points_teaching">[];
+  assignments: Pick<T["assignments"]["Row"], "trainee_id" | "assignment_type" | "first_status" | "resubmission_status" | "due_date" | "first_submitted_at" | "resubmission_submitted_at">[];
+  celta5_records: Pick<T["celta5_records"]["Row"], "trainee_id" | "hours_attended" | "provisional_grade" | "provisional_grade_upper" | "stage1_completed_at" | "stage2_candidate_submitted_at" | "stage2_completed_at" | "stage2_moved_earlier_at" | "stage2_moved_earlier_reason" | "trainee_signoff_final_at" | "trainer_signoff_final_at" | "stage3_tutorial_required" | "stage3_finalized_at" | "stage3_moved_earlier_at" | "stage3_moved_earlier_reason">[];
+  matrix: Pick<T["celta5_matrix"]["Row"], "trainee_id" | "criteria_code" | "tutor_status_stage2">[];
+  supervised_events: { id: string }[];
+  supervised_completions: Pick<T["supervised_session_completions"]["Row"], "timetable_event_id" | "trainee_id" | "submitted_at" | "time_spent_seconds">[];
+  tp_plans: Pick<T["tp_plans"]["Row"], "trainee_id" | "tp_number" | "submitted_at">[];
+  tp_self_evals: Pick<T["tp_self_evaluations"]["Row"], "trainee_id" | "tp_number" | "submitted_at">[];
+  observations: Pick<T["observations"]["Row"], "trainee_id" | "filmed" | "length_minutes">[];
+  stage2_slots: Pick<T["stage2_tutorial_slots"]["Row"], "position" | "trainee_id" | "booked_at">[];
+  error_log: Pick<T["class_error_log"]["Row"], "logged_by_candidate_id">[];
+  obs_tasks: { id: string }[];
+  obs_task_submissions: Pick<T["observation_task_submissions"]["Row"], "trainee_id" | "task_id">[];
+  pct_sections: { id: string; pre_course_task_items: { id: string }[] }[];
+  pct_responses: Pick<T["pre_course_task_responses"]["Row"], "trainee_id" | "response">[];
+  filmed_tasks: { id: string; session_id: string }[];
+  filmed_responses: Pick<T["filmed_observation_task_responses"]["Row"], "trainee_id" | "task_id" | "completed_at">[];
+}
+
 export async function fetchRosterRows(
   supabase: SupabaseClient<Database>,
   courseId: string
 ): Promise<RosterRow[]> {
+  // One round trip for everything below (migration 0273), with the
+  // query-by-query path kept as the fallback until the function exists on
+  // the database -- and as the readable definition of what the bundle
+  // must return. Perf audit 5 Sep 2026: 20 tutors opening Roster in the
+  // same second meant 20 x 26 calls; this makes it 20 x 1.
+  const bundled = await supabase.rpc("hub_roster_bundle", { p_course_id: courseId });
+  const B: RosterBundle | null = !bundled.error && bundled.data ? (bundled.data as unknown as RosterBundle) : null;
   // Wave 1: the roster, plus everything that needs only the course. Perf
   // audit 5 Sep 2026: this function ran 12 one-after-another waves; the
   // course-only lookups (stage 2 blocks, tutorial invites, filmed-obs
   // events and sessions, pre-course sections) waited behind the trainee
   // list for no reason. Three waves now.
-  const [{ data: trainees }, { data: stage2Blocks }, { data: tutorialInvites }, { data: filmedObsEvents }, { data: filmedObsSessions }, { data: courseForCentre }] =
-    await Promise.all([
+  const [{ data: trainees }, { data: stage2Blocks }, { data: tutorialInvites }, { data: filmedObsEvents }, { data: filmedObsSessions }, { data: courseForCentre }] = B
+    ? [{ data: B.trainees }, { data: B.stage2_blocks }, { data: B.tutorial_invites }, { data: B.filmed_events }, { data: B.filmed_sessions }, { data: B.course }]
+    : await Promise.all([
       supabase.from("profiles").select("id, full_name, email, phone, course_status").eq("course_id", courseId).eq("role", "trainee").order("full_name"),
       // Stage 2 blocks are scoped by course first (stage2_tutorial_slots has
       // no course_id of its own -- it only reaches the course through its block).
@@ -142,8 +179,25 @@ export async function fetchRosterRows(
     { data: errorLog },
     { data: obsTasks },
     { data: obsTaskSubmissions },
-  ] =
-    traineeIds.length > 0
+  ] = B
+    ? [
+        { data: B.taught_plans },
+        { data: B.feedback },
+        { data: B.assignments },
+        { data: B.celta5_records },
+        { data: B.matrix },
+        { data: B.course },
+        { data: B.supervised_events },
+        { data: B.supervised_completions },
+        { data: B.tp_plans },
+        { data: B.tp_self_evals },
+        { data: B.observations },
+        { data: B.stage2_slots },
+        { data: B.error_log },
+        { data: B.obs_tasks },
+        { data: B.obs_task_submissions },
+      ]
+    : traineeIds.length > 0
       ? await Promise.all([
           // Real "taught" signal is plan_assignments.taught_at (migration
           // 0017) -- tp_lessons is only ever written by the old,
@@ -214,18 +268,21 @@ export async function fetchRosterRows(
   // on the CENTRE (sections are seeded per centre and shared by every
   // course it runs, so the total is one number for the whole roster). The
   // sections come with their items in one embedded read.
-  const [center, { data: pctSectionsWithItems }, { data: pctResponses }, { data: filmedObsTasks }] = await Promise.all([
-    centerId ? getCachedCenter(centerId) : Promise.resolve(null),
-    centerId && traineeIds.length > 0
-      ? supabase.from("pre_course_task_sections").select("id, pre_course_task_items(id)").eq("center_id", centerId)
-      : Promise.resolve({ data: [] as { id: string; pre_course_task_items: { id: string }[] }[] }),
-    traineeIds.length > 0
-      ? supabase.from("pre_course_task_responses").select("trainee_id, response").in("trainee_id", traineeIds)
-      : Promise.resolve({ data: [] as { trainee_id: string; response: string }[] }),
-    (filmedObsSessions ?? []).length > 0
-      ? supabase.from("filmed_observation_tasks").select("id").in("session_id", (filmedObsSessions ?? []).map((x) => x.id))
-      : Promise.resolve({ data: [] as { id: string }[] }),
-  ]);
+  const centerPromise = centerId ? getCachedCenter(centerId) : Promise.resolve(null);
+  const [center, { data: pctSectionsWithItems }, { data: pctResponses }, { data: filmedObsTasks }] = B
+    ? await Promise.all([centerPromise, Promise.resolve({ data: B.pct_sections }), Promise.resolve({ data: B.pct_responses }), Promise.resolve({ data: B.filmed_tasks })])
+    : await Promise.all([
+        centerPromise,
+        centerId && traineeIds.length > 0
+          ? supabase.from("pre_course_task_sections").select("id, pre_course_task_items(id)").eq("center_id", centerId)
+          : Promise.resolve({ data: [] as { id: string; pre_course_task_items: { id: string }[] }[] }),
+        traineeIds.length > 0
+          ? supabase.from("pre_course_task_responses").select("trainee_id, response").in("trainee_id", traineeIds)
+          : Promise.resolve({ data: [] as { trainee_id: string; response: string }[] }),
+        (filmedObsSessions ?? []).length > 0
+          ? supabase.from("filmed_observation_tasks").select("id").in("session_id", (filmedObsSessions ?? []).map((x) => x.id))
+          : Promise.resolve({ data: [] as { id: string }[] }),
+      ]);
   const preCourseTaskTotal = (pctSectionsWithItems ?? []).reduce((n, sec) => n + (sec.pre_course_task_items?.length ?? 0), 0);
   // Shares responseIsAnswered with the task page itself, so the roster and
   // the candidate's own progress bar can never disagree about what counts
@@ -236,8 +293,9 @@ export async function fetchRosterRows(
   // still one the candidate will owe, and counting only prepared sessions
   // would make the target shrink and grow as staff work through setup.
   const filmedObsTotal = (filmedObsEvents ?? []).length;
-  const { data: filmedObsResponses } =
-    (filmedObsTasks ?? []).length > 0 && traineeIds.length > 0
+  const { data: filmedObsResponses } = B
+    ? { data: B.filmed_responses }
+    : (filmedObsTasks ?? []).length > 0 && traineeIds.length > 0
       ? await supabase
           .from("filmed_observation_task_responses")
           .select("trainee_id, task_id, completed_at")

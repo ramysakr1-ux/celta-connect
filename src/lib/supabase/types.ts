@@ -3845,6 +3845,7 @@ export interface Database {
     Views: Record<string, never>;
     Functions: {
       current_tp_number: { Args: { p_course_id: string }; Returns: number };
+      hub_roster_bundle: { Args: { p_course_id: string }; Returns: unknown };
       sync_tp_group_tutors: { Args: { p_course_id: string }; Returns: undefined };
       centre_hard_delete: {
         Args: { p_center_id: string };
