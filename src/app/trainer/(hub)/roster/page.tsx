@@ -39,14 +39,12 @@ export default async function TrainerRosterPage() {
   // course_tutors helper the layout already paid for -- the old
   // profiles.tutor_role guess is the stale column layout.tsx warns about.
   const adminClient = createAdminClient();
-  const [rows, isMct, filmsTpSessions, { data: subgroupsForFol }, { data: classErrorRows }, { data: courseRow }, { data: tutorRows }, { data: invitationRows }, { data: centreTrainers }] =
+  const [rows, isMct, filmsTpSessions, { data: courseRow }, { data: tutorRows }, { data: invitationRows }, { data: centreTrainers }] =
     await Promise.all([
       fetchRosterRows(supabase, courseId),
       trainer ? isMctOfCourse(trainer, courseId) : Promise.resolve(false),
       // specs/admissions-and-close-out.md §10 -- "only used if a centre films."
       trainer?.center_id ? supabase.from("centers").select("films_tp_sessions").eq("id", trainer.center_id).maybeSingle().then((r) => Boolean(r.data?.films_tp_sessions)) : Promise.resolve(false),
-      supabase.from("course_subgroups").select("name").eq("course_id", courseId),
-      supabase.from("class_error_log").select("tp_class").eq("course_id", courseId),
       trainer
         ? adminClient.from("courses").select("trainee_join_token, course_code, name, chat_retention_days, chat_retention_mode, delivery_mode").eq("id", courseId).maybeSingle()
         : Promise.resolve({ data: null }),
@@ -78,10 +76,6 @@ export default async function TrainerRosterPage() {
   ]);
   const consentConfirmedById = new Map((consentRows ?? []).map((r) => [r.id, !!r.filming_consent_confirmed_at]));
 
-  const folCountByClass = new Map<string, number>();
-  for (const s of subgroupsForFol ?? []) folCountByClass.set(s.name, 0);
-  for (const r of classErrorRows ?? []) folCountByClass.set(r.tp_class, (folCountByClass.get(r.tp_class) ?? 0) + 1);
-  const folByClass = [...folCountByClass.entries()].sort(([a], [b]) => a.localeCompare(b));
 
   // build-spec.md §18 -- "Visibility follows the chat rule: tutors
   // registered on that course, nobody else. No admin exception." An admin
@@ -176,30 +170,11 @@ export default async function TrainerRosterPage() {
         {trainer && isMct ? <AddCandidateButton courseId={courseId} joinUrl={joinUrl} /> : null}
       </PageHead>
 
-      {trainer ? <AlsoUnder tab="Roster" links={[{ href: "/trainer/fol-spot-check", label: "Error log spot check" }]} /> : null}
+      {trainer ? <AlsoUnder tab="Roster" links={[{ href: "/trainer/fol-spot-check", label: "FOL pool by class" }]} /> : null}
 
-      {folByClass.length > 0 ? (
-        <div className="sheet flex flex-wrap items-center gap-3 p-4">
-          <span className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">FOL pool, by class</span>
-          {folByClass.map(([name, count]) => (
-            <span
-              key={name}
-              className={`rounded-[6px] px-2.5 py-1 text-xs font-medium ${
-                count === 0 ? "border border-dashed border-status-warning-text text-status-warning-text" : "bg-accent text-ink"
-              }`}
-              title={count === 0 ? `${name} hasn't logged any observations yet` : `${count} observation${count === 1 ? "" : "s"} logged`}
-            >
-              {name} -- {count}
-            </span>
-          ))}
-          {/* specs/for-claude-code-fol-spot-check.md -- the fuller
-              grammar/pronunciation-split, last-logged, status-pill view
-              this compact row doesn't have room for. */}
-          <Link href="/trainer/fol-spot-check" className="text-xs font-medium text-primary hover:underline">
-            Full spot-check view →
-          </Link>
-        </div>
-      ) : null}
+      {/* The FOL pool by class used to be a row here AND a page; Ramy,
+          5 Sep 2026: "just one nice pill... the class distribution would be
+          inside." The pill in the row above is the one door. */}
 
       {filmsTpSessions ? (
         <div className="sheet sheet-garnet flex flex-wrap items-center gap-3 p-4">
