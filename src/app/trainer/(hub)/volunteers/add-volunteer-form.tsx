@@ -41,7 +41,7 @@ export function AddVolunteerForm() {
         disabled={pending}
         className="h-10 rounded-[6px] bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60"
       >
-        {pending ? "Adding…" : "Add student"}
+        {pending ? "Adding…" : "Add volunteer"}
       </button>
     </form>
   );

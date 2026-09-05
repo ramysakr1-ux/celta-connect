@@ -18,7 +18,7 @@ export function CopyLinkButton({ token }: { token: string }) {
       onClick={handleCopy}
       className="rounded-[6px] border border-border px-3 py-1.5 text-xs text-ink trainer-hover-fill"
     >
-      {copied ? "Copied!" : "Copy invite link"}
+      {copied ? "Copied!" : "Copy their link"}
     </button>
   );
 }
