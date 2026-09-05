@@ -34,11 +34,11 @@ export function RosterTable({
       <button
         type="button"
         onClick={() => setShowDetail((v) => !v)}
-        className="self-start text-xs font-medium text-primary hover:underline"
+        aria-pressed={showDetail}
+        title="TP stages, observation hours, stage sign-offs, FOL, standing"
+        className={`trainer-hover self-start rounded-full border border-border px-3.5 py-1.5 text-[12.5px] font-semibold ${showDetail ? "bg-card-inset text-ink" : "bg-card text-muted"}`}
       >
-        {showDetail
-          ? "Hide progress detail ↑"
-          : "Show progress detail -- TP stages, observation hours, stage sign-offs, FOL, standing →"}
+        {showDetail ? "Hide progress detail" : "Show progress detail"}
       </button>
       <div className="sheet overflow-x-auto !p-0">
         <table className="table-plain w-full">

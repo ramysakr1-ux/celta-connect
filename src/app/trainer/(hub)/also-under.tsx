@@ -11,20 +11,27 @@ import Link from "next/link";
 // reassurance copy.
 export function AlsoUnder({ tab, links }: { tab: string; links: { href: string; label: string }[] }) {
   if (links.length === 0) return null;
+  // Ramy, 5 Sep 2026: no "Also under" label, no arrows ("where is that
+  // arrow pointing?"), a pill with a permanent colour, a little bigger.
+  // Soft gold, the same tint as the announcement template pill, so every
+  // sub-page door in the hub is one recognisable thing; hover = the role
+  // ring like every other door. `tab` is kept for the accessible name.
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-      <span className="text-[10.5px] font-bold tracking-[0.11em] text-muted uppercase">Also under {tab}</span>
-      <div className="flex flex-wrap gap-1.5">
-        {links.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            className="rounded-full border border-border px-2.5 py-1 text-[12px] text-muted transition-colors hover:border-[var(--hub-accent)] hover:text-ink"
-          >
-            {l.label} &rarr;
-          </Link>
-        ))}
-      </div>
+    <div className="flex flex-wrap gap-2" aria-label={`Also under ${tab}`}>
+      {links.map((l) => (
+        <Link
+          key={l.href}
+          href={l.href}
+          className="trainer-hover inline-flex h-9 items-center rounded-full border px-4 text-[13px] font-semibold"
+          style={{
+            background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))",
+            borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)",
+            color: "oklch(40% 0.09 68)",
+          }}
+        >
+          {l.label}
+        </Link>
+      ))}
     </div>
   );
 }
