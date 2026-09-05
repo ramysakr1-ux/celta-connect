@@ -18,6 +18,7 @@ import type { DeliveryMode } from "@/lib/delivery-mode";
 import { isCourseStatusReadOnly } from "@/lib/course-status";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { computeWeekOf } from "@/lib/course-progress";
 
 // The detailed operational roster. Row computation lives in lib/roster.ts,
 // shared with the CSV export route below so the two can't drift on what a
@@ -49,7 +50,7 @@ export default async function TrainerRosterPage() {
       // specs/admissions-and-close-out.md §10 -- "only used if a centre films."
       trainer?.center_id ? supabase.from("centers").select("films_tp_sessions").eq("id", trainer.center_id).maybeSingle().then((r) => Boolean(r.data?.films_tp_sessions)) : Promise.resolve(false),
       trainer
-        ? adminClient.from("courses").select("trainee_join_token, course_code, name, start_date, chat_retention_days, chat_retention_mode, delivery_mode").eq("id", courseId).maybeSingle()
+        ? adminClient.from("courses").select("trainee_join_token, course_code, name, start_date, end_date, chat_retention_days, chat_retention_mode, delivery_mode").eq("id", courseId).maybeSingle()
         : Promise.resolve({ data: null }),
       trainer
         ? adminClient.from("course_tutors").select("id, profile_id, tutor_role, verified_at, owned_assignment_types").eq("course_id", courseId).is("left_at", null)
@@ -91,6 +92,9 @@ export default async function TrainerRosterPage() {
   const frozenSubById: Record<string, string> = {};
   const startDate = courseRow?.start_date ?? null;
   const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
+  // "provisional, week N" under the Pass A / B summary tile (roster v2).
+  const weekLabel =
+    courseRow?.start_date && courseRow?.end_date ? computeWeekOf(courseRow.start_date, courseRow.end_date, toLocalIso(new Date(), timeZone)) : null;
   for (const r of frozenRows ?? []) {
     if (!startDate || !r.course_status_set_at) continue;
     const left = toLocalIso(new Date(r.course_status_set_at), timeZone);
@@ -219,6 +223,7 @@ export default async function TrainerRosterPage() {
         showContact={isRegisteredTutor}
         courseCode={courseCode}
         frozenSubById={frozenSubById}
+        weekLabel={weekLabel}
         leading={trainer ? <AlsoUnder tab="Roster" links={[{ href: "/trainer/fol-spot-check", label: "FOL pool by class" }]} /> : null}
       />
 

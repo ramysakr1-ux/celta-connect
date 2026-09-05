@@ -6,7 +6,7 @@ const ASSIGNMENT_TYPES = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
 const SHORT_LABEL: Record<(typeof ASSIGNMENT_TYPES)[number], string> = {
   "Focus on Learner": "FoL",
   LRT: "LRT",
-  Skills: "Skills",
+  Skills: "SRT",
   LfC: "LfC",
 };
 

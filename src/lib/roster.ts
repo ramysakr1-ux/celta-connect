@@ -11,6 +11,22 @@ import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/obser
 
 export type Celta5SignoffStatus = "not_started" | "candidate_signed" | "both_signed";
 
+export type AssignmentTileState = "passed" | "pending" | "resub_pending" | "failed" | "not_submitted";
+export interface AssignmentTile {
+  type: string;
+  /** FoL · LRT · SRT · LfC -- Ramy, 5 Sep 2026: "we say SRT for skills". */
+  short: string;
+  state: AssignmentTileState;
+}
+
+const ASSIGNMENT_TILE_ORDER = ["Focus on Learner", "LRT", "Skills", "LfC"] as const;
+const ASSIGNMENT_SHORT: Record<(typeof ASSIGNMENT_TILE_ORDER)[number], string> = {
+  "Focus on Learner": "FoL",
+  LRT: "LRT",
+  Skills: "SRT",
+  LfC: "LfC",
+};
+
 export interface RosterRow {
   id: string;
   name: string;
@@ -69,6 +85,14 @@ export interface RosterRow {
   // resubmission flag if used."
   assignmentsPassed: number;
   assignmentsTotal: number;
+  /**
+   * Roster v2 (design_handoff_trainer_roster_v2): one tile per standard
+   * assignment, in syllabus order, with the state a tutor cares about.
+   * "resub_pending" = failed first submission, resubmission not yet in.
+   */
+  assignmentTiles: AssignmentTile[];
+  /** Any assignment waiting on a resubmission -- the v2 "Resubmission" flag and summary tile. */
+  resubmissionPending: boolean;
   assignmentsResubmitted: boolean;
   // Item 9: relative to the course, not an invented absolute number --
   // "flagged low" means below half the cohort's own average, since the
@@ -344,6 +368,23 @@ export async function fetchRosterRows(
       (a) => a.first_status === "approved" || a.resubmission_status === "approved"
     ).length;
     const assignmentsLeft = Math.max(standardAssignments.length - assignmentsPassed, 0);
+    const assignmentTiles: AssignmentTile[] = ASSIGNMENT_TILE_ORDER.flatMap((type) => {
+      const a = standardAssignments.find((x) => x.assignment_type === type);
+      if (!a) return [];
+      const awaitingMark = (st: string) => st === "pending" || st === "submitted";
+      const state: AssignmentTileState =
+        a.first_status === "approved" || a.resubmission_status === "approved"
+          ? "passed"
+          : awaitingMark(a.first_status) || awaitingMark(a.resubmission_status)
+            ? "pending"
+            : a.first_status === "resubmission_required" && a.resubmission_status === "resubmission_required"
+              ? "failed"
+              : a.first_status === "resubmission_required"
+                ? "resub_pending"
+                : "not_submitted";
+      return [{ type, short: ASSIGNMENT_SHORT[type], state }];
+    });
+    const resubmissionPending = assignmentTiles.some((t) => t.state === "resub_pending");
 
     const traineeMatrix = (matrixRows ?? []).filter((m) => m.trainee_id === trainee.id);
     const matrixByCode = new Map(traineeMatrix.map((m) => [m.criteria_code, m.tutor_status_stage2]));
@@ -460,6 +501,8 @@ export async function fetchRosterRows(
       celta5SignoffStatus,
       assignmentsPassed,
       assignmentsTotal,
+      assignmentTiles,
+      resubmissionPending,
       assignmentsResubmitted,
       folEntriesLogged,
       folEntriesLow,

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TrajectoryBarInline } from "@/components/trajectory-gradient-bar";
-import type { RosterRow } from "@/lib/roster";
+import type { RosterRow, AssignmentTile } from "@/lib/roster";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { ordinal } from "@/lib/stage2-tutorials";
@@ -13,20 +13,26 @@ import { Avatar, toneForName } from "@/components/avatar";
 
 const moveEarlierInitialState: FormState = { error: null };
 
-// design_handoff_trainer_roster: one grid for the header row and every
-// candidate row, so the columns line up without a <table>. Candidate ·
-// six glance columns · At risk · Contact.
-export const ROSTER_COLS = "grid gap-x-2 grid-cols-[300px_repeat(6,minmax(0,1fr))_96px_110px]";
+// design_handoff_trainer_roster_v2: one grid for the header row and every
+// candidate row. Candidate · TPs · Assessed hrs · Assignments · Criteria ·
+// Attendance · Provisional · Flags · Contact. (Assignments is wider than
+// the handoff's 110px because Connect has four assignments, not two.)
+export const ROSTER_COLS = "grid gap-x-1.5 grid-cols-[236px_122px_96px_124px_112px_84px_100px_minmax(140px,1fr)_74px]";
 
-const NUM = "text-center text-[14px] font-medium tabular-nums";
+// The v2 colour vocabulary: teal = good, gold = watch, red = problem.
+export const TONE = {
+  teal: { background: "oklch(93% 0.019 190)", color: "oklch(32% 0.05 195)" },
+  gold: { background: "oklch(93% 0.05 80)", color: "oklch(40% 0.09 68)" },
+  red: { background: "oklch(94% 0.043 25)", color: "oklch(45% 0.15 27)" },
+  blue: { background: "oklch(93.5% 0.033 235)", color: "oklch(42% 0.09 250)" },
+} as const;
+const TEAL_BAR = "oklch(45% 0.07 195)";
+const GOLD_BAR = "oklch(63% 0.096 72)";
+const RED_BAR = "oklch(52% 0.19 32)";
 
-function MoveEarlierControl({
-  traineeId,
-  stage,
-}: {
-  traineeId: string;
-  stage: "stage2" | "stage3";
-}) {
+const PILL = "inline-flex h-[26px] w-fit items-center gap-1.5 rounded-full px-2.5 text-[12.5px] font-bold tabular-nums whitespace-nowrap";
+
+function MoveEarlierControl({ traineeId, stage }: { traineeId: string; stage: "stage2" | "stage3" }) {
   const [open, setOpen] = useState(false);
   const action = stage === "stage2" ? moveStage2Earlier : moveStage3Earlier;
   const [state, formAction, pending] = useActionState(action, moveEarlierInitialState);
@@ -58,11 +64,7 @@ function MoveEarlierControl({
       />
       {state.error ? <p className="text-[11px] text-destructive">{state.error}</p> : null}
       <div className="flex items-center gap-2">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-[6px] bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground disabled:opacity-60"
-        >
+        <button type="submit" disabled={pending} className="rounded-[6px] bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground disabled:opacity-60">
           {pending ? "Saving…" : "Confirm"}
         </button>
         <button type="button" onClick={() => setOpen(false)} className="text-[11px] text-muted hover:text-ink">
@@ -91,25 +93,11 @@ const CELTA5_SIGNOFF_LONG: Record<RosterRow["celta5SignoffStatus"], string> = {
 };
 
 /** One cell of the progress strip: tiny uppercase label over a bold value. */
-function Cell({
-  label,
-  warn = false,
-  first = false,
-  children,
-}: {
-  label: string;
-  warn?: boolean;
-  first?: boolean;
-  children: React.ReactNode;
-}) {
+function Cell({ label, warn = false, first = false, children }: { label: string; warn?: boolean; first?: boolean; children: React.ReactNode }) {
   return (
-    <div
-      className={`flex min-h-10 min-w-0 flex-col items-center justify-center gap-1 px-1.5 ${first ? "" : "border-l border-black/[0.08]"}`}
-    >
+    <div className={`flex min-h-10 min-w-0 flex-col items-center justify-center gap-1 px-1.5 ${first ? "" : "border-l border-black/[0.08]"}`}>
       <span className="text-[9.5px] font-bold tracking-[0.08em] whitespace-nowrap text-muted uppercase">{label}</span>
-      <span className={`text-[12.5px] font-semibold tabular-nums whitespace-nowrap ${warn ? "text-status-warning-text" : "text-ink"}`}>
-        {children}
-      </span>
+      <span className={`text-[12.5px] font-semibold tabular-nums whitespace-nowrap ${warn ? "text-status-warning-text" : "text-ink"}`}>{children}</span>
     </div>
   );
 }
@@ -121,7 +109,7 @@ function stop(e: React.MouseEvent) {
 const CELL_LINK = "hover:underline";
 
 // The eleven fields the flat table used to carry as columns, now a strip
-// inside the row (handoff, "Progress detail strip"): margin 0 20px 12px
+// inside the row (v1 handoff, "Progress detail strip"): margin 0 20px 12px
 // 68px so its left edge sits under the name, past the avatar. Same row
 // element as the glance columns, so the hover ring wraps both.
 function DetailStrip({ row, isMct }: { row: RosterRow; isMct: boolean }) {
@@ -149,12 +137,7 @@ function DetailStrip({ row, isMct }: { row: RosterRow; isMct: boolean }) {
     <div className="mr-5 mb-3 ml-[68px] grid grid-cols-[repeat(11,minmax(0,1fr))] items-start rounded-[8px] bg-black/[0.035] px-1 py-2">
       <Cell label="TP stages" first warn={row.tpStagesBehind > 0}>
         {row.tpStagesTaught > 0 ? (
-          <Link
-            href={`/portfolio/${row.id}/tp`}
-            onClick={stop}
-            title="Taught TPs with plan + self-evaluation + feedback all submitted"
-            className={CELL_LINK}
-          >
+          <Link href={`/portfolio/${row.id}/tp`} onClick={stop} title="Taught TPs with plan + self-evaluation + feedback all submitted" className={CELL_LINK}>
             {row.tpStagesTaught - row.tpStagesBehind}/{row.tpStagesTaught}
           </Link>
         ) : (
@@ -199,12 +182,7 @@ function DetailStrip({ row, isMct }: { row: RosterRow; isMct: boolean }) {
         </Link>
       </Cell>
       <Cell label="Stage 2/3" warn={stageWarn}>
-        <Link
-          href={`/portfolio/${row.id}/celta5`}
-          onClick={stop}
-          title={[s2.long, s3.long, moved].filter(Boolean).join(" · ")}
-          className={CELL_LINK}
-        >
+        <Link href={`/portfolio/${row.id}/celta5`} onClick={stop} title={[s2.long, s3.long, moved].filter(Boolean).join(" · ")} className={CELL_LINK}>
           {s2.short} · {s3.short}
           {moved ? (
             <span className="ml-1" aria-label="moved earlier">
@@ -225,9 +203,7 @@ function DetailStrip({ row, isMct }: { row: RosterRow; isMct: boolean }) {
         </Link>
       </Cell>
       <Cell label="FOL" warn={row.folEntriesLow}>
-        <span title={row.folEntriesLow ? "Below half the cohort's average -- may be under-logging" : "FOL entries logged this course"}>
-          {row.folEntriesLogged}
-        </span>
+        <span title={row.folEntriesLow ? "Below half the cohort's average -- may be under-logging" : "FOL entries logged this course"}>{row.folEntriesLogged}</span>
       </Cell>
       <Cell label="Standing">
         <TrajectoryBarInline value={row.trajectory} />
@@ -282,6 +258,40 @@ function ContactCell({ row, courseCode, show }: { row: RosterRow; courseCode: st
   );
 }
 
+// v2 "Assignments": one 26px tile per assignment, FoL · LRT · SRT · LfC.
+const TILE_STATE: Record<AssignmentTile["state"], { style: React.CSSProperties; words: string }> = {
+  passed: { style: { ...TONE.teal, borderColor: "transparent" }, words: "passed" },
+  pending: { style: { background: "oklch(95% 0.008 85)", color: "oklch(38% 0.014 70)", borderColor: "transparent" }, words: "submitted, awaiting the mark" },
+  resub_pending: { style: { ...TONE.gold, borderStyle: "dashed", borderColor: "var(--color-status-warning-text)" }, words: "resubmission pending" },
+  failed: { style: { ...TONE.red, borderColor: "transparent" }, words: "failed on resubmission" },
+  not_submitted: { style: { background: "transparent", color: "var(--color-muted)", borderColor: "oklch(80% 0.014 82)" }, words: "not submitted" },
+};
+
+function AssignmentTiles({ row }: { row: RosterRow }) {
+  if (row.assignmentTiles.length === 0) return <span className="text-muted">--</span>;
+  return (
+    <Link href={`/portfolio/${row.id}/assignments`} onClick={stop} className="flex items-center gap-1">
+      {row.assignmentTiles.map((t) => (
+        <span
+          key={t.type}
+          title={`${t.type}: ${TILE_STATE[t.state].words}`}
+          className="flex size-[26px] items-center justify-center rounded-[7px] border-[1.5px] text-[10px] font-bold"
+          style={TILE_STATE[t.state].style}
+        >
+          {t.short}
+        </span>
+      ))}
+    </Link>
+  );
+}
+
+function provisionalStyle(row: RosterRow): React.CSSProperties {
+  if (row.provisionalSlashed) return { ...TONE.red, textDecoration: "line-through" };
+  if (row.provisionalLabel === "Pass A") return { background: GOLD_BAR, color: "oklch(24% 0.06 55)" };
+  if (row.provisionalLabel === "Pass B") return { background: "oklch(90% 0.05 75)", color: "oklch(38% 0.09 65)" };
+  return TONE.teal;
+}
+
 // build-spec.md §8 bug 3 -- rows carried cursor-pointer but only the name
 // cell actually navigated. Whole row pushes to the portfolio; the name
 // keeps its own <Link> too, for keyboard nav and hover colour.
@@ -312,6 +322,18 @@ export function RosterRowView({
     ? (frozenSub ?? "Record kept")
     : `${row.stage1Filed ? "Stage 1 filed" : "Stage 1 not filed"} · ${row.folEntriesLogged} FOL ${row.folEntriesLogged === 1 ? "entry" : "entries"}`;
 
+  // Thresholds: hours warn is the roster's own (< 6 of 6), not the
+  // handoff's illustrative < 4 -- Ramy agreed 5 Sep 2026. Attendance and
+  // criteria bands are the handoff's.
+  const hoursTone = row.assessedHrs < 6 ? TONE.gold : TONE.teal;
+  const attendanceTone = row.attendancePct < 80 ? TONE.red : row.attendancePct < 90 ? TONE.gold : TONE.teal;
+  const criteriaBar = row.criteriaPct < 60 ? RED_BAR : row.criteriaPct < 75 ? GOLD_BAR : TEAL_BAR;
+
+  const flags: { label: string; title: string; tone: React.CSSProperties }[] = [];
+  if (row.atRiskReasons.length > 0) flags.push({ label: "At risk", title: row.atRiskReasons.map((r) => AT_RISK_LABELS[r]).join(" · "), tone: TONE.red });
+  if (row.resubmissionPending) flags.push({ label: "Resubmission", title: "An assignment is waiting on a resubmission", tone: TONE.gold });
+  if (!row.stage1Filed) flags.push({ label: "Stage 1 unfiled", title: "Stage 1 record not filed yet", tone: TONE.blue });
+
   return (
     <div
       className={`roster-row cursor-pointer border-b border-[oklch(90%_0.012_82)] last:border-b-0 ${frozen ? "opacity-60" : ""}`}
@@ -321,23 +343,16 @@ export function RosterRowView({
       style={{ background: `color-mix(in oklab, ${toneForName(row.name)} 9%, var(--color-card))` }}
       onClick={() => router.push(`/portfolio/${row.id}`)}
     >
-      <div className={`${ROSTER_COLS} min-h-[58px] items-center px-5 py-2.5`}>
+      <div className={`${ROSTER_COLS} min-h-[58px] items-center px-4 py-2.5`}>
         <div className="flex min-w-0 items-center gap-3">
           <Avatar name={row.name} size="sm" />
           <div className="flex min-w-0 flex-col gap-0.5">
             <div className="flex items-center gap-2">
-              <Link
-                href={`/portfolio/${row.id}`}
-                onClick={stop}
-                className="text-[14px] font-semibold whitespace-nowrap text-ink hover:text-[var(--hub-accent-deep)]"
-              >
+              <Link href={`/portfolio/${row.id}`} onClick={stop} className="text-[14px] font-semibold whitespace-nowrap text-ink hover:text-[var(--hub-accent-deep)]">
                 {row.name}
               </Link>
               {row.courseStatus === "extension" ? (
-                <span
-                  className="rounded-full px-2 py-px text-[10.5px] font-bold whitespace-nowrap"
-                  style={{ background: "oklch(93.5% 0.033 235)", color: "oklch(42% 0.09 250)" }}
-                >
+                <span className="rounded-full px-2 py-px text-[10.5px] font-bold whitespace-nowrap" style={TONE.blue}>
                   Extension
                 </span>
               ) : null}
@@ -348,54 +363,66 @@ export function RosterRowView({
 
         {frozen ? (
           <div className="col-span-7 text-center">
-            <span
-              className="rounded-full px-2.5 py-[3px] text-[11px] font-semibold"
-              style={{ background: "oklch(93.5% 0.008 85)", color: "oklch(44% 0.014 70)" }}
-            >
+            <span className="rounded-full px-2.5 py-[3px] text-[11px] font-semibold" style={{ background: "oklch(93.5% 0.008 85)", color: "oklch(44% 0.014 70)" }}>
               {COURSE_STATUS_LABEL[row.courseStatus]}
             </span>
           </div>
         ) : (
           <>
-            {/* Warn threshold is the roster's own (< 6 of the 6 assessed
-                hours), not the handoff's illustrative "< 4". */}
-            <div className={`${NUM} ${row.assessedHrs < 6 ? "text-status-warning-text" : "text-ink"}`}>{row.assessedHrs.toFixed(2)}</div>
-            <div className={`${NUM} text-ink`}>
-              {row.tpsPassed}
-              <span className="font-normal text-muted">/8</span>
+            {/* TPs passed · of 8 -- eight segments, 1-4 teal, 5-8 gold. The
+                column stays "passed" (feedback in, not "not to standard"),
+                not the handoff's "taught": Ramy, 5 Sep 2026. */}
+            <div className="flex items-center gap-2" title={`${row.tpsPassed} of 8 TPs passed`}>
+              <span className="flex gap-[3px]">
+                {Array.from({ length: 8 }, (_, i) => (
+                  <span
+                    key={i}
+                    className="block h-4 w-2.5 rounded-[3px]"
+                    style={{ background: i < row.tpsPassed ? (i < 4 ? TEAL_BAR : GOLD_BAR) : "oklch(0% 0 0 / 0.08)" }}
+                  />
+                ))}
+              </span>
+              <span className="text-[12.5px] font-semibold tabular-nums text-ink">{row.tpsPassed}</span>
             </div>
-            <div className={`${NUM} text-ink`}>
-              {row.assignmentsTotal > 0 ? (
-                <Link
-                  href={`/portfolio/${row.id}/assignments`}
-                  onClick={stop}
-                  title={row.assignmentsResubmitted ? "Includes a resubmission" : "No resubmissions used"}
-                  className="hover:underline"
+            <div>
+              <span className={PILL} style={hoursTone} title={`${row.assessedHrs.toFixed(2)} of the 6 assessed hours`}>
+                {row.assessedHrs.toFixed(2)}
+                <span className="font-medium opacity-75">of 6</span>
+              </span>
+            </div>
+            <AssignmentTiles row={row} />
+            <div className="flex items-center gap-2" title={`${row.criteriaPct}% of the CELTA 5 criteria met`}>
+              <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-black/[0.07]">
+                <span className="absolute inset-y-0 left-0 block rounded-full" style={{ width: `${row.criteriaPct}%`, background: criteriaBar }} />
+              </span>
+              <span className="w-[34px] text-right text-[12.5px] font-semibold tabular-nums text-ink">{row.criteriaPct}%</span>
+            </div>
+            <div>
+              <span className={PILL} style={attendanceTone}>
+                <span className="block size-1.5 rounded-full bg-current" />
+                {row.attendancePct}%
+              </span>
+            </div>
+            <div>
+              {row.provisionalLabel ? (
+                <span
+                  className="inline-flex h-[26px] w-fit items-center rounded-full px-3 text-[12px] font-bold tracking-[0.02em] whitespace-nowrap"
+                  style={provisionalStyle(row)}
+                  title={row.provisionalSlashed ? "Provisional grade not yet settled between two grades" : "Provisional grade"}
                 >
-                  {row.assignmentsPassed}/{row.assignmentsTotal}
-                  {row.assignmentsResubmitted ? <sup className="ml-0.5 text-[9px] text-status-warning-text">R</sup> : null}
-                </Link>
+                  {row.provisionalLabel}
+                </span>
               ) : (
-                <span className="text-muted">--</span>
+                <span className="text-[12.5px] text-muted">Not set</span>
               )}
             </div>
-            <div className={`${NUM} text-ink`}>{row.criteriaPct}%</div>
-            <div className={`${NUM} ${row.attendancePct < 80 ? "font-bold text-destructive" : "text-ink"}`}>{row.attendancePct}%</div>
-            <div className={`text-center text-[13px] ${row.provisionalSlashed ? "font-bold text-destructive" : "font-medium text-ink"}`}>
-              {row.provisionalLabel ?? <span className="font-normal text-muted">Not set</span>}
-            </div>
-            <div className="text-center">
-              {row.atRiskReasons.length > 0 ? (
-                <span
-                  title={row.atRiskReasons.map((r) => AT_RISK_LABELS[r]).join(" · ")}
-                  onClick={stop}
-                  className="inline-flex items-center gap-1.5 rounded-full px-[9px] py-[3px] text-[11px] font-semibold whitespace-nowrap"
-                  style={{ background: "oklch(94% 0.043 25)", color: "oklch(45% 0.15 27)" }}
-                >
+            <div className="flex flex-wrap gap-1" onClick={stop}>
+              {flags.map((f) => (
+                <span key={f.label} title={f.title} className="inline-flex items-center gap-1.5 rounded-full px-[9px] py-[3px] text-[11px] font-semibold whitespace-nowrap" style={f.tone}>
                   <span className="block size-1.5 rounded-full bg-current" />
-                  At risk
+                  {f.label}
                 </span>
-              ) : null}
+              ))}
             </div>
           </>
         )}
