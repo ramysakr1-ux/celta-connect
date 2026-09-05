@@ -447,6 +447,24 @@ h6 {
      Release final reports, Create subgroup...) follows the MCT garnet / ACT
      gold set by the (hub) layout, so a page never shows a teal solid next
      to a garnet one. Teal stays for TP items and text links, per v4. */
+  /* Focus and hover rings inside the hub are the role colour too -- Ramy,
+     5 Sep 2026: "some of the rings are red as they should be, but some are
+     green... everything will be the red ring." 112 inputs carry
+     focus:border-primary from the old palette; one scoped rule instead of
+     112 edits. */
+  .hub-v4 .focus\:border-primary:focus,
+  .hub-v4 .hover\:border-primary:hover,
+  .hub-v4 .hover\:border-primary\/50:hover,
+  .hub-v4 .hover\:border-primary\/40:hover {
+    border-color: var(--hub-accent) !important;
+  }
+  .hub-v4 .hover\:text-primary:hover {
+    color: var(--hub-accent-deep) !important;
+  }
+  .hub-v4 .sheet-interactive:hover {
+    border-color: color-mix(in oklab, var(--hub-accent) 55%, transparent);
+    background-color: color-mix(in oklab, var(--hub-accent) 7%, var(--color-card));
+  }
   .hub-v4 .bg-primary {
     background-color: var(--hub-accent) !important;
   }

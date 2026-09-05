@@ -63,6 +63,7 @@ export function AnnouncementComposer({
   const [body, setBody] = useState("");
   const [timing, setTiming] = useState<"now" | "anchored">("now");
   const [offsetDays, setOffsetDays] = useState("-2");
+  const [templateOn, setTemplateOn] = useState(false);
   const [groupScopeId, setGroupScopeId] = useState(cohortAllowed ? "" : (groups[0]?.id ?? ""));
   const selectedGroup = groups.find((g) => g.id === groupScopeId) ?? null;
 
@@ -84,6 +85,18 @@ export function AnnouncementComposer({
         <button
           type="button"
           onClick={() => {
+            // A toggle: second click takes the prefill away again, so a
+            // stray click costs nothing (Ramy, 5 Sep 2026) -- but only if the
+            // words are still the template's; an edited draft is never wiped.
+            const untouched = title === ASSESSOR_VISIT_TEMPLATE.title && body === ASSESSOR_VISIT_TEMPLATE.body;
+            if (templateOn && untouched) {
+              setTitle("");
+              setBody("");
+              setLinkedEventId("");
+              setTiming("now");
+              setTemplateOn(false);
+              return;
+            }
             setTitle(ASSESSOR_VISIT_TEMPLATE.title);
             setBody(ASSESSOR_VISIT_TEMPLATE.body);
             // Prefill the reminder too, not just the words. Anchored two days
@@ -95,9 +108,15 @@ export function AnnouncementComposer({
               setTiming("anchored");
               setOffsetDays("-2");
             }
+            setTemplateOn(true);
           }}
+          aria-pressed={templateOn}
           className="self-start rounded-full border px-3 py-1 text-xs font-semibold transition-colors hover:brightness-95"
-          style={{ background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))", borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)", color: "oklch(40% 0.09 68)" }}
+          style={
+            templateOn
+              ? { background: "var(--color-gold)", borderColor: "var(--color-gold)", color: "var(--color-ink)" }
+              : { background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))", borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)", color: "oklch(40% 0.09 68)" }
+          }
         >
           Use assessor-visit template
         </button>
