@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { hubReadClient } from "@/lib/supabase/hub-read";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { PageHead, HUB_BUTTON, HUB_PRIMARY, HUB_PRIMARY_STYLE } from "@/app/trainer/(hub)/page-head";
 import { BackLink } from "@/components/back-link";
@@ -54,9 +55,8 @@ export default async function TrainerTimetablePage({
   if (!trainer && !assessorCourseId) redirect("/login");
 
   const { lock_error, date: lockErrorDate, half: lockErrorHalf, run: lockErrorRun, mode } = await searchParams;
-  const supabase = trainer ? await createClient() : createAdminClient();
-
   const courseId = trainer?.course_id ?? assessorCourseId;
+  const supabase = trainer ? hubReadClient(trainer, courseId!) : createAdminClient();
   if (!courseId) {
     return (
       <div className="sheet text-sm text-muted">No course assigned.</div>

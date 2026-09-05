@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { hubReadClient } from "@/lib/supabase/hub-read";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -26,12 +27,11 @@ export default async function TrainerRosterPage() {
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
   if (!trainer && !assessorCourseId) redirect("/login");
 
-  const supabase = assessorCourseId ? createAdminClient() : await createClient();
-
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
     return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
   }
+  const supabase = trainer ? hubReadClient(trainer, courseId) : createAdminClient();
 
   // Wave 1: the roster and everything that needs only the course or the
   // trainer, together. Perf audit 5 Sep 2026: this page ran ~35 queries in

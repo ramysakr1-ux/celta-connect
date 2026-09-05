@@ -1,3 +1,4 @@
+import { hubReadClient } from "@/lib/supabase/hub-read";
 import { requireRole } from "@/lib/auth/require-role";
 import { ASSESSOR_MEETING_TITLE } from "@/lib/assessor-day";
 import { createClient } from "@/lib/supabase/server";
@@ -23,8 +24,8 @@ export default async function AnnouncementsPage() {
   if (!trainer.course_id) {
     return <div className="sheet text-sm text-muted">No course assigned.</div>;
   }
-  const supabase = await createClient();
   const courseId = trainer.course_id;
+  const supabase = hubReadClient(trainer, courseId);
   const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
 

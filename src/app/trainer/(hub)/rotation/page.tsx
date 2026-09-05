@@ -1,3 +1,4 @@
+import { hubReadClient } from "@/lib/supabase/hub-read";
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
@@ -25,8 +26,8 @@ const TP_NUMBERS = [1, 2, 3, 4, 5, 6];
 
 export default async function TrainerRotationPage() {
   const trainer = await requireRole(["trainer", "admin"]);
-  const supabase = await createClient();
   const courseId = trainer.course_id!;
+  const supabase = hubReadClient(trainer, courseId);
 
   const { data: subgroups } = await supabase
     .from("course_subgroups")

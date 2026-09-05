@@ -1,3 +1,4 @@
+import { hubReadClient } from "@/lib/supabase/hub-read";
 import Link from "next/link";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { PageHead } from "@/app/trainer/(hub)/page-head";
@@ -33,11 +34,11 @@ const PILL_LABEL: Record<QueueStatus, string> = {
 // here, just as links rather than the page's own content.
 export default async function TeachingPracticeQueuePage() {
   const trainer = await requireRole(["trainer", "admin"]);
-  const supabase = await createClient();
   const courseId = trainer.course_id;
   if (!courseId) {
     return <div className="sheet text-sm text-muted">No course assigned.</div>;
   }
+  const supabase = hubReadClient(trainer, courseId);
   // Ramy, 28 Aug 2026: "the logic behind everything" -- today was previously
   // new Date().toLocaleDateString("en-CA"), which reads the server's own
   // local time (UTC on Vercel), not the trainer's centre. Same bug class as
@@ -46,18 +47,23 @@ export default async function TeachingPracticeQueuePage() {
   const now = new Date();
   const today = toLocalIso(now, timeZone);
 
-  const [{ data: subgroupRows }, { data: memberRows }, { data: roster }, { data: plans }, { data: feedback }, { data: tpEvents }] =
-    await Promise.all([
-      supabase.from("course_subgroups").select("id, name, tp_group_id, half_order").eq("course_id", courseId).order("created_at"),
-      supabase.from("course_subgroup_members").select("subgroup_id, trainee_id, base_slot"),
-      supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee"),
-      supabase
-        .from("plan_assignments")
-        .select("trainee_id, tp_number, taught_at, main_lesson_aim, short_title")
-        .eq("course_id", courseId),
-      supabase.from("tp_feedback").select("trainee_id, tp_number, submitted_at"),
-      supabase.from("course_timetable_events").select("*").eq("course_id", courseId).eq("type", "tp").order("event_date"),
-    ]);
+  const [{ data: subgroupRows }, { data: roster }, { data: plans }, { data: tpEvents }] = await Promise.all([
+    supabase.from("course_subgroups").select("id, name, tp_group_id, half_order").eq("course_id", courseId).order("created_at"),
+    supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee"),
+    supabase.from("plan_assignments").select("trainee_id, tp_number, taught_at, main_lesson_aim, short_title").eq("course_id", courseId),
+    supabase.from("course_timetable_events").select("*").eq("course_id", courseId).eq("type", "tp").order("event_date"),
+  ]);
+  // Scoped through this course's subgroups and candidates -- these two used
+  // to be read with no filter at all, leaning on row security to narrow them.
+  const rosterIds = (roster ?? []).map((r) => r.id);
+  const [{ data: memberRows }, { data: feedback }] = await Promise.all([
+    (subgroupRows ?? []).length > 0
+      ? supabase.from("course_subgroup_members").select("subgroup_id, trainee_id, base_slot").in("subgroup_id", (subgroupRows ?? []).map((g) => g.id))
+      : Promise.resolve({ data: [] as { subgroup_id: string; trainee_id: string; base_slot: number }[] }),
+    rosterIds.length > 0
+      ? supabase.from("tp_feedback").select("trainee_id, tp_number, submitted_at").in("trainee_id", rosterIds)
+      : Promise.resolve({ data: [] as { trainee_id: string; tp_number: number; submitted_at: string | null }[] }),
+  ]);
 
   const nameByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.full_name]));
   const subgroupIds = new Set((subgroupRows ?? []).map((g) => g.id));

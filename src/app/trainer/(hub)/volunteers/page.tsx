@@ -1,3 +1,4 @@
+import { hubReadClient } from "@/lib/supabase/hub-read";
 import { redirect } from "next/navigation";
 import { PageHead, HUB_BUTTON, HUB_PRIMARY, HUB_PRIMARY_STYLE } from "@/app/trainer/(hub)/page-head";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -36,7 +37,7 @@ export default async function VolunteersPage() {
     return <div className="sheet text-sm text-muted">No course assigned.</div>;
   }
 
-  const supabase = assessorCourseId ? createAdminClient() : await createClient();
+  const supabase = trainer ? hubReadClient(trainer, courseId) : createAdminClient();
   const { data: volunteers } = await supabase
     .from("volunteer_students")
     .select("*")

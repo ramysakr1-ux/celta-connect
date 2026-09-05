@@ -1,3 +1,4 @@
+import { hubReadClient } from "@/lib/supabase/hub-read";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -59,7 +60,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
   }
   if (!isMct) redirect("/trainer");
 
-  const supabase = await createClient();
+  const supabase = hubReadClient(trainer, courseId);
   const timeZone = (trainer.center_id ? (await getCachedCenter(trainer.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
 

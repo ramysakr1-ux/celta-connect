@@ -1,3 +1,4 @@
+import { hubReadClient } from "@/lib/supabase/hub-read";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -57,11 +58,14 @@ export default async function TodayPage() {
   const tourMode = assessorCourseId ? await isAssessorTourMode() : false;
   if (assessorCourseId && !trainer && !tourMode) redirect("/trainer/roster");
 
-  const supabase = trainer ? await createClient() : createAdminClient();
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
     return <div className="sheet text-sm text-muted">No course assigned.</div>;
   }
+  // Reads go through the service role: the tutor is on this course by
+  // construction (courseId is their own profile's), an assessor session is
+  // already the admin client. See hub-read.ts for the trade.
+  const supabase = trainer ? hubReadClient(trainer, courseId) : createAdminClient();
   const admin = createAdminClient();
 
   // ---- Wave 1: everything that needs only the course, all at once, and

@@ -1,3 +1,4 @@
+import { hubReadClient } from "@/lib/supabase/hub-read";
 import Link from "next/link";
 import { PageHead, HUB_BUTTON, HUB_PRIMARY, HUB_PRIMARY_STYLE } from "@/app/trainer/(hub)/page-head";
 import { redirect } from "next/navigation";
@@ -39,8 +40,8 @@ export default async function TrainerResourceHubPage() {
   const tourMode = assessorCourseId ? await isAssessorTourMode() : false;
   if (!trainer && !tourMode) redirect("/login");
 
-  const supabase = trainer ? await createClient() : createAdminClient();
   const courseId = trainer?.course_id ?? assessorCourseId;
+  const supabase = trainer && courseId ? hubReadClient(trainer, courseId) : createAdminClient();
   // UI visibility only, matching roster.tsx/grades-report.tsx's own isMct --
   // admin bypasses at the action layer (updateTpMaterialPoolEnabled), not
   // here, same split as every other MCT-gated section in the trainer hub.
@@ -155,7 +156,7 @@ export default async function TrainerResourceHubPage() {
     supabase.from("tp_video_library").select("id", { count: "exact", head: true }).eq("center_id", centerId),
     supabase.from("assignment_templates").select("id", { count: "exact", head: true }).eq("center_id", centerId),
     supabase.from("marking_guidance_entries").select("id", { count: "exact", head: true }).eq("center_id", centerId),
-    courseId ? supabase.from("course_tp_schedule").select("tp_number, tp_coursebook_id") : Promise.resolve({ data: [] }),
+    courseId ? supabase.from("course_tp_schedule").select("tp_number, tp_coursebook_id").eq("course_id", courseId) : Promise.resolve({ data: [] }),
   ]);
 
   // "TP points" inline panel -- release style / round(s) / source / usage,

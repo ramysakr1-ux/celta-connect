@@ -9,7 +9,7 @@
     "lint": "eslint",
     "seed:demo": "node scripts/seed-demo.mjs",
     "check:branch-scope": "node scripts/check-branch-scope.mjs",
-    "prebuild": "node scripts/check-branch-scope.mjs"
+    "prebuild": "node scripts/check-branch-scope.mjs && node scripts/check-course-scope.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

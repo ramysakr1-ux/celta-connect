@@ -1,3 +1,4 @@
+import { hubReadClient } from "@/lib/supabase/hub-read";
 import { redirect } from "next/navigation";
 import { PageHead, HUB_BUTTON, HUB_PRIMARY, HUB_PRIMARY_STYLE } from "@/app/trainer/(hub)/page-head";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
@@ -48,8 +49,8 @@ export default async function GradesReportPage() {
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
   if (!trainer && !assessorCourseId) redirect("/login");
 
-  const supabase = assessorCourseId ? createAdminClient() : await createClient();
   const courseId = trainer?.course_id ?? assessorCourseId;
+  const supabase = trainer && courseId ? hubReadClient(trainer, courseId) : createAdminClient();
   if (!courseId) {
     return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
   }

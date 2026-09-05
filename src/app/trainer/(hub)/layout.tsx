@@ -47,7 +47,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   const [staffChat, currentCourseTutorRole, center, courseResult, tutorLinksResult] = await Promise.all([
     // Chat is trainer-only, no admin exception -- see migration 0039's
     // "you cannot be on the course unless registered as a trainer" rule.
-    profile?.role === "trainer" ? getInitialStaffChatData(profile.id) : Promise.resolve(null),
+    profile?.role === "trainer" ? getInitialStaffChatData(profile.id, admin) : Promise.resolve(null),
     // course_tutors.tutor_role for the course CURRENTLY open is the one
     // place the role is never stale (profiles.tutor_role is set once at
     // signup and never re-synced; a platform_owner never has it at all).

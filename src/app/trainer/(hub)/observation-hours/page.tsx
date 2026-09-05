@@ -27,27 +27,30 @@ export default async function ObservationHoursPage() {
   const courseId = trainer.course_id;
   const supabase = await createClient();
 
-  const [
-    { data: trainees },
-    { data: observations },
-    { data: obsTasks },
-    { data: obsTaskSubmissions },
-    { data: filmedSessions },
-    { data: filmedTasks },
-    { data: filmedResponses },
-    { data: peerSheets },
-  ] = await Promise.all([
+  const [{ data: trainees }, { data: observations }, { data: obsTasks }, { data: filmedSessions }, { data: peerSheets }] = await Promise.all([
     supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee").order("full_name"),
     supabase
       .from("observations")
       .select("id, trainee_id, observation_date, length_minutes, level, learners_present, lesson_focus, filmed, mode")
       .eq("course_id", courseId),
     supabase.from("observation_tasks").select("id, title").eq("course_id", courseId),
-    supabase.from("observation_task_submissions").select("task_id, trainee_id, observation_id"),
     supabase.from("filmed_observation_sessions").select("id, lesson_title").eq("course_id", courseId),
-    supabase.from("filmed_observation_tasks").select("id, session_id"),
-    supabase.from("filmed_observation_task_responses").select("task_id, trainee_id, observation_id, completed_at"),
     supabase.from("peer_observation_sheets").select("id, trainee_id, tp_number").eq("course_id", courseId),
+  ]);
+  // Scoped through this course's candidates and sessions -- these three used
+  // to be read with no filter, leaning on row security alone.
+  const traineeIdList = (trainees ?? []).map((t) => t.id);
+  const sessionIdList = (filmedSessions ?? []).map((s) => s.id);
+  const [{ data: obsTaskSubmissions }, { data: filmedTasks }, { data: filmedResponses }] = await Promise.all([
+    traineeIdList.length > 0
+      ? supabase.from("observation_task_submissions").select("task_id, trainee_id, observation_id").in("trainee_id", traineeIdList)
+      : Promise.resolve({ data: [] as { task_id: string; trainee_id: string; observation_id: string | null }[] }),
+    sessionIdList.length > 0
+      ? supabase.from("filmed_observation_tasks").select("id, session_id").in("session_id", sessionIdList)
+      : Promise.resolve({ data: [] as { id: string; session_id: string }[] }),
+    traineeIdList.length > 0
+      ? supabase.from("filmed_observation_task_responses").select("task_id, trainee_id, observation_id, completed_at").in("trainee_id", traineeIdList)
+      : Promise.resolve({ data: [] as { task_id: string; trainee_id: string; observation_id: string | null; completed_at: string | null }[] }),
   ]);
 
   const traineeNameById = new Map((trainees ?? []).map((t) => [t.id, t.full_name]));
