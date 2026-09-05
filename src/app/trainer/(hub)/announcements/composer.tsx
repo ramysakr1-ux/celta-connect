@@ -188,31 +188,43 @@ export function AnnouncementComposer({
       ) : null}
 
       <div className="flex flex-col gap-1.5 rounded-[6px] border border-border-faint p-2.5">
-        <p className="text-xs font-semibold text-ink">Send timing</p>
+        <p className="text-xs font-semibold text-ink">When to send</p>
         <label className="flex items-center gap-2 text-sm text-ink">
           <input type="radio" checked={timing === "now"} onChange={() => setTiming("now")} />
           Now
         </label>
-        <label className="flex items-center gap-2 text-sm text-ink">
+        <label className={`flex items-center gap-2 text-sm ${linkedEventId ? "text-ink" : "text-muted"}`}>
           <input
             type="radio"
             checked={timing === "anchored"}
             onChange={() => setTiming("anchored")}
             disabled={!linkedEventId}
           />
-          <span className={!linkedEventId ? "text-muted" : ""}>
+          <span>
             {timing === "anchored" ? (
               <>
                 <input
                   type="number"
-                  value={offsetDays}
-                  onChange={(e) => setOffsetDays(e.target.value)}
+                  value={Math.abs(Number(offsetDays) || 0)}
+                  min={0}
+                  onChange={(e) => setOffsetDays(`${Number(offsetDays) < 0 ? "-" : ""}${e.target.value.replace(/^-/, "")}`)}
                   className="mx-1 h-7 w-14 rounded-[4px] border border-input bg-card px-1.5 text-center text-sm outline-none focus:border-primary"
                 />
-                days relative to the linked event (negative = before)
+                day{Math.abs(Number(offsetDays)) === 1 ? "" : "s"}{" "}
+                <select
+                  value={Number(offsetDays) < 0 ? "before" : "after"}
+                  onChange={(e) => setOffsetDays(`${e.target.value === "before" ? "-" : ""}${Math.abs(Number(offsetDays) || 0)}`)}
+                  className="mx-1 h-7 rounded-[4px] border border-input bg-card px-1.5 text-sm outline-none focus:border-primary"
+                >
+                  <option value="before">before</option>
+                  <option value="after">after</option>
+                </select>
+                the linked event
               </>
+            ) : linkedEventId ? (
+              "Before or after the linked event"
             ) : (
-              "Days relative to the linked event"
+              "Before or after a timetable event -- link one above first"
             )}
           </span>
         </label>
