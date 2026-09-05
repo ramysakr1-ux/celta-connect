@@ -14,6 +14,18 @@ import type { RosterRow } from "@/lib/roster";
 export const CORE_COLUMN_COUNT = 7; // Assessed hrs, TPs, Assignments, Criteria, Attendance, Provisional, At risk
 export const DETAIL_COLUMN_COUNT = 11; // TP stages, Supervised review, Observation hrs, Stage 1, Stage 2/3, CELTA 5, FOL, Standing, Obs. tasks, Pre-course, Filmed obs
 
+// Ramy, 5 Sep 2026: "I just don't like the way those headlines are
+// written... the progress detail, they're kind of too bulky." Short
+// labels, small caps like every other label in the hub, allowed to wrap
+// onto two lines so the detail columns stop pushing the table wide.
+function Th({ right = false, children }: { right?: boolean; children: React.ReactNode }) {
+  return (
+    <th className={`align-bottom text-[10.5px] leading-[1.15] font-bold tracking-[0.08em] whitespace-normal text-muted uppercase ${right ? "text-right" : ""}`}>
+      <span className="inline-block max-w-[7.5rem]">{children}</span>
+    </th>
+  );
+}
+
 export function RosterTable({
   rows,
   isMct,
@@ -44,28 +56,28 @@ export function RosterTable({
         <table className="table-plain w-full">
           <thead>
             <tr>
-              <th className="text-sm text-muted">Candidate</th>
-              {showContact ? <th className="text-right text-sm text-muted">Outside Connect -- urgent only</th> : <th />}
-              <th className="text-right text-sm text-muted">Assessed hrs</th>
-              <th className="text-right text-sm text-muted">TPs passed</th>
-              <th className="text-right text-sm text-muted">Assignments</th>
-              <th className="text-right text-sm text-muted">Criteria</th>
-              <th className="text-right text-sm text-muted">Attendance</th>
-              <th className="text-right text-sm text-muted">Provisional</th>
-              <th className="text-right text-sm text-muted">At risk</th>
+              <Th>Candidate</Th>
+              {showContact ? <Th right>Email</Th> : <th />}
+              <Th right>Assessed hrs</Th>
+              <Th right>TPs</Th>
+              <Th right>Assignments</Th>
+              <Th right>Criteria</Th>
+              <Th right>Attendance</Th>
+              <Th right>Provisional</Th>
+              <Th right>At risk</Th>
               {showDetail ? (
                 <>
-                  <th className="text-right text-sm text-muted">TP stages</th>
-                  <th className="text-right text-sm text-muted">Supervised review</th>
-                  <th className="text-right text-sm text-muted">Observation hrs</th>
-                  <th className="text-right text-sm text-muted">Stage 1 report</th>
-                  <th className="text-right text-sm text-muted">Stage 2 / 3</th>
-                  <th className="text-right text-sm text-muted">CELTA 5 sign-off</th>
-                  <th className="text-right text-sm text-muted">FOL logged</th>
-                  <th className="text-right text-sm text-muted">Standing</th>
-                  <th className="text-right text-sm text-muted">Obs. tasks</th>
-                  <th className="text-right text-sm text-muted">Pre-course</th>
-                  <th className="text-right text-sm text-muted">Filmed obs</th>
+                  <Th right>TP stages</Th>
+                  <Th right>Supervised</Th>
+                  <Th right>Obs. hrs</Th>
+                  <Th right>Stage 1</Th>
+                  <Th right>Stage 2/3</Th>
+                  <Th right>CELTA 5</Th>
+                  <Th right>FOL</Th>
+                  <Th right>Standing</Th>
+                  <Th right>Obs. tasks</Th>
+                  <Th right>Pre-course</Th>
+                  <Th right>Filmed obs</Th>
                 </>
               ) : null}
             </tr>

@@ -10,7 +10,7 @@ import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { COURSE_STATUS_LABEL, isCourseStatusReadOnly } from "@/lib/course-status";
 import { ordinal } from "@/lib/stage2-tutorials";
 import { moveStage2Earlier, moveStage3Earlier, type FormState } from "@/app/dashboard/trainer/celta5-actions";
-import { Avatar } from "@/components/avatar";
+import { Avatar, toneForName } from "@/components/avatar";
 
 const moveEarlierInitialState: FormState = { error: null };
 
@@ -131,7 +131,12 @@ export function RosterRowView({
   // stale numbers next to the others' live ones.
   if (isCourseStatusReadOnly(row.courseStatus)) {
     return (
-      <tr className="trainer-hover cursor-pointer opacity-70" onClick={() => router.push(`/portfolio/${row.id}`)}>
+      <tr className="trainer-hover cursor-pointer opacity-70"
+      // The colour that follows the person (avatar.tsx) runs across their
+      // whole row, faintly -- Ramy, 5 Sep 2026: "avatar will run through
+      // the whole line", neighbouring rows naturally different shades.
+      style={{ background: `color-mix(in oklab, ${toneForName(row.name)} 9%, var(--color-card))` }}
+      onClick={() => router.push(`/portfolio/${row.id}`)}>
         <td>
           <Link href={`/portfolio/${row.id}`} className="flex items-center gap-2.5 text-ink hover:text-[var(--hub-accent-deep)]">
             <Avatar name={row.name} size="sm" />
@@ -152,7 +157,12 @@ export function RosterRowView({
   }
 
   return (
-    <tr className="trainer-hover cursor-pointer" onClick={() => router.push(`/portfolio/${row.id}`)}>
+    <tr className="trainer-hover cursor-pointer"
+      // The colour that follows the person (avatar.tsx) runs across their
+      // whole row, faintly -- Ramy, 5 Sep 2026: "avatar will run through
+      // the whole line", neighbouring rows naturally different shades.
+      style={{ background: `color-mix(in oklab, ${toneForName(row.name)} 9%, var(--color-card))` }}
+      onClick={() => router.push(`/portfolio/${row.id}`)}>
       <td>
         {/* The mark sits inside the link so the whole name cell stays one
             target -- Ramy, 4 Sep 2026. */}
