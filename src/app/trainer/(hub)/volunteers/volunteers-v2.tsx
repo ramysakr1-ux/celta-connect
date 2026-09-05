@@ -365,7 +365,10 @@ export function VolunteersV2({
                     {todayInfo.underway ? `${cInRoom} in the room · ${cComing} said they were coming` : `${cComing} coming · ${cCant} can't · ${cNoReply} no reply`}
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
+                {/* Ramy, 6 Sep 2026: the chips sit to the RIGHT of their
+                    column, against the session status, rather than
+                    stranded at the left of an empty middle. */}
+                <div className="flex flex-wrap gap-1.5 lg:justify-end">
                   {c.members.map((r) => {
                     const chip = CHIP[r.todayState ?? "no_reply"];
                     return (
