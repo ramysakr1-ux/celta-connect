@@ -127,7 +127,7 @@ export default async function VolunteersPage() {
               const token = tokenByVolunteer.get(volunteer.id);
               const transcript = transcriptByVolunteer.get(volunteer.id);
               return (
-                <li key={volunteer.id} className="list-row flex flex-col gap-2">
+                <li key={volunteer.id} className="list-row flex flex-col gap-2 transition-colors hover:bg-[color-mix(in_oklab,var(--hub-hover-accent)_6%,transparent)]">
                   <div className="flex items-center justify-between gap-4">
                     <p className="text-sm text-ink">
                       {volunteer.name}
@@ -175,7 +175,9 @@ export default async function VolunteersPage() {
 
       <div>
         <h2 className="font-serif text-lg text-ink">Attendance register</h2>
-        <p className="mt-1 text-sm text-muted">Real per-session attendance -- this is what goes to the assessor.</p>
+        <p className="mt-1 text-sm text-muted">
+          One class, no halves: every volunteer against every teaching-practice session they came to. This is what goes to the assessor.
+        </p>
         <div className="mt-3">
           <AttendanceRegisterGrid events={tpEvents ?? []} volunteers={volunteers ?? []} attendance={attendanceRows ?? []} />
         </div>

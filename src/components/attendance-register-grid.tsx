@@ -1,6 +1,19 @@
-function formatShortDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+// One shape for every date header, two lines, never wrapped -- Ramy,
+// 5 Sep 2026: "the date keeps changing, vertical and then horizontal."
+// (52px columns let "17 Aug" sit on one line and pushed "1 Sept" onto
+// two.) Node's ICU also spells September "Sept"; the hub says "Sep".
+function dateHeader(iso: string): { weekday: string; dayMonth: string } {
+  const d = new Date(`${iso}T00:00:00Z`);
+  return {
+    weekday: d.toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" }),
+    dayMonth: d.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).replace("Sept", "Sep"),
+  };
 }
+
+// A little colour on hover, not much (Ramy, 5 Sep 2026). --hub-hover-accent
+// is set by the trainer hub; the assessor pack and the register-viewer
+// page fall back to the teal.
+const ROW_HOVER = "hover:bg-[color-mix(in_oklab,var(--hub-hover-accent,var(--color-primary))_6%,transparent)]";
 
 // Checkpoint 9 (Assessor pack) -- the one new deliverable build-spec.md
 // names for this checkpoint: a real, per-session volunteer attendance
@@ -33,8 +46,9 @@ export function AttendanceRegisterGrid({
           <tr className="border-b border-border">
             <th className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Volunteer</th>
             {events.map((e) => (
-              <th key={e.id} className="w-[52px] px-0.5 py-2.5 text-center text-[10px] font-semibold text-muted">
-                {formatShortDate(e.event_date)}
+              <th key={e.id} className="w-[56px] px-0.5 py-2 text-center align-bottom text-[10px] leading-[1.25] font-semibold whitespace-nowrap text-muted">
+                <span className="block text-[9px] font-bold tracking-[0.08em] uppercase">{dateHeader(e.event_date).weekday}</span>
+                <span className="block">{dateHeader(e.event_date).dayMonth}</span>
               </th>
             ))}
             <th className="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Total</th>
@@ -44,7 +58,7 @@ export function AttendanceRegisterGrid({
           {volunteers.map((v) => {
             const attendedCount = events.filter((e) => attendedSet.has(`${v.id}:${e.id}`)).length;
             return (
-              <tr key={v.id} className="border-b border-border-faint last:border-none">
+              <tr key={v.id} className={`border-b border-border-faint transition-colors last:border-none ${ROW_HOVER}`}>
                 <td className="px-4 py-2.5 text-ink">
                   {v.name}
                   {v.level ? <span className="ml-2 text-xs text-muted">{v.level}</span> : null}
@@ -55,7 +69,7 @@ export function AttendanceRegisterGrid({
                     <td key={e.id} className="px-0.5 py-2.5 text-center">
                       <span
                         title={present ? "Attended" : "Not marked present"}
-                        className={`inline-flex h-[22px] w-[30px] items-center justify-center rounded-[5px] text-xs font-medium ${
+                        className={`inline-flex h-[22px] w-[30px] items-center justify-center rounded-[5px] text-xs font-medium transition-shadow hover:shadow-[inset_0_0_0_1px_var(--hub-hover-accent,var(--color-primary))] ${
                           present ? "status-pill status-pill-on-track" : "border border-dashed border-border-faint text-muted"
                         }`}
                       >
