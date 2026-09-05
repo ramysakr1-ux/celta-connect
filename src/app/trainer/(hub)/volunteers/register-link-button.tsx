@@ -16,6 +16,11 @@ export function RegisterLinkButton() {
     if (error || !token) {
       setState("error");
       setMessage(error ?? "Could not create the link.");
+      // The message clears itself -- it shouldn't sit there forever.
+      setTimeout(() => {
+        setMessage(null);
+        setState("idle");
+      }, 6000);
       return;
     }
     await navigator.clipboard.writeText(`${window.location.origin}/register/${token}`);
@@ -24,7 +29,11 @@ export function RegisterLinkButton() {
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
+    // The message floats below the button (absolute) so it never changes
+    // the button's own height -- a growing box re-centred the whole
+    // actions row and knocked its neighbours out of line (Ramy, 5 Sep
+    // 2026: "the filming consent form doesn't go back where it is").
+    <div className="relative">
       <button
         type="button"
         onClick={handleClick}
@@ -34,7 +43,7 @@ export function RegisterLinkButton() {
       >
         {state === "loading" ? "Getting link…" : state === "copied" ? "Link copied" : "Share register view"}
       </button>
-      {message ? <p className="max-w-[260px] text-right text-[11px] text-destructive">{message}</p> : null}
+      {message ? <p className="absolute top-full right-0 z-10 mt-1 w-max max-w-[280px] rounded-[6px] bg-card px-2 py-1 text-right text-[11px] text-destructive shadow-sm">{message}</p> : null}
     </div>
   );
 }
