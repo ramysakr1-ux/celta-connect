@@ -222,6 +222,9 @@ export interface Database {
           // migration 0146 -- was a plain 160 constant ("the spec's own
           // illustrative figure... no centre setting for this yet").
           volunteer_certificate_hours_threshold: number;
+          // migration 0278 -- hours after a lesson ends within which the
+          // tutor's written feedback still counts as same-day.
+          feedback_same_day_hours: number;
           // migration 0149 -- interview slot generation rule. Per-interviewer
           // WHICH days/hours lives on interview_availability_patterns; these
           // four are the shared "how long, how far ahead" numbers.

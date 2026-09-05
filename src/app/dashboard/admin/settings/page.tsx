@@ -41,7 +41,7 @@ export default async function AdminSettingsPage({
   const { data: center } = await admin
     .from("centers")
     .select(
-      "name, center_number, is_uk_centre, auto_tag_criteria_enabled, admissions_email, volunteer_certificate_hours_threshold, application_response_hours"
+      "name, center_number, is_uk_centre, auto_tag_criteria_enabled, admissions_email, volunteer_certificate_hours_threshold, feedback_same_day_hours, application_response_hours"
     )
     // single-centre: the centre row whose settings this page edits
     .eq("id", profile.center_id)
@@ -180,6 +180,7 @@ export default async function AdminSettingsPage({
                 isUkCentre={center?.is_uk_centre ?? false}
                 admissionsEmail={center?.admissions_email ?? null}
                 volunteerCertificateHoursThreshold={center?.volunteer_certificate_hours_threshold ?? 160}
+                feedbackSameDayHours={center?.feedback_same_day_hours ?? 24}
                 applicationResponseHours={center?.application_response_hours ?? 10}
               />
             </div>

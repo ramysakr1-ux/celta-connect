@@ -28,6 +28,8 @@ export async function updateCenterProfile(
   const volunteerThresholdRaw = formData.get("volunteer_certificate_hours_threshold");
   const volunteerCertificateHoursThreshold =
     typeof volunteerThresholdRaw === "string" && volunteerThresholdRaw ? Number(volunteerThresholdRaw) : 160;
+  const sameDayRaw = formData.get("feedback_same_day_hours");
+  const feedbackSameDayHours = typeof sameDayRaw === "string" && sameDayRaw ? Number(sameDayRaw) : 24;
   const responseHoursRaw = formData.get("application_response_hours");
   const applicationResponseHours =
     typeof responseHoursRaw === "string" && responseHoursRaw ? Number(responseHoursRaw) : 10;
@@ -50,6 +52,7 @@ export async function updateCenterProfile(
       is_uk_centre: isUkCentre,
       admissions_email: admissionsEmail,
       volunteer_certificate_hours_threshold: volunteerCertificateHoursThreshold,
+      feedback_same_day_hours: feedbackSameDayHours,
       application_response_hours: applicationResponseHours,
     })
     .eq("id", profile.center_id);

@@ -1810,6 +1810,55 @@ async function main() {
   });
   console.log("volunteer audio: Emeka's recording + transcript on file");
 
+  // --- TP tab v2 (design_handoff_teaching_practice_v2, 6 Sep 2026): the
+  // tab is the feedback-owed queue, and a demo where every lesson is
+  // already marked shows an empty page forever. The last teaching day's
+  // three lessons are left owed, in the three states the card is built to
+  // show: notes + self-eval + a draft (Continue draft), notes + self-eval
+  // and nothing started (Write feedback), and one where the candidate has
+  // not sent their self-evaluation yet (amber). Capture notes belong to
+  // the group's own tutor -- a tutor writes from their own notes. ---
+  const { data: lastTaught } = await supabase
+    .from("plan_assignments")
+    .select("trainee_id, tp_number, taught_at")
+    .eq("course_id", course.id)
+    .not("taught_at", "is", null)
+    .order("taught_at", { ascending: false })
+    .limit(3);
+  const owedTrio = lastTaught ?? [];
+  const groupTutorId = trainer2Id; // Group A's tutor, set above
+  const CAPTURE = [
+    { text: "Clear model on the board, learners copied it accurately.", codes: ["4c", "4e"] },
+    { text: "Instructions given before handing out the task -- good.", codes: ["4e"] },
+    { text: "Two learners left out of the pair check; monitor the far table.", codes: ["4d", "5k"] },
+    { text: "Concept checked the target language, but not the negative form.", codes: ["4i"] },
+    { text: "Good use of the whiteboard for the timeline.", codes: ["4l"] },
+  ];
+  for (const [i, lesson] of owedTrio.entries()) {
+    // Unpublish: the first keeps its content as a draft, the others start clean.
+    if (i === 0) {
+      await supabase.from("tp_feedback").update({ submitted_at: null }).eq("trainee_id", lesson.trainee_id).eq("tp_number", lesson.tp_number);
+    } else {
+      await supabase.from("tp_feedback").delete().eq("trainee_id", lesson.trainee_id).eq("tp_number", lesson.tp_number);
+    }
+    // The third candidate has not sent their self-evaluation yet.
+    if (i === 2) {
+      await supabase.from("tp_self_evaluations").update({ submitted_at: null }).eq("trainee_id", lesson.trainee_id).eq("tp_number", lesson.tp_number);
+    }
+    await supabase.from("tp_capture_notes").insert(
+      CAPTURE.slice(0, 3 + i).map((n) => ({
+        course_id: course.id,
+        trainer_id: groupTutorId,
+        trainee_id: lesson.trainee_id,
+        tp_number: lesson.tp_number,
+        text: n.text,
+        criteria_codes: n.codes,
+        captured_at: new Date(`${lesson.taught_at.slice(0, 10)}T11:00:00Z`).toISOString(),
+      }))
+    );
+  }
+  console.log("tp queue:", owedTrio.length, "lessons left owed with capture notes, one draft, one self-eval pending");
+
   console.log("DEMO SEED COMPLETE");
   console.log("center_id=" + center.id);
   console.log("course_id=" + course.id);

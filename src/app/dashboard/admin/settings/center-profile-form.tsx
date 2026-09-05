@@ -11,6 +11,7 @@ export function CenterProfileForm({
   isUkCentre,
   admissionsEmail,
   volunteerCertificateHoursThreshold,
+  feedbackSameDayHours,
   applicationResponseHours,
 }: {
   name: string;
@@ -18,6 +19,7 @@ export function CenterProfileForm({
   isUkCentre: boolean;
   admissionsEmail: string | null;
   volunteerCertificateHoursThreshold: number;
+  feedbackSameDayHours: number;
   applicationResponseHours: number;
 }) {
   const [state, action, pending] = useActionState(updateCenterProfile, initialState);
@@ -127,6 +129,26 @@ export function CenterProfileForm({
         <p className="text-xs text-muted">
           Hours of credited attendance a volunteer needs before they&apos;ve earned a certificate. Shown on the
           Volunteers register and on a volunteer&apos;s own class link.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="feedback_same_day_hours" className="text-sm text-muted">
+          Written feedback due within (hours)
+        </label>
+        <input
+          id="feedback_same_day_hours"
+          name="feedback_same_day_hours"
+          type="number"
+          min={1}
+          max={168}
+          required
+          defaultValue={feedbackSameDayHours}
+          className="w-24 rounded-[6px] border border-border bg-card-inset px-3 py-2 text-ink outline-none focus:border-primary"
+        />
+        <p className="text-xs text-muted">
+          How long after a lesson ends a tutor&apos;s written feedback still counts as same-day. Past this, the
+          lesson is flagged red on the Teaching Practice tab.
         </p>
       </div>
 
