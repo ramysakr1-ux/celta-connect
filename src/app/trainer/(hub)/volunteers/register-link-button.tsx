@@ -1,5 +1,7 @@
 "use client";
 
+import { HUB_BUTTON } from "@/app/trainer/(hub)/page-head";
+
 import { useState } from "react";
 import { getOrCreateRegisterViewToken } from "@/app/trainer/(hub)/volunteers/actions";
 
@@ -23,7 +25,7 @@ export function RegisterLinkButton() {
       type="button"
       onClick={handleClick}
       disabled={state === "loading"}
-      className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover-fill disabled:opacity-60"
+      className={`${HUB_BUTTON} disabled:opacity-60`}
     >
       {state === "loading" ? "Getting link…" : state === "copied" ? "Copied!" : state === "error" ? "Try again" : "Share register view"}
     </button>

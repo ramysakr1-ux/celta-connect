@@ -1,5 +1,7 @@
 "use client";
 
+import { HUB_BUTTON } from "@/app/trainer/(hub)/page-head";
+
 import Link from "next/link";
 import { useActionState } from "react";
 import { releaseAllFinalReports, type FormState } from "@/app/dashboard/trainer/celta5-actions";
@@ -92,10 +94,10 @@ export function CohortSheet({
     <div className="sheet flex flex-col gap-4">
       <div className="flex items-end justify-between gap-5">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
-            {courseName} · {rows.length} candidate{rows.length === 1 ? "" : "s"}
-          </p>
-          <h2 className="font-serif text-xl text-ink">Grade form</h2>
+          <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Cohort</p>
+          <h2 className="font-serif text-[20px] font-semibold text-ink-warm">
+            {rows.length} candidate{rows.length === 1 ? "" : "s"}
+          </h2>
         </div>
         <div className="flex items-center gap-2">
           {/* Ramy: "leave it there exactly." Sits with the other two page
@@ -107,14 +109,14 @@ export function CohortSheet({
               href={appianUrl}
               target="_blank"
               rel="noreferrer"
-              className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover-fill"
+              className={HUB_BUTTON}
             >
               Open Appian &rarr;
             </a>
           ) : null}
           <a
             href="/trainer/grades-report/export"
-            className="rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover-fill"
+            className={HUB_BUTTON}
           >
             Export report
           </a>

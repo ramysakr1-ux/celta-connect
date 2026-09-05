@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageHead, HUB_BUTTON, HUB_PRIMARY, HUB_PRIMARY_STYLE } from "@/app/trainer/(hub)/page-head";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { createClient } from "@/lib/supabase/server";
@@ -96,36 +97,21 @@ export default async function VolunteersPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
-            {volunteers?.length ?? 0} registered, {volunteerSessions.filter((v) => (v.today?.attendedBlocks ?? 0) > 0).length} in
-            today
-          </p>
-          <h1 className="font-serif text-2xl text-ink">Volunteer students</h1>
-          <p className="mt-1 text-sm text-muted">
-            The TP students who attend teaching practice. Each gets their own no-login link to see shared materials
-            and their attendance -- links expire when the course ends.
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <a
-            href="/api/filming-consent.pdf"
-            className="rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink trainer-hover-fill"
-          >
-            Filming consent form ↓
-          </a>
-          <RegisterLinkButton />
-          <SendAllLinksButton />
-          <a
-            href="#add-volunteer"
-            className="rounded-[6px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
-          >
-            Add volunteer
-          </a>
-        </div>
-      </div>
+    <div className="flex flex-col gap-[18px]">
+      <PageHead
+        eyebrow={`Volunteers · ${volunteers?.length ?? 0} registered · ${volunteerSessions.filter((v) => (v.today?.attendedBlocks ?? 0) > 0).length} in today`}
+        title="Volunteer students"
+        lede="The TP students who attend teaching practice. Each gets their own no-login link to see shared materials and their attendance -- links expire when the course ends."
+      >
+        <a href="/api/filming-consent.pdf" className={HUB_BUTTON}>
+          Filming consent form &darr;
+        </a>
+        <RegisterLinkButton />
+        <SendAllLinksButton />
+        <a href="#add-volunteer" className={HUB_PRIMARY} style={HUB_PRIMARY_STYLE}>
+          Add volunteer
+        </a>
+      </PageHead>
 
       <VolunteerSessionPanels sessions={volunteerSessions} certificateHoursThreshold={certificateHoursThreshold} />
 

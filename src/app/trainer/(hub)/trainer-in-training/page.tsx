@@ -6,6 +6,7 @@ import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-ac
 import { trainerInTrainingAccess } from "@/lib/tit-access";
 import { TitWorkspace } from "@/app/trainer/(hub)/trainer-in-training/workspace";
 import { AccessPanel, type AccessGrantView } from "@/app/trainer/(hub)/trainer-in-training/access-panel";
+import { PageHead } from "@/app/trainer/(hub)/page-head";
 
 // specs/for-claude-code-trainer-in-training.md: the whole TinT portfolio
 // workspace. Private to the people the record concerns -- "the TinT has no
@@ -50,13 +51,11 @@ export default async function TrainerInTrainingPage() {
   });
 
   const heading = (
-    <div>
-      <h1 className="font-serif text-2xl text-ink">Trainer-in-Training</h1>
-      <p className="mt-1 text-sm text-muted">
-        Everything here stays between the trainer-in-training, their supervisor, the main course tutor and anyone they let in -- nothing on this
-        page ever reaches a candidate.
-      </p>
-    </div>
+    <PageHead
+      eyebrow="Trainer-in-Training · private"
+      title="Trainer-in-Training"
+      lede="Everything here stays between the trainer-in-training, their supervisor, the main course tutor and anyone they let in -- nothing on this page ever reaches a candidate."
+    />
   );
 
   if (access.all.length === 0) {

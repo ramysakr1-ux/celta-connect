@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageHead, HUB_BUTTON, HUB_PRIMARY, HUB_PRIMARY_STYLE } from "@/app/trainer/(hub)/page-head";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -169,6 +170,7 @@ export default async function GradesReportPage() {
   return (
     <LaptopOnlyGate task="The grade form" skip={!trainer}>
     <div className="flex flex-col gap-6">
+      <PageHead eyebrow={`${courseName} · Grade form · ${cohortRows.length} candidate${cohortRows.length === 1 ? "" : "s"}`} title="Grade form" />
       <CohortSheet
         courseId={courseId}
         courseName={courseName}

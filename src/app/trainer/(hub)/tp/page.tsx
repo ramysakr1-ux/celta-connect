@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
+import { PageHead } from "@/app/trainer/(hub)/page-head";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { buildMarkingQueue, meetingDaysLabel, type QueueStatus } from "@/lib/tp-marking-queue";
@@ -83,12 +84,8 @@ export default async function TeachingPracticeQueuePage() {
   });
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-2xl text-ink">{queue.length} lesson{queue.length === 1 ? "" : "s"} waiting on you</h1>
-        </div>
-      </div>
+    <div className="flex flex-col gap-[18px]">
+      <PageHead eyebrow="Teaching Practice · feedback queue" title={`${queue.length} lesson${queue.length === 1 ? "" : "s"} waiting on you`} />
 
       {/* The tab's occasional pages, one door each (the "TP points
           library" header button and the four text links this replaces
