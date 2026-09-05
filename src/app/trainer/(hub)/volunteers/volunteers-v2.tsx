@@ -233,8 +233,10 @@ function ShareClassButton({ level }: { level: string | null }) {
   return (
     <form action={action} className="flex items-center gap-2">
       <input type="hidden" name="level" value={level ?? ""} />
-      <button type="submit" disabled={pending} title="Emails every student in this class their own link" className="text-[11px] font-semibold hover:underline" style={{ color: TEAL }}>
-        {pending ? "Sending…" : state.sentCount !== null ? `Emailed ${state.sentCount}` : "+ Share with class"}
+      {/* Ramy, 5 Sep 2026: "Share with class" read like sharing materials
+          -- the button delivers each student their own Connect link. */}
+      <button type="submit" disabled={pending} title="Emails every student in this class their own Connect link" className="text-[11px] font-semibold hover:underline" style={{ color: TEAL }}>
+        {pending ? "Sending…" : state.sentCount !== null ? `Emailed ${state.sentCount}` : "Email everyone their link"}
       </button>
       {state.error ? <span className="text-[11px] text-destructive">{state.error}</span> : null}
     </form>
