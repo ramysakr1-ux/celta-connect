@@ -136,7 +136,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           <span className="rounded-full bg-[color-mix(in_oklab,white_22%,transparent)] px-2 py-[2px] text-[10px] font-bold tracking-[0.08em] uppercase">Visit day</span>
           <span className="flex-1 font-semibold">{visitDayProblem}</span>
           <Link href="/trainer/timetable?mode=edit" className="text-[12px] whitespace-nowrap underline">
-            Nothing to observe &middot; §14.2 &rarr;
+            Nothing to observe &middot; §14.2
           </Link>
         </div>
       ) : null}
@@ -195,7 +195,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
                 href="/trainer/grades-report"
                 className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover-fill"
               >
-                Grade form &rarr;
+                Grade form
               </Link>
               {packOpens ? (
                 <a
@@ -203,7 +203,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
                   className="rounded-[6px] px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-[filter] hover:brightness-[1.12]"
                   style={{ background: "var(--hub-accent)" }}
                 >
-                  Preview as the assessor &rarr;
+                  Preview as the assessor
                 </a>
               ) : (
                 <span className="rounded-[6px] border border-dashed border-border px-3 py-1.5 text-sm text-muted" title="Complete the portfolios first">

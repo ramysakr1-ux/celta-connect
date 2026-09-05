@@ -44,7 +44,7 @@ export default async function ConcernsInboxPage() {
               <div className="flex items-baseline justify-between gap-3">
                 <p className="text-sm font-semibold text-ink">
                   {c.anonymous ? "Anonymous" : (nameById.get(c.trainee_id) ?? "Unknown")}
-                  <span className="ml-2 text-xs font-normal text-muted">→ {ROUTE_LABEL[c.route] ?? c.route}</span>
+                  <span className="ml-2 text-xs font-normal text-muted">Routed to {ROUTE_LABEL[c.route] ?? c.route}</span>
                 </p>
                 <p className="text-xs text-muted">{new Date(c.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
               </div>

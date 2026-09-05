@@ -105,7 +105,7 @@ export default async function VolunteersPage() {
         lede="The TP students who attend teaching practice. Each gets their own no-login link to see shared materials and their attendance -- links expire when the course ends."
       >
         <a href="/api/filming-consent.pdf" className={HUB_BUTTON}>
-          Filming consent form &darr;
+          Filming consent form
         </a>
         <RegisterLinkButton />
         <SendAllLinksButton />

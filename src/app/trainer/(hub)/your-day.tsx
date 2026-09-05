@@ -124,7 +124,7 @@ export function YourDay({ slots, serverNowMs, accent }: { slots: DaySlot[]; serv
       <p className="border-t border-border-faint px-[18px] py-2.5 text-[11.5px] text-muted">
         Only sessions you are named on.{" "}
         <a href="/trainer/timetable" className="underline hover:text-ink">
-          Full timetable &rarr;
+          Full timetable
         </a>
       </p>
     </section>

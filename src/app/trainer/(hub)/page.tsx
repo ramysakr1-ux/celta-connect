@@ -653,7 +653,7 @@ export default async function TodayPage() {
           <span className="rounded-[5px] bg-white/[0.18] px-2 py-1 text-[10.5px] font-bold tracking-[0.08em] uppercase whitespace-nowrap">{pr.tag}</span>
           <span className="flex-1 text-[14px] font-semibold">{pr.message}</span>
           <span className="text-[12.5px] opacity-80 whitespace-nowrap">
-            {pr.detail} &middot; &sect;{pr.cite} &rarr;
+            {pr.detail} &middot; &sect;{pr.cite}
           </span>
         </Link>
       ))}
@@ -672,7 +672,7 @@ export default async function TodayPage() {
                   </span>
                 </div>
                 <Link href="/trainer/roster" className="text-[12.5px] text-muted hover:underline">
-                  Full roster &rarr;
+                  Full roster
                 </Link>
               </div>
               <div className="grid grid-cols-1 gap-2.5 px-3.5 pb-4 sm:grid-cols-2">
@@ -736,7 +736,7 @@ export default async function TodayPage() {
                 {centrePreparation.length} preparation item{centrePreparation.length === 1 ? "" : "s"}
                 {preparationDeadline ? ` · ready by ${new Date(`${preparationDeadline}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}
               </span>
-              <span className="text-[12.5px] font-semibold text-gold">Open the Assessor tab &rarr;</span>
+              <span className="text-[12.5px] font-semibold text-gold">Open the Assessor tab</span>
             </Link>
           ) : null}
 

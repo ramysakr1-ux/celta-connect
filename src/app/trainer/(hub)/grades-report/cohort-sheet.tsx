@@ -111,7 +111,7 @@ export function CohortSheet({
               rel="noreferrer"
               className={HUB_BUTTON}
             >
-              Open Appian &rarr;
+              Open Appian
             </a>
           ) : null}
           <a

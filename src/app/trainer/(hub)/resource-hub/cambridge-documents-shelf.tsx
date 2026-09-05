@@ -51,7 +51,7 @@ function DocCard({ doc, editable }: { doc: DocRow; editable: boolean }) {
             rel="noopener noreferrer"
             className="shrink-0 text-xs font-semibold text-primary hover:underline"
           >
-            Open →
+            Open
           </a>
         ) : (
           <span className="shrink-0 text-xs text-muted">Not uploaded</span>

@@ -469,7 +469,7 @@ export default async function TrainerRotationPage() {
           href="/trainer/rotation/override"
           className="shrink-0 rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink trainer-hover-fill"
         >
-          Manual override →
+          Manual override
         </Link>
       </div>
 

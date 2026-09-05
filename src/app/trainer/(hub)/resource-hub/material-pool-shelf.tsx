@@ -113,7 +113,7 @@ function ItemCard({ item, removable }: { item: MaterialPoolItemView; removable: 
         </div>
         {item.signedUrl ? (
           <a href={item.signedUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 text-xs font-semibold text-primary hover:underline">
-            Open →
+            Open
           </a>
         ) : null}
       </div>

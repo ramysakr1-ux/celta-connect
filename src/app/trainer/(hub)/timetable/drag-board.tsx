@@ -383,7 +383,7 @@ function DetailPanel({
             <span className="text-muted">Zoom link</span>
             <span>
               <a href={event.zoom_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
-                Open Zoom link →
+                Open Zoom link
               </a>
             </span>
           </div>
@@ -408,7 +408,7 @@ function DetailPanel({
 
       {event.type === "milestone" && event.title.startsWith("Filmed observation") ? (
         <Link href={`/trainer/timetable/filmed-observation/${event.id}`} className="text-sm font-medium text-primary hover:underline">
-          Set up this session →
+          Set up this session
         </Link>
       ) : null}
 

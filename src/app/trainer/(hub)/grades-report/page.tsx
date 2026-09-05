@@ -511,7 +511,7 @@ export default async function GradesReportPage() {
                         rel="noreferrer"
                         className="trainer-hover-fill ml-auto rounded-[6px] border border-border px-3 py-1 text-[11.5px] font-medium text-ink"
                       >
-                        Open Appian &rarr;
+                        Open Appian
                       </a>
                     </div>
                   ) : null}

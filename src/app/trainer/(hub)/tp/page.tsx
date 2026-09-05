@@ -149,7 +149,7 @@ export default async function TeachingPracticeQueuePage() {
           <div className="flex items-baseline justify-between">
             <p className="text-[10.5px] font-bold tracking-[0.12em] text-muted uppercase">Your groups</p>
             <Link href="/trainer/rotation" className="text-[11px] text-primary hover:underline">
-              Manage rotation →
+              Manage rotation
             </Link>
           </div>
           {subgroups.length === 0 ? (
