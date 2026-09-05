@@ -1458,13 +1458,25 @@ async function main() {
   // days attended in full, one day a single block (the 45-89 minute
   // "partial" mark, which credits no hours but is still recorded), and one
   // day missed entirely.
-  const pastTpEvents = [...tpEventIdByTitle.entries()]
-    .filter(([title]) => /^TP[123]\b/.test(title))
-    .map(([, id]) => id);
-  const attendanceRows = pastTpEvents.map((eventId) => ({
-    volunteer_student_id: volunteer.id,
-    timetable_event_id: eventId,
-  }));
+  // Deliberately uneven, so the register demonstrates its own rule (and
+  // actually is now -- this used to attend every block of every day, so
+  // the half-filled "one lesson" mark never appeared anywhere on the demo;
+  // Ramy went looking for it 5 Sep 2026): full days, then one day of a
+  // single block (one lesson -- recorded, banks nothing), then one day
+  // missed entirely.
+  const { data: earlyTpRows } = await supabase
+    .from("course_timetable_events")
+    .select("id, event_date")
+    .eq("course_id", course.id)
+    .eq("type", "tp")
+    .order("event_date")
+    .order("event_time");
+  const earlyDates = [...new Set((earlyTpRows ?? []).map((e) => e.event_date))].slice(0, 6);
+  const attendanceRows = earlyDates.flatMap((date, i) => {
+    const blocks = (earlyTpRows ?? []).filter((e) => e.event_date === date);
+    const take = i === 4 ? 1 : i === 5 ? 0 : blocks.length;
+    return blocks.slice(0, take).map((e) => ({ volunteer_student_id: volunteer.id, timetable_event_id: e.id }));
+  });
   if (attendanceRows.length > 0) {
     const { error: attErr } = await supabase.from("volunteer_attendance").insert(attendanceRows);
     if (attErr) console.warn("  volunteer attendance:", attErr.message);
