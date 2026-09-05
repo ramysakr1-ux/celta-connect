@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { buildMarkingQueue, meetingDaysLabel, type QueueStatus } from "@/lib/tp-marking-queue";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { isMctOfCourse } from "@/lib/course-tutor-role";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 const RULE_COLOR: Record<QueueStatus, string> = {
@@ -47,18 +48,31 @@ export default async function TeachingPracticeQueuePage() {
   const now = new Date();
   const today = toLocalIso(now, timeZone);
 
-  const [{ data: subgroupRows }, { data: roster }, { data: plans }, { data: tpEvents }] = await Promise.all([
+  const [{ data: subgroupRows }, { data: roster }, { data: plans }, { data: tpEvents }, isMct, { data: tpGroupRows }] = await Promise.all([
     supabase.from("course_subgroups").select("id, name, tp_group_id, half_order").eq("course_id", courseId).order("created_at"),
     supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee"),
     supabase.from("plan_assignments").select("trainee_id, tp_number, taught_at, main_lesson_aim, short_title").eq("course_id", courseId),
     supabase.from("course_timetable_events").select("*").eq("course_id", courseId).eq("type", "tp").order("event_date"),
+    isMctOfCourse(trainer, courseId),
+    supabase.from("course_tp_groups").select("id, tutor_profile_id").eq("course_id", courseId),
   ]);
+  // Ramy, 5 Sep 2026: "the ACT doesn't need to see anything other than
+  // their own group" -- a non-MCT tutor's queue and groups are scoped to
+  // the TP groups they tutor. Unpaired subgroups have no tutor anywhere in
+  // the schema (same gap the timetable's tutorial scoping flags) and stay
+  // visible; a tutor who owns no group at all sees the whole course (fail
+  // open -- groups just aren't staffed yet), same convention as Today.
+  const ownedTpGroupIds = new Set((tpGroupRows ?? []).filter((g) => g.tutor_profile_id === trainer.id).map((g) => g.id));
+  const scopedToOwnGroup = trainer.role === "trainer" && !isMct && ownedTpGroupIds.size > 0;
+  const visibleSubgroupRows = scopedToOwnGroup
+    ? (subgroupRows ?? []).filter((sg) => !sg.tp_group_id || ownedTpGroupIds.has(sg.tp_group_id))
+    : (subgroupRows ?? []);
   // Scoped through this course's subgroups and candidates -- these two used
   // to be read with no filter at all, leaning on row security to narrow them.
   const rosterIds = (roster ?? []).map((r) => r.id);
   const [{ data: memberRows }, { data: feedback }] = await Promise.all([
-    (subgroupRows ?? []).length > 0
-      ? supabase.from("course_subgroup_members").select("subgroup_id, trainee_id, base_slot").in("subgroup_id", (subgroupRows ?? []).map((g) => g.id))
+    visibleSubgroupRows.length > 0
+      ? supabase.from("course_subgroup_members").select("subgroup_id, trainee_id, base_slot").in("subgroup_id", visibleSubgroupRows.map((g) => g.id))
       : Promise.resolve({ data: [] as { subgroup_id: string; trainee_id: string; base_slot: number }[] }),
     rosterIds.length > 0
       ? supabase.from("tp_feedback").select("trainee_id, tp_number, submitted_at").in("trainee_id", rosterIds)
@@ -66,11 +80,11 @@ export default async function TeachingPracticeQueuePage() {
   ]);
 
   const nameByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.full_name]));
-  const subgroupIds = new Set((subgroupRows ?? []).map((g) => g.id));
+  const subgroupIds = new Set(visibleSubgroupRows.map((g) => g.id));
   const members = (memberRows ?? []).filter((m) => subgroupIds.has(m.subgroup_id));
   const traineeIds = new Set((roster ?? []).map((r) => r.id));
 
-  const subgroups = (subgroupRows ?? []).map((g) => ({
+  const subgroups = visibleSubgroupRows.map((g) => ({
     id: g.id,
     tpGroupId: g.tp_group_id,
     halfOrder: g.half_order,
@@ -91,7 +105,10 @@ export default async function TeachingPracticeQueuePage() {
 
   return (
     <div className="flex flex-col gap-[18px]">
-      <PageHead eyebrow="Teaching Practice · feedback queue" title={`${queue.length} lesson${queue.length === 1 ? "" : "s"} waiting on you`} />
+      <PageHead
+        eyebrow={`Teaching Practice · feedback queue${scopedToOwnGroup ? " · your group" : isMct ? " · all groups" : ""}`}
+        title={`${queue.length} lesson${queue.length === 1 ? "" : "s"} waiting on you`}
+      />
 
       {/* The tab's occasional pages, one door each (the "TP points
           library" header button and the four text links this replaces
@@ -159,7 +176,7 @@ export default async function TeachingPracticeQueuePage() {
               {subgroups.map((g, i) => (
                 <div key={g.id} className={`flex items-center justify-between gap-3 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
                   <div className="flex flex-col gap-[3px]">
-                    <p className="text-[13px] font-semibold text-ink">{(subgroupRows ?? []).find((s) => s.id === g.id)?.name}</p>
+                    <p className="text-[13px] font-semibold text-ink">{visibleSubgroupRows.find((s) => s.id === g.id)?.name}</p>
                     <p className="text-[11.5px] text-muted">
                       {g.members.length > 0 ? g.members.map((m) => m.fullName).join(", ") : "No trainees yet"}
                     </p>
