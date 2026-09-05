@@ -92,7 +92,7 @@ const CELTA5_SIGNOFF_LABEL: Record<RosterRow["celta5SignoffStatus"], string> = {
 // only, never role==='admin' even when scoped to the same course.
 function ContactCell({ row, courseCode }: { row: RosterRow; courseCode: string }) {
   return (
-    <td className="text-right text-xs" onClick={(e) => e.stopPropagation()}>
+    <td className="text-center text-xs" onClick={(e) => e.stopPropagation()}>
       <div className="flex justify-end gap-2">
         <a href={`mailto:${row.email}?subject=${encodeURIComponent(courseCode)}`} className="text-primary hover:underline">
           Email
@@ -149,7 +149,7 @@ export function RosterRowView({
             one before "Filmed obs" was added. The name and contact cells
             are rendered separately above, hence the -1 for the name; the
             contact cell is inside CORE's own count of what follows it. */}
-        <td colSpan={CORE_COLUMN_COUNT + 1 + (showDetail ? DETAIL_COLUMN_COUNT : 0)} className="text-right">
+        <td colSpan={CORE_COLUMN_COUNT + 1 + (showDetail ? DETAIL_COLUMN_COUNT : 0)} className="text-center">
           <span className="pill pill-neutral">{COURSE_STATUS_LABEL[row.courseStatus]}</span>
         </td>
       </tr>
@@ -173,11 +173,11 @@ export function RosterRowView({
         </Link>
       </td>
       {showContact ? <ContactCell row={row} courseCode={courseCode} /> : <td />}
-      <td className={`text-right tabular-nums ${row.assessedHrs < 6 ? "text-status-warning-text" : "text-ink"}`}>
+      <td className={`text-center tabular-nums ${row.assessedHrs < 6 ? "text-status-warning-text" : "text-ink"}`}>
         {row.assessedHrs.toFixed(2)}
       </td>
-      <td className="text-right tabular-nums text-ink">{row.tpsPassed} / 8</td>
-      <td className="text-right tabular-nums text-ink">
+      <td className="text-center tabular-nums text-ink">{row.tpsPassed} / 8</td>
+      <td className="text-center tabular-nums text-ink">
         {row.assignmentsTotal > 0 ? (
           <Link
             href={`/portfolio/${row.id}/assignments`}
@@ -192,14 +192,14 @@ export function RosterRowView({
           <span className="text-muted">--</span>
         )}
       </td>
-      <td className="text-right tabular-nums text-ink">{row.criteriaPct}%</td>
-      <td className={`text-right tabular-nums ${row.attendancePct < 80 ? "font-semibold text-destructive" : "text-ink"}`}>
+      <td className="text-center tabular-nums text-ink">{row.criteriaPct}%</td>
+      <td className={`text-center tabular-nums ${row.attendancePct < 80 ? "font-semibold text-destructive" : "text-ink"}`}>
         {row.attendancePct}%
       </td>
-      <td className={`text-right ${row.provisionalSlashed ? "font-bold text-destructive" : "text-ink"}`}>
+      <td className={`text-center ${row.provisionalSlashed ? "font-bold text-destructive" : "text-ink"}`}>
         {row.provisionalLabel ?? <span className="text-muted">Not set</span>}
       </td>
-      <td className="text-right">
+      <td className="text-center">
         {row.atRiskReasons.length > 0 ? (
           <span title={row.atRiskReasons.map((r) => AT_RISK_LABELS[r]).join(" · ")} className="pill pill-danger">
             At risk
@@ -208,7 +208,7 @@ export function RosterRowView({
       </td>
       {showDetail ? (
         <>
-          <td className="text-right tabular-nums">
+          <td className="text-center tabular-nums">
             {row.tpStagesTaught > 0 ? (
               <Link
                 href={`/portfolio/${row.id}/tp`}
@@ -222,7 +222,7 @@ export function RosterRowView({
               <span className="text-muted">--</span>
             )}
           </td>
-          <td className="text-right tabular-nums">
+          <td className="text-center tabular-nums">
             {row.supervisedTotal > 0 ? (
               <Link
                 href={`/portfolio/${row.id}/timetable`}
@@ -236,7 +236,7 @@ export function RosterRowView({
               <span className="text-muted">--</span>
             )}
           </td>
-          <td className="text-right tabular-nums">
+          <td className="text-center tabular-nums">
             <Link
               href={`/portfolio/${row.id}/celta5`}
               onClick={(e) => e.stopPropagation()}
@@ -245,7 +245,7 @@ export function RosterRowView({
               {row.observationHoursCounted.toFixed(1)} / 6
             </Link>
           </td>
-          <td className="text-right">
+          <td className="text-center">
             <Link
               href={`/portfolio/${row.id}/celta5`}
               onClick={(e) => e.stopPropagation()}
@@ -257,7 +257,7 @@ export function RosterRowView({
               ) : null}
             </Link>
           </td>
-          <td className="text-right">
+          <td className="text-center">
             <Link href={`/portfolio/${row.id}/celta5`} onClick={(e) => e.stopPropagation()} className="hover:underline text-ink">
               {row.stage2BookedPosition ? ordinal(row.stage2BookedPosition) : <span className="text-status-warning-text">Not booked</span>}
               {" · "}
@@ -286,7 +286,7 @@ export function RosterRowView({
               </div>
             ) : null}
           </td>
-          <td className="text-right">
+          <td className="text-center">
             <Link
               href={`/portfolio/${row.id}/celta5`}
               onClick={(e) => e.stopPropagation()}
@@ -296,17 +296,17 @@ export function RosterRowView({
             </Link>
           </td>
           <td
-            className={`text-right tabular-nums ${row.folEntriesLow ? "text-status-warning-text" : "text-ink"}`}
+            className={`text-center tabular-nums ${row.folEntriesLow ? "text-status-warning-text" : "text-ink"}`}
             title={row.folEntriesLow ? "Below half the cohort's average -- may be under-logging" : "FOL entries logged this course"}
           >
             {row.folEntriesLogged}
           </td>
-          <td className="text-right">
+          <td className="text-center">
             <div className="ml-auto">
               <TrajectoryBarCompact value={row.trajectory} />
             </div>
           </td>
-          <td className="text-right tabular-nums">
+          <td className="text-center tabular-nums">
             {row.obsTasksTotal > 0 ? (
               <Link
                 href={`/portfolio/${row.id}/celta5`}
@@ -319,7 +319,7 @@ export function RosterRowView({
               <span className="text-muted">--</span>
             )}
           </td>
-          <td className="text-right tabular-nums">
+          <td className="text-center tabular-nums">
             {row.preCourseTaskTotal > 0 ? (
               <Link
                 href={`/portfolio/${row.id}/pre-course-task`}
@@ -332,7 +332,7 @@ export function RosterRowView({
               <span className="text-muted">--</span>
             )}
           </td>
-          <td className="text-right tabular-nums">
+          <td className="text-center tabular-nums">
             {row.filmedObsTotal > 0 ? (
               <Link
                 href={`/portfolio/${row.id}/resources`}

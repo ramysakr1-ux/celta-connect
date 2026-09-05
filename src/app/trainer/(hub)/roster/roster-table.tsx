@@ -18,10 +18,12 @@ export const DETAIL_COLUMN_COUNT = 11; // TP stages, Supervised review, Observat
 // written... the progress detail, they're kind of too bulky." Short
 // labels, small caps like every other label in the hub, allowed to wrap
 // onto two lines so the detail columns stop pushing the table wide.
-function Th({ right = false, children }: { right?: boolean; children: React.ReactNode }) {
+function Th({ center = false, children }: { center?: boolean; children: React.ReactNode }) {
+  // Two-line labels are broken on purpose ("Assessed" over "hrs"), never
+  // wherever the column width happens to fall; numbers centre under them.
   return (
-    <th className={`align-bottom text-[10.5px] leading-[1.15] font-bold tracking-[0.08em] whitespace-normal text-muted uppercase ${right ? "text-right" : ""}`}>
-      <span className="inline-block max-w-[7.5rem]">{children}</span>
+    <th className={`align-bottom text-[10.5px] leading-[1.2] font-bold tracking-[0.08em] whitespace-pre-line text-muted uppercase ${center ? "text-center" : ""}`}>
+      {children}
     </th>
   );
 }
@@ -56,28 +58,28 @@ export function RosterTable({
         <table className="table-plain w-full">
           <thead>
             <tr>
-              <Th>Candidate</Th>
-              {showContact ? <Th right>Email</Th> : <th />}
-              <Th right>Assessed hrs</Th>
-              <Th right>TPs</Th>
-              <Th right>Assignments</Th>
-              <Th right>Criteria</Th>
-              <Th right>Attendance</Th>
-              <Th right>Provisional</Th>
-              <Th right>At risk</Th>
+              <Th>{"Candidate"}</Th>
+              {showContact ? <Th center>{"Email"}</Th> : <th />}
+              <Th center>{"Assessed\nhrs"}</Th>
+              <Th center>{"TPs"}</Th>
+              <Th center>{"Assignments"}</Th>
+              <Th center>{"Criteria"}</Th>
+              <Th center>{"Attendance"}</Th>
+              <Th center>{"Provisional"}</Th>
+              <Th center>{"At\nrisk"}</Th>
               {showDetail ? (
                 <>
-                  <Th right>TP stages</Th>
-                  <Th right>Supervised</Th>
-                  <Th right>Obs. hrs</Th>
-                  <Th right>Stage 1</Th>
-                  <Th right>Stage 2/3</Th>
-                  <Th right>CELTA 5</Th>
-                  <Th right>FOL</Th>
-                  <Th right>Standing</Th>
-                  <Th right>Obs. tasks</Th>
-                  <Th right>Pre-course</Th>
-                  <Th right>Filmed obs</Th>
+                  <Th center>{"TP\nstages"}</Th>
+                  <Th center>{"Supervised"}</Th>
+                  <Th center>{"Obs.\nhrs"}</Th>
+                  <Th center>{"Stage 1"}</Th>
+                  <Th center>{"Stage\n2/3"}</Th>
+                  <Th center>{"CELTA 5\nsign-off"}</Th>
+                  <Th center>{"FOL"}</Th>
+                  <Th center>{"Standing"}</Th>
+                  <Th center>{"Obs.\ntasks"}</Th>
+                  <Th center>{"Pre-\ncourse"}</Th>
+                  <Th center>{"Filmed\nobs"}</Th>
                 </>
               ) : null}
             </tr>
