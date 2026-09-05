@@ -186,7 +186,10 @@ export default async function AnnouncementsPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+      {/* Today's idiom: one shadowed spine (the composer), flat cards beside
+          it, rows with a badge and a hover ring. Ramy, 5 Sep 2026, on the
+          old three grey boxes: "still looks the same kind of bland paper." */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_380px]">
         {canCompose ? (
           <AnnouncementComposer
             timetableEvents={composerEvents}
@@ -198,39 +201,49 @@ export default async function AnnouncementsPage() {
             cohortAllowed={isMct}
           />
         ) : (
-          <div className="sheet flex flex-col gap-2">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Write an announcement</p>
-            <p className="text-sm text-muted">
+          <div className="trainer-hover flex flex-col gap-2 overflow-hidden rounded-[14px] border border-border bg-frame pb-4">
+            <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
+              <h2 className="font-serif text-[20px] font-semibold">Write an announcement</h2>
+            </div>
+            <p className="px-[18px] text-sm text-muted">
               Whole-cohort announcements are sent by the main course tutor. You can post to a TP group once you are named
               its tutor on Rotation; until then, the chat pill reaches your candidates informally.
             </p>
           </div>
         )}
 
-        <ScheduledPanel scheduled={scheduledRows} timetableEvents={editPickerEvents} canManage={canCompose} />
+        <div className="flex flex-col gap-5">
+          <ScheduledPanel scheduled={scheduledRows} timetableEvents={editPickerEvents} canManage={canCompose} />
 
-        <div className="rounded-[6px] border border-border">
-          <p className="border-b border-border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
-            Posted · {posted.length}
-          </p>
-          {posted.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-muted">Nothing posted yet.</p>
-          ) : (
-            <div className="divide-y divide-border-faint">
-              {posted.map((b) => (
-                <div key={b.id} className="flex flex-col gap-1 px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-ink">{b.title}</p>
-                    {b.pinned ? <span className="pill pill-neutral">Pinned</span> : null}
-                  </div>
-                  <p className="text-xs text-muted">
-                    {authorNameById.get(b.author_id) ?? "Unknown"} · {(b.sent_at ?? b.created_at).slice(0, 10)}
-                    {b.visible_to_tp_group_id ? ` · ${groupNameById.get(b.visible_to_tp_group_id) ?? "one group"} only` : ""}
-                  </p>
-                </div>
-              ))}
+          <section className="trainer-hover flex flex-col overflow-hidden rounded-[14px] border border-border bg-frame">
+            <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
+              <h3 className="font-serif text-[20px] font-semibold">Posted</h3>
+              <span className="text-[12.5px] text-gold">{posted.length === 0 ? "Nothing yet" : `${posted.length} sent`}</span>
             </div>
-          )}
+            <div className="flex flex-col px-2.5 pt-2 pb-2.5">
+              {posted.map((b) => {
+                const when = new Date(`${(b.sent_at ?? b.created_at).slice(0, 10)}T00:00:00`);
+                return (
+                  <div key={b.id} className="trainer-hover grid grid-cols-[40px_1fr] items-center gap-3.5 rounded-[10px] px-3 py-[10px]">
+                    <span className="flex size-10 flex-col items-center justify-center rounded-[10px] bg-ink-warm text-primary-foreground">
+                      <span className="text-[13px] leading-none font-bold">{when.getDate()}</span>
+                      <span className="text-[9px] leading-none tracking-[0.06em] uppercase">{when.toLocaleDateString("en-GB", { month: "short" })}</span>
+                    </span>
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-2">
+                        <span className="truncate text-[14px] font-semibold text-ink">{b.title}</span>
+                        {b.pinned ? <span className="rounded-full bg-card-inset px-1.5 py-[2px] text-[9.5px] font-bold tracking-[0.08em] text-muted uppercase">Pinned</span> : null}
+                      </span>
+                      <span className="block truncate text-[12.5px] text-muted">
+                        {authorNameById.get(b.author_id) ?? "Unknown"}
+                        {b.visible_to_tp_group_id ? ` · ${groupNameById.get(b.visible_to_tp_group_id) ?? "one group"} only` : " · whole cohort"}
+                      </span>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
         </div>
       </div>
     </div>

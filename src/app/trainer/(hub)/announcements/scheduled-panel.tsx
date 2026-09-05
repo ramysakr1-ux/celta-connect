@@ -63,12 +63,13 @@ export function ScheduledPanel({
   }, [savedId]);
 
   return (
-    <div className="rounded-[6px] border border-border">
-      <p className="border-b border-border bg-muted/10 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
-        Scheduled · {scheduled.length}
-      </p>
+    <div className="trainer-hover flex flex-col overflow-hidden rounded-[14px] border border-border bg-frame">
+      <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
+        <h3 className="font-serif text-[20px] font-semibold">Scheduled</h3>
+        <span className="text-[12.5px] text-gold">{scheduled.length === 0 ? "Nothing waiting" : `${scheduled.length} waiting`}</span>
+      </div>
       {scheduled.length === 0 ? (
-        <p className="px-4 py-3 text-sm text-muted">Nothing scheduled.</p>
+        <p className="px-[18px] py-4 text-sm text-muted">Anchor an announcement to a timetable event and it waits here until it fires.</p>
       ) : (
         <div className="divide-y divide-border-faint">
           {scheduled.map((row) =>
@@ -112,7 +113,7 @@ function ReadRow({
 }) {
   const held = Boolean(row.heldAt);
   return (
-    <div className={`flex flex-col gap-1.5 px-4 py-3 ${held ? "bg-surface-muted/40" : ""}`}>
+    <div className={`trainer-hover mx-2.5 flex flex-col gap-1.5 rounded-[10px] px-3 py-3 ${held ? "bg-surface-muted/40" : ""}`}>
       <div className="flex items-center gap-2">
         <p className="text-sm font-semibold text-ink">{row.title}</p>
         {held ? <span className="pill pill-neutral">Held</span> : null}

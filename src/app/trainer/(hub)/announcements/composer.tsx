@@ -66,8 +66,18 @@ export function AnnouncementComposer({
   const selectedGroup = groups.find((g) => g.id === groupScopeId) ?? null;
 
   return (
-    <form action={formAction} className="sheet flex flex-col gap-3">
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Write an announcement</p>
+    <form
+      action={formAction}
+      className="trainer-hover flex flex-col gap-3 overflow-hidden rounded-[14px] border border-border bg-frame pb-4"
+      style={{ boxShadow: "0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06)" }}
+    >
+      {/* The sub-page card header: one ink-brown bar, label inside, on every
+          card of the page -- the same bar Today's assessor card uses, so it
+          is one colour system, not a fruit salad (Ramy, 5 Sep 2026). */}
+      <div className="flex items-center justify-between gap-3 rounded-t-[13px] px-[18px] py-2.5 text-[oklch(96%_0.008_85)]" style={{ background: "var(--color-ink-warm)" }}>
+        <h2 className="font-serif text-[20px] font-semibold">Write an announcement</h2>
+      </div>
+      <div className="flex flex-col gap-3 px-[18px]">
 
       {showAssessorTemplate ? (
         <button
@@ -85,7 +95,8 @@ export function AnnouncementComposer({
               setOffsetDays("-2");
             }
           }}
-          className="self-start rounded-full border border-border bg-muted/10 px-3 py-1 text-xs font-medium text-muted hover:bg-muted/20"
+          className="self-start rounded-full border px-3 py-1 text-xs font-semibold transition-colors hover:brightness-95"
+          style={{ background: "color-mix(in oklab, var(--color-gold) 18%, var(--color-card))", borderColor: "color-mix(in oklab, var(--color-gold) 45%, transparent)", color: "oklch(40% 0.09 68)" }}
         >
           Use assessor-visit template
         </button>
@@ -242,10 +253,12 @@ export function AnnouncementComposer({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-[6px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          className="inline-flex h-10 items-center rounded-[8px] px-[18px] text-[13.5px] font-bold text-primary-foreground transition-[filter] hover:brightness-110 disabled:opacity-60"
+          style={{ background: "var(--hub-accent)" }}
         >
           {pending ? "Saving…" : timing === "anchored" ? "Schedule" : "Post announcement"}
         </button>
+      </div>
       </div>
     </form>
   );
