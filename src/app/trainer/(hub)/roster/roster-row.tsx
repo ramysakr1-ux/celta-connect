@@ -249,40 +249,47 @@ export function RosterRowView({
             <Link
               href={`/portfolio/${row.id}/celta5`}
               onClick={(e) => e.stopPropagation()}
+              title={row.stage1Filed ? "Stage 1 record filed" : row.stage1TutorialConfirmed === null ? "Stage 1 record not filed" : row.stage1TutorialConfirmed ? "Not filed -- tutorial confirmed" : "Not filed -- tutorial invited"}
               className={`hover:underline ${row.stage1Filed ? "text-ink" : "text-status-warning-text"}`}
             >
-              {row.stage1Filed ? "Filed" : "Not filed"}
-              {!row.stage1Filed && row.stage1TutorialConfirmed !== null ? (
-                <span className="ml-1 text-[11px] text-muted">({row.stage1TutorialConfirmed ? "confirmed" : "invited"})</span>
-              ) : null}
+              {row.stage1Filed ? "Filed" : "Not yet"}
             </Link>
           </td>
           <td className="text-center">
-            <Link href={`/portfolio/${row.id}/celta5`} onClick={(e) => e.stopPropagation()} className="hover:underline text-ink">
-              {row.stage2BookedPosition ? ordinal(row.stage2BookedPosition) : <span className="text-status-warning-text">Not booked</span>}
-              {" · "}
-              {row.stage3Required
-                ? row.stage3Done
-                  ? "Stage 3 done"
+            {/* Two short tokens -- "3rd · done" -- with the full state in the
+                tooltip. It used to spell out "Not booked · Stage 3 N/A" and
+                the moved-earlier reasons in full, which made the detail
+                view a wall (Ramy, 5 Sep 2026). */}
+            {(() => {
+              const s3 = !row.stage3Required
+                ? { short: "n/a", long: "Stage 3 not required for this candidate" }
+                : row.stage3Done
+                  ? { short: "done", long: "Stage 3 done" }
                   : row.stage3TutorialConfirmed === null
-                    ? "Stage 3 pending"
+                    ? { short: "pending", long: "Stage 3 pending" }
                     : row.stage3TutorialConfirmed
-                      ? "Stage 3 confirmed"
-                      : "Stage 3 invited"
-                : "Stage 3 N/A"}
-            </Link>
-            {isMct ? (
-              <div className="mt-1 flex flex-col items-end gap-1">
-                {row.stage2MovedEarlierReason ? (
-                  <p className="text-[11px] text-status-warning-text">Stage 2 moved earlier — {row.stage2MovedEarlierReason}</p>
-                ) : row.stage2CanMoveEarlier ? (
-                  <MoveEarlierControl traineeId={row.id} stage="stage2" />
-                ) : null}
-                {row.stage3MovedEarlierReason ? (
-                  <p className="text-[11px] text-status-warning-text">Stage 3 moved earlier — {row.stage3MovedEarlierReason}</p>
-                ) : row.stage3CanMoveEarlier ? (
-                  <MoveEarlierControl traineeId={row.id} stage="stage3" />
-                ) : null}
+                      ? { short: "confirmed", long: "Stage 3 tutorial confirmed" }
+                      : { short: "invited", long: "Stage 3 tutorial invited" };
+              const s2 = row.stage2BookedPosition ? { short: ordinal(row.stage2BookedPosition), long: `Stage 2 tutorial booked, ${ordinal(row.stage2BookedPosition)} slot` } : { short: "--", long: "Stage 2 tutorial not booked" };
+              const moved = [row.stage2MovedEarlierReason ? `Stage 2 moved earlier: ${row.stage2MovedEarlierReason}` : null, row.stage3MovedEarlierReason ? `Stage 3 moved earlier: ${row.stage3MovedEarlierReason}` : null].filter(Boolean).join(" · ");
+              return (
+                <Link
+                  href={`/portfolio/${row.id}/celta5`}
+                  onClick={(e) => e.stopPropagation()}
+                  title={[s2.long, s3.long, moved].filter(Boolean).join(" · ")}
+                  className="whitespace-nowrap hover:underline text-ink"
+                >
+                  <span className={row.stage2BookedPosition ? "" : "text-status-warning-text"}>{s2.short}</span>
+                  {" · "}
+                  <span className={row.stage3Required && !row.stage3Done ? "text-status-warning-text" : ""}>{s3.short}</span>
+                  {moved ? <span className="ml-1 text-status-warning-text" aria-label="moved earlier">*</span> : null}
+                </Link>
+              );
+            })()}
+            {isMct && (row.stage2CanMoveEarlier || row.stage3CanMoveEarlier) ? (
+              <div className="mt-1 flex flex-col items-center gap-1">
+                {row.stage2CanMoveEarlier && !row.stage2MovedEarlierReason ? <MoveEarlierControl traineeId={row.id} stage="stage2" /> : null}
+                {row.stage3CanMoveEarlier && !row.stage3MovedEarlierReason ? <MoveEarlierControl traineeId={row.id} stage="stage3" /> : null}
               </div>
             ) : null}
           </td>
