@@ -1714,6 +1714,65 @@ async function main() {
     });
   }
 
+  // --- Volunteer v2 (design_handoff_volunteer_students_v2, 5 Sep 2026):
+  // emails on both volunteers, RSVP replies for the next teaching day, a
+  // cross-course identity with prior hours, and an opened link -- so the
+  // trainer's register, Today strip and student card all have real states
+  // to show on a walkthrough. ---
+  await supabase.from("volunteer_students").update({ email: "demo-emeka@celtaconnect.com" }).eq("id", volunteer.id);
+  await supabase.from("volunteer_students").update({ email: "demo-grace@celtaconnect.com" }).eq("id", graceVolunteer.id);
+  await supabase.from("course_access_tokens").update({ last_opened_at: new Date().toISOString() }).eq("volunteer_student_id", volunteer.id);
+
+  // Emeka volunteered on the Spring course too: one identity, prior hours.
+  const { data: emekaPerson } = await supabase
+    .from("volunteer_people")
+    .insert({ center_id: center.id, email: "demo-emeka@celtaconnect.com" })
+    .select("id")
+    .single();
+  await supabase.from("volunteer_students").update({ volunteer_person_id: emekaPerson.id }).eq("id", volunteer.id);
+  const { data: pastEmeka } = await supabase
+    .from("volunteer_students")
+    .insert({ course_id: pastCourse.id, name: "Emeka Nwosu", level: "Intermediate", email: "demo-emeka@celtaconnect.com", volunteer_person_id: emekaPerson.id })
+    .select("id")
+    .single();
+  const pastTpRows = [];
+  for (let day = 0; day < 4; day++) {
+    for (let block = 0; block < 3; block++) {
+      pastTpRows.push({
+        course_id: pastCourse.id,
+        type: "tp",
+        title: `TP${day + 1}`,
+        event_date: isoDaysFromNow(-145 + day),
+        event_time: ["10:00", "10:45", "11:30"][block],
+        created_by: trainerId,
+      });
+    }
+  }
+  const { data: pastTp } = await supabase.from("course_timetable_events").insert(pastTpRows).select("id");
+  await supabase.from("volunteer_attendance").insert(
+    (pastTp ?? []).map((e) => ({ volunteer_student_id: pastEmeka.id, timetable_event_id: e.id }))
+  );
+
+  // RSVP replies for the next teaching day: Emeka said yes, Grace can't.
+  const todayIsoV2 = isoDaysFromNow(0);
+  const { data: nextTpDay } = await supabase
+    .from("course_timetable_events")
+    .select("id, event_date")
+    .eq("course_id", course.id)
+    .eq("type", "tp")
+    .gte("event_date", todayIsoV2)
+    .order("event_date")
+    .order("event_time")
+    .limit(3);
+  for (const e of nextTpDay ?? []) {
+    await supabase.from("volunteer_confirmations").insert({ volunteer_student_id: volunteer.id, timetable_event_id: e.id });
+    await supabase.from("volunteer_declines").upsert(
+      { volunteer_student_id: graceVolunteer.id, timetable_event_id: e.id },
+      { onConflict: "volunteer_student_id,timetable_event_id" }
+    );
+  }
+  console.log("volunteer v2: emails + person link + 9 prior hours + RSVP replies for", (nextTpDay ?? [])[0]?.event_date ?? "no upcoming TP");
+
   console.log("DEMO SEED COMPLETE");
   console.log("center_id=" + center.id);
   console.log("course_id=" + course.id);

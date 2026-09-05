@@ -12,6 +12,15 @@
 // per-minute attendance data.
 export const TICK_THRESHOLD_MINUTES = 90;
 
+// design_handoff_volunteer_students_v2 generalises the present rule to the
+// day's own lesson count: present means the round(2N/3) of a session's N
+// lessons -- 2 of 3 (identical to the 90-minute rule the constant above
+// encodes), and 1 of 2 on a two-lesson day, which the flat 90 minutes got
+// wrong (1 x 45 min read as "one lesson" and banked nothing).
+export function blocksNeededForPresent(totalBlocks: number): number {
+  return Math.max(1, Math.round((totalBlocks * 2) / 3));
+}
+
 // build-spec.md's volunteer hours model, third tier: "45 to 89 minutes -> one
 // lesson. Recorded on the register as a distinct mark, but credits no hours
 // toward the certificate. It exists because a tutor seeing someone who
@@ -56,7 +65,7 @@ export function computeSessionTicks(
       const attendedBlocks = dayEvents.filter((e) => attendedEventIds.has(e.id)).length;
       const totalBlocks = dayEvents.length;
       const minutesAttended = attendedBlocks * lessonLengthMinutes;
-      const ticked = minutesAttended >= TICK_THRESHOLD_MINUTES;
+      const ticked = attendedBlocks >= blocksNeededForPresent(totalBlocks);
       const tier: AttendanceTier = ticked ? "present" : minutesAttended >= PARTIAL_THRESHOLD_MINUTES ? "partial" : "absent";
       return {
         date,

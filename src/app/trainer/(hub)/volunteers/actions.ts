@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import { sendVolunteerClassStartingEmail } from "@/lib/volunteer-class-starting";
+import { linkVolunteerByEmail } from "@/lib/volunteer-identity";
 
 export interface FormState {
   error: string | null;
@@ -22,6 +23,10 @@ export async function addVolunteerStudent(_prevState: FormState, formData: FormD
   const name = (formData.get("name") as string | null)?.trim();
   if (!name) return { error: "Name is required." };
   const level = (formData.get("level") as string | null)?.trim() || null;
+  // v2 (design_handoff_volunteer_students_v2 §7): email is what links a new
+  // registration to hours already on file -- exact-match auto-link via the
+  // pool's own rule (linkVolunteerByEmail), never by name.
+  const email = (formData.get("email") as string | null)?.trim().toLowerCase() || null;
 
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("end_date").eq("id", trainer.course_id).maybeSingle();
@@ -29,11 +34,15 @@ export async function addVolunteerStudent(_prevState: FormState, formData: FormD
 
   const { data: volunteer, error } = await supabase
     .from("volunteer_students")
-    .insert({ course_id: trainer.course_id, name, level })
+    .insert({ course_id: trainer.course_id, name, level, email })
     .select("id")
     .single();
 
   if (error || !volunteer) return { error: "Could not add the student. Try again." };
+
+  if (email && trainer.center_id) {
+    await linkVolunteerByEmail(createAdminClient(), { volunteerStudentId: volunteer.id, centerId: trainer.center_id, email });
+  }
 
   const expiresAt = new Date(`${course.end_date}T23:59:59Z`).toISOString();
   const { error: tokenError } = await supabase.from("course_access_tokens").insert({
@@ -49,8 +58,85 @@ export async function addVolunteerStudent(_prevState: FormState, formData: FormD
     return { error: "Added the student, but could not create their link. Try again." };
   }
 
+  // v2's button is "Add and send link" -- when an email was given, the
+  // starting email with their link goes out immediately.
+  if (email) {
+    await sendVolunteerClassStartingEmail(createAdminClient(), { id: volunteer.id, name, email, level, course_id: trainer.course_id }, { skipIfAlreadySent: false });
+  }
+
   revalidatePath("/trainer/volunteers");
   return { error: null };
+}
+
+export interface ReissueState {
+  error: string | null;
+  done: boolean;
+}
+
+// v2 student card: "Re-issue mints a new token, the old one dies,
+// attendance and hours untouched" -- for the link that never arrived.
+export async function reissueVolunteerLink(_prevState: ReissueState, formData: FormData): Promise<ReissueState> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const volunteerId = formData.get("volunteer_id");
+  if (typeof volunteerId !== "string" || !trainer.course_id) return { error: "Something went wrong.", done: false };
+
+  const admin = createAdminClient();
+  const { data: volunteer } = await admin
+    .from("volunteer_students")
+    .select("id, course_id")
+    .eq("id", volunteerId)
+    .eq("course_id", trainer.course_id)
+    .maybeSingle();
+  if (!volunteer) return { error: "Volunteer not found.", done: false };
+
+  const { data: course } = await admin.from("courses").select("end_date").eq("id", trainer.course_id).maybeSingle();
+  if (!course) return { error: "Could not find your course.", done: false };
+
+  await admin.from("course_access_tokens").delete().eq("role", "volunteer_student").eq("volunteer_student_id", volunteer.id);
+  const { error } = await admin.from("course_access_tokens").insert({
+    course_id: trainer.course_id,
+    role: "volunteer_student",
+    volunteer_student_id: volunteer.id,
+    expires_at: new Date(`${course.end_date}T23:59:59Z`).toISOString(),
+  });
+  if (error) {
+    console.error("[trainer/(hub)/volunteers:reissueVolunteerLink]", error);
+    return { error: "Could not create the new link. Try again.", done: false };
+  }
+
+  revalidatePath("/trainer/volunteers");
+  return { error: null, done: true };
+}
+
+export interface ShareClassState {
+  error: string | null;
+  sentCount: number | null;
+}
+
+// v2 class header's "+ Share with class": the starting email with each
+// student's own link, scoped to one class instead of the whole course.
+export async function sendClassStartingEmails(_prevState: ShareClassState, formData: FormData): Promise<ShareClassState> {
+  const trainer = await requireRole(["trainer", "admin"]);
+  const levelRaw = formData.get("level");
+  if (!trainer.course_id) return { error: "No course assigned.", sentCount: null };
+  const level = typeof levelRaw === "string" && levelRaw ? levelRaw : null;
+
+  const admin = createAdminClient();
+  let query = admin
+    .from("volunteer_students")
+    .select("id, name, email, level, course_id")
+    .eq("course_id", trainer.course_id)
+    .is("removed_at", null)
+    .not("email", "is", null);
+  query = level ? query.eq("level", level) : query.is("level", null);
+  const { data: volunteers } = await query;
+
+  let sentCount = 0;
+  for (const volunteer of volunteers ?? []) {
+    const result = await sendVolunteerClassStartingEmail(admin, volunteer, { skipIfAlreadySent: false });
+    if (result.sent) sentCount += 1;
+  }
+  return { error: null, sentCount };
 }
 
 // A single read-only, no-login link for center business/admissions staff --

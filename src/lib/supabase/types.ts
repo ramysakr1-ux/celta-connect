@@ -3533,6 +3533,9 @@ export interface Database {
           expires_at: string;
           created_at: string;
           terms_accepted_at: string | null;
+          // migration 0276 -- stamped on every volunteer token-page open,
+          // for the register's "Never opened" / "Opened today" column.
+          last_opened_at: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["course_access_tokens"]["Row"]> & {
           course_id: string;
@@ -3598,6 +3601,20 @@ export interface Database {
           timetable_event_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["volunteer_declines"]["Row"]>;
+        Relationships: [];
+      };
+      volunteer_confirmations: {
+        Row: {
+          id: string;
+          volunteer_student_id: string;
+          timetable_event_id: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["volunteer_confirmations"]["Row"]> & {
+          volunteer_student_id: string;
+          timetable_event_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["volunteer_confirmations"]["Row"]>;
         Relationships: [];
       };
       volunteer_session_reminders_sent: {

@@ -166,6 +166,12 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
     .eq("role", "volunteer_student")
     .maybeSingle();
 
+  // "Never opened" on the trainer's register (migration 0276) -- stamped
+  // on every open of a live link, before anything else can bail out.
+  if (accessToken?.volunteer_student_id && new Date(accessToken.expires_at) >= new Date()) {
+    await admin.from("course_access_tokens").update({ last_opened_at: new Date().toISOString() }).eq("token", token);
+  }
+
   if (!accessToken || !accessToken.volunteer_student_id || new Date(accessToken.expires_at) < new Date()) {
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">

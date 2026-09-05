@@ -1,8 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendApplicantEmail, volunteerSessionReminderEmailHtml } from "@/lib/admissions-email";
+import { sendApplicantEmail, volunteerRsvpEmailHtml } from "@/lib/admissions-email";
 import { zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
-import { teachingDayNumber } from "@/lib/volunteer-attendance";
 import { extractLevelCode } from "@/lib/levels";
 
 const WINDOW_START_MINUTES = 20 * 60 - 15; // 19h45m before
@@ -115,35 +114,39 @@ export async function runVolunteerSessionEmailReminderCron(): Promise<{ eventsCh
     const tokenByVolunteerId = new Map((tokens ?? []).map((t) => [t.volunteer_student_id, t.token]));
 
     const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://celtaconnect.com";
-    const whenFact = `${new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}${
-      event.event_time ? `, ${event.event_time.slice(0, 5)}` : ""
-    }`;
-    // Ramy, 25 Aug 2026: "TP4" meant nothing to a volunteer, and neither
-    // does the raw course name/code -- what's actually useful is the
-    // level (set by the MCT at the very beginning, via the same Class
-    // level dropdown every "add volunteer" form already has) and which
-    // teaching day this is.
-    const dayFact = `Day ${teachingDayNumber(tpDatesByCourse.get(event.course_id) ?? [], event.event_date)}`;
+    // for-claude-code-volunteer-messaging-complete.md §2: the finalized
+    // RSVP email. Sender is "Connect" only (push can't carry centre
+    // branding at the OS level; this keeps the two consistent) -- the
+    // course name lives in the body line instead. The 20-hours-before
+    // window above already keys off each session's own start time, which
+    // is the spec's timing requirement.
+    const dateFact = `Tomorrow, ${new Date(`${event.event_date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}`;
+    const timeFact = event.event_time ? event.event_time.slice(0, 5) : "";
+    const whereFact = event.zoom_url ? "Zoom" : "In person at the centre";
 
     const sentVolunteerIds: string[] = [];
     for (const volunteer of dueVolunteers) {
       const token = tokenByVolunteerId.get(volunteer.id);
       if (!token || !volunteer.email) continue;
-      const classFact = volunteer.level ? `${extractLevelCode(volunteer.level)} English lesson` : course.name;
       const { error } = await sendApplicantEmail({
-        centerName: center.name,
+        centerName: "Connect",
         centerAdmissionsEmail: center.admissions_email,
         to: volunteer.email,
-        subject: "your class is tomorrow",
+        subject: "Tomorrow's class — will you be there?",
+        subjectVerbatim: true,
+        from: "Connect <noreply@celtaconnect.com>",
         centerId: center.id,
         applicantId: null,
         type: "volunteer_session_reminder",
         recipientName: volunteer.name,
-        html: volunteerSessionReminderEmailHtml({
-          classFact,
-          dayFact,
-          whenFact,
-          joinUrl: event.zoom_url ?? `${base}/student/${token}`,
+        html: volunteerRsvpEmailHtml({
+          firstName: volunteer.name.split(" ")[0] || volunteer.name,
+          courseName: volunteer.level ? `${extractLevelCode(volunteer.level)} English` : course.name,
+          dateFact,
+          timeFact,
+          whereFact,
+          yesUrl: `${base}/student/${token}/rsvp/${event.id}/yes`,
+          noUrl: `${base}/student/${token}/rsvp/${event.id}/no`,
           unsubscribeUrl: `${base}/student/${token}/unsubscribe`,
         }),
       });

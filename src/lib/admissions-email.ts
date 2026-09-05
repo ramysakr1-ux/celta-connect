@@ -162,6 +162,12 @@ export async function sendApplicantEmail(input: {
   // sending identity that predates this function, not something to collapse
   // silently just by routing through here.
   from?: string;
+  /**
+   * for-claude-code-volunteer-messaging-complete.md: the RSVP email's
+   * sender IS "Connect", so the centre-name subject prefix would double
+   * it. Only that email passes this.
+   */
+  subjectVerbatim?: boolean;
 }): Promise<{ error: string | null }> {
   // "After **two consecutive bounces** to the same address, Connect stops
   // sending and requires a new address." Checked before sending rather than
@@ -203,7 +209,7 @@ export async function sendApplicantEmail(input: {
   // Skipped when the subject already starts with the centre's name, so a
   // caller that spells it out in full doesn't produce "Centre · Centre · ...".
   const leadsWithCentre = input.subject.trim().toLowerCase().startsWith(input.centerName.trim().toLowerCase());
-  const subject = leadsWithCentre ? input.subject : `${input.centerName} · ${input.subject}`;
+  const subject = input.subjectVerbatim || leadsWithCentre ? input.subject : `${input.centerName} · ${input.subject}`;
 
   // Ramy, 25 Aug 2026: "I wouldn't mind the center name but connect sort of
   // logo there... connect logo on top." Same centralisation reasoning as
@@ -1234,33 +1240,35 @@ export function volunteerClassStartingEmailHtml(input: {
 // volunteerClassStartingEmailHtml above (which announces the whole course
 // starting) and from the 30-minutes-before push (volunteer-session-
 // reminder-cron.ts) -- email, per Ramy, 23 Aug 2026.
-export function volunteerSessionReminderEmailHtml(input: {
-  classFact: string;
-  dayFact: string;
-  whenFact: string;
-  joinUrl: string;
+export function volunteerRsvpEmailHtml(input: {
+  firstName: string;
+  courseName: string;
+  dateFact: string;
+  timeFact: string;
+  whereFact: string;
+  yesUrl: string;
+  noUrl: string;
   unsubscribeUrl: string;
 }): string {
-  // Ramy, 25 Aug 2026: "will you come?... two clear buttons." Both point
-  // at joinUrl -- the dashboard already surfaces this exact class (their
-  // "next class" is tomorrow's, which is what this email is about) with
-  // its own real decline button front and centre, so there's nothing new
-  // to build or track: "Yes" is a reassuring click to their class page,
-  // "No" lands them right where the existing "Let them know" flow lives.
+  // for-claude-code-volunteer-messaging-complete.md §2 -- the finalized
+  // day-before RSVP. The old version's two buttons both opened the class
+  // page and recorded nothing; these record a confirmation or a decline
+  // (one mechanism each -- volunteer_confirmations / volunteer_declines)
+  // and then land on the class page.
   const twoButtons = `
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:14px 0 6px;">
       <tr>
         <td width="50%" style="padding-right:6px;">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
             <tr><td align="center" style="border-radius:6px;background:${EMAIL_TONE.green};">
-              <a href="${input.joinUrl}" style="display:block;padding:12px 8px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:6px;">Yes, I&rsquo;m coming</a>
+              <a href="${input.yesUrl}" style="display:block;padding:12px 8px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:6px;">Yes, I&rsquo;ll be there</a>
             </td></tr>
           </table>
         </td>
         <td width="50%" style="padding-left:6px;">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
             <tr><td align="center" style="border-radius:6px;border:1px solid #e0dcd4;">
-              <a href="${input.joinUrl}" style="display:block;padding:12px 8px;font-size:14px;font-weight:700;color:#241d16;text-decoration:none;border-radius:6px;">No, I can&rsquo;t make it</a>
+              <a href="${input.noUrl}" style="display:block;padding:12px 8px;font-size:14px;font-weight:700;color:#241d16;text-decoration:none;border-radius:6px;">Can&rsquo;t make it</a>
             </td></tr>
           </table>
         </td>
@@ -1268,15 +1276,17 @@ export function volunteerSessionReminderEmailHtml(input: {
     </table>`;
 
   return emailShell({
-    heading: "Your class is tomorrow",
+    heading: `See you tomorrow, ${esc(input.firstName)}?`,
     tone: "green",
-    body: p("Will you be joining your class tomorrow?") + rawP(twoButtons),
+    body:
+      p(`Your ${input.courseName} class is tomorrow. Let your teachers know if you'll make it -- it helps them plan the lesson.`) +
+      rawP(twoButtons),
     facts: [
-      { label: "Your class", value: input.classFact },
-      { label: "Day", value: input.dayFact },
-      { label: "When", value: input.whenFact },
+      { label: "Date", value: input.dateFact },
+      { label: "Time", value: input.timeFact },
+      { label: "Where", value: input.whereFact },
     ],
-    footnote: "No account and no password. The same link opens your class each time.",
+    footnote: "Tapping either button opens your class page -- no login needed. This link is yours alone.",
     unsubscribeUrl: input.unsubscribeUrl,
   });
 }

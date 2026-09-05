@@ -14,7 +14,7 @@ import {
   startsMondayEmailHtml,
   volunteerSignedUpEmailHtml,
   volunteerClassStartingEmailHtml,
-  volunteerSessionReminderEmailHtml,
+  volunteerRsvpEmailHtml,
   volunteer30MinReminderEmailHtml,
 } from "@/lib/admissions-email";
 import { withConnectBranding } from "@/lib/email-layout";
@@ -399,14 +399,17 @@ export default async function JourneyPage() {
     centreName
   );
   const volunteerDayBeforeHtml = withConnectBranding(
-    volunteerSessionReminderEmailHtml({
-      classFact: "B1 English lesson",
-      dayFact: "Day 4",
-      whenFact: "Friday 28 August, 10:00",
-      joinUrl: "https://celtaconnect.com/student/<token>",
+    volunteerRsvpEmailHtml({
+      firstName: "Grace",
+      courseName: "CELTA Demo Course",
+      dateFact: "Tomorrow, Friday 28 August",
+      timeFact: "10:00",
+      whereFact: "In person at the centre",
+      yesUrl: "https://celtaconnect.com/student/<token>",
+      noUrl: "https://celtaconnect.com/student/<token>",
       unsubscribeUrl: "https://celtaconnect.com/student/<token>/unsubscribe",
     }),
-    centreName
+    "Connect"
   );
   const volunteer30MinHtml = withConnectBranding(
     volunteer30MinReminderEmailHtml({

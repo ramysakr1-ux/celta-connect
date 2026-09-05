@@ -88,13 +88,20 @@ export async function runVolunteerSessionReminderCron(): Promise<{ eventsChecked
       .in("volunteer_student_id", dueVolunteerIds);
     const tokenByVolunteerId = new Map((tokens ?? []).map((t) => [t.volunteer_student_id, t.token]));
 
+    // for-claude-code-volunteer-messaging-complete.md §1: tell them the
+    // actual time to join -- five minutes before this event's own start,
+    // computed per event, never a fixed clock time. "The room won't be
+    // ready before then" replaces copy that implied it already was.
+    const [h, m] = (event.event_time ?? "00:00").slice(0, 5).split(":").map(Number);
+    const joinMinutes = h * 60 + m - 5;
+    const joinAt = `${String(Math.floor(((joinMinutes % 1440) + 1440) % 1440 / 60)).padStart(2, "0")}:${String(((joinMinutes % 60) + 60) % 60).padStart(2, "0")}`;
     for (const volunteerId of dueVolunteerIds) {
       const token = tokenByVolunteerId.get(volunteerId);
       await sendPushToOwners(
         { volunteerStudentIds: [volunteerId] },
         {
           title: "Your class starts in 30 minutes",
-          body: "Log in early to check today's materials. The Join link opens 10 minutes before class.",
+          body: `Please join at ${joinAt} -- the room won't be ready before then.`,
           url: token ? `/student/${token}` : "/",
         }
       );

@@ -34,6 +34,13 @@ export async function declineClass(_prevState: DeclineState, formData: FormData)
   const { error } = await admin
     .from("volunteer_declines")
     .upsert({ volunteer_student_id: accessToken.volunteer_student_id, timetable_event_id: eventId }, { onConflict: "volunteer_student_id,timetable_event_id" });
+  // A decline and a confirmation can't both stand (migration 0276) -- the
+  // RSVP email's Yes may have been tapped first and plans changed.
+  await admin
+    .from("volunteer_confirmations")
+    .delete()
+    .eq("volunteer_student_id", accessToken.volunteer_student_id)
+    .eq("timetable_event_id", eventId);
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[student/[token]/decline-actions.ts:declineClass]", error);

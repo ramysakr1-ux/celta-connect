@@ -1,31 +1,21 @@
 import { hubReadClient } from "@/lib/supabase/hub-read";
 import { redirect } from "next/navigation";
-import { PageHead, HUB_BUTTON, HUB_PRIMARY, HUB_PRIMARY_STYLE } from "@/app/trainer/(hub)/page-head";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { removeVolunteerStudent, saveVolunteerTranscript } from "@/app/trainer/(hub)/volunteers/actions";
-import { AddVolunteerForm } from "@/app/trainer/(hub)/volunteers/add-volunteer-form";
-import { CopyLinkButton } from "@/app/trainer/(hub)/volunteers/copy-link-button";
-import { SendStartingEmailButton } from "@/app/trainer/(hub)/volunteers/send-starting-email-button";
-import { RegisterLinkButton } from "@/app/trainer/(hub)/volunteers/register-link-button";
-import { SendAllLinksButton } from "@/app/trainer/(hub)/volunteers/send-all-links-button";
 import { AttendanceRegisterGrid } from "@/components/attendance-register-grid";
-import { VolunteerSessionPanels } from "@/app/trainer/(hub)/volunteers/session-panels";
+import { VolunteersV2, type VolunteerRowData, type ClassLabel } from "@/app/trainer/(hub)/volunteers/volunteers-v2";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
-import { computeSessionTicks, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-attendance";
+import { computeSessionTicks, creditedHours, blocksNeededForPresent, CERTIFICATE_HOURS_THRESHOLD, teachingDayNumber } from "@/lib/volunteer-attendance";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 
-// §14 -- the trainer-side register that mints the tokenized links volunteer
-// students use to reach /student/[token] (no login, no password -- see
-// migration 0030 and the auth-model note in project memory). Checkpoint 9
-// adds a second, read-only viewer: an assessor session (getAssessorCourseId,
-// same pattern as roster/celta5/grades-report) sees the real per-session
-// attendance register -- build-spec.md's own named gap for the assessor
-// pack -- but none of the management controls (add/remove/copy-link),
-// which stay trainer/admin-only.
+// §14 + design_handoff_volunteer_students_v2 (Ramy, 5 Sep 2026). The
+// trainer-side register: Today strip (RSVP replies + Zoom presence),
+// register grouped by class (per-day marks, hours banked, link state),
+// student card. Attendance is computed, never entered here -- Zoom writes
+// it (migration 0200), face-to-face is ticked on the timetable event.
+// Checkpoint 9's read-only assessor branch keeps the flat grid.
 export default async function VolunteersPage() {
   const session = await getCurrentProfile();
   const trainer = session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner" ? session.profile : null;
@@ -38,54 +28,83 @@ export default async function VolunteersPage() {
   }
 
   const supabase = trainer ? hubReadClient(trainer, courseId) : createAdminClient();
-  const { data: volunteers } = await supabase
-    .from("volunteer_students")
-    .select("*")
-    .eq("course_id", courseId)
-    .is("removed_at", null)
-    .order("name");
-
-  const { data: courseForThreshold } = await supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle();
-  const { data: centerForThreshold } = courseForThreshold
-    ? await supabase.from("centers").select("volunteer_certificate_hours_threshold").eq("id", courseForThreshold.center_id).maybeSingle()
-    : { data: null };
-  const certificateHoursThreshold = centerForThreshold?.volunteer_certificate_hours_threshold ?? CERTIFICATE_HOURS_THRESHOLD;
+  const [{ data: volunteers }, { data: course }, { data: tpEvents }] = await Promise.all([
+    supabase
+      .from("volunteer_students")
+      .select("id, name, level, email, created_at, signup_completed_at, volunteer_person_id")
+      .eq("course_id", courseId)
+      .is("removed_at", null)
+      .order("name"),
+    supabase.from("courses").select("id, name, end_date, center_id").eq("id", courseId).maybeSingle(),
+    supabase.from("course_timetable_events").select("id, event_date, event_time, zoom_url").eq("course_id", courseId).eq("type", "tp").order("event_date").order("event_time"),
+  ]);
 
   const volunteerIds = (volunteers ?? []).map((v) => v.id);
-  const [{ data: tokens }, { data: tpEvents }, { data: attendanceRows }, { data: signupProfiles }] = await Promise.all([
-    volunteerIds.length > 0
-      ? supabase.from("course_access_tokens").select("token, volunteer_student_id").in("volunteer_student_id", volunteerIds)
-      : Promise.resolve({ data: [] }),
-    supabase.from("course_timetable_events").select("id, event_date").eq("course_id", courseId).eq("type", "tp").order("event_date"),
-    volunteerIds.length > 0
-      ? supabase.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", volunteerIds)
-      : Promise.resolve({ data: [] }),
-    !trainer && volunteerIds.length > 0
-      ? Promise.resolve({ data: [] })
-      : volunteerIds.length > 0
-        ? supabase.from("volunteer_signup_profiles").select("volunteer_student_id, transcript").in("volunteer_student_id", volunteerIds)
-        : Promise.resolve({ data: [] }),
+  const [center, { data: centerSettings }] = await Promise.all([
+    course ? getCachedCenter(course.center_id) : Promise.resolve(null),
+    course
+      ? supabase.from("centers").select("volunteer_certificate_hours_threshold").eq("id", course.center_id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
-  const tokenByVolunteer = new Map((tokens ?? []).map((t) => [t.volunteer_student_id, t.token]));
-  const transcriptByVolunteer = new Map((signupProfiles ?? []).map((p) => [p.volunteer_student_id, p.transcript]));
-
-  const timeZone = (courseForThreshold ? (await getCachedCenter(courseForThreshold.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
+  const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
-  const volunteerSessions = (volunteers ?? []).map((v) => {
-    const attendedEventIds = new Set(
-      (attendanceRows ?? []).filter((a) => a.volunteer_student_id === v.id).map((a) => a.timetable_event_id)
-    );
-    const sessions = computeSessionTicks(tpEvents ?? [], attendedEventIds, TP_LESSON_LENGTH_MINUTES);
-    return {
-      id: v.id,
-      name: v.name,
-      today: sessions.find((s) => s.date === today) ?? null,
-      certificateHours: sessions.reduce((sum, s) => sum + s.creditedMinutes, 0) / 60,
-    };
-  });
+  const todayEvents = (tpEvents ?? []).filter((e) => e.event_date === today);
+  const todayEventIds = todayEvents.map((e) => e.id);
+  const certificateHoursThreshold = centerSettings?.volunteer_certificate_hours_threshold ?? CERTIFICATE_HOURS_THRESHOLD;
 
+  const [{ data: tokens }, { data: attendanceRows }, { data: signupProfiles }, { data: confirmations }, { data: declines }] = await Promise.all([
+    volunteerIds.length > 0
+      ? supabase.from("course_access_tokens").select("token, volunteer_student_id, last_opened_at, expires_at").eq("role", "volunteer_student").in("volunteer_student_id", volunteerIds)
+      : Promise.resolve({ data: [] }),
+    volunteerIds.length > 0
+      ? supabase.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id, joined_at, left_at, source").in("volunteer_student_id", volunteerIds)
+      : Promise.resolve({ data: [] }),
+    !trainer || volunteerIds.length === 0
+      ? Promise.resolve({ data: [] })
+      : supabase.from("volunteer_signup_profiles").select("volunteer_student_id, transcript, recording_consent_given_at").in("volunteer_student_id", volunteerIds),
+    todayEventIds.length > 0 && volunteerIds.length > 0
+      ? supabase.from("volunteer_confirmations").select("volunteer_student_id, timetable_event_id").in("timetable_event_id", todayEventIds)
+      : Promise.resolve({ data: [] }),
+    todayEventIds.length > 0 && volunteerIds.length > 0
+      ? supabase.from("volunteer_declines").select("volunteer_student_id, timetable_event_id").in("timetable_event_id", todayEventIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  // Cross-course hours follow the person, not this course (volunteer_people,
+  // migration 0125) -- the same math the Centre Admin pool and the
+  // volunteer's own page already use.
+  const personIds = [...new Set((volunteers ?? []).map((v) => v.volunteer_person_id).filter((id): id is string => Boolean(id)))];
+  const admin = createAdminClient();
+  const { data: siblingRows } =
+    personIds.length > 0
+      ? // course-wide: hours follow the volunteer_person across every course they've volunteered on
+        await admin.from("volunteer_students").select("id, course_id, volunteer_person_id").in("volunteer_person_id", personIds)
+      : { data: [] as { id: string; course_id: string; volunteer_person_id: string | null }[] };
+  const priorSiblings = (siblingRows ?? []).filter((s) => s.course_id !== courseId);
+  const priorCourseIds = [...new Set(priorSiblings.map((s) => s.course_id))];
+  const priorSiblingIds = priorSiblings.map((s) => s.id);
+  const [{ data: priorTpEvents }, { data: priorAttendance }] = await Promise.all([
+    priorCourseIds.length > 0
+      ? admin.from("course_timetable_events").select("id, event_date, course_id").in("course_id", priorCourseIds).eq("type", "tp")
+      : Promise.resolve({ data: [] as { id: string; event_date: string; course_id: string }[] }),
+    priorSiblingIds.length > 0
+      ? // course-wide: attendance on the person's earlier courses
+        admin.from("volunteer_attendance").select("volunteer_student_id, timetable_event_id").in("volunteer_student_id", priorSiblingIds)
+      : Promise.resolve({ data: [] as { volunteer_student_id: string; timetable_event_id: string }[] }),
+  ]);
+  const priorHoursByPerson = new Map<string, { hours: number; courses: number }>();
+  for (const personId of personIds) {
+    const memberIds = priorSiblings.filter((s) => s.volunteer_person_id === personId).map((s) => s.id);
+    if (memberIds.length === 0) continue;
+    const memberCourseIds = new Set(priorSiblings.filter((s) => s.volunteer_person_id === personId).map((s) => s.course_id));
+    const attended = new Set((priorAttendance ?? []).filter((a) => memberIds.includes(a.volunteer_student_id)).map((a) => a.timetable_event_id));
+    const events = (priorTpEvents ?? []).filter((e) => memberCourseIds.has(e.course_id));
+    const hours = creditedHours(computeSessionTicks(events, attended, TP_LESSON_LENGTH_MINUTES));
+    priorHoursByPerson.set(personId, { hours, courses: memberCourseIds.size });
+  }
+
+  // Assessor: read-only register, no management controls at all.
   if (!trainer) {
-    // Assessor: read-only register, no management controls at all.
     return (
       <div className="flex flex-col gap-4">
         <div>
@@ -97,91 +116,115 @@ export default async function VolunteersPage() {
     );
   }
 
+  // ---- shape everything for the client component ----
+  const tokenByVolunteer = new Map((tokens ?? []).map((t) => [t.volunteer_student_id, t]));
+  const profileByVolunteer = new Map((signupProfiles ?? []).map((p) => [p.volunteer_student_id, p]));
+  const confirmedSet = new Set((confirmations ?? []).map((c) => c.volunteer_student_id));
+  const declinedSet = new Set((declines ?? []).map((d) => d.volunteer_student_id));
+  const attendedByVolunteer = new Map<string, Set<string>>();
+  const liveByVolunteer = new Set<string>();
+  for (const a of attendanceRows ?? []) {
+    const set = attendedByVolunteer.get(a.volunteer_student_id) ?? new Set<string>();
+    set.add(a.timetable_event_id);
+    attendedByVolunteer.set(a.volunteer_student_id, set);
+    if (todayEventIds.includes(a.timetable_event_id) && a.joined_at && !a.left_at) liveByVolunteer.add(a.volunteer_student_id);
+  }
+
+  const tpDates = [...new Set((tpEvents ?? []).map((e) => e.event_date))].sort();
+  const now = new Date();
+  const todayStart = todayEvents[0]?.event_time ?? null;
+  // "Underway" = the first of today's TP blocks has started, on the
+  // centre's own clock (event_date already matched "today" in that zone).
+  const localNow = new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hour12: false }).format(now);
+  const todayUnderway = Boolean(todayStart) && localNow >= (todayStart ?? "").slice(0, 5);
+
+  // The rule line's numbers come from the course's own typical day.
+  const blocksPerDay = new Map<string, number>();
+  for (const e of tpEvents ?? []) blocksPerDay.set(e.event_date, (blocksPerDay.get(e.event_date) ?? 0) + 1);
+  const counts = [...blocksPerDay.values()];
+  const typicalBlocks = counts.length > 0 ? counts.sort((a, b) => counts.filter((x) => x === a).length - counts.filter((x) => x === b).length).pop()! : 3;
+  const sessionHours = (typicalBlocks * TP_LESSON_LENGTH_MINUTES) / 60;
+
+  const rows: VolunteerRowData[] = (volunteers ?? []).map((v) => {
+    const attended = attendedByVolunteer.get(v.id) ?? new Set<string>();
+    // Held days and today only -- a day that hasn't happened yet is
+    // "upcoming", not an absence.
+    const ticks = computeSessionTicks(tpEvents ?? [], attended, TP_LESSON_LENGTH_MINUTES).filter((t) => t.date <= today);
+    const hoursHere = creditedHours(ticks);
+    const prior = v.volunteer_person_id ? (priorHoursByPerson.get(v.volunteer_person_id) ?? { hours: 0, courses: 0 }) : { hours: 0, courses: 0 };
+    const tok = tokenByVolunteer.get(v.id);
+    const prof = profileByVolunteer.get(v.id);
+    const oneLessonCount = ticks.filter((t) => t.date < today && t.tier === "partial").length;
+    const absentCount = ticks.filter((t) => t.date < today && t.tier === "absent").length;
+    const todayState = todayEvents.length === 0
+      ? null
+      : liveByVolunteer.has(v.id)
+        ? ("in_room" as const)
+        : confirmedSet.has(v.id)
+          ? todayUnderway
+            ? ("not_joined_yet" as const)
+            : ("coming" as const)
+          : declinedSet.has(v.id)
+            ? ("cant" as const)
+            : todayUnderway
+              ? ("not_joined_yet" as const)
+              : ("no_reply" as const);
+    return {
+      id: v.id,
+      name: v.name,
+      level: v.level,
+      email: v.email,
+      joinedAt: v.created_at.slice(0, 10),
+      signupCompleted: Boolean(v.signup_completed_at),
+      token: tok?.token ?? null,
+      lastOpenedAt: tok?.last_opened_at ?? null,
+      expiresAt: tok?.expires_at ?? null,
+      consentAt: prof?.recording_consent_given_at ?? null,
+      transcript: prof?.transcript ?? null,
+      sessions: ticks.map((t) => ({
+        date: t.date,
+        dayNumber: teachingDayNumber(tpDates, t.date),
+        tier: t.tier,
+        creditedMinutes: t.creditedMinutes,
+        isToday: t.date === today,
+        inRoomNow: t.date === today && liveByVolunteer.has(v.id),
+      })),
+      totalDays: tpDates.length,
+      hoursHere,
+      hoursPrior: prior.hours,
+      priorCourses: prior.courses,
+      oneLessonCount,
+      absentCount,
+      todayState,
+      saidComing: confirmedSet.has(v.id),
+      saidCant: declinedSet.has(v.id),
+    };
+  });
+
+  const classes: ClassLabel[] = [...new Set(rows.map((r) => r.level ?? ""))].sort().map((level) => ({
+    level: level || null,
+    label: level || "No class set",
+  }));
+
   return (
-    <div className="flex flex-col gap-[18px]">
-      <PageHead
-        eyebrow={`Volunteers · ${volunteers?.length ?? 0} registered · ${volunteerSessions.filter((v) => (v.today?.attendedBlocks ?? 0) > 0).length} in today`}
-        title="Volunteer students"
-        lede="The TP students who attend teaching practice. Each gets their own no-login link to see shared materials and their attendance -- links expire when the course ends."
-      >
-        <a href="/api/filming-consent.pdf" className={HUB_BUTTON}>
-          Filming consent form
-        </a>
-        <RegisterLinkButton />
-        <SendAllLinksButton />
-        <a href="#add-volunteer" className={HUB_PRIMARY} style={HUB_PRIMARY_STYLE}>
-          Add volunteer
-        </a>
-      </PageHead>
-
-      <VolunteerSessionPanels sessions={volunteerSessions} certificateHoursThreshold={certificateHoursThreshold} />
-
-      <div id="add-volunteer" className="scroll-mt-6">
-        <AddVolunteerForm />
-      </div>
-
-      <div className="sheet !p-0 overflow-hidden">
-        {volunteers && volunteers.length > 0 ? (
-          <ul>
-            {volunteers.map((volunteer) => {
-              const token = tokenByVolunteer.get(volunteer.id);
-              const transcript = transcriptByVolunteer.get(volunteer.id);
-              return (
-                <li key={volunteer.id} className="list-row flex flex-col gap-2 transition-colors hover:bg-[color-mix(in_oklab,var(--hub-hover-accent)_6%,transparent)]">
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-sm text-ink">
-                      {volunteer.name}
-                      {volunteer.level ? <span className="ml-2 text-xs text-muted">{volunteer.level}</span> : null}
-                      {!volunteer.signup_completed_at ? <span className="ml-2 text-xs text-muted">-- sign-up not completed</span> : null}
-                    </p>
-                    <div className="flex items-center gap-3">
-                      {token ? <CopyLinkButton token={token} /> : null}
-                      {token && volunteer.email ? <SendStartingEmailButton volunteerId={volunteer.id} /> : null}
-                      <form action={removeVolunteerStudent}>
-                        <input type="hidden" name="volunteer_id" value={volunteer.id} />
-                        <button type="submit" className="text-xs text-destructive hover:underline">
-                          Remove
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                  {volunteer.signup_completed_at ? (
-                    transcript ? (
-                      <p className="text-xs text-muted">Transcript on file (for Focus on the Learner).</p>
-                    ) : (
-                      <form action={saveVolunteerTranscript} className="flex items-end gap-2">
-                        <input type="hidden" name="volunteer_id" value={volunteer.id} />
-                        <textarea
-                          name="transcript"
-                          required
-                          rows={1}
-                          placeholder="No transcript yet -- listen to the recording and paste one here"
-                          className="w-full flex-1 rounded-[6px] border border-border bg-card px-2 py-1 text-xs text-ink outline-none focus:border-primary"
-                        />
-                        <button type="submit" className="shrink-0 rounded-[6px] border border-border px-2 py-1 text-xs text-ink trainer-hover-fill">
-                          Save
-                        </button>
-                      </form>
-                    )
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="p-6 text-sm text-muted">No volunteer students added yet.</p>
-        )}
-      </div>
-
-      <div>
-        <h2 className="font-serif text-lg text-ink">Attendance register</h2>
-        <p className="mt-1 text-sm text-muted">
-          One class, no halves: every volunteer against every teaching-practice session they came to. This is what goes to the assessor.
-        </p>
-        <div className="mt-3">
-          <AttendanceRegisterGrid events={tpEvents ?? []} volunteers={volunteers ?? []} attendance={attendanceRows ?? []} />
-        </div>
-      </div>
-    </div>
+    <VolunteersV2
+      rows={rows}
+      classes={classes}
+      todayInfo={
+        todayEvents.length > 0
+          ? {
+              dateLabel: new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" }),
+              classNumber: teachingDayNumber(tpDates, today),
+              totalClasses: tpDates.length,
+              startTime: todayStart ? todayStart.slice(0, 5) : null,
+              underway: todayUnderway,
+              lessonsToday: todayEvents.length,
+            }
+          : null
+      }
+      rule={{ need: blocksNeededForPresent(typicalBlocks), lessons: typicalBlocks, sessionHours, target: certificateHoursThreshold }}
+      courseEndDate={course?.end_date ?? null}
+      siteOrigin={process.env.SITE_URL ?? "https://www.celtaconnect.com"}
+    />
   );
 }
