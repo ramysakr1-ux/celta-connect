@@ -1773,6 +1773,31 @@ async function main() {
   }
   console.log("volunteer v2: emails + person link + 9 prior hours + RSVP replies for", (nextTpDay ?? [])[0]?.event_date ?? "no upcoming TP");
 
+  // Emeka's sign-up recording -- so the student card's Listen player and
+  // "Transcript on file" line have something real behind them (Ramy,
+  // 5 Sep 2026: "I don't see a play icon"). An 18-second synthesised
+  // learner-English answer checked into seed-assets, same pattern as the
+  // TP materials; the transcript matches it word for word, which is what
+  // Focus on the Learner needs.
+  const emekaAudio = fs.readFileSync(new URL("./seed-assets/volunteer-signup-emeka.m4a", import.meta.url));
+  const emekaAudioPath = `${center.id}/${volunteer.id}-seed.m4a`;
+  const { error: audioErr } = await supabase.storage.from("volunteer-signup-audio").upload(emekaAudioPath, emekaAudio, { contentType: "audio/mp4" });
+  if (audioErr) console.warn("  volunteer audio:", audioErr.message);
+  await supabase.from("volunteer_signup_profiles").insert({
+    center_id: center.id,
+    course_id: course.id,
+    volunteer_student_id: volunteer.id,
+    written_answers: { motivation: "Practice speaking for my restaurant job." },
+    audio_url: emekaAudioPath,
+    transcript:
+      "My name is Emeka. I come from Lagos, and I am living in New York since two years. I work in restaurant in evenings. I want practice my speaking, because I understand good, but when I speak, the words is coming slow. I hope the classes help me for talk with customers more easy.",
+    transcript_generated_at: new Date().toISOString(),
+    l1_language: "Yoruba",
+    consent_given_at: new Date(Date.now() - 18 * 86400000).toISOString(),
+    recording_consent_given_at: new Date(Date.now() - 18 * 86400000).toISOString(),
+  });
+  console.log("volunteer audio: Emeka's recording + transcript on file");
+
   console.log("DEMO SEED COMPLETE");
   console.log("center_id=" + center.id);
   console.log("course_id=" + course.id);
