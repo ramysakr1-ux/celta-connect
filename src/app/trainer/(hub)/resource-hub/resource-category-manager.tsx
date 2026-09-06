@@ -39,7 +39,7 @@ export function ResourceCategoryManager({
             return (
               <li key={r.id} className="sheet trainer-hover flex h-full flex-col gap-3 p-4">
                 <div className="flex items-start gap-3">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-surface-muted" style={{ color: "var(--hub-accent)" }}>
                     <Icon className="size-4" aria-hidden="true" />
                   </span>
                   <div className="min-w-0 flex-1">

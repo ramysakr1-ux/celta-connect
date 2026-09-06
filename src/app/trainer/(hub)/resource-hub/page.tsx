@@ -226,21 +226,7 @@ export default async function TrainerResourceHubPage() {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[190px_1fr]">
-      <SectionsRail
-        sections={[
-          { href: "/trainer/coursebooks", label: "TP points", count: sectionCounts.tpPoints },
-          { href: "#coursebooks", label: "Coursebooks", count: sectionCounts.coursebooks },
-          { href: "/trainer/audio", label: "Multimedia", count: sectionCounts.multimedia },
-          { href: "/trainer/video", label: "Video Library", count: sectionCounts.videoLibrary },
-          { href: "/trainer/assignment-briefs", label: "Assignment briefs", count: sectionCounts.assignmentBriefs },
-          { href: "/trainer/marking-guidance", label: "Marking guidance", count: sectionCounts.markingGuidance },
-          { href: "#input-sessions", label: "Input sessions", count: sectionCounts.inputSessions },
-          { href: "#forms-and-documents", label: "Forms and documents", count: sectionCounts.forms },
-          { href: "#centre-documents", label: "Centre documents", count: sectionCounts.centreDocuments },
-          { href: "#cambridge-documents", label: "Cambridge documents", count: cambridgeDocs.filter((d) => d.url || d.storagePath).length },
-        ]}
-      />
+    <div className="flex flex-col gap-6">
 
       <div className="flex flex-col gap-8">
       <PageHead
@@ -262,10 +248,22 @@ export default async function TrainerResourceHubPage() {
           </>
         ) : null}
       </PageHead>
-      <div className="max-w-sm">
-        <ResourceHubSearch items={searchItems} />
-      </div>
 
+      <SectionsRail
+        sections={[
+          { href: "/trainer/coursebooks", label: "TP points", count: sectionCounts.tpPoints },
+          { href: "#coursebooks", label: "Coursebooks", count: sectionCounts.coursebooks },
+          { href: "/trainer/audio", label: "Multimedia", count: sectionCounts.multimedia },
+          { href: "/trainer/video", label: "Video Library", count: sectionCounts.videoLibrary },
+          { href: "/trainer/assignment-briefs", label: "Assignment briefs", count: sectionCounts.assignmentBriefs },
+          { href: "/trainer/marking-guidance", label: "Marking guidance", count: sectionCounts.markingGuidance },
+          { href: "#input-sessions", label: "Input sessions", count: sectionCounts.inputSessions },
+          { href: "#forms-and-documents", label: "Forms and documents", count: sectionCounts.forms },
+          { href: "#centre-documents", label: "Centre documents", count: sectionCounts.centreDocuments },
+          { href: "#cambridge-documents", label: "Cambridge documents", count: cambridgeDocs.filter((d) => d.url || d.storagePath).length },
+        ]}
+        search={<ResourceHubSearch items={searchItems} />}
+      />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/trainer/coursebooks" className="trainer-hover sheet flex flex-col gap-1 p-5">
           <p className="font-serif text-lg text-ink">TP points library</p>
@@ -369,9 +367,18 @@ export default async function TrainerResourceHubPage() {
             The built-in library of interactive input sessions (lead-in, exercises, trainer notes) lives on its own
             page.
           </p>
+          {/* Ramy, 6 Sep 2026: "the input sessions card is sort of the green
+              teal... maybe that should go with the MCT's red, and with the
+              ACT's colour." Solid fills on a hub page follow the role, the
+              same rule HUB_PRIMARY_STYLE already sets for the page's own
+              primary button -- teal here was the app default rather than a
+              decision. Text links stay teal: they are teal on every screen in
+              the platform, and recolouring them on one page would be the
+              inconsistency, not the fix. */}
           <Link
             href="/input-sessions"
-            className="flex h-8 shrink-0 items-center rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground"
+            className="flex h-8 shrink-0 items-center rounded-full px-4 text-xs font-semibold text-primary-foreground"
+            style={{ background: "var(--hub-accent)" }}
           >
             Open input sessions
           </Link>
