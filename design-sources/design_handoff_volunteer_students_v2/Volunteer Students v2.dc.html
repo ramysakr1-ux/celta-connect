@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 36px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 12px; max-width: 940px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · volunteer students · trainer side · v2</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">One page: today's class on top, students grouped by class, the card beside the list.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Attendance is logged from Zoom by the timetable, never typed in here. A session is three lessons; staying for two earns the whole class and banks 2¼ hours, one lesson is recorded but banks nothing. The certificate sits at 160 hours across every course a volunteer has joined.</div>
+  </div>
+
+  <div id="2a" style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;">
+      <div style="display: flex; flex-direction: column; gap: 5px; max-width: 700px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">Volunteer students</div>
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 5px; background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); color: oklch(51% 0.017 70);">{{ roleLabel }}</div>
+        </div>
+        <div style="font-size: 13px; line-height: 1.55; color: oklch(51% 0.017 70);">Each student has a no-login link to their materials and hours. {{ ruleLine }}</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 9px; flex: none;">
+        <a href="#" style="height: 34px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; white-space: nowrap;">Filming consent form ↓</a>
+        <div style="height: 34px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap;" style-hover="border-color: oklch(38% 0.072 195);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7L12 19"></path></svg>
+          <div>Register view link</div>
+        </div>
+        <div onClick="{{ toggleAdd }}" style="height: 34px; padding: 0 14px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 12px; font-weight: 600; display: flex; align-items: center; cursor: pointer; white-space: nowrap;">{{ addLabel }}</div>
+      </div>
+    </div>
+
+    <sc-if value="{{ addOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(38% 0.072 195); border-radius: 6px; padding: 14px 16px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 132px; gap: 12px; align-items: end;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">Name</div>
+          <div style="height: 36px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 0 11px; display: flex; align-items: center; font-size: 13px; color: oklch(51% 0.017 70);">Full name</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">Class</div>
+          <div style="height: 36px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 0 11px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: oklch(23.5% 0.017 65);">
+            <div>Pre-Intermediate (A2+)</div>
+            <div style="font-size: 9px; color: oklch(51% 0.017 70);">▾</div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">Email <span style="font-style: italic;">(matches them to hours already on file)</span></div>
+          <div style="height: 36px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 0 11px; display: flex; align-items: center; font-size: 13px; color: oklch(51% 0.017 70);">name@example.com</div>
+        </div>
+        <div style="height: 36px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer;">Add and send link</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showToday }}" hint-placeholder-val="{{ true }}">
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 11px 16px; border-bottom: 1px solid oklch(88% 0.016 82);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(38% 0.072 195);">Today</div>
+            <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">Wed 15 · Class 6 of 12</div>
+            <div style="font-size: 12px; color: oklch(51% 0.017 70);">Replies come from the confirmation email; presence is logged from Zoom by the timetable. Nothing to enter here.</div>
+          </div>
+          <div style="font-size: 12px; font-weight: 600; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">{{ todaySummary }}</div>
+        </div>
+        <sc-for list="{{ todayClasses }}" as="tc" hint-placeholder-count="2">
+          <div style="display: grid; grid-template-columns: 300px 1fr auto; gap: 16px; align-items: center; padding: 12px 16px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 42%, transparent);">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ tc.name }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ tc.meta }}</div>
+              <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); padding-top: 3px;">{{ tc.headcount }}</div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <sc-for list="{{ tc.chips }}" as="ch" hint-placeholder-count="3">
+                <div style="height: 30px; padding: 0 12px 0 9px; border-radius: 999px; border: 1px solid {{ ch.border }}; background: {{ ch.bg }}; color: {{ ch.ink }}; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 7px;">
+                  <div style="width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid {{ ch.markBorder }}; background: {{ ch.markBg }}; color: oklch(99.2% 0.005 90); font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">{{ ch.mark }}</div>
+                  <div>{{ ch.name }}</div>
+                  <div style="font-size: 10px; font-weight: 600; color: {{ ch.tagInk }}; padding-left: 2px;">{{ ch.tag }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="font-size: 11px; color: oklch(51% 0.017 70); white-space: nowrap;">{{ tc.status }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 16px; align-items: start;">
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <sc-for list="{{ classes }}" as="cl" hint-placeholder-count="2">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 11px 16px; background: oklch(96.4% 0.014 85); border-bottom: 1px solid oklch(88% 0.016 82);">
+              <div style="display: flex; align-items: baseline; gap: 10px;">
+                <div style="font-size: 13px; font-weight: 700; color: oklch(23.5% 0.017 65);">{{ cl.name }}</div>
+                <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ cl.meta }}</div>
+              </div>
+              <div style="font-size: 11px; font-weight: 600; color: oklch(38% 0.072 195); cursor: pointer; white-space: nowrap;">+ Share with class</div>
+            </div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1.2fr) 196px 150px 132px 44px; gap: 14px; padding: 8px 16px; border-bottom: 1px solid oklch(88% 0.016 82);">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(51% 0.017 70);">Student</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(51% 0.017 70);">This course · 12 classes</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(51% 0.017 70);">Hours banked · of 160</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(51% 0.017 70);">Link</div>
+              <div></div>
+            </div>
+            <sc-for list="{{ cl.students }}" as="s" hint-placeholder-count="3">
+              <div onClick="{{ s.onSelect }}" style="display: grid; grid-template-columns: minmax(0, 1.2fr) 196px 150px 132px 44px; gap: 14px; align-items: center; padding: 11px 16px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 42%, transparent); cursor: pointer; background: {{ s.rowBg }}; box-shadow: inset 3px 0 0 {{ s.rowEdge }};" style-hover="background: color-mix(in oklab, oklch(92% 0.028 190) 28%, oklch(99.2% 0.005 90));">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                  <div style="width: 28px; height: 28px; border-radius: 8px; background: color-mix(in oklab, oklch(92% 0.028 190) 55%, oklch(99.2% 0.005 90)); color: oklch(38% 0.072 195); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">{{ s.initials }}</div>
+                  <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+                    <div style="font-size: 13px; font-weight: 500; color: oklch(23.5% 0.017 65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ s.name }}</div>
+                    <div style="font-size: 11px; color: {{ s.noteInk }}; white-space: nowrap;">{{ s.note }}</div>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 3px;">
+                  <sc-for list="{{ s.segs }}" as="g" hint-placeholder-count="12">
+                    <div title="{{ g.title }}" style="width: 13px; height: 16px; border-radius: 3px; background: {{ g.bg }}; border: 1.5px {{ g.style }} {{ g.border }}; box-sizing: border-box;"></div>
+                  </sc-for>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 6px;">
+                    <div style="font-size: 13px; font-weight: 700; color: oklch(23.5% 0.017 65); font-variant-numeric: tabular-nums;">{{ s.hoursLabel }}</div>
+                    <div style="font-size: 10px; color: oklch(51% 0.017 70); white-space: nowrap;">{{ s.nextLabel }}</div>
+                  </div>
+                  <div style="position: relative; height: 4px; border-radius: 2px; background: oklch(93.5% 0.012 85); overflow: hidden;">
+                    <div style="height: 4px; width: {{ s.hoursPct }}; border-radius: 2px; background: oklch(60% 0.11 70);"></div>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 7px;">
+                  <div style="width: 6px; height: 6px; border-radius: 50%; background: {{ s.linkDot }}; flex: none;"></div>
+                  <div style="font-size: 12px; color: {{ s.linkInk }}; white-space: nowrap;">{{ s.link }}</div>
+                </div>
+                <div style="font-size: 11px; font-weight: 600; color: oklch(38% 0.072 195); text-align: right;">Copy</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+
+        <div style="display: flex; align-items: center; gap: 18px; padding: 0 2px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: oklch(51% 0.017 70);"><div style="width: 11px; height: 13px; border-radius: 3px; background: oklch(23.5% 0.017 65);"></div>Present · 2¼ h banked</div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: oklch(51% 0.017 70);"><div style="width: 11px; height: 13px; border-radius: 3px; background: linear-gradient(to top, oklch(23.5% 0.017 65) 50%, oklch(99.2% 0.005 90) 50%); border: 1.5px solid oklch(23.5% 0.017 65); box-sizing: border-box;"></div>One lesson · recorded, nothing banked</div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: oklch(51% 0.017 70);"><div style="width: 11px; height: 13px; border-radius: 3px; background: color-mix(in oklab, oklch(45% 0.16 27) 18%, oklch(99.2% 0.005 90)); border: 1.5px solid oklch(45% 0.16 27); box-sizing: border-box;"></div>Absent</div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: oklch(51% 0.017 70);"><div style="width: 11px; height: 13px; border-radius: 3px; border: 1.5px dashed oklch(38% 0.072 195); box-sizing: border-box;"></div>Today, in progress</div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: oklch(51% 0.017 70);"><div style="width: 11px; height: 13px; border-radius: 3px; background: oklch(93.5% 0.012 85);"></div>Upcoming</div>
+          <div style="font-size: 11px; color: oklch(51% 0.017 70); margin-left: auto;">{{ footer }}</div>
+        </div>
+      </div>
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 18px; display: flex; flex-direction: column; gap: 16px; position: sticky; top: 16px;">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: color-mix(in oklab, oklch(92% 0.028 190) 55%, oklch(99.2% 0.005 90)); color: oklch(38% 0.072 195); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">{{ sel.initials }}</div>
+            <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; color: oklch(23.5% 0.017 65); line-height: 1.1;">{{ sel.name }}</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ sel.sub }}</div>
+            </div>
+          </div>
+          <div style="height: 30px; padding: 0 10px; border-radius: 6px; border: 1px solid color-mix(in oklab, oklch(45% 0.16 27) 35%, transparent); font-size: 11px; font-weight: 600; color: oklch(45% 0.16 27); display: flex; align-items: center; cursor: pointer; white-space: nowrap; flex: none;">Remove</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px 15px; border-radius: 6px; background: color-mix(in oklab, oklch(60% 0.11 70) 9%, oklch(99.2% 0.005 90)); border: 1px solid color-mix(in oklab, oklch(60% 0.11 70) 30%, transparent);">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(44% 0.095 68);">Hours toward certificate</div>
+            <div style="font-size: 18px; font-weight: 700; color: oklch(23.5% 0.017 65); font-variant-numeric: tabular-nums;">{{ sel.hoursBig }}</div>
+          </div>
+          <div style="position: relative; height: 6px; border-radius: 3px; background: oklch(99.2% 0.005 90); overflow: hidden;">
+            <div style="height: 6px; width: {{ sel.hoursPct }}; border-radius: 3px; background: oklch(60% 0.11 70);"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: oklch(51% 0.017 70); font-variant-numeric: tabular-nums;">
+            <div>0</div><div>40</div><div>80</div><div>120</div><div>160</div>
+          </div>
+          <div style="font-size: 12px; color: oklch(44% 0.095 68); line-height: 1.5;">{{ sel.hoursLine }}</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(51% 0.017 70);">This course</div>
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ sel.courseLine }}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <sc-for list="{{ sel.segs }}" as="g" hint-placeholder-count="12">
+              <div title="{{ g.title }}" style="flex: 1; height: 22px; border-radius: 4px; background: {{ g.bg }}; border: 1.5px {{ g.style }} {{ g.border }}; box-sizing: border-box;"></div>
+            </sc-for>
+          </div>
+          <div style="display: flex; flex-direction: column;">
+            <sc-for list="{{ sel.sessions }}" as="a" hint-placeholder-count="6">
+              <div style="display: flex; align-items: center; gap: 10px; padding: 7px 0; border-top: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 42%, transparent);">
+                <div style="width: 16px; height: 16px; border-radius: 5px; background: {{ a.bg }}; border: 1.5px {{ a.style }} {{ a.border }}; box-sizing: border-box; flex: none;"></div>
+                <div style="flex: 1; font-size: 12px; color: oklch(23.5% 0.017 65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ a.label }}</div>
+                <div style="font-size: 11px; color: {{ a.stateInk }}; white-space: nowrap;">{{ a.state }}</div>
+                <div style="font-size: 11px; color: oklch(51% 0.017 70); width: 44px; text-align: right;">{{ a.date }}</div>
+              </div>
+            </sc-for>
+            <div style="font-size: 11px; color: oklch(51% 0.017 70); padding-top: 8px; border-top: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 42%, transparent); line-height: 1.5;">Presence is Zoom join-to-leave time, summed across rejoins. Handouts appear on the student's link when the lesson is marked taught, attended or not.</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(51% 0.017 70);">Their link</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer;">Copy</div>
+              <div style="height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer;">Re-issue</div>
+            </div>
+          </div>
+          <div style="padding: 8px 11px; border-radius: 6px; background: oklch(96.4% 0.014 85); font-size: 11px; color: oklch(51% 0.017 70); word-break: break-all;">{{ sel.url }}</div>
+          <sc-for list="{{ sel.linkFacts }}" as="l" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ l.label }}</div>
+              <div style="font-size: 11px; font-weight: 600; color: {{ l.ink }};">{{ l.value }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ sel.neverOpened }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 9px 11px; border-radius: 6px; background: color-mix(in oklab, oklch(60% 0.11 70) 14%, oklch(99.2% 0.005 90)); font-size: 11px; line-height: 1.5; color: oklch(44% 0.095 68);">Never opened — the link probably didn't arrive. Re-issue and hand it over in class.</div>
+          </sc-if>
+        </div>
+
+        <div style="font-size: 11px; line-height: 1.5; color: oklch(51% 0.017 70); border-top: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 42%, transparent); padding-top: 10px;">Students see their own hours and a plain count of classes — no percentage, no threshold. They never see lesson plans, tutor feedback, grades, other students, or the portfolio.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:1300},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;MCT&quot;,&quot;ACT&quot;],&quot;default&quot;:&quot;MCT&quot;,&quot;tsType&quot;:&quot;'MCT' | 'ACT'&quot;,&quot;section&quot;:&quot;View&quot;},&quot;showToday&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;View&quot;},&quot;lessonsPerSession&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[2,3],&quot;default&quot;:3,&quot;tsType&quot;:&quot;2 | 3&quot;,&quot;section&quot;:&quot;Centre settings&quot;}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const AMBER = 'oklch(44% 0.095 68)';
+const GOLD = 'oklch(60% 0.11 70)';
+const RED = 'oklch(45% 0.16 27)';
+const PAPER = 'oklch(99.2% 0.005 90)';
+const FAINT = 'oklch(93.5% 0.012 85)';
+const tint = (c, p) => `color-mix(in oklab, ${c} ${p}%, ${PAPER})`;
+
+// Centre settings (never hardcoded in the build): session = 3 × 45 min lessons,
+// present at ≥ 2 lessons (90 min), a present class banks the full session (2.25 h),
+// certificate at 160 h, milestones 40/80/120.
+const TOTAL = 12, HELD = 5;
+const SESSIONS = [
+  { n: 1, label: 'Getting to know you', date: 'Wed 8' },
+  { n: 2, label: 'Speaking — introductions', date: 'Thu 9' },
+  { n: 3, label: 'Reading — city life', date: 'Fri 10' },
+  { n: 4, label: 'Vocabulary — travel', date: 'Mon 13' },
+  { n: 5, label: 'Grammar — past forms', date: 'Tue 14' },
+  { n: 6, label: 'Listening — daily routines', date: 'Wed 15' },
+];
+const CLASSES = [
+  { id: 'pre', name: 'Pre-Intermediate (A2+)', tutor: 'Sara Yılmaz', time: '17:00' },
+  { id: 'int', name: 'Intermediate (B1)', tutor: 'Mert Kaya', time: '18:15' },
+];
+// att marks per held class: 'p' present (2+ lessons), 'l' one lesson, 'a' absent.
+// prior = hours banked on earlier courses (held against the person, not this enrolment).
+const STUDENTS = [
+  { id: 'fatma', name: 'Fatma Aydın', cls: 'pre', contact: 'fatma.aydin@example.com', joined: '6 Nov', att: 'pplpp', prior: 27, courses: 2, link: 'Opened today', st: 'on', last: 'Today, 08:41', consent: '6 Nov, 19:12' },
+  { id: 'yusuf', name: 'Yusuf Çelik', cls: 'pre', contact: 'yusuf.celik@example.com', joined: '6 Nov', att: 'ppppp', prior: 67.5, courses: 3, link: 'Opened 2 days ago', st: 'on', last: 'Mon, 21:05', consent: '6 Nov, 20:30' },
+  { id: 'meryem', name: 'Meryem Öz', cls: 'pre', contact: 'meryem.oz@example.com', joined: '7 Nov', att: 'pllap', prior: 0, courses: 1, link: 'Never opened', st: 'never', last: '—', consent: 'Not yet' },
+  { id: 'ali', name: 'Ali Kurt', cls: 'int', contact: 'ali.kurt@example.com', joined: '6 Nov', att: 'pppap', prior: 112.5, courses: 5, link: 'Opened today', st: 'on', last: 'Today, 07:58', consent: '6 Nov, 18:44' },
+  { id: 'hatice', name: 'Hatice Yıldız', cls: 'int', contact: 'hatice.y@example.com', joined: '6 Nov', att: 'ppppp', prior: 22.5, courses: 2, link: 'Opened yesterday', st: 'on', last: 'Tue, 22:10', consent: '6 Nov, 19:01' },
+  { id: 'burak', name: 'Burak Şimşek', cls: 'int', contact: 'burak.s@example.com', joined: '8 Nov', att: 'alaap', prior: 0, courses: 1, link: 'Never opened', st: 'never', last: '—', consent: 'Not yet' },
+];
+const fmtH = h => (Number.isInteger(h) ? String(h) : h.toFixed(2).replace(/0$/, '')) + ' h';
+
+class Component extends DCLogic {
+  state = { sel: 'fatma', addOpen: false };
+  // Class 6 is underway for Pre-Intermediate (17:00): Zoom has logged arrivals.
+  // 'in' = joined, still counting; Intermediate (18:15) hasn't started.
+  today = { fatma: 'in', yusuf: 'in' };
+  // Replies to the Class 6 confirmation email (sent the evening before).
+  replies = { fatma: 'yes', yusuf: 'yes', meryem: 'no', ali: 'yes', hatice: 'yes' };
+
+  seg(mark, title) {
+    if (mark === 'p') return { bg: INK, border: INK, style: 'solid', title: title + ' · present' };
+    if (mark === 'l') return { bg: `linear-gradient(to top, ${INK} 50%, ${PAPER} 50%)`, border: INK, style: 'solid', title: title + ' · one lesson, nothing banked' };
+    if (mark === 'a') return { bg: tint(RED, 18), border: RED, style: 'solid', title: title + ' · absent' };
+    if (mark === 'in') return { bg: tint(TEAL, 30), border: TEAL, style: 'solid', title: title + ' · in the room now' };
+    if (mark === 'today') return { bg: PAPER, border: TEAL, style: 'dashed', title: title + ' · today, in progress' };
+    return { bg: FAINT, border: FAINT, style: 'solid', title };
+  }
+
+  renderVals() {
+    const role = this.props.role ?? 'MCT';
+    const showToday = this.props.showToday ?? true;
+    const lessons = this.props.lessonsPerSession ?? 3;
+    const need = Math.ceil(lessons * 2 / 3);
+    const perClass = lessons * 0.75;
+    const init = n => n.split(' ').map(w => w[0]).join('');
+
+    const rows = STUDENTS.map(st => {
+      const marks = st.att.split('');
+      const present = marks.filter(m => m === 'p').length;
+      const one = marks.filter(m => m === 'l').length;
+      const absent = marks.filter(m => m === 'a').length;
+      const courseHours = present * perClass;
+      const hours = st.prior + courseHours;
+      const nextMile = [40, 80, 120, 160].find(m => m > hours);
+      const segs = [];
+      for (let i = 0; i < TOTAL; i++) {
+        const s = SESSIONS[i];
+        const t = s ? `Class ${s.n} · ${s.label} · ${s.date}` : `Class ${i + 1} · upcoming`;
+        segs.push(this.seg(i < HELD ? marks[i] : i === HELD ? (this.today[st.id] || 'today') : null, t));
+      }
+      const note = one >= 2 ? `${one} one-lesson marks — leaving early` : absent >= 2 ? `${absent} absences` : '';
+      const selected = st.id === this.state.sel;
+      return {
+        ...st, initials: init(st.name), present, one, absent, courseHours, hours, nextMile, segs,
+        reply: this.replies[st.id], mark: this.today[st.id],
+        note, noteInk: one >= 2 ? AMBER : RED,
+        hoursLabel: fmtH(hours),
+        nextLabel: nextMile ? `${fmtH(nextMile - hours)} to ${nextMile}` : 'Certificate earned',
+        hoursPct: Math.min(100, hours / 160 * 100) + '%',
+        linkDot: st.st === 'on' ? TEAL : GOLD, linkInk: st.st === 'on' ? MUTED : AMBER,
+        rowBg: selected ? tint('oklch(92% 0.028 190)', 45) : 'transparent',
+        rowEdge: selected ? TEAL : 'transparent',
+        onSelect: () => this.setState({ sel: st.id }),
+      };
+    });
+
+    const classes = CLASSES.map(cl => {
+      const students = rows.filter(r => r.cls === cl.id);
+      const drift = students.filter(r => r.note).length;
+      const never = students.filter(r => r.st === 'never').length;
+      const bits = [`${students.length} students`, `today ${cl.time} · ${cl.tutor}`];
+      if (drift) bits.push(`${drift} drifting`);
+      if (never) bits.push(`${never} never opened link`);
+      return { ...cl, meta: bits.join(' · '), students };
+    });
+
+    const todayClasses = CLASSES.map(cl => {
+      const students = rows.filter(r => r.cls === cl.id);
+      const inRoom = students.filter(r => r.mark === 'in').length;
+      const yes = students.filter(r => r.reply === 'yes').length;
+      const no = students.filter(r => r.reply === 'no').length;
+      const silent = students.length - yes - no;
+      const underway = inRoom > 0;
+      return {
+        name: cl.name, meta: `${cl.time} · Class 6 · Listening — daily routines · ${cl.tutor}`,
+        status: underway ? `Underway · present at ${need} of ${lessons} lessons` : `Starts ${cl.time} · nothing logged yet`,
+        headcount: underway ? `${inRoom} in the room · ${yes} said they were coming` : `${yes} coming · ${no} can't${silent ? ` · ${silent} no reply` : ''}`,
+        chips: students.map(r => {
+          const st = r.mark === 'in' ? 'in' : r.reply === 'yes' ? 'yes' : r.reply === 'no' ? 'no' : (underway ? 'missing' : 'silent');
+          const c = { in: TEAL, yes: TEAL, no: RED, missing: RED, silent: GOLD }[st];
+          return {
+            name: r.name,
+            tag: { in: 'in the room', yes: 'coming', no: "can't come", missing: 'not joined yet', silent: 'no reply' }[st],
+            tagInk: st === 'silent' ? AMBER : c,
+            mark: st === 'in' ? '✓' : st === 'yes' ? '·' : st === 'no' ? '—' : '',
+            bg: st === 'in' ? tint(TEAL, 14) : st === 'silent' ? tint(GOLD, 10) : st === 'missing' ? tint(RED, 8) : PAPER,
+            border: st === 'in' ? TEAL : st === 'silent' ? GOLD : st === 'no' || st === 'missing' ? tint(RED, 45) : 'oklch(88% 0.016 82)',
+            ink: st === 'no' ? MUTED : INK,
+            markBg: st === 'in' ? TEAL : st === 'yes' ? tint(TEAL, 30) : st === 'no' ? RED : 'transparent',
+            markBorder: st === 'in' || st === 'yes' ? TEAL : st === 'silent' ? GOLD : st === 'no' ? RED : tint(RED, 45),
+          };
+        }),
+      };
+    });
+
+    const s = rows.find(r => r.id === this.state.sel) || rows[0];
+    const cls = CLASSES.find(c => c.id === s.cls);
+    const sessions = SESSIONS.map((se, i) => {
+      const mark = i < HELD ? s.att[i] : (s.mark || 'today');
+      const g = this.seg(mark, '');
+      const state = { p: `Present · +${fmtH(perClass)}`, l: 'One lesson · nothing banked', a: 'Absent', in: 'In the room now', today: s.reply === 'no' ? "Said can't come" : s.reply === 'yes' ? 'Said coming' : 'No reply' }[mark];
+      return { label: `Class ${se.n} · ${se.label}`, date: se.date, bg: g.bg, border: g.border, style: g.style, state, stateInk: mark === 'a' ? RED : mark === 'l' ? AMBER : MUTED };
+    }).reverse();
+
+    const roleLabel = role === 'MCT' ? 'MCT · whole course' : 'ACT · teaching Pre-Intermediate today';
+    return {
+      roleLabel, showToday,
+      ruleLine: `Present means ${need} of a session's ${lessons} lessons and banks the whole ${fmtH(perClass)}; certificate at 160 h across all courses.`,
+      addOpen: this.state.addOpen,
+      addLabel: this.state.addOpen ? 'Cancel' : 'Add student',
+      toggleAdd: () => this.setState(st => ({ addOpen: !st.addOpen })),
+      todaySummary: `${rows.filter(r => r.reply === 'yes').length} of ${rows.length} said coming · ${rows.filter(r => r.reply === 'no').length} can't · ${rows.filter(r => r.reply === undefined).length} no reply · ${rows.filter(r => r.mark === 'in').length} in the room`,
+      todayClasses, classes,
+      footer: `${STUDENTS.length} students · ${CLASSES.length} classes · presence logged from Zoom by the timetable; face-to-face sessions are ticked by the tutor`,
+      sel: {
+        name: s.name, initials: s.initials,
+        sub: `${cls.name} · joined ${s.joined} · ${s.contact}`,
+        hoursBig: fmtH(s.hours) + ' of 160',
+        hoursPct: s.hoursPct,
+        hoursLine: s.nextMile
+          ? `${fmtH(s.hours - s.courseHours)} from ${s.courses - 1 || 'no'} earlier course${s.courses - 1 === 1 ? '' : 's'} + ${fmtH(s.courseHours)} here. ${fmtH(s.nextMile - s.hours)} to the ${s.nextMile}-hour ${s.nextMile === 160 ? 'certificate' : 'milestone'} — ${Math.ceil((s.nextMile - s.hours) / perClass)} more classes.`
+          : 'Certificate earned. Hours keep accruing on the record.',
+        courseLine: `${s.present} present · ${s.one} one-lesson · ${s.absent} absent · ${TOTAL - HELD} to come`,
+        segs: s.segs, sessions,
+        url: `connectcelta.app/student/${s.id.slice(0, 2)}8f2c…a91d`,
+        linkFacts: [
+          { label: "Today's reply", value: s.reply === 'yes' ? 'Coming' : s.reply === 'no' ? "Can't come" : 'No reply to confirmation', ink: s.reply === 'yes' ? INK : s.reply === 'no' ? RED : AMBER },
+          { label: 'Last opened', value: s.last, ink: s.st === 'on' ? INK : AMBER },
+          { label: 'Filming consent', value: s.consent, ink: s.consent === 'Not yet' ? AMBER : INK },
+          { label: 'Expires', value: '7 Dec (course end)', ink: INK },
+        ],
+        neverOpened: s.st === 'never',
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

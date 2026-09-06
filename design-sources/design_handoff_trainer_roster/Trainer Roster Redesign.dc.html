@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600;1,500&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(94.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(30% 0.042 58); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; width: 1440px; min-height: 900px; box-sizing: border-box; display: flex; flex-direction: column; color: oklch(23.5% 0.017 65);">
+
+  <div style="height: 56px; background: oklch(99.5% 0.004 90); border-bottom: 1px solid oklch(88% 0.014 82); display: flex; align-items: center; gap: 28px; padding: 0 28px; flex: none;">
+    <div style="display: flex; align-items: center; gap: 9px; flex: none;">
+      <svg width="26" height="15" viewBox="8 30 104 60" fill="none">
+        <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(60% 0.11 70)" stroke-width="13" stroke-linecap="round"></path>
+        <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(42% 0.13 27)" stroke-width="13" stroke-linecap="round"></path>
+      </svg>
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 21px; color: oklch(30% 0.042 58);">Connect</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0;">
+      <sc-for list="{{ nav }}" as="t" hint-placeholder-count="8">
+        <div style="font-size: 13px; font-weight: {{ t.weight }}; color: {{ t.ink }}; background: {{ t.bg }}; padding: 7px 11px; border-radius: 6px; white-space: nowrap; cursor: pointer;" style-hover="background: oklch(94.5% 0.012 85);">{{ t.label }}</div>
+      </sc-for>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; flex: none;">
+      <div style="height: 24px; padding: 0 10px; border-radius: 999px; background: {{ accent }}; color: oklch(98.5% 0.006 90); font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; display: flex; align-items: center;">{{ roleLabel }}</div>
+      <div style="height: 24px; padding: 0 10px; border-radius: 999px; border: 1px solid oklch(88% 0.014 82); background: oklch(99.5% 0.004 90); font-size: 11px; font-weight: 600; display: flex; align-items: center;">C2/2026</div>
+      <div style="font-size: 13px; font-weight: 500;">Ramy Sakr</div>
+      <div style="font-size: 12px; color: oklch(51% 0.017 70); cursor: pointer; padding: 6px 4px;" style-hover="color: oklch(23.5% 0.017 65);">Settings</div>
+    </div>
+  </div>
+
+  <div style="padding: 28px 40px 44px; display: flex; flex-direction: column; gap: 20px; flex: 1;">
+
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;">
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <div style="font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">C2/2026 · Roster · click a row to open a portfolio</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.05; color: oklch(30% 0.042 58);">12 candidates <span style="font-weight: 500; font-style: italic; color: {{ accentDeep }};">· {{ atRiskCount }} at risk</span></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid oklch(88% 0.014 82); background: oklch(99.5% 0.004 90); font-size: 13px; font-weight: 500; white-space: nowrap; display: flex; align-items: center; cursor: pointer;" style-hover="background: color-mix(in oklab, {{ accent }} 12%, oklch(99.5% 0.004 90));">Export CSV</div>
+        <div title="Outside Connect — urgent only. Opens your mail client with every candidate BCC'd." style="height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid oklch(88% 0.014 82); background: oklch(99.5% 0.004 90); font-size: 13px; font-weight: 500; white-space: nowrap; display: flex; align-items: center; cursor: pointer;" style-hover="background: color-mix(in oklab, {{ accent }} 12%, oklch(99.5% 0.004 90));">Email all candidates</div>
+        <sc-if value="{{ isMct }}" hint-placeholder-val="{{ true }}">
+          <div style="height: 40px; padding: 0 18px; border-radius: 8px; background: {{ accent }}; color: oklch(98.5% 0.006 90); font-size: 13.5px; font-weight: 600; white-space: nowrap; display: flex; align-items: center; cursor: pointer;" style-hover="filter: brightness(1.12);">Add candidate</div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid color-mix(in oklab, oklch(63% 0.096 72) 45%, transparent); background: color-mix(in oklab, oklch(63% 0.096 72) 18%, oklch(99.5% 0.004 90)); color: oklch(40% 0.09 68); font-size: 13px; font-weight: 600; display: flex; align-items: center; cursor: pointer;" style-hover="box-shadow: inset 0 0 0 1px {{ accent }};">FOL pool by class</div>
+      <div onClick="{{ toggleDetail }}" title="TP stages, observation hours, stage sign-offs, FOL, standing" style="height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid oklch(88% 0.014 82); background: {{ detailBg }}; color: {{ detailInk }}; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer;" style-hover="box-shadow: inset 0 0 0 1px {{ accent }};">
+        <span style="width: 26px; height: 14px; border-radius: 999px; background: {{ switchBg }}; position: relative; display: block; flex: none; transition: background 0.15s;"><span style="position: absolute; top: 2px; left: {{ switchLeft }}; width: 10px; height: 10px; border-radius: 50%; background: oklch(99.5% 0.004 90); transition: left 0.15s; display: block;"></span></span>
+        {{ detailLabel }}
+      </div>
+    </div>
+
+    <div style="background: oklch(99.5% 0.004 90); border-radius: 14px; border: 1px solid oklch(88% 0.014 82); box-shadow: 0 1px 2px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06); overflow: hidden;">
+      <div style="display: grid; grid-template-columns: 300px repeat(6, 1fr) 96px 110px; align-items: end; gap: 0 8px; padding: 14px 20px 10px; border-bottom: 1px solid oklch(88% 0.014 82); font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70); line-height: 1.2;">
+        <div>Candidate</div>
+        <div style="text-align: center;">Assessed<br>hrs</div>
+        <div style="text-align: center;">TPs</div>
+        <div style="text-align: center;">Assignments</div>
+        <div style="text-align: center;">Criteria</div>
+        <div style="text-align: center;">Attendance</div>
+        <div style="text-align: center;">Provisional</div>
+        <div style="text-align: center;">At risk</div>
+        <div style="text-align: right;">Contact</div>
+      </div>
+
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+        <div style="border-bottom: 1px solid oklch(90% 0.012 82); background: {{ r.rowBg }}; cursor: pointer; opacity: {{ r.opacity }};" style-hover="box-shadow: inset 0 0 0 1px {{ accent }}, inset 4px 0 0 {{ accent }};">
+          <div style="display: grid; grid-template-columns: 300px repeat(6, 1fr) 96px 110px; align-items: center; gap: 0 8px; padding: 10px 20px; min-height: 58px;">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div style="width: 36px; height: 36px; border-radius: 10px; flex: none; background: {{ r.avatarBg }}; color: {{ r.tone }}; box-shadow: inset 0 0 0 1.5px {{ r.avatarRing }}; font-family: Newsreader, Georgia, serif; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center;">{{ r.initials }}</div>
+              <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="font-size: 14px; font-weight: 600; white-space: nowrap;">{{ r.name }}</div>
+                  <sc-if value="{{ r.hasTag }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size: 10.5px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: {{ r.tagBg }}; color: {{ r.tagInk }}; white-space: nowrap;">{{ r.tag }}</div>
+                  </sc-if>
+                </div>
+                <div style="font-size: 12px; color: oklch(51% 0.017 70); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ r.sub }}</div>
+              </div>
+            </div>
+            <sc-if value="{{ r.frozen }}" hint-placeholder-val="{{ false }}">
+              <div style="grid-column: span 7; text-align: center;"><span style="font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: oklch(93.5% 0.008 85); color: oklch(44% 0.014 70);">{{ r.statusLabel }}</span></div>
+            </sc-if>
+            <sc-if value="{{ r.live }}" hint-placeholder-val="{{ true }}">
+              <div style="text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; font-weight: 500; color: {{ r.hrsInk }};">{{ r.hrs }}</div>
+              <div style="text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; font-weight: 500;">{{ r.tps }}<span style="color: oklch(51% 0.017 70); font-weight: 400;">/8</span></div>
+              <div style="text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; font-weight: 500;">{{ r.asg }}<sup style="font-size: 9px; color: oklch(44% 0.095 68); margin-left: 2px;">{{ r.resub }}</sup></div>
+              <div style="text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; font-weight: 500;">{{ r.criteria }}%</div>
+              <div style="text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; font-weight: {{ r.attWeight }}; color: {{ r.attInk }};">{{ r.attendance }}%</div>
+              <div style="text-align: center; font-size: 13px; font-weight: {{ r.provWeight }}; color: {{ r.provInk }};">{{ r.provisional }}</div>
+              <div style="text-align: center;">
+                <sc-if value="{{ r.atRisk }}" hint-placeholder-val="{{ false }}">
+                  <span title="{{ r.atRiskTitle }}" style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: oklch(94% 0.043 25); color: oklch(45% 0.15 27);"><span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: block;"></span>At risk</span>
+                </sc-if>
+              </div>
+              <div style="display: flex; justify-content: flex-end; gap: 10px; font-size: 12.5px; font-weight: 500;">
+                <a href="#" style="color: oklch(38% 0.072 195);">Email</a>
+                <a href="#" style="color: oklch(38% 0.072 195);">Call</a>
+              </div>
+            </sc-if>
+          </div>
+          <sc-if value="{{ r.showDetail }}" hint-placeholder-val="{{ false }}">
+            <div style="margin: 0 20px 12px 68px; padding: 8px 4px; border-radius: 8px; background: oklch(0% 0 0 / 0.035); display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); align-items: start;">
+              <sc-for list="{{ r.detail }}" as="d" hint-placeholder-count="11">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; padding: 0 6px; border-left: 1px solid {{ d.rule }}; height: 40px; justify-content: center;">
+                  <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70); white-space: nowrap;">{{ d.label }}</div>
+                  <sc-if value="{{ d.isBar }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <div style="position: relative; width: 44px; height: 5px; border-radius: 999px; background: {{ d.track }}; flex: none;"><span style="position: absolute; top: 50%; left: {{ d.pos }}; transform: translate(-50%, -50%); width: 10px; height: 10px; border-radius: 50%; border: 2px solid oklch(99.5% 0.004 90); background: {{ d.marker }}; display: block; box-shadow: 0 1px 2px oklch(0% 0 0 / 0.15);"></span></div>
+                      <div style="font-size: 12.5px; font-weight: 600; white-space: nowrap;">{{ d.value }}</div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ d.isText }}" hint-placeholder-val="{{ true }}">
+                    <div style="font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; color: {{ d.ink }}; white-space: nowrap;">{{ d.value }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ filmsTpSessions }}" hint-placeholder-val="{{ true }}">
+      <div style="background: oklch(99.5% 0.004 90); border-radius: 14px; border: 1px solid oklch(88% 0.014 82); padding: 16px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <div style="display: flex; flex-direction: column; gap: 2px; flex: none; min-width: 220px;">
+          <div style="font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">Filming consent</div>
+          <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">{{ consentSigned }} of 12 handed in · <a href="#" style="font-weight: 600;">Download blank form</a></div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; flex: 1;">
+          <sc-for list="{{ consent }}" as="c" hint-placeholder-count="12">
+            <div title="{{ c.title }}" style="height: 28px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; cursor: pointer; background: {{ c.bg }}; color: {{ c.ink }}; border: 1px {{ c.borderStyle }} {{ c.border }};" style-hover="box-shadow: inset 0 0 0 1px {{ accent }};"><span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: block;"></span>{{ c.name }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isMct }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+        <div style="display: flex; align-items: baseline; gap: 12px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(30% 0.042 58);">Course settings</div>
+          <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">Main course tutor only</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 360px; gap: 16px; align-items: start;">
+
+          <div style="background: oklch(99.5% 0.004 90); border-radius: 14px; border: 1px solid oklch(88% 0.014 82); padding: 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+              <div style="display: flex; align-items: baseline; gap: 10px;">
+                <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; color: oklch(30% 0.042 58);">Tutors</div>
+                <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">Invite by name, or hand off a role — including the MCT itself.</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column;">
+              <sc-for list="{{ tutors }}" as="t" hint-placeholder-count="3">
+                <div style="display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 16px; padding: 10px 0; border-top: 1px solid oklch(92% 0.01 82);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 36px; height: 36px; border-radius: 10px; flex: none; background: {{ t.avatarBg }}; color: {{ t.tone }}; box-shadow: inset 0 0 0 1.5px {{ t.avatarRing }}; font-family: Newsreader, Georgia, serif; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center;">{{ t.initials }}</div>
+                    <div style="display: flex; flex-direction: column; gap: 1px;">
+                      <div style="font-size: 14px; font-weight: 600;">{{ t.name }} <span style="font-size: 12px; font-weight: 400; color: oklch(51% 0.017 70);">{{ t.note }}</span></div>
+                      <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ t.email }}</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 4px;">
+                    <sc-for list="{{ t.owned }}" as="o" hint-placeholder-count="2">
+                      <div style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: oklch(94.5% 0.012 85); color: oklch(44% 0.014 70); white-space: nowrap;">{{ o }}</div>
+                    </sc-for>
+                  </div>
+                  <div style="height: 30px; padding: 0 10px; border-radius: 6px; border: 1px solid oklch(88% 0.014 82); background: oklch(99.5% 0.004 90); font-size: 12.5px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer;">{{ t.role }} <span style="font-size: 10px; color: oklch(51% 0.017 70);">▾</span></div>
+                  <div style="font-size: 12px; color: {{ t.removeInk }}; cursor: pointer; width: 52px; text-align: right;">{{ t.remove }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid oklch(92% 0.01 82);">
+              <div style="flex: 1; height: 36px; border-radius: 8px; border: 1px solid oklch(88% 0.014 82); background: oklch(99.5% 0.004 90); font-size: 13px; color: oklch(60% 0.015 70); display: flex; align-items: center; padding: 0 12px;">Name</div>
+              <div style="flex: 1.4; height: 36px; border-radius: 8px; border: 1px solid oklch(88% 0.014 82); background: oklch(99.5% 0.004 90); font-size: 13px; color: oklch(60% 0.015 70); display: flex; align-items: center; padding: 0 12px;">Email</div>
+              <div style="height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid oklch(88% 0.014 82); background: oklch(99.5% 0.004 90); font-size: 13px; display: flex; align-items: center; gap: 8px;">Assistant course tutor <span style="font-size: 10px; color: oklch(51% 0.017 70);">▾</span></div>
+              <div style="height: 36px; padding: 0 16px; border-radius: 8px; background: {{ accent }}; color: oklch(98.5% 0.006 90); font-size: 13px; font-weight: 600; display: flex; align-items: center; cursor: pointer;" style-hover="filter: brightness(1.12);">Invite</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid oklch(92% 0.01 82);">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">Invited, not yet joined</div>
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;">
+                <div>Hana Yildiz <span style="color: oklch(51% 0.017 70);">· hana.y@riverside.edu · Assistant course tutor</span></div>
+                <div style="font-size: 12px; color: oklch(51% 0.017 70); text-decoration: underline; cursor: pointer;">Withdraw</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid oklch(92% 0.01 82);">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">Also at this centre</div>
+              <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">Adding a trainer to a second course adds to their assignments — it doesn't remove them from the first.</div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <sc-for list="{{ assignable }}" as="a" hint-placeholder-count="2">
+                  <div style="display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 6px 0 12px; border-radius: 8px; border: 1px solid oklch(88% 0.014 82); font-size: 13px;">{{ a.name }} <span style="color: oklch(51% 0.017 70); font-size: 12px;">{{ a.course }}</span><div style="height: 26px; padding: 0 10px; border-radius: 6px; background: oklch(94.5% 0.012 85); font-size: 12px; font-weight: 600; display: flex; align-items: center; cursor: pointer;" style-hover="background: color-mix(in oklab, {{ accent }} 14%, oklch(99.5% 0.004 90));">Add to course</div></div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="background: oklch(99.5% 0.004 90); border-radius: 14px; border: 1px solid oklch(88% 0.014 82); padding: 20px 24px; display: flex; flex-direction: column; gap: 12px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; color: oklch(30% 0.042 58);">Delivery mode</div>
+              <div style="display: flex; gap: 6px; padding: 4px; border-radius: 10px; background: oklch(94.5% 0.012 85);">
+                <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
+                  <div onClick="{{ m.onClick }}" style="flex: 1; height: 32px; border-radius: 7px; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; background: {{ m.bg }}; color: {{ m.ink }}; box-shadow: {{ m.shadow }};">{{ m.label }}</div>
+                </sc-for>
+              </div>
+              <div style="font-size: 12.5px; color: oklch(51% 0.017 70); line-height: 1.45;">{{ modeNote }}</div>
+            </div>
+            <div style="background: oklch(99.5% 0.004 90); border-radius: 14px; border: 1px solid oklch(88% 0.014 82); padding: 20px 24px; display: flex; flex-direction: column; gap: 12px;">
+              <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; color: oklch(30% 0.042 58);">Chat retention</div>
+              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="width: 16px; height: 16px; border-radius: 50%; border: 5px solid {{ accent }}; box-sizing: border-box; display: block;"></span>
+                  <span>Keep messages for</span>
+                  <span style="height: 30px; width: 54px; border-radius: 6px; border: 1px solid oklch(88% 0.014 82); display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums;">1</span>
+                  <span>day</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; color: oklch(51% 0.017 70);">
+                  <span style="width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid oklch(80% 0.014 82); box-sizing: border-box; display: block;"></span>
+                  <span>Keep until the course closes</span>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: flex-end;">
+                <div style="height: 32px; padding: 0 14px; border-radius: 8px; border: 1px solid oklch(88% 0.014 82); font-size: 12.5px; font-weight: 600; display: flex; align-items: center; cursor: pointer;" style-hover="background: color-mix(in oklab, {{ accent }} 12%, oklch(99.5% 0.004 90));">Save</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;MCT&quot;,&quot;ACT&quot;],&quot;default&quot;:&quot;MCT&quot;,&quot;tsType&quot;:&quot;'MCT' | 'ACT'&quot;,&quot;section&quot;:&quot;View&quot;},&quot;showDetailDefault&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;View&quot;},&quot;filmsTpSessions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Centre&quot;}}">
+class Component extends DCLogic {
+  state = { showDetail: null, mode: 'f2f' };
+  renderVals() {
+    const p = this.props;
+    const role = p.role ?? 'MCT';
+    const isMct = role === 'MCT';
+    const accent = isMct ? 'oklch(42% 0.13 27)' : 'oklch(60% 0.11 70)';
+    const accentDeep = isMct ? 'oklch(36% 0.12 27)' : 'oklch(50% 0.11 65)';
+    const showDetail = this.state.showDetail !== null ? this.state.showDetail : (p.showDetailDefault ?? false);
+    const CARD = 'oklch(99.5% 0.004 90)', MUTED = 'oklch(51% 0.017 70)', INK = 'oklch(23.5% 0.017 65)';
+    const WARN = 'oklch(44% 0.095 68)', DANGER = 'oklch(52% 0.19 32)';
+    const TONES = [25, 60, 95, 130, 165, 200, 235, 270, 305, 340].map(h => `oklch(45% 0.10 ${h})`);
+    const tone = (n) => { let h = 0; for (let i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) | 0; return TONES[Math.abs(h) % TONES.length]; };
+    const initials = (n) => n.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    const person = (name) => { const t = tone(name); return { name, initials: initials(name), tone: t, avatarBg: `color-mix(in oklab, ${t} 30%, ${CARD})`, avatarRing: `color-mix(in oklab, ${t} 55%, transparent)`, rowBg: `color-mix(in oklab, ${t} 9%, ${CARD})` }; };
+
+    const nav = ['Today', 'Roster', 'Timetable', 'Teaching Practice', 'Volunteers', 'Assessor', 'Resource hub', 'Grades report'].map(l => ({ label: l, weight: l === 'Roster' ? 600 : 500, ink: l === 'Roster' ? accent : INK, bg: l === 'Roster' ? `color-mix(in oklab, ${accent} 10%, transparent)` : 'transparent' }));
+
+    const trackFor = (v) => v === 'At risk' ? 'linear-gradient(to right, oklch(44% 0.095 68), oklch(52% 0.19 32))' : v === 'Not yet assessed' ? 'oklch(94.8% 0.01 85)' : 'linear-gradient(to right, oklch(37.5% 0.058 195), oklch(65% 0.008 90), oklch(63% 0.096 72))';
+    const posFor = { 'Not yet assessed': 4, 'At risk': 18, 'Pass': 40, 'Pass B': 70, 'Pass A': 95 };
+    const markerFor = { 'Not yet assessed': MUTED, 'At risk': DANGER, 'Pass': 'oklch(37.5% 0.058 195)', 'Pass B': 'oklch(65% 0.008 90)', 'Pass A': 'oklch(63% 0.096 72)' };
+
+    const raw = [
+      { name: 'Amara Okafor', hrs: 4.5, tps: 4, asg: '2/2', criteria: 88, att: 100, prov: 'Pass B', risk: [], standing: 'Pass B', d: ['4/4', '3/3', '4.0/6', 'Filed', '2nd · pending', 'Candidate signed', 14, '3/4', '18/18', '1/2'] },
+      { name: 'Deniz Kaya', hrs: 4.5, tps: 4, asg: '1/2', resub: 'R', criteria: 74, att: 92, prov: 'Pass', risk: [], standing: 'Pass', d: ['4/4', '2/3', '3.5/6', 'Filed', '-- · pending', 'Not started', 9, '2/4', '18/18', '1/2'] },
+      { name: 'Farah Mansour', hrs: 3.75, tps: 3, asg: '1/2', criteria: 61, att: 76, prov: 'Pass', risk: ['Attendance below 80%', 'Assignment 1 resubmission pending'], standing: 'At risk', d: ['2/3', '1/3', '2.0/6', 'Not yet', '-- · pending', 'Not started', 3, '1/4', '15/18', '0/2'], hasTag: false },
+      { name: 'Jonas Lindqvist', hrs: 4.5, tps: 4, asg: '2/2', criteria: 91, att: 100, prov: 'Pass A', risk: [], standing: 'Pass A', d: ['4/4', '3/3', '4.5/6', 'Filed', '1st · pending', 'Both signed', 17, '4/4', '18/18', '2/2'] },
+      { name: 'Leila Haddad', hrs: 4.5, tps: 4, asg: '2/2', criteria: 82, att: 96, prov: 'Pass B', risk: [], standing: 'Pass B', d: ['4/4', '3/3', '4.0/6', 'Filed', '3rd · pending', 'Candidate signed', 11, '3/4', '18/18', '1/2'] },
+      { name: 'Marco Bellini', hrs: 4.5, tps: 4, asg: '2/2', criteria: 79, att: 88, prov: 'Pass', risk: [], standing: 'Pass', d: ['4/4', '3/3', '3.5/6', 'Filed', '-- · pending', 'Not started', 8, '2/4', '18/18', '1/2'] },
+      { name: 'Nusaiba Rahman', hrs: 3.0, tps: 3, asg: '1/2', resub: 'R', criteria: 58, att: 84, prov: 'Pass', slashed: true, risk: ['Assessed hours behind', 'Criteria below 60%'], standing: 'At risk', d: ['2/3', '1/3', '2.5/6', 'Not yet', '-- · pending', 'Not started', 4, '1/4', '12/18', '0/2'] },
+      { name: 'Priya Nair', hrs: 4.5, tps: 4, asg: '2/2', criteria: 85, att: 100, prov: 'Pass B', risk: [], standing: 'Pass B', d: ['4/4', '3/3', '4.0/6', 'Filed', '4th · pending', 'Candidate signed', 12, '3/4', '18/18', '1/2'] },
+      { name: 'Samuel Adeyemi', hrs: 4.5, tps: 4, asg: '2/2', criteria: 77, att: 92, prov: 'Pass', risk: [], standing: 'Pass', tag: 'Extension', d: ['4/4', '3/3', '3.0/6', 'Filed', '-- · pending', 'Not started', 7, '2/4', '18/18', '1/2'] },
+      { name: 'Tomasz Nowak', hrs: 2.25, tps: 2, frozen: 'Withdrawn' },
+      { name: 'Yuki Tanaka', hrs: 4.5, tps: 4, asg: '2/2', criteria: 86, att: 100, prov: 'Pass B', risk: [], standing: 'Pass B', d: ['4/4', '3/3', '4.5/6', 'Filed', '2nd · pending', 'Candidate signed', 13, '3/4', '18/18', '2/2'] },
+      { name: 'Zainab Al-Sayed', hrs: 4.5, tps: 4, asg: '2/2', criteria: 80, att: 96, prov: 'Pass', risk: [], standing: 'Pass', d: ['4/4', '3/3', '4.0/6', 'Filed', '-- · pending', 'Not started', 10, '3/4', '18/18', '1/2'] },
+    ];
+    const labels = ['TP stages', 'Supervised', 'Obs. hrs', 'Stage 1', 'Stage 2/3', 'CELTA 5', 'FOL', 'Obs. tasks', 'Pre-course', 'Filmed obs'];
+    const behind = (v) => /Not|--|pending|Not started/.test(v) || (/\d+\/\d+/.test(v) && v.split('/')[0].trim() !== v.split('/')[1].trim().split(' ')[0]);
+    const rows = raw.map(r => {
+      const base = person(r.name);
+      if (r.frozen) return { ...base, frozen: true, live: false, showDetail: false, opacity: 0.6, statusLabel: r.frozen, sub: 'Left week 2 · record kept', hasTag: false };
+      const short = { 'Candidate signed': 'Cand. signed', 'Both signed': 'Both signed', 'Not started': 'Not started' };
+      const detail = labels.map((label, i) => {
+        let value = i === 6 ? String(r.d[i]) : r.d[i];
+        if (i === 5) value = short[value] ?? value;
+        if (i === 4) value = value.replace(' · pending', ' · pend.');
+        const low = i === 6 ? r.d[i] < 6 : behind(String(r.d[i]));
+        return { label, value, isText: true, isBar: false, ink: low ? WARN : INK, rule: i === 0 ? 'transparent' : 'oklch(0% 0 0 / 0.08)' };
+      });
+      detail.splice(7, 0, { label: 'Standing', value: r.standing, isBar: true, isText: false, rule: 'oklch(0% 0 0 / 0.08)', track: trackFor(r.standing), pos: posFor[r.standing] + '%', marker: markerFor[r.standing] });
+      return {
+        ...base, frozen: false, live: true, showDetail, opacity: 1,
+        sub: `${r.d[3] === 'Filed' ? 'Stage 1 filed' : 'Stage 1 not filed'} · ${r.d[6]} FOL entries`,
+        hasTag: Boolean(r.tag), tag: r.tag ?? '', tagBg: 'oklch(93.5% 0.033 235)', tagInk: 'oklch(42% 0.09 250)',
+        hrs: r.hrs.toFixed(2), hrsInk: r.hrs < 4 ? WARN : INK,
+        tps: r.tps, asg: r.asg, resub: r.resub ?? '', criteria: r.criteria,
+        attendance: r.att, attInk: r.att < 80 ? DANGER : INK, attWeight: r.att < 80 ? 700 : 500,
+        provisional: r.prov, provInk: r.slashed ? DANGER : INK, provWeight: r.slashed ? 700 : 500,
+        atRisk: r.risk.length > 0, atRiskTitle: r.risk.join(' · '), detail,
+      };
+    });
+    rows.sort((a, b) => (b.atRisk ? 1 : 0) - (a.atRisk ? 1 : 0));
+
+    const consent = raw.filter(r => !r.frozen).map((r, i) => { const signed = i % 3 !== 1; return { name: r.name.split(' ')[0], title: signed ? 'Click to mark as not yet collected' : 'Click to mark as collected', bg: signed ? 'oklch(93% 0.019 190)' : 'transparent', ink: signed ? 'oklch(32% 0.05 195)' : WARN, border: signed ? 'transparent' : WARN, borderStyle: signed ? 'solid' : 'dashed' }; });
+
+    const tutors = [
+      { ...person('Ramy Sakr'), email: 'ramy@riverside.edu', note: '', owned: ['Assignment 1', 'Assignment 3'], role: 'Main course tutor', remove: '', removeInk: MUTED },
+      { ...person('Priya Menon'), email: 'priya.m@riverside.edu', note: '', owned: ['Assignment 2', 'Assignment 4'], role: 'Assistant course tutor', remove: '', removeInk: MUTED },
+      { ...person('Omar Farouk'), email: 'omar.f@riverside.edu', note: '(second course)', owned: [], role: 'TP tutor', remove: 'Remove', removeInk: DANGER },
+    ];
+    const modes = [['f2f', 'Face to face'], ['online', 'Online'], ['mixed', 'Mixed mode']].map(([k, label]) => ({ label, onClick: () => this.setState({ mode: k }), bg: this.state.mode === k ? CARD : 'transparent', ink: this.state.mode === k ? INK : MUTED, shadow: this.state.mode === k ? '0 1px 2px oklch(0% 0 0 / 0.08)' : 'none' }));
+    const modeNotes = { f2f: 'All TP and input in the room. Volunteers attend in person.', online: 'TP runs on Zoom; the timetable shows joining links, and filming consent is not needed.', mixed: 'Input online, TP in the room. Weeks are marked on the timetable.' };
+
+    return {
+      nav, accent, accentDeep, isMct, roleLabel: role, rows,
+      atRiskCount: rows.filter(r => r.atRisk).length,
+      toggleDetail: () => this.setState({ showDetail: !showDetail }),
+      detailLabel: showDetail ? 'Progress detail on' : 'Show progress detail',
+      detailBg: showDetail ? `color-mix(in oklab, ${accent} 8%, ${CARD})` : CARD, detailInk: showDetail ? INK : MUTED,
+      switchBg: showDetail ? accent : 'oklch(80% 0.014 82)', switchLeft: showDetail ? '14px' : '2px',
+      filmsTpSessions: p.filmsTpSessions ?? true, consent, consentSigned: consent.filter(c => c.borderStyle === 'solid').length,
+      tutors, assignable: [{ name: 'Hana Yildiz', course: 'C1/2026' }, { name: 'Lucas Moreau', course: 'no course' }],
+      modes, modeNote: modeNotes[this.state.mode],
+    };
+  }
+}
+</script>
+</body>
+</html>

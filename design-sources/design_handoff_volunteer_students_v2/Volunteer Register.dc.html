@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(92.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(23.5% 0.017 65); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; padding: 56px; display: flex; flex-direction: column; gap: 44px; width: 1560px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-direction: column; gap: 12px; max-width: 940px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(51% 0.017 70);">Connect · volunteer students · trainer side</div>
+    <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.15; color: oklch(23.5% 0.017 65);">The register, and the card where each student's material lives.</div>
+    <div style="font-size: 14px; line-height: 1.6; color: oklch(51% 0.017 70); text-wrap: pretty;">Today the register holds a name, a copy-link button and remove. Everything else about a volunteer — which level they're in, whether they've been attending, what they've been given — is recorded elsewhere or not at all. The card is where those meet.</div>
+  </div>
+
+  <!-- 1a -->
+  <div id="1a" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1a</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">The register</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 5px; max-width: 640px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">Volunteer students</div>
+          <div style="font-size: 13px; line-height: 1.55; color: oklch(51% 0.017 70);">The TP students who attend teaching practice. Each gets their own no-login link to see shared materials and their attendance — links expire when the course ends.</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; flex: none;">
+          <a href="#" style="height: 34px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Filming consent form ↓</a>
+          <div style="height: 34px; padding: 0 13px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap;" style-hover="border-color: oklch(38% 0.072 195);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7L12 19"></path></svg>
+            <div>Register view link</div>
+          </div>
+          <div style="height: 34px; padding: 0 14px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 12px; font-weight: 600; display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Add student</div>
+        </div>
+      </div>
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 14px 16px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 132px; gap: 12px; align-items: end;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">Name</div>
+          <div style="height: 36px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 0 11px; display: flex; align-items: center; font-size: 13px; color: oklch(51% 0.017 70);">Full name</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">Class</div>
+          <div style="height: 36px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 0 11px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: oklch(23.5% 0.017 65);">
+            <div>Pre-Intermediate (A2+)</div>
+            <div style="font-size: 9px; color: oklch(51% 0.017 70);">▾</div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="font-size: 11px; color: oklch(51% 0.017 70);">Contact <span style="font-style: italic;">(optional)</span></div>
+          <div style="height: 36px; border: 1px solid oklch(88.8% 0.013 82); border-radius: 6px; background: oklch(96.4% 0.014 85); padding: 0 11px; display: flex; align-items: center; font-size: 13px; color: oklch(51% 0.017 70);">Email or phone</div>
+        </div>
+        <div style="height: 36px; border-radius: 6px; background: oklch(38% 0.072 195); color: oklch(98.5% 0.006 90); font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer;">Add student</div>
+      </div>
+
+      <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 1.5fr 1.2fr 132px 1fr 152px 96px; gap: 16px; padding: 11px 16px; border-bottom: 1px solid oklch(88% 0.016 82);">
+          <sc-for list="{{ cols }}" as="c" hint-placeholder-count="6">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(51% 0.017 70); text-align: {{ c.align }};">{{ c.label }}</div>
+          </sc-for>
+        </div>
+        <sc-for list="{{ register }}" as="v" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 1.5fr 1.2fr 132px 1fr 152px 96px; gap: 16px; align-items: center; padding: 13px 16px; border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 42%, transparent); cursor: pointer;" style-hover="background: color-mix(in oklab, oklch(92% 0.028 190) 28%, oklch(99.2% 0.005 90));">
+            <div style="font-size: 13px; font-weight: 500; color: oklch(23.5% 0.017 65);">{{ v.name }}</div>
+            <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ v.level }}</div>
+            <div style="display: flex; align-items: center; gap: 9px;">
+              <div style="font-size: 12px; font-weight: 600; color: {{ v.attInk }}; font-variant-numeric: tabular-nums; width: 34px;">{{ v.att }}</div>
+              <div style="position: relative; flex: 1; height: 4px; border-radius: 2px; background: oklch(93.5% 0.012 85); overflow: hidden;">
+                <div style="height: 4px; width: {{ v.att }}; border-radius: 2px; background: {{ v.attInk }};"></div>
+              </div>
+            </div>
+            <div style="font-size: 12px; color: {{ v.certInk }};">{{ v.cert }}</div>
+            <div style="display: flex; align-items: center; gap: 7px;">
+              <div style="width: 6px; height: 6px; border-radius: 50%; background: {{ v.linkDot }}; flex: none;"></div>
+              <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ v.link }}</div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+              <div style="font-size: 11px; font-weight: 600; color: oklch(38% 0.072 195);">Copy</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">Open →</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 0 2px;">
+        <div style="font-size: 12px; color: oklch(51% 0.017 70);">6 students · 2 classes · attendance counted from the timetable's volunteer sessions</div>
+        <div style="font-size: 12px; color: oklch(51% 0.017 70);">Removing a student keeps their attendance record and kills their link.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1b -->
+  <div id="1b" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: oklch(23.5% 0.017 65); color: oklch(99.2% 0.005 90);">1b</div>
+      <div style="font-size: 13px; font-weight: 600; color: oklch(23.5% 0.017 65);">One student's card — where the material lives</div>
+    </div>
+
+    <div style="width: 1440px; box-sizing: border-box; background: oklch(96.4% 0.014 85); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: color-mix(in oklab, oklch(92% 0.028 190) 55%, oklch(99.2% 0.005 90)); color: oklch(38% 0.072 195); font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center;">FA</div>
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: oklch(23.5% 0.017 65);">Fatma Aydın</div>
+            <div style="font-size: 12px; color: oklch(51% 0.017 70);">Pre-Intermediate (A2+) · joined 6 Nov · fatma.aydin@example.com</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <div style="height: 32px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Copy link</div>
+          <div style="height: 32px; padding: 0 12px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65); display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Re-issue</div>
+          <div style="height: 32px; padding: 0 12px; border-radius: 6px; border: 1px solid color-mix(in oklab, oklch(45% 0.16 27) 35%, transparent); font-size: 12px; font-weight: 600; color: oklch(45% 0.16 27); display: flex; align-items: center; cursor: pointer; white-space: nowrap;">Remove</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 380px 1fr; gap: 16px; align-items: start;">
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(51% 0.017 70);">Attendance</div>
+              <div style="font-size: 18px; font-weight: 700; color: oklch(23.5% 0.017 65); font-variant-numeric: tabular-nums;">80%</div>
+            </div>
+            <div style="position: relative; height: 5px; border-radius: 3px; background: oklch(93.5% 0.012 85); overflow: hidden;">
+              <div style="height: 5px; width: 80%; border-radius: 3px; background: oklch(23.5% 0.017 65);"></div>
+              <div style="position: absolute; top: -2px; left: 80%; width: 1px; height: 9px; background: oklch(23.5% 0.017 65);"></div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">4 of 5 held · 12 total · missed 1</div>
+              <div style="font-size: 11px; font-weight: 600; color: oklch(23.5% 0.017 65);">Can miss 1 more</div>
+            </div>
+            <div style="display: flex; flex-direction: column; padding-top: 4px;">
+              <sc-for list="{{ attendance }}" as="a" hint-placeholder-count="5">
+                <div style="display: flex; align-items: center; gap: 11px; padding: 8px 0; border-top: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 42%, transparent);">
+                  <div style="width: 15px; height: 15px; border-radius: 5px; background: {{ a.bg }}; color: {{ a.ink }}; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none;">{{ a.mark }}</div>
+                  <div style="flex: 1; font-size: 12px; color: oklch(23.5% 0.017 65);">{{ a.label }}</div>
+                  <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ a.date }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 17px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(51% 0.017 70);">Their link</div>
+            <div style="padding: 9px 11px; border-radius: 6px; background: oklch(96.4% 0.014 85); border: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent); font-size: 11px; color: oklch(51% 0.017 70); word-break: break-all;">connectcelta.app/student/8f2c…a91d</div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <sc-for list="{{ linkFacts }}" as="l" hint-placeholder-count="3">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                  <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ l.label }}</div>
+                  <div style="font-size: 11px; font-weight: 600; color: {{ l.ink }};">{{ l.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(51% 0.017 70);">Material they can see</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">Shared automatically when a class is marked taught</div>
+            </div>
+
+            <sc-for list="{{ material }}" as="m" hint-placeholder-count="4">
+              <div style="border: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 62%, transparent); border-radius: 6px; overflow: hidden;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 13px; background: oklch(96.4% 0.014 85); border-bottom: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 55%, transparent);">
+                  <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                    <div style="width: 6px; height: 6px; border-radius: 50%; background: {{ m.dot }}; flex: none;"></div>
+                    <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ m.title }}</div>
+                    <div style="font-size: 11px; color: oklch(51% 0.017 70);">{{ m.meta }}</div>
+                  </div>
+                  <div style="font-size: 11px; color: {{ m.stateInk }}; font-weight: 600; flex: none;">{{ m.state }}</div>
+                </div>
+                <div style="padding: 10px 13px; display: flex; flex-wrap: wrap; gap: 8px;">
+                  <sc-for list="{{ m.files }}" as="f" hint-placeholder-count="3">
+                    <div style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; border: 1px solid oklch(88% 0.016 82); background: oklch(99.2% 0.005 90); cursor: pointer;" style-hover="border-color: oklch(38% 0.072 195);">
+                      <div style="width: 20px; height: 20px; border-radius: 5px; background: oklch(94.5% 0.011 85); color: oklch(38% 0.072 195); display: flex; align-items: center; justify-content: center; flex: none;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+                      </div>
+                      <div style="font-size: 12px; color: oklch(23.5% 0.017 65);">{{ f.name }}</div>
+                      <div style="font-size: 10px; color: oklch(51% 0.017 70);">{{ f.size }}</div>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ m.none }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size: 12px; font-style: italic; color: oklch(51% 0.017 70); padding: 4px 0;">Nothing shared from this class yet — the trainee's handouts appear here once the lesson is marked taught.</div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+
+            <div style="display: flex; align-items: center; gap: 10px; padding-top: 2px;">
+              <div style="height: 32px; padding: 0 12px; border-radius: 6px; border: 1px dashed oklch(88% 0.016 82); font-size: 12px; font-weight: 600; color: oklch(51% 0.017 70); display: flex; align-items: center; cursor: pointer; white-space: nowrap;" style-hover="border-color: oklch(38% 0.072 195); color: oklch(23.5% 0.017 65);">+ Share something with this class</div>
+              <div style="font-size: 11px; color: oklch(51% 0.017 70);">Goes to every student in Pre-Intermediate, not just Fatma.</div>
+            </div>
+          </div>
+
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: oklch(51% 0.017 70);">Never on this card</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <sc-for list="{{ never }}" as="n" hint-placeholder-count="4">
+                <div style="padding: 4px 11px; border-radius: 999px; background: oklch(96.4% 0.014 85); border: 1px solid color-mix(in srgb, oklch(88% 0.016 82) 60%, transparent); font-size: 11px; color: oklch(51% 0.017 70);">{{ n }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+        <sc-for list="{{ notes }}" as="n" hint-placeholder-count="6">
+          <div style="background: oklch(99.2% 0.005 90); border: 1px solid oklch(88% 0.016 82); border-radius: 6px; padding: 13px 15px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 12px; font-weight: 600; color: oklch(23.5% 0.017 65);">{{ n.title }}</div>
+            <div style="font-size: 12px; line-height: 1.55; color: oklch(51% 0.017 70); text-wrap: pretty;">{{ n.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:1800}}">
+const INK = 'oklch(23.5% 0.017 65)';
+const MUTED = 'oklch(51% 0.017 70)';
+const TEAL = 'oklch(38% 0.072 195)';
+const GOLD = 'oklch(60% 0.11 70)';
+const AMBER = 'oklch(44% 0.095 68)';
+// GREEN retired -- neutral/gray absorbs positive/complete (matches code)
+const GREEN = MUTED; // retired as own hue -- absorbed into neutral/gray per code's globals.css / specs/green.md
+const RED = 'oklch(45% 0.16 27)';
+
+class Component extends DCLogic {
+  renderVals() {
+    // 12 classes in total, 5 held so far, threshold 80% -> 10 must be attended,
+    // so 2 misses are allowed across the whole course. Eligibility is decided by
+    // what is still reachable (attended + remaining), never by the running rate.
+    const TOTAL = 12, HELD = 5, NEEDED = Math.ceil(0.8 * TOTAL);
+    const row = (name, level, attended, link, linkState) => {
+      const missed = HELD - attended;
+      const ceiling = attended + (TOTAL - HELD);
+      const spare = ceiling - NEEDED;
+      const pct = Math.round((attended / HELD) * 100) + '%';
+      const attInk = spare >= 2 ? TEAL : spare >= 0 ? AMBER : RED;
+      return {
+        name, level, att: pct, attInk,
+        cert: spare < 0 ? 'No longer eligible' : spare === 0 ? 'Cannot miss another' : 'Can miss ' + spare + ' more',
+        certInk: attInk,
+        link, linkDot: linkState === 'on' ? TEAL : linkState === 'never' ? MUTED : AMBER,
+      };
+    };
+
+    return {
+      cols: [
+        { label: 'Student', align: 'left' },
+        { label: 'Class', align: 'left' },
+        { label: 'Attendance', align: 'left' },
+        { label: 'Certificate · 10 of 12 needed', align: 'left' },
+        { label: 'Link', align: 'left' },
+        { label: '', align: 'right' },
+      ],
+      register: [
+        row('Fatma Aydın', 'Pre-Intermediate (A2+)', 4, 'Opened today', 'on'),
+        row('Yusuf Çelik', 'Pre-Intermediate (A2+)', 5, 'Opened 2 days ago', 'on'),
+        row('Meryem Öz', 'Pre-Intermediate (A2+)', 3, 'Never opened', 'never'),
+        row('Ali Kurt', 'Intermediate (B1)', 4, 'Opened today', 'on'),
+        row('Hatice Yıldız', 'Intermediate (B1)', 5, 'Opened yesterday', 'on'),
+        row('Burak Şimşek', 'Intermediate (B1)', 2, 'Never opened', 'never'),
+      ],
+      attendance: [
+        { mark: '✓', label: 'Class 5 · Grammar — past forms', date: 'Tue 14', bg: 'oklch(93.5% 0.008 85)', ink: GREEN },
+        { mark: '✓', label: 'Class 4 · Vocabulary — travel', date: 'Mon 13', bg: 'oklch(93.5% 0.008 85)', ink: GREEN },
+        { mark: '—', label: 'Class 3 · Reading — city life', date: 'Fri 10', bg: 'oklch(94.5% 0.011 85)', ink: MUTED },
+        { mark: '✓', label: 'Class 2 · Speaking — introductions', date: 'Thu 9', bg: 'oklch(93.5% 0.008 85)', ink: GREEN },
+        { mark: '✓', label: 'Class 1 · Getting to know you', date: 'Wed 8', bg: 'oklch(93.5% 0.008 85)', ink: GREEN },
+      ],
+      linkFacts: [
+        { label: 'Expires', value: '7 Dec 2023', ink: INK },
+        { label: 'Consent accepted', value: '6 Nov, 19:12', ink: GREEN },
+        { label: 'Last opened', value: 'Today, 08:41', ink: INK },
+      ],
+      material: [
+        {
+          title: 'Class 5 · Grammar — past forms', meta: 'Tue 14 · taught by Sara Yılmaz',
+          state: 'Attended', stateInk: GREEN, dot: GREEN, none: false,
+          files: [
+            { name: 'Past forms — handout.pdf', size: '2 pages' },
+            { name: 'Homework — exercises.pdf', size: '1 page' },
+          ],
+        },
+        {
+          title: 'Class 4 · Vocabulary — travel', meta: 'Mon 13 · taught by Deniz Aksoy',
+          state: 'Attended', stateInk: GREEN, dot: GREEN, none: false,
+          files: [
+            { name: 'Travel vocabulary — worksheet.pdf', size: '1 page' },
+            { name: 'Word list.pdf', size: '1 page' },
+          ],
+        },
+        {
+          title: 'Class 3 · Reading — city life', meta: 'Fri 10 · taught by Mert Kaya',
+          state: 'Missed', stateInk: MUTED, dot: MUTED, none: false,
+          files: [
+            { name: 'City life — text and tasks.pdf', size: '3 pages' },
+          ],
+        },
+        {
+          title: 'Class 6 · Listening — daily routines', meta: 'Wed 15 · Sara Yılmaz',
+          state: 'Not yet taught', stateInk: MUTED, dot: MUTED, none: true,
+          files: [],
+        },
+      ],
+      never: [
+        'Candidate names beyond who taught',
+        'Lesson plans',
+        'Tutor feedback or grades',
+        'Other students’ details or attendance',
+        'Anything from the portfolio',
+      ],
+      notes: [
+        { title: 'A class, not just a name', text: 'Level is recorded on the register, not remembered by the tutor. Volunteers are grouped by class, so material and messages address a class rather than individuals — and the rotation already needs to know which level teaches when.' },
+        { title: 'Attendance is a column, not a page', text: 'It is already recorded per TP event. Surfacing it here is what makes the certificate promise checkable, and shows a tutor early who has drifted.' },
+        { title: 'Material follows the class automatically', text: 'When a lesson is marked taught, the handouts on that plan become visible to the students in that class. Nobody re-uploads anything, and a missed class still gets its material.' },
+        { title: 'Link state is worth showing', text: '“Never opened” is the most useful thing on the register — it means the link never arrived, and the student is turning up with no materials. Today there is no way to know.' },
+        { title: 'Re-issue instead of remove-and-re-add', text: 'A lost link is common. Re-issuing mints a new token, kills the old one, and keeps attendance intact — removing and re-adding loses the record.' },
+        { title: 'The card states what it never shows', text: 'Volunteers sit inside a course full of assessment material. Naming the boundary on the screen is what stops it drifting when someone later asks to “just add the plan”.' },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

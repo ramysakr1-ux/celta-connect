@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Newsreader:ital,wght@0,500;0,600;1,500&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(94.5% 0.012 85); }
+  a { color: oklch(38% 0.072 195); text-decoration: none; }
+  a:hover { color: oklch(30% 0.042 58); }
+</style>
+</helmet>
+
+<div style="font-family: Karla, Helvetica, sans-serif; width: 1440px; box-sizing: border-box; display: flex; flex-direction: column; color: oklch(23.5% 0.017 65);">
+
+  <div style="height: 56px; background: oklch(99.5% 0.004 90); border-bottom: 1px solid oklch(88% 0.014 82); display: flex; align-items: center; gap: 28px; padding: 0 28px; flex: none;">
+    <div style="display: flex; align-items: center; gap: 9px; flex: none;">
+      <svg width="26" height="15" viewBox="8 30 104 60" fill="none">
+        <path d="M56.1 42.2 A 24 24 0 1 0 56.1 77.8" stroke="oklch(60% 0.11 70)" stroke-width="13" stroke-linecap="round"></path>
+        <path d="M96.1 42.2 A 24 24 0 1 0 96.1 77.8" stroke="oklch(42% 0.13 27)" stroke-width="13" stroke-linecap="round"></path>
+      </svg>
+      <div style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 21px; color: oklch(30% 0.042 58);">Connect</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0;">
+      <sc-for list="{{ nav }}" as="t" hint-placeholder-count="8">
+        <div style="font-size: 13px; font-weight: {{ t.weight }}; color: {{ t.ink }}; background: {{ t.bg }}; padding: 7px 11px; border-radius: 6px; white-space: nowrap; cursor: pointer;" style-hover="background: oklch(94.5% 0.012 85);">{{ t.label }}</div>
+      </sc-for>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; flex: none;">
+      <div style="height: 24px; padding: 0 10px; border-radius: 999px; background: {{ accent }}; color: oklch(98.5% 0.006 90); font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; display: flex; align-items: center;">{{ roleLabel }}</div>
+      <div style="height: 24px; padding: 0 10px; border-radius: 999px; border: 1px solid oklch(88% 0.014 82); background: oklch(99.5% 0.004 90); font-size: 11px; font-weight: 600; display: flex; align-items: center;">C2/2026</div>
+      <div style="font-size: 13px; font-weight: 500;">Ramy Sakr</div>
+    </div>
+  </div>
+
+  <div style="padding: 28px 40px 44px; display: flex; flex-direction: column; gap: 28px;">
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <div style="font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(51% 0.017 70);">CELTA demo course · Timetable · Week 3 of 4</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 34px; font-weight: 600; line-height: 1.05; color: oklch(30% 0.042 58);">Timetable</div>
+      </div>
+      <div style="height: 150px; border-radius: 14px; border: 1px dashed oklch(80% 0.014 82); display: flex; align-items: center; justify-content: center; font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 17px; color: oklch(51% 0.017 70); background: repeating-linear-gradient(90deg, transparent 0 199px, oklch(88% 0.014 82) 199px 200px);">… the timetable board, unchanged …</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 6px; max-width: 760px;">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 28px; font-weight: 600; line-height: 1.1; color: oklch(30% 0.042 58);">Tutorials and consultations</div>
+          <div style="font-size: 13.5px; line-height: 1.5; color: oklch(51% 0.017 70); text-wrap: pretty;">Where every candidate stands, one row each. A cell is the state and the door: click it to invite, open a sheet, or see the booking. {{ scopeNote }}</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+          <sc-for list="{{ legend }}" as="l" hint-placeholder-count="5">
+            <div style="display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: {{ l.bg }}; color: {{ l.ink }}; font-size: 11.5px; font-weight: 600; white-space: nowrap;"><span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: block;"></span>{{ l.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <sc-for list="{{ blockGroups }}" as="g" hint-placeholder-count="2">
+          <div style="background: {{ g.cardBg }}; border-radius: 14px; border: 1px solid {{ g.cardBorder }}; padding: 16px 20px 8px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="display: flex; align-items: baseline; gap: 10px;">
+                  <div style="font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: {{ g.titleInk }};">{{ g.title }}</div>
+                  <div style="font-size: 12px; color: oklch(51% 0.017 70);">{{ g.sub }}</div>
+                </div>
+              </div>
+              <sc-if value="{{ g.hasStages }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; gap: 3px; padding: 3px; border-radius: 8px; background: oklch(0% 0 0 / 0.06);">
+                  <sc-for list="{{ g.stages }}" as="st" hint-placeholder-count="3">
+                    <div onClick="{{ st.onClick }}" style="height: 24px; padding: 0 10px; border-radius: 6px; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; gap: 5px; cursor: pointer; background: {{ st.bg }}; color: {{ st.ink }}; box-shadow: {{ st.shadow }}; white-space: nowrap;"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{ st.dot }}; display: block;"></span>{{ st.label }}</div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ g.canAdd }}" hint-placeholder-val="{{ true }}">
+                <div style="height: 30px; padding: 0 12px; border-radius: 8px; background: {{ accent }}; color: oklch(98.5% 0.006 90); font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer;" style-hover="filter: brightness(1.12);"><span style="font-size: 15px; line-height: 1;">+</span>{{ g.addLabel }}</div>
+              </sc-if>
+            </div>
+            <sc-if value="{{ g.isSummary }}" hint-placeholder-val="{{ false }}">
+              <sc-for list="{{ g.summaryRows }}" as="sr" hint-placeholder-count="3">
+                <div style="display: grid; grid-template-columns: 150px 1fr 150px; align-items: center; gap: 14px; padding: 10px 0; border-top: 1px solid oklch(92% 0.01 82); cursor: pointer;" style-hover="background: color-mix(in oklab, {{ accent }} 5%, transparent);">
+                  <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                    <div style="width: 30px; height: 30px; border-radius: 8px; flex: none; background: {{ sr.avatarBg }}; color: {{ sr.tone }}; box-shadow: inset 0 0 0 1.5px {{ sr.avatarRing }}; font-family: Newsreader, Georgia, serif; font-weight: 600; font-size: 11.5px; display: flex; align-items: center; justify-content: center;">{{ sr.initials }}</div>
+                    <div style="font-size: 13.5px; font-weight: 600; white-space: nowrap;">{{ sr.name }}</div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 5px; min-width: 0;">
+                    <div style="font-size: 12.5px; color: oklch(35% 0.017 65); white-space: nowrap;">{{ sr.when }}</div>
+                    <div style="display: flex; gap: 3px;">
+                      <sc-for list="{{ sr.segs }}" as="s" hint-placeholder-count="8">
+                        <span style="flex: 1; max-width: 22px; height: 6px; border-radius: 999px; background: {{ s }}; display: block;"></span>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: {{ sr.pillBg }}; color: {{ sr.pillInk }}; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; justify-self: end;"><span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: block;"></span>{{ sr.booked }}</div>
+                </div>
+              </sc-for>
+            </sc-if>
+            <sc-for list="{{ g.blocks }}" as="b" hint-placeholder-count="3">
+              <div style="display: grid; grid-template-columns: 120px 1fr 150px; align-items: center; gap: 14px; padding: 10px 8px; margin: 0 -8px; border-radius: 8px; border-top: 1px solid oklch(92% 0.01 82); cursor: pointer; background: {{ b.mineBg }}; box-shadow: {{ b.mineRing }};" style-hover="background: color-mix(in oklab, {{ accent }} 5%, transparent);">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                  <div style="width: 30px; height: 30px; border-radius: 8px; flex: none; background: {{ b.avatarBg }}; color: {{ b.tone }}; box-shadow: inset 0 0 0 1.5px {{ b.avatarRing }}; font-family: Newsreader, Georgia, serif; font-weight: 600; font-size: 11.5px; display: flex; align-items: center; justify-content: center;">{{ b.initials }}</div>
+                  <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+                    <div style="font-size: 13.5px; font-weight: 600; white-space: nowrap;">{{ b.name }}</div>
+                    <sc-if value="{{ b.mine }}" hint-placeholder-val="{{ false }}"><div style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: {{ accent }};">Yours</div></sc-if>
+                  </div>
+                </div>
+                <sc-if value="{{ b.placed }}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; flex-direction: column; gap: 5px; min-width: 0;">
+                    <div style="font-size: 12.5px; color: oklch(35% 0.017 65); font-variant-numeric: tabular-nums; white-space: nowrap;">{{ b.when }}</div>
+                    <div style="display: flex; gap: 3px;">
+                      <sc-for list="{{ b.segs }}" as="s" hint-placeholder-count="6">
+                        <span style="flex: 1; max-width: 34px; height: 6px; border-radius: 999px; background: {{ s }}; display: block;"></span>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: {{ b.pillBg }}; color: {{ b.pillInk }}; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; justify-self: end;"><span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: block;"></span>{{ b.booked }}</div>
+                </sc-if>
+                <sc-if value="{{ b.unplaced }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size: 12.5px; color: oklch(51% 0.017 70); font-style: italic;">{{ b.emptyText }}</div>
+                  <div style="height: 28px; padding: 0 12px; border-radius: 8px; border: 1.5px solid {{ accent }}; color: {{ accent }}; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-self: end; cursor: pointer;" style-hover="background: color-mix(in oklab, {{ accent }} 10%, transparent);">{{ b.action }}</div>
+                </sc-if>
+                <sc-if value="{{ b.summary }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size: 12.5px; color: oklch(35% 0.017 65); white-space: nowrap;">{{ b.when }}</div>
+                  <div style="display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: {{ b.pillBg }}; color: {{ b.pillInk }}; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; justify-self: end;"><span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: block;"></span>{{ b.booked }}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: oklch(99.5% 0.004 90); border-radius: 14px; border: 1px solid oklch(88% 0.014 82); box-shadow: 0 1px 2px oklch(0% 0 0 / 0.04), 0 8px 24px oklch(30% 0.04 58 / 0.06); overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 280px repeat(4, 1fr); align-items: end; gap: 0 12px; padding: 14px 20px 10px; border-bottom: 1px solid oklch(88% 0.014 82); font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">
+          <div>Candidate</div>
+          <div>Stage 1</div>
+          <div>Stage 2</div>
+          <div>Stage 3</div>
+          <div>Consultations</div>
+        </div>
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 280px repeat(4, 1fr); align-items: center; gap: 0 12px; padding: 10px 20px; min-height: 66px; border-bottom: 1px solid oklch(90% 0.012 82); background: {{ r.rowBg }};">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div style="width: 36px; height: 36px; border-radius: 10px; flex: none; background: {{ r.avatarBg }}; color: {{ r.tone }}; box-shadow: inset 0 0 0 1.5px {{ r.avatarRing }}; font-family: Newsreader, Georgia, serif; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center;">{{ r.initials }}</div>
+              <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                <div style="font-size: 14px; font-weight: 600; white-space: nowrap; color: {{ r.nameInk }};">{{ r.name }}</div>
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: oklch(51% 0.017 70); white-space: nowrap;">{{ r.group }} · {{ r.tutor }}<sc-if value="{{ r.own }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 6px; border-radius: 999px; background: color-mix(in oklab, {{ accent }} 14%, transparent); color: {{ accent }};">Yours</span></sc-if></div>
+              </div>
+            </div>
+            <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="4">
+              <div title="{{ c.title }}" style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 6px 10px 6px 8px; margin: 0 -8px; border-radius: 10px; cursor: pointer; min-width: 0;" style-hover="background: color-mix(in oklab, {{ accent }} 7%, transparent); box-shadow: inset 0 0 0 1px {{ accent }};">
+                <div style="display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: {{ c.bg }}; color: {{ c.ink }}; border: 1.5px {{ c.borderStyle }} {{ c.border }}; box-sizing: border-box; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; max-width: 100%;"><span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: block; flex: none;"></span><span style="overflow: hidden; text-overflow: ellipsis;">{{ c.main }}</span></div>
+                <div style="font-size: 11.5px; color: {{ c.subInk }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; padding-left: 2px;">{{ c.sub }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;">
+        <div style="background: {{ sheetBg }}; border-radius: 14px; border: 1.5px solid {{ sheetBorder }}; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="font-family: Newsreader, Georgia, serif; font-size: 20px; font-weight: 600; color: oklch(30% 0.042 58);">{{ sheetTitle }}</div>
+                <sc-if value="{{ sheetMine }}" hint-placeholder-val="{{ false }}"><div style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; background: {{ accent }}; color: oklch(98.5% 0.006 90);">Yours</div></sc-if>
+              </div>
+              <div style="font-size: 12.5px; color: oklch(51% 0.017 70);">Tue 15 Sep · 15:30 · four positions of 15 min · {{ sheetOpenedFrom }}</div>
+            </div>
+            <div style="display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: oklch(93% 0.05 80); color: oklch(40% 0.09 68); font-size: 12px; font-weight: 700; white-space: nowrap;"><span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: block;"></span>2 of 4 booked</div>
+          </div>
+          <div style="display: flex; flex-direction: column;">
+            <sc-for list="{{ sheet }}" as="s" hint-placeholder-count="4">
+              <div style="display: grid; grid-template-columns: 44px 56px 1fr auto; align-items: center; gap: 14px; padding: 10px 0; border-top: 1px solid oklch(92% 0.01 82);">
+                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(51% 0.017 70);">{{ s.pos }}</div>
+                <div style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums;">{{ s.time }}</div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <sc-if value="{{ s.taken }}" hint-placeholder-val="{{ true }}">
+                    <div style="width: 28px; height: 28px; border-radius: 8px; flex: none; background: {{ s.avatarBg }}; color: {{ s.tone }}; box-shadow: inset 0 0 0 1.5px {{ s.avatarRing }}; font-family: Newsreader, Georgia, serif; font-weight: 600; font-size: 11px; display: flex; align-items: center; justify-content: center;">{{ s.initials }}</div>
+                    <div style="font-size: 13.5px; font-weight: 600;">{{ s.name }}</div>
+                  </sc-if>
+                  <sc-if value="{{ s.open }}" hint-placeholder-val="{{ false }}">
+                    <div style="width: 28px; height: 28px; border-radius: 8px; flex: none; border: 1.5px dashed oklch(80% 0.014 82); box-sizing: border-box;"></div>
+                    <div style="font-size: 13.5px; font-style: italic; color: oklch(51% 0.017 70);">Open</div>
+                  </sc-if>
+                </div>
+                <div style="display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 999px; background: {{ s.bg }}; color: {{ s.ink }}; font-size: 11px; font-weight: 700;"><span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: block;"></span>{{ s.state }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size: 12.5px; line-height: 1.5; color: oklch(51% 0.017 70); padding-top: 12px; border-top: 1px solid oklch(92% 0.01 82); text-wrap: pretty;">Same sheet as Stage 2: the candidate books the next open position, the sheet is the source of truth, nothing pings per booking.</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="background: color-mix(in oklab, oklch(63% 0.096 72) 14%, oklch(99.5% 0.004 90)); border-radius: 14px; border: 1px solid color-mix(in oklab, oklch(63% 0.096 72) 40%, transparent); padding: 18px 22px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(40% 0.09 68);">Your rule, applied at booking</div>
+            <div style="font-size: 13.5px; line-height: 1.55; color: oklch(30% 0.042 58); text-wrap: pretty;">Before an assignment's first submission a candidate may book with any tutor. Once they have submitted it, consultation on that assignment is with their own tutor only. <strong>Daniel Kim</strong> has submitted LRT, so this sheet is closed to him and Marcus Webb's is open.</div>
+          </div>
+          <div style="background: oklch(99.5% 0.004 90); border-radius: 14px; border: 1px solid oklch(88% 0.014 82); padding: 18px 22px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+            <sc-for list="{{ changes }}" as="ch" hint-placeholder-count="3">
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 999px; background: {{ ch.bg }}; color: {{ ch.ink }}; font-size: 11px; font-weight: 700; width: fit-content;"><span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: block;"></span>{{ ch.label }}</div>
+                <div style="font-size: 12.5px; line-height: 1.5; color: oklch(35% 0.017 65); text-wrap: pretty;">{{ ch.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;MCT&quot;,&quot;ACT&quot;],&quot;default&quot;:&quot;MCT&quot;,&quot;tsType&quot;:&quot;'MCT' | 'ACT'&quot;,&quot;section&quot;:&quot;View&quot;},&quot;currentStage&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[1,2,3],&quot;default&quot;:2,&quot;tsType&quot;:&quot;1 | 2 | 3&quot;,&quot;section&quot;:&quot;Course&quot;}}">
+class Component extends DCLogic {
+  state = { stage: null };
+  renderVals() {
+    const p = this.props;
+    const role = p.role ?? 'MCT';
+    const isMct = role === 'MCT';
+    const accent = isMct ? 'oklch(42% 0.13 27)' : 'oklch(60% 0.11 70)';
+    const CARD = 'oklch(99.5% 0.004 90)', MUTED = 'oklch(51% 0.017 70)', INK = 'oklch(23.5% 0.017 65)';
+    const S = {
+      booked: { bg: 'oklch(93% 0.019 190)', ink: 'oklch(32% 0.05 195)', border: 'transparent', borderStyle: 'solid' },
+      waiting: { bg: 'oklch(93% 0.05 80)', ink: 'oklch(40% 0.09 68)', border: 'transparent', borderStyle: 'solid' },
+      done: { bg: 'oklch(93.5% 0.008 85)', ink: 'oklch(38% 0.014 70)', border: 'transparent', borderStyle: 'solid' },
+      move: { bg: 'transparent', ink: accent, border: accent, borderStyle: 'solid' },
+      none: { bg: 'transparent', ink: MUTED, border: 'oklch(85% 0.012 82)', borderStyle: 'dashed' },
+    };
+    const TONES = [25, 60, 95, 130, 165, 200, 235, 270, 305, 340].map(h => `oklch(45% 0.10 ${h})`);
+    const tone = (n) => { let h = 0; for (let i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) | 0; return TONES[Math.abs(h) % TONES.length]; };
+    const person = (name) => { const t = tone(name); return { name, initials: name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase(), tone: t, avatarBg: `color-mix(in oklab, ${t} 30%, ${CARD})`, avatarRing: `color-mix(in oklab, ${t} 55%, transparent)`, rowBg: `color-mix(in oklab, ${t} 7%, ${CARD})` }; };
+    const nav = ['Today', 'Roster', 'Timetable', 'Teaching Practice', 'Volunteers', 'Assessor', 'Resource hub', 'Grade form'].map(l => ({ label: l, weight: l === 'Timetable' ? 600 : 500, ink: l === 'Timetable' ? accent : INK, bg: l === 'Timetable' ? `color-mix(in oklab, ${accent} 10%, transparent)` : 'transparent' }));
+
+    const block = (name, when, booked, total) => {
+      const full = booked === total, empty = booked === 0;
+      const pill = full ? S.booked : empty ? S.none : S.waiting;
+      return { ...person(name), placed: true, unplaced: false, summary: false, when, booked: `${booked} of ${total} booked`, pillBg: full ? S.booked.bg : empty ? 'oklch(93.5% 0.008 85)' : S.waiting.bg, pillInk: pill.ink === MUTED ? 'oklch(38% 0.014 70)' : pill.ink, segs: Array.from({ length: total }, (_, i) => i < booked ? (full ? 'oklch(45% 0.07 195)' : 'oklch(63% 0.096 72)') : 'oklch(0% 0 0 / 0.09)') };
+    };
+    const stage = this.state.stage ?? Number(p.currentStage ?? 2);
+    const summary = (name, when, k, text) => ({ ...person(name), placed: false, unplaced: false, summary: true, when, booked: text, pillBg: S[k].bg === 'transparent' ? 'oklch(93.5% 0.008 85)' : S[k].bg, pillInk: k === 'move' ? accent : S[k].ink === MUTED ? 'oklch(38% 0.014 70)' : S[k].ink });
+    const stageData = {
+      1: { sub: 'week 1 · invites, one to one', add: false, blocks: [summary('Group A', 'Invites sent Mon 24 Aug', 'done', '6 of 6 filed'), summary('Group B', 'Invites sent Mon 24 Aug', 'waiting', '5 of 6 filed · 1 pending'), summary('Group C', 'Invites sent Tue 25 Aug', 'done', '6 of 6 filed')] },
+      2: { sub: 'week 3 · one sheet per group · 15-min positions', add: true, blocks: [block('Group A', 'Mon 14 Sep · 14:00 · 90 min', 4, 6), block('Group B', 'Tue 15 Sep · 14:00 · 90 min', 1, 6), { ...person('Group C'), placed: false, unplaced: true, summary: false, emptyText: 'No sheet placed yet', action: 'Place sheet' }] },
+      3: { sub: 'week 4 · only for flagged candidates', add: false, blocks: [{ ...person('Group A'), placed: false, unplaced: true, summary: false, emptyText: '1 flagged · Priya Sharma', action: 'Invite' }, summary('Group B', 'Nobody flagged', 'none', 'nothing due'), summary('Group C', 'Nobody flagged', 'none', 'nothing due')] },
+    };
+    const stageDot = { 1: 'oklch(45% 0.07 195)', 2: accent, 3: 'oklch(0% 0 0 / 0.25)' };
+    const stages = [1, 2, 3].map(n => ({ label: `Stage ${n}`, onClick: () => this.setState({ stage: n }), bg: stage === n ? CARD : 'transparent', ink: stage === n ? INK : MUTED, shadow: stage === n ? '0 1px 2px oklch(0% 0 0 / 0.08)' : 'none', dot: stageDot[n] }));
+    const blockGroups = [
+      { title: 'Tutorials', hasStages: true, stages, canAdd: stageData[stage].add, addLabel: 'Add sheet', cardBg: 'color-mix(in oklab, oklch(45% 0.07 195) 7%, oklch(99.5% 0.004 90))', cardBorder: 'color-mix(in oklab, oklch(45% 0.07 195) 30%, transparent)', titleInk: 'oklch(32% 0.05 195)', sub: stageData[stage].sub, blocks: stageData[stage].blocks },
+      { title: 'Consultation blocks', hasStages: false, canAdd: true, addLabel: 'Add block', cardBg: 'color-mix(in oklab, oklch(63% 0.096 72) 10%, oklch(99.5% 0.004 90))', cardBorder: 'color-mix(in oklab, oklch(63% 0.096 72) 40%, transparent)', titleInk: 'oklch(40% 0.09 68)', sub: 'belong to a tutor · bookable across the course', blocks: [block('Jordan Blake', 'Tue 15 Sep · 15:30 · 60 min', 2, 4), block('Marcus Webb', 'Wed 16 Sep · 12:45 · 45 min', 3, 3), block('Marcus Webb', 'Fri 18 Sep · 15:30 · 60 min', 0, 4)] },
+    ];
+
+    const cell = (k, main, sub, title) => ({ ...S[k], main, sub, title: title ?? `${main} — ${sub}`, subInk: k === 'move' ? accent : MUTED });
+    const raw = [
+      ['Amara Okafor', 'Group A', 'Jordan Blake', cell('done', 'Filed', 'Tue 25 Aug'), cell('booked', '2nd · Mon 14 Sep 14:20', 'Group A sheet'), cell('none', '—', 'not flagged'), cell('booked', 'Tue 15 Sep · 15:30', 'with Jordan · 1 earlier')],
+      ['Daniel Kim', 'Group A', 'Jordan Blake', cell('done', 'Filed', 'Wed 26 Aug'), cell('waiting', 'Not booked', 'sheet open, 2 positions left'), cell('waiting', 'Thu 24 Sep · 11:00', 'awaiting confirmation'), cell('none', 'None yet', 'LRT submitted · own tutor only')],
+      ['Priya Sharma', 'Group A', 'Jordan Blake', cell('booked', 'Mon 14 Sep · 09:15', 'confirmed'), cell('booked', '1st · Mon 14 Sep 14:00', 'Group A sheet'), cell('move', 'Flagged · invite', 'needs a Stage 3'), cell('booked', 'Wed 16 Sep · 12:45', 'with Marcus')],
+      ['Leila Haddad', 'Group B', 'Marcus Webb', cell('waiting', 'Tue 15 Sep · 09:15', 'awaiting confirmation'), cell('booked', '1st · Tue 15 Sep 14:00', 'Group B sheet'), cell('none', '—', 'not flagged'), cell('booked', 'Wed 16 Sep · 13:00', 'with Marcus')],
+      ['Marco Bellini', 'Group B', 'Marcus Webb', cell('move', 'Invite', 'not yet invited'), cell('waiting', 'Not booked', 'sheet open, 5 positions left'), cell('none', '—', 'not flagged'), cell('none', 'None yet', 'any tutor until first submission')],
+      ['Yuki Tanaka', 'Group C', 'Helen Marsh', cell('done', 'Filed', 'Thu 27 Aug'), cell('move', 'No sheet yet', 'Group C block not placed'), cell('none', '—', 'not flagged'), cell('booked', 'Wed 16 Sep · 13:15', 'with Marcus')],
+    ];
+    const me = 'Jordan Blake';
+    const rowsAll = raw.map(([name, group, tutor, ...cells]) => ({ ...person(name), group, tutor, cells: isMct || tutor === me ? cells : cells.map(c => ({ ...c, subInk: MUTED, title: `${c.main} — ${c.sub} · view only` })), own: isMct || tutor === me, nameInk: INK }));
+
+    const rows = rowsAll.map(r => ({ ...r, own: !isMct && r.own }));
+    const meName = isMct ? 'Ramy Sakr' : 'Jordan Blake';
+    blockGroups[1].blocks = blockGroups[1].blocks.map(b => { const mine = b.name === meName; return { ...b, mine, mineBg: mine ? `color-mix(in oklab, ${accent} 9%, transparent)` : 'transparent', mineRing: mine ? `inset 0 0 0 1.5px ${accent}` : 'none' }; });
+    blockGroups[1].sub = isMct ? 'one line per tutor · click to open their blocks' : 'every tutor\'s blocks · yours highlighted · others view only';
+    if (isMct) {
+      const byTutor = {};
+      blockGroups[1].blocks.forEach(b => { const t = byTutor[b.name] ??= { name: b.name, n: 0, booked: 0, total: 0 }; t.n++; const [bk, tot] = b.booked.match(/\d+/g).map(Number); t.booked += bk; t.total += tot; });
+      blockGroups[1].summaryRows = Object.values(byTutor).map(t => { const full = t.booked === t.total, empty = t.booked === 0; return { ...person(t.name), when: `${t.n} block${t.n > 1 ? 's' : ''} this course`, booked: `${t.booked} of ${t.total} booked`, pillBg: full ? S.booked.bg : empty ? 'oklch(93.5% 0.008 85)' : S.waiting.bg, pillInk: full ? S.booked.ink : empty ? 'oklch(38% 0.014 70)' : S.waiting.ink, segs: Array.from({ length: t.total }, (_, i) => i < t.booked ? (full ? 'oklch(45% 0.07 195)' : 'oklch(63% 0.096 72)') : 'oklch(0% 0 0 / 0.09)') }; });
+      blockGroups[1].isSummary = true;
+      blockGroups[1].blocks = [];
+    } else { blockGroups[1].isSummary = false; blockGroups[1].summaryRows = []; }
+    blockGroups[0].isSummary = false; blockGroups[0].summaryRows = [];
+    const legend = [['booked / confirmed', S.booked], ['waiting on the candidate', S.waiting], ['done, on the CELTA 5', S.done], ['your move', { bg: `color-mix(in oklab, ${accent} 12%, ${CARD})`, ink: accent }], ['— nothing due', { bg: 'transparent', ink: MUTED }]].map(([label, s]) => ({ label, bg: s.bg, ink: s.ink }));
+
+    const sheet = [['1st', '15:30', 'Amara Okafor'], ['2nd', '15:45', 'Priya Sharma'], ['3rd', '16:00', null], ['4th', '16:15', null]].map(([pos, time, name]) => name ? { pos, time, taken: true, open: false, ...person(name), state: 'Booked', bg: S.booked.bg, ink: S.booked.ink } : { pos, time, taken: false, open: true, state: 'Open', bg: 'oklch(93.5% 0.008 85)', ink: 'oklch(38% 0.014 70)' });
+
+    const changes = [
+      { label: 'Stays', bg: S.done.bg, ink: S.done.ink, text: 'The board, the Stage 2 engine, the Stage 1 and 3 invite actions, the candidate\'s own booking pages, the CELTA 5 records.' },
+      { label: 'Goes', bg: 'oklch(94% 0.043 25)', ink: 'oklch(45% 0.15 27)', text: 'The three stacked forms. Their fields move into the cells and the two "Add block" buttons.' },
+      { label: 'New', bg: S.booked.bg, ink: S.booked.ink, text: 'A consultation block that belongs to a tutor rather than a group, bookable more than once per candidate across the course, with the any-tutor-then-own-tutor rule. One migration.' },
+    ];
+
+    return { nav, accent, roleLabel: role, sheetTitle: isMct ? 'Consultation sheet · Jordan Blake' : 'Your consultation sheet', sheetOpenedFrom: isMct ? 'opened from the list above · MCT can edit' : 'opened from the list above', sheetMine: !isMct, sheetBg: isMct ? CARD : `color-mix(in oklab, ${accent} 9%, ${CARD})`, sheetBorder: isMct ? 'oklch(88% 0.014 82)' : accent, scopeNote: isMct ? 'You see all three groups.' : 'You see all three groups; you can act on your own.', blockGroups, rows, legend, sheet, changes };
+  }
+}
+</script>
+</body>
+</html>
