@@ -5,13 +5,26 @@ import { getOrCreateAssessorToken, sendAssessorInviteEmail, type SendAssessorEma
 
 const initialEmailState: SendAssessorEmailState = { error: null, sent: false };
 
-export function AssessorLinkButton() {
-  const [state, setState] = useState<"idle" | "loading" | "copied" | "error" | "not_ready">("idle");
+// Ramy, 6 Sep 2026: "an enforced checklist... a warning that so and so is
+// still missing, with a potential override." The 14.1 items that are not
+// ready come up BEFORE the link is copied or the email sent, and can be
+// overridden -- his standing rule that anything the system decides must be
+// overridable, and the right call here because Cambridge's own deadline does
+// not wait for a centre's paperwork.
+export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[] }) {
+  const [state, setState] = useState<"idle" | "loading" | "copied" | "error" | "not_ready" | "warn">("idle");
   const [issues, setIssues] = useState<string[]>([]);
   const [emailOpen, setEmailOpen] = useState(false);
   const [emailState, emailAction, emailPending] = useActionState(sendAssessorInviteEmail, initialEmailState);
 
-  async function handleClick() {
+  async function handleClick(skipWarning = false) {
+    // The 14.1 warning comes first and is advisory; the portfolio readiness
+    // check below still refuses, because that one gates the assessor's own
+    // page rather than the centre's paperwork.
+    if (!skipWarning && outstanding.length > 0) {
+      setState("warn");
+      return;
+    }
     setState("loading");
     const { token, error, readinessIssues } = await getOrCreateAssessorToken();
     if (readinessIssues && readinessIssues.length > 0) {
@@ -33,7 +46,7 @@ export function AssessorLinkButton() {
       <div className="relative">
         <button
           type="button"
-          onClick={handleClick}
+          onClick={() => handleClick()}
           disabled={state === "loading"}
           className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover-fill disabled:opacity-60"
         >
@@ -45,8 +58,41 @@ export function AssessorLinkButton() {
                 ? "Try again"
                 : state === "not_ready"
                   ? "Not ready yet"
-                  : "Share assessor link"}
+                  : state === "warn"
+                    ? "Check first"
+                    : "Share assessor link"}
         </button>
+        {state === "warn" ? (
+          <div className="absolute top-full right-0 z-10 mt-1.5 w-80 rounded-[6px] border border-border bg-card p-3 text-xs shadow-sm">
+            <p className="font-semibold text-ink">
+              {outstanding.length} thing{outstanding.length === 1 ? "" : "s"} on the Handbook&apos;s §14.1 list {outstanding.length === 1 ? "is" : "are"} not
+              ready yet:
+            </p>
+            <ul className="mt-1.5 flex list-disc flex-col gap-1 pl-4 text-muted">
+              {outstanding.slice(0, 6).map((label) => (
+                <li key={label}>{label}</li>
+              ))}
+              {outstanding.length > 6 ? <li>and {outstanding.length - 6} more</li> : null}
+            </ul>
+            <p className="mt-2 text-muted">
+              You can share the link anyway &mdash; §14.1 wants the pack two to three days before the visit, and that
+              deadline does not wait for the paperwork.
+            </p>
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleClick(true)}
+                className="rounded-[5px] px-2.5 py-1 text-[11.5px] font-semibold text-primary-foreground"
+                style={{ background: "var(--hub-accent)" }}
+              >
+                Share anyway
+              </button>
+              <button type="button" onClick={() => setState("idle")} className="text-primary hover:underline">
+                Not yet
+              </button>
+            </div>
+          </div>
+        ) : null}
         {state === "not_ready" ? (
           <div className="absolute right-0 top-full z-10 mt-1.5 w-72 rounded-[6px] border border-border bg-card p-3 text-xs shadow-sm">
             <p className="font-semibold text-ink">Portfolios aren&apos;t complete yet:</p>

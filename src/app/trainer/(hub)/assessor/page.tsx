@@ -17,6 +17,8 @@ import { visitTeachingOrder } from "@/lib/assessor-wall";
 import { buildAssessorRecommendation } from "@/lib/assessor-recommendation";
 import { RecommendationPanel } from "@/app/trainer/(hub)/assessor/recommendation-panel";
 import { appianHref } from "@/lib/appian";
+import { buildPrepSummary } from "@/lib/assessor-prep-state";
+import { PrepList } from "@/app/trainer/(hub)/assessor/prep-list";
 import { tintModeration } from "@/lib/tint-moderation";
 import { TintBlock } from "@/app/trainer/(hub)/assessor/tint-block";
 import { DesignerCredit } from "@/components/designer-credit";
@@ -136,7 +138,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
   // which is the other half of what the tab is for, and was previously only a
   // checkbox list behind a button.
   const cards = await buildCandidateCards(supabase, courseId);
-  const { slots: teachingSlots } = await visitTeachingOrder(supabase, courseId, visitDate, cards);
+  const { slots: teachingSlots, tpNumber: visitDayTpNumber } = await visitTeachingOrder(supabase, courseId, visitDate, cards);
 
   // Lesson start times for the visit day, so a suggested candidate can be
   // named with the slot the assessor would sit in. The nth TP event of the day
@@ -226,6 +228,58 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
       // Past four, the names stop being readable and the count is the point.
       label: names.length > 4 ? `${names.length} candidates` : names.join(", "),
     }));
+
+  // Ramy, 6 Sep 2026: "maybe you should have an enforced checklist... a
+  // warning that so and so is still missing, with a potential override."
+  // A third of 14.1's list Connect can answer for itself; these are the reads
+  // that let it, gathered here rather than inside the lib so the page keeps
+  // one wave of queries instead of two.
+  const [{ count: timetableEvents }, { count: publishedBriefs }, { count: attendanceRows }, { count: visitDayPlans }, { count: withdrawalsWithoutLetter }] =
+    await Promise.all([
+      supabase.from("course_timetable_events").select("id", { count: "exact", head: true }).eq("course_id", courseId),
+      supabase
+        .from("assignment_templates")
+        .select("id", { count: "exact", head: true })
+        .eq("center_id", trainer.center_id ?? "")
+        .not("published_at", "is", null),
+      // volunteer_attendance hangs off a timetable event, not a course, so
+      // the register's existence is asked of this course's own TP events.
+      supabase
+        .from("volunteer_attendance")
+        .select("id, course_timetable_events!inner(course_id)", { count: "exact", head: true })
+        .eq("course_timetable_events.course_id", courseId),
+      visitDayTpNumber > 0
+        ? supabase.from("plan_assignments").select("id", { count: "exact", head: true }).eq("course_id", courseId).eq("tp_number", visitDayTpNumber)
+        : Promise.resolve({ count: 0 }),
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("course_id", courseId)
+        .eq("course_status", "withdrawn")
+        .is("withdrawal_letter_generated_at", null),
+    ]);
+
+  const { count: previousReports } = await supabase
+    .from("resources")
+    .select("id", { count: "exact", head: true })
+    .eq("center_id", trainer.center_id ?? "")
+    .eq("category", "centre_documents")
+    .ilike("title", "%previous assessor%");
+  const previousReportOnFile = (previousReports ?? 0) > 0;
+
+  const prep = await buildPrepSummary(supabase, centrePreparation, {
+    courseId,
+    candidateCount: rows.length,
+    portfoliosComplete: readiness.portfoliosCompleteCount,
+    hasTimetable: (timetableEvents ?? 0) > 0,
+    publishedAssignmentTitles: (publishedBriefs ?? 0) > 0,
+    appianReference: course?.appian_notification_reference ?? null,
+    previousReportOnFile,
+    attendanceRegisterRows: attendanceRows ?? 0,
+    lessonPlansForVisitDay: visitDayPlans ?? 0,
+    visitDayTeachingSlots: teachingSlots.length,
+    withdrawalLettersOutstanding: withdrawalsWithoutLetter ?? 0,
+  });
 
   const nameById = new Map(cards.map((c) => [c.traineeId, c.name]));
   // The chooser is a tutor, not a candidate, so it is not in `rows`.
@@ -358,6 +412,21 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Before they arrive</p>
         <p className="max-w-[70ch] text-sm text-muted">
           Setting the visit up, handing the pack over, and the Handbook&apos;s own list of what the centre owes them.
+          {prep.outstanding.length > 0 ? (
+            <>
+              {" "}
+              <span className="font-semibold" style={{ color: "oklch(44% 0.1 68)" }}>
+                {prep.outstanding.length} of {prep.total} not ready.
+              </span>
+            </>
+          ) : (
+            <>
+              {" "}
+              <span className="font-semibold" style={{ color: "var(--color-primary)" }}>
+                All {prep.total} ready.
+              </span>
+            </>
+          )}
         </p>
       </div>
 
@@ -380,7 +449,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <AssessorSelectionButton candidates={candidates} />
-              <AssessorLinkButton />
+              <AssessorLinkButton outstanding={prep.outstanding.map((i) => i.label)} />
               {/* Grade form was here as well as in the top nav -- the same
                   duplicate door Ramy took off Teaching Practice on 6 Sep 2026.
                   One room, one door. */}
@@ -422,31 +491,10 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         </section>
       </div>
 
-      <section className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
-        <div className="flex flex-col gap-[3px]">
-          <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">What the assessor needs from you</p>
-          <p className="text-sm text-muted">
-            Administration Handbook §14.1.{" "}
-            {preparationDeadline
-              ? `Available by ${fmtDate(preparationDeadline, { day: "numeric", month: "long" })} — two to three days before the visit, so the assessor can read it.`
-              : "Set a visit date and Connect will date this list for you."}
-          </p>
-        </div>
-        <ul className="grid grid-cols-1 gap-x-8 gap-y-0 sm:grid-cols-2 xl:grid-cols-3">
-          {centrePreparation.map((item) => (
-            <li key={item.label} className="flex flex-col gap-[2px] border-t border-border-faint py-2.5">
-              <div className="flex items-baseline justify-between gap-3">
-                <p className="text-[13px] font-semibold text-ink">
-                  {item.label}
-                  {item.conditional ? <span className="ml-2 text-[10px] font-bold tracking-[0.08em] text-gold uppercase">This course</span> : null}
-                </p>
-                <span className="shrink-0 text-[10px] font-semibold text-muted tabular-nums">§{item.cite}</span>
-              </div>
-              <p className="text-xs text-muted">{item.detail}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <PrepList
+        summary={prep}
+        deadline={preparationDeadline ? fmtDate(preparationDeadline, { day: "numeric", month: "long" }) : null}
+      />
 
       <DesignerCredit />
     </div>

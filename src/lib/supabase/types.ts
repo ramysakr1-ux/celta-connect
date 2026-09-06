@@ -2719,6 +2719,28 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["assessor_meeting_requests"]["Row"]>;
         Relationships: [];
       };
+      // migration 0282 -- the centre's own ticks against Administration
+      // Handbook 14.1. Append-only: a tick and a later untick are two rows,
+      // and the current state is the newest row for that item_key.
+      assessor_prep_marks: {
+        Row: {
+          id: string;
+          course_id: string;
+          /** CentrePreparationItem.key -- see src/lib/assessor-requirements.ts. */
+          item_key: string;
+          done: boolean;
+          marked_by: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["assessor_prep_marks"]["Row"]> & {
+          course_id: string;
+          item_key: string;
+          done: boolean;
+          marked_by: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
       // migration 0279 -- which candidates the centre puts to the assessor for
       // observation, and why. Append-only: a corrected choice is a new row,
       // and the current one is simply the newest. Advisory -- it never touches

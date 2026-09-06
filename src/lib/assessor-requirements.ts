@@ -148,6 +148,12 @@ export function doubleMarkingPerAssignment(candidateCount: number): number | nul
 export type DeliveryMode = "f2f" | "online" | "mixed" | string;
 
 export interface CentrePreparationItem {
+  /**
+   * Stable identity for the item, so a tick survives a reworded label.
+   * Never reuse or repurpose one -- a key that changes meaning silently
+   * re-points every tick already recorded against it.
+   */
+  key: string;
   label: string;
   detail: string;
   cite: string;
@@ -166,19 +172,19 @@ export function buildCentrePreparationList(input: {
 
   const items: CentrePreparationItem[] = [
     {
-      label: "Candidate portfolios",
+      key: "portfolios", label: "Candidate portfolios",
       detail: `All ${candidateCount}, clearly named, containing Sections A, B and C. Checked by candidates and tutors so that all assessed work is in and all records are completed and signed.`,
       cite: "14.1 / 12.1.1",
     },
     {
-      label: "Assessment timetable",
+      key: "assessment_timetable", label: "Assessment timetable",
       detail:
         "Enough time for the assessor to read a cross-section of portfolios, observe teaching practice, observe tutor feedback and meet the candidates -- and not too spread out.",
       cite: "14.1",
     },
-    { label: "Candidate descriptions", detail: "One per candidate, with photos if possible. Candidates must be told this is shared.", cite: "14.1" },
+    { key: "candidate_descriptions", label: "Candidate descriptions", detail: "One per candidate, with photos if possible. Candidates must be told this is shared.", cite: "14.1" },
     {
-      label: "Application task",
+      key: "application_task", label: "Application task",
       detail:
         withdrawnCount > 0
           ? `Completed selection tasks and interview notes for accepted AND rejected applicants -- including the ${withdrawnCount} who withdrew, whose applications the assessor also checks. Names only; no other identifying information.`
@@ -186,40 +192,40 @@ export function buildCentrePreparationList(input: {
       cite: "14.1 / 12.2",
       conditional: withdrawnCount > 0,
     },
-    { label: "Candidate agreements", detail: "The version current for these candidates, not an older one.", cite: "14.1" },
-    { label: "Course timetable", detail: "The whole course.", cite: "14.1" },
-    { label: "Teaching practice schedule", detail: "The TP arrangements for the time of the assessment specifically -- a separate document from the course timetable.", cite: "14.1" },
-    { label: "Written assignment titles", detail: "All four.", cite: "14.1" },
+    { key: "candidate_agreements", label: "Candidate agreements", detail: "The version current for these candidates, not an older one.", cite: "14.1" },
+    { key: "course_timetable", label: "Course timetable", detail: "The whole course.", cite: "14.1" },
+    { key: "tp_schedule", label: "Teaching practice schedule", detail: "The TP arrangements for the time of the assessment specifically -- a separate document from the course timetable.", cite: "14.1" },
+    { key: "assignment_titles", label: "Written assignment titles", detail: "All four.", cite: "14.1" },
     {
-      label: "Sample end-of-course report",
+      key: "sample_report", label: "Sample end-of-course report",
       detail: `Showing details relevant to this course's mode -- ${modeWord}.`,
       cite: "14.1",
       conditional: true,
     },
-    { label: "Attendance registers", detail: "For the language students attending teaching practice. Student names only, nothing else.", cite: "14.1" },
+    { key: "attendance_registers", label: "Attendance registers", detail: "For the language students attending teaching practice. Student names only, nothing else.", cite: "14.1" },
     {
-      label: "Lesson plans for the day",
+      key: "lesson_plans", label: "Lesson plans for the day",
       detail: "For everyone teaching on the assessment day. If not ready in advance, handed over at the start of the lesson.",
       cite: "14.1",
     },
-    { label: "The previous assessor's report", detail: "From the centre's most recent visit.", cite: "14.1" },
+    { key: "previous_report", label: "The previous assessor's report", detail: "From the centre's most recent visit.", cite: "14.1" },
     {
       // Not a document, but 14.1 puts it on the same 2-3 day deadline as the
       // documents, and it is the only item on that list that blocks the
       // assessor outright: 15.2 says they cannot open their report without
       // it. A centre that forgets it has stopped the assessment without
       // knowing, which is exactly the failure a checklist is for.
-      label: "Appian course notification reference",
+      key: "appian_reference", label: "Appian course notification reference",
       detail:
         "Given to the assessor, not just recorded. Without it they cannot open their Assessor Report at all. Set it on the Assessor card and it appears on their landing page for them to copy.",
       cite: "14.1 / 15.2",
     },
-    { label: "Any action plan agreed with Cambridge", detail: "A copy, where one is in place -- the assessor checks the measures are being adopted.", cite: "14.1 / 14.2" },
+    { key: "action_plan", label: "Any action plan agreed with Cambridge", detail: "A copy, where one is in place -- the assessor checks the measures are being adopted.", cite: "14.1 / 14.2" },
   ];
 
   if (withdrawnCount > 0) {
     items.push({
-      label: "Withdrawal documentation",
+      key: "withdrawal_docs", label: "Withdrawal documentation",
       detail: `${withdrawnCount} candidate${withdrawnCount === 1 ? " has" : "s have"} withdrawn. The letter confirming withdrawal is checked at the assessment.`,
       cite: "14.2",
       conditional: true,
@@ -228,7 +234,7 @@ export function buildCentrePreparationList(input: {
 
   if (assessmentKind === "two_yearly") {
     items.push({
-      label: "Map and accommodation details",
+      key: "map_accommodation", label: "Map and accommodation details",
       detail: "For the two-yearly visit, where the assessor does not live locally. The centre normally books the accommodation and sends the details in advance.",
       cite: "14.1 / 15.3",
       conditional: true,
