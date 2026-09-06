@@ -13,9 +13,8 @@ import { AssessorSelectionButton } from "@/app/trainer/(hub)/roster/assessor-sel
 import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
 import { assessorVisitDayProblem } from "@/lib/assessor-day";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
-import { buildWall, observeHeading, observeNote, visitTeachingOrder, wallFootLine } from "@/lib/assessor-wall";
+import { visitTeachingOrder } from "@/lib/assessor-wall";
 import { buildAssessorRecommendation } from "@/lib/assessor-recommendation";
-import { CandidateWall } from "@/app/trainer/(hub)/assessor/candidate-wall";
 import { RecommendationPanel } from "@/app/trainer/(hub)/assessor/recommendation-panel";
 import { appianHref } from "@/lib/appian";
 import { tintModeration } from "@/lib/tint-moderation";
@@ -39,8 +38,8 @@ function fmtDate(iso: string, opts: Intl.DateTimeFormatOptions) {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", opts);
 }
 
-export default async function AssessorPage({ searchParams }: { searchParams: Promise<{ preview?: string; cohort?: string }> }) {
-  const { preview, cohort } = await searchParams;
+export default async function AssessorPage({ searchParams }: { searchParams: Promise<{ preview?: string }> }) {
+  const { preview } = await searchParams;
   const session = await getCurrentProfile();
   const trainer =
     session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner"
@@ -137,9 +136,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
   // which is the other half of what the tab is for, and was previously only a
   // checkbox list behind a button.
   const cards = await buildCandidateCards(supabase, courseId);
-  const { slots: teachingSlots, tpNumber: visitTpNumber } = await visitTeachingOrder(supabase, courseId, visitDate, cards);
-  const wantsFullCohort = cohort === "full";
-  const wallCandidates = buildWall(cards, new Set(teachingSlots.map((s) => s.traineeId)), wantsFullCohort);
+  const { slots: teachingSlots } = await visitTeachingOrder(supabase, courseId, visitDate, cards);
 
   // Lesson start times for the visit day, so a suggested candidate can be
   // named with the slot the assessor would sit in. The nth TP event of the day
@@ -312,13 +309,58 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         </div>
       ) : null}
 
-      {/* Ramy, 6 Sep 2026, on the hole this page had in the middle of it: the
-          left column ended after "Hand over the pack" while the §14.1 list ran
-          on for another 700px beside it. Same call he made on the assessor's
-          own page in August -- "everything underneath is blank, and then it's
-          all on the right" -- and the same fix: the two short cards sit side
-          by side, and the long reference list becomes a full-width band at the
-          foot, where reference belongs. */}
+      {cards.length > 0 ? (
+        <RecommendationPanel
+          rec={recommendation}
+          visitDateLabel={visitDate ? fmtDate(visitDate, { weekday: "long", day: "numeric", month: "long" }) : null}
+          existing={existingChoice}
+        />
+      ) : null}
+
+      {tintRow ? (
+        <TintBlock
+          name={tintNameById.get(tintRow.profile_id) ?? "Your trainer-in-training"}
+          supervisorName={tintRow.supervisor_profile_id ? (tintNameById.get(tintRow.supervisor_profile_id) ?? null) : null}
+          moderation={tintModeration({
+            scheme: titRecord?.scheme ?? null,
+            trainsAtNominatingCentre: titRecord?.trains_at_nominating_centre ?? true,
+          })}
+        />
+      ) : null}
+
+      {/* The candidate wall used to sit here, and Ramy cut it on 6 Sep 2026:
+          "starting from which candidates the assessor sees, it just feels
+          redundant, is it?" It was -- half of it repeated the recommendation
+          above, and the other half were cards whose only sentence was "put
+          forward by the centre".
+
+          Checked before removing, and every job it did is done better
+          elsewhere on this tab or one tab away: the withdrawn candidate is a
+          conditional item on the 14.1 list below, incomplete portfolios are
+          named precisely by the hand-over card's blockers, a door into each
+          portfolio is Roster, and grades at a glance are the Grade form.
+
+          The wall itself was never wrong -- it was designed for the ASSESSOR's
+          own page, where there is no Roster and no Grade form and it is the
+          only view of the cohort there is. It is redundant here and nowhere
+          else. candidate-wall.tsx and assessor-wall.ts are kept for that. */}
+
+      {/* Ramy, 6 Sep 2026: "why didn't you build this mockup?" -- it WAS built,
+          but the mockup drew only the three new things (banner, recommendation,
+          wall) and never drew the two sections already on this tab. So the page
+          opened on preparation admin and buried the thing you came to see.
+
+          Reordered, not rebuilt: the visit itself first -- who is coming, what
+          Connect suggests, which candidates they see -- then everything the
+          centre has to get ready before they arrive. The tools are all still
+          here, just after the answer instead of in front of it. */}
+      <div className="flex flex-col gap-1 pt-2">
+        <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Before they arrive</p>
+        <p className="max-w-[70ch] text-sm text-muted">
+          Setting the visit up, handing the pack over, and the Handbook&apos;s own list of what the centre owes them.
+        </p>
+      </div>
+
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <AssessorCard
           initialName={course?.assessor_name ?? null}
@@ -379,51 +421,6 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
             )}
         </section>
       </div>
-
-      {cards.length > 0 ? (
-        <RecommendationPanel
-          rec={recommendation}
-          visitDateLabel={visitDate ? fmtDate(visitDate, { weekday: "long", day: "numeric", month: "long" }) : null}
-          existing={existingChoice}
-        />
-      ) : null}
-
-      {tintRow ? (
-        <TintBlock
-          name={tintNameById.get(tintRow.profile_id) ?? "Your trainer-in-training"}
-          supervisorName={tintRow.supervisor_profile_id ? (tintNameById.get(tintRow.supervisor_profile_id) ?? null) : null}
-          moderation={tintModeration({
-            scheme: titRecord?.scheme ?? null,
-            trainsAtNominatingCentre: titRecord?.trains_at_nominating_centre ?? true,
-          })}
-        />
-      ) : null}
-
-      {cards.length > 0 ? (
-        <section className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
-          <div className="flex flex-col gap-[3px]">
-            <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Which candidates the assessor sees</p>
-            <p className="max-w-[76ch] text-sm text-muted">
-              The whole cohort, in the order the Handbook asks the assessor to work through it. Open a card to read the
-              portfolio yourself before they do.
-            </p>
-          </div>
-          <CandidateWall
-            candidates={wallCandidates}
-            observeHeading={observeHeading(teachingSlots.length)}
-            observeNote={observeNote(visitTpNumber, teachingSlots)}
-            footLine={wallFootLine(cards.length, selectedCount, wantsFullCohort)}
-            toggleLabel={
-              wantsFullCohort
-                ? "Back to the selection"
-                : cards.length > selectedCount
-                  ? `Show the ${cards.length - selectedCount} not put forward`
-                  : ""
-            }
-            toggleHref={wantsFullCohort ? "/trainer/assessor" : "/trainer/assessor?cohort=full"}
-          />
-        </section>
-      ) : null}
 
       <section className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
         <div className="flex flex-col gap-[3px]">
