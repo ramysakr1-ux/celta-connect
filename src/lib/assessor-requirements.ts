@@ -38,16 +38,10 @@ export interface AssessorRequirementInput {
   /** Candidates the centre has flagged for this visit. */
   selectedCount: number;
   withdrawnCount: number;
-  /**
-   * Candidates who have asked to speak with the assessor. A count only --
-   * the names are deliberately not carried anywhere near this file, and the
-   * meeting is private in both directions.
-   */
-  meetingRequestCount?: number;
 }
 
 export function buildAssessorRequirements(input: AssessorRequirementInput): AssessorRequirement[] {
-  const { assessmentKind, candidateCount, atRiskCount, selectedCount, withdrawnCount, meetingRequestCount = 0 } = input;
+  const { assessmentKind, candidateCount, atRiskCount, selectedCount, withdrawnCount } = input;
   const twoYearly = assessmentKind === "two_yearly";
 
   const requirements: AssessorRequirement[] = [
@@ -91,10 +85,6 @@ export function buildAssessorRequirements(input: AssessorRequirementInput): Asse
       label: "Meet the candidates without tutors present",
       detail: "The assessor is introduced to the candidates, and there is an opportunity for discussion with no tutors in the room.",
       cite: "14.2",
-      emphasis:
-        meetingRequestCount > 0
-          ? `${meetingRequestCount} candidate${meetingRequestCount === 1 ? " has" : "s have"} asked to speak with you. Names are not shown before the meeting.`
-          : undefined,
     },
   ];
 
