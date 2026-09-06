@@ -1258,21 +1258,12 @@ async function main() {
     { d: 20, b: 7, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
   ];
 
-  // Group B teaches the same slots on the same days, in its own room. Real
-  // centres run their groups in parallel like this, and the alternative --
-  // six candidates sharing three lessons -- is not a thing that happens.
-  // Generated from Group A's rows rather than hand-written: letters run A-F
-  // for Group A, so Group B continues G-L, and every TP number and day band
-  // stays in step by construction.
-  const LETTERS = "ABCDEFGHIJKL";
-  const groupBTp = designSessions
-    .filter((e) => e.type === "tp")
-    .map((e) => {
-      const letter = e.title.slice(-1);
-      const shifted = LETTERS[LETTERS.indexOf(letter) + 6];
-      return { ...e, title: `${e.title.slice(0, -1)}${shifted}`, detail: "Group B" };
-    });
-  designSessions.push(...groupBTp);
+  // NO group-B TP rows. Ramy, 6 Sep 2026: "we have two groups of six, A, B, C
+  // one day, D, E, F the other day. That's it." The letters are slots WITHIN a
+  // group, not across the course -- both groups teach the same three slots at
+  // the same times, in their own rooms, so the timetable is identical whether
+  // the course has one group or two. An earlier pass here generated a parallel
+  // G-L set and doubled the day; that was inventing a course shape nobody runs.
 
   // --- Timetable (capture ids: TP events feed the volunteer demo below) ---
   // Built from designSessions above: every card in Ramy's own timetable,

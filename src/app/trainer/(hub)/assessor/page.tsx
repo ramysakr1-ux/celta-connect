@@ -152,10 +152,19 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         .eq("type", "tp")
         .order("event_time")
     : { data: [] as { event_time: string | null }[] };
+  // Both TP groups teach the SAME three slots at the same times, in their own
+  // rooms -- the letters on the timetable are positions within a group, not
+  // across the course. So the time comes from a candidate's place in their own
+  // group's running order, not from a flat index across everyone teaching:
+  // group A's first lesson and group B's first lesson are both at 10:00.
+  const seenPerGroup = new Map<string, number>();
   const slotTimeById = new Map(
-    teachingSlots.map((s, i) => {
+    teachingSlots.map((slot) => {
+      const key = slot.groupName ?? "";
+      const i = seenPerGroup.get(key) ?? 0;
+      seenPerGroup.set(key, i + 1);
       const time = (visitDayTp ?? [])[i]?.event_time?.slice(0, 5) ?? null;
-      return [s.traineeId, time ? `teaches ${time}` : "teaches on the day"];
+      return [slot.traineeId, time ? `teaches ${time}` : "teaches on the day"];
     })
   );
 
@@ -257,17 +266,23 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-        <div className="flex flex-col gap-6">
-          <AssessorCard
-            initialName={course?.assessor_name ?? null}
-            initialEmail={course?.assessor_email ?? null}
-            initialVisitDate={visitDate}
-            initialAssessmentKind={assessmentKind}
-            initialAppianReference={course?.appian_notification_reference ?? null}
-          />
+      {/* Ramy, 6 Sep 2026, on the hole this page had in the middle of it: the
+          left column ended after "Hand over the pack" while the §14.1 list ran
+          on for another 700px beside it. Same call he made on the assessor's
+          own page in August -- "everything underneath is blank, and then it's
+          all on the right" -- and the same fix: the two short cards sit side
+          by side, and the long reference list becomes a full-width band at the
+          foot, where reference belongs. */}
+      <div className="grid items-start gap-6 lg:grid-cols-2">
+        <AssessorCard
+          initialName={course?.assessor_name ?? null}
+          initialEmail={course?.assessor_email ?? null}
+          initialVisitDate={visitDate}
+          initialAssessmentKind={assessmentKind}
+          initialAppianReference={course?.appian_notification_reference ?? null}
+        />
 
-          <section className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
+        <section className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
             <div className="flex flex-col gap-[3px]">
               <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Hand over the pack</p>
               <p className="text-sm text-muted">
@@ -318,33 +333,6 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
                 preview&rdquo; at the top brings you back here.
               </p>
             )}
-          </section>
-        </div>
-
-        <section className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
-          <div className="flex flex-col gap-[3px]">
-            <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">What the assessor needs from you</p>
-            <p className="text-sm text-muted">
-              Administration Handbook §14.1.{" "}
-              {preparationDeadline
-                ? `Available by ${fmtDate(preparationDeadline, { day: "numeric", month: "long" })} — two to three days before the visit, so the assessor can read it.`
-                : "Set a visit date and Connect will date this list for you."}
-            </p>
-          </div>
-          <ul className="flex flex-col gap-2.5">
-            {centrePreparation.map((item) => (
-              <li key={item.label} className="flex flex-col gap-[2px] border-t border-border-faint pt-2.5 first:border-t-0 first:pt-0">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-[13px] font-semibold text-ink">
-                    {item.label}
-                    {item.conditional ? <span className="ml-2 text-[10px] font-bold tracking-[0.08em] text-gold uppercase">This course</span> : null}
-                  </p>
-                  <span className="shrink-0 text-[10px] font-semibold text-muted tabular-nums">§{item.cite}</span>
-                </div>
-                <p className="text-xs text-muted">{item.detail}</p>
-              </li>
-            ))}
-          </ul>
         </section>
       </div>
 
@@ -381,6 +369,32 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           />
         </section>
       ) : null}
+
+      <section className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
+        <div className="flex flex-col gap-[3px]">
+          <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">What the assessor needs from you</p>
+          <p className="text-sm text-muted">
+            Administration Handbook §14.1.{" "}
+            {preparationDeadline
+              ? `Available by ${fmtDate(preparationDeadline, { day: "numeric", month: "long" })} — two to three days before the visit, so the assessor can read it.`
+              : "Set a visit date and Connect will date this list for you."}
+          </p>
+        </div>
+        <ul className="grid grid-cols-1 gap-x-8 gap-y-0 sm:grid-cols-2 xl:grid-cols-3">
+          {centrePreparation.map((item) => (
+            <li key={item.label} className="flex flex-col gap-[2px] border-t border-border-faint py-2.5">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="text-[13px] font-semibold text-ink">
+                  {item.label}
+                  {item.conditional ? <span className="ml-2 text-[10px] font-bold tracking-[0.08em] text-gold uppercase">This course</span> : null}
+                </p>
+                <span className="shrink-0 text-[10px] font-semibold text-muted tabular-nums">§{item.cite}</span>
+              </div>
+              <p className="text-xs text-muted">{item.detail}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <DesignerCredit />
     </div>
