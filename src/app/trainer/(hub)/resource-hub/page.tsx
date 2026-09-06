@@ -251,12 +251,11 @@ export default async function TrainerResourceHubPage() {
 
       <SectionsRail
         sections={[
-          { href: "/trainer/coursebooks", label: "TP points", count: sectionCounts.tpPoints },
+          // In-page only. The five that went to other pages are the five
+          // shortcut cards below -- having them here as well made identical
+          // chips do two unrelated jobs.
+          { href: "#tp-points", label: "TP points", count: sectionCounts.tpPoints },
           { href: "#coursebooks", label: "Coursebooks", count: sectionCounts.coursebooks },
-          { href: "/trainer/audio", label: "Multimedia", count: sectionCounts.multimedia },
-          { href: "/trainer/video", label: "Video Library", count: sectionCounts.videoLibrary },
-          { href: "/trainer/assignment-briefs", label: "Assignment briefs", count: sectionCounts.assignmentBriefs },
-          { href: "/trainer/marking-guidance", label: "Marking guidance", count: sectionCounts.markingGuidance },
           { href: "#input-sessions", label: "Input sessions", count: sectionCounts.inputSessions },
           { href: "#forms-and-documents", label: "Forms and documents", count: sectionCounts.forms },
           { href: "#centre-documents", label: "Centre documents", count: sectionCounts.centreDocuments },
@@ -264,7 +263,10 @@ export default async function TrainerResourceHubPage() {
         ]}
         search={<ResourceHubSearch items={searchItems} />}
       />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Five cards in a four-column grid left the fifth alone on its own
+          row, which is most of why this page looked unfinished next to the
+          other tabs. Five columns, one row, and they read as a set. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <Link href="/trainer/coursebooks" className="trainer-hover sheet flex flex-col gap-1 p-5">
           <p className="font-serif text-lg text-ink">TP points library</p>
           <p className="text-xs text-muted">The staged point-by-point content. Trainer-only -- never shown to trainees.</p>
