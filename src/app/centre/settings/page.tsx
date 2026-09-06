@@ -174,7 +174,6 @@ export default async function CentreSettingsPage({
                 currency={center.currency}
                 appianUrl={center.appian_url}
                 filmsTpSessions={center.films_tp_sessions}
-                tintScheme={(center as { tint_scheme?: "internal" | "external" | null }).tint_scheme ?? null}
                 driveConnection={driveConnection}
               />
               <ZoomConnectionForm connection={zoomConnection} connected={zoom_connected === "1"} error={zoom_error} />

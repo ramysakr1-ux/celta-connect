@@ -220,7 +220,6 @@ export async function updateCourseTutor(
   const isTraineeInTraining = formData.get("is_trainer_in_training") === "on";
   const verifiedAt = (formData.get("verified_at") as string | null) || null;
   const supervisorProfileId = (formData.get("supervisor_profile_id") as string | null) || null;
-  const tintNominatedBy = (formData.get("tint_nominated_by") as string | null)?.trim() || null;
   const onlineExperienceEvidenced = formData.get("online_experience_evidenced") === "on";
   const onlineExperienceNote = (formData.get("online_experience_note") as string | null)?.trim() || null;
 
@@ -248,7 +247,6 @@ export async function updateCourseTutor(
       is_trainer_in_training: isTraineeInTraining,
       verified_at: verifiedAt,
       supervisor_profile_id: supervisorProfileId,
-      tint_nominated_by: isTraineeInTraining ? tintNominatedBy : null,
       online_experience_evidenced: onlineExperienceEvidenced,
       online_experience_note: onlineExperienceNote,
     })

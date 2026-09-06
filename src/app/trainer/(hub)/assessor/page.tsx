@@ -191,14 +191,17 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
   // scheme, and who nominated the trainer (TinT Handbook 5.1, steps 6a/6b).
   const { data: tintRow } = await supabase
     .from("course_tutors")
-    .select("profile_id, supervisor_profile_id, tint_nominated_by")
+    .select("id, profile_id, supervisor_profile_id")
     .eq("course_id", courseId)
     .eq("is_trainer_in_training", true)
     .is("left_at", null)
     .limit(1)
     .maybeSingle();
-  const { data: centre } = tintRow
-    ? await supabase.from("centers").select("tint_scheme").eq("id", trainer.center_id ?? "").maybeSingle()
+  // The scheme and the nominating centre live on tit_records (migrations 0148
+  // and 0234), set on the Trainer-in-Training screen -- the same two fields
+  // workspace.tsx has used for requiresAssessorDay since 28 Aug 2026.
+  const { data: titRecord } = tintRow
+    ? await supabase.from("tit_records").select("scheme, trains_at_nominating_centre").eq("course_tutors_id", tintRow.id).maybeSingle()
     : { data: null };
   const { data: tintPeople } = tintRow
     ? await supabase
@@ -390,8 +393,8 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           name={tintNameById.get(tintRow.profile_id) ?? "Your trainer-in-training"}
           supervisorName={tintRow.supervisor_profile_id ? (tintNameById.get(tintRow.supervisor_profile_id) ?? null) : null}
           moderation={tintModeration({
-            scheme: (centre as { tint_scheme?: "internal" | "external" | null } | null)?.tint_scheme ?? null,
-            nominatedBy: tintRow.tint_nominated_by,
+            scheme: titRecord?.scheme ?? null,
+            trainsAtNominatingCentre: titRecord?.trains_at_nominating_centre ?? true,
           })}
         />
       ) : null}

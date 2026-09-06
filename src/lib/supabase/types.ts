@@ -266,11 +266,6 @@ export interface Database {
           // migration 0173 -- specs/admissions-and-close-out.md §10: filming
           // consent is "only used if a centre films" at all.
           films_tp_sessions: boolean;
-          // migration 0281 -- Cambridge's trainer-in-training approval for this
-          // centre: 'internal' (the centre assesses its own trainers),
-          // 'external' (the course assessor does), or null -- not approved to
-          // train trainers at all. TinT Handbook 4.1-4.3.
-          tint_scheme: "internal" | "external" | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["centers"]["Row"]> & {
@@ -2257,11 +2252,6 @@ export interface Database {
             | "external_assessor"
             | null;
           is_trainer_in_training: boolean;
-          // migration 0281 -- the centre that nominated this trainer-in-training,
-          // when it is not this one. Null = our own trainer. On the internal
-          // scheme this is what turns assessor moderation from optional into
-          // required (TinT Handbook 5.1 step 6b).
-          tint_nominated_by: string | null;
           verified_at: string | null;
           supervisor_profile_id: string | null;
           online_experience_evidenced: boolean;

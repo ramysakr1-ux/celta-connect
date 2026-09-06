@@ -12,11 +12,11 @@ import "server-only";
 //     supervisor assesses them, and may still ask the visiting assessor for a
 //     second opinion, in which case the same report is completed.
 //
-// Deliberately returns "unknown" rather than guessing when the centre has not
-// recorded its scheme. Both facts are read off a Cambridge approval letter and
-// neither is inferable from anything else in the database -- a page that
-// asserted "moderation applies" on a hunch would have a centre under-booking
-// or over-booking its assessor by a day.
+// Both facts already live on tit_records (migrations 0148 and 0234): `scheme`
+// and `trains_at_nominating_centre`, set on the Trainer-in-Training screen.
+// This is the same rule workspace.tsx has computed as `requiresAssessorDay`
+// since 28 Aug 2026 -- lifted into a lib so the Assessor tab and the TinT
+// screen cannot drift, not reinvented beside it.
 
 export type ModerationVerdict = "required" | "optional" | "not_applicable" | "unknown";
 
@@ -31,23 +31,25 @@ export interface TintModeration {
 }
 
 export interface TintModerationInput {
-  /** centers.tint_scheme -- null when the centre has not recorded it. */
+  /** tit_records.scheme */
   scheme: "internal" | "external" | null;
-  /** course_tutors.tint_nominated_by -- null when this centre nominated them. */
-  nominatedBy: string | null;
+  /** tit_records.trains_at_nominating_centre -- false = another centre nominated them. */
+  trainsAtNominatingCentre: boolean;
 }
 
-export function tintModeration({ scheme, nominatedBy }: TintModerationInput): TintModeration {
-  const reportTo = nominatedBy
-    ? `the JCA for ${nominatedBy}, the centre that nominated them`
-    : "the JCA for this centre";
+export function tintModeration({ scheme, trainsAtNominatingCentre }: TintModerationInput): TintModeration {
+  const reportTo = trainsAtNominatingCentre
+    ? "the JCA for this centre"
+    : "the JCA for the centre that nominated them";
 
+  // No tit_records row yet -- the course_tutors flag is set but the record has
+  // not been opened on the Trainer-in-Training screen.
   if (scheme === null) {
     return {
       verdict: "unknown",
       because:
-        "Connect does not know which trainer-in-training scheme Cambridge approved this centre for, so it cannot say whether your assessor has to moderate this training.",
-      action: "Set the scheme in Centre settings — it is on the approval letter. Until then, agree it with your assessor directly.",
+        "This course has a trainer-in-training, but their record has not been opened yet, so Connect cannot say whether your assessor has to moderate the training.",
+      action: "Open the Trainer-in-Training tab and set the scheme — it is on their Cambridge approval letter.",
       reportTo: null,
     };
   }
@@ -55,16 +57,17 @@ export function tintModeration({ scheme, nominatedBy }: TintModerationInput): Ti
   if (scheme === "external") {
     return {
       verdict: "required",
-      because: "This centre is on the external scheme, so the course assessor assesses the trainer-in-training alongside their supervisor.",
+      because: "This trainer-in-training is on the external scheme, so the course assessor assesses them alongside their supervisor.",
       action: "Tell your assessor there is a trainer-in-training to moderate, and agree a schedule that fits it alongside the course assessment.",
       reportTo,
     };
   }
 
-  if (nominatedBy) {
+  if (!trainsAtNominatingCentre) {
     return {
       verdict: "required",
-      because: `This centre is on the internal scheme, but ${nominatedBy} nominated this trainer-in-training — a trainer from another centre is moderated by the course assessor.`,
+      because:
+        "Internal scheme, but this trainer-in-training does not train at the centre that nominated them — a trainer from another centre is moderated by the course assessor.",
       action: "Tell your assessor there is a trainer-in-training to moderate, and agree a schedule that fits it alongside the course assessment.",
       reportTo,
     };
@@ -73,7 +76,7 @@ export function tintModeration({ scheme, nominatedBy }: TintModerationInput): Ti
   return {
     verdict: "optional",
     because:
-      "This centre is on the internal scheme and this is your own trainer, so the supervisor assesses them and no assessor moderation is required.",
+      "Internal scheme, training at the centre that nominated them, so the supervisor assesses them and no assessor moderation is required.",
     action:
       "Nothing, unless the supervisor wants a second opinion — they may ask the visiting assessor to observe the input and the TP feedback, and the same report is then completed.",
     reportTo,

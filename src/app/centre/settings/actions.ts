@@ -38,11 +38,6 @@ export async function updateCentreProfile(_prevState: FormState, formData: FormD
   const currency = (formData.get("currency") as string | null)?.trim() || null;
   const appianUrl = (formData.get("appian_url") as string | null)?.trim() || null;
   const filmsTpSessions = formData.get("films_tp_sessions") === "on";
-  // TinT Handbook 4.1: a Cambridge approval granted to the centre, read off
-  // the approval letter. Empty means "not approved to train trainers", which
-  // is the ordinary case and not a gap to nag about.
-  const tintSchemeRaw = (formData.get("tint_scheme") as string | null) || "";
-  const tintScheme = tintSchemeRaw === "internal" || tintSchemeRaw === "external" ? tintSchemeRaw : null;
   if (!name) return { error: "Enter the centre name." };
   if (!timeZone || !TIMEZONE_OPTIONS.some((tz) => tz.value === timeZone)) return { error: "Pick a valid time zone." };
 
@@ -57,7 +52,6 @@ export async function updateCentreProfile(_prevState: FormState, formData: FormD
       currency,
       appian_url: appianUrl,
       films_tp_sessions: filmsTpSessions,
-      tint_scheme: tintScheme,
     })
     .eq("id", centerId);
   if (error) {
