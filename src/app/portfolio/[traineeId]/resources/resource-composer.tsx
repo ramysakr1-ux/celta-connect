@@ -77,8 +77,25 @@ export function ResourceComposer({
     }
   }
 
+  // Ramy, 6 Sep 2026: "the background is kind of green... could it be that
+  // light red for the MCT and the other colour for the ACT, just to match
+  // what we have so far."
+  //
+  // Was bg-accent/30 -- --color-accent is a pale teal-green, and unlike
+  // --color-primary it is not redefined per room, so this wash stayed teal
+  // everywhere however the surrounding page was coloured. Now mixed from
+  // --hub-accent: pale garnet in an MCT's hub, pale gold in an ACT's. The
+  // fallback is --color-primary, so the trainee's own resources page --
+  // where there is no hub accent -- keeps exactly the teal it has today.
   return (
-    <form onSubmit={handleSubmit} className="sheet flex flex-col gap-3 border-primary/25 bg-accent/30">
+      <form
+        onSubmit={handleSubmit}
+        className="sheet flex flex-col gap-3"
+        style={{
+          background: "color-mix(in oklab, var(--hub-accent, var(--color-primary)) 9%, var(--color-card))",
+          borderColor: "color-mix(in oklab, var(--hub-accent, var(--color-primary)) 25%, transparent)",
+        }}
+      >
       <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Add a resource</p>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <input
