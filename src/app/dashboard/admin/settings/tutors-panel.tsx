@@ -19,6 +19,7 @@ export interface TutorRowData {
   isTrainerInTraining: boolean;
   verifiedAt: string | null;
   supervisorProfileId: string | null;
+  tintNominatedBy: string | null;
   onlineExperienceEvidenced: boolean;
   onlineExperienceNote: string | null;
 }
@@ -166,6 +167,23 @@ function TutorRow({
                         </option>
                       ))}
                     </select>
+                  </div>
+                  {/* TinT Handbook 5.1, step 6b: on the internal scheme, a
+                      trainer nominated by ANOTHER centre is moderated by the
+                      course assessor -- which adds a day to the visit. Blank
+                      means our own trainer, the ordinary case. */}
+                  <div className="flex flex-col gap-1 sm:col-span-2">
+                    <label className="text-xs text-muted">Nominated by another centre</label>
+                    <input
+                      name="tint_nominated_by"
+                      defaultValue={row.tintNominatedBy ?? ""}
+                      placeholder="Leave blank if we nominated them"
+                      className="rounded-[6px] border border-border bg-card-inset px-2 py-1.5 text-sm text-ink"
+                    />
+                    <span className="text-xs text-muted">
+                      The nominating centre&apos;s name. On the internal scheme this is what makes assessor moderation
+                      required, and it names the JCA the moderation report goes to.
+                    </span>
                   </div>
                 </div>
               </>

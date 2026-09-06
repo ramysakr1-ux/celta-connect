@@ -17,6 +17,7 @@ export function ProfileDriveForm({
   currency,
   appianUrl,
   filmsTpSessions,
+  tintScheme,
   driveConnection,
 }: {
   name: string;
@@ -27,6 +28,7 @@ export function ProfileDriveForm({
   currency: string | null;
   appianUrl: string | null;
   filmsTpSessions: boolean;
+  tintScheme: "internal" | "external" | null;
   driveConnection: { connected_at: string; template_doc_id: string | null; output_folder_id: string | null } | null;
 }) {
   const [state, action, pending] = useActionState(updateCentreProfile, initialState);
@@ -157,6 +159,26 @@ export function ProfileDriveForm({
               Turns on filming consent tracking on every course roster. Off by default -- most centres don&apos;t film.
             </span>
           </label>
+        </div>
+
+        <div className="sm:col-span-2">
+          <label htmlFor="cs_tint" className="text-sm text-ink">
+            Trainer-in-training scheme
+          </label>
+          <select
+            id="cs_tint"
+            name="tint_scheme"
+            defaultValue={tintScheme ?? ""}
+            className="mt-1 w-full rounded-[8px] border border-border bg-card px-3 py-2 text-sm text-ink"
+          >
+            <option value="">Not approved to train trainers</option>
+            <option value="internal">Internal — we assess our own trainers-in-training</option>
+            <option value="external">External — the course assessor assesses them</option>
+          </select>
+          <p className="mt-1 text-xs text-muted">
+            Cambridge approves this per centre and it is on the approval letter (Trainer-in-Training Handbook 4.1). It decides
+            whether your course assessor owes a trainer-in-training an extra day, so Connect will not guess it.
+          </p>
         </div>
 
         <div className="sm:col-span-2">

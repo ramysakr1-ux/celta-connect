@@ -125,6 +125,7 @@ export default async function AdminSettingsPage({
           isTrainerInTraining: t.is_trainer_in_training,
           verifiedAt: t.verified_at,
           supervisorProfileId: t.supervisor_profile_id,
+          tintNominatedBy: (t as { tint_nominated_by?: string | null }).tint_nominated_by ?? null,
           onlineExperienceEvidenced: t.online_experience_evidenced,
           onlineExperienceNote: t.online_experience_note,
         })),

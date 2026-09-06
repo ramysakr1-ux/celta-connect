@@ -18,6 +18,8 @@ import { buildAssessorRecommendation } from "@/lib/assessor-recommendation";
 import { CandidateWall } from "@/app/trainer/(hub)/assessor/candidate-wall";
 import { RecommendationPanel } from "@/app/trainer/(hub)/assessor/recommendation-panel";
 import { appianHref } from "@/lib/appian";
+import { tintModeration } from "@/lib/tint-moderation";
+import { TintBlock } from "@/app/trainer/(hub)/assessor/tint-block";
 import { DesignerCredit } from "@/components/designer-credit";
 
 // The assessor's room. MCT only.
@@ -184,6 +186,28 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+  // The course's trainer-in-training, if it has one. Two facts decide what the
+  // assessor owes them, and neither is inferable: the centre's Cambridge
+  // scheme, and who nominated the trainer (TinT Handbook 5.1, steps 6a/6b).
+  const { data: tintRow } = await supabase
+    .from("course_tutors")
+    .select("profile_id, supervisor_profile_id, tint_nominated_by")
+    .eq("course_id", courseId)
+    .eq("is_trainer_in_training", true)
+    .is("left_at", null)
+    .limit(1)
+    .maybeSingle();
+  const { data: centre } = tintRow
+    ? await supabase.from("centers").select("tint_scheme").eq("id", trainer.center_id ?? "").maybeSingle()
+    : { data: null };
+  const { data: tintPeople } = tintRow
+    ? await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", [tintRow.profile_id, tintRow.supervisor_profile_id].filter((x): x is string => Boolean(x)))
+    : { data: [] as { id: string; full_name: string }[] };
+  const tintNameById = new Map((tintPeople ?? []).map((p) => [p.id, p.full_name]));
+
   const nameById = new Map(cards.map((c) => [c.traineeId, c.name]));
   // The chooser is a tutor, not a candidate, so it is not in `rows`.
   const { data: chooser } = lastChoice
@@ -341,6 +365,17 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           rec={recommendation}
           visitDateLabel={visitDate ? fmtDate(visitDate, { weekday: "long", day: "numeric", month: "long" }) : null}
           existing={existingChoice}
+        />
+      ) : null}
+
+      {tintRow ? (
+        <TintBlock
+          name={tintNameById.get(tintRow.profile_id) ?? "Your trainer-in-training"}
+          supervisorName={tintRow.supervisor_profile_id ? (tintNameById.get(tintRow.supervisor_profile_id) ?? null) : null}
+          moderation={tintModeration({
+            scheme: (centre as { tint_scheme?: "internal" | "external" | null } | null)?.tint_scheme ?? null,
+            nominatedBy: tintRow.tint_nominated_by,
+          })}
         />
       ) : null}
 
