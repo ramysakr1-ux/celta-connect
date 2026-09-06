@@ -371,16 +371,18 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         />
       ) : null}
 
-      {tintRow ? (
+      {/* Always rendered: folded to a pill when the course has none, so the
+          capability is discoverable rather than invisible (Ramy, 6 Sep 2026). */}
+      {(
         <TintBlock
-          name={tintNameById.get(tintRow.profile_id) ?? "Your trainer-in-training"}
-          supervisorName={tintRow.supervisor_profile_id ? (tintNameById.get(tintRow.supervisor_profile_id) ?? null) : null}
+          name={tintRow ? (tintNameById.get(tintRow.profile_id) ?? "Your trainer-in-training") : null}
+          supervisorName={tintRow?.supervisor_profile_id ? (tintNameById.get(tintRow.supervisor_profile_id) ?? null) : null}
           moderation={tintModeration({
             scheme: titRecord?.scheme ?? null,
             trainsAtNominatingCentre: titRecord?.trains_at_nominating_centre ?? true,
           })}
         />
-      ) : null}
+      )}
 
       {/* The candidate wall used to sit here, and Ramy cut it on 6 Sep 2026:
           "starting from which candidates the assessor sees, it just feels

@@ -13,7 +13,118 @@ import { TINT_ASSESSOR_DUTIES } from "@/lib/tint-moderation";
 
 const AMBER = "oklch(44% 0.1 68)";
 
+/**
+ * The block, always present, folded away when the course has no
+ * trainer-in-training.
+ *
+ * Ramy, 6 Sep 2026: "when I'm showing this to people, they can see what the
+ * page [does]... could we have a pill, strategically positioned, and if you
+ * click on it, it drops down and opens the whole card."
+ *
+ * Worth more than a demo aid. The block is conditional by design -- most
+ * courses never have a trainer-in-training -- but that means an MCT who has
+ * never had one has no way to discover that having one adds a day to their
+ * assessor's visit and five duties to their list. Folded, it says the feature
+ * exists; opened, it says what it would cost. It never implies the course has
+ * one when it does not.
+ *
+ * <details> rather than client state: this is a disclosure, and it should work
+ * before any JavaScript arrives.
+ */
 export function TintBlock({
+  name,
+  supervisorName,
+  moderation,
+}: {
+  /** null when the course has no trainer-in-training. */
+  name: string | null;
+  supervisorName: string | null;
+  moderation: TintModeration;
+}) {
+  if (!name) return <TintEmpty />;
+  return <TintPresent name={name} supervisorName={supervisorName} moderation={moderation} />;
+}
+
+function Pill({ label, tone }: { label: string; tone: "accent" | "muted" }) {
+  return (
+    <span
+      className="rounded-full px-2.5 py-[3px] text-[10px] font-bold tracking-[0.07em] uppercase"
+      style={
+        tone === "accent"
+          ? { background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }
+          : { border: "1px solid var(--color-border)", color: "var(--color-muted)" }
+      }
+    >
+      {label}
+    </span>
+  );
+}
+
+function TintEmpty() {
+  return (
+    <details className="trainer-hover group rounded-[14px] border border-border bg-card px-[22px] py-4" style={{ borderTop: "3px solid var(--hub-accent)" }}>
+      <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3">
+        <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
+          Also on this visit &middot; trainer-in-training
+        </span>
+        <Pill label="None on this course" tone="muted" />
+        <span className="ml-auto text-[12px] font-semibold text-primary">What it would mean</span>
+      </summary>
+      <div className="mt-4 flex flex-col gap-4">
+        <p className="max-w-[76ch] text-sm text-pretty text-muted">
+          Nobody on this course is a trainer-in-training, so none of this applies today. It is here so you know what
+          changes when one is added &mdash; on the Tutors panel in Centre settings &mdash; because the answer is more than
+          a line on a form.
+        </p>
+        <div
+          className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[10px] border px-4 py-3"
+          style={{ borderColor: `color-mix(in oklab, ${AMBER} 34%, transparent)`, background: `color-mix(in oklab, ${AMBER} 8%, var(--color-card))` }}
+        >
+          <span className="rounded-full px-2.5 py-[3px] text-[10px] font-bold tracking-[0.07em] uppercase" style={{ background: AMBER, color: "var(--color-primary-foreground)" }}>
+            Usually an extra day
+          </span>
+          <span className="min-w-[280px] flex-1 text-[12.5px] leading-[1.55] text-ink">
+            Where moderation applies, your assessor spends longer on the course &mdash; and a visit timetabled from the
+            candidate side alone will not have booked it.
+          </span>
+        </div>
+        <div className="hub-hairline flex flex-wrap items-baseline gap-x-3 border-b pb-1.5">
+          <h3 className="font-serif text-[16px] font-semibold text-ink">Whether it applies at all depends on the scheme</h3>
+          <span className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
+            TinT Handbook &sect;5.1
+          </span>
+        </div>
+        <ul className="flex flex-col">
+          {[
+            ["External scheme", "assessor moderation required"],
+            ["Internal scheme, trainer from another centre", "required"],
+            ["Internal scheme, your own trainer", "not required — the supervisor assesses them"],
+          ].map(([a, b]) => (
+            <li key={a} className="hub-hairline border-t py-2.5 text-[12.5px] text-muted first:border-t-0 first:pt-0">
+              <b className="text-ink">{a}</b> &mdash; {b}
+            </li>
+          ))}
+        </ul>
+        <div className="hub-hairline flex flex-wrap items-baseline gap-x-3 border-b pb-1.5">
+          <h3 className="font-serif text-[16px] font-semibold text-ink">And what the assessor would do with them</h3>
+          <span className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
+            TinT Handbook &sect;5.2.2
+          </span>
+        </div>
+        <ul className="flex flex-col">
+          {TINT_ASSESSOR_DUTIES.map((d) => (
+            <li key={d.label} className="hub-hairline flex flex-col gap-[2px] border-t py-2.5 first:border-t-0 first:pt-0">
+              <p className="text-[13px] font-semibold text-ink">{d.label}</p>
+              {d.detail ? <p className="text-xs leading-[1.5] text-muted">{d.detail}</p> : null}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </details>
+  );
+}
+
+function TintPresent({
   name,
   supervisorName,
   moderation,
@@ -27,17 +138,22 @@ export function TintBlock({
   const tone = heavy || unknown ? AMBER : "var(--color-muted)";
 
   return (
-    <section
-      className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5"
+    <details
+      open
+      className="trainer-hover flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5"
       style={{ borderTop: "3px solid var(--hub-accent)" }}
     >
-      <div className="flex flex-col gap-[3px]">
-        <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
+      <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3">
+        <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
           Also on this visit · trainer-in-training
-        </p>
+        </span>
+        <Pill label={name} tone="accent" />
+      </summary>
+      <div className="mt-4 flex flex-col gap-4">
+      <div className="flex flex-col gap-[3px]">
         <p className="max-w-[76ch] text-sm text-pretty text-muted">
           <b className="text-ink">{name}</b>
-          {supervisorName ? <> , supervised by <b className="text-ink">{supervisorName}</b></> : null}. This is not a candidate
+          {supervisorName ? <>, supervised by <b className="text-ink">{supervisorName}</b></> : null}. This is not a candidate
           matter, so it sits apart from the reading and the observation above.
         </p>
       </div>
@@ -110,6 +226,7 @@ export function TintBlock({
           pack.
         </span>
       </div>
-    </section>
+      </div>
+    </details>
   );
 }
