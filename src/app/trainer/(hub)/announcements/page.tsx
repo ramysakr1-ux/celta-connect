@@ -226,7 +226,10 @@ export default async function AnnouncementsPage() {
             </div>
             <div className="flex flex-col px-2.5 pt-2 pb-2.5">
               {posted.map((b) => {
-                const when = new Date(`${(b.sent_at ?? b.created_at).slice(0, 10)}T00:00:00`);
+                // Slicing a timestamptz to its first ten characters takes the UTC date,
+                // so a notice posted at 20:00 in New York was badged tomorrow. Ask
+                // for the centre's own day instead (en-CA is ISO order).
+                const when = new Date(`${new Date(b.sent_at ?? b.created_at).toLocaleDateString("en-CA", { timeZone })}T00:00:00`);
                 return (
                   <div key={b.id} className="trainer-hover grid grid-cols-[40px_1fr] items-center gap-3.5 rounded-[10px] px-3 py-[10px]">
                     <span className="flex size-10 flex-col items-center justify-center rounded-[10px] bg-ink-warm text-primary-foreground">

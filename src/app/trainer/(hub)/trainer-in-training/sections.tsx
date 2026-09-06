@@ -32,6 +32,8 @@ import {
   type FormState,
 } from "@/app/trainer/(hub)/trainer-in-training/actions";
 import { SHADOW_DAYS_REQUIRED, TIT_MODE_LABEL } from "@/lib/trainer-in-training-constants";
+import { useHubTimeZone } from "@/components/hub-time-zone";
+import { formatDate } from "@/lib/format-date";
 
 const initial: FormState = { error: null };
 const inputClass = "rounded-[6px] border border-input bg-card px-2.5 py-1.5 text-sm text-ink outline-none focus:border-primary";
@@ -189,6 +191,7 @@ export function Task12Stage1Form({ titRecordId, events }: { titRecordId: string;
 }
 
 export function Task12Stage1List({ rows }: { rows: { id: string; eventTitle: string | null; handoutDescription: string; filedAt: string }[] }) {
+  const timeZone = useHubTimeZone();
   if (rows.length === 0) return <p className="text-sm text-muted">Nothing filed yet.</p>;
   return (
     <ul className="flex flex-col gap-1.5">
@@ -196,7 +199,7 @@ export function Task12Stage1List({ rows }: { rows: { id: string; eventTitle: str
         <li key={r.id} className="flex items-start justify-between gap-3 rounded-[6px] bg-surface-muted/50 px-3 py-2">
           <div>
             <p className="text-sm text-ink">{r.handoutDescription}</p>
-            <p className="text-xs text-muted">{r.eventTitle ? `${r.eventTitle} · ` : ""}{new Date(r.filedAt).toLocaleDateString("en-GB")}</p>
+            <p className="text-xs text-muted">{r.eventTitle ? `${r.eventTitle} · ` : ""}{formatDate(r.filedAt, timeZone)}</p>
           </div>
           <form action={removeTask12Stage1}>
             <input type="hidden" name="id" value={r.id} />
@@ -606,6 +609,7 @@ export function TaskRecordItemRow({
 }
 
 export function ReflectiveEssayForm({ titRecordId, essay, submittedAt }: { titRecordId: string; essay: string | null; submittedAt: string | null }) {
+  const timeZone = useHubTimeZone();
   const [saveState, saveAction, savePending] = useActionState(updateReflectiveEssay, initial);
   const [submitState, submitAction, submitPending] = useActionState(submitReflectiveEssay, initial);
   const wordCount = (essay ?? "").trim().split(/\s+/).filter(Boolean).length;
@@ -613,7 +617,7 @@ export function ReflectiveEssayForm({ titRecordId, essay, submittedAt }: { titRe
   if (submittedAt) {
     return (
       <div>
-        <p className="text-sm text-ink">Submitted {new Date(submittedAt).toLocaleDateString("en-GB")}.</p>
+        <p className="text-sm text-ink">Submitted {formatDate(submittedAt, timeZone)}.</p>
         <p className="mt-2 text-sm whitespace-pre-wrap text-ink">{essay}</p>
       </div>
     );
@@ -656,6 +660,7 @@ export function ReflectiveEssayForm({ titRecordId, essay, submittedAt }: { titRe
 }
 
 export function AssessorDayCard({ titRecordId, bookedAt, completedAt }: { titRecordId: string; bookedAt: string | null; completedAt: string | null }) {
+  const timeZone = useHubTimeZone();
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs text-muted">
@@ -664,7 +669,7 @@ export function AssessorDayCard({ titRecordId, bookedAt, completedAt }: { titRec
       </p>
       <div className="flex items-center gap-3">
         {bookedAt ? (
-          <span className="pill pill-success">Booked {new Date(bookedAt).toLocaleDateString("en-GB")}</span>
+          <span className="pill pill-success">Booked {formatDate(bookedAt, timeZone)}</span>
         ) : (
           <form action={bookAssessorDay}>
             <input type="hidden" name="tit_record_id" value={titRecordId} />
@@ -681,7 +686,7 @@ export function AssessorDayCard({ titRecordId, bookedAt, completedAt }: { titRec
             </button>
           </form>
         ) : completedAt ? (
-          <span className="pill pill-success">Completed {new Date(completedAt).toLocaleDateString("en-GB")}</span>
+          <span className="pill pill-success">Completed {formatDate(completedAt, timeZone)}</span>
         ) : null}
       </div>
     </div>
@@ -724,8 +729,9 @@ export function OutcomeForm({ titRecordId, outcome, note }: { titRecordId: strin
 }
 
 export function SubmitPortfolioButton({ titRecordId, submittedAt }: { titRecordId: string; submittedAt: string | null }) {
+  const timeZone = useHubTimeZone();
   if (submittedAt) {
-    return <span className="pill pill-success">Submitted {new Date(submittedAt).toLocaleDateString("en-GB")}</span>;
+    return <span className="pill pill-success">Submitted {formatDate(submittedAt, timeZone)}</span>;
   }
   return (
     <form action={submitPortfolio}>

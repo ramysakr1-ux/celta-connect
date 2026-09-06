@@ -2,6 +2,9 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { CreateTaskForm } from "@/app/trainer/(hub)/observation-tasks/create-task-form";
 import { deleteObservationTask } from "@/app/trainer/(hub)/observation-tasks/actions";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDateTime } from "@/lib/format-date";
 
 // Observation Tasks -- "directed, assignable, submittable" observation
 // activities, replacing the bare self-reported log as the trainer-facing
@@ -12,6 +15,7 @@ import { deleteObservationTask } from "@/app/trainer/(hub)/observation-tasks/act
 // where a trainer creates tasks and reads real submission text.
 export default async function ObservationTasksPage() {
   const trainer = await requireRole(["trainer", "admin"]);
+  const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   if (!trainer.course_id) {
     return <div className="sheet text-sm text-muted">No course assigned.</div>;
   }
@@ -87,7 +91,7 @@ export default async function ObservationTasksPage() {
                         </summary>
                         {submission ? (
                           <div className="mt-2 pl-1">
-                            <p className="text-xs text-muted">{new Date(submission.submitted_at).toLocaleString()}</p>
+                            <p className="text-xs text-muted">{formatDateTime(submission.submitted_at, timeZone)}</p>
                             <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{submission.response}</p>
                           </div>
                         ) : null}

@@ -3,6 +3,8 @@
 import { useActionState } from "react";
 import { grantCourseSupportAccess, revokeSupportGrant, type SupportGrantFormState } from "@/app/centre/settings/support-access-actions";
 import type { SupportGrantRow } from "@/app/centre/settings/support-access-tab";
+import { useHubTimeZone } from "@/components/hub-time-zone";
+import { formatDateTime } from "@/lib/format-date";
 
 const initial: SupportGrantFormState = { error: null };
 
@@ -18,6 +20,7 @@ const STATUS_LABEL: Record<SupportGrantRow["status"], string> = {
 };
 
 export function CourseSupportAccessForm({ courseName, grants }: { courseName: string; grants: SupportGrantRow[] }) {
+  const timeZone = useHubTimeZone();
   const [state, action, pending] = useActionState(grantCourseSupportAccess, initial);
 
   return (
@@ -84,7 +87,7 @@ export function CourseSupportAccessForm({ courseName, grants }: { courseName: st
                     </p>
                     <p className="mt-0.5 text-xs text-muted">{g.reason}</p>
                     <p className="mt-1 text-[11px] text-muted">
-                      Granted by {g.grantedByName} · {new Date(g.grantedAt).toLocaleString()} · {g.durationHours}h window
+                      Granted by {g.grantedByName} · {formatDateTime(g.grantedAt, timeZone)} · {g.durationHours}h window
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">

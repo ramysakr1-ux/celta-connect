@@ -2,13 +2,10 @@
 
 import { useActionState, useState } from "react";
 import { setProvisionalGradesDueDate, type FormState } from "@/app/dashboard/trainer/celta5-actions";
+import { useHubTimeZone } from "@/components/hub-time-zone";
+import { formatDate } from "@/lib/format-date";
 
 const initialState: FormState = { error: null };
-
-function formatDue(dueAt: string | null): string {
-  if (!dueAt) return "";
-  return new Date(dueAt).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
-}
 
 // The MCT still sets this. Ramy, 2026-08-17: "the assessor visit falls on a
 // bank holiday... maybe Friday will be appropriate, but maybe it doesn't" --
@@ -34,6 +31,7 @@ export function ProvisionalDeadlineBanner({
   approvedCount: number;
   totalCount: number;
 }) {
+  const timeZone = useHubTimeZone();
   const [state, action, pending] = useActionState(setProvisionalGradesDueDate, initialState);
   const [editing, setEditing] = useState(false);
 
@@ -41,7 +39,7 @@ export function ProvisionalDeadlineBanner({
     <div className="flex flex-col gap-1.5 rounded-[6px] border border-status-warning-text/30 bg-status-warning-bg px-4 py-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-[13px] font-semibold text-ink">
-          {dueAt ? `Provisional grades due to the assessor — ${formatDue(dueAt)}` : "Provisional grades due date not set yet"}
+          {dueAt ? `Provisional grades due to the assessor — ${formatDate(dueAt, timeZone, { weekday: "long", month: "long" })}` : "Provisional grades due date not set yet"}
         </p>
         {dueAt && derived ? (
           <span className="rounded-full bg-card px-2 py-0.5 text-[10px] font-semibold tracking-[0.06em] text-muted uppercase">

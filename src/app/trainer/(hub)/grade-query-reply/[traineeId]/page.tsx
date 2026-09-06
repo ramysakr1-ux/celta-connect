@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { GenerateReplyButton } from "@/app/trainer/(hub)/grade-query-reply/[traineeId]/generate-reply-button";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDate, formatDateTime } from "@/lib/format-date";
 
 // build-spec.md "Grade query -- the reply before an appeal". Entry point:
 // one candidate's history of generated/filed grade-query replies, plus the
@@ -16,6 +19,7 @@ export default async function GradeQueryReplyListPage({
 }) {
   const { traineeId } = await params;
   const trainer = await requireRole(["trainer", "admin"]);
+  const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const supabase = await createClient();
 
   const { data: trainee } = await supabase
@@ -62,10 +66,10 @@ export default async function GradeQueryReplyListPage({
                 className="flex items-center justify-between gap-3 px-6 py-3 hover:bg-accent/40"
               >
                 <span className="text-sm text-ink">
-                  Generated {new Date(r.generated_at).toLocaleString()}
+                  Generated {formatDateTime(r.generated_at, timeZone)}
                 </span>
                 <span className={`pill ${r.filed_at ? "pill-success" : "pill-neutral"}`}>
-                  {r.filed_at ? `Filed ${new Date(r.filed_at).toLocaleDateString()}` : "Draft -- not filed"}
+                  {r.filed_at ? `Filed ${formatDate(r.filed_at, timeZone)}` : "Draft -- not filed"}
                 </span>
               </Link>
             ))}

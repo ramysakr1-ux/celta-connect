@@ -17,6 +17,8 @@ import {
 } from "@/app/trainer/(hub)/volunteers/actions";
 import { LEVEL_OPTIONS } from "@/lib/levels";
 import { Avatar } from "@/components/avatar";
+import { useHubTimeZone } from "@/components/hub-time-zone";
+import { formatDate, formatTime } from "@/lib/format-date";
 
 // design_handoff_volunteer_students_v2: the Today strip (RSVP replies +
 // Zoom presence, nothing to enter), the register grouped by class, and the
@@ -108,13 +110,16 @@ function shortDay(iso: string): string {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" });
 }
 
-function stampLabel(iso: string | null): string {
+// "Today" and the clock both have to be the CENTRE's, not the runtime's --
+// toDateString() and a bare toLocaleTimeString() both read the server's zone
+// (UTC on Vercel), so a link opened at 09:00 in New York was reported as
+// 14:00, and one opened after 19:00 there was reported as tomorrow.
+function stampLabel(iso: string | null, timeZone: string): string {
   if (!iso) return "Never";
+  const dayOf = (d: Date) => d.toLocaleDateString("en-CA", { timeZone });
   const d = new Date(iso);
-  const today = new Date();
-  const sameDay = d.toDateString() === today.toDateString();
-  if (sameDay) return `Today, ${d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`;
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).replace("Sept", "Sep");
+  if (dayOf(d) === dayOf(new Date())) return `Today, ${formatTime(iso, timeZone)}`;
+  return formatDate(iso, timeZone).replace("Sept", "Sep");
 }
 
 // ---------- segments ----------
@@ -285,6 +290,7 @@ export function VolunteersV2({
   courseEndDate: string | null;
   siteOrigin: string;
 }) {
+  const timeZone = useHubTimeZone();
   const [selectedId, setSelectedId] = useState<string | null>(rows[0]?.id ?? null);
   const [addOpen, setAddOpen] = useState(false);
   const selected = rows.find((r) => r.id === selectedId) ?? null;
@@ -464,7 +470,7 @@ export function VolunteersV2({
                       </span>
                       <span className="flex items-center gap-1.5 text-[12px]" style={{ color: r.lastOpenedAt ? TEAL : AMBER }}>
                         <span className="block size-1.5 rounded-full bg-current" />
-                        {r.lastOpenedAt ? `Opened ${stampLabel(r.lastOpenedAt).toLowerCase()}` : "Never opened"}
+                        {r.lastOpenedAt ? `Opened ${stampLabel(r.lastOpenedAt, timeZone).toLowerCase()}` : "Never opened"}
                       </span>
                       <span onClick={(e) => e.stopPropagation()}>{r.token ? <CopyButton small url={`${siteOrigin}/student/${r.token}`} /> : null}</span>
                     </button>
@@ -496,6 +502,7 @@ export function VolunteersV2({
 // ---------- the student card ----------
 
 function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerRowData; rule: RuleInfo; courseEndDate: string | null; siteOrigin: string }) {
+  const timeZone = useHubTimeZone();
   const [reissueState, reissueAction, reissuing] = useActionState(reissueVolunteerLink, { error: null, done: false } as ReissueState);
   const [emailState, emailAction, emailing] = useActionState(sendVolunteerStartingEmailNow, { error: null, sent: false } as SendStartingEmailState);
   const total = row.hoursPrior + row.hoursHere;
@@ -654,10 +661,10 @@ function StudentCard({ row, rule, courseEndDate, siteOrigin }: { row: VolunteerR
             </>
           ) : null}
           <span className="text-muted">Last opened</span>
-          <span className="text-right font-semibold text-ink">{stampLabel(row.lastOpenedAt)}</span>
+          <span className="text-right font-semibold text-ink">{stampLabel(row.lastOpenedAt, timeZone)}</span>
           <span className="text-muted">Recording consent</span>
           <span className="text-right font-semibold" style={{ color: row.consentAt ? "var(--color-ink)" : AMBER }}>
-            {row.consentAt ? stampLabel(row.consentAt) : "Not yet"}
+            {row.consentAt ? stampLabel(row.consentAt, timeZone) : "Not yet"}
           </span>
           <span className="text-muted">Expires</span>
           <span className="text-right font-semibold text-ink">{courseEndDate ? `${shortDay(courseEndDate)} (course end)` : "Course end"}</span>

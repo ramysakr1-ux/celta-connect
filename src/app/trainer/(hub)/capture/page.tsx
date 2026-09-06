@@ -1,6 +1,9 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { CaptureForm } from "@/app/trainer/(hub)/capture/capture-form";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatTime } from "@/lib/format-date";
 
 const TP_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8];
 
@@ -14,6 +17,7 @@ const TP_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8];
 // wants usable on a phone, mid-lesson.
 export default async function CapturePage() {
   const trainer = await requireRole(["trainer", "admin"]);
+  const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const supabase = await createClient();
 
   const { data: roster } = trainer.course_id
@@ -57,7 +61,7 @@ export default async function CapturePage() {
               <li key={note.id} className="border-b border-border-faint pb-3 text-sm last:border-none">
                 <p className="text-xs font-medium text-muted">
                   {nameByTraineeId.get(note.trainee_id) ?? "Unknown"} -- TP{note.tp_number} ·{" "}
-                  {new Date(note.captured_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                  {formatTime(note.captured_at, timeZone)}
                 </p>
                 <p className="mt-1 text-ink">{note.text}</p>
               </li>

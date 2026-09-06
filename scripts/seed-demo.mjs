@@ -1318,20 +1318,25 @@ async function main() {
         tag: e.tagOverride ?? e.tag ?? null,
         detail: e.detail ?? null,
         linked_assignment_type: e.linked ?? null,
+        // Real trainer-facing timetable events link a TP calendar day to its
+        // rotation number so the volunteer view, the portfolio pages and the
+        // §9.1.1 six-hours check can resolve a topic, materials and the TP
+        // slots still ahead. The app's own skeleton generator sets it
+        // (timetable-skeleton.ts); the demo has to set it by hand.
+        //
+        // This line is the fix made on 25 Aug 2026. A SECOND
+        // linked_tp_number followed it in the same object literal --
+        // Number(e.title.replace("TP", "")) -- which silently won, and on a
+        // title like "TP1 · A" produced Number("1 · A") = NaN, stored as
+        // null. So every TP event in the demo carried no TP number for
+        // twelve days while the code read as though it did. Removed 6 Sep
+        // 2026. Number() returning NaN instead of throwing is what hid it.
         linked_tp_number: e.tpNumber ?? null,
         zoom_url: e.zoomUrl ?? null,
         // Which non-TP sessions volunteer students may see materials for --
         // the demo lesson, the unassessed teach and the introduction, so the
         // Share materials page has something to show (5 Sep 2026).
         shares_materials: e.type !== "tp" && Boolean(e.shares),
-        // Real trainer-facing timetable events link a TP calendar day to its
-        // rotation number (course_timetable_events.linked_tp_number) so the
-        // volunteer view and portfolio pages can resolve a topic/materials
-        // for that day via plan_assignments/tp_plans.tp_number -- these demo
-        // "TPn"-titled events never carried that link, so every downstream
-        // lookup silently found nothing (caught 25 Aug 2026 comparing the
-        // volunteer view demo against its own design mockup).
-        linked_tp_number: e.type === "tp" ? Number(e.title.replace("TP", "")) : null,
         created_by: trainerId,
       }))
     )

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { OwedLesson, TodaySession, TomorrowLine } from "@/lib/tp-queue";
 import { AIM_TYPE_LABELS, AIM_TYPE_STYLE, type AimType } from "@/lib/aim-type";
+import { formatDate, formatTime } from "@/lib/format-date";
 
 // design_handoff_teaching_practice_v2: the owed lessons as cards, each
 // showing what is already on the tutor's desk to write from; today's
@@ -76,7 +77,7 @@ function DeskRow({
   );
 }
 
-export function OwedCard({ lesson }: { lesson: OwedLesson }) {
+export function OwedCard({ lesson, timeZone }: { lesson: OwedLesson; timeZone: string }) {
   const edge = lesson.isLate ? RED : "var(--hub-accent)";
   const dateLabel = new Date(`${lesson.taughtDate}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" }).toUpperCase();
   const meta = [lesson.point.level, lesson.slotIndex ? `slot ${lesson.slotIndex}` : null, lesson.slotTime].filter(Boolean).join(" · ");
@@ -137,7 +138,7 @@ export function OwedCard({ lesson }: { lesson: OwedLesson }) {
           label="Self-evaluation"
           value={
             lesson.selfEval.receivedAt
-              ? `In · ${new Date(lesson.selfEval.receivedAt).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" })} ${new Date(lesson.selfEval.receivedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`
+              ? `In · ${formatDate(lesson.selfEval.receivedAt, timeZone, { weekday: "short", month: undefined })} ${formatTime(lesson.selfEval.receivedAt, timeZone)}`
               : "Not yet · due 22:00 tonight"
           }
           tone={lesson.selfEval.receivedAt ? undefined : "amber"}

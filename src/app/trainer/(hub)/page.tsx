@@ -41,6 +41,15 @@ import { sixHoursProblems, doubleMarkingProblems, entryFormProblems, tpGroupSize
 //
 // So: treat these as provenance for WHY the screens changed, never as a
 // specification to check the code against. There is nothing to check against.
+
+// Two alerts in Needs you printed their date raw -- "taught 2026-09-05",
+// "2026-09-03" -- on the one page every tutor opens first, while everything
+// around them read "Sat 5 Sep" (audit, 6 Sep 2026). Date-only strings, so
+// T00:00:00 parses and formats in the same zone and the day is preserved.
+function shortDate(iso: string): string {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+}
+
 export default async function TodayPage() {
   const session = await getCurrentProfile();
   const trainer =
@@ -338,7 +347,7 @@ export default async function TodayPage() {
       badge: "TP",
       due: "Today",
       title: `TP feedback unsent — ${unsentByTrainee.size} candidate${unsentByTrainee.size === 1 ? "" : "s"}`,
-      meta: `${names.join(", ")} · taught ${latestDate}`,
+      meta: `${names.join(", ")} · taught ${latestDate ? shortDate(latestDate) : "--"}`,
       // This alert has just worked out exactly who is outstanding, and used
       // to discard that and drop you on the roster. The TP queue is the page
       // that lists them with a "Feedback due" pill and clicks straight into
@@ -371,7 +380,7 @@ export default async function TodayPage() {
       badge: "RG",
       due: "Today",
       title: `Register not logged — ${session.title}`,
-      meta: session.event_date,
+      meta: shortDate(session.event_date),
       href: "/trainer/volunteers",
     });
   }

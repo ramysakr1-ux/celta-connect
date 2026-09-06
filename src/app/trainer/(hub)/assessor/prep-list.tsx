@@ -3,6 +3,8 @@
 import { useTransition } from "react";
 import type { PrepItemState, PrepSummary } from "@/lib/assessor-prep-state";
 import { markPrepItem } from "@/app/trainer/(hub)/assessor/prep-actions";
+import { useHubTimeZone } from "@/components/hub-time-zone";
+import { formatDate } from "@/lib/format-date";
 
 // Handbook 14.1's list, with state.
 //
@@ -14,11 +16,10 @@ import { markPrepItem } from "@/app/trainer/(hub)/assessor/prep-actions";
 const AMBER = "oklch(44% 0.1 68)";
 const TEAL = "oklch(37.5% 0.058 195)";
 
-function fmt(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-}
+
 
 function Row({ item, pending, onToggle }: { item: PrepItemState; pending: boolean; onToggle: (key: string, done: boolean) => void }) {
+  const timeZone = useHubTimeZone();
   const ready = item.status === "ready";
   const na = item.status === "not_applicable";
   const tone = ready ? TEAL : na ? "var(--color-muted)" : AMBER;
@@ -67,7 +68,7 @@ function Row({ item, pending, onToggle }: { item: PrepItemState; pending: boolea
       {item.markedByName && ready ? (
         <p className="pl-[21px] text-[11px] text-muted">
           Confirmed by {item.markedByName}
-          {item.markedAt ? ` · ${fmt(item.markedAt)}` : ""}
+          {item.markedAt ? ` · ${formatDate(item.markedAt, timeZone)}` : ""}
         </p>
       ) : null}
     </li>

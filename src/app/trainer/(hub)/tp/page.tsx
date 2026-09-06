@@ -202,7 +202,7 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
       {shown.length > 0 ? (
         <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-3">
           {shown.map((lesson) => (
-            <OwedCard key={`${lesson.traineeId}-${lesson.tpNumber}`} lesson={lesson} />
+            <OwedCard key={`${lesson.traineeId}-${lesson.tpNumber}`} lesson={lesson} timeZone={timeZone} />
           ))}
         </div>
       ) : (

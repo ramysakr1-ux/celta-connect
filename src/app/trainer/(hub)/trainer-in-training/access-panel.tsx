@@ -1,4 +1,5 @@
 import { grantTitAccess, revokeTitAccess } from "@/app/trainer/(hub)/trainer-in-training/actions";
+import { formatDate } from "@/lib/format-date";
 
 // "Who can see this" -- the grant list every person on the record can
 // read, and the grant/revoke controls only the MCT gets.
@@ -18,10 +19,6 @@ export interface AccessGrantView {
   revokedByName: string | null;
 }
 
-function when(iso: string) {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-}
-
 export function AccessPanel({
   courseTutorsId,
   tintName,
@@ -30,7 +27,9 @@ export function AccessPanel({
   grants,
   canManage,
   grantable,
+  timeZone,
 }: {
+  timeZone: string;
   courseTutorsId: string;
   tintName: string;
   supervisorName: string | null;
@@ -71,7 +70,7 @@ export function AccessPanel({
             <div className="flex items-baseline justify-between gap-3">
               <span className="font-semibold text-ink">{g.granteeName}</span>
               <span className="flex items-center gap-3">
-                <span className="text-xs text-muted">Granted by {g.grantedByName} · {when(g.grantedAt)}</span>
+                <span className="text-xs text-muted">Granted by {g.grantedByName} · {formatDate(g.grantedAt, timeZone, { year: "numeric" })}</span>
                 {canManage ? (
                   <form action={revokeTitAccess}>
                     <input type="hidden" name="id" value={g.id} />
@@ -126,8 +125,8 @@ export function AccessPanel({
           <ul className="mt-2 flex flex-col gap-1.5">
             {past.map((g) => (
               <li key={g.id}>
-                <span className="line-through">{g.granteeName}</span> · granted by {g.grantedByName} {when(g.grantedAt)} · revoked by {g.revokedByName}{" "}
-                {g.revokedAt ? when(g.revokedAt) : ""} · {g.reason}
+                <span className="line-through">{g.granteeName}</span> · granted by {g.grantedByName} {formatDate(g.grantedAt, timeZone, { year: "numeric" })} · revoked by {g.revokedByName}{" "}
+                {g.revokedAt ? formatDate(g.revokedAt, timeZone, { year: "numeric" }) : ""} · {g.reason}
               </li>
             ))}
           </ul>

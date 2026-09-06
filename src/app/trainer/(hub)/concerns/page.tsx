@@ -1,6 +1,9 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { ConcernReplyForm } from "@/app/trainer/(hub)/concerns/reply-form";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDate } from "@/lib/format-date";
 
 const ROUTE_LABEL: Record<string, string> = { tutor: "Tutor", mct: "Main Course Tutor", manager: "Centre manager" };
 
@@ -19,6 +22,7 @@ const ROUTE_LABEL: Record<string, string> = { tutor: "Tutor", mct: "Main Course 
 // Anonymous concerns never show the trainee's name here, regardless of viewer.
 export default async function ConcernsInboxPage() {
   const trainer = await requireRole(["trainer", "admin"]);
+  const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const supabase = await createClient();
 
   const { data: concerns } = await supabase
@@ -60,14 +64,14 @@ export default async function ConcernsInboxPage() {
                   {c.anonymous ? "Anonymous" : (nameById.get(c.trainee_id) ?? "Unknown")}
                   <span className="ml-2 text-xs font-normal text-muted">Routed to {ROUTE_LABEL[c.route] ?? c.route}</span>
                 </p>
-                <p className="text-xs text-muted">{new Date(c.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
+                <p className="text-xs text-muted">{formatDate(c.created_at, timeZone, { year: "numeric" })}</p>
               </div>
               <p className="text-sm whitespace-pre-wrap text-ink">{c.body}</p>
 
               {c.response ? (
                 <div className="mt-1 rounded-[6px] bg-surface-muted/40 p-3">
                   <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">
-                    Replied {c.responded_at ? new Date(c.responded_at).toLocaleDateString("en-GB") : ""}
+                    Replied {c.responded_at ? formatDate(c.responded_at, timeZone) : ""}
                   </p>
                   <p className="mt-1 text-sm text-ink">{c.response}</p>
                 </div>

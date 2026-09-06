@@ -4,6 +4,9 @@ import { UndoImportButton } from "@/components/import/undo-import-button";
 import { VolunteerImportWizard } from "@/components/import/volunteer-import-wizard";
 import { UndoVolunteerImportButton } from "@/components/import/undo-volunteer-import-button";
 import { UNDO_WINDOW_DAYS, isWithinUndoWindow, undoDeadline } from "@/lib/spreadsheet-import";
+import { formatDate } from "@/lib/format-date";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 /**
  * Bulk-loading people from a spreadsheet, rendered inside whichever room
@@ -34,6 +37,7 @@ export async function SpreadsheetImportSection({
   centerId: string;
 }) {
   const supabase = await createClient();
+  const timeZone = (await getCachedCenter(centerId))?.time_zone ?? DEFAULT_TIMEZONE;
 
   // Ramy, 27 Aug 2026: none of these depend on each other, and the
   // existing-emails lookup used to sit in an async child rendered after
@@ -77,11 +81,11 @@ export async function SpreadsheetImportSection({
                 <div className="flex flex-col gap-0.5">
                   <p className="text-sm text-ink">{imp.source_filename}</p>
                   <p className="text-xs text-muted">
-                    {tallies.willImport ?? 0} imported &middot; {new Date(imp.created_at).toLocaleDateString("en-GB")}
+                    {tallies.willImport ?? 0} imported &middot; {formatDate(imp.created_at, timeZone)}
                     {imp.undone_at
                       ? " · undone"
                       : undoable
-                        ? ` · undo until ${undoDeadline(imp.created_at).toLocaleDateString("en-GB")}`
+                        ? ` · undo until ${formatDate(undoDeadline(imp.created_at).toISOString(), timeZone)}`
                         : ` · older than ${UNDO_WINDOW_DAYS} days, now ordinary data`}
                   </p>
                 </div>

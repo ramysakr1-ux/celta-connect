@@ -52,3 +52,4 @@ supabase/.temp
 /_*.html
 .env.migration
 scripts/migration/rollback-values.json
+.tmp-*

@@ -7,6 +7,9 @@ import { trainerInTrainingAccess } from "@/lib/tit-access";
 import { TitWorkspace } from "@/app/trainer/(hub)/trainer-in-training/workspace";
 import { AccessPanel, type AccessGrantView } from "@/app/trainer/(hub)/trainer-in-training/access-panel";
 import { PageHead } from "@/app/trainer/(hub)/page-head";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDate } from "@/lib/format-date";
 
 // specs/for-claude-code-trainer-in-training.md: the whole TinT portfolio
 // workspace. Private to the people the record concerns -- "the TinT has no
@@ -24,6 +27,7 @@ export default async function TrainerInTrainingPage() {
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
   if (!trainer && !assessorCourseId) redirect("/login");
 
+  const timeZone = (trainer ? (await getCachedCenter(trainer.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
     return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
@@ -147,7 +151,7 @@ export default async function TrainerInTrainingPage() {
           // what keeps whose-is-whose obvious.
           <div key={ct.id} className="group-frame flex flex-col gap-6 p-5 sm:p-6">
             {supabase ? (
-              <TitWorkspace supabase={supabase} courseTutor={ct} />
+              <TitWorkspace supabase={supabase} courseTutor={ct} timeZone={timeZone} />
             ) : (
               // The assessor's read-only view: the record's state, not its
               // working forms. Handbook §5.2.1 -- the assessor's own TinT
@@ -156,7 +160,7 @@ export default async function TrainerInTrainingPage() {
                 <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">{nameOf(ct.profile_id)} · read-only</p>
                 <dl className="grid grid-cols-[160px_1fr] gap-x-4 gap-y-1.5">
                   <dt className="text-muted">Verified</dt>
-                  <dd className="text-ink">{ct.verified_at ? new Date(ct.verified_at).toLocaleDateString("en-GB") : "Not yet"}</dd>
+                  <dd className="text-ink">{ct.verified_at ? formatDate(ct.verified_at, timeZone) : "Not yet"}</dd>
                   <dt className="text-muted">Supervisor</dt>
                   <dd className="text-ink">{nameOf(ct.supervisor_profile_id) ?? "Not set"}</dd>
                   <dt className="text-muted">Scheme</dt>
@@ -164,14 +168,14 @@ export default async function TrainerInTrainingPage() {
                   <dt className="text-muted">Assessor day</dt>
                   <dd className="text-ink">
                     {record?.assessor_day_completed_at
-                      ? `Completed ${new Date(record.assessor_day_completed_at).toLocaleDateString("en-GB")}`
+                      ? `Completed ${formatDate(record.assessor_day_completed_at, timeZone)}`
                       : record?.assessor_day_booked_at
-                        ? `Booked ${new Date(record.assessor_day_booked_at).toLocaleDateString("en-GB")}`
+                        ? `Booked ${formatDate(record.assessor_day_booked_at, timeZone)}`
                         : "Not booked"}
                   </dd>
                   <dt className="text-muted">Portfolio</dt>
                   <dd className="text-ink">
-                    {record?.portfolio_submitted_at ? `Submitted ${new Date(record.portfolio_submitted_at).toLocaleDateString("en-GB")}` : "Not submitted"}
+                    {record?.portfolio_submitted_at ? `Submitted ${formatDate(record.portfolio_submitted_at, timeZone)}` : "Not submitted"}
                   </dd>
                   <dt className="text-muted">Outcome</dt>
                   <dd className="text-ink">{record?.outcome?.replace(/_/g, " ") ?? "Not decided"}</dd>
@@ -179,6 +183,7 @@ export default async function TrainerInTrainingPage() {
               </section>
             )}
             <AccessPanel
+              timeZone={timeZone}
               courseTutorsId={ct.id}
               tintName={nameOf(ct.profile_id) ?? "Unknown"}
               supervisorName={nameOf(ct.supervisor_profile_id)}

@@ -4,6 +4,8 @@ import { useActionState, useState } from "react";
 import { saveMarkingGuidanceEntry, type FormState } from "@/app/trainer/(hub)/marking-guidance/actions";
 import type { AssignmentCriterion } from "@/lib/assignment-criteria";
 import type { Database } from "@/lib/supabase/types";
+import { useHubTimeZone } from "@/components/hub-time-zone";
+import { formatDate } from "@/lib/format-date";
 
 type GuidanceRow = Database["public"]["Tables"]["marking_guidance_entries"]["Row"];
 export type SerializedGuidance = Record<string, Record<string, GuidanceRow>>;
@@ -76,6 +78,7 @@ function CriterionCard({
   row: GuidanceRow | undefined;
   updatedByName: string | undefined;
 }) {
+  const timeZone = useHubTimeZone();
   const [state, action, pending] = useActionState(saveMarkingGuidanceEntry, initialState);
 
   return (
@@ -107,7 +110,7 @@ function CriterionCard({
 
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs text-muted">
-          {row?.updated_at ? `Last updated ${updatedByName ? `by ${updatedByName} ` : ""}${formatDate(row.updated_at)}` : "Not written yet"}
+          {row?.updated_at ? `Last updated ${updatedByName ? `by ${updatedByName} ` : ""}${formatDate(row.updated_at, timeZone, { year: "numeric" })}` : "Not written yet"}
         </p>
         <div className="flex items-center gap-2">
           {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
@@ -138,6 +141,4 @@ function romanNumeral(n: number): string {
   return numerals[n - 1] ?? String(n);
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-}
+

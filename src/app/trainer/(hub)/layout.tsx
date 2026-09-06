@@ -15,6 +15,7 @@ import { CourseSwitcher, type SwitcherCourse } from "@/app/trainer/(hub)/course-
 import { trainerInTrainingAccess } from "@/lib/tit-access";
 import { getCourseTutorRole } from "@/lib/course-tutor-role";
 import { HUB_GARNET, HUB_GARNET_DEEP, HUB_GOLD, HUB_GOLD_DEEP, HUB_TEAL } from "@/lib/hub-accent";
+import { HubTimeZoneProvider } from "@/components/hub-time-zone";
 
 // The operational "Command Centre" -- roster/timetable/volunteers/TP
 // rotation/TP points library/grades report. Deliberately separate from
@@ -166,6 +167,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   }
 
   return (
+    <HubTimeZoneProvider timeZone={center?.time_zone}>
     <div className="flex min-h-full flex-1 flex-col" style={hubVars}>
       {isDemo ? <DemoModeBanner /> : null}
       {/* design_handoff_trainer_homepage_v4 README, "Header (56px, white,
@@ -247,5 +249,6 @@ export default async function TrainerHubLayout({ children }: { children: React.R
         <StaffChatDrawer profileId={profile.id} initialChannels={staffChat.channels} coworkers={staffChat.coworkers} />
       ) : null}
     </div>
+    </HubTimeZoneProvider>
   );
 }

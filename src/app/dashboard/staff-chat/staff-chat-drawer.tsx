@@ -50,18 +50,6 @@ function playChime() {
   }
 }
 
-function msUntilLocalMidnight(): number {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0);
-  return midnight.getTime() - now.getTime();
-}
-
-function formatCountdown(ms: number): string {
-  const totalMinutes = Math.max(0, Math.floor(ms / 60000));
-  return `Clears in ${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`;
-}
-
 export function StaffChatDrawer({
   profileId,
   initialChannels,
@@ -104,7 +92,6 @@ export function StaffChatDrawer({
   const [startingDm, setStartingDm] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(false);
-  const [msLeft, setMsLeft] = useState(0);
   const [body, setBody] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messageThreadRef = useRef<MessageThreadHandle>(null);
@@ -158,27 +145,22 @@ export function StaffChatDrawer({
     }
   }
 
-  // Reset meter -- local midnight, same boundary as staff-chat.ts's
-  // deleteStaleStaffMessages, so the countdown never lies about when
-  // messages actually clear. Only meaningful for the Nightly (1-day)
-  // default -- anything longer has no single shared clear moment to count
-  // down to (each message ages out N days after IT was sent, not at a
-  // shared boundary), so it gets static "resets on the course's schedule"
-  // copy instead.
-  useEffect(() => {
-    if (retentionLabel !== "nightly") return;
-    const update = () => setMsLeft(msUntilLocalMidnight());
-    update();
-    const id = setInterval(update, 30_000);
-    return () => clearInterval(id);
-  }, [retentionLabel]);
-
   // "The one unacceptable outcome is a bar promising a midnight clear on a
   // centre [course] that retains" -- each mode gets its own accurate copy,
   // never the nightly wording as a generic fallback.
+  //
+  // Nightly used to be a live "Clears in 7h 42m" counting down to the
+  // VIEWER'S BROWSER midnight, on the reasoning that this matched
+  // staff-chat.ts's deleteStaleStaffMessages. Migration 0271 (5 Sep 2026)
+  // retired that function: the sweep is now pg_cron, hourly at :23, deleting
+  // each message 24 hours after IT was sent. There is no shared midnight
+  // moment left to count down to, in any timezone -- and this component's
+  // own message list (message-thread.tsx) already filters on that same
+  // rolling window. So the countdown was contradicted by the database, by
+  // the cron schedule and by the messages next to it. Removed 6 Sep 2026.
   const retentionCopy =
     retentionLabel === "nightly"
-      ? "clears at midnight"
+      ? "clears 24h after sending"
       : retentionLabel === "course"
         ? "cleared when this course closes"
         : "resets on the course's schedule";
@@ -414,9 +396,7 @@ export function StaffChatDrawer({
           <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
             <span className="size-[5px] shrink-0 rounded-full bg-muted" aria-hidden="true" />
             <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted">
-              {retentionLabel === "nightly"
-                ? formatCountdown(msLeft)
-                : retentionCopy.charAt(0).toUpperCase() + retentionCopy.slice(1)}
+              {retentionCopy.charAt(0).toUpperCase() + retentionCopy.slice(1)}
             </span>
           </div>
 

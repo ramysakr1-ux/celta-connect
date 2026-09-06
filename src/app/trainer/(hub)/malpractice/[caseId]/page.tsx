@@ -5,6 +5,9 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { CandidateAccountForm, DecisionForm } from "@/app/trainer/(hub)/malpractice/case-forms";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDate } from "@/lib/format-date";
 
 const CONCERN_KIND_LABEL: Record<string, string> = {
   unattributed_source: "Unattributed source",
@@ -16,6 +19,7 @@ const CONCERN_KIND_LABEL: Record<string, string> = {
 export default async function MalpracticeCasePage({ params }: { params: Promise<{ caseId: string }> }) {
   const { caseId } = await params;
   const trainer = await requireRole("trainer");
+  const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const supabase = await createClient();
 
   const { data: caseRow } = await supabase
@@ -55,7 +59,7 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
         <p className="text-sm text-muted">
           {trainee?.full_name} · {assignment ? ASSIGNMENT_INFO[assignment.assignment_type]?.title ?? assignment.assignment_type : "Assignment"}{" "}
           ({caseRow.assignment_round === "first" ? "1st submission" : "resubmission"}) · opened by {openedBy?.full_name ?? "—"} on{" "}
-          {new Date(caseRow.opened_at).toLocaleDateString()}
+          {formatDate(caseRow.opened_at, timeZone)}
         </p>
       </div>
 
@@ -66,6 +70,7 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
           sequence, rather than the whole page reflowing around it. */}
       <div className="sheet overflow-hidden !p-0">
         <TimelineRow
+          timeZone={timeZone}
           date={caseRow.opened_at}
           step="Case opened"
           text={
@@ -77,6 +82,7 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
         />
         {caseRow.candidate_account ? (
           <TimelineRow
+            timeZone={timeZone}
             date={caseRow.candidate_account_recorded_at ?? caseRow.opened_at}
             step="Candidate's account"
             text={caseRow.candidate_account}
@@ -85,6 +91,7 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
         ) : null}
         {caseRow.status === "decided" ? (
           <TimelineRow
+            timeZone={timeZone}
             date={caseRow.decided_at ?? caseRow.opened_at}
             step="Decision"
             text={
@@ -121,13 +128,13 @@ export default async function MalpracticeCasePage({ params }: { params: Promise<
   );
 }
 
-function TimelineRow({ date, step, text, who, last }: { date: string; step: string; text: string; who: string; last?: boolean }) {
+function TimelineRow({ date, step, text, who, last, timeZone }: { date: string; step: string; text: string; who: string; last?: boolean; timeZone: string }) {
   return (
     <div
       className={`grid grid-cols-[110px_150px_1fr_130px] items-start gap-4 px-5 py-3.5 ${last ? "" : "border-b border-border-faint"}`}
     >
       <span className="text-xs text-muted" style={{ fontVariantNumeric: "tabular-nums" }}>
-        {new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+        {formatDate(date, timeZone)}
       </span>
       <span className="text-xs font-semibold text-ink">{step}</span>
       <span className="whitespace-pre-wrap text-sm text-ink">{text}</span>

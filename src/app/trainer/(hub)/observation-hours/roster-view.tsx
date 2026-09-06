@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
+import { useHubTimeZone } from "@/components/hub-time-zone";
+import { formatDate } from "@/lib/format-date";
 
 export interface ObservationLogEntry {
   id: string;
@@ -42,6 +44,7 @@ const KIND_CLASS: Record<ObservationLogEntry["kind"], string> = {
 };
 
 export function ObservationHoursRoster({ rows, obsTasksTotal }: { rows: CandidateObservationRow[]; obsTasksTotal: number }) {
+  const timeZone = useHubTimeZone();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("all");
 
   return (
@@ -104,7 +107,7 @@ export function ObservationHoursRoster({ rows, obsTasksTotal }: { rows: Candidat
                           <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${KIND_CLASS[entry.kind]}`}>
                             {KIND_LABEL[entry.kind]}
                           </span>
-                          {entry.date ? <span className="text-xs text-muted">{new Date(entry.date).toLocaleDateString("en-GB")}</span> : null}
+                          {entry.date ? <span className="text-xs text-muted">{formatDate(entry.date, timeZone)}</span> : null}
                           {entry.lengthMinutes ? <span className="text-xs text-muted">{entry.lengthMinutes} min</span> : null}
                           {entry.level ? <span className="text-xs text-muted">{entry.level}</span> : null}
                           {entry.learnerCount != null ? <span className="text-xs text-muted">{entry.learnerCount} learners</span> : null}

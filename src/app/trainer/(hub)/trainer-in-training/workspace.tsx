@@ -13,6 +13,7 @@ import {
   TIT_MODES,
   SHADOW_DAYS_REQUIRED,
 } from "@/lib/trainer-in-training";
+import { formatDate } from "@/lib/format-date";
 import {
   PreCourseChecklist,
   SchemeAndModesForm,
@@ -52,9 +53,11 @@ interface CourseTutorRow {
 export async function TitWorkspace({
   supabase,
   courseTutor,
+  timeZone,
 }: {
   supabase: SupabaseClient<Database>;
   courseTutor: CourseTutorRow;
+  timeZone: string;
 }) {
   const [{ data: tutorProfile }, { data: supervisorProfile }] = await Promise.all([
     supabase.from("profiles").select("full_name").eq("id", courseTutor.profile_id).maybeSingle(),
@@ -157,7 +160,7 @@ export async function TitWorkspace({
           <h2 className="font-serif text-xl text-ink">{tutorProfile?.full_name ?? "Unknown"}</h2>
           <p className="mt-1 text-sm text-muted">
             {titRecord.scheme === "external" ? "External scheme" : "Internal scheme"} · verified{" "}
-            {new Date(courseTutor.verified_at).toLocaleDateString("en-GB")}
+            {formatDate(courseTutor.verified_at, timeZone)}
             {supervisorProfile ? ` · supervised by ${supervisorProfile.full_name}` : " · no supervisor set"}
           </p>
         </div>
