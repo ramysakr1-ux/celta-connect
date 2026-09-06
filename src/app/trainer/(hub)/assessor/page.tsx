@@ -12,7 +12,12 @@ import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 import { AssessorSelectionButton } from "@/app/trainer/(hub)/roster/assessor-selection-button";
 import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
 import { assessorVisitDayProblem } from "@/lib/assessor-day";
-import { computeAssessorReadiness } from "@/lib/assessor-pack";
+import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
+import { buildWall, observeHeading, observeNote, visitTeachingOrder, wallFootLine } from "@/lib/assessor-wall";
+import { buildAssessorRecommendation } from "@/lib/assessor-recommendation";
+import { CandidateWall } from "@/app/trainer/(hub)/assessor/candidate-wall";
+import { RecommendationPanel } from "@/app/trainer/(hub)/assessor/recommendation-panel";
+import { appianHref } from "@/lib/appian";
 import { DesignerCredit } from "@/components/designer-credit";
 
 // The assessor's room. MCT only.
@@ -32,8 +37,8 @@ function fmtDate(iso: string, opts: Intl.DateTimeFormatOptions) {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", opts);
 }
 
-export default async function AssessorPage({ searchParams }: { searchParams: Promise<{ preview?: string }> }) {
-  const { preview } = await searchParams;
+export default async function AssessorPage({ searchParams }: { searchParams: Promise<{ preview?: string; cohort?: string }> }) {
+  const { preview, cohort } = await searchParams;
   const session = await getCurrentProfile();
   const trainer =
     session?.profile?.role === "trainer" || session?.profile?.role === "admin" || session?.profile?.role === "platform_owner"
@@ -85,6 +90,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         delivery_mode: "f2f" | "online" | "blended" | null;
         assessment_kind?: string;
         appian_notification_reference?: string | null;
+        center_id: string;
       }
     | null;
 
@@ -123,6 +129,68 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
 
   const daysToVisit = visitDate ? Math.ceil((Date.parse(`${visitDate}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86400000) : null;
 
+  // The candidate wall, and Connect's own recommendation above it. Ramy, 6 Sep
+  // 2026: the banner stays, this goes underneath. "Who is coming" is already
+  // answered up there, so this answers "which candidates they will see" --
+  // which is the other half of what the tab is for, and was previously only a
+  // checkbox list behind a button.
+  const cards = await buildCandidateCards(supabase, courseId);
+  const { slots: teachingSlots, tpNumber: visitTpNumber } = await visitTeachingOrder(supabase, courseId, visitDate, cards);
+  const wantsFullCohort = cohort === "full";
+  const wallCandidates = buildWall(cards, new Set(teachingSlots.map((s) => s.traineeId)), wantsFullCohort);
+
+  // Lesson start times for the visit day, so a suggested candidate can be
+  // named with the slot the assessor would sit in. The nth TP event of the day
+  // belongs to the nth candidate in the rotation order -- the same derivation
+  // the assessor's own lesson-plans page uses.
+  const { data: visitDayTp } = visitDate
+    ? await supabase
+        .from("course_timetable_events")
+        .select("event_time")
+        .eq("course_id", courseId)
+        .eq("event_date", visitDate)
+        .eq("type", "tp")
+        .order("event_time")
+    : { data: [] as { event_time: string | null }[] };
+  const slotTimeById = new Map(
+    teachingSlots.map((s, i) => {
+      const time = (visitDayTp ?? [])[i]?.event_time?.slice(0, 5) ?? null;
+      return [s.traineeId, time ? `teaches ${time}` : "teaches on the day"];
+    })
+  );
+
+  const recommendation = buildAssessorRecommendation({
+    candidates: cards,
+    teachingSlots,
+    slotTimeById,
+    twoYearly: assessmentKind === "two_yearly",
+  });
+
+  // The centre's last recorded proposal, if any. Append-only, so the newest
+  // row is the current one (migration 0279).
+  const { data: lastChoice } = await supabase
+    .from("assessor_observation_choices")
+    .select("trainee_ids, source, reason, chosen_by, created_at")
+    .eq("course_id", courseId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nameById = new Map(cards.map((c) => [c.traineeId, c.name]));
+  // The chooser is a tutor, not a candidate, so it is not in `rows`.
+  const { data: chooser } = lastChoice
+    ? await supabase.from("profiles").select("full_name").eq("id", lastChoice.chosen_by).maybeSingle()
+    : { data: null };
+  const chooserName = chooser?.full_name ?? null;
+  const existingChoice = lastChoice
+    ? {
+        names: lastChoice.trainee_ids.map((id) => nameById.get(id) ?? "Unknown"),
+        source: lastChoice.source,
+        reason: lastChoice.reason,
+        by: chooserName ?? "the centre",
+        at: fmtDate(lastChoice.created_at.slice(0, 10), { day: "numeric", month: "long" }),
+      }
+    : null;
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
@@ -160,7 +228,22 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
             </span>
             {course?.assessor_email ? <span className="text-[12.5px] opacity-80">{course.assessor_email}</span> : null}
           </div>
-          <div className="flex flex-col items-end gap-1 text-right text-[12.5px]">
+          <div className="flex flex-col items-end gap-2.5 text-right text-[12.5px]">
+            {/* Ramy, 6 Sep 2026: the Appian link belongs on the banner, in the
+                MCT's own garnet rather than a translucent tint -- brown on
+                brown had it disappearing. Lifted off --hub-accent so it still
+                reads against the dark ground. Handbook 14.1 puts the centre in
+                Appian 2-3 days before the visit to submit the grade form, so
+                this is a door the MCT actually needs on this screen. */}
+            <a
+              href={appianHref(null)}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-8 items-center rounded-[6px] border px-[13px] text-[12.5px] font-semibold no-underline transition-[filter] duration-150 hover:brightness-125"
+              style={{ background: "oklch(46% 0.15 27)", borderColor: "oklch(58% 0.16 27)", color: "oklch(96% 0.008 85)" }}
+            >
+              Open Appian
+            </a>
             <span>
               <span className="font-semibold">{selectedCount}</span> of {candidates.length} candidates selected
             </span>
@@ -264,6 +347,40 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           </ul>
         </section>
       </div>
+
+      {cards.length > 0 ? (
+        <RecommendationPanel
+          rec={recommendation}
+          visitDateLabel={visitDate ? fmtDate(visitDate, { weekday: "long", day: "numeric", month: "long" }) : null}
+          existing={existingChoice}
+        />
+      ) : null}
+
+      {cards.length > 0 ? (
+        <section className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
+          <div className="flex flex-col gap-[3px]">
+            <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Which candidates the assessor sees</p>
+            <p className="max-w-[76ch] text-sm text-muted">
+              The whole cohort, in the order the Handbook asks the assessor to work through it. Open a card to read the
+              portfolio yourself before they do.
+            </p>
+          </div>
+          <CandidateWall
+            candidates={wallCandidates}
+            observeHeading={observeHeading(teachingSlots.length)}
+            observeNote={observeNote(visitTpNumber, teachingSlots)}
+            footLine={wallFootLine(cards.length, selectedCount, wantsFullCohort)}
+            toggleLabel={
+              wantsFullCohort
+                ? "Back to the selection"
+                : cards.length > selectedCount
+                  ? `Show the ${cards.length - selectedCount} not put forward`
+                  : ""
+            }
+            toggleHref={wantsFullCohort ? "/trainer/assessor" : "/trainer/assessor?cohort=full"}
+          />
+        </section>
+      ) : null}
 
       <DesignerCredit />
     </div>

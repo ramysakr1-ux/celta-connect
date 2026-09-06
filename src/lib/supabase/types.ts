@@ -2719,6 +2719,34 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["assessor_meeting_requests"]["Row"]>;
         Relationships: [];
       };
+      // migration 0279 -- which candidates the centre puts to the assessor for
+      // observation, and why. Append-only: a corrected choice is a new row,
+      // and the current one is simply the newest. Advisory -- it never touches
+      // profiles.selected_for_assessor_visit, since Handbook 15.1 gives the
+      // selection to the assessor in consultation with the centre.
+      assessor_observation_choices: {
+        Row: {
+          id: string;
+          course_id: string;
+          trainee_ids: string[];
+          /** 'connect' = recommendation accepted unchanged; 'centre' = overridden. */
+          source: "connect" | "centre";
+          /** Required for an override, null when the recommendation was accepted. */
+          reason: string | null;
+          /** What Connect suggested at the time, so the row still reads correctly once grades move. */
+          recommended_ids: string[];
+          chosen_by: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["assessor_observation_choices"]["Row"]> & {
+          course_id: string;
+          trainee_ids: string[];
+          source: "connect" | "centre";
+          chosen_by: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
       // migration 0120 -- named invitations. The shared join links stay; this
       // is the path where the centre decides who is what before they arrive,
       // and it is what makes "10 of 12 joined" and the Invited pill real.
