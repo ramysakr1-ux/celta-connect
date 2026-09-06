@@ -12,7 +12,7 @@ import { getInitialStaffChatData } from "@/lib/staff-chat";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { CourseSwitcher, type SwitcherCourse } from "@/app/trainer/(hub)/course-switcher";
-import { canSeeTrainerInTraining } from "@/lib/tit-access";
+import { trainerInTrainingAccess } from "@/lib/tit-access";
 import { getCourseTutorRole } from "@/lib/course-tutor-role";
 
 // The operational "Command Centre" -- roster/timetable/volunteers/TP
@@ -84,11 +84,33 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // where moderation applies, reading the e-portfolio is a duty (TinT
   // Handbook 5.2.2), not something to find on the optional tour.
   const assessorCourseId = isAssessor ? await getAssessorCourseId() : null;
-  const tintVisible = await canSeeTrainerInTraining({
+  const tintAccess = await trainerInTrainingAccess({
     courseId: profile?.course_id ?? assessorCourseId ?? null,
     profile: profile ? { id: profile.id, role: profile.role, isMct } : null,
     assessorSession: Boolean(assessorCourseId),
   });
+  // Ramy, 6 Sep 2026: "make the trainer-in-training tab always visible too...
+  // the tab being visible doesn't mean everybody can go and snoop around. When
+  // there is an actual TinT, then there will be safeguards."
+  //
+  // That reverses his 4 Sep call ("it will only appear if there is one"), and
+  // his framing is better than the guard I first wrote. I had kept the tab
+  // hidden for anyone outside the circle when a record existed -- but that
+  // makes the tab's ABSENCE the tell: an ACT who sees it disappear learns the
+  // course has a trainer-in-training. Always visible leaks strictly less.
+  //
+  // The door is open; the room is not. What is private is the RECORD -- the
+  // e-portfolio, the shadow marking, the signature trails -- and the page
+  // itself refuses it, telling anyone outside the circle that it is private to
+  // the trainer-in-training, their supervisor and the MCT, who can grant them
+  // access. RLS (tit_can_access(), migration 0267) enforces the same at the
+  // data layer, so the tab is signage, not permission. That a trainer-in-
+  // training exists is not a secret: they are on the teaching team.
+  //
+  // An assessor session is the exception and keeps the strict rule: their tab
+  // set is the pack, deliberately minimal, not a place to browse a capability.
+  const tintVisible = tintAccess.visible.length > 0;
+  const tintTab = assessorCourseId ? tintVisible : true;
   // design_handoff_trainer_homepage_v4, Design Tokens: "MCT accent -- garnet
   // oklch(42% 0.13 27), deep oklch(36% 0.12 27); ACT accent -- gold
   // oklch(60% 0.11 70), deep oklch(50% 0.11 65)". The accent is the role
@@ -167,7 +189,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
           >
             <Wordmark size="header-compact" gapPx={9} />
           </Link>
-          <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} mct={isMct && !isAssessor} tint={tintVisible} />
+          <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} mct={isMct && !isAssessor} tint={tintTab} />
           <div className="flex shrink-0 items-center gap-[11px]">
             {isRealStaff && isMctReal ? (
               // The pill is the preview toggle for a real MCT -- one click

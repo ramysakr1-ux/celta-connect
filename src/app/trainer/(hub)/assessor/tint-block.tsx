@@ -62,7 +62,7 @@ function Pill({ label, tone }: { label: string; tone: "accent" | "muted" }) {
 
 function TintEmpty() {
   return (
-    <details className="trainer-hover group rounded-[14px] border border-border bg-card px-[22px] py-4" style={{ borderTop: "3px solid var(--hub-accent)" }}>
+    <details className="group-frame-inner trainer-hover rounded-[14px] bg-card px-[22px] py-4" style={{ borderTop: "3px solid var(--hub-accent)" }}>
       <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3">
         <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
           Also on this visit &middot; trainer-in-training
@@ -140,7 +140,7 @@ function TintPresent({
   return (
     <details
       open
-      className="trainer-hover flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5"
+      className="group-frame-inner trainer-hover flex flex-col gap-4 rounded-[14px] bg-card px-[22px] py-5"
       style={{ borderTop: "3px solid var(--hub-accent)" }}
     >
       <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3">

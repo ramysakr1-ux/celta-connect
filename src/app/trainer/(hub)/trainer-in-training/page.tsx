@@ -65,7 +65,7 @@ export default async function TrainerInTrainingPage() {
             them to go and set one up -- that is the centre's job, not theirs. */}
         <div className="sheet text-sm text-muted">
           {trainer
-            ? "No trainer-in-training on this course. Set someone as one, with a verification date and a supervisor, on the Tutors panel in Centre settings."
+            ? "Nobody on this course is a trainer-in-training. The tab is here anyway so the room is findable: set someone as one on the Tutors panel in Centre settings, with a Cambridge verification date and a supervisor, and their portfolio, shadow-marking record and signature trails live here. It also adds a day to your assessor's visit where the scheme requires moderation -- the Assessor tab spells that out."
             : "No trainer-in-training on this course, so there is nothing here to moderate."}
         </div>
       </div>

@@ -363,6 +363,20 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         </div>
       ) : null}
 
+      {/* Ramy, 6 Sep 2026: "I like those dotted borders you have in the
+          preview... it could just be a frame that surrounds the entire page,
+          around everything until just under the banner."
+
+          One frame, not one per card: he asked first for dashes on each of the
+          cards below and then replaced that with this, which is the better of
+          the two -- a dashed rule repeated on six cards reads as six warnings,
+          while one around the lot reads as a boundary. In the mockup this
+          treatment meant "new"; here it means "this is the visit", holding
+          everything under the banner together.
+
+          The accent again, so it is garnet for an MCT and gold for an ACT.
+          Cards keep their own borders and hovers; this sits outside them. */}
+      <div className="group-frame flex flex-col gap-6 p-5 sm:p-6">
       {cards.length > 0 ? (
         <RecommendationPanel
           rec={recommendation}
@@ -497,6 +511,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         summary={prep}
         deadline={preparationDeadline ? fmtDate(preparationDeadline, { day: "numeric", month: "long" }) : null}
       />
+      </div>
 
       <DesignerCredit />
     </div>

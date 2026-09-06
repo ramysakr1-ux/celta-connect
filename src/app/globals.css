@@ -504,6 +504,28 @@ h6 {
      beside it: Tailwind v4's utilities layer outranks this components-layer
      rule regardless of source order, so a stray border-border-faint would
      silently swallow it. */
+  /* Ramy, 6 Sep 2026: "it's like saying this section belongs together, and
+     this section belongs together... I think we can apply this throughout the
+     platform when appropriate."
+
+     A dashed frame is a grouping device, not decoration and not a warning:
+     it says these cards are one piece of work. Nesting is deliberate and he
+     asked for it -- one around the whole visit, one around the
+     trainer-in-training inside it -- because the inner group is a genuine
+     sub-topic rather than a peer of the cards beside it.
+
+     Reads --hub-accent, so it is garnet for an MCT and gold for an ACT with
+     nothing to change; outside the trainer hub it falls back to the neutral
+     border and still reads as a group. Two rules, not one, so a nested frame
+     can step back rather than compete with its parent. */
+  .group-frame {
+    border: 1.5px dashed color-mix(in oklab, var(--hub-accent, var(--color-border)) 45%, transparent);
+    border-radius: 20px;
+  }
+  .group-frame-inner {
+    border: 1.5px dashed color-mix(in oklab, var(--hub-accent, var(--color-border)) 30%, transparent);
+  }
+
   .hub-hairline {
     border-color: color-mix(in oklab, var(--hub-accent, var(--color-border)) 28%, transparent);
   }
