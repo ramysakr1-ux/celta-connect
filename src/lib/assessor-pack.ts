@@ -53,9 +53,24 @@ export async function computeAssessorReadiness(
     supabase.from("plan_assignments").select("trainee_id, tp_point_id, taught_at").eq("course_id", courseId),
   ]);
 
-  const { data: tpPoints } = await supabase.from("tp_points").select("id, tp_coursebook_id");
-  const { data: coursebooks } = await supabase.from("tp_coursebooks").select("id, level");
+  // Perf, 6 Sep 2026: these two were `select(...)` with NO filter at all --
+  // every TP point and every coursebook on the PLATFORM, fetched twice per
+  // assessor page load (once here, once in buildCandidateCards) and
+  // sequentially at that. Small today, but it grows with every centre that
+  // ever joins rather than with this course, which is the shape of a page
+  // that quietly gets slower over months.
+  //
+  // Only the points this course actually taught are needed -- the pair of
+  // maps exists to turn a taught tp_point_id into its coursebook's level --
+  // so both are now bounded by the course instead of by the platform. Still
+  // two round trips, but two small ones that stay small.
+  const usedPointIds = [...new Set((planAssignments ?? []).map((p) => p.tp_point_id).filter((x): x is string => Boolean(x)))];
+  const { data: tpPoints } = usedPointIds.length
+    ? await supabase.from("tp_points").select("id, tp_coursebook_id").in("id", usedPointIds)
+    : { data: [] };
   const tpPointCoursebookById = new Map((tpPoints ?? []).map((p) => [p.id, p.tp_coursebook_id]));
+  const usedBookIds = [...new Set([...tpPointCoursebookById.values()].filter((x): x is string => Boolean(x)))];
+  const { data: coursebooks } = usedBookIds.length ? await supabase.from("tp_coursebooks").select("id, level").in("id", usedBookIds) : { data: [] };
   const coursebookLevelById = new Map((coursebooks ?? []).map((c) => [c.id, c.level]));
 
   const recordByTrainee = new Map((records ?? []).map((r) => [r.trainee_id, r]));
@@ -190,9 +205,15 @@ export async function buildCandidateCards(
       return [m.trainee_id, sg ? (sg.tp_group_id ? (tpGroupNameById.get(sg.tp_group_id) ?? sg.name) : sg.name) : null];
     })
   );
-  const { data: tpPoints } = await supabase.from("tp_points").select("id, tp_coursebook_id");
-  const { data: coursebooks } = await supabase.from("tp_coursebooks").select("id, level");
+  // Same unscoped-table-scan fix as computeAssessorReadiness above -- see the
+  // note there. This is the second of the two copies the page paid for.
+  const usedPointIds = [...new Set((planAssignments ?? []).map((p) => p.tp_point_id).filter((x): x is string => Boolean(x)))];
+  const { data: tpPoints } = usedPointIds.length
+    ? await supabase.from("tp_points").select("id, tp_coursebook_id").in("id", usedPointIds)
+    : { data: [] };
   const tpPointCoursebookById = new Map((tpPoints ?? []).map((p) => [p.id, p.tp_coursebook_id]));
+  const usedBookIds = [...new Set([...tpPointCoursebookById.values()].filter((x): x is string => Boolean(x)))];
+  const { data: coursebooks } = usedBookIds.length ? await supabase.from("tp_coursebooks").select("id, level").in("id", usedBookIds) : { data: [] };
   const coursebookLevelById = new Map((coursebooks ?? []).map((c) => [c.id, c.level]));
 
   const recordByTrainee = new Map((records ?? []).map((r) => [r.trainee_id, r]));

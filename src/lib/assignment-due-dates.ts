@@ -61,18 +61,26 @@ export async function resolveAssignmentDueDates(
   supabase: SupabaseClient<Database>,
   courseId: string
 ): Promise<DueDateResult[]> {
-  const [{ data: allEvents }, { data: trainees }, { data: subgroups }, { data: members }] = await Promise.all([
-    supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId),
+  // Perf/scope, 6 Sep 2026. Two things were wrong here:
+  //
+  //   1. course_subgroup_members was read with NO filter -- every subgroup
+  //      membership on the platform, to answer a question about one course.
+  //      On the service-role client there is no RLS to catch that, and a
+  //      trainee who appears in another course's subgroup would have shifted
+  //      this course's due dates. Scoped to this course's own subgroups.
+  //   2. The course's timetable events were fetched twice, the second time
+  //      only to filter type = 'tp'. Ask for the type once and split in
+  //      memory; the rows are the same rows.
+  const [{ data: allEvents }, { data: trainees }, { data: subgroups }] = await Promise.all([
+    supabase.from("course_timetable_events").select("event_date, type").eq("course_id", courseId),
     supabase.from("profiles").select("id").eq("course_id", courseId).eq("role", "trainee"),
     supabase.from("course_subgroups").select("id, tp_group_id, half_order").eq("course_id", courseId),
-    supabase.from("course_subgroup_members").select("trainee_id, subgroup_id"),
   ]);
-  const { data: tpEventsRaw } = await supabase
-    .from("course_timetable_events")
-    .select("event_date")
-    .eq("course_id", courseId)
-    .eq("type", "tp");
-  const tpEvents: TpTimetableEvent[] = tpEventsRaw ?? [];
+  const subgroupIds = (subgroups ?? []).map((s) => s.id);
+  const { data: members } = subgroupIds.length
+    ? await supabase.from("course_subgroup_members").select("trainee_id, subgroup_id").in("subgroup_id", subgroupIds)
+    : { data: [] as { trainee_id: string; subgroup_id: string }[] };
+  const tpEvents: TpTimetableEvent[] = (allEvents ?? []).filter((e) => e.type === "tp").map((e) => ({ event_date: e.event_date }));
 
   const subgroupById = new Map((subgroups ?? []).map((s) => [s.id, s]));
   const memberBySubgroupId = new Map((members ?? []).map((m) => [m.trainee_id, m.subgroup_id]));
