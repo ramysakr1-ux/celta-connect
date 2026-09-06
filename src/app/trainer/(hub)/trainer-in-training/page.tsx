@@ -141,7 +141,11 @@ export default async function TrainerInTrainingPage() {
         }));
         const record = (records ?? []).find((r) => r.course_tutors_id === ct.id);
         return (
-          <div key={ct.id} className="flex flex-col gap-6">
+          // Ramy, 6 Sep 2026, extending the pattern off the Assessor tab: one
+          // trainer-in-training's workspace and the list of who may see it are
+          // one piece of work, and on a course with two of them the frame is
+          // what keeps whose-is-whose obvious.
+          <div key={ct.id} className="group-frame flex flex-col gap-6 p-5 sm:p-6">
             {supabase ? (
               <TitWorkspace supabase={supabase} courseTutor={ct} />
             ) : (
