@@ -62,14 +62,23 @@ function Pill({ label, tone }: { label: string; tone: "accent" | "muted" }) {
 
 function TintEmpty() {
   return (
-    <details className="group-frame-inner trainer-hover rounded-[14px] bg-card px-[22px] py-4" style={{ borderTop: "3px solid var(--hub-accent)" }}>
-      <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3">
+    // Ramy, 6 Sep 2026: "if I click on 'none on this course' it opens the
+    // page... 'none on this course' should not open it." A <summary> is the
+    // click target in its entirety, so the heading and the pill toggled it
+    // too. They sit outside the summary now, and only the affordance opens
+    // it -- lifted to the corner so the row still reads as one line.
+    <div className="group-frame-inner trainer-hover relative rounded-[14px] bg-card px-[22px] py-4" style={{ borderTop: "3px solid var(--hub-accent)" }}>
+      <div className="flex flex-wrap items-center gap-3 pr-0 sm:pr-40">
         <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
           Also on this visit &middot; trainer-in-training
         </span>
         <Pill label="None on this course" tone="muted" />
-        <span className="ml-auto text-[12px] font-semibold text-primary">What it would mean</span>
-      </summary>
+      </div>
+      <details className="group">
+        <summary className="mt-2 inline-flex cursor-pointer list-none text-[12px] font-semibold text-primary hover:underline sm:absolute sm:top-4 sm:right-[22px] sm:mt-0">
+          <span className="group-open:hidden">What it would mean</span>
+          <span className="hidden group-open:inline">Hide</span>
+        </summary>
       <div className="mt-4 flex flex-col gap-4">
         <p className="max-w-[76ch] text-sm text-pretty text-muted">
           Nobody on this course is a trainer-in-training, so none of this applies today. It is here so you know what
@@ -120,7 +129,8 @@ function TintEmpty() {
           ))}
         </ul>
       </div>
-    </details>
+      </details>
+    </div>
   );
 }
 
@@ -138,17 +148,23 @@ function TintPresent({
   const tone = heavy || unknown ? AMBER : "var(--color-muted)";
 
   return (
-    <details
-      open
-      className="group-frame-inner trainer-hover flex flex-col gap-4 rounded-[14px] bg-card px-[22px] py-5"
+    // Same split as the empty state: the heading and the person's name are
+    // not a control, only the toggle is.
+    <div
+      className="group-frame-inner trainer-hover relative flex flex-col gap-4 rounded-[14px] bg-card px-[22px] py-5"
       style={{ borderTop: "3px solid var(--hub-accent)" }}
     >
-      <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 pr-0 sm:pr-24">
         <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--hub-accent-deep)" }}>
           Also on this visit · trainer-in-training
         </span>
         <Pill label={name} tone="accent" />
-      </summary>
+      </div>
+      <details className="group" open>
+        <summary className="inline-flex cursor-pointer list-none text-[12px] font-semibold text-primary hover:underline sm:absolute sm:top-5 sm:right-[22px]">
+          <span className="group-open:hidden">Show</span>
+          <span className="hidden group-open:inline">Hide</span>
+        </summary>
       <div className="mt-4 flex flex-col gap-4">
       <div className="flex flex-col gap-[3px]">
         <p className="max-w-[76ch] text-sm text-pretty text-muted">
@@ -227,6 +243,7 @@ function TintPresent({
         </span>
       </div>
       </div>
-    </details>
+      </details>
+    </div>
   );
 }
