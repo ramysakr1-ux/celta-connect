@@ -32,18 +32,13 @@ export default async function TrainerPreCourseTaskPage() {
     return <div className="sheet p-6 text-sm text-muted">Course not found.</div>;
   }
 
-  const { data: trainees } = await supabase
-    .from("profiles")
-    .select("id, full_name")
-    .eq("course_id", courseId)
-    .eq("role", "trainee")
-    .order("full_name");
-
-  const { data: sections } = await supabase
-    .from("pre_course_task_sections")
-    .select("id, source, sequence_index, title")
-    .eq("center_id", course.center_id)
-    .order("sequence_index");
+  // Perf, 6 Sep 2026: five round trips in a line, of which only two pairs
+  // actually depend on each other. Trainees and sections both need nothing
+  // but the course; the two lookups after them need an id list each.
+  const [{ data: trainees }, { data: sections }] = await Promise.all([
+    supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee").order("full_name"),
+    supabase.from("pre_course_task_sections").select("id, source, sequence_index, title").eq("center_id", course.center_id).order("sequence_index"),
+  ]);
 
   const traineeIds = (trainees ?? []).map((t) => t.id);
   // Ramy, 28 Aug 2026: candidates answer the task inside Connect now, so
@@ -52,20 +47,20 @@ export default async function TrainerPreCourseTaskPage() {
   // tick a candidate gave themselves was never evidence they had written
   // anything anyway. responseIsAnswered is shared with the candidate's own
   // page and the roster column, so all three agree.
-  const { data: sectionItems } =
+  const [{ data: sectionItems }, { data: responses }] = await Promise.all([
     (sections ?? []).length > 0
-      ? await supabase
+      ? supabase
           .from("pre_course_task_items")
           .select("id, section_id")
           .in(
             "section_id",
             (sections ?? []).map((s) => s.id)
           )
-      : { data: [] };
-  const { data: responses } =
+      : Promise.resolve({ data: [] }),
     traineeIds.length > 0
-      ? await supabase.from("pre_course_task_responses").select("trainee_id, item_id, response").in("trainee_id", traineeIds)
-      : { data: [] };
+      ? supabase.from("pre_course_task_responses").select("trainee_id, item_id, response").in("trainee_id", traineeIds)
+      : Promise.resolve({ data: [] }),
+  ]);
 
   const sectionIdByItemId = new Map((sectionItems ?? []).map((i) => [i.id, i.section_id]));
   const itemCountBySection = new Map<string, number>();

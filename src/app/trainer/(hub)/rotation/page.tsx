@@ -29,58 +29,88 @@ export default async function TrainerRotationPage() {
   const courseId = trainer.course_id!;
   const supabase = hubReadClient(trainer, courseId);
 
-  const { data: subgroups } = await supabase
-    .from("course_subgroups")
-    .select("id, name, tp_group_id, half_order")
-    .eq("course_id", courseId)
-    .order("created_at");
-
-  const { data: tpGroups } = await supabase
-    .from("course_tp_groups")
-    .select("id, name, tutor_profile_id, meeting_days")
-    .eq("course_id", courseId);
-
-  // Any trainer on the course can own a TP group -- setTpGroupTutor's own
-  // comment: "Ramy was clear that the MCT/ACT distinction governs
-  // announcements, not teaching."
-  const { data: courseTutorsForGroups } = await supabase
-    .from("profiles")
-    .select("id, full_name")
-    .eq("course_id", courseId)
-    .eq("role", "trainer")
-    .order("full_name");
-
-  // The tutor plan per group (migration 0268) and where the course is in
-  // its TPs, for the "now" line. Admin client for the plan: set_by names
-  // can be tutors no longer on the course.
-  const [{ data: tutorPlanRows }, { data: currentTpRaw }] = await Promise.all([
-    createAdminClient()
+  // Perf, 6 Sep 2026: this page made THIRTEEN round trips one after another,
+  // and only two of them actually needed a previous answer. Same treatment
+  // the hub pages got on 5 Sep: three waves, ordered by what genuinely
+  // depends on what. Nothing about the queries themselves changed.
+  //
+  // Wave 1 -- everything answerable from courseId / center_id alone.
+  const admin = createAdminClient();
+  const [
+    { data: subgroups },
+    { data: tpGroups },
+    { data: courseTutorsForGroups },
+    { data: tutorPlanRows },
+    { data: currentTpRaw },
+    { data: roster },
+    { data: coursebooks },
+    { data: schedule },
+    { data: plans },
+    { data: tpEvents },
+    { data: courseSettings },
+  ] = await Promise.all([
+    supabase.from("course_subgroups").select("id, name, tp_group_id, half_order").eq("course_id", courseId).order("created_at"),
+    supabase.from("course_tp_groups").select("id, name, tutor_profile_id, meeting_days").eq("course_id", courseId),
+    // Any trainer on the course can own a TP group -- setTpGroupTutor's own
+    // comment: "Ramy was clear that the MCT/ACT distinction governs
+    // announcements, not teaching."
+    supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainer").order("full_name"),
+    // The tutor plan per group (migration 0268). Admin client: set_by names
+    // can be tutors no longer on the course.
+    admin
       .from("course_tp_group_tutors")
       .select("id, tp_group_id, tutor_profile_id, from_tp_number, set_by_profile_id, set_at, note")
       .eq("course_id", courseId)
       .is("superseded_at", null),
+    // Where the course is in its TPs, for the "now" line.
     supabase.rpc("current_tp_number", { p_course_id: courseId }),
+    supabase.from("profiles").select("id, full_name, course_status").eq("course_id", courseId).eq("role", "trainee"),
+    supabase.from("tp_coursebooks").select("id, title, level").eq("center_id", trainer.center_id).order("title"),
+    supabase.from("course_tp_schedule").select("tp_number, tp_coursebook_id").eq("course_id", courseId),
+    supabase
+      .from("plan_assignments")
+      .select("id, trainee_id, tp_number, taught_at, rotation_position_used, main_lesson_aim, aim_type, class_grouping")
+      .eq("course_id", courseId),
+    // checkpoint 3 -- real TP-day dates a paired TP group's halves alternate
+    // across, derived from the actual timetable (not a stored weekday
+    // setting -- see src/lib/rotation.ts).
+    supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).eq("type", "tp"),
+    // connect-spec-corrections-for-claude-code.md item 2: "a TP block should
+    // not end on the course's final day" -- flagged, not blocked.
+    supabase.from("courses").select("end_date, tp7_allowed_aim_types, tp8_allowed_aim_types").eq("id", courseId).maybeSingle(),
   ]);
+
   const currentTp = typeof currentTpRaw === "number" ? currentTpRaw : 0;
   const planPeopleIds = [...new Set((tutorPlanRows ?? []).flatMap((r) => [r.tutor_profile_id, r.set_by_profile_id]).filter((x): x is string => Boolean(x)))];
-  const { data: planPeople } = planPeopleIds.length
-    ? await createAdminClient().from("profiles").select("id, full_name").in("id", planPeopleIds)
-    : { data: [] };
+
+  // Wave 2 -- the three that genuinely need a wave-1 answer: members keys off
+  // the subgroup ids, feedback off the roster, and the plan's people off the
+  // ids inside the plan rows.
+  const [{ data: planPeople }, { data: members }, { data: feedbackRows }] = await Promise.all([
+    planPeopleIds.length ? admin.from("profiles").select("id, full_name").in("id", planPeopleIds) : Promise.resolve({ data: [] }),
+    supabase
+      .from("course_subgroup_members")
+      .select("id, subgroup_id, trainee_id, base_slot")
+      .in("subgroup_id", (subgroups ?? []).map((g) => g.id))
+      .order("base_slot"),
+    // Handbook 3.7: "TP must be split evenly between the two tutors." Real
+    // signal is who actually GAVE feedback (tp_feedback.trainer_id), not
+    // course_tp_groups.tutor_profile_id -- a group's named tutor and who
+    // ends up submitting a given round's feedback can differ in practice
+    // (covering for a colleague, a TinT's supervisor stepping in). Advisory
+    // only, same pattern as the double-booking warning on Course Admin.
+    (roster ?? []).length
+      ? supabase
+          .from("tp_feedback")
+          .select("trainer_id")
+          .in("trainee_id", (roster ?? []).map((r) => r.id))
+          .not("trainer_id", "is", null)
+          .not("submitted_at", "is", null)
+      : Promise.resolve({ data: [] }),
+  ]);
   const planNameById = new Map((planPeople ?? []).map((p) => [p.id, p.full_name]));
 
-  const { data: members } = await supabase
-    .from("course_subgroup_members")
-    .select("id, subgroup_id, trainee_id, base_slot")
-    .in("subgroup_id", (subgroups ?? []).map((g) => g.id))
-    .order("base_slot");
-
   const assignedTraineeIds = new Set((members ?? []).map((m) => m.trainee_id));
-
-  const { data: roster } = await supabase
-    .from("profiles")
-    .select("id, full_name, course_status")
-    .eq("course_id", courseId)
-    .eq("role", "trainee");
 
   const nameByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.full_name]));
   const courseStatusByTraineeId = new Map((roster ?? []).map((r) => [r.id, r.course_status]));
@@ -88,53 +118,26 @@ export default async function TrainerRotationPage() {
     .filter((r) => !assignedTraineeIds.has(r.id))
     .map((r) => ({ id: r.id, full_name: r.full_name }));
 
-  // Handbook 3.7: "TP must be split evenly between the two tutors." Real
-  // signal is who actually GAVE feedback (tp_feedback.trainer_id), not
-  // course_tp_groups.tutor_profile_id -- a group's named tutor and who
-  // ends up submitting a given round's feedback can differ in practice
-  // (covering for a colleague, a TinT's supervisor stepping in). Advisory
-  // only, same pattern as the double-booking warning on Course Admin.
-  const { data: feedbackRows } = (roster ?? []).length
-    ? await supabase
-        .from("tp_feedback")
-        .select("trainer_id")
-        .in("trainee_id", (roster ?? []).map((r) => r.id))
-        .not("trainer_id", "is", null)
-        .not("submitted_at", "is", null)
-    : { data: [] };
   const feedbackCountByTrainer = new Map<string, number>();
   for (const row of feedbackRows ?? []) {
     if (!row.trainer_id) continue;
     feedbackCountByTrainer.set(row.trainer_id, (feedbackCountByTrainer.get(row.trainer_id) ?? 0) + 1);
   }
-  const { data: courseTrainers } =
-    feedbackCountByTrainer.size > 0
-      ? await supabase.from("profiles").select("id, full_name").in("id", [...feedbackCountByTrainer.keys()])
-      : { data: [] };
-  const trainerNameById = new Map((courseTrainers ?? []).map((t) => [t.id, t.full_name]));
+  // Wave 3 -- the only query that needs a wave-2 answer. Usually free: the
+  // people who gave feedback are nearly always the course's own trainers,
+  // already fetched above, so this asks only for the ones who are not.
+  const missingTrainerIds = [...feedbackCountByTrainer.keys()].filter((id) => !(courseTutorsForGroups ?? []).some((t) => t.id === id));
+  const { data: courseTrainers } = missingTrainerIds.length
+    ? await admin.from("profiles").select("id, full_name").in("id", missingTrainerIds)
+    : { data: [] };
+  const trainerNameById = new Map([...(courseTutorsForGroups ?? []), ...(courseTrainers ?? [])].map((t) => [t.id, t.full_name]));
   const tpDistribution = [...feedbackCountByTrainer.entries()]
     .map(([trainerId, count]) => ({ name: trainerNameById.get(trainerId) ?? "Unknown", count }))
     .sort((a, b) => b.count - a.count);
   const tpDistributionUneven =
     tpDistribution.length >= 2 && tpDistribution[0].count - tpDistribution[tpDistribution.length - 1].count >= 3;
 
-  const { data: coursebooks } = await supabase
-    .from("tp_coursebooks")
-    .select("id, title, level")
-    .eq("center_id", trainer.center_id)
-    .order("title");
-
-  const { data: schedule } = await supabase
-    .from("course_tp_schedule")
-    .select("tp_number, tp_coursebook_id")
-    .eq("course_id", courseId);
-
   const coursebookByTpNumber = new Map((schedule ?? []).map((s) => [s.tp_number, s.tp_coursebook_id]));
-
-  const { data: plans } = await supabase
-    .from("plan_assignments")
-    .select("id, trainee_id, tp_number, taught_at, rotation_position_used, main_lesson_aim, aim_type, class_grouping")
-    .eq("course_id", courseId);
 
   // connect-spec-corrections-for-claude-code.md item 10: whichever trainee
   // (if any) already carries this course's one allowed 1-to-1/small-group
@@ -144,14 +147,6 @@ export default async function TrainerRotationPage() {
 
   const planByTraineeAndTp = new Map((plans ?? []).map((p) => [`${p.trainee_id}-${p.tp_number}`, p]));
 
-  // checkpoint 3 -- real TP-day dates a paired TP group's halves alternate
-  // across, derived from the actual timetable (not a stored weekday
-  // setting -- see src/lib/rotation.ts).
-  const { data: tpEvents } = await supabase
-    .from("course_timetable_events")
-    .select("event_date")
-    .eq("course_id", courseId)
-    .eq("type", "tp");
   const tpEventRows = tpEvents ?? [];
   const timeZone = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
@@ -164,13 +159,6 @@ export default async function TrainerRotationPage() {
   const intensiveCheck = checkIntensiveTpBreaks(distinctTpDates(tpEventRows));
   const looksIntensive = intensiveCheck.longestConsecutiveRun >= 4;
 
-  // connect-spec-corrections-for-claude-code.md item 2: "a TP block should
-  // not end on the course's final day" -- flagged, not blocked.
-  const { data: courseSettings } = await supabase
-    .from("courses")
-    .select("end_date, tp7_allowed_aim_types, tp8_allowed_aim_types")
-    .eq("id", courseId)
-    .maybeSingle();
   const endsOnFinalDay = tpBlockEndsOnFinalDay(distinctTpDates(tpEventRows), courseSettings?.end_date ?? null);
 
   const buildMembers = (subgroupId: string) =>
