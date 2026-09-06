@@ -124,35 +124,92 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
   // buttons would contradict.
   const packOpens = readiness.ready || Boolean(liveToken);
 
-  const { data: selectionRows } =
-    rows.length > 0 ? await supabase.from("profiles").select("id, selected_for_assessor_visit").in("id", rows.map((r) => r.id)) : { data: [] };
+  // Perf, 6 Sep 2026: the slowest page in the hub at ~840 ms, and ten of its
+  // round trips ran one after another although only three needed a previous
+  // answer. Same three-wave shape as the rest of the hub.
+  //
+  // Wave A -- answerable from courseId / center_id / the roster already read.
+  const [
+    { data: selectionRows },
+    cards,
+    { data: visitDayTp },
+    { data: lastChoice },
+    { data: tintRow },
+    { count: previousReports },
+  ] = await Promise.all([
+    rows.length > 0 ? supabase.from("profiles").select("id, selected_for_assessor_visit").in("id", rows.map((r) => r.id)) : Promise.resolve({ data: [] }),
+    // The candidate wall, and Connect's own recommendation above it. Ramy, 6
+    // Sep 2026: the banner stays, this goes underneath. "Who is coming" is
+    // already answered up there, so this answers "which candidates they will
+    // see" -- the other half of what the tab is for.
+    buildCandidateCards(supabase, courseId),
+    // Lesson start times for the visit day, so a suggested candidate can be
+    // named with the slot the assessor would sit in. The nth TP event of the
+    // day belongs to the nth candidate in the rotation order -- the same
+    // derivation the assessor's own lesson-plans page uses.
+    visitDate
+      ? supabase
+          .from("course_timetable_events")
+          .select("event_time")
+          .eq("course_id", courseId)
+          .eq("event_date", visitDate)
+          .eq("type", "tp")
+          .order("event_time")
+      : Promise.resolve({ data: [] as { event_time: string | null }[] }),
+    // The centre's last recorded proposal, if any. Append-only, so the newest
+    // row is the current one (migration 0279).
+    supabase
+      .from("assessor_observation_choices")
+      .select("trainee_ids, source, reason, chosen_by, created_at")
+      .eq("course_id", courseId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    // The course's trainer-in-training, if it has one. Two facts decide what
+    // the assessor owes them, and neither is inferable: the centre's Cambridge
+    // scheme, and who nominated the trainer (TinT Handbook 5.1, steps 6a/6b).
+    supabase
+      .from("course_tutors")
+      .select("id, profile_id, supervisor_profile_id")
+      .eq("course_id", courseId)
+      .eq("is_trainer_in_training", true)
+      .is("left_at", null)
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("resources")
+      .select("id", { count: "exact", head: true })
+      .eq("center_id", trainer.center_id ?? "")
+      .eq("category", "centre_documents")
+      .ilike("title", "%previous assessor%"),
+  ]);
+  const previousReportOnFile = (previousReports ?? 0) > 0;
+
+  // Wave B -- the four that need a wave-A answer.
+  const [{ slots: teachingSlots, tpNumber: visitDayTpNumber }, { data: titRecord }, { data: tintPeople }, { data: chooser }] = await Promise.all([
+    visitTeachingOrder(supabase, courseId, visitDate, cards),
+    // The scheme and the nominating centre live on tit_records (migrations
+    // 0148 and 0234), set on the Trainer-in-Training screen -- the same two
+    // fields workspace.tsx has used for requiresAssessorDay since 28 Aug 2026.
+    tintRow
+      ? supabase.from("tit_records").select("scheme, trains_at_nominating_centre").eq("course_tutors_id", tintRow.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    tintRow
+      ? supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", [tintRow.profile_id, tintRow.supervisor_profile_id].filter((x): x is string => Boolean(x)))
+      : Promise.resolve({ data: [] as { id: string; full_name: string }[] }),
+    // The chooser is a tutor, not a candidate, so it is not in `rows`.
+    lastChoice ? supabase.from("profiles").select("full_name").eq("id", lastChoice.chosen_by).maybeSingle() : Promise.resolve({ data: null }),
+  ]);
+
   const selectedById = new Map((selectionRows ?? []).map((r) => [r.id, r.selected_for_assessor_visit]));
   const candidates = rows.map((r) => ({ id: r.id, name: r.name, selected: selectedById.get(r.id) ?? true }));
   const selectedCount = candidates.filter((c) => c.selected).length;
 
   const daysToVisit = visitDate ? Math.ceil((Date.parse(`${visitDate}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86400000) : null;
 
-  // The candidate wall, and Connect's own recommendation above it. Ramy, 6 Sep
-  // 2026: the banner stays, this goes underneath. "Who is coming" is already
-  // answered up there, so this answers "which candidates they will see" --
-  // which is the other half of what the tab is for, and was previously only a
-  // checkbox list behind a button.
-  const cards = await buildCandidateCards(supabase, courseId);
-  const { slots: teachingSlots, tpNumber: visitDayTpNumber } = await visitTeachingOrder(supabase, courseId, visitDate, cards);
-
-  // Lesson start times for the visit day, so a suggested candidate can be
-  // named with the slot the assessor would sit in. The nth TP event of the day
-  // belongs to the nth candidate in the rotation order -- the same derivation
-  // the assessor's own lesson-plans page uses.
-  const { data: visitDayTp } = visitDate
-    ? await supabase
-        .from("course_timetable_events")
-        .select("event_time")
-        .eq("course_id", courseId)
-        .eq("event_date", visitDate)
-        .eq("type", "tp")
-        .order("event_time")
-    : { data: [] as { event_time: string | null }[] };
   // Both TP groups teach the SAME three slots at the same times, in their own
   // rooms -- the letters on the timetable are positions within a group, not
   // across the course. So the time comes from a candidate's place in their own
@@ -176,38 +233,6 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
     twoYearly: assessmentKind === "two_yearly",
   });
 
-  // The centre's last recorded proposal, if any. Append-only, so the newest
-  // row is the current one (migration 0279).
-  const { data: lastChoice } = await supabase
-    .from("assessor_observation_choices")
-    .select("trainee_ids, source, reason, chosen_by, created_at")
-    .eq("course_id", courseId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  // The course's trainer-in-training, if it has one. Two facts decide what the
-  // assessor owes them, and neither is inferable: the centre's Cambridge
-  // scheme, and who nominated the trainer (TinT Handbook 5.1, steps 6a/6b).
-  const { data: tintRow } = await supabase
-    .from("course_tutors")
-    .select("id, profile_id, supervisor_profile_id")
-    .eq("course_id", courseId)
-    .eq("is_trainer_in_training", true)
-    .is("left_at", null)
-    .limit(1)
-    .maybeSingle();
-  // The scheme and the nominating centre live on tit_records (migrations 0148
-  // and 0234), set on the Trainer-in-Training screen -- the same two fields
-  // workspace.tsx has used for requiresAssessorDay since 28 Aug 2026.
-  const { data: titRecord } = tintRow
-    ? await supabase.from("tit_records").select("scheme, trains_at_nominating_centre").eq("course_tutors_id", tintRow.id).maybeSingle()
-    : { data: null };
-  const { data: tintPeople } = tintRow
-    ? await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .in("id", [tintRow.profile_id, tintRow.supervisor_profile_id].filter((x): x is string => Boolean(x)))
-    : { data: [] as { id: string; full_name: string }[] };
   const tintNameById = new Map((tintPeople ?? []).map((p) => [p.id, p.full_name]));
 
   // Ramy, 6 Sep 2026: "a long line of names saying the pack cannot open yet --
@@ -259,14 +284,6 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         .is("withdrawal_letter_generated_at", null),
     ]);
 
-  const { count: previousReports } = await supabase
-    .from("resources")
-    .select("id", { count: "exact", head: true })
-    .eq("center_id", trainer.center_id ?? "")
-    .eq("category", "centre_documents")
-    .ilike("title", "%previous assessor%");
-  const previousReportOnFile = (previousReports ?? 0) > 0;
-
   const prep = await buildPrepSummary(supabase, centrePreparation, {
     courseId,
     candidateCount: rows.length,
@@ -282,10 +299,6 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
   });
 
   const nameById = new Map(cards.map((c) => [c.traineeId, c.name]));
-  // The chooser is a tutor, not a candidate, so it is not in `rows`.
-  const { data: chooser } = lastChoice
-    ? await supabase.from("profiles").select("full_name").eq("id", lastChoice.chosen_by).maybeSingle()
-    : { data: null };
   const chooserName = chooser?.full_name ?? null;
   const existingChoice = lastChoice
     ? {
