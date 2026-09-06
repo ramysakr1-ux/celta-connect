@@ -5,10 +5,18 @@ import { ConcernReplyForm } from "@/app/trainer/(hub)/concerns/reply-form";
 const ROUTE_LABEL: Record<string, string> = { tutor: "Tutor", mct: "Main Course Tutor", manager: "Centre manager" };
 
 // Enrolment Forms.dc.html 1c -- the staff side of the internal complaints
-// route. Course-wide visibility (see migration 0140): any trainer/admin can
-// read and reply, since the design's own escalation text frames this as
-// "the centre replies," not one gatekept recipient. Anonymous concerns
-// never show the trainee's name here, regardless of viewer.
+// route.
+//
+// Course-wide among the TUTORS, and only for the two routes addressed to
+// them. Migration 0280 took the centre-manager route out of this inbox
+// entirely: the candidate's own form promises that route is "independent of
+// the teaching team... for anything you would rather the tutors did not see
+// first", and until then every trainer on the course could read it. That is
+// the one thing Administration Handbook 16.1 actually requires -- "recourse
+// to someone other than the tutors on the course" -- so it is enforced in
+// RLS now, not by what this page chooses to query.
+//
+// Anonymous concerns never show the trainee's name here, regardless of viewer.
 export default async function ConcernsInboxPage() {
   const trainer = await requireRole(["trainer", "admin"]);
   const supabase = await createClient();
@@ -30,8 +38,14 @@ export default async function ConcernsInboxPage() {
         <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">Today</p>
         <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Concerns</h1>
         <p className="mt-1 text-sm text-muted">
-          Admin Handbook requires an internal complaints route with recourse beyond the tutors. The centre replies to
-          every concern.
+          Concerns candidates raised with a tutor or with you. Every one gets a reply.
+        </p>
+        {/* Said plainly, and without a count: a number here would itself tell
+            the tutors that somebody had gone over their heads, which is the
+            thing the route exists to prevent. */}
+        <p className="mt-2 text-xs text-muted">
+          Concerns sent to the centre manager are not shown here and never will be. Administration Handbook &sect;16.1 requires a
+          route with recourse beyond the course tutors; the centre answers those.
         </p>
       </div>
 

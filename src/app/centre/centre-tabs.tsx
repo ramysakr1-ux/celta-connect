@@ -23,10 +23,22 @@ import { activeRoomKey } from "@/components/room-pills";
 // whole. Nothing here is a verb.
 const TABS = [
   { href: "/centre/roles", label: "Roles" },
+  // Administration Handbook 16.1's final rung. Shown only to the roles that
+  // may actually read these -- a tab the read-only observer could see would
+  // be a door onto a confidential complaint.
+  { href: "/centre/concerns", label: "Concerns" },
   { href: "/centre/settings", label: "Settings" },
 ] as const;
 
-export function CentreTabs({ canSettings, canCreateCourse }: { canSettings: boolean; canCreateCourse: boolean }) {
+export function CentreTabs({
+  canSettings,
+  canCreateCourse,
+  canConcerns = false,
+}: {
+  canSettings: boolean;
+  canCreateCourse: boolean;
+  canConcerns?: boolean;
+}) {
   const pathname = usePathname() ?? "";
 
   // Only inside Centre Management. This nav used to render on every route
@@ -40,7 +52,9 @@ export function CentreTabs({ canSettings, canCreateCourse }: { canSettings: bool
   // record, and the Centre observer is defined as read-only across the whole
   // centre. Settings follows the capability its own page enforces, so the
   // row never offers a door that opens onto nothing.
-  const tabs = TABS.filter((t) => t.href !== "/centre/settings" || canSettings);
+  const tabs = TABS.filter(
+    (t) => (t.href !== "/centre/settings" || canSettings) && (t.href !== "/centre/concerns" || canConcerns)
+  );
   if (tabs.length === 0) return null;
 
   // Ramy, 2 Sep 2026: "Why is New course at the bottom? It should be on top...

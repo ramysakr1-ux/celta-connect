@@ -59,6 +59,12 @@ export type Capability =
   | "enrolment.view"
   | "import.run"
   | "assessorPack.export"
+  // Administration Handbook 16.1's internal complaints route, final rung: the
+  // concerns a candidate deliberately sent past their tutors. Deliberately
+  // absent from centre_manager -- that role is this app's READ-ONLY observer,
+  // not the "centre manager" the candidate's own form names, and a
+  // confidential complaint is not observation material.
+  | "concerns.manage"
   // -- Course administration (the Course Admin spec's own screens)
   | "courseAdmin.view"
   | "courseAdmin.invite"
@@ -128,6 +134,7 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
   //  Export the assessor pack." Cannot: course chat, grade or mark, see lesson
   //  feedback or CELTA 5 records.
   centre_administrator: {
+    "concerns.manage": true,
     "course.create": true,
     "course.editRecord": true,
     "centre.settings.edit": true,
@@ -237,6 +244,9 @@ const MATRIX: Record<CentreRole, Partial<Record<Capability, Grant>>> = {
     // the role exists for: somebody left, somebody is off sick.
     "course.reassignUnowned": true,
     "roles.grant": true,
+    // 16.1's "Director of School" rung. Every read here is logged like the
+    // owner's other interventions -- see LOGGED_FOR_OWNER below.
+    "concerns.manage": true,
     // Centre level: may intervene, and every one of these is logged.
     "centre.settings.edit": true,
     "payments.view": true,
@@ -293,10 +303,12 @@ export const LOGGED_FOR_OWNER: Capability[] = [
   "volunteers.manage",
   "import.run",
   "assessorPack.export",
+  "concerns.manage",
   "courseAdmin.invite",
   "courseAdmin.groups",
   "courseAdmin.settings",
   "timetable.publish",
+  "concerns.manage",
 ];
 
 /**
@@ -439,6 +451,7 @@ export const CAPABILITY_LABELS: Record<Capability, string> = {
   "courseAdmin.groups": "Form TP groups",
   "courseAdmin.settings": "Course-level settings",
   "timetable.publish": "Publish timetable",
+  "concerns.manage": "Read and answer concerns sent past the tutors",
 };
 
 /**
