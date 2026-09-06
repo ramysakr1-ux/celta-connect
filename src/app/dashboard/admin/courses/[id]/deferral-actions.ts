@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireCapability } from "@/lib/auth/require-capability";
+import { holdsCentre } from "@/lib/branch-scope";
 import type {
   DeferredAssignmentSnapshot,
   CarriedTpSnapshot,
@@ -35,7 +36,7 @@ export async function linkDeferralTransfer(formData: FormData): Promise<void> {
     .select("id, center_id, source_course_id, carried_assignments, carried_tps, carried_celta5_matrix, carried_celta5_record, destination_trainee_id")
     .eq("id", transferId)
     .maybeSingle();
-  if (!transfer || transfer.center_id !== admin.center_id || transfer.destination_trainee_id) {
+  if (!transfer || transfer.destination_trainee_id || !(await holdsCentre(admin, transfer.center_id))) {
     return;
   }
 
@@ -44,7 +45,7 @@ export async function linkDeferralTransfer(formData: FormData): Promise<void> {
     .select("id, course_id, role, center_id")
     .eq("id", destinationTraineeId)
     .maybeSingle();
-  if (!destination || destination.role !== "trainee" || destination.course_id !== courseId || destination.center_id !== admin.center_id) {
+  if (!destination || destination.role !== "trainee" || destination.course_id !== courseId || destination.center_id !== transfer.center_id) {
     return;
   }
 

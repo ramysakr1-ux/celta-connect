@@ -39,10 +39,42 @@ export interface BranchScope {
  * A filter can only ever narrow what someone already holds -- a branch id
  * they hold nothing at resolves to nothing, exactly as in /centre.
  */
-export async function resolveBranchScope(profile: Profile, branchParam?: string): Promise<BranchScope> {
+type HeldBy = { id: string; center_id: string; active_center_id?: string | null; role?: string };
+
+/**
+ * Every centre this person holds: home, granted, and an accepted invite.
+ * The same set resolveBranchScope reads from, exposed on its own for the
+ * places that check ONE row rather than narrow a query.
+ */
+export async function heldCenterIds(profile: HeldBy): Promise<string[]> {
   const ctx = await getCentreRoleContext(profile);
   const mine = ctx.availableCenterIds.filter(Boolean);
-  const held = mine.length > 0 ? mine : [profile.center_id].filter(Boolean);
+  return mine.length > 0 ? mine : [profile.center_id].filter(Boolean);
+}
+
+/**
+ * Does this person hold the centre a row belongs to?
+ *
+ * Audit, 6 Sep 2026: Course Admin's landing listed every held branch's
+ * courses, and its course page -- and fifteen server actions behind it --
+ * then compared the course's centre with profiles.center_id, the HOME
+ * branch only. So an admin holding two branches was offered the other
+ * branch's course and got a 404 on opening it; had it opened, every action
+ * would have said "Course not found". The build lock never saw it: it
+ * inspects query narrowing, and these were plain `!==` in JavaScript.
+ * scripts/check-branch-scope.mjs now flags that shape too.
+ *
+ * Membership, not equality: the question is never "is this my home
+ * centre", it is "is this a centre I hold".
+ */
+export async function holdsCentre(profile: HeldBy, centerId: string | null | undefined): Promise<boolean> {
+  if (!centerId) return false;
+  return (await heldCenterIds(profile)).includes(centerId);
+}
+
+export async function resolveBranchScope(profile: Profile, branchParam?: string): Promise<BranchScope> {
+  const ctx = await getCentreRoleContext(profile);
+  const held = await heldCenterIds(profile);
   const branch = branchParam && held.includes(branchParam) ? branchParam : null;
   const scope = branch ? [branch] : held;
 

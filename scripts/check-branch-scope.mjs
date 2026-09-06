@@ -35,6 +35,18 @@ const MENTIONS_CENTRE = /\b(?:to_|from_)?center_id\b/;
 // Passing the resolved scope is the correct shape, in any of its spellings.
 const SCOPED = /\bscope\b|availableCenterIds|\bmine\b/;
 const EXEMPT = /\/\/\s*single-centre:/;
+// A row's centre compared with the person's HOME centre in plain JavaScript.
+// Audit, 6 Sep 2026: the whole Course Admin course room did this -- the page
+// 404'd and fifteen actions refused a course from a held branch that the
+// landing had just listed -- and this lock walked past all of it because it
+// only knew query narrowing. Applies to writes too: the write exemption
+// below is about which centre you SAVE to, not about refusing a row you
+// hold. The right shape is holdsCentre() / heldCenterIds() from
+// src/lib/branch-scope.ts.
+// `trainer` is deliberately absent: in the course room it names a ROW (the
+// tutor being assigned), and comparing that with the course's own centre is
+// the correct shape, not the bug.
+const HOME_COMPARE = /\.center_id\s*[!=]==?\s*(?:admin|profile|staff|user|me|holder|viewer|session\.profile)\.center_id\b|\b(?:admin|profile|staff|user|me|holder|viewer)\.center_id\s*[!=]==?\s*\w+\.center_id\b/;
 
 /** Writes act on one centre by definition -- you save to a branch, not to all of them. */
 const isWriteFile = (f) => /actions\.ts$/.test(f);
@@ -51,12 +63,16 @@ function walk(dir, out = []) {
 const problems = [];
 for (const room of ROOMS) {
   for (const file of walk(room)) {
-    if (isWriteFile(file)) continue;
     const lines = readFileSync(file, "utf8").split("\n");
     lines.forEach((line, i) => {
+      const prev = lines[i - 1] ?? "";
+      if (HOME_COMPARE.test(line) && !(EXEMPT.test(line) || EXEMPT.test(prev))) {
+        problems.push(`${file}:${i + 1}  (compares a row's centre with the home centre -- use holdsCentre)\n    ${line.trim().slice(0, 110)}`);
+        return;
+      }
+      if (isWriteFile(file)) return;
       if (!(MENTIONS_CENTRE.test(line) && NARROWING.test(line))) return;
       if (SCOPED.test(line)) return;
-      const prev = lines[i - 1] ?? "";
       if (EXEMPT.test(line) || EXEMPT.test(prev)) return;
       problems.push(`${file}:${i + 1}\n    ${line.trim().slice(0, 110)}`);
     });

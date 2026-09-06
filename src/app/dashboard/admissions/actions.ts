@@ -18,6 +18,7 @@ import { regenerateSlotsForInterviewer } from "@/lib/interview-availability";
 import type { Database } from "@/lib/supabase/types";
 import { interviewWhen } from "@/lib/interview-time";
 import { sendInterviewConfirmationToApplicant } from "@/lib/interview-confirmation";
+import { holdsCentre } from "@/lib/branch-scope";
 
 /** "You are second on the waiting list" -- the design spells the rank out. */
 const ORDINAL_WORD: Record<number, string> = {
@@ -223,7 +224,7 @@ export async function bookInterviewSlot(formData: FormData): Promise<void> {
   if (!slotId) return;
 
   const { data: slot } = await supabase.from("interview_slots").select("id, center_id, booked_applicant_id").eq("id", slotId).maybeSingle();
-  if (!slot || slot.center_id !== staff.center_id || slot.booked_applicant_id) return;
+  if (!slot || slot.booked_applicant_id || !(await holdsCentre(staff, slot.center_id))) return;
 
   await supabase.from("interview_slots").update({ booked_applicant_id: applicantId }).eq("id", slotId);
   await supabase.from("applicants").update({ stage: "interview_booked" }).eq("id", applicantId).eq("center_id", staff.center_id);
@@ -276,7 +277,7 @@ export async function sendInterviewInviteManually(formData: FormData): Promise<v
 
   const admin = createAdminClient();
   const { data: applicant } = await admin.from("applicants").select("center_id").eq("id", applicantId).maybeSingle();
-  if (!applicant || applicant.center_id !== staff.center_id) return;
+  if (!applicant || !(await holdsCentre(staff, applicant.center_id))) return;
 
   const { sendInterviewInvite } = await import("@/lib/admissions-invite");
   await sendInterviewInvite(admin, applicantId);
@@ -634,7 +635,7 @@ export async function saveInterviewRecord(_prevState: FormState, formData: FormD
 
   const supabase = await createClient();
   const { data: applicant } = await supabase.from("applicants").select("center_id, full_name").eq("id", applicantId).maybeSingle();
-  if (!applicant || applicant.center_id !== staff.center_id) return { error: "Applicant not found." };
+  if (!applicant || !(await holdsCentre(staff, applicant.center_id))) return { error: "Applicant not found." };
 
   const { data: existing } = await supabase.from("interview_records").select("id").eq("applicant_id", applicantId).maybeSingle();
 

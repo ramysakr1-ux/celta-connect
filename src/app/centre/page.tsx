@@ -433,7 +433,7 @@ export default async function CentreOverviewPage({
                   {(volunteers ?? []).length} registrations
                 </span>
               </div>
-              <span className="text-xs font-semibold text-primary">See all →</span>
+              <span className="text-xs font-semibold text-primary">See all</span>
             </Link>
           ) : null}
 
@@ -451,7 +451,7 @@ export default async function CentreOverviewPage({
                     : ""}
                 </span>
               </div>
-              <span className="text-xs font-semibold text-primary">See all →</span>
+              <span className="text-xs font-semibold text-primary">See all</span>
             </Link>
           ) : null}
         </div>

@@ -7,6 +7,7 @@ import { isCourseRunning, notifyCourseTutorsOfChange } from "@/lib/course-change
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireCapabilityOrTrainer } from "@/lib/auth/require-capability";
 import { isMctOnCourse } from "@/lib/course-mct";
+import { holdsCentre, heldCenterIds } from "@/lib/branch-scope";
 
 // Named invitations, and the tutor role that travels with them.
 //
@@ -47,7 +48,7 @@ export async function inviteToCourse(_prev: InviteState, formData: FormData): Pr
 
   const admin = createAdminClient();
   const { data: course } = await admin.from("courses").select("id, center_id, name").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== profile.center_id) return { error: "Course not found." };
+  if (!course || !(await holdsCentre(profile, course.center_id))) return { error: "Course not found." };
   // Once a course is running, Course Admin isn't necessarily still watching
   // -- the MCT can invite/reassign their own tutors the same way, same
   // isMctOnCourse gate as every other MCT-only write this session.
@@ -163,7 +164,7 @@ export async function revokeInvitation(_prev: InviteState, formData: FormData): 
     .from("course_invitations")
     .update({ revoked_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("center_id", profile.center_id)
+    .in("center_id", await heldCenterIds(profile))
     .is("accepted_at", null);
   if (error) {
     // The message above is what the person reads; this is what we read.
@@ -204,7 +205,7 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
     .select("id, center_id, name, start_date, end_date")
     .eq("id", courseId)
     .maybeSingle();
-  if (!course || course.center_id !== profile.center_id) return { error: "Course not found." };
+  if (!course || !(await holdsCentre(profile, course.center_id))) return { error: "Course not found." };
   if (profile.role === "trainer" && !(await isMctOnCourse(admin, courseId, profile.id))) {
     return { error: "Only the main course tutor can do this." };
   }
@@ -249,7 +250,7 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
     // only the promotion would leave their demotion unexplained.
     if (outgoing?.profile_id) {
       await logManagementAction({
-        centerId: profile.center_id,
+        centerId: course.center_id,
         actorId: profile.id,
         courseId,
         action: "tutor.role_changed",
@@ -274,7 +275,7 @@ export async function changeTutorRole(_prev: InviteState, formData: FormData): P
   }
 
   await logManagementAction({
-    centerId: profile.center_id,
+    centerId: course.center_id,
     actorId: profile.id,
     courseId,
     action: "tutor.role_changed",
@@ -323,7 +324,7 @@ export async function updateOwnedAssignmentTypes(formData: FormData): Promise<vo
 
   const admin = createAdminClient();
   const { data: course } = await admin.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== profile.center_id) return;
+  if (!course || !(await holdsCentre(profile, course.center_id))) return;
   if (profile.role === "trainer" && !(await isMctOnCourse(admin, courseId, profile.id))) return;
 
   await admin.from("course_tutors").update({ owned_assignment_types: owned }).eq("id", courseTutorId).eq("course_id", courseId);

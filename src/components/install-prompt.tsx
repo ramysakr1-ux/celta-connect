@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 
 // specs/build-spec.md §7: "Offer 'Add to Home Screen' for trainees only
 // (daily use for five weeks)." Also rendered on the volunteer page, where
@@ -20,6 +21,15 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 // inline variant below gives a quiet, always-present way in that ignores
 // the snooze entirely -- so choosing "not now" once can never strand
 // somebody who changes their mind an hour later.
+//
+// Ramy, 6 Sep 2026, trainee view: "we don't need both... does it need to be
+// on every page or just the landing page?" -- and: all of it. So for
+// trainees the banner is the one door, shown on the landing page only
+// (`landingPath`), and the inline variant is gone from their footer. The
+// week-long snooze is what makes that safe: "Not now" brings it back on
+// the next landing after seven days rather than for never. Volunteers keep
+// the inline button -- a link in an old email is their only way in, and
+// that button is how it becomes something they keep.
 const DISMISS_KEY = "connect-a2hs-dismissed";
 const SNOOZE_DAYS = 7;
 
@@ -68,7 +78,11 @@ function snoozed(): boolean {
 
 const subscribeNothing = () => () => {};
 
-export function InstallPrompt({ variant = "banner" }: { variant?: "banner" | "inline" }) {
+export function InstallPrompt({ variant = "banner", landingPath }: { variant?: "banner" | "inline"; landingPath?: string }) {
+  // Only the banner is ever confined to one page; the inline variant is
+  // placed by hand where it belongs.
+  const pathname = usePathname();
+  const offLanding = variant === "banner" && landingPath !== undefined && pathname !== landingPath;
   // Everything this component decides on -- user agent, display mode,
   // localStorage -- exists only in the browser, so the server render and
   // the hydration render must both be "nothing". useSyncExternalStore is
@@ -193,7 +207,7 @@ export function InstallPrompt({ variant = "banner" }: { variant?: "banner" | "in
     );
   }
 
-  if (!installable || bannerSnoozed) return null;
+  if (offLanding || !installable || bannerSnoozed) return null;
 
   return (
     <div className="flex items-center justify-between gap-3 border-b border-border bg-accent/40 px-4 py-2 text-sm text-ink">

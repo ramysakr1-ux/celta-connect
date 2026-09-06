@@ -12,6 +12,9 @@ import { AssignmentCriteriaManager } from "@/app/dashboard/admin/settings/assign
 import { SettingsNav } from "@/app/dashboard/admin/settings/settings-nav";
 import type { DeliveryMode } from "@/lib/delivery-mode";
 import { LaptopOnlyGate } from "@/components/laptop-only-gate";
+import { formatDateTime } from "@/lib/format-date";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 const SETTINGS_NAV_BASE = [
   { href: "#centre-profile", label: "Centre profile" },
@@ -35,6 +38,9 @@ export default async function AdminSettingsPage({
   searchParams: Promise<{ google_connected?: string; google_error?: string }>;
 }) {
   const profile = await requireRole("admin");
+  // For the one timestamp on the page. toLocaleString() with no arguments
+  // rendered it as "9/6/2026, 5:12:33 PM" at UTC (audit, 6 Sep 2026).
+  const timeZone = (await getCachedCenter(profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const { google_connected, google_error } = await searchParams;
 
   const admin = createAdminClient();
@@ -227,7 +233,7 @@ export default async function AdminSettingsPage({
               <div className="mt-4 flex flex-col gap-4">
                 <p className="text-sm text-muted">
                   Connected{" "}
-                  {new Date(connection.connected_at).toLocaleString()}.
+                  {formatDateTime(connection.connected_at, timeZone)}.
                 </p>
                 <GoogleDriveTargetsForm
                   templateDocId={connection.template_doc_id}

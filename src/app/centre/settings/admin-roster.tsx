@@ -106,7 +106,7 @@ export function AdminRoster({
       <p className="text-xs text-muted">
         Nobody chooses their own role — the invitation carries it.{" "}
         <Link href="/centre/roles" className="text-primary hover:underline">
-          See the full permission breakdown per role →
+          See the full permission breakdown per role
         </Link>
       </p>
     </div>

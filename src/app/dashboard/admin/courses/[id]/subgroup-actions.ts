@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireCapabilityOrTrainer } from "@/lib/auth/require-capability";
 import { syncAssignmentDueDates } from "@/lib/assignment-due-dates";
+import { holdsCentre } from "@/lib/branch-scope";
 
 export interface FormState {
   error: string | null;
@@ -208,10 +209,10 @@ export async function unpairTpGroup(formData: FormData): Promise<void> {
  * course, with no tutor_role requirement -- "the MCT/ACT distinction
  * governs announcements, not teaching."
  */
-async function checkGroupAndCourse(profileCenterId: string | null, groupId: string, courseId: string): Promise<string | null> {
+async function checkGroupAndCourse(holder: { id: string; center_id: string; active_center_id?: string | null; role?: string }, groupId: string, courseId: string): Promise<string | null> {
   const admin = createAdminClient();
   const { data: course } = await admin.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== profileCenterId) return "Course not found.";
+  if (!course || !(await holdsCentre(holder, course.center_id))) return "Course not found.";
   const { data: group } = await admin.from("course_tp_groups").select("id").eq("id", groupId).eq("course_id", courseId).maybeSingle();
   if (!group) return "Group not found.";
   return null;
@@ -228,7 +229,7 @@ export async function addTpGroupTutorAssignment(_prevState: FormState, formData:
   if (!tutorId) return { error: "Choose a tutor." };
   if (!Number.isInteger(fromTp) || fromTp < 1 || fromTp > 8) return { error: "Choose which TP the tutor takes over from." };
 
-  const problem = await checkGroupAndCourse(profile.center_id, groupId, courseId);
+  const problem = await checkGroupAndCourse(profile, groupId, courseId);
   if (problem) return { error: problem };
 
   const admin = createAdminClient();
@@ -270,7 +271,7 @@ export async function removeTpGroupTutorAssignment(formData: FormData): Promise<
   const groupId = formData.get("group_id");
   const courseId = formData.get("course_id");
   if (typeof id !== "string" || typeof groupId !== "string" || typeof courseId !== "string") return;
-  if (await checkGroupAndCourse(profile.center_id, groupId, courseId)) return;
+  if (await checkGroupAndCourse(profile, groupId, courseId)) return;
 
   const admin = createAdminClient();
   await admin
@@ -290,7 +291,7 @@ export async function setTpGroupTutor(_prevState: FormState, formData: FormData)
   const courseId = formData.get("course_id");
   const meetingDays = (formData.get("meeting_days") as string | null)?.trim() || null;
   if (typeof groupId !== "string" || typeof courseId !== "string") return { error: "Something went wrong. Refresh and try again." };
-  const problem = await checkGroupAndCourse(profile.center_id, groupId, courseId);
+  const problem = await checkGroupAndCourse(profile, groupId, courseId);
   if (problem) return { error: problem };
 
   const { error } = await createAdminClient().from("course_tp_groups").update({ meeting_days: meetingDays }).eq("id", groupId).eq("course_id", courseId);

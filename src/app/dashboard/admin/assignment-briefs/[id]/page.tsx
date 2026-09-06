@@ -9,6 +9,7 @@ import {
   updateAssignmentTemplateSections,
 } from "@/app/dashboard/admin/assignment-briefs/actions";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
+import { holdsCentre } from "@/lib/branch-scope";
 
 export default async function AdminAssignmentBriefDetailPage({
   params,
@@ -24,7 +25,7 @@ export default async function AdminAssignmentBriefDetailPage({
 
   const { data: template } = await supabase.from("assignment_templates").select("*").eq("id", id).maybeSingle();
 
-  if (!template || template.center_id !== admin.center_id) {
+  if (!template || !(await holdsCentre(admin, template.center_id))) {
     notFound();
   }
 

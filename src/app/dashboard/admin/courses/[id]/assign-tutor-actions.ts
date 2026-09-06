@@ -7,6 +7,7 @@ import { requireCapabilityOrTrainer } from "@/lib/auth/require-capability";
 import { isMctOnCourse } from "@/lib/course-mct";
 import { TUTOR_ROLES, type TutorRole } from "@/lib/tutor-roles";
 import { checkConcurrentCourseAssignment, type CourseWindow } from "@/lib/concurrent-course-check";
+import { holdsCentre } from "@/lib/branch-scope";
 
 // for-claude-code-concurrent-course-checks.md: "assigning a trainer to a
 // second course adds to their assignments -- it does not remove them from
@@ -39,7 +40,7 @@ export async function assignExistingTutor(_prev: AssignTutorState, formData: For
     .select("id, center_id, is_part_time, start_date, end_date")
     .eq("id", courseId)
     .maybeSingle();
-  if (!targetCourse || targetCourse.center_id !== admin.center_id) return { error: "Course not found." };
+  if (!targetCourse || !(await holdsCentre(admin, targetCourse.center_id))) return { error: "Course not found." };
   if (admin.role === "trainer" && !(await isMctOnCourse(adminClient, courseId, admin.id))) {
     return { error: "Only the main course tutor can do this." };
   }
@@ -51,7 +52,7 @@ export async function assignExistingTutor(_prev: AssignTutorState, formData: For
     .select("id, full_name, role, center_id")
     .eq("id", profileId)
     .maybeSingle();
-  if (!trainer || trainer.role !== "trainer" || trainer.center_id !== admin.center_id) {
+  if (!trainer || trainer.role !== "trainer" || trainer.center_id !== targetCourse.center_id) {
     return { error: "That person isn't a tutor at this centre." };
   }
 
@@ -97,7 +98,7 @@ export async function assignExistingTutor(_prev: AssignTutorState, formData: For
         : { data: [] };
 
     const existingWindows: CourseWindow[] = (linkedCourses ?? [])
-      .filter((c) => c.center_id === admin.center_id)
+      .filter((c) => c.center_id === targetCourse.center_id)
       .map((c) => ({ id: c.id, is_part_time: c.is_part_time, start_date: c.start_date, end_date: c.end_date }));
 
     const result = checkConcurrentCourseAssignment(
@@ -141,7 +142,7 @@ export async function leaveSecondaryCourse(formData: FormData): Promise<void> {
 
   const adminClient = createAdminClient();
   const { data: course } = await adminClient.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== admin.center_id) return;
+  if (!course || !(await holdsCentre(admin, course.center_id))) return;
   if (admin.role === "trainer" && !(await isMctOnCourse(adminClient, courseId, admin.id))) return;
 
   await adminClient

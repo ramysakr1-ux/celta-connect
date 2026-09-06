@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireCapability } from "@/lib/auth/require-capability";
 import type { CarriedAssignmentSnapshot } from "@/lib/supabase/types";
+import { holdsCentre } from "@/lib/branch-scope";
 
 // specs/build-spec.md §3 "First-half withdrawal with a restart" -- the
 // destination side. Links a pending restart_transfers row (created on the
@@ -31,7 +32,7 @@ export async function linkRestartTransfer(formData: FormData): Promise<void> {
     .select("id, center_id, carried_assignments, destination_trainee_id")
     .eq("id", transferId)
     .maybeSingle();
-  if (!transfer || transfer.center_id !== admin.center_id || transfer.destination_trainee_id) {
+  if (!transfer || transfer.destination_trainee_id || !(await holdsCentre(admin, transfer.center_id))) {
     return;
   }
 
@@ -40,7 +41,7 @@ export async function linkRestartTransfer(formData: FormData): Promise<void> {
     .select("id, course_id, role, center_id")
     .eq("id", destinationTraineeId)
     .maybeSingle();
-  if (!destination || destination.role !== "trainee" || destination.course_id !== courseId || destination.center_id !== admin.center_id) {
+  if (!destination || destination.role !== "trainee" || destination.course_id !== courseId || destination.center_id !== transfer.center_id) {
     return;
   }
 

@@ -9,6 +9,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { can } from "@/lib/auth/centre-permissions";
 import type { DeliveryMode } from "@/lib/delivery-mode";
+import { holdsCentre } from "@/lib/branch-scope";
 
 export interface FormState {
   error: string | null;
@@ -241,14 +242,18 @@ export async function duplicateCourse(
     .select("id, center_id, start_date, delivery_mode")
     .eq("id", sourceCourseId)
     .maybeSingle();
-  if (!source || source.center_id !== admin.center_id) {
+  if (!source || !(await holdsCentre(admin, source.center_id))) {
     return { error: "Course not found." };
   }
 
   const { data: newCourse, error: createError } = await supabase
     .from("courses")
     .insert({
-      center_id: admin.center_id,
+      // The copy lives where the original does. `admin.center_id` is the
+      // home branch, and the source may sit at any branch this person holds
+      // (holdsCentre above) -- a copy landing at the wrong branch would be
+      // a course nobody there can see.
+      center_id: source.center_id,
       name,
       start_date: startDate,
       end_date: endDate,
@@ -346,7 +351,7 @@ export async function duplicateCourse(
   if (resources && resources.length > 0) {
     await supabase.from("resources").insert(
       resources.map((r) => ({
-        center_id: admin.center_id,
+        center_id: source.center_id,
         course_id: newCourse.id,
         title: r.title,
         file_url: r.file_url,

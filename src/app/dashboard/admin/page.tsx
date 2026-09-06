@@ -393,7 +393,7 @@ export default async function AdminDashboardPage({
             nothing to copy there.
           </p>
           <Link href="/dashboard/admin/settings" className="text-xs font-medium text-primary hover:underline">
-            Settings →
+            Settings
           </Link>
         </div>
 

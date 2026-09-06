@@ -12,6 +12,7 @@ import { joinLinkSender } from "@/lib/resend/client";
 import { sendApplicantEmail } from "@/lib/admissions-email";
 import { esc } from "@/lib/email-layout";
 import type { DeliveryMode } from "@/lib/delivery-mode";
+import { holdsCentre } from "@/lib/branch-scope";
 
 const VALID_DELIVERY_MODES: DeliveryMode[] = ["f2f", "online", "mixed"];
 
@@ -34,7 +35,7 @@ export async function updateDeliveryMode(formData: FormData): Promise<void> {
 
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== staff.center_id) return;
+  if (!course || !(await holdsCentre(staff, course.center_id))) return;
   if (staff.role !== "admin" && staff.course_id && !(await isMctOnCourse(supabase, staff.course_id, staff.id))) return;
 
   await supabase.from("courses").update({ delivery_mode: deliveryMode as DeliveryMode }).eq("id", courseId);
@@ -58,7 +59,7 @@ export async function updateTpMaterialPoolEnabled(formData: FormData): Promise<v
 
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== staff.center_id) return;
+  if (!course || !(await holdsCentre(staff, course.center_id))) return;
   if (staff.role !== "admin" && staff.course_id && !(await isMctOnCourse(supabase, staff.course_id, staff.id))) return;
 
   await supabase.from("courses").update({ tp_material_pool_enabled: enabled === "true" }).eq("id", courseId);
@@ -79,7 +80,7 @@ export async function updateApplicationSettings(formData: FormData): Promise<voi
 
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== admin.center_id) return;
+  if (!course || !(await holdsCentre(admin, course.center_id))) return;
 
   await supabase.from("courses").update({ accepting_applications: accepting, application_cap: cap }).eq("id", courseId);
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
@@ -108,7 +109,7 @@ export async function updateChatRetentionDays(formData: FormData): Promise<void>
 
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== staff.center_id) return;
+  if (!course || !(await holdsCentre(staff, course.center_id))) return;
   if (staff.role !== "admin" && staff.course_id && !(await isMctOnCourse(supabase, staff.course_id, staff.id))) return;
 
   await supabase
@@ -126,7 +127,7 @@ export async function updateAssessorVisitDate(formData: FormData): Promise<void>
 
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== admin.center_id) return;
+  if (!course || !(await holdsCentre(admin, course.center_id))) return;
 
   await supabase.from("courses").update({ assessor_visit_date: assessorVisitDate }).eq("id", courseId);
   // Same sync as the MCT's own assessor card (trainer/assessor-actions.ts) --
@@ -151,7 +152,7 @@ export async function updateEntryFormSentAt(formData: FormData): Promise<void> {
     .select("id, center_id, entry_form_sent_at")
     .eq("id", courseId)
     .maybeSingle();
-  if (!course || course.center_id !== admin.center_id) return;
+  if (!course || !(await holdsCentre(admin, course.center_id))) return;
 
   const next = entryFormSentAt ? new Date(entryFormSentAt).toISOString() : null;
   await supabase.from("courses").update({ entry_form_sent_at: next }).eq("id", courseId);
@@ -163,7 +164,7 @@ export async function updateEntryFormSentAt(formData: FormData): Promise<void> {
   const asDate = (v: string | null) => (v ? v.slice(0, 10) : null);
   if (asDate(course.entry_form_sent_at) !== asDate(next)) {
     await logManagementAction({
-      centerId: admin.center_id,
+      centerId: course.center_id,
       actorId: admin.id,
       courseId,
       action: next ? "entry_form.marked_sent" : "entry_form.cleared",
@@ -190,7 +191,7 @@ export async function updateAssessor(formData: FormData): Promise<void> {
 
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
-  if (!course || course.center_id !== admin.center_id) return;
+  if (!course || !(await holdsCentre(admin, course.center_id))) return;
 
   await supabase.from("courses").update({ assessor_name: assessorName, assessor_email: assessorEmail }).eq("id", courseId);
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
@@ -210,7 +211,7 @@ export async function regenerateJoinLink(formData: FormData): Promise<void> {
     .select("id, center_id")
     .eq("id", courseId)
     .maybeSingle();
-  if (!course || course.center_id !== admin.center_id) return;
+  if (!course || !(await holdsCentre(admin, course.center_id))) return;
 
   const update =
     role === "trainee"
@@ -235,7 +236,7 @@ export async function removeRosterMember(formData: FormData): Promise<void> {
     .eq("id", memberId)
     .maybeSingle();
 
-  if (!member || member.center_id !== admin.center_id || member.course_id !== courseId) return;
+  if (!member || member.course_id !== courseId || !(await holdsCentre(admin, member.center_id))) return;
 
   const adminClient = createAdminClient();
   await adminClient.auth.admin.deleteUser(memberId);
@@ -291,7 +292,7 @@ export async function sendJoinLinkEmail(
     .maybeSingle();
 
   const authorized =
-    course && (staff.role === "admin" ? course.center_id === staff.center_id : courseId === staff.course_id);
+    course && (staff.role === "admin" ? await holdsCentre(staff, course.center_id) : courseId === staff.course_id);
   if (!course || !authorized) {
     return { error: "Course not found.", sent: false };
   }
@@ -306,7 +307,9 @@ export async function sendJoinLinkEmail(
   // Subject leads with the centre, not the platform -- the recipient
   // recognises their centre; Connect is the tool underneath
   // (specs/rename-to-connect.md, "Copy that changes meaning" #2).
-  const { data: center } = await supabase.from("centers").select("name").eq("id", staff.center_id).maybeSingle();
+  // The course's own centre, not the sender's home branch -- they differ for
+  // an admin holding two branches, and the recipient is joining THIS one.
+  const { data: center } = await supabase.from("centers").select("name").eq("id", course.center_id).maybeSingle();
   const centerName = center?.name ?? "Your centre";
 
   // for-claude-code-email-delivery-tracking.md -- was a raw resend.emails.

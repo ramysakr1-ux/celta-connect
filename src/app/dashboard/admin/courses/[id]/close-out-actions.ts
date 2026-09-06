@@ -9,6 +9,7 @@ import { isMctOnCourse } from "@/lib/course-mct";
 import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rules";
 import { verifyCourseForCloseOut } from "@/lib/course-close-out/verify";
 import { exportCourseToDrive } from "@/lib/course-close-out/export";
+import { holdsCentre } from "@/lib/branch-scope";
 
 export interface FormState {
   error: string | null;
@@ -39,7 +40,7 @@ export async function toggleCambridgeGradesConfirmed(formData: FormData): Promis
   const courseId = formData.get("course_id");
   if (typeof courseId !== "string") return;
 
-  const course = await loadOwnedCourse(courseId, trainer.center_id);
+  const course = await loadOwnedCourse(courseId, trainer);
   if (!course) return;
 
   const supabase = await createClient();
@@ -81,7 +82,7 @@ export async function recordCertificateGrade(_prevState: FormState, formData: Fo
     gradeRaw && (CERTIFICATE_GRADES as readonly string[]).includes(gradeRaw) ? (gradeRaw as CertificateGrade) : null;
   if (gradeRaw && !grade) return { error: "Invalid grade." };
 
-  const course = await loadOwnedCourse(courseId, trainer.center_id);
+  const course = await loadOwnedCourse(courseId, trainer);
   if (!course) return { error: "Course not found." };
 
   const supabase = await createClient();
@@ -105,14 +106,14 @@ export async function recordCertificateGrade(_prevState: FormState, formData: Fo
   return { error: null };
 }
 
-async function loadOwnedCourse(courseId: string, centerId: string) {
+async function loadOwnedCourse(courseId: string, holder: { id: string; center_id: string; active_center_id?: string | null; role?: string }) {
   const supabase = await createClient();
   const { data: course } = await supabase
     .from("courses")
     .select("id, center_id")
     .eq("id", courseId)
     .maybeSingle();
-  if (!course || course.center_id !== centerId) return null;
+  if (!course || !(await holdsCentre(holder, course.center_id))) return null;
   return course;
 }
 
@@ -129,7 +130,7 @@ export async function initiateCloseOut(_prevState: FormState, formData: FormData
     return { error: "Something went wrong. Refresh and try again." };
   }
 
-  const course = await loadOwnedCourse(courseId, trainer.center_id);
+  const course = await loadOwnedCourse(courseId, trainer);
   if (!course) return { error: "Course not found." };
 
   const supabase = await createClient();
@@ -195,7 +196,7 @@ export async function confirmCloseOutReceipt(_prevState: FormState, formData: Fo
     return { error: "Type your name to confirm receipt." };
   }
 
-  const course = await loadOwnedCourse(courseId, trainer.center_id);
+  const course = await loadOwnedCourse(courseId, trainer);
   if (!course) return { error: "Course not found." };
 
   const supabase = await createClient();
@@ -252,7 +253,7 @@ export async function extendGracePeriod(_prevState: FormState, formData: FormDat
     return { error: "Pick a new deletion date." };
   }
 
-  const course = await loadOwnedCourse(courseId, trainer.center_id);
+  const course = await loadOwnedCourse(courseId, trainer);
   if (!course) return { error: "Course not found." };
 
   const supabase = await createClient();
@@ -306,7 +307,7 @@ export async function exportCloseOut(_prevState: FormState, formData: FormData):
     return { error: "Something went wrong. Refresh and try again." };
   }
 
-  const course = await loadOwnedCourse(courseId, trainer.center_id);
+  const course = await loadOwnedCourse(courseId, trainer);
   if (!course) return { error: "Course not found." };
 
   const supabase = await createClient();

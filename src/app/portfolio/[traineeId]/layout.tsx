@@ -286,7 +286,7 @@ export default async function PortfolioLayout({
           the right. Attendance hours (previously a StatBar) has no slot in this
           layout and isn't shown here any more -- still visible on the
           roster table and Today's "Needs you" alerts. */}
-      {showTraineeNav ? <InstallPrompt /> : null}
+      {showTraineeNav ? <InstallPrompt landingPath={`/portfolio/${trainee.id}`} /> : null}
 
       {showTraineeNav ? (
         // Ramy, 2026-08-24: "think of this as one big sheet of paper... it
@@ -485,20 +485,11 @@ export default async function PortfolioLayout({
             .filter(Boolean)
             .join(" · ")}
         </span>
-        {/* The always-available install entry, for trainees this time.
-        
-            Ramy: "I want to make sure that the shortcut on your phone, on
-            your desktop, that option is also for the trainees, because I
-            don't see it." He could not: trainees had only the banner
-            variant, gated on beforeinstallprompt -- an event Chrome
-            withholds behind its own heuristics and Firefox and desktop
-            Safari never fire -- so for most people it never appeared. Same
-            fault already fixed for volunteers.
-        
-            Five weeks of daily use is the original reason build-spec §7
-            wanted this offered to trainees at all; the banner stays for the
-            first visit, and this is the way back to it afterwards. */}
-        {showTraineeNav ? <InstallPrompt variant="inline" /> : null}
+        {/* The inline install button sat here from 30 Aug to 6 Sep 2026 as
+            the way back after "Not now". It ended up almost on top of the
+            mobile nav pill, and with the banner's week-long snooze there is
+            a way back already -- so the banner above is the one door, on
+            the landing page only (Ramy, 6 Sep 2026). */}
       </footer>
 
       {showTraineeNav ? <TraineeMobileNav traineeId={trainee.id} /> : null}

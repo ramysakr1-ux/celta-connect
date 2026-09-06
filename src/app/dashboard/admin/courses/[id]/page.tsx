@@ -12,6 +12,7 @@ import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 import { computeApplicantCounts, summarizeApplicantsForCard, MIN_CANDIDATES } from "@/lib/admissions-counts";
+import { holdsCentre } from "@/lib/branch-scope";
 
 // for-claude-code-course-admin-landing-and-admissions.md §2 +
 // for-claude-code-course-admin-page-not-rebuilt.md: the old kitchen-sink
@@ -37,11 +38,14 @@ export default async function CourseAdminDetailPage({
   const supabase = await createClient();
 
   const { data: course } = await supabase.from("courses").select("*").eq("id", id).maybeSingle();
-  if (!course || course.center_id !== admin.center_id) notFound();
+  // Held, not home: see holdsCentre. Everything below that names a centre
+  // uses the COURSE's -- the Appian link and the clock belong to the branch
+  // the course runs at, not to wherever the admin's own record lives.
+  if (!course || !(await holdsCentre(admin, course.center_id))) notFound();
 
   const [{ data: center }, { data: tutorRows }, { data: applicants }] = await Promise.all([
     // single-centre: the Appian URL of the centre this course belongs to
-    supabase.from("centers").select("appian_url").eq("id", admin.center_id).maybeSingle(),
+    supabase.from("centers").select("appian_url").eq("id", course.center_id).maybeSingle(),
     supabase.from("course_tutors").select("id, profile_id, tutor_role, verified_at").eq("course_id", id).is("left_at", null),
     supabase.from("applicants").select("id, full_name, stage, special_requirements").eq("intake_course_id", id),
   ]);
@@ -66,8 +70,11 @@ export default async function CourseAdminDetailPage({
   const visibleCandidateRows = candidateRows.slice(0, CANDIDATE_ROW_LIMIT);
   const hiddenCandidateCount = candidateRows.length - visibleCandidateRows.length;
 
-  const timeZone = (await getCachedCenter(admin.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const today = toLocalIso(new Date(), timeZone);
+  // The eyebrow printed "2026-08-17 – 2026-09-11" raw while the landing it is
+  // reached from says "17 Aug – 11 Sept" (audit, 6 Sep 2026).
+  const calendarDay = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
   const courseState = computeCourseState(course.start_date, course.end_date, today);
   const weekOf = courseState === "running" ? computeWeekOf(course.start_date, course.end_date, today) : null;
 
@@ -83,7 +90,7 @@ export default async function CourseAdminDetailPage({
       <div className="card card-garnet flex items-start justify-between gap-4 p-6">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">
-            {course.start_date} &ndash; {course.end_date}
+            {calendarDay(course.start_date)} &ndash; {calendarDay(course.end_date)}
             {weekOf ? ` · ${weekOf}` : ""}
           </p>
           <h1 className="mt-0.5 font-serif text-xl text-ink">{course.name}</h1>

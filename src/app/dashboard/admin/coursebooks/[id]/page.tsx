@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GenerateButton } from "@/components/tp-library/generate-button";
 import { TpNumberTabs } from "@/components/tp-library/tp-number-tabs";
 import { updateTpPoint, setTpPointStatus } from "@/app/dashboard/admin/coursebooks/actions";
+import { holdsCentre } from "@/lib/branch-scope";
 
 export default async function AdminCoursebookDetailPage({
   params,
@@ -20,7 +21,7 @@ export default async function AdminCoursebookDetailPage({
     .eq("id", id)
     .maybeSingle();
 
-  if (!coursebook || coursebook.center_id !== admin.center_id) {
+  if (!coursebook || !(await holdsCentre(admin, coursebook.center_id))) {
     notFound();
   }
 

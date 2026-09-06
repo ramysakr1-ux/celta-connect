@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireCapability } from "@/lib/auth/require-capability";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { holdsCentre } from "@/lib/branch-scope";
 
 export interface FormState {
   error: string | null;
@@ -236,7 +237,7 @@ export async function updateCourseTutor(
   const { data: row } = await admin.from("course_tutors").select("id, course_id").eq("id", id).maybeSingle();
   if (!row) return { error: "Tutor record not found." };
   const { data: course } = await admin.from("courses").select("center_id").eq("id", row.course_id).maybeSingle();
-  if (!course || course.center_id !== profile.center_id) {
+  if (!course || !(await holdsCentre(profile, course.center_id))) {
     return { error: "Tutor record not found." };
   }
 

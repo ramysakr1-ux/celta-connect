@@ -24,6 +24,7 @@ import { WaitingListForm } from "@/app/dashboard/admissions/[id]/waiting-list-fo
 import { ReferForm, type ReferDestination } from "@/app/dashboard/admissions/[id]/refer-form";
 import { RequestReferralForm } from "@/app/dashboard/admissions/[id]/request-referral-form";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { holdsCentre } from "@/lib/branch-scope";
 
 export default async function ApplicantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const staff = await requireAdmissionsHandler();
@@ -31,7 +32,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
   const supabase = await createClient();
 
   const { data: applicant } = await supabase.from("applicants").select("*").eq("id", id).maybeSingle();
-  if (!applicant || applicant.center_id !== staff.center_id) notFound();
+  // Held, not home -- see holdsCentre (audit, 6 Sep 2026).
+  if (!applicant || !(await holdsCentre(staff, applicant.center_id))) notFound();
 
   const [
     { data: intake },

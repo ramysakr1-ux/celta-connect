@@ -32,6 +32,8 @@ export default async function ClosedCoursesPage({
     .in("center_id", scope)
     .order("end_date", { ascending: false });
 
+  // Was "Ended 2026-05-09" -- the one raw ISO date on the page (audit, 6 Sep 2026).
+  const calendarDay = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
   const closedCourses = (courses ?? []).filter((c) => computeCourseState(c.start_date, c.end_date, today) === "closed");
 
   return (
@@ -50,7 +52,7 @@ export default async function ClosedCoursesPage({
               className="admin-hover flex items-center justify-between gap-4 border-b border-border-faint px-5 py-3.5 transition-colors duration-150 last:border-none admin-hover-fill"
             >
               <p className="truncate text-sm font-semibold text-ink">{course.name}</p>
-              <span className="shrink-0 text-xs text-muted">Ended {course.end_date}</span>
+              <span className="shrink-0 text-xs text-muted">Ended {calendarDay(course.end_date)}</span>
             </Link>
           ))}
         </div>
