@@ -72,7 +72,7 @@ export function TintBlock({
 
       {heavy ? (
         <>
-          <div className="flex flex-wrap items-baseline gap-x-3 border-b border-border-faint pb-1.5">
+          <div className="flex flex-wrap items-baseline gap-x-3 border-b hub-hairline pb-1.5">
             <h3 className="font-serif text-[16px] font-semibold text-ink">What the assessor does with them</h3>
             <span
               className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.07em] uppercase"
@@ -83,7 +83,7 @@ export function TintBlock({
           </div>
           <ul className="flex flex-col">
             {TINT_ASSESSOR_DUTIES.map((d) => (
-              <li key={d.label} className="flex flex-col gap-[2px] border-t border-border-faint py-2.5 first:border-t-0 first:pt-0">
+              <li key={d.label} className="flex flex-col gap-[2px] border-t hub-hairline py-2.5 first:border-t-0 first:pt-0">
                 <p className="text-[13px] font-semibold text-ink">{d.label}</p>
                 {d.detail ? <p className="text-xs leading-[1.5] text-muted">{d.detail}</p> : null}
               </li>
@@ -99,7 +99,7 @@ export function TintBlock({
         </>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-border-faint pt-3">
+      <div className="flex flex-wrap items-center gap-3 border-t hub-hairline pt-3">
         {/* The record has its own tab in this hub; this is a pointer to it, not
             a second copy of the door. */}
         <Link href="/trainer/trainer-in-training" className="text-[12.5px] font-semibold text-primary hover:underline">

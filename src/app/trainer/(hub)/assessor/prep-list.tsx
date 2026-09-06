@@ -24,7 +24,7 @@ function Row({ item, pending, onToggle }: { item: PrepItemState; pending: boolea
   const tone = ready ? TEAL : na ? "var(--color-muted)" : AMBER;
 
   return (
-    <li className="flex flex-col gap-[3px] border-t border-border-faint py-2.5">
+    <li className="flex flex-col gap-[3px] border-t hub-hairline py-2.5">
       <div className="flex items-baseline justify-between gap-3">
         <span className="flex min-w-0 items-baseline gap-2">
           {item.derived ? (
@@ -88,7 +88,10 @@ export function PrepList({ summary, deadline }: { summary: PrepSummary; deadline
   const allReady = summary.outstanding.length === 0;
 
   return (
-    <section className="flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5">
+    <section
+      className="trainer-hover flex flex-col gap-4 rounded-[14px] border border-border bg-card px-[22px] py-5"
+      style={{ borderTop: "3px solid var(--hub-accent)" }}
+    >
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div className="flex flex-col gap-[3px]">
           <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">What the assessor needs from you</p>
@@ -117,7 +120,7 @@ export function PrepList({ summary, deadline }: { summary: PrepSummary; deadline
         ))}
       </ul>
 
-      <p className="border-t border-border-faint pt-3 text-[11.5px] text-muted">
+      <p className="border-t hub-hairline pt-3 text-[11.5px] text-muted">
         Ticks are yours and Course Admin&apos;s — whoever prepared the thing can say it is ready, and their name goes on it.
         The items Connect can see for itself have no tick: the reading underneath each one is what it looked at.
       </p>

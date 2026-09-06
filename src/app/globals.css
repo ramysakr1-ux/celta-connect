@@ -492,6 +492,22 @@ h6 {
   .hub-v4 .roster-row:hover {
     box-shadow: inset 0 0 0 1px var(--hub-accent), inset 4px 0 0 var(--hub-accent);
   }
+  /* Ramy, 6 Sep 2026: "all the lines inside the cards... those lines should
+     have one color running through it." Same request he made on the assessor's
+     own page in August -- "those lines in between could have a bit of a
+     colour, a soft colour, to distinguish them" -- so the same answer, made
+     consistent: a well-diluted version of the room's OWN accent rather than a
+     neutral hairline or a new colour.
+
+     Reads --hub-accent, so it is garnet in an MCT's hub and gold in an ACT's
+     with nothing else to change. Use INSTEAD of border-border-faint, never
+     beside it: Tailwind v4's utilities layer outranks this components-layer
+     rule regardless of source order, so a stray border-border-faint would
+     silently swallow it. */
+  .hub-hairline {
+    border-color: color-mix(in oklab, var(--hub-accent, var(--color-border)) 28%, transparent);
+  }
+
   .trainer-hover {
     transition: box-shadow 150ms ease;
   }

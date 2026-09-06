@@ -59,7 +59,7 @@ function Card({ c, muted = false }: { c: RecommendedCandidate; muted?: boolean }
       <p className="text-[12px] leading-[1.45] text-pretty" style={{ color: c.provenance === "handbook" ? "var(--color-ink)" : "var(--color-muted)" }}>
         {c.why}
       </p>
-      <div className="border-t border-border-faint pt-2">
+      <div className="border-t hub-hairline pt-2">
         <Provenance kind={c.provenance} />
       </div>
     </div>
@@ -68,7 +68,7 @@ function Card({ c, muted = false }: { c: RecommendedCandidate; muted?: boolean }
 
 function Heading({ title, cite, note }: { title: string; cite: string; note?: string }) {
   return (
-    <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-border-faint pb-1.5 first:mt-0">
+    <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b hub-hairline pb-1.5 first:mt-0">
       <h3 className="font-serif text-[16px] font-semibold text-ink">{title}</h3>
       <span className="rounded-full px-2 py-[2px] text-[10px] font-bold tracking-[0.07em] uppercase" style={{ background: "var(--hub-accent)", color: "var(--color-primary-foreground)" }}>
         {cite}
@@ -258,7 +258,7 @@ export function RecommendationPanel({
                     placeholder="Nadia asked to be observed, and Priya was observed at the last visit…"
                   />
                 </label>
-                <p className="border-t border-border-faint pt-2.5 text-[11.5px] text-muted">
+                <p className="border-t hub-hairline pt-2.5 text-[11.5px] text-muted">
                   Recorded against the visit with your name and today&apos;s date, and kept &mdash; a later change adds a
                   row rather than replacing this one.
                 </p>
