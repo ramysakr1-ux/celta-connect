@@ -10,6 +10,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // mirror the (hub) layout uses to decide whether the tab exists at all,
 // and the TinT page uses to pick which records to show. Uses the admin
 // client because an assessor session has no auth.uid() for RLS to key on.
+//
+// Widened 6 Sep 2026 from "a touring assessor" to any assessor session.
+// Reading the trainer-in-training's e-portfolio is a DUTY where moderation
+// applies -- TinT Handbook 5.2.2 lists it alongside observing their input and
+// their TP supervision -- so reaching it only through the optional platform
+// tour had a required task sitting behind a sightseeing link. Ramy, 6 Sep
+// 2026: "let's open the door to the trainer in training through the assessor."
 
 export interface TitRowLite {
   id: string;
@@ -34,7 +41,7 @@ const access = cache(
     profileId: string | null,
     role: string | null,
     isMct: boolean,
-    assessorTour: boolean
+    assessorSession: boolean
   ): Promise<{ all: TitRowLite[]; visible: TitRowLite[]; grantedIds: Set<string> }> => {
     const none = { all: [], visible: [], grantedIds: new Set<string>() };
     if (!courseId) return none;
@@ -49,9 +56,9 @@ const access = cache(
     if (all.length === 0) return none;
 
     if (!profileId) {
-      // An assessor on the tour sees everything, read-only; anyone else
-      // without a profile sees nothing.
-      return assessorTour ? { all, visible: all, grantedIds: new Set() } : none;
+      // An assessor holding a token for this course sees everything,
+      // read-only; anyone else without a profile sees nothing.
+      return assessorSession ? { all, visible: all, grantedIds: new Set() } : none;
     }
     if (role === "admin" || role === "platform_owner" || isMct) return { all, visible: all, grantedIds: new Set() };
 
@@ -67,11 +74,11 @@ const access = cache(
   }
 );
 
-export function trainerInTrainingAccess(input: { courseId: string | null; profile: TitViewer | null; assessorTour: boolean }) {
-  return access(input.courseId, input.profile?.id ?? null, input.profile?.role ?? null, input.profile?.isMct ?? false, input.assessorTour);
+export function trainerInTrainingAccess(input: { courseId: string | null; profile: TitViewer | null; assessorSession: boolean }) {
+  return access(input.courseId, input.profile?.id ?? null, input.profile?.role ?? null, input.profile?.isMct ?? false, input.assessorSession);
 }
 
-export async function canSeeTrainerInTraining(input: { courseId: string | null; profile: TitViewer | null; assessorTour: boolean }): Promise<boolean> {
+export async function canSeeTrainerInTraining(input: { courseId: string | null; profile: TitViewer | null; assessorSession: boolean }): Promise<boolean> {
   const { visible } = await trainerInTrainingAccess(input);
   return visible.length > 0;
 }

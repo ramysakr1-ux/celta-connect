@@ -33,6 +33,11 @@ const TABS = [
 // decides (`tint` prop); migration 0267's tit_access_grants is the source.
 const TINT_TAB = { href: "/trainer-in-training", label: "Trainer-in-Training" } as const;
 
+// An assessor's own trimmed tab set carries it too, when the course has one.
+// TinT Handbook 5.2.2 makes reading the e-portfolio a duty where moderation
+// applies, so it belongs beside the pack's other required reading rather than
+// only on the optional tour (Ramy, 6 Sep 2026).
+
 // Grades Report is assessor-facing material, not an operational trainer
 // tool -- unlike the rest of TABS, it stays visible for assessor sessions
 // (rosterOnly) too.
@@ -83,7 +88,7 @@ export function TrainerTabs({
 }) {
   const pathname = usePathname();
   const tabs = rosterOnly
-    ? [TABS[0], ATTENDANCE_REGISTER_TAB, GRADES_REPORT_TAB]
+    ? [TABS[0], ATTENDANCE_REGISTER_TAB, ...(tint ? [TINT_TAB] : []), GRADES_REPORT_TAB]
     : tourMode
       ? [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[4], ...(tint ? [TINT_TAB] : []), GRADES_REPORT_TAB]
       : [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[3], ...(mct ? [ASSESSOR_TAB] : []), TABS[4], ...(tint ? [TINT_TAB] : []), GRADES_REPORT_TAB];

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { trainerInTrainingAccess } from "@/lib/tit-access";
 import { TitWorkspace } from "@/app/trainer/(hub)/trainer-in-training/workspace";
 import { AccessPanel, type AccessGrantView } from "@/app/trainer/(hub)/trainer-in-training/access-panel";
@@ -23,8 +23,6 @@ export default async function TrainerInTrainingPage() {
       : null;
   const assessorCourseId = !trainer ? await getAssessorCourseId() : null;
   if (!trainer && !assessorCourseId) redirect("/login");
-  const tour = assessorCourseId && !trainer ? await isAssessorTourMode() : false;
-  if (assessorCourseId && !trainer && !tour) redirect("/assessor");
 
   const courseId = trainer?.course_id ?? assessorCourseId;
   if (!courseId) {
@@ -47,7 +45,7 @@ export default async function TrainerInTrainingPage() {
   const access = await trainerInTrainingAccess({
     courseId,
     profile: trainer ? { id: trainer.id, role: trainer.role, isMct } : null,
-    assessorTour: tour,
+    assessorSession: Boolean(assessorCourseId),
   });
 
   const heading = (
@@ -62,9 +60,13 @@ export default async function TrainerInTrainingPage() {
     return (
       <div className="flex flex-col gap-4">
         {heading}
+        {/* An assessor can reach this page now (the pack links to it where the
+            course has a trainer-in-training), so the empty state must not tell
+            them to go and set one up -- that is the centre's job, not theirs. */}
         <div className="sheet text-sm text-muted">
-          No trainer-in-training on this course. Set someone as one, with a verification date and a supervisor, on the Tutors panel in Centre
-          settings.
+          {trainer
+            ? "No trainer-in-training on this course. Set someone as one, with a verification date and a supervisor, on the Tutors panel in Centre settings."
+            : "No trainer-in-training on this course, so there is nothing here to moderate."}
         </div>
       </div>
     );

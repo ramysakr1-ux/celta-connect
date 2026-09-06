@@ -197,6 +197,17 @@ export default async function AssessorPage({
   // since briefs are identical for the whole cohort.
   const firstCandidateId = candidates[0]?.traineeId ?? null;
 
+  // Does this course have a trainer-in-training at all? The pack only shows
+  // the e-portfolio row when it does -- on every other course there is nothing
+  // to moderate and the row would be a dead link.
+  const { count: tintCount } = await admin
+    .from("course_tutors")
+    .select("id", { count: "exact", head: true })
+    .eq("course_id", courseId)
+    .eq("is_trainer_in_training", true)
+    .is("left_at", null);
+  const hasTrainerInTraining = (tintCount ?? 0) > 0;
+
   // Ramy, 30 Aug 2026: "those numbers that are hard to [remember]. Let's get
   // them down somewhere. Maybe the assessor pack will contain them." Derived
   // against this course rather than printed as a static list -- Handbook
@@ -979,6 +990,23 @@ export default async function AssessorPage({
               {COHORT_DOCUMENTS.map((name) => (
                 <DocRow key={name} label={name} href={COHORT_DOC_HREF(name)} status="Live" />
               ))}
+              {/* Ramy, 6 Sep 2026: "let's open the door to the trainer in
+                  training through the assessor."
+
+                  Only when the course has one. Where the centre's scheme
+                  requires assessor moderation, the TinT Handbook (5.2.2) makes
+                  reading this e-portfolio a duty, alongside observing their
+                  input and their TP supervision -- and until now the only way
+                  in was the optional platform tour, which is the wrong door
+                  for a required task. The record itself is unchanged and
+                  read-only; this is a link to it. */}
+              {hasTrainerInTraining ? (
+                <DocRow
+                  label="Trainer-in-training e-portfolio"
+                  href="/trainer/trainer-in-training"
+                  status="Moderation may apply — TinT Handbook 5.2.2"
+                />
+              ) : null}
             </Panel>
 
             {moodleSchedule.length > 0 ? (

@@ -80,12 +80,14 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   const actPreview = isMctReal && (await isActPreview());
   const isMct = isMctReal && !actPreview;
   // Trainer-in-Training tab: only for the people the record concerns, and
-  // only when the course has one. A touring assessor sees it view-only.
+  // only when the course has one. Any assessor session sees it view-only --
+  // where moderation applies, reading the e-portfolio is a duty (TinT
+  // Handbook 5.2.2), not something to find on the optional tour.
   const assessorCourseId = isAssessor ? await getAssessorCourseId() : null;
   const tintVisible = await canSeeTrainerInTraining({
     courseId: profile?.course_id ?? assessorCourseId ?? null,
     profile: profile ? { id: profile.id, role: profile.role, isMct } : null,
-    assessorTour: tourMode,
+    assessorSession: Boolean(assessorCourseId),
   });
   // design_handoff_trainer_homepage_v4, Design Tokens: "MCT accent -- garnet
   // oklch(42% 0.13 27), deep oklch(36% 0.12 27); ACT accent -- gold
