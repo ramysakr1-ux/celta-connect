@@ -118,6 +118,13 @@ export function RecommendationPanel({
         teaches {visitDateLabel ? `on ${visitDateLabel}` : "on the visit day"}, so that at least one observed candidate is
         also being read. Every line says whether it comes from the Handbook or from custom.
       </p>
+      {/* Ramy, 30 Aug 2026, on the assessor's own page: "I'm not sure what
+          those numbers are. 15.1, 14.2. What are they?" A bare § is only
+          meaningful to someone who already knows which document it belongs to.
+          Said once here rather than on every pill. */}
+      <p className="text-xs text-muted">
+        § numbers are the CELTA Administration Handbook, June 2025, so any line here can be checked rather than taken on trust.
+      </p>
 
       <Heading
         title="Read in full"
@@ -159,10 +166,20 @@ export function RecommendationPanel({
             {rec.observe.map((c) => (
               <Card key={c.traineeId} c={c} />
             ))}
-            {rec.alsoTeaching.map((c) => (
-              <Card key={c.traineeId} c={c} muted />
-            ))}
           </div>
+          {/* Ramy, 6 Sep 2026: "why is the Pass there as well?" -- the four
+              teaching candidates Connect does NOT suggest were getting a full
+              card each, so six people appeared here and again in the cohort
+              below. They are named, because which two get observed is agreed
+              on the day and you may want a different one; they do not need a
+              card twice on the same page. */}
+          {rec.alsoTeaching.length > 0 ? (
+            <p className="mt-2.5 text-[12px] leading-[1.5] text-muted">
+              <b className="text-ink">Also teaching that day:</b>{" "}
+              {rec.alsoTeaching.map((c) => c.name).join(", ")}. Their plans are in the pack either way, and the assessor can
+              choose any of them on the day.
+            </p>
+          ) : null}
 
           <div
             className="mt-3.5 rounded-[8px] border px-4 py-3 text-[12.5px] leading-[1.55] text-ink"

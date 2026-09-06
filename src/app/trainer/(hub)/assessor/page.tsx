@@ -208,6 +208,25 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
     : { data: [] as { id: string; full_name: string }[] };
   const tintNameById = new Map((tintPeople ?? []).map((p) => [p.id, p.full_name]));
 
+  // Ramy, 6 Sep 2026: "a long line of names saying the pack cannot open yet --
+  // what is this?" It was one line per issue, and on a mid-course cohort that
+  // is eleven near-identical lines of "Stage 2 record not signed off". Grouped
+  // by reason instead: the reason is the thing you act on, the names are the
+  // detail. Ordered by how many candidates each reason holds, so the one
+  // blocking the most reads first.
+  const issuesByReason = new Map<string, string[]>();
+  for (const issue of readiness.issues) {
+    issuesByReason.set(issue.reason, [...(issuesByReason.get(issue.reason) ?? []), issue.traineeName]);
+  }
+  const groupedIssues = [...issuesByReason.entries()]
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([reason, names]) => ({
+      reason,
+      names,
+      // Past four, the names stop being readable and the count is the point.
+      label: names.length > 4 ? `${names.length} candidates` : names.join(", "),
+    }));
+
   const nameById = new Map(cards.map((c) => [c.traineeId, c.name]));
   // The chooser is a tutor, not a candidate, so it is not in `rows`.
   const { data: chooser } = lastChoice
@@ -317,12 +336,9 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
             <div className="flex flex-wrap items-center gap-2">
               <AssessorSelectionButton candidates={candidates} />
               <AssessorLinkButton />
-              <Link
-                href="/trainer/grades-report"
-                className="rounded-[6px] border border-border px-3 py-1.5 text-sm text-ink trainer-hover-fill"
-              >
-                Grade form
-              </Link>
+              {/* Grade form was here as well as in the top nav -- the same
+                  duplicate door Ramy took off Teaching Practice on 6 Sep 2026.
+                  One room, one door. */}
               {packOpens ? (
                 <a
                   href="/trainer/assessor/preview"
@@ -341,9 +357,10 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
               <div className={`rounded-[10px] px-4 py-3 text-xs ${preview === "not-ready" ? "bg-card-inset text-ink" : "text-muted"}`}>
                 <p className="font-semibold">The pack cannot open yet -- the link, the email and the preview all wait for this:</p>
                 <ul className="mt-1.5 flex flex-col gap-1">
-                  {readiness.issues.map((i, n) => (
-                    <li key={n}>
-                      {i.traineeName}: {i.reason}
+                  {groupedIssues.map((g) => (
+                    <li key={g.reason}>
+                      <span className="font-semibold">{g.reason}</span> &mdash;{" "}
+                      <span title={g.names.join(", ")}>{g.label}</span>
                     </li>
                   ))}
                 </ul>
@@ -351,7 +368,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
             ) : (
               <p className="text-xs text-muted">
                 {liveToken && !readiness.ready
-                  ? `The link is already issued, so it, the email and the preview all open -- but ${readiness.issues.length} portfolio item${readiness.issues.length === 1 ? " is" : "s are"} still incomplete: ${readiness.issues.map((i) => `${i.traineeName}: ${i.reason}`).join("; ")}. `
+                  ? `The link is already issued, so it, the email and the preview all open -- but ${readiness.issues.length} portfolio item${readiness.issues.length === 1 ? " is" : "s are"} still incomplete: ${groupedIssues.map((g) => `${g.reason} (${g.label})`).join("; ")}. `
                   : ""}
                 The preview opens the pack through the same link the assessor gets, without accepting the terms on their behalf. &ldquo;Exit
                 preview&rdquo; at the top brings you back here.

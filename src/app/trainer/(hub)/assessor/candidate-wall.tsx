@@ -21,7 +21,11 @@ const SECTION_META: Record<WallSectionId, { heading: string; note: string; edge:
   observe: { heading: "You will watch these teach", note: "", edge: BROWN },
   fail: { heading: "Fail or potential Fail", note: "read before anything else", edge: RED, headingColor: RED },
   passA: { heading: "Potential Pass A", note: "recommended", edge: "transparent" },
-  centre: { heading: "The centre's selection", note: "", edge: "transparent" },
+  // Ramy, 6 Sep 2026: "the centre's selection, five candidates -- what does
+  // that mean?" It read as though only those five had been put forward, when
+  // every candidate on the course had been. They are simply the ones no rule
+  // singles out.
+  centre: { heading: "Everyone else", note: "", edge: "transparent" },
   withdrawn: { heading: "Withdrawn", note: "", edge: "transparent", muted: true },
 };
 
