@@ -26,7 +26,17 @@ const TP_NUMBERS = [1, 2, 3, 4, 5, 6];
 
 export default async function TrainerRotationPage() {
   const trainer = await requireRole(["trainer", "admin"]);
-  const courseId = trainer.course_id!;
+  // Every admin at a centre has course_id null -- they hold the centre, not a
+  // course -- so this is a page they can genuinely reach with nothing to show.
+  // The `!` said otherwise: hubReadClient's null === null passed, every query
+  // narrowed to course_id = null and returned nothing, and the board rendered
+  // fully laid out and completely empty with no word about why (audit, 6 Sep
+  // 2026). Today, the timetable and the pre-course task all say it plainly;
+  // this page and its override now do too.
+  const courseId = trainer.course_id;
+  if (!courseId) {
+    return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
+  }
   const supabase = hubReadClient(trainer, courseId);
 
   // Perf, 6 Sep 2026: this page made THIRTEEN round trips one after another,

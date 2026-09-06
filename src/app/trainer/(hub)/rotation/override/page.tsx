@@ -14,7 +14,12 @@ const TP_NUMBERS = [1, 2, 3, 4, 5, 6];
 export default async function TpPointOverridePage() {
   const trainer = await requireRole(["trainer", "admin"]);
   const supabase = await createClient();
-  const courseId = trainer.course_id!;
+  // See the note on the rotation page: an admin holds the centre, not a
+  // course, so "No trainees yet" was the wrong answer to why this is empty.
+  const courseId = trainer.course_id;
+  if (!courseId) {
+    return <div className="sheet p-6 text-sm text-muted">No course assigned.</div>;
+  }
 
   const [{ data: trainees }, { data: schedule }] = await Promise.all([
     supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee").order("full_name"),
