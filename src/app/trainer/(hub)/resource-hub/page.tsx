@@ -1,6 +1,6 @@
 import { hubReadClient } from "@/lib/supabase/hub-read";
 import Link from "next/link";
-import { PageHead, HUB_BUTTON, HUB_PRIMARY, HUB_PRIMARY_STYLE } from "@/app/trainer/(hub)/page-head";
+import { PageHead, HUB_PRIMARY, HUB_PRIMARY_STYLE } from "@/app/trainer/(hub)/page-head";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
@@ -235,17 +235,16 @@ export default async function TrainerResourceHubPage() {
         lede="Everything a candidate or tutor needs to find during the course, in one place. Trainees see a filtered version of this from their own portfolio."
       >
         {/* for-claude-code-assessor-tour-mode.md: "no functional purpose
-            beyond letting them see" -- both of these are write entry
-            points a touring assessor shouldn't be invited to click. */}
+            beyond letting them see" -- a write entry point a touring
+            assessor shouldn't be invited to click.
+            There was an "Upload" button beside this one until 6 Sep 2026.
+            It only jumped to #input-sessions, which the sticky strip now
+            does by name -- and it silently picked one of the three
+            sections you can add to. Each section carries its own form. */}
         {trainer ? (
-          <>
-            <a href="#input-sessions" className={HUB_BUTTON}>
-              Upload
-            </a>
-            <Link href="/trainer/coursebooks" className={HUB_PRIMARY} style={HUB_PRIMARY_STYLE}>
-              New TP point
-            </Link>
-          </>
+          <Link href="/trainer/coursebooks" className={HUB_PRIMARY} style={HUB_PRIMARY_STYLE}>
+            New TP point
+          </Link>
         ) : null}
       </PageHead>
 
