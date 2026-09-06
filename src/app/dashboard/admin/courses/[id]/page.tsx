@@ -194,7 +194,7 @@ export default async function CourseAdminDetailPage({
         </div>
         {!course.entry_form_sent_at ? (
           <p className={`text-sm ${entryFormOverdue ? "font-semibold text-destructive" : "text-muted"}`}>
-            {entryFormOverdue ? "Overdue" : "Due"} {entryFormDeadline} -- {course.delivery_mode === "online" ? "four" : "two"} weeks before
+            {entryFormOverdue ? "Overdue" : "Due"} {calendarDay(entryFormDeadline)} -- {course.delivery_mode === "online" ? "four" : "two"} weeks before
             the course starts (Handbook 4.1).
           </p>
         ) : (
