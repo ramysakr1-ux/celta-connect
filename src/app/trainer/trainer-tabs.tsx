@@ -31,7 +31,11 @@ const TABS = [
 // assessor (view-only). Ramy, 4 Sep 2026: "trainer in training will only
 // appear if there is one" -- and only to those people. The (hub) layout
 // decides (`tint` prop); migration 0267's tit_access_grants is the source.
-const TINT_TAB = { href: "/trainer-in-training", label: "Trainer-in-Training" } as const;
+// Labelled by its acronym, not its name (Ramy, 6 Sep 2026): with the tab
+// showing on every MCT course the row got tight enough that "Grade form"
+// lost its last letters to the container's overflow-hidden. TinT is the
+// term the handbook and the trainers both use, so it costs no clarity.
+const TINT_TAB = { href: "/trainer-in-training", label: "TinT" } as const;
 
 // An assessor's own trimmed tab set carries it too, when the course has one.
 // TinT Handbook 5.2.2 makes reading the e-portfolio a duty where moderation

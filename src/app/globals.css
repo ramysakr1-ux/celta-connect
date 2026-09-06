@@ -474,6 +474,28 @@ h6 {
   .hub-v4 .hover\:bg-primary\/90:hover {
     background-color: color-mix(in oklab, var(--hub-accent) 90%, transparent) !important;
   }
+  /* The last teal in the hub. Ramy, 6 Sep 2026: "the Grade form, it's kind
+     of all green teal -- it's the old one... maybe just the hovering could
+     change, so it's consistent with what we're doing across the board."
+
+     --color-accent is the platform's pale teal wash and, unlike
+     --color-primary, it is never redefined per room -- which is exactly why
+     it survived every earlier colour pass. Ten places in the hub still reach
+     for it: row hovers on the Grade form, the pre-course task table, grade
+     queries, the course switcher, the rotation tabs, and the selected state
+     of the malpractice option buttons.
+
+     Two strengths, because they say different things: a hover is a pointer
+     passing over (7%, the value .sheet-interactive:hover already uses), a
+     selected fill is a decision that stays on screen (10%). Backgrounds only
+     -- text links stay teal platform-wide, as on the resource hub. */
+  .hub-v4 .hover\:bg-accent:hover,
+  .hub-v4 .hover\:bg-accent\/40:hover {
+    background-color: color-mix(in oklab, var(--hub-accent) 7%, var(--color-card)) !important;
+  }
+  .hub-v4 .bg-accent\/30 {
+    background-color: color-mix(in oklab, var(--hub-accent) 10%, var(--color-card)) !important;
+  }
   .hub-v4 .sheet,
   .hub-v4 .sheet-interactive,
   .hub-v4 .card,

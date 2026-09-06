@@ -14,6 +14,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { CourseSwitcher, type SwitcherCourse } from "@/app/trainer/(hub)/course-switcher";
 import { trainerInTrainingAccess } from "@/lib/tit-access";
 import { getCourseTutorRole } from "@/lib/course-tutor-role";
+import { HUB_GARNET, HUB_GARNET_DEEP, HUB_GOLD, HUB_GOLD_DEEP, HUB_TEAL } from "@/lib/hub-accent";
 
 // The operational "Command Centre" -- roster/timetable/volunteers/TP
 // rotation/TP points library/grades report. Deliberately separate from
@@ -118,11 +119,6 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // itself is no longer a coloured band (was ink for MCT, garnet for ACT
   // until 5 Sep 2026) but the same light bar for everyone. An assessor
   // session, which v4 does not restyle, keeps Connect's teal as its accent.
-  const HUB_GARNET = "oklch(42% 0.13 27)";
-  const HUB_GARNET_DEEP = "oklch(36% 0.12 27)";
-  const HUB_GOLD = "oklch(60% 0.11 70)";
-  const HUB_GOLD_DEEP = "oklch(50% 0.11 65)";
-  const HUB_TEAL = "oklch(37.5% 0.058 195)"; // = --color-primary
   const accent = !isRealStaff ? HUB_TEAL : isMct ? HUB_GARNET : HUB_GOLD;
   const accentDeep = !isRealStaff ? HUB_TEAL : isMct ? HUB_GARNET_DEEP : HUB_GOLD_DEEP;
   const hubVars = {
