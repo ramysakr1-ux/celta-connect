@@ -183,11 +183,18 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
           >
             Rotation &amp; TP points
           </Link>
+          {/* Ramy, 6 Sep 2026: the Roster pill came off -- Roster is already a
+              top-level tab, so this was a second door to a room you can
+              reach from anywhere. In its place, the one preference that
+              actually shapes what you are about to write on this page: the
+              Direct and Encouraging phrasing your feedback is drafted in.
+              It used to sit behind "Settings" beside your name, which named
+              the furniture rather than the thing. */}
           <Link
-            href="/trainer/roster"
+            href="/trainer/settings"
             className="trainer-hover-fill inline-flex h-[34px] items-center rounded-[6px] border border-border bg-card px-3 text-[12px] font-semibold whitespace-nowrap text-ink"
           >
-            Roster
+            Feedback wording
           </Link>
         </div>
       </div>

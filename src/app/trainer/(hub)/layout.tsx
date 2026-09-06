@@ -196,13 +196,12 @@ export default async function TrainerHubLayout({ children }: { children: React.R
               <span className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-ink">{courseCode}</span>
             ) : null}
             <span className="text-[13px] font-semibold text-ink">{profile?.full_name ?? session?.email}</span>
-            {/* v4 draws "Settings" here. The tutor's own preferences
-                (feedback assist) live behind it, off Today. */}
-            {isRealStaff ? (
-              <Link href="/trainer/settings" className="text-[12.5px] text-muted transition-colors hover:text-ink hover:underline">
-                Settings
-              </Link>
-            ) : null}
+            {/* v4 drew "Settings" here, and behind it sat exactly one card:
+                the tutor's feedback wording. Ramy, 6 Sep 2026 -- the door
+                moved to the Teaching Practice tab, next to the feedback it
+                shapes, and took a name that says what it does. Two doors to
+                a one-card room, one of them vaguely labelled, was worse than
+                one door in the right place. */}
           </div>
         </div>
       </header>

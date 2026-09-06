@@ -4,10 +4,15 @@ import { getFeedbackAssistState } from "@/lib/feedback-assist";
 import { FeedbackAssistCard } from "@/app/trainer/(hub)/feedback-assist-card";
 import { DesignerCredit } from "@/components/designer-credit";
 
-// A tutor's own settings. Reached from the "Settings" link in the hub
-// header (the v4 handoff draws it there). Feedback assist moved here off
-// Today, 5 Sep 2026 -- it is a preference, not a task, and the landing
-// page is for tasks.
+// A tutor's own feedback wording. Feedback assist moved here off Today,
+// 5 Sep 2026 -- it is a preference, not a task, and the landing page is for
+// tasks.
+//
+// Reached from the Teaching Practice tab since 6 Sep 2026, not from a
+// "Settings" link beside your name. Ramy: the page holds one thing, so it
+// should say so, and the door belongs next to the feedback it shapes. The
+// route keeps its /settings path -- renaming the URL would break links for
+// no gain -- but nothing on screen calls it settings any more.
 export default async function TrainerSettingsPage() {
   const session = await getCurrentProfile();
   const trainer =
@@ -29,8 +34,11 @@ export default async function TrainerSettingsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <p className="text-[11.5px] font-bold tracking-[0.1em] text-muted uppercase">{trainer.full_name ?? "Trainer"} &middot; This course</p>
-        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Settings</h1>
-        <p className="max-w-[62ch] text-sm text-muted">Your own preferences for this course. Nothing here changes what candidates or other tutors see.</p>
+        <h1 className="font-serif text-[34px] leading-[1.08] font-semibold text-ink-warm">Feedback wording</h1>
+        <p className="max-w-[62ch] text-sm text-muted">
+          How your written feedback is phrased when Connect drafts it for you. Yours alone for this course &mdash; it changes nothing
+          that candidates or other tutors see, and never what you actually say.
+        </p>
       </div>
 
       {feedbackAssist ? (
