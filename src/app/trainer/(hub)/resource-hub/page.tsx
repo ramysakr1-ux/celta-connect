@@ -289,6 +289,13 @@ export default async function TrainerResourceHubPage() {
         </Link>
       </div>
 
+      {/* Ramy, 6 Sep 2026: one frame, around the material this centre owns and
+          can change -- its TP points, coursebooks, input sessions, forms and
+          uploads. Cambridge's own documents sit OUTSIDE it deliberately: that
+          is the real distinction on this page, the stuff you control against
+          the stuff you cannot, and it was invisible while all twelve blocks
+          ran down one column with nothing between them. */}
+      <div className="group-frame flex flex-col gap-8 p-5 sm:p-6">
       <div id="tp-points">
         <h2 className="font-serif text-lg text-ink">TP points — this course&apos;s schedule</h2>
         <p className="mt-1 text-sm text-muted">
@@ -405,6 +412,8 @@ export default async function TrainerResourceHubPage() {
         <div className="mt-3">
           <ResourceCategoryManager category="centre_documents" centerId={centerId} resources={centreDocResources ?? []} readOnly={!trainer} />
         </div>
+      </div>
+
       </div>
 
       <div id="cambridge-documents">

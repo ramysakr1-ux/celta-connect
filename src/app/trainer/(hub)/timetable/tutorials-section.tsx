@@ -198,7 +198,12 @@ export function TutorialsSection({ data }: { data: TutorialsSectionData }) {
   ];
 
   return (
-    <section className="flex flex-col gap-4">
+    // Ramy, 6 Sep 2026: the group frame, applied where it does work. The week
+    // grid above already sits in its own board and reads as one object; this
+    // block had no container at all -- it simply began, with nothing to say
+    // the grid had ended and a different job had started. The grid is the
+    // course's shape; these are bookings against it.
+    <section className="group-frame flex flex-col gap-4 p-5 sm:p-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex max-w-[760px] flex-col gap-1.5">
           <h2 className="font-serif text-[28px] leading-[1.1] font-semibold text-ink-warm">Tutorials and consultations</h2>
