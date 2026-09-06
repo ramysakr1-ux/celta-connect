@@ -497,10 +497,36 @@ async function main() {
   console.log("course admin:", courseAdminId);
 
   // --- Trainees, varied depth ---
+  // Twelve candidates, six and six (Ramy, 6 Sep 2026). Two TP groups, each
+  // split into halves of three that teach on alternating days -- the shape
+  // this timetable was always written for ("All six meet the learners", slots
+  // A-F) but which only ever had three people in it.
+  //
+  // Three candidates could not demonstrate anything that involves a range:
+  // no half B meant the rotation never rotated, and the assessor's own
+  // recommendation had nothing to choose between. The grade spread below is
+  // Ramy's own worked example -- two in danger of failing, one Pass A, the
+  // rest passing -- plus one withdrawal, so every section of the candidate
+  // wall has something real in it.
+  //
+  // `grade`/`upper` are the provisional pair: upper set makes it a range, so
+  // Fail + Pass reads "Fail / Pass" (a potential Fail). Left null for the one
+  // candidate the grading meeting has not settled.
   const traineeDefs = [
-    { name: "Amara Okafor", email: "demo-amara@celtaconnect.com" },
-    { name: "Daniel Kim", email: "demo-daniel@celtaconnect.com" },
-    { name: "Priya Sharma", email: "demo-priya@celtaconnect.com" },
+    { name: "Amara Okafor", email: "demo-amara@celtaconnect.com", group: "A", half: 1, slot: 0, grade: "Pass B", upper: null },
+    { name: "Daniel Kim", email: "demo-daniel@celtaconnect.com", group: "A", half: 1, slot: 1, grade: "Fail", upper: "Pass" },
+    { name: "Priya Sharma", email: "demo-priya@celtaconnect.com", group: "A", half: 1, slot: 2, grade: "Pass A", upper: null },
+    { name: "Tomas Novak", email: "demo-tomas@celtaconnect.com", group: "A", half: 2, slot: 0, grade: "Pass", upper: null },
+    { name: "Leila Haddad", email: "demo-leila@celtaconnect.com", group: "A", half: 2, slot: 1, grade: "Pass B", upper: null },
+    { name: "Sam Whitfield", email: "demo-sam@celtaconnect.com", group: "A", half: 2, slot: 2, grade: "Pass", upper: null },
+    { name: "Ines Marchetti", email: "demo-ines@celtaconnect.com", group: "B", half: 1, slot: 0, grade: "Fail", upper: "Pass" },
+    { name: "Kofi Mensah", email: "demo-kofi@celtaconnect.com", group: "B", half: 1, slot: 1, grade: "Pass B", upper: null },
+    { name: "Hana Sato", email: "demo-hana@celtaconnect.com", group: "B", half: 1, slot: 2, grade: "Pass", upper: null },
+    { name: "Ruben Ortiz", email: "demo-ruben@celtaconnect.com", group: "B", half: 2, slot: 0, grade: null, upper: null },
+    { name: "Aoife Byrne", email: "demo-aoife@celtaconnect.com", group: "B", half: 2, slot: 1, grade: "Pass B", upper: null },
+    // Withdrew mid-course. Handbook 14.2 makes the withdrawal letter and the
+    // application the assessor's business, so the demo needs one.
+    { name: "Marek Kowalski", email: "demo-marek@celtaconnect.com", group: "B", half: 2, slot: 2, grade: null, upper: null, withdrawn: true },
   ];
   const trainees = {};
   for (const def of traineeDefs) {
@@ -516,7 +542,8 @@ async function main() {
       role: "trainee",
       center_id: center.id,
       course_id: course.id,
-      course_status: "active",
+      course_status: def.withdrawn ? "withdrawn" : "active",
+      course_status_set_at: def.withdrawn ? new Date(Date.now() - 9 * 86400000).toISOString() : null,
     });
     if (traineeProfileErr) throw traineeProfileErr;
     trainees[def.name] = authUser.user.id;
@@ -564,41 +591,66 @@ async function main() {
   // which is exactly the TP1 A/B/C then D/E/F shape the demo timetable
   // below already has). A plain subgroup would switch the chat on and
   // leave the teaching card contradicting it.
-  const { data: tpGroup, error: tpGroupErr } = await supabase
-    .from("course_tp_groups")
-    // The ACT (Marcus Webb) is the group's tutor -- what makes the ACT demo
-    // show a group of their own rather than the whole course, and lets them
-    // post a group-scoped announcement (5 Sep 2026). Set on the live demo
-    // course the same day; this keeps it so on every rebuild.
-    .insert({ course_id: course.id, name: "Group A", tutor_profile_id: trainer2Id })
-    .select("id")
-    .single();
-  if (tpGroupErr) throw tpGroupErr;
-  // The tutor plan (migration 0268) is what the Rotation card shows; the
-  // field above is derived from it on real courses, so the demo gets the
-  // matching "from TP1" row rather than a field with no plan behind it.
-  const { error: tutorPlanErr } = await supabase.from("course_tp_group_tutors").insert({
-    course_id: course.id,
-    tp_group_id: tpGroup.id,
-    tutor_profile_id: trainer2Id,
-    from_tp_number: 1,
-    note: "Seeded demo plan",
-  });
-  if (tutorPlanErr) throw tutorPlanErr;
-  const { data: subgroup, error: subgroupErr } = await supabase
-    .from("course_subgroups")
-    .insert({ course_id: course.id, name: "Group A -- Half A", tp_group_id: tpGroup.id, half_order: 1 })
-    .select("id")
-    .single();
-  if (subgroupErr) throw subgroupErr;
+  // Two TP groups of six, each split into halves of three. half_order is what
+  // the rotation reads (halfTpDates in src/lib/rotation.ts gives half 1 the
+  // alternating TP dates), and until 6 Sep 2026 the demo had only half 1 with
+  // three people in it -- so the alternation the whole rotation is built on
+  // was never exercised by anything we verified against.
+  const tpGroupIds = {};
+  for (const [name, tutorId] of [["Group A", trainer2Id], ["Group B", trainerId]]) {
+    const { data: g, error: gErr } = await supabase
+      .from("course_tp_groups")
+      // The ACT (Marcus Webb) keeps Group A -- what makes the ACT demo show a
+      // group of their own rather than the whole course, and lets them post a
+      // group-scoped announcement (5 Sep 2026). The MCT takes Group B.
+      .insert({ course_id: course.id, name, tutor_profile_id: tutorId })
+      .select("id")
+      .single();
+    if (gErr) throw gErr;
+    tpGroupIds[name] = g.id;
+    // The tutor plan (migration 0268) is what the Rotation card shows; the
+    // field above is derived from it on real courses, so the demo gets the
+    // matching "from TP1" row rather than a field with no plan behind it.
+    const { error: planErr } = await supabase.from("course_tp_group_tutors").insert({
+      course_id: course.id,
+      tp_group_id: g.id,
+      tutor_profile_id: tutorId,
+      from_tp_number: 1,
+      note: "Seeded demo plan",
+    });
+    if (planErr) throw planErr;
+  }
+
+  const subgroupIds = {};
+  for (const letter of ["A", "B"]) {
+    for (const half of [1, 2]) {
+      const { data: sg, error: sgErr } = await supabase
+        .from("course_subgroups")
+        .insert({
+          course_id: course.id,
+          name: `Group ${letter} -- Half ${half === 1 ? "A" : "B"}`,
+          tp_group_id: tpGroupIds[`Group ${letter}`],
+          half_order: half,
+        })
+        .select("id")
+        .single();
+      if (sgErr) throw sgErr;
+      subgroupIds[`${letter}${half}`] = sg.id;
+    }
+  }
   // base_slot is the rotation position (0-indexed, unique within the
   // subgroup, migration 0014) -- who teaches first, second, third, rotating
   // one place each TP. It's NOT NULL, so seeding members without it fails.
   const { error: subgroupMemberErr } = await supabase.from("course_subgroup_members").insert(
-    Object.values(trainees).map((traineeId, i) => ({ subgroup_id: subgroup.id, trainee_id: traineeId, base_slot: i }))
+    traineeDefs.map((def) => ({
+      subgroup_id: subgroupIds[`${def.group}${def.half}`],
+      trainee_id: trainees[def.name],
+      base_slot: def.slot,
+    }))
   );
   if (subgroupMemberErr) throw subgroupMemberErr;
-  console.log("subgroup:", subgroup.id, "-- TP group chat channel provisioned by trigger");
+  const tpGroup = { id: tpGroupIds["Group A"] };
+  console.log("subgroups:", Object.keys(subgroupIds).length, "-- TP group chat channels provisioned by trigger");
 
   // --- TP feedback helper -- returns the tp_plans.id so callers can attach
   // shared materials to a specific plan. ---
@@ -736,6 +788,35 @@ async function main() {
     });
     amaraTpPlanIds.push({ planId, materialNames: cfg.materialNames });
   }
+
+  // The nine candidates added on 6 Sep 2026 get a plain six taught TPs each,
+  // so the roster, the wall and the assessor's recommendation all read TP 6/8
+  // for them rather than TP 0/8. Deliberately unembellished -- the three
+  // original candidates keep the hand-written detail (shared materials, a
+  // self-evaluation, an open Stage Three) that the walkthroughs depend on,
+  // and nine more of that would be noise rather than a better demo.
+  const FILLER_AIMS = [
+    "Present simple for routines",
+    "Reading for gist: short news items",
+    "Vocabulary: food and cooking",
+    "Functional language: making arrangements",
+    "Listening for specific information",
+    "Past continuous for interrupted actions",
+  ];
+  for (const def of traineeDefs.slice(3)) {
+    // A candidate who withdrew stops teaching at the point they left.
+    const taught = def.withdrawn ? 3 : 6;
+    for (let n = 1; n <= taught; n += 1) {
+      await seedTaughtTp(trainees[def.name], n, {
+        aim: FILLER_AIMS[(n - 1) % FILLER_AIMS.length],
+        grade: n % 3 === 0 ? "above_standard" : "to_standard",
+        strengths: ["Clear instructions", "Good rapport with learners"],
+        actionPoints: ["Vary interaction patterns a little more"],
+        daysAgo: 14 - n * 2,
+      });
+    }
+  }
+  console.log("taught TPs seeded for", traineeDefs.length, "candidates");
   // EVERY candidate gets a CELTA 5 record, not just the one with a
   // provisional grade. In the real app it is created the moment they join
   // (join/[token]/actions.ts) -- the seed writes profiles directly, so it
@@ -745,14 +826,21 @@ async function main() {
   // any other candidate's workspace showed "No CELTA 5 record exists for
   // this trainee yet... an admin will need to add it manually", and their
   // Progress tab said "check CELTA 5" -- pointing at the thing that did not
-  // exist. Amara keeps her grade; the others start empty, which is what a
-  // record looks like before the grades meeting.
+  // exist. Grades now come from traineeDefs (see below), since the course
+  // sits past its own provisional deadline.
+  // Provisional grades come from traineeDefs. Ramy, 30 Aug 2026: they are
+  // submitted around the end of TP6, and this demo course sits at TP6/8 with
+  // its provisional deadline already past -- so a graded cohort is the honest
+  // state, not an empty one. The one candidate left ungraded is the one the
+  // grading meeting has not settled, which is also a real state.
   await supabase.from("celta5_records").insert(
-    Object.entries(trainees).map(([name, id]) =>
-      name === "Amara Okafor"
-        ? { course_id: course.id, trainee_id: id, hours_attended: 24, provisional_grade: "Pass B" }
-        : { course_id: course.id, trainee_id: id }
-    )
+    traineeDefs.map((def) => ({
+      course_id: course.id,
+      trainee_id: trainees[def.name],
+      hours_attended: def.withdrawn ? 9 : 24,
+      provisional_grade: def.grade,
+      provisional_grade_upper: def.upper,
+    }))
   );
   await supabase.from("assignments").insert([
     {
@@ -1169,6 +1257,22 @@ async function main() {
     { d: 20, b: 6, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
     { d: 20, b: 7, type: "input_session", title: "Course close", tag: "whole_group", detail: null, linked: null, tp: null },
   ];
+
+  // Group B teaches the same slots on the same days, in its own room. Real
+  // centres run their groups in parallel like this, and the alternative --
+  // six candidates sharing three lessons -- is not a thing that happens.
+  // Generated from Group A's rows rather than hand-written: letters run A-F
+  // for Group A, so Group B continues G-L, and every TP number and day band
+  // stays in step by construction.
+  const LETTERS = "ABCDEFGHIJKL";
+  const groupBTp = designSessions
+    .filter((e) => e.type === "tp")
+    .map((e) => {
+      const letter = e.title.slice(-1);
+      const shifted = LETTERS[LETTERS.indexOf(letter) + 6];
+      return { ...e, title: `${e.title.slice(0, -1)}${shifted}`, detail: "Group B" };
+    });
+  designSessions.push(...groupBTp);
 
   // --- Timetable (capture ids: TP events feed the volunteer demo below) ---
   // Built from designSessions above: every card in Ramy's own timetable,
