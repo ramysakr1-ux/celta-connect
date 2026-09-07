@@ -24,7 +24,7 @@ import { WaitingListForm } from "@/app/dashboard/admissions/[id]/waiting-list-fo
 import { ReferForm, type ReferDestination } from "@/app/dashboard/admissions/[id]/refer-form";
 import { RequestReferralForm } from "@/app/dashboard/admissions/[id]/request-referral-form";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { holdsCentre } from "@/lib/branch-scope";
+import { holdsCentre, heldCenterIds } from "@/lib/branch-scope";
 
 export default async function ApplicantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const staff = await requireAdmissionsHandler();
@@ -55,13 +55,17 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       supabase
         .from("interview_slots")
         .select("id, slot_date, slot_time, mode, panel, interviewer_id")
-        // single-centre: one applicant, already found by id -- this is the guard that they belong to this centre, not a listing
-        .eq("center_id", staff.center_id)
+        // single-centre: the slots are the APPLICANT's branch's calendar -- a
+        // physical thing -- not the interviewer's home branch (6 Sep 2026)
+        .eq("center_id", applicant.center_id)
         .eq("intake_course_id", applicant.intake_course_id)
         .is("booked_applicant_id", null)
         .order("slot_date"),
-      // single-centre: one applicant, already found by id -- this is the guard that they belong to this centre, not a listing
-      supabase.from("interview_questions").select("id, question_text, coverage_area").eq("center_id", staff.center_id).eq("active", true),
+      // Ramy, 6 Sep 2026: "they should have the same questions anyway." Questions
+      // are stored per branch and Settings saves them to whoever's home branch,
+      // so an LA applicant was interviewed off an empty list while NY's sat
+      // unused. One list across every branch the interviewer holds.
+      supabase.from("interview_questions").select("id, question_text, coverage_area").in("center_id", await heldCenterIds(staff)).eq("active", true),
       supabase.from("interview_records").select("*").eq("applicant_id", id).maybeSingle(),
     ]);
 
