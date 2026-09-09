@@ -33,8 +33,22 @@ const ROOMS = ["src/app/dashboard/admissions", "src/app/dashboard/admin", "src/a
 const NARROWING = /\.(eq|filter|or|contains|overlaps)\s*\(\s*["'`]|\.match\s*\(\s*\{/;
 const MENTIONS_CENTRE = /\b(?:to_|from_)?center_id\b/;
 // Passing the resolved scope is the correct shape, in any of its spellings.
-const SCOPED = /\bscope\b|availableCenterIds|\bmine\b/;
+// heldCenterIds()/holdsCentre() belong here too: HOME_COMPARE below already
+// names them as the right shape, and leaving them out of SCOPED made the lock
+// reject its own prescribed fix -- which is exactly what happened to the
+// interview-questions read on 7 Sep 2026, and it broke the build.
+const SCOPED = /\bscope\b|availableCenterIds|\bmine\b|heldCenterIds|holdsCentre/;
 const EXEMPT = /\/\/\s*single-centre:/;
+// The marker may sit at the top of a wrapped comment, several lines above the
+// query. Checking only the line immediately above meant a two-line reason
+// silently stopped exempting anything.
+const isComment = (l) => /^\s*(\/\/|\*|\/\*)/.test(l);
+function exemptAbove(lines, i) {
+  for (let j = i - 1; j >= 0 && isComment(lines[j]); j--) {
+    if (EXEMPT.test(lines[j])) return true;
+  }
+  return false;
+}
 // A row's centre compared with the person's HOME centre in plain JavaScript.
 // Audit, 6 Sep 2026: the whole Course Admin course room did this -- the page
 // 404'd and fifteen actions refused a course from a held branch that the
@@ -65,15 +79,15 @@ for (const room of ROOMS) {
   for (const file of walk(room)) {
     const lines = readFileSync(file, "utf8").split("\n");
     lines.forEach((line, i) => {
-      const prev = lines[i - 1] ?? "";
-      if (HOME_COMPARE.test(line) && !(EXEMPT.test(line) || EXEMPT.test(prev))) {
+      const exempt = EXEMPT.test(line) || exemptAbove(lines, i);
+      if (HOME_COMPARE.test(line) && !exempt) {
         problems.push(`${file}:${i + 1}  (compares a row's centre with the home centre -- use holdsCentre)\n    ${line.trim().slice(0, 110)}`);
         return;
       }
       if (isWriteFile(file)) return;
       if (!(MENTIONS_CENTRE.test(line) && NARROWING.test(line))) return;
       if (SCOPED.test(line)) return;
-      if (EXEMPT.test(line) || EXEMPT.test(prev)) return;
+      if (exempt) return;
       problems.push(`${file}:${i + 1}\n    ${line.trim().slice(0, 110)}`);
     });
   }
