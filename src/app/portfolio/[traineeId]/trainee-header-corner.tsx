@@ -25,10 +25,17 @@ export function TraineeHeaderCorner({
   const pathname = usePathname();
   const isLanding = pathname === `/portfolio/${traineeId}`;
 
-  if (isLanding) return <DesignerCredit pinned={false} />;
-
+  // Until 9 Sep 2026 the landing returned the credit INSTEAD of these two, so
+  // the one screen design_handoff_trainee_landing draws a header for was the
+  // one screen missing its right-hand side -- no "Day N of 20", no avatar.
+  // That made sense while TraineeNameBanner sat directly below carrying the
+  // trainee's name and week; the banner is gone and the credit was the only
+  // occupant left. Both now, credit first: the design gets the counter and the
+  // avatar it asks for, and Ramy's credit stays on the screen it has always
+  // been on.
   return (
     <div className="flex shrink-0 items-center gap-2.5">
+      {isLanding ? <DesignerCredit pinned={false} /> : null}
       {courseDayProgress ? (
         <span className="text-[11px] font-medium tabular-nums text-muted">
           Day {courseDayProgress.currentDay} of {courseDayProgress.totalDays}

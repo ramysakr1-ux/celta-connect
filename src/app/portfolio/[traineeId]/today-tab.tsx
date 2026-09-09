@@ -9,6 +9,8 @@ import { rotationPosition, halfTpDates, type TpTimetableEvent } from "@/lib/rota
 import { getTpCardStatus } from "@/lib/tp-plan-content";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { SCAVENGER_HUNT_QUESTIONS } from "@/lib/scavenger-hunt";
+import { buildStreamDay } from "@/lib/course-stream-day";
+import { StreamEyebrow, StreamDayTrack } from "@/app/portfolio/[traineeId]/course-stream-day";
 
 const TP_LESSON_LENGTH_MINUTES = 45;
 // Matches celta5/page.tsx's own local OBSERVATION_HOURS_REQUIRED -- kept as
@@ -27,18 +29,6 @@ function relativeTime(iso: string): string {
   if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
   const days = Math.floor(hours / 24);
   return `${days} day${days === 1 ? "" : "s"} ago`;
-}
-
-// The hero card's "in 90 minutes" meta -- Trainee Walkthrough.dc.html's own
-// example, a live countdown to the lesson's start, not fixed text. Mirrors
-// relativeTime's shape but counting forward instead of back.
-function countdownTo(startsAt: Date): string {
-  const diffMs = startsAt.getTime() - Date.now();
-  if (diffMs <= 0) return "starting now";
-  const minutes = Math.round(diffMs / 60_000);
-  if (minutes < 60) return `in ${minutes} minute${minutes === 1 ? "" : "s"}`;
-  const hours = Math.round(minutes / 60);
-  return `in ${hours} hour${hours === 1 ? "" : "s"}`;
 }
 
 // Plain calendar-day arithmetic on a YYYY-MM-DD string -- deliberately not
@@ -61,6 +51,11 @@ interface WaitingItem {
   label: string;
   detail: string;
   href: string;
+  /** What sort of thing this is, which is what the Catch up badge colours by:
+   *  garnet for something overdue, teal for an action someone is waiting on,
+   *  gold for a figure that is simply progressing. They were all one colour
+   *  until 9 Sep 2026, which made the list read as uniformly urgent. */
+  kind?: "overdue" | "scheduled" | "progress";
   isLetter?: boolean;
   // Ramy, 28 Aug 2026: matches the real mockup's row() pill fields --
   // "Assignment 3 due today" and "Book your Stage 1 tutorial slot" both
@@ -109,7 +104,10 @@ export async function TodayTab({
     { data: subgroupMember },
     { data: observations },
   ] = await Promise.all([
-    supabase.from("courses").select("start_date, end_date").eq("id", courseId).maybeSingle(),
+    // time_bands: the course's real daily structure, which is what gives the
+    // Course Stream day track its window and every session its end -- events
+    // carry a start time and nothing else.
+    supabase.from("courses").select("start_date, end_date, time_bands").eq("id", courseId).maybeSingle(),
     supabase.from("plan_assignments").select("*").eq("trainee_id", traineeId),
     supabase.from("tp_plans").select("tp_number, submitted_at").eq("trainee_id", traineeId),
     supabase.from("tp_self_evaluations").select("tp_number, submitted_at").eq("trainee_id", traineeId),
@@ -279,6 +277,9 @@ export async function TodayTab({
     title: string;
     teachingOrder: number;
     groupSize: number;
+    /** The timetable row itself -- Course Stream's day track needs to know
+     *  which block on the day is this trainee's own, to give it the gold. */
+    eventId: string;
     zoomUrl: string | null;
     eventTime: string | null;
     groupName: string | null;
@@ -312,7 +313,20 @@ export async function TodayTab({
 
     const size = (members ?? []).length;
     const order = rotationPosition(subgroupMember.base_slot, size, tpNumber) + 1;
-    const event = tpEvents[0];
+    // A TP day runs one slot per trainee in the subgroup -- "TP8 · A", "TP8 · B",
+    // "TP8 · C" -- and `order` is which of them is this trainee's. This used to
+    // take tpEvents[0] unconditionally, so every trainee teaching that day was
+    // told they taught in the FIRST slot: the right lesson, the wrong hour, for
+    // everyone but whoever happened to be going first.
+    //
+    // It went unnoticed while the hero only printed a time. Course Stream's day
+    // track puts a gold block on the lesson, so a wrong slot is now a wrong
+    // block on the wrong part of the day, which is unmissable.
+    //
+    // Sorted by time, because the query does not order and PostgREST gives no
+    // guarantee -- the slot order IS the clock order.
+    const orderedTpEvents = [...tpEvents].sort((a, b) => (a.event_time ?? "").localeCompare(b.event_time ?? ""));
+    const event = orderedTpEvents[order - 1] ?? orderedTpEvents[0];
     // Matches the timetable's own camera-icon/live-now-bar gate
     // (isEventLive: joinable from 10 min before start) -- this card's
     // "Join the room" button used to have no time check at all, unlike
@@ -369,6 +383,7 @@ export async function TodayTab({
       title: plan.short_title || plan.main_lesson_aim,
       teachingOrder: order,
       groupSize: size,
+      eventId: event.id,
       zoomUrl: event.zoom_url,
       eventTime: event.event_time,
       groupName: tpGroup?.name ?? null,
@@ -404,6 +419,7 @@ export async function TodayTab({
   if (preCourse && !scavengerDone) {
     waiting.push({
       label: "Find your way around Connect",
+      kind: "progress",
       detail: `${huntFoundCount} of ${SCAVENGER_HUNT_QUESTIONS.length} found`,
       href: `/portfolio/${traineeId}/pre-course-task`,
     });
@@ -434,6 +450,7 @@ export async function TodayTab({
     const stageLabel = invite.stage === "stage1" ? "Stage 1" : "Stage 3";
     waiting.push({
       label: `Confirm your ${stageLabel} tutorial`,
+      kind: "scheduled",
       detail: event ? `${event.event_date}${event.event_time ? ` · ${event.event_time.slice(0, 5)}` : ""}` : "Time set by your tutor",
       href: `/portfolio/${traineeId}/individual-tutorial/${invite.id}`,
     });
@@ -455,52 +472,17 @@ export async function TodayTab({
   if (observedMinutes / 60 < OBSERVATION_HOURS_REQUIRED) {
     waiting.push({
       label: "Observation hours",
+      kind: "progress",
       detail: `${(observedMinutes / 60).toFixed(1)} of ${OBSERVATION_HOURS_REQUIRED} hrs logged`,
       href: `/portfolio/${traineeId}/celta5`,
     });
   }
-  // A formal letter is the one item type here with no other route to it
-  // anywhere in the trainee UI (no letters archive/nav entry) -- it must
-  // never fall off this cap, or it becomes permanently unreachable. Ramy,
-  // 28 Aug 2026: "urgent items never get bumped off this list" -- extended
-  // the same guarantee to any date-bound urgent item (assignment due
-  // today/overdue), not just letters. Guaranteed items always keep a slot;
-  // the rest fill whatever remains, in their existing priority order.
-  const guaranteedSlots = waiting.filter((w) => w.isLetter || w.urgent).length;
-  const otherSlotsRemaining = Math.max(0, 3 - guaranteedSlots);
-  let otherSlotsUsed = 0;
-  const waitingCapped = waiting.filter((w) => {
-    if (w.isLetter || w.urgent) return true;
-    if (otherSlotsUsed >= otherSlotsRemaining) return false;
-    otherSlotsUsed += 1;
-    return true;
-  });
-  // for-claude-code-trainee-interface.md: "up to 3 items, newest first" --
-  // was rendering every broadcast unbounded.
+  // design_handoff_trainee_landing: "Catch up is never truncated. If nothing
+  // is outstanding, drop the column rather than showing an empty state." The
+  // old three-slot cap -- and the letter/urgent guarantee that existed only to
+  // survive it -- go with it. Nothing can be crowded off a list with no lid.
   const broadcastsCapped = (broadcasts ?? []).slice(0, 3);
 
-  // for-claude-code-trainee-assessor-card-system.md's card-edge rule: small
-  // cards in a 3-column grid get a left border. Ramy, 28 Aug 2026: "three
-  // cards will always be there" -- the grid is permanently 3-column now (see
-  // heroKind below), so every card always takes the left variant; there's no
-  // more 2-column state that needed the top variant. Full literal class
-  // strings (not string-built) so Tailwind's static scanner can see them --
-  // a template-built `border-l-${color}` would never be generated.
-  // Ramy, 28 Aug 2026, live on the preview: the design file's own default
-  // (--trainee-plum) read "a very bright color" against this card's pale
-  // background -- rejected in favor of --color-garnet, the same accent
-  // already used sitewide (Assignments' second card, Resources' list-item
-  // alternation, the trainer-hub ACT color). Not paired back up with teal
-  // into the old alternation, though -- one shared garnet, same as plum was
-  // one shared color, just a different hue. The hero card keeps its own
-  // teal edge -- the file computes that as color-mix(in oklab, teal 55%,
-  // transparent), referencing --color-primary, not a flat solid teal.
-  const CARD_EDGE: Record<"mauve" | "primary", string> = {
-    mauve: "border-l-[3px] border-l-[var(--color-garnet)] border-t-0",
-    primary: "border-l-[3px] border-t-0",
-  };
-  const cardEdge = (color: keyof typeof CARD_EDGE) => CARD_EDGE[color];
-  const heroEdgeColor = "color-mix(in oklab, var(--color-primary) 55%, transparent)";
 
   // Ramy, 28 Aug 2026, correcting an earlier pass: "the hero card is
   // exclusive for teaching" -- not assignments due, not Announcements
@@ -640,31 +622,6 @@ export async function TodayTab({
                 }
               : null;
 
-  // Hero card meta + footer, teaching-today only -- the countdown and the
-  // "nothing above it until after {time}" note both only make sense for
-  // the lesson that's actually happening today, not tomorrow/next.
-  const teachingTodayStartsAt =
-    teachingToday?.eventTime ? zonedTimeToUtc(today, teachingToday.eventTime, timeZone) : null;
-  const teachingTodayMeta = teachingTodayStartsAt ? countdownTo(teachingTodayStartsAt) : null;
-  // Real cutoff, not invented: the same day's own "Feedback" session
-  // (timetable-skeleton.ts's FEEDBACK_AND_LESSON_PLANNING, title exactly
-  // "Feedback", always type supervised_session) -- if today has one, its
-  // start time is genuinely when this trainee is free of teaching +
-  // feedback. Omitted (not faked) on a day with no Feedback session.
-  const { data: todaysFeedbackEvent } = teachingToday
-    ? await supabase
-        .from("course_timetable_events")
-        .select("event_time")
-        .eq("course_id", courseId)
-        .eq("event_date", today)
-        .eq("type", "supervised_session")
-        .eq("title", "Feedback")
-        .maybeSingle()
-    : { data: null };
-  const teachingTodayFoot = todaysFeedbackEvent?.event_time
-    ? `The one thing that matters this morning, and nothing above it. Everything else here can wait until after ${todaysFeedbackEvent.event_time.slice(0, 5)}.`
-    : null;
-
   const weekOf = course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
   const eyebrow = [courseName, weekOf].filter(Boolean).join(" · ");
   // The trainee's name moved to TraineeNameBanner, above the Connect header
@@ -672,176 +629,217 @@ export async function TodayTab({
   // here too.
   const todayHeading = new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
+  // ---------------------------------------------------------------- 4b ----
+  // design_handoff_trainee_landing, "Course Stream (Status rail, option 4b)".
+  // The screen answers two questions and nothing else: what is happening
+  // today, and what do I owe. No course history -- no TP grade list, no
+  // assignment ledger -- those live behind their own doors.
+  const { data: traineeProfile } = await supabase.from("profiles").select("full_name").eq("id", traineeId).maybeSingle();
+  const firstName = (traineeProfile?.full_name ?? "").trim().split(/\s+/)[0] || "there";
+
+  const { data: todaysEvents } = await supabase
+    .from("course_timetable_events")
+    .select("*")
+    .eq("course_id", courseId)
+    .eq("event_date", today);
+
+  const streamDay = buildStreamDay({
+    events: todaysEvents ?? [],
+    timeBands: course?.time_bands ?? null,
+    dateIso: today,
+    timeZone,
+    mineEventIds: new Set(teachingToday ? [teachingToday.eventId] : []),
+    tpGroupId: subgroupTpGroupId,
+  });
+
+  // Unread notices (migration 0283). The read rows are RLS-scoped to the
+  // reader, so a peer viewing a groupmate's portfolio under layout.tsx's
+  // observation carve-out sees no read state and, more importantly, marks
+  // nothing on their behalf -- the insert simply fails the policy.
+  const broadcastIds = broadcastsCapped.map((b) => b.id);
+  const { data: readRows } =
+    broadcastIds.length > 0
+      ? await supabase
+          .from("course_broadcast_reads")
+          .select("broadcast_id")
+          .eq("trainee_id", traineeId)
+          .in("broadcast_id", broadcastIds)
+      : { data: [] };
+  const readIds = new Set((readRows ?? []).map((r) => r.broadcast_id));
+  const unreadIds = broadcastIds.filter((id) => !readIds.has(id));
+  if (unreadIds.length > 0) {
+    // Marked on the render that shows them: this pass still draws them bold,
+    // the next one doesn't. Same shape as markScavengerHuntFound's own
+    // read-side write in page.tsx.
+    await supabase
+      .from("course_broadcast_reads")
+      .upsert(unreadIds.map((id) => ({ broadcast_id: id, trainee_id: traineeId })), { ignoreDuplicates: true });
+  }
+
+  const serverNowMs = Date.now();
+  const dateLabel = new Date(`${today}T00:00:00`).toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
+  // The handoff's hero has two states, teaching and observing. This app has
+  // six -- pre-course, tomorrow, further out, all taught, no group yet -- and
+  // genericHero already carries the copy for every one of them. So the hero
+  // takes the handoff's SHAPE and keeps the app's states, rather than losing
+  // four of them to match a prototype that never had to render them.
+  const teachTime = teachingToday?.eventTime ? teachingToday.eventTime.slice(0, 5) : null;
+  const heroTitle = teachingToday
+    ? `You teach${teachTime ? ` at ${teachTime}` : " today"} — ${teachingToday.title}`
+    : (genericHero?.big ?? "Your day");
+  const heroPrimary = teachingToday
+    ? teachingToday.joinable && teachingToday.zoomUrl
+      ? { href: teachingToday.zoomUrl, label: "Join the room", external: true }
+      : { href: `/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`, label: "Open your plan", external: false }
+    : genericHero
+      ? { href: genericHero.ctaHref, label: genericHero.ctaLabel, external: false }
+      : null;
+  // design_handoff_trainee_landing pairs a primary with a real second action --
+  // "Join the room" / "Open your plan" -- not a standing Timetable link, which
+  // the design does not have and which the rail already reaches. Timetable is
+  // the fallback only when there is no second action worth offering.
+  const heroSecondary = teachingToday
+    ? teachingToday.joinable && teachingToday.zoomUrl
+      ? { href: `/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`, label: "Open your plan" }
+      : { href: `/portfolio/${traineeId}/timetable`, label: "Timetable" }
+    : { href: `/portfolio/${traineeId}/timetable`, label: "Timetable" };
+  const metaLead = teachingToday
+    ? `You teach${teachTime ? ` ${teachTime}` : ""}`
+    : (genericHero?.label ?? "Today");
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-[11px] font-semibold tracking-[0.1em] text-muted uppercase">{eyebrow}</p>
-          <h1 className="font-serif text-2xl text-ink">{todayHeading}</h1>
+    <div className="flex flex-col gap-5">
+      <div className="flex items-end justify-between gap-5">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <StreamEyebrow firstName={firstName} dateLabel={dateLabel} serverNowMs={serverNowMs} timeZone={timeZone} />
+          <h1 className="font-serif text-[32px] leading-tight text-ink">{heroTitle}</h1>
+          {!teachingToday && genericHero?.bigSub ? (
+            <p className="text-[13px] text-muted">{genericHero.bigSub}</p>
+          ) : null}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Link
-            href={`/portfolio/${traineeId}/timetable`}
-            className="trainee-hover-fill inline-flex h-[34px] items-center rounded-[6px] border border-border bg-card px-[14px] text-[13px] font-medium text-ink"
-          >
-            Timetable
-          </Link>
-          {teachingToday ? (
+        <div className="flex shrink-0 items-center gap-2.5">
+          {heroPrimary ? (
+            heroPrimary.external ? (
+              <a
+                href={heroPrimary.href}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-[38px] items-center gap-[7px] rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold text-primary-foreground"
+              >
+                <span aria-hidden className="size-[5px] rounded-full bg-gold" />
+                {heroPrimary.label}
+              </a>
+            ) : (
+              <Link
+                href={heroPrimary.href}
+                className="inline-flex h-[38px] items-center gap-[7px] rounded-[6px] bg-primary px-[15px] text-[13px] font-semibold text-primary-foreground"
+              >
+                <span aria-hidden className="size-[5px] rounded-full bg-gold" />
+                {heroPrimary.label}
+              </Link>
+            )
+          ) : null}
+          {heroSecondary ? (
             <Link
-              href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`}
-              className="inline-flex h-[34px] items-center rounded-[6px] bg-primary px-[14px] text-[13px] font-semibold text-primary-foreground"
+              href={heroSecondary.href}
+              className="trainee-hover-fill inline-flex h-[38px] items-center rounded-[6px] border border-border bg-card px-[14px] text-[13px] font-medium text-ink"
             >
-              Open TP{teachingToday.tpNumber} plan
+              {heroSecondary.label}
             </Link>
           ) : null}
         </div>
       </div>
 
-      {/* Ramy, 28 Aug 2026: items-start -- without it, CSS Grid's default
-          stretch makes every card in the row match the tallest one, losing
-          the reference design's real size progression (short hero card,
-          taller announcements, tallest waiting-on-you). Each card should
-          size to its own content instead. Grid is permanently 3-column now
-          -- "three cards will always be there," never a 2-card fallback.
-          Dimensions below (18px grid gap, 16px/18px card padding, 13px
-          internal gap, 25px/13px/10.5px type sizes, 34px buttons, the 5px
-          gold dot on a primary CTA) are the literal pixel values from
-          Trainee Walkthrough.dc.html's own panel template (lines ~83-106),
-          not Tailwind's default spacing/type scale -- Ramy, 28 Aug 2026:
-          "I'm going to use the exact specs and HTML that you shared with
-          me," not an approximation. */}
-      <div className="grid grid-cols-1 items-start gap-[18px] lg:grid-cols-[1.2fr_1fr_1fr]">
-        {heroKind === "teaching" && teachingToday ? (
-          <div
-            className={`sheet-accent trainee-hover flex flex-col gap-[13px] rounded-[9px] px-[18px] py-4 ${cardEdge("primary")}`}
-            style={{ background: "color-mix(in oklab, var(--color-accent) 40%, var(--color-card))", borderLeftColor: heroEdgeColor }}
-          >
-            <div className="flex items-baseline justify-between gap-3">
-              <p className="text-[10.5px] font-semibold tracking-[0.12em] text-primary uppercase">You teach today</p>
-              {teachingTodayMeta ? <p className="text-[11px] text-muted">{teachingTodayMeta}</p> : null}
+      <StreamDayTrack
+        day={streamDay}
+        serverNowMs={serverNowMs}
+        timeZone={timeZone}
+        meta={{ lead: metaLead, countdownFor: teachingToday ? "mine" : null }}
+      />
+
+      {/* Two columns, and a column with nothing in it is dropped rather than
+          rendered as an empty state -- the handoff is explicit about that. */}
+      <div className="grid items-start gap-[26px] md:grid-cols-[1.4fr_1fr]">
+        {waiting.length > 0 ? (
+          <section className="flex flex-col">
+            <div className="mb-1 flex items-baseline gap-2.5">
+              <h2 className="font-serif text-[21px] font-semibold text-ink-warm">Catch up</h2>
+              <span className="text-[12.5px] text-muted">{waiting.length} · all shown</span>
             </div>
-            <p className="font-serif text-[25px] leading-[1.15] font-semibold text-ink-warm">
-              TP{teachingToday.tpNumber} — {teachingToday.title}
-            </p>
-            {/* Ramy, 28 Aug 2026: level and volunteer headcount are both
-                real, checked against the schema -- level via this TP's own
-                tp_point -> tp_coursebook, volunteer count via the same
-                aggregate already built for the TP detail page (25 Aug:
-                "the trainees also should know"). No fabricated student
-                count -- that field doesn't exist anywhere before a lesson
-                is taught, only tp_lessons.learner_count after the fact. */}
-            <p className="text-[13px] leading-[1.5] text-ink-warm">
-              {[
-                teachingToday.eventTime ? teachingToday.eventTime.slice(0, 5) : null,
-                teachingToday.level,
-                `${teachingToday.teachingOrder === 1 ? "1st" : teachingToday.teachingOrder === 2 ? "2nd" : `${teachingToday.teachingOrder}th`} of ${teachingToday.groupSize} today`,
-                `${TP_LESSON_LENGTH_MINUTES} min`,
-                teachingToday.groupName ? `Group ${teachingToday.groupName}` : null,
-                teachingToday.volunteers ? `${teachingToday.volunteers.expected} of ${teachingToday.volunteers.total} volunteers coming` : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-            <div className="flex items-center gap-2 pt-[3px]">
-              {teachingToday.zoomUrl && teachingToday.joinable ? (
-                <a
-                  href={teachingToday.zoomUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex h-[34px] items-center gap-[7px] rounded-[6px] bg-primary px-[14px] text-[13px] font-semibold text-primary-foreground"
+            {waiting.map((w, i) => {
+              const overdue = w.pill === "Overdue" || w.pill === "Today";
+              return (
+                <Link
+                  key={`${w.href}-${i}`}
+                  href={w.href}
+                  className="trainee-hover-ring grid grid-cols-[38px_1fr_auto] items-center gap-[13px] border-t border-border py-[11px]"
                 >
-                  <span className="size-[5px] shrink-0 rounded-full bg-gold" />
-                  Join the room
-                </a>
-              ) : teachingToday.zoomUrl ? (
-                <span
-                  title="Opens 10 minutes before the session"
-                  aria-disabled="true"
-                  className="inline-flex h-[34px] items-center gap-[7px] rounded-[6px] bg-primary/10 px-[14px] text-[13px] font-semibold text-primary/60"
-                  style={{ cursor: "default" }}
-                >
-                  <span className="size-[5px] shrink-0 rounded-full bg-gold/60" />
-                  Join the room
-                </span>
-              ) : null}
-              <Link
-                href={`/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`}
-                className="inline-flex h-[34px] items-center rounded-[6px] border border-border bg-card px-[13px] text-[13px] font-medium text-ink"
-              >
-                Open your plan
-              </Link>
-            </div>
-            {teachingTodayFoot ? <p className="text-[13px] leading-[1.5] text-muted">{teachingTodayFoot}</p> : null}
-          </div>
-        ) : genericHero ? (
-          <div
-            className={`sheet-accent trainee-hover flex flex-col gap-[13px] rounded-[9px] px-[18px] py-4 ${cardEdge("primary")}`}
-            style={{ background: "color-mix(in oklab, var(--color-accent) 40%, var(--color-card))", borderLeftColor: heroEdgeColor }}
-          >
-            <p className="text-[10.5px] font-semibold tracking-[0.12em] text-primary uppercase">{genericHero.label}</p>
-            <p className="font-serif text-[25px] leading-[1.15] font-semibold text-ink-warm">{genericHero.big}</p>
-            <p className="text-[13px] leading-[1.5] text-ink-warm">{genericHero.bigSub}</p>
-            <div className="flex items-center gap-2 pt-[3px]">
-              <Link
-                href={genericHero.ctaHref}
-                className="inline-flex h-[34px] items-center gap-[7px] rounded-[6px] bg-primary px-[14px] text-[13px] font-semibold text-primary-foreground"
-              >
-                <span className="size-[5px] shrink-0 rounded-full bg-gold" />
-                {genericHero.ctaLabel}
-              </Link>
-            </div>
-          </div>
+                  <span
+                    aria-hidden
+                    className={`grid size-[38px] shrink-0 place-items-center rounded-[10px] text-[11.5px] font-bold ${
+                      overdue || w.isLetter
+                        ? "bg-garnet text-primary-foreground"
+                        : w.kind === "progress"
+                          ? "bg-gold text-ink"
+                          : "bg-primary text-primary-foreground"
+                    }`}
+                  >
+                    {initialsFor(w.label)}
+                  </span>
+                  <span className="min-w-0">
+                    <span className={`block text-[14px] font-semibold ${overdue ? "text-garnet" : "text-ink"}`}>{w.label}</span>
+                    <span className="block text-[12.5px] text-muted">{w.detail}</span>
+                  </span>
+                  <span className={`text-[12px] ${overdue ? "font-bold text-garnet" : "font-semibold text-muted"}`}>
+                    {w.pill ?? ""}
+                  </span>
+                </Link>
+              );
+            })}
+          </section>
         ) : null}
 
-        {/* Announcements -- shared mauve default (no accent of its own),
-            same as Waiting-on-you beside it. Edge side (left vs top)
-            follows cardEdge -- see its own comment above. */}
-        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("mauve")}`}>
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">
-            Announcements{broadcastsCapped.length > 0 ? ` · ${broadcastsCapped.length}` : ""}
-          </p>
-          {broadcastsCapped.length === 0 ? (
-            <p className="text-sm text-muted">Nothing posted yet.</p>
-          ) : (
-            <div className="flex flex-col">
-              {broadcastsCapped.map((b, i) => (
-                <div key={b.id} className={`flex flex-col gap-1 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""} ${b.pinned ? "border-l-2 border-status-warning-text pl-2.5" : ""}`}>
-                  <p className={`text-sm ${b.pinned ? "font-bold text-ink" : "font-semibold text-ink"}`}>{b.title}</p>
-                  {b.body ? (
-                    <div className="flex flex-col gap-2 text-sm whitespace-pre-line text-ink">{b.body}</div>
-                  ) : null}
-                  <p className="text-xs text-muted">
-                    {b.author_id ? (authorNameById.get(b.author_id) ?? "Your tutor") : "Your tutor"} · {relativeTime(b.created_at)}
+        {broadcastsCapped.length > 0 ? (
+          <section className="flex flex-col">
+            <div className="mb-1 flex items-baseline gap-2.5">
+              <h2 className="font-serif text-[21px] font-semibold text-ink-warm">From your tutors</h2>
+              <span className="text-[12.5px] text-muted">{broadcastsCapped.length}</span>
+            </div>
+            {broadcastsCapped.map((b) => {
+              const unread = !readIds.has(b.id);
+              return (
+                <div key={b.id} className="border-t border-border py-[11px]">
+                  <p className={`flex items-center gap-[7px] text-[14px] ${unread ? "font-bold" : "font-semibold"} text-ink`}>
+                    {unread ? <span aria-hidden className="size-[5px] shrink-0 rounded-full bg-gold" /> : null}
+                    {b.title}
+                  </p>
+                  {unread && b.body ? <p className="mt-[3px] text-[12.5px] leading-relaxed text-ink">{b.body}</p> : null}
+                  <p className="mt-[3px] text-[12px] text-muted">
+                    {authorNameById.get(b.author_id ?? "") ?? "Your tutor"} · {relativeTime(b.created_at)}
                   </p>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Waiting on you -- shared mauve default, same as Announcements
-            beside it. */}
-        <div className={`sheet flex flex-col gap-3 rounded-[9px] ${cardEdge("mauve")}`}>
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">
-            Waiting on you{waiting.length > 0 ? ` · ${waiting.length}` : ""}
-          </p>
-          {waitingCapped.length === 0 ? (
-            <p className="text-sm text-muted">Well done — you're all caught up.</p>
-          ) : (
-            <div className="flex flex-col">
-              {waitingCapped.map((w, i) => (
-                <Link key={i} href={w.href} className={`trainee-hover -mx-2 flex flex-col gap-0.5 rounded-[6px] px-2 py-2.5 ${i > 0 ? "border-t border-border-faint" : ""}`}>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-ink">{w.label}</p>
-                    {w.pill ? <span className={`pill shrink-0 ${w.pillClass ?? "pill-warning"}`}>{w.pill}</span> : null}
-                  </div>
-                  <p className="text-xs text-muted">{w.detail}</p>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+              );
+            })}
+          </section>
+        ) : null}
       </div>
     </div>
   );
+}
+
+/** The badge on a Catch up row. Two letters off the item, so "Assignment 3 ·
+ *  Language skills" reads A3 and "Observation hours" reads OH -- the handoff's
+ *  own examples, derived rather than hand-listed so a new kind of item can
+ *  never turn up with a blank badge. */
+function initialsFor(label: string): string {
+  const digits = label.match(/\d+/);
+  const first = label.trim()[0]?.toUpperCase() ?? "?";
+  if (digits) return `${first}${digits[0]}`;
+  const words = label.trim().split(/\s+/);
+  return (first + (words[1]?.[0] ?? "")).toUpperCase();
 }

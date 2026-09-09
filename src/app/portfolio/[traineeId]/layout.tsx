@@ -11,7 +11,7 @@ import { Eye } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
 import { TraineeSidebarNav } from "@/app/portfolio/[traineeId]/trainee-sidebar-nav";
-import { TraineeNameBanner } from "@/app/portfolio/[traineeId]/trainee-name-banner";
+import { buildRailStatus, type RailStatus } from "@/lib/trainee-rail-status";
 import { TraineeHeaderCorner } from "@/app/portfolio/[traineeId]/trainee-header-corner";
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
 import { computeWeekOf } from "@/lib/course-progress";
@@ -118,16 +118,33 @@ export default async function PortfolioLayout({
   // browsing one candidate's whole record rather than a daily briefing.
   const showTraineeNav = !isStaffView;
 
-  // TraineeNameBanner's own "week N" -- only fetched for the showTraineeNav
-  // branch's landing page, same course_id already used above. Ramy,
-  // 2026-08-24: just the week number now, no weekday and no "of M" -- the
-  // real date already shows in Today's own heading below.
+  // The rail's foot ("Week 3 of 5" over the tick strip) and, with it, every
+  // door's status line. Ramy, 9 Sep 2026: "plugged into the layout" -- so this
+  // runs for every page under this layout, not just the landing.
+  //
+  // TraineeNameBanner used to take the week number alone and render it above
+  // the Connect header. The banner is gone (the hero row on Course Stream says
+  // who and when now, in the place a reader actually looks), but the same
+  // computeWeekOf value it was fetching still earns its query here.
   let bannerWeekNumber: number | null = null;
+  let weekTotal: number | null = null;
+  let railStatus: RailStatus | null = null;
   if (showTraineeNav && trainee.course_id) {
     const { data: courseDates } = await supabase.from("courses").select("start_date, end_date").eq("id", trainee.course_id).maybeSingle();
-    const today = toLocalIso(new Date(), timeZone);
-    const weekOf = courseDates?.start_date && courseDates?.end_date ? computeWeekOf(courseDates.start_date, courseDates.end_date, today) : null;
-    bannerWeekNumber = weekOf ? Number(weekOf.match(/week (\d+)/)?.[1]) || null : null;
+    const todayIso = toLocalIso(new Date(), timeZone);
+    const weekOf = courseDates?.start_date && courseDates?.end_date ? computeWeekOf(courseDates.start_date, courseDates.end_date, todayIso) : null;
+    const parts = weekOf?.match(/week (\d+) of (\d+)/);
+    bannerWeekNumber = parts ? Number(parts[1]) : null;
+    weekTotal = parts ? Number(parts[2]) : null;
+    railStatus = await buildRailStatus({
+      supabase,
+      traineeId: trainee.id,
+      courseId: trainee.course_id,
+      todayIso,
+      timeZone,
+      weekNumber: bannerWeekNumber,
+      weekTotal,
+    });
   }
 
   // specs/for-claude-code-trainee-interface.md §"Header": "Day N of 20"
@@ -300,7 +317,6 @@ export default async function PortfolioLayout({
         // distinct --color-card tone; that contrast is the only place color
         // actually changes.
         <div className="flex min-h-0 flex-1 flex-col" style={{ background: "var(--color-frame)" }}>
-          <TraineeNameBanner traineeId={trainee.id} traineeName={trainee.full_name} weekNumber={bannerWeekNumber} />
           <div className="border-t border-border" />
           {/* Ramy, 2026-08-24: Connect's own band is a distinct off-white
               ("one end to the other"), not the same tone as the sheet
@@ -317,7 +333,14 @@ export default async function PortfolioLayout({
               and a candidate only ever has one. */}
           <div
             style={{
-              background: "color-mix(in oklab, var(--color-primary) 3%, oklch(99.5% 0.004 90))",
+              // Ramy, 9 Sep 2026, on the 4b landing: "the background is
+              // different. It's just not white. It's beige." The band was
+              // near-white (oklch 99.5%) warmed 3% toward teal; the handoff
+              // draws the header on --color-card, and against the page's own
+              // beige the old value read as a separate white sheet laid on top.
+              // The teal hairline from 30 Aug stays -- that was the part he
+              // asked for ("maybe just a tiny bit of teal green").
+              background: "color-mix(in oklab, var(--color-primary) 3%, var(--color-card))",
               borderTop: "2px solid color-mix(in oklab, var(--color-primary) 45%, transparent)",
             }}
           >
@@ -333,7 +356,7 @@ export default async function PortfolioLayout({
             </div>
           </div>
           <div className="border-t border-border" />
-          <PortfolioFocusRow traineeId={trainee.id} sidebar={<TraineeSidebarNav traineeId={trainee.id} />}>{children}</PortfolioFocusRow>
+          <PortfolioFocusRow traineeId={trainee.id} sidebar={<TraineeSidebarNav traineeId={trainee.id} status={railStatus} />}>{children}</PortfolioFocusRow>
         </div>
       ) : (
         <div className="border-b border-border bg-card">

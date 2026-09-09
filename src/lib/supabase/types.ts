@@ -2560,6 +2560,22 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["course_broadcasts"]["Row"]>;
         Relationships: [];
       };
+      // migration 0283 -- which tutor notices a trainee has read. Course
+      // Stream's "From your tutors" shows an unread notice in full and a read
+      // one as a title and an attribution; nothing tracked that before.
+      course_broadcast_reads: {
+        Row: {
+          broadcast_id: string;
+          trainee_id: string;
+          read_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["course_broadcast_reads"]["Row"]> & {
+          broadcast_id: string;
+          trainee_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_broadcast_reads"]["Row"]>;
+        Relationships: [];
+      };
       course_timetable_events: {
         Row: {
           id: string;

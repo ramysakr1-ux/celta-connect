@@ -45,6 +45,12 @@
   --color-surface-muted: oklch(94.8% 0.01 85); /* muted BACKGROUND tint */
   --color-gold: oklch(63% 0.096 72); /* brass/gold accent, used sparingly */
   --color-gold-foreground: oklch(99% 0.005 90);
+  /* Gold dark enough to read as TEXT on a light surface -- --color-gold itself
+     is a fill, and fails against card/frame at body sizes. Named in
+     design_handoff_trainee_landing's token list as though it already existed;
+     it didn't. Course Stream uses it for the trainee's own TP block, whose
+     time and NEXT pill sit on a 22% gold wash. */
+  --color-gold-ink: oklch(40% 0.1 65);
   --color-ink-warm: oklch(30% 0.042 58); /* warm dark brown, one step lighter/warmer than --color-ink -- the wordmark tile, and headings/primary buttons/checkboxes on entry surfaces (rename-to-connect.md) */
   /* Command Center's own gold, at two strengths, for the rules inside its
      tables. Ramy, 3 Sep 2026: "make those lines between centres... a nice
@@ -114,6 +120,7 @@
   --color-surface-muted: var(--color-surface-muted);
   --color-gold: var(--color-gold);
   --color-gold-foreground: var(--color-gold-foreground);
+  --color-gold-ink: var(--color-gold-ink);
   --color-ink-warm: var(--color-ink-warm);
   --color-rule-gold: var(--color-rule-gold);
   --color-rule-gold-soft: var(--color-rule-gold-soft);

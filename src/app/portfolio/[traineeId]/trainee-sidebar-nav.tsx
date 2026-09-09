@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import type { RailStatus } from "@/lib/trainee-rail-status";
 
 // for-claude-code-trainee-assessor-card-system.md / Trainee Walkthrough.dc.html:
 // a left "Workspace" rail, not TraineeTopNav's horizontal tabs -- and a
@@ -39,7 +40,7 @@ const SIDEBAR_TABS = [
 // Desktop only (`hidden md:flex`), same breakpoint TraineeTopNav used --
 // TraineeMobileNav's own bottom bar (unrelated, unchanged) covers narrow
 // viewports with its own simpler six-item set.
-export function TraineeSidebarNav({ traineeId }: { traineeId: string }) {
+export function TraineeSidebarNav({ traineeId, status }: { traineeId: string; status?: RailStatus | null }) {
   const pathname = usePathname();
   // A room (Resource Hub, and any later one) hides this rail entirely, so
   // there is nothing to bracket while you are inside it. Coming out, the
@@ -64,6 +65,7 @@ export function TraineeSidebarNav({ traineeId }: { traineeId: string }) {
           : tab.href === ""
             ? pathname === href || alsoMatch.some((extra) => pathname.startsWith(`${base}${extra}`))
             : pathname.startsWith(href);
+        const door = status?.byHref[tab.href] ?? null;
         return (
           <Link
             key={tab.href}
@@ -73,14 +75,49 @@ export function TraineeSidebarNav({ traineeId }: { traineeId: string }) {
             // fill. They had only hover:text-ink, so the rail was the one
             // part of the trainee's chrome that did not respond to the
             // pointer at all.
-            className={`trainee-hover-fill rounded-[6px] border-l-[3px] px-2.5 py-2 text-[13px] transition-colors ${
+            className={`trainee-hover-fill flex flex-col gap-px rounded-[6px] border-l-[3px] px-2.5 py-[9px] transition-colors ${
               active ? "border-l-primary font-semibold text-primary" : "border-l-transparent font-medium text-muted hover:text-ink"
             }`}
           >
-            {tab.label}
+            <span className="flex items-center justify-between gap-2">
+              <span className="text-[13px]">{tab.label}</span>
+              {/* design_handoff_trainee_landing: a gold dot on any door with
+                  something live today. It is the only thing in the rail that
+                  is allowed to be gold, so it stays legible as "look here". */}
+              {door?.live ? <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-gold" /> : null}
+            </span>
+            {door ? (
+              <span
+                className={`text-[11.5px] leading-[1.35] font-normal ${door.urgent ? "text-garnet" : "text-muted"}`}
+              >
+                {door.status}
+              </span>
+            ) : null}
           </Link>
         );
       })}
+      {status && (status.weekNumber || status.tpNumber) ? (
+        <div className="mt-auto border-t border-border pt-3.5">
+          <div className="flex justify-between px-0.5 pb-[7px] text-[11px] tabular-nums text-muted">
+            <span>{status.weekNumber && status.weekTotal ? `Week ${status.weekNumber} of ${status.weekTotal}` : ""}</span>
+            <span>{status.tpNumber && status.tpTotal ? `TP${status.tpNumber} of ${status.tpTotal}` : ""}</span>
+          </div>
+          {status.weekTotal ? (
+            <div className="flex gap-[3px] px-0.5">
+              {Array.from({ length: status.weekTotal }).map((_, i) => {
+                const n = i + 1;
+                const week = status.weekNumber ?? 0;
+                return (
+                  <span
+                    key={n}
+                    className={`h-[3px] flex-1 rounded-[2px] ${n < week ? "bg-primary" : n === week ? "bg-gold" : "bg-border"}`}
+                  />
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }
