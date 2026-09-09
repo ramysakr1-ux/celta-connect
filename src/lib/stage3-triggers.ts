@@ -10,10 +10,13 @@ import type { StandardRating } from "@/lib/supabase/types";
 // progress in the second half of the course. A tutorial must be given and
 // the whole record completed."
 //
-// CELTA Administration Handbook 10.2 adds a fourth the booklet doesn't
-// print -- candidates who have received indications of Pass B or Pass A but
-// have not maintained their progress -- and permits a centre to give Stage
-// Three to everyone as a centre setting.
+// CELTA Administration Handbook (June 2025) 10.2 adds a fourth trigger the
+// booklet doesn't print -- candidates who have received indications of Pass B
+// or Pass A but have not maintained their progress.
+//
+// The centre-wide setting below is ours, not Cambridge's: 10.2 neither grants
+// nor forbids giving Stage Three to every candidate. It is safe because it
+// only ever adds candidates.
 //
 // Ramy, 29 Aug 2026: "leave it to the centre to decide, with the exception
 // of a violation of the Cambridge rules." So the centre may opt everyone
@@ -49,7 +52,10 @@ export interface Stage3TriggerInput {
    * setting by hand -- the LfC exception lives there.
    */
   assignmentFailed: boolean;
-  /** Centre setting -- Handbook 10.2 allows a centre to give Stage Three to everyone. */
+  /**
+   * Centre setting: give Stage Three to every candidate. Not a Cambridge
+   * provision -- see the note above -- and it can only raise the floor.
+   */
   centreGivesStage3ToAll: boolean;
 }
 
