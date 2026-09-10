@@ -142,13 +142,13 @@ export default async function DashboardLayout({
             className="flex shrink-0 items-center gap-3 hover:opacity-80"
           >
             <Wordmark size="header" />
-            <HeaderCredit />
             {/* Course Admin.dc.html's own header carries a role pill beside
                 the mark: 11px/700 uppercase at 0.06em with a 5px dot, on a 12%
                 accent tint. Centre Admin has the same device at /centre; this
                 screen had none, so it read as the generic dashboard rather
                 than as the course admin's own view. */}
           </Link>
+          <HeaderCredit />
 
           {/* The same pill row Centre Management carries, with the teal on
               this view instead. Ramy, 31 Aug 2026: "this is meant to be a

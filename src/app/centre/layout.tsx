@@ -105,8 +105,8 @@ export default async function CentreLayout({ children }: { children: React.React
             className="shrink-0 hover:opacity-80"
           >
             <Wordmark size="header" />
-            <HeaderCredit />
           </Link>
+          <HeaderCredit />
         </div>
         {/* The garnet Centre owner pill is gone: Connect is the way home
             now, and for an owner home IS the owner screen. Ramy: "you don't

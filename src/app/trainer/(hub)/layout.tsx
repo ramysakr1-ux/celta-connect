@@ -8,7 +8,7 @@ import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
-import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
+import { getAssessorCourseId, isAssessorPreview, isAssessorTourMode } from "@/lib/auth/portfolio-access";
 import { getInitialStaffChatData } from "@/lib/staff-chat";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
@@ -40,6 +40,19 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // a touring assessor gets the real trainer tab set instead, since the
   // whole point is letting them see how the platform actually works.
   const tourMode = isAssessor && (await isAssessorTourMode());
+  // Ramy, 10 Sep 2026: "there is no way to go back to the assessor page."
+  //
+  // isAssessor is deliberately `!isRealStaff && cookie`, so a real MCT checking
+  // what the pack looks like is not an assessor here -- they keep their own
+  // tabs, which is right. But it also meant the hub had no idea they had come
+  // from the pack, so the wordmark sent them to /trainer and the pack was
+  // unreachable without retyping the URL.
+  //
+  // The preview cookie is the precise signal: only /trainer/assessor/preview
+  // sets it, and /assessor/exit clears it. A stale plain assessor cookie does
+  // not trigger this.
+  const assessorPreview = await isAssessorPreview();
+  const backToPack = isAssessor || assessorPreview;
 
   // Everything the frame needs that depends only on the profile, in ONE
   // wave. Perf audit, 5 Sep 2026: this used to be four stacked round-trip
@@ -183,12 +196,23 @@ export default async function TrainerHubLayout({ children }: { children: React.R
       <header className="border-b border-border bg-frame">
         <div className="flex h-14 items-center gap-[18px] px-[22px]">
           <Link
-            href={profile?.role === "platform_owner" ? "/platform/command-center" : isAssessor ? "/assessor" : "/trainer"}
+            href={backToPack ? "/assessor" : profile?.role === "platform_owner" ? "/platform/command-center" : "/trainer"}
             className="block shrink-0"
           >
             <Wordmark size="header-compact" gapPx={9} />
-            <HeaderCredit />
           </Link>
+          <HeaderCredit />
+          {assessorPreview ? (
+            // The wordmark alone is not a discoverable way back -- nobody
+            // reads a logo as "return to the thing I was previewing". This
+            // says it.
+            <Link
+              href="/assessor"
+              className="trainer-hover-fill flex h-7 shrink-0 items-center rounded-full border border-border bg-card px-3 text-[11px] font-semibold text-ink"
+            >
+              Assessor pack
+            </Link>
+          ) : null}
           <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} mct={isMct && !isAssessor} tint={tintTab} />
           <div className="flex shrink-0 items-center gap-[11px]">
             {isRealStaff && isMctReal ? (

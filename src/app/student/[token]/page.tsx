@@ -223,8 +223,8 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         <div className="container flex items-center gap-4 py-6">
           <Link href="/" className="hover:opacity-80">
             <Wordmark size="header" />
-            <HeaderCredit />
           </Link>
+          <HeaderCredit />
         </div>
         <div className="container pb-16">
           <div className="frame mx-auto flex max-w-xl flex-col gap-6 p-6">
