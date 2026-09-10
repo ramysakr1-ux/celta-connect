@@ -1,5 +1,6 @@
 "use client";
 
+import { useServerNow } from "@/lib/use-server-now";
 import { useEffect, useState } from "react";
 import type { StreamDay, StreamSlot } from "@/lib/course-stream-day";
 
@@ -19,15 +20,6 @@ import type { StreamDay, StreamSlot } from "@/lib/course-stream-day";
 
 type State = "done" | "now" | "next" | "later";
 
-function useNow(serverNowMs: number, tickMs = 15_000): number {
-  const [now, setNow] = useState(serverNowMs);
-  useEffect(() => {
-    setNow(Date.now());
-    const t = setInterval(() => setNow(Date.now()), tickMs);
-    return () => clearInterval(t);
-  }, [tickMs]);
-  return now;
-}
 
 /** The same window isEventLive uses everywhere else: the door opens ten
  *  minutes before the session and closes when it ends. A join link that
@@ -56,7 +48,7 @@ export function StreamEyebrow({
   timeZone: string;
 }) {
   const [mounted, setMounted] = useState(false);
-  const now = useNow(serverNowMs);
+  const now = useServerNow(serverNowMs);
   useEffect(() => setMounted(true), []);
 
   const hour = Number(
@@ -92,7 +84,7 @@ export function StreamDayTrack({
   meta: { lead: string; countdownFor: string | null };
 }) {
   const [mounted, setMounted] = useState(false);
-  const now = useNow(serverNowMs);
+  const now = useServerNow(serverNowMs);
   useEffect(() => setMounted(true), []);
 
   // windowStart/windowEnd are not read here any more: placing blocks by

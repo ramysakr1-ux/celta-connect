@@ -1,5 +1,6 @@
 "use client";
 
+import { useServerNow } from "@/lib/use-server-now";
 import { useEffect, useState } from "react";
 
 // The tutor's own day, and the clock that drives it.
@@ -36,19 +37,10 @@ function stateOf(slot: DaySlot, nowMs: number, firstFutureId: string | null): St
   return slot.id === firstFutureId ? "next" : "later";
 }
 
-function useNow(serverNowMs: number, tickMs = 30_000): number {
-  const [now, setNow] = useState(serverNowMs);
-  useEffect(() => {
-    setNow(Date.now());
-    const t = setInterval(() => setNow(Date.now()), tickMs);
-    return () => clearInterval(t);
-  }, [tickMs]);
-  return now;
-}
 
 export function LiveClock({ timeZone, serverNowMs, accent }: { timeZone: string; serverNowMs: number; accent: string }) {
   const [mounted, setMounted] = useState(false);
-  const now = useNow(serverNowMs, 15_000);
+  const now = useServerNow(serverNowMs, 15_000);
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   const hhmm = new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(now));
@@ -60,7 +52,7 @@ export function LiveClock({ timeZone, serverNowMs, accent }: { timeZone: string;
 }
 
 export function YourDay({ slots, serverNowMs, accent }: { slots: DaySlot[]; serverNowMs: number; accent: string }) {
-  const now = useNow(serverNowMs);
+  const now = useServerNow(serverNowMs);
   const firstFuture = slots.find((s) => now < s.startsAtMs)?.id ?? null;
 
   return (

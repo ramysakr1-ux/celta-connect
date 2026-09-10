@@ -1,5 +1,6 @@
 "use client";
 
+import { useServerNow } from "@/lib/use-server-now";
 import { useEffect, useState } from "react";
 
 // The day, end to end, as one thin bar: how much of it has gone, where each
@@ -34,15 +35,6 @@ export interface DayBarItem {
   emphasis?: boolean;
 }
 
-function useNow(serverNowMs: number, tickMs = 15_000): number {
-  const [now, setNow] = useState(serverNowMs);
-  useEffect(() => {
-    setNow(Date.now());
-    const t = setInterval(() => setNow(Date.now()), tickMs);
-    return () => clearInterval(t);
-  }, [tickMs]);
-  return now;
-}
 
 export function DayBar({
   items,
@@ -72,7 +64,7 @@ export function DayBar({
   timeZone: string;
 }) {
   const [mounted, setMounted] = useState(false);
-  const now = useNow(serverNowMs);
+  const now = useServerNow(serverNowMs);
   useEffect(() => setMounted(true), []);
 
   const span = Math.max(1, windowEnd - windowStart);
