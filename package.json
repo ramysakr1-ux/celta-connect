@@ -12,7 +12,8 @@
     "prebuild": "node scripts/check-branch-scope.mjs && node scripts/check-course-scope.mjs",
     "smoke": "node scripts/smoke.mjs",
     "smoke:prod": "node scripts/smoke.mjs --base https://www.celtaconnect.com",
-    "check:course": "node scripts/course-readiness.mjs"
+    "check:course": "node scripts/course-readiness.mjs",
+    "check:writes": "node scripts/write-paths.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
