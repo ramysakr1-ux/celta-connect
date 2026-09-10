@@ -13,7 +13,8 @@
     "smoke": "node scripts/smoke.mjs",
     "smoke:prod": "node scripts/smoke.mjs --base https://www.celtaconnect.com",
     "check:course": "node scripts/course-readiness.mjs",
-    "check:writes": "node scripts/write-paths.mjs"
+    "check:writes": "node scripts/write-paths.mjs",
+    "check:browser": "node scripts/browser-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
@@ -40,6 +41,7 @@
     "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
+    "playwright": "^1.63.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

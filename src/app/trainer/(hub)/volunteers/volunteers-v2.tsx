@@ -438,11 +438,26 @@ export function VolunteersV2({
                   const totalHours = r.hoursPrior + r.hoursHere;
                   const nextMilestone = milestones.find((m) => totalHours < m);
                   return (
-                    <button
+                    // A div, not a button. This row carries a Copy link button
+                    // inside it, and HTML does not allow a button inside a
+                    // button -- the browser hoists the inner one out while
+                    // parsing, so the DOM it builds does not match the HTML the
+                    // server sent and React abandons hydrating the whole
+                    // subtree. The page still rendered and still returned 200,
+                    // which is why nothing caught it until browser-check.mjs
+                    // read the console (10 Sep 2026).
+                    //
+                    // role/tabIndex/onKeyDown keep it operable from the
+                    // keyboard, which is what the button element was giving us.
+                    <div
                       key={r.id}
-                      type="button"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setSelectedId(r.id)}
-                      className="grid w-full grid-cols-[minmax(0,1.2fr)_196px_150px_112px_44px] items-center gap-x-3.5 border-b border-border-faint px-4 py-[11px] text-left transition-colors last:border-b-0 hover:bg-[color-mix(in_oklab,var(--hub-hover-accent)_7%,transparent)]"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedId(r.id); }
+                      }}
+                      className="grid w-full cursor-pointer grid-cols-[minmax(0,1.2fr)_196px_150px_112px_44px] items-center gap-x-3.5 border-b border-border-faint px-4 py-[11px] text-left transition-colors last:border-b-0 hover:bg-[color-mix(in_oklab,var(--hub-hover-accent)_7%,transparent)]"
                       style={isSelected ? { background: `color-mix(in oklab, ${TEAL_TINT} 45%, var(--color-card))`, boxShadow: `inset 3px 0 0 ${TEAL}` } : undefined}
                     >
                       <span className="flex min-w-0 items-center gap-2.5">
@@ -473,7 +488,7 @@ export function VolunteersV2({
                         {r.lastOpenedAt ? `Opened ${stampLabel(r.lastOpenedAt, timeZone).toLowerCase()}` : "Never opened"}
                       </span>
                       <span onClick={(e) => e.stopPropagation()}>{r.token ? <CopyButton small url={`${siteOrigin}/student/${r.token}`} /> : null}</span>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
