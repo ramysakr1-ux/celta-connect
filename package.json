@@ -14,7 +14,8 @@
     "smoke:prod": "node scripts/smoke.mjs --base https://www.celtaconnect.com",
     "check:course": "node scripts/course-readiness.mjs",
     "check:writes": "node scripts/write-paths.mjs",
-    "check:browser": "node scripts/browser-check.mjs"
+    "check:browser": "node scripts/browser-check.mjs",
+    "check:journeys": "node scripts/journeys.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

@@ -29,16 +29,16 @@
  *   node scripts/write-paths.mjs
  */
 
-import fs from "node:fs";
+// The world is built by scripts/lib/test-world.mjs, shared with journeys.mjs.
+// It used to be built here, inline, and a second copy of a fixture is a fixture
+// the two harnesses stop agreeing about.
+import { buildWorld, tearDown, env } from "./lib/test-world.mjs";
 
-const env = Object.fromEntries(
-  fs.readFileSync(".env.local", "utf8").split("\n").filter((l) => l.includes("=") && !l.startsWith("#"))
-    .map((l) => [l.slice(0, l.indexOf("=")).trim(), l.slice(l.indexOf("=") + 1).trim()])
-);
+const E = env();
 const { createClient } = await import("@supabase/supabase-js");
-const URL_ = env.NEXT_PUBLIC_SUPABASE_URL;
-const ANON = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const admin = createClient(URL_, env.SUPABASE_SERVICE_ROLE_KEY);
+const URL_ = E.NEXT_PUBLIC_SUPABASE_URL;
+const ANON = E.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const admin = createClient(URL_, E.SUPABASE_SERVICE_ROLE_KEY);
 
 const stamp = Date.now();
 const results = [];
@@ -62,59 +62,18 @@ async function signIn(email) {
   });
 }
 
-let centre, course, traineeId, trainerId, demoCentreId;
+let world = null;
 try {
-  // ------------------------------------------------------------- build ----
-  const { data: c, error: cErr } = await admin.from("centers").insert({
-    name: `Write Path Test ${stamp}`, center_number: `WPT-${stamp}`, is_demo: false, time_zone: "Europe/Istanbul",
-  }).select("id").single();
-  if (cErr) throw new Error(`create centre: ${cErr.message}`);
-  centre = c.id;
+  world = await buildWorld({ admin });
+  const { courseId: course, trainee, trainer, planId, assignmentId, broadcastId } = world;
+  const traineeId = trainee.id;
+  const trainerId = trainer.id;
+  const plan = { id: planId };
+  const assignment = { id: assignmentId };
+  const broadcast = { id: broadcastId };
 
-  const { data: co, error: coErr } = await admin.from("courses").insert({
-    center_id: centre, name: `WPT ${stamp}`, start_date: "2026-09-07", end_date: "2026-10-02", total_hours: 120, delivery_mode: "f2f",
-  }).select("id").single();
-  if (coErr) throw new Error(`create course: ${coErr.message}`);
-  course = co.id;
-
-  const mkUser = async (email, role, name) => {
-    const { data: u, error } = await admin.auth.admin.createUser({ email, email_confirm: true });
-    if (error) throw new Error(`createUser ${email}: ${error.message}`);
-    // INSERT, not update. Creating an auth user does NOT create a profile --
-    // there is no trigger -- so an update matched zero rows and the run then
-    // died several statements later on a foreign key to a profile that had
-    // never existed. seed-demo.mjs inserts for the same reason.
-    const { error: pErr } = await admin.from("profiles").insert({
-      id: u.user.id, email, full_name: name, role,
-      // profiles_course_required_for_trainer_trainee: a trainer needs a course
-      // too, not just a trainee. Worth knowing -- it means a tutor cannot exist
-      // at a centre without one.
-      center_id: centre, course_id: course,
-    });
-    if (pErr) throw new Error(`profile ${email}: ${pErr.message}`);
-    return u.user.id;
-  };
-  traineeId = await mkUser(`wpt-trainee-${stamp}@example.com`, "trainee", "WPT Trainee");
-  trainerId = await mkUser(`wpt-trainer-${stamp}@example.com`, "trainer", "WPT Trainer");
-  await admin.from("course_tutors").insert({ course_id: course, profile_id: trainerId, tutor_role: "main_course_tutor" });
-
-  // Every scaffolding insert says what went wrong. The first draft destructured
-  // only `data` and the run died on "Cannot read properties of null" with no
-  // clue which of six inserts had failed.
-  const seed = async (table, row) => {
-    const { data, error } = await admin.from(table).insert(row).select("id").single();
-    if (error) throw new Error(`seed ${table}: ${error.message}`);
-    return data;
-  };
-  const g = await seed("course_tp_groups", { course_id: course, name: "Group A", tutor_profile_id: trainerId });
-  const sg = await seed("course_subgroups", { course_id: course, name: "Group A -- Half A", tp_group_id: g.id, half_order: 1 });
-  await seed("course_subgroup_members", { subgroup_id: sg.id, trainee_id: traineeId, base_slot: 0 });
-  const plan = await seed("plan_assignments", { course_id: course, trainee_id: traineeId, tp_number: 1, main_lesson_aim: "Present perfect", density_tier: "scripted", assigned_by: trainerId });
-  const assignment = await seed("assignments", { course_id: course, trainee_id: traineeId, assignment_type: "Focus on Learner", first_status: "not_submitted" });
-  const broadcast = await seed("course_broadcasts", { course_id: course, title: "Test notice", body: "Body", author_id: trainerId, sent_at: new Date().toISOString() });
-
-  const asTrainee = await signIn(`wpt-trainee-${stamp}@example.com`);
-  const asTrainer = await signIn(`wpt-trainer-${stamp}@example.com`);
+  const asTrainee = await signIn(trainee.email);
+  const asTrainer = await signIn(trainer.email);
 
   // ------------------------------------------------------- trainee writes --
   {
@@ -231,21 +190,7 @@ try {
 } catch (e) {
   bad("harness", e.message);
 } finally {
-  // ------------------------------------------------------------ tear down --
-  // Explicit, because the one-liner this replaced picked the filter column
-  // with a nested ternary and was unreadable enough to hide a bug: a
-  // PostgREST builder is thenable but is not a Promise, so .catch() on it
-  // threw and took the whole teardown with it, stranding the centre.
-  const BY_COURSE = ["tp_feedback", "tp_plans", "plan_assignments", "assignments", "course_broadcasts", "course_subgroups", "course_tp_groups", "course_tutors"];
-  const BY_TRAINEE = ["tp_self_evaluations", "course_broadcast_reads", "course_subgroup_members"];
-  const quietly = async (fn) => { try { await fn(); } catch { /* teardown never masks a result */ } };
-  if (traineeId) for (const t of BY_TRAINEE) await quietly(() => admin.from(t).delete().eq("trainee_id", traineeId));
-  if (course) {
-    for (const t of BY_COURSE) await quietly(() => admin.from(t).delete().eq("course_id", course));
-    await quietly(() => admin.from("courses").delete().eq("id", course));
-  }
-  for (const id of [traineeId, trainerId]) if (id) await quietly(() => admin.auth.admin.deleteUser(id));
-  if (centre) await quietly(() => admin.from("centers").delete().eq("id", centre));
+  await tearDown({ admin, world });
 }
 
 console.log("\nWRITE PATHS\n");
