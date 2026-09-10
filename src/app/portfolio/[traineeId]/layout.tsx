@@ -336,25 +336,45 @@ export default async function PortfolioLayout({
               with a teal hairline on top. Against the beige page it read as a
               separate white sheet, which is what he kept seeing. */}
           <div style={{ background: "var(--color-ink-warm)" }}>
-            <div className="container flex h-14 items-center gap-7">
-              <Link href={`/portfolio/${trainee.id}`} className="block shrink-0">
-                <Wordmark
-                  size="header"
-                  onDark
-                  tileBg="color-mix(in oklab, oklch(98.5% 0.006 90) 12%, transparent)"
-                />
-              </Link>
-              <HeaderCredit onDark />
-              {traineeDay ? (
-                <HeaderDayBar day={traineeDay} serverNowMs={Date.now()} timeZone={timeZone} />
+            {/* One row from md up, exactly as it was. Below that the bar drops
+                to a full-width second line rather than fighting the wordmark,
+                the day counter and the clock for a 375px row -- measured on
+                production 10 Sep 2026, the track had 24px to draw a whole day
+                in and the clock printed on top of "Day 19 of 20".
+
+                The wrapper below is `md:contents`, so on desktop its children
+                sit in this same flex row and the gap-7 rhythm is unchanged;
+                `md:order-*` keeps the bar between the credit and the corner
+                even though it comes after them in the markup. */}
+            <div className="container flex flex-col justify-center gap-1.5 py-2 md:h-14 md:flex-row md:items-center md:gap-7 md:py-0">
+              <div className="flex min-w-0 items-center gap-3 md:contents">
+                <Link href={`/portfolio/${trainee.id}`} className="block shrink-0">
+                  <Wordmark
+                    size="header"
+                    onDark
+                    tileBg="color-mix(in oklab, oklch(98.5% 0.006 90) 12%, transparent)"
+                  />
+                </Link>
+                <HeaderCredit onDark />
+                <div className="min-w-0 flex-1 md:hidden" />
+                <div className="shrink-0 md:order-3">
+                  <TraineeHeaderCorner
+                    traineeId={trainee.id}
+                    traineeName={trainee.full_name}
+                    courseDayProgress={courseDayProgress}
+                  />
+                </div>
+              </div>
+              {/* A day with nothing timetabled draws no bar, so on a phone it
+                  gets no second line either -- an empty strip under the
+                  wordmark would be a header that grew to say nothing. */}
+              {traineeDay && traineeDay.slots.length > 0 ? (
+                <div className="flex min-w-0 flex-1 md:order-2">
+                  <HeaderDayBar day={traineeDay} serverNowMs={Date.now()} timeZone={timeZone} />
+                </div>
               ) : (
-                <div className="min-w-0 flex-1" />
+                <div className="hidden min-w-0 flex-1 md:order-2 md:block" />
               )}
-              <TraineeHeaderCorner
-                traineeId={trainee.id}
-                traineeName={trainee.full_name}
-                courseDayProgress={courseDayProgress}
-              />
             </div>
           </div>
           <PortfolioFocusRow traineeId={trainee.id} sidebar={<TraineeSidebarNav traineeId={trainee.id} status={railStatus} />}>{children}</PortfolioFocusRow>

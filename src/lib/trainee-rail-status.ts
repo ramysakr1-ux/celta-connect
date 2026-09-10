@@ -93,7 +93,24 @@ export async function buildRailStatus({
   const tpToday = teachesToday ? halfDates.indexOf(todayIso) + 1 : null;
 
   const untaught = (plans ?? []).filter((p) => !p.taught_at).sort((a, b) => a.tp_number - b.tp_number);
-  const nextTp = untaught[0] ?? null;
+
+  // Split the untaught plans by whether their day has been and gone. taught_at
+  // is written when the trainer logs the outcome, not when the date arrives, so
+  // an untaught TP behind us is an open RECORD, not a lesson to prepare -- and
+  // "TP7 plan · Giving advice" for a lesson given three days ago is an
+  // instruction to do something impossible. The teaching-today branch below
+  // already refused to call a lower-numbered TP "next" for exactly this reason;
+  // that reasoning was just never applied to the other six days of the week.
+  const dateOfTp = (tpNumber: number): string | null => halfDates[tpNumber - 1] ?? null;
+  const stillAhead = untaught.filter((p) => {
+    const d = dateOfTp(p.tp_number);
+    return d === null || d >= todayIso;
+  });
+  const unrecorded = untaught.filter((p) => {
+    const d = dateOfTp(p.tp_number);
+    return d !== null && d < todayIso;
+  });
+  const nextTp = stillAhead[0] ?? null;
   const currentTp = tpToday ?? nextTp?.tp_number ?? null;
 
   const times = (todaysEvents ?? []).map((e) => e.event_time).filter((t): t is string => Boolean(t));
@@ -135,7 +152,16 @@ export async function buildRailStatus({
       }
     : nextTp
       ? { status: `TP${nextTp.tp_number} plan${nextTp.short_title ? ` · ${nextTp.short_title}` : ""}`, live: false, urgent: false }
-      : { status: "All your TPs are taught", live: false, urgent: false };
+      : unrecorded.length > 0
+        ? {
+            status:
+              unrecorded.length === 1
+                ? `TP${unrecorded[0].tp_number} not recorded yet`
+                : `${unrecorded.length} TPs not recorded yet`,
+            live: false,
+            urgent: false,
+          }
+        : { status: "All your TPs are taught", live: false, urgent: false };
 
   // Written Assignments -- the only door that ever turns garnet.
   const outstanding = (assignments ?? [])

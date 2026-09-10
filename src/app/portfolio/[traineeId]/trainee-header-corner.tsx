@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { DesignerCredit } from "@/components/designer-credit";
 import { Avatar } from "@/components/avatar";
 
 // Ramy, 2026-08-24: only the bare landing route gets the credit pill (same

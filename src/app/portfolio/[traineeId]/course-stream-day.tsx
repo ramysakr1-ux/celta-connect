@@ -95,10 +95,11 @@ export function StreamDayTrack({
   const now = useNow(serverNowMs);
   useEffect(() => setMounted(true), []);
 
-  const { slots, windowStart, windowEnd, axis } = day;
-  const span = Math.max(1, windowEnd - windowStart);
+  // windowStart/windowEnd are not read here any more: placing blocks by
+  // percentage went out with the equal boxes, and the axis labels arrive
+  // already formatted. The header's bar is what still draws to the minute.
+  const { slots, axis } = day;
   const firstFuture = slots.find((s) => now < s.startsAtMs)?.id ?? null;
-  const pct = (minutes: number) => ((minutes - windowStart) / span) * 100;
 
   const mine = slots.find((s) => s.mine) ?? null;
   const countdown = (() => {
@@ -150,7 +151,21 @@ export function StreamDayTrack({
               timeline now, drawn to the minute from the same rows, so between
               the two the day reads both ways: how long things are up top, and
               what they actually say down here. */}
-          <div className="relative flex h-[104px] gap-1.5">
+          {/* Below lg the row becomes a list. Seven equal boxes on a 375px
+              phone are 45px wide -- "10:00" clipped to "10:0" and "TP8 · D"
+              running one letter per line, measured on production 10 Sep 2026.
+              Nothing is lost by stacking: the header's bar is the proportional
+              day now, so down here the boxes are a sequence of what the day
+              SAYS, and a sequence reads down a phone as happily as across a
+              desktop. It also makes the box a real target -- the whole box is
+              the Zoom door when a session is live, and on a phone that is
+              exactly where someone would tap it.
+
+              lg, not md: the workspace rail comes back at md and takes 190px
+              off the content column, so 768-1023 is the WORST width for the
+              row -- 68px a box, "TP8 - D" over three lines. Stacked is right
+              for the whole of that band too. */}
+          <div className="relative flex flex-col gap-1.5 lg:h-[104px] lg:flex-row">
             {slots.map((s) => {
               const st = stateOf(s, now, firstFuture);
               const gold = s.mine && st !== "done";
@@ -168,7 +183,7 @@ export function StreamDayTrack({
                   {...(joinable
                     ? { href: s.zoomUrl!, target: "_blank", rel: "noreferrer", title: `Join ${s.title}` }
                     : {})}
-                  className={`flex min-w-0 flex-1 flex-col gap-[3px] overflow-hidden rounded-[10px] px-3 py-2.5 ${
+                  className={`flex min-w-0 items-center gap-3 overflow-hidden rounded-[10px] px-3 py-2.5 lg:flex-1 lg:flex-col lg:items-stretch lg:gap-[3px] ${
                     st === "done" ? "opacity-50" : ""
                   } ${joinable ? "cursor-pointer transition-shadow hover:brightness-[1.06]" : ""}`}
                   style={{
@@ -203,8 +218,12 @@ export function StreamDayTrack({
                           : undefined,
                   }}
                 >
+                  {/* Stacked, the time is a fixed gutter so every title starts
+                      at the same x, and the Now/Next badge drops beneath it
+                      rather than shunting the title along on one row out of
+                      seven. Back to one inline line from lg up. */}
                   <span
-                    className="flex items-center gap-1.5 text-[11px] font-bold tabular-nums"
+                    className="flex w-[52px] shrink-0 flex-col items-start gap-1 text-[11px] font-bold tabular-nums lg:w-auto lg:flex-row lg:items-center lg:gap-1.5"
                     style={{
                       color:
                         st === "now"
@@ -231,6 +250,11 @@ export function StreamDayTrack({
                       </span>
                     ) : null}
                   </span>
+                  {/* `lg:contents` dissolves this wrapper from lg up, so the
+                      title and the sub-line go back to being direct children of
+                      the box and the desktop column is byte-for-byte what it
+                      was. Stacked, they are the second half of the row. */}
+                  <span className="flex min-w-0 flex-1 flex-col gap-[3px] lg:contents">
                   <span
                     className={`leading-tight ${gold ? "text-[14px] font-bold" : st === "now" ? "text-[12px] font-bold" : "text-[12px]"}`}
                     style={{
@@ -266,6 +290,7 @@ export function StreamDayTrack({
                       {s.sub}
                     </span>
                   ) : null}
+                  </span>
                 </Box>
               );
             })}
@@ -273,7 +298,12 @@ export function StreamDayTrack({
             {showMarker ? (
               <span
                 aria-hidden
-                className="pointer-events-none absolute -top-1.5 -bottom-1.5 w-0.5"
+                // The seam marker is a horizontal idea -- it sits between the
+                // boxes that are finished and the ones that are not. Stacked
+                // there is no seam to sit on, and the day already reads
+                // top-to-bottom with the done rows dimmed and the ring on the
+                // one you are in, so it stays off below lg.
+                className="pointer-events-none absolute -top-1.5 -bottom-1.5 hidden w-0.5 lg:block"
                 style={{ left: `${markerPct}%`, background: "var(--color-garnet)" }}
               >
                 <span
@@ -299,7 +329,9 @@ export function StreamDayTrack({
             ) : null}
           </div>
 
-          <div className="mt-[25px] flex justify-between border-t border-border pt-1.5 text-[11px] tabular-nums text-muted">
+          {/* The 25px is headroom for the marker's clock label, which hangs
+              below the track. No marker below lg, so no headroom needed. */}
+          <div className="mt-3 flex justify-between border-t border-border pt-1.5 text-[11px] tabular-nums text-muted lg:mt-[25px]">
             {axis.map((a) => (
               <span key={a}>{a}</span>
             ))}
@@ -308,13 +340,4 @@ export function StreamDayTrack({
       )}
     </section>
   );
-}
-
-/** Minutes past midnight in the same frame the slots were placed in. The slots
- *  carry both, so the offset between UTC ms and centre-local minutes is read
- *  off one of them rather than re-deriving the zone in the browser. */
-function minutesFromMs(nowMs: number, day: StreamDay): number {
-  const anchor = day.slots[0];
-  if (!anchor) return day.windowStart;
-  return anchor.fromMin + (nowMs - anchor.startsAtMs) / 60_000;
 }

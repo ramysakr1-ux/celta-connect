@@ -504,12 +504,24 @@ export async function TodayTab({
   // reuses computeTeachingFor itself (same level/volunteers/order/etc. as
   // today and tomorrow get) rather than a separate thin lookup that only
   // knew a TP number and a date.
-  async function findNextTeaching(): Promise<TeachingOn | null> {
-    if (!subgroupMember || !subgroupRow?.half_order) return null;
+  // Fetched at most once, and only inside the branch that needs it: the "next
+  // TP" walk and the "which TPs never got recorded" check read the same list,
+  // and they must read the same list -- two answers about the same schedule
+  // from two queries is exactly how the hero and the rail ended up
+  // contradicting each other.
+  let halfDatesCache: string[] | null = null;
+  async function getHalfDates(): Promise<string[]> {
+    if (halfDatesCache) return halfDatesCache;
+    if (!subgroupMember || !subgroupRow?.half_order) return (halfDatesCache = []);
     const allTpTimetableEvents: TpTimetableEvent[] = (
       await supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).eq("type", "tp")
     ).data ?? [];
-    const halfDates = halfTpDates(allTpTimetableEvents, subgroupRow.half_order);
+    return (halfDatesCache = halfTpDates(allTpTimetableEvents, subgroupRow.half_order));
+  }
+
+  async function findNextTeaching(): Promise<TeachingOn | null> {
+    if (!subgroupMember || !subgroupRow?.half_order) return null;
+    const halfDates = await getHalfDates();
     for (let i = 0; i < halfDates.length; i++) {
       if (halfDates[i] <= tomorrow) continue;
       const tpNumber = i + 1;
@@ -519,6 +531,35 @@ export async function TodayTab({
     return null;
   }
   const teachingNext = !preCourse && !teachingToday && !teachingTomorrow ? await findNextTeaching() : null;
+
+  // A TP whose day has gone by with taught_at still null.
+  //
+  // taught_at is not a date -- it is written when the TRAINER logs the lesson
+  // outcome (dashboard/trainer/actions.ts), so on every real course there is a
+  // gap between the lesson happening and it being recorded, sometimes days
+  // long. findNextTeaching only looks forward (`halfDates[i] <= tomorrow` is
+  // skipped), so for the whole of that gap the TP was invisible to the hero and
+  // the hero fell through to "All your TPs are taught" -- which was flatly
+  // untrue, and sat on the same screen as a rail saying "TP7 plan", telling
+  // them to go and prepare a lesson they had already given. Ramy caught the
+  // pair of them on production, 10 Sep 2026.
+  //
+  // Neither statement is the right one. The truth is that the record is open,
+  // so that is what the screen says now.
+  const unrecordedTps =
+    !preCourse && !teachingToday && !teachingTomorrow && !teachingNext
+      ? (await getHalfDates()).reduce<number[]>((acc, date, i) => {
+          const plan = planByTpNumber.get(i + 1);
+          if (date < today && plan && !plan.taught_at) acc.push(i + 1);
+          return acc;
+        }, [])
+      : [];
+  const unrecordedLabel =
+    unrecordedTps.length === 0
+      ? null
+      : unrecordedTps.length === 1
+        ? `TP${unrecordedTps[0]}`
+        : `${unrecordedTps.slice(0, -1).map((n) => `TP${n}`).join(", ")} and TP${unrecordedTps[unrecordedTps.length - 1]}`;
   // Ramy, 28 Aug 2026: "this is never gonna be the case because they will
   // always have a TP... if it's the end of the course, why do they still
   // have a lot of things waiting on them?" -- caught a real bug, not a
@@ -532,7 +573,14 @@ export async function TodayTab({
   const hasTeachingSchedule = Boolean(subgroupMember && subgroupRow?.half_order);
 
   type HeroContent = { label: string; big: string; bigSub: string; ctaHref: string; ctaLabel: string };
-  const heroKind: "teaching" | "teaching_tomorrow" | "teaching_next" | "teaching_done" | "teaching_unscheduled" | "precourse_gtky" = preCourse
+  const heroKind:
+    | "teaching"
+    | "teaching_tomorrow"
+    | "teaching_next"
+    | "teaching_unrecorded"
+    | "teaching_done"
+    | "teaching_unscheduled"
+    | "precourse_gtky" = preCourse
     ? "precourse_gtky"
     : teachingToday
       ? "teaching"
@@ -540,9 +588,11 @@ export async function TodayTab({
         ? "teaching_tomorrow"
         : teachingNext
           ? "teaching_next"
-          : hasTeachingSchedule
-            ? "teaching_done"
-            : "teaching_unscheduled";
+          : unrecordedLabel
+            ? "teaching_unrecorded"
+            : hasTeachingSchedule
+              ? "teaching_done"
+              : "teaching_unscheduled";
   const genericHero: HeroContent | null =
     heroKind === "precourse_gtky"
       ? !gtkyAssignment
@@ -608,6 +658,19 @@ export async function TodayTab({
               ctaHref: `/portfolio/${traineeId}/tp/${teachingNext.tpNumber}`,
               ctaLabel: "Open your plan",
             }
+          : heroKind === "teaching_unrecorded" && unrecordedLabel
+            ? {
+                label: "Teaching practice",
+                big: `${unrecordedLabel} ${unrecordedTps.length === 1 ? "isn't" : "aren't"} recorded yet`,
+                // Deliberately not "nothing for you to do": most of the time
+                // the tutor simply hasn't written it up, but a deferred or
+                // missed lesson looks identical from here, and this screen
+                // cannot tell the two apart. So it says who writes it and what
+                // to do if it stays open, and claims nothing else.
+                bigSub: "Your tutor logs the outcome after the lesson -- ask them if it stays open.",
+                ctaHref: `/portfolio/${traineeId}/tp`,
+                ctaLabel: "My teaching",
+              }
           : heroKind === "teaching_done"
             ? {
                 label: "Teaching practice",
@@ -708,16 +771,31 @@ export async function TodayTab({
       ? { href: `/portfolio/${traineeId}/tp/${teachingToday.tpNumber}`, label: "Open your plan" }
       : { href: `/portfolio/${traineeId}/timetable`, label: "Timetable" }
     : { href: `/portfolio/${traineeId}/timetable`, label: "Timetable" };
+  // The line to the right of "Your day" answers one question -- am I teaching
+  // today -- so it takes the hero's label only where that label happens to
+  // answer it ("You teach tomorrow", "You teach Friday"). It used to take it
+  // unconditionally, which is how the day's status line came to read
+  // "Teaching practice", a heading with nothing in it about today.
   const metaLead = teachingToday
     ? `You teach${teachTime ? ` ${teachTime}` : ""}`
-    : (genericHero?.label ?? "Today");
+    : heroKind === "teaching_tomorrow" || heroKind === "teaching_next"
+      ? (genericHero?.label ?? "Today")
+      : heroKind === "precourse_gtky"
+        ? "Before day one"
+        : "Not teaching today";
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-end justify-between gap-5">
+      {/* The headline and the buttons only sit side by side once there is room
+          for both. On a 375px phone this row gave the h1 42 pixels of width and
+          200 of height -- one word per line -- because the buttons kept their
+          half of it. Below lg they stack and the headline gets the page --
+          lg rather than sm because the workspace rail returns at md, which is
+          where the headline's share of the row gets tight again. */}
+      <div className="flex flex-col items-start gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-5">
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <StreamEyebrow firstName={firstName} dateLabel={dateLabel} serverNowMs={serverNowMs} timeZone={timeZone} />
-          <h1 className="font-serif text-[32px] leading-tight text-ink">{heroTitle}</h1>
+          <h1 className="font-serif text-[26px] leading-tight text-ink lg:text-[32px]">{heroTitle}</h1>
           {!teachingToday && genericHero?.bigSub ? (
             <p className="text-[13px] text-muted">{genericHero.bigSub}</p>
           ) : null}
