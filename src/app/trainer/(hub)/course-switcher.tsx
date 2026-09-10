@@ -41,8 +41,11 @@ export function CourseSwitcher({ courses, activeCourseId }: { courses: SwitcherC
         disabled={pending}
         className="flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground disabled:opacity-70"
       >
-        {active?.label ?? "—"}
-        <ChevronDown className="size-3" aria-hidden="true" />
+        {/* Truncated below sm so the badge stays on screen without owning it:
+            "the active course code stays shown in the header badge at all
+            times" (the switcher spec) -- shown, not necessarily in full. */}
+        <span className="max-w-[110px] truncate sm:max-w-none">{active?.label ?? "—"}</span>
+        <ChevronDown className="size-3 shrink-0" aria-hidden="true" />
       </button>
 
       {open ? (

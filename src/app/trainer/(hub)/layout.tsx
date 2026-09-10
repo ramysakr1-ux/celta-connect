@@ -197,7 +197,15 @@ export default async function TrainerHubLayout({ children }: { children: React.R
           ("connect will actually connect me to my command center, but
           only me"); everyone else gets their course's Today. */}
       <header className="border-b border-border bg-frame">
-        <div className="flex h-14 items-center gap-[18px] px-[22px]">
+        {/* One row from sm up, exactly as before. Below sm it wraps: the
+            wordmark and the tab row take the first line and the role pill,
+            the scope pill and the course switcher drop to a second. They add
+            up to ~272px and the space left beside the wordmark on a 375px
+            screen is ~94px, so no amount of hiding got them onto one line --
+            and the switcher's own spec says the active course badge stays
+            shown at all times, so hiding it was the wrong answer anyway. Same
+            treatment the trainee header got for its day bar on 10 Sep 2026. */}
+        <div className="flex flex-wrap items-center gap-x-[18px] gap-y-2 px-[22px] py-2 sm:h-14 sm:flex-nowrap sm:py-0">
           <Link
             href={backToPack ? "/assessor" : profile?.role === "platform_owner" ? "/platform/command-center" : "/trainer"}
             className="block shrink-0"
@@ -258,7 +266,13 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             {switcherCourses.length > 1 && profile?.course_id ? (
               <CourseSwitcher courses={switcherCourses} activeCourseId={profile.course_id} />
             ) : courseCode ? (
-              <span className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-ink">{courseCode}</span>
+              // Hidden on a phone, like the name below it. The header's right-hand
+              // group is shrink-0 on purpose, and with the scope pill beside the
+              // role pill this 123px course code was the piece that pushed a 375px
+              // screen sideways (432px, measured). A tutor already knows which
+              // course they are signed in to; the switcher, when there is more than
+              // one, stays.
+              <span className="hidden rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-ink sm:inline">{courseCode}</span>
             ) : null}
             {/* Hidden on a phone. This group is shrink-0 -- deliberately, the
                 role pill and the course must not squash -- so at 375 it held

@@ -202,6 +202,35 @@ export default async function TodayPage() {
   // fourteen had no route. Ramy, 4 Sep 2026: "it's a panel announcing work
   // and then hiding it." kind/badge/due feed the filter and the row layout.
   type Alert = TodayAlert;
+  // ---- Scope: a tutor sees their own group's people and sessions. Computed
+  // BEFORE any alert is built, so an alert that names candidates or lessons
+  // can leave the other group's out as it is made -- the course-wide ones
+  // ("TP feedback unsent -- 3 candidates", "Register not logged") were built
+  // from the whole course and then let through by href, so the MCT scoped to
+  // Group B was reading Group A's feedback debt. A group
+  // is "theirs" when course_tp_groups names them as its tutor. If no group on
+  // the course is staffed yet (tutor_profile_id null everywhere), scope stays
+  // the whole course rather than an empty page -- honest about the setup
+  // rather than hiding it.
+  //
+  // This used to read `!isMct`: the MCT saw everything, always. Ramy, 11 Sep
+  // 2026: on a course of twelve with two tutors, "if you log in as an MCT, you
+  // see your six." Their six by default, the full twelve one click away -- the
+  // click is the header pill, read through seesWholeCourse (hub-scope.ts).
+  let scopedTraineeIds: Set<string> | null = null;
+  let scopedGroupIds: Set<string> | null = null;
+  const wholeCourse = isMct && (await seesWholeCourse());
+  if (trainer && !wholeCourse) {
+    const myGroups = (tpGroups ?? []).filter((g) => g.tutor_profile_id === trainer.id);
+    if (myGroups.length > 0) {
+      const mine = new Set(myGroups.map((g) => g.id));
+      scopedGroupIds = mine;
+      const mySubIds = new Set((subgroups ?? []).filter((x) => x.tp_group_id && mine.has(x.tp_group_id)).map((x) => x.id));
+      scopedTraineeIds = new Set((members ?? []).filter((m) => mySubIds.has(m.subgroup_id)).map((m) => m.trainee_id));
+    }
+  }
+  const inScope = (traineeId: string) => !scopedTraineeIds || scopedTraineeIds.has(traineeId);
+
   const alerts: Alert[] = [];
 
   // Enrolment Forms.dc.html 1c -- "the centre replies to every concern."
@@ -329,6 +358,7 @@ export default async function TodayPage() {
 
   const unsentByTrainee = new Map<string, string>(); // trainee_id -> most recent taught date
   for (const lesson of lessons ?? []) {
+    if (!inScope(lesson.trainee_id)) continue; // the other tutor's debt is theirs
     const hasFeedback = (feedbackRows ?? []).some(
       (f) => f.trainee_id === lesson.trainee_id && f.tp_number === lesson.tp_number && f.submitted_at
     );
@@ -374,6 +404,9 @@ export default async function TodayPage() {
   })();
   const unloggedSessions = events
     .filter((e) => e.type === "tp" && e.event_date < today && e.event_date >= lookbackDate && !e.register_submitted_at)
+    // A register is taken by the tutor in the room. The other group's rooms
+    // are the other tutor's registers.
+    .filter((e) => !scopedGroupIds || !e.tp_group_scope_id || scopedGroupIds.has(e.tp_group_scope_id))
     .sort((a, b) => (a.event_date < b.event_date ? 1 : a.event_date > b.event_date ? -1 : 0));
   for (const session of unloggedSessions ?? []) {
     alerts.push({
@@ -441,29 +474,6 @@ export default async function TodayPage() {
     });
   }
 
-  // ---- Scope: a tutor sees their own group's people and sessions. A group
-  // is "theirs" when course_tp_groups names them as its tutor. If no group on
-  // the course is staffed yet (tutor_profile_id null everywhere), scope stays
-  // the whole course rather than an empty page -- honest about the setup
-  // rather than hiding it.
-  //
-  // This used to read `!isMct`: the MCT saw everything, always. Ramy, 11 Sep
-  // 2026: on a course of twelve with two tutors, "if you log in as an MCT, you
-  // see your six." Their six by default, the full twelve one click away -- the
-  // click is the header pill, read through seesWholeCourse (hub-scope.ts).
-  let scopedTraineeIds: Set<string> | null = null;
-  let scopedGroupIds: Set<string> | null = null;
-  const wholeCourse = isMct && (await seesWholeCourse());
-  if (trainer && !wholeCourse) {
-    const myGroups = (tpGroups ?? []).filter((g) => g.tutor_profile_id === trainer.id);
-    if (myGroups.length > 0) {
-      const mine = new Set(myGroups.map((g) => g.id));
-      scopedGroupIds = mine;
-      const mySubIds = new Set((subgroups ?? []).filter((x) => x.tp_group_id && mine.has(x.tp_group_id)).map((x) => x.id));
-      scopedTraineeIds = new Set((members ?? []).filter((m) => mySubIds.has(m.subgroup_id)).map((m) => m.trainee_id));
-    }
-  }
-  const inScope = (traineeId: string) => !scopedTraineeIds || scopedTraineeIds.has(traineeId);
   // Ramy, 5 Sep 2026: an ACT may post announcements to their own group.
   const canAnnounce = isMct || (scopedGroupIds?.size ?? 0) > 0;
 
