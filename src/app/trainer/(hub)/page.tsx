@@ -20,6 +20,7 @@ import { Avatar } from "@/components/avatar";
 import { NeedsYou, type TodayAlert } from "@/app/trainer/(hub)/needs-you";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
+import { DayBar, type DayBarItem } from "@/components/day-bar";
 import { sixHoursProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpLevelProblems, contactHoursProblems, type ComplianceProblem } from "@/lib/course-compliance";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
@@ -515,6 +516,30 @@ export default async function TodayPage() {
     }
   }
 
+  // The day bar, from the same daySlots YourDay renders below -- one source,
+  // as on the trainee's landing. DaySlot carries UTC ms and a wall-clock label;
+  // the bar needs minutes past midnight, which the label already is (a
+  // collapsed run reads "10:00-15:15", so take the left side).
+  const hubBands = resolveTimeBands(course?.time_bands ?? null);
+  const bandMin = (t: string) => {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + (m ?? 0);
+  };
+  const dayBarItems: DayBarItem[] = daySlots.map((slot) => {
+    const fromMin = bandMin(slot.time.split("\u2013")[0]);
+    return {
+      id: slot.id,
+      fromMin,
+      toMin: fromMin + Math.max(15, Math.round((slot.endsAtMs - slot.startsAtMs) / 60_000)),
+      endsAtMs: slot.endsAtMs,
+      title: slot.title,
+    };
+  });
+  const dayBarWindow = {
+    start: bandMin(hubBands[0].start),
+    end: bandMin(hubBands[hubBands.length - 1].end),
+  };
+
   // ---- The banner: what the course cannot satisfy as planned.
   const problems: ComplianceProblem[] = [];
   if (visitDayProblem) {
@@ -630,6 +655,31 @@ export default async function TodayPage() {
             {todayHeading}
             <LiveClock timeZone={timeZone} serverNowMs={serverNowMs} accent={accentDeep} />
           </h1>
+          {/* Ramy, 10 Sep 2026, on porting the trainee landing's day bar:
+              "keep the bar colour relevant to the trainer role, MCT or ACT."
+              So it takes accentDeep -- garnet for an MCT, gold for an ACT --
+              rather than the trainee's garnet, which on this page would read
+              as a role the tutor does not have.
+
+              An MCT is named on sessions across several groups with gaps
+              between them, so "where am I in this day" is a harder question
+              here than on a trainee's single thread. Same daySlots YourDay
+              renders below; nothing is fetched twice. */}
+          {dayBarItems.length > 0 ? (
+            <div className="mt-2 flex max-w-[560px] min-w-[320px]">
+              <DayBar
+                items={dayBarItems}
+                windowStart={dayBarWindow.start}
+                windowEnd={dayBarWindow.end}
+                anchorMs={daySlots[0].startsAtMs}
+                anchorMin={dayBarItems[0].fromMin}
+                accent={accentDeep}
+                tone="light"
+                serverNowMs={serverNowMs}
+                timeZone={timeZone}
+              />
+            </div>
+          ) : null}
         </div>
         {trainer ? (
           <div className="flex flex-wrap items-center gap-2">
