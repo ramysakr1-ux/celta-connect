@@ -6,6 +6,7 @@ import { CELTA_CRITERIA_CODES, computeCriteriaPct, computeTrajectory, type Traje
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { computeAtRiskReasons, type AtRiskReason } from "@/lib/at-risk";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { courseElapsedFraction } from "@/lib/course-progress";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
 
@@ -131,7 +132,7 @@ interface RosterBundle {
   tutorial_invites: Pick<T["individual_tutorial_invites"]["Row"], "trainee_id" | "stage" | "confirmed_at">[];
   filmed_events: { id: string }[];
   filmed_sessions: { id: string }[];
-  course: Pick<T["courses"]["Row"], "total_hours" | "center_id"> | null;
+  course: Pick<T["courses"]["Row"], "total_hours" | "center_id" | "start_date" | "end_date"> | null;
   taught_plans: Pick<T["plan_assignments"]["Row"], "trainee_id" | "tp_number">[];
   feedback: Pick<T["tp_feedback"]["Row"], "trainee_id" | "tp_number" | "grade" | "submitted_at" | "strengths_planning" | "strengths_teaching" | "action_points_planning" | "action_points_teaching">[];
   assignments: Pick<T["assignments"]["Row"], "trainee_id" | "assignment_type" | "first_status" | "resubmission_status" | "due_date" | "first_submitted_at" | "resubmission_submitted_at">[];
@@ -246,7 +247,7 @@ export async function fetchRosterRows(
             )
             .eq("course_id", courseId),
           supabase.from("celta5_matrix").select("trainee_id, criteria_code, tutor_status_stage2").eq("course_id", courseId),
-          supabase.from("courses").select("total_hours, center_id").eq("id", courseId).maybeSingle(),
+          supabase.from("courses").select("total_hours, center_id, start_date, end_date").eq("id", courseId).maybeSingle(),
           supabase.from("course_timetable_events").select("id").eq("course_id", courseId).eq("type", "supervised_session"),
           supabase
             .from("supervised_session_completions")
@@ -287,6 +288,9 @@ export async function fetchRosterRows(
 
   const totalHours = course?.total_hours ?? 120;
   const centerId = course?.center_id ?? courseForCentre?.center_id ?? null;
+  // The hours that should have been attended BY NOW. `today` is resolved a few
+  // lines down against the centre's zone; this is deliberately computed after
+  // it, so both read the same day.
 
   // Wave 3: what needs wave 2's ids -- and the pre-course task, which lives
   // on the CENTRE (sections are seeded per centre and shared by every
@@ -339,6 +343,12 @@ export async function fetchRosterRows(
     preCourseAnsweredByTrainee.set(row.trainee_id, (preCourseAnsweredByTrainee.get(row.trainee_id) ?? 0) + 1);
   }
   const today = toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE);
+  const expectedHoursSoFar = Math.max(
+    1,
+    course?.start_date && course?.end_date
+      ? totalHours * courseElapsedFraction(course.start_date, course.end_date, today)
+      : totalHours
+  );
 
   // Item 9's "flagged low" is relative to the cohort, not an invented fixed
   // number -- the spec gave no absolute threshold.
@@ -392,7 +402,10 @@ export async function fetchRosterRows(
 
     const celta5Record = celta5Records?.find((r) => r.trainee_id === trainee.id);
     const hoursAttended = celta5Record?.hours_attended ?? 0;
-    const attendancePct = Math.round((hoursAttended / totalHours) * 100);
+    // Against the hours that have HAPPENED, not the course total. See
+    // courseElapsedFraction -- measured against the total, a perfect record
+    // read as 70% on day 14 of 20 and the whole cohort showed "below 80%".
+    const attendancePct = Math.min(100, Math.round((hoursAttended / expectedHoursSoFar) * 100));
     // for-claude-code-trainer-remaining-screens.md's "slashed provisional"
     // -- a candidate the tutors haven't settled between two adjacent
     // grades yet. Same provisional_grade/_upper pairing Grades Report

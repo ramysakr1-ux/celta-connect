@@ -131,6 +131,38 @@ export function computeThisWeekRange(startDate: string, today: string): { weekSt
   return { weekStart: toIso(weekStart), weekEnd: toIso(weekEnd) };
 }
 
+// How much of the course has actually happened, 0..1, counted in teaching days
+// (Monday to Friday) rather than calendar days.
+//
+// Attendance needs this. It was measured against the course's TOTAL hours --
+// hoursAttended / course.total_hours -- so a candidate with a perfect record on
+// day 14 of 20 read as 70% and got flagged "Attendance below 80%". Every
+// candidate did, on every course, for all but the last fortnight of it: the
+// number could only reach the threshold once the course was nearly over. The
+// MCT's landing page would have opened on day one of a real course showing the
+// whole cohort in red. Found 10 Sep 2026 when Ramy asked why the demo looked
+// like the end of the world.
+//
+// You cannot be behind on hours that have not been taught yet.
+export function courseElapsedFraction(startDate: string, endDate: string, today: string): number {
+  const weekdaysBetween = (from: string, to: string) => {
+    if (to < from) return 0;
+    let n = 0;
+    const d = new Date(`${from}T00:00:00`);
+    const end = new Date(`${to}T00:00:00`);
+    while (d <= end) {
+      const day = d.getDay();
+      if (day >= 1 && day <= 5) n += 1;
+      d.setDate(d.getDate() + 1);
+    }
+    return n;
+  };
+  const total = weekdaysBetween(startDate, endDate);
+  if (total <= 0) return 1;
+  const done = weekdaysBetween(startDate, today < endDate ? today : endDate);
+  return Math.min(1, Math.max(0, done / total));
+}
+
 export type CourseState = "running" | "upcoming" | "closed";
 
 // Purely date-derived -- a lightweight "past its dates" signal, distinct

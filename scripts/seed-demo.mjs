@@ -260,6 +260,28 @@ async function main() {
   };
   /** ...minus whatever --unlogged asks us to leave open. */
   const tpRoundsLogged = (half) => Math.max(0, tpRoundsSoFar(half) - UNLOGGED);
+
+  // Hours taught so far, for attendance. The same elapsed-teaching-days idea
+  // src/lib/course-progress.ts uses, kept in step with it deliberately.
+  const weekdaysBetween = (from, to) => {
+    if (to < from) return 0;
+    let n = 0;
+    const d = new Date(`${from}T00:00:00`);
+    const end = new Date(`${to}T00:00:00`);
+    while (d <= end) { const w = d.getDay(); if (w >= 1 && w <= 5) n += 1; d.setDate(d.getDate() + 1); }
+    return n;
+  };
+  const COURSE_TOTAL_HOURS = 120;
+  const elapsed = (() => {
+    const total = weekdaysBetween(startDate, endDate);
+    if (total <= 0) return 1;
+    return Math.min(1, weekdaysBetween(startDate, todayIso < endDate ? todayIso : endDate) / total);
+  })();
+  const hoursSoFar = Math.max(1, Math.round(COURSE_TOTAL_HOURS * elapsed));
+  // Everyone at or near a full record except two. Kofi is the borderline case
+  // an MCT would want to see; Daniel (below) is the real problem.
+  const ATTENDANCE_RATE = { "Kofi Mensah": 0.78 };
+  console.log(`attendance: ${hoursSoFar} of ${COURSE_TOTAL_HOURS} h taught so far`);
   console.log(
     `course: ${startDate} -> ${endDate}; half A has been through ${tpRoundsSoFar(1)} TP round(s), half B ${tpRoundsSoFar(2)}`
   );
@@ -1037,6 +1059,21 @@ async function main() {
     return plan.id;
   }
 
+  // Two candidates carry a recurring action point on purpose -- that is what
+  // "at risk" is for, and an MCT needs to see it working. Everyone else gets a
+  // different point each round, which is what good feedback looks like.
+  const AT_RISK_CANDIDATES = new Set(["Hana Sato", "Marek Kowalski"]);
+  const ROTATING_ACTION_POINTS = [
+    "Vary interaction patterns a little more",
+    "Give clearer time limits on tasks",
+    "Grade your language a little further for this level",
+    "Check instructions with a question, not \"OK?\"",
+    "Board the form as well as the meaning",
+    "Leave more thinking time after a question",
+    "Monitor further from the pair you are helping",
+    "Nominate rather than take the first hand up",
+  ];
+
   // Amara: strong, 4 TPs taught
   const amaraTpPlanIds = []; // index 0 = TP1, ... -- every TP gets several
   // shared materials below, not one apiece (Ramy, 25 Aug 2026, pointing at
@@ -1083,7 +1120,7 @@ async function main() {
       aim: cfg.aim,
       grade: cfg.grade,
       strengths: ["Clear instructions", "Good rapport with learners", "Effective concept checking"],
-      actionPoints: ["Vary interaction patterns a little more"],
+      actionPoints: [ROTATING_ACTION_POINTS[i % ROTATING_ACTION_POINTS.length]],
       half: halfOf("Amara Okafor"),
     });
     amaraTpPlanIds.push({ planId, materialNames: cfg.materialNames });
@@ -1113,7 +1150,19 @@ async function main() {
         aim: FILLER_AIMS[(n - 1) % FILLER_AIMS.length],
         grade: n % 3 === 0 ? "above_standard" : "to_standard",
         strengths: ["Clear instructions", "Good rapport with learners"],
-        actionPoints: ["Vary interaction patterns a little more"],
+        // A DIFFERENT action point each round, except for the two candidates
+        // who are meant to look at risk.
+        //
+        // computeAtRiskReasons raises "repeating action point" when the same
+        // criterion comes back across two or more TPs -- which is a real CELTA
+        // warning sign, and the detector is right. The fixture gave every
+        // candidate the identical action point on every single TP, so ten of
+        // twelve were flagged at risk and the MCT's landing page read as a
+        // course in collapse. A demo should show a course being run well, with
+        // the couple of genuine concerns an MCT would actually be chasing.
+        actionPoints: [AT_RISK_CANDIDATES.has(def.name)
+          ? "Vary interaction patterns a little more"
+          : ROTATING_ACTION_POINTS[(n - 1) % ROTATING_ACTION_POINTS.length]],
         half: def.half,
       });
     }
@@ -1139,7 +1188,16 @@ async function main() {
     traineeDefs.map((def) => ({
       course_id: course.id,
       trainee_id: trainees[def.name],
-      hours_attended: def.withdrawn ? 9 : 24,
+      // Hours are measured against the hours that have HAPPENED (see
+      // courseElapsedFraction), so a flat 24 out of a 120-hour course read as
+      // 20% for everyone and put the entire cohort on the MCT's landing page
+      // under "Attendance below 80%". Ramy, 10 Sep 2026: "it's all red, it's
+      // like the end of the world."
+      //
+      // A well-run course is the default. Two candidates carry a real
+      // attendance problem, because a demo with nothing wrong in it teaches
+      // nobody what the alert looks like.
+      hours_attended: def.withdrawn ? Math.round(hoursSoFar * 0.4) : Math.round(hoursSoFar * (ATTENDANCE_RATE[def.name] ?? 1)),
       provisional_grade: def.grade,
       provisional_grade_upper: def.upper,
     }))
@@ -1193,7 +1251,7 @@ async function main() {
   await supabase.from("celta5_records").insert({
     course_id: course.id,
     trainee_id: trainees["Daniel Kim"],
-    hours_attended: 12,
+    hours_attended: Math.round(hoursSoFar * 0.72), // Daniel -- the genuine attendance concern
   });
   await supabase.from("assignments").insert({
     course_id: course.id,
@@ -1242,7 +1300,7 @@ async function main() {
   await supabase.from("celta5_records").insert({
     course_id: course.id,
     trainee_id: trainees["Priya Sharma"],
-    hours_attended: 6,
+    hours_attended: Math.round(hoursSoFar * 0.95), // Priya
   });
 
   // --- Criteria ratings, so the Grades Report has something to derive ---
@@ -1919,6 +1977,27 @@ async function main() {
         .eq("id", e.id);
     }
     console.log("rooms:", (tpEvents ?? []).length, "TP events");
+
+    // Registers. The trainer hub raises "Register not logged" for any TP in
+    // the last seven days without a register_submitted_at, and nothing ever
+    // set one -- twelve alerts, every one of them the fixture's fault rather
+    // than the tutor's. A register is taken at the end of the session, so it
+    // is stamped for every TP whose day has been and gone.
+    const pastTpIds = (
+      await supabase
+        .from("course_timetable_events")
+        .select("id, event_date")
+        .eq("course_id", course.id)
+        .eq("type", "tp")
+        .lt("event_date", todayIso)
+    ).data ?? [];
+    for (const e of pastTpIds) {
+      await supabase
+        .from("course_timetable_events")
+        .update({ register_submitted_at: new Date(`${e.event_date}T16:00:00Z`).toISOString() })
+        .eq("id", e.id);
+    }
+    console.log("registers logged:", pastTpIds.length, "past TP sessions");
   }
 
   // 2. Amara's TPs that are STILL AHEAD.
