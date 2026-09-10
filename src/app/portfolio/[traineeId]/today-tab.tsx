@@ -55,7 +55,7 @@ interface WaitingItem {
    *  garnet for something overdue, teal for an action someone is waiting on,
    *  gold for a figure that is simply progressing. They were all one colour
    *  until 9 Sep 2026, which made the list read as uniformly urgent. */
-  kind?: "overdue" | "scheduled" | "progress";
+  kind?: "overdue" | "scheduled" | "progress" | "assignment";
   isLetter?: boolean;
   // Ramy, 28 Aug 2026: matches the real mockup's row() pill fields --
   // "Assignment 3 due today" and "Book your Stage 1 tutorial slot" both
@@ -427,7 +427,11 @@ export async function TodayTab({
   for (const a of assignments ?? []) {
     if (a.first_status === "not_submitted" && a.due_date && a.due_date <= today) {
       waiting.push({
+        // Ramy, 10 Sep 2026: "the assignments avatar will be garnet and the
+        // assignment itself -- LRT or FOL -- will be written in the same
+        // colour. Just let it pop a little bit. It's too bland."
         label: `${ASSIGNMENT_INFO[a.assignment_type]?.title ?? a.assignment_type} due`,
+        kind: "assignment",
         detail: a.due_date,
         href: `/portfolio/${traineeId}/assignments/${a.id}`,
         pill: a.due_date === today ? "Today" : "Overdue",
@@ -769,6 +773,7 @@ export async function TodayTab({
             </div>
             {waiting.map((w, i) => {
               const overdue = w.pill === "Overdue" || w.pill === "Today";
+              const garnet = overdue || w.isLetter || w.kind === "assignment";
               return (
                 <Link
                   key={`${w.href}-${i}`}
@@ -778,7 +783,7 @@ export async function TodayTab({
                   <span
                     aria-hidden
                     className={`grid size-[38px] shrink-0 place-items-center rounded-[10px] text-[11.5px] font-bold ${
-                      overdue || w.isLetter
+                      garnet
                         ? "bg-garnet text-primary-foreground"
                         : w.kind === "progress"
                           ? "bg-gold text-ink"
@@ -788,7 +793,7 @@ export async function TodayTab({
                     {initialsFor(w.label)}
                   </span>
                   <span className="min-w-0">
-                    <span className={`block text-[14px] font-semibold ${overdue ? "text-garnet" : "text-ink"}`}>{w.label}</span>
+                    <span className={`block text-[14px] font-semibold ${garnet ? "text-garnet" : "text-ink"}`}>{w.label}</span>
                     <span className="block text-[12.5px] text-muted">{w.detail}</span>
                   </span>
                   <span className={`text-[12px] ${overdue ? "font-bold text-garnet" : "font-semibold text-muted"}`}>

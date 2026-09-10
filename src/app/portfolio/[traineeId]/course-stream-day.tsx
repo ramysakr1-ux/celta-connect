@@ -114,11 +114,12 @@ export function StreamDayTrack({
     return `in ${mins} minute${mins === 1 ? "" : "s"}`;
   })();
 
-  // Before mount the marker would sit at the server's minute, which is a
-  // different pixel from the browser's -- and unlike a state class, a moving
-  // line drawing itself into place is the one thing a reader notices. It waits.
-  const markerPct = Math.max(0, Math.min(100, pct(minutesFromMs(now, day))));
-  const showMarker = mounted && markerPct >= 0 && markerPct <= 100;
+  // With equal boxes the track is a sequence, so the marker sits on the seam
+  // between what is finished and what is not, rather than at a pixel that no
+  // longer means a time. The header's bar keeps the real clock position.
+  const doneCount = slots.filter((s) => now >= s.endsAtMs).length;
+  const markerPct = slots.length > 0 ? (doneCount / slots.length) * 100 : 0;
+  const showMarker = mounted && doneCount > 0 && doneCount < slots.length;
 
   return (
     <section className="flex flex-col">
@@ -136,7 +137,20 @@ export function StreamDayTrack({
         </p>
       ) : (
         <>
-          <div className="relative h-[86px]">
+          {/* Ramy, 10 Sep 2026: "those boxes should be more of a box really,
+              maybe with a nice curve. And same size, a little bigger, same
+              size. So they don't change size."
+
+              So the track stops being a timeline and becomes a sequence: equal
+              boxes, evenly spaced, 104px tall, properly rounded. A 30-minute
+              session no longer renders half the width of an hour-long one and
+              gets squeezed out of legibility.
+
+              Nothing is lost by it -- the header's day bar is the proportional
+              timeline now, drawn to the minute from the same rows, so between
+              the two the day reads both ways: how long things are up top, and
+              what they actually say down here. */}
+          <div className="relative flex h-[104px] gap-1.5">
             {slots.map((s) => {
               const st = stateOf(s, now, firstFuture);
               const gold = s.mine && st !== "done";
@@ -144,34 +158,51 @@ export function StreamDayTrack({
               return (
                 <div
                   key={s.id}
-                  className={`absolute top-0 bottom-0 flex flex-col gap-[3px] overflow-hidden rounded-[3px] px-2.5 py-2 ${
+                  className={`flex min-w-0 flex-1 flex-col gap-[3px] overflow-hidden rounded-[10px] px-3 py-2.5 ${
                     st === "done" ? "opacity-50" : ""
                   }`}
                   style={{
-                    left: `${pct(s.fromMin)}%`,
-                    width: `calc(${pct(s.toMin) - pct(s.fromMin)}% - 3px)`,
-                    background: gold
-                      ? "color-mix(in oklab, var(--color-gold) 22%, var(--color-card))"
-                      : st === "now"
-                        ? "color-mix(in oklab, var(--color-primary) 12%, var(--color-card))"
+                    // Ramy, 10 Sep 2026: "the box where you are... will have a
+                    // ring around it, a garnet ring. And the box itself will
+                    // change colour and become a little bit dark, same colour
+                    // as the header." So the session you are in is the one dark
+                    // object on a light page, tied to the header by sharing its
+                    // fill -- the two ends of the same "now".
+                    background: st === "now"
+                      ? "var(--color-ink-warm)"
+                      : gold
+                        ? "color-mix(in oklab, var(--color-gold) 22%, var(--color-card))"
                         : "var(--color-card-inset)",
-                    border: gold
-                      ? "1.5px solid var(--color-gold)"
-                      : st === "now"
-                        ? "1.5px solid var(--color-primary)"
+                    border: st === "now"
+                      ? "1.5px solid var(--color-garnet)"
+                      : gold
+                        ? "1.5px solid var(--color-gold)"
                         : "1px solid var(--color-border)",
-                    boxShadow: lit ? "0 2px 10px color-mix(in oklab, var(--color-gold) 22%, transparent)" : undefined,
+                    boxShadow:
+                      st === "now"
+                        ? "0 0 0 3px color-mix(in oklab, var(--color-garnet) 22%, transparent)"
+                        : lit
+                          ? "0 2px 10px color-mix(in oklab, var(--color-gold) 22%, transparent)"
+                          : undefined,
                   }}
                 >
                   <span
                     className="flex items-center gap-1.5 text-[11px] font-bold tabular-nums"
                     style={{
-                      color: gold ? "var(--color-gold-ink)" : st === "now" ? "var(--color-primary)" : "var(--color-muted)",
+                      color:
+                        st === "now"
+                          ? "var(--color-garnet-lift)"
+                          : gold
+                            ? "var(--color-gold-ink)"
+                            : "var(--color-muted)",
                     }}
                   >
                     {s.time}
                     {st === "now" ? (
-                      <span className="rounded-full bg-primary px-1.5 py-px text-[9px] font-bold tracking-[0.08em] text-primary-foreground uppercase">
+                      <span
+                        className="rounded-full px-1.5 py-px text-[9px] font-bold tracking-[0.08em] uppercase"
+                        style={{ background: "var(--color-garnet)", color: "oklch(98.5% 0.006 90)" }}
+                      >
                         Now
                       </span>
                     ) : st === "next" ? (
@@ -184,9 +215,15 @@ export function StreamDayTrack({
                     ) : null}
                   </span>
                   <span
-                    className={`leading-tight ${gold ? "text-[14px] font-bold" : st === "now" ? "text-[12px] font-bold" : "text-[12px]"} ${
-                      st === "done" ? "text-muted" : "text-ink"
-                    }`}
+                    className={`leading-tight ${gold ? "text-[14px] font-bold" : st === "now" ? "text-[12px] font-bold" : "text-[12px]"}`}
+                    style={{
+                      color:
+                        st === "now"
+                          ? "oklch(94% 0.012 86)"
+                          : st === "done"
+                            ? "var(--color-muted)"
+                            : "var(--color-ink)",
+                    }}
                   >
                     {s.title}
                   </span>
@@ -208,7 +245,12 @@ export function StreamDayTrack({
                       Join
                     </a>
                   ) : s.sub ? (
-                    <span className="text-[11px] leading-tight text-muted">{s.sub}</span>
+                    <span
+                      className="text-[11px] leading-tight"
+                      style={{ color: st === "now" ? "oklch(78% 0.02 80)" : "var(--color-muted)" }}
+                    >
+                      {s.sub}
+                    </span>
                   ) : null}
                 </div>
               );

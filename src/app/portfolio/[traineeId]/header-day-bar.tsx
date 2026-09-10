@@ -77,7 +77,9 @@ export function HeaderDayBar({
         {mounted ? (
           <div
             className="absolute inset-y-0 left-0 rounded-[2px]"
-            style={{ width: `${nowPct}%`, background: "var(--color-gold)" }}
+            // Ramy, 10 Sep 2026: garnet for "the part of the day you're on".
+            // Lifted, because plain garnet on ink-warm is barely a shade.
+            style={{ width: `${nowPct}%`, background: "var(--color-garnet-lift)" }}
           />
         ) : null}
 
