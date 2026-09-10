@@ -19,7 +19,7 @@ export function TraineeHeaderCorner({
 }: {
   traineeId: string;
   traineeName: string;
-  courseDayProgress: { currentDay: number; totalDays: number } | null;
+  courseDayProgress: { currentDay: number; totalDays: number; finished: boolean } | null;
 }) {
   const pathname = usePathname();
   const isLanding = pathname === `/portfolio/${traineeId}`;
@@ -33,9 +33,14 @@ export function TraineeHeaderCorner({
   // beside the mark, on every screen. See HeaderCredit.
   return (
     <div className="flex shrink-0 items-center gap-2.5">
+      {/* A course that has ended says so. It used to go on counting "Day 20
+          of 20" indefinitely, which told someone opening Connect weeks later
+          that they were still on the last day of a course that was over. */}
       {courseDayProgress ? (
         <span className="text-[11px] font-medium tabular-nums" style={{ color: "oklch(78% 0.02 80)" }}>
-          Day {courseDayProgress.currentDay} of {courseDayProgress.totalDays}
+          {courseDayProgress.finished
+            ? "Course finished"
+            : `Day ${courseDayProgress.currentDay} of ${courseDayProgress.totalDays}`}
         </span>
       ) : null}
       {/* Was a hardcoded teal tile with initials computed in the layout --

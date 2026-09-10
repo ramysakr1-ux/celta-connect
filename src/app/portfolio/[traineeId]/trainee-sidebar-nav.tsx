@@ -96,7 +96,19 @@ export function TraineeSidebarNav({ traineeId, status }: { traineeId: string; st
           </Link>
         );
       })}
-      {status && (status.weekNumber || status.tpNumber) ? (
+      {/* The foot. computeWeekOf clamps at both ends -- Math.max(1, ...) and
+          Math.min(totalWeeks, ...) -- so a course four days from opening read
+          "Week 1 of 4" and a finished one read "Week 4 of 4" for ever. The
+          number was never wrong so much as unqualified: outside the run the
+          honest thing is not a week at all. Same for the tick strip, which
+          drew a full course in progress on a course with no first day yet. */}
+      {status && status.courseState !== "running" ? (
+        <div className="mt-auto border-t border-border pt-3.5">
+          <p className="px-0.5 text-[11px] text-muted">
+            {status.courseState === "upcoming" ? "Your course hasn't started yet" : "Your course has finished"}
+          </p>
+        </div>
+      ) : status && (status.weekNumber || status.tpNumber) ? (
         <div className="mt-auto border-t border-border pt-3.5">
           <div className="flex justify-between px-0.5 pb-[7px] text-[11px] tabular-nums text-muted">
             <span>{status.weekNumber && status.weekTotal ? `Week ${status.weekNumber} of ${status.weekTotal}` : ""}</span>

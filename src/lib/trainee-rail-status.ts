@@ -3,7 +3,8 @@ import type { Database } from "@/lib/supabase/types";
 import { halfTpDates, type TpTimetableEvent } from "@/lib/rotation";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
-import { formatDate } from "@/lib/format-date";
+import { formatCalendarDate } from "@/lib/format-date";
+import { computeCourseState, type CourseState } from "@/lib/course-progress";
 
 // The status line under each door in the trainee's rail.
 //
@@ -36,30 +37,55 @@ export interface RailStatus {
   /** "TP4 of 8" -- the TP they are on, not the count taught. */
   tpNumber: number | null;
   tpTotal: number | null;
+  /** Whether the course has started, is running, or is over. The foot and two
+   *  of the door lines read differently outside "running", and until 10 Sep
+   *  2026 they had no way to know: the rail said "Week 1 of 4" on a course
+   *  that opened in four days' time, and went on saying "Week 4 of 4" after
+   *  it had finished. */
+  courseState: CourseState;
+  /** The first day, for the "starts on" line. Null once it has started. */
+  startsOn: string | null;
 }
 
-const EMPTY: RailStatus = { byHref: {}, weekNumber: null, weekTotal: null, tpNumber: null, tpTotal: null };
+const EMPTY: RailStatus = {
+  byHref: {},
+  weekNumber: null,
+  weekTotal: null,
+  tpNumber: null,
+  tpTotal: null,
+  courseState: "running",
+  startsOn: null,
+};
 
 export async function buildRailStatus({
   supabase,
   traineeId,
   courseId,
   todayIso,
-  timeZone,
   weekNumber,
   weekTotal,
+  startDate,
+  endDate,
 }: {
   supabase: SupabaseClient<Database>;
   traineeId: string;
   courseId: string | null;
+  /** The centre's calendar date. No timeZone argument any more: every date
+   *  this file renders is a date-only column, and formatCalendarDate is the
+   *  helper for those precisely because handing them a zone is what moved
+   *  them a day. The zone is applied once, by the caller, to get todayIso. */
   todayIso: string;
-  /** The centre's zone -- a due date rendered raw is the bug the 6 Sep hub
-   *  audit spent 38 call sites removing. It does not come back here. */
-  timeZone: string;
   weekNumber: number | null;
   weekTotal: number | null;
+  /** The course's own dates, so the rail can tell "no sessions today" from
+   *  "this course has not started" and from "this course is over". */
+  startDate: string | null;
+  endDate: string | null;
 }): Promise<RailStatus> {
   if (!courseId) return EMPTY;
+  const courseState: CourseState =
+    startDate && endDate ? computeCourseState(startDate, endDate, todayIso) : "running";
+  const dayLabel = (iso: string) => formatCalendarDate(iso, { weekday: "long", day: "numeric", month: "long" });
 
   const [{ data: subgroupMember }, { data: assignments }, { data: plans }, { data: invites }, { data: todaysEvents }] =
     await Promise.all([
@@ -138,7 +164,11 @@ export async function buildRailStatus({
           live: true,
           urgent: false,
         }
-      : { status: "Nothing timetabled today", live: false, urgent: false };
+      : courseState === "upcoming" && startDate
+        ? { status: `Starts ${dayLabel(startDate)}`, live: false, urgent: false }
+        : courseState === "closed"
+          ? { status: "This course has finished", live: false, urgent: false }
+          : { status: "Nothing timetabled today", live: false, urgent: false };
 
   // Teaching Practice -- the plan they owe, or today's lesson.
   byHref["/tp"] = teachesToday && tpToday !== null
@@ -177,7 +207,11 @@ export async function buildRailStatus({
           urgent: true,
         }
       : {
-          status: `${shortName(soonest.assignment_type)} due ${formatDate(soonest.due_date, timeZone, { day: "numeric", month: "short" })}`,
+          // due_date is a date column, so it must not go through formatDate:
+          // that read it as UTC midnight and rendered "due 4 Sep" for a
+          // deadline of the 5th at any centre west of UTC. Every demo centre
+          // is, and so is roughly half the world.
+          status: `${shortName(soonest.assignment_type)} due ${formatCalendarDate(soonest.due_date)}`,
           live: false,
           urgent: false,
         }
@@ -200,5 +234,7 @@ export async function buildRailStatus({
     weekTotal,
     tpNumber: currentTp,
     tpTotal: halfDates.length > 0 ? halfDates.length : null,
+    courseState,
+    startsOn: courseState === "upcoming" ? startDate : null,
   };
 }

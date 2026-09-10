@@ -36,10 +36,18 @@ export async function isCourseDayReached(
 // same distinct-timetabled-date clock as isCourseDayReached above, just
 // exposed as a count instead of a single-day boolean gate. Null before the
 // first timetabled date exists/has arrived (nothing sensible to show yet).
+//
+// `finished` because the count used to clamp: Math.min(daysReached, total)
+// returns the total for ever once the last day has been and gone, so a
+// trainee opening Connect a month after their course still read "Day 20 of
+// 20" -- a course that never ends. Found 10 Sep 2026 at --stage finished,
+// a state nothing had ever been looked at in. The clamp stays (the number is
+// still the last real day), but callers can now tell the difference between
+// standing on the last day and standing past it.
 export async function computeCourseDayProgress(
   supabase: SupabaseClient<Database>,
   courseId: string
-): Promise<{ currentDay: number; totalDays: number } | null> {
+): Promise<{ currentDay: number; totalDays: number; finished: boolean } | null> {
   const [{ data }, { data: course }] = await Promise.all([
     supabase.from("course_timetable_events").select("event_date").eq("course_id", courseId).order("event_date", { ascending: true }),
     supabase.from("courses").select("center_id").eq("id", courseId).maybeSingle(),
@@ -52,5 +60,9 @@ export async function computeCourseDayProgress(
   const daysReached = distinctDates.filter((d) => d <= today).length;
   if (daysReached === 0) return null;
 
-  return { currentDay: Math.min(daysReached, distinctDates.length), totalDays: distinctDates.length };
+  return {
+    currentDay: Math.min(daysReached, distinctDates.length),
+    totalDays: distinctDates.length,
+    finished: today > distinctDates[distinctDates.length - 1],
+  };
 }

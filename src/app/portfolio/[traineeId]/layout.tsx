@@ -146,9 +146,10 @@ export default async function PortfolioLayout({
       traineeId: trainee.id,
       courseId: trainee.course_id,
       todayIso,
-      timeZone,
       weekNumber: bannerWeekNumber,
       weekTotal,
+      startDate: courseDates?.start_date ?? null,
+      endDate: courseDates?.end_date ?? null,
     });
   }
 
@@ -157,7 +158,7 @@ export default async function PortfolioLayout({
   // already existed (built for the FOL spot-check page's own Day N language)
   // but was never actually called from the trainee header itself, so the
   // spec's counter never rendered anywhere a real trainee could see it.
-  let courseDayProgress: { currentDay: number; totalDays: number } | null = null;
+  let courseDayProgress: { currentDay: number; totalDays: number; finished: boolean } | null = null;
   if (showTraineeNav && trainee.course_id) {
     courseDayProgress = await computeCourseDayProgress(supabase, trainee.course_id);
   }

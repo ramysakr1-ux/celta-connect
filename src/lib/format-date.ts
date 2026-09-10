@@ -18,10 +18,18 @@ import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 // -- a caller that has not thought about it cannot accidentally skip it, the
 // same rule the timetable helpers already follow.
 //
-// Date-only columns (courses.start_date and friends) do NOT belong here.
-// They are calendar dates, not instants; the established pattern for those
-// is new Date(`${iso}T00:00:00`), which parses and formats in one zone and
-// so preserves the day.
+// Date-only columns (courses.start_date and friends) do NOT belong in
+// formatDate. They are calendar dates, not instants: "2026-09-14" parses as
+// UTC midnight, and formatting THAT in New York lands on the 13th. Use
+// formatCalendarDate below, which is that pattern with a name.
+//
+// It had no name until 10 Sep 2026, only a paragraph telling you to write it
+// out yourself, and the result was predictable: five files carry their own
+// private copy of the same three lines, one live call site had reached for
+// formatDate anyway and was rendering assignment due dates a day early for
+// any centre west of UTC, and I made the same mistake within a minute of
+// writing a new one. A rule you have to remember is a rule that gets missed;
+// this is the same rule as a function you can call.
 
 type Nullable = string | null | undefined;
 
@@ -33,6 +41,18 @@ export function formatDate(iso: Nullable, timeZone: string, opts?: Intl.DateTime
     month: "short",
     ...opts,
     timeZone: timeZone || DEFAULT_TIMEZONE,
+  });
+}
+
+/** "Mon 14 Sep" -- for a DATE-ONLY value (courses.start_date, due_date and
+ *  friends). No timeZone argument, deliberately: a calendar date does not
+ *  have one, and accepting a zone here is what turns the 14th into the 13th. */
+export function formatCalendarDate(iso: Nullable, opts?: Intl.DateTimeFormatOptions): string {
+  if (!iso) return "--";
+  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    ...opts,
   });
 }
 

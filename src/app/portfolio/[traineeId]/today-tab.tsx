@@ -233,6 +233,13 @@ export async function TodayTab({
   // found. Only queried pre-course -- these tables are irrelevant once the
   // course has actually started.
   const preCourse = course?.start_date ? today < course.start_date : false;
+  // The other end of the course, which nothing had ever drawn. After the last
+  // day the landing fell through to whatever the teaching branches happened to
+  // say -- "All your TPs are taught", a day track reading "Nothing timetabled
+  // for you today", a header still counting "Day 20 of 20". A finished course
+  // rendered as a quiet Thursday, and that is the last thing Connect ever says
+  // to a trainee. Found 10 Sep 2026 at --stage finished.
+  const postCourse = course?.end_date ? today > course.end_date : false;
   // Ramy, 28 Aug 2026: counts tasks actually answered, not sections
   // self-ticked -- the task is answered inside Connect now, and the hero
   // card, the Resource Hub door and the roster all have to say the same
@@ -580,7 +587,10 @@ export async function TodayTab({
     | "teaching_unrecorded"
     | "teaching_done"
     | "teaching_unscheduled"
-    | "precourse_gtky" = preCourse
+    | "course_finished"
+    | "precourse_gtky" = postCourse
+    ? "course_finished"
+    : preCourse
     ? "precourse_gtky"
     : teachingToday
       ? "teaching"
@@ -594,7 +604,20 @@ export async function TodayTab({
               ? "teaching_done"
               : "teaching_unscheduled";
   const genericHero: HeroContent | null =
-    heroKind === "precourse_gtky"
+    heroKind === "course_finished"
+      ? {
+          label: "Course complete",
+          big: "That's your course finished",
+          // Deliberately says nothing about the outcome. A trainee never sees
+          // their grade in Connect -- it is Cambridge's to give, after the
+          // assessor and the awarding process -- so a landing that implied one
+          // either way would be inventing news. What it CAN do is point at the
+          // record they own and tell them where the result actually comes from.
+          bigSub: "Your record stays here. Your result comes from Cambridge through your centre.",
+          ctaHref: `/portfolio/${traineeId}/celta5`,
+          ctaLabel: "Your record",
+        }
+      : heroKind === "precourse_gtky"
       ? !gtkyAssignment
         ? {
             label: "Before day one",
@@ -782,7 +805,9 @@ export async function TodayTab({
       ? (genericHero?.label ?? "Today")
       : heroKind === "precourse_gtky"
         ? "Before day one"
-        : "Not teaching today";
+        : heroKind === "course_finished"
+          ? "Course finished"
+          : "Not teaching today";
 
   return (
     <div className="flex flex-col gap-5">
