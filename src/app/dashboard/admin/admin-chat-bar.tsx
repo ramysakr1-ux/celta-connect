@@ -67,12 +67,7 @@ export function AdminChatBar({ profileId, rooms }: { profileId: string; rooms: A
   return (
     // Ramy, 26 Aug 2026: "the chat pill is not really at the bottom...
     // it needs to go more further down at the bottom, not hovering."
-    // pr on md+ reserves the bottom-right corner for DesignerCredit, which is
-    // fixed there on every landing. The pill is centred in what is left, so at
-    // 1024px it stops at 848 and the credit starts at 859 -- they no longer
-    // overlap, and the credit does not have to float up over the page content
-    // to avoid it (Ramy, 10 Sep 2026: "it should be fixed to the bottom").
-    <div className="pointer-events-none fixed inset-x-0 bottom-2 z-30 flex justify-center px-3 md:pr-[176px]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-2 z-30 flex justify-center px-3">
       <div className="pointer-events-auto flex w-full max-w-[840px] flex-col gap-2" onKeyDown={handleKeyDown}>
         {pickerOpen && rooms.length > 1 ? (
           <div className="w-[300px] self-start rounded-[16px] border border-border bg-card p-2 shadow-lg">

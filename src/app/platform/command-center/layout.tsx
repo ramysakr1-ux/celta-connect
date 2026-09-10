@@ -1,3 +1,4 @@
+import { HeaderCredit } from "@/components/designer-credit";
 import { requireRole } from "@/lib/auth/require-role";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { adminHomePath } from "@/lib/auth/centre-permissions";
@@ -56,6 +57,7 @@ export default async function CommandCenterLayout({ children }: { children: Reac
           <div style={{ fontFamily: "Newsreader, Georgia, serif", fontStyle: "italic", fontSize: 19, color: INK }}>Connect</div>
           <div style={{ width: 1, height: 18, background: BORDER }} />
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: GOLD }}>Command center</div>
+          <HeaderCredit onDark />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

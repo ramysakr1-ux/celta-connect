@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/wordmark";
+import { HeaderCredit } from "@/components/designer-credit";
 import { TrainerTabs } from "@/app/trainer/trainer-tabs";
 import { isActPreview } from "@/lib/act-preview";
 import { enterActPreview, exitActPreview } from "@/app/trainer/(hub)/act-preview-actions";
@@ -186,6 +187,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             className="block shrink-0"
           >
             <Wordmark size="header-compact" gapPx={9} />
+            <HeaderCredit />
           </Link>
           <TrainerTabs rosterOnly={isAssessor && !tourMode} tourMode={tourMode} mct={isMct && !isAssessor} tint={tintTab} />
           <div className="flex shrink-0 items-center gap-[11px]">

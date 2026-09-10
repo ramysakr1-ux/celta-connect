@@ -21,7 +21,6 @@ import { buildPrepSummary } from "@/lib/assessor-prep-state";
 import { PrepList } from "@/app/trainer/(hub)/assessor/prep-list";
 import { tintModeration } from "@/lib/tint-moderation";
 import { TintBlock } from "@/app/trainer/(hub)/assessor/tint-block";
-import { DesignerCredit } from "@/components/designer-credit";
 
 // The assessor's room. MCT only.
 //
@@ -526,7 +525,6 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
       />
       </div>
 
-      <DesignerCredit />
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { resolveProvisionalDeadline } from "@/lib/provisional-deadline";
 import { hasMarkingGuidance } from "@/lib/marking-guidance";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
-import { DesignerCredit } from "@/components/designer-credit";
+import { HeaderCredit } from "@/components/designer-credit";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
 import { buildAssessorRequirements, doubleMarkingPerAssignment, type AssessmentKind } from "@/lib/assessor-requirements";
 import { AppianReference } from "@/app/assessor/appian-reference";
@@ -481,6 +481,7 @@ export default async function AssessorPage({
           >
             Assessor · read-only
           </span>
+          <HeaderCredit onDark />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {/* assessor-visit-pack-full-spec.md: "Links to Appian's login page
@@ -1243,7 +1244,6 @@ export default async function AssessorPage({
         </div>
       </div>
 
-      <DesignerCredit />
     </div>
   );
 }

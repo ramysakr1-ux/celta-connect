@@ -13,7 +13,6 @@ import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-gr
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
-import { DesignerCredit } from "@/components/designer-credit";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
 import { AssessorMeetingCard } from "./assessor-meeting-card";
 import { AssessorPortfolioLanding } from "./assessor-landing";
@@ -580,7 +579,6 @@ export default async function CourseStreamPage({
         </div>
       ) : null}
 
-      <DesignerCredit />
     </div>
   );
 }

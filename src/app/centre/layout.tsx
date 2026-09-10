@@ -13,7 +13,7 @@ import { OwnerBranchRow } from "@/app/centre/owner-branch-row";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
-import { LandingDesignerCredit } from "@/components/designer-credit";
+import { HeaderCredit } from "@/components/designer-credit";
 
 // Centre Admin has its own chrome, deliberately outside /dashboard: the layout
 // spec gives it a header with a "Centre admin" pill and exactly THREE tabs
@@ -89,11 +89,11 @@ export default async function CentreLayout({ children }: { children: React.React
        more than one: the volunteer pool is its own room with its own colour,
        and everything else is Centre Management. */
     <AreaTheme className="flex min-h-full flex-1 flex-col">
-      {/* Header: 32px mark + wordmark, a hairline divider, then the pill.
-          Two rows on the right (Ramy, 23 Aug 2026): row 1 leaves headroom
-          for the fixed DesignerCredit badge (rendered from centre/page.tsx
-          itself, landing-page-only); row 2 carries the branch filter, name
-          and sign out, which used to collide with the credit on one line. */}
+      {/* Header: 32px mark + wordmark, the credit, a hairline divider, then
+          the pill. Two rows on the right (Ramy, 23 Aug 2026): row 2 carries
+          the branch filter, name and sign out. The headroom row 1 used to
+          leave for a floating credit badge is no longer needed -- the credit
+          sits in the header itself now, beside the mark, on every screen. */}
       <div className="container flex items-center justify-between gap-6 pt-10">
         <div className="flex items-center gap-3.5">
           {/* Ramy, 27 Aug 2026: "except for my home screen, which if I click
@@ -105,12 +105,12 @@ export default async function CentreLayout({ children }: { children: React.React
             className="shrink-0 hover:opacity-80"
           >
             <Wordmark size="header" />
+            <HeaderCredit />
           </Link>
         </div>
         {/* The garnet Centre owner pill is gone: Connect is the way home
             now, and for an owner home IS the owner screen. Ramy: "you don't
             need a Centre owner pill. You just click on Connect." */}
-        <LandingDesignerCredit landingPath="/centre" />
       </div>
       <div className="container flex items-center justify-end gap-4 pt-2 text-[13px] text-muted">
         <CentreHeaderMeta

@@ -41,7 +41,6 @@ const RED = "var(--color-destructive)";
 const GOLD = "var(--color-gold)";
 const MUTED = "var(--color-muted)";
 
-import { DesignerCredit } from "@/components/designer-credit";
 
 export default async function CommandCenterOverviewPage() {
   const profile = await requireRole("platform_owner");
@@ -363,7 +362,7 @@ export default async function CommandCenterOverviewPage() {
       </div>
       {/* Every landing carries the credit in the same corner (Ramy, 10 Sep
           2026). This one had none at all. */}
-      <DesignerCredit />
+
     </>
   );
 }

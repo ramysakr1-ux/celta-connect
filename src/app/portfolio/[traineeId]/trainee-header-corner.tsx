@@ -27,14 +27,13 @@ export function TraineeHeaderCorner({
 
   // §1b: on the dark header the corner text lightens to oklch(78% 0.02 80).
   //
-  // The credit is no longer wedged in beside it. Ramy, 10 Sep 2026, and the
-  // handoff's own §5: it is the bottom-right watermark on landing screens --
-  // 13px mark, faint text, no border. DesignerCredit's default corner is
-  // bottom-right precisely because the chat pill sits centred, so it cannot be
-  // covered; that was the thing he asked me to watch for.
+  // The credit is not here any more. It spent 10 Sep 2026 moving between this
+  // corner, the page's bottom-right, and a floating position clear of the chat
+  // bars, colliding with something in each -- Ramy: "it keeps moving, and it
+  // blocks the view, and it's not consistent." It lives in the header band now,
+  // beside the mark, on every screen. See HeaderCredit.
   return (
     <div className="flex shrink-0 items-center gap-2.5">
-      {isLanding ? <DesignerCredit /> : null}
       {courseDayProgress ? (
         <span className="text-[11px] font-medium tabular-nums" style={{ color: "oklch(78% 0.02 80)" }}>
           Day {courseDayProgress.currentDay} of {courseDayProgress.totalDays}

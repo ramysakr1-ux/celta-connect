@@ -12,7 +12,6 @@ import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE, resolveTimeBands, bandInd
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeWeekOf } from "@/lib/course-progress";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
-import { DesignerCredit } from "@/components/designer-credit";
 import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
 import { assessorVisitDayProblem } from "@/lib/assessor-day";
 import { findMaterialsOverlaps } from "@/lib/materials-overlap";
@@ -816,7 +815,6 @@ export default async function TodayPage() {
         </div>
       </div>
 
-      <DesignerCredit />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { TraineeSidebarNav } from "@/app/portfolio/[traineeId]/trainee-sidebar-n
 import { buildRailStatus, type RailStatus } from "@/lib/trainee-rail-status";
 import { getTraineeStreamDay, type TraineeDay } from "@/lib/trainee-day";
 import { HeaderDayBar } from "@/app/portfolio/[traineeId]/header-day-bar";
+import { HeaderCredit } from "@/components/designer-credit";
 import { TraineeHeaderCorner } from "@/app/portfolio/[traineeId]/trainee-header-corner";
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
 import { computeWeekOf } from "@/lib/course-progress";
@@ -343,6 +344,7 @@ export default async function PortfolioLayout({
                   tileBg="color-mix(in oklab, oklch(98.5% 0.006 90) 12%, transparent)"
                 />
               </Link>
+              <HeaderCredit onDark />
               {traineeDay ? (
                 <HeaderDayBar day={traineeDay} serverNowMs={Date.now()} timeZone={timeZone} />
               ) : (

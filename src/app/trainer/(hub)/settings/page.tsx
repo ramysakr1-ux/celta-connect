@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { getFeedbackAssistState } from "@/lib/feedback-assist";
 import { FeedbackAssistCard } from "@/app/trainer/(hub)/feedback-assist-card";
-import { DesignerCredit } from "@/components/designer-credit";
 
 // A tutor's own feedback wording. Feedback assist moved here off Today,
 // 5 Sep 2026 -- it is a preference, not a task, and the landing page is for
@@ -53,7 +52,6 @@ export default async function TrainerSettingsPage() {
         </p>
       )}
 
-      <DesignerCredit />
     </div>
   );
 }

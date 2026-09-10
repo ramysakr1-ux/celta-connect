@@ -15,6 +15,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { AreaTheme } from "@/components/area-theme";
 import { can, canView, adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
 import { LandingDesignerCredit } from "@/components/designer-credit";
+import { HeaderCredit } from "@/components/designer-credit";
 
 export default async function DashboardLayout({
   children,
@@ -114,13 +115,8 @@ export default async function DashboardLayout({
           identity. AreaHeaderRule below knows which room is actually showing
           and draws nothing in a room that has no colour yet. */}
       <header className="border-b border-border">
-        {/* Two rows on the right (Ramy, 23 Aug 2026): row 1 carries the
-            credit via LandingDesignerCredit, which checks the live pathname
-            itself and renders nothing off /dashboard/admin -- landing-only,
-            without leaking onto every /dashboard/* route this layout wraps.
-            No longer `fixed`: it scrolls away with the header now instead of
-            staying pinned to the viewport. Row 2 carries name + sign out,
-            which used to collide with the credit when both sat on one line. */}
+        {/* The credit lives in this header now, beside the mark -- same place
+              on every screen, nothing to collide with. */}
         <div className="container flex h-14 items-center justify-between gap-6">
           {/* Left group: where you are, then where else you can go. Without
               this wrapper the destination pill became a third child of a
@@ -146,6 +142,7 @@ export default async function DashboardLayout({
             className="flex shrink-0 items-center gap-3 hover:opacity-80"
           >
             <Wordmark size="header" />
+            <HeaderCredit />
             {/* Course Admin.dc.html's own header carries a role pill beside
                 the mark: 11px/700 uppercase at 0.06em with a 5px dot, on a 12%
                 accent tint. Centre Admin has the same device at /centre; this
@@ -175,7 +172,6 @@ export default async function DashboardLayout({
             </>
           ) : null}
           </div>
-          <LandingDesignerCredit landingPath="/dashboard/admin" />
         </div>
         <div className="container flex items-center justify-end gap-4 pb-2.5 text-sm text-muted">
           <BranchFilter branches={switchable} />

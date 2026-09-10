@@ -240,12 +240,7 @@ export function StaffChatDrawer({
 
   return (
     <div
-      // pr on md+ reserves the bottom-right corner for DesignerCredit, which
-      // is fixed there on every landing. Without it the centred pill reaches
-      // 932 at a 1024px window and the credit starts at 859 -- they overlap,
-      // which is what forced the credit to float up over the page content
-      // before Ramy (10 Sep 2026) asked for it back in the corner.
-      className={`pointer-events-none fixed left-0 right-0 z-30 flex justify-center px-3 md:pr-[176px] ${
+      className={`pointer-events-none fixed left-0 right-0 z-30 flex justify-center px-3 ${
         raiseForMobileNav ? "bottom-20 py-3 md:bottom-6" : "bottom-6"
       }`}
       // Ramy, 2026-08-24: "the frame, the border where the pill sits" gets

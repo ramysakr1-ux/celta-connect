@@ -133,3 +133,34 @@ export function LandingDesignerCredit({ landingPath }: { landingPath: string }) 
   if (pathname !== landingPath) return null;
   return <DesignerCredit />;
 }
+
+/** The credit as it lives in a header, beside the Connect mark.
+ *
+ * Ramy, 10 Sep 2026, ending three passes of trying to keep a floating corner
+ * clear: "it keeps moving, and it blocks the view, and it's not consistent."
+ * He had already pointed at the answer earlier the same day -- "there is room
+ * in the header for my credit if it's done in a different colour, obviously."
+ *
+ * The header is the one band in this app that nothing floats over and that
+ * floats over nothing: no chat pill, no mobile nav, no back-to-top button. It
+ * is also the one element every screen shares, so "the same spot everywhere"
+ * is true by construction rather than by measurement.
+ *
+ * Bronze, because it sits beside a gold wordmark and above muted text -- a
+ * third accent keeps it from reading as either.
+ *
+ * `onDark` for the trainee's ink-warm band, where bronze has nothing to sit on.
+ */
+export function HeaderCredit({ onDark = false }: { onDark?: boolean }) {
+  return (
+    <span
+      className="hidden shrink-0 items-center gap-1.5 text-[10.5px] whitespace-nowrap md:inline-flex"
+      style={{ color: onDark ? "oklch(72% 0.05 65)" : "var(--color-bronze)", opacity: onDark ? 0.9 : 0.8 }}
+    >
+      designed and built by{" "}
+      <span className="font-semibold" style={{ opacity: 1 }}>
+        Ramy
+      </span>
+    </span>
+  );
+}

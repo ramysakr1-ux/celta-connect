@@ -7,7 +7,7 @@ import { LessonMaterialsCard } from "@/app/student/[token]/lesson-materials-card
 import { JoinOnlineButton } from "@/app/student/[token]/join-online-button";
 import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
-import { DesignerCredit } from "@/components/designer-credit";
+import { HeaderCredit } from "@/components/designer-credit";
 import { Greeting } from "@/app/student/[token]/greeting";
 import type { Metadata } from "next";
 import { InstallPrompt } from "@/components/install-prompt";
@@ -223,6 +223,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         <div className="container flex items-center gap-4 py-6">
           <Link href="/" className="hover:opacity-80">
             <Wordmark size="header" />
+            <HeaderCredit />
           </Link>
         </div>
         <div className="container pb-16">
@@ -780,7 +781,7 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
       {/* One credit, bottom-right, same as every other landing. This page had
           two -- inline in a card and centred below it on mobile -- and neither
           was where the rest of the app puts it. */}
-      <DesignerCredit />
+
     </div>
   );
 }
