@@ -137,7 +137,7 @@ export default async function CommandCenterMoneyPage() {
         Connect to Stripe
       </button>
       <Link href="/platform/accounts" className="text-[11px] font-semibold text-muted hover:underline">
-        Manage subscriptions &amp; invoices →
+        Manage subscriptions &amp; invoices
       </Link>
     </div>
   );

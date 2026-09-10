@@ -253,7 +253,7 @@ export default async function CommandCenterOverviewPage() {
                         <>
                           <span className={`mr-3 text-[11px] font-bold ${access === "Owner" ? "text-primary" : "text-muted"}`}>{access}</span>
                           <Link href={access === "Owner" ? "/centre" : `/platform/command-center/enter/${c.id}`} className="text-[11px] font-bold text-primary">
-                            Open →
+                            Open
                           </Link>
                         </>
                       ) : (
@@ -357,7 +357,7 @@ export default async function CommandCenterOverviewPage() {
             href="/platform/accounts"
             className="admin-hover-fill rounded-[6px] border border-border px-4 py-3 text-center text-[12.5px] font-semibold text-primary"
           >
-            Accounts, subscriptions &amp; invoices →
+            Accounts, subscriptions &amp; invoices
           </Link>
         </div>
       </div>

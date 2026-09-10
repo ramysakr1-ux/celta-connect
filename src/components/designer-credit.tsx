@@ -101,25 +101,20 @@ export function DesignerCredit({
 
   // Ramy, 10 Sep 2026: "bottom right of the screen, all the screens... make
   // sure you measure it well so it's not blocking a view, and it's not being
-  // blocked, and it could all be seen by everybody."
+  // blocked." Then, when a first pass lifted it clear of the chat bars:
+  // "the credit should be fixed to the bottom. It should not move on the
+  // screen, because then it blocks [the content]." He is right -- floated up
+  // 100px it sat over Catch up.
   //
-  // Measured, rather than guessed, because bottom-right is the busiest corner
-  // in this app and the old bottom-3 was landing on things:
+  // So it stays in the corner, and the chat bars give it room instead: both
+  // reserve a right inset on md+ so their centred pill can never reach it.
+  // Measured at 375, 1024 and 1280 -- see the note on those wrappers.
   //
-  //   /centre at 1024px  -- the admin chat bar's visible pill spans 92-932 and
-  //                         its top is 64px off the bottom. A credit at
-  //                         bottom-3 sat at 859-1012, straight through it.
-  //   trainee, desktop   -- the staff chat pill is bottom-6 with py-3, so its
-  //                         top measures 92px off the bottom.
-  //   trainee, 375x812   -- TraineeMobileNav owns 755-812 and the chat pill
-  //                         664-720: one 35px gap, and the credit is 24px tall.
-  //
-  // So: 100px on desktop clears the highest of the two chat pills by 8px, and
-  // 62px on mobile centres it in the only gap there is -- 5px above the nav,
-  // 6px below the pill. One position, every screen, blocking nothing and
-  // blocked by nothing.
+  // Mobile is the one place it cannot sit at bottom-0: TraineeMobileNav is a
+  // full-width bar there (755-812 on a 375x812 screen) with the chat pill
+  // above it (664-720). 62px centres the 24px credit in that 35px gap.
   const cornerClass =
-    corner === "bottom-right" ? "right-3 bottom-[62px] md:bottom-[100px]" : "top-3 right-3";
+    corner === "bottom-right" ? "right-3 bottom-[62px] md:bottom-3" : "top-3 right-3";
   return <div className={`pointer-events-none fixed z-20 ${cornerClass} ${className}`}>{mark}</div>;
 }
 
