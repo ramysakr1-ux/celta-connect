@@ -10,6 +10,7 @@ import { hasMarkingGuidance } from "@/lib/marking-guidance";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { HeaderCredit } from "@/components/designer-credit";
+import { HeaderClock } from "@/components/header-clock";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
 import { buildAssessorRequirements, doubleMarkingPerAssignment, type AssessmentKind } from "@/lib/assessor-requirements";
 import { AppianReference } from "@/app/assessor/appian-reference";
@@ -496,6 +497,12 @@ export default async function AssessorPage({
             Assessor · read-only
           </span>
           <HeaderCredit onDark />
+        </div>
+        {/* Ramy, 10 Sep 2026: a clock on every landing. The assessor's token
+            names exactly one course, so this one gets the whole day bar and not
+            just the time -- and it is the day they are here to moderate. */}
+        <div style={{ display: "flex", flex: 1, minWidth: 0, margin: "0 28px" }}>
+          <HeaderClock supabase={admin} courseId={courseId} timeZone={timeZone} accent={GOLD_UNDERLINE} tone="dark" />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {/* assessor-visit-pack-full-spec.md: "Links to Appian's login page

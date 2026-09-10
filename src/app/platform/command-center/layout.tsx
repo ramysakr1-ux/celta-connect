@@ -1,4 +1,8 @@
 import { HeaderCredit } from "@/components/designer-credit";
+import { HeaderClock } from "@/components/header-clock";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { requireRole } from "@/lib/auth/require-role";
 import { getCentreRoleContext } from "@/lib/auth/centre-roles";
 import { adminHomePath } from "@/lib/auth/centre-permissions";
@@ -43,6 +47,14 @@ export default async function CommandCenterLayout({ children }: { children: Reac
   ]);
   const connectHref = centreCtx.roles.length > 0 ? adminHomePath(centreCtx.roles) : "/dashboard";
 
+  // The owner's own centre is the clock. Command Center looks across every
+  // centre on the platform and they are not in one zone, so there is no
+  // platform-wide "now" to show and certainly no single teaching day -- the
+  // clock alone, named by its city for anyone whose device disagrees with it.
+  const ownerTimeZone = profile.center_id
+    ? ((await getCachedCenter(profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE)
+    : DEFAULT_TIMEZONE;
+
   return (
     <div style={{ fontFamily: "Karla, Helvetica, sans-serif", background: SAND, minHeight: "100vh" }}>
       <div style={{ height: 3, background: GOLD }} />
@@ -58,6 +70,9 @@ export default async function CommandCenterLayout({ children }: { children: Reac
           <div style={{ width: 1, height: 18, background: BORDER }} />
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: GOLD }}>Command center</div>
           <HeaderCredit onDark />
+        </div>
+        <div style={{ display: "flex", flex: 1, minWidth: 0, margin: "0 28px" }}>
+          <HeaderClock supabase={createAdminClient()} timeZone={ownerTimeZone} accent={GOLD} tone="light" />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

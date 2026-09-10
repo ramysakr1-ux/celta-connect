@@ -8,12 +8,14 @@ import { JoinOnlineButton } from "@/app/student/[token]/join-online-button";
 import { SIGNUP_QUESTIONS } from "@/lib/fol/volunteer-signup-questions";
 import { Wordmark } from "@/components/wordmark";
 import { HeaderCredit } from "@/components/designer-credit";
+import { HeaderClock } from "@/components/header-clock";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { Greeting } from "@/app/student/[token]/greeting";
 import type { Metadata } from "next";
 import { InstallPrompt } from "@/components/install-prompt";
 import { getVolunteerIdentityData, CERTIFICATE_HOURS_THRESHOLD } from "@/lib/volunteer-cross-course";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
-import { resolveTimeBands, toLocalIso, zonedTimeToUtc } from "@/lib/timetable-grid";
+import { resolveTimeBands, toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { PushSubscribeButton } from "@/components/push-subscribe-button";
 import { subscribeVolunteerPush, unsubscribeVolunteerPush } from "@/lib/push/actions";
 
@@ -199,6 +201,13 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
       .order("created_at", { ascending: false }),
   ]);
 
+  // The centre's clock, for the header. Every class row already carries its
+  // own zone (a volunteer can sit on courses at two branches), but the header
+  // is about THIS course, so it takes this course's centre.
+  const courseTimeZone = course?.center_id
+    ? ((await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE)
+    : DEFAULT_TIMEZONE;
+
   if (!volunteer) {
     return (
       <div className="entry-ground flex min-h-screen flex-1 items-center justify-center p-8">
@@ -225,6 +234,15 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
             <Wordmark size="header" />
           </Link>
           <HeaderCredit />
+          <div className="flex min-w-0 flex-1">
+            <HeaderClock
+              supabase={admin}
+              courseId={accessToken.course_id}
+              timeZone={courseTimeZone}
+              accent="var(--color-primary)"
+              tone="light"
+            />
+          </div>
         </div>
         <div className="container pb-16">
           <div className="frame mx-auto flex max-w-xl flex-col gap-6 p-6">
@@ -699,6 +717,19 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                     wordmark and who built it" -- the credit had gone missing
                     from it when the floating one was retired. */}
                 <HeaderCredit />
+              </div>
+              {/* Ramy, 10 Sep 2026: a clock on every landing. A volunteer's
+                  link names one course, so this carries the whole day -- the
+                  sessions they may be walking into, on the centre's clock
+                  rather than their own. */}
+              <div className="ml-6 flex min-w-0 flex-1">
+                <HeaderClock
+                  supabase={admin}
+                  courseId={accessToken.course_id}
+                  timeZone={courseTimeZone}
+                  accent="var(--color-primary)"
+                  tone="light"
+                />
               </div>
             </header>
 

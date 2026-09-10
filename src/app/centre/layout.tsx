@@ -14,6 +14,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
 import { HeaderCredit } from "@/components/designer-credit";
+import { HeaderClock } from "@/components/header-clock";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 // Centre Admin has its own chrome, deliberately outside /dashboard: the layout
 // spec gives it a header with a "Centre admin" pill and exactly THREE tabs
@@ -49,6 +52,12 @@ export default async function CentreLayout({ children }: { children: React.React
       : Promise.resolve({ data: [] as { id: string; name: string; center_number: string | null }[] }),
   ]);
   const switchable = (switchableRaw.data ?? []).map((c) => ({ id: c.id, name: c.name, centerNumber: c.center_number }));
+
+  // This person's own centre is the clock they keep, whichever branch they are
+  // currently looking at.
+  const centreTimeZone = profile.center_id
+    ? ((await getCachedCenter(profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE)
+    : DEFAULT_TIMEZONE;
 
   // Same four rooms as the /dashboard side, gated on what this person can
   // actually reach, so nobody is shown a door that will bounce them.
@@ -107,6 +116,17 @@ export default async function CentreLayout({ children }: { children: React.React
             <Wordmark size="header" />
           </Link>
           <HeaderCredit />
+        </div>
+        {/* Ramy, 10 Sep 2026: "Centre should have a clock. Centre management
+            should have a clock. Every landing page should have a clock."
+            The clock, and only the clock. A centre can be running several
+            courses at once and an owner holds more than one branch, so there
+            is no such thing as "the day" here -- drawing a day bar would mean
+            picking one course and presenting it as the centre's. The time is
+            never ambiguous, and the zone note names it for anyone reading
+            from another country. */}
+        <div className="flex min-w-0 flex-1">
+          <HeaderClock supabase={createAdminClient()} timeZone={centreTimeZone} accent="var(--color-primary)" tone="light" />
         </div>
         {/* The garnet Centre owner pill is gone: Connect is the way home
             now, and for an owner home IS the owner screen. Ramy: "you don't

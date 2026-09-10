@@ -16,6 +16,9 @@ import { AreaTheme } from "@/components/area-theme";
 import { can, canView, adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
 import { LandingDesignerCredit } from "@/components/designer-credit";
 import { HeaderCredit } from "@/components/designer-credit";
+import { HeaderClock } from "@/components/header-clock";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 
 export default async function DashboardLayout({
   children,
@@ -50,6 +53,9 @@ export default async function DashboardLayout({
   // page.tsx). centreCtx itself stays -- adminChatRooms below still needs
   // its availableCenterIds.
   const centreCtx = profile?.role === "admin" ? await getCentreRoleContext(profile) : null;
+  const dashboardTimeZone = profile?.center_id
+    ? ((await getCachedCenter(profile.center_id))?.time_zone ?? DEFAULT_TIMEZONE)
+    : DEFAULT_TIMEZONE;
   // Which role this person is acting as, for the header. First held role: a
   // person with several sees the one that decides their landing page, which is
   // the one this section belongs to. roleLabel() covers owner-defined custom
@@ -171,6 +177,12 @@ export default async function DashboardLayout({
             <>
             </>
           ) : null}
+          {/* Ramy, 10 Sep 2026: a clock on every landing. The clock only --
+              this header sits over every course this administrator touches,
+              not one of them, so there is no single teaching day to draw. */}
+          <div className="flex min-w-0 flex-1">
+            <HeaderClock supabase={createAdminClient()} timeZone={dashboardTimeZone} accent="var(--color-primary)" tone="light" />
+          </div>
           </div>
         </div>
         <div className="container flex items-center justify-end gap-4 pb-2.5 text-sm text-muted">

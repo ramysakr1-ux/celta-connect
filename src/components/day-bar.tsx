@@ -15,6 +15,12 @@ import { useEffect, useState } from "react";
 //
 // `tone` is which ground it sits on, which decides the neutrals only. Everything
 // coloured comes from `accent`.
+//
+// Ramy, 10 Sep 2026: "I think everyone should have a clock. Every landing page
+// should have a clock." Not everyone has a DAY -- a centre manager may be
+// looking at four courses at once, a platform owner at four centres -- but
+// everyone has a time. So with no sessions to draw, this renders the clock
+// alone rather than nothing, and the bar is the part that needs a course.
 
 export interface DayBarItem {
   id: string;
@@ -59,6 +65,10 @@ export function DayBar({
   accent: string;
   tone: "dark" | "light";
   serverNowMs: number;
+  /** The CENTRE's zone. This clock is the centre's wall clock, never the
+   *  reader's device -- a course has one timetable and one 10:00, and a tutor
+   *  working from another country who saw their own time next to it would show
+   *  up an hour out. See zoneNote below for how it says so. */
   timeZone: string;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -87,9 +97,45 @@ export function DayBar({
     new Date(now)
   );
 
-  // No sessions, no bar: end labels alone would promise a day the timetable is
-  // not describing.
-  if (items.length === 0) return <div className="min-w-0 flex-1" />;
+  // Ramy, 10 Sep 2026, on his own device in Istanbul reading a New York
+  // centre: "why is the clock not set to my time zone or the course time
+  // zone?" It was the course's, exactly as designed -- but a bare "11:08" with
+  // nothing naming it just reads as a broken clock, which is what he
+  // concluded. So when the reader is somewhere else, the clock says whose it
+  // is. In the centre's own zone there is nothing to disambiguate and the note
+  // stays off, which is every trainee on a normal course.
+  //
+  // Mount-gated: the server has no idea where the reader is, and a value that
+  // differs between the two is a hydration mismatch.
+  const zoneNote = (() => {
+    if (!mounted) return null;
+    const here = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!here || here === timeZone) return null;
+    return timeZone.split("/").pop()?.replace(/_/g, " ") ?? timeZone;
+  })();
+
+  const clockBlock = (
+    <span className="flex flex-none items-baseline gap-1.5">
+      {/* min-width so the row does not shift as the digits change. */}
+      <span className="min-w-[42px] text-[12px] font-bold tabular-nums" style={{ color: clockInk }}>
+        {mounted ? clock : ""}
+      </span>
+      {zoneNote ? (
+        <span className="text-[10.5px] whitespace-nowrap" style={{ color: label }}>
+          {zoneNote}
+        </span>
+      ) : null}
+    </span>
+  );
+
+  // No sessions, no bar -- end labels alone would promise a day the timetable
+  // is not describing. The clock still stands: it is the centre's time, which
+  // is true whether or not anything is timetabled in it.
+  if (items.length === 0) {
+    return (
+      <div className="flex min-w-0 flex-1 items-center justify-end gap-3">{clockBlock}</div>
+    );
+  }
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -132,10 +178,7 @@ export function DayBar({
         {hhmm(windowEnd)}
       </span>
 
-      {/* min-width so the row does not shift as the digits change. */}
-      <span className="min-w-[42px] flex-none text-[12px] font-bold tabular-nums" style={{ color: clockInk }}>
-        {mounted ? clock : ""}
-      </span>
+      {clockBlock}
     </div>
   );
 }
