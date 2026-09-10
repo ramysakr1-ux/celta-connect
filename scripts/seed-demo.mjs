@@ -70,7 +70,61 @@ function courseDay(start, n) {
   return isoOf(d);
 }
 
+// ------------------------------------------------------------------ clock ---
+// WHERE IN ITS LIFE the demo course is planted.
+//
+// Every screen in Connect computes from "what day of the course is it" -- the
+// hero, the rail, the day bar, the assessor pack, close-out. Until this existed
+// the seed anchored the course two weeks back and that was the only day any of
+// those screens had ever been looked at. So a whole class of bug could only be
+// found by waiting for the calendar: on 10 Sep 2026 the trainee's landing was
+// found claiming "All your TPs are taught" while the rail sent them off to
+// prepare a lesson they had already given, and it had been doing that for days.
+//
+// Nothing here fakes the clock. The course is MOVED, so the app's own date
+// arithmetic runs for real against a real "now" -- which is the only version of
+// this test worth having. A frozen clock proves the code agrees with the fake.
+//
+//   npm run seed:demo -- --stage week1
+//   npm run seed:demo -- --stage week4 --unlogged 2
+//
+// week3 is the default and reproduces exactly what the seed did before.
+const STAGE_WEEKS = {
+  precourse: 1,   // starts next Monday -- nothing taught, GTKY still open
+  week1: 0,       // opened this Monday
+  week2: -1,
+  week3: -2,      // the historical default
+  week4: -3,      // assessor visit week, close-out in sight
+  finished: -4,   // ended last Friday
+};
+
+function cliArg(name) {
+  const i = process.argv.indexOf(`--${name}`);
+  return i > -1 ? process.argv[i + 1] : null;
+}
+
+const STAGE = cliArg("stage") ?? process.env.SEED_STAGE ?? "week3";
+if (!(STAGE in STAGE_WEEKS)) {
+  console.error(`Unknown --stage "${STAGE}". One of: ${Object.keys(STAGE_WEEKS).join(", ")}`);
+  process.exit(1);
+}
+
+// How many TP rounds have happened but not been written up yet. taught_at is
+// written when the TRAINER logs the outcome, never when the date arrives, so
+// this gap is a real state of every real course and needs to be reachable on
+// purpose rather than by accident.
+const UNLOGGED = Number(cliArg("unlogged") ?? process.env.SEED_UNLOGGED ?? 0);
+
+// Half A teaches on course days 2, 4, 6, 8, 11, 13, 16, 18; half B the day
+// after each. Read off the timetable literal further down -- the one schedule,
+// not a second opinion about it.
+const TP_COURSE_DAYS = {
+  1: [2, 4, 6, 8, 11, 13, 16, 18],
+  2: [3, 5, 7, 9, 12, 14, 17, 19],
+};
+
 async function main() {
+  console.log(`stage: ${STAGE}${UNLOGGED ? ` (last ${UNLOGGED} TP round(s) left unlogged)` : ""}`);
   // --- Clean slate ---
   // Every demo centre, not "the" demo centre.
   //
@@ -169,11 +223,37 @@ async function main() {
   // TPs graded and three assignments marked, so the demo shows the states
   // a locked, early-course record never can, while the course is still
   // running rather than finished.
-  const courseStart = mondayNearest(-14);
+  const courseStart = mondayNearest(STAGE_WEEKS[STAGE] * 7);
   const courseEnd = new Date(courseStart);
   courseEnd.setDate(courseStart.getDate() + 25); // Mon + 25 = Friday of week 4
   const startDate = isoOf(courseStart);
   const endDate = isoOf(courseEnd);
+
+  // ---- the course's own calendar, which the seeded RECORD now follows ----
+  //
+  // Before this, how much teaching had happened was a hardcoded list of
+  // days-ago (12, 9, 6, 3, 2, 1) that had nothing to do with when the
+  // timetable actually put those lessons. Move the course and the record
+  // stayed where it was, so the two disagreed -- which is how the demo ended
+  // up with TP7 and TP8 sitting unrecorded days after their dates had passed,
+  // and the landing page contradicting itself about them.
+  //
+  // A lesson is taught on the day the timetable says it is taught. Everything
+  // below derives from that, so the record is coherent at ANY stage.
+  const todayIso = isoOf(new Date());
+  const tpDateIso = (half, tpNumber) => courseDay(courseStart, TP_COURSE_DAYS[half][tpNumber - 1]);
+  /** TP rounds this half has already been through -- strictly before today, so
+   *  a lesson happening this morning is not yet in the book. */
+  const tpRoundsSoFar = (half) => {
+    let n = 0;
+    for (let i = 1; i <= 8; i += 1) if (tpDateIso(half, i) < todayIso) n = i;
+    return n;
+  };
+  /** ...minus whatever --unlogged asks us to leave open. */
+  const tpRoundsLogged = (half) => Math.max(0, tpRoundsSoFar(half) - UNLOGGED);
+  console.log(
+    `course: ${startDate} -> ${endDate}; half A has been through ${tpRoundsSoFar(1)} TP round(s), half B ${tpRoundsSoFar(2)}`
+  );
   const { data: course, error: courseErr } = await supabase
     .from("courses")
     .insert({
@@ -326,13 +406,8 @@ async function main() {
   //
   // Run separately by scripts/seed-demo-pipeline.mjs so it can also be applied
   // to an existing demo centre without a full rebuild.
-  await import("node:child_process").then(({ execFileSync }) => {
-    try {
-      execFileSync("node", ["scripts/seed-demo-pipeline.mjs"], { stdio: "inherit", env: process.env });
-    } catch (e) {
-      console.warn("  pipeline seed did not run:", e.message);
-    }
-  });
+  // (Actually run further down, once BOTH branches exist -- see below.)
+
 
   // A SECOND branch, in another city, owned by the same person.
   //
@@ -410,6 +485,33 @@ async function main() {
   }
 
   console.log("second branch: Los Angeles, owned by the same person, with its own staff");
+
+  // --- Admissions pipeline for BOTH demo branches ---
+  //
+  // Runs HERE, not where it used to sit further up, because it fills both
+  // branches and Los Angeles did not exist yet at that point -- it died on
+  // `la.id` of undefined every single time.
+  //
+  // The child also gets the credentials EXPLICITLY. This file reads .env.local by
+  // hand into `url`/`key` rather than loading it into process.env, so passing
+  // `env: process.env` handed the child nothing and it died on
+  // "supabaseUrl is required" -- caught, warned about in a line nobody read,
+  // and the run carried on looking successful. So the pipeline this seeds has
+  // never once been in the demo, on any rebuild, since the day it was written:
+  // exactly the empty funnel Ramy asked to have fixed. Found 10 Sep 2026 while
+  // building the stage harness, which is the point of the harness.
+  await import("node:child_process").then(({ execFileSync }) => {
+    try {
+      execFileSync("node", ["scripts/seed-demo-pipeline.mjs"], {
+        stdio: "inherit",
+        env: { ...process.env, NEXT_PUBLIC_SUPABASE_URL: url, SUPABASE_SERVICE_ROLE_KEY: key },
+      });
+    } catch (e) {
+      // Loudly. A seed step that fails quietly is a seed step that is not there.
+      console.error("  PIPELINE SEED FAILED:", e.message);
+      process.exitCode = 1;
+    }
+  });
 
   // The assessor, linked BOTH ways -- because there are two of them.
   //
@@ -528,6 +630,10 @@ async function main() {
     // application the assessor's business, so the demo needs one.
     { name: "Marek Kowalski", email: "demo-marek@celtaconnect.com", group: "B", half: 2, slot: 2, grade: null, upper: null, withdrawn: true },
   ];
+
+  // Which half a candidate teaches in decides which days their TPs fall on,
+  // and so how many of their rounds have already happened by now.
+  const halfOf = (name) => traineeDefs.find((d) => d.name === name).half;
   const trainees = {};
   // The centre's sample for the assessor visit. CELTA 5: assessors "scrutinise
   // a selection of portfolios to moderate candidates' work" -- a selection, not
@@ -679,7 +785,13 @@ async function main() {
     "Vary interaction patterns a little more": ["5b"],  // setting up and managing group activities
   };
 
-  async function seedTaughtTp(traineeId, tpNumber, { aim, grade, strengths, actionPoints, daysAgo }) {
+  // `half` replaces the old `daysAgo`: the lesson happened when the timetable
+  // says it happened, and the plan, self-evaluation, feedback and CELTA 5 row
+  // all hang off that one date instead of six invented ones.
+  async function seedTaughtTp(traineeId, tpNumber, { aim, grade, strengths, actionPoints, half }) {
+    const lessonIso = tpDateIso(half, tpNumber);
+    const lessonMs = Date.parse(`${lessonIso}T12:00:00Z`);
+    const at = (offsetDays = 0) => new Date(lessonMs + offsetDays * 86400000).toISOString();
     await supabase.from("plan_assignments").insert({
       course_id: course.id,
       trainee_id: traineeId,
@@ -687,7 +799,7 @@ async function main() {
       main_lesson_aim: aim,
       density_tier: tpNumber <= 2 ? "scripted" : tpNumber <= 4 ? "framework" : "minimal",
       assigned_by: trainerId,
-      taught_at: new Date(Date.now() - daysAgo * 86400000).toISOString(),
+      taught_at: at(),
     });
     const { data: plan } = await supabase
       .from("tp_plans")
@@ -696,7 +808,7 @@ async function main() {
         trainee_id: traineeId,
         tp_number: tpNumber,
         main_aims: aim,
-        submitted_at: new Date(Date.now() - (daysAgo + 1) * 86400000).toISOString(),
+        submitted_at: at(-1),
       })
       .select("id")
       .single();
@@ -706,7 +818,7 @@ async function main() {
       tp_number: tpNumber,
       what_went_well: "The lead-in got strong engagement and the timing worked well.",
       what_not_as_planned: "Ran short on freer practice time.",
-      submitted_at: new Date(Date.now() - daysAgo * 86400000).toISOString(),
+      submitted_at: at(),
     });
     await supabase.from("tp_feedback").insert({
       tp_plan_id: plan.id,
@@ -727,7 +839,7 @@ async function main() {
       strengths_teaching: strengths.map((s) => ({ text: s, starred: false, criteria_codes: TEACHING_CODES[s] ?? [] })),
       action_points_teaching: actionPoints.map((s) => ({ text: s, starred: false, criteria_codes: TEACHING_CODES[s] ?? [] })),
       overall_comment: "A confident, well-paced lesson overall -- keep building on this.",
-      submitted_at: new Date(Date.now() - daysAgo * 86400000).toISOString(),
+      submitted_at: at(),
     });
 
     // The CELTA 5 "Record of assessed teaching practice" reads tp_lessons,
@@ -744,7 +856,7 @@ async function main() {
       trainee_id: traineeId,
       trainer_id: trainerId,
       tp_number: tpNumber,
-      lesson_date: new Date(Date.now() - daysAgo * 86400000).toISOString().slice(0, 10),
+      lesson_date: lessonIso,
       length_minutes: 45,
       level: tpNumber <= 4 ? "Intermediate (B1+)" : "Elementary (A2)",
       learner_count: tpNumber <= 4 ? 11 : 9,
@@ -777,24 +889,31 @@ async function main() {
     "Making suggestions -- role-play cards": "making-suggestions-role-play-cards.pdf",
   };
   for (const [i, cfg] of [
-    { aim: "Present perfect for life experience", grade: "above_standard", days: 12, materialNames: ["Present perfect -- slides", "Present perfect -- gap-fill handout"] },
-    { aim: "Reading for gist and detail: a city life article", grade: "to_standard", days: 9, materialNames: ["Reading for gist and detail -- handout", "Reading for gist -- comprehension questions"] },
-    { aim: "Vocabulary: Air Travel", grade: "above_standard", days: 6, materialNames: ["Air Travel vocabulary -- flashcards", "Air Travel -- listening transcript", "Air Travel -- matching worksheet"] },
-    { aim: "Functional language: Making suggestions", grade: "to_standard", days: 3, materialNames: ["Making suggestions -- worksheet", "Making suggestions -- role-play cards"] },
+    { aim: "Present perfect for life experience", grade: "above_standard", materialNames: ["Present perfect -- slides", "Present perfect -- gap-fill handout"] },
+    { aim: "Reading for gist and detail: a city life article", grade: "to_standard", materialNames: ["Reading for gist and detail -- handout", "Reading for gist -- comprehension questions"] },
+    { aim: "Vocabulary: Air Travel", grade: "above_standard", materialNames: ["Air Travel vocabulary -- flashcards", "Air Travel -- listening transcript", "Air Travel -- matching worksheet"] },
+    { aim: "Functional language: Making suggestions", grade: "to_standard", materialNames: ["Making suggestions -- worksheet", "Making suggestions -- role-play cards"] },
     // Ramy, 30 Aug 2026: "provisional grades are submitted around the end of
     // TP6, so it doesn't make sense that we have one and two TPs in there --
     // there should be at least six." The demo had candidates carrying a
     // provisional grade after one or two TPs, which is not a state a real
     // course is ever in.
-    { aim: "Receptive skills: listening for specific information", grade: "above_standard", days: 2, materialNames: [] },
-    { aim: "Grammar: second conditional in context", grade: "above_standard", days: 1, materialNames: [] },
-  ].entries()) {
+    { aim: "Receptive skills: listening for specific information", grade: "above_standard", materialNames: [] },
+    { aim: "Grammar: second conditional in context", grade: "above_standard", materialNames: [] },
+    // TP7 and TP8 -- the same two lessons the "still to come" block further
+    // down assigns her. Which of the two blocks actually gets them is decided
+    // by the calendar: taught if their day has been, still to come if not.
+    { aim: "Giving advice -- should and ought to", grade: "to_standard", materialNames: [] },
+    { aim: "Reading for gist -- city guides", grade: "above_standard", materialNames: [] },
+  ]
+    .slice(0, tpRoundsLogged(halfOf("Amara Okafor")))
+    .entries()) {
     const planId = await seedTaughtTp(trainees["Amara Okafor"], i + 1, {
       aim: cfg.aim,
       grade: cfg.grade,
       strengths: ["Clear instructions", "Good rapport with learners", "Effective concept checking"],
       actionPoints: ["Vary interaction patterns a little more"],
-      daysAgo: cfg.days,
+      half: halfOf("Amara Okafor"),
     });
     amaraTpPlanIds.push({ planId, materialNames: cfg.materialNames });
   }
@@ -815,14 +934,16 @@ async function main() {
   ];
   for (const def of traineeDefs.slice(3)) {
     // A candidate who withdrew stops teaching at the point they left.
-    const taught = def.withdrawn ? 3 : 6;
+    // As many rounds as have actually happened -- a candidate who withdrew
+    // stops at the point they left, whichever comes first.
+    const taught = Math.min(def.withdrawn ? 3 : 8, tpRoundsLogged(def.half));
     for (let n = 1; n <= taught; n += 1) {
       await seedTaughtTp(trainees[def.name], n, {
         aim: FILLER_AIMS[(n - 1) % FILLER_AIMS.length],
         grade: n % 3 === 0 ? "above_standard" : "to_standard",
         strengths: ["Clear instructions", "Good rapport with learners"],
         actionPoints: ["Vary interaction patterns a little more"],
-        daysAgo: 14 - n * 2,
+        half: def.half,
       });
     }
   }
@@ -879,19 +1000,23 @@ async function main() {
 
   // Daniel: average, 2 TPs, one resubmission in progress, a recurring action point (at-risk)
   for (const [i, cfg] of [
-    { aim: "Grammar: First conditional", grade: "to_standard", days: 10 },
-    { aim: "Listening for gist: a podcast about moving abroad", grade: "not_to_standard", days: 4 },
-    { aim: "Vocabulary: describing character", grade: "to_standard", days: 8 },
-    { aim: "Reading for detail: a workplace article", grade: "to_standard", days: 6 },
-    { aim: "Functional language: making arrangements", grade: "to_standard", days: 3 },
-    { aim: "Grammar: past continuous for interrupted actions", grade: "to_standard", days: 1 },
-  ].entries()) {
+    { aim: "Grammar: First conditional", grade: "to_standard" },
+    { aim: "Listening for gist: a podcast about moving abroad", grade: "not_to_standard" },
+    { aim: "Vocabulary: describing character", grade: "to_standard" },
+    { aim: "Reading for detail: a workplace article", grade: "to_standard" },
+    { aim: "Functional language: making arrangements", grade: "to_standard" },
+    { aim: "Grammar: past continuous for interrupted actions", grade: "to_standard" },
+    { aim: "Vocabulary: work and study habits", grade: "to_standard" },
+    { aim: "Reading for gist: short reviews", grade: "to_standard" },
+  ]
+    .slice(0, tpRoundsLogged(halfOf("Daniel Kim")))
+    .entries()) {
     await seedTaughtTp(trainees["Daniel Kim"], i + 1, {
       aim: cfg.aim,
       grade: cfg.grade,
       strengths: ["Good board work"],
       actionPoints: ["Instructions need to be more concise and checked", "Monitor more actively during pair work"],
-      daysAgo: cfg.days,
+      half: halfOf("Daniel Kim"),
     });
   }
   await supabase.from("celta5_records").insert({
@@ -924,19 +1049,23 @@ async function main() {
   // Priya: six TPs like the others, but the weakest profile of the three --
   // a provisional grade only makes sense once the TP cycle is nearly done.
   for (const [i, cfg] of [
-    { aim: "Reading for gist and detail: a workplace article", grade: "to_standard", days: 12 },
-    { aim: "Vocabulary: food and cooking", grade: "not_to_standard", days: 10 },
-    { aim: "Grammar: comparatives", grade: "to_standard", days: 8 },
-    { aim: "Speaking: giving opinions", grade: "to_standard", days: 6 },
-    { aim: "Listening for gist: a radio interview", grade: "not_to_standard", days: 3 },
-    { aim: "Functional language: apologising", grade: "to_standard", days: 1 },
-  ].entries()) {
+    { aim: "Reading for gist and detail: a workplace article", grade: "to_standard" },
+    { aim: "Vocabulary: food and cooking", grade: "not_to_standard" },
+    { aim: "Grammar: comparatives", grade: "to_standard" },
+    { aim: "Speaking: giving opinions", grade: "to_standard" },
+    { aim: "Listening for gist: a radio interview", grade: "not_to_standard" },
+    { aim: "Functional language: apologising", grade: "to_standard" },
+    { aim: "Speaking: telling a story", grade: "to_standard" },
+    { aim: "Grammar: used to for past habits", grade: "to_standard" },
+  ]
+    .slice(0, tpRoundsLogged(halfOf("Priya Sharma")))
+    .entries()) {
     await seedTaughtTp(trainees["Priya Sharma"], i + 1, {
       aim: cfg.aim,
       grade: cfg.grade,
       strengths: ["Warm, confident classroom presence"],
       actionPoints: ["Give clearer time limits on tasks"],
-      daysAgo: cfg.days,
+      half: halfOf("Priya Sharma"),
     });
   }
   await supabase.from("celta5_records").insert({
@@ -1621,31 +1750,57 @@ async function main() {
     console.log("rooms:", (tpEvents ?? []).length, "TP events");
   }
 
-  // 2. Amara's remaining two TPs, UNTAUGHT.
+  // 2. Amara's TPs that are STILL AHEAD.
   //
-  // The course runs to TP8 and she was seeded with six, so the trainee
-  // landing page's hero card correctly concluded she had nothing left to
-  // teach and fell back to a three-line "All your TPs are taught" -- which
-  // Ramy read as the card having lost its dimensions. It had not; it had
-  // lost its content. An untaught plan_assignment is what makes the hero
-  // show the lesson, the time, the room and "Open your plan".
-  for (const tp of [
-    { tp_number: 7, short_title: "Giving advice — should and ought to", main_lesson_aim: "By the end of the lesson learners will be better able to give advice using should/ought to in the context of moving to a new city." },
-    { tp_number: 8, short_title: "Reading for gist — city guides", main_lesson_aim: "By the end of the lesson learners will have practised reading for gist and specific information in the context of short city guides." },
-  ]) {
-    await supabase.from("plan_assignments").insert({
-      course_id: course.id,
-      trainee_id: trainees["Amara Okafor"],
-      tp_number: tp.tp_number,
-      short_title: tp.short_title,
-      main_lesson_aim: tp.main_lesson_aim,
-      density_tier: "coaching_prose",
-      class_grouping: "whole_class",
-      assigned_by: trainerId,
-      taught_at: null,
-    });
+  // An untaught plan_assignment is what makes the hero show the lesson, the
+  // time, the room and "Open your plan" -- without one the landing correctly
+  // concludes she has nothing left to teach, which Ramy once read as the card
+  // having lost its dimensions. It had not; it had lost its content.
+  //
+  // Which rounds land here is the calendar's decision, not a constant. It used
+  // to hardcode "7 and 8 are still to come", which was true the day it was
+  // written and false a fortnight later -- their dates had passed and the
+  // record still called them upcoming, which is exactly how the landing came
+  // to say "All your TPs are taught" and "TP7 plan" in the same breath. And at
+  // --stage precourse it was worse: a course that had not started yet handed
+  // her TP7 as her next lesson, with TP1 to TP6 missing entirely.
+  //
+  // Everything not in the taught block above belongs here, including the rounds
+  // --unlogged deliberately leaves open: a lesson that happened and was never
+  // written up IS an untaught plan with a date behind it, and that is the whole
+  // state we want to be able to reproduce on purpose.
+  {
+    const amaraTps = [
+      { short_title: "Present perfect — life experience", main_lesson_aim: "By the end of the lesson learners will be better able to talk about life experience using the present perfect." },
+      { short_title: "Reading for gist and detail — city life", main_lesson_aim: "By the end of the lesson learners will have practised reading for gist and detail in the context of an article about city life." },
+      { short_title: "Vocabulary — air travel", main_lesson_aim: "By the end of the lesson learners will be better able to use vocabulary for air travel." },
+      { short_title: "Making suggestions", main_lesson_aim: "By the end of the lesson learners will be better able to make and respond to suggestions." },
+      { short_title: "Listening for specific information", main_lesson_aim: "By the end of the lesson learners will have practised listening for specific information." },
+      { short_title: "Second conditional in context", main_lesson_aim: "By the end of the lesson learners will be better able to use the second conditional to talk about imagined situations." },
+      { short_title: "Giving advice — should and ought to", main_lesson_aim: "By the end of the lesson learners will be better able to give advice using should/ought to in the context of moving to a new city." },
+      { short_title: "Reading for gist — city guides", main_lesson_aim: "By the end of the lesson learners will have practised reading for gist and specific information in the context of short city guides." },
+    ];
+    const alreadyLogged = tpRoundsLogged(halfOf("Amara Okafor"));
+    const ahead = amaraTps
+      .map((tp, i) => ({ ...tp, tp_number: i + 1 }))
+      .filter((tp) => tp.tp_number > alreadyLogged);
+    for (const tp of ahead) {
+      await supabase.from("plan_assignments").insert({
+        course_id: course.id,
+        trainee_id: trainees["Amara Okafor"],
+        tp_number: tp.tp_number,
+        short_title: tp.short_title,
+        main_lesson_aim: tp.main_lesson_aim,
+        density_tier: "coaching_prose",
+        class_grouping: "whole_class",
+        assigned_by: trainerId,
+        taught_at: null,
+      });
+    }
+    console.log(
+      `Amara: ${alreadyLogged} TP(s) logged, ${ahead.length} assigned untaught (TP${ahead.map((t) => t.tp_number).join(", TP") || "-"})`
+    );
   }
-  console.log("Amara: TP7 and TP8 assigned, untaught");
 
   // 3. Announcements. The trainee landing's middle card is one of three and
   // read "Nothing posted yet" on every course. Note sent_at: scheduling came
