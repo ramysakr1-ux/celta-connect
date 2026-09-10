@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
 import { fetchRosterRows } from "@/lib/roster";
+import { seesWholeCourse, tutorScope } from "@/lib/hub-scope";
 import { RosterTable } from "@/app/trainer/(hub)/roster/roster-table";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { isMctView } from "@/lib/act-preview";
@@ -43,7 +44,7 @@ export default async function TrainerRosterPage() {
   // course_tutors helper the layout already paid for -- the old
   // profiles.tutor_role guess is the stale column layout.tsx warns about.
   const adminClient = createAdminClient();
-  const [rows, isMct, filmsTpSessions, { data: courseRow }, { data: tutorRows }, { data: invitationRows }, { data: centreTrainers }] =
+  const [allRows, isMct, filmsTpSessions, { data: courseRow }, { data: tutorRows }, { data: invitationRows }, { data: centreTrainers }] =
     await Promise.all([
       fetchRosterRows(supabase, courseId),
       trainer ? isMctView(trainer, courseId) : Promise.resolve(false),
@@ -62,6 +63,12 @@ export default async function TrainerRosterPage() {
         ? adminClient.from("profiles").select("id, full_name, email, course_id").eq("role", "trainer").eq("center_id", trainer.center_id)
         : Promise.resolve({ data: [] as { id: string; full_name: string; email: string; course_id: string | null }[] }),
     ]);
+
+  // The roster showed all twelve to both tutors. Ramy, 11 Sep 2026: each
+  // tutor sees their six; the MCT reaches the whole course from the header
+  // pill. An assessor has no group and sees the course.
+  const scope = trainer ? await tutorScope(supabase, trainer.id, courseId, isMct && (await seesWholeCourse())) : null;
+  const rows = scope?.traineeIds ? allRows.filter((r) => scope.traineeIds!.has(r.id)) : allRows;
 
   // Wave 2: the ones that need wave 1's ids.
   const tutorProfileIds = (tutorRows ?? []).map((t) => t.profile_id);
@@ -187,7 +194,9 @@ export default async function TrainerRosterPage() {
         eyebrow={`${courseCode} · Roster · click a row to open a portfolio`}
         title={
           <>
-            {rows.length} candidate{rows.length === 1 ? "" : "s"}
+            {scope?.traineeIds
+              ? `${rows.length} of ${scope.onCourse} candidates · ${scope.groupNames.join(", ")}`
+              : `${rows.length} candidate${rows.length === 1 ? "" : "s"}`}
             {atRiskCount > 0 ? (
               <span className="font-medium italic" style={{ color: "var(--hub-accent-deep)" }}>
                 {" "}

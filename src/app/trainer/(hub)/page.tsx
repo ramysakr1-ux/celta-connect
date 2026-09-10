@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAssessorCourseId, isAssessorTourMode } from "@/lib/auth/portfolio-access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isMctView } from "@/lib/act-preview";
+import { seesWholeCourse } from "@/lib/hub-scope";
 import type { Database } from "@/lib/supabase/types";
 import { fetchRosterRows } from "@/lib/roster";
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE, resolveTimeBands, bandIndexFor } from "@/lib/timetable-grid";
@@ -440,14 +441,20 @@ export default async function TodayPage() {
     });
   }
 
-  // ---- Scope: an ACT sees their own group's people and sessions; the MCT
-  // sees the course. A group is "theirs" when course_tp_groups names them as
-  // its tutor. If no group on the course is staffed yet (tutor_profile_id
-  // null everywhere), scope stays the whole course rather than an empty
-  // page -- honest about the setup rather than hiding it.
+  // ---- Scope: a tutor sees their own group's people and sessions. A group
+  // is "theirs" when course_tp_groups names them as its tutor. If no group on
+  // the course is staffed yet (tutor_profile_id null everywhere), scope stays
+  // the whole course rather than an empty page -- honest about the setup
+  // rather than hiding it.
+  //
+  // This used to read `!isMct`: the MCT saw everything, always. Ramy, 11 Sep
+  // 2026: on a course of twelve with two tutors, "if you log in as an MCT, you
+  // see your six." Their six by default, the full twelve one click away -- the
+  // click is the header pill, read through seesWholeCourse (hub-scope.ts).
   let scopedTraineeIds: Set<string> | null = null;
   let scopedGroupIds: Set<string> | null = null;
-  if (trainer && !isMct) {
+  const wholeCourse = isMct && (await seesWholeCourse());
+  if (trainer && !wholeCourse) {
     const myGroups = (tpGroups ?? []).filter((g) => g.tutor_profile_id === trainer.id);
     if (myGroups.length > 0) {
       const mine = new Set(myGroups.map((g) => g.id));

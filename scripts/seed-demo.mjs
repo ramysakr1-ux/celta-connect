@@ -1459,7 +1459,7 @@ async function main() {
   // ---------------------------------------------------------------------
   const BAND_TIMES = ["10:00", "10:45", "11:45", "12:45", "13:30", "14:15", "15:15", "16:15", "17:15"];
 
-  const designSessions = [
+  const designSessionsBase = [
     { d: 1, b: 1, type: "input_session", title: "Course introduction", tag: "whole_group", detail: "Timetable, CELTA 5, portfolio", linked: null, tp: null, shares: true },
     { d: 1, b: 2, type: "supervised_session", title: "Demo lesson", tag: "group_room", detail: "Observation task", linked: null, tp: null, shares: true },
     { d: 1, b: 3, type: "supervised_session", title: "Demo lesson", tag: "group_room", detail: "Observation task", linked: null, tp: null, shares: true },
@@ -1653,6 +1653,46 @@ async function main() {
   // on its real teaching day and time band. TP6 keeps the working Zoom
   // link the volunteer demo needs -- it is the course's "next TP" and the
   // volunteer view pairs a room with a Join button on it.
+  // ---- Teaching practice for BOTH groups, with the rotation in the times ----
+  //
+  // Ramy, 11 Sep 2026: "on a course of twelve you don't get three trainees
+  // teaching on one day. You get six, for two different levels." The literal
+  // above carried six letters -- A to F, one group split across two days --
+  // so Group B was never timetabled and the two groups never taught in
+  // parallel. Now every TP day has six lessons: Group A in rooms 2-4, Group B
+  // in rooms 5-7, at the same three times, at two levels.
+  //
+  // Letters are PEOPLE, not slots: A-C and D-F are Group A's two halves, G-I
+  // and J-L are Group B's. The order they teach in rotates every round --
+  // rotationPosition(slot, 3, tp), the same function src/lib/rotation.ts uses
+  // -- so TP1 reads A,B,C, TP2 reads C,A,B, TP3 reads B,C,A, and the rotation
+  // is visible on the timetable itself rather than only in the code.
+  //
+  // tp_group_scope_id is set, which is what lets a tutor's view narrow to
+  // their own group's lessons (hub-scope.ts) and keeps the other group's rows
+  // off a trainee's day (course-stream-day.ts).
+  const GROUP_LETTERS = {
+    "Group A": { 1: ["A", "B", "C"], 2: ["D", "E", "F"] },
+    "Group B": { 1: ["G", "H", "I"], 2: ["J", "K", "L"] },
+  };
+  const rotationPosition = (baseSlot, size, tp) => (baseSlot + (tp - 1)) % size;
+  const tpRows = [];
+  for (let tp = 1; tp <= 8; tp += 1) {
+    for (const half of [1, 2]) {
+      const d = TP_COURSE_DAYS[half][tp - 1];
+      for (const [group, byHalf] of Object.entries(GROUP_LETTERS)) {
+        byHalf[half].forEach((letter, slot) => {
+          tpRows.push({
+            d, b: rotationPosition(slot, 3, tp) + 1, type: "tp", title: `TP${tp} \u00b7 ${letter}`,
+            tag: "group_room", detail: null, linked: null, tp, scope: tpGroupIds[group],
+          });
+        });
+      }
+    }
+  }
+  const designSessions = [...designSessionsBase.filter((x) => x.type !== "tp"), ...tpRows];
+  console.log("TP timetable:", tpRows.length, "lessons across both groups");
+
   const events = designSessions.map((x) => ({
     // A "due" card is a deadline and belongs in the admin column; a "Q&A"
     // card is a timetabled session that happens to be about an assignment,
@@ -1685,6 +1725,7 @@ async function main() {
     detail: x.detail,
     linked: x.linked,
     tpNumber: x.tp,
+    scope: x.scope ?? null,
     shares: x.shares ?? false,
     zoomUrl:
       x.title === "TP6 \u00b7 A" || x.title === "TP6 \u00b7 D" ? "https://zoom.us/j/5551234567" : null,
@@ -1715,6 +1756,7 @@ async function main() {
         // twelve days while the code read as though it did. Removed 6 Sep
         // 2026. Number() returning NaN instead of throwing is what hid it.
         linked_tp_number: e.tpNumber ?? null,
+        tp_group_scope_id: e.scope ?? null,
         zoom_url: e.zoomUrl ?? null,
         // Which non-TP sessions volunteer students may see materials for --
         // the demo lesson, the unassessed teach and the introduction, so the
@@ -1980,15 +2022,26 @@ async function main() {
   {
     const { data: tpEvents } = await supabase
       .from("course_timetable_events")
-      .select("id, title")
+      .select("id, title, linked_tp_number")
       .eq("course_id", course.id)
       .eq("type", "tp");
-    const ROOMS = { A: 2, B: 3, C: 4, D: 5, E: 6, F: 7 };
+    // Two groups, two room sets, two levels. Group A's halves share rooms 2-4
+    // because they teach on different days; Group B likewise in 5-7; on any
+    // one day the six lessons are in six different rooms. The groups swap
+    // levels at TP5 -- the "Level & tutor change" the timetable already
+    // announces, and the reason the library splits there.
+    const ROOMS = { A: 2, B: 3, C: 4, D: 2, E: 3, F: 4, G: 5, H: 6, I: 7, J: 5, K: 6, L: 7 };
+    const levelFor = (letter, tp) => {
+      const groupA = "ABCDEF".includes(letter);
+      const firstHalf = (tp ?? 1) <= 4;
+      return groupA === firstHalf ? "A2" : "B1+";
+    };
     for (const e of tpEvents ?? []) {
-      const letter = (e.title.match(/·\s*([A-F])/) || [])[1];
+      const letter = (e.title.match(/·\s*([A-L])/) || [])[1];
+      if (!letter) continue;
       await supabase
         .from("course_timetable_events")
-        .update({ detail: `Room ${ROOMS[letter] ?? 2}` })
+        .update({ detail: `Room ${ROOMS[letter] ?? 2} · ${levelFor(letter, e.linked_tp_number)}` })
         .eq("id", e.id);
     }
     console.log("rooms:", (tpEvents ?? []).length, "TP events");

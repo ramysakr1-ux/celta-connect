@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { isMctView } from "@/lib/act-preview";
+import { seesWholeCourse } from "@/lib/hub-scope";
 import { buildTpQueue, type QueueGroup } from "@/lib/tp-queue";
 import { OwedCard, TodayCard } from "@/app/trainer/(hub)/tp/tp-cards";
 import { computeWeekOf } from "@/lib/course-progress";
@@ -31,8 +32,9 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
   const now = new Date();
   const today = toLocalIso(now, timeZone);
 
-  const [isMct, { data: subgroupRows }, { data: tpGroupRows }, { data: roster }, { data: events }, { data: centerSettings }, { data: course }] = await Promise.all([
+  const [isMct, wholeCourseChosen, { data: subgroupRows }, { data: tpGroupRows }, { data: roster }, { data: events }, { data: centerSettings }, { data: course }] = await Promise.all([
     isMctView(trainer, courseId),
+    seesWholeCourse(),
     supabase.from("course_subgroups").select("id, name, tp_group_id, half_order").eq("course_id", courseId).order("created_at"),
     supabase.from("course_tp_groups").select("id, name, tutor_profile_id").eq("course_id", courseId),
     supabase.from("profiles").select("id, full_name").eq("course_id", courseId).eq("role", "trainee"),
@@ -126,7 +128,10 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
     selfEvals: selfEvals ?? [],
     events: events ?? [],
     viewerId: trainer.id,
-    seesAllGroups: isMct,
+    // The MCT's own group by default; both groups once they have clicked
+    // through (hub-scope.ts). The queue narrows to groups the viewer tutors
+    // when this is false, which is exactly "your six".
+    seesAllGroups: isMct && wholeCourseChosen,
     today,
     now,
     sameDayHours: centerSettings?.feedback_same_day_hours ?? 24,
@@ -160,7 +165,7 @@ export default async function TeachingPracticeQueuePage({ searchParams }: { sear
               className="rounded-full px-2.5 py-[3px] text-[10.5px] font-bold tracking-[0.08em] text-primary-foreground uppercase"
               style={{ background: "var(--hub-accent)" }}
             >
-              {isMct ? "MCT · both groups" : "ACT · your group"}
+              {isMct ? (wholeCourseChosen ? "MCT · both groups" : "MCT · your group") : "ACT · your group"}
             </span>
           </div>
           {/* The debt line is the page in one sentence -- red when anything

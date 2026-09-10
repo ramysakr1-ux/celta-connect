@@ -4,6 +4,8 @@ import { HeaderCredit } from "@/components/designer-credit";
 import { TrainerTabs } from "@/app/trainer/trainer-tabs";
 import { isActPreview } from "@/lib/act-preview";
 import { enterActPreview, exitActPreview } from "@/app/trainer/(hub)/act-preview-actions";
+import { showWholeCourse, showMyGroup } from "@/app/trainer/(hub)/scope-actions";
+import { seesWholeCourse } from "@/lib/hub-scope";
 import { StaffChatDrawer } from "@/app/dashboard/staff-chat/staff-chat-drawer";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
 import { AssessorReadOnlyBanner } from "@/components/assessor-readonly-banner";
@@ -93,6 +95,7 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   const isMctReal = Boolean(profile && (profile.role === "admin" || currentCourseTutorRole === "main_course_tutor"));
   // MCT → ACT preview (Ramy, 5 Sep 2026): the cookie only dims the DISPLAY
   // role -- every write action keeps checking the real one. One way only.
+  const wholeCourse = await seesWholeCourse();
   const actPreview = isMctReal && (await isActPreview());
   const isMct = isMctReal && !actPreview;
   // Trainer-in-Training tab: only for the people the record concerns, and
@@ -235,6 +238,22 @@ export default async function TrainerHubLayout({ children }: { children: React.R
               >
                 ACT
               </span>
+            ) : null}
+            {/* The scope pill -- Ramy, 11 Sep 2026: "their six by default with
+                the full twelve one click away." Real MCT only; an ACT has one
+                group and nothing to click through to. Hidden during the ACT
+                preview, which is itself a narrower view. Display only: see
+                hub-scope.ts. */}
+            {isRealStaff && isMctReal && !actPreview ? (
+              <form action={wholeCourse ? showMyGroup : showWholeCourse}>
+                <button
+                  type="submit"
+                  title={wholeCourse ? "Showing every candidate on the course -- click for your own group" : "Showing your own group -- click for the whole course"}
+                  className="cursor-pointer rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-ink transition-colors hover:bg-frame"
+                >
+                  {wholeCourse ? "Whole course" : "Your group"}
+                </button>
+              </form>
             ) : null}
             {switcherCourses.length > 1 && profile?.course_id ? (
               <CourseSwitcher courses={switcherCourses} activeCourseId={profile.course_id} />
