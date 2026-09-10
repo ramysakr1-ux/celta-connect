@@ -13,7 +13,7 @@ import { OwnerBranchRow } from "@/app/centre/owner-branch-row";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminChatRooms } from "@/lib/admin-chat";
 import { AdminChatBar } from "@/app/dashboard/admin/admin-chat-bar";
-import { HeaderDesignerCredit } from "@/components/designer-credit";
+import { LandingDesignerCredit } from "@/components/designer-credit";
 
 // Centre Admin has its own chrome, deliberately outside /dashboard: the layout
 // spec gives it a header with a "Centre admin" pill and exactly THREE tabs
@@ -110,7 +110,7 @@ export default async function CentreLayout({ children }: { children: React.React
         {/* The garnet Centre owner pill is gone: Connect is the way home
             now, and for an owner home IS the owner screen. Ramy: "you don't
             need a Centre owner pill. You just click on Connect." */}
-        <HeaderDesignerCredit landingPath="/centre" />
+        <LandingDesignerCredit landingPath="/centre" />
       </div>
       <div className="container flex items-center justify-end gap-4 pt-2 text-[13px] text-muted">
         <CentreHeaderMeta

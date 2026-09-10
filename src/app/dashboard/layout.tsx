@@ -14,7 +14,7 @@ import { BranchFilter } from "@/app/centre/branch-filter";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AreaTheme } from "@/components/area-theme";
 import { can, canView, adminHomePath, roleLabel } from "@/lib/auth/centre-permissions";
-import { HeaderDesignerCredit } from "@/components/designer-credit";
+import { LandingDesignerCredit } from "@/components/designer-credit";
 
 export default async function DashboardLayout({
   children,
@@ -115,7 +115,7 @@ export default async function DashboardLayout({
           and draws nothing in a room that has no colour yet. */}
       <header className="border-b border-border">
         {/* Two rows on the right (Ramy, 23 Aug 2026): row 1 carries the
-            credit via HeaderDesignerCredit, which checks the live pathname
+            credit via LandingDesignerCredit, which checks the live pathname
             itself and renders nothing off /dashboard/admin -- landing-only,
             without leaking onto every /dashboard/* route this layout wraps.
             No longer `fixed`: it scrolls away with the header now instead of
@@ -175,7 +175,7 @@ export default async function DashboardLayout({
             </>
           ) : null}
           </div>
-          <HeaderDesignerCredit landingPath="/dashboard/admin" />
+          <LandingDesignerCredit landingPath="/dashboard/admin" />
         </div>
         <div className="container flex items-center justify-end gap-4 pb-2.5 text-sm text-muted">
           <BranchFilter branches={switchable} />

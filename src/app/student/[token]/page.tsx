@@ -693,7 +693,6 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
               <Link href="/" className="hover:opacity-80">
                 <Wordmark size="header-compact" />
               </Link>
-              <DesignerCredit pinned={false} className="text-[11px] text-muted" />
             </header>
 
             <div className="flex flex-col gap-5 p-[22px_20px]">
@@ -778,7 +777,10 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
         </div>
       </div>
 
-      <DesignerCredit pinned={false} className="flex justify-center py-4 md:hidden" />
+      {/* One credit, bottom-right, same as every other landing. This page had
+          two -- inline in a card and centred below it on mobile -- and neither
+          was where the rest of the app puts it. */}
+      <DesignerCredit />
     </div>
   );
 }

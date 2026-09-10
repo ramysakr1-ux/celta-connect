@@ -17,6 +17,8 @@ import { UnownedCoursesCard } from "@/app/centre/owner/unowned-courses-card";
 // 'this surface carries real weight,' not a fifth tab that happens to look
 // the same." Ink + garnet, a dark header band, warmer parchment field --
 // see Centre Owner Landing.dc.html for the exact tokens.
+import { DesignerCredit } from "@/components/designer-credit";
+
 export default async function CentreOwnerPage({ searchParams }: { searchParams: Promise<{ branch?: string }> }) {
   const session = await getCurrentProfile();
   if (!session?.profile) redirect("/login");
@@ -315,6 +317,9 @@ export default async function CentreOwnerPage({ searchParams }: { searchParams: 
            here highlights as firmly as a row anywhere else. */
         .owner-row-hover:hover { background-color: var(--area-hover-fill, var(--owner-garnet-soft)); }
       `}</style>
+      {/* Every landing carries the credit in the same corner (Ramy, 10 Sep
+          2026). This one had none at all. */}
+      <DesignerCredit />
     </div>
   );
 }

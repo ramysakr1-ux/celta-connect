@@ -99,18 +99,42 @@ export function DesignerCredit({
 
   if (!pinned) return <div className={className}>{mark}</div>;
 
-  const cornerClass = corner === "bottom-right" ? "bottom-3 right-3" : "top-3 right-3";
+  // Ramy, 10 Sep 2026: "bottom right of the screen, all the screens... make
+  // sure you measure it well so it's not blocking a view, and it's not being
+  // blocked, and it could all be seen by everybody."
+  //
+  // Measured, rather than guessed, because bottom-right is the busiest corner
+  // in this app and the old bottom-3 was landing on things:
+  //
+  //   /centre at 1024px  -- the admin chat bar's visible pill spans 92-932 and
+  //                         its top is 64px off the bottom. A credit at
+  //                         bottom-3 sat at 859-1012, straight through it.
+  //   trainee, desktop   -- the staff chat pill is bottom-6 with py-3, so its
+  //                         top measures 92px off the bottom.
+  //   trainee, 375x812   -- TraineeMobileNav owns 755-812 and the chat pill
+  //                         664-720: one 35px gap, and the credit is 24px tall.
+  //
+  // So: 100px on desktop clears the highest of the two chat pills by 8px, and
+  // 62px on mobile centres it in the only gap there is -- 5px above the nav,
+  // 6px below the pill. One position, every screen, blocking nothing and
+  // blocked by nothing.
+  const cornerClass =
+    corner === "bottom-right" ? "right-3 bottom-[62px] md:bottom-[100px]" : "top-3 right-3";
   return <div className={`pointer-events-none fixed z-20 ${cornerClass} ${className}`}>{mark}</div>;
 }
 
-// For a layout's own header row (centre/layout.tsx, dashboard/layout.tsx):
-// the layout wraps every sub-route (Roles/Import/Settings under Centre
-// Admin; every /dashboard/* page under Course Admin's shared layout), but
-// the credit is landing-page-only. A layout has no page-level prop to key
-// off, so this checks the live pathname client-side instead -- renders
-// nothing at all on any route except the one landing path given.
-export function HeaderDesignerCredit({ landingPath }: { landingPath: string }) {
+// For a layout that wraps several routes but where only ONE of them is the
+// landing (Centre Admin's Roles/Import/Settings; every /dashboard/* page under
+// Course Admin). A layout has no page-level prop to key off, so this checks the
+// live pathname client-side and renders nothing anywhere else.
+//
+// Renamed from HeaderDesignerCredit on 10 Sep 2026, when it stopped being a
+// header thing: both layouts used to drop an unpinned credit into their header
+// row, which put it in a different place from the six landings that pin it
+// bottom-right. Ramy: "keep it all the same spot... if there's more than one,
+// remove the other one and keep only the bottom right."
+export function LandingDesignerCredit({ landingPath }: { landingPath: string }) {
   const pathname = usePathname();
   if (pathname !== landingPath) return null;
-  return <DesignerCredit pinned={false} />;
+  return <DesignerCredit />;
 }
