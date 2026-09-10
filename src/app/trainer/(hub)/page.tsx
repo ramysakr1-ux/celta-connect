@@ -710,7 +710,11 @@ export default async function TodayPage() {
         >
           <span className="rounded-[5px] bg-white/[0.18] px-2 py-1 text-[10.5px] font-bold tracking-[0.08em] uppercase whitespace-nowrap">{pr.tag}</span>
           <span className="flex-1 text-[14px] font-semibold">{pr.message}</span>
-          <span className="text-[12.5px] opacity-80 whitespace-nowrap">
+          {/* No whitespace-nowrap. pr.detail is a list of names -- "Aoife
+              Byrne, Leila Haddad, ..." came out 419px wide and pushed the
+              whole page sideways on a phone. The row already wraps; this was
+              the one thing in it refusing to. */}
+          <span className="min-w-0 text-[12.5px] opacity-80">
             {pr.detail} &middot; &sect;{pr.cite}
           </span>
         </Link>

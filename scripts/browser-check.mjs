@@ -38,7 +38,12 @@ const ROLES = [
   { name: "trainer", door: "/demo/trainer", prefixes: ["/trainer"], landing: true },
   { name: "course-admin", door: "/demo/course-admin", prefixes: ["/dashboard"], landing: true },
   { name: "centre-admin", door: "/demo/centre-admin", prefixes: ["/centre"], landing: true },
-  { name: "assessor", door: "/demo/assessor", prefixes: ["/assessor"], landing: true },
+  // The assessor pack is laid out for a laptop on purpose -- a moderation
+  // visit happens at a desk -- and it carries a note saying so. Checking it at
+  // 375 would report a settled decision as a fault on every run, which is how
+  // a check stops being read. Console and hydration still apply; only the
+  // narrow-width layout assertions are off.
+  { name: "assessor", door: "/demo/assessor", prefixes: ["/assessor"], landing: true, widths: [1280] },
   { name: "volunteer", door: "/demo/volunteer", prefixes: ["/student"], landing: true },
 ];
 
@@ -79,11 +84,35 @@ async function checkLayout(page, role, url, width) {
     const h1 = document.querySelector("h1");
     const box = h1?.getBoundingClientRect();
     // Anything with text sitting in the top band, to catch a header printing
-    // over itself.
+    // over itself -- measured as the box you can actually SEE.
+    //
+    // getBoundingClientRect() reports an element's full layout box even when an
+    // ancestor with overflow:hidden is clipping most of it off. The first
+    // version of this check compared raw boxes and reported the trainer hub's
+    // header as overlapping by 64px at 1280. It was not: the tab row clips, and
+    // a clipped tab still measures its whole width. I told Ramy the header
+    // overlapped, and it did not.
+    //
+    // So intersect every rect with each clipping ancestor before comparing.
+    // What is invisible cannot be on top of anything.
+    const visibleRect = (el) => {
+      let r = el.getBoundingClientRect();
+      let p = el.parentElement;
+      while (p && p !== document.documentElement) {
+        if (getComputedStyle(p).overflowX !== "visible") {
+          const pr = p.getBoundingClientRect();
+          const left = Math.max(r.left, pr.left);
+          const right = Math.min(r.right, pr.right);
+          r = { left, right, top: r.top, bottom: r.bottom, width: right - left, height: r.height };
+        }
+        p = p.parentElement;
+      }
+      return r;
+    };
     const top = [...document.querySelectorAll("body *")]
       .filter((e) => !e.children.length && e.textContent.trim())
-      .map((e) => ({ t: e.textContent.trim().slice(0, 18), ...e.getBoundingClientRect().toJSON() }))
-      .filter((b) => b.top < 80 && b.height > 0 && b.width > 0);
+      .map((e) => ({ t: e.textContent.trim().slice(0, 18), ...visibleRect(e) }))
+      .filter((b) => b.top < 80 && b.height > 0 && b.width > 1);
     let overlap = null;
     for (let i = 0; i < top.length && !overlap; i += 1) {
       for (let j = i + 1; j < top.length; j += 1) {
@@ -173,7 +202,7 @@ for (const role of ROLES) {
   // Layout, on the landing only and at the three widths that matter. Every
   // page at every width would be slow and would mostly repeat the same shell.
   if (role.landing) {
-    for (const width of [375, 768, 1280]) {
+    for (const width of role.widths ?? [375, 768, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(BASE + landing, { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(400);

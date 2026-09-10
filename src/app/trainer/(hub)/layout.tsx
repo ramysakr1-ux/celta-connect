@@ -241,7 +241,12 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             ) : courseCode ? (
               <span className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-ink">{courseCode}</span>
             ) : null}
-            <span className="text-[13px] font-semibold text-ink">{profile?.full_name ?? session?.email}</span>
+            {/* Hidden on a phone. This group is shrink-0 -- deliberately, the
+                role pill and the course must not squash -- so at 375 it held
+                280px and shoved the page sideways. The name is the piece a
+                trainer least needs on a screen they are already signed in to,
+                and it is the widest. */}
+            <span className="hidden text-[13px] font-semibold text-ink sm:inline">{profile?.full_name ?? session?.email}</span>
             {/* v4 drew "Settings" here, and behind it sat exactly one card:
                 the tutor's feedback wording. Ramy, 6 Sep 2026 -- the door
                 moved to the Teaching Practice tab, next to the feedback it

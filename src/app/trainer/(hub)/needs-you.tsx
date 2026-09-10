@@ -57,10 +57,14 @@ export function NeedsYou({ alerts, accent }: { alerts: TodayAlert[]; accent: str
             {alerts.length} &middot; all shown
           </span>
         </div>
+        {/* Wraps, and the segmented control scrolls rather than pushing the
+            page: "Show" plus every filter came to 372px against 331px of
+            usable width on a phone. The control itself must not wrap -- it is
+            one object -- so it scrolls instead. */}
         {alerts.length > 0 ? (
-          <div className="inline-flex items-center gap-2 text-[11.5px] text-muted">
+          <div className="inline-flex max-w-full flex-wrap items-center gap-2 text-[11.5px] text-muted">
             <span>Show</span>
-            <span className="inline-flex overflow-hidden rounded-[7px] border border-border bg-card">
+            <span className="scroll-row inline-flex max-w-full rounded-[7px] border border-border bg-card">
               <FilterButton active={show === "all"} onClick={() => setShow("all")} accent={accent}>
                 All <Count n={alerts.length} />
               </FilterButton>

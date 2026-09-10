@@ -464,6 +464,23 @@ export default async function AssessorPage({
           pill, and download button below were built for a light header
           (CARD background) and are corrected here to translucent light
           treatments so they read against this darker one instead. */}
+      {/* This pack is laid out for a laptop and is not going to reflow onto a
+          phone -- 75 elements sit wider than 375px, and it is a formal
+          moderation visit conducted at a desk. Ramy, 10 Sep 2026: "an assessor
+          would never moderate the course on a phone... it's ridiculous."
+          So: a note rather than a rebuild, and rather than silence. Someone who
+          does open it on a phone should be told why it looks like that instead
+          of concluding the pack is broken. */}
+      <p
+        className="lg:hidden"
+        style={{
+          margin: 0, padding: "10px 16px", background: "oklch(96% 0.02 85)",
+          borderBottom: "1px solid oklch(88% 0.02 85)", color: "oklch(40% 0.03 70)",
+          fontSize: 12.5, textAlign: "center",
+        }}
+      >
+        This pack is laid out for a larger screen &mdash; open it on a laptop or tablet for the full width.
+      </p>
       <header
         style={{
           height: 92, background: WARM, borderBottom: `3px solid ${GOLD_UNDERLINE}`, display: "flex",

@@ -98,7 +98,10 @@ export function TrainerTabs({
       : [TODAY_TAB, TABS[0], TABS[1], TABS[2], TABS[3], ...(mct ? [ASSESSOR_TAB] : []), TABS[4], ...(tint ? [TINT_TAB] : []), GRADES_REPORT_TAB];
 
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
+    // scroll-row, not overflow-hidden: the tabs that do not fit are still
+    // reachable. See globals.css -- this row has quietly eaten its last tab
+    // twice now, and shortening labels only postpones it.
+    <div className="scroll-row flex min-w-0 flex-1 items-center gap-1">
       {tabs.map((tab) => {
         const href = `/trainer${tab.href}`;
         const alsoMatch = "alsoMatch" in tab ? tab.alsoMatch : [];

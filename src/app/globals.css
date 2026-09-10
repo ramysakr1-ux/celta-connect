@@ -1348,3 +1348,24 @@ h6 {
 @media (prefers-reduced-motion: reduce) {
   .assessor-anchor:target { animation: none; outline: 2px solid oklch(60% 0.11 70); }
 }
+
+/* A row that scrolls sideways without advertising it.
+ *
+ * The trainer hub's tab bar used to be `overflow-hidden`, which does not clip
+ * politely -- it swallows. At 1280 it held 763px of tabs in a 682px box, so
+ * "Grade form" showed an 8px sliver that could not be clicked and could not be
+ * scrolled to, and any tab after it was gone entirely. The response last time
+ * was to shorten a label to buy room; that bought room, it did not fix the
+ * mechanism, and the row grew again.
+ *
+ * A scrollbar across a 56px header is worse than the problem, hence hiding it.
+ * The row still scrolls by wheel, trackpad, touch and keyboard.
+ */
+.scroll-row {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}
