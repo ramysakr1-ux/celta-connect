@@ -204,15 +204,23 @@ async function main() {
   const { data: center, error: centerErr } = await supabase
     .from("centers")
     .insert({
-      name: "Connect CELTA New York",
-      center_number: "DEMO-NY",
+      // Istanbul, because this is the centre Ramy demos FROM.
+      //
+      // It was New York, and every clock and date on every screen was
+      // therefore seven hours behind him: at 00:26 on Friday the 11th his
+      // screens read "Thursday 10 September - 17:26". Correct -- a course runs
+      // on its centre's wall clock, and the header labels it -- but nobody
+      // walking through a demo should have to hold a timezone conversion in
+      // their head to decide whether the product is working. He asked twice.
+      //
+      // The second branch stays in Los Angeles, so two centres in genuinely
+      // different zones still exercise every date helper's explicit-timezone
+      // contract. Renaming this one costs nothing: it was always fiction.
+      name: "Connect CELTA Istanbul",
+      center_number: "DEMO-IST",
       is_demo: true,
-      address: "Midtown, New York, NY",
-      // A real timezone, and deliberately not the same as the second branch
-      // below: every date helper in the app takes an explicit centre
-      // timezone, so two coasts actually exercise that rather than two
-      // labels that happen to differ.
-      time_zone: "America/New_York",
+      address: "Beyoglu, Istanbul",
+      time_zone: "Europe/Istanbul",
     })
     .select("id")
     .single();
@@ -535,7 +543,14 @@ async function main() {
     try {
       execFileSync("node", ["scripts/seed-demo-pipeline.mjs"], {
         stdio: "inherit",
-        env: { ...process.env, NEXT_PUBLIC_SUPABASE_URL: url, SUPABASE_SERVICE_ROLE_KEY: key },
+        env: {
+          ...process.env,
+          NEXT_PUBLIC_SUPABASE_URL: url,
+          SUPABASE_SERVICE_ROLE_KEY: key,
+          // By id, not by name. See the pipeline's own comment.
+          DEMO_PRIMARY_CENTER_ID: center.id,
+          DEMO_SECOND_CENTER_ID: branchTwo?.id ?? "",
+        },
       });
     } catch (e) {
       // Loudly. A seed step that fails quietly is a seed step that is not there.

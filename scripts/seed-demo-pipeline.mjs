@@ -20,9 +20,20 @@ const STAGES = ["accepted","accepted","accepted","offer_sent","offer_sent","inte
                 "interview_booked","submitted","waiting_list"];
 const ago = (d) => new Date(Date.now() - d * 86400000).toISOString();
 
-const { data: centres } = await supabase.from("centers").select("id, name, currency").eq("is_demo", true);
-const ny = centres.find((c) => /New York/.test(c.name));
-const la = centres.find((c) => /Los Angeles/.test(c.name));
+// The two demo centres are handed in by id. They used to be found by matching
+// their NAMES -- /New York/ and /Los Angeles/ -- so renaming the primary demo
+// centre to Istanbul made `ny` undefined and this died on `ny.id`. That is the
+// second time this file has died on an undefined centre; a script that finds
+// its own subject by regex over a display name will keep doing it.
+//
+// Falls back to whatever demo centres exist, primary first, so it still runs
+// on its own.
+const { data: centres } = await supabase
+  .from("centers").select("id, name, currency").eq("is_demo", true).order("created_at");
+const byId = (id) => centres.find((c) => c.id === id) ?? null;
+const ny = byId(process.env.DEMO_PRIMARY_CENTER_ID) ?? centres[0];
+const la = byId(process.env.DEMO_SECOND_CENTER_ID) ?? centres[1] ?? centres[0];
+if (!ny || !la) { console.error("pipeline: need two demo centres, found", centres.length); process.exit(1); }
 const { data: courses } = await supabase.from("courses").select("id, name, center_id").in("center_id", [ny.id, la.id]);
 
 // The application form's own prompts. Ramy, 3 Sep 2026: "the recording part,
