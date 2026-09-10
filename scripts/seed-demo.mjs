@@ -166,6 +166,15 @@ async function main() {
     if (ids.length > 0) {
       await supabase.from("centre_owner_actions").delete().in("actor_profile_id", ids);
     }
+    // Same shape as centre_owner_actions above, and found the same way: the
+    // TP library records who wrote each entry, and tp_points.created_by is a
+    // plain restrict reference to profiles. Nothing in the demo centre had a
+    // library until 10 Sep 2026, so the hard-delete graph had never met it and
+    // the next rebuild died on the foreign key. Centre-scoped, so it only ever
+    // touches the demo centre being torn down.
+    await supabase.from("tp_points").delete().eq("center_id", existing.id);
+    await supabase.from("tp_coursebooks").delete().eq("center_id", existing.id);
+    await supabase.from("assignment_templates").delete().eq("center_id", existing.id);
     const { error: profileDeleteErr } = await supabase.from("profiles").delete().eq("center_id", existing.id);
     if (profileDeleteErr) console.warn("  profile delete:", profileDeleteErr.message);
 
@@ -768,6 +777,162 @@ async function main() {
   const tpGroup = { id: tpGroupIds["Group A"] };
   console.log("subgroups:", Object.keys(subgroupIds).length, "-- TP group chat channels provisioned by trigger");
 
+  // --- The TP library, and the assignment briefs ---
+  //
+  // Both were missing entirely, and the smoke test found them by being unable
+  // to open a single page that needed one (10 Sep 2026): the demo centre had
+  // ZERO tp_coursebooks and ZERO assignment_templates of its own. Elmswood has
+  // both, which is why nobody noticed -- unscoped queries kept finding the real
+  // centre's and the demo's own screens were simply never opened.
+  //
+  // Three things were broken by that, not one:
+  //
+  //   1. /trainer/coursebooks/[id] and /trainer/assignment-briefs/[id] had
+  //      never been opened by anyone, on any course.
+  //   2. The TP library the whole plan-assignment flow reads from was empty.
+  //   3. CELTA 5's Section 6 could not show LEVELS. computeAssessedTpStats
+  //      traces a taught TP to its level through plan_assignments.tp_point_id
+  //      -> tp_points -> tp_coursebooks.level, and nothing seeded that link, so
+  //      "at least two levels" (Handbook, six assessed hours at two levels) read
+  //      as zero levels for every demo candidate. tp_lessons.level was being
+  //      seeded with the right words and is not the column that page reads.
+  //
+  // Two coursebooks, split at TP5 -- the timetable's own "Level & tutor change"
+  // -- so the demo genuinely demonstrates the two-level requirement rather than
+  // asserting it. tp_coursebooks.level is a bare CEFR code, not the wrapped
+  // display string.
+  // TP1-6 only. tp_points.tp_number is checked `between 1 and 6` (migration
+  // 0013) and migration 0025 deliberately did NOT extend it when it raised the
+  // ceiling to 8 everywhere else: TP7 and TP8 are the trainee's own choice,
+  // through syllabus planning, not a library point. So those two have no
+  // tp_point and no traceable level, which is correct and is why the split
+  // below is at TP5 rather than halfway through eight.
+  const COURSEBOOKS = [
+    {
+      title: "Speakout 3rd Edition B1+ (Set 1)",
+      level: "B1+",
+      filename: "Speakout_B1plus_Set1_TP1-4.zip",
+      tps: [
+        { tp: 1, tier: "scripted", aim: "Grammar: present perfect for life experience", materials: "Speakout 3rd Ed B1+ SB p.18-19, Ex 1-5" },
+        { tp: 2, tier: "scripted", aim: "Reading for gist and detail: an article about city life", materials: "Speakout 3rd Ed B1+ SB p.22-23, Ex 1-4" },
+        { tp: 3, tier: "framework", aim: "Vocabulary: air travel", materials: "Speakout 3rd Ed B1+ SB p.30, Ex 2-6" },
+        { tp: 4, tier: "framework", aim: "Functional language: making suggestions", materials: "Speakout 3rd Ed B1+ SB p.34-35, Ex 1-7" },
+      ],
+    },
+    {
+      // The level change the timetable already announces at TP5.
+      title: "Roadmap A2 (Set 1)",
+      level: "A2",
+      filename: "Roadmap_A2_Set1_TP5-6.zip",
+      tps: [
+        { tp: 5, tier: "framework", aim: "Listening for specific information: short announcements", materials: "Roadmap A2 SB p.41, Ex 3-7" },
+        { tp: 6, tier: "minimal", aim: "Grammar: second conditional in context", materials: "Roadmap A2 SB p.48-49, Ex 1-6" },
+      ],
+    },
+  ];
+
+  // tp_point_id by TP number, so a taught lesson can point at the library entry
+  // it came from and its level can be traced.
+  const tpPointByNumber = new Map();
+  for (const cb of COURSEBOOKS) {
+    const { data: coursebook, error: cbErr } = await supabase
+      .from("tp_coursebooks")
+      .insert({
+        center_id: center.id,
+        title: cb.title,
+        level: cb.level,
+        // No zip in storage, and deliberately not a path pretending there is
+        // one: the only thing that reads this is the AI generation pipeline,
+        // and a demo centre cannot write anyway (migration 0079). A row
+        // pointing at a file that is not there is the exact state Ramy asked
+        // us NOT to create for Elmswood.
+        storage_path: `demo:${cb.filename}`,
+        original_filename: cb.filename,
+        uploaded_by: trainerId,
+        generation_status: "completed",
+      })
+      .select("id")
+      .single();
+    if (cbErr) throw cbErr;
+    for (const [i, point] of cb.tps.entries()) {
+      const { data: tpPoint, error: ptErr } = await supabase
+        .from("tp_points")
+        .insert({
+          tp_coursebook_id: coursebook.id,
+          center_id: center.id,
+          tp_number: point.tp,
+          sequence_index: i,
+          density_tier: point.tier,
+          main_lesson_aim: point.aim,
+          sub_aim: "You choose -- and say in your plan why it follows from the main aim.",
+          materials_description: point.materials,
+          generation_source: "manual",
+          status: "published",
+          created_by: trainerId,
+        })
+        .select("id")
+        .single();
+      if (ptErr) throw ptErr;
+      tpPointByNumber.set(point.tp, tpPoint.id);
+    }
+  }
+  console.log("TP library:", COURSEBOOKS.length, "coursebooks,", tpPointByNumber.size, "points");
+
+  // The four Cambridge assignments, as briefs with real section prompts. The
+  // sections are what the brief page actually renders -- storage_path is only
+  // the uploaded original, and "system:" is the established marker for a brief
+  // that has no file behind it (malpractice/actions.ts writes the same for the
+  // plagiarism reflection).
+  const BRIEFS = [
+    {
+      type: "Focus on Learner",
+      sections: [
+        { key: "learner_profile", title: "Learner profile", instruction: "Describe your chosen learner or small group: age, nationality, first language, reason for studying English, and how they prefer to learn." },
+        { key: "needs_analysis", title: "Needs analysis", instruction: "What evidence did you gather, and how? Refer to the pooled observation log, not only your impressions." },
+        { key: "language_problem", title: "The language problem", instruction: "Claim one specific grammar or pronunciation problem. Analyse meaning, form and phonology, and say why it matters for this learner." },
+        { key: "remedial", title: "Remedial activities", instruction: "Two activities, with a rationale for each and a reference to the source you took or adapted them from." },
+      ],
+    },
+    {
+      type: "LRT",
+      sections: [
+        { key: "meaning", title: "Meaning", instruction: "For each item: concept, a concept-checking question, and the answer you would expect." },
+        { key: "form", title: "Form", instruction: "Write the form out. Include contractions, negatives and questions where they apply." },
+        { key: "phonology", title: "Phonology", instruction: "Sentence stress, weak forms and connected speech features, with a model marked up." },
+        { key: "problems", title: "Anticipated problems and solutions", instruction: "One problem per item, with the clarification approach you would use." },
+      ],
+    },
+    {
+      type: "Skills",
+      sections: [
+        { key: "text", title: "The text", instruction: "Attach your authentic text and say where it came from. Do not simplify it." },
+        { key: "suitability", title: "Suitability", instruction: "Why this text for this level and this group? Comment on length, topic, and lexical load." },
+        { key: "receptive", title: "Receptive tasks", instruction: "A gist task and a detail task, with the rationale for each." },
+        { key: "productive", title: "Productive task", instruction: "One task that follows from the text, with a rationale linking it to the receptive work." },
+      ],
+    },
+    {
+      type: "LfC",
+      sections: [
+        { key: "strengths", title: "Strengths", instruction: "Two strengths, each evidenced from a specific lesson and from tutor or peer feedback." },
+        { key: "development", title: "Areas for development", instruction: "Two areas, evidenced the same way. Be specific: 'instructions' is not an area, 'staging instructions for a jigsaw reading' is." },
+        { key: "action_plan", title: "Action plan", instruction: "What you will do next, how you will know it worked, and by when." },
+      ],
+    },
+  ];
+  for (const brief of BRIEFS) {
+    const { error: brErr } = await supabase.from("assignment_templates").insert({
+      center_id: center.id,
+      assignment_type: brief.type,
+      storage_path: `system:${brief.type.toLowerCase().replace(/\s+/g, "-")}`,
+      sections: brief.sections,
+      generation_status: "completed",
+      published_at: new Date().toISOString(),
+    });
+    if (brErr) throw brErr;
+  }
+  console.log("assignment briefs:", BRIEFS.length);
+
   // --- TP feedback helper -- returns the tp_plans.id so callers can attach
   // shared materials to a specific plan. ---
   // Criteria the seeded feedback wording actually evidences. Planning codes
@@ -799,6 +964,12 @@ async function main() {
       main_lesson_aim: aim,
       density_tier: tpNumber <= 2 ? "scripted" : tpNumber <= 4 ? "framework" : "minimal",
       assigned_by: trainerId,
+      // The library entry this lesson came from. Without it CELTA 5 Section 6
+      // can show hours but no LEVELS -- computeAssessedTpStats traces the level
+      // through tp_point_id, not through tp_lessons.level, and every demo
+      // candidate read as having taught at zero levels against a requirement of
+      // two. The split at TP5 is what makes it two.
+      tp_point_id: tpPointByNumber.get(tpNumber) ?? null,
       taught_at: at(),
     });
     const { data: plan } = await supabase

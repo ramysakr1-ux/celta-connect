@@ -366,7 +366,18 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         <p className="whitespace-pre-wrap text-sm text-ink">{applicant.writing_task_submission ?? "--"}</p>
 
         <h3 className="mt-2 text-sm font-semibold text-ink">Language awareness</h3>
-        {(applicant.language_awareness_submission ?? []).map((qa, i) => (
+        {/* Array.isArray, not `?? []`. The column is jsonb NOT NULL DEFAULT
+            '[]', so the nullish guard could never fire -- but jsonb will hold
+            anything, and a row carrying a bare string (the demo pipeline wrote
+            one) took the whole applicant page down with "map is not a
+            function". The trainee-side view of the same column has always
+            guarded it properly; this one never did.
+
+            One malformed row should cost you one empty panel, not the screen. */}
+        {(Array.isArray(applicant.language_awareness_submission)
+          ? applicant.language_awareness_submission
+          : []
+        ).map((qa, i) => (
           <div key={i}>
             <p className="text-xs text-muted">{qa.question}</p>
             <p className="whitespace-pre-wrap text-sm text-ink">{qa.answer}</p>

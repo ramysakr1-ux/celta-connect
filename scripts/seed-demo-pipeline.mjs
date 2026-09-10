@@ -85,7 +85,21 @@ for (const [centre, course, names] of [
     const stage = STAGES[i % STAGES.length];
     const { data: applicant, error } = await supabase.from("applicants").insert({
       center_id: centre.id, intake_course_id: course.id, full_name, email, stage,
-      language_awareness_submission: "", fee_paid: false, waiting_list_opt_out: false,
+      // A LIST, not a string. applicants.language_awareness_submission is
+      // jsonb NOT NULL DEFAULT '[]' and /apply always writes an array of
+      // {question, answer}; this wrote "" and every reader treats the column
+      // as a list, so the applicant detail page died on `.map is not a
+      // function`. Nobody had seen it because this file had never run (its
+      // credentials never reached the child process). Real answers, so the
+      // Language awareness panel has something in it.
+      language_awareness_submission: [
+        {
+          question: "Identify and correct the language errors in the passage provided.",
+          answer:
+            "\"He don't like\" should be \"He doesn't like\" -- third person singular. \"I am living here since 2019\" needs the present perfect continuous: \"I have been living here since 2019\", because the action started in the past and continues now.",
+        },
+      ],
+      fee_paid: false, waiting_list_opt_out: false,
       notification_opt_outs: [], created_at: ago(daysAgo), updated_at: ago(daysAgo),
     }).select("id").single();
     if (error) { console.warn("  applicant:", full_name, error.message); continue; }

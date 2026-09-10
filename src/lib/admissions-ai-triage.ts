@@ -64,7 +64,11 @@ export async function runSelectionTaskTriage(
   }
 
   const reading = await readSelectionTask({
-    languageAwarenessQA: applicant.language_awareness_submission ?? [],
+    // Same guard as the applicant page: jsonb holds whatever it was given,
+    // and everything downstream treats this as a list.
+    languageAwarenessQA: Array.isArray(applicant.language_awareness_submission)
+      ? applicant.language_awareness_submission
+      : [],
     writingPrompt,
     writingSubmission: applicant.writing_task_submission,
   });
