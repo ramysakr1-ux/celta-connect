@@ -408,7 +408,13 @@ export default async function TodayPage() {
   // master-backlog #1 -- 3 streams (back-to-back fails, missing must-submit
   // docs, repeating action points) plus the same-TP contradiction flag,
   // computed once in fetchRosterRows so roster/CSV/Today can't disagree.
-  const flaggedRows = rows.filter((r) => r.atRiskReasons.length > 0);
+  // Active candidates only. Someone who has withdrawn is not a candidate the
+  // MCT can act on, and their record stops moving the moment they leave -- so
+  // chasing their attendance or their action points is noise on a page whose
+  // whole job is "what needs you today". The demo's withdrawn candidate was
+  // sitting in the list at 43%.
+  const activeRows = rows.filter((r) => r.courseStatus === "active");
+  const flaggedRows = activeRows.filter((r) => r.atRiskReasons.length > 0);
   for (const r of flaggedRows) {
     alerts.push({
       kind: "candidate",
@@ -421,7 +427,7 @@ export default async function TodayPage() {
     });
   }
 
-  const atRisk = rows.filter((r) => r.attendancePct < 80);
+  const atRisk = activeRows.filter((r) => r.attendancePct < 80);
   for (const r of atRisk) {
     alerts.push({
       kind: "candidate",

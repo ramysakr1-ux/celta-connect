@@ -280,7 +280,7 @@ async function main() {
   const hoursSoFar = Math.max(1, Math.round(COURSE_TOTAL_HOURS * elapsed));
   // Everyone at or near a full record except two. Kofi is the borderline case
   // an MCT would want to see; Daniel (below) is the real problem.
-  const ATTENDANCE_RATE = { "Kofi Mensah": 0.78 };
+  const ATTENDANCE_RATE = { "Kofi Mensah": 0.70 };
   console.log(`attendance: ${hoursSoFar} of ${COURSE_TOTAL_HOURS} h taught so far`);
   console.log(
     `course: ${startDate} -> ${endDate}; half A has been through ${tpRoundsSoFar(1)} TP round(s), half B ${tpRoundsSoFar(2)}`
