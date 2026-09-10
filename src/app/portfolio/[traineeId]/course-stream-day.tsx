@@ -155,12 +155,22 @@ export function StreamDayTrack({
               const st = stateOf(s, now, firstFuture);
               const gold = s.mine && st !== "done";
               const lit = gold && (st === "now" || st === "next");
+              // Ramy, 10 Sep 2026: "can we make it on the actual bar itself? So
+              // TP8 B, if they click on it, and then they join Zoom." A pill
+              // inside the box asked people to find a small target inside a
+              // large one that already looked like the thing. The whole box is
+              // the door while the session is joinable.
+              const joinable = joinableNow(s, now);
+              const Box = joinable ? "a" : "div";
               return (
-                <div
+                <Box
                   key={s.id}
+                  {...(joinable
+                    ? { href: s.zoomUrl!, target: "_blank", rel: "noreferrer", title: `Join ${s.title}` }
+                    : {})}
                   className={`flex min-w-0 flex-1 flex-col gap-[3px] overflow-hidden rounded-[10px] px-3 py-2.5 ${
                     st === "done" ? "opacity-50" : ""
-                  }`}
+                  } ${joinable ? "cursor-pointer transition-shadow hover:brightness-[1.06]" : ""}`}
                   style={{
                     // Ramy, 10 Sep 2026: "the box where you are... will have a
                     // ring around it, a garnet ring. And the box itself will
@@ -172,7 +182,14 @@ export function StreamDayTrack({
                       ? "var(--color-ink-warm)"
                       : gold
                         ? "color-mix(in oklab, var(--color-gold) 22%, var(--color-card))"
-                        : "var(--color-card-inset)",
+                        // Ramy, 10 Sep 2026: "they're almost the same colour
+                        // [as the background]... make them a little bit darker,
+                        // not as dark as TP8 B, but a bit darker, so you can
+                        // see a contrast." --color-card-inset is 93% lightness
+                        // against a 97.8% frame -- under five points, which
+                        // mushes. Mixed toward ink-warm it lands near 88.5%:
+                        // clearly a card, nowhere near the now-box's 30%.
+                        : "color-mix(in oklab, var(--color-ink-warm) 7%, var(--color-card-inset))",
                     border: st === "now"
                       ? "1.5px solid var(--color-garnet)"
                       : gold
@@ -234,16 +251,13 @@ export function StreamDayTrack({
                       rendered, so an online course had a timetable you could
                       read and not enter. Same treatment as the trainer hub's
                       own your-day.tsx, on whichever block is actually live. */}
-                  {joinableNow(s, now) ? (
-                    <a
-                      href={s.zoomUrl!}
-                      target="_blank"
-                      rel="noreferrer"
+                  {joinable ? (
+                    <span
                       className="w-fit rounded-full px-1.5 py-px text-[10px] font-bold tracking-[0.06em] uppercase"
                       style={{ background: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
                     >
                       Join
-                    </a>
+                    </span>
                   ) : s.sub ? (
                     <span
                       className="text-[11px] leading-tight"
@@ -252,7 +266,7 @@ export function StreamDayTrack({
                       {s.sub}
                     </span>
                   ) : null}
-                </div>
+                </Box>
               );
             })}
 
