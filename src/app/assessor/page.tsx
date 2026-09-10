@@ -354,12 +354,26 @@ export default async function AssessorPage({
   // for-claude-code-assessor-pack-decisions.md §1: "default to showing the
   // candidates the centre has selected... not a restriction -- the
   // assessor can freely browse into the complete cohort... at any time."
-  // isNarrowed is false for an untouched course (everyone still defaults
-  // to selected=true), so the link only appears once a centre has actually
-  // narrowed something down.
-  const isNarrowed = candidates.some((c) => !c.selectedForAssessorVisit);
+  // Ramy, 10 Sep 2026: "the assessor should only have the ones they're going
+  // to check the portfolios for, not all of them."
+  //
+  // This asked `some(c => !c.selected)` -- "has anyone been deselected?" --
+  // which was false on every course in the database, because the column
+  // defaulted to true and everybody arrived already selected. Migration 0284
+  // flips that default, so the question is now the right one: has the centre
+  // actually chosen a sample?
+  //
+  // Three states, and the middle one is the reason this is not just a filter:
+  //   - a real sample chosen  -> show it, with the full cohort a click away
+  //   - nobody chosen yet     -> show everyone, and say the centre has not
+  //                              picked, rather than showing an empty pack
+  //   - everyone chosen       -> that IS the whole cohort; no toggle to offer
+  const selectedCandidates = candidates.filter((c) => c.selectedForAssessorVisit);
+  const centreHasChosen = selectedCandidates.length > 0 && selectedCandidates.length < candidates.length;
+  const noSampleChosen = selectedCandidates.length === 0 && candidates.length > 0;
+  const isNarrowed = centreHasChosen;
   const wantsFullCohort = cohort === "full";
-  const visibleCandidates = isNarrowed && !wantsFullCohort ? candidates.filter((c) => c.selectedForAssessorVisit) : candidates;
+  const visibleCandidates = centreHasChosen && !wantsFullCohort ? selectedCandidates : candidates;
 
   const openCandidate = openCandidateId ? candidates.find((c) => c.traineeId === openCandidateId) ?? null : null;
   // Ramy, 29 Aug 2026, on opening a candidate card: "Like, what is this?
@@ -758,10 +772,20 @@ export default async function AssessorPage({
               </div>
             ) : (
             <>
-            {isNarrowed ? (
+            {noSampleChosen ? (
+              // Not an error, and not empty: the pack still shows everyone. It
+              // just says so, rather than implying the centre picked a cohort
+              // of fifteen to moderate.
+              <span style={{ fontSize: 11.5, color: MUTED }}>
+                Showing all {candidates.length} candidates -- the centre has not selected a sample for this visit.
+              </span>
+            ) : isNarrowed ? (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                 <span style={{ fontSize: 11.5, color: MUTED }}>
-                  Showing {visibleCandidates.length} of {candidates.length} candidates -- the centre&apos;s selection for this visit.
+                  {/* Explicit {" "} -- the plain source space after the
+                      expression was being dropped, rendering "12candidates". */}
+                  Showing {visibleCandidates.length} of {candidates.length}{" "}
+                  candidates -- the centre&apos;s selection for this visit.
                 </span>
                 <Link
                   href={wantsFullCohort ? "/assessor" : "/assessor?cohort=full"}

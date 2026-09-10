@@ -529,6 +529,14 @@ async function main() {
     { name: "Marek Kowalski", email: "demo-marek@celtaconnect.com", group: "B", half: 2, slot: 2, grade: null, upper: null, withdrawn: true },
   ];
   const trainees = {};
+  // The centre's sample for the assessor visit. CELTA 5: assessors "scrutinise
+  // a selection of portfolios to moderate candidates' work" -- a selection, not
+  // the cohort. Migration 0284 made the column default false so a centre opts
+  // people in; the demo picks four so the pack actually demonstrates the
+  // narrowing instead of listing everybody (Ramy, 10 Sep 2026: "why is the
+  // assessor getting all those cards?").
+  const assessorSampleCount = 4;
+  let assessorSampleTaken = 0;
   for (const def of traineeDefs) {
     const { data: authUser, error: authErr } = await supabase.auth.admin.createUser({
       email: def.email,
@@ -544,6 +552,8 @@ async function main() {
       course_id: course.id,
       course_status: def.withdrawn ? "withdrawn" : "active",
       course_status_set_at: def.withdrawn ? new Date(Date.now() - 9 * 86400000).toISOString() : null,
+      // Withdrawn candidates are not part of a moderation sample.
+      selected_for_assessor_visit: !def.withdrawn && assessorSampleTaken < assessorSampleCount ? (assessorSampleTaken += 1, true) : false,
     });
     if (traineeProfileErr) throw traineeProfileErr;
     trainees[def.name] = authUser.user.id;
