@@ -340,7 +340,7 @@ export default async function AdminDashboardPage({
                     <span className="text-sm text-ink">
                       {closedCourses.length} closed course{closedCourses.length === 1 ? "" : "s"}
                     </span>
-                    <span className="text-xs font-medium text-primary">View history &rarr;</span>
+                    <span className="text-xs font-medium text-primary">View history</span>
                   </Link>
                 </div>
               ) : null}

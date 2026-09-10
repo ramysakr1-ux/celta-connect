@@ -141,7 +141,7 @@ export default async function AssessorLessonPlansPage() {
                     className="hover:underline"
                     style={{ fontSize: 11.5, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}
                   >
-                    Open the full plan →
+                    Open the full plan
                   </Link>
                 </div>
 

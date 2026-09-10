@@ -133,7 +133,7 @@ function InputSessionCard({
       <div className="mt-auto pt-1">
         {openable ? (
           <span className="text-[11px] font-bold" style={{ color: "oklch(38% 0.072 195)" }}>
-            Open session →
+            Open session
           </span>
         ) : (
           <span className="text-[11px] text-muted">On your timetable</span>
@@ -691,7 +691,7 @@ export default async function ResourceHubPage({
                         className="self-start rounded-[6px] px-[14px] py-2 text-[12px] font-bold"
                         style={{ background: "oklch(30% 0.042 58)", color: "oklch(99.2% 0.005 90)" }}
                       >
-                        Watch and answer the task →
+                        Watch and answer the task
                       </span>
                     </span>
                   ) : null}
@@ -747,7 +747,7 @@ export default async function ResourceHubPage({
               href={`/input-sessions?back=${encodeURIComponent(`/portfolio/${traineeId}/resources`)}`}
               className="shrink-0 text-xs font-semibold text-primary"
             >
-              Connect Native session library →
+              Connect Native session library
             </Link>
           </div>
           <p className="mb-4 text-[12.5px] text-muted">

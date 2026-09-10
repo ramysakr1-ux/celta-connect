@@ -122,7 +122,7 @@ export default async function CourseAdminDetailPage({
             </p>
           </div>
           <Link href={`/dashboard/admissions/pipeline?course=${course.id}`} className="shrink-0 text-sm font-medium text-primary hover:underline">
-            Full applications view &rarr;
+            Full applications view
           </Link>
         </div>
 
@@ -208,7 +208,7 @@ export default async function CourseAdminDetailPage({
               rel="noreferrer"
               className="admin-hover-fill rounded-[6px] border border-border px-3.5 py-2 text-sm font-medium text-ink hover:border-primary"
             >
-              Open Appian &rarr;
+              Open Appian
             </a>
           ) : (
             <p className="text-xs text-muted">

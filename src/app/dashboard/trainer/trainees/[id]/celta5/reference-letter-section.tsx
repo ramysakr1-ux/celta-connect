@@ -39,7 +39,7 @@ export function ReferenceLetterSection({
                 Issued {new Date(l.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
               </p>
               <a href={`/api/formal-letter/${l.id}`} className="text-xs font-semibold text-primary hover:underline">
-                Download →
+                Download
               </a>
             </div>
           ))}

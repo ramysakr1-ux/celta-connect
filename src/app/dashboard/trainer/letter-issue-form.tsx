@@ -36,7 +36,7 @@ export function LetterIssueForm({
       <div className="flex flex-col gap-2">
         <p className="text-sm font-semibold text-primary">Issued.</p>
         <a href={`/api/formal-letter/${state.letterId}`} className="text-sm text-primary hover:underline">
-          Download the letter →
+          Download the letter
         </a>
       </div>
     );

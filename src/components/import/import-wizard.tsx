@@ -458,7 +458,7 @@ export function ImportWizard({
             ))}
           </div>
           <Link href="/dashboard/admissions" className="text-sm text-primary hover:underline">
-            Go to the pipeline &rarr;
+            Go to the pipeline
           </Link>
         </div>
       ) : null}

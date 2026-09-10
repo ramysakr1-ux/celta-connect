@@ -33,7 +33,7 @@ export function CentreSettingsCard() {
             Centre profile, Google Drive connection, payment providers, admin roles
           </span>
         </div>
-        <span className="shrink-0 text-sm font-medium text-primary">Open settings &rarr;</span>
+        <span className="shrink-0 text-sm font-medium text-primary">Open settings</span>
       </Link>
     </div>
   );

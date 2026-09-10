@@ -151,7 +151,7 @@ export default async function CentreVolunteersPage({
               so it is gated on the same capability the page enforces. */}
           {can(ctx.roles, "volunteers.manage", ctx.overrides) ? (
             <Link href="/centre/volunteers/import" className="text-sm font-semibold text-primary hover:underline">
-              Import from a spreadsheet &rarr;
+              Import from a spreadsheet
             </Link>
           ) : null}
         </div>

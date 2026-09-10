@@ -35,7 +35,7 @@ export function AssignmentWarningLetterSection({
                 <p className="text-xs text-muted">{l.acknowledged_at ? `Acknowledged ${new Date(l.acknowledged_at).toLocaleDateString("en-GB")}` : "Awaiting acknowledgement"}</p>
               </div>
               <a href={`/api/formal-letter/${l.id}`} className="text-xs font-semibold text-primary hover:underline">
-                Download →
+                Download
               </a>
             </div>
           ))}

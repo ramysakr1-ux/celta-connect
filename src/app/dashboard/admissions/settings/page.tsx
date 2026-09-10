@@ -75,7 +75,7 @@ export default async function AdmissionsSettingsPage() {
             separate job from giving it a door. */}
         <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-border-faint pt-3">
           <Link href="/dashboard/admissions/emails" className="text-sm font-medium text-primary hover:underline">
-            Email delivery &rarr;
+            Email delivery
           </Link>
           <Link href="/dashboard/admin/email-preview" className="text-sm text-muted hover:text-ink">
             Preview candidate emails

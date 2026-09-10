@@ -86,7 +86,7 @@ export function ResourceContentLink({
   if (contentType === "link" && fileUrl) {
     return (
       <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-ink hover:text-primary hover:underline">
-        {title} →
+        {title}
       </a>
     );
   }
@@ -103,7 +103,7 @@ export function ResourceContentLink({
           disabled={loading}
           className="text-sm font-semibold text-ink hover:text-primary hover:underline disabled:opacity-60"
         >
-          {loading ? "Loading…" : `${title} →`}
+          {loading ? "Loading…" : title}
         </button>
         {error ? <p className="mt-1 text-xs text-destructive">{error}</p> : null}
       </div>
@@ -122,7 +122,7 @@ export function ResourceContentLink({
         disabled={loading}
         className="self-start text-sm font-semibold text-ink hover:text-primary hover:underline disabled:opacity-60"
       >
-        {loading ? "Loading…" : open ? `Hide ${title}` : `Open ${title} →`}
+        {loading ? "Loading…" : open ? `Hide ${title}` : `Open ${title}`}
       </button>
       {error ? <p className="text-xs text-destructive">{error}</p> : null}
       {open && htmlText ? (

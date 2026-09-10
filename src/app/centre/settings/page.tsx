@@ -196,7 +196,7 @@ export default async function CentreSettingsPage({
                 credentialsPresent={credentialsPresent}
               />
               <Link href="/centre/payments" className="self-start text-sm font-medium text-primary hover:underline">
-                Refund history &rarr;
+                Refund history
               </Link>
             </div>
           ) : (

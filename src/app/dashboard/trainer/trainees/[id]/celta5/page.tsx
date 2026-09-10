@@ -200,7 +200,7 @@ export default async function Celta5RecordPage({
             href={`/trainer/grade-query-reply/${id}`}
             className="inline-flex rounded-[6px] border border-border px-3 py-1.5 text-xs font-medium text-ink hover:border-primary"
           >
-            Grade query reply →
+            Grade query reply
           </Link>
         </div>
         <p className="mt-4 text-sm text-muted">

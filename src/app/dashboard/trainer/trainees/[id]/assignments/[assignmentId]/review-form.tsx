@@ -126,7 +126,7 @@ export function AssignmentReviewForm({
               rel="noreferrer"
               className="shrink-0 text-[11px] font-medium text-primary hover:underline"
             >
-              Marking guidance →
+              Marking guidance
             </a>
           </div>
           <div className="flex flex-col">

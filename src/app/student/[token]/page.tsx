@@ -691,9 +691,15 @@ export default async function StudentPage({ params }: { params: Promise<{ token:
                 greeting drops out of the 12px chrome line it was crammed
                 into and gets to be the size it deserves. */}
             <header className="flex h-[52px] items-center justify-between border-b border-border px-5">
-              <Link href="/" className="hover:opacity-80">
-                <Wordmark size="header-compact" />
-              </Link>
+              <div className="flex items-center gap-4">
+                <Link href="/" className="hover:opacity-80">
+                  <Wordmark size="header-compact" />
+                </Link>
+                {/* This header's own comment already called the top row "the
+                    wordmark and who built it" -- the credit had gone missing
+                    from it when the floating one was retired. */}
+                <HeaderCredit />
+              </div>
             </header>
 
             <div className="flex flex-col gap-5 p-[22px_20px]">

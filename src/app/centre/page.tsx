@@ -371,7 +371,7 @@ export default async function CentreOverviewPage({
                 <AdmissionsChangeIndicator centerIds={scope} initialUnread={(unreadAdmissionsCount ?? 0) > 0} />
               </div>
               <Link href="/dashboard/admissions" className="text-xs font-medium text-primary hover:underline">
-                Open &rarr;
+                Open
               </Link>
             </div>
             {stageCounts.size === 0 ? (

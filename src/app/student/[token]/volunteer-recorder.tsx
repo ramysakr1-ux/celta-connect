@@ -283,7 +283,7 @@ export function VolunteerRecorder({
             onClick={nextQuestion}
             className="w-full max-w-xs rounded-lg bg-[#3a2e18] px-5 py-3 text-sm font-semibold text-white"
           >
-            {isLast ? "Stop and finish" : "Next question →"}
+            {isLast ? "Stop and finish" : "Next question"}
           </button>
         </div>
       ) : null}

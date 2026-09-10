@@ -448,7 +448,7 @@ export default async function AssessorPage({
         </span>
         {preview ? (
           <a href="/assessor/exit" style={{ fontSize: 12, fontWeight: 700, color: GOLD, flex: "none", textDecoration: "underline" }}>
-            Exit preview →
+            Exit preview
           </a>
         ) : accessToken ? (
           <span style={{ fontSize: 11.5, color: "oklch(76% 0.02 80)", flex: "none" }}>
@@ -730,7 +730,7 @@ export default async function AssessorPage({
                         color: CREAM, textDecoration: "none",
                       }}
                     >
-                      Open the whole portfolio →
+                      Open the whole portfolio
                     </Link>
                     <Link
                       href="/assessor"
@@ -751,7 +751,7 @@ export default async function AssessorPage({
                       <span style={{ fontSize: 12, color: MUTED }}>{row.value}</span>
                       <span style={{ fontSize: 11, fontWeight: 600, color: row.ink, textAlign: "right" }}>{row.state}</span>
                       <span style={{ fontSize: 11, fontWeight: 600, color: row.href ? TEAL : "transparent", textAlign: "right" }}>
-                        {row.href ? "Open →" : "—"}
+                        {row.href ? "Open" : "—"}
                       </span>
                     </>
                   );
@@ -791,7 +791,7 @@ export default async function AssessorPage({
                   href={wantsFullCohort ? "/assessor" : "/assessor?cohort=full"}
                   style={{ fontSize: 11.5, fontWeight: 600, color: TEAL, textDecoration: "none" }}
                 >
-                  {wantsFullCohort ? "← Back to selected" : `View full cohort (${candidates.length}) →`}
+                  {wantsFullCohort ? "Back to selected" : `View full cohort (${candidates.length})`}
                 </Link>
               </div>
             ) : null}
@@ -935,7 +935,7 @@ export default async function AssessorPage({
                             rel="noreferrer"
                             style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none", textDecoration: "none" }}
                           >
-                            Join →
+                            Join
                           </a>
                         ) : null}
                       </div>
@@ -1089,7 +1089,7 @@ export default async function AssessorPage({
                       <span style={{ fontSize: 10.5, color: MUTED }}>{doc.meta}</span>
                     </span>
                     {present && href ? (
-                      <span style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none" }}>Open →</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none" }}>Open</span>
                     ) : (
                       <span style={{ fontSize: 11, fontWeight: 600, color: AMBER, flex: "none" }}>
                         {isMarkingGuidance ? "Not written yet" : "Not uploaded"}
@@ -1135,7 +1135,7 @@ export default async function AssessorPage({
                     <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>{d.title}</span>
                     <span style={{ fontSize: 10.5, color: MUTED }}>Added by the centre</span>
                   </span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none" }}>Open →</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none" }}>Open</span>
                 </a>
               ))}
               {/* "Tutor list and roles doesn't take you there" -- it did jump,
@@ -1257,7 +1257,7 @@ export default async function AssessorPage({
                 borderRadius: 999, padding: "12px 20px", textDecoration: "none",
               }}
             >
-              Take a tour of the platform →
+              Take a tour of the platform
             </a>
             <p style={{ fontSize: 11, lineHeight: 1.5, color: MUTED, marginTop: -4 }}>
               Browse the wider platform read-only -- the trainer dashboard, a candidate&apos;s full portfolio, the
@@ -1360,7 +1360,7 @@ function Panel({
 //
 // Worth saying what was actually wrong, because it was more than a missing
 // ring: every one of these rows already carried .assessor-hover, so the whole
-// row lit up on hover -- but only the small "Open →" anchor was clickable.
+// row lit up on hover -- but only the small "Open" anchor was clickable.
 // The hover was writing a cheque the row could not cash, and on a read-only
 // screen an assessor has no way to discover that except by clicking and
 // having nothing happen. The row is the link now, so the ring means what it
@@ -1380,7 +1380,7 @@ function DocRow({ label, href, status }: { label: string; href: string; status: 
         <span style={{ fontSize: 10.5, color: TEAL }}>{status}</span>
       </span>
       <span style={{ fontSize: 11, fontWeight: 600, color: "oklch(38% 0.072 195)", flex: "none" }}>
-        Open →
+        Open
       </span>
     </Link>
   );

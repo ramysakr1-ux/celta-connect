@@ -89,7 +89,7 @@ export function CandidateStatusCard({
               onClick={() => setMode(pendingRequest.kind === "withdraw" ? "withdraw" : "deferral")}
               className="mt-1 self-start text-xs font-semibold text-primary hover:underline"
             >
-              Review and action →
+              Review and action
             </button>
           ) : null}
         </div>
@@ -162,7 +162,7 @@ export function CandidateStatusCard({
               ) : null}
               {specialConsiderationEvidenceUrl ? (
                 <a href={specialConsiderationEvidenceUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
-                  View supporting evidence →
+                  View supporting evidence
                 </a>
               ) : null}
             </div>

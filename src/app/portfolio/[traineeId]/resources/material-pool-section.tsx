@@ -62,7 +62,7 @@ function ItemCard({
       {item.description ? <p className="text-xs text-muted">{item.description}</p> : null}
       {item.signedUrl ? (
         <a href={item.signedUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-primary hover:underline">
-          Open →
+          Open
         </a>
       ) : null}
 
