@@ -25,19 +25,18 @@ export function TraineeHeaderCorner({
   const pathname = usePathname();
   const isLanding = pathname === `/portfolio/${traineeId}`;
 
-  // Until 9 Sep 2026 the landing returned the credit INSTEAD of these two, so
-  // the one screen design_handoff_trainee_landing draws a header for was the
-  // one screen missing its right-hand side -- no "Day N of 20", no avatar.
-  // That made sense while TraineeNameBanner sat directly below carrying the
-  // trainee's name and week; the banner is gone and the credit was the only
-  // occupant left. Both now, credit first: the design gets the counter and the
-  // avatar it asks for, and Ramy's credit stays on the screen it has always
-  // been on.
+  // §1b: on the dark header the corner text lightens to oklch(78% 0.02 80).
+  //
+  // The credit is no longer wedged in beside it. Ramy, 10 Sep 2026, and the
+  // handoff's own §5: it is the bottom-right watermark on landing screens --
+  // 13px mark, faint text, no border. DesignerCredit's default corner is
+  // bottom-right precisely because the chat pill sits centred, so it cannot be
+  // covered; that was the thing he asked me to watch for.
   return (
     <div className="flex shrink-0 items-center gap-2.5">
-      {isLanding ? <DesignerCredit pinned={false} /> : null}
+      {isLanding ? <DesignerCredit /> : null}
       {courseDayProgress ? (
-        <span className="text-[11px] font-medium tabular-nums text-muted">
+        <span className="text-[11px] font-medium tabular-nums" style={{ color: "oklch(78% 0.02 80)" }}>
           Day {courseDayProgress.currentDay} of {courseDayProgress.totalDays}
         </span>
       ) : null}

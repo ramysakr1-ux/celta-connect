@@ -29,6 +29,14 @@ function useNow(serverNowMs: number, tickMs = 15_000): number {
   return now;
 }
 
+/** The same window isEventLive uses everywhere else: the door opens ten
+ *  minutes before the session and closes when it ends. A join link that
+ *  appears at a different moment from the timetable's own is worse than none. */
+const JOIN_LEAD_MS = 10 * 60 * 1000;
+function joinableNow(slot: StreamSlot, nowMs: number): boolean {
+  return Boolean(slot.zoomUrl) && nowMs >= slot.startsAtMs - JOIN_LEAD_MS && nowMs < slot.endsAtMs;
+}
+
 function stateOf(slot: StreamSlot, nowMs: number, firstFutureId: string | null): State {
   if (nowMs >= slot.endsAtMs) return "done";
   if (nowMs >= slot.startsAtMs) return "now";
@@ -182,7 +190,26 @@ export function StreamDayTrack({
                   >
                     {s.title}
                   </span>
-                  {s.sub ? <span className="text-[11px] leading-tight text-muted">{s.sub}</span> : null}
+                  {/* Ramy, 10 Sep 2026: "the join the room, which is the Zoom
+                      link -- I don't see it anywhere." It was on the hero and
+                      nowhere else, and only for the trainee's OWN TP: every
+                      other session on the day carried a zoom_url that nothing
+                      rendered, so an online course had a timetable you could
+                      read and not enter. Same treatment as the trainer hub's
+                      own your-day.tsx, on whichever block is actually live. */}
+                  {joinableNow(s, now) ? (
+                    <a
+                      href={s.zoomUrl!}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-fit rounded-full px-1.5 py-px text-[10px] font-bold tracking-[0.06em] uppercase"
+                      style={{ background: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
+                    >
+                      Join
+                    </a>
+                  ) : s.sub ? (
+                    <span className="text-[11px] leading-tight text-muted">{s.sub}</span>
+                  ) : null}
                 </div>
               );
             })}

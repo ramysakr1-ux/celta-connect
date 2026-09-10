@@ -9,7 +9,7 @@ import { rotationPosition, halfTpDates, type TpTimetableEvent } from "@/lib/rota
 import { getTpCardStatus } from "@/lib/tp-plan-content";
 import { ASSIGNMENT_INFO } from "@/lib/assignment-info";
 import { SCAVENGER_HUNT_QUESTIONS } from "@/lib/scavenger-hunt";
-import { buildStreamDay } from "@/lib/course-stream-day";
+import { getTraineeStreamDay } from "@/lib/trainee-day";
 import { StreamEyebrow, StreamDayTrack } from "@/app/portfolio/[traineeId]/course-stream-day";
 
 const TP_LESSON_LENGTH_MINUTES = 45;
@@ -643,14 +643,10 @@ export async function TodayTab({
     .eq("course_id", courseId)
     .eq("event_date", today);
 
-  const streamDay = buildStreamDay({
-    events: todaysEvents ?? [],
-    timeBands: course?.time_bands ?? null,
-    dateIso: today,
-    timeZone,
-    mineEventIds: new Set(teachingToday ? [teachingToday.eventId] : []),
-    tpGroupId: subgroupTpGroupId,
-  });
+  // The same object the header's day bar renders from -- getTraineeStreamDay is
+  // cache()d per request, so this is one set of queries and one answer, which
+  // is what §1b means by "never a second source".
+  const streamDay = await getTraineeStreamDay(supabase, traineeId, courseId, today, timeZone);
 
   // Unread notices (migration 0283). The read rows are RLS-scoped to the
   // reader, so a peer viewing a groupmate's portfolio under layout.tsx's

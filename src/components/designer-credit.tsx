@@ -74,16 +74,25 @@ export function DesignerCredit({
   className = "",
   pinned = true,
   corner = "bottom-right",
+  tone = "muted",
 }: {
   className?: string;
   pinned?: boolean;
   corner?: "top-right" | "bottom-right";
+  // Ramy, 10 Sep 2026: "there is room in the header for my credit if it's done
+  // in a different colour, obviously." In the trainee header it shares a row
+  // with "Day N of 20" and the avatar, both of which are muted -- three muted
+  // things in a row read as one crowded thing. Bronze is the existing third
+  // accent, already used where teal and gold are both spoken for.
+  tone?: "muted" | "bronze";
 }) {
+  const toneClass = tone === "bronze" ? "text-bronze/75" : "text-muted/70";
+  const nameClass = tone === "bronze" ? "text-bronze" : "text-muted";
   const mark = (
-    <span className="pointer-events-auto inline-flex items-center gap-1.5 text-[10.5px] text-muted/70">
+    <span className={`pointer-events-auto inline-flex items-center gap-1.5 text-[10.5px] ${toneClass}`}>
       <Wordmark size="icon" iconSizePx={13} />
       <span>
-        designed and built by <span className="font-semibold text-muted">Ramy</span>
+        designed and built by <span className={`font-semibold ${nameClass}`}>Ramy</span>
       </span>
     </span>
   );

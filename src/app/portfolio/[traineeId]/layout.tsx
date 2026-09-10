@@ -12,6 +12,8 @@ import { Wordmark } from "@/components/wordmark";
 import { PortfolioTabs } from "@/app/portfolio/[traineeId]/portfolio-tabs";
 import { TraineeSidebarNav } from "@/app/portfolio/[traineeId]/trainee-sidebar-nav";
 import { buildRailStatus, type RailStatus } from "@/lib/trainee-rail-status";
+import { getTraineeStreamDay, type TraineeDay } from "@/lib/trainee-day";
+import { HeaderDayBar } from "@/app/portfolio/[traineeId]/header-day-bar";
 import { TraineeHeaderCorner } from "@/app/portfolio/[traineeId]/trainee-header-corner";
 import { TraineeMobileNav } from "@/app/portfolio/[traineeId]/trainee-mobile-nav";
 import { computeWeekOf } from "@/lib/course-progress";
@@ -129,6 +131,7 @@ export default async function PortfolioLayout({
   let bannerWeekNumber: number | null = null;
   let weekTotal: number | null = null;
   let railStatus: RailStatus | null = null;
+  let traineeDay: TraineeDay | null = null;
   if (showTraineeNav && trainee.course_id) {
     const { data: courseDates } = await supabase.from("courses").select("start_date, end_date").eq("id", trainee.course_id).maybeSingle();
     const todayIso = toLocalIso(new Date(), timeZone);
@@ -136,6 +139,7 @@ export default async function PortfolioLayout({
     const parts = weekOf?.match(/week (\d+) of (\d+)/);
     bannerWeekNumber = parts ? Number(parts[1]) : null;
     weekTotal = parts ? Number(parts[2]) : null;
+    traineeDay = await getTraineeStreamDay(supabase, trainee.id, trainee.course_id, todayIso, timeZone);
     railStatus = await buildRailStatus({
       supabase,
       traineeId: trainee.id,
@@ -318,36 +322,32 @@ export default async function PortfolioLayout({
         // actually changes.
         <div className="flex min-h-0 flex-1 flex-col" style={{ background: "var(--color-frame)" }}>
           <div className="border-t border-border" />
-          {/* Ramy, 2026-08-24: Connect's own band is a distinct off-white
-              ("one end to the other"), not the same tone as the sheet
-              around it -- edge-to-edge, so .container goes inside this
-              wrapper rather than carrying the background itself. */}
-          {/* A trace of teal, not a colour band. Ramy, 30 Aug 2026: "I don't
-              think it needs to be wider since it's just the same colour.
-              Maybe just give it a tiny bit of colour, maybe a tiny bit of
-              teal green or something." So the off-white warms fractionally
-              toward the accent and takes a hairline of it along the top --
-              enough to stop the band reading as another sheet, not enough to
-              compete with the hero card below it. The trainee still has no
-              role colour, deliberately: colour in this app signals scope,
-              and a candidate only ever has one. */}
-          <div
-            style={{
-              // Ramy, 9 Sep 2026, on the 4b landing: "the background is
-              // different. It's just not white. It's beige." The band was
-              // near-white (oklch 99.5%) warmed 3% toward teal; the handoff
-              // draws the header on --color-card, and against the page's own
-              // beige the old value read as a separate white sheet laid on top.
-              // The teal hairline from 30 Aug stays -- that was the part he
-              // asked for ("maybe just a tiny bit of teal green").
-              background: "color-mix(in oklab, var(--color-primary) 3%, var(--color-card))",
-              borderTop: "2px solid color-mix(in oklab, var(--color-primary) 45%, transparent)",
-            }}
-          >
-            <div className="container flex h-14 items-center justify-between gap-4">
-              <Link href={`/portfolio/${trainee.id}`} className="shrink-0 block">
-                <Wordmark size="header" />
+          {/* design_handoff_trainee_landing §1b, "Dark header + day bar".
+              Ramy, 10 Sep 2026: "the colourful header and the clock on the
+              header is what actually makes this page cool."
+
+              56px on ink-warm, no bottom border, 28px between three blocks:
+              the wordmark, the day bar, the corner. The bar is the whole day
+              at a glance, and it renders from the SAME StreamDay the main
+              track below renders from, so the two cannot disagree.
+
+              This retires the 30 Aug band -- near-white warmed 3% toward teal
+              with a teal hairline on top. Against the beige page it read as a
+              separate white sheet, which is what he kept seeing. */}
+          <div style={{ background: "var(--color-ink-warm)" }}>
+            <div className="container flex h-14 items-center gap-7">
+              <Link href={`/portfolio/${trainee.id}`} className="block shrink-0">
+                <Wordmark
+                  size="header"
+                  onDark
+                  tileBg="color-mix(in oklab, oklch(98.5% 0.006 90) 12%, transparent)"
+                />
               </Link>
+              {traineeDay ? (
+                <HeaderDayBar day={traineeDay} serverNowMs={Date.now()} timeZone={timeZone} />
+              ) : (
+                <div className="min-w-0 flex-1" />
+              )}
               <TraineeHeaderCorner
                 traineeId={trainee.id}
                 traineeName={trainee.full_name}
@@ -355,7 +355,6 @@ export default async function PortfolioLayout({
               />
             </div>
           </div>
-          <div className="border-t border-border" />
           <PortfolioFocusRow traineeId={trainee.id} sidebar={<TraineeSidebarNav traineeId={trainee.id} status={railStatus} />}>{children}</PortfolioFocusRow>
         </div>
       ) : (
