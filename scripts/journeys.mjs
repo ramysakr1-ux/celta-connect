@@ -41,6 +41,15 @@ let world = null;
 let browser = null;
 
 try {
+  // Warm the deployment first. The very first request after a deploy pays
+  // for a cold serverless function and a cold database connection, and on
+  // 11 Sep 2026 that was enough for the assignment form to miss its 15-second
+  // wait -- 2 of 3, then 3 of 3 on the re-run, nothing changed in between.
+  // A test that fails for reasons that are not bugs is a test that gets
+  // ignored, so cold-start is measured out of it rather than into it.
+  await fetch(`${BASE}/login`).catch(() => {});
+  await fetch(`${BASE}/demo/trainee`, { redirect: "manual" }).catch(() => {});
+
   world = await buildWorld({ admin });
   browser = await chromium.launch({ headless: !HEADED });
 
@@ -58,7 +67,7 @@ try {
     const name = "a trainee writes and submits an assignment";
     const { context, page } = await signedInPage(world.trainee, `/portfolio/${world.trainee.id}/assignments/${world.assignmentId}`);
     try {
-      await page.waitForSelector("textarea", { timeout: 15000 });
+      await page.waitForSelector("textarea", { timeout: 30000 });
       const boxes = await page.locator("textarea").all();
       for (const [i, box] of boxes.entries()) {
         await box.fill(`Response ${i + 1}. ${"The learner is a B1 Turkish speaker with strong receptive skills. ".repeat(6)}`);
@@ -84,7 +93,7 @@ try {
     const name = "a trainee saves a lesson plan";
     const { context, page } = await signedInPage(world.trainee, `/portfolio/${world.trainee.id}/tp/1`);
     try {
-      await page.waitForSelector("textarea", { timeout: 15000 });
+      await page.waitForSelector("textarea", { timeout: 30000 });
       const first = page.locator("textarea").first();
       await first.fill("By the end of the lesson learners will be better able to talk about life experience.");
       const save = page.getByRole("button", { name: /save/i }).first();
