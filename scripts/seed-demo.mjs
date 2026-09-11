@@ -1298,6 +1298,14 @@ async function main() {
       hours_attended: def.withdrawn ? Math.round(hoursSoFar * 0.4) : Math.round(hoursSoFar * (ATTENDANCE_RATE[def.name] ?? 1)),
       provisional_grade: def.grade,
       provisional_grade_upper: def.upper,
+      // The MCT approves the provisional grades before they are sent to the
+      // assessor -- provisional_approved_at is what the assessor pack counts
+      // as "confirmed", not merely entered. The seed set the grades but never
+      // this, so the pack read "0 of 11 confirmed" on a course whose grades
+      // were due today. Confirmed wherever a grade exists; the one ungraded
+      // candidate (Ruben) stays unconfirmed, which is the honest state of the
+      // one case the grading meeting has not settled.
+      provisional_approved_at: def.grade ? new Date(Date.now() - 1 * 86400000).toISOString() : null,
     }))
   );
   // Written assignments for every candidate are seeded together further down

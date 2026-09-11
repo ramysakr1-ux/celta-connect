@@ -252,7 +252,23 @@ export async function buildCandidateCards(
         const status = isResubmissionRound ? a.resubmission_status : a.first_status;
         return status !== "approved";
       });
-      if (unresolved) flaggedIssue = `${unresolved.assignment_type} resubmission unresolved`;
+      if (unresolved) {
+        // Name the actual state, not "resubmission" for everything. A first
+        // submission awaiting the tutor is not a resubmission, and telling an
+        // assessor "Skills resubmission unresolved" when the candidate has
+        // never resubmitted anything is simply wrong. A candidate on their
+        // one resubmission is the only case that carries that word.
+        const onResub = unresolved.first_status === "resubmission_required" || unresolved.resubmission_status !== "not_submitted";
+        const round = onResub ? unresolved.resubmission_status : unresolved.first_status;
+        const state = onResub
+          ? round === "not_submitted"
+            ? "resubmission outstanding"
+            : "resubmission awaiting marking"
+          : round === "not_submitted"
+            ? "not yet submitted"
+            : "awaiting marking";
+        flaggedIssue = `${unresolved.assignment_type} ${state}`;
+      }
     } else if (!celta5Complete) flaggedIssue = "Stage 2 record still open";
 
     return {
