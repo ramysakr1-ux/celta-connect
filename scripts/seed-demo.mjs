@@ -2208,6 +2208,64 @@ async function main() {
     });
   }
 
+  // Directed observation of experienced teachers -- Administration Handbook
+  // June 2025 p. 30: "six hours' directed observation of experienced ELT
+  // professionals", of which filmed observation counts for at most three
+  // (observation-hours.ts). The seed planted none, so every candidate read
+  // "0.0 of 6" in week 4 and the roster's warning had nothing real to show.
+  // Ramy, 12 Sep 2026: a realistic spread -- most at six hours by now, a few
+  // short (4.5, 3) so the shortfall surfaces. Live observations on course
+  // days, one filmed session each; the withdrawn candidate is left out.
+  {
+    const OBS_FOCI = [
+      ["Reading for gist and detail: a news article on city life", "B1+"],
+      ["Present perfect for life experience: guided discovery", "B1+"],
+      ["Functional language: making and responding to suggestions", "A2"],
+      ["Listening for specific information: a hotel booking", "A2"],
+      ["Vocabulary: food and cooking, with a personalised speaking task", "A2"],
+    ];
+    const HOURS_PATTERN = [6, 6, 6, 4.5, 6, 6, 3, 6, 4.5, 6, 3];
+    const liveDayOffsets = [3, 8, 11, 16];
+    const observationRows = [];
+    let i = 0;
+    for (const [name, traineeId] of Object.entries(trainees)) {
+      if (name === "Marek Kowalski") continue;
+      const target = HOURS_PATTERN[i % HOURS_PATTERN.length];
+      // 6h = four live hours + two filmed; 4.5h = three + 1.5; 3h = two + one.
+      const liveCount = target === 6 ? 4 : target === 4.5 ? 3 : 2;
+      const filmedMinutes = target === 6 ? 120 : target === 4.5 ? 90 : 60;
+      for (let k = 0; k < liveCount; k += 1) {
+        const [focus, level] = OBS_FOCI[(i + k) % OBS_FOCI.length];
+        observationRows.push({
+          course_id: course.id,
+          trainee_id: traineeId,
+          observation_date: isoOf(new Date(courseStart.getTime() + liveDayOffsets[k] * 86400000)),
+          length_minutes: 60,
+          level,
+          learners_present: 12,
+          lesson_focus: focus,
+          filmed: false,
+          mode: "f2f",
+        });
+      }
+      observationRows.push({
+        course_id: course.id,
+        trainee_id: traineeId,
+        observation_date: isoOf(new Date(courseStart.getTime() + 4 * 86400000)),
+        length_minutes: filmedMinutes,
+        level: "B1+",
+        learners_present: 14,
+        lesson_focus: "Filmed: a full lesson on used to, with the tutor's commentary",
+        filmed: true,
+        mode: "f2f",
+      });
+      i += 1;
+    }
+    const { error: obsErr } = await supabase.from("observations").insert(observationRows);
+    if (obsErr) throw obsErr;
+    console.log(`observation hours seeded: ${observationRows.length} rows for ${i} candidates`);
+  }
+
   // §14.2: candidates may ask to speak with the assessor privately, without
   // tutors. The assessor's "On the day" panel shows this as a COUNT, never the
   // names (identities never leave the database before the meeting). The seed

@@ -12,7 +12,7 @@ import { AssessorCard } from "@/app/trainer/(hub)/assessor-card";
 import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 import { AssessorSelectionButton } from "@/app/trainer/(hub)/roster/assessor-selection-button";
 import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
-import { assessorVisitDayProblem } from "@/lib/assessor-day";
+import { assessorVisitDayProblem, assessorVisitDayNote } from "@/lib/assessor-day";
 import { computeAssessorReadiness, buildCandidateCards } from "@/lib/assessor-pack";
 import { visitTeachingOrder } from "@/lib/assessor-wall";
 import { buildAssessorRecommendation } from "@/lib/assessor-recommendation";
@@ -116,8 +116,9 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
     candidateCount: activeCandidateCount,
     withdrawnCount: withdrawnCount ?? 0,
   });
-  const [visitDayProblem, readiness, { data: liveToken }] = await Promise.all([
+  const [visitDayProblem, visitDayNote, readiness, { data: liveToken }] = await Promise.all([
     assessorVisitDayProblem(supabase, courseId, visitDate),
+    assessorVisitDayNote(supabase, courseId, visitDate),
     computeAssessorReadiness(supabase, courseId),
     supabase
       .from("course_access_tokens")
@@ -382,6 +383,18 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
           <span className="flex-1 font-semibold">{visitDayProblem}</span>
           <Link href="/trainer/timetable?mode=edit" className="text-[12px] whitespace-nowrap underline">
             Nothing to observe &middot; §14.2
+          </Link>
+        </div>
+      ) : null}
+      {/* A note, not a refusal: lessons but no Feedback session on the visit
+          day. 14.2 lets the assessor observe an earlier session's feedback,
+          so the visit stands -- it is just better with one (12 Sep 2026). */}
+      {!visitDayProblem && visitDayNote ? (
+        <div className="flex items-center gap-3 rounded-[10px] border border-border bg-card px-4 py-3 text-[13px] text-muted">
+          <span className="rounded-full bg-frame px-2 py-[2px] text-[10px] font-bold tracking-[0.08em] text-ink uppercase">Visit day</span>
+          <span className="flex-1">{visitDayNote}</span>
+          <Link href="/trainer/timetable?mode=edit" className="text-[12px] whitespace-nowrap text-primary underline">
+            Open the timetable
           </Link>
         </div>
       ) : null}

@@ -328,6 +328,28 @@ export default async function TodayPage() {
     }
   }
 
+  // Administration Handbook June 2025 p. 30: "six hours' directed observation
+  // of experienced ELT professionals" per candidate. The roster has warned
+  // per row since the unified-tracking column; nothing said so here, where
+  // the MCT looks first. Ramy, 12 Sep 2026: alert in the final week -- five
+  // days out, while there is still a lesson left to sit in on.
+  if (isMct && course?.end_date) {
+    const daysLeft = Math.ceil((new Date(`${course.end_date}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000);
+    const short = rows.filter((r) => r.courseStatus !== "withdrawn" && r.observationHoursShort);
+    if (daysLeft <= 5 && daysLeft >= 0 && short.length > 0) {
+      const named = short.slice(0, 3).map((r) => r.name).join(", ");
+      alerts.push({
+        kind: "candidate",
+        badge: "OB",
+        due: daysLeft === 0 ? "Today" : `${daysLeft}d`,
+        title: `${short.length} candidate${short.length === 1 ? "" : "s"} short of six observation hours`,
+        meta: `${named}${short.length > 3 ? ` and ${short.length - 3} more` : ""} · course ends ${shortDate(course.end_date)}`,
+        href: "/trainer/observation-hours",
+        destructive: daysLeft <= 1,
+      });
+    }
+  }
+
   // for-claude-code-course-admin-landing-and-admissions.md §4: "When [the
   // assessor is] set, the MCT should get notified... with the assessor's
   // name and contact info." Same "computed fresh, no persisted dismiss

@@ -142,3 +142,28 @@ export async function assessorVisitDayProblem(
   }
   return null;
 }
+
+/**
+ * A note, not a refusal. Handbook 14.2 has the assessor observe the TP
+ * feedback as well as the teaching -- "if feedback is delayed, the assessor
+ * should observe the feedback from a previous teaching practice session" --
+ * so a visit day with lessons but no Feedback session is workable, just worth
+ * saying out loud while the timetable can still change. Ramy, 12 Sep 2026.
+ * The day's Feedback session is identified by title, as pickMeetingTime does.
+ */
+export async function assessorVisitDayNote(
+  supabase: SupabaseClient<Database>,
+  courseId: string,
+  visitDate: string | null
+): Promise<string | null> {
+  if (!visitDate) return null;
+  const { data: dayEvents } = await supabase
+    .from("course_timetable_events")
+    .select("type, title")
+    .eq("course_id", courseId)
+    .eq("event_date", visitDate);
+  const events = dayEvents ?? [];
+  if (!events.some((e) => e.type === "tp")) return null; // the refusal above covers this
+  if (events.some((e) => e.title === "Feedback")) return null;
+  return "No Feedback session is timetabled on the visit date. The assessor observes the feedback on the day, or an earlier session's if it is delayed (Handbook 14.2) -- worth adding one while the timetable can still change.";
+}
