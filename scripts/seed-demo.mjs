@@ -2077,6 +2077,18 @@ async function main() {
     });
   }
 
+  // §14.2: candidates may ask to speak with the assessor privately, without
+  // tutors. The assessor's "On the day" panel shows this as a COUNT, never the
+  // names (identities never leave the database before the meeting). The seed
+  // created none, so the panel always read "No candidate has asked to speak
+  // with you" and the feature -- and its deliberate anonymity -- never showed.
+  // Amara has asked, so the panel reads "1 candidate has asked".
+  await supabase.from("assessor_meeting_requests").insert({
+    course_id: course.id,
+    trainee_id: trainees["Amara Okafor"],
+    requested_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+  });
+
   // --- Pre-course task: seeded per-centre (centre admins normally author
   // these themselves), then marked handed in for all three trainees so the
   // shared course reads as properly mid-stream, not day one. ---
