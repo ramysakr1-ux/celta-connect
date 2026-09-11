@@ -155,7 +155,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   },
 
   // Day 1-2 (Tue/Wed) -- TP1, one half each day.
-  { type: "tp", title: "TP1 -- Half A", position: pos(1), time: "10:00", tag: "individual", linkedTpNumber: 1 },
+  { type: "tp", title: "TP1 -- Day A", position: pos(1), time: "10:00", tag: "individual", linkedTpNumber: 1 },
   {
     type: "input_session",
     title: "Lesson planning input",
@@ -177,7 +177,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     inputSessionCriteria: ["3a", "4l"],
   },
-  { type: "tp", title: "TP1 -- Half B", position: pos(2), time: "10:00", tag: "individual", linkedTpNumber: 1 },
+  { type: "tp", title: "TP1 -- Day B", position: pos(2), time: "10:00", tag: "individual", linkedTpNumber: 1 },
   {
     type: "input_session",
     title: "Eliciting and concept checking",
@@ -203,7 +203,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // Day 3-4 (Thu/Fri) -- TP2, one half each day. SRT released day 3
   // (Timetable Refresh.dc.html FULL week 1, "9"), Stage 1 tutorials begin
   // once both halves have TP2 behind them (day 4).
-  { type: "tp", title: "TP2 -- Half A", position: pos(3), time: "10:00", tag: "individual", linkedTpNumber: 2 },
+  { type: "tp", title: "TP2 -- Day A", position: pos(3), time: "10:00", tag: "individual", linkedTpNumber: 2 },
   {
     type: "input_session",
     title: "PPP",
@@ -221,7 +221,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     inputSessionCriteria: ["3a", "3b", "4c"],
   },
   { type: "milestone", title: "Language Skills Related Tasks released", position: pos(3), time: "17:00", tag: "whole_group", linkedAssignmentType: "Skills" },
-  { type: "tp", title: "TP2 -- Half B", position: pos(4), time: "10:00", tag: "individual", linkedTpNumber: 2 },
+  { type: "tp", title: "TP2 -- Day B", position: pos(4), time: "10:00", tag: "individual", linkedTpNumber: 2 },
   {
     // "overlaps with Language analysis 1 on 4i" (Ramy) -- both rows below
     // carry 4i; whichever the trainer actually runs later that day wins
@@ -249,7 +249,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // half's own TP3 -- for Half A that's Half B's TP3 day (day 6); Half B's
   // own due tile lands on day 7 below (assignment-due-dates.ts resolves
   // the real per-trainee date; this tile is the display-only echo of it).
-  { type: "tp", title: "TP3 -- Half A", position: pos(5), time: "10:00", tag: "individual", linkedTpNumber: 3 },
+  { type: "tp", title: "TP3 -- Day A", position: pos(5), time: "10:00", tag: "individual", linkedTpNumber: 3 },
   {
     type: "input_session",
     title: "Giving feedback on tasks",
@@ -269,7 +269,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     // requirement from day one, not purely session-gated" (Ramy).
     inputSessionCriteria: ["2d"],
   },
-  { type: "tp", title: "TP3 -- Half B", position: pos(6), time: "10:00", tag: "individual", linkedTpNumber: 3 },
+  { type: "tp", title: "TP3 -- Day B", position: pos(6), time: "10:00", tag: "individual", linkedTpNumber: 3 },
   {
     type: "input_session",
     title: "Staging controlled practice",
@@ -281,7 +281,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   { type: "milestone", title: "Filmed observation 3", position: pos(6), time: "17:00", tag: "individual", detail: "With task" },
   {
     type: "assignment_due",
-    title: "Language Skills Related Tasks -- due 9am (Half A)",
+    title: "Language Skills Related Tasks -- due 9am (Day A)",
     position: pos(6),
     time: "09:00",
     tag: "individual",
@@ -290,16 +290,16 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
 
   // Day 7-8 (Wed/Thu) -- TP4. Half B's Skills due lands the day after
   // their own TP3, which is Half A's TP4 day.
-  { type: "tp", title: "TP4 -- Half A", position: pos(7), time: "10:00", tag: "individual", linkedTpNumber: 4 },
+  { type: "tp", title: "TP4 -- Day A", position: pos(7), time: "10:00", tag: "individual", linkedTpNumber: 4 },
   {
     type: "assignment_due",
-    title: "Language Skills Related Tasks -- due 9am (Half B)",
+    title: "Language Skills Related Tasks -- due 9am (Day B)",
     position: pos(7),
     time: "09:00",
     tag: "individual",
     linkedAssignmentType: "Skills",
   },
-  { type: "tp", title: "TP4 -- Half B", position: pos(8), time: "10:00", tag: "individual", linkedTpNumber: 4 },
+  { type: "tp", title: "TP4 -- Day B", position: pos(8), time: "10:00", tag: "individual", linkedTpNumber: 4 },
   { type: "milestone", title: "Filmed observation 4", position: pos(8), time: "17:00", tag: "individual", detail: "With task" },
   { type: "milestone", title: "Language Related Tasks released", position: pos(8), time: "17:00", tag: "whole_group", linkedAssignmentType: "LRT" },
 
@@ -320,7 +320,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // Day 10-11 (Mon/Tue) -- TP5, new level. FOL itself is due day 11
   // (course day 12), a whole-cohort date -- see COHORT_DAY_ASSIGNMENTS in
   // assignment-due-dates.ts.
-  { type: "tp", title: "TP5 -- Half A", position: pos(10), time: "10:00", tag: "individual", linkedTpNumber: 5 },
+  { type: "tp", title: "TP5 -- Day A", position: pos(10), time: "10:00", tag: "individual", linkedTpNumber: 5 },
   { type: "milestone", title: "Stage 2 tutorials begin", position: pos(10), time: "14:30", tag: "individual" },
   {
     // 3b is FIRST introduced in Text-based teaching (day 4 above), which is
@@ -335,7 +335,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     inputSessionCriteria: ["3b"],
   },
-  { type: "tp", title: "TP5 -- Half B", position: pos(11), time: "10:00", tag: "individual", linkedTpNumber: 5 },
+  { type: "tp", title: "TP5 -- Day B", position: pos(11), time: "10:00", tag: "individual", linkedTpNumber: 5 },
   {
     // Both this session and "Teaching speaking" above tag 3b -- 3b covers
     // BOTH oral and written production in one code (no separate "writing"
@@ -359,7 +359,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
 
   // Day 12-13 (Wed/Thu) -- TP6. Skills resubmission and LfC's release sit
   // here, mirroring the reference.
-  { type: "tp", title: "TP6 -- Half A", position: pos(12), time: "10:00", tag: "individual", linkedTpNumber: 6 },
+  { type: "tp", title: "TP6 -- Day A", position: pos(12), time: "10:00", tag: "individual", linkedTpNumber: 6 },
   {
     type: "resubmission_due",
     title: "Language Skills Related Tasks -- resubmission due, both groups",
@@ -368,7 +368,7 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
     tag: "whole_group",
     linkedAssignmentType: "Skills",
   },
-  { type: "tp", title: "TP6 -- Half B", position: pos(13), time: "10:00", tag: "individual", linkedTpNumber: 6 },
+  { type: "tp", title: "TP6 -- Day B", position: pos(13), time: "10:00", tag: "individual", linkedTpNumber: 6 },
   { type: "milestone", title: "Lessons from the Classroom released", position: pos(13), time: "17:00", tag: "whole_group", linkedAssignmentType: "LfC" },
 
   // Day 14 (Fri) -- no TP: syllabus planning, FOL resubmission due.
@@ -386,19 +386,19 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // (not "the day after your own last TP") -- each half is due on the
   // OTHER half's TP7 day, giving both a symmetric gap after TP7 and before
   // TP8, the final assessed lesson.
-  { type: "tp", title: "TP7 -- Half A", position: pos(15), time: "10:00", tag: "individual", linkedTpNumber: 7 },
+  { type: "tp", title: "TP7 -- Day A", position: pos(15), time: "10:00", tag: "individual", linkedTpNumber: 7 },
   {
     type: "assignment_due",
-    title: "Lessons from the Classroom -- due 9am (Half B)",
+    title: "Lessons from the Classroom -- due 9am (Day B)",
     position: pos(15),
     time: "09:00",
     tag: "individual",
     linkedAssignmentType: "LfC",
   },
-  { type: "tp", title: "TP7 -- Half B", position: pos(16), time: "10:00", tag: "individual", linkedTpNumber: 7 },
+  { type: "tp", title: "TP7 -- Day B", position: pos(16), time: "10:00", tag: "individual", linkedTpNumber: 7 },
   {
     type: "assignment_due",
-    title: "Lessons from the Classroom -- due 9am (Half A)",
+    title: "Lessons from the Classroom -- due 9am (Day A)",
     position: pos(16),
     time: "09:00",
     tag: "individual",
@@ -409,9 +409,9 @@ export const STANDARD_CELTA_SKELETON: SkeletonEventDraft[] = [
   // LRT and LfC resubmissions both land day 18, mirroring the reference
   // (flagged there as clustering worth spreading out once real pacing is
   // tested -- kept as-is here for the same reason).
-  { type: "tp", title: "TP8 -- Half A", position: pos(17), time: "10:00", tag: "individual", linkedTpNumber: 8 },
+  { type: "tp", title: "TP8 -- Day A", position: pos(17), time: "10:00", tag: "individual", linkedTpNumber: 8 },
   { type: "milestone", title: "Filmed observation 5", position: pos(17), time: "17:00", tag: "individual", detail: "With task" },
-  { type: "tp", title: "TP8 -- Half B", position: pos(18), time: "10:00", tag: "individual", linkedTpNumber: 8 },
+  { type: "tp", title: "TP8 -- Day B", position: pos(18), time: "10:00", tag: "individual", linkedTpNumber: 8 },
   { type: "input_session", title: "Reflective Practice & Professional Development", position: pos(18), time: "14:30", tag: "whole_group" },
   {
     type: "resubmission_due",

@@ -809,7 +809,7 @@ async function main() {
         .from("course_subgroups")
         .insert({
           course_id: course.id,
-          name: `Group ${letter} -- Half ${half === 1 ? "A" : "B"}`,
+          name: `Group ${letter} -- Day ${half === 1 ? "A" : "B"}`,
           tp_group_id: tpGroupIds[`Group ${letter}`],
           half_order: half,
         })

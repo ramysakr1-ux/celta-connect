@@ -2250,6 +2250,7 @@ export interface Database {
             | "teaching_practice_tutor"
             | "input_session_tutor"
             | "external_assessor"
+            | "refresher_training"
             | null;
           is_trainer_in_training: boolean;
           verified_at: string | null;
@@ -2802,6 +2803,7 @@ export interface Database {
             | "teaching_practice_tutor"
             | "input_session_tutor"
             | "external_assessor"
+            | "refresher_training"
             | null;
           token: string;
           invited_by: string | null;

@@ -15,6 +15,10 @@ export const TUTOR_ROLES = [
   "teaching_practice_tutor",
   "input_session_tutor",
   "external_assessor",
+  // Admin Handbook §3.7.3 lists Refresher training as a course tutor role
+  // (a tutor re-accrediting). Added 11 Sep 2026 -- it was the one role from
+  // the Handbook's list the enum was missing.
+  "refresher_training",
 ] as const;
 
 export type TutorRole = (typeof TUTOR_ROLES)[number];
@@ -25,6 +29,7 @@ export const TUTOR_ROLE_LABELS: Record<TutorRole, string> = {
   teaching_practice_tutor: "TP Tutor",
   input_session_tutor: "Input Tutor",
   external_assessor: "Assessor (if known)",
+  refresher_training: "Refresher Training",
 };
 
 /** Alias kept so the Course Admin screens can read singular. */

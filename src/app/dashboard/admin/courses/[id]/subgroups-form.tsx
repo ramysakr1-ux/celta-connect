@@ -76,7 +76,7 @@ export function PairSubgroupsForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="first_subgroup_id" className="text-sm text-muted">
-            Half A
+            Day A
           </label>
           <select
             id="first_subgroup_id"
@@ -94,7 +94,7 @@ export function PairSubgroupsForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="second_subgroup_id" className="text-sm text-muted">
-            Half B
+            Day B
           </label>
           <select
             id="second_subgroup_id"

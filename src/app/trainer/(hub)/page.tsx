@@ -21,7 +21,7 @@ import { NeedsYou, type TodayAlert } from "@/app/trainer/(hub)/needs-you";
 import { AlsoUnder } from "@/app/trainer/(hub)/also-under";
 import { YourDay, LiveClock, type DaySlot } from "@/app/trainer/(hub)/your-day";
 import { DayBar, type DayBarItem } from "@/components/day-bar";
-import { sixHoursProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpLevelProblems, contactHoursProblems, type ComplianceProblem } from "@/lib/course-compliance";
+import { sixHoursProblems, doubleMarkingProblems, entryFormProblems, tpGroupSizeProblems, tpLevelProblems, contactHoursProblems, wholeClassProblems, mixedModeProblems, type ComplianceProblem } from "@/lib/course-compliance";
 
 // Checkpoint 2 -- Today, the (hub) group's own index page (bare /trainer),
 // replacing the old marketing hero + candidate-card-grid. build-spec.md's
@@ -623,6 +623,40 @@ export default async function TodayPage() {
       else if (e.type === "input_session" || e.type === "supervised_session") contactMinutes += bandMinutes(e.event_time);
     }
     problems.push(...contactHoursProblems({ locked: Boolean(course?.timetable_locked_at), contactHours: contactMinutes / 60 }));
+
+    // Whole-class rule (§9.1.2): at most one of a candidate's assessed lessons
+    // may be one-to-one. The "not in the final two" half is already a DB
+    // constraint (migration 0182); this catches two or more.
+    //
+    // Fetched here, standalone, rather than threaded through the bundle/
+    // fallback destructuring above -- adding a row there drifts every position
+    // after it, which is a bug I have shipped once already.
+    const { data: wholeClassPlans } = await admin
+      .from("plan_assignments")
+      .select("trainee_id, class_grouping")
+      .eq("course_id", courseId);
+    const oneToOneByTrainee = new Map<string, number>();
+    for (const pa of wholeClassPlans ?? []) {
+      if (!activeIds.has(pa.trainee_id)) continue;
+      if (pa.class_grouping === "one_to_one_or_small_group") {
+        oneToOneByTrainee.set(pa.trainee_id, (oneToOneByTrainee.get(pa.trainee_id) ?? 0) + 1);
+      }
+    }
+    problems.push(
+      ...wholeClassProblems({
+        candidates: rows
+          .filter((r) => r.courseStatus === "active" && (oneToOneByTrainee.get(r.id) ?? 0) > 0)
+          .map((r) => ({ id: r.id, name: r.name, oneToOneCount: oneToOneByTrainee.get(r.id) ?? 0 })),
+      })
+    );
+
+    // Mixed-mode split (§9.1.2): only fires when the course is declared mixed.
+    problems.push(
+      ...mixedModeProblems({
+        deliveryMode: course?.delivery_mode ?? "f2f",
+        tpModes: events.filter((e) => e.type === "tp").map((e) => e.mode),
+      })
+    );
   }
 
   // Same-tag problems collapse to one row. Seen live on the demo course:

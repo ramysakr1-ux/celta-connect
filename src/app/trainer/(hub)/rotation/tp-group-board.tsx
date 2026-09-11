@@ -1,4 +1,5 @@
 import { rotationPosition, distinctTpDates, type TpTimetableEvent } from "@/lib/rotation";
+import { lettersForGroup, dayLabel } from "@/lib/tp-letters";
 
 export interface BoardMember {
   traineeId: string;
@@ -23,17 +24,21 @@ export interface PlanLookup {
 // reference's own legend ("Blank means the other half is teaching").
 export function TpGroupBoard({
   groupName,
+  groupIndex,
   halves,
   tpEvents,
   plansByKey,
   today,
 }: {
   groupName: string;
+  /** 0-based position among the course's groups, for lettering (group 1 = A-F). */
+  groupIndex: number;
   halves: BoardHalf[];
   tpEvents: TpTimetableEvent[];
   plansByKey: Map<string, PlanLookup>;
   today: string;
 }) {
+  const letters = lettersForGroup(halves, groupIndex);
   const allDates = distinctTpDates(tpEvents);
   const nextDate = allDates.find((d) => d >= today) ?? null;
 
@@ -56,7 +61,7 @@ export function TpGroupBoard({
     <div className="sheet flex flex-col gap-4 p-6">
       <div>
         <h3 className="font-serif text-lg text-ink">{groupName}</h3>
-        <p className="text-sm text-muted">Halves alternate which real TP day they teach on.</p>
+        <p className="text-sm text-muted">Day A and Day B teach on alternating TP days.</p>
       </div>
 
       <div className="overflow-x-auto">
@@ -80,7 +85,7 @@ export function TpGroupBoard({
                       {new Date(`${date}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                     </span>
                     <span className="block text-[9px] font-semibold uppercase tracking-[0.06em] text-muted">
-                      Half {owningHalf === 1 ? "A" : "B"}
+                      {dayLabel(owningHalf)}
                     </span>
                   </th>
                 );
@@ -96,12 +101,13 @@ export function TpGroupBoard({
                       className={`h-3.5 w-[3px] shrink-0 rounded-full ${half.halfOrder === 1 ? "bg-primary" : "bg-[oklch(45%_0.1_300)]"}`}
                     />
                     <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink">
-                      Half {half.halfOrder === 1 ? "A" : "B"}
+                      {dayLabel(half.halfOrder)}
                     </span>
                   </div>
                   <div className="mt-2 flex flex-col gap-2.5">
                     {half.members.map((m) => (
-                      <p key={m.traineeId} className="text-sm text-ink">
+                      <p key={m.traineeId} className="flex items-baseline gap-2 text-sm text-ink">
+                        <span className="w-4 shrink-0 text-[11px] font-bold tabular-nums text-muted">{letters.get(m.traineeId) ?? ""}</span>
                         {m.fullName}
                       </p>
                     ))}
