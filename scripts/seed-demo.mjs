@@ -1924,6 +1924,34 @@ async function main() {
       sent_at: daysAgoIso(3),
     });
 
+    // §11 double-marking: the centre blind-second-marks a sample of each
+    // assignment (quota is 4 of each on a course of 12) for standardisation.
+    // Only marked work can be double-marked, so at this point only Focus on
+    // the Learner and LRT qualify -- Skills is still under review and LfC is
+    // not open. The two resubmissions already carry a second marker (Ines's
+    // FoL, Priya's LRT), so top each type up to four with the ACT (Marcus) as
+    // the blind second marker on already-passed first submissions. The seed
+    // wrote none of this, so the MCT's §11 compliance nudge read the centre
+    // as behind on double-marking it had in fact done.
+    const doubleMarkAt = daysAgoIso(3);
+    const doubleMarkSample = [
+      ["Amara Okafor", "Focus on Learner"],
+      ["Priya Sharma", "Focus on Learner"],
+      ["Kofi Mensah", "Focus on Learner"],
+      ["Amara Okafor", "LRT"],
+      ["Ines Marchetti", "LRT"],
+      ["Tomas Novak", "LRT"],
+    ];
+    for (const [name, type] of doubleMarkSample) {
+      const id = assignmentIds[name]?.[type];
+      if (!id) continue;
+      await supabase
+        .from("assignments")
+        .update({ second_marker_id: trainer2Id, second_marker_recorded_at: doubleMarkAt })
+        .eq("id", id);
+    }
+    console.log(`double-marking: FoL and LRT topped up to the §11 quota (4 each) with the ACT as blind second marker`);
+
     console.log(
       `written assignments: ${activeDefs.length} candidates, full cycle + 1 warning letter + Assignment 5 (plagiarism reflection)`
     );

@@ -580,6 +580,11 @@ export default async function TodayPage() {
     const byType = new Map<string, number>();
     const types = new Set<string>();
     for (const a of courseAssignments ?? []) {
+      // Double-marking (§11) is a sample of the four Cambridge assignments. The
+      // Plagiarism Reflection is a one-chance centre sanction, never double-
+      // marked, so counting it as a fifth type put the quota permanently one
+      // assignment short ("5 short" where the real answer is four).
+      if (a.assignment_type === "Plagiarism Reflection") continue;
       types.add(a.assignment_type);
       if (a.second_marker_recorded_at) byType.set(a.assignment_type, (byType.get(a.assignment_type) ?? 0) + 1);
     }
