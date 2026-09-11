@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchRosterRows } from "@/lib/roster";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { formatDateTime } from "@/lib/format-date";
 import { AssessorCard } from "@/app/trainer/(hub)/assessor-card";
 import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 import { AssessorSelectionButton } from "@/app/trainer/(hub)/roster/assessor-selection-button";
@@ -319,6 +320,24 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
     withdrawalLettersOutstanding: withdrawalsWithoutLetter ?? 0,
   });
 
+  // What became of the last pack email. "Sent." on the button is true at the
+  // moment of sending and stays on screen; a bounce arrives seconds later by
+  // webhook and, until 11 Sep 2026, surfaced only on the Centre landing and
+  // the admissions email log -- never here, where the MCT pressed Send. The
+  // demo's own assessor address bounced exactly like that while the tab still
+  // said "Sent." The centre's own log, read through the admin client as the
+  // rest of this page's centre-level reads are; authorisation is the
+  // trainer's role and centre, already established above.
+  const { data: packEmailRows } = await createAdminClient()
+    .from("applicant_emails")
+    .select("to_email, status, error, created_at, bounced_at, bounce_reason, delivered_at, opened_at")
+    .eq("center_id", trainer.center_id ?? "")
+    .eq("type", "assessor_pack")
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const packEmail = packEmailRows?.[0] ?? null;
+  const packEmailTz = (await getCachedCenter(trainer.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+
   const nameById = new Map(cards.map((c) => [c.traineeId, c.name]));
   const chooserName = chooser?.full_name ?? null;
   const existingChoice = lastChoice
@@ -523,6 +542,23 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
                 </span>
               )}
             </div>
+            {packEmail ? (
+              <p className={`text-xs ${packEmail.status === "bounced" || packEmail.status === "failed" ? "font-medium text-destructive" : "text-muted"}`}>
+                {packEmail.status === "bounced"
+                  ? `The pack email to ${packEmail.to_email} bounced, ${formatDateTime(packEmail.bounced_at ?? packEmail.created_at, packEmailTz)}${
+                      packEmail.bounce_reason ? `: ${packEmail.bounce_reason}` : "."
+                    } The link still works -- send it another way, or correct the address on the Assessor card.`
+                  : packEmail.status === "failed"
+                    ? `The pack email to ${packEmail.to_email} could not be sent${packEmail.error ? `: ${packEmail.error}` : "."}`
+                    : `Pack emailed to ${packEmail.to_email}, ${formatDateTime(packEmail.created_at, packEmailTz)}${
+                        packEmail.opened_at
+                          ? ` · opened ${formatDateTime(packEmail.opened_at, packEmailTz)}`
+                          : packEmail.delivered_at
+                            ? " · delivered"
+                            : ""
+                      }.`}
+              </p>
+            ) : null}
             {!packOpens ? (
               <div className={`rounded-[10px] px-4 py-3 text-xs ${preview === "not-ready" ? "bg-card-inset text-ink" : "text-muted"}`}>
                 <p className="font-semibold">The pack cannot open yet -- the link, the email and the preview all wait for this:</p>

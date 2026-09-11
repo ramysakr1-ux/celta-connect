@@ -12,8 +12,9 @@ const initialEmailState: SendAssessorEmailState = { error: null, sent: false };
 // overridable, and the right call here because Cambridge's own deadline does
 // not wait for a centre's paperwork.
 export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[] }) {
-  const [state, setState] = useState<"idle" | "loading" | "copied" | "error" | "not_ready" | "warn">("idle");
+  const [state, setState] = useState<"idle" | "loading" | "copied" | "error" | "not_ready" | "warn" | "manual">("idle");
   const [issues, setIssues] = useState<string[]>([]);
+  const [link, setLink] = useState<string | null>(null);
   const [emailOpen, setEmailOpen] = useState(false);
   const [emailState, emailAction, emailPending] = useActionState(sendAssessorInviteEmail, initialEmailState);
 
@@ -36,9 +37,21 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
       setState("error");
       return;
     }
-    await navigator.clipboard.writeText(`${window.location.origin}/assessor/${token}`);
-    setState("copied");
-    setTimeout(() => setState("idle"), 2000);
+    const url = `${window.location.origin}/assessor/${token}`;
+    // The clipboard can refuse -- no permission, an insecure context, a
+    // document that is not focused (Safari, some embeds). This used to await
+    // it bare, so a refusal left the button on "Checking readiness…" for
+    // good, disabled, with the link minted and nowhere to see it (found 11
+    // Sep 2026 walking the flow). Fall back to showing the link to copy by
+    // hand: the point of the button is that the MCT ends up holding the link.
+    try {
+      await navigator.clipboard.writeText(url);
+      setState("copied");
+      setTimeout(() => setState("idle"), 2000);
+    } catch {
+      setLink(url);
+      setState("manual");
+    }
   }
 
   return (
@@ -60,8 +73,26 @@ export function AssessorLinkButton({ outstanding = [] }: { outstanding?: string[
                   ? "Not ready yet"
                   : state === "warn"
                     ? "Check first"
-                    : "Share assessor link"}
+                    : state === "manual"
+                      ? "Copy by hand"
+                      : "Share assessor link"}
         </button>
+        {state === "manual" && link ? (
+          <div className="absolute right-0 top-full z-10 mt-1.5 w-80 rounded-[6px] border border-border bg-card p-3 text-xs shadow-sm">
+            <p className="font-semibold text-ink">The link is ready, but the clipboard refused it.</p>
+            <input
+              readOnly
+              value={link}
+              onFocus={(e) => e.currentTarget.select()}
+              aria-label="Assessor link"
+              className="mt-1.5 h-8 w-full rounded-[6px] border border-border bg-card-inset px-2 font-mono text-[11px] text-ink"
+            />
+            <p className="mt-1.5 text-muted">Select it and copy.</p>
+            <button type="button" onClick={() => setState("idle")} className="mt-2 text-primary hover:underline">
+              Close
+            </button>
+          </div>
+        ) : null}
         {state === "warn" ? (
           <div className="absolute top-full right-0 z-10 mt-1.5 w-80 rounded-[6px] border border-border bg-card p-3 text-xs shadow-sm">
             <p className="font-semibold text-ink">
