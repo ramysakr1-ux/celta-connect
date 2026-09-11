@@ -376,6 +376,10 @@ export default async function AssessorPage({
     new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
   const shortDate = (iso: string) =>
     new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  // Malpractice fields are timestamptz (an instant), not date-only, so this
+  // resolves the day in the centre's zone before writing it the pack's way.
+  const fmtCaseDate = (ts: string) =>
+    new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone });
 
   const CARD = "var(--color-card)";
   const BORDER = "oklch(88% 0.016 82)";
@@ -1162,12 +1166,16 @@ export default async function AssessorPage({
                       {c.flagged_for_referral ? (
                         <span style={{ fontSize: 11, fontWeight: 600, color: "oklch(45% 0.15 27)" }}>Referred to the centre&apos;s malpractice procedure</span>
                       ) : null}
+                      {/* en-GB in the centre's zone, like every other date in
+                          this pack. Bare toLocaleDateString() rendered in the
+                          SERVER's locale -- "9/6/2026", which a British
+                          assessor reads as 9 June, not 6 September. */}
                       <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 11.5, color: MUTED }}>
-                        <span>Opened {new Date(c.opened_at).toLocaleDateString()}</span>
+                        <span>Opened {fmtCaseDate(c.opened_at)}</span>
                         {c.candidate_account_recorded_at ? (
-                          <span>Candidate&apos;s account recorded {new Date(c.candidate_account_recorded_at).toLocaleDateString()}</span>
+                          <span>Candidate&apos;s account recorded {fmtCaseDate(c.candidate_account_recorded_at)}</span>
                         ) : null}
-                        {c.decided_at ? <span>Decided {new Date(c.decided_at).toLocaleDateString()}</span> : null}
+                        {c.decided_at ? <span>Decided {fmtCaseDate(c.decided_at)}</span> : null}
                       </div>
                       {c.candidate_account ? (
                         <div>
