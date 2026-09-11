@@ -1333,7 +1333,13 @@ async function main() {
       // attendance problem, because a demo with nothing wrong in it teaches
       // nobody what the alert looks like.
       hours_attended: def.withdrawn ? Math.round(hoursSoFar * 0.4) : Math.round(hoursSoFar * (ATTENDANCE_RATE[def.name] ?? 1)),
-      provisional_grade: def.grade,
+      // A withdrawn candidate's grade IS "Withdrawn" -- it is recorded and
+      // reported to Cambridge as such. The seed left it null, so the grade
+      // form read "Not set" and then chased the candidate for four assignment
+      // signatures they will never give. "Withdrawn" is a real provisional
+      // slot (PROVISIONAL_SLOTS); recording it puts Marek in the Withdrawn
+      // band with nothing outstanding.
+      provisional_grade: def.withdrawn ? "Withdrawn" : def.grade,
       provisional_grade_upper: def.upper,
       // The MCT approves the provisional grades before they are sent to the
       // assessor -- provisional_approved_at is what the assessor pack counts
@@ -1342,7 +1348,7 @@ async function main() {
       // were due today. Confirmed wherever a grade exists; the one ungraded
       // candidate (Ruben) stays unconfirmed, which is the honest state of the
       // one case the grading meeting has not settled.
-      provisional_approved_at: def.grade ? new Date(Date.now() - 1 * 86400000).toISOString() : null,
+      provisional_approved_at: def.grade || def.withdrawn ? new Date(Date.now() - 1 * 86400000).toISOString() : null,
       };
     })
   );

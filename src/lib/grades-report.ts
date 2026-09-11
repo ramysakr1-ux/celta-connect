@@ -82,6 +82,12 @@ export async function computeCohortRows(
     let outstanding = "";
     if (!record) {
       outstanding = "No CELTA 5 record";
+    } else if (record.provisional_grade === "Withdrawn") {
+      // A withdrawn candidate has nothing outstanding -- their portfolio is
+      // paused as it stands. Without this the sheet chased them for the four
+      // assignment signatures they never gave, which read as an open item on
+      // someone who has left the course.
+      outstanding = "";
     } else if (record.stage3_tutorial_required && !record.stage3_finalized_at) {
       outstanding = "Stage 3 record open";
     } else {
