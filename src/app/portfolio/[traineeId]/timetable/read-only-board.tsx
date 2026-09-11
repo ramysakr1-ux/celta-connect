@@ -365,6 +365,13 @@ export function ReadOnlyTimetableBoard({
                       <span className="text-[12.5px] text-ink" style={{ fontWeight: style.titleWeight }}>
                         {event.title}
                       </span>
+                      {/* The subtitle the grid Cell shows (room and level for a
+                          TP slot -- "Room 7 · A2"). Dropping it here made the
+                          two parallel groups' identically-titled slots ("TP5 ·
+                          B" in both) read as duplicates on a narrow screen. */}
+                      {event.detail ? (
+                        <span className="text-[10.5px] text-muted">{event.detail}</span>
+                      ) : null}
                       {meta.teachingLetters ? (
                         <span className="text-[10.5px] text-muted">{meta.teachingLetters}</span>
                       ) : null}
