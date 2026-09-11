@@ -42,19 +42,14 @@ export default async function TrainerHubLayout({ children }: { children: React.R
   // a touring assessor gets the real trainer tab set instead, since the
   // whole point is letting them see how the platform actually works.
   const tourMode = isAssessor && (await isAssessorTourMode());
-  // Ramy, 10 Sep 2026: "there is no way to go back to the assessor page."
-  //
-  // isAssessor is deliberately `!isRealStaff && cookie`, so a real MCT checking
-  // what the pack looks like is not an assessor here -- they keep their own
-  // tabs, which is right. But it also meant the hub had no idea they had come
-  // from the pack, so the wordmark sent them to /trainer and the pack was
-  // unreachable without retyping the URL.
-  //
-  // The preview cookie is the precise signal: only /trainer/assessor/preview
-  // sets it, and /assessor/exit clears it. A stale plain assessor cookie does
-  // not trigger this.
+  // Ramy, 10 Sep 2026: "there is no way to go back to the assessor page." A
+  // trainer who previews the pack needs a door back to it. The preview cookie
+  // is the precise signal that they came from there: only
+  // /trainer/assessor/preview sets it, and /assessor/exit clears it (a stale
+  // plain assessor cookie does not trigger it). That door is the "Assessor
+  // pack" pill below -- NOT the Connect mark, which is a home door (Ramy,
+  // 11 Sep 2026: "Connect takes you home").
   const assessorPreview = await isAssessorPreview();
-  const backToPack = isAssessor || assessorPreview;
 
   // Everything the frame needs that depends only on the profile, in ONE
   // wave. Perf audit, 5 Sep 2026: this used to be four stacked round-trip
@@ -207,7 +202,16 @@ export default async function TrainerHubLayout({ children }: { children: React.R
             treatment the trainee header got for its day bar on 10 Sep 2026. */}
         <div className="flex flex-wrap items-center gap-x-[18px] gap-y-2 px-[22px] py-2 sm:h-14 sm:flex-nowrap sm:py-0">
           <Link
-            href={backToPack ? "/assessor" : profile?.role === "platform_owner" ? "/platform/command-center" : "/trainer"}
+            // Ramy, 11 Sep 2026: "Connect takes you home." The mark is a home
+            // door, not a back button -- so it goes to the VIEWER's own home:
+            // a real assessor's is /assessor, a platform owner's is the command
+            // centre, everyone else's is /trainer. A trainer PREVIEWING the
+            // pack (assessorPreview) is still a trainer, so their home is
+            // /trainer, not /assessor -- sending the mark there took a trainer
+            // account to a page it cannot open, which bounced to sign-in. The
+            // discoverable way back to the pack is the "Assessor pack" pill
+            // beside the mark (below), which is what that fix should have been.
+            href={isAssessor ? "/assessor" : profile?.role === "platform_owner" ? "/platform/command-center" : "/trainer"}
             className="block shrink-0"
           >
             <Wordmark size="header-compact" gapPx={9} />
