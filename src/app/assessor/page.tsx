@@ -666,7 +666,15 @@ export default async function AssessorPage({
           >
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: AMBER }}>
               {sendByDate ? `Provisional grades due: ${longDate(sendByDate)} EOD` : "No provisional grades deadline set"}
-              {daysOut !== null ? ` · ${daysOut} day${daysOut === 1 ? "" : "s"} out` : ""}
+              {/* "-1 days out" was what this printed the morning after the
+                  deadline (12 Sep 2026). Past is said as overdue. */}
+              {daysOut === null
+                ? ""
+                : daysOut > 0
+                  ? ` · ${daysOut} day${daysOut === 1 ? "" : "s"} out`
+                  : daysOut === 0
+                    ? " · due today"
+                    : ` · ${-daysOut} day${daysOut === -1 ? "" : "s"} overdue`}
             </span>
             <span style={{ fontSize: 12, color: INK }}>
               {sendByDate

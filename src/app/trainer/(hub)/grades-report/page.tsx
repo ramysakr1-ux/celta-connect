@@ -5,6 +5,8 @@ import { getCurrentProfile } from "@/lib/auth/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAssessorCourseId } from "@/lib/auth/portfolio-access";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { computeStrengthsAndActionPoints, applyGradesReportOverrides, criterionLine } from "@/lib/celta-criteria";
 import { CriteriaList, CopyField } from "@/app/trainer/(hub)/grades-report/report-cards";
 import { buildReleaseChecklist } from "@/lib/release-checklist";
@@ -84,6 +86,15 @@ export default async function GradesReportPage() {
     courseId,
     { approvedOnly: !trainer }
   );
+  // How far the provisional deadline is, counted in the centre's own day --
+  // worked out here rather than in the banner, which is a client component
+  // and would otherwise disagree with the server about the date near
+  // midnight. Negative means overdue.
+  const gradesTimeZone = (trainer?.center_id ? (await getCachedCenter(trainer.center_id))?.time_zone : null) ?? DEFAULT_TIMEZONE;
+  const gradesToday = toLocalIso(new Date(), gradesTimeZone);
+  const provisionalDaysOut = provisionalDueAt
+    ? Math.ceil((new Date(`${provisionalDueAt.slice(0, 10)}T00:00:00`).getTime() - new Date(`${gradesToday}T00:00:00`).getTime()) / 86400000)
+    : null;
 
   const { data: trainees } = await supabase
     .from("profiles")
@@ -179,6 +190,7 @@ export default async function GradesReportPage() {
         canRelease={Boolean(trainer)}
         provisionalDueAt={provisionalDueAt}
         provisionalDueDerived={provisionalDueDerived}
+        provisionalDaysOut={provisionalDaysOut}
         appianUrl={appianUrl}
         isMct={isMct}
       />

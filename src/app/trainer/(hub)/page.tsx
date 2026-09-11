@@ -14,6 +14,7 @@ import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeWeekOf } from "@/lib/course-progress";
 import { AT_RISK_LABELS } from "@/lib/at-risk";
 import { buildCentrePreparationList, centrePreparationDeadline, type AssessmentKind } from "@/lib/assessor-requirements";
+import { resolveProvisionalDeadline, REMINDER_DAYS_BEFORE_DUE } from "@/lib/provisional-deadline";
 import { assessorVisitDayProblem } from "@/lib/assessor-day";
 import { findMaterialsOverlaps } from "@/lib/materials-overlap";
 import { Avatar } from "@/components/avatar";
@@ -286,19 +287,41 @@ export default async function TodayPage() {
     });
     visitDayProblem = visitDayProblemRaw;
   }
-  if (isMct && course?.provisional_grades_due_at) {
-    const withProvisional = (celta5Rows ?? []).filter((r) => r.provisional_grade);
-    const approvedCount = withProvisional.filter((r) => r.provisional_approved_at).length;
-    const dueDate = course.provisional_grades_due_at.slice(0, 10);
+  // The same deadline the Grade form and the assessor pack work to: an
+  // MCT-set date wins, else two days before the visit. This read only the
+  // MCT-set field until 12 Sep 2026, so a course on the suggested date --
+  // most of them -- never got the alert at all; and it said "due today" for
+  // any day at or past the date, the morning after included.
+  const provisionalDeadline = isMct
+    ? resolveProvisionalDeadline(course?.provisional_grades_due_at ?? null, course?.assessor_visit_date ?? null)
+    : null;
+  if (isMct && provisionalDeadline?.dueDate) {
+    // The active cohort, as the Grade form and the pack count it: a withdrawn
+    // candidate is a settled outcome, not a grade to confirm, so it sits in
+    // neither the numerator nor the denominator. This read "11 of 12" beside
+    // a sheet reading "10 of 11" until 12 Sep 2026.
+    // The bundle's CELTA 5 slice carries no trainee id, so the withdrawn are
+    // excluded the way the Grade form marks them: a "Withdrawn" slot is a
+    // settled outcome, not a confirmed grade.
+    const gradeCandidateCount = rows.filter((r) => r.courseStatus !== "withdrawn").length;
+    const approvedCount = (celta5Rows ?? []).filter(
+      (r) => r.provisional_grade && r.provisional_grade !== "Withdrawn" && r.provisional_approved_at
+    ).length;
+    const dueDate = provisionalDeadline.dueDate;
     const daysOut = Math.ceil((new Date(`${dueDate}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000);
-    const REMINDER_WINDOW_DAYS = 4;
-    if (daysOut <= REMINDER_WINDOW_DAYS && approvedCount < traineeIds.length) {
+    if (daysOut <= REMINDER_DAYS_BEFORE_DUE && approvedCount < gradeCandidateCount) {
+      const overdue = -daysOut;
       alerts.push({
         kind: "marking",
         badge: "PG",
-        due: daysOut <= 0 ? "Today" : `${daysOut}d`,
-        title: `Provisional grades due ${daysOut <= 0 ? "today" : `in ${daysOut} day${daysOut === 1 ? "" : "s"}`}`,
-        meta: `${approvedCount} of ${traineeIds.length} confirmed by the MCT`,
+        due: daysOut > 0 ? `${daysOut}d` : daysOut === 0 ? "Today" : "Late",
+        title:
+          daysOut > 0
+            ? `Provisional grades due in ${daysOut} day${daysOut === 1 ? "" : "s"}`
+            : daysOut === 0
+              ? "Provisional grades due today"
+              : `Provisional grades overdue by ${overdue} day${overdue === 1 ? "" : "s"}`,
+        meta: `${approvedCount} of ${gradeCandidateCount} confirmed by the MCT`,
         href: "/trainer/grades-report",
         destructive: daysOut <= 0,
       });

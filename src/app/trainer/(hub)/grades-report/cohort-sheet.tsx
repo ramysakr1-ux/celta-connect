@@ -66,6 +66,7 @@ export function CohortSheet({
   canRelease,
   provisionalDueAt,
   provisionalDueDerived,
+  provisionalDaysOut = null,
   appianUrl,
   isMct,
 }: {
@@ -75,6 +76,8 @@ export function CohortSheet({
   canRelease: boolean;
   provisionalDueAt: string | null;
   provisionalDueDerived?: boolean;
+  /** Days until the provisional deadline in the centre's day; negative when past. */
+  provisionalDaysOut?: number | null;
   /** The centre's Appian sign-in page. Null until someone sets it. */
   appianUrl?: string | null;
   isMct: boolean;
@@ -148,6 +151,7 @@ export function CohortSheet({
       <ProvisionalDeadlineBanner
         dueAt={provisionalDueAt}
         derived={provisionalDueDerived}
+        daysOut={provisionalDaysOut}
         isMct={isMct}
         approvedCount={approvedCount}
         totalCount={gradeCandidates.length}
