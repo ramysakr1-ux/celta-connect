@@ -99,10 +99,18 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
   const visitDate = course?.assessor_visit_date ?? null;
   const assessmentKind = (course?.assessment_kind ?? "regular") as AssessmentKind;
   const preparationDeadline = centrePreparationDeadline(visitDate);
+  // Handbook 14.1's counts are of candidates being assessed. fetchRosterRows
+  // returns the withdrawn too (they still belong on the roster), but a
+  // withdrawn candidate has no portfolio to hand over -- their paperwork is
+  // the separate withdrawal-documentation item -- and the readiness figures
+  // this list is compared against count only the active. "All 12 ... 0 of 12
+  // complete" against "11 active" was the same denominator bug the assessor
+  // pack had, fixed there the same day (11 Sep 2026).
+  const activeCandidateCount = rows.filter((r) => r.courseStatus !== "withdrawn").length;
   const centrePreparation = buildCentrePreparationList({
     assessmentKind,
     deliveryMode: course?.delivery_mode ?? "f2f",
-    candidateCount: rows.length,
+    candidateCount: activeCandidateCount,
     withdrawnCount: withdrawnCount ?? 0,
   });
   const [visitDayProblem, readiness, { data: liveToken }] = await Promise.all([
@@ -272,8 +280,20 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         .from("volunteer_attendance")
         .select("id, course_timetable_events!inner(course_id)", { count: "exact", head: true })
         .eq("course_timetable_events.course_id", courseId),
-      visitDayTpNumber > 0
-        ? supabase.from("plan_assignments").select("id", { count: "exact", head: true }).eq("course_id", courseId).eq("tp_number", visitDayTpNumber)
+      // 14.1's "lesson plans for the day" are the CANDIDATES' plans -- tp_plans,
+      // the document a trainee submits -- not plan_assignments, which is the
+      // tutor's TP-point record (rotation, aims, procedure). This counted the
+      // wrong table until 11 Sep 2026 and read "1 of 6 plans in" against six
+      // submitted plans. Scoped to whoever teaches on the visit day, so a plan
+      // from someone not teaching cannot stand in for one who is.
+      visitDayTpNumber > 0 && teachingSlots.length > 0
+        ? supabase
+            .from("tp_plans")
+            .select("id", { count: "exact", head: true })
+            .eq("course_id", courseId)
+            .eq("tp_number", visitDayTpNumber)
+            .in("trainee_id", teachingSlots.map((s) => s.traineeId))
+            .not("submitted_at", "is", null)
         : Promise.resolve({ count: 0 }),
       supabase
         .from("profiles")
@@ -285,14 +305,16 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
 
   const prep = await buildPrepSummary(supabase, centrePreparation, {
     courseId,
-    candidateCount: rows.length,
+    candidateCount: activeCandidateCount,
     portfoliosComplete: readiness.portfoliosCompleteCount,
     hasTimetable: (timetableEvents ?? 0) > 0,
     publishedAssignmentTitles: (publishedBriefs ?? 0) > 0,
     appianReference: course?.appian_notification_reference ?? null,
     previousReportOnFile,
     attendanceRegisterRows: attendanceRows ?? 0,
-    lessonPlansForVisitDay: visitDayPlans ?? 0,
+    // Capped at the slots: a trainee with a draft and a resubmission would
+    // otherwise count twice and read "7 of 6".
+    lessonPlansForVisitDay: Math.min(visitDayPlans ?? 0, teachingSlots.length),
     visitDayTeachingSlots: teachingSlots.length,
     withdrawalLettersOutstanding: withdrawalsWithoutLetter ?? 0,
   });

@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { updateAssessorContact, type AssessorContactState } from "@/app/trainer/assessor-actions";
+import { formatCalendarDate } from "@/lib/format-date";
 
 const initialState: AssessorContactState = { error: null };
 
@@ -168,7 +169,15 @@ export function AssessorCard({
         <div className="flex flex-col gap-1 text-[12.5px] leading-[1.5]">
           <p className="text-ink">{name || <span className="text-muted italic">Not set yet</span>}</p>
           {email ? <p className="text-muted">{email}</p> : null}
-          <p className="text-muted">{visitDate ? `Visit date: ${visitDate}` : "Visit date not set yet."}</p>
+          {/* Written the way a person says it, not "2026-09-14": the date
+              input keeps the ISO value, the read-out does not have to. A
+              date-only column, so formatCalendarDate -- no zone, no shifting
+              the 14th to the 13th. */}
+          <p className="text-muted">
+            {visitDate
+              ? `Visit date: ${formatCalendarDate(visitDate, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`
+              : "Visit date not set yet."}
+          </p>
           {appianReference ? (
             <p className="text-muted">
               Appian reference: <span className="font-mono text-ink">{appianReference}</span>

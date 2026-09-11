@@ -303,6 +303,7 @@ export default async function AssessorPage({
       ? halfTpDates(allCourseTpEvents, visitHalf).indexOf(course.assessor_visit_date) + 1
       : 0;
   const teachingOrderNames: string[] = [];
+  const visitTeachingIds: string[] = [];
   if (visitHalf && visitTpNumber > 0) {
     const halfSubgroupIds = (visitSubgroups ?? []).filter((sg) => sg.half_order === visitHalf).map((sg) => sg.id);
     const members = (visitMembers ?? []).filter((m) => halfSubgroupIds.includes(m.subgroup_id));
@@ -311,12 +312,31 @@ export default async function AssessorPage({
     );
     const ordered = members
       .map((m) => ({
+        traineeId: m.trainee_id,
         name: candidates.find((c) => c.traineeId === m.trainee_id)?.name ?? null,
         order: rotationPosition(m.base_slot, sizeBySubgroup.get(m.subgroup_id) ?? 1, visitTpNumber) + 1,
       }))
-      .filter((x): x is { name: string; order: number } => Boolean(x.name))
+      .filter((x): x is { traineeId: string; name: string; order: number } => Boolean(x.name))
       .sort((a, b) => a.order - b.order);
     teachingOrderNames.push(...ordered.map((o) => o.name));
+    visitTeachingIds.push(...ordered.map((o) => o.traineeId));
+  }
+  // How many of the day's teachers have actually submitted a plan. The panel
+  // used to assert "All N carry a lesson plan" from the slot count alone --
+  // a rule (14.1) printed as a fact, and on 11 Sep 2026 the trainer's own
+  // Assessor tab was reading a different number for the same six lessons.
+  // Both now read tp_plans, the document a candidate submits, for the visit's
+  // TP, scoped to whoever teaches that day.
+  let visitPlansIn = 0;
+  if (visitTeachingIds.length > 0) {
+    const { count } = await admin
+      .from("tp_plans")
+      .select("id", { count: "exact", head: true })
+      .eq("course_id", courseId)
+      .eq("tp_number", visitTpNumber)
+      .in("trainee_id", visitTeachingIds)
+      .not("submitted_at", "is", null);
+    visitPlansIn = Math.min(count ?? 0, visitTeachingIds.length);
   }
 
   const hasTimetabledCandidateMeeting = (onDayEvents ?? []).some((e) =>
@@ -932,8 +952,10 @@ export default async function AssessorPage({
                   {teachingOrderNames.length > 2 ? (
                     <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(90% 0.012 85)" }}>
                       You co-observe <strong style={{ color: INK }}>two</strong> of the {teachingOrderNames.length} lessons above
-                      (Handbook 14.2), agreed with the centre. All {teachingOrderNames.length} carry a lesson plan, since the
-                      choice can change on the day.
+                      (Handbook 14.2), agreed with the centre.{" "}
+                      {visitPlansIn >= teachingOrderNames.length
+                        ? `All ${teachingOrderNames.length} lesson plans are in, since the choice can change on the day.`
+                        : `${visitPlansIn} of ${teachingOrderNames.length} lesson plans are in so far -- 14.1 allows the rest to be handed over at the start of the lesson.`}
                     </span>
                   ) : null}
 
