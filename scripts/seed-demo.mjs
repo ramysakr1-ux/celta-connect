@@ -1306,9 +1306,23 @@ async function main() {
   // state, not an empty one. The one candidate left ungraded is the one the
   // grading meeting has not settled, which is also a real state.
   await supabase.from("celta5_records").insert(
-    traineeDefs.map((def) => ({
+    traineeDefs.map((def) => {
+      // Stage One is filed early (week 1-2) for a well-run course, so by now
+      // it is done for everyone still on the course -- except Daniel, whose
+      // Stage 1 invite is still unconfirmed below (his tutorial has not
+      // happened), and the withdrawn candidate. The seed created the Stage 1
+      // timetable events but never the record, so the roster flagged all
+      // twelve "Stage 1 unfiled"; this files it where it should be.
+      const stage1Filed = !def.withdrawn && def.name !== "Daniel Kim";
+      const stage1At = new Date(Date.now() - 12 * 86400000).toISOString();
+      return {
       course_id: course.id,
       trainee_id: trainees[def.name],
+      stage1_tutorial_given: stage1Filed,
+      stage1_completed_at: stage1Filed ? stage1At : null,
+      stage1_released_at: stage1Filed ? stage1At : null,
+      stage1_strengths: stage1Filed ? "Confident classroom presence and a clear speaking model; good rapport with the learners from the first lesson." : null,
+      stage1_action_plan: stage1Filed ? "Tighten task instructions and check them before starting; give clearer time limits so pace does not drift." : null,
       // Hours are measured against the hours that have HAPPENED (see
       // courseElapsedFraction), so a flat 24 out of a 120-hour course read as
       // 20% for everyone and put the entire cohort on the MCT's landing page
@@ -1329,7 +1343,8 @@ async function main() {
       // candidate (Ruben) stays unconfirmed, which is the honest state of the
       // one case the grading meeting has not settled.
       provisional_approved_at: def.grade ? new Date(Date.now() - 1 * 86400000).toISOString() : null,
-    }))
+      };
+    })
   );
   // Written assignments for every candidate are seeded together further down
   // (see "Written assignments -- the whole cycle"), not per-candidate here.
@@ -2477,6 +2492,52 @@ async function main() {
     expires_at: new Date(Date.now() + 5 * 365 * 86400000).toISOString(),
   });
   console.log("volunteer signup demo: Grace Adeyemi seeded, not yet signed up");
+
+  // The pooled Focus-on-the-Learner observation log (class_error_log,
+  // migration 0088): candidates log the language errors they hear the
+  // volunteer learners make in TP classes, and the Focus on the Learner
+  // assignment draws on this pooled evidence ("refer to the pooled observation
+  // log, not only your impressions"). The seed never wrote any, so the roster
+  // read "0 FOL entries" for every candidate and that instruction pointed at
+  // nothing. A couple each, against the two volunteer learners they teach.
+  {
+    const folLearners = [
+      { id: volunteer.id, tpClass: "A2" },
+      { id: graceVolunteer.id, tpClass: "B1+" },
+    ];
+    const FOL_ERRORS = [
+      { problem_type: "grammar", note: '"She don\'t like coffee" -- third-person -s dropped in the present simple.' },
+      { problem_type: "grammar", note: '"I have seen him yesterday" -- present perfect used with a finished-time adverbial.' },
+      { problem_type: "pronunciation", note: '"comfortable" produced with four syllables; the schwa in the middle is dropped.' },
+      { problem_type: "grammar", note: '"I am agree with you" -- "agree" treated as an adjective.' },
+      { problem_type: "pronunciation", note: 'Final consonant clusters simplified: "asked" comes out as /ɑːst/.' },
+      { problem_type: "grammar", note: '"There is many people" -- singular verb with a plural noun.' },
+      { problem_type: "pronunciation", note: 'Word stress misplaced: "deVElopment" stressed on the first syllable.' },
+      { problem_type: "grammar", note: '"He suggested me to go" -- "suggest" followed by object + infinitive.' },
+    ];
+    const folRows = [];
+    traineeDefs
+      .filter((d) => !d.withdrawn)
+      .forEach((def, i) => {
+        for (let k = 0; k < 2; k += 1) {
+          const e = FOL_ERRORS[(i * 2 + k) % FOL_ERRORS.length];
+          const learner = folLearners[(i + k) % folLearners.length];
+          folRows.push({
+            center_id: center.id,
+            course_id: course.id,
+            logged_by_candidate_id: trainees[def.name],
+            learner_id: learner.id,
+            tp_class: learner.tpClass,
+            tp_number: 3 + ((i + k) % 3), // TP3-5, already taught by now
+            problem_type: e.problem_type,
+            note: e.note,
+          });
+        }
+      });
+    const { error: folErr } = await supabase.from("class_error_log").insert(folRows);
+    if (folErr) throw folErr;
+    console.log(`FOL observation log: ${folRows.length} entries`);
+  }
 
   // Matched on the title PREFIX, not the whole title.
   //
