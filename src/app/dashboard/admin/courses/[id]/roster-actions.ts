@@ -187,13 +187,20 @@ export async function updateAssessor(formData: FormData): Promise<void> {
   const courseId = formData.get("course_id");
   const assessorName = (formData.get("assessor_name") as string | null)?.trim() || null;
   const assessorEmail = (formData.get("assessor_email") as string | null)?.trim().toLowerCase() || null;
+  // Stored verbatim, as the MCT's card stores it (trainer/assessor-actions.ts):
+  // Cambridge publishes no format, so validating the shape could only ever
+  // reject a correct reference. Shared column; whichever side sets it first.
+  const appianReference = (formData.get("appian_notification_reference") as string | null)?.trim() || null;
   if (typeof courseId !== "string") return;
 
   const supabase = await createClient();
   const { data: course } = await supabase.from("courses").select("id, center_id").eq("id", courseId).maybeSingle();
   if (!course || !(await holdsCentre(admin, course.center_id))) return;
 
-  await supabase.from("courses").update({ assessor_name: assessorName, assessor_email: assessorEmail }).eq("id", courseId);
+  await supabase
+    .from("courses")
+    .update({ assessor_name: assessorName, assessor_email: assessorEmail, appian_notification_reference: appianReference } as never)
+    .eq("id", courseId);
   revalidatePath(`/dashboard/admin/courses/${courseId}`);
 }
 

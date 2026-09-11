@@ -9,6 +9,7 @@ import { TutorInviteForm } from "@/app/dashboard/admin/courses/[id]/tutor-invite
 import { EntryFormSentCheckbox } from "@/app/dashboard/admin/courses/[id]/entry-form-sent-checkbox";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDate } from "@/lib/format-date";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { computeEntryFormDeadline } from "@/lib/entry-form-deadline";
 import { computeApplicantCounts, summarizeApplicantsForCard, MIN_CANDIDATES } from "@/lib/admissions-counts";
@@ -198,7 +199,11 @@ export default async function CourseAdminDetailPage({
             the course starts (Handbook 4.1).
           </p>
         ) : (
-          <p className="text-sm text-ink">Marked sent {course.entry_form_sent_at.slice(0, 10)}.</p>
+          // An instant, not a calendar date -- written in the centre's zone
+          // the way every other date on this page is, not "2026-08-27".
+          // A .slice(0, 10) here was the UTC day, which is the wrong day
+          // every evening for a centre east of Greenwich.
+          <p className="text-sm text-ink">Marked sent {formatDate(course.entry_form_sent_at, timeZone, { year: "numeric" })}.</p>
         )}
         <div className="flex flex-wrap items-center gap-4">
           {center?.appian_url ? (
@@ -272,7 +277,7 @@ export default async function CourseAdminDetailPage({
             once the course is running. The MCT gets notified with this contact info as soon as it&apos;s set.
           </p>
         </div>
-        <form action={updateAssessor} className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <form action={updateAssessor} className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
           <input type="hidden" name="course_id" value={course.id} />
           <div className="flex flex-col gap-1">
             <label htmlFor="assessor_name" className="text-xs text-muted">
@@ -295,6 +300,28 @@ export default async function CourseAdminDetailPage({
               name="assessor_email"
               type="email"
               defaultValue={course.assessor_email ?? ""}
+              className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
+            />
+          </div>
+          {/* The same shared column the MCT's Assessor card writes (migration
+              0256). Handbook 14.1 has the CENTRE give the assessor this
+              reference, and it is produced when Course Admin submits the
+              course notification in Appian -- the entry-form card above --
+              so the side that holds it first could not record it until 11
+              Sep 2026, and the MCT had to come and ask. Whichever side sets
+              it first is what the other sees, as with the name and email;
+              once set it appears on the assessor's landing page to copy.
+              The generated Database type lags the migration, hence the cast. */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="appian_notification_reference" className="text-xs text-muted">
+              Appian course notification reference
+            </label>
+            <input
+              id="appian_notification_reference"
+              name="appian_notification_reference"
+              type="text"
+              defaultValue={(course as { appian_notification_reference?: string | null }).appian_notification_reference ?? ""}
+              placeholder="From CELTA Admin's course approval email"
               className="h-10 rounded-[6px] border border-border bg-card-inset px-3 text-sm text-ink outline-none focus:border-primary"
             />
           </div>
