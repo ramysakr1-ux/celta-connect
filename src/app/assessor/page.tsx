@@ -1124,6 +1124,14 @@ export default async function AssessorPage({
                   : (centreDocs ?? []).find((d) => d.title.trim().toLowerCase() === doc.name.toLowerCase());
                 const present = isMarkingGuidance ? markingGuidancePresent : Boolean(uploaded?.file_url);
                 const href = isMarkingGuidance ? "/assessor/marking-guidance" : uploaded?.file_url;
+                // The authorisation certificate's own datum is the centre's
+                // Cambridge number, and that IS on file even before the
+                // certificate is attached -- so name it rather than the
+                // generic "Cambridge centre number on file".
+                const meta =
+                  doc.name === "Centre authorisation certificate" && center?.center_number
+                    ? `Centre number ${center.center_number} on file`
+                    : doc.meta;
                 const rowStyle = {
                   display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
                   padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",
@@ -1132,7 +1140,7 @@ export default async function AssessorPage({
                   <>
                     <span>
                       <span style={{ fontSize: 12.5, fontWeight: 600, color: INK, display: "block" }}>{doc.name}</span>
-                      <span style={{ fontSize: 10.5, color: MUTED }}>{doc.meta}</span>
+                      <span style={{ fontSize: 10.5, color: MUTED }}>{meta}</span>
                     </span>
                     {present && href ? (
                       <span style={{ fontSize: 11, fontWeight: 600, color: TEAL, flex: "none" }}>Open</span>
