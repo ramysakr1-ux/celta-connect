@@ -114,11 +114,14 @@ export function buildAssessorRequirements(input: AssessorRequirementInput): Asse
 }
 
 /**
- * Handbook 11: how many of each written assignment the CENTRE must
- * double-mark. Scales with cohort size, which is the number people tend to
- * confuse with the assessment requirements above. The assessor doesn't do
- * this -- but "course assessors may ask to see this record", so the pack is
- * the right place for the centre to be reminded what its own number is.
+ * Handbook 9.2.3 (Assessment of written assignments): how many of each
+ * written assignment the CENTRE must double-mark. Scales with cohort size,
+ * which is the number people tend to confuse with the assessment
+ * requirements above. The assessor doesn't do this -- but assignments are
+ * "moderated externally by the assessor" and the record may be asked for, so
+ * the pack is the right place for the centre to be reminded what its own
+ * number is. (The displayed badge said "§11" until 11 Sep 2026 -- stale from
+ * before the top-of-file correction; §11 is Candidate assessment, not this.)
  */
 export function doubleMarkingPerAssignment(candidateCount: number): number | null {
   if (candidateCount <= 0) return null;
