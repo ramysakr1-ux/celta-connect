@@ -781,6 +781,13 @@ async function main() {
         : null,
       course_status_set_by: def.withdrawn ? courseAdminId : null,
       withdrawal_reportable: def.withdrawn ? true : null,
+      // The real withdraw flow (portfolio/[traineeId]/status-actions.ts) stamps
+      // the letter as generated in the SAME update that sets the status -- the
+      // app cannot produce a withdrawn candidate without one. Left null here,
+      // the Assessor tab's §14.1 list flagged "1 withdrawal letter not
+      // generated" as outstanding: a state no course can actually be in.
+      // Same instant as the withdrawal, as the flow does.
+      withdrawal_letter_generated_at: def.withdrawn ? new Date(Date.now() - 9 * 86400000).toISOString() : null,
       // Withdrawn candidates are not part of a moderation sample.
       selected_for_assessor_visit: !def.withdrawn && ASSESSOR_SAMPLE.has(def.name),
     });
