@@ -76,7 +76,7 @@ export default async function TrainerRotationPage() {
     supabase.rpc("current_tp_number", { p_course_id: courseId }),
     supabase.from("profiles").select("id, full_name, course_status").eq("course_id", courseId).eq("role", "trainee"),
     supabase.from("tp_coursebooks").select("id, title, level").eq("center_id", trainer.center_id).order("title"),
-    supabase.from("course_tp_schedule").select("tp_number, tp_coursebook_id").eq("course_id", courseId),
+    supabase.from("course_tp_schedule").select("tp_group_id, tp_number, tp_coursebook_id").eq("course_id", courseId),
     supabase
       .from("plan_assignments")
       .select("id, trainee_id, tp_number, taught_at, rotation_position_used, main_lesson_aim, aim_type, class_grouping")
@@ -147,7 +147,12 @@ export default async function TrainerRotationPage() {
   const tpDistributionUneven =
     tpDistribution.length >= 2 && tpDistribution[0].count - tpDistribution[tpDistribution.length - 1].count >= 3;
 
-  const coursebookByTpNumber = new Map((schedule ?? []).map((s) => [s.tp_number, s.tp_coursebook_id]));
+  // Keyed by "<tp_group_id>:<tp_number>" -- the schedule is per group now
+  // (migration 0288), so two groups can teach two levels on the same round.
+  const scheduleKey = (groupId: string, tpNumber: number) => `${groupId}:${tpNumber}`;
+  const coursebookByGroupTp = new Map(
+    (schedule ?? []).map((s) => [scheduleKey(s.tp_group_id, s.tp_number), s.tp_coursebook_id])
+  );
 
   // connect-spec-corrections-for-claude-code.md item 10: whichever trainee
   // (if any) already carries this course's one allowed 1-to-1/small-group
@@ -337,7 +342,7 @@ export default async function TrainerRotationPage() {
                 members={nextHalf.members}
                 nextDate={nextDate}
                 tpNumber={nextTpNumber}
-                hasSchedule={coursebookByTpNumber.has(nextTpNumber) && Boolean(coursebookByTpNumber.get(nextTpNumber))}
+                hasSchedule={Boolean(coursebookByGroupTp.get(scheduleKey(tpGroup.id, nextTpNumber)))}
                 allPlans={(plans ?? [])
                   .filter((p) => nextHalf.members.some((m) => m.traineeId === p.trainee_id))
                   .map((p) => ({
@@ -436,18 +441,29 @@ export default async function TrainerRotationPage() {
     <div className="sheet p-6">
       <h2 className="font-serif text-lg text-ink">Coursebook schedule</h2>
       <p className="mt-1 text-sm text-muted">
-        Which coursebook&apos;s TP Points Library feeds each TP number.
+        Which coursebook&apos;s TP Points Library feeds each TP number -- set per
+        group, so two groups can teach different levels at once.
       </p>
-      <div className="mt-3 flex flex-col gap-3">
-        {TP_NUMBERS.map((tpNumber) => (
-          <ScheduleForm
-            key={tpNumber}
-            tpNumber={tpNumber}
-            coursebooks={coursebooks ?? []}
-            currentCoursebookId={coursebookByTpNumber.get(tpNumber) ?? null}
-          />
-        ))}
-      </div>
+      {(tpGroups ?? []).length === 0 ? (
+        <p className="mt-3 text-sm text-muted">Create a TP group first.</p>
+      ) : (
+        <div className="mt-4 flex flex-col gap-6">
+          {(tpGroups ?? []).map((tpGroup) => (
+            <div key={tpGroup.id} className="flex flex-col gap-3">
+              <h3 className="text-sm font-semibold text-ink">{tpGroup.name}</h3>
+              {TP_NUMBERS.map((tpNumber) => (
+                <ScheduleForm
+                  key={tpNumber}
+                  tpNumber={tpNumber}
+                  tpGroupId={tpGroup.id}
+                  coursebooks={coursebooks ?? []}
+                  currentCoursebookId={coursebookByGroupTp.get(scheduleKey(tpGroup.id, tpNumber)) ?? null}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 

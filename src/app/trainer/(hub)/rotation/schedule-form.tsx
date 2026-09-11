@@ -7,10 +7,12 @@ const initialState: FormState = { error: null };
 
 export function ScheduleForm({
   tpNumber,
+  tpGroupId,
   coursebooks,
   currentCoursebookId,
 }: {
   tpNumber: number;
+  tpGroupId: string;
   coursebooks: { id: string; title: string; level: string }[];
   currentCoursebookId: string | null;
 }) {
@@ -19,6 +21,7 @@ export function ScheduleForm({
   return (
     <form action={action} className="flex items-center gap-3">
       <input type="hidden" name="tp_number" value={tpNumber} />
+      <input type="hidden" name="tp_group_id" value={tpGroupId} />
       <span className="w-14 text-ink">TP{tpNumber}</span>
       <select
         name="tp_coursebook_id"

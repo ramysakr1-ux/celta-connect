@@ -3257,6 +3257,7 @@ export interface Database {
         Row: {
           id: string;
           course_id: string;
+          tp_group_id: string;
           tp_number: number;
           tp_coursebook_id: string;
           created_at: string;
@@ -3264,6 +3265,7 @@ export interface Database {
         };
         Insert: Partial<Database["public"]["Tables"]["course_tp_schedule"]["Row"]> & {
           course_id: string;
+          tp_group_id: string;
           tp_number: number;
           tp_coursebook_id: string;
         };

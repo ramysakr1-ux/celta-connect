@@ -600,12 +600,22 @@ export default async function TodayPage() {
     }
     problems.push(...tpGroupSizeProblems({ groups: (tpGroups ?? []).map((g) => ({ id: g.id, name: g.name, size: sizeByGroup.get(g.id) ?? 0 })) }));
 
+    // Levels are per group now (migration 0288): each group teaches its own
+    // two levels, so the rule is checked per group. Fetched standalone with
+    // tp_group_id -- the hub bundle's `schedule` field carries only tp_number
+    // and tp_coursebook_id, and widening it would mean editing the bundle SQL
+    // in lockstep, which is a drift I would rather not court for one check.
+    const { data: groupedSchedule } = await admin
+      .from("course_tp_schedule")
+      .select("tp_group_id, tp_number, tp_coursebook_id")
+      .eq("course_id", courseId);
     const levelByBook = new Map((books ?? []).map((b) => [b.id, b.level]));
-    problems.push(
-      ...tpLevelProblems({
-        schedule: (schedule ?? []).map((x) => ({ tpNumber: x.tp_number, level: x.tp_coursebook_id ? (levelByBook.get(x.tp_coursebook_id) ?? null) : null })),
-      })
-    );
+    for (const g of tpGroups ?? []) {
+      const groupSchedule = (groupedSchedule ?? [])
+        .filter((x) => x.tp_group_id === g.id)
+        .map((x) => ({ tpNumber: x.tp_number, level: x.tp_coursebook_id ? (levelByBook.get(x.tp_coursebook_id) ?? null) : null }));
+      problems.push(...tpLevelProblems({ schedule: groupSchedule }));
+    }
 
     const bands = resolveTimeBands(course?.time_bands ?? null);
     const bandMinutes = (t: string | null) => {

@@ -57,19 +57,37 @@ export async function setTpSchedule(
   const trainer = await requireRole(["trainer", "admin"]);
 
   const tpNumber = formData.get("tp_number");
+  const tpGroupId = formData.get("tp_group_id");
   const tpCoursebookId = formData.get("tp_coursebook_id");
-  if (typeof tpNumber !== "string" || typeof tpCoursebookId !== "string" || !tpCoursebookId) {
+  if (typeof tpNumber !== "string" || typeof tpGroupId !== "string" || !tpGroupId) {
+    return { error: "Something went wrong. Refresh and try again." };
+  }
+  if (typeof tpCoursebookId !== "string") {
     return { error: "Choose a coursebook." };
   }
 
   const supabase = await createClient();
+  // No coursebook chosen clears the row rather than upserting an empty one:
+  // course_tp_schedule.tp_coursebook_id is NOT NULL, so "unset" is a delete.
+  if (!tpCoursebookId) {
+    const { error: delErr } = await supabase
+      .from("course_tp_schedule")
+      .delete()
+      .eq("course_id", trainer.course_id!)
+      .eq("tp_group_id", tpGroupId)
+      .eq("tp_number", Number(tpNumber));
+    if (delErr) return { error: delErr.message };
+    revalidatePath("/trainer/rotation");
+    return { error: null };
+  }
   const { error } = await supabase.from("course_tp_schedule").upsert(
     {
       course_id: trainer.course_id!,
+      tp_group_id: tpGroupId,
       tp_number: Number(tpNumber),
       tp_coursebook_id: tpCoursebookId,
     },
-    { onConflict: "course_id,tp_number" }
+    { onConflict: "course_id,tp_group_id,tp_number" }
   );
 
   if (error) {

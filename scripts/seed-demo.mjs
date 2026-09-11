@@ -857,82 +857,117 @@ async function main() {
   // -- so the demo genuinely demonstrates the two-level requirement rather than
   // asserting it. tp_coursebooks.level is a bare CEFR code, not the wrapped
   // display string.
-  // TP1-6 only. tp_points.tp_number is checked `between 1 and 6` (migration
-  // 0013) and migration 0025 deliberately did NOT extend it when it raised the
-  // ceiling to 8 everywhere else: TP7 and TP8 are the trainee's own choice,
-  // through syllabus planning, not a library point. So those two have no
-  // tp_point and no traceable level, which is correct and is why the split
-  // below is at TP5 rather than halfway through eight.
-  const COURSEBOOKS = [
-    {
-      title: "Speakout 3rd Edition B1+ (Set 1)",
-      level: "B1+",
-      filename: "Speakout_B1plus_Set1_TP1-4.zip",
-      tps: [
-        { tp: 1, tier: "scripted", aim: "Grammar: present perfect for life experience", materials: "Speakout 3rd Ed B1+ SB p.18-19, Ex 1-5" },
-        { tp: 2, tier: "scripted", aim: "Reading for gist and detail: an article about city life", materials: "Speakout 3rd Ed B1+ SB p.22-23, Ex 1-4" },
-        { tp: 3, tier: "framework", aim: "Vocabulary: air travel", materials: "Speakout 3rd Ed B1+ SB p.30, Ex 2-6" },
-        { tp: 4, tier: "framework", aim: "Functional language: making suggestions", materials: "Speakout 3rd Ed B1+ SB p.34-35, Ex 1-7" },
-      ],
+  // The TP Points Library, and the per-group coursebook schedule, built so the
+  // demo runs the REAL rotation engine (assign_tp_round, migration 0288)
+  // instead of hand-writing plans. Two books -- A2 (below intermediate) and
+  // B1+ -- each covering TP1-6 with THREE distinct published points per round,
+  // because a day-set is three trainees and the engine hands each of them a
+  // different point (§9.1.2: a round is three different lessons). Aim types are
+  // derived the same way a tutor tags them (aimTypeOf), so the coverage matrix
+  // is populated for free.
+  const AIMS_BY_LEVEL = {
+    "A2": {
+      1: ["Grammar: present simple for daily routines", "Reading for gist: three short profiles", "Vocabulary: everyday objects"],
+      2: ["Listening for gist: a day in the life", "Grammar: there is / there are", "Functional language: ordering in a cafe"],
+      3: ["Vocabulary: food and drink", "Reading for detail: a simple menu", "Grammar: countable and uncountable nouns"],
+      4: ["Grammar: past simple (regular verbs)", "Speaking: talking about last weekend", "Listening for detail: a short anecdote"],
+      5: ["Functional language: making arrangements", "Vocabulary: places in a town", "Reading for gist: a short city guide"],
+      6: ["Grammar: comparative adjectives", "Speaking: describing people", "Vocabulary: adjectives of personality"],
     },
-    {
-      // The level change the timetable already announces at TP5.
-      title: "Roadmap A2 (Set 1)",
-      level: "A2",
-      filename: "Roadmap_A2_Set1_TP5-6.zip",
-      tps: [
-        { tp: 5, tier: "framework", aim: "Listening for specific information: short announcements", materials: "Roadmap A2 SB p.41, Ex 3-7" },
-        { tp: 6, tier: "minimal", aim: "Grammar: second conditional in context", materials: "Roadmap A2 SB p.48-49, Ex 1-6" },
-      ],
+    "B1+": {
+      1: ["Grammar: present perfect for experience", "Reading for gist and detail: a city-life article", "Vocabulary: travel and transport"],
+      2: ["Listening for detail: a radio interview", "Grammar: past continuous", "Functional language: making suggestions"],
+      3: ["Vocabulary: air travel", "Reading for detail: a short review", "Grammar: the second conditional"],
+      4: ["Grammar: used to for past habits", "Speaking: giving and justifying opinions", "Listening for gist: a podcast extract"],
+      5: ["Functional language: apologising", "Vocabulary: work and study", "Reading for gist: a workplace article"],
+      6: ["Grammar: defining relative clauses", "Speaking: telling a story", "Vocabulary: describing character"],
     },
+  };
+  const BOOKS = [
+    { level: "A2", title: "Roadmap A2 (Set 1)", filename: "Roadmap_A2_Set1.zip" },
+    { level: "B1+", title: "Speakout 3rd Edition B1+ (Set 1)", filename: "Speakout_B1plus_Set1.zip" },
   ];
-
-  // tp_point_id by TP number, so a taught lesson can point at the library entry
-  // it came from and its level can be traced.
-  const tpPointByNumber = new Map();
-  for (const cb of COURSEBOOKS) {
-    const { data: coursebook, error: cbErr } = await supabase
+  const coursebookIdByLevel = {};
+  let pointCount = 0;
+  for (const book of BOOKS) {
+    const { data: cb, error: cbErr } = await supabase
       .from("tp_coursebooks")
       .insert({
         center_id: center.id,
-        title: cb.title,
-        level: cb.level,
-        // No zip in storage, and deliberately not a path pretending there is
-        // one: the only thing that reads this is the AI generation pipeline,
-        // and a demo centre cannot write anyway (migration 0079). A row
-        // pointing at a file that is not there is the exact state Ramy asked
-        // us NOT to create for Elmswood.
-        storage_path: `demo:${cb.filename}`,
-        original_filename: cb.filename,
+        title: book.title,
+        level: book.level,
+        storage_path: `demo:${book.filename}`,
+        original_filename: book.filename,
         uploaded_by: trainerId,
         generation_status: "completed",
       })
       .select("id")
       .single();
     if (cbErr) throw cbErr;
-    for (const [i, point] of cb.tps.entries()) {
-      const { data: tpPoint, error: ptErr } = await supabase
-        .from("tp_points")
-        .insert({
-          tp_coursebook_id: coursebook.id,
+    coursebookIdByLevel[book.level] = cb.id;
+    for (let tp = 1; tp <= 6; tp += 1) {
+      // Rotate the round's three aims by (tp-1) before lettering their
+      // sequence_index. The engine gives base-slot b the point at offset
+      // (b + tp-1) mod 3, so without this a fixed trainee lands on the same
+      // sequence position's TYPE every round -- base-slot 0 taught grammar all
+      // three A2 rounds. The offset de-correlates aim type from rotation
+      // position, so each trainee cycles through the round's three kinds.
+      const roundAims = AIMS_BY_LEVEL[book.level][tp];
+      const rotated = roundAims.map((_, i) => roundAims[(i + (tp - 1)) % roundAims.length]);
+      for (const [seq, aim] of rotated.entries()) {
+        const { error: ptErr } = await supabase.from("tp_points").insert({
+          tp_coursebook_id: cb.id,
           center_id: center.id,
-          tp_number: point.tp,
-          sequence_index: i,
-          density_tier: point.tier,
-          main_lesson_aim: point.aim,
+          tp_number: tp,
+          sequence_index: seq,
+          density_tier: tp <= 2 ? "scripted" : tp <= 4 ? "framework" : "minimal",
+          main_lesson_aim: aim,
+          aim_type: aimTypeOf(aim),
           sub_aim: "You choose -- and say in your plan why it follows from the main aim.",
-          materials_description: point.materials,
+          materials_description: `${book.title} -- see the TP Points Library`,
           generation_source: "manual",
           status: "published",
           created_by: trainerId,
-        })
-        .select("id")
-        .single();
-      if (ptErr) throw ptErr;
-      tpPointByNumber.set(point.tp, tpPoint.id);
+        });
+        if (ptErr) throw ptErr;
+        pointCount += 1;
+      }
     }
   }
-  console.log("TP library:", COURSEBOOKS.length, "coursebooks,", tpPointByNumber.size, "points");
+  console.log("TP library:", BOOKS.length, "coursebooks,", pointCount, "points (3 per round)");
+
+  // Per-group schedule: Group A teaches A2 then B1+, Group B the mirror, so the
+  // two groups are at two levels in parallel and swap at TP4 -- every candidate
+  // teaches both (§9.1.2). This is the row assign_tp_round reads to know which
+  // book feeds a group's round.
+  const SCHEDULE = {
+    "Group A": { 1: "A2", 2: "A2", 3: "A2", 4: "B1+", 5: "B1+", 6: "B1+" },
+    "Group B": { 1: "B1+", 2: "B1+", 3: "B1+", 4: "A2", 5: "A2", 6: "A2" },
+  };
+  for (const [groupName, byTp] of Object.entries(SCHEDULE)) {
+    for (const [tp, level] of Object.entries(byTp)) {
+      const { error } = await supabase.from("course_tp_schedule").insert({
+        course_id: course.id,
+        tp_group_id: tpGroupIds[groupName],
+        tp_number: Number(tp),
+        tp_coursebook_id: coursebookIdByLevel[level],
+      });
+      if (error) throw error;
+    }
+  }
+  console.log("TP schedule: 2 groups x 6 rounds, two levels in parallel");
+
+  // Run the REAL engine. assign_tp_round distributes a distinct library point
+  // to each trainee in a subgroup by rotation position, for every round -- the
+  // exact code a live course runs. seedTaughtTp below then only MARKS rounds
+  // taught and writes the feedback; the aims themselves come from here.
+  for (const sgId of Object.values(subgroupIds)) {
+    for (let tp = 1; tp <= 6; tp += 1) {
+      const { error } = await supabase.rpc("assign_tp_round", { p_subgroup_id: sgId, p_tp_number: tp });
+      if (error) throw new Error(`assign_tp_round(${sgId}, TP${tp}): ${error.message}`);
+    }
+  }
+  console.log("assign_tp_round: plans created for TP1-6 across every subgroup");
 
   // The four Cambridge assignments, as briefs with real section prompts. The
   // sections are what the brief page actually renders -- storage_path is only
@@ -1009,26 +1044,54 @@ async function main() {
   // `half` replaces the old `daysAgo`: the lesson happened when the timetable
   // says it happened, and the plan, self-evaluation, feedback and CELTA 5 row
   // all hang off that one date instead of six invented ones.
-  async function seedTaughtTp(traineeId, tpNumber, { aim, grade, strengths, actionPoints, half }) {
+  // Marks a round taught and writes its records. The PLAN already exists --
+  // assign_tp_round created it from the library above -- so this reads the
+  // engine's aim rather than inventing one, updates taught_at, and derives the
+  // real level from the point's coursebook. Returns the plan id, or null if
+  // the trainee has no plan for that round (withdrawn / not assigned).
+  async function seedTaughtTp(traineeId, tpNumber, { grade, strengths, actionPoints, half }) {
     const lessonIso = tpDateIso(half, tpNumber);
     const lessonMs = Date.parse(`${lessonIso}T12:00:00Z`);
     const at = (offsetDays = 0) => new Date(lessonMs + offsetDays * 86400000).toISOString();
-    await supabase.from("plan_assignments").insert({
-      course_id: course.id,
-      trainee_id: traineeId,
-      tp_number: tpNumber,
-      main_lesson_aim: aim,
-      aim_type: aimTypeOf(aim),
-      density_tier: tpNumber <= 2 ? "scripted" : tpNumber <= 4 ? "framework" : "minimal",
-      assigned_by: trainerId,
-      // The library entry this lesson came from. Without it CELTA 5 Section 6
-      // can show hours but no LEVELS -- computeAssessedTpStats traces the level
-      // through tp_point_id, not through tp_lessons.level, and every demo
-      // candidate read as having taught at zero levels against a requirement of
-      // two. The split at TP5 is what makes it two.
-      tp_point_id: tpPointByNumber.get(tpNumber) ?? null,
-      taught_at: at(),
-    });
+    let { data: assigned } = await supabase
+      .from("plan_assignments")
+      .select("id, main_lesson_aim, tp_point_id")
+      .eq("trainee_id", traineeId)
+      .eq("tp_number", tpNumber)
+      .maybeSingle();
+    // TP7 and TP8 are self-select -- outside the library, so assign_tp_round
+    // never created them. On a stage late enough to have taught them, create
+    // the self-chosen plan here (a real trainee picks it via the syllabus
+    // grid) before marking it taught.
+    if (!assigned) {
+      if (tpNumber < 7) return null;
+      const selfAim = tpNumber === 7 ? "Giving advice -- should and ought to" : "Reading for gist -- city guides";
+      const { data: created, error: selfErr } = await supabase
+        .from("plan_assignments")
+        .insert({
+          course_id: course.id,
+          trainee_id: traineeId,
+          tp_number: tpNumber,
+          main_lesson_aim: selfAim,
+          aim_type: aimTypeOf(selfAim),
+          density_tier: "coaching_prose",
+          class_grouping: "whole_class",
+          assigned_by: trainerId,
+        })
+        .select("id, main_lesson_aim, tp_point_id")
+        .single();
+      if (selfErr) throw selfErr;
+      assigned = created;
+    }
+    const aim = assigned.main_lesson_aim;
+    // The level that was actually taught, traced through the assigned point.
+    let level = "Elementary (A2)";
+    if (assigned.tp_point_id) {
+      const { data: pt } = await supabase.from("tp_points").select("tp_coursebook_id").eq("id", assigned.tp_point_id).maybeSingle();
+      const { data: cbk } = pt ? await supabase.from("tp_coursebooks").select("level").eq("id", pt.tp_coursebook_id).maybeSingle() : { data: null };
+      if (cbk?.level) level = cbk.level === "A2" ? "Elementary (A2)" : `Lower-intermediate (${cbk.level})`;
+    }
+    await supabase.from("plan_assignments").update({ taught_at: at() }).eq("id", assigned.id);
     const { data: plan } = await supabase
       .from("tp_plans")
       .insert({
@@ -1086,8 +1149,8 @@ async function main() {
       tp_number: tpNumber,
       lesson_date: lessonIso,
       length_minutes: 45,
-      level: tpNumber <= 4 ? "Intermediate (B1+)" : "Elementary (A2)",
-      learner_count: tpNumber <= 4 ? 11 : 9,
+      level,
+      learner_count: level.startsWith("Elementary") ? 9 : 11,
       lesson_focus: aim,
       tutor_assessment: grade,
     });
@@ -1691,9 +1754,12 @@ async function main() {
   // tp_group_scope_id is set, which is what lets a tutor's view narrow to
   // their own group's lessons (hub-scope.ts) and keeps the other group's rows
   // off a trainee's day (course-stream-day.ts).
+  // Per-group letters: every group is its own A-F (Ramy, 11 Sep 2026 -- "there
+  // is no G-L"). Two "TP1 - A" cards then exist, one per group, told apart by
+  // room and tp_group_scope_id, which matches how a tutor sees only their own.
   const GROUP_LETTERS = {
     "Group A": { 1: ["A", "B", "C"], 2: ["D", "E", "F"] },
-    "Group B": { 1: ["G", "H", "I"], 2: ["J", "K", "L"] },
+    "Group B": { 1: ["A", "B", "C"], 2: ["D", "E", "F"] },
   };
   const rotationPosition = (baseSlot, size, tp) => (baseSlot + (tp - 1)) % size;
   const tpRows = [];
@@ -2042,26 +2108,27 @@ async function main() {
   {
     const { data: tpEvents } = await supabase
       .from("course_timetable_events")
-      .select("id, title, linked_tp_number")
+      .select("id, title, linked_tp_number, tp_group_scope_id")
       .eq("course_id", course.id)
       .eq("type", "tp");
-    // Two groups, two room sets, two levels. Group A's halves share rooms 2-4
-    // because they teach on different days; Group B likewise in 5-7; on any
-    // one day the six lessons are in six different rooms. The groups swap
-    // levels at TP5 -- the "Level & tutor change" the timetable already
-    // announces, and the reason the library splits there.
-    const ROOMS = { A: 2, B: 3, C: 4, D: 2, E: 3, F: 4, G: 5, H: 6, I: 7, J: 5, K: 6, L: 7 };
-    const levelFor = (letter, tp) => {
-      const groupA = "ABCDEF".includes(letter);
-      const firstHalf = (tp ?? 1) <= 4;
-      return groupA === firstHalf ? "A2" : "B1+";
-    };
+    // Room and level per group, read off the schedule the engine also uses.
+    // Group A teaches in rooms 2-4, Group B in 5-7; on any one day the six
+    // lessons are in six different rooms. Levels swap at TP4, matching the
+    // per-group course_tp_schedule above, so a card's level always agrees with
+    // the plan the engine assigned for it.
+    const groupNameById = { [tpGroupIds["Group A"]]: "Group A", [tpGroupIds["Group B"]]: "Group B" };
+    const ROOM_BY_GROUP = { "Group A": [2, 3, 4], "Group B": [5, 6, 7] };
+    const SLOT_OF_LETTER = { A: 0, B: 1, C: 2, D: 0, E: 1, F: 2 };
+    const firstLevel = { "Group A": "A2", "Group B": "B1+" };
+    const levelForGroupTp = (g, tp) => ((tp ?? 1) <= 3 ? firstLevel[g] : firstLevel[g] === "A2" ? "B1+" : "A2");
     for (const e of tpEvents ?? []) {
-      const letter = (e.title.match(/·\s*([A-L])/) || [])[1];
-      if (!letter) continue;
+      const letter = (e.title.match(/·\s*([A-F])/) || [])[1];
+      const g = groupNameById[e.tp_group_scope_id];
+      if (!letter || !g) continue;
+      const room = ROOM_BY_GROUP[g][SLOT_OF_LETTER[letter]] ?? 2;
       await supabase
         .from("course_timetable_events")
-        .update({ detail: `Room ${ROOMS[letter] ?? 2} · ${levelFor(letter, e.linked_tp_number)}` })
+        .update({ detail: `Room ${room} · ${levelForGroupTp(g, e.linked_tp_number)}` })
         .eq("id", e.id);
     }
     console.log("rooms:", (tpEvents ?? []).length, "TP events");
