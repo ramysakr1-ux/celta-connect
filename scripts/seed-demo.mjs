@@ -2213,6 +2213,179 @@ async function main() {
     requested_at: new Date(Date.now() - 1 * 86400000).toISOString(),
   });
 
+  // --- Trainer-in-Training (TinT) -- an experienced teacher training to become
+  // a CELTA trainer, supervised by the MCT. The portfolio (observed and
+  // delivered sessions, feedback led, shadow marking, a task record with
+  // signatures) is verified at the assessor visit, which gains a moderation
+  // day. The demo had none, so the whole TinT room read empty and the assessor
+  // pack never showed the e-portfolio row. Elena Vasquez is the TinT here, on
+  // the internal scheme, most of the way through her portfolio (Ramy, 11 Sep).
+  {
+    const dAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
+    const { data: tintAuth, error: tintAuthErr } = await supabase.auth.admin.createUser({
+      email: "demo-tint@celtaconnect.com",
+      email_confirm: true,
+    });
+    if (tintAuthErr) throw tintAuthErr;
+    const tintId = tintAuth.user.id;
+    await supabase.from("profiles").insert({
+      id: tintId,
+      email: "demo-tint@celtaconnect.com",
+      full_name: "Elena Vasquez",
+      role: "trainer",
+      tutor_role: "assistant_course_tutor",
+      center_id: center.id,
+      course_id: course.id,
+    });
+    const { data: tintTutor, error: tintTutorErr } = await supabase
+      .from("course_tutors")
+      .insert({
+        course_id: course.id,
+        profile_id: tintId,
+        tutor_role: "assistant_course_tutor",
+        is_trainer_in_training: true,
+        supervisor_profile_id: trainerId, // the MCT, Jordan Blake, supervises
+        verified_at: new Date(courseStart.getTime() - 30 * 86400000).toISOString(),
+      })
+      .select("id")
+      .single();
+    if (tintTutorErr) throw tintTutorErr;
+
+    const { data: titRecord, error: titErr } = await supabase
+      .from("tit_records")
+      .insert({
+        course_tutors_id: tintTutor.id,
+        scheme: "internal",
+        trains_at_nominating_centre: true,
+        modes_trained: ["f2f"],
+        reflective_essay:
+          "The hardest adjustment from teaching to training has been holding back my own answer so a candidate reaches it themselves -- especially in feedback, where the instinct is to fix rather than to ask.",
+        reflective_essay_submitted_at: dAgo(4),
+        // Portfolio is still in progress -- consistent with the observation
+        // meters (TP7-8 are not taught yet, so it cannot be complete). Booked
+        // for the assessor day; finalised closer to it.
+        portfolio_submitted_at: null,
+        assessor_day_booked_at: dAgo(6),
+        // outcome stays null -- it is decided at the assessor visit, still ahead.
+      })
+      .select("id")
+      .single();
+    if (titErr) throw titErr;
+    const titId = titRecord.id;
+
+    await supabase.from("tit_delivered_sessions").insert([
+      {
+        tit_record_id: titId,
+        title: "Input session: Teaching vocabulary",
+        delivered_at: dAgo(12),
+        self_evaluation: "Clear staging, good models -- but I over-explained the clarification stage instead of eliciting.",
+        self_evaluation_at: dAgo(12),
+        supervisor_feedback: "Strong subject knowledge. Cut your own examples and let the group do the work.",
+        supervisor_feedback_at: dAgo(11),
+      },
+      {
+        tit_record_id: titId,
+        title: "Input session: Guided discovery (self-designed)",
+        delivered_at: dAgo(6),
+        self_evaluation: "Better pacing this time; the discovery task did the teaching for me.",
+        self_evaluation_at: dAgo(6),
+        supervisor_feedback: "Much improved, and your own design. Ready to be observed for the record.",
+        supervisor_feedback_at: dAgo(5),
+        self_designed_attested_at: dAgo(5),
+      },
+    ]);
+
+    await supabase.from("tit_feedback_sessions").insert([
+      {
+        tit_record_id: titId,
+        trainee_id: trainees["Priya Sharma"],
+        tp_number: 4,
+        conducted_at: dAgo(9),
+        observed_by_supervisor: true,
+        supervisor_discussion_notes: "We agreed the standard away from the group first; Elena led the feedback confidently.",
+        finalized_at: dAgo(9),
+        feedback_on_feedback_notes: "Good balance of praise and one clear, actionable point.",
+        feedback_on_feedback_at: dAgo(8),
+      },
+      {
+        tit_record_id: titId,
+        trainee_id: trainees["Daniel Kim"],
+        tp_number: 5,
+        conducted_at: dAgo(3),
+        observed_by_supervisor: true,
+        finalized_at: dAgo(3),
+      },
+    ]);
+
+    await supabase.from("tit_shadow_days").insert([
+      { tit_record_id: titId, mode: "f2f", shadowed_at: dAgo(14), note: "Shadowed the MCT across a full teaching-practice day." },
+      { tit_record_id: titId, mode: "f2f", shadowed_at: dAgo(7), note: "Shadowed feedback and the grading discussion." },
+    ]);
+
+    await supabase.from("tit_candidates_followed").insert([
+      {
+        tit_record_id: titId,
+        trainee_id: trainees["Amara Okafor"],
+        notes_beginning: "Confident classroom presence from day one.",
+        notes_middle: "Consolidating; needs stretching rather than supporting.",
+        notes_end: null,
+      },
+      {
+        tit_record_id: titId,
+        trainee_id: trainees["Daniel Kim"],
+        notes_beginning: "Nervous, tends to over-plan.",
+        notes_middle: "Instructions still the recurring issue after the resubmission.",
+        notes_end: null,
+      },
+    ]);
+
+    const taskItems = [
+      "Observed at least six hours of teaching practice with the supervisor",
+      "Delivered two input sessions, one of them self-designed",
+      "Led feedback on three occasions, observed by the supervisor",
+      "Shadow-marked a sample of written assignments against the supervisor",
+    ];
+    await supabase.from("tit_task_record_items").insert(
+      taskItems.map((label, i) => ({
+        tit_record_id: titId,
+        item_number: i + 1,
+        label,
+        tit_signed_at: dAgo(3),
+        supervisor_signed_at: i < 3 ? dAgo(2) : null, // the last one still awaits the supervisor's sign-off
+      }))
+    );
+
+    await supabase.from("tit_pre_course_tasks").insert([
+      { tit_record_id: titId, task_key: "read_tint_handbook", completed_at: dAgo(30) },
+      { tit_record_id: titId, task_key: "observe_experienced_trainer", completed_at: dAgo(25) },
+    ]);
+
+    // Shadow marking references real assignments (created earlier). The
+    // observed-session and Stage-1-handout records reference timetable events,
+    // which are created further down, so they are seeded there instead.
+    const { data: markableForTint } = await supabase
+      .from("assignments")
+      .select("id")
+      .eq("course_id", course.id)
+      .eq("assignment_type", "Focus on Learner")
+      .neq("first_status", "not_submitted")
+      .limit(3);
+    if (markableForTint?.length) {
+      await supabase.from("tit_shadow_marking").insert(
+        markableForTint.map((a, i) => ({
+          tit_record_id: titId,
+          assignment_id: a.id,
+          tit_grade: "pass",
+          supervisor_grade: "pass",
+          agreed: true,
+          marked_at: dAgo(8 - i),
+        }))
+      );
+    }
+
+    console.log("trainer-in-training: Elena Vasquez seeded (internal scheme, portfolio in progress, assessor day booked)");
+  }
+
   // --- Pre-course task: seeded per-centre (centre admins normally author
   // these themselves), then marked handed in for all three trainees so the
   // shared course reads as properly mid-stream, not day one. ---
@@ -2577,6 +2750,59 @@ async function main() {
     )
     .select("id, title");
   const tpEventIdByTitle = new Map((timetableRows ?? []).filter((r) => r.title.startsWith("TP")).map((r) => [r.title, r.id]));
+
+  // --- The TinT's observed sessions and Stage-1 handout, seeded here because
+  // they reference the timetable events just created. Elena has observed most
+  // of the input sessions and a good share of the teaching practice -- the
+  // "on track for 80%" state a submitted portfolio should show, rather than
+  // the zero it read at first. ---
+  {
+    const dAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
+    const { data: tintCt } = await supabase
+      .from("course_tutors")
+      .select("id")
+      .eq("course_id", course.id)
+      .eq("is_trainer_in_training", true)
+      .maybeSingle();
+    const { data: tintRec } = tintCt
+      ? await supabase.from("tit_records").select("id").eq("course_tutors_id", tintCt.id).maybeSingle()
+      : { data: null };
+    if (tintRec) {
+      const { data: allEvents } = await supabase
+        .from("course_timetable_events")
+        .select("id, type, event_date")
+        .eq("course_id", course.id)
+        .in("type", ["input_session", "tp"])
+        .lte("event_date", todayIso) // only sessions that have already happened
+        .order("event_date");
+      const inputEv = (allEvents ?? []).filter((e) => e.type === "input_session");
+      const tpEv = (allEvents ?? []).filter((e) => e.type === "tp");
+      // Observe ~90% of the input sessions that have run, and about two-thirds
+      // of the teaching practice -- above the 80% input bar, mid-way on TP,
+      // which is an honest "portfolio in progress" for a course at TP6.
+      const observeInput = inputEv.slice(0, Math.ceil(inputEv.length * 0.9));
+      const observeTp = tpEv.slice(0, Math.ceil(tpEv.length * 0.65));
+      const observedRows = [...observeInput, ...observeTp].map((e, i) => ({
+        tit_record_id: tintRec.id,
+        timetable_event_id: e.id,
+        asynchronous: e.type === "input_session" && i % 6 === 0, // a few input sessions caught up on asynchronously
+        observed_at: `${e.event_date}T15:00:00.000Z`,
+      }));
+      if (observedRows.length > 0) {
+        const { error: obsErr } = await supabase.from("tit_observed_sessions").insert(observedRows);
+        if (obsErr) throw obsErr;
+      }
+      if (inputEv[0]) {
+        await supabase.from("tit_task12_stage1").insert({
+          tit_record_id: tintRec.id,
+          timetable_event_id: inputEv[0].id,
+          handout_description: "A guided-discovery worksheet on the present perfect, delivered in a Stage 1 input slot and filed with the supervisor.",
+          filed_at: dAgo(10),
+        });
+      }
+      console.log(`trainer-in-training observations: ${observedRows.length} sessions (${observeInput.length} input, ${observeTp.length} TP)`);
+    }
+  }
 
   // --- Tutorials and consultations (design_handoff_tutorials_consultations,
   // 5 Sep 2026) --- Without these the section under the timetable is empty
