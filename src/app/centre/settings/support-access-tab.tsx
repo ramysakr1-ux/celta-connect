@@ -1,4 +1,5 @@
 "use client";
+import { formatDateTime } from "@/lib/format-date";
 
 import { useActionState } from "react";
 import { grantBillingSupportAccess, revokeSupportGrant, type SupportGrantFormState } from "@/app/centre/settings/support-access-actions";
@@ -33,7 +34,16 @@ const STATUS_LABEL: Record<SupportGrantRow["status"], string> = {
 // built against the .sheet/pill/list-row vocabulary already used
 // throughout Centre Settings for visual consistency with the rest of the
 // tab set.
-export function SupportAccessTab({ canGrantBilling, grants }: { canGrantBilling: boolean; grants: SupportGrantRow[] }) {
+export function SupportAccessTab({
+  canGrantBilling,
+  grants,
+  timeZone,
+}: {
+  canGrantBilling: boolean;
+  grants: SupportGrantRow[];
+  /** The centre's zone: a grant's timestamp is an instant, written the way a person says it. */
+  timeZone: string;
+}) {
   const [state, action, pending] = useActionState(grantBillingSupportAccess, initial);
 
   return (
@@ -103,7 +113,7 @@ export function SupportAccessTab({ canGrantBilling, grants }: { canGrantBilling:
                     </p>
                     <p className="mt-0.5 text-xs text-muted">{g.reason}</p>
                     <p className="mt-1 text-[11px] text-muted">
-                      Granted by {g.grantedByName} · {new Date(g.grantedAt).toLocaleString()} · {g.durationHours}h window
+                      Granted by {g.grantedByName} · {formatDateTime(g.grantedAt, timeZone)} · {g.durationHours}h window
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">

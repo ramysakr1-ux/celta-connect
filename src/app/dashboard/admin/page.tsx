@@ -397,7 +397,7 @@ export default async function AdminDashboardPage({
           </Link>
         </div>
 
-        <WhatChangedPanel changes={recentChanges} />
+        <WhatChangedPanel changes={recentChanges} timeZone={center?.time_zone ?? DEFAULT_TIMEZONE} />
         </div>
         </LaptopOnlyGate>
       </div>

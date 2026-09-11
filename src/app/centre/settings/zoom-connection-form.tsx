@@ -1,15 +1,19 @@
 "use client";
 
 import { disconnectZoom } from "@/app/dashboard/admin/settings/actions";
+import { formatDateTime } from "@/lib/format-date";
 
 export function ZoomConnectionForm({
   connection,
   connected,
   error,
+  timeZone,
 }: {
   connection: { connected_at: string; zoom_account_email: string | null } | null;
   connected?: boolean;
   error?: string;
+  /** The centre's zone: connected_at is an instant, written the way a person says it. */
+  timeZone: string;
 }) {
   return (
     <div className="card px-[22px] py-5">
@@ -28,7 +32,7 @@ export function ZoomConnectionForm({
       {connection ? (
         <div className="mt-4 flex flex-col gap-3">
           <p className="text-sm text-muted">
-            Connected {new Date(connection.connected_at).toLocaleString()}
+            Connected {formatDateTime(connection.connected_at, timeZone)}
             {connection.zoom_account_email ? ` as ${connection.zoom_account_email}` : ""}.
           </p>
           <form action={disconnectZoom}>

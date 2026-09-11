@@ -111,7 +111,8 @@ export default async function Celta5RecordPage({
 
   // assessment-model.md link 3: which TP round the COHORT has reached,
   // not this one trainee's own pace -- see computeCurrentTpRound().
-  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], toLocalIso(new Date(), center?.time_zone ?? DEFAULT_TIMEZONE));
+  const timeZone = center?.time_zone ?? DEFAULT_TIMEZONE;
+  const currentTpRound = computeCurrentTpRound(tpEvents ?? [], toLocalIso(new Date(), timeZone));
 
   const lessonIds = (lessons ?? []).map((l) => l.id);
   const { data: criteriaTags } =
@@ -272,6 +273,7 @@ export default async function Celta5RecordPage({
           <Stage1Form
             key={`stage1-${record.updated_at}`}
             record={record}
+            timeZone={timeZone}
             trainerFullName={trainer.full_name}
             trainerSignatureName={trainer.signature_name}
           />
@@ -279,6 +281,7 @@ export default async function Celta5RecordPage({
             <Stage1ReleaseForm
               key={`stage1-release-${record.updated_at}`}
               traineeId={id}
+              timeZone={timeZone}
               completedAt={record.stage1_completed_at}
               releasedAt={record.stage1_released_at}
               candidateSignedAt={record.stage1_candidate_signed_at}
@@ -300,6 +303,7 @@ export default async function Celta5RecordPage({
             <Stage2OverallForm
               key={`stage2-${record.updated_at}`}
               record={record}
+              timeZone={timeZone}
               trainerFullName={trainer.full_name}
               trainerSignatureName={trainer.signature_name}
             />
@@ -325,6 +329,7 @@ export default async function Celta5RecordPage({
             <Stage3OverallForm
               key={`stage3-${record.updated_at}`}
               record={record}
+              timeZone={timeZone}
               trainerFullName={trainer.full_name}
               trainerSignatureName={trainer.signature_name}
             />
@@ -369,7 +374,7 @@ export default async function Celta5RecordPage({
           record.final_recommended_grade !== "Deferred" &&
           record.trainer_signoff_final_at ? (
             <div className="mt-4">
-              <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} />
+              <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} timeZone={timeZone} />
             </div>
           ) : null}
 

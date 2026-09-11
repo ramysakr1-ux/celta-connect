@@ -7,6 +7,9 @@ import { OfferNextPlaceForm } from "@/app/dashboard/admissions/offer-next-place-
 import { InterviewAvailabilityPanel, type PatternRow, type BlockRow } from "@/app/dashboard/admissions/interview-availability-panel";
 import { MARKETING_SOURCE_LABEL, type MarketingSource } from "@/lib/marketing-source";
 import { Avatar } from "@/components/avatar";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDate } from "@/lib/format-date";
 
 const STAGE_LABEL: Record<string, string> = {
   submitted: "Submitted",
@@ -42,6 +45,9 @@ export default async function AdmissionsPage({
   // and `scope` can only ever contain centres this person actually holds.
   const { branch } = await searchParams;
   const { scope, aggregated, nameById } = await resolveBranchScope(staff, branch);
+  // The reader's own centre's zone. A list can span the branches this person
+  // holds, but the "applied" day is read from where they sit.
+  const timeZone = (await getCachedCenter(staff.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
   const supabase = createAdminClient();
 
   // Ramy, 28 Aug 2026: "admission pipeline takes forever" -- traced the same
@@ -244,7 +250,7 @@ export default async function AdmissionsPage({
                   <td className={a.deposit_paid_at ? "text-ink" : "text-muted"}>
                     {a.deposit_paid_at ? `${a.deposit_amount}` : "--"}
                   </td>
-                  <td className="text-muted">{a.created_at.slice(0, 10)}</td>
+                  <td className="text-muted">{formatDate(a.created_at, timeZone)}</td>
                 </tr>
               ))
             ) : (

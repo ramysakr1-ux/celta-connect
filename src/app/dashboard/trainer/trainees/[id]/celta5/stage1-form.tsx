@@ -5,6 +5,7 @@ import { updateStage1, type FormState } from "@/app/dashboard/trainer/celta5-act
 import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
 import { SetSignatureForm } from "@/components/set-signature-form";
 import type { Database } from "@/lib/supabase/types";
+import { formatDate } from "@/lib/format-date";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 
@@ -14,10 +15,13 @@ export function Stage1Form({
   record,
   trainerFullName,
   trainerSignatureName,
+  timeZone,
 }: {
   record: Celta5Record;
   trainerFullName: string;
   trainerSignatureName: string | null;
+  /** The centre's zone: a signature's date is an instant, read where it was signed. */
+  timeZone: string;
 }) {
   const [state, action, pending] = useActionState(updateStage1, initialState);
 
@@ -75,7 +79,7 @@ export function Stage1Form({
 
       {record.stage1_tutor_signature_name && record.stage1_completed_at ? (
         <p className="text-xs text-muted">
-          Signed by {record.stage1_tutor_signature_name} on {new Date(record.stage1_completed_at).toLocaleDateString()}.
+          Signed by {record.stage1_tutor_signature_name} on {formatDate(record.stage1_completed_at, timeZone, { year: "numeric" })}.
         </p>
       ) : null}
 

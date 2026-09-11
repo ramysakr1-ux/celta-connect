@@ -25,6 +25,9 @@ import { ReferForm, type ReferDestination } from "@/app/dashboard/admissions/[id
 import { RequestReferralForm } from "@/app/dashboard/admissions/[id]/request-referral-form";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { holdsCentre, heldCenterIds } from "@/lib/branch-scope";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDate, formatCalendarDate } from "@/lib/format-date";
 
 export default async function ApplicantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const staff = await requireAdmissionsHandler();
@@ -34,6 +37,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
   const { data: applicant } = await supabase.from("applicants").select("*").eq("id", id).maybeSingle();
   // Held, not home -- see holdsCentre (audit, 6 Sep 2026).
   if (!applicant || !(await holdsCentre(staff, applicant.center_id))) notFound();
+  // Every timestamp on this page is written in the applicant's centre's zone.
+  const timeZone = (await getCachedCenter(applicant.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
 
   const [
     { data: intake },
@@ -286,7 +291,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
 
       {isRejected ? (
         <div className={`card p-6 ${rejectedGarnet ? "card-garnet" : ""}`}>
-          <p className="text-sm font-semibold text-ink">Rejected {applicant.rejected_at?.slice(0, 10)}</p>
+          <p className="text-sm font-semibold text-ink">Rejected {formatDate(applicant.rejected_at, timeZone, { year: "numeric" })}</p>
           <p className="mt-1 text-sm text-ink">{applicant.rejection_reason}</p>
         </div>
       ) : null}
@@ -550,7 +555,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           <div className={`card p-6 ${offerGarnet ? "card-garnet" : ""}`}>
             <h2 className="font-serif text-lg text-ink">Offer</h2>
             <p className="mt-1 text-sm text-ink">
-              Sent {applicant.offer_sent_at?.slice(0, 10)}, accept by {applicant.offer_accept_by}.
+              Sent {formatDate(applicant.offer_sent_at, timeZone, { year: "numeric" })}, accept by {formatCalendarDate(applicant.offer_accept_by, { year: "numeric" })}.
               {applicant.fee_amount ? ` Fee: ${applicant.fee_amount}${applicant.fee_currency ? ` ${applicant.fee_currency}` : ""}.` : ""}
             </p>
           </div>
@@ -573,7 +578,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
               </AreaAction>
             </div>
           </div>
-          <PaymentsPanel applicant={applicant} payments={payments ?? []} garnet={paymentsGarnet} />
+          <PaymentsPanel applicant={applicant} payments={payments ?? []} garnet={paymentsGarnet} timeZone={timeZone} />
           <EmailHistoryPanel emails={emailHistory ?? []} garnet={emailHistoryGarnet} />
           {/* The green light sits with the money, because that is what informs
               it -- but it is a separate decision, which is the whole point of

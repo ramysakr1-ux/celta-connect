@@ -6,6 +6,7 @@ import { STANDARD_RATING_OPTIONS } from "@/lib/celta-criteria";
 import { TrainerFeedbackTextarea } from "@/components/trainer-feedback-textarea";
 import { SetSignatureForm } from "@/components/set-signature-form";
 import type { Database } from "@/lib/supabase/types";
+import { formatDate } from "@/lib/format-date";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 
@@ -15,10 +16,13 @@ export function Stage3OverallForm({
   record,
   trainerFullName,
   trainerSignatureName,
+  timeZone,
 }: {
   record: Celta5Record;
   trainerFullName: string;
   trainerSignatureName: string | null;
+  /** The centre's zone: a signature's date is an instant, read where it was signed. */
+  timeZone: string;
 }) {
   const [state, action, pending] = useActionState(updateStage3Overall, initialState);
 
@@ -119,7 +123,7 @@ export function Stage3OverallForm({
 
       {record.stage3_tutor_signature_name && record.stage3_finalized_at ? (
         <p className="text-xs text-muted">
-          Signed by {record.stage3_tutor_signature_name} on {new Date(record.stage3_finalized_at).toLocaleDateString()}.
+          Signed by {record.stage3_tutor_signature_name} on {formatDate(record.stage3_finalized_at, timeZone, { year: "numeric" })}.
         </p>
       ) : null}
 

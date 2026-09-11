@@ -8,6 +8,7 @@ import { computeFunnel, computeFunnelAlerts, type FunnelApplicant } from "@/lib/
 import { PipelineFunnel, type PipelinePerson } from "@/app/dashboard/admissions/pipeline/pipeline-funnel";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { formatDate } from "@/lib/format-date";
 
 // Admissions Pipeline.dc.html: "A course fills in stages, and each stage
 // leaks... this is the one screen that shows where the leak is while
@@ -123,7 +124,7 @@ export default async function AdmissionsPipelinePage({
   for (const stage of activeFunnel) {
     peopleByStage[stage.key] = stage.applicantIds.map((id) => {
       const a = activeApplicants.find((x) => x.id === id)!;
-      return { id, name: a.fullName, meta: `${STAGE_META_LABEL[a.stage]} · applied ${a.createdAt.slice(0, 10)}` };
+      return { id, name: a.fullName, meta: `${STAGE_META_LABEL[a.stage]} · applied ${formatDate(a.createdAt, timeZone)}` };
     });
   }
 

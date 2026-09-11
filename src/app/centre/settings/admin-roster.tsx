@@ -1,4 +1,5 @@
 "use client";
+import { formatDate } from "@/lib/format-date";
 
 import { useState } from "react";
 import { CreateInviteForm, RevokeInviteButton, GrantRoleForm, RevokeRoleButton } from "@/app/centre/roles/role-forms";
@@ -31,11 +32,14 @@ export function AdminRoster({
   invites,
   mayAppoint,
   customRoles = [],
+  timeZone,
 }: {
   rows: RosterRow[];
   invites: { id: string; role: string; created_at: string }[];
   mayAppoint: boolean;
   customRoles?: { role_key: string; label: string }[];
+  /** The centre's zone: an invite's date is an instant, written the way a person says it. */
+  timeZone: string;
 }) {
   const [showInvite, setShowInvite] = useState(false);
 
@@ -96,7 +100,7 @@ export function AdminRoster({
           {invites.map((inv) => (
             <div key={inv.id} className="admin-hover flex items-center justify-between gap-3 rounded-[6px] border border-border-faint px-3 py-2">
               <span className="text-sm text-ink">{roleLabel(inv.role, customRoles)}</span>
-              <span className="text-xs text-muted">{new Date(inv.created_at).toLocaleDateString()}</span>
+              <span className="text-xs text-muted">{formatDate(inv.created_at, timeZone, { year: "numeric" })}</span>
               <RevokeInviteButton inviteId={inv.id} />
             </div>
           ))}

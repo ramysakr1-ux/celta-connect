@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { setStage1Release } from "@/app/dashboard/trainer/celta5-actions";
 import type { FormState } from "@/app/dashboard/trainer/celta5-actions";
+import { formatDate, formatDateTime } from "@/lib/format-date";
 
 const initial: FormState = { error: null };
 
@@ -16,11 +17,14 @@ export function Stage1ReleaseForm({
   completedAt,
   releasedAt,
   candidateSignedAt,
+  timeZone,
 }: {
   traineeId: string;
   completedAt: string | null;
   releasedAt: string | null;
   candidateSignedAt: string | null;
+  /** The centre's zone: release and signature are instants, read where they happened. */
+  timeZone: string;
 }) {
   const [state, formAction, pending] = useActionState(setStage1Release, initial);
   const released = Boolean(releasedAt);
@@ -34,7 +38,7 @@ export function Stage1ReleaseForm({
             {!completedAt
               ? "Finish and sign Stage One above first — there is nothing to release yet."
               : released
-                ? `Released ${new Date(releasedAt!).toLocaleString()}. They can read and sign it.`
+                ? `Released ${formatDateTime(releasedAt, timeZone)}. They can read and sign it.`
                 : "Written but not yet visible to the candidate."}
           </p>
         </div>
@@ -46,7 +50,7 @@ export function Stage1ReleaseForm({
           before they press it, not after. */}
       {released && candidateSignedAt ? (
         <p className="rounded-[6px] border border-border bg-surface-muted px-3 py-2 text-xs text-ink">
-          They signed this on {new Date(candidateSignedAt).toLocaleDateString()}. If you un-release and release a revised
+          They signed this on {formatDate(candidateSignedAt, timeZone, { year: "numeric" })}. If you un-release and release a revised
           version, that signature is cleared and they will be asked to sign again.
         </p>
       ) : null}

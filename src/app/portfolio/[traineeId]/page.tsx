@@ -11,6 +11,7 @@ import { CandidateStatusCard } from "@/app/portfolio/[traineeId]/withdraw-card";
 import { TUTOR_ROLE_LABELS, type TutorRole } from "@/lib/tutor-roles";
 import { toLocalIso, zonedTimeToUtc, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { formatDate, formatDateTime } from "@/lib/format-date";
 import { COURSE_STATUS_LABEL } from "@/lib/course-status";
 import type { AssignmentTypeValue } from "@/lib/assignment-templates/content";
 import { markScavengerHuntFound } from "@/lib/scavenger-hunt";
@@ -320,7 +321,7 @@ export default async function CourseStreamPage({
             const zoomWhen = linkedEvent
               ? [linkedEvent.event_date, linkedEvent.event_time].filter(Boolean).join(" ")
               : b.zoom_time
-                ? new Date(b.zoom_time).toLocaleString()
+                ? formatDateTime(b.zoom_time, timeZone)
                 : null;
             // Only a linked event WITH a time, or an ad-hoc zoom_time, gives
             // an actual instant to compare against -- a date-only linked
@@ -353,7 +354,7 @@ export default async function CourseStreamPage({
                     <div>
                       <p className="text-sm font-semibold text-ink">{author?.full_name ?? "Unknown"}</p>
                       <p className="text-xs text-muted">
-                        {[author?.role, new Date(b.created_at).toLocaleString()].filter(Boolean).join(" · ")}
+                        {[author?.role, formatDateTime(b.created_at, timeZone)].filter(Boolean).join(" · ")}
                       </p>
                     </div>
                   </div>
@@ -519,7 +520,7 @@ export default async function CourseStreamPage({
               <p className="mt-2 text-sm font-semibold text-ink">{COURSE_STATUS_LABEL[trainee.course_status]}</p>
               {trainee.course_status_set_at ? (
                 <p className="mt-0.5 text-xs text-muted">
-                  Set {new Date(trainee.course_status_set_at).toLocaleDateString()}
+                  Set {formatDate(trainee.course_status_set_at, timeZone, { year: "numeric" })}
                 </p>
               ) : null}
               {trainee.course_status === "withdrawn" ? (

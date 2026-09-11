@@ -4,6 +4,8 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SubscriptionForm, InvoiceForm, InvoiceRowActions } from "@/app/platform/accounts/accounts-forms";
 import { tutorRoleLabel } from "@/lib/tutor-roles";
+import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDateTime } from "@/lib/format-date";
 
 // specs/for-claude-code-command-center-belongs-in-connect.md: this is Connect's
 // own revenue/accounts view for the platform owner, not a Connect Hub screen --
@@ -319,7 +321,11 @@ export default async function CommandCenterPage() {
           activity.map((item, i) => (
             <div key={i} className="list-row admin-hover flex items-center justify-between gap-3">
               <span className="text-sm text-ink">{item.label}</span>
-              <span className="text-xs text-muted">{new Date(item.at).toLocaleString()}</span>
+              {/* A platform-wide log has no single centre; the platform
+                  owner's own zone is the right one, the same call
+                  platform-owner-greeting.ts makes. toLocaleString() with no
+                  arguments was the SERVER's locale and zone. */}
+              <span className="text-xs text-muted">{formatDateTime(item.at, DEFAULT_TIMEZONE)}</span>
             </div>
           ))
         )}

@@ -1734,7 +1734,7 @@ export default async function PortfolioCelta5Page({
         </div>
       ) : null}
 
-      <Stage1Form key={`stage1-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} />
+      <Stage1Form key={`stage1-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} timeZone={center?.time_zone ?? DEFAULT_TIMEZONE} />
 
       <div>
         <h3 className="font-serif text-lg text-ink">Progress Record — Stage 2: criteria ratings</h3>
@@ -1751,7 +1751,7 @@ export default async function PortfolioCelta5Page({
         </div>
       </div>
 
-      <Stage2OverallForm key={`stage2-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} />
+      <Stage2OverallForm key={`stage2-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} timeZone={center?.time_zone ?? DEFAULT_TIMEZONE} />
 
       <div>
         <h3 className="font-serif text-lg text-ink">Stage Three -- criteria ratings</h3>
@@ -1767,7 +1767,7 @@ export default async function PortfolioCelta5Page({
         </div>
       </div>
 
-      <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} />
+      <Stage3OverallForm key={`stage3-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} timeZone={center?.time_zone ?? DEFAULT_TIMEZONE} />
 
       {record.stage3_tutorial_required ? (
         <GradeReviewCommentsForm key={`grade-review-${record.updated_at}`} record={record} />
@@ -1790,7 +1790,7 @@ export default async function PortfolioCelta5Page({
       <FinalizeRecordForm key={`finalize-${record.updated_at}`} record={record} trainerFullName={viewer?.full_name ?? ""} trainerSignatureName={viewer?.signature_name ?? null} />
 
       {record.final_recommended_grade && record.final_recommended_grade !== "Withdrawn" && record.final_recommended_grade !== "Extension" && record.final_recommended_grade !== "Deferred" && record.trainer_signoff_final_at ? (
-        <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} />
+        <ReleaseFinalReportForm key={`release-${record.updated_at}`} record={record} timeZone={center?.time_zone ?? DEFAULT_TIMEZONE} />
       ) : null}
 
       <AdminGrantForm key={`admin-grant-${record.updated_at}`} record={record} />

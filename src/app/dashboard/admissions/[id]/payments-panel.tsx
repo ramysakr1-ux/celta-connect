@@ -2,6 +2,7 @@ import { markPaymentManual } from "@/lib/payments/actions";
 import { PaymentPlanForm } from "@/app/dashboard/admissions/[id]/payment-plan-form";
 import { CheckoutLinkButton } from "@/app/dashboard/admissions/[id]/checkout-link-button";
 import type { Database } from "@/lib/supabase/types";
+import { formatDate } from "@/lib/format-date";
 
 type Applicant = Database["public"]["Tables"]["applicants"]["Row"];
 type Payment = Database["public"]["Tables"]["payments"]["Row"];
@@ -28,10 +29,13 @@ export function PaymentsPanel({
   applicant,
   payments,
   garnet = false,
+  timeZone,
 }: {
   applicant: Applicant;
   payments: Payment[];
   garnet?: boolean;
+  /** The centre's zone -- paid_at is an instant, written the way a person says it. */
+  timeZone: string;
 }) {
   const sorted = [...payments].sort((a, b) => a.instalment_index - b.instalment_index);
   const total = sorted.reduce((sum, p) => sum + p.amount, 0);
@@ -71,7 +75,7 @@ export function PaymentsPanel({
 
               {payment.status === "paid" ? (
                 <div className="mt-2 text-xs text-ink">
-                  <p>Paid{payment.paid_at ? ` on ${payment.paid_at.slice(0, 10)}` : ""}.</p>
+                  <p>Paid{payment.paid_at ? ` on ${formatDate(payment.paid_at, timeZone, { year: "numeric" })}` : ""}.</p>
                   {payment.marked_note ? <p className="mt-0.5 text-muted">{payment.marked_note}</p> : null}
                   {payment.source === "manual" ? (
                     <form action={markPaymentManual} className="mt-1">

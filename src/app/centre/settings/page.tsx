@@ -176,7 +176,7 @@ export default async function CentreSettingsPage({
                 filmsTpSessions={center.films_tp_sessions}
                 driveConnection={driveConnection}
               />
-              <ZoomConnectionForm connection={zoomConnection} connected={zoom_connected === "1"} error={zoom_error} />
+              <ZoomConnectionForm connection={zoomConnection} connected={zoom_connected === "1"} error={zoom_error} timeZone={center.time_zone} />
             </div>
           ) : (
             <p className="text-sm text-muted">You don&apos;t hold a role that can edit centre settings.</p>
@@ -209,10 +209,11 @@ export default async function CentreSettingsPage({
             invites={(invites ?? []) as { id: string; role: string; created_at: string }[]}
             mayAppoint={mayAppoint}
             customRoles={customRoles ?? []}
+            timeZone={center.time_zone}
           />
         }
-        support={<SupportAccessTab canGrantBilling={canGrantBilling} grants={supportGrantRows} />}
-        platform={<PlatformAccessTab invite={platformInviteRow} accessLog={platformAccessLogRows} />}
+        support={<SupportAccessTab canGrantBilling={canGrantBilling} grants={supportGrantRows} timeZone={center.time_zone} />}
+        platform={<PlatformAccessTab invite={platformInviteRow} accessLog={platformAccessLogRows} timeZone={center.time_zone} />}
       />
     </div>
   );

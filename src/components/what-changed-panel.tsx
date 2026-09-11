@@ -1,6 +1,7 @@
 import type { RecentChange } from "@/lib/what-changed";
+import { formatDate } from "@/lib/format-date";
 
-export function WhatChangedPanel({ changes }: { changes: RecentChange[] }) {
+export function WhatChangedPanel({ changes, timeZone }: { changes: RecentChange[]; timeZone: string }) {
   return (
     // Decorative garnet, alternating against the plain-teal "Centre
     // material" card it stacks directly beneath on Course Admin's overview
@@ -14,7 +15,7 @@ export function WhatChangedPanel({ changes }: { changes: RecentChange[] }) {
         <ul className="mt-2 flex flex-col gap-1.5">
           {changes.map((c, i) => (
             <li key={i} className="text-xs text-muted">
-              <span className="text-ink">{c.label}</span> &middot; {c.createdAt.slice(0, 10)}
+              <span className="text-ink">{c.label}</span> &middot; {formatDate(c.createdAt, timeZone)}
             </li>
           ))}
         </ul>

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { releaseFinalReport, type FormState } from "@/app/dashboard/trainer/celta5-actions";
 import type { Database } from "@/lib/supabase/types";
+import { formatDateTime } from "@/lib/format-date";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 
@@ -11,7 +12,7 @@ const initialState: FormState = { error: null };
 // Deliberately separate from FinalizeRecordForm -- finalizing is an
 // internal act at course end, this is the later, distinct moment the
 // trainee actually gets their own copy. See migration 0038.
-export function ReleaseFinalReportForm({ record }: { record: Celta5Record }) {
+export function ReleaseFinalReportForm({ record, timeZone }: { record: Celta5Record; timeZone: string }) {
   const [state, action, pending] = useActionState(releaseFinalReport, initialState);
 
   return (
@@ -26,7 +27,7 @@ export function ReleaseFinalReportForm({ record }: { record: Celta5Record }) {
 
       {record.final_report_released_at ? (
         <p className="text-sm text-ink">
-          Released {new Date(record.final_report_released_at).toLocaleString()}.
+          Released {formatDateTime(record.final_report_released_at, timeZone)}.
         </p>
       ) : (
         <button

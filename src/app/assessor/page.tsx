@@ -9,6 +9,7 @@ import { resolveProvisionalDeadline } from "@/lib/provisional-deadline";
 import { hasMarkingGuidance } from "@/lib/marking-guidance";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
+import { formatDate } from "@/lib/format-date";
 import { HeaderCredit } from "@/components/designer-credit";
 import { HeaderClock } from "@/components/header-clock";
 import { CENTRE_DOCUMENTS, COHORT_DOCUMENTS } from "@/lib/assessor-pack-contents";
@@ -461,7 +462,7 @@ export default async function AssessorPage({
           </a>
         ) : accessToken ? (
           <span style={{ fontSize: 11.5, color: "oklch(76% 0.02 80)", flex: "none" }}>
-            Link expires {accessToken.expires_at.slice(0, 10)}
+            Link expires {formatDate(accessToken.expires_at, timeZone, { year: "numeric" })}
           </span>
         ) : null}
       </div>

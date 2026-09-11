@@ -1,4 +1,5 @@
 "use client";
+import { formatDate, formatDateTime } from "@/lib/format-date";
 
 import { useActionState } from "react";
 import { invitePlatformOwner, revokePlatformOwnerInvite, type PlatformAccessFormState } from "@/app/centre/settings/platform-access-actions";
@@ -23,7 +24,16 @@ export interface AccessLogRow {
 // and the real, permanent log of every time he's actually used it -- "they
 // should see in their own activity log that Ramy accessed their centre. No
 // silent/backdoor viewing."
-export function PlatformAccessTab({ invite, accessLog }: { invite: PlatformAccessRow | null; accessLog: AccessLogRow[] }) {
+export function PlatformAccessTab({
+  invite,
+  accessLog,
+  timeZone,
+}: {
+  invite: PlatformAccessRow | null;
+  accessLog: AccessLogRow[];
+  /** The centre's zone: every timestamp here is an instant, written the way a person says it. */
+  timeZone: string;
+}) {
   const [state, action, pending] = useActionState(invitePlatformOwner, initial);
 
   return (
@@ -41,7 +51,7 @@ export function PlatformAccessTab({ invite, accessLog }: { invite: PlatformAcces
           <div>
             <p className="text-sm font-medium text-ink">Standing access granted</p>
             <p className="mt-1 text-xs text-muted">
-              Since {new Date(invite.invitedAt).toLocaleDateString()}
+              Since {formatDate(invite.invitedAt, timeZone, { year: "numeric" })}
               {invite.note ? ` — ${invite.note}` : ""}
             </p>
           </div>
@@ -92,7 +102,7 @@ export function PlatformAccessTab({ invite, accessLog }: { invite: PlatformAcces
               {accessLog.map((a) => (
                 <li key={a.id} className="list-row flex items-center justify-between gap-4">
                   <span className="text-sm text-ink">Opened {a.page}</span>
-                  <span className="text-xs text-muted">{new Date(a.accessedAt).toLocaleString()}</span>
+                  <span className="text-xs text-muted">{formatDateTime(a.accessedAt, timeZone)}</span>
                 </li>
               ))}
             </ul>

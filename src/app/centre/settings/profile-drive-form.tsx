@@ -5,6 +5,7 @@ import { updateCentreProfile, type FormState } from "@/app/centre/settings/actio
 import { disconnectGoogleDrive } from "@/app/dashboard/admin/settings/actions";
 import { GoogleDriveTargetsForm } from "@/app/dashboard/admin/settings/targets-form";
 import { TIMEZONE_OPTIONS } from "@/lib/timezones";
+import { formatDateTime } from "@/lib/format-date";
 
 const initialState: FormState = { error: null };
 
@@ -179,7 +180,7 @@ export function ProfileDriveForm({
         </p>
         {driveConnection ? (
           <div className="mt-4 flex flex-col gap-4">
-            <p className="text-sm text-muted">Connected {new Date(driveConnection.connected_at).toLocaleString()}.</p>
+            <p className="text-sm text-muted">Connected {formatDateTime(driveConnection.connected_at, timeZone)}.</p>
             <GoogleDriveTargetsForm templateDocId={driveConnection.template_doc_id} outputFolderId={driveConnection.output_folder_id} />
             <form action={disconnectGoogleDrive}>
               <button type="submit" className="text-sm text-destructive underline">
