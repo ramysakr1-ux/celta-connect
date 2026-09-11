@@ -704,7 +704,14 @@ export default async function TodayPage() {
   const weekOf =
     course?.start_date && course?.end_date ? computeWeekOf(course.start_date, course.end_date, today) : null;
 
+  // Ramy, 11 Sep 2026: "remove Jordan Blake [from the header bar] ... before
+  // Friday, eleven September." The tutor's name left the hub header to give
+  // the tab strip its width back (layout.tsx), and lands here instead --
+  // the line directly above the date heading, the way the trainee landing
+  // greets a candidate in its eyebrow. A touring assessor has no trainer
+  // profile, so the line simply starts at the course for them.
   const overline = [
+    trainer?.full_name,
     course?.name,
     isMct ? "cohort" : scopedGroupIds ? "your group" : "all groups",
     weekOf,
