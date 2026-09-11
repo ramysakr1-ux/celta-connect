@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toLocalIso, zonedTimeToUtc } from "@/lib/timetable-grid";
+import { formatCalendarDate } from "@/lib/format-date";
 import { computeWeekOf } from "@/lib/course-progress";
 import { rotationPosition, halfTpDates, type TpTimetableEvent } from "@/lib/rotation";
 import { getTpCardStatus } from "@/lib/tp-plan-content";
@@ -461,7 +462,9 @@ export async function TodayTab({
         // colour. Just let it pop a little bit. It's too bland."
         label: `${ASSIGNMENT_INFO[a.assignment_type]?.title ?? a.assignment_type} due`,
         kind: "assignment",
-        detail: a.due_date,
+        // A date-only column, said the way a person says it -- "due 3 Sept",
+        // not "due 2026-09-03" (seen on a finished course, 12 Sep 2026).
+        detail: formatCalendarDate(a.due_date),
         href: `/portfolio/${traineeId}/assignments/${a.id}`,
         pill: a.due_date === today ? "Today" : "Overdue",
         pillClass: a.due_date === today ? "pill-warning" : "pill-danger",

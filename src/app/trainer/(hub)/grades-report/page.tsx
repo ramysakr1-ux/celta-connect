@@ -215,7 +215,9 @@ export default async function GradesReportPage() {
         canRelease={Boolean(trainer)}
         provisionalDueAt={provisionalDueAt}
         provisionalDueDerived={provisionalDueDerived}
-        provisionalDaysOut={provisionalDaysOut}
+        // No overdue count once the visit has happened: the provisionals were
+        // for the visit, and the finals are what is owed now.
+        provisionalDaysOut={assessorVisitDateForCourse && assessorVisitDateForCourse < gradesToday ? null : provisionalDaysOut}
         appianUrl={appianUrl}
         isMct={isMct}
       />

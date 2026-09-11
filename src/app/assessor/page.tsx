@@ -675,10 +675,14 @@ export default async function AssessorPage({
             }}
           >
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: AMBER }}>
-              {sendByDate ? `Provisional grades due: ${longDate(sendByDate)} EOD` : "No provisional grades deadline set"}
+              {sendByDate
+                ? `Provisional grades ${course.assessor_visit_date && course.assessor_visit_date < today ? "were due" : "due"}: ${longDate(sendByDate)} EOD`
+                : "No provisional grades deadline set"}
               {/* "-1 days out" was what this printed the morning after the
-                  deadline (12 Sep 2026). Past is said as overdue. */}
-              {daysOut === null
+                  deadline (12 Sep 2026). Past is said as overdue -- until the
+                  visit itself has passed, after which the provisionals are
+                  history and the count is dropped. */}
+              {daysOut === null || (course.assessor_visit_date && course.assessor_visit_date < today)
                 ? ""
                 : daysOut > 0
                   ? ` · ${daysOut} day${daysOut === 1 ? "" : "s"} out`

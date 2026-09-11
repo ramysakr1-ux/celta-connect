@@ -309,7 +309,11 @@ export default async function TodayPage() {
     ).length;
     const dueDate = provisionalDeadline.dueDate;
     const daysOut = Math.ceil((new Date(`${dueDate}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000);
-    if (daysOut <= REMINDER_DAYS_BEFORE_DUE && approvedCount < gradeCandidateCount) {
+    // Once the visit has happened the provisionals are history -- the finals
+    // are what is owed now, and the FG alert below says so. A finished
+    // course read "Provisional grades overdue by 15 days" (12 Sep 2026).
+    const visitPassed = Boolean(course?.assessor_visit_date && course.assessor_visit_date < today);
+    if (!visitPassed && daysOut <= REMINDER_DAYS_BEFORE_DUE && approvedCount < gradeCandidateCount) {
       const overdue = -daysOut;
       alerts.push({
         kind: "marking",
@@ -385,15 +389,21 @@ export default async function TodayPage() {
         .filter((e) => e.type === "tp" && e.linked_tp_number !== null)
         .sort((a, b) => (b.linked_tp_number ?? 0) - (a.linked_tp_number ?? 0))[0]?.event_date ?? null;
     if (lastTpDate && lastTpDate <= today) {
-      const finalizedCount = (celta5Rows ?? []).filter((r) => r.final_recommended_grade).length;
-      if (finalizedCount < traineeIds.length) {
+      // The active cohort, as everywhere else on the grades thread: a
+      // withdrawn candidate has no final grade to recommend (read "0 of 12"
+      // on a finished course beside a sheet counting 11, 12 Sep 2026).
+      const finalGradeCandidates = rows.filter((r) => r.courseStatus !== "withdrawn").length;
+      const finalizedCount = (celta5Rows ?? []).filter(
+        (r) => r.final_recommended_grade && r.final_recommended_grade !== "Withdrawn"
+      ).length;
+      if (finalizedCount < finalGradeCandidates) {
         const daysSince = Math.ceil((new Date(`${today}T00:00:00`).getTime() - new Date(`${lastTpDate}T00:00:00`).getTime()) / 86400000);
         alerts.push({
           kind: "marking",
           badge: "FG",
           due: daysSince > 3 ? "Now" : "Today",
           title: `Final grades -- ${daysSince <= 0 ? "last TP day" : `${daysSince} day${daysSince === 1 ? "" : "s"} since the last TP`}`,
-          meta: `${finalizedCount} of ${traineeIds.length} recommended`,
+          meta: `${finalizedCount} of ${finalGradeCandidates} recommended`,
           href: "/trainer/grades-report",
           destructive: daysSince > 3,
         });

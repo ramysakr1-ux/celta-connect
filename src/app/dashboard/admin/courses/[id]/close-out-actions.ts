@@ -9,6 +9,21 @@ import { isMctOnCourse } from "@/lib/course-mct";
 import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rules";
 import { verifyCourseForCloseOut } from "@/lib/course-close-out/verify";
 import { exportCourseToDrive } from "@/lib/course-close-out/export";
+import { getCachedCenter } from "@/lib/supabase/cached-queries";
+
+// Close-out writes go through the admin client (a trainer has no RLS grant on
+// course_close_outs), which means the shared demo's write-block trigger never
+// sees them: found 12 Sep 2026 when "Run verification" on the demo course
+// wrote a verification report for keeps -- and the same path would have let
+// a visitor start the seven-day wipe clock on the demo. So the demo is
+// refused here, in the same words the trigger uses everywhere else.
+const DEMO_REFUSAL = "This is a shared demo -- changes are not saved.";
+async function refuseIfDemo(courseId: string): Promise<string | null> {
+  const { data: course } = await createAdminClient().from("courses").select("center_id").eq("id", courseId).maybeSingle();
+  if (!course) return null;
+  const center = await getCachedCenter(course.center_id);
+  return center?.is_demo ? DEMO_REFUSAL : null;
+}
 import { holdsCentre } from "@/lib/branch-scope";
 
 export interface FormState {
@@ -136,6 +151,8 @@ export async function initiateCloseOut(_prevState: FormState, formData: FormData
   const supabase = await createClient();
   if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
 
+  const demoRefusal = await refuseIfDemo(courseId);
+  if (demoRefusal) return { error: demoRefusal };
   const adminClient = createAdminClient();
   const { data: existing } = await adminClient
     .from("course_close_outs")
@@ -207,6 +224,8 @@ export async function confirmCloseOutReceipt(_prevState: FormState, formData: Fo
     return { error: blockingReasons.map((r) => r.message).join(" ") };
   }
 
+  const demoRefusal = await refuseIfDemo(courseId);
+  if (demoRefusal) return { error: demoRefusal };
   const adminClient = createAdminClient();
   const { data: closeOut } = await adminClient.from("course_close_outs").select("status").eq("course_id", courseId).maybeSingle();
   if (!closeOut || closeOut.status !== "awaiting_receipt") {
@@ -259,6 +278,8 @@ export async function extendGracePeriod(_prevState: FormState, formData: FormDat
   const supabase = await createClient();
   if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
 
+  const demoRefusal = await refuseIfDemo(courseId);
+  if (demoRefusal) return { error: demoRefusal };
   const adminClient = createAdminClient();
   const { data: closeOut } = await adminClient
     .from("course_close_outs")
@@ -313,6 +334,8 @@ export async function exportCloseOut(_prevState: FormState, formData: FormData):
   const supabase = await createClient();
   if (!(await requireMctCloseOutAccess(supabase, trainer))) return { error: NOT_MCT_ERROR };
 
+  const demoRefusal = await refuseIfDemo(courseId);
+  if (demoRefusal) return { error: demoRefusal };
   const adminClient = createAdminClient();
   const { data: closeOut } = await adminClient.from("course_close_outs").select("status").eq("course_id", courseId).maybeSingle();
   if (!closeOut || closeOut.status !== "ready_to_export") {
