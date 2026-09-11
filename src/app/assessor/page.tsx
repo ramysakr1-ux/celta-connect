@@ -91,6 +91,17 @@ export default async function AssessorPage({
   ]);
   const markingGuidancePresent = course ? await hasMarkingGuidance(admin, course.center_id) : false;
 
+  // Volunteer attendance registers are a document Connect keeps, not one the
+  // centre uploads: the register lives at /trainer/volunteers, which already
+  // has a read-only assessor branch. Surface it when the course actually has
+  // volunteer students -- a course taught to hired classes has none, and an
+  // "Open" link to an empty register would be worse than the honest blank.
+  const { count: volunteerCount } = await admin
+    .from("volunteer_students")
+    .select("id", { count: "exact", head: true })
+    .eq("course_id", courseId);
+  const hasVolunteerRegister = (volunteerCount ?? 0) > 0;
+
   if (!course) redirect("/login?error=assessor_link_invalid");
 
   const center = course.centers as unknown as { name: string; center_number: string; appian_url: string | null } | null;
@@ -1126,6 +1137,10 @@ export default async function AssessorPage({
                 // it rather than ever reading "Not uploaded". A centre that
                 // has uploaded its own fuller version takes precedence.
                 const isCandidateAgreement = doc.name === "Candidate agreement & policies";
+                // The volunteer attendance register is likewise Connect's own,
+                // not an upload: /trainer/volunteers has a read-only assessor
+                // branch. Surface it when the course has volunteer students.
+                const isVolunteerRegister = doc.name === "Volunteer attendance registers";
                 const uploaded = isMarkingGuidance
                   ? null
                   : (centreDocs ?? []).find((d) => d.title.trim().toLowerCase() === doc.name.toLowerCase());
@@ -1133,14 +1148,20 @@ export default async function AssessorPage({
                   ? markingGuidancePresent
                   : isCandidateAgreement
                     ? true
-                    : Boolean(uploaded?.file_url);
+                    : isVolunteerRegister
+                      ? Boolean(uploaded?.file_url) || hasVolunteerRegister
+                      : Boolean(uploaded?.file_url);
                 const href = isMarkingGuidance
                   ? "/assessor/marking-guidance"
                   : isCandidateAgreement
                     ? uploaded?.file_url ?? "/candidate-agreement"
-                    : uploaded?.file_url;
+                    : isVolunteerRegister
+                      ? uploaded?.file_url ?? "/trainer/volunteers"
+                      : uploaded?.file_url;
                 // App routes open in place; an uploaded file opens in a new tab.
-                const opensInApp = isMarkingGuidance || (isCandidateAgreement && !uploaded?.file_url);
+                const opensInApp =
+                  isMarkingGuidance ||
+                  ((isCandidateAgreement || isVolunteerRegister) && !uploaded?.file_url);
                 // The authorisation certificate's own datum is the centre's
                 // Cambridge number, and that IS on file even before the
                 // certificate is attached -- so name it rather than the
