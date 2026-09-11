@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchRosterRows } from "@/lib/roster";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
-import { formatDateTime } from "@/lib/format-date";
+import { formatDate, formatDateTime } from "@/lib/format-date";
 import { AssessorCard } from "@/app/trainer/(hub)/assessor-card";
 import { AssessorLinkButton } from "@/app/trainer/assessor-link-button";
 import { AssessorSelectionButton } from "@/app/trainer/(hub)/roster/assessor-selection-button";
@@ -346,7 +346,9 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         source: lastChoice.source,
         reason: lastChoice.reason,
         by: chooserName ?? "the centre",
-        at: fmtDate(lastChoice.created_at.slice(0, 10), { day: "numeric", month: "long" }),
+        // An instant, read in the centre's zone -- .slice(0, 10) was the UTC
+        // day, which after 21:00 in Istanbul is yesterday.
+        at: formatDate(lastChoice.created_at, timeZone, { day: "numeric", month: "long" }),
       }
     : null;
 
