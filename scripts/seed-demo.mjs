@@ -706,8 +706,15 @@ async function main() {
   // people in; the demo picks four so the pack actually demonstrates the
   // narrowing instead of listing everybody (Ramy, 10 Sep 2026: "why is the
   // assessor getting all those cards?").
-  const assessorSampleCount = 4;
-  let assessorSampleTaken = 0;
+  //
+  // The four are CHOSEN, not the first four names (Ramy, 11 Sep 2026): the
+  // pack's own §15.1 line tells the assessor to focus on the Fail/borderline
+  // cases, so the sample is exactly those -- Ines (a terminal Fail), Kofi (the
+  // upheld plagiarism case), Daniel (a resubmission outstanding, at risk), and
+  // Amara (a clean Pass B, for contrast and because she is one of the two the
+  // assessor watches teach on the day). All four also teach on the visit day,
+  // satisfying "read the portfolio of someone you watched teach".
+  const ASSESSOR_SAMPLE = new Set(["Ines Marchetti", "Kofi Mensah", "Daniel Kim", "Amara Okafor"]);
   for (const def of traineeDefs) {
     const { data: authUser, error: authErr } = await supabase.auth.admin.createUser({
       email: def.email,
@@ -724,7 +731,7 @@ async function main() {
       course_status: def.withdrawn ? "withdrawn" : "active",
       course_status_set_at: def.withdrawn ? new Date(Date.now() - 9 * 86400000).toISOString() : null,
       // Withdrawn candidates are not part of a moderation sample.
-      selected_for_assessor_visit: !def.withdrawn && assessorSampleTaken < assessorSampleCount ? (assessorSampleTaken += 1, true) : false,
+      selected_for_assessor_visit: !def.withdrawn && ASSESSOR_SAMPLE.has(def.name),
     });
     if (traineeProfileErr) throw traineeProfileErr;
     trainees[def.name] = authUser.user.id;

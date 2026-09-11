@@ -109,7 +109,12 @@ export default async function AssessorPage({
   const daysOut = sendByDate ? Math.ceil((new Date(`${sendByDate}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000) : null;
 
   const [{ data: tutorRows }, { data: onDayEvents }, { data: centreDocs }, { data: asyncEvents }, { data: malpracticeCases }] = await Promise.all([
-    admin.from("course_tutors").select("profile_id, tutor_role").eq("course_id", courseId).is("left_at", null),
+    // Only people with an actual teaching/assessing role. A course_tutors row
+    // can carry a null tutor_role -- the course administrator is approved on
+    // the course but is not on the teaching roster (see the seed's own note) --
+    // and listing them under "Tutor list" with a blank role misrepresents who
+    // teaches. The assessor wants the tutors, not everyone with access.
+    admin.from("course_tutors").select("profile_id, tutor_role").eq("course_id", courseId).is("left_at", null).not("tutor_role", "is", null),
     course.assessor_visit_date
       ? admin.from("course_timetable_events").select("*").eq("course_id", courseId).eq("event_date", course.assessor_visit_date).order("event_time")
       : Promise.resolve({ data: [] }),
