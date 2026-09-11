@@ -7,7 +7,7 @@ import { ApplicationSettingsForm } from "@/app/dashboard/admin/courses/[id]/appl
 import { TutorRoleControl } from "@/app/dashboard/admin/courses/[id]/tutor-role-control";
 import { TutorInviteForm } from "@/app/dashboard/admin/courses/[id]/tutor-invite-form";
 import { EntryFormSentCheckbox } from "@/app/dashboard/admin/courses/[id]/entry-form-sent-checkbox";
-import { markGradeFormSubmitted } from "@/app/dashboard/admin/courses/[id]/grade-form-actions";
+import { markGradeFormSubmitted, markGradeApprovalFormSubmitted } from "@/app/dashboard/admin/courses/[id]/grade-form-actions";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDate } from "@/lib/format-date";
@@ -79,6 +79,13 @@ export default async function CourseAdminDetailPage({
   const gradeFormSubmittedBy = (course as { grade_form_submitted_by?: string | null }).grade_form_submitted_by ?? null;
   const { data: gradeFormMarker } = gradeFormSubmittedBy
     ? await supabase.from("profiles").select("full_name").eq("id", gradeFormSubmittedBy).maybeSingle()
+    : { data: null };
+  // And the centre grade approval form after the assessor's report (14.4,
+  // migration 0290) -- the same shared tick.
+  const approvalSubmittedAt = (course as { grade_approval_form_submitted_at?: string | null }).grade_approval_form_submitted_at ?? null;
+  const approvalSubmittedBy = (course as { grade_approval_form_submitted_by?: string | null }).grade_approval_form_submitted_by ?? null;
+  const { data: approvalMarker } = approvalSubmittedBy
+    ? await supabase.from("profiles").select("full_name").eq("id", approvalSubmittedBy).maybeSingle()
     : { data: null };
   const today = toLocalIso(new Date(), timeZone);
   // The eyebrow printed "2026-08-17 – 2026-09-11" raw while the landing it is
@@ -256,6 +263,27 @@ export default async function CourseAdminDetailPage({
               courseId={course.id}
               fieldName="grade_form_submitted_at"
               sent={Boolean(gradeFormSubmittedAt)}
+              label="Mark as submitted"
+            />
+          </div>
+          {/* The third and last: after the assessor's report, the centre
+              confirms the final recommended grades on the centre grade
+              approval form (Handbook 14.4). Cambridge's confirmation is the
+              MCT's close-out tick. */}
+          <div className="flex flex-col gap-2 border-t border-border-faint pt-3">
+            <p className="text-sm font-semibold text-ink">Centre grade approval form</p>
+            <p className="text-xs text-muted">
+              {approvalSubmittedAt
+                ? `Marked submitted ${formatDate(approvalSubmittedAt, timeZone, { year: "numeric" })}${
+                    approvalMarker?.full_name ? ` by ${approvalMarker.full_name}` : ""
+                  }.`
+                : "After the assessor's report, the centre confirms the final recommended grades on this form in Appian. Shared with the MCT -- whoever submits it marks it."}
+            </p>
+            <EntryFormSentCheckbox
+              action={markGradeApprovalFormSubmitted}
+              courseId={course.id}
+              fieldName="grade_approval_form_submitted_at"
+              sent={Boolean(approvalSubmittedAt)}
               label="Mark as submitted"
             />
           </div>

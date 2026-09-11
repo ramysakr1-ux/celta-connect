@@ -30,7 +30,7 @@ const overrideByOf = (r: unknown): string | null =>
 import { UpgradeConditionsForm } from "@/app/trainer/(hub)/grades-report/upgrade-conditions-form";
 import { CohortSheet } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
 import { EntryFormSentCheckbox } from "@/app/dashboard/admin/courses/[id]/entry-form-sent-checkbox";
-import { markGradeFormSubmitted } from "@/app/dashboard/admin/courses/[id]/grade-form-actions";
+import { markGradeFormSubmitted, markGradeApprovalFormSubmitted } from "@/app/dashboard/admin/courses/[id]/grade-form-actions";
 import { formatDate } from "@/lib/format-date";
 import { CloseOutCard } from "@/app/dashboard/admin/courses/[id]/close-out-card";
 import { CertificateCheckCard, type CertificateCandidate } from "@/app/dashboard/admin/courses/[id]/certificate-check-card";
@@ -104,10 +104,21 @@ export default async function GradesReportPage() {
   // Database type lags the migration; the marker may be Course Admin, so
   // not necessarily one of the course tutors.
   const { data: gradeFormCourse } = await createAdminClient().from("courses").select("*").eq("id", courseId).maybeSingle();
-  const gradeForm = gradeFormCourse as { grade_form_submitted_at?: string | null; grade_form_submitted_by?: string | null } | null;
+  const gradeForm = gradeFormCourse as {
+    grade_form_submitted_at?: string | null;
+    grade_form_submitted_by?: string | null;
+    grade_approval_form_submitted_at?: string | null;
+    grade_approval_form_submitted_by?: string | null;
+  } | null;
   const gradeFormSubmittedAt = gradeForm?.grade_form_submitted_at ?? null;
   const { data: gradeFormMarker } = gradeForm?.grade_form_submitted_by
     ? await createAdminClient().from("profiles").select("full_name").eq("id", gradeForm.grade_form_submitted_by).maybeSingle()
+    : { data: null };
+  // And the last step of 14.4 (migration 0290): after the assessor's report,
+  // the centre confirms the finals on the centre grade approval form.
+  const approvalSubmittedAt = gradeForm?.grade_approval_form_submitted_at ?? null;
+  const { data: approvalMarker } = gradeForm?.grade_approval_form_submitted_by
+    ? await createAdminClient().from("profiles").select("full_name").eq("id", gradeForm.grade_approval_form_submitted_by).maybeSingle()
     : { data: null };
 
   const { data: trainees } = await supabase
@@ -577,6 +588,30 @@ export default async function GradesReportPage() {
 
       {isMct ? (
         <>
+          {/* Handbook 14.4's last line: after the assessor's report, "the
+              centre subsequently confirms the final recommended grades on the
+              centre grade approval form" in Appian. Recorded here, beside
+              the close-out it precedes (migration 0290, 12 Sep 2026) --
+              Cambridge's own confirmation is the close-out card's tick below. */}
+          <div className="sheet flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Centre grade approval form in Appian</p>
+              <p className="text-sm text-muted">
+                {approvalSubmittedAt
+                  ? `Marked submitted ${formatDate(approvalSubmittedAt, gradesTimeZone, { year: "numeric" })}${
+                      approvalMarker?.full_name ? ` by ${approvalMarker.full_name}` : ""
+                    }. Cambridge's confirmation follows -- the close-out card records it.`
+                  : "Not yet marked as submitted. After the assessor's report, the centre confirms the final recommended grades on the centre grade approval form in Appian (Handbook 14.4); Cambridge then confirms them."}
+              </p>
+            </div>
+            <EntryFormSentCheckbox
+              action={markGradeApprovalFormSubmitted}
+              courseId={courseId}
+              fieldName="grade_approval_form_submitted_at"
+              sent={Boolean(approvalSubmittedAt)}
+              label="Mark as submitted"
+            />
+          </div>
           <CertificateCheckCard courseId={courseId} candidates={certificateCandidates} />
           <CloseOutCard
             courseId={courseId}
