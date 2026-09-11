@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { buildDayRows, bandIndexFor, categorize, isEventLive, type CellCategory, type DayRow, type TimeBand, type TimetableEvent } from "@/lib/timetable-grid";
+import { buildDayRows, bandIndexFor, categorize, isEventLive, type DayRow, type TimeBand, type TimetableEvent } from "@/lib/timetable-grid";
+import { CATEGORY_STYLE, toDisplayCategory, type DisplayCategory } from "@/lib/timetable-category-style";
 
 // for-claude-code-timetable-view.md -- read-only 4-week glass-card board,
 // shared by trainee and staff-preview viewers of a trainee's portfolio
@@ -9,57 +10,7 @@ import { buildDayRows, bandIndexFor, categorize, isEventLive, type CellCategory,
 // editable grid uses (timetable-grid.ts), so this never invents its own
 // notion of "what's scheduled" -- only how it's presented.
 
-type DisplayCategory = "wg" | "rm" | "admin" | "iw" | "lu";
 
-// The spec's own 5-bucket model has no separate "consultation" category --
-// `cs` (split out from `rm` elsewhere in the app, see timetable-grid.ts)
-// folds back into `iw` here ("Individual / bookable (consultations,
-// own-time writing, Stage 3)" -- the spec's own wording).
-function toDisplayCategory(cat: CellCategory): DisplayCategory {
-  return cat === "cs" ? "iw" : cat;
-}
-
-const CATEGORY_STYLE: Record<DisplayCategory, { accent: string; tintFrom: string; tintTo: string; label: string; titleWeight: number }> = {
-  wg: {
-    accent: "oklch(38% 0.072 195)",
-    tintFrom: "oklch(95.5% 0.03 195 / 0.75)",
-    tintTo: "oklch(95.5% 0.03 195 / 0.35)",
-    label: "Whole group — Zoom input",
-    titleWeight: 500,
-  },
-  rm: {
-    accent: "oklch(23.5% 0.017 65)",
-    tintFrom: "oklch(100% 0 0 / 0.92)",
-    tintTo: "oklch(100% 0 0 / 0.55)",
-    label: "Group room — TP, feedback, planning",
-    titleWeight: 600,
-  },
-  admin: {
-    // Ramy's design file (29 Aug 2026) uses gold here, and gold is what the
-    // 2026-08-21 colour audit had re-pointed to amber. His file is the
-    // authority for this screen, so gold it is -- the legend swatch and the
-    // card spine both read from this one value, so they cannot disagree.
-    accent: "oklch(60% 0.11 70)",
-    tintFrom: "oklch(96% 0.045 80 / 0.75)",
-    tintTo: "oklch(96% 0.045 80 / 0.35)",
-    label: "Admin & deadlines",
-    titleWeight: 500,
-  },
-  iw: {
-    accent: "oklch(51% 0.017 70)",
-    tintFrom: "oklch(96% 0.008 85 / 0.6)",
-    tintTo: "oklch(96% 0.008 85 / 0.25)",
-    label: "Individual · bookable",
-    titleWeight: 500,
-  },
-  lu: {
-    accent: "transparent",
-    tintFrom: "oklch(96% 0.008 85 / 0.35)",
-    tintTo: "oklch(96% 0.008 85 / 0.15)",
-    label: "Lunch",
-    titleWeight: 400,
-  },
-};
 
 // From the design file, verbatim.
 const GRID_COLUMNS = "64px 150px repeat(9, minmax(118px, 1fr))";

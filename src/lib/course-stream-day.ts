@@ -1,5 +1,6 @@
 import type { TimeBand } from "@/lib/supabase/types";
-import { bandIndexFor, resolveTimeBands, zonedTimeToUtc, type TimetableEvent } from "@/lib/timetable-grid";
+import { bandIndexFor, categorize, resolveTimeBands, zonedTimeToUtc, type TimetableEvent } from "@/lib/timetable-grid";
+import { toDisplayCategory, type DisplayCategory } from "@/lib/timetable-category-style";
 
 // The trainee's day, as the Course Stream landing draws it.
 //
@@ -52,6 +53,9 @@ export interface StreamSlot {
   /** This trainee is the one teaching -- the block that carries the gold. */
   mine: boolean;
   zoomUrl: string | null;
+  /** The timetable's own category for this event, so the Your-day card can
+   *  wear the same glass tint as the same session on the 4-week grid. */
+  category: DisplayCategory;
 }
 
 export interface StreamDay {
@@ -117,6 +121,7 @@ export function buildStreamDay({
       endsAtMs: zonedTimeToUtc(dateIso, hhmm(toMin), timeZone).getTime(),
       mine: mineEventIds.has(event.id),
       zoomUrl: event.zoom_url,
+      category: toDisplayCategory(categorize(event)),
     });
   }
   slots.sort((a, b) => a.fromMin - b.fromMin || a.title.localeCompare(b.title));

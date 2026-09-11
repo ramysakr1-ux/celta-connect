@@ -3,6 +3,7 @@
 import { useServerNow } from "@/lib/use-server-now";
 import { useEffect, useState } from "react";
 import type { StreamDay, StreamSlot } from "@/lib/course-stream-day";
+import { CATEGORY_STYLE } from "@/lib/timetable-category-style";
 
 // Course Stream's hour hand.
 //
@@ -18,21 +19,12 @@ import type { StreamDay, StreamSlot } from "@/lib/course-stream-day";
 // the browser take over and tick. The clock in the eyebrow starts blank for the
 // same reason.
 
-type State = "done" | "now" | "next" | "later";
-
-
 /** The same window isEventLive uses everywhere else: the door opens ten
  *  minutes before the session and closes when it ends. A join link that
  *  appears at a different moment from the timetable's own is worse than none. */
 const JOIN_LEAD_MS = 10 * 60 * 1000;
 function joinableNow(slot: StreamSlot, nowMs: number): boolean {
   return Boolean(slot.zoomUrl) && nowMs >= slot.startsAtMs - JOIN_LEAD_MS && nowMs < slot.endsAtMs;
-}
-
-function stateOf(slot: StreamSlot, nowMs: number, firstFutureId: string | null): State {
-  if (nowMs >= slot.endsAtMs) return "done";
-  if (nowMs >= slot.startsAtMs) return "now";
-  return slot.id === firstFutureId ? "next" : "later";
 }
 
 /** The eyebrow above the hero title: greeting, date, live clock. */
@@ -91,7 +83,6 @@ export function StreamDayTrack({
   // percentage went out with the equal boxes, and the axis labels arrive
   // already formatted. The header's bar is what still draws to the minute.
   const { slots, axis } = day;
-  const firstFuture = slots.find((s) => now < s.startsAtMs)?.id ?? null;
 
   const mine = slots.find((s) => s.mine) ?? null;
   const countdown = (() => {
@@ -107,12 +98,31 @@ export function StreamDayTrack({
     return `in ${mins} minute${mins === 1 ? "" : "s"}`;
   })();
 
-  // With equal boxes the track is a sequence, so the marker sits on the seam
-  // between what is finished and what is not, rather than at a pixel that no
-  // longer means a time. The header's bar keeps the real clock position.
-  const doneCount = slots.filter((s) => now >= s.endsAtMs).length;
-  const markerPct = slots.length > 0 ? (doneCount / slots.length) * 100 : 0;
-  const showMarker = mounted && doneCount > 0 && doneCount < slots.length;
+  // The garnet marker is the only thing on this track that moves. Ramy, 11 Sep
+  // 2026: "the garnet bar moving across, sort of stopping where the time of day
+  // is." It rides the real clock -- gliding across whichever box is live in
+  // proportion to how far through that session we are, and resting on the seam
+  // between boxes during the gaps (lunch, breaks). Equal boxes mean a pixel is
+  // no longer a fixed number of minutes, so the sweep is anchored box by box
+  // rather than to the day's raw minute span: the marker is always where the
+  // live session is, never adrift in the whitespace a collapsed gap left behind.
+  const markerFrac = (() => {
+    if (!mounted || slots.length === 0) return null;
+    const first = slots[0];
+    const last = slots[slots.length - 1];
+    if (now < first.startsAtMs || now >= last.endsAtMs) return null;
+    for (let i = 0; i < slots.length; i += 1) {
+      const s = slots[i];
+      if (now < s.startsAtMs) return i / slots.length; // in the gap before box i
+      if (now < s.endsAtMs) {
+        const through = (now - s.startsAtMs) / (s.endsAtMs - s.startsAtMs);
+        return (i + through) / slots.length; // sweeping across the live box
+      }
+    }
+    return null;
+  })();
+  const markerPct = markerFrac === null ? 0 : markerFrac * 100;
+  const showMarker = markerFrac !== null;
 
   return (
     <section className="flex flex-col">
@@ -159,14 +169,10 @@ export function StreamDayTrack({
               for the whole of that band too. */}
           <div className="relative flex flex-col gap-1.5 lg:h-[104px] lg:flex-row">
             {slots.map((s) => {
-              const st = stateOf(s, now, firstFuture);
-              const gold = s.mine && st !== "done";
-              const lit = gold && (st === "now" || st === "next");
+              const cat = CATEGORY_STYLE[s.category];
               // Ramy, 10 Sep 2026: "can we make it on the actual bar itself? So
-              // TP8 B, if they click on it, and then they join Zoom." A pill
-              // inside the box asked people to find a small target inside a
-              // large one that already looked like the thing. The whole box is
-              // the door while the session is joinable.
+              // TP8 B, if they click on it, and then they join Zoom." The whole
+              // box is the door while the session is joinable.
               const joinable = joinableNow(s, now);
               const Box = joinable ? "a" : "div";
               return (
@@ -176,97 +182,47 @@ export function StreamDayTrack({
                     ? { href: s.zoomUrl!, target: "_blank", rel: "noreferrer", title: `Join ${s.title}` }
                     : {})}
                   className={`flex min-w-0 items-center gap-3 overflow-hidden rounded-[10px] px-3 py-2.5 lg:flex-1 lg:flex-col lg:items-stretch lg:gap-[3px] ${
-                    st === "done" ? "opacity-50" : ""
-                  } ${joinable ? "cursor-pointer transition-shadow hover:brightness-[1.06]" : ""}`}
+                    joinable ? "cursor-pointer transition-shadow hover:brightness-[1.04]" : ""
+                  }`}
                   style={{
-                    // Ramy, 10 Sep 2026: "the box where you are... will have a
-                    // ring around it, a garnet ring. And the box itself will
-                    // change colour and become a little bit dark, same colour
-                    // as the header." So the session you are in is the one dark
-                    // object on a light page, tied to the header by sharing its
-                    // fill -- the two ends of the same "now".
-                    background: st === "now"
-                      ? "var(--color-ink-warm)"
-                      : gold
-                        ? "color-mix(in oklab, var(--color-gold) 22%, var(--color-card))"
-                        // Ramy, 10 Sep 2026: "they're almost the same colour
-                        // [as the background]... make them a little bit darker,
-                        // not as dark as TP8 B, but a bit darker, so you can
-                        // see a contrast." --color-card-inset is 93% lightness
-                        // against a 97.8% frame -- under five points, which
-                        // mushes. Mixed toward ink-warm it lands near 88.5%:
-                        // clearly a card, nowhere near the now-box's 30%.
-                        : "color-mix(in oklab, var(--color-ink-warm) 7%, var(--color-card-inset))",
-                    border: st === "now"
-                      ? "1.5px solid var(--color-garnet)"
-                      : gold
-                        ? "1.5px solid var(--color-gold)"
-                        : "1px solid var(--color-border)",
-                    boxShadow:
-                      st === "now"
-                        ? "0 0 0 3px color-mix(in oklab, var(--color-garnet) 22%, transparent)"
-                        : lit
-                          ? "0 2px 10px color-mix(in oklab, var(--color-gold) 22%, transparent)"
-                          : undefined,
+                    // The same glass card as the 4-week timetable grid: a
+                    // category tint, a white glass border with a coloured spine
+                    // on top, the same blur and lift. Ramy, 11 Sep 2026 -- the
+                    // day track "is basically the timetable of the day... it
+                    // should be the same, the same coloration and everything",
+                    // so the box that says "TP7" here and the box that says
+                    // "TP7" on the grid are one object now, read from one style
+                    // map (timetable-category-style.ts). And no per-time fill:
+                    // the boxes hold still all day. The dark-brown "now" box
+                    // that used to crawl across the row is gone -- the garnet
+                    // marker below is the only thing that moves.
+                    backdropFilter: "blur(10px)",
+                    background: `linear-gradient(180deg, ${cat.tintFrom}, ${cat.tintTo})`,
+                    border: "1px solid oklch(100% 0 0 / 0.75)",
+                    borderTop: `2.5px solid ${cat.accent === "transparent" ? "oklch(88% 0.016 82)" : cat.accent}`,
+                    boxShadow: "0 6px 18px oklch(23.5% 0.017 65 / 0.07), inset 0 1px 0 oklch(100% 0 0 / 0.8)",
                   }}
                 >
                   {/* Stacked, the time is a fixed gutter so every title starts
-                      at the same x, and the Now/Next badge drops beneath it
-                      rather than shunting the title along on one row out of
-                      seven. Back to one inline line from lg up. */}
-                  <span
-                    className="flex w-[52px] shrink-0 flex-col items-start gap-1 text-[11px] font-bold tabular-nums lg:w-auto lg:flex-row lg:items-center lg:gap-1.5"
-                    style={{
-                      color:
-                        st === "now"
-                          ? "var(--color-garnet-lift)"
-                          : gold
-                            ? "var(--color-gold-ink)"
-                            : "var(--color-muted)",
-                    }}
-                  >
+                      at the same x. One inline line from lg up. */}
+                  <span className="flex w-[52px] shrink-0 flex-col items-start gap-1 text-[11px] font-bold tabular-nums text-muted lg:w-auto lg:flex-row lg:items-center lg:gap-1.5">
                     {s.time}
-                    {st === "now" ? (
-                      <span
-                        className="rounded-full px-1.5 py-px text-[9px] font-bold tracking-[0.08em] uppercase"
-                        style={{ background: "var(--color-garnet)", color: "oklch(98.5% 0.006 90)" }}
-                      >
-                        Now
-                      </span>
-                    ) : st === "next" ? (
-                      <span
-                        className="rounded-full bg-frame px-1.5 py-px text-[9px] font-bold tracking-[0.08em] uppercase"
-                        style={{ color: "var(--color-gold-ink)" }}
-                      >
-                        Next
-                      </span>
-                    ) : null}
                   </span>
                   {/* `lg:contents` dissolves this wrapper from lg up, so the
                       title and the sub-line go back to being direct children of
-                      the box and the desktop column is byte-for-byte what it
-                      was. Stacked, they are the second half of the row. */}
+                      the box. Stacked, they are the second half of the row. */}
                   <span className="flex min-w-0 flex-1 flex-col gap-[3px] lg:contents">
                   <span
-                    className={`leading-tight ${gold ? "text-[14px] font-bold" : st === "now" ? "text-[12px] font-bold" : "text-[12px]"}`}
-                    style={{
-                      color:
-                        st === "now"
-                          ? "oklch(94% 0.012 86)"
-                          : st === "done"
-                            ? "var(--color-muted)"
-                            : "var(--color-ink)",
-                    }}
+                    className="text-[12px] leading-tight text-ink"
+                    style={{ fontWeight: cat.titleWeight }}
                   >
                     {s.title}
                   </span>
                   {/* Ramy, 10 Sep 2026: "the join the room, which is the Zoom
-                      link -- I don't see it anywhere." It was on the hero and
-                      nowhere else, and only for the trainee's OWN TP: every
-                      other session on the day carried a zoom_url that nothing
-                      rendered, so an online course had a timetable you could
-                      read and not enter. Same treatment as the trainer hub's
-                      own your-day.tsx, on whichever block is actually live. */}
+                      link -- I don't see it anywhere." The whole box is the
+                      door when a session is joinable; otherwise the trainee's
+                      own TP wears the timetable's "You teach" pill, and every
+                      other box shows its room/level sub-line. */}
                   {joinable ? (
                     <span
                       className="w-fit rounded-full px-1.5 py-px text-[10px] font-bold tracking-[0.06em] uppercase"
@@ -274,13 +230,10 @@ export function StreamDayTrack({
                     >
                       Join
                     </span>
+                  ) : s.mine ? (
+                    <span className="pill pill-neutral w-fit text-[9px]">You teach</span>
                   ) : s.sub ? (
-                    <span
-                      className="text-[11px] leading-tight"
-                      style={{ color: st === "now" ? "oklch(78% 0.02 80)" : "var(--color-muted)" }}
-                    >
-                      {s.sub}
-                    </span>
+                    <span className="text-[11px] leading-tight text-muted">{s.sub}</span>
                   ) : null}
                   </span>
                 </Box>
