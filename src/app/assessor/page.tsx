@@ -197,6 +197,23 @@ export default async function AssessorPage({
     tutorProfileIds.length > 0 ? await admin.from("profiles").select("id, full_name").in("id", tutorProfileIds) : { data: [] };
   const tutorNameById = new Map((tutorProfiles ?? []).map((p) => [p.id, p.full_name]));
 
+  // The "roles" half of "Tutor list and roles": which TP group each tutor
+  // leads. Standalone fetch, not folded into the bundle above -- a course
+  // tutor with a title but no group is a real state (the MCT covering input
+  // sessions), so this maps tutor -> group only where a group names them.
+  const { data: tpGroupRows } = await admin
+    .from("course_tp_groups")
+    .select("name, tutor_profile_id")
+    .eq("course_id", courseId)
+    .order("name");
+  const groupsByTutorId = new Map<string, string[]>();
+  for (const g of tpGroupRows ?? []) {
+    if (!g.tutor_profile_id) continue;
+    const list = groupsByTutorId.get(g.tutor_profile_id) ?? [];
+    list.push(g.name);
+    groupsByTutorId.set(g.tutor_profile_id, list);
+  }
+
   // "Assignment briefs" cohort document -- reuses an existing, already
   // assessor-safe candidate resources page (portfolio/[traineeId]/resources
   // already checks getAssessorCourseId) rather than a course-level page,
@@ -1176,12 +1193,16 @@ export default async function AssessorPage({
               {tutorNameById.size > 0 ? (
                 <div id="tutor-list" className="assessor-anchor" style={{ padding: "11px 15px" }}>
                   <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: MUTED }}>Tutor list</p>
-                  {(tutorRows ?? []).map((t) => (
-                    <p key={t.profile_id} style={{ fontSize: 12, color: INK }}>
-                      {tutorNameById.get(t.profile_id) ?? "Unknown"}
-                      {t.tutor_role ? <span style={{ color: MUTED }}> · {t.tutor_role.replace(/_/g, " ")}</span> : null}
-                    </p>
-                  ))}
+                  {(tutorRows ?? []).map((t) => {
+                    const groups = groupsByTutorId.get(t.profile_id) ?? [];
+                    return (
+                      <p key={t.profile_id} style={{ fontSize: 12, color: INK }}>
+                        {tutorNameById.get(t.profile_id) ?? "Unknown"}
+                        {t.tutor_role ? <span style={{ color: MUTED }}> · {t.tutor_role.replace(/_/g, " ")}</span> : null}
+                        {groups.length > 0 ? <span style={{ color: MUTED }}> · {groups.join(", ")}</span> : null}
+                      </p>
+                    );
+                  })}
                 </div>
               ) : null}
             </Panel>
