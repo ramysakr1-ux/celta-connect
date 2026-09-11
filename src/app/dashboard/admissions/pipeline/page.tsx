@@ -8,7 +8,7 @@ import { computeFunnel, computeFunnelAlerts, type FunnelApplicant } from "@/lib/
 import { PipelineFunnel, type PipelinePerson } from "@/app/dashboard/admissions/pipeline/pipeline-funnel";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
-import { formatDate } from "@/lib/format-date";
+import { formatDate, formatCalendarDate } from "@/lib/format-date";
 
 // Admissions Pipeline.dc.html: "A course fills in stages, and each stage
 // leaks... this is the one screen that shows where the leak is while
@@ -209,7 +209,7 @@ export default async function AdmissionsPipelinePage({
                     <Link href={`/dashboard/admissions/pipeline?course=${c.id}`} className="font-medium text-ink hover:underline">
                       {c.course_code || c.name}
                     </Link>
-                    <p className="text-xs text-muted">starts {c.start_date}</p>
+                    <p className="text-xs text-muted">starts {formatCalendarDate(c.start_date, { year: "numeric" })}</p>
                   </td>
                   {(["app", "int", "off", "dep", "paid"] as const).map((key) => (
                     <td key={key} className="text-right tabular-nums text-ink">

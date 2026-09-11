@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { FunnelStage, FunnelStageKey, FunnelAlert } from "@/lib/admissions-pipeline";
 
 export interface PipelinePerson {
@@ -74,9 +75,15 @@ export function PipelineFunnel({
           ) : (
             <ul>
               {people.map((p) => (
-                <li key={p.id} className="border-b border-border-faint px-4 py-2.5 last:border-none admin-hover admin-hover-fill">
-                  <p className="text-sm font-semibold text-ink">{p.name}</p>
-                  <p className="text-xs text-muted">{p.meta}</p>
+                <li key={p.id} className="border-b border-border-faint last:border-none admin-hover admin-hover-fill">
+                  {/* A name here is a door to the applicant, not a label -- the
+                      funnel listed people with nowhere to go until 12 Sep 2026,
+                      and for an accepted applicant this and the course page are
+                      the only places their name still appears. */}
+                  <Link href={`/dashboard/admissions/${p.id}`} className="block px-4 py-2.5 no-underline">
+                    <p className="text-sm font-semibold text-ink">{p.name}</p>
+                    <p className="text-xs text-muted">{p.meta}</p>
+                  </Link>
                 </li>
               ))}
             </ul>

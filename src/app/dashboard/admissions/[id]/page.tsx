@@ -574,6 +574,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                 depositPaidAt={applicant.deposit_paid_at}
                 markedByName={depositMarkedByName}
                 note={applicant.deposit_note}
+                timeZone={timeZone}
               />
               </AreaAction>
             </div>

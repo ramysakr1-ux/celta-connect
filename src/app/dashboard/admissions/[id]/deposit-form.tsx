@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { recordDeposit } from "@/app/dashboard/admissions/actions";
+import { formatDate } from "@/lib/format-date";
 import type { FormState } from "@/app/dashboard/admissions/actions";
 
 const initial: FormState = { error: null };
@@ -21,6 +22,7 @@ export function DepositForm({
   depositPaidAt,
   markedByName,
   note,
+  timeZone,
 }: {
   applicantId: string;
   depositAmount: number | null;
@@ -28,6 +30,8 @@ export function DepositForm({
   depositPaidAt: string | null;
   markedByName: string | null;
   note: string | null;
+  /** The centre's zone: deposit_paid_at is an instant, written the way a person says it. */
+  timeZone: string;
 }) {
   const [state, action, pending] = useActionState(recordDeposit, initial);
 
@@ -40,7 +44,7 @@ export function DepositForm({
             {depositCurrency ?? ""}
             {depositAmount}
           </span>{" "}
-          recorded {new Date(depositPaidAt).toLocaleDateString("en-GB")}
+          recorded {formatDate(depositPaidAt, timeZone, { year: "numeric" })}
           {markedByName ? ` by ${markedByName}` : ""}.
         </p>
         {note ? <p className="text-xs text-muted">{note}</p> : null}

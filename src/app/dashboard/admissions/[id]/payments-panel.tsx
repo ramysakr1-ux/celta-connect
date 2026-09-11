@@ -2,7 +2,7 @@ import { markPaymentManual } from "@/lib/payments/actions";
 import { PaymentPlanForm } from "@/app/dashboard/admissions/[id]/payment-plan-form";
 import { CheckoutLinkButton } from "@/app/dashboard/admissions/[id]/checkout-link-button";
 import type { Database } from "@/lib/supabase/types";
-import { formatDate } from "@/lib/format-date";
+import { formatDate, formatCalendarDate } from "@/lib/format-date";
 
 type Applicant = Database["public"]["Tables"]["applicants"]["Row"];
 type Payment = Database["public"]["Tables"]["payments"]["Row"];
@@ -66,7 +66,7 @@ export function PaymentsPanel({
                     Instalment {payment.instalment_index} of {sorted.length} -- {payment.amount} {payment.currency}
                   </p>
                   <p className="text-xs text-muted">
-                    Due {payment.due_date ?? "--"}
+                    Due {formatCalendarDate(payment.due_date, { year: "numeric" })}
                     {payment.source ? ` · ${payment.source === "provider" ? "via Stripe" : "marked manually"}` : ""}
                   </p>
                 </div>
