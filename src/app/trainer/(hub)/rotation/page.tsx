@@ -275,7 +275,7 @@ export default async function TrainerRotationPage() {
       </div>
 
       {/* Paired TP groups -- the real board + running order, per checkpoint 3 */}
-      {(tpGroups ?? []).map((tpGroup, groupIndex) => {
+      {(tpGroups ?? []).map((tpGroup) => {
         const halves = paired
           .filter((g) => g.tp_group_id === tpGroup.id)
           .sort((a, b) => (a.half_order ?? 0) - (b.half_order ?? 0));
@@ -318,7 +318,6 @@ export default async function TrainerRotationPage() {
           <div key={tpGroup.id} className="flex flex-col gap-4">
             <TpGroupBoard
               groupName={tpGroup.name}
-              groupIndex={groupIndex}
               halves={boardHalves}
               tpEvents={tpEventRows}
               plansByKey={

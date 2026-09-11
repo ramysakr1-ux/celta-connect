@@ -8,11 +8,13 @@
 // hours of TP a day and a candidate teaches once a day (§26). Those two
 // teaching-day sets are what we had been mislabelling "Half A / Half B".
 //
-// Letters run across the whole course, so no two candidates share one on a
-// whole-course view: group 1 is A-F, group 2 G-L, group 3 M-R, group 4 S-X --
-// four groups of six, the Handbook's maximum of 24 (§7.1).
+// Letters are per group, not across the course: every TP group has six
+// candidates lettered A-F (a group is four to six, §7.1). Ramy, 11 Sep 2026:
+// "there is no G-L. There are only six in the group -- Day A is A, B, C, Day B
+// is D, E, F." Two groups each have their own A-F; a tutor only ever sees their
+// own group's six, so the letters never collide in view.
 
-const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWX";
+const ALPHABET = "ABCDEF";
 
 export interface LetterMember {
   traineeId: string;
@@ -23,14 +25,13 @@ export interface LetterHalf {
   members: LetterMember[];
 }
 
-/** Every trainee in one TP group mapped to their letter. `groupIndex` is
- *  0-based across the course's groups (ordered however the caller orders
- *  them). Day A is lettered first, by slot, then Day B -- so a 3+3 group reads
- *  A B C / D E F and an uneven 4+2 reads A B C D / E F. */
-export function lettersForGroup(halves: LetterHalf[], groupIndex: number): Map<string, string> {
+/** Every trainee in one TP group mapped to their letter, A-F. Day A is
+ *  lettered first, by slot, then Day B -- so a 3+3 group reads A B C / D E F
+ *  and an uneven 4+2 reads A B C D / E F. */
+export function lettersForGroup(halves: LetterHalf[]): Map<string, string> {
   const ordered = [...halves].sort((a, b) => a.halfOrder - b.halfOrder);
   const out = new Map<string, string>();
-  let n = groupIndex * 6;
+  let n = 0;
   for (const half of ordered) {
     for (const m of [...half.members].sort((a, b) => a.baseSlot - b.baseSlot)) {
       out.set(m.traineeId, ALPHABET[n] ?? "?");

@@ -24,21 +24,18 @@ export interface PlanLookup {
 // reference's own legend ("Blank means the other half is teaching").
 export function TpGroupBoard({
   groupName,
-  groupIndex,
   halves,
   tpEvents,
   plansByKey,
   today,
 }: {
   groupName: string;
-  /** 0-based position among the course's groups, for lettering (group 1 = A-F). */
-  groupIndex: number;
   halves: BoardHalf[];
   tpEvents: TpTimetableEvent[];
   plansByKey: Map<string, PlanLookup>;
   today: string;
 }) {
-  const letters = lettersForGroup(halves, groupIndex);
+  const letters = lettersForGroup(halves);
   const allDates = distinctTpDates(tpEvents);
   const nextDate = allDates.find((d) => d >= today) ?? null;
 
