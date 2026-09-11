@@ -3,7 +3,6 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { requireCapabilityOrTrainer } from "@/lib/auth/require-capability";
 import { holdsCentre } from "@/lib/branch-scope";
 import { isMctOfCourse } from "@/lib/course-tutor-role";
@@ -42,10 +41,12 @@ export async function markGradeFormSubmitted(formData: FormData): Promise<void> 
   const previous = course.grade_form_submitted_at ?? null;
   const next = ticked ? new Date().toISOString() : null;
 
-  // The write goes through the admin client: courses RLS lets an admin update
-  // the row but not a trainer, and the authorisation above is the real gate
-  // -- same reasoning as withdrawTrainee and updateAssessorContact.
-  const { error } = await createAdminClient()
+  // Through the RLS client, not the admin one: the MCT already updates the
+  // course row this way (updateAssessorContact) and Course Admin does for the
+  // entry form -- and on the shared demo the write-block trigger only bites
+  // writes made as the signed-in user. An admin-client write here would have
+  // let any demo visitor mark the demo's grade form submitted, for keeps.
+  const { error } = await supabase
     .from("courses")
     .update({ grade_form_submitted_at: next, grade_form_submitted_by: next ? actor.id : null } as never)
     .eq("id", courseId);
