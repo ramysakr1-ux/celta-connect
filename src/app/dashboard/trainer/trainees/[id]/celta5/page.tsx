@@ -11,6 +11,7 @@ import {
 } from "@/lib/celta-criteria";
 import { computeCurrentTpRound } from "@/lib/course-progress";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatCalendarDate } from "@/lib/format-date";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { AssignmentsSummary, TpFeedbackSummary } from "@/app/dashboard/trainer/trainees/[id]/celta5/linked-progress";
 import { Stage1Form } from "@/app/dashboard/trainer/trainees/[id]/celta5/stage1-form";
@@ -193,7 +194,11 @@ export default async function Celta5RecordPage({
           </div>
           <div>
             <p className="text-muted">Dates</p>
-            <p className="text-ink">{course ? `${course.start_date} → ${course.end_date}` : "--"}</p>
+            <p className="text-ink">
+              {course
+                ? `${formatCalendarDate(course.start_date, { year: "numeric" })} → ${formatCalendarDate(course.end_date, { year: "numeric" })}`
+                : "--"}
+            </p>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">

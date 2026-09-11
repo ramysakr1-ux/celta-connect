@@ -21,6 +21,7 @@ import { CriteriaRatingPill, StandardRatingPill } from "@/lib/status-pill";
 import { computeProgressIssues, computeAssessedTpStats, computeAssessedHoursByMode, computeCurrentTpRound } from "@/lib/course-progress";
 import { computeObservationHours, OBSERVATION_HOURS_REQUIRED } from "@/lib/observation-hours";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
+import { formatDate, formatCalendarDate } from "@/lib/format-date";
 import { resolveAssignmentResult } from "@/lib/assignment-info";
 import { TP_LESSON_LENGTH_MINUTES } from "@/lib/tp-plan-content";
 import { SelfAssessmentForm } from "@/app/dashboard/trainee/celta5/self-assessment-form";
@@ -601,7 +602,7 @@ export default async function PortfolioCelta5Page({
                         : stage1Invite
                           ? `Tutorial ${stage1Invite.confirmed_at ? "confirmed" : "invited, not yet confirmed"}${
                               tutorialEventById.get(stage1Invite.timetable_event_id)
-                                ? ` · ${tutorialEventById.get(stage1Invite.timetable_event_id)!.event_date}`
+                                ? ` · ${formatCalendarDate(tutorialEventById.get(stage1Invite.timetable_event_id)!.event_date)}`
                                 : ""
                             } -- the report itself isn't filed yet`
                           : "Not yet filed"}
@@ -634,7 +635,7 @@ export default async function PortfolioCelta5Page({
                           : stage3Invite
                             ? `Tutorial ${stage3Invite.confirmed_at ? "confirmed" : "invited, not yet confirmed"}${
                                 tutorialEventById.get(stage3Invite.timetable_event_id)
-                                  ? ` · ${tutorialEventById.get(stage3Invite.timetable_event_id)!.event_date}`
+                                  ? ` · ${formatCalendarDate(tutorialEventById.get(stage3Invite.timetable_event_id)!.event_date)}`
                                   : ""
                               }`
                             : stage3TriggerReason ?? "Expected -- not yet filed"
@@ -780,7 +781,7 @@ export default async function PortfolioCelta5Page({
                   {record.stage1_candidate_signed_at ? (
                     <p className="text-[11px] text-muted">
                       Signed by {record.stage1_candidate_signature_name} on{" "}
-                      {new Date(record.stage1_candidate_signed_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
+                      {formatDate(record.stage1_candidate_signed_at, center?.time_zone ?? DEFAULT_TIMEZONE, { month: "long", year: "numeric" })}.
                     </p>
                   ) : !viewer?.signature_name ? (
                     <SetSignatureForm fullName={viewer?.full_name ?? ""} />
@@ -1212,7 +1213,11 @@ export default async function PortfolioCelta5Page({
         </div>
         <div>
           <p className="text-muted">Dates</p>
-          <p className="text-ink">{course ? `${course.start_date} → ${course.end_date}` : "--"}</p>
+          <p className="text-ink">
+            {course
+              ? `${formatCalendarDate(course.start_date, { year: "numeric" })} → ${formatCalendarDate(course.end_date, { year: "numeric" })}`
+              : "--"}
+          </p>
         </div>
         <div>
           <p className="text-muted">Tutors</p>
@@ -1445,7 +1450,7 @@ export default async function PortfolioCelta5Page({
                 courseNumber: course?.course_code ?? null,
                 courseDates:
                   course?.start_date && course?.end_date
-                    ? `${new Date(`${course.start_date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} – ${new Date(`${course.end_date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`
+                    ? `${formatCalendarDate(course.start_date, { month: "long", year: "numeric" })} – ${formatCalendarDate(course.end_date, { month: "long", year: "numeric" })}`
                     : null,
                 tutors: [],
                 uln: null,

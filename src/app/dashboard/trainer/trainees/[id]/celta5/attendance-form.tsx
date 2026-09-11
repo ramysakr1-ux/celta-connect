@@ -7,6 +7,7 @@ import {
   type FormState,
 } from "@/app/dashboard/trainer/celta5-actions";
 import type { Database } from "@/lib/supabase/types";
+import { formatCalendarDate } from "@/lib/format-date";
 
 type Celta5Record = Database["public"]["Tables"]["celta5_records"]["Row"];
 type Absence = Database["public"]["Tables"]["attendance_absences"]["Row"];
@@ -79,7 +80,7 @@ export function AttendanceForm({
             <tbody>
               {absences.map((a) => (
                 <tr key={a.id}>
-                  <td className="text-ink">{a.session_date ?? "--"}</td>
+                  <td className="text-ink">{formatCalendarDate(a.session_date)}</td>
                   <td className="text-muted capitalize">{a.category}</td>
                   <td className="text-muted">{a.session_missed ?? "--"}</td>
                   <td className="text-muted">{a.reason ?? "--"}</td>

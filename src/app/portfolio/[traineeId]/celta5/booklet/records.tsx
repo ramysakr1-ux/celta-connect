@@ -1,4 +1,5 @@
 import { Pulled } from "@/app/portfolio/[traineeId]/celta5/booklet/shell";
+import { formatCalendarDate } from "@/lib/format-date";
 
 // The four record tables, in the column order of Ramy's design file.
 //
@@ -11,11 +12,16 @@ import { Pulled } from "@/app/portfolio/[traineeId]/celta5/booklet/shell";
 // and re-entering it by hand is how paper records end up contradicting the
 // system. Signature stays a candidate-typed field, as on paper.
 
-function fmtDate(iso: string | null | undefined) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return String(iso);
-  return d.toISOString().slice(0, 10);
+// Every date column in these tables is a date-only value (lesson_date,
+// session_date, event_date). Written the way a person says it, "25 Aug
+// 2026", not "2026-08-25" -- and through formatCalendarDate, with no zone,
+// because this used to go via new Date(iso).toISOString(), which is the UTC
+// day and printed the 25th as the 24th for a centre east of Greenwich. An
+// empty cell stays empty, as on the printed form; anything that is not an
+// ISO date (free text) passes through untouched.
+function fmtDate(value: string | null | undefined) {
+  if (!value) return "";
+  return /^\d{4}-\d{2}-\d{2}/.test(value) ? formatCalendarDate(value.slice(0, 10), { year: "numeric" }) : value;
 }
 
 export function AttendanceRecord({
@@ -66,7 +72,7 @@ export function AttendanceRecord({
         <tbody>
           {unavoidable.map((r, i) => (
             <tr key={i}>
-              <td>{r.date}</td>
+              <td>{fmtDate(r.date)}</td>
               <td>{r.session}</td>
               <td>{r.reason}</td>
               <td>{r.madeUp}</td>
@@ -93,7 +99,7 @@ export function AttendanceRecord({
         <tbody>
           {other.map((r, i) => (
             <tr key={i}>
-              <td>{r.date}</td>
+              <td>{fmtDate(r.date)}</td>
               <td>{r.session}</td>
               <td>{r.reason}</td>
               <td>{r.madeUp}</td>
