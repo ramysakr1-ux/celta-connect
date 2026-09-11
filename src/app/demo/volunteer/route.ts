@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { pickDemoCourse } from "@/lib/demo-course";
 
 // Volunteer students never get a real Supabase Auth account (migration
 // 0030) -- so unlike the other four demo entries, this one doesn't mint a
@@ -26,13 +27,8 @@ export async function GET() {
     .maybeSingle();
   if (!demoCenter) return fallback();
 
-  const { data: course } = await admin
-    .from("courses")
-    .select("id")
-    .eq("center_id", demoCenter.id)
-    .order("start_date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // The course running today, not the newest row -- see pickDemoCourse.
+  const course = await pickDemoCourse<{ id: string; start_date: string }>(admin, demoCenter.id, "id, start_date");
   if (!course) return fallback();
 
   // Ramy, 25 Aug 2026: this demo course now has more than one volunteer

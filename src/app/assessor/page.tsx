@@ -103,6 +103,22 @@ export default async function AssessorPage({
     .eq("course_id", courseId);
   const hasVolunteerRegister = (volunteerCount ?? 0) > 0;
 
+  // "Application files / Including rejected applicants" is likewise a view
+  // Connect builds from its own pipeline, not an upload: every applicant on
+  // this intake whose selection reached a decision, names only (§12.2), with
+  // their task, marks and interview notes at /assessor/application-files.
+  // Surfaced when selection actually went through Connect -- a centre that
+  // selected on paper uploads its files under centre documents instead.
+  const { data: applicationFileRows } = await admin
+    .from("applicants")
+    .select("stage")
+    .eq("intake_course_id", courseId)
+    .in("stage", ["accepted", "offer_sent", "rejected_before_interview", "rejected_after_interview", "waiting_list", "not_this_time"]);
+  const applicationFilesAccepted = (applicationFileRows ?? []).filter((a) => a.stage === "accepted" || a.stage === "offer_sent").length;
+  const applicationFilesWaiting = (applicationFileRows ?? []).filter((a) => a.stage === "waiting_list").length;
+  const applicationFilesRejected = (applicationFileRows ?? []).length - applicationFilesAccepted - applicationFilesWaiting;
+  const hasApplicationFiles = (applicationFileRows ?? []).length > 0;
+
   if (!course) redirect("/login?error=assessor_link_invalid");
 
   const center = course.centers as unknown as { name: string; center_number: string; appian_url: string | null } | null;
@@ -1108,6 +1124,9 @@ export default async function AssessorPage({
                 // not an upload: /trainer/volunteers has a read-only assessor
                 // branch. Surface it when the course has volunteer students.
                 const isVolunteerRegister = doc.name === "Volunteer attendance registers";
+                // And the application files: built from the admissions
+                // pipeline when selection went through Connect.
+                const isApplicationFiles = doc.name === "Application files";
                 const uploaded = isMarkingGuidance
                   ? null
                   : (centreDocs ?? []).find((d) => d.title.trim().toLowerCase() === doc.name.toLowerCase());
@@ -1117,26 +1136,33 @@ export default async function AssessorPage({
                     ? true
                     : isVolunteerRegister
                       ? Boolean(uploaded?.file_url) || hasVolunteerRegister
-                      : Boolean(uploaded?.file_url);
+                      : isApplicationFiles
+                        ? Boolean(uploaded?.file_url) || hasApplicationFiles
+                        : Boolean(uploaded?.file_url);
                 const href = isMarkingGuidance
                   ? "/assessor/marking-guidance"
                   : isCandidateAgreement
                     ? uploaded?.file_url ?? "/candidate-agreement"
                     : isVolunteerRegister
                       ? uploaded?.file_url ?? "/trainer/volunteers"
-                      : uploaded?.file_url;
+                      : isApplicationFiles
+                        ? uploaded?.file_url ?? "/assessor/application-files"
+                        : uploaded?.file_url;
                 // App routes open in place; an uploaded file opens in a new tab.
                 const opensInApp =
                   isMarkingGuidance ||
-                  ((isCandidateAgreement || isVolunteerRegister) && !uploaded?.file_url);
+                  ((isCandidateAgreement || isVolunteerRegister || isApplicationFiles) && !uploaded?.file_url);
                 // The authorisation certificate's own datum is the centre's
                 // Cambridge number, and that IS on file even before the
                 // certificate is attached -- so name it rather than the
-                // generic "Cambridge centre number on file".
+                // generic "Cambridge centre number on file". The application
+                // files likewise say what is in them.
                 const meta =
                   doc.name === "Centre authorisation certificate" && center?.center_number
                     ? `Centre number ${center.center_number} on file`
-                    : doc.meta;
+                    : isApplicationFiles && hasApplicationFiles && !uploaded?.file_url
+                      ? `${applicationFilesAccepted} accepted · ${applicationFilesRejected} rejected${applicationFilesWaiting > 0 ? ` · ${applicationFilesWaiting} waiting` : ""}`
+                      : doc.meta;
                 const rowStyle = {
                   display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
                   padding: "11px 15px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 45%, transparent)",

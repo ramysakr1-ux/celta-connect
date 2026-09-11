@@ -316,7 +316,14 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
     ? `${formatDate(course.grade_form_submitted_at, timeZone, { year: "numeric" })}${gradeFormMarker?.full_name ? ` by ${gradeFormMarker.full_name}` : ""}`
     : null;
 
+  // §14.1 "application files" -- what selection left on record for this
+  // intake. Decided stages only: someone still being interviewed is not a
+  // file the assessor checks. Read through the admin client because the
+  // MCT's own RLS sees applicants at their home centre only.
+  const applicationFiles = await countApplicationFiles(createAdminClient(), courseId);
+
   const prep = await buildPrepSummary(supabase, centrePreparation, {
+    applicationFiles,
     courseId,
     candidateCount: activeCandidateCount,
     portfoliosComplete: readiness.portfoliosCompleteCount,
@@ -618,4 +625,30 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
 
     </div>
   );
+}
+
+const DECIDED_STAGES = ["accepted", "offer_sent", "rejected_before_interview", "rejected_after_interview", "waiting_list", "not_this_time"] as const;
+
+async function countApplicationFiles(
+  admin: ReturnType<typeof createAdminClient>,
+  courseId: string
+): Promise<{ decided: number; complete: number } | null> {
+  const { data: applicants } = await admin
+    .from("applicants")
+    .select("id, stage, writing_task_submission, marked_at")
+    .eq("intake_course_id", courseId)
+    .in("stage", [...DECIDED_STAGES]);
+  if (!applicants || applicants.length === 0) return null;
+  const { data: records } = await admin
+    .from("interview_records")
+    .select("applicant_id")
+    .in("applicant_id", applicants.map((a) => a.id));
+  const interviewed = new Set((records ?? []).map((r) => r.applicant_id));
+  const complete = applicants.filter(
+    (a) =>
+      Boolean(a.writing_task_submission) &&
+      Boolean(a.marked_at) &&
+      (a.stage === "rejected_before_interview" || interviewed.has(a.id))
+  ).length;
+  return { decided: applicants.length, complete };
 }

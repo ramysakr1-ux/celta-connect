@@ -58,6 +58,14 @@ export interface PrepInputs {
   withdrawalLettersOutstanding: number;
   /** "11 Sept 2026 by Jordan Blake" once the Centre Grade form is marked submitted; null until then. */
   gradeFormSubmittedLabel: string | null;
+  /**
+   * Applicants on this intake whose selection reached a decision (accepted,
+   * rejected either side of interview, waiting list, not this time) -- the
+   * set §14.1 hands the assessor as "application files". Null when selection
+   * for this course never went through Connect, in which case the item stays
+   * a manual tick: a task read on paper is still a task read.
+   */
+  applicationFiles: { decided: number; complete: number } | null;
 }
 
 function derive(key: string, i: PrepInputs): { status: PrepStatus; evidence: string } | null {
@@ -106,6 +114,18 @@ function derive(key: string, i: PrepInputs): { status: PrepStatus; evidence: str
           i.withdrawalLettersOutstanding === 0
             ? "Letter generated for every withdrawal"
             : `${i.withdrawalLettersOutstanding} withdrawal letter${i.withdrawalLettersOutstanding === 1 ? "" : "s"} not generated`,
+      };
+    case "application_task":
+      // Complete = the written task is on file and marked, and -- unless the
+      // applicant was turned down before interview -- the interview notes
+      // are saved. What the assessor opens at /assessor/application-files.
+      if (!i.applicationFiles) return null;
+      return {
+        status: i.applicationFiles.complete >= i.applicationFiles.decided ? "ready" : "missing",
+        evidence:
+          i.applicationFiles.complete >= i.applicationFiles.decided
+            ? `Task, marks and interview notes on file for all ${i.applicationFiles.decided} decided applicants`
+            : `${i.applicationFiles.complete} of ${i.applicationFiles.decided} decided applicants have a marked task and interview notes on file`,
       };
     case "grade_form":
       // Derived from the tick rather than ticked here, so the person who

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { pickDemoCourse } from "@/lib/demo-course";
 import { mintDemoMagicLink } from "@/lib/demo/mint-magic-link";
 
 // Redemption for the links generated on Command Center > Access.
@@ -70,15 +71,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     );
   }
 
-  // Newest course at the chosen centre. Both token roles hang off a course,
-  // not off the centre itself.
-  const { data: course } = await admin
-    .from("courses")
-    .select("id, end_date")
-    .eq("center_id", centre.id)
-    .order("start_date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // The course running today at the chosen centre (see pickDemoCourse).
+  // Both token roles hang off a course, not off the centre itself.
+  const course = await pickDemoCourse<{ id: string; end_date: string; start_date: string }>(admin, centre.id, "id, end_date, start_date");
 
   if (link.role_key === "assessor") {
     if (!course) return page("No course to assess", `${centre.name} has no course yet, and an assessor link is issued against a course.`);

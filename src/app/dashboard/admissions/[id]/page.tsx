@@ -302,7 +302,8 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           <div>
             <dt className="text-xs text-muted">Date of birth</dt>
             <dd className="text-sm text-ink">
-              {applicant.date_of_birth ?? "--"}
+              {/* A date-only column, so no zone: formatCalendarDate, not formatDate. */}
+              {applicant.date_of_birth ? formatCalendarDate(applicant.date_of_birth, { year: "numeric" }) : "--"}
               {/* Handbook 7.3 governs SELECTION, not application -- "applicants
                   should be selected for the course only if they meet the
                   following entry requirements". So nothing is refused at the
@@ -454,7 +455,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         <h2 className="font-serif text-lg text-ink">Interview</h2>
         {bookedSlot ? (
           <p className="text-sm text-ink">
-            Booked: {bookedSlot.slot_date} {bookedSlot.slot_time} ({bookedSlot.mode === "online" ? "Online" : "Face to face"}
+            Booked: {formatCalendarDate(bookedSlot.slot_date, { weekday: "short" })} at {bookedSlot.slot_time.slice(0, 5)} ({bookedSlot.mode === "online" ? "Online" : "Face to face"}
             {bookedSlot.panel ? ", panel" : ""})
           </p>
         ) : (
@@ -498,7 +499,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                 <select id="time_key" name="time_key" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
                   {groupedSlots.map(([key, g]) => (
                     <option key={key} value={key}>
-                      {g.slotDate} {g.slotTime.slice(0, 5)} ({g.mode === "online" ? "Online" : "Face to face"}
+                      {formatCalendarDate(g.slotDate, { weekday: "short" })} {g.slotTime.slice(0, 5)} ({g.mode === "online" ? "Online" : "Face to face"}
                       {g.panel ? ", panel" : ""}
                       {g.count > 1 ? ` -- ${g.count} interviewers free` : ""})
                     </option>
@@ -516,7 +517,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
                 <select name="slot_id" required className="h-9 rounded-[6px] border border-input bg-card-inset px-2 text-sm text-ink">
                   {(openSlots ?? []).map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.slot_date} {s.slot_time.slice(0, 5)} -- {interviewerNameById.get(s.interviewer_id) ?? "Unknown"} (
+                      {formatCalendarDate(s.slot_date, { weekday: "short" })} {s.slot_time.slice(0, 5)} -- {interviewerNameById.get(s.interviewer_id) ?? "Unknown"} (
                       {s.mode === "online" ? "Online" : "Face to face"}
                       {s.panel ? ", panel" : ""})
                     </option>
@@ -538,15 +539,22 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
           </p>
         ) : null}
 
-        {bookedSlot && canDecide ? (
+        {/* A record with no slot behind it is still a record: an interview
+            agreed by phone, or one that came in before the slot picker did.
+            Until 12 Sep 2026 the form only appeared with a booking, so a
+            saved record on a slotless applicant was invisible on this page. */}
+        {(bookedSlot || interviewRecord) && canDecide ? (
           <InterviewRecordForm
             applicantId={applicant.id}
-            slotId={bookedSlot.id}
+            slotId={bookedSlot?.id ?? null}
             questions={questions ?? []}
             existingRecord={interviewRecord ?? null}
           />
-        ) : bookedSlot ? (
-          <p className="text-sm text-muted">Only a verified course tutor or a nominated admissions decider can record this interview.</p>
+        ) : bookedSlot || interviewRecord ? (
+          <div className="flex flex-col gap-2 border-t border-border pt-4">
+            <p className="text-sm text-muted">Only a verified course tutor or a nominated admissions decider can record this interview.</p>
+            {interviewRecord ? <IdentityCheckLine record={interviewRecord} timeZone={timeZone} /> : null}
+          </div>
         ) : null}
       </div>
 
@@ -602,7 +610,7 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
         <div className={`card p-6 ${waitingListGarnet ? "card-garnet" : ""}`}>
           <h2 className="font-serif text-lg text-ink">Waiting list</h2>
           <p className="mt-1 text-sm text-ink">
-            Position {applicant.waiting_list_position}. Will hear by {applicant.waiting_list_hear_by}.
+            Position {applicant.waiting_list_position}. Will hear by {formatCalendarDate(applicant.waiting_list_hear_by, { year: "numeric" })}.
           </p>
         </div>
       ) : null}
@@ -610,7 +618,12 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
       {canDecide && !isSettled ? (
         <>
           <AreaAction verdict={offerVerdict}>
-            <OfferForm applicantId={applicant.id} hasDeposit={Boolean(applicant.deposit_paid_at)} garnet={offerFormGarnet} />
+            <OfferForm
+              applicantId={applicant.id}
+              hasDeposit={Boolean(applicant.deposit_paid_at)}
+              hasMarkedTask={Boolean(applicant.writing_task_submission) && Boolean(applicant.marked_at)}
+              garnet={offerFormGarnet}
+            />
           </AreaAction>
           <WaitingListForm applicantId={applicant.id} garnet={waitingListFormGarnet} />
           <RejectForm applicantId={applicant.id} garnet={rejectFormGarnet} />
@@ -637,3 +650,27 @@ export default async function ApplicantDetailPage({ params }: { params: Promise<
     </div>
   );
 }
+
+/**
+ * Handbook §7.2's identity authentication, as the record says it happened.
+ * Read-only; the tick itself lives on the interview record form. Cast because
+ * the columns are migration-added (0291) and the generated types lag.
+ */
+function IdentityCheckLine({ record, timeZone }: { record: { interviewer_signature_name: string | null }; timeZone: string }) {
+  const r = record as { identity_checked_at?: string | null; identity_document_type?: string | null; interviewer_signature_name: string | null };
+  if (!r.identity_checked_at) return <p className="text-xs text-status-warning-text">Identity not yet recorded as checked (Handbook §7.2).</p>;
+  const doc = IDENTITY_DOCUMENT_LABEL[r.identity_document_type ?? ""] ?? "a document";
+  return (
+    <p className="text-xs text-muted">
+      Identity checked — {doc} seen, {formatDate(r.identity_checked_at, timeZone, { year: "numeric" })}
+      {r.interviewer_signature_name ? ` by ${r.interviewer_signature_name}` : ""}.
+    </p>
+  );
+}
+
+const IDENTITY_DOCUMENT_LABEL: Record<string, string> = {
+  passport: "passport",
+  national_id: "national ID card",
+  driving_licence: "driving licence",
+  other: "another photo ID",
+};

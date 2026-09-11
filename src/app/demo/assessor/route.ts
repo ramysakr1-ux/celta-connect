@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { pickDemoCourse } from "@/lib/demo-course";
 
 // Sixth demo entry point (the original five -- centre-admin, course-admin,
 // volunteer, trainer, trainee -- didn't include this one). Assessors never
@@ -31,13 +32,8 @@ export async function GET() {
     .maybeSingle();
   if (!demoCenter) return fallback();
 
-  const { data: course } = await admin
-    .from("courses")
-    .select("id, end_date")
-    .eq("center_id", demoCenter.id)
-    .order("start_date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // The course running today, not the newest row -- see pickDemoCourse.
+  const course = await pickDemoCourse<{ id: string; end_date: string; start_date: string }>(admin, demoCenter.id, "id, end_date, start_date");
   if (!course) return fallback();
 
   const { data: existing } = await admin

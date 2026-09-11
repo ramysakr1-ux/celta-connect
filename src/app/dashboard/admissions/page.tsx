@@ -9,7 +9,7 @@ import { MARKETING_SOURCE_LABEL, type MarketingSource } from "@/lib/marketing-so
 import { Avatar } from "@/components/avatar";
 import { getCachedCenter } from "@/lib/supabase/cached-queries";
 import { DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
-import { formatDate } from "@/lib/format-date";
+import { formatDate, formatCalendarDate } from "@/lib/format-date";
 
 const STAGE_LABEL: Record<string, string> = {
   submitted: "Submitted",
@@ -278,7 +278,7 @@ export default async function AdmissionsPage({
           <ul className="flex flex-col gap-1.5">
             {(openSlots ?? []).map((s) => (
               <li key={s.id} className="text-sm text-ink admin-hover">
-                {intakeNameById.get(s.intake_course_id) ?? "--"} -- {s.slot_date} {s.slot_time} ({s.mode === "online" ? "Online" : "Face to face"}
+                {intakeNameById.get(s.intake_course_id) ?? "--"} -- {formatCalendarDate(s.slot_date, { weekday: "short" })} at {s.slot_time.slice(0, 5)} ({s.mode === "online" ? "Online" : "Face to face"}
                 {s.panel ? ", panel" : ""})
               </li>
             ))}

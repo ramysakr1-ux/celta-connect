@@ -176,7 +176,10 @@ async function fixtures() {
   const db = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 
   const { data: centre } = await db.from("centers").select("id").eq("is_demo", true).limit(1).maybeSingle();
-  const { data: course } = await db.from("courses").select("id").eq("center_id", centre?.id).order("start_date", { ascending: false }).limit(1).maybeSingle();
+  // The course running today, not the newest row: the demo centre carries a
+  // next intake as well (seed-demo-pipeline.mjs), and the newest row is that.
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: course } = await db.from("courses").select("id").eq("center_id", centre?.id).lte("start_date", today).order("start_date", { ascending: false }).limit(1).maybeSingle();
   const one = async (table, select, filter = (q) => q) =>
     (await filter(db.from(table).select(select)).limit(1).maybeSingle()).data;
 

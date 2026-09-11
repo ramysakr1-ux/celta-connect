@@ -9,13 +9,20 @@ const inputClass = "rounded-[6px] border border-border bg-card-inset px-3 py-1.5
 export function OfferForm({
   applicantId,
   hasDeposit,
+  hasMarkedTask,
   garnet = false,
 }: {
   applicantId: string;
   hasDeposit: boolean;
+  /** A written task is on file AND has been marked -- Handbook §7.2's half of selection. */
+  hasMarkedTask: boolean;
   garnet?: boolean;
 }) {
   const [state, action, pending] = useActionState(sendOffer, initialState);
+  // Both overrides appear together once the server has objected to either:
+  // the boxes are checkboxes on the same form, and a box that unmounted
+  // between two tries would have its objection come straight back.
+  const gateObjected = Boolean(state.error?.startsWith("Before this offer goes out"));
 
   return (
     <form action={action} className={`card flex flex-col gap-3 p-6 ${garnet ? "card-garnet" : ""}`}>
@@ -47,10 +54,16 @@ export function OfferForm({
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       {/* Only offered once the server has objected -- there is no point
           pre-emptively asking someone to override a rule they haven't hit. */}
-      {!hasDeposit && state.error?.includes("No deposit") ? (
+      {!hasDeposit && gateObjected ? (
         <label className="flex items-start gap-2 text-xs text-muted">
           <input type="checkbox" name="confirm_no_deposit" value="1" className="mt-0.5 accent-primary" />
           <span>Send this offer without a recorded deposit.</span>
+        </label>
+      ) : null}
+      {!hasMarkedTask && gateObjected ? (
+        <label className="flex items-start gap-2 text-xs text-muted">
+          <input type="checkbox" name="confirm_no_task" value="1" className="mt-0.5 accent-primary" />
+          <span>Send this offer without a marked written task on file.</span>
         </label>
       ) : null}
 

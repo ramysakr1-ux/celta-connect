@@ -4,7 +4,20 @@ import { useActionState, useState } from "react";
 import { saveInterviewRecord, type FormState } from "@/app/dashboard/admissions/actions";
 import type { Database } from "@/lib/supabase/types";
 
-type InterviewRecord = Database["public"]["Tables"]["interview_records"]["Row"];
+// identity_checked_at / identity_document_type are migration-added (0291);
+// the generated types lag, so the record is widened here.
+type InterviewRecord = Database["public"]["Tables"]["interview_records"]["Row"] & {
+  identity_checked_at?: string | null;
+  identity_document_type?: string | null;
+};
+
+// Same set as migration 0291's check constraint and the action's own list.
+const IDENTITY_DOCUMENTS = [
+  ["passport", "Passport"],
+  ["national_id", "National ID card"],
+  ["driving_licence", "Driving licence"],
+  ["other", "Other photo ID"],
+] as const;
 
 interface Question {
   id: string;
@@ -22,18 +35,53 @@ export function InterviewRecordForm({
   existingRecord,
 }: {
   applicantId: string;
-  slotId: string;
+  /** Null when the interview was recorded without a booked slot (agreed by phone, or before the picker existed). */
+  slotId: string | null;
   questions: Question[];
   existingRecord: InterviewRecord | null;
 }) {
   const [state, action, pending] = useActionState(saveInterviewRecord, initialState);
   const existingFixed = new Map((existingRecord?.fixed_questions ?? []).map((q) => [q.question_id, q.answer_text]));
   const [drawnCount, setDrawnCount] = useState(Math.max(existingRecord?.drawn_questions.length ?? 0, 2));
+  const [identityChecked, setIdentityChecked] = useState(Boolean(existingRecord?.identity_checked_at));
 
   return (
     <form action={action} className="flex flex-col gap-4 border-t border-border pt-4">
       <input type="hidden" name="applicant_id" value={applicantId} />
-      <input type="hidden" name="slot_id" value={slotId} />
+      {slotId ? <input type="hidden" name="slot_id" value={slotId} /> : null}
+
+      {/* Handbook §7.2: "selection procedures must include authentication of
+          the candidate's identity (e.g., checking passport details)". What is
+          recorded is that it happened and what was seen -- never the number.
+          The assessor's application-files view shows this line per applicant. */}
+      <div className="flex flex-col gap-2 rounded-[6px] border border-border bg-card-inset/60 p-3">
+        <label className="flex items-start gap-2 text-sm text-ink">
+          <input
+            type="checkbox"
+            name="identity_checked"
+            value="1"
+            checked={identityChecked}
+            onChange={(e) => setIdentityChecked(e.target.checked)}
+            className="mt-0.5 accent-primary"
+          />
+          <span>
+            <span className="font-semibold">Identity checked — document seen</span>
+            <span className="block text-xs text-muted">Required by Handbook §7.2. Note only which document; never its number.</span>
+          </span>
+        </label>
+        {identityChecked ? (
+          <label className="flex flex-wrap items-center gap-2 pl-6 text-xs text-muted">
+            Document
+            <select name="identity_document_type" defaultValue={existingRecord?.identity_document_type ?? "passport"} className={inputClass}>
+              {IDENTITY_DOCUMENTS.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+      </div>
 
       <p className="text-sm font-semibold text-ink">Fixed questions</p>
       {questions.length === 0 ? (

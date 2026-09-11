@@ -604,6 +604,10 @@ export async function saveMarkingScheme(_prevState: FormState, formData: FormDat
 
 // ---- Interview record ----
 
+// Mirrors the check constraint in migration 0291. Kept local: a "use server"
+// file may only export async functions, so the form carries its own copy.
+const IDENTITY_DOCUMENT_TYPES = ["passport", "national_id", "driving_licence", "other"];
+
 export async function saveInterviewRecord(_prevState: FormState, formData: FormData): Promise<FormState> {
   const staff = await requireAdmissionsHandler();
   const applicantId = formData.get("applicant_id");
@@ -628,6 +632,14 @@ export async function saveInterviewRecord(_prevState: FormState, formData: FormD
   const interviewerSignature = (formData.get("interviewer_signature_name") as string | null)?.trim() || null;
   const applicantSignature = (formData.get("applicant_signature_name") as string | null)?.trim() || null;
   const overallNotes = (formData.get("overall_notes") as string | null)?.trim() || null;
+  // Handbook §7.2: selection "must include authentication of the candidate's
+  // identity (e.g., checking passport details)". The tick records that it
+  // happened and what was seen; the document's number is never asked for.
+  const identityChecked = formData.get("identity_checked") === "1";
+  const identityDocumentType = (formData.get("identity_document_type") as string | null) || null;
+  if (identityChecked && !IDENTITY_DOCUMENT_TYPES.includes(identityDocumentType ?? "")) {
+    return { error: "Say which document you saw when you checked their identity." };
+  }
 
   if (!interviewerSignature) {
     return { error: "The interviewer's signature is required to save the interview record." };
@@ -637,9 +649,16 @@ export async function saveInterviewRecord(_prevState: FormState, formData: FormD
   const { data: applicant } = await supabase.from("applicants").select("center_id, full_name").eq("id", applicantId).maybeSingle();
   if (!applicant || !(await holdsCentre(staff, applicant.center_id))) return { error: "Applicant not found." };
 
-  const { data: existing } = await supabase.from("interview_records").select("id").eq("applicant_id", applicantId).maybeSingle();
+  // select("*"): identity_checked_at is a migration-added column (0291) and
+  // naming it would poison the row's generated type.
+  const { data: existingRow } = await supabase.from("interview_records").select("*").eq("applicant_id", applicantId).maybeSingle();
+  const existing = existingRow as { id: string; identity_checked_at?: string | null } | null;
 
   const record = {
+    // The first time it was checked stands; re-saving the notes later does
+    // not move the check to today.
+    identity_checked_at: identityChecked ? (existing?.identity_checked_at ?? new Date().toISOString()) : null,
+    identity_document_type: identityChecked ? identityDocumentType : null,
     applicant_id: applicantId,
     slot_id: slotId,
     fixed_questions: fixedQuestions,
@@ -653,8 +672,8 @@ export async function saveInterviewRecord(_prevState: FormState, formData: FormD
   };
 
   const { error } = existing
-    ? await supabase.from("interview_records").update(record).eq("id", existing.id)
-    : await supabase.from("interview_records").insert(record);
+    ? await supabase.from("interview_records").update(record as never).eq("id", existing.id)
+    : await supabase.from("interview_records").insert(record as never);
   if (error) {
     // The message above is what the person reads; this is what we read.
     console.error("[dashboard/admissions:saveInterviewRecord]", error);
@@ -980,19 +999,33 @@ export async function sendOffer(_prevState: FormState, formData: FormData): Prom
   const supabase = await createClient();
   const { data: applicant } = await supabase
     .from("applicants")
-    .select("full_name, email, intake_course_id, deposit_paid_at, task_feedback")
+    .select("full_name, email, intake_course_id, deposit_paid_at, task_feedback, writing_task_submission, marked_at")
     .eq("id", applicantId)
     .eq("center_id", staff.center_id)
     .maybeSingle();
   if (!applicant) return { error: "Applicant not found." };
 
+  // Two things worth stopping on -- once each, and both at the same time so
+  // nobody ticks one box only to hit the other on the next try.
+  //
   // The deposit is what lets a centre invite someone before the balance is
-  // settled, so sending an offer without one is worth stopping on -- once.
-  // Deliberately a warning and not a block: centres take deposits by bank
-  // transfer and out of band all the time, and a hard gate would have staff
-  // fighting the app on day one. Tick the box and it proceeds.
+  // settled. The written task is what Handbook §7.2 makes selection rest on
+  // ("a written task ... and an interview"), and an offer with no marked
+  // task on file is the thing the assessor's application-files check finds.
+  //
+  // Deliberately warnings and not blocks: centres take deposits by bank
+  // transfer and out of band all the time, and a task read on paper before
+  // the centre used Connect is still a task read. Tick and it proceeds.
+  const objections: string[] = [];
   if (!applicant.deposit_paid_at && formData.get("confirm_no_deposit") !== "1") {
-    return { error: "No deposit is recorded for this applicant. Record one first, or tick to send the offer anyway." };
+    objections.push("no deposit is recorded");
+  }
+  const taskMarked = Boolean(applicant.writing_task_submission) && Boolean(applicant.marked_at);
+  if (!taskMarked && formData.get("confirm_no_task") !== "1") {
+    objections.push(applicant.writing_task_submission ? "the written task has not been marked" : "no written task is on file");
+  }
+  if (objections.length > 0) {
+    return { error: `Before this offer goes out: ${objections.join(", and ")}. Put that right first, or tick to send the offer anyway.` };
   }
 
   const offerToken = crypto.randomUUID();
