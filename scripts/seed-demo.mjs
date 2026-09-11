@@ -1888,13 +1888,21 @@ async function main() {
 
   // --- Plans for the assessor's visit day ---
   //
-  // TP7 is what half 1 teaches on assessor_visit_date (start+21), so these
-  // are the plans the assessor reads before observing -- the pack's
-  // "Lesson plans for the day" row (/assessor/lesson-plans). Submitted but
-  // not taught: the visit is still ahead of "today" in this seed, which is
-  // the state that row exists to show. seedTaughtTp is deliberately not
-  // reused -- it also writes a taught_at, a self-evaluation and tutor
-  // feedback, none of which can exist for a lesson nobody has taught yet.
+  // TP7 is taught on assessor_visit_date (start+21) by half 1 of BOTH groups
+  // running in parallel -- six candidates, the ones the assessor co-observes.
+  // These are the plans the assessor reads before observing (the pack's
+  // "Lesson plans for the day" row, /assessor/lesson-plans), and the pack's
+  // own "On the day" panel promises "all 6 carry a lesson plan", so all six
+  // must. Group A teaches B1+ and Group B teaches A2 at this point in the
+  // rotation, so the two halves' plans sit at different levels. Submitted but
+  // not taught: the visit is still ahead of "today" in this seed, which is the
+  // state this row exists to show. seedTaughtTp is deliberately not reused --
+  // it also writes a taught_at, a self-evaluation and tutor feedback, none of
+  // which can exist for a lesson nobody has taught yet.
+  //
+  // Until 11 Sep 2026 only the three Group A plans existed -- a leftover from
+  // when the demo had a single group -- so the other three read "No plan
+  // started for TP 7 yet", contradicting the panel one screen away.
   const visitPlans = [
     {
       name: "Amara Okafor",
@@ -1919,6 +1927,30 @@ async function main() {
       profile: "Same B1+ group. They have met the past simple but not used to.",
       materials: "Guided discovery handout built from the coursebook text",
       framework: "Guided discovery into controlled practice",
+    },
+    {
+      name: "Ines Marchetti",
+      main: "Vocabulary: food and cooking, for an everyday A2 context",
+      sub: "Personalised speaking about meals and habits",
+      profile: "Twelve A2 adults, mixed L1. Confident speakers but a narrow everyday vocabulary.",
+      materials: "Picture set and a matching task adapted from the coursebook",
+      framework: "Presentation, practice, production",
+    },
+    {
+      name: "Kofi Mensah",
+      main: "Grammar: present continuous for actions happening now",
+      sub: "Controlled oral practice with classroom mimes",
+      profile: "Same A2 group. They know the present simple and confuse the two.",
+      materials: "A short situational text and a set of mime cards of my own",
+      framework: "Situational presentation into practice",
+    },
+    {
+      name: "Hana Sato",
+      main: "Listening for gist: a short dialogue about making plans",
+      sub: "Introducing functional language for suggestions",
+      profile: "Same A2 group. Anxious about listening; reassured by a clear first task.",
+      materials: "Coursebook audio with a gist task and a guided second-listen task",
+      framework: "Receptive skills lesson",
     },
   ];
   for (const vp of visitPlans) {
