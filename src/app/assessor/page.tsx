@@ -69,9 +69,9 @@ const GRADE: Record<string, { bg: string; ink: string }> = {
 export default async function AssessorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ candidate?: string; cohort?: string }>;
+  searchParams: Promise<{ cohort?: string }>;
 }) {
-  const { candidate: openCandidateId, cohort } = await searchParams;
+  const { cohort } = await searchParams;
   const cookieStore = await cookies();
   if (!cookieStore.get(ASSESSOR_COOKIE)?.value) redirect("/login");
   const termsStatus = await getAssessorTermsStatus();
@@ -418,64 +418,6 @@ export default async function AssessorPage({
   const wantsFullCohort = cohort === "full";
   const visibleCandidates = centreHasChosen && !wantsFullCohort ? selectedCandidates : candidates;
 
-  const openCandidate = openCandidateId ? candidates.find((c) => c.traineeId === openCandidateId) ?? null : null;
-  // Ramy, 29 Aug 2026, on opening a candidate card: "Like, what is this?
-  // Like, a summary? The assessor is supposed to check the entire
-  // portfolio for those candidates." It was a summary and nothing else --
-  // six rows of completeness with no way into any of them, so the one
-  // thing the assessor is here to do (CELTA 5's own "assessors scrutinise
-  // a selection of portfolios to moderate candidates' work") could only be
-  // reached by taking the optional platform tour instead.
-  //
-  // Each row that names a real part of the portfolio now opens it. The two
-  // without a link have nothing to link to: attendance is recorded inside
-  // the CELTA 5 rather than as its own register, so linking it would just
-  // be a second route to the row above, and special arrangements has no
-  // screen at all. Every destination is a page an assessor session already
-  // reaches read-only.
-  const drawerRows: { label: string; value: string; state: string; ink: string; href?: string }[] = openCandidate
-    ? [
-        {
-          label: "CELTA 5 record",
-          value: openCandidate.celta5Detail,
-          state: openCandidate.celta5Complete ? "Complete" : "Incomplete",
-          ink: openCandidate.celta5Complete ? TEAL : AMBER,
-          href: `/portfolio/${openCandidate.traineeId}/celta5`,
-        },
-        {
-          label: "Teaching practice",
-          value: `${openCandidate.tpsTaught} of 8 TPs · ${openCandidate.hoursAssessed.toFixed(1)} hrs assessed${
-            openCandidate.levels.length > 0 ? ` · ${openCandidate.levels.join(", ")}` : ""
-          }`,
-          state: openCandidate.tpsComplete ? "Complete" : "Incomplete",
-          ink: openCandidate.tpsComplete ? TEAL : AMBER,
-          href: `/portfolio/${openCandidate.traineeId}/tp`,
-        },
-        {
-          label: "Assignments",
-          value: "Four assignments, criteria and marks recorded",
-          state: openCandidate.assignmentsComplete ? "Complete" : (openCandidate.flaggedIssue ?? "Incomplete"),
-          ink: openCandidate.assignmentsComplete ? TEAL : AMBER,
-          href: `/portfolio/${openCandidate.traineeId}/assignments`,
-        },
-        {
-          label: "Attendance",
-          value: "Recorded in the CELTA 5, not as a separate register",
-          state: "On file",
-          ink: TEAL,
-        },
-        { label: "Special arrangements", value: "None declared", state: "—", ink: MUTED },
-        {
-          label: "Provisional grade",
-          value: openCandidate.provisionalLabel ?? "Not yet entered",
-          state: openCandidate.provisionalLabel ? "Recorded" : "Pending",
-          ink: openCandidate.provisionalLabel ? TEAL : AMBER,
-          href: "/trainer/grades-report",
-        },
-      ]
-    : [];
-
-
   return (
     <div style={{ minHeight: "100vh", background: "var(--color-background)" }}>
       <div
@@ -768,75 +710,6 @@ export default async function AssessorPage({
 
         <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 20, alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            {openCandidate ? (
-              <div className="card overflow-hidden" style={{ borderColor: "color-mix(in oklab, oklch(38% 0.072 195) 32%, transparent)" }}>
-                <div
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
-                    padding: "14px 20px", background: WARM, color: CREAM,
-                  }}
-                >
-                  <div>
-                    <p style={{ fontSize: 14, fontWeight: 600 }}>{openCandidate.name}</p>
-                    <p style={{ fontSize: 11, color: "oklch(76% 0.02 80)" }}>
-                      {openCandidate.tpsTaught}/8 TPs · {openCandidate.hoursAssessed.toFixed(1)} hrs assessed
-                      {openCandidate.levels.length > 0 ? ` · ${openCandidate.levels.join(", ")}` : ""}
-                    </p>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flex: "none" }}>
-                    {/* The whole point of the visit, said plainly -- the rows
-                        below open one part each, this opens the portfolio
-                        itself. */}
-                    <Link
-                      href={`/portfolio/${openCandidate.traineeId}`}
-                      style={{
-                        fontSize: 11.5, fontWeight: 600, padding: "7px 14px", borderRadius: 6,
-                        border: `1px solid color-mix(in oklab, ${GOLD_UNDERLINE} 70%, transparent)`,
-                        background: `color-mix(in oklab, ${GOLD_UNDERLINE} 22%, transparent)`,
-                        color: CREAM, textDecoration: "none",
-                      }}
-                    >
-                      Open the whole portfolio
-                    </Link>
-                    <Link
-                      href="/assessor"
-                      style={{
-                        fontSize: 11.5, fontWeight: 600, padding: "7px 14px", borderRadius: 6,
-                        border: "1px solid oklch(45% 0.045 58)", background: "oklch(24% 0.036 58)",
-                        color: CREAM, textDecoration: "none",
-                      }}
-                    >
-                      Close
-                    </Link>
-                  </div>
-                </div>
-                {drawerRows.map((row) => {
-                  const cells = (
-                    <>
-                      <span style={{ fontSize: 12.5, fontWeight: 600, color: INK }}>{row.label}</span>
-                      <span style={{ fontSize: 12, color: MUTED }}>{row.value}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: row.ink, textAlign: "right" }}>{row.state}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: row.href ? TEAL : "transparent", textAlign: "right" }}>
-                        {row.href ? "Open" : "—"}
-                      </span>
-                    </>
-                  );
-                  const rowStyle = {
-                    display: "grid", gridTemplateColumns: "200px 1fr 120px 58px", gap: 14, alignItems: "center",
-                    padding: "12px 20px", borderBottom: "1px solid color-mix(in srgb, oklch(88% 0.016 82) 50%, transparent)",
-                  } as const;
-                  return row.href ? (
-                    <Link key={row.label} href={row.href} className="assessor-hover no-underline" style={rowStyle}>
-                      {cells}
-                    </Link>
-                  ) : (
-                    <div key={row.label} style={rowStyle}>
-                      {cells}
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
             <>
             {noSampleChosen ? (
               // Not an error, and not empty: the pack still shows everyone. It
@@ -916,7 +789,6 @@ export default async function AssessorPage({
               {visibleCandidates.length === 0 ? <p style={{ fontSize: 12.5, color: MUTED }}>No candidates on this course.</p> : null}
             </div>
             </>
-            )}
 
               <div>
                 {/* Ramy, 30 Aug 2026: "instead of saying on the day, it should
