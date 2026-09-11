@@ -29,6 +29,9 @@ const overrideByOf = (r: unknown): string | null =>
   (r as Celta5OverrideCols | null)?.assignment_fail_override_by ?? null;
 import { UpgradeConditionsForm } from "@/app/trainer/(hub)/grades-report/upgrade-conditions-form";
 import { CohortSheet } from "@/app/trainer/(hub)/grades-report/cohort-sheet";
+import { EntryFormSentCheckbox } from "@/app/dashboard/admin/courses/[id]/entry-form-sent-checkbox";
+import { markGradeFormSubmitted } from "@/app/dashboard/admin/courses/[id]/grade-form-actions";
+import { formatDate } from "@/lib/format-date";
 import { CloseOutCard } from "@/app/dashboard/admin/courses/[id]/close-out-card";
 import { CertificateCheckCard, type CertificateCandidate } from "@/app/dashboard/admin/courses/[id]/certificate-check-card";
 import { getCloseOutBlockingReasons } from "@/lib/course-close-out/blocking-rules";
@@ -95,6 +98,17 @@ export default async function GradesReportPage() {
   const provisionalDaysOut = provisionalDueAt
     ? Math.ceil((new Date(`${provisionalDueAt.slice(0, 10)}T00:00:00`).getTime() - new Date(`${gradesToday}T00:00:00`).getTime()) / 86400000)
     : null;
+
+  // The Centre Grade form in Appian (migration 0289): the hand-off the
+  // confirmed grades exist for. Read whole and cast because the generated
+  // Database type lags the migration; the marker may be Course Admin, so
+  // not necessarily one of the course tutors.
+  const { data: gradeFormCourse } = await createAdminClient().from("courses").select("*").eq("id", courseId).maybeSingle();
+  const gradeForm = gradeFormCourse as { grade_form_submitted_at?: string | null; grade_form_submitted_by?: string | null } | null;
+  const gradeFormSubmittedAt = gradeForm?.grade_form_submitted_at ?? null;
+  const { data: gradeFormMarker } = gradeForm?.grade_form_submitted_by
+    ? await createAdminClient().from("profiles").select("full_name").eq("id", gradeForm.grade_form_submitted_by).maybeSingle()
+    : { data: null };
 
   const { data: trainees } = await supabase
     .from("profiles")
@@ -194,6 +208,34 @@ export default async function GradesReportPage() {
         appianUrl={appianUrl}
         isMct={isMct}
       />
+
+      {/* Administration Handbook 14.1: 2-3 days before the assessment the
+          centre must "complete the centre grade form in Appian"; 15.2: the
+          assessor's report "can be accessed once the centre has submitted
+          the grade form". It happens in Appian, where Connect cannot see,
+          so the person who did it says so -- MCT here, or Course Admin on
+          their course page, whoever first (migration 0289, 12 Sep 2026). */}
+      <div className="sheet flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Centre Grade form in Appian</p>
+          <p className="text-sm text-muted">
+            {gradeFormSubmittedAt
+              ? `Marked submitted ${formatDate(gradeFormSubmittedAt, gradesTimeZone, { year: "numeric" })}${
+                  gradeFormMarker?.full_name ? ` by ${gradeFormMarker.full_name}` : ""
+                }. The assessor can open their report.`
+              : "Not yet marked as submitted. Completed in Appian with the confirmed provisional grades, two to three days before the visit (Handbook 14.1) -- the assessor's report cannot open until it is (15.2)."}
+          </p>
+        </div>
+        {isMct ? (
+          <EntryFormSentCheckbox
+            action={markGradeFormSubmitted}
+            courseId={courseId}
+            fieldName="grade_form_submitted_at"
+            sent={Boolean(gradeFormSubmittedAt)}
+            label="Mark as submitted"
+          />
+        ) : null}
+      </div>
 
       <div className="sheet sheet-garnet">
         {/* Rewritten 30 Aug 2026. Ramy: "provisional grades are submitted

@@ -654,6 +654,16 @@ export default async function AssessorPage({
             on Appian." */}
         <AppianReference
           reference={(course as { appian_notification_reference?: string | null }).appian_notification_reference ?? null}
+          // Whether the centre has marked the Centre Grade form submitted
+          // (migration 0289). Until 12 Sep 2026 this card could only say the
+          // report "opens once the centre has submitted" it, with no way to
+          // know whether they had.
+          gradeFormNote={(() => {
+            const at = (course as { grade_form_submitted_at?: string | null }).grade_form_submitted_at ?? null;
+            return at
+              ? `The centre marked it submitted ${formatDate(at, timeZone, { year: "numeric" })}.`
+              : "The centre has not yet marked it as submitted -- if the report will not open, ask them.";
+          })()}
         />
 
         {(

@@ -12,11 +12,14 @@ export function EntryFormSentCheckbox({
   courseId,
   fieldName,
   sent,
+  label = "Mark as sent",
 }: {
   action: (formData: FormData) => void;
   courseId: string;
   fieldName: string;
   sent: boolean;
+  /** The Centre Grade form (0289) reuses this tick and says "submitted", the Handbook's word for it. */
+  label?: string;
 }) {
   return (
     <form
@@ -28,7 +31,7 @@ export function EntryFormSentCheckbox({
       <input type="hidden" name={fieldName} value={sent ? "" : new Date().toISOString().slice(0, 10)} />
       <label className="flex items-center gap-2 text-sm text-ink">
         <input type="checkbox" defaultChecked={sent} />
-        Mark as sent
+        {label}
       </label>
     </form>
   );

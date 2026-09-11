@@ -93,6 +93,8 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         delivery_mode: "f2f" | "online" | "blended" | null;
         assessment_kind?: string;
         appian_notification_reference?: string | null;
+        grade_form_submitted_at?: string | null;
+        grade_form_submitted_by?: string | null;
         center_id: string;
       }
     | null;
@@ -304,6 +306,15 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
         .is("withdrawal_letter_generated_at", null),
     ]);
 
+  // Who marked the Centre Grade form as submitted, for the 14.1 list's
+  // evidence line. The MCT or Course Admin -- so not necessarily in `rows`.
+  const { data: gradeFormMarker } = course?.grade_form_submitted_by
+    ? await supabase.from("profiles").select("full_name").eq("id", course.grade_form_submitted_by).maybeSingle()
+    : { data: null };
+  const gradeFormSubmittedLabel = course?.grade_form_submitted_at
+    ? `${formatDate(course.grade_form_submitted_at, timeZone, { year: "numeric" })}${gradeFormMarker?.full_name ? ` by ${gradeFormMarker.full_name}` : ""}`
+    : null;
+
   const prep = await buildPrepSummary(supabase, centrePreparation, {
     courseId,
     candidateCount: activeCandidateCount,
@@ -311,6 +322,7 @@ export default async function AssessorPage({ searchParams }: { searchParams: Pro
     hasTimetable: (timetableEvents ?? 0) > 0,
     publishedAssignmentTitles: (publishedBriefs ?? 0) > 0,
     appianReference: course?.appian_notification_reference ?? null,
+    gradeFormSubmittedLabel,
     previousReportOnFile,
     attendanceRegisterRows: attendanceRows ?? 0,
     // Capped at the slots: a trainee with a draft and a resubmission would

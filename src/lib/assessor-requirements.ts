@@ -213,6 +213,18 @@ export function buildCentrePreparationList(input: {
     },
     { key: "previous_report", label: "The previous assessor's report", detail: "From the centre's most recent visit.", cite: "14.1" },
     {
+      // 14.1's middle bullet, and the one the assessor's report hinges on --
+      // 15.2: the report form "can be accessed once the centre has submitted
+      // the grade form". It happens in Appian, where Connect cannot see, so
+      // like the entry form a person marks it (MCT or Course Admin, migration
+      // 0289). Recorded at last on 12 Sep 2026; the list had the reference
+      // and the timetable but not this.
+      key: "grade_form", label: "Centre grade form in Appian",
+      detail:
+        "Completed in Appian with the confirmed provisional grades, two to three days before the visit. The assessor's report cannot be opened until it is submitted.",
+      cite: "14.1 / 15.2",
+    },
+    {
       // Not a document, but 14.1 puts it on the same 2-3 day deadline as the
       // documents, and it is the only item on that list that blocks the
       // assessor outright: 15.2 says they cannot open their report without

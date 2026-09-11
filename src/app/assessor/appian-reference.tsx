@@ -30,7 +30,14 @@ const GOLD = "oklch(60% 0.11 70)";
 // and the way into Appian is already a primary action at the top of the
 // pack. Two doors to the same place, a few hundred pixels apart, is just
 // something else to read.
-export function AppianReference({ reference }: { reference: string | null }) {
+export function AppianReference({
+  reference,
+  gradeFormNote = null,
+}: {
+  reference: string | null;
+  /** Whether the centre has marked the Centre Grade form submitted -- 15.2: the report opens once it is. */
+  gradeFormNote?: string | null;
+}) {
   const [copied, setCopied] = useState(false);
 
   // No reference set. Say so plainly rather than hiding the block: an
@@ -102,6 +109,7 @@ export function AppianReference({ reference }: { reference: string | null }) {
       <span style={{ fontSize: 12, color: "var(--color-muted)", flex: "1 1 240px", minWidth: 220 }}>
         Paste this into Appian to reach your Assessor Report for this course. It opens once the centre has submitted the Centre
         Grade form.
+        {gradeFormNote ? <> {gradeFormNote}</> : null}
       </span>
     </div>
   );

@@ -56,6 +56,8 @@ export interface PrepInputs {
   lessonPlansForVisitDay: number;
   visitDayTeachingSlots: number;
   withdrawalLettersOutstanding: number;
+  /** "11 Sept 2026 by Jordan Blake" once the Centre Grade form is marked submitted; null until then. */
+  gradeFormSubmittedLabel: string | null;
 }
 
 function derive(key: string, i: PrepInputs): { status: PrepStatus; evidence: string } | null {
@@ -104,6 +106,15 @@ function derive(key: string, i: PrepInputs): { status: PrepStatus; evidence: str
           i.withdrawalLettersOutstanding === 0
             ? "Letter generated for every withdrawal"
             : `${i.withdrawalLettersOutstanding} withdrawal letter${i.withdrawalLettersOutstanding === 1 ? "" : "s"} not generated`,
+      };
+    case "grade_form":
+      // Derived from the tick rather than ticked here, so the person who
+      // marked it and when is on the record (grade-form-actions.ts logs it).
+      return {
+        status: i.gradeFormSubmittedLabel ? "ready" : "missing",
+        evidence: i.gradeFormSubmittedLabel
+          ? `Marked submitted ${i.gradeFormSubmittedLabel}`
+          : "Not yet marked as submitted -- the assessor's report cannot open until it is (§15.2)",
       };
     default:
       return null;

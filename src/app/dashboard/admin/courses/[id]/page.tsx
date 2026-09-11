@@ -7,6 +7,7 @@ import { ApplicationSettingsForm } from "@/app/dashboard/admin/courses/[id]/appl
 import { TutorRoleControl } from "@/app/dashboard/admin/courses/[id]/tutor-role-control";
 import { TutorInviteForm } from "@/app/dashboard/admin/courses/[id]/tutor-invite-form";
 import { EntryFormSentCheckbox } from "@/app/dashboard/admin/courses/[id]/entry-form-sent-checkbox";
+import { markGradeFormSubmitted } from "@/app/dashboard/admin/courses/[id]/grade-form-actions";
 import { computeWeekOf, computeCourseState } from "@/lib/course-progress";
 import { toLocalIso, DEFAULT_TIMEZONE } from "@/lib/timetable-grid";
 import { formatDate } from "@/lib/format-date";
@@ -72,6 +73,13 @@ export default async function CourseAdminDetailPage({
   const hiddenCandidateCount = candidateRows.length - visibleCandidateRows.length;
 
   const timeZone = (await getCachedCenter(course.center_id))?.time_zone ?? DEFAULT_TIMEZONE;
+  // The Centre Grade form in Appian (migration 0289) -- shared with the MCT,
+  // whoever submits it marks it. Cast: the generated type lags the migration.
+  const gradeFormSubmittedAt = (course as { grade_form_submitted_at?: string | null }).grade_form_submitted_at ?? null;
+  const gradeFormSubmittedBy = (course as { grade_form_submitted_by?: string | null }).grade_form_submitted_by ?? null;
+  const { data: gradeFormMarker } = gradeFormSubmittedBy
+    ? await supabase.from("profiles").select("full_name").eq("id", gradeFormSubmittedBy).maybeSingle()
+    : { data: null };
   const today = toLocalIso(new Date(), timeZone);
   // The eyebrow printed "2026-08-17 – 2026-09-11" raw while the landing it is
   // reached from says "17 Aug – 11 Sept" (audit, 6 Sep 2026).
@@ -230,6 +238,27 @@ export default async function CourseAdminDetailPage({
             fieldName="entry_form_sent_at"
             sent={Boolean(course.entry_form_sent_at)}
           />
+          {/* The second Appian submission on this course: the Centre Grade
+              form, 2-3 days before the assessor visit (Handbook 14.1), which
+              the assessor's report cannot open without (15.2). Shared with
+              the MCT's Grade form page -- whoever submits it marks it. */}
+          <div className="flex flex-col gap-2 border-t border-border-faint pt-3">
+            <p className="text-sm font-semibold text-ink">Centre Grade form</p>
+            <p className="text-xs text-muted">
+              {gradeFormSubmittedAt
+                ? `Marked submitted ${formatDate(gradeFormSubmittedAt, timeZone, { year: "numeric" })}${
+                    gradeFormMarker?.full_name ? ` by ${gradeFormMarker.full_name}` : ""
+                  }.`
+                : "Completed in Appian with the confirmed provisional grades, two to three days before the assessor visit. The assessor's report cannot open until it is submitted. Shared with the MCT -- whoever submits it marks it."}
+            </p>
+            <EntryFormSentCheckbox
+              action={markGradeFormSubmitted}
+              courseId={course.id}
+              fieldName="grade_form_submitted_at"
+              sent={Boolean(gradeFormSubmittedAt)}
+              label="Mark as submitted"
+            />
+          </div>
         </div>
       </div>
 
