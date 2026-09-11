@@ -340,6 +340,32 @@ export default async function AssessorPage({
     visitPlansIn = Math.min(count ?? 0, visitTeachingIds.length);
   }
 
+  // The centre's half of the 15.1 consultation. Handbook 15.1 gives the
+  // selection to the assessor "in consultation with the centre"; the MCT's
+  // Assessor tab records the centre's proposal (assessor_observation_choices,
+  // append-only, migration 0279) -- and until 12 Sep 2026 that record lived
+  // only on the MCT's screen. Ramy: show it here. The latest row is the
+  // current proposal; earlier rows are the history the centre keeps.
+  const { data: proposalRows } = await admin
+    .from("assessor_observation_choices")
+    .select("trainee_ids, source, reason, chosen_by, created_at")
+    .eq("course_id", courseId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const proposalRow = proposalRows?.[0] ?? null;
+  const { data: proposer } = proposalRow
+    ? await admin.from("profiles").select("full_name").eq("id", proposalRow.chosen_by).maybeSingle()
+    : { data: null };
+  const centreProposal = proposalRow
+    ? {
+        names: proposalRow.trainee_ids.map((id: string) => candidates.find((c) => c.traineeId === id)?.name ?? "a candidate"),
+        by: proposer?.full_name ?? "the centre",
+        at: formatDate(proposalRow.created_at, timeZone, { day: "numeric", month: "long" }),
+        ownChoice: proposalRow.source === "centre",
+        reason: proposalRow.reason,
+      }
+    : null;
+
   const hasTimetabledCandidateMeeting = (onDayEvents ?? []).some((e) =>
     (e.title ?? "").toLowerCase().includes("assessor")
   );
@@ -957,6 +983,17 @@ export default async function AssessorPage({
                       {visitPlansIn >= teachingOrderNames.length
                         ? `All ${teachingOrderNames.length} lesson plans are in, since the choice can change on the day.`
                         : `${visitPlansIn} of ${teachingOrderNames.length} lesson plans are in so far -- 14.1 allows the rest to be handed over at the start of the lesson.`}
+                    </span>
+                  ) : null}
+
+                  {centreProposal ? (
+                    <span style={{ fontSize: 11.5, lineHeight: 1.5, color: MUTED, paddingTop: 4, borderTop: "1px solid oklch(90% 0.012 85)" }}>
+                      The centre proposes <strong style={{ color: INK }}>{centreProposal.names.join(" and ")}</strong> for observation
+                      {" "}&mdash; {centreProposal.by}, {centreProposal.at}
+                      {centreProposal.ownChoice
+                        ? `, their own choice rather than Connect's suggestion${centreProposal.reason ? `: “${centreProposal.reason}”` : ""}`
+                        : ""}
+                      . The choice is yours, in consultation with the centre (Handbook 15.1).
                     </span>
                   ) : null}
 
